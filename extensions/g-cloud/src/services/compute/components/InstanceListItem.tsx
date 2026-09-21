@@ -1,17 +1,17 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { ComputeInstance, ComputeService } from "../ComputeService";
 import { useStreamerMode } from "../../../utils/useStreamerMode";
 import { maskIPIfEnabled } from "../../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../../components/StreamerModeAction";
 import { CloudShellAction } from "../../../components/CloudShellAction";
+import { ComputeLifecycleAction, getInstanceLifecycleActions, getInstanceStatusPresentation } from "../instanceLifecycle";
 
 interface InstanceListItemProps {
   instance: ComputeInstance;
   service: ComputeService | null;
   projectId: string;
   onViewDetails: (instance: ComputeInstance) => void;
-  onStart: (instance: ComputeInstance) => Promise<void>;
-  onStop: (instance: ComputeInstance) => Promise<void>;
+  onInstanceAction: (instance: ComputeInstance, action: ComputeLifecycleAction) => Promise<void>;
   onSshCommand: (instance: ComputeInstance) => void;
   onCreateVM: () => void;
 }
@@ -21,14 +21,14 @@ export default function InstanceListItem({
   service,
   projectId,
   onViewDetails,
-  onStart,
-  onStop,
+  onInstanceAction,
   onSshCommand,
   onCreateVM,
 }: InstanceListItemProps) {
   const { isEnabled: isStreamerMode } = useStreamerMode();
 
-  const statusIcon = getStatusIcon(instance.status);
+  const statusIcon = getInstanceStatusPresentation(instance.status);
+  const lifecycleActions = getInstanceLifecycleActions(instance.status);
 
   // Format zone and machine type for display
   const zone = service?.formatZone(instance.zone) || instance.zone;
@@ -51,12 +51,14 @@ export default function InstanceListItem({
         <ActionPanel>
           <ActionPanel.Section title="Instance Actions">
             <Action title="View Details" icon={{ source: Icon.Sidebar }} onAction={() => onViewDetails(instance)} />
-            {instance.status.toLowerCase() !== "running" && (
-              <Action title="Start Instance" icon={{ source: Icon.Play }} onAction={() => onStart(instance)} />
-            )}
-            {instance.status.toLowerCase() === "running" && (
-              <Action title="Stop Instance" icon={{ source: Icon.Stop }} onAction={() => onStop(instance)} />
-            )}
+            {lifecycleActions.map((action) => (
+              <Action
+                key={action.kind}
+                title={action.title}
+                icon={{ source: action.icon, tintColor: action.tintColor }}
+                onAction={() => onInstanceAction(instance, action.kind)}
+              />
+            ))}
             {instance.status.toLowerCase() === "running" && (
               <Action
                 title="Copy SSH Command"
@@ -84,23 +86,4 @@ export default function InstanceListItem({
       }
     />
   );
-}
-
-// Helper function to get status icon and color
-function getStatusIcon(status: string): { icon: string; color: Color; text: string } {
-  const statusLower = status.toLowerCase();
-
-  switch (statusLower) {
-    case "running":
-      return { icon: Icon.Circle, color: Color.Green, text: "Running" };
-    case "terminated":
-      return { icon: Icon.Circle, color: Color.Red, text: "Stopped" };
-    case "stopping":
-      return { icon: Icon.CircleProgress, color: Color.Orange, text: "Stopping" };
-    case "provisioning":
-    case "staging":
-      return { icon: Icon.CircleProgress, color: Color.Blue, text: "Starting" };
-    default:
-      return { icon: Icon.Circle, color: Color.SecondaryText, text: status };
-  }
 }

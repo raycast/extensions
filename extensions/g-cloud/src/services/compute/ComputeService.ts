@@ -8,11 +8,17 @@ import {
   getComputeInstance,
   startComputeInstance,
   stopComputeInstance,
+  resumeComputeInstance,
+  suspendComputeInstance,
+  resetComputeInstance,
+  getComputeZoneOperation,
+  type ComputeZoneOperation,
   listComputeZones,
   listComputeDisks,
   type ComputeInstance as ApiComputeInstance,
   type ComputeDisk as ApiComputeDisk,
 } from "../../utils/gcpApi";
+import { isInstanceTransitionalStatus, normalizeInstanceStatus } from "./instanceLifecycle";
 
 // Interfaces
 export interface ComputeInstance {
@@ -87,6 +93,11 @@ export interface MetadataItem {
 export interface ServiceAccount {
   email: string;
   scopes: string[];
+}
+
+export interface InstanceLifecycleResult {
+  isTimedOut?: boolean;
+  instance?: ComputeInstance | null;
 }
 
 /**
@@ -169,18 +180,19 @@ export class ComputeService {
    * @param zone Optional zone filter. If undefined, lists VMs in all zones.
    * @returns Promise with array of compute instances
    */
-  async getInstances(zone?: string): Promise<ComputeInstance[]> {
+  async getInstances(zone?: string, options?: { forceRefresh?: boolean }): Promise<ComputeInstance[]> {
     const cacheKey = zone ? `instances:${zone}` : "instances:all";
     const cachedData = this.vmCache.get(cacheKey);
     const now = Date.now();
+    const forceRefresh = options?.forceRefresh ?? false;
 
-    if (cachedData && now - cachedData.timestamp < this.CACHE_TTL) {
+    if (!forceRefresh && cachedData && now - cachedData.timestamp < this.CACHE_TTL) {
       return cachedData.data;
     }
 
     try {
       // Return stale cache while refreshing in background
-      if (!zone && this.hasCachedZoneInstances()) {
+      if (!forceRefresh && !zone && this.hasCachedZoneInstances()) {
         const combinedInstances = this.getCombinedCachedInstances();
         if (combinedInstances.length > 0) {
           setTimeout(() => this.refreshInstancesInBackground().catch(() => {}), 100);
@@ -194,11 +206,11 @@ export class ComputeService {
 
       this.vmCache.set(cacheKey, { data: instances, timestamp: now });
       return instances;
-    } catch {
+    } catch (error) {
       if (cachedData) {
         return cachedData.data;
       }
-      return [];
+      throw error;
     }
   }
 
@@ -254,26 +266,30 @@ export class ComputeService {
    * @param zone Zone of the instance
    * @returns Promise with instance details or null if not found
    */
-  async getInstance(name: string, zone: string): Promise<ComputeInstance | null> {
+  async getInstance(name: string, zone: string, options?: { forceRefresh?: boolean }): Promise<ComputeInstance | null> {
+    const forceRefresh = options?.forceRefresh ?? false;
+
     // Check if we have this instance in cache first
     const allInstancesKey = "instances:all";
     const zoneInstancesKey = `instances:${zone}`;
 
-    // Check zone-specific cache first
-    const zoneCache = this.vmCache.get(zoneInstancesKey);
-    if (zoneCache) {
-      const instance = zoneCache.data.find((i) => i.name === name);
-      if (instance) {
-        return instance;
+    if (!forceRefresh) {
+      // Check zone-specific cache first
+      const zoneCache = this.vmCache.get(zoneInstancesKey);
+      if (zoneCache) {
+        const instance = zoneCache.data.find((i) => i.name === name);
+        if (instance) {
+          return instance;
+        }
       }
-    }
 
-    // Check all-instances cache
-    const allCache = this.vmCache.get(allInstancesKey);
-    if (allCache) {
-      const instance = allCache.data.find((i) => i.name === name && this.formatZone(i.zone) === zone);
-      if (instance) {
-        return instance;
+      // Check all-instances cache
+      const allCache = this.vmCache.get(allInstancesKey);
+      if (allCache) {
+        const instance = allCache.data.find((i) => i.name === name && this.formatZone(i.zone) === zone);
+        if (instance) {
+          return instance;
+        }
       }
     }
 
@@ -417,9 +433,8 @@ export class ComputeService {
    * @param zone Zone of the instance
    * @returns Promise indicating success
    */
-  async startInstance(name: string, zone: string): Promise<void> {
-    await startComputeInstance(this.gcloudPath, this.projectId, zone, name);
-    this.clearCache("instances");
+  async startInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
+    return this.executeLifecycleOperation(name, zone, () => startComputeInstance(this.gcloudPath, this.projectId, zone, name));
   }
 
   /**
@@ -428,20 +443,85 @@ export class ComputeService {
    * @param zone Zone of the instance
    * @returns Promise indicating success and VM status information
    */
-  async stopInstance(name: string, zone: string): Promise<{ isTimedOut?: boolean }> {
-    try {
-      await stopComputeInstance(this.gcloudPath, this.projectId, zone, name);
-      this.clearCache("instances");
-      return {};
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      // REST API might return before operation completes
-      if (errorMessage.includes("timed out") || errorMessage.includes("RUNNING")) {
-        this.clearCache("instances");
-        return { isTimedOut: true };
-      }
-      throw error;
+  async stopInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
+    return this.executeLifecycleOperation(name, zone, () => stopComputeInstance(this.gcloudPath, this.projectId, zone, name));
+  }
+
+  async resumeInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
+    return this.executeLifecycleOperation(name, zone, () =>
+      resumeComputeInstance(this.gcloudPath, this.projectId, zone, name),
+    );
+  }
+
+  async suspendInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
+    return this.executeLifecycleOperation(name, zone, () =>
+      suspendComputeInstance(this.gcloudPath, this.projectId, zone, name),
+    );
+  }
+
+  async restartInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
+    return this.executeLifecycleOperation(name, zone, () => resetComputeInstance(this.gcloudPath, this.projectId, zone, name));
+  }
+
+  private async executeLifecycleOperation(
+    name: string,
+    zone: string,
+    operationFactory: () => Promise<ComputeZoneOperation>,
+  ): Promise<InstanceLifecycleResult> {
+    const operation = await operationFactory();
+    this.clearCache("instances");
+
+    const operationName = operation.name;
+    if (!operationName) {
+      const instance = await this.getInstance(name, zone, { forceRefresh: true });
+      return { instance };
     }
+
+    const operationCompleted = await this.waitForZoneOperation(zone, operationName);
+    const instance = await this.waitForStableInstanceState(name, zone);
+    return {
+      isTimedOut: !operationCompleted || !instance || isInstanceTransitionalStatus(instance.status),
+      instance,
+    };
+  }
+
+  private async waitForZoneOperation(zone: string, operationName: string, timeoutMs = 60000): Promise<boolean> {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const operation = await getComputeZoneOperation(this.gcloudPath, this.projectId, zone, operationName);
+      if (operation.status === "DONE") {
+        const errors = operation.error?.errors?.map((error) => error.message).filter(Boolean) ?? [];
+        if (errors.length > 0) {
+          throw new Error(errors.join(" "));
+        }
+        return true;
+      }
+
+      await this.delay(2000);
+    }
+
+    return false;
+  }
+
+  private async waitForStableInstanceState(name: string, zone: string, timeoutMs = 30000): Promise<ComputeInstance | null> {
+    const startedAt = Date.now();
+    let latestInstance: ComputeInstance | null = null;
+
+    while (Date.now() - startedAt < timeoutMs) {
+      latestInstance = await this.getInstance(name, zone, { forceRefresh: true });
+      if (latestInstance && !isInstanceTransitionalStatus(latestInstance.status)) {
+        return latestInstance;
+      }
+
+      await this.delay(2000);
+    }
+
+    return latestInstance;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -482,10 +562,23 @@ export class ComputeService {
    * @returns CSS color name
    */
   getStatusColor(status: string): string {
-    const lowerStatus = status.toLowerCase();
-    if (lowerStatus === "running") return "green";
-    if (lowerStatus === "terminated" || lowerStatus === "stopped") return "red";
-    if (lowerStatus === "stopping" || lowerStatus === "starting") return "orange";
-    return "gray";
+    switch (normalizeInstanceStatus(status)) {
+      case "running":
+        return "green";
+      case "terminated":
+        return "red";
+      case "stopping":
+      case "suspending":
+        return "orange";
+      case "suspended":
+      case "repairing":
+        return "yellow";
+      case "starting":
+      case "provisioning":
+      case "staging":
+        return "blue";
+      default:
+        return "gray";
+    }
   }
 }
