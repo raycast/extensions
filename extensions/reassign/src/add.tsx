@@ -69,7 +69,7 @@ function optionalFields(values: FormValues): {
  * other. A named day without a time ("lunch tomorrow") remains an Inbox idea
  * with a planned date. A duration can find concrete times for the user to review.
  */
-function Command(props: LaunchProps<{ arguments: { text?: string }; launchContext?: ScheduleContext }>) {
+function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: ScheduleContext }>) {
   const ctx = props.launchContext;
   const argText = props.arguments?.text?.trim() ?? "";
   const initial = argText || (ctx?.name ?? "");
