@@ -144,23 +144,29 @@ export interface SearchResult {
   batchDate: string;
 }
 
-// Full-text search across all stories, optionally restricted to a date range (same endpoint that powers
-// the search on news.kagi.com). Unlike category browsing, this already spans every date, not just today.
+// Full-text search across all stories, newest first, with an optional upper date bound (same endpoint that
+// powers the search on news.kagi.com). Unlike category browsing, this already spans every date, not just today.
+// The API rejects a lower bound (`from`), so callers must filter that side themselves on `batchDate`.
 export async function searchStories(
   query: string,
   lang: string,
   limit: number,
-  from?: string,
   to?: string,
 ): Promise<{ results: SearchResult[]; totalCount: number; hasMore: boolean }> {
   let url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&limit=${limit}&lang=${encodeURIComponent(lang)}`;
-  if (from) url += `&from=${encodeURIComponent(from)}`;
   if (to) url += `&to=${encodeURIComponent(to)}`;
   const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
+  const data = (await response.json().catch(() => ({}))) as {
+    results?: SearchResult[];
+    totalCount?: number;
+    hasMore?: boolean;
+    message?: string;
+  };
+  // The API can answer with an error message instead of results, sometimes even with a 200 status
+  if (!response.ok || !data.results) {
+    throw new Error(data.message ?? `Search failed: ${response.status}`);
   }
-  return response.json() as Promise<{ results: SearchResult[]; totalCount: number; hasMore: boolean }>;
+  return { results: data.results, totalCount: data.totalCount ?? data.results.length, hasMore: data.hasMore ?? false };
 }
 
 // ============================================================================

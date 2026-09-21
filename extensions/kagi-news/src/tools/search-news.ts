@@ -16,6 +16,7 @@ type Input = {
    * Restrict results to this date/time onward, ISO 8601 (e.g. "2026-06-10T00:00:00Z"). Use this together with
    * `to` to cover a specific past day or range ("last week", "on June 10th") resolved to concrete dates.
    * Archives start on 2025-07-09. Omit both `from` and `to` to search across all time.
+   * Results are ordered newest first.
    */
   from?: string;
   /**
@@ -28,30 +29,41 @@ type Input = {
   limit?: number;
 };
 
+// Search results give batchDate as "2026-09-19 12:00:08.660831": UTC, but with no timezone marker, which
+// JavaScript would otherwise read as local time. Normalize it to a UTC timestamp before comparing dates.
+function batchTimestamp(batchDate: string): number {
+  const hasTimezone = /(Z|[+-]\d\d:?\d\d)$/i.test(batchDate);
+  return new Date(hasTimezone ? batchDate : `${batchDate.replace(" ", "T").replace(/\.\d+$/, "")}Z`).getTime();
+}
+
 export default async function (input: Input) {
   if (input.query.trim().length < 3) {
     return { error: "Search query must be at least 3 characters long." };
   }
 
+  const fromTime = input.from ? new Date(input.from).getTime() : undefined;
+  if (fromTime !== undefined && Number.isNaN(fromTime)) {
+    return { error: `Invalid "from" date: ${input.from}. Use ISO 8601, e.g. 2026-06-10T00:00:00Z.` };
+  }
+
   const preferences = getPreferenceValues<Preferences>();
   const limit = Math.min(Math.max(input.limit ?? 8, 1), 15);
   const categoryFilter = input.category?.trim().toLowerCase();
-  // The search API's own category filter uses an internal taxonomy that doesn't match Kagi News' category
-  // names (e.g. "tech" instead of "Technology"), so filtering by name is done here instead, over-fetching
-  // a larger page from the API first since a category filter narrows down the results after the fact.
-  const fetchLimit = categoryFilter ? 100 : limit;
+  // The search API rejects a lower date bound, and its own category filter uses an internal taxonomy that
+  // doesn't match Kagi News' category names (e.g. "tech" instead of "Technology"). Both are therefore applied
+  // here, over-fetching a full page from the API first since these filters narrow results down after the fact.
+  const needsClientFilter = Boolean(categoryFilter) || fromTime !== undefined;
+  const fetchLimit = needsClientFilter ? 100 : limit;
 
-  const { results, totalCount, hasMore } = await searchStories(
-    input.query,
-    preferences.language,
-    fetchLimit,
-    input.from,
-    input.to,
+  const { results, totalCount, hasMore } = await searchStories(input.query, preferences.language, fetchLimit, input.to);
+
+  const matchingResults = results.filter(
+    (result) =>
+      (!categoryFilter || result.categoryName.toLowerCase().includes(categoryFilter)) &&
+      (fromTime === undefined || batchTimestamp(result.batchDate) >= fromTime),
   );
-
-  const matchingResults = categoryFilter
-    ? results.filter((result) => result.categoryName.toLowerCase().includes(categoryFilter))
-    : results;
+  // Results come newest first: once one predates `from`, every result on the following pages does too.
+  const pastRange = fromTime !== undefined && results.some((result) => batchTimestamp(result.batchDate) < fromTime);
 
   const limitedResults = matchingResults.slice(0, limit);
   const articles = storiesToArticles(limitedResults.map((result) => result.story));
@@ -59,14 +71,13 @@ export default async function (input: Input) {
   return {
     query: input.query,
     category: input.category,
-    totalCount: categoryFilter ? undefined : totalCount,
-    // With a category filter, more matches could exist beyond the one fetched page even if
-    // this page's own matches fit within `limit` - so still defer to the raw API's hasMore.
-    hasMore: categoryFilter ? matchingResults.length > limit || hasMore : hasMore,
+    totalCount: needsClientFilter ? undefined : totalCount,
+    // More matches may exist beyond the fetched page unless it already reached back before `from`.
+    hasMore: matchingResults.length > limit || (hasMore && !pastRange),
     stories: articles.map((article, index) => ({
       ...toAIStorySummary(article),
       category: limitedResults[index].categoryName || article.category,
-      date: limitedResults[index].batchDate,
+      date: new Date(batchTimestamp(limitedResults[index].batchDate)).toISOString(),
     })),
   };
 }

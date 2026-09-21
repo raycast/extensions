@@ -22,7 +22,8 @@ type Input = {
    */
   date?: string;
   /**
-   * Maximum number of stories to return. Defaults to 8, capped at 15.
+   * Maximum number of stories to return. Omit it to get every story of the category (a category holds 12 at
+   * most), which is what the user expects when asking for a category's news. Capped at 15.
    */
   limit?: number;
 };
@@ -30,7 +31,7 @@ type Input = {
 export default async function (input: Input) {
   const preferences = getPreferenceValues<Preferences>();
   const lang = preferences.language;
-  const limit = Math.min(Math.max(input.limit ?? 8, 1), 15);
+  const limit = Math.min(Math.max(input.limit ?? 15, 1), 15);
 
   let batch: { id: string; createdAt: string };
   if (input.date) {
@@ -63,6 +64,8 @@ export default async function (input: Input) {
   return {
     category: match.name,
     batchDate: batch.createdAt,
+    totalStories: articles.length,
+    note: `This category has ${articles.length} stories: cover every one of them (one short line each) unless the user asks for fewer.`,
     stories: articles.map((article) => toAIStorySummary(article)),
   };
 }

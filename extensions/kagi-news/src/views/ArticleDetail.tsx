@@ -318,7 +318,10 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
           <Action
             title={showSources ? "Hide Sources" : "Show Sources"}
             icon={showSources ? Icon.EyeDisabled : Icon.Eye}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "s" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+            }}
             onAction={() => setShowSources(!showSources)}
           />
         </ActionPanel>
