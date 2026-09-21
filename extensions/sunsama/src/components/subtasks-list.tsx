@@ -11,7 +11,7 @@ import {
   withActiveTimer,
 } from "../lib/sunsama-client";
 import { reportError, runWithToast } from "../lib/errors";
-import { formatElapsed } from "../lib/time";
+import { elapsedSeconds, formatElapsed } from "../lib/time";
 import { xShortcut } from "../lib/shortcuts";
 import { Subtask, Task } from "../lib/types";
 import { EditSubtaskForm } from "./edit-subtask-form";
@@ -27,12 +27,11 @@ interface Props {
 function accessories(subtask: Subtask, now: number): List.Item.Accessory[] {
   const items: List.Item.Accessory[] = [];
   if (subtask.isRunning) {
-    const current = subtask.timerStart
-      ? Math.floor((now - Date.parse(subtask.timerStart)) / 1000)
-      : undefined;
     items.push({
       tag: {
-        value: current === undefined ? "running" : formatElapsed(current),
+        value: subtask.timerStart
+          ? formatElapsed(elapsedSeconds(subtask.timerStart, now))
+          : "running",
         color: Color.Green,
       },
       icon: { source: Icon.Stopwatch, tintColor: Color.Green },
@@ -179,7 +178,8 @@ export function SubtasksList({ task, onChanged }: Props) {
                       : "Mark as Completed"
                   }
                   icon={subtask.completed ? Icon.Circle : Icon.Check}
-                  shortcut={xShortcut("enter")}
+                  // Second in the section, so Raycast gives it ⌘↩ itself;
+                  // setting that shortcut explicitly is stripped as reserved.
                   onAction={() => onToggle(subtask)}
                 />
               </ActionPanel.Section>
