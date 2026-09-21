@@ -4,23 +4,47 @@ import { post, SavedArticle, ScreviError } from "./lib/screvi";
 
 const URL_PATTERN = /https?:\/\/[^\s<>"']+/i;
 
+/** Closing characters that only belong to a URL when something opened them. */
+const CLOSERS: Record<string, string> = {
+  ")": "(",
+  "]": "[",
+  "}": "{",
+};
+
 /**
  * A URL copied mid-sentence drags the punctuation after it, and Screvi would
- * try to fetch `example.com,`. Trim the characters that cannot end a URL, then
- * let the parser have the final say.
+ * try to fetch `example.com,`. Strip from the end one character at a time,
+ * stopping at the first closing bracket the URL actually opened — trimming the
+ * whole run at once would mangle `.../Cat_(animal)).`, which ends in one
+ * bracket that belongs to the path and one that belongs to the sentence.
  */
+function trimTrailing(url: string): string {
+  let out = url;
+  while (out.length > 0) {
+    const last = out[out.length - 1];
+    if (".,;:!?'\"".includes(last)) {
+      out = out.slice(0, -1);
+      continue;
+    }
+    const opener = CLOSERS[last];
+    if (opener) {
+      const opens = out.split(opener).length - 1;
+      const closes = out.split(last).length - 1;
+      if (closes > opens) {
+        out = out.slice(0, -1);
+        continue;
+      }
+    }
+    break;
+  }
+  return out;
+}
+
 function cleanUrl(candidate: string): string | undefined {
   const match = candidate.match(URL_PATTERN);
   if (!match) return undefined;
-  const trimmed = match[0].replace(/[.,;:!?'"]+$/, "").replace(/[)\]}]+$/, (tail, offset: number) => {
-    // Keep a closing bracket that a matching opener earlier in the URL needs.
-    const head = match[0].slice(0, offset);
-    const opens = (head.match(/[([{]/g) ?? []).length;
-    const closes = (head.match(/[)\]}]/g) ?? []).length;
-    return opens > closes ? tail : "";
-  });
   try {
-    const url = new URL(trimmed);
+    const url = new URL(trimTrailing(match[0]));
     return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : undefined;
   } catch {
     return undefined;
