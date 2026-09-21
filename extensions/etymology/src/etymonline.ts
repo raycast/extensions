@@ -8,6 +8,7 @@
 // Not under src/sources/ for that reason — nothing here fetches anything.
 
 import { Entry } from "./model";
+import { escapeMarkdown } from "./render";
 
 export function etymonlineUrl(term: string): string {
   return `https://www.etymonline.com/word/${encodeURIComponent(term)}`;
@@ -21,7 +22,5 @@ export function etymonlineUrl(term: string): string {
  */
 export function etymonlineFooter(entry: Entry, enabled: boolean): string {
   if (!enabled || entry.lang !== "en") return "";
-  // Not "Also on": a tree that names side branches already ends on "Also from
-  // English -ic", and two Alsos in a row read as one list.
-  return `Read more at [Etymonline](${etymonlineUrl(entry.term)})`;
+  return `See also **${escapeMarkdown(entry.term)}** at [Etymonline](${etymonlineUrl(entry.term)})`;
 }

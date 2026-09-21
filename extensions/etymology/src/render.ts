@@ -11,23 +11,6 @@ export const ATTRIBUTION =
   "Etymology from [Wiktionary](https://en.wiktionary.org), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).";
 
 /**
- * The tree as a table.
- *
- * It was a fenced code block, which cost more than it bought. A code block is
- * drawn as a grey slab in dim monospace, so the terms - the one thing on screen
- * worth reading - came out fainter than the attribution line underneath them,
- * and every level of depth pushed them further right on a ragged edge.
- *
- * A table puts the terms in a column of their own, set in the interface font and
- * bold, and carries depth as a chevron in the language cell instead of as real
- * indentation. `computer` is eleven levels deep; as indentation that runs off the
- * pane, as chevrons it stays a fixed width.
- *
- * The headword is not a row: the pane already carries it as a heading. Roots get
- * a trailing line rather than a branch, since they hang off the headword and in a
- * tree would surface below the whole chain, reading as its continuation.
- */
-/**
  * What a tree shows: the line of descent, and the names of what branches off it.
  *
  * Drawing every node indented was the problem. `computer` has twenty-six of them
@@ -60,7 +43,8 @@ export function treeMarkdown(node: EtymNode): string {
 
   // A table rather than a fenced block. A code block is drawn as a grey slab in
   // dim monospace, so the terms came out fainter than the attribution beneath
-  // them; a table gives them a column of their own in the interface font.
+  // them; a table gives them a column of their own in the interface font. The
+  // headword is not a row: the pane already carries it as a heading.
   const rows = path.map((n) => `| ${RELATION_MARKS[n.relation]} | ${cell(n.langName)} | ${cell(term(n))} |`);
   // Labelled, not blank. Markdown requires a header row and Raycast draws it
   // regardless, so an empty one renders as an unexplained grey band above the
@@ -91,7 +75,7 @@ function cell(text: string): string {
   return text.replace(/\|/g, "\\|");
 }
 
-function escapeMarkdown(text: string): string {
+export function escapeMarkdown(text: string): string {
   return text.replace(/([*_`[\]])/g, "\\$1");
 }
 
