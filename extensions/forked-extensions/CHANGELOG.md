@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-09-21
 
 - Separate repository initialization from extension list refresh
 
