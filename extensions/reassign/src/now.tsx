@@ -27,13 +27,8 @@ import {
 } from "./lib/schedule-model";
 import { BILLING_URL, WEB_BASE, webDayUrl } from "./lib/wire";
 
-interface Prefs {
-  showBlockName: boolean;
-  notifyTransitions: boolean;
-}
-
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const { data, isLoading, revalidate } = useCachedPromise((date: string) => getSchedule(date, true), [todayISO()], {
     keepPreviousData: true,
   });
