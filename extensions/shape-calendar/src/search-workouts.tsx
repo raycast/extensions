@@ -10,7 +10,7 @@ import {
   Alert,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getActivities, deleteActivity, updateActivity } from "./api/client";
 import { Activity, SportType } from "./api/types";
 import { sportIcons, sportNames } from "./constants";
@@ -66,12 +66,18 @@ export default function Command() {
   );
 
   // Activities come back newest first, so the upcoming ones sit above today.
-  // Start on today's workout, or the next planned one if today is empty.
-  const today = toLocalDateString(new Date());
-  const nextDate = data?.findLast((activity) => activity.date >= today)?.date;
-  const initialItemId = data?.find(
-    (activity) => activity.date === nextDate,
-  )?.id;
+  // Start on today's workout, or the next planned one if today is empty — but
+  // only once per filter, so revalidating doesn't pull the selection back.
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const initializedFilter = useRef<string>(undefined);
+
+  useEffect(() => {
+    if (!data || initializedFilter.current === sportFilter) return;
+    initializedFilter.current = sportFilter;
+    const today = toLocalDateString(new Date());
+    const nextDate = data.findLast((activity) => activity.date >= today)?.date;
+    setSelectedItemId(data.find((activity) => activity.date === nextDate)?.id);
+  }, [data, sportFilter]);
 
   useEffect(() => {
     if (error) {
@@ -130,7 +136,8 @@ export default function Command() {
       searchBarPlaceholder="Search activities"
       isLoading={isLoading}
       isShowingDetail
-      selectedItemId={initialItemId}
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by sport"
@@ -194,8 +201,7 @@ function ActivityItem({
       icon={
         activity.completed
           ? { source: Icon.CheckCircle, tintColor: Color.Green }
-          : new Date(activity.date) <
-              new Date(new Date().toISOString().split("T")[0])
+          : activity.date < toLocalDateString(new Date())
             ? { source: Icon.XMarkCircle, tintColor: Color.Red }
             : { source: Icon.Calendar, tintColor: Color.Orange }
       }

@@ -1,7 +1,8 @@
-import { LocalStorage, OAuth } from "@raycast/api";
+import { environment, LaunchType, LocalStorage, OAuth } from "@raycast/api";
 
 const ORIGIN = "https://shapecalendar.com";
 const CLIENT_ID_KEY = "oauth-client-id";
+const REQUEST_TIMEOUT_MS = 30_000;
 // Shape matches redirect URIs by exact string, so this has to be the literal
 // value Raycast sends for OAuth.RedirectMethod.Web.
 const REDIRECT_URI = "https://raycast.com/redirect?packageName=Extension";
@@ -17,6 +18,7 @@ const client = new OAuth.PKCEClient({
 async function registerClient(): Promise<string> {
   const response = await fetch(`${ORIGIN}/oauth/register`, {
     method: "POST",
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       client_name: "Raycast",
@@ -44,6 +46,7 @@ async function getClientId(): Promise<string> {
   if (stored) {
     const response = await fetch(
       `${ORIGIN}/api/oauth/client/${encodeURIComponent(stored)}`,
+      { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
     );
     if (response.ok) {
       const { redirect_uris } = (await response.json()) as {
@@ -79,6 +82,12 @@ async function runAuthorization(): Promise<string> {
   const tokens = await client.getTokens();
   if (tokens?.accessToken) return tokens.accessToken;
 
+  // The sign-in screen can't be shown from a background refresh, including
+  // when a revoked token is discovered halfway through one.
+  if (environment.launchType === LaunchType.Background) {
+    throw new Error("Sign in to Shape Calendar to continue.");
+  }
+
   const clientId = await getClientId();
   const authRequest = await client.authorizationRequest({
     endpoint: `${ORIGIN}/oauth/authorize`,
@@ -89,6 +98,7 @@ async function runAuthorization(): Promise<string> {
 
   const response = await fetch(`${ORIGIN}/oauth/token`, {
     method: "POST",
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code: authorizationCode,

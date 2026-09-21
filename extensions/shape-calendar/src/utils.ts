@@ -91,8 +91,8 @@ export function getDateRange(
   const to = new Date();
   to.setDate(to.getDate() + futureDays);
   return {
-    from: from.toISOString().split("T")[0],
-    to: to.toISOString().split("T")[0],
+    from: toLocalDateString(from),
+    to: toLocalDateString(to),
   };
 }
 function formatEndCondition(step: {
