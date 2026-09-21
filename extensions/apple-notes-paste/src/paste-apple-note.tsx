@@ -16,6 +16,7 @@ import { usePromise } from "@raycast/utils";
 import { getNotePlainText } from "./notes";
 import { getOpenNoteURL, Note } from "./notes-db";
 import { useNotes } from "./use-notes";
+import CreateAppleNote from "./create-apple-note";
 
 const ALL_NOTES = "__all_notes__";
 const DEFAULT_FOLDER = "__default_folder__";
@@ -25,7 +26,9 @@ function withoutFirstLine(text: string) {
 }
 
 function codeBlock(text: string) {
-  const fence = "~".repeat(Math.max(3, ...Array.from(text.matchAll(/~+/g), (match) => match[0].length + 1)));
+  let length = 3;
+  for (const match of text.matchAll(/~+/g)) length = Math.max(length, match[0].length + 1);
+  const fence = "~".repeat(length);
   return `${fence}\n${text}\n${fence}`;
 }
 
@@ -65,7 +68,11 @@ export default function PasteAppleNote() {
   }, [selectedNoteId, visibleNotes]);
 
   const selectedNote = visibleNotes.find((note) => note.id === selectedNoteId);
-  const { data: selectedContent, isLoading: isLoadingContent } = usePromise(
+  const {
+    data: selectedContent,
+    isLoading: isLoadingContent,
+    error: contentError,
+  } = usePromise(
     async (noteId?: string) => (noteId ? { id: noteId, text: await getNotePlainText(noteId) } : undefined),
     [selectedNote?.id],
   );
@@ -75,6 +82,12 @@ export default function PasteAppleNote() {
   return (
     <List
       isLoading={isLoading}
+      filtering={false}
+      actions={
+        <ActionPanel>
+          <Action.Push title="Create Apple Note" icon={Icon.Plus} target={<CreateAppleNote />} />
+        </ActionPanel>
+      }
       isShowingDetail
       selectedItemId={selectedNoteId ?? undefined}
       onSelectionChange={setSelectedNoteId}
@@ -104,6 +117,7 @@ export default function PasteAppleNote() {
           excludeFirstLineWhenPasting={preferences.excludeFirstLineWhenPasting}
           detailContent={selectedContent?.id === note.id ? selectedContent.text : undefined}
           isLoadingDetail={selectedNote?.id === note.id && isLoadingContent}
+          contentError={selectedNote?.id === note.id && Boolean(contentError)}
         />
       ))}
       {!isLoading && visibleNotes.length === 0 ? (
@@ -120,6 +134,7 @@ function NoteItem({
   excludeFirstLineWhenPasting,
   detailContent,
   isLoadingDetail,
+  contentError,
 }: {
   note: Note;
   onRefresh: () => Promise<unknown>;
@@ -127,6 +142,7 @@ function NoteItem({
   excludeFirstLineWhenPasting: boolean;
   detailContent?: string;
   isLoadingDetail: boolean;
+  contentError: boolean;
 }) {
   async function pasteNote() {
     try {
@@ -157,13 +173,20 @@ function NoteItem({
       detail={
         <List.Item.Detail
           isLoading={isLoadingDetail}
-          markdown={detailMarkdown(detailContent ?? note.snippet, excludeFirstLineWhenPasting)}
+          markdown={
+            contentError
+              ? "Could not load this note. Open it in Apple Notes to check access or unlock it."
+              : detailContent === undefined
+                ? "Loading note content…"
+                : detailMarkdown(detailContent, excludeFirstLineWhenPasting)
+          }
         />
       }
       actions={
         <ActionPanel>
           {defaultAction === "paste" ? pasteAction : openAction}
           {defaultAction === "paste" ? openAction : pasteAction}
+          <Action.Push title="Create Apple Note" icon={Icon.Plus} target={<CreateAppleNote />} />
           {detailContent !== undefined && !isLoadingDetail ? (
             <Action.CreateSnippet
               title="Create Raycast Snippet"

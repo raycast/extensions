@@ -8,15 +8,18 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { createAppleNote } from "./notes";
 
 export default function CreateAppleNote() {
   const { defaultFolder } = getPreferenceValues<Preferences>();
   const [isCreating, setIsCreating] = useState(false);
+  const creating = useRef(false);
 
   async function handleSubmit(values: { title: string; content: string }) {
+    if (creating.current) return;
+    creating.current = true;
     try {
       setIsCreating(true);
       await createAppleNote(values.title, values.content, defaultFolder?.trim());
@@ -25,6 +28,7 @@ export default function CreateAppleNote() {
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Could not create note", message: String(error) });
     } finally {
+      creating.current = false;
       setIsCreating(false);
     }
   }

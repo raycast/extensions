@@ -2,7 +2,7 @@ import { showFailureToast, useSQL } from "@raycast/utils";
 
 import { Note, NOTES_DB } from "./notes-db";
 
-type NoteRow = Omit<Note, "folderKey">;
+type NoteRow = Note;
 
 const notesQuery = `
   SELECT
@@ -11,6 +11,7 @@ const notesQuery = `
     COALESCE(note.zsnippet, '') AS snippet,
     COALESCE(folder.ztitle2, '') AS folder,
     COALESCE(account.zname, '') AS account,
+    CAST(folder.z_pk AS TEXT) AS folderKey,
     note.zidentifier AS uuid
   FROM ziccloudsyncingobject AS note
   INNER JOIN ziccloudsyncingobject AS folder ON note.zfolder = folder.z_pk
@@ -25,14 +26,12 @@ const notesQuery = `
 export function useNotes() {
   const notesState = useSQL<NoteRow>(NOTES_DB, notesQuery, {
     permissionPriming:
-      "Apple Notes Paste needs Full Disk Access to search your Apple Notes. Your notes stay on this Mac.",
+      "Apple Notes Paste needs Full Disk Access to search your local Apple Notes database. Apple Notes manages iCloud sync.",
     onError(error) {
       showFailureToast(error, { title: "Could not read Apple Notes" });
     },
   });
-  const notes = (notesState.data ?? [])
-    .filter((note) => note.folder !== "Recently Deleted")
-    .map((note) => ({ ...note, folderKey: `${note.account}|${note.folder}` }));
+  const notes = (notesState.data ?? []).filter((note) => note.folder !== "Recently Deleted");
   const folders = Array.from(
     new Map(
       notes.map((note) => [note.folderKey, { key: note.folderKey, name: note.folder, account: note.account }]),
