@@ -121,6 +121,16 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
     resume?.(signedInUser);
   }
 
+  /**
+   * Adds the card, sending a signed-out visitor through sign-in first.
+   *
+   * Reason: both the signed-in and the signed-out row action call this, so the
+   * rule for what happens after signing in lives in one place. The account
+   * comes from the resume callback rather than `user`, which is still the
+   * signed-out value in the closure the callback was created in.
+   *
+   * @param entry - The dictionary entry whose card is being added
+   */
   async function handleAddCard(entry: DictionaryEntry) {
     if (!user) {
       promptSignIn((signedInUser) => addCardFor(signedInUser.id, entry));
@@ -260,11 +270,7 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
                   {isSignedIn ? (
                     <Action title="Add to Deck" icon={Icon.Plus} onAction={() => handleAddCard(entry)} />
                   ) : (
-                    <Action
-                      title="Sign in to Add Cards"
-                      icon={Icon.Key}
-                      onAction={() => promptSignIn(() => handleAddCard(entry))}
-                    />
+                    <Action title="Sign in to Add Cards" icon={Icon.Key} onAction={() => handleAddCard(entry)} />
                   )}
                   <Action
                     title="Pronounce"
