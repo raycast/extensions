@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Browser Opening and Favicons] - {PR_MERGE_DATE}
+## [Browser Opening and Favicons] - 2026-09-21
 
 - Added macOS actions to open bookmarks in a new browser tab or window, plus an option to replace the current tab
 - Improved Chromium favicons using local browser data and private-network fallbacks
