@@ -1,6 +1,6 @@
 # Claude Artifacts Changelog
 
-## [Run Doctor] - {PR_MERGE_DATE}
+## [Run Doctor] - 2026-09-21
 
 - **The recording hook stopped recording on 2026-09-10 and nothing said so.** Artifact URLs changed from `claude.ai/code/artifact/<uuid>` to `claude.ai/artifact/<slug>`; the hook matched the UUID form, stopped recognising its own payload, and — because it must never fail a Claude Code turn — went on exiting cleanly on every publish. Fixed by matching the shape of the URL and treating the id as opaque, which is the part that will change again
 - Added a **Run Doctor** command, which checks the whole chain and says which link is broken: `jq` and `perl`, the recorder script, its registration, the index, and coverage against your transcripts
