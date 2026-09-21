@@ -42,6 +42,7 @@ function accountScope(): string {
 }
 
 const timeEntriesCacheKey = () => `clockify/${accountScope()}/timeEntries`;
+const timeEntriesRefreshedAtCacheKey = () => `clockify/${accountScope()}/timeEntriesRefreshedAt`;
 const projectsCacheKey = () => `clockify/${accountScope()}/projects`;
 const activeEntryCacheKey = () => `clockify/${accountScope()}/activeEntry`;
 const tasksCacheKey = (projectId: string) => `clockify/${accountScope()}/project[${projectId}]`;
@@ -270,11 +271,48 @@ export async function getTimeEntries({ onError }: { onError?: (state: boolean) =
         a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
     );
     cache.set(timeEntriesCacheKey(), JSON.stringify(filteredEntries));
+    markTimeEntriesRefreshed();
 
     return filteredEntries;
   } else {
+    // An account with no entries answers successfully with an empty list. Record that as a refresh —
+    // otherwise timeEntriesCacheAge() stays at Infinity and the menu bar asks again every 10 seconds
+    // forever — and empty the cached list too, so a previously cached set does not keep being shown
+    // for entries that no longer exist.
+    //
+    // Both only on a successful array response: a failed request has to be retried, not mistaken for
+    // an account with no entries.
+    if (!error && Array.isArray(data)) {
+      cache.set(timeEntriesCacheKey(), JSON.stringify([]));
+      markTimeEntriesRefreshed();
+    }
+
     return [];
   }
+}
+
+function markTimeEntriesRefreshed(): void {
+  cache.set(timeEntriesRefreshedAtCacheKey(), String(Date.now()));
+}
+
+/**
+ * How long ago this list was last refreshed from Clockify, in milliseconds, or Infinity if it never
+ * has been.
+ *
+ * Exists so the menu bar can decide whether a refresh is worth paying for: the request above returns
+ * 500 hydrated entries — roughly 1.2MB and three seconds — which is far too expensive to repeat on a
+ * 10-second interval. Counted from the last refresh by *either* command, so opening the time-tracking
+ * view also satisfies the menu bar.
+ *
+ * Deliberately measures the fetch, not the cache contents: stopCurrentTimer() and addNewTimeEntry()
+ * amend the cached list in place without refetching, and those edits should not pass for freshness.
+ */
+export function timeEntriesCacheAge(): number {
+  const stored = cache.get(timeEntriesRefreshedAtCacheKey());
+  if (!stored) return Infinity;
+
+  const refreshedAt = Number(stored);
+  return Number.isFinite(refreshedAt) ? Date.now() - refreshedAt : Infinity;
 }
 
 export async function stopCurrentTimer(callback?: () => void): Promise<void> {
@@ -537,26 +575,35 @@ async function findCachedProject(projectId: string): Promise<Project | undefined
 }
 
 /**
- * Whether a project is billable by default.
+ * The project an entry belongs to.
  *
  * Reads the cached project list and only falls back to a request, because a timer can be restarted
- * from a recent entry before any form has loaded projects. getProjects() populates one of the
- * caches findCachedProject() reads, so that fallback primes itself and costs one request rather
- * than one per timer start. Returns undefined when the setting cannot be determined, which callers
- * pass straight into the request body: JSON.stringify drops undefined, so the field is omitted and
- * behaviour is unchanged rather than guessed at.
+ * from a recent entry before any form has loaded projects. getProjects() populates one of the caches
+ * findCachedProject() reads, so that fallback primes itself and costs one request rather than one per
+ * timer start.
  *
- * Cache-first means a setting changed in Clockify web can be stale here until a cache is
- * rewritten, which either form does on mount. Restarting a recent entry does not open a form, so
- * that path can use an older value. Accepted deliberately: billability changes rarely, and always
- * refetching would add a request to every timer start.
+ * Cache-first means a project changed in Clockify web can be stale here until a cache is rewritten,
+ * which either form does on mount. Restarting a recent entry does not open a form, so that path can
+ * use an older copy. Accepted deliberately: projects change rarely, and always refetching would add a
+ * request to every timer start.
  */
-export async function isProjectBillable(projectId: string): Promise<boolean | undefined> {
+async function resolveProject(projectId: string): Promise<Project | undefined> {
   const cached = await findCachedProject(projectId);
-  if (cached) return cached.billable;
+  if (cached) return cached;
 
   const projects = await getProjects();
-  return projects.find((project) => project.id === projectId)?.billable;
+  return projects.find((project) => project.id === projectId);
+}
+
+/**
+ * Whether a project is billable by default.
+ *
+ * Returns undefined when the setting cannot be determined, which callers pass straight into the
+ * request body: JSON.stringify drops undefined, so the field is omitted and Clockify's own default
+ * applies rather than a guess of ours.
+ */
+export async function isProjectBillable(projectId: string): Promise<boolean | undefined> {
+  return (await resolveProject(projectId))?.billable;
 }
 
 export async function getTasksForProject(projectId: string): Promise<Task[]> {
@@ -589,10 +636,14 @@ export async function addNewTimeEntry(
 
   const { workspaceId } = await resolveConfig();
 
+  // Resolved once and used twice: for `billable` below, and to fill in the project on the created
+  // entry before it is cached.
+  const project = await resolveProject(projectId);
+
   // Clockify defaults billable to false when the field is absent; it does not fall back to the
   // project's "billable by default" setting, so that has to be sent explicitly or every entry
   // lands as non-billable.
-  const billable = await isProjectBillable(projectId);
+  const billable = project?.billable;
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
     method: "POST",
@@ -610,8 +661,16 @@ export async function addNewTimeEntry(
   if (!error && data?.id) {
     notify(Toast.Style.Success, "Timer is running");
 
+    const created = data as TimeEntry;
+
+    // The response to this POST is not hydrated: it carries projectId but no project object. Anything
+    // rendering it straight from the cache therefore showed the entry with no project name and an
+    // untinted icon — visible in the menu bar's restart list, which is served from that cache. Fill
+    // the project in from the copy already resolved above.
+    if (!created.project && project) created.project = project;
+
     // Keep the active-timer cache in step; see cacheActiveTimeEntry.
-    cacheActiveTimeEntry(data as TimeEntry);
+    cacheActiveTimeEntry(created);
 
     // Update the cache directly
     try {
@@ -619,14 +678,14 @@ export async function addNewTimeEntry(
       if (entriesString) {
         const entries = JSON.parse(entriesString as string);
         // Add the new entry to the beginning of the array
-        entries.unshift(data);
+        entries.unshift(created);
         cache.set(timeEntriesCacheKey(), JSON.stringify(entries));
       }
     } catch (e) {
       console.error("Error updating cache:", e);
     }
 
-    return data as TimeEntry;
+    return created;
   } else {
     // Surface the reason: this toast used to be the extension's only symptom for several distinct
     // failures, which made them very hard to tell apart.
