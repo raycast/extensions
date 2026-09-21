@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Menu Bar Process Safety] - {PR_MERGE_DATE}
+## [Menu Bar Process Safety] - 2026-09-21
 
 - Keep background refreshes process-free by collecting CPU and storage without external programs
 - Keep the menu-bar Memory reading consistent with the Memory tab; the background refresh reuses the last value collected when the menu was opened
