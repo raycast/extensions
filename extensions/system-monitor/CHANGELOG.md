@@ -1,5 +1,13 @@
 # System Monitor Changelog
 
+## [Menu Bar Process Safety] - 2026-09-21
+
+- Keep background refreshes process-free by collecting CPU and storage without external programs
+- Keep the menu-bar Memory reading consistent with the Memory tab; the background refresh reuses the last value collected when the menu was opened
+- Reuse cached network, temperature, and battery values until the menu is opened instead of starting `nettop` or `temperature-reader` every 10 seconds
+- Prevent overlapping background workers with a stale-recoverable cross-process lease
+- Validate and bound the versioned menu-bar snapshot cache
+
 ## [Disk Tab] - 2026-08-05
 
 - Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
