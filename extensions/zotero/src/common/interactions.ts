@@ -21,12 +21,21 @@ export async function loadInteractions(): Promise<InteractionMap> {
   return {};
 }
 
-export async function recordInteraction(id: string): Promise<void> {
-  const map = await loadInteractions();
-  map[id] = Date.now();
-  // Bound the stored size: keep the most recent entries past the cap.
-  const entries = Object.entries(map)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, MAX_ENTRIES);
-  await LocalStorage.setItem(KEY, JSON.stringify(Object.fromEntries(entries)));
+// Serialized read-modify-write: two overlapping opens would otherwise read the
+// same map and the later write would drop the earlier entry.
+let writeChain: Promise<void> = Promise.resolve();
+
+export function recordInteraction(id: string): Promise<void> {
+  writeChain = writeChain
+    .then(async () => {
+      const map = await loadInteractions();
+      map[id] = Date.now();
+      // Bound the stored size: keep the most recent entries past the cap.
+      const entries = Object.entries(map)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, MAX_ENTRIES);
+      await LocalStorage.setItem(KEY, JSON.stringify(Object.fromEntries(entries)));
+    })
+    .catch((e) => console.error("failed to record interaction", e));
+  return writeChain;
 }

@@ -200,7 +200,7 @@
       "required": false,
       "default": false,
       "label": "Order Empty Results by Last Opened",
-      "description": "When the search is empty, show entries you opened most recently first. Tracks when you open a PDF, the Zotero entry, or the original link"
+      "description": "When the search is empty, show entries you opened most recently first. Tracks when you open a PDF, the Zotero entry, the original link, or reveal a PDF in Finder"
     }
   ],
   "dependencies": {

@@ -165,12 +165,18 @@ export function rankResults(items: RefData[], query: string, opts: RankOptions =
   }
 
   if (terms.length === 0) {
-    const openedAt = opts.interactions ?? {};
-    const lastOpened = (it: RefData): number => openedAt[itemIdentity(it)] ?? 0;
-    // Recently opened first (by when they were opened, not added), then the
-    // never-opened rest by date added; with no interactions this reduces to
-    // date-added order.
-    return pool.sort((a, b) => lastOpened(b) - lastOpened(a) || recency(b) - recency(a)).slice(0, limit);
+    // Open history only reorders a truly blank query, matching the preference
+    // text ("when the search is empty"); a tag-only query keeps date-added
+    // order.
+    if (tags.length === 0) {
+      const openedAt = opts.interactions ?? {};
+      const lastOpened = (it: RefData): number => openedAt[itemIdentity(it)] ?? 0;
+      // Recently opened first (by when they were opened, not added), then the
+      // never-opened rest by date added; with no interactions this reduces to
+      // date-added order.
+      return pool.sort((a, b) => lastOpened(b) - lastOpened(a) || recency(b) - recency(a)).slice(0, limit);
+    }
+    return pool.sort((a, b) => recency(b) - recency(a)).slice(0, limit);
   }
 
   const scored: { item: RefData; score: number }[] = [];

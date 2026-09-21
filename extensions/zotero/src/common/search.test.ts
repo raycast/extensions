@@ -63,6 +63,14 @@ describe("rankResults", () => {
     expect(out.map((i) => i.added)).toEqual([new Date("2022-01-01"), new Date("2019-01-01")]);
   });
 
+  it("tag-only query keeps date-added order, not open history", () => {
+    const a = item({ title: "Opened Old", tags: ["physics"], added: new Date("2019-01-01") });
+    const b = item({ title: "Never Opened", tags: ["physics"], added: new Date("2022-01-01") });
+    const interactions = { [itemIdentity(a)]: 2000 };
+    const out = rankResults([a, b], ".physics", { interactions });
+    expect(out.map((i) => i.title)).toEqual(["Never Opened", "Opened Old"]);
+  });
+
   it("matches a subsequence in the title", () => {
     const a = item({ title: "Quantum Simulation of Lattice Gauge Theories" });
     const b = item({ title: "A Study of Marine Biology" });
