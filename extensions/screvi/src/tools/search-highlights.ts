@@ -1,4 +1,4 @@
-import { endpoint, get, Paginated, SearchResult } from "../lib/screvi";
+import { endpoint, get, highlightUrl, Paginated, SearchResult } from "../lib/screvi";
 
 type Input = {
   /**
@@ -41,6 +41,6 @@ export default async function searchHighlights(input: Input) {
     tags: highlight.tags.map((tag) => tag.name),
     favorite: highlight.favorite,
     matchedBy: highlight.match_type,
-    url: `https://app.screvi.com/highlights/${highlight.id}`,
+    url: highlightUrl(highlight.id),
   }));
 }

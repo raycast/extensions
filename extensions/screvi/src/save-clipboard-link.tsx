@@ -2,7 +2,30 @@ import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { post, SavedArticle, ScreviError } from "./lib/screvi";
 
-const URL_PATTERN = /https?:\/\/[^\s<>"')]+/i;
+const URL_PATTERN = /https?:\/\/[^\s<>"']+/i;
+
+/**
+ * A URL copied mid-sentence drags the punctuation after it, and Screvi would
+ * try to fetch `example.com,`. Trim the characters that cannot end a URL, then
+ * let the parser have the final say.
+ */
+function cleanUrl(candidate: string): string | undefined {
+  const match = candidate.match(URL_PATTERN);
+  if (!match) return undefined;
+  const trimmed = match[0].replace(/[.,;:!?'"]+$/, "").replace(/[)\]}]+$/, (tail, offset: number) => {
+    // Keep a closing bracket that a matching opener earlier in the URL needs.
+    const head = match[0].slice(0, offset);
+    const opens = (head.match(/[([{]/g) ?? []).length;
+    const closes = (head.match(/[)\]}]/g) ?? []).length;
+    return opens > closes ? tail : "";
+  });
+  try {
+    const url = new URL(trimmed);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Whatever you have selected wins over the clipboard: selecting a link in a
@@ -25,8 +48,8 @@ async function findUrl(): Promise<string | undefined> {
     // Clipboard access denied.
   }
   for (const candidate of candidates) {
-    const match = candidate.match(URL_PATTERN);
-    if (match) return match[0];
+    const url = cleanUrl(candidate);
+    if (url) return url;
   }
   return undefined;
 }

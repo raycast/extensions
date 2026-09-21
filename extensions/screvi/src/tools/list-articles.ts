@@ -20,7 +20,7 @@ type Input = {
  * saved page.
  */
 export default async function listArticles(input: Input) {
-  const { data } = await get<Paginated<Article>>(
+  const { data, pagination } = await get<Paginated<Article>>(
     endpoint("/articles", {
       home_status: input.homeStatus,
       q: input.query,
@@ -29,18 +29,25 @@ export default async function listArticles(input: Input) {
     }),
   );
 
-  return data.map((article) => ({
-    title: article.title,
-    author: article.author,
-    site: article.site_name ?? article.source_domain,
-    excerpt: article.excerpt,
-    status: article.home_status,
-    readingTimeMinutes: article.reading_time_minutes,
-    progressPercentage: article.progress_percentage,
-    highlightCount: article.highlight_count,
-    tags: article.tags.map((tag) => tag.name),
-    savedAt: article.saved_at,
-    originalUrl: article.url,
-    url: article.screvi_url,
-  }));
+  // The page is capped, so "how many do I have saved?" has to be answered from
+  // `total` rather than by counting `articles`.
+  return {
+    total: pagination.total,
+    returned: data.length,
+    hasMore: pagination.has_more,
+    articles: data.map((article) => ({
+      title: article.title,
+      author: article.author,
+      site: article.site_name ?? article.source_domain,
+      excerpt: article.excerpt,
+      status: article.home_status,
+      readingTimeMinutes: article.reading_time_minutes,
+      progressPercentage: article.progress_percentage,
+      highlightCount: article.highlight_count,
+      tags: article.tags.map((tag) => tag.name),
+      savedAt: article.saved_at,
+      originalUrl: article.url,
+      url: article.screvi_url,
+    })),
+  };
 }

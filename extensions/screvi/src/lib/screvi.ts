@@ -6,8 +6,6 @@ import { getPreferenceValues } from "@raycast/api";
  * 100 requests/minute per key, so the views below page rather than prefetch.
  */
 
-export const APP_URL = "https://app.screvi.com";
-
 export type SourceType =
   "book" | "article" | "tweet" | "self" | "podcast" | "video" | "custom" | "youtube" | "pdf" | "author" | "topics";
 
@@ -113,11 +111,7 @@ export interface Paginated<T> {
   pagination: Pagination;
 }
 
-interface Preferences {
-  apiKey: string;
-  apiUrl?: string;
-}
-
+// `Preferences` is generated from package.json into raycast-env.d.ts.
 function preferences(): Preferences {
   return getPreferenceValues<Preferences>();
 }
@@ -217,15 +211,34 @@ export async function get<T>(url: string): Promise<T> {
   return parseResponse<T>(await fetch(url, { headers: headers() }));
 }
 
+/**
+ * Where the web app lives for the configured server. Screvi serves the API at
+ * `api.<domain>` and the app at `app.<domain>`, so a self-hosted `apiUrl` has to
+ * move the deep links with it — otherwise they all point at the hosted app.
+ */
+export function appBase(): string {
+  const raw = preferences().apiUrl?.trim();
+  if (!raw) return "https://app.screvi.com";
+  try {
+    const url = new URL(raw);
+    url.hostname = url.hostname.replace(/^api\./, "app.");
+    url.pathname = "";
+    url.search = "";
+    return url.toString().replace(/\/+$/, "");
+  } catch {
+    return "https://app.screvi.com";
+  }
+}
+
 /** Where an item lives in the web app. */
 export function highlightUrl(id: string) {
-  return `${APP_URL}/highlights/${id}`;
+  return `${appBase()}/highlights/${id}`;
 }
 
 export function sourceUrl(id: string) {
-  return `${APP_URL}/sources/${id}`;
+  return `${appBase()}/sources/${id}`;
 }
 
 export function articleUrl(id: string) {
-  return `${APP_URL}/articles/${id}`;
+  return `${appBase()}/articles/${id}`;
 }
