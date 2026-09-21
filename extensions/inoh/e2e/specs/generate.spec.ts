@@ -22,6 +22,17 @@ const SAVED_WORD = "zzzzsavedword";
 
 const MEANING = "A word invented for a test, which is the sense its card should teach.";
 
+/**
+ * A word the seeded dictionary does carry, and the sense it carries it in.
+ *
+ * The two meanings of "battery" are nothing like each other, so one word
+ * exercises the check in both directions: the same sense has to be held, and
+ * the other sense has to go straight through.
+ */
+const HELD_WORD = "battery";
+const HELD_WORD_SAME_SENSE = "Device that stores and provides electrical energy";
+const HELD_WORD_OTHER_SENSE = "the crime of unlawfully hitting another person";
+
 let signedInUserId: string;
 
 /** The rows this account holds for a word, whatever state they have reached. */
@@ -125,5 +136,42 @@ describe("asking for a card for a word saved from a search miss", () => {
 
   it("does not spend a private card on a public request", async () => {
     expect(await _readAllowanceUsed()).toBe(1);
+  });
+});
+
+describe("asking for a card Inoh looks to have already", () => {
+  it("holds the word and names the card it looks to be", async () => {
+    expect(await requestCard(signedInUserId, HELD_WORD, HELD_WORD_SAME_SENSE, "public")).toEqual({
+      status: "held",
+      word: HELD_WORD,
+      likelyExisting: expect.objectContaining({ word: HELD_WORD, foundIn: "publicDictionary" }),
+    });
+  });
+
+  it("leaves the held word written down as a draft, so nothing typed is lost", async () => {
+    const requests = await _readRequestsForWord(HELD_WORD);
+    expect(requests).toEqual([
+      expect.objectContaining({ word: HELD_WORD, context: HELD_WORD_SAME_SENSE, status: "draft" }),
+    ]);
+  });
+
+  it("asks for it anyway once the user has said to", async () => {
+    expect(await requestCard(signedInUserId, HELD_WORD, HELD_WORD_SAME_SENSE, "public", true)).toEqual({
+      status: "queued",
+      word: HELD_WORD,
+    });
+
+    const requests = await _readRequestsForWord(HELD_WORD);
+    expect(requests).toEqual([expect.objectContaining({ word: HELD_WORD, status: "pending" })]);
+  });
+
+  it("never interrupts a genuinely different sense of the same word", async () => {
+    // The draft above has been asked for, so this writes a fresh one. A check
+    // matching on the word alone would have stopped this; matching on the
+    // meaning is what lets a real second sense through.
+    expect(await requestCard(signedInUserId, HELD_WORD, HELD_WORD_OTHER_SENSE, "public")).toEqual({
+      status: "queued",
+      word: HELD_WORD,
+    });
   });
 });

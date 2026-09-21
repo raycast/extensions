@@ -29,6 +29,8 @@ type DestinationCopy = {
   promiseLine: string;
   /** What has become of the word, the moment it has gone. */
   queuedHeadline: string;
+  /** What the action is called once Inoh has said it looks to have the card. */
+  goAheadAnywayTitle: string;
 };
 
 export const DESTINATION_COPY: Record<CardRequestDestination, DestinationCopy> = {
@@ -38,6 +40,7 @@ export const DESTINATION_COPY: Record<CardRequestDestination, DestinationCopy> =
     submitTitle: "Generate Private Card",
     promiseLine: "Yours only, about a minute.",
     queuedHeadline: "Your card generation is in a queue.",
+    goAheadAnywayTitle: "Generate Anyway",
   },
   public: {
     label: "Public",
@@ -45,5 +48,6 @@ export const DESTINATION_COPY: Record<CardRequestDestination, DestinationCopy> =
     submitTitle: "Request Public Card",
     promiseLine: "Free, but not guaranteed. It might take days.",
     queuedHeadline: "Your card request is in a queue.",
+    goAheadAnywayTitle: "Request Anyway",
   },
 };

@@ -2,6 +2,7 @@ import { supabase } from "./supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { describeCardRequestRefusal } from "./card-request-refusals";
 import { CARD_REQUEST_SOURCE, findDraftIdForWord } from "./card-request-drafts";
+import { findLikelyExistingCard } from "./existing-card-check";
 import type { CardRequestDestination, RequestCardResult } from "../types";
 
 /**
@@ -61,7 +62,7 @@ async function _updateWhileStillDraft(draftId: string, changes: Record<string, s
 }
 
 /**
- * Writes the word down with its meaning, reusing the draft already there.
+ * Writes the word down with its definition, reusing the draft already there.
  *
  * Reason: reused rather than inserted again, because the word may well have
  * been written down from a search miss already, and two drafts for one word
@@ -69,20 +70,20 @@ async function _updateWhileStillDraft(draftId: string, changes: Record<string, s
  *
  * @param userId - Whose card this is
  * @param word - The word, already trimmed
- * @param meaning - The sense its card should teach, already trimmed
+ * @param definition - The sense its card should teach, already trimmed
  * @param destination - Which dictionary it is headed for
  * @returns The draft's id, or the error that stopped it being written down
  */
-async function _writeDownWithMeaning(
+async function _writeDownWithDefinition(
   userId: string,
   word: string,
-  meaning: string,
+  definition: string,
   destination: CardRequestDestination,
 ): Promise<{ draftId: string } | { error: string }> {
   const existingDraftId = await findDraftIdForWord(userId, word);
 
   if (existingDraftId !== null) {
-    const reuseResult = await _updateWhileStillDraft(existingDraftId, { context: meaning, destination });
+    const reuseResult = await _updateWhileStillDraft(existingDraftId, { context: definition, destination });
     return reuseResult.changed ? { draftId: existingDraftId } : { error: reuseResult.errorMessage };
   }
 
@@ -91,7 +92,7 @@ async function _writeDownWithMeaning(
     .insert({
       user_id: userId,
       word,
-      context: meaning,
+      context: definition,
       destination,
       source: CARD_REQUEST_SOURCE,
       status: DRAFT_STATUS,
@@ -111,22 +112,37 @@ async function _writeDownWithMeaning(
  *
  * @param userId - Authenticated user's ID
  * @param word - The word to make a card for, as the user typed it
- * @param meaning - Which meaning the card should teach
+ * @param definition - Which sense the card should teach
  * @param destination - Private for the user's own card, public to ask the
  *   shared dictionary for one
- * @returns Whether it is being made, was refused, or could not be written
+ * @param hasSaidGoAhead - Skip the already-have-this check, for a user who
+ *   has read the card Inoh found and asked for theirs regardless
+ * @returns Whether it is being made, is held pending the user, was refused, or
+ *   could not be written
  */
 export async function requestCard(
   userId: string,
   word: string,
-  meaning: string,
+  definition: string,
   destination: CardRequestDestination,
+  hasSaidGoAhead = false,
 ): Promise<RequestCardResult> {
   const trimmedWord = word.trim();
+  const trimmedDefinition = definition.trim();
 
-  const draftWriteResult = await _writeDownWithMeaning(userId, trimmedWord, meaning.trim(), destination);
+  const draftWriteResult = await _writeDownWithDefinition(userId, trimmedWord, trimmedDefinition, destination);
   if ("error" in draftWriteResult) {
     return { status: "failed", error: draftWriteResult.error };
+  }
+
+  // Reason: checked after the word is written down and before it is asked
+  // for, so a held word stays a draft. That is exactly where a refused word
+  // ends up, and it is why the two writes above are two writes.
+  if (!hasSaidGoAhead) {
+    const likelyExisting = await findLikelyExistingCard(userId, trimmedWord, trimmedDefinition);
+    if (likelyExisting !== null) {
+      return { status: "held", word: trimmedWord, likelyExisting };
+    }
   }
 
   const queueResult = await _updateWhileStillDraft(draftWriteResult.draftId, { status: PENDING_STATUS });

@@ -30,6 +30,14 @@
   drafts either way
 - A card that has gone says so and names the page it is watched from, showing
   the dictionary it actually went to
+- The definition writes its own first draft: type the word, pause, and Inoh
+  fills in what it thinks the word means, tagged **Suggested**, for you to
+  correct. You came looking for the word because you do not know it well, so
+  answering "which sense should this card teach" from nothing is the hardest
+  part of a search miss. Anything you have typed yourself is left alone
+- A card Inoh looks to have already holds the word back once and says where it
+  found it, and the button becomes **Generate Anyway** or **Request Anyway** so
+  the second press goes through. Editing the word or the meaning asks again
 
 ## [Drafts Link and AI Assistants] - {PR_MERGE_DATE}
 

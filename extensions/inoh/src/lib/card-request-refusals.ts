@@ -23,7 +23,7 @@ const CONTEXT_CONSTRAINT = "card_requests_context_check";
 
 const ACTIVE_REQUEST_EXISTS_MESSAGE = "You already have an active request for this word.";
 const DAILY_LIMIT_REACHED_MESSAGE = "You've hit today's request limit. Try again tomorrow!";
-const MEANING_REQUIRED_MESSAGE = "Add a meaning before asking for this card.";
+const DEFINITION_REQUIRED_MESSAGE = "Add a definition before asking for this card.";
 const RETRY_LIMIT_REACHED_MESSAGE = "This one has already been retried three times.";
 const UNKNOWN_FAILURE_MESSAGE = "Something went wrong. Please try again.";
 
@@ -53,7 +53,7 @@ export function describeCardRequestRefusal(error: PostgrestError): CardRequestRe
   // anything leaving draft, and the composer refuses to send without one, so
   // reaching this means the draft was emptied somewhere else in the meantime.
   if (error.code === POSTGRES_CHECK_VIOLATION && error.message.includes(CONTEXT_CONSTRAINT)) {
-    return { message: MEANING_REQUIRED_MESSAGE, isPlanLimit: false };
+    return { message: DEFINITION_REQUIRED_MESSAGE, isPlanLimit: false };
   }
 
   if (error.message.includes(MONTHLY_LIMIT_MARKER)) {

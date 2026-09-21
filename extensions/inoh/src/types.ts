@@ -54,7 +54,31 @@ export type CardRequestDestination = "private" | "public";
 export type RequestCardResult =
   | { status: "queued"; word: string }
   | { status: "refused"; word: string; reason: string; isPlanLimit: boolean }
+  /**
+   * Inoh looks to have this card already and is waiting to be told to go
+   * ahead. Not a refusal: nothing turned the word down, and it is still
+   * written down as a draft.
+   */
+  | { status: "held"; word: string; likelyExisting: LikelyExistingCard }
   | { status: "failed"; error: string };
+
+/**
+ * A card Inoh looks to have already, found when someone was about to ask for
+ * it.
+ *
+ * Which dictionary it sits in changes what it means. A public entry was
+ * matched on what the card teaches, and makes a public request pointless. One
+ * of the user's own cards was matched on the word alone, because private cards
+ * carry no embedding, so it is offered to read rather than as a verdict.
+ */
+export type LikelyExistingCard = {
+  word: string;
+  definition: string;
+  foundIn: ExistingCardSource;
+};
+
+/** Which dictionary a likely duplicate was found in. */
+export type ExistingCardSource = "publicDictionary" | "ownCards";
 
 /**
  * What "Search Word from Screenshot" got out of a screen capture. Mirrors the
