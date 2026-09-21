@@ -35,7 +35,6 @@ interface ScheduleService {
   id: string;
   type: ScheduleableKind;
   name: string;
-  appName: string;
 }
 
 interface Schedule {
@@ -76,8 +75,13 @@ export default function ServiceSchedules({ service }: { service: ScheduleService
         const err = (await response.json()) as ErrorResult;
         throw new Error(err.message);
       }
-      toast.style = Toast.Style.Success;
-      toast.title = "Run complete";
+      // Unlike backup.manualBackup*, this doesn't reject when the run itself fails - Dokploy
+      // catches the command's error internally, marks the deployment "error", and still answers
+      // 200. The only way to tell success from failure is this status field.
+      const result = (await response.json()) as { status?: string };
+      const succeeded = result.status === "done";
+      toast.style = succeeded ? Toast.Style.Success : Toast.Style.Failure;
+      toast.title = succeeded ? "Run complete" : "Run failed";
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not run schedule";
@@ -310,8 +314,10 @@ function ScheduleForm({
           shellType: values.shellType,
           timezone: values.timezone.trim() || undefined,
           enabled: values.enabled,
+          // Left out on purpose - Dokploy generates its own per-schedule appName and derives the
+          // run log path from it. Sending the service's own appName would make every schedule on
+          // this service share one log file instead of each getting its own.
           scheduleType: service.type,
-          appName: service.appName,
           [ID_FIELDS[service.type]]: service.id,
           ...(isCompose ? { serviceName: values.containerServiceName } : {}),
           ...(initial ? { scheduleId: initial.scheduleId } : {}),
