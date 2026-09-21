@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Schedules] - {PR_MERGE_DATE}
+## [Schedules] - 2026-09-21
 
 - Add a `View Schedules` action to Applications and Compose stacks, listing scheduled shell commands with `Add Schedule`, `Edit Schedule`, `Run Now`, `View Runs` (with logs) and `Delete Schedule` actions.
 
