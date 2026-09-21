@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add GTD Brain MCP Server] - 2026-09-21
+
+- Add GTD Brain to the official registry: a Getting Things Done board (capture to Inbox, next actions by context, projects, waiting-for, weekly review) shared with the GTD Brain web, iOS and Android apps. Remote Streamable HTTP server at https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp through `mcp-remote`; OAuth 2.1 sign-in with an email code, no API key.
+
 ## [Add Sitelemetry MCP Server] - 2026-09-19
 
 - Add Sitelemetry to the official registry: authorized website audits (security posture, technical SEO, AI visibility, analytics integrations, WCAG 2.2 accessibility and performance) with evidence-backed findings and fixes in nine languages. Remote Streamable HTTP server at https://sitelemetry.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
