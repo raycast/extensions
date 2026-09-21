@@ -142,7 +142,9 @@ This extension support a few sub commands.
 - paste bibtex entry for the paper to the frontmost application
 
 Please note that in case a reference has multiple PDF files associated with it, the primary (oldest)
-PDF file will be opened, matching Zotero's native behavior.
+PDF file will be opened, matching Zotero's native behavior. The remaining pdfs open through the
+"Open Secondary PDF" action (`⌘⇧↵`): with exactly two pdfs it opens the secondary one directly,
+with more it shows a list of them.
 
 ## Group libraries
 
