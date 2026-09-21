@@ -669,6 +669,7 @@ export default function Command() {
                 {openBookmarkBrowser ? (
                   <Action
                     title="Open in Browser"
+                    icon={Icon.Globe}
                     onAction={async () => {
                       if (replaceCurrentTab && supportsBrowserAutomation(item.browser)) {
                         await openWithBrowserAutomation(
@@ -686,6 +687,7 @@ export default function Command() {
                 ) : (
                   <Action
                     title="Open in Browser"
+                    icon={Icon.Globe}
                     onAction={async () => {
                       await open(item.url);
                       await updateFrecency(item);
@@ -693,49 +695,43 @@ export default function Command() {
                   />
                 )}
 
-                <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
+                {/* Raycast only exposes Cmd+Enter for the alternate action directly after the primary action. */}
+                {IS_MACOS && bookmarkBrowserApplication ? (
+                  <Action
+                    title="Open in New Browser Tab"
+                    icon={Icon.NewDocument}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    onAction={async () => {
+                      if (supportsBrowserAutomation(item.browser)) {
+                        await openWithBrowserAutomation(item.url, item.browser, "new-tab", bookmarkBrowserApplication);
+                      } else {
+                        await open(item.url, bookmarkBrowserApplication);
+                      }
+                      await updateFrecency(item);
+                    }}
+                  />
+                ) : null}
+
+                {IS_MACOS && bookmarkBrowserApplication && supportsBrowserAutomation(item.browser) ? (
+                  <Action
+                    title="Open in New Browser Window"
+                    icon={Icon.AppWindow}
+                    shortcut={{ modifiers: ["shift"], key: "enter" }}
+                    onAction={async () => {
+                      await openWithBrowserAutomation(item.url, item.browser, "new-window", bookmarkBrowserApplication);
+                      await updateFrecency(item);
+                    }}
+                  />
+                ) : null}
+
+                <Action.CopyToClipboard
+                  title="Copy Link"
+                  content={item.url}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  onCopy={() => updateFrecency(item)}
+                />
 
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => removeFrecency(item)} />
-
-                {IS_MACOS && bookmarkBrowserApplication ? (
-                  <>
-                    <Action
-                      title="Open in New Browser Tab"
-                      icon={Icon.Globe}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                      onAction={async () => {
-                        if (supportsBrowserAutomation(item.browser)) {
-                          await openWithBrowserAutomation(
-                            item.url,
-                            item.browser,
-                            "new-tab",
-                            bookmarkBrowserApplication,
-                          );
-                        } else {
-                          await open(item.url, bookmarkBrowserApplication);
-                        }
-                        await updateFrecency(item);
-                      }}
-                    />
-
-                    {supportsBrowserAutomation(item.browser) ? (
-                      <Action
-                        title="Open in New Browser Window"
-                        icon={Icon.AppWindow}
-                        shortcut={{ modifiers: ["shift"], key: "enter" }}
-                        onAction={async () => {
-                          await openWithBrowserAutomation(
-                            item.url,
-                            item.browser,
-                            "new-window",
-                            bookmarkBrowserApplication,
-                          );
-                          await updateFrecency(item);
-                        }}
-                      />
-                    ) : null}
-                  </>
-                ) : null}
 
                 <ActionPanel.Section>
                   {availableBrowsers && availableBrowsers.length > 1 ? (

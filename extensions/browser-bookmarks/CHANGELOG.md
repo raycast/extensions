@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Fixed the new-tab keyboard shortcut and clarified the browser action icons
+
 ## [Browser Opening and Favicons] - 2026-09-21
 
 - Added macOS actions to open bookmarks in a new browser tab or window, plus an option to replace the current tab
