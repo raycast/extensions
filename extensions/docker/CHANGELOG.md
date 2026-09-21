@@ -2,8 +2,8 @@
 
 ## [Docker Context Support] - {PR_MERGE_DATE}
 
-- Use the endpoint of the current Docker CLI context (`docker context use`) when no socket path is configured, so alternative runtimes such as Colima, OrbStack, Rancher Desktop, Podman and Lima work out of the box like they do with the `docker` CLI.
-- Honor the `DOCKER_HOST` environment variable when set.
+- Use the endpoint of the current Docker CLI context (`docker context use`) when no socket path is configured, so alternative runtimes such as Colima, OrbStack, Rancher Desktop, Podman and Lima work out of the box like they do with the `docker` CLI. TLS certificates and `SkipTLSVerify` stored with the context are applied for remote `tcp://` endpoints.
+- Honor the `DOCKER_HOST`, `DOCKER_CERT_PATH` and `DOCKER_TLS_VERIFY` environment variables when set.
 - Accept `unix://`, `npipe://`, `tcp://`, `http://` and `https://` prefixed values in the "Socket path" preference.
 
 ## [Security Maintenance] - 2026-05-21

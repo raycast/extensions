@@ -1,10 +1,10 @@
 import { getPreferenceValues } from '@raycast/api';
 import Dockerode from '@priithaamer/dockerode';
 import { useMemo } from 'react';
-import { dockerodeOptions, resolveDockerHost } from './host';
+import { resolveDockerOptions } from './host';
 
 export const useDockerode = () => {
-  const { socketPath } = getPreferenceValues<{ socketPath?: string }>();
+  const { socketPath } = getPreferenceValues<Preferences>();
 
-  return useMemo(() => new Dockerode(dockerodeOptions(resolveDockerHost(socketPath))), [socketPath]);
+  return useMemo(() => new Dockerode(resolveDockerOptions(socketPath)), [socketPath]);
 };

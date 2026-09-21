@@ -1,12 +1,18 @@
+import Dockerode from '@priithaamer/dockerode';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { URL } from 'node:url';
 
-export type DockerodeOptions = { socketPath: string } | { host: string; port: number; protocol: 'http' | 'https' };
+export type DockerOptions = Dockerode.DockerOptions & { checkServerIdentity?: () => undefined };
 
-const REMOTE_PROTOCOLS = ['http://', 'https://', 'tcp://'];
+interface DockerContext {
+  name: string;
+  host: string;
+  skipTLSVerify: boolean;
+  tlsDir: string;
+}
 
 const dockerConfigDir = (env: NodeJS.ProcessEnv): string => env.DOCKER_CONFIG || join(homedir(), '.docker');
 
@@ -19,61 +25,45 @@ const readJson = (path: string): any | undefined => {
   }
 };
 
+const readIfExists = (path: string): Buffer | undefined => (existsSync(path) ? readFileSync(path) : undefined);
+
 /**
- * Resolves the Docker host of the currently selected Docker CLI context.
+ * Reads the currently selected Docker CLI context.
  *
  * Mirrors the lookup done by the Docker CLI: the context name comes from `DOCKER_CONTEXT`
- * or `currentContext` in `~/.docker/config.json`, and its endpoint is stored in
- * `~/.docker/contexts/meta/<sha256(name)>/meta.json`.
+ * or `currentContext` in `~/.docker/config.json`, its endpoint is stored in
+ * `~/.docker/contexts/meta/<sha256(name)>/meta.json` and its TLS material (if any) in
+ * `~/.docker/contexts/tls/<sha256(name)>/docker/`.
  */
-export const hostFromDockerContext = (env: NodeJS.ProcessEnv = process.env): string | undefined => {
+export const currentDockerContext = (env: NodeJS.ProcessEnv = process.env): DockerContext | undefined => {
   const configDir = dockerConfigDir(env);
-  const contextName: unknown = env.DOCKER_CONTEXT || readJson(join(configDir, 'config.json'))?.currentContext;
+  const name: unknown = env.DOCKER_CONTEXT || readJson(join(configDir, 'config.json'))?.currentContext;
 
-  if (typeof contextName !== 'string' || contextName === '' || contextName === 'default') {
+  if (typeof name !== 'string' || name === '' || name === 'default') {
     return undefined;
   }
 
-  const contextId = createHash('sha256').update(contextName).digest('hex');
-  const host: unknown = readJson(join(configDir, 'contexts', 'meta', contextId, 'meta.json'))?.Endpoints?.docker?.Host;
+  const id = createHash('sha256').update(name).digest('hex');
+  const endpoint = readJson(join(configDir, 'contexts', 'meta', id, 'meta.json'))?.Endpoints?.docker;
+  const host: unknown = endpoint?.Host;
 
-  return typeof host === 'string' && host !== '' ? host : undefined;
+  if (typeof host !== 'string' || host === '') {
+    return undefined;
+  }
+
+  return {
+    name,
+    host,
+    skipTLSVerify: endpoint?.SkipTLSVerify === true,
+    tlsDir: join(configDir, 'contexts', 'tls', id, 'docker'),
+  };
 };
 
 /**
- * Picks the Docker host to connect to, in order of precedence:
- * 1. the `socketPath` extension preference
- * 2. the `DOCKER_HOST` environment variable
- * 3. the endpoint of the current Docker CLI context
- *
- * Returns `undefined` when none is set so that dockerode falls back to its platform default.
+ * Turns a Docker host string (`unix://`, `npipe://`, `tcp://`, `http://`, `https://` or a bare
+ * socket path) into dockerode connection options.
  */
-export const resolveDockerHost = (
-  preference: string | undefined,
-  env: NodeJS.ProcessEnv = process.env,
-): string | undefined => {
-  const trimmedPreference = preference?.trim();
-  if (trimmedPreference) {
-    return trimmedPreference;
-  }
-
-  return env.DOCKER_HOST || hostFromDockerContext(env);
-};
-
-export const dockerodeOptions = (host: string | undefined): DockerodeOptions | undefined => {
-  if (!host) {
-    return undefined;
-  }
-
-  if (REMOTE_PROTOCOLS.some((protocol) => host.startsWith(protocol))) {
-    const url = new URL(host);
-    return {
-      host: url.hostname,
-      port: url.port ? Number(url.port) : 2375,
-      protocol: url.protocol === 'https:' ? 'https' : 'http',
-    };
-  }
-
+export const optionsForHost = (host: string): DockerOptions => {
   if (host.startsWith('unix://')) {
     return { socketPath: host.slice('unix://'.length) };
   }
@@ -82,5 +72,72 @@ export const dockerodeOptions = (host: string | undefined): DockerodeOptions | u
     return { socketPath: host.slice('npipe://'.length) };
   }
 
+  if (/^(tcp|https?):\/\//.test(host)) {
+    const url = new URL(host);
+    return {
+      host: url.hostname,
+      port: url.port ? Number(url.port) : 2375,
+      protocol: url.protocol === 'https:' ? 'https' : 'http',
+    };
+  }
+
   return { socketPath: host };
+};
+
+/**
+ * The bundled docker-modem has no SSH transport, so an `ssh://` context cannot be honoured.
+ * Returning `undefined` keeps the previous behaviour (platform default socket) for such users
+ * instead of silently misreading the URI as a local socket path.
+ */
+const optionsForContext = (context: DockerContext): DockerOptions | undefined => {
+  if (context.host.startsWith('ssh://')) {
+    return undefined;
+  }
+
+  const options = optionsForHost(context.host);
+
+  if (!options.host) {
+    return options;
+  }
+
+  const ca = readIfExists(join(context.tlsDir, 'ca.pem'));
+  const cert = readIfExists(join(context.tlsDir, 'cert.pem'));
+  const key = readIfExists(join(context.tlsDir, 'key.pem'));
+
+  if (ca || cert || key) {
+    Object.assign(options, { ca, cert, key, protocol: 'https' });
+  }
+
+  if (context.skipTLSVerify) {
+    options.checkServerIdentity = () => undefined;
+  }
+
+  return options;
+};
+
+/**
+ * Picks the dockerode connection options, in order of precedence:
+ * 1. the `socketPath` extension preference
+ * 2. the `DOCKER_HOST` environment variable (together with `DOCKER_CERT_PATH` and
+ *    `DOCKER_TLS_VERIFY`), handled by docker-modem itself
+ * 3. the endpoint and TLS settings of the current Docker CLI context (unless it is `ssh://`)
+ * 4. docker-modem's platform default socket
+ *
+ * Returns `undefined` for 2 and 4 so that docker-modem applies its own defaults.
+ */
+export const resolveDockerOptions = (
+  preference: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): DockerOptions | undefined => {
+  const trimmedPreference = preference?.trim();
+  if (trimmedPreference) {
+    return optionsForHost(trimmedPreference);
+  }
+
+  if (env.DOCKER_HOST) {
+    return undefined;
+  }
+
+  const context = currentDockerContext(env);
+  return context ? optionsForContext(context) : undefined;
 };
