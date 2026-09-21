@@ -351,7 +351,11 @@ function docPathHandler(appName: string, spec: AppScriptSpec): string {
 //
 // The wait loop covers open being
 // asynchronous for non-native formats, a no-op for an already-open document, and apps that
-// auto-create a blank startup document. The export runs inside try/on error so the message is
+// auto-create a blank startup document. There is deliberately no looser fallback: a new pathless
+// document that does not match the source name may be a blank or import window the running app
+// created on its own, and exporting that would silently produce the wrong PDF. If the app names
+// the imported document unlike the file, the wait times out and the next engine runs instead.
+// The export runs inside try/on error so the message is
 // captured instead of swallowed; the document is always closed and the app quits if we launched
 // it. The captured error is re-raised only when export itself did not finish — a close failure
 // after a completed export is not a conversion failure. A leftover file is not used as a success
@@ -389,21 +393,6 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `            end if`,
     `          end repeat`,
     `        end try`,
-    // Last resort for an app that names the imported document unlike the file: something did
-    // open, so accept a document that appeared after the open call and fits the source.
-    `        if docIndex is 0 and tries > 20 and (count of ${docs}) > initialCount then`,
-    `          try`,
-    `            repeat with i from 1 to (count of ${docs})`,
-    `              if ${isNew} then`,
-    `                set candPath to my docPath(i)`,
-    `                if candPath is ${asString(src)} or candPath is "" then`,
-    `                  set docIndex to i`,
-    `                  exit repeat`,
-    `                end if`,
-    `              end if`,
-    `            end repeat`,
-    `          end try`,
-    `        end if`,
     `        if docIndex is 0 then`,
     `          delay 0.5`,
     `          set tries to tries + 1`,

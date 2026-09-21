@@ -1,6 +1,6 @@
 # Slides2PDF Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Convert slides, documents, spreadsheets, images, and text or code files selected in Finder to PDF
 - Uses locally installed apps as conversion engines: Keynote, PowerPoint, Pages, Word, Numbers, Excel, LibreOffice, and sips
