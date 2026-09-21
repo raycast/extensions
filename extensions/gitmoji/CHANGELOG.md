@@ -1,6 +1,6 @@
 # Gitmoji Changelog
 
-## [Fix Search] - {PR_MERGE_DATE}
+## [Fix Search] - 2026-09-21
 
 - Fix searching a gitmoji by its name or code.
 
