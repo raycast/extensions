@@ -29,12 +29,15 @@ export function SecretStoreSecrets({ store }: SecretStoreSecretsProps) {
       setIsLoading(true);
       const allSecrets: SecretStoreSecret[] = [];
       let cursor: string | undefined;
+      // Guard against a non-advancing cursor pinning the loop
+      let pages = 0;
 
       do {
         const response = await getSecretStoreSecrets(store.id, cursor);
         allSecrets.push(...response.data);
-        cursor = response.meta.cursor;
-      } while (cursor);
+        cursor = response.meta?.next_cursor;
+        pages += 1;
+      } while (cursor && pages < 20);
 
       setSecrets(allSecrets);
     } catch (error) {
