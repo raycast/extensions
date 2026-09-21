@@ -73,8 +73,8 @@
       "type": "checkbox",
       "required": false,
       "title": "Etymonline",
-      "label": "Show Etymonline Action",
-      "description": "Add an action that opens the word on etymonline.com",
+      "label": "Link to Etymonline",
+      "description": "Show a link to etymonline.com on English entries, in the footer and the action panel",
       "default": true
     }
   ],

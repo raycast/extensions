@@ -68,7 +68,9 @@ Ancestry is read two ways:
 Results are cached for 30 days. No account, no API key, no tracking.
 
 Etymonline has no public API and its entries are copyrighted prose, so this
-extension links to it and never reproduces it.
+extension links to it and never reproduces it. English entries carry a
+**Read more at Etymonline** line in the footer and an action to match; turn both
+off with the **Link to Etymonline** preference.
 
 ## Install from source
 

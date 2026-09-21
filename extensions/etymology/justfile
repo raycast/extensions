@@ -8,13 +8,9 @@
 #                     tool) stays invisible until Raycast restarts, because it
 #                     caches package.json and only rereads it on launch.
 #
-# Two branches, because one of them is publishable and the other is not:
-#
-#   main    what goes to the store. Carries nothing it cannot ship.
-#   local   main + personal additions that are not part of the extension.
-#
-# Work on main. Run `just local` to fold main into the local branch and install
-# that. Publishing happens from main and refuses to run anywhere else.
+# One branch. Etymonline used to be scraped behind a preference, which needed a
+# second branch to keep it out of the store; it is a link now, so there is
+# nothing to keep out and nothing to keep in sync.
 
 # Default target: list recipes.
 default:
@@ -92,49 +88,6 @@ langcodes:
 
 # Run before committing.
 check: types lint parsers
-
-# Run this after any change to main if you want those additions on your machine.
-
-# Rebase the personal branch onto main and install it.
-local:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [ -n "$(git status --porcelain)" ]; then
-      echo "working tree is dirty — commit or stash first" >&2
-      exit 1
-    fi
-    start=$(git branch --show-current)
-    # If local carries no commit of its own, rebasing fast-forwards it onto main
-    # and silently discards it. That happened once; hence this check.
-    if [ "$(git rev-list --count main..local)" -eq 0 ]; then
-      echo "branch 'local' has no commits of its own — nothing to install." >&2
-      echo "Recover with: git checkout local && git revert --no-commit <the" >&2
-      echo "commit that removed it> && git commit" >&2
-      exit 1
-    fi
-    git checkout -q local
-    if ! git rebase main; then
-      echo >&2
-      echo "rebase stopped. Fix the conflict, 'git rebase --continue', then" >&2
-      echo "'just install'. To bail out: 'git rebase --abort'." >&2
-      exit 1
-    fi
-    just install
-    # Back to main deliberately. The installed build stays as it was just built,
-    # so you keep those additions, but your checkout sits on the branch you are
-    # supposed to be editing. Sitting on 'local' is how a fix ends up committed
-    # to a branch that never gets published.
-    git checkout -q main
-    echo
-    echo "Installed from 'local'."
-    echo "Checkout returned to 'main'. Edit here."
-
-# Install main, the publishable version.
-public:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    git checkout -q main
-    just install
 
 # Fail unless the checkout is on main with nothing uncommitted. Runs first, so
 # the common mistakes say so plainly instead of surfacing eight steps later —

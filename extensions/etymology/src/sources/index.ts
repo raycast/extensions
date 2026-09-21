@@ -4,7 +4,7 @@
 //   2. contains {{etymon and tree wanted:
 //      prop=text -> tree.ts               -> full branching tree
 //   3. no templates                       -> raw prose only
-//   4. nothing                            -> "not on Wiktionary" + Etymonline link
+//   4. nothing                            -> "not on Wiktionary"
 //
 // Each rung degrades into the next. A word never fails, it only gets thinner.
 
@@ -22,7 +22,7 @@ import {
   toPlainText,
 } from "./wikitext";
 
-export { NotFoundError, etymonlineUrl, pageUrl, randomTermWithTree } from "./client";
+export { NotFoundError, pageUrl, randomTermWithTree } from "./client";
 export { suggest } from "./search";
 export type { TitleSuggestion } from "./client";
 

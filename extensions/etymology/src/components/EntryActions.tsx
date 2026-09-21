@@ -4,7 +4,7 @@
 import { ReactNode } from "react";
 import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { Entry, EtymNode, ancestors } from "../model";
-import { etymonlineUrl } from "../sources";
+import { etymonlineUrl } from "../etymonline";
 import { applyTemplate, chainOneLine, plainSummary } from "../render";
 import { Favorite } from "../favorites";
 import { COPY_LINK, COPY_MARKDOWN, COPY_PROSE, TOGGLE_VIEW } from "../shortcuts";

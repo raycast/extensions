@@ -134,7 +134,3 @@ export async function randomTermWithTree(): Promise<string> {
 export function pageUrl(title: string, lang = "English"): string {
   return `https://en.wiktionary.org/wiki/${encodeURIComponent(title)}#${encodeURIComponent(lang)}`;
 }
-
-export function etymonlineUrl(term: string): string {
-  return `https://www.etymonline.com/word/${encodeURIComponent(term)}`;
-}

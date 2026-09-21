@@ -14,6 +14,7 @@ import { EtymNode } from "../model";
 import { loadEntry, reloadEntry } from "../entry";
 import { earliest, entryMarkdown, relationKey } from "../render";
 import { pageUrl } from "../sources";
+import { etymonlineFooter, etymonlineUrl } from "../etymonline";
 import { languageName } from "../langcodes";
 import { EntryActions } from "./EntryActions";
 import * as favorites from "../favorites";
@@ -76,6 +77,11 @@ export function EntryDetail({ term, lang = "en" }: Props) {
               url={pageUrl(term, languageName(lang))}
               shortcut={Keyboard.Shortcut.Common.Open}
             />
+            <Action.OpenInBrowser
+              title="Open in Etymonline"
+              url={etymonlineUrl(term)}
+              shortcut={Keyboard.Shortcut.Common.OpenWith}
+            />
           </ActionPanel>
         }
       />
@@ -88,7 +94,12 @@ export function EntryDetail({ term, lang = "en" }: Props) {
 
   const tree = entry.sections.find((s) => s.tree)?.tree;
   const oldest = tree ? earliest(tree) : undefined;
-  const markdown = entryMarkdown(entry, view);
+  const markdown = [
+    entryMarkdown(entry, view),
+    etymonlineFooter(entry, getPreferenceValues<Preferences>().showEtymonline),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
   return (
     <Detail
