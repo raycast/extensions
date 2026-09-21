@@ -2,6 +2,8 @@
 
 Moon phase, illumination, zodiac sign, and lunar mansions across three traditions — plus planets and calendars — in Raycast.
 
+> Prefer a native app? [Moon Mansions for Mac](https://github.com/minhaajre/moon-mansions-mac/releases) is free — same engine as a menu-bar app, no Raycast needed.
+
 ## Commands
 
 - **Show Moon Info** — Detail view: phase, illumination %, moon age, tropical zodiac, Arab manzil (number, name, divine name, degrees, rating, theme), Vedic nakshatra (ruler, deity, theme), Chinese lodge (palace, theme), all seven classical planets with sign, degree and direct/retrograde motion, and a Calendars section (Hijri date, Chinese day/month pillars with animals, Vedic tithi, masa and vara).
