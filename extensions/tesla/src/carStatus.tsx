@@ -85,7 +85,7 @@ export default function CarStatus() {
   // Tires (bar -> PSI)
   const toPsi = (bar: number) => `${Math.round(bar * 14.5038)} PSI`;
 
-  const lastUpdated = cs.timestamp ? moment(cs.timestamp).fromNow() : "Unknown";
+  const lastUpdated = vs.timestamp ? moment.unix(vs.timestamp).fromNow() : "Unknown";
 
   const odometer = `${getDistance(vs.odometer, distanceType).toLocaleString(undefined, {
     maximumFractionDigits: 0,
