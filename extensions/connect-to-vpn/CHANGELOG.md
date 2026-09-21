@@ -1,6 +1,6 @@
 # Connect to VPN Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-09-21
 
 - Tint the menu bar icon with the menu bar text colour, so it no longer stays black on a dark menu bar
 - Check service status without blocking, so the background refresh no longer stalls the extension for close to two seconds every 30 seconds
