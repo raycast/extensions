@@ -1,6 +1,6 @@
 # DesktopRenamer Changelog
 
-## [Desktop Controls and Window Actions] - {PR_MERGE_DATE}
+## [Desktop Controls and Window Actions] - 2026-09-21
 
 - Added desktop locking, restoring moved windows, and desktop reordering actions to `Switch Desktop`
 - Added keyboard shortcuts and pending-restore counts for desktop actions
