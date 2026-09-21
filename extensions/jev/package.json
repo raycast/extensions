@@ -33,7 +33,7 @@
       "description": "Sends your installed app names to api.typesafe.ai so requests like \"open cursor\" match the right app. Turn off to keep every local name on-device — file names are already sent only when a request is about opening a file.",
       "type": "checkbox",
       "required": false,
-      "default": true
+      "default": false
     }
   ],
   "dependencies": {

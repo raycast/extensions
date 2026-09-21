@@ -10,8 +10,6 @@ import path from "path";
  * machine, so nothing relevant gets truncated away.
  */
 const MAX_FILE_CANDIDATES = 150;
-/** Hard safety cap on raw files scanned before scoring, in case a watched folder is huge. */
-const MAX_FILES_SCANNED = 4000;
 /** How deep into subfolders of Downloads/Desktop/Documents we look. */
 const SCAN_DEPTH = 1;
 
@@ -76,13 +74,17 @@ export function rankAppsByQuery(
     .map((entry) => entry.app);
 }
 
+/**
+ * Stats every file in the watched folders (they're shallow — home dirs plus
+ * one level of subfolders). No scan cap: an arbitrarily truncated inventory
+ * could hide the true newest/oldest file and `findDownload` would present a
+ * partial result as authoritative.
+ */
 async function collectFiles(
   absoluteDir: string,
   label: string,
   depth: number,
-  scanned: { count: number },
 ): Promise<FileCandidate[]> {
-  if (scanned.count >= MAX_FILES_SCANNED) return [];
   let entries;
   try {
     entries = await fs.readdir(absoluteDir, { withFileTypes: true });
@@ -92,13 +94,11 @@ async function collectFiles(
 
   const files: FileCandidate[] = [];
   for (const entry of entries) {
-    if (scanned.count >= MAX_FILES_SCANNED) break;
     if (entry.name.startsWith(".")) continue;
     const absolutePath = path.join(absoluteDir, entry.name);
     const entryLabel = `${label}/${entry.name}`;
 
     if (entry.isFile()) {
-      scanned.count += 1;
       try {
         const stat = await fs.stat(absolutePath);
         files.push({ label: entryLabel, absolutePath, mtimeMs: stat.mtimeMs });
@@ -106,9 +106,7 @@ async function collectFiles(
         // File may have been removed/renamed between readdir and stat; skip it.
       }
     } else if (entry.isDirectory() && depth > 0) {
-      files.push(
-        ...(await collectFiles(absolutePath, entryLabel, depth - 1, scanned)),
-      );
+      files.push(...(await collectFiles(absolutePath, entryLabel, depth - 1)));
     }
   }
   return files;
@@ -121,9 +119,7 @@ const FILES_CACHE_TTL_MS = 30_000;
 
 /**
  * The raw inventory of the watched folders. Cached (with a TTL) so typing
- * doesn't rescan the disk on every debounce pause, while each folder still
- * gets its own MAX_FILES_SCANNED budget so a huge Downloads can't starve
- * Desktop/Documents of candidates.
+ * doesn't rescan the disk on every debounce pause.
  */
 async function getAllFiles(): Promise<FileCandidate[]> {
   if (filesCache && Date.now() - filesCache.at < FILES_CACHE_TTL_MS)
@@ -131,7 +127,7 @@ async function getAllFiles(): Promise<FileCandidate[]> {
   const all: FileCandidate[] = [];
   for (const folder of FOLDERS_TO_SCAN) {
     const dir = path.join(os.homedir(), folder);
-    all.push(...(await collectFiles(dir, folder, SCAN_DEPTH, { count: 0 })));
+    all.push(...(await collectFiles(dir, folder, SCAN_DEPTH)));
   }
   filesCache = { files: all, at: Date.now() };
   return all;
@@ -229,14 +225,20 @@ const RANK_TO_INDEX: Record<string, number> = {
   oldest: -1,
 };
 
-/** A file in ~/Downloads matching a file type, picked by recency rank. Deterministic — no AI needed here. */
+/**
+ * A file in ~/Downloads matching a file type, picked by recency rank.
+ * Deterministic — no AI needed here. Scans ~/Downloads fresh on every call
+ * (one shallow folder, so it's cheap) — download queries are exactly where a
+ * file that arrived seconds ago must resolve, so the TTL cache can't be used.
+ */
 export async function findDownload(
   fileType: string,
   rank: string,
 ): Promise<FileCandidate | null> {
-  const downloadsDir = path.join(os.homedir(), "Downloads");
-  const downloadFiles = (await getAllFiles()).filter((f) =>
-    f.absolutePath.startsWith(downloadsDir + path.sep),
+  const downloadFiles = await collectFiles(
+    path.join(os.homedir(), "Downloads"),
+    "Downloads",
+    0,
   );
   const matching = downloadFiles.filter((f) =>
     matchesFileType(path.basename(f.absolutePath), fileType),
