@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Order Empty Results by Last Opened] - {PR_MERGE_DATE}
+## [Order Empty Results by Last Opened] - 2026-09-21
 
 - Added an "Order by Last Opened" preference. When it is on and the search is empty, entries you opened most recently are shown first and the rest follow by date added. Tracking covers opening a PDF, the Zotero entry, or the original link, and survives a cache rebuild
 
