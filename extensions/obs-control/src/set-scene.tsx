@@ -29,7 +29,7 @@ function findScene(scenes: Scene[], sceneName: string) {
   return scenes.find((scene) => scene.sceneName.toLocaleLowerCase() === sceneName.toLocaleLowerCase());
 }
 
-export default function SetScene(props: LaunchProps<{ arguments: { sceneName?: string } }>) {
+export default function SetScene(props: LaunchProps<{ arguments: Arguments.SetScene }>) {
   const isAppInstalled = useIsInstalled();
   const didAutoSelectScene = useRef(false);
   const requestedSceneName = props.arguments.sceneName?.trim();

@@ -7,6 +7,23 @@ const values = getPreferenceValues<Preferences>();
 const startupRetryCount = 15;
 const startupRetryDelay = 1000;
 
+function isLocalUnavailable(error: unknown) {
+  let url: URL;
+  try {
+    url = new URL(values["obs-url"]);
+  } catch {
+    return false;
+  }
+
+  const localHost = url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "[::1]";
+  if (!localHost || !["ws:", "wss:"].includes(url.protocol) || !(error instanceof Error)) {
+    return false;
+  }
+
+  const connectionError = error as Error & { code?: number };
+  return connectionError.code === 1006 || (connectionError.code === -1 && /ECONNREFUSED/i.test(error.message));
+}
+
 async function connectObs() {
   const obs = new OBSWebSocket();
   await obs.connect(values["obs-url"], values["obs-password"]);
@@ -16,7 +33,10 @@ async function connectObs() {
 export async function getObs() {
   try {
     return await connectObs();
-  } catch {
+  } catch (error) {
+    if (!isLocalUnavailable(error)) {
+      throw error;
+    }
     await openObsStudio();
   }
 
@@ -25,8 +45,10 @@ export async function getObs() {
 
     try {
       return await connectObs();
-    } catch {
-      // OBS may still be starting. Try again until the startup window expires.
+    } catch (error) {
+      if (!isLocalUnavailable(error)) {
+        throw error;
+      }
     }
   }
 
