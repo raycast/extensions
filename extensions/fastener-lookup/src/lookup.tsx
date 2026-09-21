@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { Row, Section, Unit, formatLength, search } from "./search";
+import { Row, Section, Unit, formatLength, rowsForSize, search } from "./search";
 
 type UnitPref = "native" | "in" | "mm";
 
@@ -76,7 +76,7 @@ function subtitleFor(row: Row): string {
 
 // Full sheet for a size regardless of the current filter, so "cbore 1/4" still copies all of 1/4
 function specSheet(size: string): string {
-  const mine = search(size).filter((r) => r.size === size);
+  const mine = rowsForSize(size);
   if (mine.length === 0) return "";
   const lines = [`## ${size}`, "", "| Item | in | mm |", "|---|---|---|"];
   for (const r of mine) {

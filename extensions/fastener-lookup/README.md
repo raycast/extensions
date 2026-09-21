@@ -18,7 +18,9 @@ Type a size the way you'd say it. Keywords narrow the result.
 | `unc 1/4`, `m8 fine` | coarse / fine series |
 | _(empty)_ | full drill & tap chart, browsable |
 
-Every metric row also shows the nearest inch drill (e.g. M6 clearance 6.6 mm ≈ H drill) for shops running imperial sets.
+Every metric row also shows the nearest inch drill (e.g. M6 clearance 6.6 mm ≈ G drill) for shops running imperial sets.
+
+A query with leftovers the parser can't account for — a typo like `#1O`, or two sizes like `#10 1/4` — shows no results rather than guessing, so a copied value is always for the fastener you meant.
 
 ## Actions
 

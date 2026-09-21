@@ -25,6 +25,8 @@ type SizeKind = "number" | "fraction" | "decimal" | "metric" | "bare";
 
 interface Query {
   empty: boolean;
+  /** Leftover text the parser couldn't account for — a typo or a second size. Matches nothing. */
+  invalid?: boolean;
   system?: System;
   kind?: SizeKind;
   sizeNumber?: number;
@@ -83,6 +85,36 @@ const KEYWORDS: Record<string, (q: Query) => void> = {
   in: (q) => (q.system = "imperial"),
 };
 
+// Words that carry no meaning of their own but show up in natural phrasing
+// ("tap drill for a 1/4-20 screw", "m6 close fit"). Anything else unrecognised is refused.
+const FILLER = new Set([
+  "a",
+  "an",
+  "the",
+  "for",
+  "of",
+  "to",
+  "and",
+  "with",
+  "what",
+  "whats",
+  "is",
+  "size",
+  "sizes",
+  "fit",
+  "drill",
+  "drills",
+  "hole",
+  "holes",
+  "screw",
+  "screws",
+  "bolt",
+  "bolts",
+  "cap",
+  "nut",
+  "nuts",
+]);
+
 function addSection(q: Query, s: Section) {
   if (!q.sections.includes(s)) q.sections.push(s);
 }
@@ -132,8 +164,14 @@ export function parse(raw: string): Query {
     take(/\b(\d+)\b/, (m) => setSize("bare", +m[1]));
   void matched;
 
-  for (const word of s.split(/[^a-z0-9.]+/).filter(Boolean)) {
-    KEYWORDS[word.replace(/\.$/, "")]?.(q);
+  // Only one size is consumed above, so any digits left over are a second size or a typo
+  // ("#1O", "#10 1/4"). Refuse rather than hand back dimensions for a fastener nobody asked for.
+  for (const raw of s.split(/[^a-z0-9.]+/).filter(Boolean)) {
+    const word = raw.replace(/\.+$/, "");
+    if (!word) continue;
+    const keyword = KEYWORDS[word];
+    if (keyword) keyword(q);
+    else if (!FILLER.has(word)) q.invalid = true;
   }
 
   if (q.kind === "bare" && q.system === "imperial") q.kind = "decimal";
@@ -268,10 +306,19 @@ function buildRows(f: Fastener, q: Query): Row[] {
 export function search(query: string): Row[] {
   const q = parse(query);
   if (q.empty) return FASTENERS.flatMap((f) => f.threads.map((t) => tapRow(f, t)));
+  if (q.invalid) return [];
 
   const matched = FASTENERS.filter((f) => matchesSize(f, q));
   const imperialFirst = [...matched].sort((a, b) => (a.system === b.system ? 0 : a.system === "imperial" ? -1 : 1));
   return imperialFirst.flatMap((f) => buildRows(f, q));
+}
+
+/**
+ * Every row for one fastener, looked up by its exact size key ("1", "#1", "M6").
+ * Spec sheets use this instead of search(): a bare "1" as a query means #1, not 1 inch.
+ */
+export function rowsForSize(size: string): Row[] {
+  return FASTENERS.filter((f) => f.size === size).flatMap((f) => buildRows(f, { empty: false, sections: [] }));
 }
 
 export function formatLength(value: number, unit: Unit): string {
