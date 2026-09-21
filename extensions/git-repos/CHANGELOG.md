@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Bug Fix] - 2026-09-21
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Use `git-url-parse` so nested GitLab group paths and custom Git host subdomains are preserved when opening repository remotes.
 
