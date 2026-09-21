@@ -1,6 +1,6 @@
 # Mozilla Firefox Changelog
 
-## [Windows Launch Fixes] - {PR_MERGE_DATE}
+## [Windows Launch Fixes] - 2026-09-21
 
 - Added an Open in New Window action on Windows (New Tab, Search History, and Search Bookmarks) with Ctrl+Enter
 - Empty destinations open `about:newtab` in the new window
