@@ -85,7 +85,7 @@ export default function Instances() {
   );
 }
 
-function AddInstance() {
+export function AddInstance() {
   const { value = [], setValue } = useLocalStorage<Instance[]>("instances");
   const { handleSubmit, itemProps } = useForm<Instance>({
     async onSubmit(values) {

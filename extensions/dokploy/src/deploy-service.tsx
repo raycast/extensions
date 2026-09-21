@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFrecencySorting } from "@raycast/utils";
-import { Instance, tokenForInstance } from "./instances";
+import { AddInstance, Instance, tokenForInstance } from "./instances";
 import { Project, ServiceCollections } from "./interfaces";
 import { isModernProject } from "./utils";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
@@ -107,6 +107,11 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
   return candidates;
 }
 
+interface FailedInstance {
+  name: string;
+  error: string;
+}
+
 /**
  * Lets you search for a service by name across every configured instance, see what it's doing, and
  * act on it (deploy/redeploy/start/stop/... and view logs) - a shortcut for the common "I know the
@@ -122,7 +127,9 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
  */
 export default function DeployService() {
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInstances, setHasInstances] = useState(true);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [failedInstances, setFailedInstances] = useState<FailedInstance[]>([]);
   const [error, setError] = useState<string>();
 
   const { data: sorted, visitItem } = useFrecencySorting(candidates, {
@@ -139,8 +146,10 @@ export default function DeployService() {
     try {
       const raw = await LocalStorage.getItem<string>("instances");
       const instances: Instance[] = raw ? JSON.parse(raw) : [];
+      setHasInstances(instances.length > 0);
       if (instances.length === 0) {
         setCandidates([]);
+        setFailedInstances([]);
         return;
       }
 
@@ -155,6 +164,13 @@ export default function DeployService() {
       );
 
       setCandidates(results.flatMap((result) => (result.status === "fulfilled" ? result.value : [])));
+      // A rejected instance shouldn't just quietly disappear from the results - the user needs to
+      // know this search wasn't actually complete, not read the shorter list as "that's everything."
+      setFailedInstances(
+        results.flatMap((result, index) =>
+          result.status === "rejected" ? [{ name: instances[index].name, error: `${result.reason}` }] : [],
+        ),
+      );
     } catch (err) {
       setError(`${err}`);
     } finally {
@@ -175,61 +191,94 @@ export default function DeployService() {
             </ActionPanel>
           }
         />
+      ) : !isLoading && !hasInstances ? (
+        <List.EmptyView
+          icon={Icon.Key}
+          title="No Instances Configured"
+          description="Add an instance to search its services."
+          actions={
+            <ActionPanel>
+              <Action.Push icon={Icon.Plus} title="Add Instance" target={<AddInstance />} />
+            </ActionPanel>
+          }
+        />
       ) : (
-        sorted.map((candidate) => {
-          // Legacy projects, and modern ones with a single environment, would otherwise repeat the
-          // project name here for no reason.
-          const scopeSuffix =
-            candidate.environmentName !== candidate.projectName ? ` / ${candidate.environmentName}` : "";
-          return (
-            <List.Item
-              key={`${candidate.instanceName}-${candidate.id}`}
-              icon={candidate.icon}
-              title={candidate.name}
-              subtitle={`${candidate.instanceName} / ${candidate.projectName}${scopeSuffix}`}
-              accessories={[statusAccessory(candidate.status)]}
-              actions={
-                <ActionPanel>
-                  {SERVICE_ACTIONS[candidate.deployType].map((action) => (
-                    <Action
-                      key={action}
-                      icon={ACTION_ICONS[action]}
-                      title={ACTION_LABELS[action]}
-                      style={action === "stop" ? Action.Style.Destructive : undefined}
-                      onAction={() => {
-                        void visitItem(candidate);
-                        void runServiceAction(
-                          candidate.url,
-                          candidate.headers,
-                          {
-                            id: candidate.id,
-                            type: candidate.deployType,
-                            name: candidate.name,
-                            appName: candidate.appName,
-                          },
-                          action,
-                          load,
-                        );
-                      }}
-                    />
-                  ))}
-                  {/* compose.readLogs requires a containerId this list doesn't collect - same reason services.tsx hides it. */}
-                  {candidate.deployType !== "compose" && (
-                    <Action.Push
-                      icon={Icon.Terminal}
-                      title="View Logs"
-                      target={
-                        <ServiceLogs service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }} />
-                      }
-                      onPush={() => visitItem(candidate)}
-                    />
-                  )}
-                  <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+        <>
+          {failedInstances.length > 0 && (
+            <List.Section title="Could Not Load">
+              {failedInstances.map((failed) => (
+                <List.Item
+                  key={failed.name}
+                  icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+                  title={failed.name}
+                  subtitle={failed.error}
+                  actions={
+                    <ActionPanel>
+                      <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => load()} />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+          {sorted.map((candidate) => {
+            // Legacy projects, and modern ones with a single environment, would otherwise repeat the
+            // project name here for no reason.
+            const scopeSuffix =
+              candidate.environmentName !== candidate.projectName ? ` / ${candidate.environmentName}` : "";
+            return (
+              <List.Item
+                key={`${candidate.instanceName}-${candidate.id}`}
+                icon={candidate.icon}
+                title={candidate.name}
+                subtitle={`${candidate.instanceName} / ${candidate.projectName}${scopeSuffix}`}
+                accessories={[statusAccessory(candidate.status)]}
+                actions={
+                  <ActionPanel>
+                    {SERVICE_ACTIONS[candidate.deployType].map((action) => (
+                      <Action
+                        key={action}
+                        icon={ACTION_ICONS[action]}
+                        title={ACTION_LABELS[action]}
+                        style={action === "stop" ? Action.Style.Destructive : undefined}
+                        onAction={() => {
+                          void visitItem(candidate);
+                          void runServiceAction(
+                            candidate.url,
+                            candidate.headers,
+                            {
+                              id: candidate.id,
+                              type: candidate.deployType,
+                              name: candidate.name,
+                              appName: candidate.appName,
+                            },
+                            action,
+                            load,
+                          );
+                        }}
+                      />
+                    ))}
+                    {/* compose.readLogs requires a containerId this list doesn't collect - same reason services.tsx hides it. */}
+                    {candidate.deployType !== "compose" && (
+                      <Action.Push
+                        icon={Icon.Terminal}
+                        title="View Logs"
+                        target={
+                          <ServiceLogs
+                            service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }}
+                            token={{ url: candidate.url, headers: candidate.headers }}
+                          />
+                        }
+                        onPush={() => visitItem(candidate)}
+                      />
+                    )}
+                    <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </>
       )}
     </List>
   );

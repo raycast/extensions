@@ -15,8 +15,18 @@ const ID_FIELDS: Record<string, string> = {
 
 const LOG_TAIL = 200;
 
-export default function ServiceLogs({ service }: { service: { id: string; type: string; name: string } }) {
-  const { url, headers } = useToken();
+export default function ServiceLogs({
+  service,
+  token,
+}: {
+  service: { id: string; type: string; name: string };
+  /** Overrides the cached active-instance token - needed by callers (like Deploy Service) that
+   * list services from more than one instance, where the service being viewed might not belong
+   * to whichever instance happens to be currently active. */
+  token?: { url: string; headers: Record<string, string> };
+}) {
+  const activeToken = useToken();
+  const { url, headers } = token ?? activeToken;
 
   const requestUrl = trpcQueryUrl(url, `${service.type}.readLogs`, {
     [ID_FIELDS[service.type]]: service.id,
