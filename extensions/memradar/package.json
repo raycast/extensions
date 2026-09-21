@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memradar",
+  "title": "MemRadar",
+  "description": "Search RAM and SSD prices with a decade of history, from MemRadar.",
+  "icon": "extension-icon.png",
+  "author": "memradar",
+  "categories": [
+    "Finance",
+    "Data"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-memory-prices",
+      "title": "Search Memory Prices",
+      "description": "Search tracked RAM and SSD prices, with all-time lows and a decade of history.",
+      "mode": "view"
+    },
+    {
+      "name": "show-market-overview",
+      "title": "Show Market Overview",
+      "description": "See how RAM and SSD prices have moved across each segment.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "preflight": "node scripts/preflight-attribution.mjs",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npm run preflight && npx @raycast/api@1.104.25 publish"
+  }
+}
