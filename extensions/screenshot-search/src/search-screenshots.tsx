@@ -228,7 +228,9 @@ export default function SearchScreenshots() {
           description={
             items.length === 0
               ? "Add a folder in Settings or use Add Search Scope from the Action Panel."
-              : "Try name:, text:, or date:yesterday."
+              : preferences.textRecognition
+                ? "Try a different name:, text:, or date: filter."
+                : "Try a different name: or date: filter."
           }
         />
       ) : null}
@@ -261,7 +263,7 @@ function ItemActions({
       <Action.Open title="Open" target={item.path} />
       <Action.ShowInFinder path={item.path} />
       <Action
-        title={isPinned ? "Unpin Screenshot" : "Pin Screenshot"}
+        title={`${isPinned ? "Unpin" : "Pin"} ${item.kind === "image" ? "Screenshot" : "Recording"}`}
         icon={isPinned ? Icon.PinDisabled : Icon.Pin}
         shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
         onAction={onTogglePinned}
@@ -311,32 +313,33 @@ function GridActions({
 }: GridActionsProps) {
   return (
     <ActionPanel>
-      <Action title={`Use ${columns} Columns`} icon={Icon.AppWindowGrid3x3} />
-      {columns > MIN_COLUMNS ? (
-        <Action
-          title={`Use ${columns - 1} Columns`}
-          shortcut={{ modifiers: ["cmd"], key: "-" }}
-          onAction={() => changeColumns(-1)}
-        />
-      ) : null}
-      {columns < MAX_COLUMNS ? (
-        <Action
-          title={`Use ${columns + 1} Columns`}
-          shortcut={{ modifiers: ["cmd"], key: "+" }}
-          onAction={() => changeColumns(1)}
-        />
-      ) : null}
-      <Action
-        title="Reset Columns"
-        shortcut={{ modifiers: ["cmd"], key: "0" }}
-        onAction={resetColumns}
-      />
       <Action title="Add Search Scope" icon={Icon.Folder} onAction={addScope} />
       <Action
         title="Open Screenshot Settings"
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />
+      <ActionPanel.Section title="Grid">
+        {columns > MIN_COLUMNS ? (
+          <Action
+            title={`Use ${columns - 1} Columns`}
+            shortcut={{ modifiers: ["cmd"], key: "-" }}
+            onAction={() => changeColumns(-1)}
+          />
+        ) : null}
+        {columns < MAX_COLUMNS ? (
+          <Action
+            title={`Use ${columns + 1} Columns`}
+            shortcut={{ modifiers: ["cmd"], key: "+" }}
+            onAction={() => changeColumns(1)}
+          />
+        ) : null}
+        <Action
+          title="Reset Columns"
+          shortcut={{ modifiers: ["cmd"], key: "0" }}
+          onAction={resetColumns}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
