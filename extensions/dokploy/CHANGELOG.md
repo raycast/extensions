@@ -2,7 +2,7 @@
 
 ## [Deploy Service Command] - {PR_MERGE_DATE}
 
-- Add a `Deploy Service` command that searches for a service by name across every configured instance and deploys the one you pick, without opening `Instances` first. Always lists matches and waits for an explicit selection - never deploys automatically, even when only one service matches.
+- Add a `Deploy Service` command that searches for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and current status, and offers the full set of lifecycle actions (Deploy, Redeploy/Rebuild, Start, Stop, Reload) plus `View Logs` - the same actions the Services screen already has, sorted by frecency. Always lists matches and waits for an explicit selection - never acts automatically, even when only one service matches.
 
 ## [Schedules] - 2026-09-21
 

@@ -1,8 +1,11 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { useFrecencySorting } from "@raycast/utils";
 import { Instance, tokenForInstance } from "./instances";
-import { ErrorResult, Project, ServiceCollections } from "./interfaces";
+import { Project, ServiceCollections } from "./interfaces";
 import { isModernProject } from "./utils";
+import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
+import ServiceLogs from "./service-logs";
 
 type Kind = keyof Pick<
   ServiceCollections,
@@ -37,6 +40,16 @@ const KIND_ICONS: Record<Kind, string> = {
   redis: "redis.svg",
   compose: "circuit-board.svg",
 };
+// Same fields services.tsx reads per kind when building its own service status accessory.
+const STATUS_FIELDS: Record<Kind, string> = {
+  applications: "applicationStatus",
+  mariadb: "applicationStatus",
+  mongo: "applicationStatus",
+  mysql: "applicationStatus",
+  postgres: "applicationStatus",
+  redis: "applicationStatus",
+  compose: "composeStatus",
+};
 
 interface Candidate {
   id: string;
@@ -44,8 +57,11 @@ interface Candidate {
   deployType: string;
   icon: string;
   name: string;
+  appName: string;
+  status: string;
   instanceName: string;
   projectName: string;
+  environmentName: string;
   url: string;
   headers: Record<string, string>;
 }
@@ -65,7 +81,8 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
     for (const scope of scopesForProject(project)) {
       for (const kind of Object.keys(KIND_ID_FIELDS) as Kind[]) {
         for (const service of scope.services[kind]) {
-          const id = (service as unknown as Record<string, string>)[KIND_ID_FIELDS[kind]];
+          const raw = service as unknown as Record<string, string>;
+          const id = raw[KIND_ID_FIELDS[kind]];
           candidates.push({
             id,
             idField: KIND_ID_FIELDS[kind],
@@ -74,8 +91,11 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
             // Dokploy allows saving a service with no name - falls back to appName, then the id,
             // so this is never empty (matches the same fallback used in service-env.tsx and others).
             name: service.name || service.appName || id,
+            appName: service.appName ?? "",
+            status: raw[STATUS_FIELDS[kind]],
             instanceName: instance.name,
             projectName: project.name,
+            environmentName: scope.name,
             url,
             headers,
           });
@@ -88,19 +108,26 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
 }
 
 /**
- * Lets you search for a service by name across every configured instance and deploy the one you
- * pick - a shortcut for the common "I know the name, just deploy it" case, without navigating
- * Projects -> Environments -> Services first.
+ * Lets you search for a service by name across every configured instance, see what it's doing, and
+ * act on it (deploy/redeploy/start/stop/... and view logs) - a shortcut for the common "I know the
+ * name, just deploy it" case, without navigating Projects -> Environments -> Services first.
  *
  * Always lists matches and waits for an explicit selection rather than guessing at a single "best"
- * match and deploying it automatically - the extension supports several Dokploy instances, and two
- * of them can have a same-named service, so picking one for the user risks deploying to the wrong
+ * match and acting on it automatically - the extension supports several Dokploy instances, and two
+ * of them can have a same-named service, so picking one for the user risks acting on the wrong
  * server. Raycast's own List search does the matching; this only has to load every candidate once.
+ * Reuses the lifecycle-action logic already reviewed in services.tsx (`src/service-actions.ts`)
+ * rather than reimplementing it, and sorts by frecency so services you actually act on here surface
+ * first next time.
  */
 export default function DeployService() {
   const [isLoading, setIsLoading] = useState(true);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [error, setError] = useState<string>();
+
+  const { data: sorted, visitItem } = useFrecencySorting(candidates, {
+    key: (candidate) => `${candidate.instanceName}-${candidate.id}`,
+  });
 
   useEffect(() => {
     void load();
@@ -135,29 +162,8 @@ export default function DeployService() {
     }
   }
 
-  async function deploy(candidate: Candidate) {
-    const toast = await showToast(Toast.Style.Animated, `Deploying ${candidate.name}…`);
-    try {
-      const response = await fetch(`${candidate.url}${candidate.deployType}.deploy`, {
-        method: "POST",
-        headers: candidate.headers,
-        body: JSON.stringify({ [candidate.idField]: candidate.id }),
-      });
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
-      toast.style = Toast.Style.Success;
-      toast.title = `Deployed ${candidate.name}`;
-    } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not deploy";
-      toast.message = `${err}`;
-    }
-  }
-
   return (
-    <List isLoading={isLoading} navigationTitle="Deploy Service" searchBarPlaceholder="Search services to deploy…">
+    <List isLoading={isLoading} navigationTitle="Deploy Service" searchBarPlaceholder="Search services to act on…">
       {error ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
@@ -170,20 +176,60 @@ export default function DeployService() {
           }
         />
       ) : (
-        candidates.map((candidate) => (
-          <List.Item
-            key={`${candidate.instanceName}-${candidate.id}`}
-            icon={candidate.icon}
-            title={candidate.name}
-            subtitle={`${candidate.instanceName} / ${candidate.projectName}`}
-            actions={
-              <ActionPanel>
-                <Action icon={Icon.Rocket} title="Deploy" onAction={() => deploy(candidate)} />
-                <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
-              </ActionPanel>
-            }
-          />
-        ))
+        sorted.map((candidate) => {
+          // Legacy projects, and modern ones with a single environment, would otherwise repeat the
+          // project name here for no reason.
+          const scopeSuffix =
+            candidate.environmentName !== candidate.projectName ? ` / ${candidate.environmentName}` : "";
+          return (
+            <List.Item
+              key={`${candidate.instanceName}-${candidate.id}`}
+              icon={candidate.icon}
+              title={candidate.name}
+              subtitle={`${candidate.instanceName} / ${candidate.projectName}${scopeSuffix}`}
+              accessories={[statusAccessory(candidate.status)]}
+              actions={
+                <ActionPanel>
+                  {SERVICE_ACTIONS[candidate.deployType].map((action) => (
+                    <Action
+                      key={action}
+                      icon={ACTION_ICONS[action]}
+                      title={ACTION_LABELS[action]}
+                      style={action === "stop" ? Action.Style.Destructive : undefined}
+                      onAction={() => {
+                        void visitItem(candidate);
+                        void runServiceAction(
+                          candidate.url,
+                          candidate.headers,
+                          {
+                            id: candidate.id,
+                            type: candidate.deployType,
+                            name: candidate.name,
+                            appName: candidate.appName,
+                          },
+                          action,
+                          load,
+                        );
+                      }}
+                    />
+                  ))}
+                  {/* compose.readLogs requires a containerId this list doesn't collect - same reason services.tsx hides it. */}
+                  {candidate.deployType !== "compose" && (
+                    <Action.Push
+                      icon={Icon.Terminal}
+                      title="View Logs"
+                      target={
+                        <ServiceLogs service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }} />
+                      }
+                      onPush={() => visitItem(candidate)}
+                    />
+                  )}
+                  <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
+                </ActionPanel>
+              }
+            />
+          );
+        })
       )}
     </List>
   );
