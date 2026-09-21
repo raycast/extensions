@@ -71,7 +71,7 @@ export default function PasteAppleNote() {
 
   const selectedNote = visibleNotes.find((note) => note.id === selectedNoteId);
   const { data: selectedContent, isLoading: isLoadingContent } = usePromise(
-    async () => (selectedNote ? getNotePlainText(selectedNote.id) : undefined),
+    async (noteId?: string) => (noteId ? getNotePlainText(noteId) : undefined),
     [selectedNote?.id],
   );
 
@@ -127,7 +127,7 @@ function NoteItem({
   isLoadingDetail,
 }: {
   note: Note;
-  onRefresh: () => Promise<void>;
+  onRefresh: () => Promise<unknown>;
   defaultAction: Preferences["defaultAction"];
   excludeFirstLineWhenPasting: boolean;
   detailContent?: string;
