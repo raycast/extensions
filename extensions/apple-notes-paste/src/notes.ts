@@ -20,13 +20,15 @@ export async function createAppleNote(title: string, content: string, folderName
   const targetFolder = folderName
     ? `
       set targetFolder to missing value
+      set matchingFolders to {}
       repeat with accountItem in accounts
-        try
-          set targetFolder to folder "${escapeAppleScript(folderName)}" of accountItem
-          exit repeat
-        end try
+        repeat with folderItem in folders of accountItem
+          if name of folderItem is "${escapeAppleScript(folderName)}" then set end of matchingFolders to contents of folderItem
+        end repeat
       end repeat
-      if targetFolder is missing value then error "Folder not found: ${escapeAppleScript(folderName)}"
+      if (count of matchingFolders) is 0 then error "Folder not found: ${escapeAppleScript(folderName)}"
+      if (count of matchingFolders) is greater than 1 then error "Multiple folders have this name. Use a unique folder name before creating a note."
+      set targetFolder to item 1 of matchingFolders
     `
     : "set targetFolder to default folder";
 

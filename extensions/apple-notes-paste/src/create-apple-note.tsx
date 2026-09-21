@@ -12,8 +12,6 @@ import { useState } from "react";
 
 import { createAppleNote } from "./notes";
 
-type Preferences = { defaultFolder?: string };
-
 export default function CreateAppleNote() {
   const { defaultFolder } = getPreferenceValues<Preferences>();
   const [isCreating, setIsCreating] = useState(false);

@@ -20,18 +20,13 @@ import { useNotes } from "./use-notes";
 const ALL_NOTES = "__all_notes__";
 const DEFAULT_FOLDER = "__default_folder__";
 
-type Preferences = {
-  defaultFolder?: string;
-  defaultAction: "paste" | "open";
-  excludeFirstLineWhenPasting: boolean;
-};
-
 function withoutFirstLine(text: string) {
   return text.split(/\r?\n/).slice(1).join("\n").replace(/^\n+/, "");
 }
 
 function codeBlock(text: string) {
-  return `~~~\n${text}\n~~~`;
+  const fence = "~".repeat(Math.max(3, ...Array.from(text.matchAll(/~+/g), (match) => match[0].length + 1)));
+  return `${fence}\n${text}\n${fence}`;
 }
 
 function detailMarkdown(content: string, excludeFirstLine: boolean) {
@@ -71,7 +66,7 @@ export default function PasteAppleNote() {
 
   const selectedNote = visibleNotes.find((note) => note.id === selectedNoteId);
   const { data: selectedContent, isLoading: isLoadingContent } = usePromise(
-    async (noteId?: string) => (noteId ? getNotePlainText(noteId) : undefined),
+    async (noteId?: string) => (noteId ? { id: noteId, text: await getNotePlainText(noteId) } : undefined),
     [selectedNote?.id],
   );
 
@@ -107,7 +102,7 @@ export default function PasteAppleNote() {
           onRefresh={reload}
           defaultAction={preferences.defaultAction}
           excludeFirstLineWhenPasting={preferences.excludeFirstLineWhenPasting}
-          detailContent={selectedNote?.id === note.id ? selectedContent : undefined}
+          detailContent={selectedContent?.id === note.id ? selectedContent.text : undefined}
           isLoadingDetail={selectedNote?.id === note.id && isLoadingContent}
         />
       ))}
@@ -153,7 +148,6 @@ function NoteItem({
       application="com.apple.notes"
     />
   );
-  const snippetText = detailContent ?? note.snippet;
 
   return (
     <List.Item
@@ -170,11 +164,13 @@ function NoteItem({
         <ActionPanel>
           {defaultAction === "paste" ? pasteAction : openAction}
           {defaultAction === "paste" ? openAction : pasteAction}
-          <Action.CreateSnippet
-            title="Create Raycast Snippet"
-            icon={Icon.TextCursor}
-            snippet={{ name: note.title || "Apple Note", text: snippetText }}
-          />
+          {detailContent !== undefined && !isLoadingDetail ? (
+            <Action.CreateSnippet
+              title="Create Raycast Snippet"
+              icon={Icon.TextCursor}
+              snippet={{ name: note.title || "Apple Note", text: detailContent }}
+            />
+          ) : null}
           <Action.CopyToClipboard title="Copy Note Preview" icon={Icon.CopyClipboard} content={note.snippet} />
           <Action
             title="Refresh Notes"

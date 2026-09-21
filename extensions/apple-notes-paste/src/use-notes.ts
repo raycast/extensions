@@ -20,7 +20,6 @@ const notesQuery = `
     AND note.zmarkedfordeletion != 1
     AND folder.zmarkedfordeletion != 1
   ORDER BY note.zmodificationdate1 DESC
-  LIMIT 1000
 `;
 
 export function useNotes() {
