@@ -109,6 +109,41 @@ export function setMeta(key: string, value: string) {
   getDb().prepare(`INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)`).run(key, value);
 }
 
+const LOCK_TTL_MS = 3 * 60 * 1000;
+
+/**
+ * Cross-process index lock stored in meta as "<heartbeat ms>:<owner token>". Acquisition is a
+ * single upsert that only overwrites a lock whose heartbeat is older than the TTL, so two
+ * workers cannot both pass the check. Returns the owner token, or null when another process holds it.
+ */
+export function acquireLock(): string | null {
+  const token = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const now = Date.now();
+  const r = getDb()
+    .prepare(
+      `INSERT INTO meta(key, value) VALUES ('lock', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value
+       WHERE CAST(meta.value AS INTEGER) < ?`,
+    )
+    .run(`${now}:${token}`, now - LOCK_TTL_MS);
+  return r.changes > 0 ? token : null;
+}
+
+export function isLocked(): boolean {
+  const v = getMeta("lock");
+  return !!v && Date.now() - parseInt(v, 10) < LOCK_TTL_MS;
+}
+
+export function heartbeatLock(token: string) {
+  getDb()
+    .prepare(`UPDATE meta SET value = ? WHERE key = 'lock' AND value LIKE ?`)
+    .run(`${Date.now()}:${token}`, `%:${token}`);
+}
+
+export function releaseLock(token: string) {
+  getDb().prepare(`DELETE FROM meta WHERE key = 'lock' AND value LIKE ?`).run(`%:${token}`);
+}
+
 interface SessionRow {
   id: string;
   agent: AgentId;

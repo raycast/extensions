@@ -14,12 +14,7 @@ import { SessionHit } from "./types";
  * heyitaki's search-agent-sessions extension.
  */
 
-interface Prefs {
-  terminalApp: "Terminal" | "iTerm" | "Ghostty" | "Warp";
-  defaultResumeTarget: "auto" | "app" | "terminal";
-  claudeCommand: string;
-  codexCommand: string;
-}
+type Prefs = Pick<Preferences, "terminalApp" | "defaultResumeTarget" | "claudeCommand" | "codexCommand">;
 
 export const CODEX_BUNDLED_CLI = "/Applications/ChatGPT.app/Contents/Resources/codex";
 

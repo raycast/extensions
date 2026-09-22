@@ -1,4 +1,14 @@
-import { deleteSessionByFile, getDb, getMeta, loadAllStates, loadRefs, setMeta, writeSession } from "./db";
+import {
+  acquireLock,
+  deleteSessionByFile,
+  getDb,
+  heartbeatLock,
+  loadAllStates,
+  loadRefs,
+  releaseLock,
+  setMeta,
+  writeSession,
+} from "./db";
 import { resolveRepo } from "./git";
 import { seenLinearWorkspaces } from "./refs";
 import { providers } from "./providers";
@@ -34,11 +44,8 @@ export async function refreshIndex(
   opts: { onProgress?: (p: IndexProgress) => void; signal?: AbortSignal } = {},
 ): Promise<IndexSummary> {
   const started = Date.now();
-  const lock = getMeta("lock");
-  if (lock && Date.now() - Number(lock) < 3 * 60 * 1000) {
-    return { scanned: 0, indexed: 0, removed: 0, durationMs: 0 };
-  }
-  setMeta("lock", String(Date.now()));
+  const lock = acquireLock();
+  if (!lock) return { scanned: 0, indexed: 0, removed: 0, durationMs: 0 };
   try {
     const existing = loadAllStates();
     const discovered: DiscoveredFile[] = [];
@@ -82,7 +89,7 @@ export async function refreshIndex(
         opts.onProgress({ done: i + 1, total: work.length, file: file.file });
       }
       if (i % 25 === 0) await new Promise((r) => setImmediate(r));
-      if (i % 100 === 0) setMeta("lock", String(Date.now()));
+      if (i % 100 === 0) heartbeatLock(lock);
     }
     if (indexed > 0 || removed > 0) {
       setMeta("lastIndexedAt", String(Date.now()));
@@ -98,6 +105,6 @@ export async function refreshIndex(
     }
     return { scanned: discovered.length, indexed, removed, durationMs: Date.now() - started };
   } finally {
-    setMeta("lock", "0");
+    releaseLock(lock);
   }
 }

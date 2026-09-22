@@ -1,4 +1,4 @@
-import { dropDb } from "../lib/db";
+import { dropDb, isLocked } from "../lib/db";
 import { setConfig } from "../lib/config";
 import { refreshIndex } from "../lib/indexer";
 
@@ -13,7 +13,10 @@ async function main() {
   const payload = JSON.parse(process.argv[2] ?? "{}") as { mode?: string; config?: Parameters<typeof setConfig>[0] };
   if (!payload.config) throw new Error("missing config");
   setConfig(payload.config);
-  if (payload.mode === "rebuild") dropDb();
+  if (payload.mode === "rebuild") {
+    if (isLocked()) throw new Error("An index refresh is running; retry the rebuild in a minute");
+    dropDb();
+  }
   let last = 0;
   const summary = await refreshIndex({
     onProgress: (p) => {

@@ -109,6 +109,27 @@ function getMeta(key) {
 function setMeta(key, value) {
   getDb().prepare(`INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)`).run(key, value);
 }
+var LOCK_TTL_MS = 3 * 60 * 1e3;
+function acquireLock() {
+  const token = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const now = Date.now();
+  const r = getDb().prepare(
+    `INSERT INTO meta(key, value) VALUES ('lock', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value
+       WHERE CAST(meta.value AS INTEGER) < ?`
+  ).run(`${now}:${token}`, now - LOCK_TTL_MS);
+  return r.changes > 0 ? token : null;
+}
+function isLocked() {
+  const v = getMeta("lock");
+  return !!v && Date.now() - parseInt(v, 10) < LOCK_TTL_MS;
+}
+function heartbeatLock(token) {
+  getDb().prepare(`UPDATE meta SET value = ? WHERE key = 'lock' AND value LIKE ?`).run(`${Date.now()}:${token}`, `%:${token}`);
+}
+function releaseLock(token) {
+  getDb().prepare(`DELETE FROM meta WHERE key = 'lock' AND value LIKE ?`).run(`%:${token}`);
+}
 function rowToState(r) {
   return {
     id: r.id,
@@ -1050,11 +1071,8 @@ var ctx = {
 };
 async function refreshIndex(opts = {}) {
   const started = Date.now();
-  const lock = getMeta("lock");
-  if (lock && Date.now() - Number(lock) < 3 * 60 * 1e3) {
-    return { scanned: 0, indexed: 0, removed: 0, durationMs: 0 };
-  }
-  setMeta("lock", String(Date.now()));
+  const lock = acquireLock();
+  if (!lock) return { scanned: 0, indexed: 0, removed: 0, durationMs: 0 };
   try {
     const existing = loadAllStates();
     const discovered = [];
@@ -1097,7 +1115,7 @@ async function refreshIndex(opts = {}) {
         opts.onProgress({ done: i + 1, total: work.length, file: file.file });
       }
       if (i % 25 === 0) await new Promise((r) => setImmediate(r));
-      if (i % 100 === 0) setMeta("lock", String(Date.now()));
+      if (i % 100 === 0) heartbeatLock(lock);
     }
     if (indexed > 0 || removed > 0) {
       setMeta("lastIndexedAt", String(Date.now()));
@@ -1112,7 +1130,7 @@ async function refreshIndex(opts = {}) {
     }
     return { scanned: discovered.length, indexed, removed, durationMs: Date.now() - started };
   } finally {
-    setMeta("lock", "0");
+    releaseLock(lock);
   }
 }
 
@@ -1121,7 +1139,10 @@ async function main() {
   const payload = JSON.parse(process.argv[2] ?? "{}");
   if (!payload.config) throw new Error("missing config");
   setConfig(payload.config);
-  if (payload.mode === "rebuild") dropDb();
+  if (payload.mode === "rebuild") {
+    if (isLocked()) throw new Error("An index refresh is running; retry the rebuild in a minute");
+    dropDb();
+  }
   let last = 0;
   const summary = await refreshIndex({
     onProgress: (p) => {

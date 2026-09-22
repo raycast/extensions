@@ -8,12 +8,13 @@ export function prUrl(hit: SessionHit, number: string): string | null {
   return repo ? `https://github.com/${repo}/pull/${number}` : null;
 }
 
-let cachedWorkspace: string | null | undefined;
+let cachedWorkspace: string | null = null;
 
 export function linearWorkspace(): string | null {
-  const pref = getPreferenceValues<{ linearWorkspace?: string }>().linearWorkspace?.trim();
+  const pref = getPreferenceValues<Preferences>().linearWorkspace?.trim();
   if (pref) return pref;
-  if (cachedWorkspace === undefined) cachedWorkspace = getMeta("linearWorkspace");
+  // A missing value is not cached: indexing may detect the workspace after the first render.
+  if (!cachedWorkspace) cachedWorkspace = getMeta("linearWorkspace");
   return cachedWorkspace;
 }
 

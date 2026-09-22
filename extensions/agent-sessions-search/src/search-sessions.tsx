@@ -358,7 +358,7 @@ async function resume(hit: SessionHit, target: "app" | "terminal") {
       title:
         target === "app"
           ? `Could not open ${appName(hit)}`
-          : `Could not launch ${getPreferenceValues<{ terminalApp?: string }>().terminalApp ?? "Terminal"}`,
+          : `Could not launch ${getPreferenceValues<Preferences>().terminalApp}`,
     });
   }
 }

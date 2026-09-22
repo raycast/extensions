@@ -203,11 +203,24 @@ export function searchSessions(rawQuery: string, opts: SearchOptions = {}): Sess
   const desktop = claudeDesktopState();
 
   if (!parsed.raw) {
+    const where = `hidden = 0 ${agentFilter ? "AND agent = ?" : ""}`;
+    const args = agentFilter ? [agentFilter] : [];
     const rows = db
-      .prepare(
-        `SELECT * FROM sessions WHERE hidden = 0 ${agentFilter ? "AND agent = ?" : ""} ORDER BY updated_at DESC LIMIT ?`,
-      )
-      .all(...(agentFilter ? [agentFilter, limit] : [limit])) as never[];
+      .prepare(`SELECT * FROM sessions WHERE ${where} ORDER BY updated_at DESC LIMIT ?`)
+      .all(...args, limit) as never[];
+    // Pinned sessions are listed first regardless of age, so fetch them separately when older than the page.
+    const pinnedIds = [...desktop.pinned].filter(
+      (id) => !rows.some((r) => (r as { session_id: string }).session_id === id),
+    );
+    if (pinnedIds.length) {
+      rows.push(
+        ...(db
+          .prepare(
+            `SELECT * FROM sessions WHERE ${where} AND agent = 'claude' AND session_id IN (${pinnedIds.map(() => "?").join(",")})`,
+          )
+          .all(...args, ...pinnedIds) as never[]),
+      );
+    }
     const hits = rows.map((r) => {
       const state = rowToState(r);
       const pin = isPinned(state, desktop);
