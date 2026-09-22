@@ -9,7 +9,7 @@ import {
   RequestChangesAction,
   ShowPullRequestDetailAction,
 } from "./actions";
-import { cacheConfig } from "../../helpers/cache";
+import { scanCacheConfig } from "../../helpers/cache";
 import { preferences } from "../../helpers/preferences";
 import { PullRequest } from "./interface";
 import { getPullRequestKey } from "./../../helpers/pullRequestKey";
@@ -22,7 +22,7 @@ const PULL_REQUESTS_CACHE_KEY = `all-open-pull-requests:${preferences.workspace}
 
 export function SearchAllPullRequests() {
   return (
-    <SWRConfig value={cacheConfig}>
+    <SWRConfig value={scanCacheConfig}>
       <SearchAllPullRequestsList />
     </SWRConfig>
   );
