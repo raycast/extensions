@@ -350,6 +350,8 @@ function detectShopifyTool(command: string): ShopifyTool | null {
 // OR a Shopify CLI dev process. Over-collection is harmless: only PIDs with a
 // LISTEN socket survive the join below.
 function isCandidate(proc: RawProcess): boolean {
+  if (commandBase(proc.command.split(/\s+/, 1)[0]) === "next-server")
+    return true;
   if (/node_modules\//.test(proc.command)) return true;
   if (detectShopifyTool(proc.command)) return true;
   const exec = proc.command.split(/\s+/, 1)[0];
@@ -405,6 +407,8 @@ function packageFromModulesPath(token: string): string | null {
 }
 
 function detectToolFromCommand(command: string, cwd: string): string {
+  if (commandBase(command.split(/\s+/, 1)[0]) === "next-server") return "next";
+
   const shopifyTool = detectShopifyTool(command);
   if (shopifyTool) return shopifyTool;
 

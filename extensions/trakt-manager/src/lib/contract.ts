@@ -19,8 +19,13 @@ import {
   TraktShowRecommendationList,
   TraktShowDetailedProgressSchema,
   TraktShowProgressQuerySchema,
+  TraktRatingItemSchema,
   TraktUpNextQuerySchema,
+  TraktPaginationSchema,
+  TraktUserRatingListSchema,
   TraktUserStatsSchema,
+  TraktIdLookupQuerySchema,
+  TraktIdLookupSchema,
 } from "./schema";
 
 const c = initContract();
@@ -371,6 +376,63 @@ const TraktShowContract = c.router({
   },
 });
 
+const TraktSyncContract = c.router({
+  addRatings: {
+    method: "POST",
+    path: "/sync/ratings",
+    responses: {
+      200: z.unknown(),
+      201: z.unknown(),
+    },
+    body: z.object({
+      movies: z.array(TraktRatingItemSchema).optional(),
+      shows: z.array(TraktRatingItemSchema).optional(),
+      seasons: z.array(TraktRatingItemSchema).optional(),
+      episodes: z.array(TraktRatingItemSchema).optional(),
+    }),
+    summary: "Add ratings for movies, shows, seasons, or episodes",
+  },
+  removeRatings: {
+    method: "POST",
+    path: "/sync/ratings/remove",
+    responses: {
+      200: z.unknown(),
+    },
+    body: z.object({
+      movies: z.array(TraktIdSchema).optional(),
+      shows: z.array(TraktIdSchema).optional(),
+      seasons: z.array(TraktIdSchema).optional(),
+      episodes: z.array(TraktIdSchema).optional(),
+    }),
+    summary: "Remove ratings",
+  },
+  getRatings: {
+    method: "GET",
+    path: "/sync/ratings/:type",
+    responses: {
+      200: TraktUserRatingListSchema,
+    },
+    pathParams: z.object({
+      type: z.enum(["movies", "shows", "seasons", "episodes", "all"]),
+    }),
+    query: TraktPaginationSchema.partial().merge(TraktExtendedSchema.partial()),
+    summary: "Get user ratings",
+  },
+  getRatingsByRating: {
+    method: "GET",
+    path: "/sync/ratings/:type/:rating",
+    responses: {
+      200: TraktUserRatingListSchema,
+    },
+    pathParams: z.object({
+      type: z.enum(["movies", "shows", "seasons", "episodes", "all"]),
+      rating: z.coerce.number(),
+    }),
+    query: TraktPaginationSchema.partial().merge(TraktExtendedSchema.partial()),
+    summary: "Get user ratings filtered by rating score",
+  },
+});
+
 const TraktUserContract = c.router({
   getUserStats: {
     method: "GET",
@@ -385,11 +447,28 @@ const TraktUserContract = c.router({
   },
 });
 
+const TraktSearchContract = c.router({
+  lookupById: {
+    method: "GET",
+    path: "/search/trakt/:id",
+    responses: {
+      200: TraktIdLookupSchema,
+    },
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    query: TraktIdLookupQuerySchema,
+    summary: "Look up a movie, show, season or episode by its Trakt ID",
+  },
+});
+
 export const TraktContract = c.router(
   {
     movies: TraktMovieContract,
     shows: TraktShowContract,
+    sync: TraktSyncContract,
     users: TraktUserContract,
+    search: TraktSearchContract,
   },
   {
     strictStatusCodes: true,

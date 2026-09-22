@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "maplestory-gg",
-  "title": "MapleStory.gg",
+  "title": "MapleStory",
   "type": "module",
-  "description": "MapleStory's Definitive Database.",
+  "description": "Look up Global MapleStory characters using Nexon rankings.",
   "icon": "maplestory-gg-icon.png",
   "author": "litomore",
   "contributors": [
@@ -36,14 +36,13 @@
     {
       "name": "lookup",
       "title": "Lookup Character",
-      "description": "Lookup charecter from maplestory.gg.",
+      "description": "Look up characters in Nexon’s North American and European rankings.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.3",
     "@raycast/utils": "^2.2.1",
-    "chartjs-to-image": "^1.2.2",
     "got": "^14.5.0"
   },
   "devDependencies": {

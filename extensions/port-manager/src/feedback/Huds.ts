@@ -7,6 +7,10 @@ const Huds = {
     Success(process: { name?: string; port: string }) {
       return `✅ Successfully killed ${process.name ?? "Untitled Process"} (${process.port})`;
     },
+
+    Survived(process: { name?: string; port: string }) {
+      return `⚠️ ${process.name ?? "Untitled Process"} (${process.port}) is still running after the signal`;
+    },
   },
 } as const;
 

@@ -4,6 +4,7 @@ import type { Meeting } from "../types/Types";
 import { exportMeeting } from "../utils/export";
 import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
 import { MeetingActionItemsDetail } from "../view-action-items";
+import { MeetingDownloadActions } from "./DownloadActions";
 import { RefreshCacheAction } from "./RefreshCacheAction";
 import { cacheManager } from "../utils/cacheManager";
 
@@ -47,7 +48,10 @@ export function MeetingCopyActions(props: {
           title="Copy Calendar Invitees Emails"
           content={meeting.calendarInvitees.join(", ")}
           icon={Icon.Envelope}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "e" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+          }}
         />
       )}
     </ActionPanel.Section>
@@ -81,7 +85,13 @@ export function MeetingExportActions(props: { meeting: Meeting; recordingId: str
         title="Export Summary as Markdown"
         icon={Icon.Download}
         onAction={() => exportMeeting({ meeting, recordingId, type: "summary", format: "md" })}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        // ⌘⇧S would collide with Common.Duplicate, and this action duplicates
+        // nothing — it writes a file. ⌘⇧M ("Markdown") is unclaimed and pairs
+        // with ⌘⇧T for the transcript export below.
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "m" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+        }}
       />
       <Action
         title="Export Summary as Text"
@@ -92,7 +102,10 @@ export function MeetingExportActions(props: { meeting: Meeting; recordingId: str
         title="Export Transcript as Markdown"
         icon={Icon.Download}
         onAction={() => exportMeeting({ meeting, recordingId, type: "transcript", format: "md" })}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "t" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+        }}
       />
       <Action
         title="Export Transcript as Text"
@@ -120,7 +133,7 @@ export function MeetingDetailActions(props: {
             title="View Action Items"
             icon={Icon.CheckCircle}
             target={<MeetingActionItemsDetail meeting={meeting} />}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
           />
         )}
         {currentView !== "transcript" && (
@@ -128,7 +141,7 @@ export function MeetingDetailActions(props: {
             title="View Transcript"
             icon={Icon.Text}
             target={<MeetingTranscriptDetail meeting={meeting} recordingId={recordingId} />}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
           />
         )}
         {currentView !== "summary" && (
@@ -136,7 +149,10 @@ export function MeetingDetailActions(props: {
             title="View Summary"
             icon={Icon.Document}
             target={<MeetingSummaryDetail meeting={meeting} recordingId={recordingId} />}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            // No shortcut: ⌘S is Common.Save and ⌘Y is Common.ToggleQuickLook,
+            // neither of which means "view the summary". Borrowing an unrelated
+            // Common binding to silence the linter would teach the wrong muscle
+            // memory; the action stays reachable from the panel and via search.
           />
         )}
       </ActionPanel.Section>
@@ -144,6 +160,7 @@ export function MeetingDetailActions(props: {
       <MeetingCopyActions meeting={meeting} additionalContent={additionalContent} />
       <MeetingOpenActions meeting={meeting} />
       <MeetingExportActions meeting={meeting} recordingId={recordingId} />
+      <MeetingDownloadActions meeting={meeting} recordingId={recordingId} />
     </ActionPanel>
   );
 }
@@ -166,7 +183,7 @@ export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Prom
           title="View Action Items"
           icon={Icon.CheckCircle}
           target={<MeetingActionItemsDetail meeting={meeting} />}
-          shortcut={{ modifiers: ["cmd"], key: "i" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
         />
         <Action.Push
           title="View Transcript"
@@ -178,6 +195,7 @@ export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Prom
       <MeetingCopyActions meeting={meeting} />
       <MeetingOpenActions meeting={meeting} />
       <MeetingExportActions meeting={meeting} recordingId={recordingId} />
+      <MeetingDownloadActions meeting={meeting} recordingId={recordingId} />
 
       {onRefresh && (
         <ActionPanel.Section>

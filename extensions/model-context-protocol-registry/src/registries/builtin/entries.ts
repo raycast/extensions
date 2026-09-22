@@ -151,6 +151,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "gtd-brain",
+    title: "GTD Brain",
+    description:
+      "Getting Things Done board: capture to Inbox, next actions by context, projects, waiting-for and a weekly review, on the same board as the GTD Brain web, iOS and Android apps. Hosted remote server with OAuth 2.1 sign-in (email code), no API key to paste.",
+    icon: "https://gtdbrain.com/gtdbrain/icon-512.png",
+    homepage: "https://gtdbrain.com/connect?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp"],
+    },
+  },
+  {
     name: "e2b",
     title: "E2B Code Interpreter",
     description: "A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/).",
@@ -232,6 +244,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?src=raycast"],
+    },
+  },
+  {
+    name: "quantral",
+    title: "Quantral",
+    description:
+      "Stock sentiment scores (0-100) per company from the retail investor and market commentator sources Quantral tracks, plus top signals, monthly recaps and the mentions behind each score. Hosted remote server with OAuth sign-in; Quantral subscription required.",
+    icon: "https://app.quantral.com/mcp-icon.png?v=2",
+    homepage: "https://quantral.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.quantral.com/api/mcp"],
     },
   },
   {
@@ -432,6 +456,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@shopify/dev-mcp@latest"],
+    },
+  },
+  {
+    name: "sitelemetry",
+    title: "Sitelemetry",
+    description:
+      "Authorized website audits for the sites you own or maintain: security posture, technical SEO, AI visibility (GEO/AEO), analytics integrations, WCAG 2.2 accessibility and performance, returning evidence-backed findings with fixes in nine languages. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://sitelemetry.com/favicon.svg",
+    homepage: "https://sitelemetry.com/mcp-guide",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://sitelemetry.com/mcp"],
     },
   },
   {

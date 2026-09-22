@@ -1,5 +1,17 @@
 # Model Context Protocol Registry Changelog
 
+## [Add GTD Brain MCP Server] - 2026-09-21
+
+- Add GTD Brain to the official registry: a Getting Things Done board (capture to Inbox, next actions by context, projects, waiting-for, weekly review) shared with the GTD Brain web, iOS and Android apps. Remote Streamable HTTP server at https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp through `mcp-remote`; OAuth 2.1 sign-in with an email code, no API key.
+
+## [Add Sitelemetry MCP Server] - 2026-09-19
+
+- Add Sitelemetry to the official registry: authorized website audits (security posture, technical SEO, AI visibility, analytics integrations, WCAG 2.2 accessibility and performance) with evidence-backed findings and fixes in nine languages. Remote Streamable HTTP server at https://sitelemetry.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add Quantral MCP Server] - 2026-09-19
+
+- Add Quantral to the official registry: per-company stock sentiment scores (0-100), top signals, monthly recaps and the mentions behind each score from the sources Quantral tracks. Hosted remote Streamable HTTP server at https://app.quantral.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in, Quantral subscription required.
+
 ## [Add EmpirioLabs AI MCP Server] - 2026-09-14
 
 - Add EmpirioLabs AI to the community registry: 180+ AI models, media generation, web search and research, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server at https://mcp.empiriolabs.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in or an EmpirioLabs API key.

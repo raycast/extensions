@@ -24,6 +24,18 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Open Domain
             - Copy URL
             - Delete Domain
+            - Add Domain
+        - View Backups (Databases and Compose stacks)
+            - Add Backup
+            - Edit Backup
+            - Run Backup Now
+            - Delete Backup
+        - View Schedules (Applications and Compose stacks)
+            - Add Schedule
+            - Edit Schedule
+            - Run Now
+            - View Runs
+            - Delete Schedule
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)
@@ -31,6 +43,11 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - View S3 Destinations
         - Delete S3 Destination
     - View Users
+- Deploy Service
+    - Search for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and status, sorted by frecency.
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
 
 ## 🚀 Getting Started
 

@@ -6,13 +6,14 @@ import fs from 'fs'
 import {useInstalled} from './use-installed'
 
 // schema
-const TimestampSchema = z.number().int().positive()
+const TimestampSchema = z.int().positive()
 
 const FlightSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     number: z.string(),
 
     // airline
+    airlineId: z.uuid(),
     airlineIata: z.string().length(2),
     airlineIcao: z.string().length(3),
     airlineName: z.string(),
@@ -60,6 +61,7 @@ SELECT
     Flight.id,
     Flight.number,
 
+    Airline.id as airlineId,
     Airline.iata as airlineIata,
     Airline.icao as airlineIcao,
     Airline.name as airlineName,
@@ -112,15 +114,15 @@ WHERE
     AND
     UserFlight.isRandom = 0
     AND
-    UserFlight.importSource IS NOT "CONNECTED_FRIEND"
+    UserFlight.importSource IS NOT 'CONNECTED_FRIEND'
     AND
-    Ticket.userId IS NOT ""
+    Ticket.userId IS NOT ''
 `
 
 function useFlightQuery(): AsyncState<Flight[]> {
     try {
         return useSQL<Flight>(path, query)
-    } catch (error) {
+    } catch {
         return {isLoading: false, error: new Error('Unable to read Flighty data. Please restart it and try again.')}
     }
 }

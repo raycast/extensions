@@ -1,5 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import { getAIProviderCacheIdentity } from "@/ai-providers/cacheIdentity";
 import { getAIProviderQueryMode, resolveAIProviderIcon } from "@/ai-providers/runtime";
 import type { AIProviderProfile } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
@@ -43,6 +44,33 @@ export interface TranslationServiceConfig extends RuntimeServiceConfig {
   enabled: (queryWordInfo: QueryInput) => boolean;
   createProvider: () => BaseTranslateProvider;
   getWebUrl?: (queryWordInfo: QueryInput) => string | undefined;
+}
+
+function getBuiltinTranslationCacheIdentity(type: TranslationType): string {
+  switch (type) {
+    case TranslationType.Bing:
+      return JSON.stringify({ type, host: myPreferences.bingHost });
+    case TranslationType.DeepL:
+      return JSON.stringify({ type, endpoint: myPreferences.deepLEndpoint, credential: myPreferences.deepLAuthKey });
+    case TranslationType.Baidu:
+      return JSON.stringify({ type, appId: myPreferences.baiduAppId, credential: myPreferences.baiduAppSecret });
+    case TranslationType.Tencent:
+      return JSON.stringify({
+        type,
+        secretId: myPreferences.tencentSecretId,
+        credential: myPreferences.tencentSecretKey,
+      });
+    case TranslationType.Volcano:
+      return JSON.stringify({
+        type,
+        accessKeyId: myPreferences.volcanoAccessKeyId,
+        credential: myPreferences.volcanoAccessKeySecret,
+      });
+    case TranslationType.Caiyun:
+      return JSON.stringify({ type, credential: myPreferences.caiyunToken });
+    default:
+      return type;
+  }
 }
 
 /** Static registry — provider classes, instantiated by the engine. */
@@ -134,6 +162,7 @@ const staticTranslationServicesWithOrder: TranslationServiceConfig[] = staticTra
     implicitlyEnabledBy: service.implicitlyEnabledBy,
     order,
     type: service.type,
+    cacheIdentity: getBuiltinTranslationCacheIdentity(service.type),
     enabled: service.isEnabled ?? (() => myPreferences[service.preference]),
     createProvider: () => new service.provider(),
     getWebUrl: service.getWebUrl,
@@ -160,6 +189,7 @@ export function resolveTranslationServices(
       order: profile.order,
       type: TranslationType.OpenAI,
       icon: resolveAIProviderIcon(profile),
+      cacheIdentity: getAIProviderCacheIdentity(profile, 1),
       enabled: (queryWordInfo: QueryInput) => getAIProviderQueryMode(profile, queryWordInfo) === "translation",
     };
 

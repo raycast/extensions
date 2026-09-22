@@ -4,6 +4,7 @@ import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
 import { Color, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { parse as parseTld } from "tldts";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -88,7 +89,11 @@ export const executeJxa = async (script: string) => {
   }
 };
 
-const normalizeText = (text: string) =>
+// Folds a string to a diacritic-insensitive, case-insensitive form (NFD
+// decomposes an accented letter into its base letter plus a combining accent
+// mark, which the second step then strips), so a query typed without accents
+// still substring-matches text that has them.
+export const normalizeText = (text: string) =>
   text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -187,6 +192,34 @@ export function getSearchEngineName(engine: SearchEngine = getSearchEngine()) {
 
 export function buildSearchUrl(query: string, engine: SearchEngine = getSearchEngine()) {
   return SEARCH_ENGINES[engine].search + encodeURIComponent(query);
+}
+
+// Accept the same kinds of address users commonly enter in a browser's address
+// bar: a hostname (with an optional protocol, port, or path), localhost, or an
+// IPv4 address. A space means this is a search query, not an address.
+export function isWebAddress(value: string): boolean {
+  const candidate = value.trim();
+  if (!candidate || /\s/.test(candidate)) return false;
+
+  const url = parseUrl(/^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`);
+  if (!url) return false;
+
+  const hostname = url.hostname;
+  if (hostname === "localhost") return true;
+  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+    return hostname.split(".").every((part) => Number(part) <= 255);
+  }
+
+  // Validate against the Public Suffix List rather than accepting any
+  // "label.2+ letters" shape - that pattern also matches file-like text such
+  // as `index.html`, `main.js`, or `file.txt`, which are not web addresses.
+  const { isIcann, isPrivate } = parseTld(hostname, { allowPrivateDomains: true });
+  return isIcann === true || isPrivate === true;
+}
+
+export function normalizeWebAddress(value: string): string {
+  const candidate = value.trim();
+  return /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
 }
 
 // Returns null for engines (e.g. Kagi) that have no public autocomplete endpoint.

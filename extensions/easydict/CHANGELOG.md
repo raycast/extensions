@@ -1,5 +1,25 @@
 # `Easydict` Changelog
 
+## [v3.3.0] - 2026-09-19
+
+### ✨ New Features
+
+#### Optional Query Caching
+
+- Added local caching for completed dictionary lookups and translations, with separate **Query Cache** and **AI Query Cache** settings. Both default to **Off** and offer **Words Only** and **All Text** modes.
+- Language detection can reuse confirmed results for inputs covered by either cache setting.
+- Cached results show a clock indicator. Use **Requery All Services** to fetch fresh results, **Regenerate AI Result** to refresh one AI provider, or **Clear Query Cache** to remove cached results.
+
+### 💎 Improvements
+
+- Improved result previews, detailed views, and saved favorites with clearer headings, pronunciation and language direction, and compact tables for short word translations, word forms, and phrases.
+- Google Translate now supports full translations of text longer than 1,830 characters, with paragraph breaks preserved.
+
+### 🐞 Bug Fixes
+
+- Fixed Google Translate failures caused by the previous web translation endpoint.
+- Favorites now show language codes when **Flags are not languages** is enabled, keeping the source and target languages distinguishable.
+
 ## [v3.2.0] - 2026-09-09
 
 ### ⚠️ Behavioral Changes

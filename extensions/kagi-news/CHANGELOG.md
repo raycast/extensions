@@ -1,5 +1,14 @@
 # Kagi News Changelog
 
+## [1.5] - 2026-09-21
+
+- Added AI Extension support: ask Kagi News questions directly from Raycast AI (@Kagi News), browsing a category or searching across all dates in natural language
+- Added a favorites system to Time Travel, now synced with Daily News
+- Added a "Hide/Show Sources" action (⌘⇧S on macOS, Ctrl+Shift+S on Windows) in the article view to free up reading space
+- Fixed favorites and the selected category losing track over time, caused by relying on an identifier that changed with each new batch instead of a stable one
+- Fixed a brief error flash when loading a new date in Time Travel
+- Noted in the Language setting that Kagi has temporarily paused News translations
+
 ## [1.4] - 2026-03-25
 
 - Added the Chaos Index Scale and analysis as a category (Cmd+P menu)  

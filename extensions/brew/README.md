@@ -6,8 +6,10 @@ Search and manage your brew casks and formulae from [Raycast](https://raycast.co
 
 - **Search** — search brew formulae & casks and install them
 - **Show Installed** — list installed formulae & casks, with pinned formulae and pinned casks each in their own section
-- **Show Upgrades** (previously Show Outdated) — review outdated packages, choose which upgrade, and run it. The review opens with everything not pinned selected (exactly what a plain `brew upgrade` would do), so running immediately upgrades everything. A pin is a lock, matching brew's own behaviour: a pinned package cannot be selected, and including one means unpinning it first — the primary action on a pinned row does both in one step. Formulae and casks behave identically.
+- **Show Upgrades** (previously Show Outdated) — review outdated packages, choose which upgrade, and run it. The review opens with everything not pinned selected (exactly what a plain `brew upgrade` would do), so running immediately upgrades everything. A pin is a lock, matching brew's own behaviour: a pinned package cannot be selected, and including one means unpinning it first — the primary action on a pinned row does both in one step. Formulae and casks behave identically. **Preview Upgrades** (⌘⇧I) runs `brew upgrade --dry-run` on demand and lists every package with its version transition, download size, running total, and brew's warnings; **Preview Upgrade** (⌘⌥I) does the same for the one package on the row, and is offered on outdated packages in Show Installed and Search too.
 - **Upgrade All** — upgrade everything outdated in one shot, no review step, with progress reported per package via the toast
+- **Show Vulnerabilities** — list installed formulae with known OSV advisories from `brew vulns`, with per-advisory detail and an Upgrade action where the formula is also outdated (needs Homebrew 7)
+- **Run Doctor** — show the `brew doctor` report with every recommended fix, and run them all with one confirmation (Fix All) (needs Homebrew 7)
 - **Manage Services** — start, stop & restart Homebrew services
 - **Services Menu Bar** — control Homebrew services from the menu bar
 - **Clean up** — clean files and packages from the cache that are older than 120 days
