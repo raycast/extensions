@@ -117,9 +117,9 @@ export default function ConnectCommand() {
           description="Install the sesh CLI with Homebrew, then press ⌘R to retry."
           actions={
             <ActionPanel>
+              {refreshAction}
               <Action.CopyToClipboard title="Copy Brew Install Command" content="brew install joshmedeski/sesh/sesh" />
               <Action.OpenInBrowser title="Open Sesh on GitHub" url="https://github.com/joshmedeski/sesh" />
-              {refreshAction}
             </ActionPanel>
           }
         />
@@ -143,9 +143,9 @@ export default function ConnectCommand() {
           description="Couldn't read sessions from sesh. Upgrade sesh, then press ⌘R to retry."
           actions={
             <ActionPanel>
+              {refreshAction}
               <Action.CopyToClipboard title="Copy Brew Upgrade Command" content="brew upgrade joshmedeski/sesh/sesh" />
               <Action.OpenInBrowser title="Open Sesh on GitHub" url="https://github.com/joshmedeski/sesh" />
-              {refreshAction}
             </ActionPanel>
           }
         />
