@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Faster Paste] - {PR_MERGE_DATE}
+## [Faster Paste] - 2026-09-22
 
 - Paste sooner: the result HUD and command metadata update now run after the paste instead of before it, and the "Pasting..." toast no longer delays the paste.
 - Drop `axios`, `cheerio` and `fs-extra`. Title fetching uses the built-in `fetch`. Bundle shrinks from 1.9 MB to under 100 KB, which cuts command start-up time.
