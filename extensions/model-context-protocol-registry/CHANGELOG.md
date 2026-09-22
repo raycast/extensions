@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add BlindPay MCP Server] - {PR_MERGE_DATE}
+## [Add BlindPay MCP Server] - 2026-09-22
 
 - Add BlindPay to the official registry: stablecoin global payments (receivers, virtual accounts, FX quotes, payouts, payins, balances, history). Remote Streamable HTTP server at https://mcp.blindpay.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
 
