@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jev",
+  "title": "Jev",
+  "description": "Run saved checks, file documents into configured folders, and search browser bookmarks with TypeSafe Jev.",
+  "icon": "icon.png",
+  "author": "Olli0103",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-preset",
+      "title": "Run Preset",
+      "description": "Check or categorize selected text with a saved preset.",
+      "mode": "view"
+    },
+    {
+      "name": "file-documents",
+      "title": "File Documents",
+      "description": "Review and move selected documents into configured folders, with undo.",
+      "mode": "view"
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Search selected browser bookmarks by words or meaning.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-presets",
+      "title": "Manage Presets",
+      "description": "Create, edit, duplicate, and export your text checks and categories.",
+      "mode": "view"
+    },
+    {
+      "name": "filing-history",
+      "title": "Filing History",
+      "description": "Inspect document moves and safely undo them.",
+      "mode": "view"
+    },
+    {
+      "name": "backup-restore",
+      "title": "Backup and Restore",
+      "description": "Export Jev settings and links, or recover a previous version.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "TypeSafe API Key",
+      "description": "Get a key at console.typesafe.ai. Used only for explicit Jev requests. Manual filing and keyword bookmark search work without it.",
+      "required": false
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "title": "Model",
+      "description": "TypeSafe model identifier.",
+      "default": "jev-latest",
+      "required": false,
+      "placeholder": "jev-latest"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "linkedom": "^0.18.13",
+    "proper-lockfile": "^4.1.2",
+    "react": "19.3.0",
+    "unpdf": "^1.8.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.20.2",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "19.3.0",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
+    "format": "prettier --write src tests package.json README.md",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "typesafe",
+    "jev",
+    "classify",
+    "documents",
+    "bookmarks"
+  ]
+}
