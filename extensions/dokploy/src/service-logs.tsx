@@ -115,12 +115,12 @@ function ServiceLogsDetail({
       markdown={markdown}
       actions={
         <ActionPanel>
+          <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
           <Action
             icon={following ? Icon.Pause : Icon.Play}
             title={following ? "Stop Following" : "Start Following"}
             onAction={() => setFollowing((current) => !current)}
           />
-          <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
           {onChangeContainer && <Action icon={Icon.Box} title="Change Container" onAction={onChangeContainer} />}
           <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Logs" content={logs} />
         </ActionPanel>
@@ -129,8 +129,9 @@ function ServiceLogsDetail({
   );
 }
 
-interface ComposeAppName {
+interface ComposeDetail {
   appName?: string | null;
+  serverId?: string | null;
 }
 
 /**
@@ -176,34 +177,43 @@ function ContainerPicker({
     isLoading: composeLoading,
     error: composeError,
     revalidate: retryCompose,
-  } = useFetch<ComposeAppName, ComposeAppName | undefined>(`${url}compose.one?composeId=${composeId}`, {
+  } = useFetch<ComposeDetail, ComposeDetail | undefined>(`${url}compose.one?composeId=${composeId}`, {
     headers,
     async parseResponse(response) {
       if (!response.ok) {
         const err = (await response.json()) as ErrorResult;
         throw new Error(err.message);
       }
-      return (await response.json()) as ComposeAppName;
+      return (await response.json()) as ComposeDetail;
     },
   });
   const appName = composeDetail?.appName;
+  const serverId = composeDetail?.serverId;
 
+  // `docker.getContainers` runs `docker ps` on the Dokploy host itself when `serverId` is omitted -
+  // a stack deployed to a remote server would otherwise always come back empty here even though
+  // `compose.readLogs` (which takes its `serverId` from the compose record server-side) works fine.
+  // Held off with `execute` until `compose.one` settles so this never fires with the wrong scope.
   const {
     data: allContainers,
     isLoading: containersLoading,
     error: containersError,
     revalidate: retryContainers,
-  } = useFetch<DockerContainer[], DockerContainer[]>(url + "docker.getContainers", {
-    headers,
-    initialData: [],
-    async parseResponse(response) {
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
-      return (await response.json()) as DockerContainer[];
+  } = useFetch<DockerContainer[], DockerContainer[]>(
+    `${url}docker.getContainers${serverId ? `?serverId=${serverId}` : ""}`,
+    {
+      headers,
+      initialData: [],
+      execute: !composeLoading,
+      async parseResponse(response) {
+        if (!response.ok) {
+          const err = (await response.json()) as ErrorResult;
+          throw new Error(err.message);
+        }
+        return (await response.json()) as DockerContainer[];
+      },
     },
-  });
+  );
 
   // This stack's own logical service names (from its compose file) - needed because an `appName`
   // alone isn't a safe prefix: a stack called "blog" would also match another stack/application's
