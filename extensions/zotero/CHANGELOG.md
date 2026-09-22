@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Open Secondary PDF] - {PR_MERGE_DATE}
+## [Open Secondary PDF] - 2026-09-22
 
 - Added an "Open Secondary PDF" action (`⌘⇧↵`) for references with more than one pdf, e.g. supplementary material saved under the same entry. With exactly two pdfs it opens the secondary one directly (with Open in System Viewer and Show in Finder below it); with more it shows a list of the remaining pdfs, each with Open PDF, Open in System Viewer, and Show in Finder
 
