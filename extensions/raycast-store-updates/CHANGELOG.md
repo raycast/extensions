@@ -1,5 +1,10 @@
 # Raycast Store Updates Changelog
 
+## [Ask AI for store updates] - {PR_MERGE_DATE}
+
+- Add a Raycast AI tool for finding recent new and updated Store extensions by keyword, update type, number of days, or start date, with descriptions, dates, and links
+- Allow AI queries to show updates for extensions installed locally
+
 ## [Raycast 2 Compatibility] - 2026-08-27
 
 - Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x

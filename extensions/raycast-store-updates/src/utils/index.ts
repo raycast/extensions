@@ -800,35 +800,37 @@ export async function convertPRsToStoreItems(
   return { updated: updatedItems, removed: removedItems };
 }
 
+async function fetchStoreFeed(): Promise<Feed> {
+  const response = await fetch(FEED_URL);
+  if (!response.ok) {
+    throw new Error(`Raycast Store feed responded ${response.status} ${response.statusText}`);
+  }
+
+  const payload: unknown = await response.json();
+  if (typeof payload !== "object" || payload === null || !Array.isArray((payload as Feed).items)) {
+    throw new Error("Raycast Store feed returned an invalid response.");
+  }
+  return payload as Feed;
+}
+
+/** Fetches updates for AI queries, surfacing source failures to the caller. */
+export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<StoreItem[]> {
+  if (type === "new") return buildStoreUpdateItems(await fetchStoreFeed(), null);
+  const [feed, prs] = await Promise.all([fetchStoreFeed(), fetchMergedPRs()]);
+  return buildStoreUpdateItems(feed, prs);
+}
+
 /**
  * Self-contained scan used by the menu-bar command (and background refreshes).
- * Fetches the feed + merged PRs and returns the combined new + updated items,
- * sorted newest-first. New items use feed fields directly (no extra network);
- * updated items reuse convertPRsToStoreItems. Removed items are intentionally
- * omitted — the menu bar surfaces things to discover, not removals.
+ * Source failures are ignored for menu-bar refreshes.
  */
 export async function scanStoreUpdates(): Promise<StoreItem[]> {
-  const [feed, prs] = await Promise.all([
-    (async (): Promise<Feed | null> => {
-      try {
-        const response = await fetch(FEED_URL);
-        if (!response.ok) return null;
-        return (await response.json()) as Feed;
-      } catch {
-        return null;
-      }
-    })(),
-    (async (): Promise<GitHubPR[] | null> => {
-      // One transport, chosen by fetchMergedPRs. The background scan has no UI to show an
-      // error in, so any failure degrades to null and the cached items stay.
-      try {
-        return await fetchMergedPRs();
-      } catch {
-        return null;
-      }
-    })(),
-  ]);
+  const [feed, prs] = await Promise.all([fetchStoreFeed().catch(() => null), fetchMergedPRs().catch(() => null)]);
 
+  return buildStoreUpdateItems(feed, prs);
+}
+
+async function buildStoreUpdateItems(feed: Feed | null, prs: GitHubPR[] | null): Promise<StoreItem[]> {
   const newItems: StoreItem[] = asArray<FeedItem>(feed?.items)
     .map((item): StoreItem | null => {
       const parsed = parseExtensionUrl(item.url);

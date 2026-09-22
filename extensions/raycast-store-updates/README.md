@@ -28,6 +28,7 @@
 - **Read/Unread Tracking** — Optionally mark items as read to keep your list tidy, with "Mark All as Read" and undo (⌘Z) support
 - **Filter Dropdown** — Quickly switch between Show All, New, Updates, and My Updates views
 - **Time Grouping** — Items are grouped into Today / Yesterday / Previous 7 Days / Previous 30 Days / Earlier for easier scanning
+- **Ask AI** — Ask Raycast about recent Store releases and updates, with optional keyword, date range, and installed-extension filters
 
 ## Store Updates Menu Bar
 

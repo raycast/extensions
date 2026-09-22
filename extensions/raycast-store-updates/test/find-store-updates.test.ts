@@ -1,0 +1,47 @@
+import { beforeEach, expect, test, vi } from "vitest";
+import findStoreUpdates from "../src/tools/find-store-updates";
+import { fetchStoreUpdates, getInstalledExtensionSlugs } from "../src/utils";
+
+vi.mock("../src/utils", () => ({
+  fetchStoreUpdates: vi.fn(),
+  getInstalledExtensionSlugs: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(fetchStoreUpdates).mockReset();
+  vi.mocked(getInstalledExtensionSlugs).mockReset();
+  vi.mocked(getInstalledExtensionSlugs).mockReturnValue(new Set());
+});
+
+function item(title: string, date: string) {
+  return {
+    id: title,
+    title,
+    summary: "",
+    image: "",
+    date,
+    authorName: "",
+    authorUrl: "",
+    url: "",
+    type: "new" as const,
+  };
+}
+
+test("since includes midnight UTC and excludes earlier updates", async () => {
+  vi.mocked(fetchStoreUpdates).mockResolvedValue([
+    item("Earlier", "2026-08-31T23:59:59Z"),
+    item("At cutoff", "2026-09-01T00:00:00Z"),
+    item("Later", "2026-09-02T12:00:00Z"),
+  ]);
+
+  const result = await findStoreUpdates({ type: "new", since: "2026-09-01" });
+
+  expect(result.totalMatches).toBe(2);
+  expect(result.items.map((item) => item.title)).toEqual(["At cutoff", "Later"]);
+});
+
+test("invalid since dates fail before fetching", async () => {
+  await expect(findStoreUpdates({ since: "2026-02-30" })).rejects.toThrow(/since must be a valid date/);
+  await expect(findStoreUpdates({ since: "09/01/2026" })).rejects.toThrow(/since must be a valid date/);
+  expect(fetchStoreUpdates).not.toHaveBeenCalled();
+});

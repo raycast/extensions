@@ -1,0 +1,105 @@
+evals:
+  - input: "@raycast-store-updates What new extensions were published recently?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        items:
+          - title: Focus Timer
+            description: Start a focus session
+            type: new
+            date: "2026-09-20T12:00:00Z"
+            author: example
+            url: https://www.raycast.com/example/focus-timer
+    expected:
+      - callsTool: find-store-updates
+      - includes: Focus Timer
+
+  - input: "@raycast-store-updates What updates are available for my installed extensions?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        items:
+          - title: Calendar
+            description: Improved event search
+            type: updated
+            date: "2026-09-21T12:00:00Z"
+            author: example
+            url: https://www.raycast.com/example/calendar
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            installedOnly: true
+      - includes: Calendar
+
+  - input: "@raycast-store-updates Find recent timer extensions."
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        items:
+          - title: Focus Timer
+            description: Start a focus session
+            type: new
+            date: "2026-09-20T12:00:00Z"
+            author: example
+            url: https://www.raycast.com/example/focus-timer
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            query:
+              includes: timer
+      - includes: Focus Timer
+
+  - input: "@raycast-store-updates What new extensions were published in the last 3 days?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        items:
+          - title: Focus Timer
+            description: Start a focus session
+            type: new
+            date: "2026-09-20T12:00:00Z"
+            author: example
+            url: https://www.raycast.com/example/focus-timer
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: new
+            days: 3
+      - includes: Focus Timer
+
+  - input: "@raycast-store-updates What new extensions were published since September 1, 2026?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        items:
+          - title: Focus Timer
+            description: Start a focus session
+            type: new
+            date: "2026-09-20T12:00:00Z"
+            author: example
+            url: https://www.raycast.com/example/focus-timer
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: new
+            since: "2026-09-01"
+      - includes: Focus Timer
+
+  - input: "@raycast-store-updates What new extensions were published since September 21, 2026?"
+    mocks:
+      find-store-updates:
+        totalMatches: 0
+        items: []
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: new
+            since: "2026-09-21"
+      - includes: "no new"
+      - not:
+          matches: "https?://"
