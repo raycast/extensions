@@ -11,10 +11,9 @@ import {
   ReplyTweetAction,
   QuoteTweetAction,
   RetweetAction,
-  SetReplyHiddenAction,
-  ShowPostEngagementAction,
   ShowAuthorTweetsAction,
   UnlikeTweetAction,
+  engagementAndModerationSections,
 } from "./actions";
 
 function isRetweet(tweet: Tweet): boolean {
@@ -90,17 +89,7 @@ export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher; canModerat
             <BookmarkTweetAction tweet={t} fetcher={props.fetcher} />
             <BookmarkTweetAction tweet={t} remove fetcher={props.fetcher} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Engagement">
-            <ShowPostEngagementAction tweet={t} kind="likes" />
-            <ShowPostEngagementAction tweet={t} kind="reposts" />
-            <ShowPostEngagementAction tweet={t} kind="quotes" />
-          </ActionPanel.Section>
-          {props.canModerateReply && (
-            <ActionPanel.Section title="Moderation">
-              <SetReplyHiddenAction tweet={t} hidden />
-              <SetReplyHiddenAction tweet={t} hidden={false} />
-            </ActionPanel.Section>
-          )}
+          {engagementAndModerationSections(t, props.canModerateReply)}
           <ActionPanel.Section title="Author">
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />

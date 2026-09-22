@@ -17,11 +17,10 @@ import {
   ReplyTweetAction,
   RetweetAction,
   QuoteTweetAction,
-  SetReplyHiddenAction,
-  ShowPostEngagementAction,
   ShowAuthorTweetsAction,
   ShowDetailV2Action,
   UnlikeTweetAction,
+  engagementAndModerationSections,
 } from "./actions";
 import { getMarkdownFromTweet } from "./detail";
 
@@ -253,17 +252,7 @@ export function TweetListItem(props: {
             <BookmarkTweetAction tweet={t} fetcher={fetcher} />
             <BookmarkTweetAction tweet={t} remove fetcher={fetcher} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Engagement">
-            <ShowPostEngagementAction tweet={t} kind="likes" />
-            <ShowPostEngagementAction tweet={t} kind="reposts" />
-            <ShowPostEngagementAction tweet={t} kind="quotes" />
-          </ActionPanel.Section>
-          {props.canModerateReply && (
-            <ActionPanel.Section title="Moderation">
-              <SetReplyHiddenAction tweet={t} hidden />
-              <SetReplyHiddenAction tweet={t} hidden={false} />
-            </ActionPanel.Section>
-          )}
+          {engagementAndModerationSections(t, props.canModerateReply)}
           <ActionPanel.Section>
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />

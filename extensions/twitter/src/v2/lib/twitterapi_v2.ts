@@ -198,21 +198,21 @@ export class TwitterAPIError extends Error {
   }
 }
 
-export class TwitterAuthenticationError extends TwitterAPIError {
+class TwitterAuthenticationError extends TwitterAPIError {
   constructor(message: string, payload: XErrorPayload, options?: ErrorOptions) {
     super(message, 401, payload, options);
     this.name = "TwitterAuthenticationError";
   }
 }
 
-export class TwitterForbiddenError extends TwitterAPIError {
+class TwitterForbiddenError extends TwitterAPIError {
   constructor(message: string, payload: XErrorPayload, options?: ErrorOptions) {
     super(message, 403, payload, options);
     this.name = "TwitterForbiddenError";
   }
 }
 
-export class TwitterRateLimitError extends TwitterAPIError {
+class TwitterRateLimitError extends TwitterAPIError {
   constructor(
     message: string,
     payload: XErrorPayload,
@@ -342,6 +342,7 @@ function requireUsername(value: string): string {
   return username;
 }
 
+// fallow-ignore-next-line unused-export -- tests/load.cjs compiles this module and calls the export directly
 export function normalizePostInput(input: CreatePostInput): CreatePostInput {
   const text = input.text?.trim() ?? "";
   const mediaPaths = [...new Set((input.mediaPaths ?? []).map((path) => path.trim()).filter(Boolean))];
@@ -439,6 +440,7 @@ export function postInputError(input: CreatePostInput): string | undefined {
   }
 }
 
+// fallow-ignore-next-line unused-export -- tests/load.cjs compiles this module and constructs the export directly
 export class ClientV2 {
   private async getAPI(): Promise<TwitterApi> {
     await authorize();
@@ -1331,7 +1333,7 @@ export class ClientV2 {
   }
 }
 
-export function createClientV2(): ClientV2 {
+function createClientV2(): ClientV2 {
   return new ClientV2();
 }
 

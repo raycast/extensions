@@ -42,7 +42,7 @@ class OAuthRequestError extends Error {
   }
 }
 
-export function getClientId(): string {
+function getClientId(): string {
   return CLIENT_ID;
 }
 
@@ -129,10 +129,7 @@ async function authorizeWithOAuthClient(): Promise<void> {
   await oauthClient.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
 
-export async function fetchTokens(
-  authRequest: OAuth.AuthorizationRequest,
-  authCode: string,
-): Promise<OAuth.TokenResponse> {
+async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", getClientId());
   params.append("code", authCode);

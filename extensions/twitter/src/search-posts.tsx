@@ -3,7 +3,9 @@ import { LaunchProps } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { TweetList } from "./v2/components/tweet";
-import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
+import "./v2/components/register-post-views";
+import { refreshingFetcher } from "./v2/lib/tweet-page";
+import { clientV2 } from "./v2/lib/twitterapi_v2";
 
 function SearchPostsCommand(props: LaunchProps<{ arguments: Arguments.SearchPosts }>) {
   const [query, setQuery] = useState(props.arguments.query?.trim() ?? props.fallbackText?.trim() ?? "");
@@ -16,11 +18,7 @@ function SearchPostsCommand(props: LaunchProps<{ arguments: Arguments.SearchPost
     [normalizedQuery],
     { execute: normalizedQuery.length > 0 },
   );
-  const refresh = async () => {
-    clientV2.clearCache();
-    await revalidate();
-  };
-  const fetcher: Fetcher = { updateInline: refresh, refresh };
+  const fetcher = refreshingFetcher(revalidate);
 
   return (
     <TweetList
