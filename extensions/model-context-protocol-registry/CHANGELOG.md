@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Clera MCP Server] - 2026-09-21
+## [Add Clera MCP Server] - {PR_MERGE_DATE}
 
 - Add Clera to the official registry: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles and request intros; candidates search open startup jobs, read full listings and save the good ones. Hosted remote Streamable HTTP server at https://mcp.getclera.com through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key; free during the beta.
 
