@@ -1,60 +1,52 @@
 import { environment } from "@raycast/api";
-import { mkdir } from "node:fs/promises";
+import { constants } from "node:fs";
+import { mkdir, open } from "node:fs/promises";
 import { join } from "node:path";
-import { lock } from "proper-lockfile";
+import { setTimeout as delay } from "node:timers/promises";
 
-/**
- * Thrown when a concurrent process stole the session lock after the holding
- * process's heartbeat stalled past `proper-lockfile`'s stale threshold.
- *
- * The default `onCompromised` throws from a heartbeat `setTimeout`, which is an
- * uncatchable uncaught exception. As a typed error it lets `oauth.ts` surface a
- * clean command failure (and a clean retry on the next invocation) instead.
- */
-export class SessionLockCompromisedError extends Error {
-  constructor(message = "Session lock was compromised by a concurrent process", options?: ErrorOptions) {
-    super(message, options);
-    this.name = "SessionLockCompromisedError";
+// Darwin's stable open(2) flag is not exposed by Node's fs.constants.
+// https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/fcntl.h
+const O_EXLOCK = 0x00000020;
+const WAIT_MS = 30_000;
+
+export class SessionLockTimeoutError extends Error {
+  constructor() {
+    super("Another Reassign command is still updating the session. Try again.");
+    this.name = "SessionLockTimeoutError";
   }
 }
 
-// Raycast commands run in separate processes but share supportPath and tokens.
-// A filesystem lock orders refresh, login commits and logout across commands.
-export async function withSessionLock<T>(action: (signal: AbortSignal) => Promise<T>): Promise<T> {
+/** Hold the kernel lock until every awaited credential operation has settled. */
+export async function withSessionLock<T>(action: () => Promise<T>): Promise<T> {
+  // O_EXLOCK is platform-specific. Never silently run the action unlocked.
+  if (process.platform !== "darwin") throw new Error("Reassign session locking requires macOS");
   await mkdir(environment.supportPath, { recursive: true });
+  const path = join(environment.supportPath, "oauth-session");
+  const flags = constants.O_CREAT | constants.O_RDWR | constants.O_NONBLOCK | constants.O_NOFOLLOW | O_EXLOCK;
+  const deadline = performance.now() + WAIT_MS;
 
-  // `proper-lockfile` invokes `onCompromised` from the heartbeat `setTimeout` in
-  // `updateLock`, i.e. outside any awaited promise chain. Its default is
-  // `(err) => { throw err; }`, which escapes this wrapper's `try/finally` as an
-  // uncaught exception and kills the command process. Route the compromise into
-  // an AbortController + a deferred so a stolen lock rejects the in-flight
-  // action with a typed error and aborts its abortable work (the refresh fetch)
-  // rather than throwing synchronously from a timer.
-  const controller = new AbortController();
-  let rejectCompromised!: (err: Error) => void;
-  const compromised = new Promise<never>((_, reject) => {
-    rejectCompromised = reject;
-  });
-
-  const release = await lock(join(environment.supportPath, "oauth-session"), {
-    realpath: false,
-    retries: { retries: 100, minTimeout: 100, maxTimeout: 300 },
-    onCompromised: (err) => {
-      const error = new SessionLockCompromisedError(err.message, { cause: err });
-      controller.abort(error);
-      rejectCompromised(error);
-    },
-  });
+  // Nonblocking acquisition keeps Node's filesystem workers free for the owner.
+  // Only waiters time out: a live owner's lock never expires on sleep or a slow
+  // Raycast setTokens/removeTokens/LocalStorage write, none of which is abortable.
+  let handle;
+  for (;;) {
+    try {
+      handle = await open(path, flags, 0o600);
+      break;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "EAGAIN" && code !== "EWOULDBLOCK") throw error;
+      const remaining = deadline - performance.now();
+      if (remaining <= 0) throw new SessionLockTimeoutError();
+      await delay(Math.min(100, remaining));
+    }
+  }
 
   try {
-    return await Promise.race([action(controller.signal), compromised]);
+    return await action();
   } finally {
-    // After a compromise `setLockAsCompromised` deletes the lock and marks it
-    // released, so `release()` rejects with ERELEASED. Only suppress that
-    // expected cleanup failure; other filesystem failures must remain visible.
-    await release().catch((error: unknown) => {
-      if (controller.signal.aborted && (error as NodeJS.ErrnoException)?.code === "ERELEASED") return;
-      throw error;
-    });
+    // Keep the file: unlinking would let another process lock a different inode.
+    // Closing (or process exit) releases ownership; timestamps never do.
+    await handle.close();
   }
 }

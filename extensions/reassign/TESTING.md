@@ -11,6 +11,19 @@ form submissions, Now's sign-in action, Inbox pagination, feedback requests, and
 nested scheduling receipts. OAuth and UI tests use mocked Raycast APIs; they do
 not replace a live OAuth callback or UI test.
 
+Session-lock integration tests run on macOS, the extension's supported platform.
+They use the real kernel lock, including separate command processes, a suspended
+owner, and recovery after process termination. The credential-write suite delays
+each login, logout, refresh, and invalid-grant write before it commits, and checks
+both fulfillment and rejection while another command waits. Portable unit tests
+cover acquisition timeout, filesystem errors, cleanup errors, and refusing to run
+unlocked on an unsupported platform. Native lock/OAuth suites are skipped elsewhere.
+
+The empty `oauth-session` file in supportPath is persistent: do not remove it while
+commands run. Ownership belongs to an open file descriptor, not the file's age.
+Only waiting commands time out; a pending credential write retains the lock until
+its action settles. Restart development commands when changing lock implementations.
+
 `npm run dev` registers the development extension in Raycast and watches local
 changes. Before final review, stop development mode, run `npm run build`, and
 repeat the live checks with that distribution build.

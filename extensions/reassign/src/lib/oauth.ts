@@ -73,15 +73,22 @@ class TokenEndpointError extends Error {
 
 /** Run the full sign-in: authorize in the browser, then exchange the code. */
 export async function signIn(options?: { automatic?: boolean }): Promise<void> {
+  return signInForSession(options);
+}
+
+async function signInForSession(options?: { automatic?: boolean }, expectedGeneration?: string): Promise<void> {
   // Snapshot the session before opening the browser. A signOut that completes
   // while the browser is open is detected at commit time against this snapshot.
   // `generation` is rotated only by signOut, so it stays stable across logins
   // and concurrent sign-ins cannot cancel each other.
-  const generation = await withSessionLock(async (signal) => {
+  const generation = await withSessionLock(async () => {
     const state = await sessionState();
-    signal.throwIfAborted();
+    const currentGeneration = sessionGeneration(state);
+    // authorize() must keep its original epoch across the recovery handoff.
+    // A fresh snapshot here would otherwise accept an intervening logout.
+    if (expectedGeneration !== undefined && currentGeneration !== expectedGeneration) throw new SignedOutError();
     if (options?.automatic && state?.signedOut) throw new SignedOutError();
-    return sessionGeneration(state);
+    return currentGeneration;
   });
   const authRequest = await client.authorizationRequest({
     endpoint: AUTHORIZE_URL,
@@ -91,34 +98,30 @@ export async function signIn(options?: { automatic?: boolean }): Promise<void> {
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await exchangeCode(authorizationCode, authRequest.redirectURI, authRequest.codeVerifier);
-  await withSessionLock(async (signal) => {
+  await withSessionLock(async () => {
     const state = await sessionState();
-    signal.throwIfAborted();
     // A changed logout epoch cancels this flow even if another login has
     // already cleared signedOut, or this explicit flow began while signed out.
     if (sessionGeneration(state) !== generation) throw new SignedOutError();
     await client.setTokens(tokens);
-    signal.throwIfAborted();
     await LocalStorage.setItem(SESSION_KEY, JSON.stringify({ generation, signedOut: false }));
   });
 }
 
 /** Return a valid token for `withAccessToken`, and start the native OAuth flow when no session lives. */
 export async function authorize(): Promise<string> {
-  const generation = await withSessionLock(async (signal) => {
+  const generation = await withSessionLock(async () => {
     const state = await sessionState();
-    signal.throwIfAborted();
     return sessionGeneration(state);
   });
   try {
     return await getAccessToken();
   } catch (error) {
     if (!(error instanceof NotAuthorizedError)) throw error;
-    if (sessionGeneration(await sessionState()) !== generation) throw new SignedOutError();
   }
   // A foreground command launch is an explicit request to connect. Background
   // reads and in-command recovery never call this provider automatically.
-  await signIn();
+  await signInForSession(undefined, generation);
   return getAccessToken();
 }
 
@@ -127,37 +130,27 @@ export const reassignProvider = { client, authorize };
 
 /** Remove credentials under the same cross-command lock as refresh commits. */
 export async function signOut(): Promise<void> {
-  await withSessionLock(async (signal) => {
-    signal.throwIfAborted();
+  await withSessionLock(async () => {
     await LocalStorage.setItem(SESSION_KEY, JSON.stringify({ generation: randomUUID(), signedOut: true }));
-    signal.throwIfAborted();
     await client.removeTokens();
   });
 }
 
 /** Background-safe: never opens the OAuth flow. */
 export async function getAccessToken(options?: { force?: boolean }): Promise<string> {
-  return withSessionLock(async (signal) => {
+  return withSessionLock(async () => {
     const state = await sessionState();
-    signal.throwIfAborted();
     if (state?.signedOut) throw new SignedOutError("Signed out of Reassign");
     const tokens = await client.getTokens();
-    signal.throwIfAborted();
     if (!tokens?.accessToken) throw new NotAuthorizedError();
     if (!options?.force && !tokens.isExpired()) return tokens.accessToken;
     if (!tokens.refreshToken) throw new NotAuthorizedError("Session expired");
     try {
-      const fresh = await exchangeRefresh(tokens.refreshToken, signal);
-      // If the lock was compromised while the fetch was in flight, the signal
-      // aborted it; but if it resolved an instant before the compromise, bail
-      // out before writing tokens into a lock we no longer own.
-      signal.throwIfAborted();
+      const fresh = await exchangeRefresh(tokens.refreshToken);
       if (!fresh.refresh_token) fresh.refresh_token = tokens.refreshToken;
       await client.setTokens(fresh);
-      signal.throwIfAborted();
       return fresh.access_token;
     } catch (error) {
-      signal.throwIfAborted();
       // Only the OAuth invalid_grant response confirms a revoked/expired grant.
       if (error instanceof TokenEndpointError && error.status === 400 && error.code === "invalid_grant") {
         await client.removeTokens();
@@ -182,24 +175,21 @@ async function exchangeCode(code: string, redirectURI: string, codeVerifier: str
 }
 
 /** Refresh the token. Never sends `resource` (the audience rides the token). */
-async function exchangeRefresh(refreshToken: string, signal?: AbortSignal): Promise<TokenResponse> {
+async function exchangeRefresh(refreshToken: string): Promise<TokenResponse> {
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     refresh_token: refreshToken,
     client_id: CLIENT_ID,
   });
-  return postToken(body, signal);
+  return postToken(body);
 }
 
-async function postToken(body: URLSearchParams, signal?: AbortSignal): Promise<TokenResponse> {
-  // Combine the session-lock signal (compromised lock) with the 15s timeout so a
-  // stolen lock aborts the refresh immediately, before any token writeback.
-  const timeout = AbortSignal.timeout(15000);
+async function postToken(body: URLSearchParams): Promise<TokenResponse> {
   const response = await fetch(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
-    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    signal: AbortSignal.timeout(15000),
   });
   const raw: unknown = await response.json().catch(() => undefined);
   const payload = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : undefined;

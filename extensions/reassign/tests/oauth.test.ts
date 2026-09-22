@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { mkdtemp, rm, utimes } from "node:fs/promises";
+import { afterEach, beforeEach, expect, it as test, vi } from "vitest";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -41,6 +41,8 @@ vi.mock("@raycast/api", () => ({
     },
   },
 }));
+
+const it = test.skipIf(process.platform !== "darwin");
 
 beforeEach(async () => {
   vi.resetModules();
@@ -232,125 +234,30 @@ it("explicit foreground launch can sign in after logout", async () => {
   expect(shared.authorize).toHaveBeenCalledTimes(1);
 });
 
-it("a compromised refresh aborts the fetch and never commits tokens", async () => {
-  const { SessionLockCompromisedError } = await import("../src/lib/session-lock");
-  const lockfile = join(shared.path, "oauth-session.lock");
-
-  // A fetch that stays pending until the lock's AbortSignal fires, mirroring an
-  // in-flight refresh. It must reject with the signal's reason (the typed
-  // SessionLockCompromisedError) rather than resolve.
-  const fetchFn = vi.fn(
-    (_url: string, init?: RequestInit) =>
-      new Promise<Response>((_, reject) => {
-        const signal = init?.signal as AbortSignal | undefined;
-        if (!signal) return reject(new Error("no abort signal wired to fetch"));
-        if (signal.aborted) return reject(signal.reason);
-        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
-      }),
-  );
-  vi.stubGlobal("fetch", fetchFn);
-
-  const auth = await import("../src/lib/oauth");
-  // shared.tokens is expired by beforeEach, so getAccessToken calls exchangeRefresh.
-  const refresh = auth.getAccessToken();
-  await vi.waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1), { interval: 10, timeout: 1000 });
-
-  // Steal the lock: the holder's first heartbeat (update = stale/2 = 5 s) finds
-  // a foreign mtime and invokes onCompromised, which aborts the refresh fetch.
-  await utimes(lockfile, new Date(Date.now() - 5000), new Date(Date.now() - 5000));
-
-  await expect(refresh).rejects.toBeInstanceOf(SessionLockCompromisedError);
-  // The fetch was aborted before setTokens could run: no token writeback, so the
-  // stealing process can complete its own refresh without a double-write.
-  expect(shared.writes).toBe(0);
-}, 15000);
-
-it("a compromised login does not write tokens after its pending session read finishes", async () => {
+it("does not restart sign-in if logout happens between authorization recovery and its login snapshot", async () => {
   const { LocalStorage } = await import("@raycast/api");
-  const { SessionLockCompromisedError } = await import("../src/lib/session-lock");
   const auth = await import("../src/lib/oauth");
+  shared.tokens = undefined;
   shared.authorize.mockResolvedValue({ authorizationCode: "code" });
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => Response.json({ access_token: "obsolete-login" })),
+    vi.fn(async () => Response.json({ access_token: "obsolete" })),
   );
-  let finishRead!: (v: undefined) => void;
-  let started!: () => void;
-  const entered = new Promise<void>((r) => {
-    started = r;
+  let reads = 0;
+  const getItem = LocalStorage.getItem.bind(LocalStorage);
+  vi.spyOn(LocalStorage, "getItem").mockImplementation(async (key: string) => {
+    const value = await getItem(key);
+    // Old authorize() read session state here without retaining ownership;
+    // its subsequent signIn() snapshot then accepted the new logout epoch.
+    if (++reads === 3) {
+      shared.storage.set("reassign-session", JSON.stringify({ generation: "new-logout", signedOut: true }));
+    }
+    return value;
   });
-  vi.spyOn(LocalStorage, "getItem")
-    .mockResolvedValueOnce(undefined)
-    .mockImplementationOnce(() => {
-      started();
-      return new Promise((r) => {
-        finishRead = r;
-      });
-    });
-  const login = auth.signIn();
-  await entered;
-  await utimes(join(shared.path, "oauth-session.lock"), new Date(Date.now() - 5000), new Date(Date.now() - 5000));
-  await expect(login).rejects.toBeInstanceOf(SessionLockCompromisedError);
-  finishRead(undefined);
-  await new Promise((r) => setTimeout(r, 20));
+  await expect(auth.authorize()).rejects.toThrow("Signed out");
+  expect(shared.tokens).toBeUndefined();
   expect(shared.writes).toBe(0);
-}, 15000);
-
-it("a compromised logout does not remove tokens after its pending session write finishes", async () => {
-  const { LocalStorage } = await import("@raycast/api");
-  const { SessionLockCompromisedError } = await import("../src/lib/session-lock");
-  const auth = await import("../src/lib/oauth");
-  let finishWrite!: () => void;
-  let started!: () => void;
-  const entered = new Promise<void>((r) => {
-    started = r;
-  });
-  vi.spyOn(LocalStorage, "setItem").mockImplementationOnce(() => {
-    started();
-    return new Promise<void>((r) => {
-      finishWrite = r;
-    });
-  });
-  const logout = auth.signOut();
-  await entered;
-  await utimes(join(shared.path, "oauth-session.lock"), new Date(Date.now() - 5000), new Date(Date.now() - 5000));
-  await expect(logout).rejects.toBeInstanceOf(SessionLockCompromisedError);
-  shared.tokens = { accessToken: "new-session", refreshToken: "new-refresh", isExpired: () => false };
-  finishWrite();
-  await new Promise((r) => setTimeout(r, 20));
-  expect(shared.tokens?.accessToken).toBe("new-session");
-}, 15000);
-
-it("a compromised refresh cannot clear a newer session after a late invalid grant", async () => {
-  const { SessionLockCompromisedError } = await import("../src/lib/session-lock");
-  const auth = await import("../src/lib/oauth");
-  let finishBody!: (value: { error: string }) => void;
-  let started!: () => void;
-  const entered = new Promise<void>((r) => {
-    started = r;
-  });
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () => ({
-      ok: false,
-      status: 400,
-      json: () => {
-        started();
-        return new Promise((r) => {
-          finishBody = r;
-        });
-      },
-    })),
-  );
-  const refresh = auth.getAccessToken();
-  await entered;
-  await utimes(join(shared.path, "oauth-session.lock"), new Date(Date.now() - 5000), new Date(Date.now() - 5000));
-  await expect(refresh).rejects.toBeInstanceOf(SessionLockCompromisedError);
-  shared.tokens = { accessToken: "new-session", refreshToken: "new-refresh", isExpired: () => false };
-  finishBody({ error: "invalid_grant" });
-  await new Promise((r) => setTimeout(r, 20));
-  expect(shared.tokens?.accessToken).toBe("new-session");
-}, 15000);
+});
 
 it.each([
   { initiallySignedOut: true, newerLogin: false },

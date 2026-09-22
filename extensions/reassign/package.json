@@ -84,13 +84,11 @@
   "dependencies": {
     "@raycast/api": "^2.4.1",
     "@raycast/utils": "^2.3.1",
-    "chrono-node": "^2.10.1",
-    "proper-lockfile": "^4.1.2"
+    "chrono-node": "^2.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.19.17",
-    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "^19.0.10",
     "eslint": "^10.8.1",
     "prettier": "^3.9.6",
