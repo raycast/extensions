@@ -1,6 +1,6 @@
 # Fastly Changelog
 
-## [AI Runtime Control, Bot Management + DDoS Protection] - {PR_MERGE_DATE}
+## [AI Runtime Control, Bot Management + DDoS Protection] - 2026-09-22
 
 New operational commands:
 
