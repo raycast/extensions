@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Tabs] - {PR_MERGE_DATE}
+## [Tabs] - 2026-09-22
 
 - Track each open tab's window-local index and whether it is Orion's current tab. Open Tabs (Search Tabs and Command Bar) now shows a "Current Tab" label, keeps duplicate URLs as separate entries instead of silently collapsing them, and switching to a tab addresses it by that stable index rather than a title/URL scan.
 - Add a "Refresh Open Tabs" action (⌘R) to Open Tabs results.
