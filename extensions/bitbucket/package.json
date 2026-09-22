@@ -4,6 +4,7 @@
   "title": "Bitbucket Search",
   "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
   "icon": "bitbucket-logo.png",
+  "categories": ["Developer Tools"],
   "author": "Francois",
   "contributors": [
     "earmstrong42",
