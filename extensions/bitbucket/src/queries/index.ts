@@ -198,6 +198,41 @@ type OpenPullRequest = {
 const REPO_CONCURRENCY = 10;
 const REPO_LIST_TTL_MS = 10 * 60 * 1000;
 
+const MAX_RETRIES = 3;
+const BASE_RETRY_DELAY_MS = 1000;
+
+function isRetryableStatus(status: number | undefined): boolean {
+  return status === 429 || (status !== undefined && status >= 500);
+}
+
+// Bitbucket's own retry-after (in seconds) takes priority over our own backoff guess,
+// since it tells us exactly how long the current rate-limit window has left.
+function retryDelayMs(error: unknown, attempt: number): number {
+  const headers = (error as { headers?: Record<string, string> } | undefined)?.headers;
+  const retryAfterHeader = headers?.["retry-after"] ?? headers?.["Retry-After"];
+  const retryAfterSeconds = retryAfterHeader ? Number(retryAfterHeader) : undefined;
+  if (retryAfterSeconds !== undefined && !Number.isNaN(retryAfterSeconds) && retryAfterSeconds > 0) {
+    return retryAfterSeconds * 1000;
+  }
+  return BASE_RETRY_DELAY_MS * 2 ** attempt;
+}
+
+// Retries a single Bitbucket request on 429/5xx instead of letting one rate-limited
+// call permanently drop a repo's PRs (or the whole repo list) from the results.
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const status = (error as { status?: number } | undefined)?.status;
+      if (attempt >= MAX_RETRIES || !isRetryableStatus(status)) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs(error, attempt)));
+    }
+  }
+}
+
 type RepoWithSlug = Schema.Repository & { slug: string; updated_on?: string };
 
 // maxRepoAgeDays only exists on the two commands that scan repos (not on the shared
@@ -258,13 +293,15 @@ async function* iterateAllRepositories(): AsyncGenerator<RepoWithSlug[]> {
   let page = "1";
 
   for (;;) {
-    const { data } = await bitbucket.repositories.list({
-      ...defaults,
-      pagelen: 100,
-      sort: "-updated_on",
-      page,
-      fields: ["values.slug", "values.name", "values.full_name", "values.updated_on", "next"].join(","),
-    });
+    const { data } = await withRetry(() =>
+      bitbucket.repositories.list({
+        ...defaults,
+        pagelen: 100,
+        sort: "-updated_on",
+        page,
+        fields: ["values.slug", "values.name", "values.full_name", "values.updated_on", "next"].join(","),
+      }),
+    );
 
     const values = ((data.values as RepoWithSlug[]) ?? []).filter(
       (repo): repo is RepoWithSlug => typeof repo.slug === "string",
@@ -310,29 +347,31 @@ async function listOpenPullRequestsForRepo(
   let page = "1";
 
   for (;;) {
-    const { data } = await bitbucket.pullrequests.list({
-      ...defaults,
-      repo_slug: repo.slug,
-      pagelen: 50,
-      page,
-      sort: "-created_on",
-      state: "OPEN",
-      ...(involvedUuid ? { q: `(author.uuid="${involvedUuid}" OR reviewers.uuid="${involvedUuid}")` } : {}),
-      fields: [
-        "values.id",
-        "values.title",
-        "values.comment_count",
-        "values.created_on",
-        "values.author.nickname",
-        "values.author.links.avatar.href",
-        "values.destination.repository.name",
-        "values.destination.repository.full_name",
-        "values.participants.state",
-        "values.participants.user.nickname",
-        "values.participants.user.uuid",
-        "next",
-      ].join(","),
-    });
+    const { data } = await withRetry(() =>
+      bitbucket.pullrequests.list({
+        ...defaults,
+        repo_slug: repo.slug,
+        pagelen: 50,
+        page,
+        sort: "-created_on",
+        state: "OPEN",
+        ...(involvedUuid ? { q: `(author.uuid="${involvedUuid}" OR reviewers.uuid="${involvedUuid}")` } : {}),
+        fields: [
+          "values.id",
+          "values.title",
+          "values.comment_count",
+          "values.created_on",
+          "values.author.nickname",
+          "values.author.links.avatar.href",
+          "values.destination.repository.name",
+          "values.destination.repository.full_name",
+          "values.participants.state",
+          "values.participants.user.nickname",
+          "values.participants.user.uuid",
+          "next",
+        ].join(","),
+      }),
+    );
 
     for (const pr of data.values ?? []) {
       const author = pr.author as { nickname?: string; links?: { avatar?: { href?: string } } } | undefined;
