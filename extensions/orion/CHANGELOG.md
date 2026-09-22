@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-22
 
 - Add a configurable limit for live search suggestions; setting it to zero hides suggestions and prevents suggestion requests.
 - Add fuzzy and pinyin matching as a labeled fallback for open tabs when there is no exact local tab match. Fallback matches are not eligible for Top Hit.
