@@ -7,7 +7,7 @@ Switch macOS **Automatically hide and show the menu bar** between two preferred 
 - **Toggle Menu Bar** switches from option 1 to option 2; any other current mode switches to option 1. Selecting the same option for both preferences applies that mode.
 - **Set Menu Bar Mode** shows all four modes and highlights the current one. The picker stays open until you choose a mode.
 
-The extension preferences retain their existing defaults: **Always** for option 1, **In Full Screen Only** for option 2, and **Close Raycast window** disabled. Existing saved preferences and the toggle command's hotkey or alias continue to work. Both commands close the window only after a successful selection when that preference is enabled; otherwise they show a toast and leave Raycast open.
+The extension preferences retain their existing defaults: **Always** for option 1, **In Full Screen Only** for option 2, and **Close Raycast window** disabled. Existing saved preferences and the toggle command's hotkey or alias continue to work. When **Close Raycast window** is enabled, the toggle closes Raycast on invocation before applying the mode, preserving its existing behavior even if the change fails. The picker closes only after a successful selection. When disabled, both commands use toasts and leave Raycast open.
 
 | Mode                | Desktop   | Full screen |
 | ------------------- | --------- | ----------- |

@@ -21,6 +21,7 @@ export default async function command() {
 
   try {
     const { firstMode, secondMode, closeWindow } = togglePreferences(getPreferenceValues<ExtensionPreferences>());
+    if (closeWindow) await closeMainWindow();
     const status = await toggleMenuBarModes(firstMode, secondMode);
     await updateStatusSubtitle(status.label);
     await showToast({
@@ -28,7 +29,6 @@ export default async function command() {
       title: "Menu bar mode updated",
       message: status.label,
     });
-    if (closeWindow) await closeMainWindow();
   } catch (error) {
     await updateCommandSubtitle("Current: Unknown");
     await showToast({

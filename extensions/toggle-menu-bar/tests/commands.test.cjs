@@ -29,6 +29,9 @@ function fixture({ preferences = {}, background = false, fail = false, output = 
       calls.push(["toast", value]);
       return value;
     },
+    async showHUD() {
+      calls.push(["hud"]);
+    },
     async closeMainWindow() {
       calls.push(["close"]);
     },
@@ -202,22 +205,35 @@ for (const fail of [false, true]) {
   });
 }
 for (const closeWindow of [false, true]) {
-  test(`toggle respects closeWindow=${closeWindow} after confirmed success`, async () => {
+  test(`toggle respects closeWindow=${closeWindow} before helper execution`, async () => {
     const f = fixture({ preferences: { closeWindow, optionOne: "ondesk", optionTwo: "infull" } });
     await f.command();
     assert.deepEqual(by(f, "exec")[0][2].slice(1), ["toggle", "desktop-only", "fullscreen-only"]);
     assert.equal(by(f, "close").length, Number(closeWindow));
     assert.equal(by(f, "toast")[0][1].style, "success");
-    if (closeWindow) assert.equal(f.calls.at(-1)[0], "close");
+    assert.equal(by(f, "hud").length, 0);
+    if (closeWindow)
+      assert.deepEqual(
+        f.calls.slice(0, 3).map(([kind]) => kind),
+        ["preferences", "close", "exec"],
+      );
   });
 }
 for (const options of [{ fail: true }, { output: "garbage" }, { output: "Menu bar auto-hide: Unknown" }]) {
   test(`toggle rejects unconfirmed helper result ${JSON.stringify(options)}`, async () => {
-    const f = fixture({ ...options, preferences: { closeWindow: true } });
-    await f.command();
-    assert.equal(by(f, "close").length, 0);
-    assert.equal(by(f, "toast")[0][1].style, "failure");
-    assert.deepEqual(by(f, "metadata"), [["metadata", "Current: Unknown"]]);
+    for (const closeWindow of [false, true]) {
+      const f = fixture({ ...options, preferences: { closeWindow } });
+      await f.command();
+      assert.equal(by(f, "close").length, Number(closeWindow));
+      assert.equal(by(f, "hud").length, 0);
+      if (closeWindow)
+        assert.deepEqual(
+          f.calls.slice(0, 3).map(([kind]) => kind),
+          ["preferences", "close", "exec"],
+        );
+      assert.equal(by(f, "toast")[0][1].style, "failure");
+      assert.deepEqual(by(f, "metadata"), [["metadata", "Current: Unknown"]]);
+    }
   });
 }
 for (const closeWindow of [false, true]) {
