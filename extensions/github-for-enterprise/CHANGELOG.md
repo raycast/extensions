@@ -1,6 +1,6 @@
 # GitHub Enterprise Changelog
 
-## [Fix Missing Icons] - {PR_MERGE_DATE}
+## [Fix Missing Icons] - 2026-09-22
 
 - Replace missing icon assets with built-in icons and existing bundled assets
 
