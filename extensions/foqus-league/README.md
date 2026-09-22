@@ -2,8 +2,6 @@
 
 Stats for Raycast Focus. Hours, streaks, weekly leagues and a shareable recap. Everything stays on your Mac.
 
-![Foqus League](./metadata/foqus-league-1.png)
-
 ## Setup
 
 Keep the Menu Bar Stats command turned on. It counts your Focus sessions for you. If you turn it off, sessions you finish in the meantime are missed.
