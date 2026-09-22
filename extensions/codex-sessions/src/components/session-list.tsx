@@ -280,7 +280,6 @@ function SessionItem({
               {copyActions}
             </>
           )}
-          {projectPath ? <NewThreadAction projectPath={projectPath} /> : null}
           {row.cwd && desktopInstalled !== undefined ? (
             <Action
               title={desktopInstalled ? "Open Project in Codex Desktop" : "Open Project Via Codex CLI"}
@@ -349,6 +348,7 @@ function SessionItem({
             icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}
             onAction={onToggleDetail}
           />
+          {projectPath ? <NewThreadAction projectPath={projectPath} /> : null}
         </ActionPanel>
       }
     />
