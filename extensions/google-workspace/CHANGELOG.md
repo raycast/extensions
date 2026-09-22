@@ -4,7 +4,7 @@
 
 - Paste a Google Drive, Docs, Sheets or Slides link in `Search Google Drive` to find the file or folder it points to.
 - Add a `Download Google Drive File` command to download a file by searching for it or pasting its link.
-- Download Google Docs as Markdown or Word, Sheets as Excel, Slides as PowerPoint, and folders as a ZIP archive.
+- Download Google Docs as Markdown or Word, Sheets as Excel, Slides as PowerPoint, Drawings as PNG, and folders as a ZIP archive.
 - Add a `download-file` AI tool.
 
 ## [Bug Fix] - 2026-05-22

@@ -17,14 +17,16 @@ type Input = {
    * - `docx`: Word (Google Docs only)
    * - `xlsx`: Excel (Google Sheets only)
    * - `pptx`: PowerPoint (Google Slides only)
+   * - `png`: PNG (Google Drawings only)
    *
    * Folders are always downloaded as a ZIP archive.
    */
-  format?: "md" | "docx" | "xlsx" | "pptx";
+  format?: "md" | "docx" | "xlsx" | "pptx" | "png";
 };
 
 /**
  * Downloads a file or folder from Google Drive to the Downloads folder and returns the path of the downloaded file.
+ * For folders, `skipped` lists the files inside that couldn't be exported.
  */
 export default withGoogleAuth(async function (input: Input) {
   const file = await getFileById(getFileIdFromLink(input.file) ?? input.file);
@@ -34,6 +36,10 @@ export default withGoogleAuth(async function (input: Input) {
     throw new Error(`"${file.name}" can't be downloaded`);
   }
 
-  const option = options.find(({ format }) => format?.extension === input.format) ?? options[0];
-  return { name: file.name, path: await downloadToDownloads(file, option.format) };
+  const option = input.format ? options.find(({ format }) => format?.extension === input.format) : options[0];
+  if (!option) {
+    throw new Error(`"${file.name}" can't be downloaded as ${input.format}`);
+  }
+
+  return { name: file.name, ...(await downloadToDownloads(file, option.format)) };
 });

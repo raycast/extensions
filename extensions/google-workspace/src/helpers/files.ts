@@ -65,6 +65,7 @@ const EXPORT_FORMATS: Record<string, ExportFormat[]> = {
       mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     },
   ],
+  "application/vnd.google-apps.drawing": [{ title: "PNG", extension: "png", mimeType: "image/png" }],
 };
 
 export type DownloadOption = { title: string; format?: ExportFormat };
@@ -74,7 +75,7 @@ export function getDownloadOptions(file: Pick<File, "mimeType">): DownloadOption
   if (EXPORT_FORMATS[file.mimeType]) {
     return EXPORT_FORMATS[file.mimeType].map((format) => ({ title: `Download as ${format.title}`, format }));
   }
-  // Other Google-native files (forms, sites, shortcuts…) can't be downloaded
+  // Other Google-native files (forms, sites, shortcuts…) can't be exported
   return file.mimeType.startsWith("application/vnd.google-apps.") ? [] : [{ title: "Download File" }];
 }
 
@@ -125,26 +126,38 @@ async function downloadToDir(
   const filePath = getAvailablePath(dir, item.name, format?.extension);
 
   let downloadedBytes = 0;
-  await pipeline(
-    Readable.fromWeb(response.body as WebReadableStream),
-    async function* (source) {
-      for await (const chunk of source) {
-        downloadedBytes += chunk.length;
-        onProgress(
-          totalBytes
-            ? `${Math.round((downloadedBytes / totalBytes) * 100)}% - ${item.name}`
-            : `${humanFileSize(downloadedBytes)} - ${item.name}`,
-        );
-        yield chunk;
-      }
-    },
-    createWriteStream(filePath),
-  );
+  try {
+    await pipeline(
+      Readable.fromWeb(response.body as WebReadableStream),
+      async function* (source) {
+        for await (const chunk of source) {
+          downloadedBytes += chunk.length;
+          onProgress(
+            totalBytes
+              ? `${Math.round((downloadedBytes / totalBytes) * 100)}% - ${item.name}`
+              : `${humanFileSize(downloadedBytes)} - ${item.name}`,
+          );
+          yield chunk;
+        }
+      },
+      // Exclusive open so a concurrent download of the same name fails instead of truncating this one
+      createWriteStream(filePath, { flags: "wx" }),
+    );
+  } catch (error) {
+    await rm(filePath, { force: true });
+    throw error;
+  }
 
   return filePath;
 }
 
-async function downloadFolderToDir(folder: DriveItem, dir: string, onProgress: OnProgress): Promise<string> {
+// Files that can't be exported are skipped and their names are collected in `skipped`
+async function downloadFolderToDir(
+  folder: DriveItem,
+  dir: string,
+  onProgress: OnProgress,
+  skipped: string[],
+): Promise<string> {
   const folderPath = getAvailablePath(dir, folder.name);
   await mkdir(folderPath);
 
@@ -163,13 +176,15 @@ async function downloadFolderToDir(folder: DriveItem, dir: string, onProgress: O
 
     for (const item of data.files) {
       if (item.mimeType === FOLDER_MIME_TYPE) {
-        await downloadFolderToDir(item, folderPath, onProgress);
+        await downloadFolderToDir(item, folderPath, onProgress, skipped);
         continue;
       }
 
       const options = getDownloadOptions(item);
       if (options.length > 0) {
         await downloadToDir(item, folderPath, onProgress, options[options.length - 1].format);
+      } else {
+        skipped.push(item.name);
       }
     }
 
@@ -179,17 +194,18 @@ async function downloadFolderToDir(folder: DriveItem, dir: string, onProgress: O
   return folderPath;
 }
 
-async function downloadFolderAsZip(folder: DriveItem, onProgress: OnProgress): Promise<string> {
+async function downloadFolderAsZip(folder: DriveItem, onProgress: OnProgress): Promise<Download> {
   const tempDir = await mkdtemp(join(tmpdir(), "google-drive-"));
   try {
-    const folderPath = await downloadFolderToDir(folder, tempDir, onProgress);
+    const skipped: string[] = [];
+    const folderPath = await downloadFolderToDir(folder, tempDir, onProgress, skipped);
     const zipPath = getAvailablePath(getDownloadsPath(), folder.name, "zip");
 
     onProgress(`Compressing ${folder.name}`);
     // bsdtar ships with both macOS and Windows and picks the zip format from the extension
     await promisify(execFile)("tar", ["-a", "-cf", zipPath, "-C", tempDir, basename(folderPath)]);
 
-    return zipPath;
+    return { path: zipPath, skipped };
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
@@ -199,24 +215,34 @@ function getDownloadsPath() {
   return join(homedir(), "Downloads");
 }
 
-// Downloads to the Downloads folder and returns the path of the downloaded file
-export function downloadToDownloads(file: DriveItem, format?: ExportFormat, onProgress: OnProgress = () => {}) {
+export type Download = {
+  path: string;
+  // Names of files inside a folder that couldn't be exported (forms, sites…)
+  skipped: string[];
+};
+
+// Downloads to the Downloads folder
+export async function downloadToDownloads(
+  file: DriveItem,
+  format?: ExportFormat,
+  onProgress: OnProgress = () => {},
+): Promise<Download> {
   return file.mimeType === FOLDER_MIME_TYPE
     ? downloadFolderAsZip(file, onProgress)
-    : downloadToDir(file, getDownloadsPath(), onProgress, format);
+    : { path: await downloadToDir(file, getDownloadsPath(), onProgress, format), skipped: [] };
 }
 
 export async function downloadFile(file: File, format?: ExportFormat): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading…", message: file.name });
 
   try {
-    const filePath = await downloadToDownloads(file, format, (message) => (toast.message = message));
+    const { path, skipped } = await downloadToDownloads(file, format, (message) => (toast.message = message));
 
     toast.style = Toast.Style.Success;
-    toast.title = "Downloaded";
-    toast.message = basename(filePath);
-    toast.primaryAction = { title: "Open File", onAction: () => open(filePath) };
-    toast.secondaryAction = { title: "Show in Folder", onAction: () => showInFinder(filePath) };
+    toast.title = skipped.length > 0 ? `Downloaded, ${skipped.length} file(s) couldn't be exported` : "Downloaded";
+    toast.message = skipped.length > 0 ? `${basename(path)} - skipped: ${skipped.join(", ")}` : basename(path);
+    toast.primaryAction = { title: "Open File", onAction: () => open(path) };
+    toast.secondaryAction = { title: "Show in Folder", onAction: () => showInFinder(path) };
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Download failed";
