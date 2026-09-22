@@ -1,9 +1,15 @@
 evals:
-  - input: "@raycast-store-updates What new extensions were published recently?"
+  - input: "@raycast-store-updates Show me the 2 newest extensions."
     mocks:
       find-store-updates:
-        totalMatches: 1
+        totalMatches: 4
         items:
+          - title: Quick Notes
+            description: Capture notes from anywhere
+            type: new
+            date: "2026-09-21T12:00:00Z"
+            author: example
+            url: https://www.raycast.com/example/quick-notes
           - title: Focus Timer
             description: Start a focus session
             type: new
@@ -11,8 +17,13 @@ evals:
             author: example
             url: https://www.raycast.com/example/focus-timer
     expected:
-      - callsTool: find-store-updates
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: new
+            limit: 2
       - includes: Focus Timer
+      - includes: Quick Notes
 
   - input: "@raycast-store-updates What updates are available for my installed extensions?"
     mocks:
