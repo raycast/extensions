@@ -1,4 +1,5 @@
 import { extractTagsFromText, parseTags } from "./helpers";
+import type { Frequency } from "./hooks/useData";
 
 export type ParsedQuickAddReminder = {
   title: string;
@@ -9,7 +10,7 @@ export type ParsedQuickAddReminder = {
   priority?: string;
   tags?: string[];
   recurrence?: {
-    frequency: string;
+    frequency: Frequency;
     interval: number;
     endDate?: string;
   };
@@ -48,7 +49,8 @@ export function resolveQuickAddReminder(
   lists: QuickAddList[],
 ): ParsedQuickAddReminder {
   const mentionedList = findListInText(inputText, lists) ?? findListInText(reminder.title, lists);
-  let { title, listId, dueDate } = reminder;
+  let { title, listId } = reminder;
+  const { dueDate } = reminder;
 
   if (mentionedList) {
     listId = mentionedList.id;

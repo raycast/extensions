@@ -40,7 +40,10 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       };
       await createReminder(reminder);
       const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
-      await runPostCreateActions(normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []), "quick-add");
+      await runPostCreateActions(
+        normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []),
+        "quick-add",
+      );
       await showToast({
         style: Toast.Style.Success,
         title: "Added reminder: " + reminder.title,

@@ -21,13 +21,13 @@ import LocationForm from "./components/LocationForm";
 import CustomizeCreateReminderForm from "./customize-create-reminder-form";
 import { getIntervalValidationError, getPriorityIcon, parseTags } from "./helpers";
 import useCreateReminderFormLayout from "./hooks/useCreateReminderFormLayout";
-import { List, Reminder, useData } from "./hooks/useData";
+import { Frequency, List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import ManageCreateActions from "./manage-create-actions";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
-export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+export type { Frequency };
 export type NewReminder = {
   title: string;
   listId?: string;

@@ -42,4 +42,35 @@ export const open = async () => {};
 export const closeMainWindow = async () => {};
 export const getPreferenceValues = () => ({});
 export const Tool = {};
+export const AI = {
+  ask: async () => "",
+};
+export const environment = {
+  canAccess: () => true,
+  commandName: "test",
+  commandMode: "view",
+  extensionName: "apple-reminders",
+  isDevelopment: false,
+};
+export const LaunchType = {
+  UserInitiated: "userInitiated",
+  Background: "background",
+};
+export const Clipboard = {
+  readText: async () => "",
+  copy: async () => {},
+};
+export const Cache = class {};
+export const MenuBarExtra = () => null;
+export const List = () => null;
+export const ActionPanel = () => null;
+export const Action = () => null;
+export const LocalStorage = {
+  getItem: async () => null,
+  setItem: async () => {},
+  removeItem: async () => {},
+  clear: async () => {},
+};
+export const OAuth = {};
+
 
