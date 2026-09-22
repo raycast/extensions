@@ -116,7 +116,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "ray build -e dist -o node_modules/.cache/foqus-league && tsc --noEmit",
     "test": "npm run typecheck --silent && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test src/lib/*.test.ts",
     "build": "ray build",
     "dev": "ray develop",

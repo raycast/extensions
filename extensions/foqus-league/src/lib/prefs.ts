@@ -5,7 +5,6 @@ export type Preferences = {
   leagues: [number, number, number];
 };
 
-// What the parser accepts: the generated preference type and anything looser, such as test input.
 export type RawPreferences = {
   weekStart?: string;
   menuBarFormat?: string;

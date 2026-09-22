@@ -7,7 +7,6 @@ import { QUICK_STARTS, quickStartGoals, RECENT_MS, startSessionUrl } from "./lib
 import { getPreferences, learnGoalBlocks, SUPPORT_URL } from "./lib/runtime.ts";
 import { useStats } from "./lib/useStats.ts";
 
-// Raycast Focus is a built-in extension; launchCommand reaches it under Raycast's own author name.
 const RAYCAST_FOCUS = {
   ownerOrAuthorName: "raycast",
   extensionName: "raycast-focus",

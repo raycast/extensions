@@ -34,7 +34,6 @@ function rowsOf(text: string): unknown[] | null {
 export function parseImport(text: string, now = Date.now()): Session[] {
   const rows = rowsOf(text.trim());
   if (!rows) throw new Error("Not a Foqus export");
-  // The store keeps whatever it is given; the form and this importer are where limits apply.
   const allowed = (s: Session) => s.duration >= 1 && s.duration <= MAX_SESSION_MINUTES && s.start <= now;
   return rows.map(parseSession).filter((s): s is Session => s !== null && allowed(s));
 }

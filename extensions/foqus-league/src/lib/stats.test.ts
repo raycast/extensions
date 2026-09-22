@@ -473,7 +473,6 @@ test("a stepped period is a closed range, each one picking up where the last lef
 
 test("a day with a clock change still counts its last hour", () => {
   process.env.TZ = BUCHAREST;
-  // 2026-10-25: clocks go back at 04:00, so the local day and its week last an hour longer
   const late = session(2026, 10, 25, 23, 45);
   const stats = computeStats([late], { weekStartsOn: 1, calendarWeeks: CALENDAR_WEEKS, now: at(2026, 10, 25, 23) });
   assert.equal(stats.todayMinutes, 45);

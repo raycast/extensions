@@ -7,7 +7,6 @@ import { liveSources, syncIfStale as staleSync, syncSessions as fullSync } from 
 
 export const SUPPORT_URL = "https://buymeacoffee.com/filipimiparebine";
 
-// `Preferences` here is the type Raycast generates from package.json in raycast-env.d.ts.
 export function getPreferences(): ParsedPreferences {
   return parsePreferences(getPreferenceValues<Preferences>());
 }

@@ -170,14 +170,6 @@ export class LocalSessionStore implements SessionStore {
     return run;
   }
 
-  // Each Raycast command runs in its own process, so the in-process queue alone cannot
-  // order a menu-bar append against a view's read-then-rewrite. A lock file does. The holder
-  // writes its token into the file and touches it every LOCK_HEARTBEAT_MS, so only a lock
-  // nobody touched for LOCK_STALE_MS is taken over. Takeover renames the stale file, which a
-  // single contender wins, and release removes the lock only while it still carries this
-  // holder's token.
-  // ponytail: a process suspended mid-write for longer than LOCK_STALE_MS can still overlap
-  // the next holder; closing that needs fcntl range locks, which Node does not expose.
   private async withFileLock<T>(op: () => Promise<T>): Promise<T> {
     await this.ensureDir();
     const lock = this.file("store.lock");
