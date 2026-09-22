@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 const DOWNLOAD_COUNT_LABEL = "Total downloads";
 /** Anchored on the heading: a bare `title="\d+"` could match an unrelated attribute. */
 const DOWNLOAD_COUNT_PATTERN = /<h3[^>]*title="([\d,]+)"/;

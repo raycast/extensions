@@ -22,6 +22,7 @@ import {
   findPackageByName,
   formatDownloadCount,
   getPackageIcon,
+  getPackageTypeTitle,
   getPackageVersionCount,
   groupPackagesByType,
 } from "./helpers/package";
@@ -43,7 +44,8 @@ function MyPackagesMenu() {
   const { showtext, titlePackage } = getPreferenceValues<Preferences.MyPackagesMenu>();
   const { data, isLoading, error } = useMyPackages();
 
-  const packages = data ?? [];
+  const packages = data?.packages ?? [];
+  const failedTypes = data?.failedTypes ?? [];
   const sections = groupPackagesByType(packages);
 
   const titledPackage = titlePackage ? findPackageByName(packages, titlePackage) : undefined;
@@ -118,6 +120,17 @@ function MyPackagesMenu() {
       {!isLoading && sections.length === 0 ? (
         <MenuBarSection>
           <MenuBarItem title="No Packages" icon={Icon.Info} />
+        </MenuBarSection>
+      ) : null}
+
+      {failedTypes.length > 0 ? (
+        <MenuBarSection>
+          <MenuBarItem
+            title={`Couldn't load ${failedTypes.map(getPackageTypeTitle).join(", ")}`}
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            tooltip="Some packages may be missing from this menu"
+            onAction={() => launchMyPackagesCommand()}
+          />
         </MenuBarSection>
       ) : null}
 

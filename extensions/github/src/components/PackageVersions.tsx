@@ -10,13 +10,18 @@ type PackageVersionsProps = {
 };
 
 export default function PackageVersions({ pkg }: PackageVersionsProps) {
-  const { data, isLoading, error } = usePackageVersions(pkg);
+  const { data, isLoading, error, pagination } = usePackageVersions(pkg);
 
-  const versions = data?.versions ?? [];
-  const versionCount = versions.length > 0 ? `${versions.length}${data?.hasMore ? "+" : ""}` : undefined;
+  const versions = data ?? [];
+  const versionCount = versions.length > 0 ? `${versions.length}${pagination?.hasMore ? "+" : ""}` : undefined;
 
   return (
-    <List isLoading={isLoading} navigationTitle={pkg.name} searchBarPlaceholder="Filter versions">
+    <List
+      isLoading={isLoading}
+      navigationTitle={pkg.name}
+      searchBarPlaceholder="Filter versions"
+      pagination={pagination}
+    >
       <List.Section title="Versions" subtitle={versionCount}>
         {versions.map((version) => {
           const tags = getPackageVersionTags(version);

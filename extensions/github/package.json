@@ -573,7 +573,7 @@
       "preferences": [
         {
           "name": "titlePackage",
-          "description": "Show this package's name and total download count in the menu bar title. Leave empty to show the number of packages instead.",
+          "description": "Show this package's name and total download count in the menu bar title. Leave empty to show the number of packages instead. GitHub publishes download counts only on public package pages, so a private package shows just its name.",
           "type": "textfield",
           "required": false,
           "title": "Menu Bar Title",

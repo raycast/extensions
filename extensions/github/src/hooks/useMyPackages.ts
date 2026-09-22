@@ -60,11 +60,11 @@ export function useMyPackages() {
 
   return useCachedPromise(
     async () => {
-      // A type the account never used can fail on its own, which shouldn't hide the rest.
+      // One registry failing shouldn't hide the rest, but the caller has to be able to
+      // say so — a silently short list looks like packages were deleted.
       const results = await Promise.allSettled(PACKAGE_TYPES.map((type) => listPackagesOfType(octokit, type)));
-      const fulfilled = results.filter((result) => result.status === "fulfilled");
 
-      if (fulfilled.length === 0) {
+      if (results.every((result) => result.status === "rejected")) {
         const rejected = results as PromiseRejectedResult[];
 
         if (rejected.some((result) => isMissingScopeError(result.reason))) {
@@ -74,7 +74,10 @@ export function useMyPackages() {
         throw rejected[0].reason;
       }
 
-      return sortPackagesByUpdatedAt(fulfilled.flatMap((result) => result.value));
+      const packages = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+      const failedTypes = PACKAGE_TYPES.filter((_, index) => results[index].status === "rejected");
+
+      return { packages: sortPackagesByUpdatedAt(packages), failedTypes };
     },
     [],
     { keepPreviousData: true },
