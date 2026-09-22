@@ -20,6 +20,7 @@ import {
   buildSearchUrl,
   extractDomainName,
   getSearchEngineName,
+  getTabKey,
   isLauncherTab,
   isWebAddress,
   normalizeWebAddress,
@@ -84,7 +85,7 @@ type Hit =
   | { kind: "tab"; tab: Tab; key: string }
   | { kind: "url"; item: UrlItem; source: string; key: string; visitCount?: number; lastVisitTime?: string };
 
-const tabKey = (t: Tab) => `tab-${t.window_id}-${t.url}`;
+const tabKey = getTabKey;
 
 function sourcePriority(hit: Hit): number {
   if (hit.kind === "tab") return 4;
@@ -281,12 +282,15 @@ export default function Command() {
   const topUrlKey = topHit?.kind === "url" ? topHit.key : undefined;
 
   const topUrl = topHit?.kind === "tab" ? topHit.tab.url : topHit?.item.url;
-  const seenUrls = new Set(topUrl ? [canonicalUrl(topUrl)] : []);
-  const exactTabSection = uniqueUrls(
-    tabHits.filter((t) => tabKey(t) !== topTabKey),
-    seenUrls,
-    hasQuery ? LIMITS.tabs : tabHits.length,
-  );
+  // Tabs are instances, not merely destinations. Keep duplicate URLs in Open
+  // Tabs, while retaining canonical-URL de-duplication only across sources.
+  // A Tab Top Hit removes only its own instance; the other instances remain.
+  const seenUrls = new Set(topHit?.kind === "url" && topUrl ? [canonicalUrl(topUrl)] : []);
+  const exactTabSection = tabHits
+    .filter((t) => tabKey(t) !== topTabKey && !seenUrls.has(canonicalUrl(t.url)))
+    .slice(0, hasQuery ? LIMITS.tabs : tabHits.length);
+  if (topHit?.kind === "tab") seenUrls.add(canonicalUrl(topHit.tab.url));
+  exactTabSection.forEach((tab) => seenUrls.add(canonicalUrl(tab.url)));
   // Fuzzy/pinyin results are a fallback only when there is no exact local tab
   // match at all; `seenUrls` already reflects Top Hit at this point (exact
   // matches are empty whenever this runs), so this only needs to exclude Top

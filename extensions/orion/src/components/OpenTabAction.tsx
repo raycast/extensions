@@ -13,15 +13,16 @@ const activateTab = async (tab: Tab) =>
     const targetName = ${JSON.stringify(tab.title)};
     let index = ${tab.tab_index};
     // The index preserves duplicate URL instances. If a tab changed or closed
-    // between refresh and action, retain the previous title/URL fallback.
+    // between refresh and action, retain the previous title/URL fallback -
+    // but only when exactly one tab still matches. Two identical tabs could
+    // have swapped positions since the last refresh, so an ambiguous match
+    // activates nothing rather than guessing the wrong instance.
     if (urls[index] !== targetUrl || names[index] !== targetName) {
-      index = -1;
+      const matches = [];
       for (let i = 0; i < urls.length; i++) {
-        if (urls[i] === targetUrl && names[i] === targetName) {
-          index = i;
-          break;
-        }
+        if (urls[i] === targetUrl && names[i] === targetName) matches.push(i);
       }
+      index = matches.length === 1 ? matches[0] : -1;
     }
     if (index !== -1) {
       window.index = 1;

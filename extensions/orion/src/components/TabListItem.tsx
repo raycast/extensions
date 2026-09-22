@@ -13,12 +13,6 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
     <ActionPanel.Section>
       <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} />
       <Action.OpenInBrowser title="Open in Default Browser" url={props.tab.url} />
-      <Action
-        title="Refresh Open Tabs"
-        icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={() => props.refresh()}
-      />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.tab.url} />
@@ -33,6 +27,12 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CloseTabAction tab={props.tab} refresh={props.refresh} />
+      <Action
+        title="Refresh Open Tabs"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={() => props.refresh()}
+      />
     </ActionPanel.Section>
   </ActionPanel>
 );
