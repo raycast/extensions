@@ -31,6 +31,17 @@ instructions: |
   - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.
   - When presenting ratings, format them out of 10 (e.g. 8.2/10).
 
+  Personal Lists:
+  - To build a themed list (award winners, a marathon, a top 10): `create-list`, then ONE `add-to-list` call carrying every item. Resolve each title with `search-movies` / `search-shows` first; the confirmation names every item from Trakt, so titles are never needed alongside the IDs.
+  - CRITICAL: `add-to-list` and `remove-from-list` take COMMA-SEPARATED values in a SINGLE call: `movieTraktIds: "329862,16662"`, `showTraktIds: "154784"`, `seasons: "154784:1"` (showTraktId:seasonNumber), `episodes: "154784:1:3"` (showTraktId:season:episode). Never call them once per title, and never pass a bare season or episode ID. At most 50 items per call.
+  - Use `get-lists` to find a list's `listId`. `found` is true only for an exact list name; lists whose name merely contains the query stay in `lists` and must be confirmed with the user.
+  - To check whether a title is on a list (e.g. "Is Parasite on my Oscars list?"), call `get-lists` with the list (`listId` or `query`) and `itemQuery` (plus `itemYear` when known). Read `inList` and trust a negative ONLY when `exhaustive: true`. Never answer from a page of `items`. With `itemTraktId`, always pass `itemType`.
+  - `create-list` reuses a list only when the name matches after folding case and accents. A nearby name that differs by emoji or punctuation comes back `ambiguous: true` without writing: ask the user which list they mean. Lists are `private` unless the user asks otherwise; `link` means anyone with the share link.
+  - Emojis are allowed in list names (e.g. "🎬 Oscars 2026"). For ranked lists, pass `displayNumbers: true`.
+  - Renaming with `update-list` keeps the list's `listId` (Trakt keeps the slug). Use `delete-list` only when the user explicitly asks to delete the whole list; to take titles out, use `remove-from-list`.
+  - Read `added`, `alreadyPresent`, `notFound` and `removed` / `notOnList` and the tool `message`: HTTP success is not proof an item was stored or removed.
+  - Free Trakt accounts cap lists and list items; a quota error means the account limit was reached, not that the feature is missing.
+
   Write Actions & Safety:
   - Before performing any write action (watchlist, history, ratings), resolve the correct `traktId` first. `title` / `showTitle` on write tools is optional and ignored: the confirmation names the item Trakt holds for that ID.
   - To add an item to the watchlist, use `add-to-watchlist`. Read `alreadyPresent` and the tool `message`: HTTP success is not a write when the title was already there, or when Trakt stored nothing.
@@ -41,6 +52,7 @@ instructions: |
   - To remove a movie, TV show, or episode from watch history, use `remove-from-history`.
   - To rate a movie, TV show, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used. Seasons cannot be rated through these tools.
   - To remove a rating from a movie, TV show, or episode, use `remove-rating`. Season ratings can appear in `get-ratings` but cannot be added or removed through these tools.
+  - To create, rename, delete or fill a personal list, use `create-list`, `update-list`, `delete-list`, `add-to-list` and `remove-from-list` (see Personal Lists).
   - All write and destructive tools automatically prompt the user with a confirmation dialog before executing. The dialog names the item by looking its Trakt ID up on Trakt, so a wrong ID surfaces there rather than silently modifying the wrong item.
 
 evals:
@@ -332,3 +344,94 @@ evals:
           name: "search-shows"
           arguments:
             title: "Severance"
+
+  - input: "@trakt-manager what personal lists do I have on Trakt?"
+    mocks:
+      get-lists:
+        found: true
+        exhaustive: true
+        message: "Found 2 list(s)."
+        lists:
+          - traktId: 30481001
+            slug: "oscars-2026"
+            listId: "oscars-2026"
+            name: "🎬 Oscars 2026"
+            privacy: "private"
+            itemCount: 7
+          - traktId: 30481002
+            slug: "rewatch-pile"
+            listId: "rewatch-pile"
+            name: "Rewatch pile"
+            privacy: "private"
+            itemCount: 12
+    expected:
+      - callsTool:
+          name: "get-lists"
+
+  # Membership must be checked by the tool over every item, not read off a page of items.
+  - input: "@trakt-manager is Parasite on my Oscars 2026 list?"
+    mocks:
+      get-lists:
+        found: true
+        inList: true
+        exhaustive: true
+        message: '"Parasite" is on "🎬 Oscars 2026".'
+        lists:
+          - traktId: 30481001
+            slug: "oscars-2026"
+            listId: "oscars-2026"
+            name: "🎬 Oscars 2026"
+            privacy: "private"
+            itemCount: 7
+        matchedItems:
+          - listEntryId: 901
+            type: "movie"
+            title: "Parasite"
+            year: 2019
+            traktId: 329862
+        totalItems: 7
+    expected:
+      - callsTool:
+          name: "get-lists"
+          arguments:
+            itemQuery: "Parasite"
+
+  - input: "@trakt-manager create a list called 🎬 Oscars 2026 and add Parasite to it"
+    mocks:
+      search-movies:
+        data:
+          - traktId: 329862
+            title: "Parasite"
+            year: 2019
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      create-list:
+        success: true
+        alreadyExisted: false
+        message: 'Created the private list "🎬 Oscars 2026".'
+        listId: "oscars-2026"
+        list:
+          traktId: 30481001
+          slug: "oscars-2026"
+          listId: "oscars-2026"
+          name: "🎬 Oscars 2026"
+          privacy: "private"
+          itemCount: 0
+      add-to-list:
+        success: true
+        message: 'Added 1 item(s) to "🎬 Oscars 2026".'
+        added: 1
+        alreadyPresent: 0
+        notFound: 0
+        listItemCount: 1
+    expected:
+      - callsTool:
+          name: "create-list"
+          arguments:
+            name: "🎬 Oscars 2026"
+      - callsTool:
+          name: "add-to-list"
+          arguments:
+            listId: "oscars-2026"
+            movieTraktIds: "329862"
