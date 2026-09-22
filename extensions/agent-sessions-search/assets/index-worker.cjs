@@ -2,11 +2,10 @@
 
 // src/lib/db.ts
 var import_node_fs = require("node:fs");
-var import_node_path2 = require("node:path");
+var import_node_path = require("node:path");
 
 // src/lib/config.ts
 var import_node_os = require("node:os");
-var import_node_path = require("node:path");
 var current = null;
 function setConfig(cfg) {
   current = cfg;
@@ -14,6 +13,9 @@ function setConfig(cfg) {
 function getConfig() {
   if (!current) throw new Error("Index configuration not initialised");
   return current;
+}
+function homeOf(id) {
+  return getConfig().homes[id] ?? "";
 }
 
 // src/lib/db.ts
@@ -23,7 +25,7 @@ var db = null;
 function getDb() {
   if (db) return db;
   const path = getConfig().dbPath;
-  (0, import_node_fs.mkdirSync)((0, import_node_path2.dirname)(path), { recursive: true });
+  (0, import_node_fs.mkdirSync)((0, import_node_path.dirname)(path), { recursive: true });
   db = new import_node_sqlite.DatabaseSync(path);
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA synchronous = NORMAL");
@@ -228,7 +230,7 @@ function writeSession(state, messages, refs, append) {
 
 // src/lib/git.ts
 var import_node_fs2 = require("node:fs");
-var import_node_path3 = require("node:path");
+var import_node_path2 = require("node:path");
 var cache = /* @__PURE__ */ new Map();
 function parseRemoteUrl(url) {
   if (!url) return null;
@@ -247,11 +249,11 @@ function readOriginFromConfig(configPath) {
   }
 }
 function findGitEntry(start) {
-  let dir = (0, import_node_path3.resolve)(start);
+  let dir = (0, import_node_path2.resolve)(start);
   for (let i = 0; i < 40; i++) {
-    const gitPath = (0, import_node_path3.join)(dir, ".git");
+    const gitPath = (0, import_node_path2.join)(dir, ".git");
     if ((0, import_node_fs2.existsSync)(gitPath)) return { root: dir, gitPath };
-    const parent = (0, import_node_path3.dirname)(dir);
+    const parent = (0, import_node_path2.dirname)(dir);
     if (parent === dir) return null;
     dir = parent;
   }
@@ -273,12 +275,12 @@ function resolveRepo(cwd) {
         if ((0, import_node_fs2.statSync)(entry.gitPath).isFile()) {
           const gitdir = (0, import_node_fs2.readFileSync)(entry.gitPath, "utf8").match(/gitdir:\s*(.+)/)?.[1]?.trim();
           if (gitdir) {
-            const abs = (0, import_node_path3.resolve)(entry.root, gitdir);
-            const common = (0, import_node_path3.join)(abs, "commondir");
-            commonDir = (0, import_node_fs2.existsSync)(common) ? (0, import_node_path3.resolve)(abs, (0, import_node_fs2.readFileSync)(common, "utf8").trim()) : abs;
+            const abs = (0, import_node_path2.resolve)(entry.root, gitdir);
+            const common = (0, import_node_path2.join)(abs, "commondir");
+            commonDir = (0, import_node_fs2.existsSync)(common) ? (0, import_node_path2.resolve)(abs, (0, import_node_fs2.readFileSync)(common, "utf8").trim()) : abs;
           }
         }
-        result = { repo: readOriginFromConfig((0, import_node_path3.join)(commonDir, "config")), repoRoot: entry.root };
+        result = { repo: readOriginFromConfig((0, import_node_path2.join)(commonDir, "config")), repoRoot: entry.root };
       }
     } else {
       const guess = guessProjectDirFromPath(cwd);
@@ -458,7 +460,7 @@ var RefCollector = class {
 
 // src/lib/providers/claude.ts
 var import_node_fs4 = require("node:fs");
-var import_node_path4 = require("node:path");
+var import_node_path3 = require("node:path");
 
 // src/lib/jsonl.ts
 var import_node_fs3 = require("node:fs");
@@ -540,9 +542,12 @@ var wrapperRegexes = WRAPPER_TAGS.map((tag) => {
   return new RegExp(`<${t}(?:\\s[^>]*)?>[\\s\\S]*?<\\/${t}>`, "gi");
 });
 var COMMAND_RE = /<command-name>([^<]*)<\/command-name>\s*(?:<command-args>([\s\S]*?)<\/command-args>)?/i;
+var USER_QUERY_RE = /<user_query>([\s\S]*?)<\/user_query>/gi;
 function cleanText(raw) {
   if (!raw) return "";
   let text = raw;
+  const queries = [...text.matchAll(USER_QUERY_RE)].map((m) => m[1].trim()).filter(Boolean);
+  if (queries.length > 0) text = queries.join("\n\n");
   const cmd = COMMAND_RE.exec(text);
   if (cmd) {
     const name = cmd[1].trim();
@@ -602,7 +607,7 @@ function isSkippableClaudeLine(text) {
 }
 var TITLE_RANK = { "custom-title": 4, "ai-title": 3, summary: 2, "agent-name": 1, prompt: 0 };
 function claudeProjectsDir() {
-  return getConfig().claudeProjectsDir;
+  return (0, import_node_path3.join)(homeOf("claude"), "projects");
 }
 function toolLine(name, input) {
   if (!input || typeof input !== "object") return name;
@@ -620,7 +625,7 @@ var claudeProvider = {
     const out = [];
     let projectDirs = [];
     try {
-      projectDirs = (0, import_node_fs4.readdirSync)(root, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => (0, import_node_path4.join)(root, e.name));
+      projectDirs = (0, import_node_fs4.readdirSync)(root, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => (0, import_node_path3.join)(root, e.name));
     } catch {
       return out;
     }
@@ -633,7 +638,7 @@ var claudeProvider = {
       }
       for (const e of entries) {
         if (!e.isFile() || !e.name.endsWith(".jsonl")) continue;
-        const file = (0, import_node_path4.join)(dir, e.name);
+        const file = (0, import_node_path3.join)(dir, e.name);
         try {
           const st = (0, import_node_fs4.statSync)(file);
           if (st.size === 0) continue;
@@ -645,7 +650,7 @@ var claudeProvider = {
     return out;
   },
   async parse(file, previous, ctx2) {
-    const sessionId = (0, import_node_path4.basename)(file.file, ".jsonl");
+    const sessionId = (0, import_node_path3.basename)(file.file, ".jsonl");
     const id = `claude:${sessionId}`;
     const state = previous ? { ...previous, fileSize: file.size, fileMtime: file.mtime } : {
       id,
@@ -780,12 +785,12 @@ var claudeProvider = {
 
 // src/lib/providers/codex.ts
 var import_node_fs5 = require("node:fs");
-var import_node_path5 = require("node:path");
+var import_node_path4 = require("node:path");
 var import_node_sqlite2 = require("node:sqlite");
 var MAX_MESSAGE_CHARS2 = 3e4;
 var MAX_TOOL_CHARS2 = 300;
 function codexHome() {
-  return getConfig().codexHome;
+  return homeOf("codex");
 }
 function walkJsonl(dir, out) {
   let entries;
@@ -795,7 +800,7 @@ function walkJsonl(dir, out) {
     return;
   }
   for (const e of entries) {
-    const p = (0, import_node_path5.join)(dir, e.name);
+    const p = (0, import_node_path4.join)(dir, e.name);
     if (e.isDirectory()) walkJsonl(p, out);
     else if (e.isFile() && e.name.endsWith(".jsonl")) {
       try {
@@ -811,7 +816,7 @@ function newestStateDb(home) {
   try {
     for (const name of (0, import_node_fs5.readdirSync)(home)) {
       const m = name.match(/^state_(\d+)\.sqlite$/);
-      if (m && (!best || Number(m[1]) > best.n)) best = { path: (0, import_node_path5.join)(home, name), n: Number(m[1]) };
+      if (m && (!best || Number(m[1]) > best.n)) best = { path: (0, import_node_path4.join)(home, name), n: Number(m[1]) };
     }
   } catch {
     return null;
@@ -823,7 +828,7 @@ var importedThreadIds = /* @__PURE__ */ new Set();
 var HIDDEN_THREAD_SOURCES = /* @__PURE__ */ new Set(["subagent", "guardian_review", "onboarding_checklist"]);
 function loadImportedThreads(home) {
   importedThreadIds = /* @__PURE__ */ new Set();
-  const file = (0, import_node_path5.join)(home, "external_agent_session_imports.json");
+  const file = (0, import_node_path4.join)(home, "external_agent_session_imports.json");
   if (!(0, import_node_fs5.existsSync)(file)) return;
   try {
     const data = JSON.parse((0, import_node_fs5.readFileSync)(file, "utf8"));
@@ -839,10 +844,10 @@ function loadThreadMeta(home) {
       const db2 = new import_node_sqlite2.DatabaseSync(dbPath, { readOnly: true });
       try {
         const cols = new Set(db2.prepare(`PRAGMA table_info(threads)`).all().map((c) => c.name));
-        const pick = (c, alias = c) => cols.has(c) ? `${c} AS ${alias}` : `NULL AS ${alias}`;
-        const sql = `SELECT id, ${pick("title")}, ${pick("git_branch")}, ${pick("cwd")}, ${pick("archived")},
-          ${pick("git_origin_url")}, ${pick("thread_source")}, ${pick("source")}, ${pick("first_user_message")},
-          ${pick("updated_at_ms")}, ${pick("updated_at")} FROM threads`;
+        const pick2 = (c, alias = c) => cols.has(c) ? `${c} AS ${alias}` : `NULL AS ${alias}`;
+        const sql = `SELECT id, ${pick2("title")}, ${pick2("git_branch")}, ${pick2("cwd")}, ${pick2("archived")},
+          ${pick2("git_origin_url")}, ${pick2("thread_source")}, ${pick2("source")}, ${pick2("first_user_message")},
+          ${pick2("updated_at_ms")}, ${pick2("updated_at")} FROM threads`;
         for (const r of db2.prepare(sql).all()) {
           const source = typeof r.source === "string" ? r.source : "";
           threadMeta.set(String(r.id), {
@@ -862,7 +867,7 @@ function loadThreadMeta(home) {
     } catch {
     }
   }
-  const indexFile = (0, import_node_path5.join)(home, "session_index.jsonl");
+  const indexFile = (0, import_node_path4.join)(home, "session_index.jsonl");
   if ((0, import_node_fs5.existsSync)(indexFile)) {
     try {
       for (const line of (0, import_node_fs5.readFileSync)(indexFile, "utf8").split("\n")) {
@@ -909,9 +914,9 @@ var codexProvider = {
   async discover() {
     const home = codexHome();
     const out = [];
-    walkJsonl((0, import_node_path5.join)(home, "sessions"), out);
+    walkJsonl((0, import_node_path4.join)(home, "sessions"), out);
     if (getConfig().includeArchived) {
-      walkJsonl((0, import_node_path5.join)(home, "archived_sessions"), out);
+      walkJsonl((0, import_node_path4.join)(home, "archived_sessions"), out);
     }
     return out;
   },
@@ -1061,8 +1066,1063 @@ var codexProvider = {
   }
 };
 
+// src/lib/providers/copilot.ts
+var import_node_fs6 = require("node:fs");
+var import_node_path5 = require("node:path");
+
+// src/lib/providers/base.ts
+var import_node_sqlite3 = require("node:sqlite");
+var MAX_MESSAGE_CHARS3 = 3e4;
+var MAX_TOOL_CHARS3 = 300;
+var SessionBuilder = class {
+  state;
+  messages = [];
+  refs;
+  titleRank = -1;
+  constructor(agent, sessionId, file, previous = null) {
+    if (previous?.title) this.titleRank = 0;
+    this.state = previous ? { ...previous, fileSize: file.size, fileMtime: file.mtime } : {
+      id: `${agent}:${sessionId}`,
+      agent,
+      sessionId,
+      file: file.file,
+      fileSize: file.size,
+      fileMtime: file.mtime,
+      indexedBytes: 0,
+      title: null,
+      titleSource: null,
+      cwd: null,
+      repo: null,
+      repoRoot: null,
+      branch: null,
+      createdAt: null,
+      updatedAt: null,
+      messageCount: 0,
+      firstPrompt: null,
+      lastPrompt: null,
+      entrypoint: null,
+      archived: false,
+      hidden: false
+    };
+    this.refs = new RefCollector([]);
+  }
+  /** Widen the session's time span with a timestamp in epoch milliseconds. */
+  touch(ts) {
+    if (ts === null || ts === void 0 || !Number.isFinite(ts) || ts <= 0) return;
+    if (this.state.createdAt === null || ts < this.state.createdAt) this.state.createdAt = ts;
+    if (this.state.updatedAt === null || ts > this.state.updatedAt) this.state.updatedAt = ts;
+  }
+  /**
+   * Record a title candidate. Higher `rank` wins; equal ranks keep the first one unless
+   * `lastWins` is set, which is what agents that re-append their current title need.
+   */
+  setTitle(source, value, rank, lastWins = false) {
+    const v = value?.trim();
+    if (!v) return;
+    if (rank < this.titleRank || rank === this.titleRank && !lastWins) return;
+    const title = makeTitle(v, 120);
+    if (!title) return;
+    this.state.title = title;
+    this.state.titleSource = source;
+    this.titleRank = rank;
+  }
+  addMessage(role, raw, ts) {
+    const trimmed = raw?.trim();
+    if (!trimmed) return;
+    const text = role === "user" ? cleanText(trimmed) : trimmed;
+    if (!text) return;
+    const stored = truncate(text, MAX_MESSAGE_CHARS3);
+    this.touch(ts);
+    this.messages.push({ role, ts: ts ?? null, text: stored });
+    this.refs.addText(role, stored);
+    this.state.messageCount += 1;
+    if (role === "user") {
+      if (!this.state.firstPrompt) this.state.firstPrompt = oneLine(text, 300);
+      this.state.lastPrompt = oneLine(text, 300);
+    }
+  }
+  /** One compact line per tool call: the tool name plus its most identifying argument. */
+  addTool(name, detail, ts) {
+    if (!name) return;
+    const arg = toolDetail(detail);
+    this.touch(ts);
+    this.messages.push({
+      role: "tool",
+      ts: ts ?? null,
+      text: truncate(`${name}${arg ? ` ${arg}` : ""}`.replace(/\s+/g, " "), MAX_TOOL_CHARS3)
+    });
+  }
+  addPrLink(prNumber, repo) {
+    this.refs.addLink(prNumber, repo);
+  }
+  /** Fill in derived fields (repo, timestamps, fallback title) and produce the parse result. */
+  finish(file, ctx2, opts = {}) {
+    const state = this.state;
+    if (opts.indexedBytes !== void 0) state.indexedBytes = opts.indexedBytes;
+    if (state.updatedAt === null) state.updatedAt = file.mtime;
+    if (state.createdAt === null) state.createdAt = state.updatedAt;
+    this.refs.addBranch(state.branch);
+    const git = ctx2.resolveRepo(state.cwd);
+    state.repo = git.repo ?? parseRemoteUrl(opts.repoUrl) ?? state.repo;
+    state.repoRoot = git.repoRoot ?? state.repoRoot;
+    if (!state.title && state.firstPrompt) {
+      state.title = makeTitle(state.firstPrompt);
+      state.titleSource = "prompt";
+    }
+    if (state.messageCount === 0 && !state.title) state.hidden = true;
+    return { state, messages: this.messages, refs: this.refs.entries() };
+  }
+};
+function toolDetail(input) {
+  if (typeof input === "string") return input;
+  if (!input || typeof input !== "object") return "";
+  const i = input;
+  const val = i.file_path ?? i.filePath ?? i.absolute_path ?? i.path ?? i.notebook_path ?? i.pattern ?? i.command ?? i.cmd ?? i.url ?? i.query ?? i.description ?? i.prompt;
+  return typeof val === "string" ? val : "";
+}
+function dbSessionFile(dbPath, sessionId) {
+  return `${dbPath}#${sessionId}`;
+}
+function splitDbSessionFile(file) {
+  const at = file.lastIndexOf("#");
+  return at === -1 ? { dbPath: file, sessionId: "" } : { dbPath: file.slice(0, at), sessionId: file.slice(at + 1) };
+}
+function openReadOnly(path) {
+  try {
+    return new import_node_sqlite3.DatabaseSync(path, { readOnly: true });
+  } catch {
+    return null;
+  }
+}
+function tablesOf(db2) {
+  try {
+    const rows = db2.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).all();
+    return new Set(rows.map((r) => r.name));
+  } catch {
+    return /* @__PURE__ */ new Set();
+  }
+}
+function columnsOf(db2, table) {
+  try {
+    const rows = db2.prepare(`PRAGMA table_info(${table})`).all();
+    return new Set(rows.map((r) => r.name));
+  } catch {
+    return /* @__PURE__ */ new Set();
+  }
+}
+function pick(cols, col) {
+  return cols.has(col) ? `${col} AS ${col}` : `NULL AS ${col}`;
+}
+
+// src/lib/providers/copilot.ts
+function parseTs(value) {
+  if (typeof value !== "string") return null;
+  const t = Date.parse(value);
+  return Number.isNaN(t) ? null : t;
+}
+function readWorkspace(dir) {
+  const out = {};
+  let text;
+  try {
+    text = (0, import_node_fs6.readFileSync)((0, import_node_path5.join)(dir, "workspace.yaml"), "utf8");
+  } catch {
+    return out;
+  }
+  for (const line of text.split("\n")) {
+    const m = /^([a-z_]+):\s*(.*)$/.exec(line.trim());
+    if (!m) continue;
+    let value = m[2].trim();
+    if (value.startsWith('"') && value.endsWith('"') && value.length > 1 || value.startsWith("'") && value.endsWith("'") && value.length > 1) {
+      value = value.slice(1, -1);
+    }
+    if (value && value !== "null" && value !== "~") out[m[1]] = value;
+  }
+  return out;
+}
+function collect(root, out) {
+  let entries;
+  try {
+    entries = (0, import_node_fs6.readdirSync)(root, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const file = (0, import_node_path5.join)(root, e.name, "events.jsonl");
+    try {
+      const st = (0, import_node_fs6.statSync)(file);
+      if (st.size > 0) out.push({ agent: "copilot", file, size: st.size, mtime: Math.floor(st.mtimeMs) });
+    } catch {
+    }
+  }
+}
+var copilotProvider = {
+  id: "copilot",
+  async prepare() {
+  },
+  async discover() {
+    const home = homeOf("copilot");
+    const out = [];
+    collect((0, import_node_path5.join)(home, "session-state"), out);
+    const legacy = (0, import_node_path5.join)(home, "history-session-state");
+    if ((0, import_node_fs6.existsSync)(legacy)) collect(legacy, out);
+    return out;
+  },
+  async parse(file, previous, ctx2) {
+    const dir = (0, import_node_path5.dirname)(file.file);
+    const ws = readWorkspace(dir);
+    const sessionId = ws.id || (0, import_node_path5.basename)(dir);
+    const b = new SessionBuilder("copilot", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    b.state.cwd = ws.cwd ?? ws.git_root ?? null;
+    b.state.branch = ws.branch ?? null;
+    b.setTitle("workspace-name", ws.name, ws.user_named === "true" ? 4 : 2);
+    b.touch(parseTs(ws.created_at));
+    b.touch(parseTs(ws.updated_at));
+    for await (const line of readJsonlLines(file.file)) {
+      const rec = safeJson(line.text);
+      if (!rec || rec.ephemeral || rec.agentId !== void 0) continue;
+      const ts = parseTs(rec.timestamp);
+      switch (rec.type) {
+        case "session.title_changed":
+          if (typeof rec.data?.title === "string") b.setTitle("title-changed", rec.data.title, 3, true);
+          break;
+        case "user.message":
+          if (rec.data?.source === void 0 && typeof rec.data?.content === "string") {
+            b.addMessage("user", rec.data.content, ts);
+          } else {
+            b.touch(ts);
+          }
+          break;
+        case "assistant.message":
+          if (typeof rec.data?.content === "string") b.addMessage("assistant", rec.data.content, ts);
+          break;
+        case "tool.execution_start":
+          if (typeof rec.data?.toolName === "string") b.addTool(rec.data.toolName, rec.data.arguments, ts);
+          break;
+        default:
+          break;
+      }
+    }
+    return b.finish(file, ctx2, { repoUrl: ws.repository ? `https://github.com/${ws.repository}` : null });
+  }
+};
+
+// src/lib/providers/crush.ts
+var import_node_fs7 = require("node:fs");
+var import_node_path6 = require("node:path");
+var DEFAULT_TITLES = /* @__PURE__ */ new Set(["New Session", "Untitled Session", "Generate a title"]);
+var projectCwds = /* @__PURE__ */ new Map();
+function registryFile() {
+  return (0, import_node_path6.join)(homeOf("crush"), "projects.json");
+}
+function loadProjects() {
+  let raw;
+  try {
+    raw = (0, import_node_fs7.readFileSync)(registryFile(), "utf8");
+  } catch {
+    return [];
+  }
+  const parsed = safeJson(raw);
+  const list = Array.isArray(parsed) ? parsed : parsed?.projects ?? [];
+  const out = [];
+  for (const p of list) {
+    if (!p?.path) continue;
+    const dataDir2 = p.data_dir || (0, import_node_path6.join)(p.path, ".crush");
+    out.push({ dbPath: (0, import_node_path6.join)(dataDir2, "crush.db"), cwd: p.path });
+  }
+  return out;
+}
+var crushProvider = {
+  id: "crush",
+  async prepare() {
+    projectCwds = new Map(loadProjects().map((p) => [p.dbPath, p.cwd]));
+  },
+  async discover() {
+    const out = [];
+    for (const dbPath of projectCwds.keys()) {
+      const db2 = openReadOnly(dbPath);
+      if (!db2) continue;
+      try {
+        if (!tablesOf(db2).has("sessions")) continue;
+        const cols = columnsOf(db2, "sessions");
+        const where = cols.has("parent_session_id") ? "parent_session_id IS NULL" : "1";
+        const rows = db2.prepare(`SELECT id, ${pick(cols, "updated_at")}, ${pick(cols, "created_at")} FROM sessions WHERE ${where}`).all();
+        for (const r of rows) {
+          out.push({
+            agent: "crush",
+            file: dbSessionFile(dbPath, r.id),
+            size: 0,
+            mtime: toMillis(r.updated_at ?? r.created_at) ?? 0
+          });
+        }
+      } finally {
+        db2.close();
+      }
+    }
+    return out;
+  },
+  async parse(file, previous, ctx2) {
+    const { dbPath, sessionId } = splitDbSessionFile(file.file);
+    const b = new SessionBuilder("crush", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    b.state.cwd = projectCwds.get(dbPath) ?? (0, import_node_path6.dirname)((0, import_node_path6.dirname)(dbPath));
+    const db2 = openReadOnly(dbPath);
+    if (!db2) return b.finish(file, ctx2);
+    try {
+      readSession(db2, sessionId, b);
+    } finally {
+      db2.close();
+    }
+    return b.finish(file, ctx2);
+  }
+};
+function readSession(db2, sessionId, b) {
+  const cols = columnsOf(db2, "sessions");
+  const row = db2.prepare(
+    `SELECT ${pick(cols, "title")}, ${pick(cols, "created_at")}, ${pick(cols, "updated_at")}
+              FROM sessions WHERE id = ?`
+  ).get(sessionId);
+  if (row) {
+    const title = row.title;
+    if (title && !DEFAULT_TITLES.has(title)) b.setTitle("session-title", title, 3);
+    b.touch(toMillis(row.created_at));
+    b.touch(toMillis(row.updated_at));
+  }
+  if (!tablesOf(db2).has("messages")) return;
+  const mcols = columnsOf(db2, "messages");
+  const rows = db2.prepare(
+    `SELECT role, ${pick(mcols, "parts")}, ${pick(mcols, "created_at")}
+       FROM messages WHERE session_id = ? ORDER BY ${mcols.has("created_at") ? "created_at, " : ""}id`
+  ).all(sessionId);
+  for (const m of rows) {
+    const role = m.role === "user" ? "user" : m.role === "assistant" ? "assistant" : null;
+    if (!role) continue;
+    const ts = toMillis(m.created_at);
+    const parts = safeJson(m.parts ?? "");
+    const texts = [];
+    for (const part of Array.isArray(parts) ? parts : []) {
+      if (part?.type === "text" && typeof part.data?.text === "string" && !part.data.hidden) {
+        texts.push(part.data.text);
+      } else if (part?.type === "tool_call" && typeof part.data?.name === "string") {
+        b.addTool(part.data.name, part.data.input, ts);
+      }
+    }
+    b.addMessage(role, texts.join("\n"), ts);
+  }
+}
+function toMillis(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return null;
+  return Math.floor(value * 1e3);
+}
+
+// src/lib/providers/cursor.ts
+var import_node_fs8 = require("node:fs");
+var import_node_os2 = require("node:os");
+var import_node_path7 = require("node:path");
+var import_node_sqlite4 = require("node:sqlite");
+var MONTHS = "jan feb mar apr may jun jul aug sep oct nov dec".split(" ");
+var TIMESTAMP_RE = /<timestamp>[^,<]*,\s*([A-Za-z]{3,})\s+(\d{1,2}),\s*(\d{4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)\s*\(UTC([+-]\d{1,2})(?::(\d{2}))?\)/i;
+function parseCursorTimestamp(text) {
+  const m = TIMESTAMP_RE.exec(text);
+  if (!m) return null;
+  const month = MONTHS.indexOf(m[1].slice(0, 3).toLowerCase());
+  if (month === -1) return null;
+  let hour = Number(m[4]) % 12;
+  if (m[6].toUpperCase() === "PM") hour += 12;
+  const offset = Number(m[7]);
+  const iso = `${m[3]}-${String(month + 1).padStart(2, "0")}-${m[2].padStart(2, "0")}T${String(hour).padStart(2, "0")}:${m[5]}:00${offset < 0 ? "-" : "+"}${String(Math.abs(offset)).padStart(2, "0")}:${m[8] ?? "00"}`;
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? null : t;
+}
+function cursorStateDb() {
+  return (0, import_node_path7.join)((0, import_node_os2.homedir)(), "Library", "Application Support", "Cursor", "User", "globalStorage", "state.vscdb");
+}
+var composers = /* @__PURE__ */ new Map();
+function loadComposerMeta() {
+  composers = /* @__PURE__ */ new Map();
+  let db2;
+  try {
+    db2 = new import_node_sqlite4.DatabaseSync(cursorStateDb(), { readOnly: true });
+  } catch {
+    return;
+  }
+  try {
+    const rows = db2.prepare(
+      `SELECT key,
+           json_extract(value,'$.name') AS name,
+           json_extract(value,'$.createdAt') AS createdAt,
+           json_extract(value,'$.lastUpdatedAt') AS lastUpdatedAt,
+           json_extract(value,'$.workspaceIdentifier.uri.fsPath') AS fsPath,
+           json_extract(value,'$.trackedGitRepos[0].repoPath') AS repoPath,
+           json_extract(value,'$.trackedGitRepos[0].branches[0].branchName') AS branch,
+           json_extract(value,'$.agentBackend') AS backend
+         FROM cursorDiskKV WHERE key >= 'composerData:' AND key < 'composerData;'`
+    ).all();
+    for (const r of rows) {
+      const id = String(r.key).slice("composerData:".length);
+      composers.set(id, {
+        title: r.name || null,
+        createdAt: numberOrNull(r.createdAt),
+        updatedAt: numberOrNull(r.lastUpdatedAt),
+        cwd: r.fsPath || r.repoPath || null,
+        branch: r.branch || null,
+        backend: r.backend || null
+      });
+    }
+  } catch {
+  } finally {
+    db2.close();
+  }
+}
+function numberOrNull(v) {
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
+}
+function blocks(content) {
+  return Array.isArray(content) ? content : [];
+}
+function modalCwd(counts) {
+  let best = null;
+  let bestCount = 0;
+  const home = (0, import_node_os2.homedir)();
+  for (const [dir, n] of counts) {
+    if (dir === home || dir.includes("/.cursor/")) continue;
+    if (n > bestCount) {
+      best = dir;
+      bestCount = n;
+    }
+  }
+  return best;
+}
+var cursorProvider = {
+  id: "cursor",
+  async prepare() {
+    loadComposerMeta();
+  },
+  async discover() {
+    const projects = (0, import_node_path7.join)(homeOf("cursor"), "projects");
+    const out = [];
+    let slugs = [];
+    try {
+      slugs = (0, import_node_fs8.readdirSync)(projects, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith(".")).map((e) => e.name);
+    } catch {
+      return out;
+    }
+    for (const slug of slugs) {
+      const root = (0, import_node_path7.join)(projects, slug, "agent-transcripts");
+      let sessions;
+      try {
+        sessions = (0, import_node_fs8.readdirSync)(root, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const s of sessions) {
+        if (!s.isDirectory()) continue;
+        const file = (0, import_node_path7.join)(root, s.name, `${s.name}.jsonl`);
+        try {
+          const st = (0, import_node_fs8.statSync)(file);
+          if (st.size === 0) continue;
+          out.push({ agent: "cursor", file, size: st.size, mtime: Math.floor(st.mtimeMs) });
+        } catch {
+        }
+      }
+    }
+    return out;
+  },
+  async parse(file, previous, ctx2) {
+    const sessionId = (0, import_node_path7.basename)(file.file, ".jsonl");
+    const meta = composers.get(sessionId);
+    const b = new SessionBuilder("cursor", sessionId, file, previous);
+    b.state.entrypoint = meta?.backend ?? "cursor";
+    b.state.branch = meta?.branch ?? null;
+    b.setTitle("composer-name", meta?.title, 3);
+    const cwdCounts = /* @__PURE__ */ new Map();
+    let ts = null;
+    let firstTs = null;
+    for await (const line of readJsonlLines(file.file)) {
+      const rec = safeJson(line.text);
+      if (!rec) continue;
+      const role = rec.role === "user" ? "user" : rec.role === "assistant" ? "assistant" : null;
+      if (!role) continue;
+      const texts = [];
+      for (const block of blocks(rec.message?.content)) {
+        if (!block || typeof block !== "object") continue;
+        if (block.type === "text" && typeof block.text === "string") {
+          texts.push(block.text);
+          if (role === "user") {
+            const at = parseCursorTimestamp(block.text);
+            if (at) {
+              ts = at;
+              if (firstTs === null) firstTs = at;
+            }
+          }
+        } else if (block.type === "tool_use" && typeof block.name === "string") {
+          b.addTool(block.name, block.input, ts);
+          const dir = block.input?.working_directory;
+          if (typeof dir === "string" && dir.startsWith("/")) cwdCounts.set(dir, (cwdCounts.get(dir) ?? 0) + 1);
+        }
+      }
+      b.addMessage(role, texts.join("\n"), ts);
+    }
+    let createdAt = meta?.createdAt ?? firstTs;
+    if (createdAt === null || createdAt === void 0) {
+      try {
+        const born = Math.floor((0, import_node_fs8.statSync)((0, import_node_path7.dirname)(file.file)).birthtimeMs);
+        if (born > 0) createdAt = born;
+      } catch {
+      }
+    }
+    b.state.updatedAt = Math.max(file.mtime, meta?.updatedAt ?? 0);
+    b.state.createdAt = createdAt && createdAt <= b.state.updatedAt ? createdAt : b.state.updatedAt;
+    b.state.cwd = meta?.cwd ?? modalCwd(cwdCounts);
+    return b.finish(file, ctx2);
+  }
+};
+
+// src/lib/providers/droid.ts
+var import_node_fs9 = require("node:fs");
+var import_node_path8 = require("node:path");
+var HIDDEN_TAGS = /* @__PURE__ */ new Set(["subagent", "exec", "btw-fork"]);
+function parseTs2(value) {
+  if (typeof value !== "string") return null;
+  const t = Date.parse(value);
+  return Number.isNaN(t) ? null : t;
+}
+function blockText(content, onTool) {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  const texts = [];
+  for (const block of content) {
+    if (!block || typeof block !== "object") continue;
+    if (block.type === "text" && typeof block.text === "string") texts.push(block.text);
+    else if (block.type === "tool_use" && typeof block.name === "string") onTool(block.name, block.input);
+  }
+  return texts.join("\n");
+}
+function sidecar(file) {
+  try {
+    const raw = JSON.parse((0, import_node_fs9.readFileSync)(file.replace(/\.jsonl$/, ".settings.json"), "utf8"));
+    const tags = Array.isArray(raw.tags) ? raw.tags : [];
+    const names = tags.map((t) => typeof t === "string" ? t : t?.name ?? "");
+    return { archived: !!raw.archivedAt, hidden: names.some((n) => HIDDEN_TAGS.has(n)) };
+  } catch {
+    return { archived: false, hidden: false };
+  }
+}
+function collect2(dir, out, recurse) {
+  let entries;
+  try {
+    entries = (0, import_node_fs9.readdirSync)(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const e of entries) {
+    if (e.isDirectory()) {
+      if (recurse && e.name.startsWith("-")) collect2((0, import_node_path8.join)(dir, e.name), out, false);
+      continue;
+    }
+    if (!e.isFile() || !e.name.endsWith(".jsonl")) continue;
+    const file = (0, import_node_path8.join)(dir, e.name);
+    try {
+      const st = (0, import_node_fs9.statSync)(file);
+      if (st.size > 0) out.push({ agent: "droid", file, size: st.size, mtime: Math.floor(st.mtimeMs) });
+    } catch {
+    }
+  }
+}
+var droidProvider = {
+  id: "droid",
+  async prepare() {
+  },
+  async discover() {
+    const out = [];
+    collect2((0, import_node_path8.join)(homeOf("droid"), "sessions"), out, true);
+    return out;
+  },
+  async parse(file, previous, ctx2) {
+    const meta = sidecar(file.file);
+    let sessionId = (0, import_node_path8.basename)(file.file, ".jsonl");
+    const b = new SessionBuilder("droid", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    b.state.archived = meta.archived;
+    for await (const line of readJsonlLines(file.file)) {
+      const rec = safeJson(line.text);
+      if (!rec) continue;
+      if (rec.type === "session_start") {
+        if (rec.id) sessionId = rec.id;
+        b.state.cwd = rec.lastCwd || rec.cwd || null;
+        if (rec.parent || rec.callingSessionId || rec.decompSessionType === "worker") b.state.hidden = true;
+        b.setTitle("session-title", rec.title, 3);
+        if (b.state.hidden) break;
+        continue;
+      }
+      if (rec.type !== "message") continue;
+      const m = rec.message;
+      const role = m?.role === "user" ? "user" : m?.role === "assistant" ? "assistant" : null;
+      if (!role) continue;
+      if (m?.visibility === "user_only" || m?.visibility === "llm_only") continue;
+      const ts = parseTs2(rec.timestamp);
+      const text = blockText(m?.content, (name, input) => b.addTool(name, input, ts));
+      b.addMessage(role, text, ts);
+    }
+    b.state.sessionId = sessionId;
+    b.state.id = `droid:${sessionId}`;
+    if (meta.hidden) b.state.hidden = true;
+    return b.finish(file, ctx2);
+  }
+};
+
+// src/lib/providers/gemini.ts
+var import_node_crypto = require("node:crypto");
+var import_node_fs10 = require("node:fs");
+var import_node_path9 = require("node:path");
+var SESSION_FILE = /^session-.*\.jsonl?$/;
+var projectRoots = /* @__PURE__ */ new Map();
+function loadProjectRoots(home) {
+  projectRoots = /* @__PURE__ */ new Map();
+  const byName = /* @__PURE__ */ new Map();
+  const registry = safeJson(readFileOrEmpty((0, import_node_path9.join)(home, "projects.json")));
+  for (const [path, slug] of Object.entries(registry?.projects ?? {})) {
+    byName.set(slug, path);
+    byName.set((0, import_node_crypto.createHash)("sha256").update(path).digest("hex"), path);
+  }
+  const tmp = (0, import_node_path9.join)(home, "tmp");
+  for (const name of listDirs(tmp)) {
+    const marker = readFileOrEmpty((0, import_node_path9.join)(tmp, name, ".project_root")).trim();
+    const root = marker || byName.get(name);
+    if (root) projectRoots.set(name, root);
+  }
+}
+function readFileOrEmpty(file) {
+  try {
+    return (0, import_node_fs10.readFileSync)(file, "utf8");
+  } catch {
+    return "";
+  }
+}
+function listDirs(dir) {
+  try {
+    return (0, import_node_fs10.readdirSync)(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+function partsToText(content) {
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) return content.map(partsToText).join("");
+  if (content && typeof content === "object") {
+    const p = content;
+    if (typeof p.text === "string") return p.text;
+  }
+  return "";
+}
+function parseTs3(value) {
+  if (typeof value !== "string") return null;
+  const t = Date.parse(value);
+  return Number.isNaN(t) ? null : t;
+}
+async function replay(file) {
+  const meta = {};
+  let messages = /* @__PURE__ */ new Map();
+  const apply = (rec) => {
+    if (typeof rec.$rewindTo === "string") {
+      const ids = [...messages.keys()];
+      const at = ids.indexOf(rec.$rewindTo);
+      messages = at === -1 ? /* @__PURE__ */ new Map() : new Map(ids.slice(0, at).map((id) => [id, messages.get(id)]));
+      return;
+    }
+    if (typeof rec.id === "string") {
+      messages.set(rec.id, rec);
+      return;
+    }
+    const patch = rec.$set && typeof rec.$set === "object" ? rec.$set : rec;
+    if (Array.isArray(patch.messages)) {
+      messages = new Map(patch.messages.filter((m) => m?.id).map((m) => [m.id, m]));
+    }
+    Object.assign(meta, { ...patch, messages: void 0 });
+  };
+  for await (const line of readJsonlLines(file)) {
+    const rec = safeJson(line.text);
+    if (rec) apply(rec);
+  }
+  if (!meta.sessionId && file.endsWith(".json")) {
+    const whole = safeJson(readFileOrEmpty(file));
+    if (whole?.sessionId) {
+      if (Array.isArray(whole.messages)) {
+        messages = new Map(whole.messages.filter((m) => m?.id).map((m) => [m.id, m]));
+      }
+      Object.assign(meta, { ...whole, messages: void 0 });
+    }
+  }
+  return { meta, messages: [...messages.values()] };
+}
+function projectRootFor(file) {
+  return projectRoots.get((0, import_node_path9.basename)((0, import_node_path9.join)(file, "..", ".."))) ?? null;
+}
+var geminiProvider = {
+  id: "gemini",
+  async prepare() {
+    loadProjectRoots(homeOf("gemini"));
+  },
+  async discover() {
+    const tmp = (0, import_node_path9.join)(homeOf("gemini"), "tmp");
+    const byName = /* @__PURE__ */ new Map();
+    for (const project of listDirs(tmp)) {
+      const chats = (0, import_node_path9.join)(tmp, project, "chats");
+      let entries;
+      try {
+        entries = (0, import_node_fs10.readdirSync)(chats, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+      for (const e of entries) {
+        if (!e.isFile() || !SESSION_FILE.test(e.name)) continue;
+        const file = (0, import_node_path9.join)(chats, e.name);
+        try {
+          const st = (0, import_node_fs10.statSync)(file);
+          if (st.size === 0) continue;
+          const found = { agent: "gemini", file, size: st.size, mtime: Math.floor(st.mtimeMs) };
+          const seen = byName.get(e.name);
+          if (!seen || found.mtime > seen.mtime) byName.set(e.name, found);
+        } catch {
+        }
+      }
+    }
+    return [...byName.values()];
+  },
+  async parse(file, previous, ctx2) {
+    const { meta, messages } = await replay(file.file);
+    const sessionId = meta.sessionId ?? (0, import_node_path9.basename)(file.file).replace(/\.jsonl?$/, "");
+    const b = new SessionBuilder("gemini", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    b.state.cwd = projectRootFor(file.file);
+    b.touch(parseTs3(meta.startTime));
+    b.touch(parseTs3(meta.lastUpdated));
+    b.setTitle("summary", meta.summary, 2);
+    for (const m of messages) {
+      const ts = parseTs3(m.timestamp);
+      if (m.type === "user") {
+        b.addMessage("user", partsToText(m.content ?? m.displayContent), ts);
+      } else if (m.type === "gemini") {
+        b.addMessage("assistant", partsToText(m.content ?? m.displayContent), ts);
+        for (const call of m.toolCalls ?? []) {
+          b.addTool(call.displayName || call.name || "tool", call.args, parseTs3(call.timestamp) ?? ts);
+        }
+      }
+    }
+    if (meta.kind === "subagent") b.state.hidden = true;
+    return b.finish(file, ctx2);
+  }
+};
+
+// src/lib/providers/goose.ts
+var import_node_path10 = require("node:path");
+var HIDDEN_TYPES = /* @__PURE__ */ new Set(["sub_agent", "hidden"]);
+var MILLISECOND_THRESHOLD = 1e10;
+function databasePath() {
+  return (0, import_node_path10.join)(homeOf("goose"), "sessions", "sessions.db");
+}
+function parseSqlTime(value) {
+  if (typeof value !== "string" || !value) return null;
+  const t = Date.parse(value.includes("T") ? value : `${value.replace(" ", "T")}Z`);
+  return Number.isNaN(t) ? null : t;
+}
+function parseEpoch(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return null;
+  return value > MILLISECOND_THRESHOLD ? value : value * 1e3;
+}
+var gooseProvider = {
+  id: "goose",
+  async prepare() {
+  },
+  async discover() {
+    const dbPath = databasePath();
+    const db2 = openReadOnly(dbPath);
+    if (!db2) return [];
+    try {
+      if (!tablesOf(db2).has("sessions")) return [];
+      const cols = columnsOf(db2, "sessions");
+      const where = cols.has("session_type") ? `session_type IS NULL OR session_type NOT IN ('sub_agent', 'hidden')` : "1";
+      const rows = db2.prepare(`SELECT id, ${pick(cols, "updated_at")}, ${pick(cols, "created_at")} FROM sessions WHERE ${where}`).all();
+      return rows.map((r) => ({
+        agent: "goose",
+        file: dbSessionFile(dbPath, String(r.id)),
+        size: 0,
+        mtime: parseSqlTime(r.updated_at) ?? parseSqlTime(r.created_at) ?? 0
+      }));
+    } finally {
+      db2.close();
+    }
+  },
+  async parse(file, previous, ctx2) {
+    const { dbPath, sessionId } = splitDbSessionFile(file.file);
+    const b = new SessionBuilder("goose", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    const db2 = openReadOnly(dbPath);
+    if (!db2) return b.finish(file, ctx2);
+    try {
+      readSession2(db2, sessionId, b);
+    } finally {
+      db2.close();
+    }
+    return b.finish(file, ctx2);
+  }
+};
+function readSession2(db2, sessionId, b) {
+  const cols = columnsOf(db2, "sessions");
+  const row = db2.prepare(
+    `SELECT ${pick(cols, "name")}, ${pick(cols, "description")}, ${pick(cols, "working_dir")},
+              ${pick(cols, "session_type")}, ${pick(cols, "created_at")}, ${pick(cols, "updated_at")},
+              ${pick(cols, "archived_at")}
+       FROM sessions WHERE id = ?`
+  ).get(sessionId);
+  if (row) {
+    b.setTitle("session-name", row.name || row.description, 3);
+    b.state.cwd = row.working_dir || null;
+    if (row.archived_at) b.state.archived = true;
+    if (row.session_type && HIDDEN_TYPES.has(row.session_type)) b.state.hidden = true;
+    b.touch(parseSqlTime(row.created_at));
+    b.touch(parseSqlTime(row.updated_at));
+    if (b.state.hidden) return;
+  }
+  if (!tablesOf(db2).has("messages")) return;
+  const mcols = columnsOf(db2, "messages");
+  const rows = db2.prepare(
+    `SELECT role, ${pick(mcols, "content_json")}, ${pick(mcols, "created_timestamp")}
+       FROM messages WHERE session_id = ? ORDER BY ${mcols.has("created_timestamp") ? "created_timestamp, " : ""}id`
+  ).all(sessionId);
+  for (const m of rows) {
+    const role = m.role === "user" ? "user" : m.role === "assistant" ? "assistant" : null;
+    if (!role) continue;
+    const ts = parseEpoch(m.created_timestamp);
+    const blocks2 = safeJson(m.content_json ?? "");
+    const texts = [];
+    for (const block of Array.isArray(blocks2) ? blocks2 : []) {
+      if (!block || typeof block !== "object") continue;
+      if (block.type === "text" && typeof block.text === "string") texts.push(block.text);
+      else if (block.type === "toolRequest") {
+        const call = block.toolCall?.value;
+        if (call?.name) b.addTool(call.name, call.arguments, ts);
+      }
+    }
+    b.addMessage(role, texts.join("\n"), ts);
+  }
+}
+
+// src/lib/providers/opencode.ts
+var import_node_fs11 = require("node:fs");
+var import_node_path11 = require("node:path");
+var DEFAULT_TITLE = /^(New session|Child session) - \d{4}-\d{2}-\d{2}T/;
+function dataDir() {
+  return homeOf("opencode");
+}
+function databases() {
+  const dir = dataDir();
+  try {
+    return (0, import_node_fs11.readdirSync)(dir, { withFileTypes: true }).filter((e) => e.isFile() && /^opencode.*\.db$/.test(e.name)).map((e) => (0, import_node_path11.join)(dir, e.name));
+  } catch {
+    return [];
+  }
+}
+var opencodeProvider = {
+  id: "opencode",
+  async prepare() {
+  },
+  async discover() {
+    const out = [];
+    for (const dbPath of databases()) {
+      const db2 = openReadOnly(dbPath);
+      if (!db2) continue;
+      try {
+        if (!tablesOf(db2).has("session")) continue;
+        const cols = columnsOf(db2, "session");
+        const rows = db2.prepare(
+          `SELECT id, ${pick(cols, "time_updated")}, ${pick(cols, "time_created")} FROM session
+             WHERE ${cols.has("parent_id") ? "parent_id IS NULL" : "1"}`
+        ).all();
+        for (const r of rows) {
+          out.push({
+            agent: "opencode",
+            file: dbSessionFile(dbPath, r.id),
+            size: 0,
+            mtime: Math.floor(r.time_updated ?? r.time_created ?? 0)
+          });
+        }
+      } finally {
+        db2.close();
+      }
+    }
+    return out;
+  },
+  async parse(file, previous, ctx2) {
+    const { dbPath, sessionId } = splitDbSessionFile(file.file);
+    const b = new SessionBuilder("opencode", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    const db2 = openReadOnly(dbPath);
+    if (!db2) return b.finish(file, ctx2);
+    try {
+      readSession3(db2, sessionId, b);
+    } finally {
+      db2.close();
+    }
+    return b.finish(file, ctx2);
+  }
+};
+function readSession3(db2, sessionId, b) {
+  const cols = columnsOf(db2, "session");
+  const row = db2.prepare(
+    `SELECT ${pick(cols, "title")}, ${pick(cols, "directory")}, ${pick(cols, "time_created")},
+              ${pick(cols, "time_updated")}, ${pick(cols, "time_archived")}, ${pick(cols, "agent")}
+       FROM session WHERE id = ?`
+  ).get(sessionId);
+  if (row) {
+    const title = row.title;
+    if (title && !DEFAULT_TITLE.test(title)) b.setTitle("session-title", title, 3);
+    b.state.cwd = row.directory || null;
+    if (row.agent) b.state.entrypoint = String(row.agent);
+    if (row.time_archived) b.state.archived = true;
+    b.touch(numberOrNull2(row.time_created));
+    b.touch(numberOrNull2(row.time_updated));
+  }
+  const tables = tablesOf(db2);
+  if (tables.has("message")) {
+    const messages = db2.prepare(`SELECT id, data FROM message WHERE session_id = ? ORDER BY time_created, id`).all(sessionId);
+    const partsFor = tables.has("part") ? db2.prepare(`SELECT data FROM part WHERE message_id = ? ORDER BY id`) : null;
+    for (const m of messages) {
+      const msg = safeJson(m.data);
+      if (!msg) continue;
+      const parts = partsFor?.all(m.id) ?? [];
+      addMessage(
+        b,
+        msg,
+        parts.map((p) => safeJson(p.data)).filter((p) => !!p)
+      );
+    }
+    return;
+  }
+  if (tables.has("session_message")) {
+    const rows = db2.prepare(`SELECT data FROM session_message WHERE session_id = ? ORDER BY seq, id`).all(sessionId);
+    for (const r of rows) {
+      const msg = safeJson(r.data);
+      if (msg) addMessage(b, msg, msg.parts ?? []);
+    }
+  }
+}
+function addMessage(b, msg, parts) {
+  const role = msg.role === "user" ? "user" : msg.role === "assistant" ? "assistant" : null;
+  if (!role) return;
+  const ts = numberOrNull2(msg.time?.created);
+  const texts = [];
+  for (const p of parts) {
+    if (p.type === "text" && typeof p.text === "string" && !p.synthetic && !p.ignored) texts.push(p.text);
+    else if (p.type === "tool" && typeof p.tool === "string") b.addTool(p.tool, p.state?.input, ts);
+  }
+  b.addMessage(role, texts.join("\n"), ts);
+}
+function numberOrNull2(v) {
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
+}
+
+// src/lib/providers/qwen.ts
+var import_node_fs12 = require("node:fs");
+var import_node_path12 = require("node:path");
+var SESSION_FILE2 = /^[0-9a-fA-F-]{32,36}\.jsonl$/;
+function partsText(parts) {
+  if (!Array.isArray(parts)) return "";
+  return parts.filter((p) => p && !p.thought && typeof p.text === "string").map((p) => p.text).join("");
+}
+function parseTs4(value) {
+  if (typeof value !== "string") return null;
+  const t = Date.parse(value);
+  return Number.isNaN(t) ? null : t;
+}
+function collect3(dir, archived, out) {
+  let entries;
+  try {
+    entries = (0, import_node_fs12.readdirSync)(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const e of entries) {
+    if (e.isDirectory() && !archived && e.name === "archive") {
+      if (getConfig().includeArchived) collect3((0, import_node_path12.join)(dir, e.name), true, out);
+      continue;
+    }
+    if (!e.isFile() || !SESSION_FILE2.test(e.name)) continue;
+    const file = (0, import_node_path12.join)(dir, e.name);
+    try {
+      const st = (0, import_node_fs12.statSync)(file);
+      if (st.size > 0) out.push({ agent: "qwen", file, size: st.size, mtime: Math.floor(st.mtimeMs) });
+    } catch {
+    }
+  }
+}
+var qwenProvider = {
+  id: "qwen",
+  async prepare() {
+  },
+  async discover() {
+    const projects = (0, import_node_path12.join)(homeOf("qwen"), "projects");
+    const out = [];
+    let dirs = [];
+    try {
+      dirs = (0, import_node_fs12.readdirSync)(projects, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+    } catch {
+      return out;
+    }
+    for (const dir of dirs) collect3((0, import_node_path12.join)(projects, dir, "chats"), false, out);
+    return out;
+  },
+  async parse(file, previous, ctx2) {
+    const sessionId = (0, import_node_path12.basename)(file.file, ".jsonl");
+    const b = new SessionBuilder("qwen", sessionId, file, previous);
+    b.state.entrypoint = "cli";
+    b.state.archived = file.file.includes("/chats/archive/");
+    for await (const line of readJsonlLines(file.file)) {
+      const rec = safeJson(line.text);
+      if (!rec) continue;
+      const ts = parseTs4(rec.timestamp);
+      if (rec.cwd) b.state.cwd = rec.cwd;
+      if (rec.gitBranch) b.state.branch = rec.gitBranch;
+      b.touch(ts);
+      if (rec.isSidechain || rec.agentId) continue;
+      switch (rec.type) {
+        case "user":
+          if (rec.subtype === void 0 && (rec.provenance === void 0 || rec.provenance === "real_user")) {
+            b.addMessage("user", rec.systemPayload?.displayText || partsText(rec.message?.parts), ts);
+          }
+          break;
+        case "assistant":
+          b.addMessage("assistant", partsText(rec.message?.parts), ts);
+          for (const p of rec.message?.parts ?? []) {
+            if (p?.functionCall?.name) b.addTool(p.functionCall.name, p.functionCall.args, ts);
+          }
+          break;
+        case "system":
+          if (rec.subtype === "custom_title") b.setTitle("custom-title", rec.systemPayload?.customTitle, 3, true);
+          break;
+        default:
+          break;
+      }
+    }
+    if (!b.state.updatedAt || file.mtime > b.state.updatedAt) b.state.updatedAt = file.mtime;
+    return b.finish(file, ctx2);
+  }
+};
+
 // src/lib/providers/index.ts
-var providers = [claudeProvider, codexProvider];
+var providers = [
+  claudeProvider,
+  codexProvider,
+  cursorProvider,
+  geminiProvider,
+  qwenProvider,
+  copilotProvider,
+  opencodeProvider,
+  crushProvider,
+  gooseProvider,
+  droidProvider
+];
 
 // src/lib/indexer.ts
 var ctx = {

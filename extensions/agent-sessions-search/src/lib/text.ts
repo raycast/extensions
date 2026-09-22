@@ -40,10 +40,19 @@ const wrapperRegexes = WRAPPER_TAGS.map((tag) => {
 
 const COMMAND_RE = /<command-name>([^<]*)<\/command-name>\s*(?:<command-args>([\s\S]*?)<\/command-args>)?/i;
 
+/**
+ * Cursor sends the human prompt inside <user_query>, preceded by a <timestamp> and followed by
+ * context blocks (git diffs, attached images, the body of a slash command). Only the query is
+ * the prompt, so it replaces the whole message when present.
+ */
+const USER_QUERY_RE = /<user_query>([\s\S]*?)<\/user_query>/gi;
+
 /** Remove injected wrapper blocks and reconstruct slash commands. Returns "" when nothing human remains. */
 export function cleanText(raw: string): string {
   if (!raw) return "";
   let text = raw;
+  const queries = [...text.matchAll(USER_QUERY_RE)].map((m) => m[1].trim()).filter(Boolean);
+  if (queries.length > 0) text = queries.join("\n\n");
   const cmd = COMMAND_RE.exec(text);
   if (cmd) {
     const name = cmd[1].trim();

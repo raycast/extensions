@@ -3,28 +3,24 @@ import { runAppleScript } from "@raycast/utils";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { agent } from "./agents";
 import { SessionHit } from "./types";
 
 /**
- * Resuming strategies (verified against the installed apps):
- *  - Claude Desktop handles `claude://resume?session=<uuid>` (imports a CLI session if needed).
- *  - Codex (ChatGPT.app, bundle com.openai.codex) handles `codex://threads/<uuid>`.
- *  - Terminal: `claude --resume <id>` / `codex resume <id>` run inside the session's cwd.
+ * Resuming strategies (see `AGENTS` in agents.ts for the per-agent details):
+ *  - desktop apps handle a deep link (`claude://resume?session=<uuid>`, `codex://threads/<uuid>`, …)
+ *  - terminal: the agent's own resume invocation, run inside the session's cwd
  * Terminal launchers follow the patterns used by ClaudeCast, claude-code-launcher and
  * heyitaki's search-agent-sessions extension.
  */
 
-type Prefs = Pick<Preferences, "terminalApp" | "defaultResumeTarget" | "claudeCommand" | "codexCommand">;
-
-export const CODEX_BUNDLED_CLI = "/Applications/ChatGPT.app/Contents/Resources/codex";
+type Prefs = Pick<Preferences, "terminalApp" | "defaultResumeTarget">;
 
 function prefs(): Prefs {
   const p = getPreferenceValues<Partial<Prefs>>();
   return {
     terminalApp: p.terminalApp ?? "Terminal",
     defaultResumeTarget: p.defaultResumeTarget ?? "auto",
-    claudeCommand: p.claudeCommand?.trim() || "claude",
-    codexCommand: p.codexCommand?.trim() || "codex",
   };
 }
 
@@ -38,28 +34,41 @@ export function workingDirectory(hit: SessionHit): string {
 }
 
 export function resumeCommand(hit: SessionHit): string {
-  const p = prefs();
+  const d = agent(hit.agent);
   const id = shellQuote(hit.sessionId);
-  if (hit.agent === "claude") return `${p.claudeCommand} --resume ${id}`;
-  if (p.codexCommand === "codex" && existsSync(CODEX_BUNDLED_CLI)) {
-    // Codex desktop users often have no `codex` on PATH; fall back to the CLI bundled with the app.
-    return `(command -v codex >/dev/null 2>&1 && codex resume ${id} || ${shellQuote(CODEX_BUNDLED_CLI)} resume ${id})`;
+  const p = getPreferenceValues<Record<string, unknown>>();
+  const override = d.commandPreference ? p[d.commandPreference] : undefined;
+  const command = (typeof override === "string" ? override.trim() : "") || d.command;
+  if (command === d.command) {
+    // Desktop-first users often have no CLI on PATH: fall back to a known install location.
+    const fallback = d.commandFallbacks.find((c) => existsSync(c));
+    if (fallback) {
+      return `(command -v ${command} >/dev/null 2>&1 && ${d.resume(command, id)} || ${d.resume(shellQuote(fallback), id)})`;
+    }
   }
-  return `${p.codexCommand} resume ${id}`;
+  return d.resume(command, id);
+}
+
+/**
+ * The file to reveal for a session. Agents that keep every session in one database are indexed
+ * as `<database path>#<session id>`, so the database itself is what exists on disk.
+ */
+export function transcriptPath(hit: SessionHit): string {
+  const at = hit.file.lastIndexOf("#");
+  return at === -1 ? hit.file : hit.file.slice(0, at);
 }
 
 export function fullTerminalCommand(hit: SessionHit): string {
   return `cd ${shellQuote(workingDirectory(hit))} && ${resumeCommand(hit)}`;
 }
 
-export function appDeepLink(hit: SessionHit): string {
-  return hit.agent === "claude"
-    ? `claude://resume?session=${encodeURIComponent(hit.sessionId)}`
-    : `codex://threads/${encodeURIComponent(hit.sessionId)}`;
+/** Deep link opening the session in the agent's desktop app, when it has one. */
+export function appDeepLink(hit: SessionHit): string | null {
+  return agent(hit.agent).app?.deepLink(hit.sessionId) ?? null;
 }
 
-export function appName(hit: SessionHit): string {
-  return hit.agent === "claude" ? "Claude Desktop" : "Codex app";
+export function appName(hit: SessionHit): string | null {
+  return agent(hit.agent).app?.name ?? null;
 }
 
 export function isDesktopSession(hit: SessionHit): boolean {
@@ -69,13 +78,16 @@ export function isDesktopSession(hit: SessionHit): boolean {
 
 /** Which action Enter should trigger for this session. */
 export function preferredTarget(hit: SessionHit): "app" | "terminal" {
+  if (!agent(hit.agent).app) return "terminal";
   const p = prefs();
   if (p.defaultResumeTarget !== "auto") return p.defaultResumeTarget;
   return isDesktopSession(hit) ? "app" : "terminal";
 }
 
 export async function openInApp(hit: SessionHit): Promise<void> {
-  await open(appDeepLink(hit));
+  const link = appDeepLink(hit);
+  if (!link) throw new Error(`${agent(hit.agent).label} has no desktop app to open`);
+  await open(link);
 }
 
 export async function openInTerminal(hit: SessionHit): Promise<void> {

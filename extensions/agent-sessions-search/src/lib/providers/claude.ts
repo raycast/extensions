@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
-import { getConfig } from "../config";
+import { homeOf } from "../config";
 import { readJsonlLines, safeJson } from "../jsonl";
 import { RefCollector } from "../refs";
 import { cleanText, makeTitle, oneLine, truncate } from "../text";
@@ -72,7 +72,7 @@ function isSkippableClaudeLine(text: string): boolean {
 const TITLE_RANK: Record<string, number> = { "custom-title": 4, "ai-title": 3, summary: 2, "agent-name": 1, prompt: 0 };
 
 export function claudeProjectsDir(): string {
-  return getConfig().claudeProjectsDir;
+  return join(homeOf("claude"), "projects");
 }
 
 function toolLine(name: string, input: unknown): string | null {

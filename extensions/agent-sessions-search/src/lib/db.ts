@@ -282,3 +282,13 @@ export function countSessions(): number {
   const row = getDb().prepare(`SELECT count(*) AS n FROM sessions WHERE hidden = 0`).get() as { n: number };
   return row.n;
 }
+
+/** Agents that actually have visible sessions indexed, so the UI only offers filters that match something. */
+export function indexedAgents(): Set<AgentId> {
+  try {
+    const rows = getDb().prepare(`SELECT DISTINCT agent FROM sessions WHERE hidden = 0`).all() as { agent: string }[];
+    return new Set(rows.map((r) => r.agent as AgentId));
+  } catch {
+    return new Set();
+  }
+}

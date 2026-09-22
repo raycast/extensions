@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { getConfig } from "../config";
+import { getConfig, homeOf } from "../config";
 import { parseRemoteUrl } from "../git";
 import { readJsonlLines, safeJson } from "../jsonl";
 import { RefCollector } from "../refs";
@@ -41,7 +41,7 @@ interface RolloutLine {
 }
 
 export function codexHome(): string {
-  return getConfig().codexHome;
+  return homeOf("codex");
 }
 
 function walkJsonl(dir: string, out: DiscoveredFile[]) {

@@ -1,9 +1,6 @@
-export type AgentId = "claude" | "codex";
-
-export const AGENT_LABELS: Record<AgentId, string> = {
-  claude: "Claude Code",
-  codex: "Codex",
-};
+/** Supported agents. Each one has an entry in `AGENTS` (agents.ts) and a `SessionProvider`. */
+export type AgentId =
+  "claude" | "codex" | "cursor" | "gemini" | "qwen" | "copilot" | "opencode" | "crush" | "goose" | "droid";
 
 /** One transcript file discovered on disk. */
 export interface DiscoveredFile {

@@ -16,7 +16,7 @@ import {
 import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { existsSync } from "node:fs";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { countSessions, getMeta } from "./lib/db";
+import { countSessions, getMeta, indexedAgents } from "./lib/db";
 import { projectLabel } from "./lib/git";
 import { runIndex } from "./lib/index-runner";
 import { configureFromPreferences } from "./lib/raycast-config";
@@ -27,12 +27,14 @@ import {
   openInApp,
   openInTerminal,
   preferredTarget,
+  transcriptPath,
   workingDirectory,
 } from "./lib/resume";
 import { refreshClaudeDesktopState } from "./lib/desktop";
 import { linearUrl, prUrl } from "./lib/links";
 import { searchSessions } from "./lib/search";
-import { AGENT_LABELS, AgentId, SessionHit } from "./lib/types";
+import { AGENTS, agent as agentInfo } from "./lib/agents";
+import { AgentId, SessionHit } from "./lib/types";
 
 type AgentFilter = AgentId | "all";
 
@@ -44,10 +46,13 @@ function appIcon(candidates: string[], fallback: string): Image.ImageLike {
   return app ? { fileIcon: app } : { source: fallback };
 }
 
-const AGENT_ICON: Record<AgentId, Image.ImageLike> = {
-  claude: appIcon(["/Applications/Claude.app"], "claude.png"),
-  codex: appIcon(["/Applications/Codex.app", "/Applications/ChatGPT.app"], "codex.png"),
-};
+const AGENT_ICON: Record<string, Image.ImageLike> = Object.fromEntries(
+  AGENTS.map((a) => [a.id, appIcon(a.appBundles, a.icon)]),
+);
+
+function agentLabel(id: AgentId): string {
+  return agentInfo(id).label;
+}
 
 function formatDate(ts: number | null): string {
   if (!ts) return "unknown";
@@ -125,6 +130,8 @@ export default function Command() {
     setSelectedItemId(hits[0]?.id);
   }, [data]);
   const lastIndexed = useMemo(() => getMeta("lastIndexedAt"), [indexStatus.indexing]);
+  // Only offer filters for agents the user actually has sessions from.
+  const available = useMemo(() => indexedAgents(), [indexStatus.indexing, data]);
 
   return (
     <List
@@ -139,8 +146,9 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown tooltip="Agent" storeValue onChange={(v) => setAgent(v as AgentFilter)}>
           <List.Dropdown.Item title="All agents" value="all" icon={Icon.Layers} />
-          <List.Dropdown.Item title="Claude Code" value="claude" icon={AGENT_ICON.claude} />
-          <List.Dropdown.Item title="Codex" value="codex" icon={AGENT_ICON.codex} />
+          {AGENTS.filter((a) => available.has(a.id) || agent === a.id).map((a) => (
+            <List.Dropdown.Item key={a.id} title={a.label} value={a.id} icon={AGENT_ICON[a.id]} />
+          ))}
         </List.Dropdown>
       }
     >
@@ -208,6 +216,7 @@ function SessionItem({
   onToggleDetail: () => void;
 }) {
   const project = projectLabel(hit.repo, hit.cwd);
+  const deepLink = appDeepLink(hit);
   const worktreeBranch = hit.branch && hit.branch !== "HEAD" && hit.branch !== "main" && hit.branch !== "master";
   const accessories: List.Item.Accessory[] = [];
   if (hit.pinned)
@@ -224,23 +233,21 @@ function SessionItem({
     accessories.push({ date: new Date(hit.updatedAt), tooltip: `Last activity ${formatDate(hit.updatedAt)}` });
 
   const target = preferredTarget(hit);
-  const primary =
-    target === "app" ? (
-      <Action title={`Open in ${appName(hit)}`} icon={Icon.AppWindow} onAction={() => resume(hit, "app")} />
-    ) : (
-      <Action title="Resume in Terminal" icon={Icon.Terminal} onAction={() => resume(hit, "terminal")} />
-    );
-  const secondary =
-    target === "app" ? (
-      <Action title="Resume in Terminal" icon={Icon.Terminal} onAction={() => resume(hit, "terminal")} />
-    ) : (
-      <Action title={`Open in ${appName(hit)}`} icon={Icon.AppWindow} onAction={() => resume(hit, "app")} />
-    );
+  const app = appName(hit);
+  const terminalAction = (
+    <Action title="Resume in Terminal" icon={Icon.Terminal} onAction={() => resume(hit, "terminal")} />
+  );
+  // Agents with no desktop app (CLI-only) only ever get the terminal action.
+  const appAction = app ? (
+    <Action title={`Open in ${app}`} icon={Icon.AppWindow} onAction={() => resume(hit, "app")} />
+  ) : null;
+  const primary = target === "app" ? appAction : terminalAction;
+  const secondary = target === "app" ? terminalAction : appAction;
 
   return (
     <List.Item
       id={hit.id}
-      icon={{ value: AGENT_ICON[hit.agent], tooltip: AGENT_LABELS[hit.agent] }}
+      icon={{ value: AGENT_ICON[hit.agent], tooltip: agentLabel(hit.agent) }}
       title={hit.title}
       subtitle={worktreeBranch ? { value: hit.branch ?? "", tooltip: "Branch" } : undefined}
       keywords={[hit.sessionId, hit.branch ?? "", project]}
@@ -263,7 +270,7 @@ function SessionItem({
               content={hit.sessionId}
               shortcut={Keyboard.Shortcut.Common.Copy}
             />
-            <Action.CopyToClipboard title="Copy Deep Link" content={appDeepLink(hit)} />
+            {deepLink && <Action.CopyToClipboard title="Copy Deep Link" content={deepLink} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Links">
             {hit.prNumbers.map((n, i) => {
@@ -304,7 +311,7 @@ function SessionItem({
                 shortcut={Keyboard.Shortcut.Common.Edit}
               />
             )}
-            <Action.ShowInFinder title="Show Transcript File" path={hit.file} />
+            <Action.ShowInFinder title="Show Transcript File" path={transcriptPath(hit)} />
           </ActionPanel.Section>
           <ActionPanel.Section title="View">
             <Action
@@ -357,7 +364,7 @@ async function resume(hit: SessionHit, target: "app" | "terminal") {
     await showFailureToast(e, {
       title:
         target === "app"
-          ? `Could not open ${appName(hit)}`
+          ? `Could not open ${appName(hit) ?? "the desktop app"}`
           : `Could not launch ${getPreferenceValues<Preferences>().terminalApp}`,
     });
   }
@@ -386,7 +393,7 @@ function SessionDetail({ hit, query }: { hit: SessionHit; query: string }) {
       markdown={md.join("\n\n")}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Agent" text={AGENT_LABELS[hit.agent]} icon={AGENT_ICON[hit.agent]} />
+          <List.Item.Detail.Metadata.Label title="Agent" text={agentLabel(hit.agent)} icon={AGENT_ICON[hit.agent]} />
           <List.Item.Detail.Metadata.Label title="Project" text={hit.repo ?? projectLabel(hit.repo, hit.cwd)} />
           {hit.branch && <List.Item.Detail.Metadata.Label title="Branch" text={hit.branch} icon={Icon.Code} />}
           {hit.prNumbers.length > 0 && (

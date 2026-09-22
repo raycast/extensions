@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-sessions-search",
   "title": "Agent Sessions",
-  "description": "Search and resume Claude Code and Codex sessions. Full-text search over every historical transcript, PR-aware ranking, one keystroke to resume in your terminal or desktop app. Everything stays local.",
+  "description": "Search and resume coding-agent sessions across Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, opencode, Crush, Goose, Droid and Qwen Code. Full-text search over every historical transcript, PR-aware ranking, one keystroke to resume in your terminal or desktop app. Everything stays local.",
   "icon": "icon.png",
   "author": "tom_esterez",
   "categories": [
@@ -14,8 +14,8 @@
     {
       "name": "search-sessions",
       "title": "Search Agent Sessions",
-      "subtitle": "Claude Code / Codex",
-      "description": "Search all Claude Code and Codex sessions by PR, issue, branch, file or text and resume them.",
+      "subtitle": "Claude Code / Codex / Cursor / \u2026",
+      "description": "Search every local coding-agent session by PR, issue, branch, file or text and resume it.",
       "mode": "view"
     },
     {
@@ -62,7 +62,7 @@
     {
       "name": "defaultResumeTarget",
       "title": "Default Resume Action",
-      "description": "What Enter does. Auto opens desktop-created sessions in the desktop app and CLI sessions in the terminal.",
+      "description": "What Enter does. Auto opens desktop-created sessions in the desktop app and everything else in the terminal. CLI-only agents always resume in the terminal.",
       "type": "dropdown",
       "required": false,
       "default": "auto",
@@ -84,7 +84,7 @@
     {
       "name": "claudeConfigDir",
       "title": "Claude Config Directory",
-      "description": "Defaults to ~/.claude.",
+      "description": "Defaults to ~/.claude. Other agents are detected automatically in their standard locations.",
       "type": "textfield",
       "required": false
     },
@@ -121,8 +121,8 @@
     {
       "name": "includeArchived",
       "title": "Archived Sessions",
-      "label": "Include archived Codex sessions",
-      "description": "Index sessions from ~/.codex/archived_sessions too.",
+      "label": "Include archived sessions",
+      "description": "Index archived Codex and Qwen Code sessions too.",
       "type": "checkbox",
       "required": false,
       "default": true

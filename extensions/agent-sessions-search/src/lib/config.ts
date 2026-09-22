@@ -1,14 +1,15 @@
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { AgentId } from "./types";
 
 /**
  * Configuration shared by the extension process and the index worker process.
- * The worker cannot import @raycast/api, so everything it needs is passed explicitly.
+ * The worker cannot import @raycast/api, so everything it needs is passed explicitly
+ * (as JSON: keep this structure serialisable).
  */
 export interface IndexConfig {
   dbPath: string;
-  claudeProjectsDir: string;
-  codexHome: string;
+  /** Root directory of each agent's local state, keyed by agent id. */
+  homes: Record<string, string>;
   includeArchived: boolean;
 }
 
@@ -23,15 +24,11 @@ export function getConfig(): IndexConfig {
   return current;
 }
 
+/** Root directory of one agent's local state (see `AGENTS` in agents.ts). */
+export function homeOf(id: AgentId): string {
+  return getConfig().homes[id] ?? "";
+}
+
 export function expandHome(p: string): string {
   return p.replace(/^~(?=$|\/)/, homedir());
-}
-
-export function defaultClaudeProjectsDir(override?: string): string {
-  const base = override?.trim() ? expandHome(override.trim()) : join(homedir(), ".claude");
-  return join(base, "projects");
-}
-
-export function defaultCodexHome(override?: string): string {
-  return override?.trim() ? expandHome(override.trim()) : join(homedir(), ".codex");
 }
