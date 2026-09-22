@@ -1,5 +1,10 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-22
+
+- Add a configurable limit for live search suggestions; setting it to zero hides suggestions and prevents suggestion requests.
+- Add fuzzy and pinyin matching as a labeled fallback for open tabs when there is no exact local tab match. Fallback matches are not eligible for Top Hit.
+
 ## [Command Bar] - 2026-09-21
 
 - Improve Top Hit ranking with deterministic match tiers and source precedence: open tabs, bookmarks, reading list, then history. Deduplicate matching destinations and use history frecency only to resolve ties within history.

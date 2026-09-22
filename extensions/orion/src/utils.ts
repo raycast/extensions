@@ -89,7 +89,11 @@ export const executeJxa = async (script: string) => {
   }
 };
 
-const normalizeText = (text: string) =>
+// Folds a string to a diacritic-insensitive, case-insensitive form (NFD
+// decomposes an accented letter into its base letter plus a combining accent
+// mark, which the second step then strips), so a query typed without accents
+// still substring-matches text that has them.
+export const normalizeText = (text: string) =>
   text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")

@@ -13,6 +13,7 @@ import TabListItem from "./components/TabListItem";
 import UrlListItem, { UrlItem } from "./components/UrlListItem";
 import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
+import { searchTabsWithFallback } from "./tabSearch";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
 import {
@@ -286,7 +287,16 @@ export default function Command() {
     seenUrls,
     hasQuery ? LIMITS.tabs : tabHits.length,
   );
-  const tabSection = exactTabSection;
+  // Fuzzy/pinyin results are a fallback only when there is no exact local tab
+  // match at all; `seenUrls` already reflects Top Hit at this point (exact
+  // matches are empty whenever this runs), so this only needs to exclude Top
+  // Hit's own destination, not re-check against exactTabSection.
+  const fuzzyTabSection =
+    hasQuery && tabHits.length === 0
+      ? searchTabsWithFallback(openTabs, query, LIMITS.tabs).filter((tab) => !seenUrls.has(canonicalUrl(tab.url)))
+      : [];
+  fuzzyTabSection.forEach((tab) => seenUrls.add(canonicalUrl(tab.url)));
+  const tabSection = exactTabSection.length > 0 ? exactTabSection : fuzzyTabSection;
   const bookmarkSection = uniqueUrls(
     bookmarkHits.filter((b) => `bm-${b.uuid}` !== topUrlKey),
     seenUrls,
@@ -438,7 +448,7 @@ export default function Command() {
       )}
 
       {tabSection.length > 0 && (
-        <List.Section title="Open Tabs">
+        <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
             <TabListItem id={tabKey(t)} key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
           ))}
