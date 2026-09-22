@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add SocialFaktory MCP Server] - {PR_MERGE_DATE}
+## [Add SocialFaktory MCP Server] - 2026-09-22
 
 - Add SocialFaktory to the official registry: write, generate, schedule and publish a brand's social content, in its own voice, on every channel. Remote Streamable HTTP server at https://www.socialfaktory.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
 
