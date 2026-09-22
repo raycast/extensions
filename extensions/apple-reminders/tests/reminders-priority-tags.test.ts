@@ -85,6 +85,20 @@ describe("Tag Helpers", () => {
     assert.strictEqual(result.title, "Buy John's task don't forget");
     assert.deepStrictEqual(result.tags, ["work"]);
   });
+
+  it("extracts comma-separated tags from text without leaving trailing tags or commas in title", () => {
+    const result1 = extractTagsFromText("Buy milk #work,#urgent");
+    assert.strictEqual(result1.title, "Buy milk");
+    assert.deepStrictEqual(result1.tags, ["work", "urgent"]);
+
+    const result2 = extractTagsFromText("Buy milk #work, #urgent");
+    assert.strictEqual(result2.title, "Buy milk");
+    assert.deepStrictEqual(result2.tags, ["work", "urgent"]);
+
+    const result3 = extractTagsFromText("Buy milk, #work, #urgent");
+    assert.strictEqual(result3.title, "Buy milk");
+    assert.deepStrictEqual(result3.tags, ["work", "urgent"]);
+  });
 });
 
 describe("Reminder Creation Tool", () => {
@@ -241,6 +255,30 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.strictEqual(resolved.title, "Call mom");
     assert.ok(resolved.dueDate && resolved.dueDate.startsWith("2026-09-23"));
     assert.deepStrictEqual(resolved.tags, ["family"]);
+  });
+
+  it("coerces empty string listId and other optional fields to undefined", () => {
+    const resolved = resolveQuickAddReminder(
+      {
+        title: "Just a plain reminder",
+        listId: "",
+        dueDate: "",
+        notes: "",
+        priority: "",
+        address: "",
+        proximity: "",
+      },
+      "Just a plain reminder",
+      [{ id: "list-1", title: "Personal" }],
+    );
+
+    assert.strictEqual(resolved.title, "Just a plain reminder");
+    assert.strictEqual(resolved.listId, undefined);
+    assert.strictEqual(resolved.dueDate, undefined);
+    assert.strictEqual(resolved.notes, undefined);
+    assert.strictEqual(resolved.priority, undefined);
+    assert.strictEqual(resolved.address, undefined);
+    assert.strictEqual(resolved.proximity, undefined);
   });
 });
 

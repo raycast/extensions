@@ -209,14 +209,14 @@ async function runStoredPostCreateActions() {
 function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewReminder {
   const reminder: NewReminder = {
     title: parsed.title,
-    listId: parsed.listId,
-    dueDate: parsed.dueDate,
-    notes: notes ?? parsed.notes,
-    priority: parsed.priority,
-    tags: parsed.tags,
-    address: parsed.address,
-    proximity: parsed.proximity,
-    radius: parsed.radius,
+    listId: parsed.listId || undefined,
+    dueDate: parsed.dueDate || undefined,
+    notes: notes || parsed.notes || undefined,
+    priority: parsed.priority || undefined,
+    tags: parsed.tags && parsed.tags.length > 0 ? parsed.tags : undefined,
+    address: parsed.address || undefined,
+    proximity: parsed.proximity || undefined,
+    radius: parsed.radius || undefined,
   };
 
   if (parsed.recurrence) {

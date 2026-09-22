@@ -51,7 +51,14 @@ export function resolveQuickAddReminder(
   now: Date = new Date(),
 ): ParsedQuickAddReminder {
   const mentionedList = findListInText(inputText, lists) ?? findListInText(reminder.title, lists);
-  let { title, listId, dueDate } = reminder;
+  let { title } = reminder;
+  let listId = reminder.listId || undefined;
+  let dueDate = reminder.dueDate || undefined;
+  const notes = reminder.notes || undefined;
+  const priority = reminder.priority || undefined;
+  const address = reminder.address || undefined;
+  const proximity = reminder.proximity || undefined;
+  const radius = reminder.radius || undefined;
 
   if (mentionedList) {
     listId = mentionedList.id;
@@ -80,6 +87,11 @@ export function resolveQuickAddReminder(
     title: title.replace(/\s+/g, " ").trim() || reminder.title.trim(),
     listId,
     dueDate,
+    notes,
+    priority,
+    address,
+    proximity,
+    radius,
     tags: combinedTags.length > 0 ? combinedTags : undefined,
   };
 }
