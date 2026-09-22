@@ -1,7 +1,5 @@
 import { cleanLineBreaks, showTips, trimEnd, trimStart } from "../types/types";
 import { Cache, showHUD, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { load } from "cheerio";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -74,12 +72,21 @@ export function extractNumber(input: string): string {
   return "";
 }
 
+const namedEntities: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+
+function decodeEntities(text: string) {
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, code: string) => {
+    if (code[0] === "#")
+      return String.fromCodePoint(parseInt(code.slice(1).replace(/^x/i, ""), code[1].toLowerCase() === "x" ? 16 : 10));
+    return namedEntities[code.toLowerCase()] ?? entity;
+  });
+}
+
 export async function fetchTitle(url: string) {
   try {
-    const response = await axios.get(url);
-    const html = response.data;
-    const $ = load(html);
-    return $("title").text();
+    const html = await (await fetch(url)).text();
+    const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    return match ? decodeEntities(match[1].trim()) : "";
   } catch (error) {
     console.error("Error fetching title:", error);
     return "";
