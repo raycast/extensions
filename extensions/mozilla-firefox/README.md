@@ -10,7 +10,8 @@ New Tab search can be configured to search from the following sources:
 - Brave
 - Baidu
 
-Limitations on macOS (due to limited AppleScript support in Firefox):
+Limitations:
 
-- When searching open tabs, the session file is read and parsed to get the list of open tabs. This means that the list of open tabs will not be updated until the session file is updated. This is done by Firefox when it checkpoints itself or when Firefox is closed.
-- Selecting an open tab will result in cycling through open tabs until desired tab. This is due to the fact that AppleScript does not support opening a specific tab in Firefox.
+- Open tabs come from Firefox's session file (`recovery.jsonlz4`). The list updates when Firefox checkpoints itself (about every 15 seconds), not instantly.
+- Enter on an open tab focuses Firefox. It does not switch to that exact tab, and it does not open a duplicate URL.
+- Shift+Enter (Edit URL in Search Bar) is available in New Tab. Search History and Search Bookmarks only filter results.

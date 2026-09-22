@@ -4,7 +4,6 @@ import { existsSync } from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
-import { Tab } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
 
 const execAsync = promisify(exec);
@@ -84,11 +83,18 @@ async function showLaunchError(err: unknown) {
   });
 }
 
+export function looksLikeUrl(text: string): boolean {
+  const trimmed = text.trim();
+  return /^(https?:\/\/|about:)/i.test(trimmed) || /^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed);
+}
+
 export function buildNewTabUrl(queryText: string | null | undefined): string {
+  const trimmed = queryText?.trim();
+  if (!trimmed) return "about:newtab";
+  if (/^(https?:\/\/|about:)/i.test(trimmed)) return trimmed;
+  if (looksLikeUrl(trimmed)) return `https://${trimmed}`;
   const searchEngine = getPreferenceValues<Preferences.NewTab>().searchEngine?.toLowerCase() || "google";
-  return queryText
-    ? `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(queryText)}`
-    : "about:newtab";
+  return `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(trimmed)}`;
 }
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
@@ -134,12 +140,21 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
   }
 }
 
-export async function setActiveTab(tab: Tab): Promise<void> {
+export async function focusFirefox(): Promise<boolean | string> {
+  const browserApp = getBrowserApp();
+  const title = browserApp.replace(/'/g, "''");
+
   try {
-    // Instead of trying to find and activate the existing tab,
-    // just open the URL which is more reliable and simpler
-    await launchFirefox(tab.url, getBrowserApp());
+    if (process.platform === "win32") {
+      await execAsync(`powershell -NoProfile -Command "(New-Object -ComObject WScript.Shell).AppActivate('${title}')"`);
+    } else {
+      await execAsync(`open -a "${browserApp}"`);
+    }
+    popToRoot();
+    closeMainWindow({ clearRootSearch: true });
+    return "success";
   } catch (err) {
     await showLaunchError(err);
+    return "error";
   }
 }

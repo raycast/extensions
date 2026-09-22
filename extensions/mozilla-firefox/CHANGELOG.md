@@ -1,5 +1,12 @@
 # Mozilla Firefox Changelog
 
+## [New Tab: Open Tabs, Edit URL] - {PR_MERGE_DATE}
+
+- New Tab lists currently open tabs from all Firefox windows (from the session file)
+- Shift+Enter copies a result URL into the search bar so it can be edited before opening
+- Open in New Window is the secondary action on Windows (Ctrl+Enter)
+- Pasting a URL into New Tab opens that URL instead of searching for it
+
 ## [Windows Launch Fixes] - 2026-09-21
 
 - Added an Open in New Window action on Windows (New Tab, Search History, and Search Bookmarks) with Ctrl+Enter
