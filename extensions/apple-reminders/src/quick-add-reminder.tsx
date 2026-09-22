@@ -12,7 +12,6 @@ import { format, addDays, addHours, nextSunday, nextFriday, nextSaturday, addYea
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
-import { extractTagsFromText } from "./helpers";
 import { Data } from "./hooks/useData";
 import { normalizePostCreateActions, STORAGE_KEY } from "./hooks/usePostCreateActions";
 import { runPostCreateActions } from "./post-create-shortcuts";
@@ -29,25 +28,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      const data: Data = await getData();
-      const defaultList = data.lists.find((list) => list.isDefault);
-      const { title, tags } = extractTagsFromText(props.arguments.text);
-      const reminder: NewReminder = {
-        title,
-        listId: defaultList?.id,
-        notes: props.arguments.notes,
-        tags: tags.length > 0 ? tags : undefined,
-      };
-      await createReminder(reminder);
-      const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
-      await runPostCreateActions(
-        normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []),
-        "quick-add",
-      );
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Added reminder: " + reminder.title,
-      });
+      await addReminderFromText(props.arguments.text, props.arguments.notes);
       return;
     }
 
@@ -148,43 +129,28 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
     const inputText = props.fallbackText ?? props.arguments.text;
     let description: string | undefined;
-    let reminderPayload: NewReminder;
+    let resolvedReminder: ParsedQuickAddReminder;
 
     try {
       const { description: aiDescription, ...newReminder } = await askAI(prompt);
       description = aiDescription;
-      if (props.arguments.notes) {
-        newReminder.notes = props.arguments.notes;
+      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
+
+      if (newReminder.dueDate && resolvedReminder.dueDate?.includes("T")) {
+        resolvedReminder.dueDate = applyAiLocalTimezone(resolvedReminder.dueDate);
       }
-
-      const resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
-
-      if (resolvedReminder.dueDate && resolvedReminder.dueDate.includes("T")) {
-        const date = new Date(resolvedReminder.dueDate);
-        const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
-        resolvedReminder.dueDate = new Date(date.getTime() + timezoneOffset).toISOString();
-      }
-
-      reminderPayload = resolvedReminder;
-    } catch (aiError) {
-      console.log("AI parsing failed or unavailable, falling back to local creation:", aiError);
-      const defaultList = data.lists.find((list) => list.isDefault);
-      const { title, tags } = extractTagsFromText(inputText);
-      reminderPayload = {
-        title,
-        listId: defaultList?.id,
-        notes: props.arguments.notes,
-        tags: tags.length > 0 ? tags : undefined,
-      };
+    } catch (error) {
+      console.log(error);
+      await addReminderFromText(inputText, props.arguments.notes);
+      return;
     }
 
-    await createReminder(reminderPayload);
-    const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
-    await runPostCreateActions(normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []), "quick-add");
+    await createReminder(toNewReminder(resolvedReminder, props.arguments.notes));
+    await runStoredPostCreateActions();
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Added reminder: " + (description ?? reminderPayload.title),
+      title: "Added reminder: " + (description ?? resolvedReminder.title),
     });
   } catch (error) {
     console.log(error);
@@ -218,4 +184,68 @@ async function askAI(prompt: string): Promise<ParsedQuickAddReminder> {
   }
 
   throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
+}
+
+async function addReminderFromText(text: string, notes?: string) {
+  const data: Data = await getData();
+  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists);
+  const reminder = toNewReminder(resolvedReminder, notes);
+
+  await createReminder(reminder);
+  await runStoredPostCreateActions();
+
+  const listTitle = data.lists.find((list) => list.id === reminder.listId)?.title ?? "default list";
+  await showToast({
+    style: Toast.Style.Success,
+    title: `Added "${reminder.title}" to ${listTitle}${formatDueDateForToast(reminder.dueDate)}`,
+  });
+}
+
+async function runStoredPostCreateActions() {
+  const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
+  await runPostCreateActions(normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []), "quick-add");
+}
+
+function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewReminder {
+  const reminder: NewReminder = {
+    title: parsed.title,
+    listId: parsed.listId,
+    dueDate: parsed.dueDate,
+    notes: notes ?? parsed.notes,
+    priority: parsed.priority,
+    tags: parsed.tags,
+    address: parsed.address,
+    proximity: parsed.proximity,
+    radius: parsed.radius,
+  };
+
+  if (parsed.recurrence) {
+    reminder.recurrence = parsed.recurrence as NewReminder["recurrence"];
+  }
+
+  return reminder;
+}
+
+function applyAiLocalTimezone(dueDate: string): string {
+  const date = new Date(dueDate);
+  if (Number.isNaN(date.getTime())) {
+    return dueDate;
+  }
+
+  const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() + timezoneOffset).toISOString();
+}
+
+function formatDueDateForToast(dueDate?: string): string {
+  if (!dueDate) {
+    return "";
+  }
+
+  const isDateTime = dueDate.includes("T");
+  const dateObj = isDateTime ? new Date(dueDate) : new Date(`${dueDate}T00:00:00`);
+  if (Number.isNaN(dateObj.getTime())) {
+    return "";
+  }
+
+  return ` due ${format(dateObj, isDateTime ? "PPPpp" : "PPP")}`;
 }

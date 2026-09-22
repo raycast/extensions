@@ -6,6 +6,23 @@
 - Add priority dropdown and tags field to Create Reminder and Edit Reminder forms.
 - Support priority and tags in AI tools and Quick Add natural language parser.
 
+## [Display due time in menu bar] - 2026-09-07
+
+- Display scheduled due time before reminder titles in menu bar items.
+- Add "Display Exact Due Time" preference to My Reminders to show exact due time in list accessories.
+
+## [Fix Menu Bar Reminders title truncation] - 2026-08-27
+
+- Truncate menu bar reminder titles by Unicode character instead of UTF-16 code units so emoji and other multi-byte characters are not split.
+
+## [Fix natural-language due dates] - 2026-08-19
+
+- Restore relative due-date parsing in Create Reminder for `1h`, `1 hour`, `3 hours`, `in 10 minutes`, `3:45 pm`, `3 days`, and `1 year`.
+- Treat the `h` shortcut as hours instead of months.
+- Harden Quick Add Reminder: parse fenced AI JSON, drop invalid list IDs, fill missing dates from natural language, and fall back to local parsing when AI fails.
+- Clear stale natural-language due dates after a failed parse or a successful create.
+- Apply Quick Add timezone conversion only to AI-provided datetimes, and keep location fields when creating from Quick Add.
+
 ## [Tighten AI reminder defaults] - 2026-06-16
 
 - Prevent AI tool calls from defaulting title-only reminders to dated, prioritized, or recurring reminders.

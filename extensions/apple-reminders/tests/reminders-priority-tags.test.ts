@@ -228,4 +228,19 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.strictEqual(resolved.listId, "work-id");
     assert.deepStrictEqual(resolved.tags, ["urgent"]);
   });
+
+  it("extracts natural-language due dates and tags when AI omits due date", () => {
+    const fakeNow = new Date("2026-09-22T10:00:00.000Z");
+    const resolved = resolveQuickAddReminder(
+      { title: "Call mom tomorrow at 9 #family" },
+      "Call mom tomorrow at 9 #family",
+      [{ id: "list-1", title: "Personal" }],
+      fakeNow,
+    );
+
+    assert.strictEqual(resolved.title, "Call mom");
+    assert.ok(resolved.dueDate && resolved.dueDate.startsWith("2026-09-23"));
+    assert.deepStrictEqual(resolved.tags, ["family"]);
+  });
 });
+
