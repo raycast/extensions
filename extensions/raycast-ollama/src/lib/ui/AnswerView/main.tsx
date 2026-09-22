@@ -1,8 +1,20 @@
 import * as React from "react";
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Detail,
+  Icon,
+  List,
+  PopToRootType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { convertAnswerToChat, GetModel, Run } from "./function";
 import { Shortcut } from "../shortcut";
+import { HasUnclosedThinkTag, StripThinkTags } from "../function";
 import { CommandAnswer } from "../../settings/enum";
 import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
@@ -13,6 +25,7 @@ import { OllamaApiModelCapability } from "../../ollama/enum";
 interface props {
   prompt: string;
   command?: CommandAnswer;
+  autoReplace?: boolean;
   server?: string;
   model?: string;
   capabilities?: OllamaApiModelCapability[];
@@ -52,6 +65,9 @@ export function AnswerView(props: props): React.JSX.Element {
     React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   ] = React.useState({} as OllamaApiGenerateResponse);
   const [showAnswerMetadata, setShowAnswerMetadata] = React.useState(false);
+  const autoReplace = props.autoReplace === true;
+  const pasteFirst = autoReplace;
+  const pasted = React.useRef(false);
 
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
@@ -86,6 +102,22 @@ export function AnswerView(props: props): React.JSX.Element {
     if (!showSelectModelForm) RevalidateModel();
   }, [showSelectModelForm]);
 
+  React.useEffect(() => {
+    if (!autoReplace || pasted.current) return;
+    if (loading || IsLoadingModel) return;
+    if (answerMetadata.done !== true) return;
+    pasted.current = true;
+    const text = StripThinkTags(answer);
+    if (text === "" || HasUnclosedThinkTag(answer)) {
+      showToast({ style: Toast.Style.Failure, title: "Answer looks incomplete, not auto-replacing." });
+      return;
+    }
+    (async () => {
+      await Clipboard.paste(text);
+      await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    })().catch((e) => showToast({ style: Toast.Style.Failure, title: "Paste failed", message: String(e) }));
+  }, [autoReplace, loading, IsLoadingModel, answerMetadata, answer]);
+
   if (showSelectModelForm && props.command)
     return (
       <EditModel
@@ -104,9 +136,15 @@ export function AnswerView(props: props): React.JSX.Element {
    * Answer Action Menu.
    */
   function AnswerAction(): React.JSX.Element {
+    const outputActions = [
+      <Action.CopyToClipboard key="copy" content={answer} />,
+      <Action.Paste key="paste" content={answer} />,
+    ];
+    if (pasteFirst) outputActions.reverse();
+
     return (
       <ActionPanel title="Actions">
-        <Action.CopyToClipboard content={answer} />
+        {outputActions[0]}
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
           icon={showAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
@@ -140,7 +178,7 @@ export function AnswerView(props: props): React.JSX.Element {
             shortcut={Shortcut.New}
           />
         )}
-        <Action.Paste content={answer} />
+        {outputActions[1]}
       </ActionPanel>
     );
   }

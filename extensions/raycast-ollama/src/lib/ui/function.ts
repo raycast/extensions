@@ -327,3 +327,21 @@ export function isThinkingModel(models?: Map<string, UiModelDetails[]>, server?:
 
   return true;
 }
+
+/**
+ * Strip inline thinking blocks emitted by models that don't use Ollama's native thinking field.
+ * @param text - Generated answer.
+ * @returns Answer without inline thinking blocks.
+ */
+export function StripThinkTags(text: string): string {
+  return text.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, "").trim();
+}
+
+/**
+ * Verify if an unclosed inline thinking block is left over, which means the answer is truncated.
+ * @param text - Generated answer.
+ * @returns True if an opening thinking tag survives stripping.
+ */
+export function HasUnclosedThinkTag(text: string): boolean {
+  return /<think(?:ing)?>/i.test(StripThinkTags(text));
+}
