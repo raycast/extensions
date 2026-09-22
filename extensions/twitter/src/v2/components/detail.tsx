@@ -18,23 +18,14 @@ import {
 } from "./actions";
 
 function isRetweet(tweet: Tweet): boolean {
-  if (tweet.text && tweet.text.startsWith("RT @")) {
-    return true;
-  }
-  return false;
+  return tweet.text.startsWith("RT @");
 }
 
-function getCleanTweetText(tweet: Tweet): string | undefined {
-  if (tweet.text === undefined) {
-    return undefined;
-  }
-  if (isRetweet(tweet)) {
-    const i = tweet.text.indexOf(":");
-    if (i !== undefined && i > 0) {
-      return tweet.text.substring(i + 1).trimStart();
-    }
-  }
-  return tweet.text;
+function getCleanTweetText(tweet: Tweet): string {
+  if (!isRetweet(tweet)) return tweet.text;
+  const separator = tweet.text.indexOf(":");
+  if (separator <= 0) return tweet.text;
+  return tweet.text.substring(separator + 1).trimStart();
 }
 
 export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {

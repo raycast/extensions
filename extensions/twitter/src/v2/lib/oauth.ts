@@ -54,8 +54,6 @@ const oauthClient = new OAuth.PKCEClient({
   description: "Connect your X account",
 });
 
-// Authorization
-
 async function migrateOAuthClient(): Promise<void> {
   const migratedConfiguration = await LocalStorage.getItem<string>(OAUTH_MIGRATION_KEY);
   if (migratedConfiguration === OAUTH_CONFIGURATION) {

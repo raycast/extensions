@@ -103,7 +103,7 @@ export function ShowPostEngagementAction(props: { tweet: Tweet; kind: "likes" | 
   );
 }
 
-export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undefined }): ReactElement {
+export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher }): ReactElement {
   const handle = async () => {
     try {
       await clientV2.likeTweet(props.tweet);
@@ -129,7 +129,7 @@ export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undef
   );
 }
 
-export function UnlikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undefined }): ReactElement {
+export function UnlikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher }): ReactElement {
   const handle = async () => {
     try {
       await clientV2.unlikeTweet(props.tweet);
@@ -212,18 +212,15 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
       showToast({ style: Toast.Style.Failure, title: "Could not delete post", message: getErrorMessage(error) });
     }
   };
-  if (user === t.user.username) {
-    return (
-      <Action
-        title="Delete Post"
-        icon={{ source: Icon.Trash, tintColor: Color.Red }}
-        shortcut={Keyboard.Shortcut.Common.Remove}
-        onAction={deleteTweet}
-      />
-    );
-  } else {
-    return null;
-  }
+  if (user !== t.user.username) return null;
+  return (
+    <Action
+      title="Delete Post"
+      icon={{ source: Icon.Trash, tintColor: Color.Red }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      onAction={deleteTweet}
+    />
+  );
 }
 
 export function ShowAuthorTweetsAction(props: { tweet: Tweet }): ReactElement {
@@ -245,7 +242,7 @@ export function OpenUserProfileInBrowserAction(props: { user: User }): ReactElem
   return <Action.OpenInBrowser title="Open Author Profile" url={`https://twitter.com/${props.user.username}`} />;
 }
 
-export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher | undefined }): ReactElement | null {
+export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher }): ReactElement | null {
   const f = props.fetcher;
   if (!f) {
     return null;
@@ -266,7 +263,7 @@ export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher | undefin
   );
 }
 
-export function RefreshTweetsAction(props: { fetcher?: Fetcher | undefined }): ReactElement | null {
+export function RefreshTweetsAction(props: { fetcher?: Fetcher }): ReactElement | null {
   const f = props.fetcher;
   if (!f) {
     return null;
