@@ -34,6 +34,12 @@ export const cacheConfig = {
   provider: () => cacheProvider,
   use: [persistCacheMiddleware],
   revalidateIfStale: true,
+  // The repo scan already retries transient 429/5xx per-request (see withRetry in
+  // queries/index.ts) and surfaces a toast on failure. Without this, a hard failure
+  // (e.g. the repo-listing call itself exhausting retries under sustained rate
+  // limiting) has SWR silently re-run the *entire* scan from scratch in the
+  // background, compounding with our own retries into what looks like it never stops.
+  shouldRetryOnError: false,
 };
 
 export const REPOSITORIES_CACHE_KEY = "repositories";
