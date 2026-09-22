@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [My Packages] - {PR_MERGE_DATE}
+## [My Packages] - 2026-09-22
 
 - Add **My Packages** and **My Packages Menu Bar** to browse the packages you published to GitHub Packages.
 
