@@ -139,24 +139,28 @@ function ContainerPicker({
 }) {
   const { pop } = useNavigation();
   const {
-    data: containers,
+    data: allContainers,
     isLoading,
     error,
     revalidate,
-  } = useFetch<DockerContainer[], DockerContainer[]>(
-    `${url}docker.getContainersByAppNameMatch?appType=docker-compose&appName=${encodeURIComponent(appName)}`,
-    {
-      headers,
-      initialData: [],
-      async parseResponse(response) {
-        if (!response.ok) {
-          const err = (await response.json()) as ErrorResult;
-          throw new Error(err.message);
-        }
-        return (await response.json()) as DockerContainer[];
-      },
+  } = useFetch<DockerContainer[], DockerContainer[]>(url + "docker.getContainers", {
+    headers,
+    initialData: [],
+    async parseResponse(response) {
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      return (await response.json()) as DockerContainer[];
     },
-  );
+  });
+
+  // docker.getContainersByAppNameMatch turned out not to actually scope by this stack (live-tested:
+  // it answered with a container that didn't belong to it, "No such container"). docker.getContainers
+  // (unscoped, but already proven to return real containerIds - confirmed live) + this stack's own
+  // Docker Compose project-name prefix is the reliable way to scope it: Dokploy names every container
+  // `<appName>-<serviceName>-<replica>`, confirmed against a real container list.
+  const containers = allContainers.filter((container) => container.name.startsWith(`${appName}-`));
 
   return (
     <List isLoading={isLoading} navigationTitle="Select Container">
@@ -165,6 +169,17 @@ function ContainerPicker({
           icon={Icon.ExclamationMark}
           title="Could Not Load Containers"
           description={`${error}`}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
+      ) : containers.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="No Containers Found"
+          description={`No running container starts with "${appName}-". This stack's appName may not match its containers' naming.`}
           actions={
             <ActionPanel>
               <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
