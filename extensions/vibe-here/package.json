@@ -5,7 +5,9 @@
   "description": "Open Mistral Vibe in Warp, Ghostty or Terminal in the selected folder.",
   "icon": "vibe-icon.png",
   "author": "sierakk",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,9 +27,18 @@
       "description": "Which terminal should launch vibe",
       "default": "warp",
       "data": [
-        { "title": "Warp", "value": "warp" },
-        { "title": "Ghostty", "value": "ghostty" },
-        { "title": "Terminal", "value": "apple" }
+        {
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "Terminal",
+          "value": "apple"
+        }
       ]
     },
     {
