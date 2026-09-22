@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, List, Action, Image, Icon, useNavigation } from "@raycast/api";
 import { fetchSuggestions } from "./lib/fetchSuggestions";
-import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance, useEnsResolver } from "wagmi";
-import { getDefaultProvider } from "ethers";
-import { useEnsRecords } from "./lib/useEnsRecords";
-
-const client = createClient({
-  autoConnect: true,
-  provider: getDefaultProvider(),
-});
+import { formatEther, type Address } from "viem";
+import { fetchEnsRecords, mainnetClient, normalizeEnsName } from "./lib/ens";
 
 export default function Command() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,11 +52,7 @@ export default function Command() {
               <Action.Push
                 title="Show Profile"
                 icon={Icon.AppWindowSidebarLeft}
-                target={
-                  <WagmiConfig client={client}>
-                    <ProfileDetail name={name} />
-                  </WagmiConfig>
-                }
+                target={<ProfileDetail name={name} />}
               />
             </ActionPanel>
           }
@@ -72,34 +62,65 @@ export default function Command() {
   );
 }
 
-function ProfileDetail({ name }: { name: string }) {
-  const [shouldFetchAvatar, setShouldFetchAvatar] = useState(false);
+interface EnsProfile {
+  address?: Address;
+  avatar?: string;
+  balance?: string;
+  records: Record<string, string>;
+}
 
-  const { data: ensAvatar, isLoading: isEnsAvatarLoading } = useEnsAvatar({
-    addressOrName: name,
-    enabled: shouldFetchAvatar,
-  });
-  const { data: ensAddress, isLoading: isEnsAddressLoading } = useEnsAddress({ name });
-  const { data: ensRecords, isLoading: isEnsRecordsLoading } = useEnsRecords({ name });
-  const { data: balance, isLoading: isBalanceLoading } = useBalance({ addressOrName: name });
+function useEnsProfile(name: string) {
+  const [profile, setProfile] = useState<EnsProfile>({ records: {} });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { pop } = useNavigation();
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
 
-  useEnsResolver({
-    name,
-    onSuccess: async (resolver) => {
-      if (!resolver) return;
-      const avatarText = await resolver.getText("avatar");
+    async function loadProfile() {
+      const normalizedName = normalizeEnsName(name);
+      const [address, avatarText, records] = await Promise.all([
+        mainnetClient.getEnsAddress({ name: normalizedName }),
+        mainnetClient.getEnsText({ name: normalizedName, key: "avatar" }).catch(() => null),
+        fetchEnsRecords(normalizedName),
+      ]);
+      const [avatar, balance] = await Promise.all([
+        avatarText && !avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")
+          ? mainnetClient.getEnsAvatar({ name: normalizedName }).catch(() => null)
+          : null,
+        address ? mainnetClient.getBalance({ address }).then(formatEther) : undefined,
+      ]);
 
-      // Ignore Avatars that use the Zora Contract
-      // https://github.com/ensdomains/ens-avatar/issues/21
-      if (avatarText && !avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")) {
-        setShouldFetchAvatar(true);
+      if (!cancelled) {
+        setProfile({
+          address: address ?? undefined,
+          avatar: avatar ?? undefined,
+          balance,
+          records,
+        });
       }
-    },
-  });
+    }
 
-  const isLoading = isEnsAddressLoading || isEnsAvatarLoading || isEnsRecordsLoading || isBalanceLoading;
+    loadProfile()
+      .catch(() => {
+        if (!cancelled) setProfile({ records: {} });
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [name]);
+
+  return { profile, isLoading };
+}
+
+function ProfileDetail({ name }: { name: string }) {
+  const { profile, isLoading } = useEnsProfile(name);
+  const { address: ensAddress, avatar: ensAvatar, records: ensRecords, balance } = profile;
+  const { pop } = useNavigation();
 
   return isLoading ? (
     <List isLoading searchBarPlaceholder={name} enableFiltering={false}>
@@ -261,10 +282,7 @@ function ProfileDetail({ name }: { name: string }) {
                     target={`https://etherscan.io/address/${ensAddress}`}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Balance"
-                    text={`${Number(balance?.formatted).toFixed(2)} ETH`}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Balance" text={`${Number(balance).toFixed(2)} ETH`} />
                 </List.Item.Detail.Metadata>
               }
             />

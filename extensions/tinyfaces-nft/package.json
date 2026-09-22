@@ -21,8 +21,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.4.8",
-    "ethers": "^5.7.0",
-    "wagmi": "^0.6.5"
+    "viem": "^2.38.5"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

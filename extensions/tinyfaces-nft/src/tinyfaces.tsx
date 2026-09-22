@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Image, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { OwnerData, PaginatedData, SearchFilters, SearchQueryStrings, TokenData } from "./types";
-import { getDefaultProvider } from "ethers";
-import { WagmiConfig, createClient, useEnsAddress } from "wagmi";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
+import { normalize } from "viem/ens";
 
-const client = createClient({
-  autoConnect: true,
-  provider: getDefaultProvider(),
+const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http("https://ethereum-rpc.publicnode.com"),
 });
 
 const isValidEthAddress = (address: string) => /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -55,24 +56,14 @@ const SEARCH_PLACEHOLDERS: Record<SearchFilters, string> = {
 };
 
 export default function Command() {
-  return (
-    <WagmiConfig client={client}>
-      <Tiny />
-    </WagmiConfig>
-  );
+  return <Tiny />;
 }
 
 export function Tiny() {
   const [searchText, setSearchText] = useState<undefined | string>(undefined);
   const [searchType, setSearchFilter] = useState<SearchFilters>("TOKEN_ID");
   const [ensAddress, setEnsAddress] = useState<undefined | string>(undefined);
-  const [lookupENSAddress, setLookupENSAddress] = useState<boolean>(false);
-
-  const { isLoading: isLoadingEnsAddress } = useEnsAddress({
-    name: searchText,
-    enabled: lookupENSAddress,
-    onSuccess: (address) => address && setEnsAddress(address),
-  });
+  const [isLoadingEnsAddress, setIsLoadingEnsAddress] = useState(false);
 
   const isSearchingByQueryString = searchType !== "TOKEN_ID" && searchType !== "OWNER";
 
@@ -95,10 +86,31 @@ export function Tiny() {
   });
 
   useEffect(() => {
-    if (searchType === "OWNER" && searchText) {
-      if (searchText?.includes(".eth")) setLookupENSAddress(true);
-      if (isValidEthAddress(searchText)) setEnsAddress(searchText);
+    let cancelled = false;
+    setEnsAddress(undefined);
+    setIsLoadingEnsAddress(false);
+
+    if (searchType !== "OWNER" || !searchText) return;
+    if (isValidEthAddress(searchText)) {
+      setEnsAddress(searchText);
+      return;
     }
+    if (searchText.includes(".") && searchText.length > 2) {
+      setIsLoadingEnsAddress(true);
+      mainnetClient
+        .getEnsAddress({ name: normalize(searchText) })
+        .then((address) => {
+          if (!cancelled && address) setEnsAddress(address);
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          if (!cancelled) setIsLoadingEnsAddress(false);
+        });
+    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchText, searchType]);
 
   let isLoading;
