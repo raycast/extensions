@@ -40,9 +40,11 @@
 ### Manual Installation
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/sierakk/vibe-here.git
    ```
+
 2. Open Raycast
 3. Go to **Extensions** → **Import Extension**
 4. Select the cloned folder
@@ -81,10 +83,10 @@ After installing the extension, you can configure it in Raycast:
 2. Navigate to **Vibe Here** extension
 3. Configure the following options:
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| **Terminal** | Choose between Warp, Ghostty or Terminal | `warp` |
-| **Vibe Binary** | Path to the vibe CLI executable | `/opt/homebrew/bin/vibe` |
+| Option          | Description                              | Default                  |
+| --------------- | ---------------------------------------- | ------------------------ |
+| **Terminal**    | Choose between Warp, Ghostty or Terminal | `warp`                   |
+| **Vibe Binary** | Path to the vibe CLI executable          | `/opt/homebrew/bin/vibe` |
 
 ---
 
@@ -98,7 +100,6 @@ After installing the extension, you can configure it in Raycast:
 4. Press Enter
 
 If nothing is selected, the front Finder window is used.
-
 The selected terminal will open in that folder, with `vibe` ready to go.
 
 ### Example Workflow
