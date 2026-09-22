@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { useComposeContainers } from "./compose-containers";
 import { useToken } from "./instances";
 import { DockerContainer, ErrorResult } from "./interfaces";
 import { parseTrpcTextResponse, trpcQueryUrl } from "./trpc";
@@ -108,7 +109,9 @@ function ServiceLogsDetail({
   return (
     <Detail
       navigationTitle={`${service.name}${containerLabel ? ` (${containerLabel})` : ""} Logs${following ? " (Following)" : ""}`}
-      isLoading={isLoading}
+      // Following polls on a 3s interval via the same `revalidate`, which would otherwise flip
+      // this on for every tick - only the initial/manual load should show it.
+      isLoading={isLoading && !following}
       markdown={markdown}
       actions={
         <ActionPanel>
@@ -202,20 +205,36 @@ function ContainerPicker({
     },
   });
 
-  const isLoading = composeLoading || containersLoading;
-  const error = composeError ?? containersError;
+  // This stack's own logical service names (from its compose file) - needed because an `appName`
+  // alone isn't a safe prefix: a stack called "blog" would also match another stack/application's
+  // containers named "blog-staging-*". Scoping to `<appName>-<serviceName>-` pairs rules that out.
+  const {
+    containers: serviceNames,
+    containersLoading: serviceNamesLoading,
+    containersError: serviceNamesError,
+    retryContainers: retryServiceNames,
+  } = useComposeContainers(url, headers, composeId, true);
+
+  const isLoading = composeLoading || containersLoading || serviceNamesLoading;
+  const error = composeError ?? containersError ?? serviceNamesError;
 
   function revalidate() {
     retryCompose();
     retryContainers();
+    retryServiceNames();
   }
 
   // docker.getContainersByAppNameMatch turned out not to actually scope by this stack (live-tested:
   // it answered with a container that didn't belong to it, "No such container"). docker.getContainers
   // (unscoped, but already proven to return real containerIds - confirmed live) + this stack's own
-  // Docker Compose project-name prefix is the reliable way to scope it: Dokploy names every container
-  // `<appName>-<serviceName>-<replica>`, confirmed against a real container list.
-  const containers = appName ? allContainers.filter((container) => container.name.startsWith(`${appName}-`)) : [];
+  // `<appName>-<serviceName>-` prefixes is the reliable way to scope it: Dokploy names every
+  // container `<appName>-<serviceName>-<replica>`, confirmed against a real container list.
+  const containers =
+    appName && serviceNames.length > 0
+      ? allContainers.filter((container) =>
+          serviceNames.some((serviceName) => container.name.startsWith(`${appName}-${serviceName}-`)),
+        )
+      : [];
 
   return (
     <List isLoading={isLoading} navigationTitle="Select Container">
@@ -234,7 +253,11 @@ function ContainerPicker({
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="No Containers Found"
-          description={`No running container starts with "${appName}-". This stack's appName may not match its containers' naming.`}
+          description={
+            serviceNames.length === 0
+              ? "This stack has no services defined yet."
+              : `No running container matches "${appName}-<service>-" for this stack's services (${serviceNames.join(", ")}).`
+          }
           actions={
             <ActionPanel>
               <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
