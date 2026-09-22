@@ -16,6 +16,9 @@
     "ray.dhruv"
   ],
   "license": "MIT",
+  "categories": [
+    "Design Tools"
+  ],
   "commands": [
     {
       "name": "create-a-snippet",
