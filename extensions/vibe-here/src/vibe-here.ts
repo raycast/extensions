@@ -1,4 +1,12 @@
-import { closeMainWindow, getPreferenceValues, getSelectedFinderItems, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  closeMainWindow,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { execFile } from "child_process";
 import { existsSync, statSync } from "fs";
 import { homedir } from "os";
@@ -64,6 +72,11 @@ function quoteAppleScript(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
+type Preferences = {
+  terminal: "warp" | "ghostty" | "apple";
+  vibePath?: string;
+};
+
 async function openInWarp(folder: string, vibeBin: string): Promise<void> {
   const uri = `warp://action/new_tab?path=${encodeURIComponent(folder)}`;
   await open(uri);
@@ -91,7 +104,7 @@ async function openInGhostty(folder: string, vibeBin: string): Promise<void> {
     }
   }
 
-  await open(folder, { app: { name: "Ghostty" } });
+  await open(folder, "Ghostty");
   await execFileAsync("osascript", [
     "-e",
     `tell application "Ghostty" to activate
