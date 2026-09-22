@@ -83,10 +83,10 @@ export default function BrowseSessions() {
                   icon={Icon.Folder}
                   target={<SessionList projectPath={row.cwd} initialScope={mode} />}
                 />
-                <NewThreadAction projectPath={row.cwd} />
                 <ChooseFolderAction />
                 <Action.CopyToClipboard title="Copy Project Path" content={row.cwd} />
                 {refresh}
+                <NewThreadAction projectPath={row.cwd} />
               </ActionPanel>
             }
           />
