@@ -1,3 +1,26 @@
+/** Preserve the identifying end of a row location; the full value stays in its tooltip. */
+export function compactPathTail(location: string, limit = 32): string {
+  const label = location.replace(/\s+/gu, " ");
+  const budget = Math.max(3, limit);
+  const chars = Array.from(label);
+  if (chars.length <= budget) return label;
+  const parts = label.split("/").filter(Boolean);
+  let tail = parts.pop() ?? "";
+  if (parts.length === 0) return `…${chars.slice(-(budget - 1)).join("")}`;
+  if (Array.from(tail).length > budget - 2) {
+    return `…/${Array.from(tail)
+      .slice(-(budget - 2))
+      .join("")}`;
+  }
+  while (
+    parts.length &&
+    Array.from(`${parts.at(-1)}/${tail}`).length <= budget - 2
+  ) {
+    tail = `${parts.pop()}/${tail}`;
+  }
+  return `…/${tail}`;
+}
+
 /** Keep the end of a location readable without letting it crowd the status. */
 export function compactScopeLabel(scope: string): string {
   const parts = scope.replace(/\s+/gu, " ").split("/").filter(Boolean);

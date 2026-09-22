@@ -701,6 +701,9 @@ function BrowserView({
       onToggleHidden,
       onReturnToStart:
         dir !== undefined || searchText !== "" ? returnToStart : undefined,
+      onUse: (entry) => {
+        void markVisited(entry.path).catch(() => {});
+      },
       onOpen: async (entry) => {
         // Persist ranking signals before the command closes.
         const generation = dataGeneration();

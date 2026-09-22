@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import path from "node:path";
 import { Entry, Visit } from "../lib/types";
 import { ScoreParts } from "../lib/score";
-import { formatSize, relativeTime } from "../lib/format";
+import { compactPathTail, formatSize, relativeTime } from "../lib/format";
 import {
   ColumnWidths,
   pad,
@@ -17,7 +17,9 @@ import { HiddenFilesAction } from "./hidden-files-action";
 export type RowHandlers = {
   /** Opens a file in its default app or a folder in Finder. */
   onOpen: (entry: Entry) => void;
-  /** ⇧⌘↓ navigates into a folder. */
+  /** Record one use after a native file action completes. */
+  onUse: (entry: Entry) => void;
+  /** ⌥⌘↓ navigates into a folder. */
   onDescend: (entry: Entry) => void;
   /** Navigates to the parent; undefined at the filesystem root or global scope. */
   onUp?: () => void;
@@ -86,7 +88,7 @@ function detailPairs(
         ["Modified", relativeTime(entry.mtimeMs)],
         ["Created", relativeTime(entry.birthtimeMs)],
         [
-          "Opened here",
+          "Used here",
           visit
             ? `${visit.count}× · last ${relativeTime(visit.lastVisit)}`
             : "never",
@@ -105,7 +107,7 @@ function detailPairs(
       section: "Ranking",
       rows: [
         ["Total score", score.total.toFixed(1)],
-        ["… from your opens", score.visit.toFixed(1)],
+        ["… from your usage", score.visit.toFixed(1)],
         ["… from modified date", score.mtime.toFixed(1)],
         ["… from Spotlight", score.spotlight.toFixed(1)],
         ["… depth penalty", score.depth.toFixed(1)],
@@ -130,7 +132,7 @@ export function Row({
   handlers,
 }: Props) {
   /*
-   * Opens, then score, then modified date, in fixed-width columns.
+   * Uses, then score, then modified date, in fixed-width columns.
    *
    * Every row carries every cell, even an empty one, and every cell is padded
    * to its column's width. Raycast sizes accessories to their content and lays
@@ -141,6 +143,19 @@ export function Row({
    */
   const opens = visitsCell(visit?.count);
   const total = scoreCell(showScore ? score.total : undefined);
+  // Raycast tail-clips subtitles. Reserve room for the title and accessory columns
+  // before shortening the path, rather than handing it another oversized suffix.
+  const locationBudget = Math.max(
+    12,
+    Math.min(
+      32,
+      64 -
+        Array.from(entry.name).length -
+        columns.visits -
+        columns.time -
+        (showScore ? columns.score : 0),
+    ),
+  );
   const accessories: List.Item.Accessory[] = [
     {
       icon: pinned ? Icon.Pin : "blank.png",
@@ -148,7 +163,7 @@ export function Row({
     },
     {
       text: pad(opens, columns.visits),
-      tooltip: opens === "" ? "Never opened" : `Opened ${visit?.count}×`,
+      tooltip: opens === "" ? "Never used here" : `Used ${visit?.count}×`,
     },
   ];
   if (showScore)
@@ -165,7 +180,14 @@ export function Row({
     <List.Item
       id={id}
       title={entry.name}
-      subtitle={showingDetail ? undefined : subtitle}
+      subtitle={
+        showingDetail || subtitle === undefined
+          ? undefined
+          : {
+              value: compactPathTail(subtitle, locationBudget),
+              tooltip: displayPath(path.dirname(entry.path)),
+            }
+      }
       icon={{ fileIcon: entry.path }}
       accessories={showingDetail ? undefined : accessories}
       // Also enables dragging the item into another app.
@@ -245,6 +267,7 @@ function RowActions({
         <Action.ShowInFinder
           path={entry.path}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
+          onShow={() => handlers.onUse(entry)}
         />
         <Action.ToggleQuickLook
           title="Quick Look"
@@ -253,6 +276,7 @@ function RowActions({
         <Action.OpenWith
           path={entry.path}
           shortcut={Keyboard.Shortcut.Common.Open}
+          onOpen={() => handlers.onUse(entry)}
         />
       </ActionPanel.Section>
 
@@ -299,16 +323,19 @@ function RowActions({
           title="Copy Path"
           content={entry.path}
           shortcut={Keyboard.Shortcut.Common.CopyPath}
+          onCopy={() => handlers.onUse(entry)}
         />
         <Action.CopyToClipboard
           title="Copy Name"
           content={entry.name}
           shortcut={Keyboard.Shortcut.Common.CopyName}
+          onCopy={() => handlers.onUse(entry)}
         />
         <Action.CopyToClipboard
           title="Copy File"
           shortcut={Keyboard.Shortcut.Common.Copy}
           content={{ file: entry.path }}
+          onCopy={() => handlers.onUse(entry)}
         />
       </ActionPanel.Section>
 

@@ -68,7 +68,7 @@ An absolute or `~/` path switches Everywhere into direct path browsing. There, f
 
 The top-right menu holds two independent choices: **All Types / Directory / File**, and **Usage / Date Modified / Date Created / Name / Size**. Each choice persists across command runs. An explicit `-d` or `-f` overrides the saved type for that query. Name sorts alphabetically with natural number ordering; date and size sorts put newest or largest first.
 
-Opening an item or entering a folder records usage and remembers the query you used. In Usage mode a remembered pairing comes first and can skip name and extension matching; type, date, and size filters still apply. Selecting, previewing, and copying record nothing.
+Open, Open With, Show in Finder, Copy Path, Copy Name, Copy File, and entering a folder each add one use. Open and folder entry also remember the query you used. In Usage mode a remembered pairing comes first and can skip name and extension matching; type, date, and size filters still apply. Selecting, Quick Look, and showing details record nothing.
 
 ## Folder navigation and results
 
@@ -78,6 +78,8 @@ Opening an item or entering a folder records usage and remembers the query you u
 - `⇧⌘H` returns to Everywhere with an empty query. Sort, type, and session hidden-file choices stay as they were.
 
 Changing folders clears the query. No folder history is kept. Folder contents refresh on their own, with a five-second poll to catch change notifications that were missed. `⌘R` refreshes by hand.
+
+Long result locations show the end of the path. Hover over the location for its full text, or use `⌘I` to see the item's full path.
 
 There are **at most 50 results in the list**, drawn from up to 50 index candidates plus remembered paths. Folder browsing reads at most 3,000 children within a three-second budget, then filters and ranks what it read. These limits can hide matches. Narrow the query, or enter a folder, when the status line reports a limit.
 

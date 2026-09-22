@@ -208,8 +208,11 @@ export function locationLabel(full: string): string {
   const marker = `${path.sep}${SHORTCUT_TARGETS}${path.sep}`;
   const at = full.indexOf(marker);
   if (at === -1) return displayPath(path.dirname(full));
-  const drive = path.basename(full.slice(0, at));
-  return `shared folder · ${drive}`;
+  const parents = full
+    .slice(at + marker.length)
+    .split(path.sep)
+    .slice(1, -1);
+  return ["shared folder", ...parents].join(path.sep);
 }
 
 /** Splits an absolute or home-relative path into a directory and name prefix. */

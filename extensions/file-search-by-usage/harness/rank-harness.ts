@@ -590,6 +590,11 @@ async function main() {
   const longNoise =
     "/Users/u/Library/CloudStorage/GoogleDrive-user@example.com/.shortcut-targets-by-id/example-id/Shared Folder/Committee Papers";
   assert(
+    locationLabel(longNoise) === "shared folder/Shared Folder" &&
+      locationLabel(path.dirname(longNoise)) === "shared folder",
+    "shared-folder locations show the nearest named parent instead of an account or target ID",
+  );
+  assert(
     matchPath(parseQuery("bootcamp"), longNoise, true) === undefined,
     "letters scattered across a long path are not a match",
   );
@@ -1465,7 +1470,7 @@ async function main() {
   );
   if (shared.length > 0) {
     assert(
-      locationLabel(shared[0].path).startsWith("shared folder · "),
+      locationLabel(shared[0].path) === "shared folder",
       "the shared-folder label hides the raw shortcut id",
     );
   }

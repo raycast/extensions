@@ -2,6 +2,10 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Show the end of long result paths, with the full location available on hover.
+
+- Count Open With, Show in Finder, and Copy actions as one use each, alongside Open and folder entry.
+
 - Search the folders you choose and your own usage history in one ranked list.
 - Match Raycast File Search shortcuts for Show in Finder, Open With, and Move to Trash; add a hidden-file toggle on `⇧⌘.` for the current command run.
 - Order the first four actions as Open, Show in Finder, Quick Look, and Open With, keeping Show in Finder in Raycast's secondary `⌘↩` position.

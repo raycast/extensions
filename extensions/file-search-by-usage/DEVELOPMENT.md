@@ -244,6 +244,8 @@ Each row carries a pin slot, the open count, an optional usage score, and the mo
 
 `src/lib/progress.ts` defines four stages: memory, folder, index, and ranking. Every stage is `done`, `running`, `waiting`, `skipped`, `partial`, or `failed`. The progress bar, the colored status light, and the section heading all derive from that object. The heading puts a shortened location, the count, and the status in one text field rather than a wrapping subtitle. A long path shows its final two components, capped at 40 characters.
 
+Result-row locations use `compactPathTail`: prefer whole trailing path components, with a leading ellipsis when ancestors are omitted. A conservative 12–32-character budget shrinks with the title and accessory columns, because Raycast can still tail-clip an oversized subtitle. This is a character-based estimate, not native pixel measurement. Shared-folder labels retain named parents instead of spending the space on provider accounts or internal target IDs. The full parent path is the subtitle tooltip; details and Copy Path retain the item's full path. This display formatting does not change search, ranking, or filesystem paths.
+
 A search is complete only after every applicable stage is done or skipped. A partial stage outranks pending stages in the status light, so orange can appear while other work runs. A failed folder or index stage outranks both and shows red. Optional usage warmup takes no part in completion or error status. Caveats do not determine the light and can appear alongside green. They report:
 
 - A missing index, or one whose last rebuild left a location incomplete
@@ -310,15 +312,15 @@ The weights are in `src/lib/score.ts`. `rank-sources.ts` is pure: callers provid
 
 | Signal                         |        Weight | Decay                                  |
 | ------------------------------ | ------------: | -------------------------------------- |
-| Recorded opens                 |           100 | 120-action half-life on an event clock |
+| Recorded uses                  |           100 | 120-action half-life on an event clock |
 | Modification time              |            40 | 14-day wall-clock half-life            |
 | Usage metadata from `mdls`     |            25 | 30-day wall-clock half-life            |
 | Positional name quality        |            30 | None                                   |
 | Depth below the current folder | -12 per level | None                                   |
 
-Recorded usage is an exponential moving sum. The clock advances for the primary Open action and for Navigate into Folder, not while the extension is idle. Quick Look, Open With, copying, and Up record nothing. The score therefore adapts as new work replaces old work, without decaying because the user took time away.
+Recorded usage is an exponential moving sum. Open and Navigate into Folder each record one use. Native Open With, Show in Finder, and all three Copy actions record one use through their completion callbacks, sharing `markVisited` via `RowHandlers.onUse`; opening an action menu alone does not count. Only Open and folder entry learn the query-to-item pairing. Quick Look, showing details, selection, and Up record nothing. The clock does not advance while the extension is idle, so the score adapts as new work replaces old work without decaying because the user took time away.
 
-The usage contribution passes through `log2`, so repeated opens give diminishing returns. History is capped at 2,000 paths, and entries whose decayed value falls below 0.01 are pruned.
+The usage contribution passes through `log2`, so repeated uses give diminishing returns. History is capped at 2,000 paths, and entries whose decayed value falls below 0.01 are pruned.
 
 In Usage mode, match tier comes before score, with learned query-to-item pairs ahead of textual matches, so a strong name match cannot be buried by an unrelated item's usage count alone. Within a tier, the combined score decides the order. Explicit Name, Date Modified, Date Created, and Size sorts bypass tier ordering and compare the selected field across admitted results. Ties use natural filename order, then the full path. A direct-child-only folder view has no positive depth below its scope, so the depth penalty is normally zero.
 

@@ -5,6 +5,7 @@ import * as React from "react";
 import { columnWidths } from "../src/lib/accessory-columns";
 import {
   compactScopeLabel,
+  compactPathTail,
   formatDuration,
   formatIndexBytes,
   formatSize,
@@ -29,6 +30,31 @@ const DASH = "\u2014";
  * cases pin that, so a later cleanup has to be a deliberate one.
  */
 function formatChecks(assert: (ok: boolean, label: string) => void) {
+  for (const [input, expected] of [
+    ["~/Documents", "~/Documents"],
+    ["", ""],
+    ["x".repeat(32), "x".repeat(32)],
+    ["x".repeat(33), `…${"x".repeat(31)}`],
+    [`/archive/${"📁".repeat(60)}`, `…/${"📁".repeat(30)}`],
+    ["~/Documents/Line\nBreak", "~/Documents/Line Break"],
+  ]) {
+    assert(
+      compactPathTail(input) === expected,
+      `row path tail preserves short labels and Unicode within its single-line limit (${input.length})`,
+    );
+  }
+  assert(
+    compactPathTail(
+      "/long/provider/account/My Drive/Teaching/Example Course",
+    ) === "…/Teaching/Example Course",
+    "path labels prefer whole trailing components over provider fragments",
+  );
+  assert(
+    compactPathTail("/archive/An unusually long folder name", 12) ===
+      "…/older name" &&
+      compactPathTail("/archive/An unusually long folder name", 3) === "…/e",
+    "a narrow budget retains the end of a single long folder name",
+  );
   // arrange: [input, expected, how the case is described in the label]
   const sizeCases: [number, string, string][] = [
     [0, "0 B", "zero"],
@@ -237,6 +263,9 @@ export async function rowRenderChecks(
   formatChecks(assert);
   let selected = "row-0";
   let isDirectory = true;
+  let showingDetail = true;
+  let crowded = false;
+  const location = `~/Library/CloudStorage/ExampleProvider/${"Archive/".repeat(8)}Teaching/Example Course`;
   let menuElements = 0;
   let detailElements = 0;
   const component = (name: string) =>
@@ -330,6 +359,7 @@ export async function rowRenderChecks(
   const calls: string[] = [];
   const handlers = {
     onOpen: (entry: { path: string }) => calls.push(entry.path),
+    onUse: (entry: { path: string }) => calls.push(`use:${entry.path}`),
     onDescend: (entry: { path: string }) => calls.push(`enter:${entry.path}`),
     onUp: () => calls.push("up"),
     onHistoryBack: () => calls.push("previous"),
@@ -347,7 +377,7 @@ export async function rowRenderChecks(
           id: `row-${i}`,
           entry: {
             path: `/foo/bar${i}`,
-            name: `bar${i}`,
+            name: crowded ? "Example Project Planning Document" : `bar${i}`,
             isDirectory,
             size: 0,
             mtimeMs: 0,
@@ -361,9 +391,12 @@ export async function rowRenderChecks(
             depth: 0,
             match: 0,
           },
-          showScore: false,
-          columns: { visits: 0, score: 0, time: 0 },
-          showingDetail: true,
+          showScore: crowded,
+          columns: crowded
+            ? { visits: 3, score: 3, time: 6 }
+            : { visits: 0, score: 0, time: 0 },
+          showingDetail,
+          subtitle: location,
           pinned: false,
           handlers,
         }),
@@ -386,6 +419,34 @@ export async function rowRenderChecks(
     assert(
       detailElements < 100,
       `500 rows construct only the selected details (${detailElements} elements)`,
+    );
+    showingDetail = false;
+    await act(() => renderer!.update(rows()));
+    const subtitle = renderer!.root.findAllByType(Item)[0].props.subtitle;
+    assert(
+      subtitle?.value?.startsWith("…") &&
+        subtitle.value.endsWith("Teaching/Example Course") &&
+        Array.from(subtitle.value).length <= 32 &&
+        subtitle.tooltip === "/foo",
+      "long row locations retain the path ending and expose the full location as a tooltip",
+    );
+    crowded = true;
+    await act(() => renderer!.update(rows()));
+    const crowdedSubtitle =
+      renderer!.root.findAllByType(Item)[0].props.subtitle;
+    assert(
+      Array.from(crowdedSubtitle.value).length <
+        Array.from(subtitle.value).length &&
+        crowdedSubtitle.value.endsWith("Example Course") &&
+        crowdedSubtitle.tooltip === "/foo",
+      "long titles and usage columns leave a smaller path label that keeps the nearest folder",
+    );
+    crowded = false;
+    showingDetail = true;
+    await act(() => renderer!.update(rows()));
+    assert(
+      renderer!.root.findAllByType(Item)[0].props.subtitle === undefined,
+      "detail mode still hides the row location subtitle",
     );
     selected = "row-499";
     menuElements = detailElements = 0;
@@ -492,6 +553,30 @@ export async function rowRenderChecks(
         renderer!.root.findByType("action-finder").props.path === "/foo/bar499",
       "Open With and Show in Finder follow the selected path",
     );
+    for (const [props, callback, label] of [
+      [
+        renderer!.root.findByType("action-finder").props,
+        "onShow",
+        "Show in Finder",
+      ],
+      [
+        renderer!.root.findByType("action-openwith").props,
+        "onOpen",
+        "Open With",
+      ],
+      ...["Copy Path", "Copy Name", "Copy File"].map((title) => [
+        copy(title),
+        "onCopy",
+        title,
+      ]),
+    ] as const) {
+      const before = calls.length;
+      props[callback]?.();
+      assert(
+        calls.length === before + 1 && calls.at(-1) === "use:/foo/bar499",
+        `${label} records exactly one use of the selected item on completion`,
+      );
+    }
     for (const [type, modifiers, key] of [
       ["action-finder", "cmd", "return"],
       ["action-openwith", "cmd", "o"],
