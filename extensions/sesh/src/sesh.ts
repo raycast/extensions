@@ -10,16 +10,33 @@ export interface Session {
   Windows: number; // The number of windows in the session
 }
 
+export const UPGRADE_SESH_MESSAGE = "Please upgrade to the latest version of the sesh CLI";
+
 export function getSessions() {
   return new Promise<Session[]>((resolve, reject) => {
     execFile("sesh", ["list", "--json"], { env: getEnv() }, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error("stderr ", stderr);
         console.error("error ", error);
-        return reject(`Please upgrade to the latest version of the sesh CLI`);
+        return reject(UPGRADE_SESH_MESSAGE);
       }
-      const sessions = JSON.parse(stdout);
-      return resolve(sessions ?? []);
+      try {
+        const sessions = JSON.parse(stdout);
+        return resolve(sessions ?? []);
+      } catch {
+        return reject(UPGRADE_SESH_MESSAGE);
+      }
+    });
+  });
+}
+
+export function getSeshVersion(): Promise<string | null> {
+  return new Promise((resolve) => {
+    execFile("sesh", ["--version"], { env: getEnv() }, (error, stdout) => {
+      if (error && error.code === "ENOENT") {
+        return resolve(null);
+      }
+      return resolve(stdout.trim());
     });
   });
 }
