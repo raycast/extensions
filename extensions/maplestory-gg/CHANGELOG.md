@@ -1,6 +1,6 @@
 # MapleStory
 
-## [Restore Character Lookup] - {PR_MERGE_DATE}
+## [Restore Character Lookup] - 2026-09-22
 
 - Replace the unavailable MapleStory.gg API with Nexon's rankings endpoint for North America and Europe
 - Preserve favorites and refresh saved profiles with supported character and Legion data
