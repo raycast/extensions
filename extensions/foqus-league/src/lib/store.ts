@@ -93,6 +93,7 @@ const MAX_TIMESTAMP = 8.64e15;
 export const MAX_NOTES = 500;
 
 const LOCK_STALE_MS = 10_000;
+const LOCK_HEARTBEAT_MS = 2_000;
 const LOCK_WAIT_MS = 5_000;
 
 let tmpSeq = 0;
@@ -170,33 +171,47 @@ export class LocalSessionStore implements SessionStore {
   }
 
   // Each Raycast command runs in its own process, so the in-process queue alone cannot
-  // order a menu-bar append against a view's read-then-rewrite. A lock file does.
-  // ponytail: a lock older than LOCK_STALE_MS is treated as left by a dead process and taken
-  // over; every write here finishes in milliseconds, so a live holder never gets that old.
+  // order a menu-bar append against a view's read-then-rewrite. A lock file does. The holder
+  // writes its token into the file and touches it every LOCK_HEARTBEAT_MS, so only a lock
+  // nobody touched for LOCK_STALE_MS is taken over. Takeover renames the stale file, which a
+  // single contender wins, and release removes the lock only while it still carries this
+  // holder's token.
+  // ponytail: a process suspended mid-write for longer than LOCK_STALE_MS can still overlap
+  // the next holder; closing that needs fcntl range locks, which Node does not expose.
   private async withFileLock<T>(op: () => Promise<T>): Promise<T> {
     await this.ensureDir();
     const lock = this.file("store.lock");
+    const token = `${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`;
     const deadline = Date.now() + LOCK_WAIT_MS;
-    let handle: fs.FileHandle | undefined;
-    while (!handle) {
+    for (;;) {
       try {
-        handle = await fs.open(lock, "wx");
+        await fs.writeFile(lock, token, { flag: "wx" });
+        break;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-        const held = (await fs.stat(lock).catch(() => null))?.mtimeMs ?? 0;
-        if (Date.now() - held > LOCK_STALE_MS) {
-          await fs.rm(lock, { force: true });
+        const touched = (await fs.stat(lock).catch(() => null))?.mtimeMs ?? Date.now();
+        if (Date.now() - touched > LOCK_STALE_MS) {
+          const claim = `${lock}.${token}.stale`;
+          await fs.rename(lock, claim).then(
+            () => fs.rm(claim, { force: true }),
+            () => undefined,
+          );
           continue;
         }
         if (Date.now() > deadline) throw new Error("Another Foqus command is writing sessions. Try again.");
         await new Promise((resolve) => setTimeout(resolve, 25 + Math.random() * 50));
       }
     }
+    const heartbeat = setInterval(() => {
+      const now = new Date();
+      fs.utimes(lock, now, now).catch(() => undefined);
+    }, LOCK_HEARTBEAT_MS);
+    heartbeat.unref();
     try {
       return await op();
     } finally {
-      await handle.close();
-      await fs.rm(lock, { force: true });
+      clearInterval(heartbeat);
+      if ((await fs.readFile(lock, "utf8").catch(() => "")) === token) await fs.rm(lock, { force: true });
     }
   }
 

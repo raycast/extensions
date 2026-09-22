@@ -9,8 +9,6 @@ export const CATEGORIES_PATH = path.join(
   "Library/Application Support/Raycast Focus/categories.json",
 );
 
-export const IMPORT_URL = "raycast://extensions/raycast/raycast-focus/import-focus-categories";
-
 const ICON = "bulls-eye-16";
 
 export type FocusCategory = {

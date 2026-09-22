@@ -40,6 +40,8 @@ type CollectorDeps = {
 
 export const COLLECTOR_MARKER = "foqus-collector-6";
 
+// Opened with `open -g` from the detached /bin/sh watcher below, where there is no Raycast
+// runtime and so no launchCommand. Everything launched from extension code uses launchCommand.
 export const MENU_BAR_DEEPLINK =
   "raycast://extensions/filipimiparebine/foqus-league/focus-menu-bar?launchType=background";
 

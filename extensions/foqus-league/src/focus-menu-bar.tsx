@@ -2,10 +2,17 @@ import { Icon, Keyboard, MenuBarExtra, launchCommand, LaunchType, open, showHUD 
 import { useCachedPromise } from "@raycast/utils";
 import { formatDuration } from "./lib/format.ts";
 import { describeStranded, planFor } from "./lib/goalBlocks.ts";
-import { categoryTitleFor, findCategory, IMPORT_URL, readCategories, writeImportFile } from "./lib/focusCategories.ts";
-import { QUICK_STARTS, quickStartGoals, RECENT_MS, START_SCREEN_URL, startSessionUrl } from "./lib/quickstart.ts";
+import { categoryTitleFor, findCategory, readCategories, writeImportFile } from "./lib/focusCategories.ts";
+import { QUICK_STARTS, quickStartGoals, RECENT_MS, startSessionUrl } from "./lib/quickstart.ts";
 import { getPreferences, learnGoalBlocks, SUPPORT_URL } from "./lib/runtime.ts";
 import { useStats } from "./lib/useStats.ts";
+
+// Raycast Focus is a built-in extension; launchCommand reaches it under Raycast's own author name.
+const RAYCAST_FOCUS = {
+  ownerOrAuthorName: "raycast",
+  extensionName: "raycast-focus",
+  type: LaunchType.UserInitiated,
+} as const;
 
 const QUICK_KEYS: Keyboard.KeyEquivalent[] = ["1", "2", "3"];
 
@@ -75,7 +82,7 @@ export default function FocusMenuBar() {
             onAction={async () => {
               try {
                 await writeImportFile(needsCategory.name, needsCategory.stranded);
-                await open(IMPORT_URL);
+                await launchCommand({ ...RAYCAST_FOCUS, name: "import-focus-categories" });
               } catch (error) {
                 await showHUD(`Could not write the import file: ${error instanceof Error ? error.message : error}`);
               }
@@ -94,7 +101,7 @@ export default function FocusMenuBar() {
           title="Start a Focus Session"
           icon={Icon.Stopwatch}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
-          onAction={() => open(START_SCREEN_URL)}
+          onAction={() => launchCommand({ ...RAYCAST_FOCUS, name: "start-focus-session" })}
         />
         <MenuBarExtra.Item
           title="Log Past Session"

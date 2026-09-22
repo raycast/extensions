@@ -7,8 +7,6 @@ export const QUICK_STARTS = 3;
 
 export const RECENT_MS = 90 * 24 * 60 * 60 * 1000;
 
-export const START_SCREEN_URL = "raycast://extensions/raycast/raycast-focus/start-focus-session";
-
 export function startSessionUrl(goal: string, minutes: number, categories: Category[], mode: FilterMode = "block") {
   const query = [`goal=${encodeURIComponent(goal)}`, `duration=${Math.round(minutes * 60)}`];
   if (categories.length) {

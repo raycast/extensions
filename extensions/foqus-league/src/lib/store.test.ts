@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { writeFileSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -581,4 +582,14 @@ test("a write waits for another command's lock and sweeps one left by a dead pro
     await fs.utimes(lock, old, old);
     assert.equal(await store.add([at(T2)]), 1, "a stale lock is taken over");
     assert.equal(await exists(lock), false, "the lock is released afterwards");
+  }));
+
+test("release leaves a lock that another holder replaced in the meantime", () =>
+  withStore(async (store, dir) => {
+    const lock = path.join(dir, "store.lock");
+    await store.mutateState((state) => {
+      writeFileSync(lock, "another command's token");
+      return state;
+    });
+    assert.equal(await fs.readFile(lock, "utf8"), "another command's token", "only the owner's lock is removed");
   }));
