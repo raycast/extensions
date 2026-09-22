@@ -1,6 +1,6 @@
 # HideMyEmail Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-09-22
 
 - Added informative error message when user needs to update iCloud terms otherwise session can't be established
 - Dependency version update
