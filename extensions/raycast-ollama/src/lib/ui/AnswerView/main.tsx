@@ -18,7 +18,7 @@ import { HasUnclosedThinkTag, StripThinkTags } from "../function";
 import { CommandAnswer } from "../../settings/enum";
 import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
-import { Creativity } from "../../enum";
+import { Creativity, PromptInputSource } from "../../enum";
 import { RaycastImage } from "../../types";
 import { OllamaApiModelCapability } from "../../ollama/enum";
 
@@ -57,6 +57,7 @@ export function AnswerView(props: props): React.JSX.Element {
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const query: React.MutableRefObject<undefined | string> = React.useRef(undefined);
   const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef(undefined);
+  const inputSource = React.useRef<PromptInputSource>(PromptInputSource.None);
   const [imageView, setImageView]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [thinking, setThinking]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
@@ -76,6 +77,7 @@ export function AnswerView(props: props): React.JSX.Element {
         props.prompt,
         query,
         images,
+        inputSource,
         setLoading,
         setImageView,
         setThinking,
@@ -107,9 +109,24 @@ export function AnswerView(props: props): React.JSX.Element {
     if (loading || IsLoadingModel) return;
     if (answerMetadata.done !== true) return;
     pasted.current = true;
+    if (inputSource.current !== PromptInputSource.SelectedText) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Not auto-replacing",
+        message:
+          inputSource.current === PromptInputSource.Clipboard
+            ? "The prompt was filled from the clipboard, so there is no selection to replace."
+            : "The prompt did not use the {selection} token, so there is no selection to replace.",
+      });
+      return;
+    }
     const text = StripThinkTags(answer);
     if (text === "" || HasUnclosedThinkTag(answer)) {
-      showToast({ style: Toast.Style.Failure, title: "Answer looks incomplete, not auto-replacing." });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Not auto-replacing",
+        message: "The answer did not complete cleanly.",
+      });
       return;
     }
     (async () => {

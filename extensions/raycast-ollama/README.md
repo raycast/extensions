@@ -54,7 +54,7 @@ The extension includes focused commands for common tasks:
 
 Most text commands use the input source selected in the extension preferences: **Selected Text** or **Clipboard**. You can also enable fallback to the other source when the preferred source is empty. After a one-shot command finishes, use **Continue as Chat** to keep the conversation going.
 
-Commands that rewrite their input also offer **Auto-Replace Selected Text**, enabled per command in its Raycast settings. When enabled, the generated text replaces your selection as soon as it is ready, instead of waiting for you to copy or paste it. Commands that explain, describe, or summarise their input do not offer it, because their output is not a replacement for what you selected.
+Commands that rewrite their input also offer **Auto-Replace Selected Text**, enabled per command in its Raycast settings. When enabled, the generated text replaces your selection as soon as it is ready, instead of waiting for you to copy or paste it. It only replaces text when the selection actually supplied the input: if the input source was the clipboard, or fell back to it because nothing was selected, the answer is shown instead of overwriting whatever happens to be highlighted. Commands that explain, describe, or summarise their input do not offer it, because their output is not a replacement for what you selected.
 
 ## Manage Models and Servers
 

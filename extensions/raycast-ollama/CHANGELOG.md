@@ -2,7 +2,7 @@
 
 ## [Improvement] - {PR_MERGE_DATE}
 
-- [Improvement] new per-command "Auto-Replace Selected Text" preference on the commands that rewrite their input: when enabled, the generated answer replaces the selected text automatically instead of waiting for you to copy or paste it. Disabled by default, and skipped when the answer did not complete cleanly.
+- [Improvement] new per-command "Auto-Replace Selected Text" preference on the commands that rewrite their input: when enabled, the generated answer replaces the selected text automatically instead of waiting for you to copy or paste it. Disabled by default, and skipped when the answer did not complete cleanly or when the input came from the clipboard rather than a selection.
 - [Improvement] Command "Create Custom Command": new "Auto-Replace" option, so a custom command can replace the selected text automatically too.
 
 ## [Improvement] - 2026-09-07

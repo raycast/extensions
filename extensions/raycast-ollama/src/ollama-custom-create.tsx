@@ -52,7 +52,7 @@ export default function Command(): React.JSX.Element {
 - Maximum: 2`;
   const InfoThinking = "Thinking Effort";
   const InfoAutoReplace =
-    "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself.";
+    "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.";
   const InfoPrompt = `Prompt Template, you can download public prompt form prompts.ray.so.
 The following tags are supported:
 - {selection}: Add selected text or clipboard to the prompt.

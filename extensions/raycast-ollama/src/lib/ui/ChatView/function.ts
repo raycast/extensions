@@ -485,7 +485,7 @@ export async function Run(
   setLoading(true);
 
   /* Parse token on query */
-  query = await PromptTokenParser(query);
+  query = (await PromptTokenParser(query))[0];
 
   /* Load Enabled Tools */
   const tools: Tool[] = [];
