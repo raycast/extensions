@@ -20,7 +20,7 @@ export default function Command() {
   const [checking, setChecking] = useState(false);
   const [connection, setConnection] = useState("");
   if (error) return <ErrorView error={error} />;
-  const keyPresent = Boolean(getPreferenceValues<{ apiKey?: string }>().apiKey?.trim());
+  const keyPresent = Boolean(getPreferenceValues<Preferences>().apiKey?.trim());
   const folders = data.destinations.filter((d) => d.kind === "folder");
   const open = (name: string) => launchCommand({ name, type: LaunchType.UserInitiated });
   async function checkConnection() {

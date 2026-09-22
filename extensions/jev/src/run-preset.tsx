@@ -23,7 +23,7 @@ function RunForm({ preset, selection }: { preset: Preset; selection: string }) {
   const [text, setText] = useState(selection);
   const [busy, setBusy] = useState(false);
   const { push } = useNavigation();
-  const hasKey = Boolean(getPreferenceValues<{ apiKey?: string }>().apiKey?.trim());
+  const hasKey = Boolean(getPreferenceValues<Preferences>().apiKey?.trim());
   return (
     <Form
       navigationTitle={preset.name}

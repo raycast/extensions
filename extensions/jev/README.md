@@ -41,7 +41,7 @@ Choose real folders through the folder picker. Jev can suggest only a configured
 
 AI suggestions support UTF-8 text files and text-based PDFs up to 10 MB. The input preview shows at most 24,000 extracted characters and explicitly marks truncation. Scanned PDFs need OCR and are not supported for AI suggestions. Other regular files can still be filed manually.
 
-Moves require confirmation, never overwrite an existing file, and are recorded before execution. Undo checks a SHA-256 digest and refuses to overwrite an occupied original path or undo a changed document. If a move is interrupted, **Reconcile Interrupted Move** checks both paths without modifying the files. Ambiguous cases keep both copies for manual inspection. Folders and symbolic links are not filed.
+Moves require confirmation, never overwrite an existing file, and are recorded before execution. Undo checks a SHA-256 digest and refuses to overwrite an occupied original path or undo a changed document. If a move is interrupted, **Reconcile Interrupted Move** checks both paths without modifying the files. Interrupted moves can leave a recovery file, available through **Show Recovery File** in Filing History. Reconciliation leaves these files untouched for manual inspection. Moves and undo require source and destination on the same volume with hard-link support. Use Finder for moves between volumes. Folders and symbolic links are not filed.
 
 ## Bookmarks and Quicklinks
 

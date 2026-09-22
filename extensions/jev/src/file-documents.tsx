@@ -70,7 +70,7 @@ function FilePicker({ onChoose }: { onChoose: (files: string[]) => void }) {
       }
     >
       <Form.FilePicker id="files" title="Documents" canChooseDirectories={false} allowMultipleSelection />
-      <Form.Description text="Files remain unchanged until you confirm a move." />
+      <Form.Description text="Files remain unchanged until you confirm a move. Choose destinations on the same volume; use Finder for moves between volumes." />
     </Form>
   );
 }

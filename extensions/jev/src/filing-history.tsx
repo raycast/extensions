@@ -43,7 +43,7 @@ export default function Command() {
                 title="Inspect Move"
                 target={
                   <Detail
-                    markdown={`# ${markdown(path.basename(m.source))}\n\n**From:** ${markdown(m.source)}\n\n**To:** ${markdown(m.destination)}\n\nStatus: ${m.status}\n\n${markdown(m.error ?? "")}`}
+                    markdown={`# ${markdown(path.basename(m.source))}\n\n**From:** ${markdown(m.source)}\n\n**To:** ${markdown(m.destination)}\n\nStatus: ${m.status}\n\n${m.recoveryPath ? `**Recovery file:** ${markdown(m.recoveryPath)}\n\n` : ""}${markdown(m.error ?? "")}`}
                   />
                 }
               />
@@ -56,6 +56,7 @@ export default function Command() {
                   })
                 }
               />
+              {m.recoveryPath && <Action.ShowInFinder title="Show Recovery File" path={m.recoveryPath} />}
               <Action.CopyToClipboard title="Copy Original Path" content={m.source} />
               <Action.CopyToClipboard title="Copy Destination Path" content={m.destination} />
               <Action title="Refresh" onAction={refresh} />

@@ -1,10 +1,10 @@
-import { TypeSafeClient, APIError, type Questions } from "@typesafe-ai/sdk";
+import { TypeSafeClient, APIError, type EntryType, type Questions } from "@typesafe-ai/sdk";
 import { assertSafeInput } from "./input";
 import { validateAnswers, type WireQuestion } from "./questions";
 export async function evaluate(
   apiKey: string,
   model: string,
-  state: unknown,
+  state: EntryType,
   questions: Record<string, WireQuestion>,
   signal?: AbortSignal,
 ) {
@@ -24,7 +24,7 @@ export async function evaluate(
   });
   try {
     const result = await client.systemOne(
-      { state: state as string, questions: questions as Questions },
+      { state, questions: questions as Questions },
       { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(35000)]) : AbortSignal.timeout(35000) },
     );
     return { answers: validateAnswers(result.answers, questions), model: result.model, usage: result.usage };

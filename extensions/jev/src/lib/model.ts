@@ -68,6 +68,7 @@ export const moveSchema = z.object({
   sha256: z.string(),
   createdAt: z.string(),
   status: z.enum(["pending", "moved", "undone", "failed"]),
+  recoveryPath: z.string().optional(),
   error: z.string().optional(),
 });
 export const dataSchema = z

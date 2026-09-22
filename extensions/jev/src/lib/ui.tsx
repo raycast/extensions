@@ -1,3 +1,4 @@
+import type { EntryType } from "@typesafe-ai/sdk";
 import {
   Action,
   launchCommand,
@@ -105,8 +106,8 @@ export function PreferencesAction() {
     </>
   );
 }
-export async function askJev(state: unknown, questions: Record<string, WireQuestion>, signal?: AbortSignal) {
-  const p = getPreferenceValues<{ apiKey?: string; model?: string }>();
+export async function askJev(state: EntryType, questions: Record<string, WireQuestion>, signal?: AbortSignal) {
+  const p = getPreferenceValues<Preferences>();
   return evaluate(p.apiKey ?? "", p.model ?? "jev-latest", state, questions, signal);
 }
 export const markdown = (s: string) => s.replace(/[\\`*_{}[\]<>#|]/g, "\\$&");
