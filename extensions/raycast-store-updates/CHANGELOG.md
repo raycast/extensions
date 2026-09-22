@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Ask AI for store updates] - {PR_MERGE_DATE}
+## [Add Ask AI Command] - {PR_MERGE_DATE}
 
 - Add a Raycast AI tool for finding recent new and updated Store extensions by keyword, update type, number of days, or start date, with descriptions, dates, and links
 - Allow AI queries to show updates for extensions installed locally
