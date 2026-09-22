@@ -139,22 +139,3 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
     return "error";
   }
 }
-
-export async function focusFirefox(): Promise<boolean | string> {
-  const browserApp = getBrowserApp();
-  const title = browserApp.replace(/'/g, "''");
-
-  try {
-    if (process.platform === "win32") {
-      await execAsync(`powershell -NoProfile -Command "(New-Object -ComObject WScript.Shell).AppActivate('${title}')"`);
-    } else {
-      await execAsync(`open -a "${browserApp}"`);
-    }
-    popToRoot();
-    closeMainWindow({ clearRootSearch: true });
-    return "success";
-  } catch (err) {
-    await showLaunchError(err);
-    return "error";
-  }
-}

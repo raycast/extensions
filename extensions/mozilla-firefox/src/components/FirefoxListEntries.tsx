@@ -1,12 +1,11 @@
 import { Icon, List } from "@raycast/api";
-import { NewTabAction, HistoryItemAction, TabListItemAction } from "./FirefoxActions";
-import { HistoryEntry, Tab, getUrlWithoutScheme, getTabFavicon } from "../interfaces";
+import { NewTabAction, HistoryItemAction } from "./FirefoxActions";
+import { HistoryEntry } from "../interfaces";
 import { looksLikeUrl } from "../actions";
 import { getFavicon } from "@raycast/utils";
 
 export const NewTabEntry = NewTabEntryComponent;
 export const HistoryListEntry = HistoryListEntryComponent;
-export const TabListEntry = TabListEntryComponent;
 
 function NewTabEntryComponent({ searchText }: { searchText?: string }) {
   const title = !searchText ? "Open Empty Tab" : looksLikeUrl(searchText) ? "Open URL" : `Search "${searchText}"`;
@@ -16,18 +15,6 @@ function NewTabEntryComponent({ searchText }: { searchText?: string }) {
       title={title}
       icon={{ source: !searchText ? Icon.Plus : looksLikeUrl(searchText) ? Icon.Link : Icon.MagnifyingGlass }}
       actions={<NewTabAction query={searchText} />}
-    />
-  );
-}
-
-function TabListEntryComponent({ tab, onEditUrl }: { tab: Tab; onEditUrl?: (url: string) => void }) {
-  return (
-    <List.Item
-      title={tab.title}
-      subtitle={getUrlWithoutScheme(tab)}
-      keywords={[getUrlWithoutScheme(tab)]}
-      actions={<TabListItemAction tab={tab} onEditUrl={onEditUrl} />}
-      icon={getTabFavicon(tab)}
     />
   );
 }

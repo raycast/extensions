@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { buildNewTabUrl, focusFirefox, looksLikeUrl, openHistoryTab, openInNewWindow, openNewTab } from "../actions";
-import { HistoryEntry, Tab } from "../interfaces";
+import { buildNewTabUrl, looksLikeUrl, openHistoryTab, openInNewWindow, openNewTab } from "../actions";
+import { HistoryEntry } from "../interfaces";
 
 function OpenInNewWindowAction({ url }: { url?: string }) {
   if (process.platform !== "win32") return null;
@@ -43,17 +43,6 @@ export function HistoryItemAction({
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
       <EditUrlAction url={url} onEditUrl={onEditUrl} />
-    </ActionPanel>
-  );
-}
-
-export function TabListItemAction({ tab, onEditUrl }: { tab: Tab; onEditUrl?: (url: string) => void }) {
-  return (
-    <ActionPanel title={tab.title}>
-      <Action title="Focus Firefox" icon={{ source: Icon.Eye }} onAction={() => focusFirefox()} />
-      {tab.url ? <OpenInNewWindowAction url={tab.url} /> : null}
-      <Action.CopyToClipboard title="Copy URL" content={tab.url} />
-      <EditUrlAction url={tab.url} onEditUrl={onEditUrl} />
     </ActionPanel>
   );
 }

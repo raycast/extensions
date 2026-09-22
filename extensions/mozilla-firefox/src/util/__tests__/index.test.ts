@@ -12,8 +12,7 @@ vi.mock("@raycast/api", () => ({
 import { getPreferenceValues } from "@raycast/api";
 
 // Import after the mock is in place so the module picks up the stub.
-import { filterTabs, getHistoryDbPath, parseSessionTabs, searchWhereClause } from "../index";
-import { decodeMozillaLz4 } from "../mozillaLz4";
+import { getHistoryDbPath, searchWhereClause } from "../index";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -517,74 +516,3 @@ describe("searchWhereClause", () => {
     );
   });
 });
-
-describe("parseSessionTabs", () => {
-  it("reads the current entry from every window", () => {
-    const json = JSON.stringify({
-      windows: [
-        {
-          tabs: [
-            {
-              index: 2,
-              entries: [
-                { url: "https://old.example", title: "Old" },
-                { url: "https://web.whatsapp.com", title: "WhatsApp" },
-              ],
-            },
-          ],
-        },
-        {
-          tabs: [{ entries: [{ url: "https://github.com/", title: "GitHub" }] }],
-        },
-      ],
-    });
-
-    expect(parseSessionTabs(json)).toEqual([
-      { url: "https://web.whatsapp.com", title: "WhatsApp" },
-      { url: "https://github.com/", title: "GitHub" },
-    ]);
-  });
-
-  it("skips tabs without a url and invalid json", () => {
-    expect(parseSessionTabs("{")).toEqual([]);
-    expect(parseSessionTabs(JSON.stringify({ windows: [{ tabs: [{ entries: [{}] }] }] }))).toEqual([]);
-  });
-});
-
-describe("filterTabs", () => {
-  const tabs = [
-    { title: "WhatsApp", url: "https://web.whatsapp.com" },
-    { title: "GitHub", url: "https://github.com/" },
-  ];
-
-  it("keeps tabs whose title or url contain every term", () => {
-    expect(filterTabs(tabs, "whats")).toEqual([tabs[0]]);
-    expect(filterTabs(tabs, "GITHUB com")).toEqual([tabs[1]]);
-  });
-});
-
-describe("decodeMozillaLz4", () => {
-  it("roundtrips a literal-only mozilla lz4 payload", () => {
-    const json = '{"windows":[]}';
-    expect(decodeMozillaLz4(encodeMozillaLz4Literals(json))).toBe(json);
-  });
-});
-
-function encodeMozillaLz4Literals(text: string): Buffer {
-  const src = Buffer.from(text, "utf8");
-  const extras: number[] = [];
-  let tokenLit = src.length;
-  if (tokenLit >= 15) {
-    let rest = tokenLit - 15;
-    tokenLit = 15;
-    while (rest >= 255) {
-      extras.push(255);
-      rest -= 255;
-    }
-    extras.push(rest);
-  }
-  const header = Buffer.from("mozLz40\0");
-  const size = Buffer.alloc(4);
-  size.writeUInt32LE(src.length, 0);
-  return Buffer.concat([header, size, Buffer.from([tokenLit << 4, ...extras]), src]);
-}

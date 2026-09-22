@@ -20,10 +20,10 @@ vi.mock("child_process", () => ({
 
 import { closeMainWindow, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
 import { existsSync } from "fs";
-import { exec, spawn } from "child_process";
+import { spawn } from "child_process";
 
 // Import after the mocks are in place so the module under test picks them up.
-import { buildNewTabUrl, focusFirefox, openNewTab, openInNewWindow } from "../index";
+import { buildNewTabUrl, openNewTab, openInNewWindow } from "../index";
 
 const setBrowserApp = (browserApp: string) =>
   vi.mocked(getPreferenceValues).mockReturnValue({ browserApp, searchEngine: "Google" });
@@ -314,37 +314,5 @@ describe("buildNewTabUrl", () => {
 
   it("sends remaining text to the search engine", () => {
     expect(buildNewTabUrl("whatsapp")).toBe("https://google.com/search?q=whatsapp");
-  });
-});
-
-describe("focusFirefox on Windows", () => {
-  const originalPlatform = process.platform;
-
-  beforeEach(() => {
-    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
-    vi.mocked(exec).mockImplementation((...args: unknown[]) => {
-      const cb = args.find((a) => typeof a === "function") as
-        | ((error: Error | null, stdout: string, stderr: string) => void)
-        | undefined;
-      cb?.(null, "", "");
-      return {} as never;
-    });
-  });
-
-  afterEach(() => {
-    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
-    vi.clearAllMocks();
-  });
-
-  it("activates Firefox without spawning a URL", async () => {
-    setBrowserApp("Firefox");
-
-    const result = await focusFirefox();
-
-    expect(result).toBe("success");
-    expect(spawn).not.toHaveBeenCalled();
-    expect(exec).toHaveBeenCalledWith(expect.stringContaining("AppActivate('Firefox')"), expect.any(Function));
-    expect(popToRoot).toHaveBeenCalled();
-    expect(closeMainWindow).toHaveBeenCalledWith({ clearRootSearch: true });
   });
 });

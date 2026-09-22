@@ -2,8 +2,6 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { getPreferenceValues } from "@raycast/api";
-import { Tab } from "../interfaces";
-import { decodeMozillaLz4 } from "./mozillaLz4";
 
 const userDataDirectoryPath = () => {
   if (process.platform === "win32") {
@@ -81,86 +79,6 @@ export const getHistoryDbPath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
 };
-
-export const getSessionManagerExtensionPath = (extensionId: string) => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(
-    userDirectoryPath,
-    getProfileName(userDirectoryPath),
-    "storage",
-    "default",
-    `moz-extension+++${extensionId}`,
-    "idb",
-  );
-};
-
-export const getSessionInactivePath = (): string => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
-};
-
-export const getSessionActivePath = (): string => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
-};
-
-type SessionEntry = { url?: string; title?: string };
-type SessionTab = { index?: number; entries?: SessionEntry[] };
-type SessionStore = { windows?: { tabs?: SessionTab[] }[] };
-
-export function parseSessionTabs(json: string): Tab[] {
-  let parsed: SessionStore;
-  try {
-    parsed = JSON.parse(json) as SessionStore;
-  } catch {
-    return [];
-  }
-
-  const tabs: Tab[] = [];
-  for (const window of parsed.windows ?? []) {
-    for (const tab of window.tabs ?? []) {
-      const entries = tab.entries ?? [];
-      const current = entries[(tab.index ?? entries.length) - 1] ?? entries[entries.length - 1];
-      const url = current?.url?.trim();
-      if (!url) continue;
-      tabs.push({ url, title: current.title?.trim() || url });
-    }
-  }
-  return tabs;
-}
-
-export function filterTabs(tabs: Tab[], query: string | undefined): Tab[] {
-  const terms = query?.trim().toLowerCase().split(/\s+/).filter(Boolean) ?? [];
-  if (terms.length === 0) return tabs;
-  return tabs.filter((tab) => {
-    const haystack = `${tab.title} ${tab.url}`.toLowerCase();
-    return terms.every((term) => haystack.includes(term));
-  });
-}
-
-function readSessionFile(filePath: string): string | undefined {
-  try {
-    const tmp = `${filePath}.${process.pid}.tmp`;
-    fs.copyFileSync(filePath, tmp);
-    try {
-      return decodeMozillaLz4(fs.readFileSync(tmp));
-    } finally {
-      try {
-        fs.unlinkSync(tmp);
-      } catch {
-        // ponytail: leftover tmp if unlink fails; next read overwrites a unique pid name
-      }
-    }
-  } catch {
-    return undefined;
-  }
-}
-
-export function readOpenTabs(query?: string): Tab[] {
-  const json = readSessionFile(getSessionActivePath()) ?? readSessionFile(getSessionInactivePath());
-  if (!json) return [];
-  return filterTabs(parseSessionTabs(json), query);
-}
 
 // Escape ' for SQL and the LIKE wildcards % and _ (plus the escape char itself) so they match literally.
 const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");

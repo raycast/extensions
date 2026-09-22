@@ -1,6 +1,6 @@
 # Mozilla Firefox
 
-Search and open Mozilla Firefox tabs from search query, opened tabs, bookmarks and history.
+Search and open Mozilla Firefox tabs from search query, bookmarks and history.
 
 New Tab search can be configured to search from the following sources:
 
@@ -10,8 +10,4 @@ New Tab search can be configured to search from the following sources:
 - Brave
 - Baidu
 
-Limitations:
-
-- Open tabs come from Firefox's session file (`recovery.jsonlz4`). The list updates when Firefox checkpoints itself (about every 15 seconds), not instantly.
-- Enter on an open tab focuses Firefox. It does not switch to that exact tab, and it does not open a duplicate URL.
-- Shift+Enter (Edit URL in Search Bar) is available in New Tab. Search History and Search Bookmarks only filter results.
+Shift+Enter copies a result URL into the search bar on New Tab, Search History, and Search Bookmarks so you can edit it before opening.
