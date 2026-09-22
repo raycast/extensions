@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Helpful empty states] - {PR_MERGE_DATE}
+## [Helpful empty states] - 2026-09-22
 
 - Show a dedicated empty state when the sesh CLI isn't installed, with a copyable Homebrew install command and a link to sesh on GitHub
 - Show clear empty states when tmux isn't running, when the sesh CLI is too old, or when no sessions exist, instead of a failure toast over a blank list
