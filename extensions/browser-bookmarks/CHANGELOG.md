@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-09-22
 
 - Fixed the new-tab keyboard shortcut and clarified the browser action icons
 
