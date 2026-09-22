@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-sessions-search",
+  "title": "Agent Sessions",
+  "description": "Search and resume Claude Code and Codex sessions. Full-text search over every historical transcript, PR-aware ranking, one keystroke to resume in your terminal or desktop app. Everything stays local.",
+  "icon": "icon.png",
+  "author": "tomesterez",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Agent Sessions",
+      "subtitle": "Claude Code / Codex",
+      "description": "Search all Claude Code and Codex sessions by PR, issue, branch, file or text and resume them.",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-index",
+      "title": "Refresh Sessions Index",
+      "description": "Incrementally index new or changed sessions in the background.",
+      "mode": "no-view",
+      "interval": "30m"
+    },
+    {
+      "name": "rebuild-index",
+      "title": "Rebuild Sessions Index",
+      "description": "Drop the local search index and rebuild it from scratch.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal",
+      "description": "Terminal used to resume sessions from the command line.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal.app",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iTerm"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        }
+      ]
+    },
+    {
+      "name": "defaultResumeTarget",
+      "title": "Default Resume Action",
+      "description": "What Enter does. Auto opens desktop-created sessions in the desktop app and CLI sessions in the terminal.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Desktop app (Claude / Codex)",
+          "value": "app"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        }
+      ]
+    },
+    {
+      "name": "claudeConfigDir",
+      "title": "Claude Config Directory",
+      "description": "Defaults to ~/.claude.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "codexHome",
+      "title": "Codex Home",
+      "description": "Defaults to ~/.codex.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "claudeCommand",
+      "title": "Claude CLI Command",
+      "description": "Command used to resume Claude Code sessions in the terminal.",
+      "type": "textfield",
+      "required": false,
+      "default": "claude"
+    },
+    {
+      "name": "codexCommand",
+      "title": "Codex CLI Command",
+      "description": "Command used to resume Codex sessions in the terminal.",
+      "type": "textfield",
+      "required": false,
+      "default": "codex"
+    },
+    {
+      "name": "linearWorkspace",
+      "title": "Linear Workspace",
+      "description": "Workspace slug used for issue links (linear.app/<workspace>/issue/KEY). Detected from URLs in your sessions when empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "includeArchived",
+      "title": "Archived Sessions",
+      "label": "Include archived Codex sessions",
+      "description": "Index sessions from ~/.codex/archived_sessions too.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.0.10",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "npm run build:worker && ray build -e dist",
+    "build:worker": "node scripts/build-worker.mjs",
+    "dev": "npm run build:worker && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
