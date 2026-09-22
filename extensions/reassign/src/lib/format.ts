@@ -43,7 +43,7 @@ export function relativeDayLabel(iso: string, todayIso: string): string {
 
 /** "22:00 → 01:30 +1" — a +1 marks a block that ends the next day. */
 export function formatRange(event: ScheduleEvent): string {
-  const plusDay = event.endNextDay || event.crossesMidnight ? " +1" : "";
+  const plusDay = event.endNextDay || event.crossesMidnight || event.end < event.start ? " +1" : "";
   return `${event.start} → ${event.end}${plusDay}`;
 }
 

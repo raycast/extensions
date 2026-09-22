@@ -183,12 +183,15 @@ const MEETING_HOSTS =
 
 /** Scan notes / source URL for a conferencing link (a fallback for synced events). */
 function scrapeMeetingLink(event: ScheduleEvent): string | null {
-  const parts: string[] = [];
-  if (typeof event.notes === "string") parts.push(event.notes);
-  if (typeof event.sourceUrl === "string") parts.push(event.sourceUrl);
-  const urls = parts.join(" ").match(/https?:\/\/[^\s<>)"']+/gi);
-  if (!urls) return null;
-  return urls.find((url) => MEETING_HOSTS.test(url)) ?? null;
+  const urls = typeof event.notes === "string" ? event.notes.match(/https?:\/\/[^\s<>)"']+/gi) : null;
+  const scraped = urls?.map((url) => url.replace(/[.,;!]+$/, "")).find((url) => MEETING_HOSTS.test(url));
+  if (scraped) return scraped;
+  // Unlike prose, sourceUrl is a structured URL; punctuation may be part of a
+  // password or path, so preserve it just like the API's meeting.url field.
+  const sourceUrl = event.sourceUrl;
+  return typeof sourceUrl === "string" && /^https?:\/\//i.test(sourceUrl) && MEETING_HOSTS.test(sourceUrl)
+    ? sourceUrl
+    : null;
 }
 
 /**
@@ -241,7 +244,16 @@ export interface TodayModel {
 
 /** Group a day's events into the Now / Up next / Later / Done sections. */
 export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): TodayModel | null {
-  const day = schedule.days.find((d) => d.date === dateISO) ?? schedule.days[0];
+  // Do not fall back to `schedule.days[0]` for a missing date. DayView calls
+  // `useCachedPromise(getSchedule, [date], { keepPreviousData: true })`, so on
+  // the first navigation to an uncached date `data` still holds the *previous*
+  // day's single-day payload. A fallback would borrow that day's events and
+  // render them under the new day's header (and bucket them against the wrong
+  // clock) for the duration of the in-flight fetch. Returning null lets DayView
+  // render its loading state instead, mirroring `buildRangeAgenda`'s policy:
+  // "a date the server omits becomes an empty day, so it never borrows another
+  // day's events."
+  const day = schedule.days.find((d) => d.date === dateISO);
   if (!day) return null;
 
   const nowMinutes = minutesFromClock(schedule.now.currentClock) ?? 0;

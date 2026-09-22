@@ -12,8 +12,8 @@ import { AgendaItem } from "./components/agenda-item";
 import { SearchView } from "./components/search-view";
 import { refusalView } from "./components/states";
 import { reassignProvider } from "./lib/oauth";
-import { ApiError, getSchedule, getScheduleRange, WriteOp } from "./lib/api";
-import { addDaysISO, addMinutesHM, relativeDayLabel, todayISO } from "./lib/format";
+import { ApiError, getSchedule, getScheduleRange } from "./lib/api";
+import { addDaysISO, relativeDayLabel, todayISO } from "./lib/format";
 import {
   buildRangeAgenda,
   buildTodayModel,
@@ -21,9 +21,9 @@ import {
   DayAgenda,
   eventMatchesFilter,
   passesKindFilter,
-  ScheduleEvent,
   TodaySection,
 } from "./lib/schedule-model";
+import { transformEvents } from "./lib/agenda-optimistic";
 import { webDayUrl } from "./lib/wire";
 
 type AgendaScope = "day" | "week";
@@ -185,7 +185,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
           ] as const,
       )
     : [];
-  const isEmpty = model ? filtered.every(([, events]) => events.length === 0) : false;
+  const isEmpty = model ? filtered.every(([, events]) => events.length === 0) : Boolean(data?.ok && !isLoading);
   const isFiltered = filter !== "all" || hideNonBlocking || hideReference;
   const backlogCount = data?.ok ? (data.data.backlogCount ?? 0) : 0;
 
@@ -252,7 +252,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
             </List.Section>
           );
         })}
-      {model && isEmpty && (
+      {isEmpty && (
         <List.EmptyView
           icon={isFiltered ? Icon.Filter : Icon.Calendar}
           title={isFiltered ? "No blocks match" : "Nothing planned"}
@@ -295,8 +295,6 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
   );
 }
 
-type OptimisticOp = Extract<WriteOp, { op: "reflect" | "delete" | "shift" }>;
-
 /**
  * Build an optimistic cache transform from a 1-op reflect / delete / shift batch.
  * The row updates instantly; `mutate` reconciles or rolls back after the call.
@@ -320,21 +318,6 @@ const buildOptimistic: OptimisticForOps<ScheduleData> = (ops) => {
     };
   };
 };
-
-function transformEvents(events: ScheduleEvent[], op: OptimisticOp): ScheduleEvent[] {
-  if (op.op === "delete") return events.filter((event) => event.id !== op.id);
-  return events.map((event) => {
-    if (event.id !== op.id) return event;
-    // Set both fields: reflectState reads `state` first, so a re-reflect of an
-    // already-reflected block must overwrite `state`, not only `status`.
-    if (op.op === "reflect") return { ...event, reflect: { ...event.reflect, state: op.status, status: op.status } };
-    return {
-      ...event,
-      start: addMinutesHM(event.start, op.byMinutes),
-      end: addMinutesHM(event.end, op.byMinutes),
-    };
-  });
-}
 
 /** The same reflect / delete / shift transform, over the week cache (days[]). */
 const buildWeekOptimistic: OptimisticForOps<WeekResult | undefined> = (ops) => {

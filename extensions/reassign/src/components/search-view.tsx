@@ -20,9 +20,9 @@ export function SearchView(props: { initialQuery?: string }) {
     keepPreviousData: true,
   });
 
-  if (data && !data.ok) return refusalView(data, revalidate);
+  if (query.length > 0 && data && !data.ok) return refusalView(data, revalidate);
 
-  const events = data?.ok ? data.data.events : [];
+  const events = query.length === 0 || !data?.ok ? [] : data.data.events;
   const todayIso = todayISO();
   const groups = groupByDate(events);
 

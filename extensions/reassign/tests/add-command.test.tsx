@@ -1,5 +1,6 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
+import { blockDraft, type AiPreview } from "../src/lib/ai-draft";
 
 const mock = vi.hoisted(() => ({
   slots: [] as unknown[],
@@ -260,4 +261,48 @@ it("derives a start from end plus duration", async () => {
   expect(mock.create).toHaveBeenCalledWith(
     expect.objectContaining({ date: "2026-09-22", start: "09:30", end: "11:00" }),
   );
+});
+afterEach(() => vi.useRealTimers());
+
+it.each([
+  ["lunch tomorrow", "2026-09-23"],
+  ["lunch", undefined],
+])("AI inbox draft preserves only an explicit planned date from %s", async (text, expectedDate) => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 22, 12));
+  const preview: AiPreview = {
+    applied: false,
+    intents: [{ op: "park", name: "Lunch", durationHours: 1 }],
+  };
+  const draft = blockDraft(preview);
+  expect(draft.destination).toBe("inbox");
+  expect(draft.start).toBeNull();
+
+  const tree = render(text);
+  const fillAction = tree.find((n) => n.props.title === "Fill with AI…")!;
+  const target = (fillAction.props as unknown as { target: ReactElement<{ onFill: (draft: unknown) => void }> }).target;
+  target.props.onFill(draft);
+  const filled = render(text);
+  await filled.find((n) => n.type === "SubmitForm")!.props.onSubmit(values);
+  const captured = mock.capture.mock.calls[0][0];
+  expect(captured.plannedDate).toBe(expectedDate);
+});
+
+it("AI schedule followed by Inbox retains the newly chosen date", async () => {
+  const scheduled = blockDraft({
+    applied: false,
+    intents: [{ op: "create", name: "Lunch", date: "2026-10-12", start: "12:00", end: "13:00" }],
+  });
+  const parked = blockDraft({ applied: false, intents: [{ op: "park", name: "Lunch" }] });
+  function fill(draft: unknown) {
+    const action = render("lunch tomorrow").find((n) => n.props.title === "Fill with AI…")!;
+    const target = (action.props as unknown as { target: ReactElement<{ onFill: (draft: unknown) => void }> }).target;
+    target.props.onFill(draft);
+  }
+  fill(scheduled);
+  fill(parked);
+  await render("lunch tomorrow")
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit(values);
+  expect(mock.capture.mock.calls[0][0].plannedDate).toBe("2026-10-12");
 });

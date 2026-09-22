@@ -48,10 +48,13 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
   let start: string | undefined;
   let end: string | undefined;
   let rangeMinutes: number | undefined;
-  const results = chrono.parse(remaining, ref, { forwardDate: true });
+  const normalized = normalizeTimeWords(remaining);
+  const results = chrono.parse(normalized.text, ref, { forwardDate: true });
   if (results.length > 0) {
     const result = results[0];
-    remaining = remaining.replace(result.text, " ");
+    const from = normalized.originalOffset(result.index);
+    const to = normalized.originalOffset(result.index + result.text.length);
+    remaining = remaining.slice(0, from) + " " + remaining.slice(to);
     date = todayISO(result.start.date());
     // A bare time ("3pm") sets a date, but the text did not name a day. Mark the
     // date explicit only when chrono is certain of a day component.
@@ -112,6 +115,25 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
   // Keep a named date on an otherwise timeless capture ("lunch tomorrow"), so
   // the caller can offer to pick a time instead of dropping the day.
   return withPreview({ kind: "unschedulable", name, date, dateExplicit, hasRecurrence });
+}
+
+/** Give chrono clock tokens while retaining offsets into the original title. */
+function normalizeTimeWords(input: string): { text: string; originalOffset: (offset: number) => number } {
+  const replacements: { end: number; removed: number }[] = [];
+  let removed = 0;
+  const text = input.replace(/\b(noon|midnight)\b/gi, (word: string, _word: string, offset: number) => {
+    const clock = word.toLowerCase() === "noon" ? "12pm" : "12am";
+    // Chrono consumes these complete tokens; only their end changes subsequent offsets.
+    replacements.push({ end: offset - removed + clock.length, removed: word.length - clock.length });
+    removed += word.length - clock.length;
+    return clock;
+  });
+  return {
+    text,
+    originalOffset: (offset) =>
+      offset +
+      replacements.reduce((delta, replacement) => delta + (replacement.end <= offset ? replacement.removed : 0), 0),
+  };
 }
 
 /** Attach the human preview string to a parsed capture. */

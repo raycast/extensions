@@ -13,18 +13,9 @@ import {
 import { signOut } from "../lib/oauth";
 import type { MutatePromise } from "@raycast/utils";
 import type { ReactNode } from "react";
-import { useState } from "react";
-import {
-  ApiError,
-  ApiResult,
-  BatchReceipt,
-  eventsBatch,
-  undo,
-  updateEvent,
-  UpdateEventPatch,
-  WriteOp,
-} from "../lib/api";
-import { applyUndoToast, failToast, showApiError } from "../lib/feedback";
+import { useRef, useState } from "react";
+import { ApiError, ApiResult, BatchReceipt, eventsBatch, updateEvent, UpdateEventPatch, WriteOp } from "../lib/api";
+import { applyUndoToast, failToast } from "../lib/feedback";
 import { ActivityType, Area, eventMeeting, ScheduleEvent, ScheduleResponse } from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
 import { EditForm } from "./edit-form";
@@ -36,7 +27,7 @@ export type ScheduleData = ApiResult<ScheduleResponse> | undefined;
 export type OptimisticForOps<T> = (ops: WriteOp[]) => ((data: T) => T) | undefined;
 
 interface AgendaMutationOptions<T> {
-  revalidate: () => void;
+  revalidate: () => void | Promise<unknown>;
   // When set, the list updates instantly (via `mutate`) and rolls back on error.
   // Without it, the list revalidates after the call.
   optimistic?: { mutate: MutatePromise<T>; forOps: OptimisticForOps<T> };
@@ -46,6 +37,21 @@ interface AgendaMutationOptions<T> {
 export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOptions<T>) {
   const { revalidate, optimistic } = options;
   const [lastUndoToken, setLastUndoToken] = useState<string | null>(null);
+
+  const lastUndoAction = useRef<{ token: string; run: () => Promise<void> } | null>(null);
+
+  function attachUndo(toast: Toast, token: string): void {
+    setLastUndoToken(token);
+    const run = applyUndoToast(toast, token, {
+      onUndone: async () => {
+        // An older toast must not discard a more recent mutation's undo.
+        setLastUndoToken((current) => (current === token ? null : current));
+        if (lastUndoAction.current?.token === token) lastUndoAction.current = null;
+        await revalidate();
+      },
+    });
+    lastUndoAction.current = { token, run };
+  }
 
   async function apply(loading: string, success: string, ops: WriteOp[]): Promise<boolean> {
     const toast = await showToast({ style: Toast.Style.Animated, title: loading });
@@ -66,8 +72,7 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
       toast.title = success;
       const token = receipt.undoToken ?? null;
       if (token) {
-        setLastUndoToken(token);
-        applyUndoToast(toast, token);
+        attachUndo(toast, token);
       }
       return true;
     } catch (error) {
@@ -102,19 +107,14 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
     toast.title = success;
     const token = result.data.undoToken ?? null;
     if (token) {
-      setLastUndoToken(token);
-      applyUndoToast(toast, token);
+      attachUndo(toast, token);
     }
     revalidate();
     return true;
   }
 
   async function runUndo(): Promise<void> {
-    if (!lastUndoToken) return;
-    const result = await undo([lastUndoToken]);
-    if (!result.ok) await showApiError(result);
-    setLastUndoToken(null);
-    revalidate();
+    await lastUndoAction.current?.run();
   }
 
   return { mutate: apply, applyEdit, lastUndoToken, runUndo };

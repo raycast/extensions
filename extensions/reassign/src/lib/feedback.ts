@@ -57,18 +57,56 @@ export function failToast(toast: Toast, error: ApiError): void {
   toast.message = message;
 }
 
-/** Add the standard cmd+Z Undo button to a finished toast. */
-export function applyUndoToast(toast: Toast, token: string): void {
-  toast.primaryAction = {
+/**
+ * Add the standard cmd+Z Undo button to a finished toast. `opts.onUndone` (if
+ * set) runs after a successful revert, so a List-backed caller can revalidate
+ * its cache — otherwise the toast Undo reverts the server but leaves the
+ * on-screen list showing the post-mutation state.
+ */
+export function applyUndoToast(
+  toast: Toast,
+  token: string,
+  opts?: { onUndone?: () => void | Promise<unknown> },
+): () => Promise<void> {
+  let inFlight = false;
+  let completed = false;
+  const action: Toast.ActionOptions = {
     title: "Undo",
     shortcut: { modifiers: ["cmd"], key: "z" },
     onAction: async (t) => {
+      if (inFlight || completed) return;
+      inFlight = true;
+      t.primaryAction = undefined;
       t.style = Toast.Style.Animated;
       t.title = "Undoing…";
-      const undone = await undo([token]);
-      t.style = undone.ok ? Toast.Style.Success : Toast.Style.Failure;
-      t.title = undone.ok ? "Undid the change" : "Could not undo the change";
+      t.message = undefined;
+      try {
+        const undone = await undo([token]);
+        completed = undone.ok;
+        t.style = undone.ok ? Toast.Style.Success : Toast.Style.Failure;
+        t.title = undone.ok ? "Undid the change" : "Could not undo the change";
+        if (completed) {
+          try {
+            await opts?.onUndone?.();
+          } catch {
+            // The server change was reverted. A cache failure must not offer
+            // another request with the now-spent undo token.
+            t.message = "Refresh the list to see the change.";
+          }
+        }
+      } catch {
+        t.style = Toast.Style.Failure;
+        t.title = "Could not undo the change";
+      } finally {
+        inFlight = false;
+        if (!completed) t.primaryAction = action;
+      }
     },
+  };
+  toast.primaryAction = action;
+  // The panel and toast share one in-flight/completed guard for this token.
+  return async () => {
+    await action.onAction(toast);
   };
 }
 
@@ -82,6 +120,7 @@ export async function runMutation<T>(
   successTitle: string,
   call: () => Promise<ApiResult<T>>,
   getUndoToken: (data: T) => string | null = defaultUndoToken,
+  opts?: { onUndone?: () => void | Promise<unknown> },
 ): Promise<{ ok: boolean; undoToken: string | null }> {
   const toast = await showToast({ style: Toast.Style.Animated, title: loadingTitle });
   const result = await call();
@@ -101,7 +140,7 @@ export async function runMutation<T>(
   const token = getUndoToken(result.data);
   toast.style = Toast.Style.Success;
   toast.title = successTitle;
-  if (token) applyUndoToast(toast, token);
+  if (token) applyUndoToast(toast, token, opts);
   return { ok: true, undoToken: token };
 }
 

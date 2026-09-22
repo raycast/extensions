@@ -170,8 +170,9 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     setEnd(draft.start && minutes ? shiftWallMinutes(draft.start, minutes) : null);
     setDuration(draft.duration);
     setAiDestination(draft.destination);
-    setPlanningDate(draft.start ? todayISO(draft.start) : todayISO());
-    setHasNamedDate(Boolean(draft.start));
+    // Keep the originally captured named day when parking in the Inbox (start=null).
+    setPlanningDate((current) => (draft.start ? todayISO(draft.start) : current));
+    setHasNamedDate((current) => Boolean(draft.start) || current);
     setDetails({ areaId: draft.areaId, activityTypeId: draft.activityTypeId, kind: draft.kind, notes: draft.notes });
     // Keep every AI-suggested field visible for review; preserve calendar choices.
     setShowDetails(true);
