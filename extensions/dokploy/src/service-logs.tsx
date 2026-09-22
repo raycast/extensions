@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { useToken } from "./instances";
 import { DockerContainer, ErrorResult } from "./interfaces";
@@ -22,7 +22,7 @@ export default function ServiceLogs({
   service,
   token,
 }: {
-  service: { id: string; type: string; name: string; appName: string };
+  service: { id: string; type: string; name: string };
   /** Overrides the cached active-instance token - needed by callers (like Deploy Service) that
    * list services from more than one instance, where the service being viewed might not belong
    * to whichever instance happens to be currently active. */
@@ -32,15 +32,44 @@ export default function ServiceLogs({
   const { url, headers } = token ?? activeToken;
   const isCompose = service.type === "compose";
 
-  // "Remember container by name": the last-picked container's own Docker containerId, per compose
-  // service - shared-cache state, same mechanism useToken()/setToken() already relies on in
-  // instances.tsx, so the picker (below) updating this is visible here without prop threading.
-  const [containerId, setContainerId] = useCachedState<string>(`log-container-${service.id}`, "");
-  const [containerLabel, setContainerLabel] = useCachedState<string>(`log-container-label-${service.id}`, "");
-  const [following, setFollowing] = useState(false);
+  // A Compose stack must always land on the container list first and require an explicit pick -
+  // this screen *is* that list (below), and picking a container pushes the log view on top of it,
+  // so the log view's own back/pop naturally returns here rather than exiting past it to Services.
+  if (isCompose) {
+    return <ContainerPicker composeId={service.id} service={service} url={url} headers={headers} />;
+  }
 
-  // Compose can't read logs until a container is picked; every other kind always can.
-  const canFetch = !isCompose || Boolean(containerId);
+  return (
+    <ServiceLogsDetail
+      service={service}
+      url={url}
+      headers={headers}
+      isCompose={false}
+      containerId=""
+      containerLabel=""
+    />
+  );
+}
+
+function ServiceLogsDetail({
+  service,
+  url,
+  headers,
+  isCompose,
+  containerId,
+  containerLabel,
+  onChangeContainer,
+}: {
+  service: { id: string; type: string; name: string };
+  url: string;
+  headers: Record<string, string>;
+  isCompose: boolean;
+  containerId: string;
+  containerLabel: string;
+  /** Present only for Compose - lets `Change Container` drop back to the picker. */
+  onChangeContainer?: () => void;
+}) {
+  const [following, setFollowing] = useState(false);
 
   const requestUrl = trpcQueryUrl(url, isCompose ? "compose.readLogs" : `${service.type}.readLogs`, {
     [ID_FIELDS[service.type]]: service.id,
@@ -59,25 +88,22 @@ export default function ServiceLogs({
     parseResponse: parseTrpcTextResponse,
     initialData: "",
     keepPreviousData: true,
-    execute: canFetch,
   });
 
   // No native polling in useFetch, and Raycast's Background Refresh only re-runs a whole
   // no-view/menu-bar command on a schedule - it can't live-update an already-open view. A manual
   // interval, toggled on/off, is the only way to get a "follow" experience here.
   useEffect(() => {
-    if (!following || !canFetch) return;
+    if (!following) return;
     const id = setInterval(() => revalidate(), FOLLOW_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [following, canFetch]);
+  }, [following]);
 
-  const markdown = !canFetch
-    ? "Select a container to view its logs."
-    : error
-      ? `**Could not load logs.**\n\n${error}`
-      : logs
-        ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\``
-        : "No logs yet.";
+  const markdown = error
+    ? `**Could not load logs.**\n\n${error}`
+    : logs
+      ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\``
+      : "No logs yet.";
 
   return (
     <Detail
@@ -86,37 +112,22 @@ export default function ServiceLogs({
       markdown={markdown}
       actions={
         <ActionPanel>
-          {canFetch && (
-            <Action
-              icon={following ? Icon.Pause : Icon.Play}
-              title={following ? "Stop Following" : "Start Following"}
-              onAction={() => setFollowing((current) => !current)}
-            />
-          )}
-          {canFetch && <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />}
-          {isCompose && (
-            <Action.Push
-              icon={Icon.Box}
-              title={containerId ? "Change Container" : "Select Container"}
-              target={
-                <ContainerPicker
-                  appName={service.appName}
-                  url={url}
-                  headers={headers}
-                  onSelect={(container) => {
-                    setFollowing(false);
-                    setContainerId(container.containerId);
-                    setContainerLabel(container.name);
-                  }}
-                />
-              }
-            />
-          )}
-          {canFetch && <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Logs" content={logs} />}
+          <Action
+            icon={following ? Icon.Pause : Icon.Play}
+            title={following ? "Stop Following" : "Start Following"}
+            onAction={() => setFollowing((current) => !current)}
+          />
+          <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
+          {onChangeContainer && <Action icon={Icon.Box} title="Change Container" onAction={onChangeContainer} />}
+          <Action.CopyToClipboard icon={Icon.Clipboard} title="Copy Logs" content={logs} />
         </ActionPanel>
       }
     />
   );
+}
+
+interface ComposeAppName {
+  appName?: string | null;
 }
 
 /**
@@ -127,22 +138,58 @@ export default function ServiceLogs({
  * way of finding a compose stack's real containers by its generated appName.
  */
 function ContainerPicker({
-  appName,
+  composeId,
+  service,
   url,
   headers,
-  onSelect,
 }: {
-  appName: string;
+  composeId: string;
+  service: { id: string; type: string; name: string };
   url: string;
   headers: Record<string, string>;
-  onSelect: (container: DockerContainer) => void;
 }) {
-  const { pop } = useNavigation();
+  const { push, pop } = useNavigation();
+
+  function selectContainer(container: DockerContainer) {
+    push(
+      <ServiceLogsDetail
+        service={service}
+        url={url}
+        headers={headers}
+        isCompose
+        containerId={container.containerId}
+        containerLabel={container.name}
+        onChangeContainer={pop}
+      />,
+    );
+  }
+
+  // Unlike applications, a compose stack's `appName` isn't included in the project tree
+  // (`project.all`) - confirmed live, every compose entry there comes back with `appName`
+  // undefined. `compose.one` is the same route service-domains.tsx/service-backups.tsx/
+  // service-env.tsx already rely on for compose details, so it's fetched here too.
+  const {
+    data: composeDetail,
+    isLoading: composeLoading,
+    error: composeError,
+    revalidate: retryCompose,
+  } = useFetch<ComposeAppName, ComposeAppName | undefined>(`${url}compose.one?composeId=${composeId}`, {
+    headers,
+    async parseResponse(response) {
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      return (await response.json()) as ComposeAppName;
+    },
+  });
+  const appName = composeDetail?.appName;
+
   const {
     data: allContainers,
-    isLoading,
-    error,
-    revalidate,
+    isLoading: containersLoading,
+    error: containersError,
+    revalidate: retryContainers,
   } = useFetch<DockerContainer[], DockerContainer[]>(url + "docker.getContainers", {
     headers,
     initialData: [],
@@ -155,12 +202,20 @@ function ContainerPicker({
     },
   });
 
+  const isLoading = composeLoading || containersLoading;
+  const error = composeError ?? containersError;
+
+  function revalidate() {
+    retryCompose();
+    retryContainers();
+  }
+
   // docker.getContainersByAppNameMatch turned out not to actually scope by this stack (live-tested:
   // it answered with a container that didn't belong to it, "No such container"). docker.getContainers
   // (unscoped, but already proven to return real containerIds - confirmed live) + this stack's own
   // Docker Compose project-name prefix is the reliable way to scope it: Dokploy names every container
   // `<appName>-<serviceName>-<replica>`, confirmed against a real container list.
-  const containers = allContainers.filter((container) => container.name.startsWith(`${appName}-`));
+  const containers = appName ? allContainers.filter((container) => container.name.startsWith(`${appName}-`)) : [];
 
   return (
     <List isLoading={isLoading} navigationTitle="Select Container">
@@ -175,7 +230,7 @@ function ContainerPicker({
             </ActionPanel>
           }
         />
-      ) : containers.length === 0 ? (
+      ) : !isLoading && containers.length === 0 ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="No Containers Found"
@@ -195,13 +250,7 @@ function ContainerPicker({
             accessories={[{ tag: container.state }, { text: container.status }]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Select"
-                  onAction={() => {
-                    onSelect(container);
-                    pop();
-                  }}
-                />
+                <Action title="Select" onAction={() => selectContainer(container)} />
               </ActionPanel>
             }
           />

@@ -2,7 +2,7 @@
 
 ## [Runtime Logs: Follow Mode and Compose Support] - {PR_MERGE_DATE}
 
-- `View Logs` now works for Compose stacks: pick a container (remembered next time you open it for that stack) to see its logs. Also adds `Start Following`/`Stop Following` to every kind, auto-refreshing the view instead of needing to hit `Refresh` manually.
+- `View Logs` now works for Compose stacks: pick a container from its stack to see its logs. Also adds `Start Following`/`Stop Following` to every kind, auto-refreshing the view instead of needing to hit `Refresh` manually.
 
 ## [Deploy Service Command] - 2026-09-22
 
