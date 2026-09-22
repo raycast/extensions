@@ -169,7 +169,7 @@ function normalizeIcon(value: unknown): IconSearchIcon | undefined {
       stringFrom(value.usageRequirements) ||
       "Review the upstream license before use.",
     commercialUseAllowed: value.commercialUseAllowed === true,
-    exportAllowed: value.exportAllowed !== false,
+    exportAllowed: value.exportAllowed === true,
     sourceUrl:
       stringFrom(value.sourceUrl) ||
       stringFrom(value.source_url) ||

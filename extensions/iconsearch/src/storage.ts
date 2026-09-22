@@ -59,7 +59,7 @@ function normalizeStoredIcon(value: unknown): IconSearchIcon | undefined {
     ),
     commercialUseAllowed: item.commercialUseAllowed === true,
     exportAllowed:
-      library !== "untitled-ui-icons" && item.exportAllowed !== false,
+      library !== "untitled-ui-icons" && item.exportAllowed === true,
     sourceUrl: item.sourceUrl ? String(item.sourceUrl) : undefined,
     svgUrl: String(item.svgUrl),
     previewUrls: Array.isArray(item.previewUrls)
