@@ -4,7 +4,7 @@
   "title": "Agent Sessions",
   "description": "Search and resume Claude Code and Codex sessions. Full-text search over every historical transcript, PR-aware ranking, one keystroke to resume in your terminal or desktop app. Everything stays local.",
   "icon": "icon.png",
-  "author": "tomesterez",
+  "author": "tom_esterez",
   "categories": [
     "Developer Tools",
     "Productivity"
