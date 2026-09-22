@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Reduce menu bar data usage while no timer is running] - {PR_MERGE_DATE}
+## [Reduce menu bar data usage while no timer is running] - 2026-09-22
 
 - The menu bar no longer refetches the full time entry list every 10 seconds while no timer is running. That request returns 500 hydrated entries — roughly 1.2MB — so keeping the five-item "Recent Timers" list up to date cost in the order of 450MB per hour. It is now refreshed at most every 10 minutes, or as soon as the "Time Tracking" command reloads it. The list still appears immediately from cache, so there is no visible change.
 - Fixed an entry started from the menu bar's "Recent Timers" showing without its project name or colour. Clockify does not return the project on the response to creating an entry, so the project is now filled in from the already-cached copy before the entry is stored.
