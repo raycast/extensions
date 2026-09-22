@@ -28,3 +28,13 @@ test("leaves a double-backtick span containing a backtick untouched", () => {
 test("keeps blockquote markers intact", () => {
   assert.equal(escapeMarkdownHtml("> quoted <X>\n> more"), "> quoted &lt;X>\n> more");
 });
+
+test("escapes ampersands so HTML entities stay literal", () => {
+  assert.equal(escapeMarkdownHtml("&copy; 2026 Acme & Co"), "&amp;copy; 2026 Acme &amp; Co");
+});
+
+test("leaves ampersands inside code untouched", () => {
+  const input = ["use `a && b` or `&amp;`", "```", "x && y", "```", "&nbsp; after"].join("\n");
+  const expected = ["use `a && b` or `&amp;`", "```", "x && y", "```", "&amp;nbsp; after"].join("\n");
+  assert.equal(escapeMarkdownHtml(input), expected);
+});

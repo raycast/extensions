@@ -10,7 +10,15 @@ export interface TranslateRequest {
 
 export class TranslateError extends Error {
   readonly kind:
-    "empty-input" | "missing-api-key" | "auth" | "rate-limit" | "refusal" | "network" | "api" | "empty-output";
+    | "empty-input"
+    | "missing-api-key"
+    | "auth"
+    | "rate-limit"
+    | "refusal"
+    | "truncated"
+    | "network"
+    | "api"
+    | "empty-output";
 
   constructor(kind: TranslateError["kind"], message?: string) {
     super(message ?? errorMessages[kind]);
@@ -25,14 +33,15 @@ const errorMessages: Record<TranslateError["kind"], string> = {
   auth: "API key is invalid. Check Preferences.",
   "rate-limit": "Rate limit reached. Try again in a moment.",
   refusal: "This text could not be translated.",
+  truncated: "The translation was cut off because the text is too long. Try a shorter text.",
   network: "Could not reach the API. Check your connection.",
   api: "The translation API returned an error.",
   "empty-output": "The translation came back empty. Try again.",
 };
 
 export async function translateText(request: TranslateRequest): Promise<string> {
-  const text = request.text.trim();
-  if (!text) {
+  const text = request.text;
+  if (!text.trim()) {
     throw new TranslateError("empty-input");
   }
 
@@ -69,6 +78,9 @@ The input is usually a prompt or instruction the user will give to an AI assista
     if (response.stop_reason === "refusal") {
       const explanation = response.stop_details?.explanation;
       throw new TranslateError("refusal", explanation ? `${errorMessages.refusal} ${explanation}` : undefined);
+    }
+    if (response.stop_reason === "max_tokens" || response.stop_reason === "model_context_window_exceeded") {
+      throw new TranslateError("truncated");
     }
 
     const translation = response.content

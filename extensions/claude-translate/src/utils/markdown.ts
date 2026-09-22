@@ -61,6 +61,12 @@ function findInlineCodeEnd(text: string, searchFrom: number, runLength: number):
   return -1;
 }
 
+const HTML_ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;" };
+
+function escapeHtmlChar(char: string): string {
+  return HTML_ESCAPES[char] ?? char;
+}
+
 function escapeOutsideInlineCode(text: string): string {
   let result = "";
   let index = 0;
@@ -80,7 +86,7 @@ function escapeOutsideInlineCode(text: string): string {
       continue;
     }
 
-    result += char === "<" ? "&lt;" : char;
+    result += escapeHtmlChar(char);
     index++;
   }
 
