@@ -1,8 +1,7 @@
 import { open, showInFinder, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import { resolveMime } from "friendly-mimes";
-import { createWriteStream, existsSync } from "fs";
-import { mkdir, mkdtemp, rm } from "fs/promises";
+import { mkdir, mkdtemp, open as openFile, rm } from "fs/promises";
 import { homedir, tmpdir } from "os";
 import { basename, join, parse } from "path";
 import { Readable } from "stream";
@@ -81,19 +80,27 @@ export function getDownloadOptions(file: Pick<File, "mimeType">): DownloadOption
 
 type DriveItem = Pick<File, "id" | "name" | "mimeType">;
 
-// Returns a path in `dir` that doesn't exist yet, e.g. "Report (1).pdf"
-function getAvailablePath(dir: string, name: string, extension?: string) {
+// Calls `create` with "name", "name (1)", "name (2)"… until it succeeds, so the path is reserved atomically
+async function createUnique<T>(
+  dir: string,
+  name: string,
+  extension: string | undefined,
+  create: (path: string) => Promise<T>,
+): Promise<[string, T]> {
   let { name: base, ext } = parse(name.replace(/[/\\:]/g, "_"));
   if (extension) {
     base = ext.toLowerCase() === `.${extension}` ? base : base + ext;
     ext = `.${extension}`;
   }
 
-  let path = join(dir, base + ext);
-  for (let i = 1; existsSync(path); i++) {
-    path = join(dir, `${base} (${i})${ext}`);
+  for (let i = 0; ; i++) {
+    const path = join(dir, `${base}${i > 0 ? ` (${i})` : ""}${ext}`);
+    try {
+      return [path, await create(path)];
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
   }
-  return path;
 }
 
 async function fetchDrive(path: string) {
@@ -123,7 +130,7 @@ async function downloadToDir(
       : `/${item.id}?alt=media&supportsAllDrives=true`,
   );
   const totalBytes = parseInt(response.headers.get("content-length") ?? "0", 10);
-  const filePath = getAvailablePath(dir, item.name, format?.extension);
+  const [filePath, handle] = await createUnique(dir, item.name, format?.extension, (path) => openFile(path, "wx"));
 
   let downloadedBytes = 0;
   try {
@@ -140,10 +147,10 @@ async function downloadToDir(
           yield chunk;
         }
       },
-      // Exclusive open so a concurrent download of the same name fails instead of truncating this one
-      createWriteStream(filePath, { flags: "wx" }),
+      handle.createWriteStream(),
     );
   } catch (error) {
+    // Only this call created the file, so removing it can't affect another download
     await rm(filePath, { force: true });
     throw error;
   }
@@ -158,8 +165,7 @@ async function downloadFolderToDir(
   onProgress: OnProgress,
   skipped: string[],
 ): Promise<string> {
-  const folderPath = getAvailablePath(dir, folder.name);
-  await mkdir(folderPath);
+  const [folderPath] = await createUnique(dir, folder.name, undefined, (path) => mkdir(path));
 
   let pageToken: string | undefined;
   do {
@@ -199,11 +205,19 @@ async function downloadFolderAsZip(folder: DriveItem, onProgress: OnProgress): P
   try {
     const skipped: string[] = [];
     const folderPath = await downloadFolderToDir(folder, tempDir, onProgress, skipped);
-    const zipPath = getAvailablePath(getDownloadsPath(), folder.name, "zip");
+    const [zipPath, handle] = await createUnique(getDownloadsPath(), folder.name, "zip", (path) =>
+      openFile(path, "wx"),
+    );
+    await handle.close();
 
     onProgress(`Compressing ${folder.name}`);
-    // bsdtar ships with both macOS and Windows and picks the zip format from the extension
-    await promisify(execFile)("tar", ["-a", "-cf", zipPath, "-C", tempDir, basename(folderPath)]);
+    try {
+      // bsdtar ships with both macOS and Windows and picks the zip format from the extension
+      await promisify(execFile)("tar", ["-a", "-cf", zipPath, "-C", tempDir, basename(folderPath)]);
+    } catch (error) {
+      await rm(zipPath, { force: true });
+      throw error;
+    }
 
     return { path: zipPath, skipped };
   } finally {
