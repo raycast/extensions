@@ -5,6 +5,7 @@ import useTabs from "src/hooks/useTabs";
 import { Tab } from "./types";
 import TabListItem from "src/components/TabListItem";
 import { searchTabsWithFallback } from "./tabSearch";
+import { getTabKey } from "./utils";
 
 const Command = () => {
   const { tabs, refresh } = useTabs();
@@ -13,7 +14,7 @@ const Command = () => {
   return (
     <List isLoading={!tabs} onSearchTextChange={setSearchText}>
       {searchTabsWithFallback(tabs ?? [], searchText).map((tab: Tab) => {
-        return <TabListItem tab={tab} key={tab.url} refresh={refresh} />;
+        return <TabListItem id={getTabKey(tab)} tab={tab} key={getTabKey(tab)} refresh={refresh} />;
       })}
     </List>
   );
