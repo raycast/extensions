@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-translate",
+  "title": "Claude Translate",
+  "description": "Translate text with the Claude API",
+  "icon": "icon.png",
+  "author": "nacky",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "Claude",
+      "description": "Type text and translate it with Claude",
+      "mode": "view"
+    },
+    {
+      "name": "translate-clipboard",
+      "title": "Translate Clipboard",
+      "subtitle": "Claude",
+      "description": "Translate clipboard text with Claude and copy the result",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "anthropicApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Anthropic API Key",
+      "description": "Get one at console.anthropic.com"
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "default": "claude-opus-5",
+      "title": "Model",
+      "description": "Claude model to use for translation",
+      "data": [
+        {
+          "title": "Claude Opus 5",
+          "value": "claude-opus-5"
+        },
+        {
+          "title": "Claude Sonnet 5",
+          "value": "claude-sonnet-5"
+        },
+        {
+          "title": "Claude Haiku 4.5",
+          "value": "claude-haiku-4-5"
+        }
+      ]
+    },
+    {
+      "name": "targetLanguage",
+      "type": "dropdown",
+      "required": false,
+      "default": "English",
+      "title": "Target Language",
+      "description": "Language to translate text into",
+      "data": [
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "Chinese (Simplified)"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test --experimental-strip-types src/utils/markdown.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "@anthropic-ai/sdk": "^0.127.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
+    "typescript": "^6.0.3"
+  }
+}
