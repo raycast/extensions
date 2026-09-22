@@ -38,8 +38,8 @@ function generateMarkdownTable(entries: any[], heading: string) {
 function updateReadme(readmeContent: string, newSection: string) {
   const start = "<!-- MCP_SERVERS_START -->";
   const end = "<!-- MCP_SERVERS_END -->";
-  const regex = new RegExp(`${start}[\s\S]*?${end}`, "m");
-  const matches = [...readmeContent.matchAll(new RegExp(`${start}[\s\S]*?${end}`, "g"))];
+  const regex = new RegExp(`${start}[\\s\\S]*?${end}`, "m");
+  const matches = [...readmeContent.matchAll(new RegExp(`${start}[\\s\\S]*?${end}`, "g"))];
   if (matches.length > 1) {
     console.warn("Warning: Multiple MCP_SERVERS marker pairs found. Only the first will be replaced.");
   }
