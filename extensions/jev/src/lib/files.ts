@@ -33,16 +33,49 @@ async function exists(file: string) {
     throw error;
   }
 }
-export async function validateFolder(folder: string): Promise<string> {
+type FolderIdentity = { path: string; dev: number; ino: number };
+class RecoveryRequiredError extends Error {}
+
+async function checkedFolder(folder: string): Promise<FolderIdentity> {
   if (!path.isAbsolute(folder)) throw new Error("Choose an absolute folder path.");
   const real = await fs.realpath(folder);
-  if (!(await fs.stat(real)).isDirectory()) throw new Error("The destination is not a folder.");
+  const info = await fs.stat(real);
+  if (!info.isDirectory()) throw new Error("The destination is not a folder.");
+  const identity = { path: real, dev: info.dev, ino: info.ino };
+  await assertFolderUnchanged(identity);
   await fs.access(real, constants.W_OK);
-  return real;
+  return identity;
 }
-async function transfer(store: Store, moveId: string, source: string, destination: string, expected: string) {
+async function assertFolderUnchanged(folder: FolderIdentity) {
+  try {
+    const [real, info] = await Promise.all([fs.realpath(folder.path), fs.lstat(folder.path)]);
+    if (real === folder.path && info.isDirectory() && info.dev === folder.dev && info.ino === folder.ino) return;
+  } catch (error) {
+    throw new Error("A filing folder changed or is no longer available. Review the folders before retrying.", {
+      cause: error,
+    });
+  }
+  throw new Error("A filing folder changed. Review the folders before retrying.");
+}
+export async function validateFolder(folder: string): Promise<string> {
+  return (await checkedFolder(folder)).path;
+}
+async function transfer(
+  store: Store,
+  moveId: string,
+  source: string,
+  destination: string,
+  expected: string,
+  destinationFolder: FolderIdentity,
+) {
+  // Keep the destination identity captured before the pending journal write.
+  // Re-resolving it here would silently approve a replacement folder.
+  await assertFolderUnchanged(destinationFolder);
+  const sourceFolder = await checkedFolder(path.dirname(source));
+  if (sourceFolder.path !== path.dirname(source))
+    throw new Error("The source folder changed. Review the folders before retrying.");
   if ((await fileHash(source)) !== expected) throw new Error("The file changed. Refresh and review it again.");
-  const [sourceInfo, destinationFolder] = await Promise.all([fs.lstat(source), fs.stat(path.dirname(destination))]);
+  const sourceInfo = await fs.lstat(source);
   if (sourceInfo.dev !== destinationFolder.dev)
     throw new Error(
       "Choose a folder on the same volume. Jev cannot safely move files between volumes; use Finder for that move.",
@@ -54,17 +87,23 @@ async function transfer(store: Store, moveId: string, source: string, destinatio
 
   // Claim the source with one rename before publishing it. The private path is
   // journaled first so an interrupted move is visible in Filing History.
+  await assertFolderUnchanged(sourceFolder);
   const stagingDirectory = await fs.mkdtemp(path.join(path.dirname(source), ".jev-move-"));
   const staged = path.join(stagingDirectory, path.basename(source));
+  let stagingFolder: FolderIdentity | undefined;
   let claimed = false;
   let published = false;
   try {
+    stagingFolder = await checkedFolder(stagingDirectory);
+    await assertFolderUnchanged(sourceFolder);
     await store.update((data) => {
       const move = data.moves.find((m) => m.id === moveId);
       if (!move) throw new Error("Move not found.");
       move.recoveryPath = staged;
       move.status = "pending";
     });
+    await assertFolderUnchanged(sourceFolder);
+    await assertFolderUnchanged(stagingFolder);
     await fs.rename(source, staged);
     claimed = true;
     if ((await fileHash(staged)) !== expected)
@@ -73,25 +112,35 @@ async function transfer(store: Store, moveId: string, source: string, destinatio
     // Hard links publish without overwriting and retain the same inode. Writes
     // through an already-open file handle therefore reach the destination too.
     // Never fall back to copy/unlink, even if the volume changed after preflight.
+    await assertFolderUnchanged(stagingFolder);
+    await assertFolderUnchanged(destinationFolder);
     await fs.link(staged, destination);
     published = true;
+    // A swap during publication must retain the recovery name. Never clean up
+    // a destination through a path whose parent identity has changed.
+    await assertFolderUnchanged(stagingFolder);
+    await assertFolderUnchanged(destinationFolder);
     await fs.unlink(staged);
   } catch (error) {
     if (claimed) {
       if (!published) {
         try {
           // Restore without replacing a file recreated at the original path.
+          await assertFolderUnchanged(sourceFolder);
+          await assertFolderUnchanged(stagingFolder!);
           await fs.link(staged, source);
+          await assertFolderUnchanged(sourceFolder);
+          await assertFolderUnchanged(stagingFolder!);
           await fs.unlink(staged);
         } catch {
-          throw new Error(
-            `The move stopped. Your file is preserved at ${staged}. Open Filing History and choose Show Recovery File.`,
+          throw new RecoveryRequiredError(
+            `The move stopped and recovery data was retained. Its last known location is ${staged}. If its containing folder moved, check that folder's new location. Open Filing History for details.`,
             { cause: error },
           );
         }
       } else {
-        throw new Error(
-          `The document reached its destination, but move cleanup stopped. A recovery file remains at ${staged}. Open Filing History and choose Show Recovery File.`,
+        throw new RecoveryRequiredError(
+          `The move could not be verified, or cleanup stopped. Recovery data was retained at its last known location ${staged}. If its containing folder moved, check that folder's new location. Open Filing History for details.`,
           { cause: error },
         );
       }
@@ -103,14 +152,19 @@ async function transfer(store: Store, moveId: string, source: string, destinatio
     throw error;
   } finally {
     // Only remove an empty staging directory. Never recursively delete recovery data.
-    await fs.rmdir(stagingDirectory).catch(() => {});
+    if (stagingFolder) {
+      await assertFolderUnchanged(stagingFolder)
+        .then(() => fs.rmdir(stagingDirectory))
+        .catch(() => {});
+    }
   }
 }
 async function recordFailure(store: Store, moveId: string, error: unknown, fallbackStatus: "failed" | "moved") {
   await store.update(async (data) => {
     const move = data.moves.find((m) => m.id === moveId);
     if (!move) return;
-    if (move.recoveryPath && !(await exists(move.recoveryPath))) delete move.recoveryPath;
+    if (!(error instanceof RecoveryRequiredError) && move.recoveryPath && !(await exists(move.recoveryPath)))
+      delete move.recoveryPath;
     move.status = move.recoveryPath ? "failed" : fallbackStatus;
     move.error =
       (error as NodeJS.ErrnoException).code === "EEXIST"
@@ -119,9 +173,9 @@ async function recordFailure(store: Store, moveId: string, error: unknown, fallb
   });
 }
 async function moveDocumentUnlocked(store: Store, source: string, folder: string): Promise<Move> {
-  const directory = await validateFolder(folder);
+  const directory = await checkedFolder(folder);
   const canonicalSource = path.join(await fs.realpath(path.dirname(source)), path.basename(source));
-  const destination = path.join(directory, path.basename(source));
+  const destination = path.join(directory.path, path.basename(source));
   if (canonicalSource === destination) throw new Error("The file is already in that folder.");
   const record: Move = {
     id: id(),
@@ -135,7 +189,7 @@ async function moveDocumentUnlocked(store: Store, source: string, folder: string
     d.moves.unshift(record);
   });
   try {
-    await transfer(store, record.id, canonicalSource, destination, record.sha256);
+    await transfer(store, record.id, canonicalSource, destination, record.sha256, directory);
   } catch (error) {
     await recordFailure(store, record.id, error, "failed");
     throw error;
@@ -152,9 +206,11 @@ async function moveDocumentUnlocked(store: Store, source: string, folder: string
 async function undoMoveUnlocked(store: Store, moveId: string) {
   const m = (await store.read()).moves.find((m) => m.id === moveId);
   if (!m || m.status !== "moved") throw new Error("This move cannot be undone.");
-  await validateFolder(path.dirname(m.source));
+  const directory = await checkedFolder(path.dirname(m.source));
+  if (directory.path !== path.dirname(m.source))
+    throw new Error("The original folder changed. Review the folders before undoing this move.");
   try {
-    await transfer(store, m.id, m.destination, m.source, m.sha256);
+    await transfer(store, m.id, m.destination, m.source, m.sha256, directory);
   } catch (error) {
     await recordFailure(store, m.id, error, "moved");
     throw error;

@@ -169,9 +169,16 @@ describe("filing with concurrent writers", () => {
   it("rejects a different destination volume before staging the source", async () => {
     const { source, folder, destination } = await files();
     const stat = fs.stat;
+    const lstat = fs.lstat;
     const rename = vi.spyOn(fs, "rename");
+    // Both lookups must report the same simulated volume identity.
     vi.spyOn(fs, "stat").mockImplementation(async (file, options) => {
       const info = await stat(file, options);
+      if (file === folder) Object.defineProperty(info, "dev", { value: Number(info.dev) + 1 });
+      return info;
+    });
+    vi.spyOn(fs, "lstat").mockImplementation(async (file, options) => {
+      const info = await lstat(file, options);
       if (file === folder) Object.defineProperty(info, "dev", { value: Number(info.dev) + 1 });
       return info;
     });
