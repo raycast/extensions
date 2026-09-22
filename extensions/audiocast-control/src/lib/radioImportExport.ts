@@ -1,7 +1,7 @@
 import { showInFinder } from "@raycast/api";
-import { writeFile, readFile } from "fs/promises";
+import { writeFile, readFile, mkdir } from "fs/promises";
 import { homedir } from "os";
-import { join } from "path";
+import { dirname, join } from "path";
 import { bulkImport, getAll, type NewRadio } from "./radioDB";
 import { createLog } from "./debug";
 
@@ -25,6 +25,8 @@ function defaultExportPath(): string {
 export async function exportRadios(): Promise<string> {
   const stations = await getAll();
   const path = defaultExportPath();
+
+  await mkdir(dirname(path), { recursive: true });
   await writeFile(path, JSON.stringify(stations, null, 2), "utf8");
 
   try {
@@ -48,6 +50,12 @@ function toStation(entry: unknown): NewRadio | null {
   }
 
   const stationTitle = typeof title === "string" && title.trim() ? title.trim() : new URL(url).hostname;
+
+  // Ignore items w/o title
+  if (!stationTitle) {
+    return null;
+  }
+
   const stationDescription = typeof description === "string" && description.trim() ? description : null;
 
   return { url, title: stationTitle, description: stationDescription };
