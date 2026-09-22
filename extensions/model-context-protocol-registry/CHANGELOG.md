@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SocialFaktory MCP Server] - 2026-09-22
+
+- Add SocialFaktory to the official registry: write, generate, schedule and publish a brand's social content, in its own voice, on every channel. Remote Streamable HTTP server at https://www.socialfaktory.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
 ## [Add BlindPay MCP Server] - 2026-09-22
 
 - Add BlindPay to the official registry: stablecoin global payments (receivers, virtual accounts, FX quotes, payouts, payins, balances, history). Remote Streamable HTTP server at https://mcp.blindpay.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
