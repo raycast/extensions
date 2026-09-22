@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import type { OrcaTerminal, OrcaWorktree } from "../src/orca.ts";
 import {
   buildSections,
+  cleanTitle,
   sessionLabel,
   sessionTitle,
   filterRows,
@@ -180,4 +181,18 @@ test("projects with the same folder name stay separate sections", () => {
     sections.map((section) => section.key),
     ["team-a/app", "team-b/app"],
   );
+});
+
+test("a pane Orca has not titled yet does not break the list", () => {
+  // Orca sends title: null for a freshly opened terminal.
+  assert.doesNotThrow(() => cleanTitle(null));
+  assert.equal(cleanTitle(null), "");
+
+  assert.equal(
+    sessionTitle({ title: null, agentIdentity: "claude", prompt: "Fix the export" }),
+    "Fix the export",
+  );
+  // Nothing to show at all: the agent name beats an empty row.
+  assert.equal(sessionTitle({ title: null, agentIdentity: "claude" }), "claude");
+  assert.equal(sessionTitle({ title: null }), "Terminal");
 });

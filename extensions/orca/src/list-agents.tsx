@@ -230,7 +230,7 @@ export default function Command(
                   agent ?? "shell",
                   branch ?? "",
                   row.state ?? "",
-                  row.title,
+                  row.title ?? "",
                   row.prompt ?? "",
                 ]}
                 accessories={

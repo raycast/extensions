@@ -4,7 +4,8 @@ export type OrcaTerminal = {
   worktreePath: string;
   worktreeId: string;
   branch?: string;
-  title: string;
+  /** Orca leaves this null on a pane it has not titled yet. */
+  title?: string | null;
   connected: boolean;
   orphaned?: boolean;
   lastOutputAt: number | null;
@@ -170,8 +171,8 @@ export function buildSections(rows: AgentRow[]): Section[] {
 }
 
 /** Orca prefixes pane titles with a status glyph; it is noise outside the app. */
-export function cleanTitle(title: string): string {
-  return title
+export function cleanTitle(title?: string | null): string {
+  return (title ?? "")
     .replace(/^[^\p{L}\p{N}]+/u, "")
     .replace(/^(claude|codex|cursor|opencode)\s*:\s*/i, "")
     .trim();
@@ -182,7 +183,10 @@ export function cleanTitle(title: string): string {
  * slash command and leaves the agent's own name behind. Those titles say
  * nothing, so the prompt is a better label.
  */
-function isGeneratedTitle(title: string, agent?: string): boolean {
+function isGeneratedTitle(
+  title: string | null | undefined,
+  agent?: string,
+): boolean {
   const clean = cleanTitle(title).toLowerCase();
   if (clean.length === 0) return true;
   if (!agent) return false;
@@ -200,7 +204,7 @@ function shortenUrls(text: string): string {
 /** What to show as the row's title: Orca's own label, or the prompt behind it. */
 export function sessionTitle(
   row: {
-    title: string;
+    title?: string | null;
     agentIdentity?: string;
     prompt?: string | null;
   },
@@ -215,7 +219,7 @@ export function sessionTitle(
 }
 
 function pickLabel(row: {
-  title: string;
+  title?: string | null;
   agentIdentity?: string;
   prompt?: string | null;
 }): string {
@@ -223,7 +227,8 @@ function pickLabel(row: {
     return cleanTitle(row.title);
 
   const prompt = row.prompt?.split("\n").find((line) => line.trim().length > 0);
-  if (!prompt) return cleanTitle(row.title) || (row.agentIdentity ?? "");
+  // A pane with no title, no prompt and no agent is still a row to show.
+  if (!prompt) return cleanTitle(row.title) || row.agentIdentity || "Terminal";
 
   return shortenUrls(prompt).replace(/\s+/g, " ").trim();
 }
