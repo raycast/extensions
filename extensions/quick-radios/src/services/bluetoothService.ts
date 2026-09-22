@@ -31,6 +31,12 @@ export async function toggleBluetoothDeviceConnection(
     : macos.toggleMacBluetoothDeviceConnection(deviceId, connect);
 }
 
+export async function unpairBluetoothDevice(deviceId: string): Promise<void> {
+  return isWindows
+    ? windows.unpairWindowsBluetoothDevice(deviceId)
+    : macos.unpairMacBluetoothDevice(deviceId);
+}
+
 export async function openBluetoothSettings(): Promise<void> {
   return isWindows
     ? windows.openWindowsBluetoothSettings()

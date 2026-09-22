@@ -37,6 +37,12 @@ export async function disconnectWifi(): Promise<void> {
     : macos.disconnectMacWifi();
 }
 
+export async function forgetWifiNetwork(ssid: string): Promise<void> {
+  return isWindows
+    ? windows.forgetWindowsWifiNetwork(ssid)
+    : macos.forgetMacWifiNetwork(ssid);
+}
+
 export async function getWifiPassword(
   ssid: string,
 ): Promise<string | undefined> {

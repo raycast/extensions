@@ -13,20 +13,27 @@ export interface SessionDataUsage {
   totalBytesOut: number;
 }
 
-let cachedSpeed: InternetSpeedResult | undefined;
-let isSpeedTestRunning = false;
+const cachedSpeeds = new Map<string, InternetSpeedResult>();
+let activeSpeedTest:
+  | {
+      ssid: string;
+      controller: AbortController;
+      promise: Promise<InternetSpeedResult | undefined>;
+    }
+  | undefined;
 
 /**
  * Measures actual internet download speed by streaming bytes from Cloudflare CDN.
  */
 async function measureDownloadSpeed(
+  signal: AbortSignal,
   bytes = 3.5 * 1024 * 1024,
 ): Promise<number | undefined> {
   try {
     const t0 = Date.now();
     const res = await fetch(
       `https://speed.cloudflare.com/__down?bytes=${bytes}`,
-      { signal: AbortSignal.timeout(3500) },
+      { signal: AbortSignal.any([signal, AbortSignal.timeout(8000)]) },
     );
     if (!res.ok) return undefined;
     const buffer = await res.arrayBuffer();
@@ -45,6 +52,7 @@ async function measureDownloadSpeed(
  * Measures actual internet upload speed by sending a payload to Cloudflare CDN.
  */
 async function measureUploadSpeed(
+  signal: AbortSignal,
   bytes = 1024 * 1024,
 ): Promise<number | undefined> {
   try {
@@ -52,7 +60,7 @@ async function measureUploadSpeed(
     const res = await fetch("https://speed.cloudflare.com/__up", {
       method: "POST",
       body: new Uint8Array(bytes),
-      signal: AbortSignal.timeout(3500),
+      signal: AbortSignal.any([signal, AbortSignal.timeout(8000)]),
     });
     if (!res.ok) return undefined;
     const durationSec = (Date.now() - t0) / 1000;
@@ -70,42 +78,60 @@ async function measureUploadSpeed(
  * Runs a fast, accurate internet speed test measuring download and upload speeds.
  */
 export async function getInternetSpeed(
+  ssid: string,
   force = false,
 ): Promise<InternetSpeedResult | undefined> {
   const now = Date.now();
+  const cachedSpeed = cachedSpeeds.get(ssid);
   if (!force && cachedSpeed && now - cachedSpeed.timestamp < 120000) {
     return cachedSpeed;
   }
 
-  if (isSpeedTestRunning && cachedSpeed) {
-    return cachedSpeed;
+  if (activeSpeedTest?.ssid === ssid) {
+    return activeSpeedTest.promise;
   }
 
-  isSpeedTestRunning = true;
-  try {
+  activeSpeedTest?.controller.abort();
+  const controller = new AbortController();
+  const test = {
+    ssid,
+    controller,
+    promise: Promise.resolve<InternetSpeedResult | undefined>(undefined),
+  };
+
+  test.promise = (async () => {
     const [down, up] = await Promise.all([
-      measureDownloadSpeed(),
-      measureUploadSpeed(),
+      measureDownloadSpeed(controller.signal),
+      measureUploadSpeed(controller.signal),
     ]);
 
-    if (down !== undefined && up !== undefined) {
-      cachedSpeed = {
+    if (!controller.signal.aborted && down !== undefined && up !== undefined) {
+      const result = {
         downloadMbps: down,
         uploadMbps: up,
         timestamp: Date.now(),
       };
-      return cachedSpeed;
+      cachedSpeeds.set(ssid, result);
+      return result;
     }
-    return cachedSpeed;
-  } finally {
-    isSpeedTestRunning = false;
-  }
+    return undefined;
+  })().finally(() => {
+    if (activeSpeedTest === test) {
+      activeSpeedTest = undefined;
+    }
+  });
+
+  activeSpeedTest = test;
+  return test.promise;
 }
 
 /**
  * Returns the currently cached speed result if still fresh (< 2 minutes).
  */
-export function getCachedInternetSpeed(): InternetSpeedResult | undefined {
+export function getCachedInternetSpeed(
+  ssid: string,
+): InternetSpeedResult | undefined {
+  const cachedSpeed = cachedSpeeds.get(ssid);
   if (cachedSpeed && Date.now() - cachedSpeed.timestamp < 120000) {
     return cachedSpeed;
   }

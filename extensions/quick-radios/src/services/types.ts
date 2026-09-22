@@ -46,6 +46,13 @@ export interface BluetoothStatus {
 export type BluetoothDeviceCategory =
   "audio" | "peripheral" | "controller" | "phone" | "other";
 
+export interface BluetoothBattery {
+  level?: number;
+  left?: number;
+  right?: number;
+  case?: number;
+}
+
 export interface BluetoothDevice {
   id: string;
   name: string;
@@ -53,5 +60,5 @@ export interface BluetoothDevice {
   category: BluetoothDeviceCategory;
   isConnected: boolean;
   isPaired?: boolean;
-  batteryPercent?: number;
+  battery?: BluetoothBattery;
 }

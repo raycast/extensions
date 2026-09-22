@@ -1,14 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Radios;
+using Windows.Storage.Streams;
 
 class QuickRadiosHelper {
+    private const string BluetoothBatteryLevelProperty = "{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2";
+
     // WLAN API for hardware channel scanning
     [DllImport("wlanapi.dll", SetLastError = true)]
     private static extern uint WlanOpenHandle(uint dwClientVersion, IntPtr pReserved, out uint pdwNegotiatedVersion, out IntPtr phClientHandle);
@@ -99,6 +105,98 @@ class QuickRadiosHelper {
 
     [DllImport("BluetoothApis.dll", SetLastError = true)]
     private static extern bool BluetoothFindDeviceClose(IntPtr hFind);
+
+    // SetupAPI: reads DEVPKEY_Bluetooth_Battery directly from the PnP device tree. Windows attaches this
+    // property to whichever Bluetooth service child node (e.g. Handsfree {0000111e-...}) actually reports it,
+    // not necessarily the main BTHENUM\DEV_ node or anything reachable via WinRT DeviceInformation queries.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct SP_DEVINFO_DATA {
+        public int cbSize;
+        public Guid ClassGuid;
+        public int DevInst;
+        public IntPtr Reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct DEVPROPKEY {
+        public Guid fmtid;
+        public uint pid;
+    }
+
+    [DllImport("setupapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern IntPtr SetupDiGetClassDevs(IntPtr ClassGuid, string Enumerator, IntPtr hwndParent, uint Flags);
+
+    [DllImport("setupapi.dll", SetLastError = true)]
+    private static extern bool SetupDiEnumDeviceInfo(IntPtr DeviceInfoSet, uint MemberIndex, ref SP_DEVINFO_DATA DeviceInfoData);
+
+    [DllImport("setupapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern bool SetupDiGetDeviceInstanceId(IntPtr DeviceInfoSet, ref SP_DEVINFO_DATA DeviceInfoData, StringBuilder DeviceInstanceId, int DeviceInstanceIdSize, out int RequiredSize);
+
+    [DllImport("setupapi.dll", EntryPoint = "SetupDiGetDevicePropertyW", SetLastError = true)]
+    private static extern bool SetupDiGetDeviceProperty(IntPtr DeviceInfoSet, ref SP_DEVINFO_DATA DeviceInfoData, ref DEVPROPKEY PropertyKey, out uint PropertyType, byte[] PropertyBuffer, int PropertyBufferSize, out int RequiredSize, uint Flags);
+
+    [DllImport("setupapi.dll", SetLastError = true)]
+    private static extern bool SetupDiDestroyDeviceInfoList(IntPtr DeviceInfoSet);
+
+    private static readonly Regex MacTokenRegex =
+        new Regex(@"(?:^|[\\&_])([0-9A-Fa-f]{12})(?=[\\&_]|$)", RegexOptions.Compiled);
+
+    private static bool TryExtractMacToken(string instanceId, out string cleanHex) {
+        cleanHex = null;
+        if (string.IsNullOrEmpty(instanceId)) return false;
+        var matches = MacTokenRegex.Matches(instanceId);
+        if (matches.Count == 0) return false;
+        cleanHex = matches[matches.Count - 1].Groups[1].Value.ToUpperInvariant();
+        return true;
+    }
+
+    private static Dictionary<string, int> GetSetupApiBluetoothBattery() {
+        var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        const uint DIGCF_PRESENT = 0x02;
+        const uint DIGCF_ALLCLASSES = 0x04;
+        IntPtr deviceInfoSet = IntPtr.Zero;
+        try {
+            // Enumerate everything under the BTHENUM enumerator across ALL device classes: the battery
+            // property lives on whichever Bluetooth service child node reports it (e.g. the Handsfree
+            // {0000111e-...} node, class "System"), which is not necessarily class Bluetooth itself.
+            deviceInfoSet = SetupDiGetClassDevs(IntPtr.Zero, "BTHENUM", IntPtr.Zero, DIGCF_PRESENT | DIGCF_ALLCLASSES);
+            if (deviceInfoSet == IntPtr.Zero || deviceInfoSet.ToInt64() == -1) return result;
+
+            DEVPROPKEY batteryKey = new DEVPROPKEY {
+                fmtid = new Guid("104EA319-6EE2-4701-BD47-8DDBF425BBE5"),
+                pid = 2
+            };
+
+            uint index = 0;
+            while (true) {
+                SP_DEVINFO_DATA devInfo = new SP_DEVINFO_DATA();
+                devInfo.cbSize = Marshal.SizeOf(typeof(SP_DEVINFO_DATA));
+                if (!SetupDiEnumDeviceInfo(deviceInfoSet, index, ref devInfo)) break;
+                index++;
+
+                var idBuilder = new StringBuilder(512);
+                int requiredSize;
+                if (!SetupDiGetDeviceInstanceId(deviceInfoSet, ref devInfo, idBuilder, idBuilder.Capacity, out requiredSize)) continue;
+
+                string macHex;
+                if (!TryExtractMacToken(idBuilder.ToString(), out macHex)) continue;
+                if (result.ContainsKey(macHex)) continue;
+
+                uint propType;
+                int propRequired;
+                byte[] buffer = new byte[8];
+                bool ok = SetupDiGetDeviceProperty(deviceInfoSet, ref devInfo, ref batteryKey, out propType, buffer, buffer.Length, out propRequired, 0);
+                if (ok && propRequired >= 1 && propType != 0) {
+                    int level = buffer[0];
+                    if (level >= 0 && level <= 100) result[macHex] = level;
+                }
+            }
+        } catch {
+        } finally {
+            if (deviceInfoSet != IntPtr.Zero) SetupDiDestroyDeviceInfoList(deviceInfoSet);
+        }
+        return result;
+    }
 
     private static int GetWin32DeviceConnectionState(ulong address) {
         // Classic Bluetooth Win32 APIs (BluetoothApis.dll) do NOT track Low Energy (BLE) or dual-mode connections.
@@ -707,6 +805,47 @@ class QuickRadiosHelper {
         }
     }
 
+    private static int UnpairDevice(ulong address) {
+        BluetoothDevice device = null;
+        try {
+            var op = BluetoothDevice.FromBluetoothAddressAsync(address);
+            var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
+            if (!task.Wait(4000) || task.Result == null) {
+                Console.WriteLine("Error: Device not found");
+                return 2;
+            }
+            device = task.Result;
+
+            var pairing = device.DeviceInformation.Pairing;
+            if (!pairing.IsPaired) {
+                CompleteSuccess("Unpaired");
+                return 0;
+            }
+
+            var unpairOp = pairing.UnpairAsync();
+            var unpairTask = System.WindowsRuntimeSystemExtensions.AsTask(unpairOp);
+            if (!unpairTask.Wait(8000)) {
+                Console.WriteLine("Error: Unpair timed out");
+                return 1;
+            }
+
+            var result = unpairTask.Result;
+            if (result.Status == DeviceUnpairingResultStatus.Unpaired ||
+                result.Status == DeviceUnpairingResultStatus.AlreadyUnpaired) {
+                CompleteSuccess("Unpaired");
+                return 0;
+            }
+
+            Console.WriteLine("Error: " + result.Status);
+            return 1;
+        } catch (Exception ex) {
+            Console.WriteLine("Error: " + ex.Message);
+            return 2;
+        } finally {
+            if (device != null) device.Dispose();
+        }
+    }
+
     private static int GetDeviceStatus(ulong address) {
         try {
             int state = GetDeviceConnectionState(address, 2500);
@@ -736,6 +875,211 @@ class QuickRadiosHelper {
         public string Name;
         public string FormattedMac;
         public bool IsConnected;
+        public int BatteryLevel = -1;
+        public string ContainerId;
+    }
+
+    private static void MergePairedDeviceInformation(string selector, Dictionary<string, DeviceEntry> devices, bool associationEndpoint) {
+        try {
+            string[] properties = new string[] {
+                "System.Devices.Aep.IsConnected",
+                "System.Devices.Aep.DeviceAddress",
+                "System.Devices.ContainerId",
+                BluetoothBatteryLevelProperty,
+                "System.Devices.BatteryLife"
+            };
+            var op = associationEndpoint
+                ? DeviceInformation.FindAllAsync(selector, properties, DeviceInformationKind.AssociationEndpoint)
+                : DeviceInformation.FindAllAsync(selector, properties);
+            var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
+            if (!task.Wait(1200) || task.Result == null) return;
+
+            foreach (var d in task.Result) {
+                ulong addr;
+                string cleanHex;
+                object addressValue;
+                bool parsedAddress = false;
+                if (d.Properties.TryGetValue("System.Devices.Aep.DeviceAddress", out addressValue) && addressValue != null) {
+                    parsedAddress = TryParseMac(addressValue.ToString(), out addr, out cleanHex);
+                } else {
+                    addr = 0;
+                    cleanHex = null;
+                }
+                if (!parsedAddress) {
+                    parsedAddress = TryParseMac(d.Id, out addr, out cleanHex);
+                }
+                if (!parsedAddress) continue;
+
+                bool isConn = false;
+                object connVal;
+                if (d.Properties.TryGetValue("System.Devices.Aep.IsConnected", out connVal) && connVal is bool) {
+                    isConn = (bool)connVal;
+                }
+
+                int batteryLevel = -1;
+                object batteryValue;
+                if ((!d.Properties.TryGetValue(BluetoothBatteryLevelProperty, out batteryValue) || batteryValue == null) &&
+                    !d.Properties.TryGetValue("System.Devices.BatteryLife", out batteryValue)) {
+                    batteryValue = null;
+                }
+                if (batteryValue != null) {
+                    try {
+                        int parsedLevel = Convert.ToInt32(batteryValue);
+                        if (parsedLevel >= 0 && parsedLevel <= 100) batteryLevel = parsedLevel;
+                    } catch {}
+                }
+
+                string containerId = null;
+                object containerValue;
+                if (d.Properties.TryGetValue("System.Devices.ContainerId", out containerValue) && containerValue != null) {
+                    containerId = containerValue.ToString();
+                }
+
+                DeviceEntry existing;
+                if (devices.TryGetValue(cleanHex, out existing)) {
+                    if (isConn) existing.IsConnected = true;
+                    if (batteryLevel >= 0) existing.BatteryLevel = batteryLevel;
+                    if (!string.IsNullOrEmpty(containerId)) existing.ContainerId = containerId;
+                    continue;
+                }
+
+                string formattedMac = string.Format("{0}:{1}:{2}:{3}:{4}:{5}",
+                    cleanHex.Substring(0, 2),
+                    cleanHex.Substring(2, 2),
+                    cleanHex.Substring(4, 2),
+                    cleanHex.Substring(6, 2),
+                    cleanHex.Substring(8, 2),
+                    cleanHex.Substring(10, 2));
+                devices[cleanHex] = new DeviceEntry {
+                    CleanHex = cleanHex,
+                    Name = string.IsNullOrEmpty(d.Name) ? ("Bluetooth Device (" + cleanHex + ")") : d.Name,
+                    FormattedMac = formattedMac,
+                    IsConnected = isConn,
+                    BatteryLevel = batteryLevel,
+                    ContainerId = containerId
+                };
+            }
+        } catch {}
+    }
+
+    private static void MergeDeviceContainerBattery(Dictionary<string, DeviceEntry> devices) {
+        try {
+            string[] properties = new string[] {
+                BluetoothBatteryLevelProperty,
+                "System.Devices.BatteryLife",
+                "System.Devices.BatteryPlusCharging",
+                "System.Devices.BatteryPlusChargingText"
+            };
+            DeviceInformationKind[] kinds = new DeviceInformationKind[] {
+                DeviceInformationKind.DeviceContainer,
+                DeviceInformationKind.AssociationEndpointContainer
+            };
+
+            foreach (var kind in kinds) {
+                var op = DeviceInformation.FindAllAsync("", properties, kind);
+                var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
+                if (!task.Wait(1200) || task.Result == null) continue;
+
+                foreach (var container in task.Result) {
+                    object batteryValue;
+                    if ((!container.Properties.TryGetValue(BluetoothBatteryLevelProperty, out batteryValue) || batteryValue == null) &&
+                        (!container.Properties.TryGetValue("System.Devices.BatteryLife", out batteryValue) || batteryValue == null)) continue;
+
+                    int batteryLevel;
+                    try {
+                        batteryLevel = Convert.ToInt32(batteryValue);
+                    } catch {
+                        continue;
+                    }
+                    if (batteryLevel < 0 || batteryLevel > 100) continue;
+
+                    foreach (var device in devices.Values) {
+                        bool sameContainer = !string.IsNullOrEmpty(device.ContainerId) &&
+                            string.Equals(device.ContainerId, container.Id, StringComparison.OrdinalIgnoreCase);
+                        bool sameName = string.Equals(device.Name, container.Name, StringComparison.OrdinalIgnoreCase);
+                        if (sameContainer || sameName) device.BatteryLevel = batteryLevel;
+                    }
+                }
+            }
+
+        } catch {}
+    }
+
+    private static void ApplyContainerBattery(
+        string id,
+        string name,
+        IReadOnlyDictionary<string, object> properties,
+        Dictionary<string, DeviceEntry> devices
+    ) {
+        object batteryValue;
+        if ((!properties.TryGetValue(BluetoothBatteryLevelProperty, out batteryValue) || batteryValue == null) &&
+            (!properties.TryGetValue("System.Devices.BatteryLife", out batteryValue) || batteryValue == null)) return;
+
+        int batteryLevel;
+        try {
+            batteryLevel = Convert.ToInt32(batteryValue);
+        } catch {
+            return;
+        }
+        if (batteryLevel < 0 || batteryLevel > 100) return;
+
+        lock (devices) {
+            foreach (var device in devices.Values) {
+                bool sameContainer = !string.IsNullOrEmpty(device.ContainerId) &&
+                    string.Equals(device.ContainerId, id, StringComparison.OrdinalIgnoreCase);
+                bool sameName = !string.IsNullOrEmpty(name) &&
+                    string.Equals(device.Name, name, StringComparison.OrdinalIgnoreCase);
+                if (sameContainer || sameName) device.BatteryLevel = batteryLevel;
+            }
+        }
+    }
+
+    private static int GetGattBatteryLevel(ulong address) {
+        BluetoothLEDevice device = null;
+        try {
+            var deviceTask = System.WindowsRuntimeSystemExtensions.AsTask(
+                BluetoothLEDevice.FromBluetoothAddressAsync(address)
+            );
+            if (!deviceTask.Wait(1200) || deviceTask.Result == null) return -1;
+            device = deviceTask.Result;
+
+            var servicesTask = System.WindowsRuntimeSystemExtensions.AsTask(
+                device.GetGattServicesForUuidAsync(GattServiceUuids.Battery, BluetoothCacheMode.Cached)
+            );
+            if (!servicesTask.Wait(1200) || servicesTask.Result == null ||
+                servicesTask.Result.Status != GattCommunicationStatus.Success) return -1;
+
+            foreach (var service in servicesTask.Result.Services) {
+                try {
+                    var characteristicsTask = System.WindowsRuntimeSystemExtensions.AsTask(
+                        service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.BatteryLevel, BluetoothCacheMode.Cached)
+                    );
+                    if (!characteristicsTask.Wait(1200) || characteristicsTask.Result == null ||
+                        characteristicsTask.Result.Status != GattCommunicationStatus.Success) continue;
+
+                    foreach (var characteristic in characteristicsTask.Result.Characteristics) {
+                        var readTask = System.WindowsRuntimeSystemExtensions.AsTask(
+                            characteristic.ReadValueAsync(BluetoothCacheMode.Cached)
+                        );
+                        if (!readTask.Wait(1200) || readTask.Result == null ||
+                            readTask.Result.Status != GattCommunicationStatus.Success ||
+                            readTask.Result.Value == null || readTask.Result.Value.Length < 1) continue;
+
+                        using (var reader = DataReader.FromBuffer(readTask.Result.Value)) {
+                            int level = reader.ReadByte();
+                            if (level >= 0 && level <= 100) return level;
+                        }
+                    }
+                } finally {
+                    service.Dispose();
+                }
+            }
+        } catch {
+            return -1;
+        } finally {
+            if (device != null) device.Dispose();
+        }
+        return -1;
     }
 
     private static int ListDevices() {
@@ -794,53 +1138,41 @@ class QuickRadiosHelper {
                 }
             }
 
-            try {
-                string leSelector = BluetoothLEDevice.GetDeviceSelectorFromPairingState(true);
-                var op = DeviceInformation.FindAllAsync(leSelector, new string[] { "System.Devices.Aep.IsConnected" });
-                var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-                if (task.Wait(400) && task.Result != null) {
-                    foreach (var d in task.Result) {
-                        ulong addr;
-                        string cleanHex;
-                        if (TryParseMac(d.Id, out addr, out cleanHex)) {
-                            bool isConn = false;
-                            object connVal;
-                            if (d.Properties.TryGetValue("System.Devices.Aep.IsConnected", out connVal) && connVal is bool) {
-                                isConn = (bool)connVal;
-                            }
-                            DeviceEntry existing;
-                            if (devices.TryGetValue(cleanHex, out existing)) {
-                                if (isConn) {
-                                    existing.IsConnected = true;
-                                }
-                            } else {
-                                string formattedMac = string.Format("{0}:{1}:{2}:{3}:{4}:{5}",
-                                    cleanHex.Substring(0, 2),
-                                    cleanHex.Substring(2, 2),
-                                    cleanHex.Substring(4, 2),
-                                    cleanHex.Substring(6, 2),
-                                    cleanHex.Substring(8, 2),
-                                    cleanHex.Substring(10, 2));
-                                devices[cleanHex] = new DeviceEntry {
-                                    CleanHex = cleanHex,
-                                    Name = string.IsNullOrEmpty(d.Name) ? ("Bluetooth Device (" + cleanHex + ")") : d.Name,
-                                    FormattedMac = formattedMac,
-                                    IsConnected = isConn
-                                };
-                            }
-                        }
+            MergePairedDeviceInformation(BluetoothDevice.GetDeviceSelectorFromPairingState(true), devices, false);
+            MergePairedDeviceInformation(BluetoothLEDevice.GetDeviceSelectorFromPairingState(true), devices, false);
+            MergePairedDeviceInformation(
+                "System.Devices.Aep.ProtocolId:=\"{e0cbf06c-cd8b-4647-bb8a-263b43f0f974}\"",
+                devices,
+                true
+            );
+            MergeDeviceContainerBattery(devices);
+
+            var setupApiBattery = GetSetupApiBluetoothBattery();
+            foreach (var dev in devices.Values) {
+                int setupApiLevel;
+                if (setupApiBattery.TryGetValue(dev.CleanHex, out setupApiLevel)) {
+                    dev.BatteryLevel = setupApiLevel;
+                }
+            }
+
+            foreach (var dev in devices.Values) {
+                if (dev.IsConnected && dev.BatteryLevel < 0) {
+                    ulong address;
+                    if (ulong.TryParse(dev.CleanHex, System.Globalization.NumberStyles.HexNumber, null, out address)) {
+                        dev.BatteryLevel = GetGattBatteryLevel(address);
                     }
                 }
-            } catch {}
+            }
 
             var results = new List<string>();
             foreach (var dev in devices.Values) {
                 results.Add(string.Format(
-                    "{{\"Id\":\"BTHENUM\\\\DEV_{0}\",\"Name\":\"{1}\",\"Address\":\"{2}\",\"IsConnected\":{3}}}",
+                    "{{\"Id\":\"BTHENUM\\\\DEV_{0}\",\"Name\":\"{1}\",\"Address\":\"{2}\",\"IsConnected\":{3},\"BatteryLevel\":{4}}}",
                     dev.CleanHex,
                     EscapeJson(dev.Name),
                     dev.FormattedMac,
-                    dev.IsConnected ? "true" : "false"
+                    dev.IsConnected ? "true" : "false",
+                    dev.BatteryLevel >= 0 ? dev.BatteryLevel.ToString() : "null"
                 ));
             }
 
@@ -892,6 +1224,20 @@ class QuickRadiosHelper {
                 return 1;
             }
             return DisconnectDevice(addr, cleanHex);
+        }
+
+        if (cmd == "unpair" || cmd == "bt-unpair" || cmd == "forget-device") {
+            if (args.Length < 2) {
+                Console.WriteLine("MissingMacAddress");
+                return 1;
+            }
+            ulong unpairAddr;
+            string unpairCleanHex;
+            if (!TryParseMac(args[1], out unpairAddr, out unpairCleanHex)) {
+                Console.WriteLine("InvalidMacAddress");
+                return 1;
+            }
+            return UnpairDevice(unpairAddr);
         }
 
         if (cmd == "device-status" || cmd == "bt-device-status") {

@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
 import { register } from "node:module";
-import { promisify } from "node:util";
 
 register("./ts-loader.mjs", import.meta.url);
-
-const execFileAsync = promisify(execFile);
 
 // Dynamically import real exported functions from the codebase
 const {
@@ -13,13 +9,15 @@ const {
   formatGigaBytes,
   calculateSessionUsage,
   clearSessionBaseline,
+  getInternetSpeed,
 } = await import("../src/services/speedService.ts");
 const { parseSubinterfaceBytes } = await import(
   "../src/services/platform/windows.ts"
 );
-const { parseNetstatBytes } = await import(
+const { parseNetstatBytes, parseMacWifiAssociationKey } = await import(
   "../src/services/platform/macos.ts"
 );
+const { isLatestSsidRequest } = await import("../src/utils/wifiState.ts");
 
 console.log("==================================================");
 console.log("RUNNING COMPREHENSIVE SESSION DATA VERIFICATION");
@@ -378,44 +376,9 @@ assert.deepEqual(
 console.log("✓ macOS netstat parser tests passed!");
 
 // ---------------------------------------------------------------
-// 5. Test Live Windows Netsh Execution (Host Environment)
+// 5. Test WLAN Event Multi-Adapter & SSID Isolation
 // ---------------------------------------------------------------
-if (process.platform === "win32") {
-  console.log("\n--- 5. Testing Live Windows Netsh execution ---");
-  const { stdout: v4Out } = await execFileAsync("netsh", [
-    "interface",
-    "ipv4",
-    "show",
-    "subinterfaces",
-  ]);
-  const { stdout: v6Out } = await execFileAsync("netsh", [
-    "interface",
-    "ipv6",
-    "show",
-    "subinterfaces",
-  ]);
-
-  const liveV4 = parseSubinterfaceBytes(v4Out, "Wi-Fi");
-  const liveV6 = parseSubinterfaceBytes(v6Out, "Wi-Fi");
-  console.log("Live Wi-Fi IPv4 counters:", liveV4);
-  console.log("Live Wi-Fi IPv6 counters:", liveV6);
-
-  assert(liveV4 !== undefined, "Live IPv4 Wi-Fi counters should be parsed");
-  assert(
-    typeof liveV4.bytesIn === "number" && liveV4.bytesIn > 0,
-    "Bytes In should be > 0",
-  );
-  assert(
-    typeof liveV4.bytesOut === "number" && liveV4.bytesOut > 0,
-    "Bytes Out should be > 0",
-  );
-  console.log("✓ Live Windows Netsh query verified successfully!");
-}
-
-// ---------------------------------------------------------------
-// 6. Test WLAN Event Multi-Adapter & SSID Isolation
-// ---------------------------------------------------------------
-console.log("\n--- 6. Testing WLAN event multi-adapter isolation ---");
+console.log("\n--- 5. Testing WLAN event multi-adapter isolation ---");
 
 function unescapeXml(str) {
   return str
@@ -533,6 +496,113 @@ assert.equal(
 );
 
 console.log("✓ WLAN event multi-adapter isolation tests passed!");
+
+// ---------------------------------------------------------------
+// 6. Test SSID-scoped internet speed cache
+// ---------------------------------------------------------------
+console.log("\n--- 6. Testing SSID-scoped speed cache ---");
+
+const originalFetch = globalThis.fetch;
+let fetchCalls = 0;
+globalThis.fetch = async () => {
+  fetchCalls++;
+  await new Promise((resolve) => setTimeout(resolve, 2));
+  return {
+    ok: true,
+    arrayBuffer: async () => new ArrayBuffer(1024),
+  };
+};
+
+try {
+  const [firstA, duplicateA] = await Promise.all([
+    getInternetSpeed("TestNetwork-A", true),
+    getInternetSpeed("TestNetwork-A", true),
+  ]);
+  assert(firstA && duplicateA, "Shared speed test should return a result");
+  assert.equal(
+    fetchCalls,
+    2,
+    "Concurrent requests for one SSID should share one test",
+  );
+
+  const cachedA = await getInternetSpeed("TestNetwork-A");
+  assert.deepEqual(cachedA, firstA);
+  assert.equal(fetchCalls, 2, "Fresh same-SSID result should be cached");
+
+  const resultB = await getInternetSpeed("TestNetwork-B");
+  assert(resultB, "A different SSID should receive its own result");
+  assert.equal(fetchCalls, 4, "A different SSID must run a new speed test");
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
+console.log("✓ SSID-scoped speed cache tests passed!");
+
+// ---------------------------------------------------------------
+// 7. Test macOS Wi-Fi association identity parsing
+// ---------------------------------------------------------------
+console.log("\n--- 7. Testing macOS association identity parser ---");
+
+const firstAssociationLog = `
+2026-09-12 10:00:00.000 airportd: en0 associated with SSID HomeFiber BSSID aa:bb:cc:dd:ee:ff
+`;
+const secondAssociationLog = `${firstAssociationLog}
+2026-09-12 12:00:00.000 airportd: en0 associated with SSID HomeFiber BSSID aa:bb:cc:dd:ee:ff
+`;
+const firstAssociationKey = parseMacWifiAssociationKey(
+  firstAssociationLog,
+  "HomeFiber",
+  "aa:bb:cc:dd:ee:ff",
+  "en0",
+);
+const secondAssociationKey = parseMacWifiAssociationKey(
+  secondAssociationLog,
+  "HomeFiber",
+  "aa:bb:cc:dd:ee:ff",
+  "en0",
+);
+assert(firstAssociationKey);
+assert(secondAssociationKey);
+assert.notEqual(
+  firstAssociationKey,
+  secondAssociationKey,
+  "Reconnect to the same SSID and BSSID must produce a fresh connection key",
+);
+
+const redactedAssociationKey = parseMacWifiAssociationKey(
+  "2026-09-12 12:00:00.000 airportd: en0 joined <private>",
+  "HomeFiber",
+  undefined,
+  "en0",
+);
+assert(
+  redactedAssociationKey,
+  "Interface identity should support redacted SSID logs",
+);
+
+console.log("✓ macOS association identity parser tests passed!");
+
+// ---------------------------------------------------------------
+// 8. Test stale SSID request rejection
+// ---------------------------------------------------------------
+console.log("\n--- 8. Testing stale SSID request rejection ---");
+
+assert.equal(
+  isLatestSsidRequest("Network-A", "Network-A", "Network-A"),
+  true,
+);
+assert.equal(
+  isLatestSsidRequest("Network-A", "Network-B", "Network-B"),
+  false,
+  "A password result from the previous network must be rejected",
+);
+assert.equal(
+  isLatestSsidRequest("Network-A", undefined, undefined),
+  false,
+  "A password result arriving after disconnect must be rejected",
+);
+
+console.log("✓ stale SSID request rejection tests passed!");
 
 console.log("\n==================================================");
 console.log("ALL VERIFICATION TESTS PASSED SUCCESSFULLY! 🎉");

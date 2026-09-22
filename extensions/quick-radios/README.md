@@ -25,6 +25,7 @@ Control your **Wi-Fi** and **Bluetooth** connections directly from the Raycast s
 ### ᛒ Manage Bluetooth (`bluetooth`)
 - **Paired Devices Dashboard**: See all paired Bluetooth devices categorized into **Audio & Headphones**, **Keyboards, Mice & Controllers**, and **Other Paired Devices**.
 - **Live Connection State**: Instantly see which devices are currently connected (🟢) vs paired/disconnected (⚪).
+- **Battery Levels**: View OS-reported battery percentages for connected devices, including separate left, right, and case levels when available.
 - **1-Click Connect / Disconnect**: Toggle connection state for audio headsets and peripherals.
 - **Radio Toggle**: Turn Bluetooth on/off directly from search (`Cmd/Ctrl + T`).
 - **Pair New Devices**: Quick shortcut to launch OS Bluetooth pairing settings (`Cmd/Ctrl + O`).
@@ -70,4 +71,3 @@ npm run lint
 # Build extension
 npm run build
 ```
-

@@ -1,5 +1,9 @@
 import { Color, Icon, List } from "@raycast/api";
 import { BluetoothDevice } from "../services/types";
+import {
+  formatBluetoothBattery,
+  getBluetoothBatteryParts,
+} from "../utils/bluetoothBattery";
 
 interface BluetoothDetailProps {
   device: BluetoothDevice;
@@ -16,6 +20,10 @@ export function BluetoothDetail({
   pendingAction = null,
 }: BluetoothDetailProps) {
   const categoryLabel = getCategoryLabel(device.category);
+  const batteryParts = device.isConnected
+    ? getBluetoothBatteryParts(device.battery)
+    : [];
+  const batteryText = formatBluetoothBattery(device.battery);
 
   let stateText = device.isConnected
     ? `${CONNECTED_BADGE} **Connected**`
@@ -35,8 +43,8 @@ export function BluetoothDetail({
     markdown += `**Bluetooth Address**: \`${device.address}\`  \n`;
   }
 
-  if (device.batteryPercent !== undefined) {
-    markdown += `**Battery**: 🔋 ${device.batteryPercent}%  \n`;
+  if (batteryParts.length > 0) {
+    markdown += `**Battery**: 🔋 ${batteryText}  \n`;
   }
 
   markdown += `\n---\n*Press **Enter** to ${
@@ -68,12 +76,17 @@ export function BluetoothDetail({
               text={device.address}
             />
           )}
-          {device.batteryPercent !== undefined && (
+          {batteryParts.map(({ label, value }) => (
             <List.Item.Detail.Metadata.Label
-              title="Battery"
-              text={`${device.batteryPercent}%`}
+              key={label || "level"}
+              title={
+                label
+                  ? `${label === "L" ? "Left" : label === "R" ? "Right" : label} Battery`
+                  : "Battery"
+              }
+              text={`${value}%`}
             />
-          )}
+          ))}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Status">
             <List.Item.Detail.Metadata.TagList.Item

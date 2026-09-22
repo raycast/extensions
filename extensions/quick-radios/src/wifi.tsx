@@ -1,9 +1,11 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Icon,
   List,
+  confirmAlert,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -13,6 +15,7 @@ import { ConnectPasswordForm } from "./components/ConnectPasswordForm";
 import {
   connectWifi,
   disconnectWifi,
+  forgetWifiNetwork,
   getInternetSpeed,
   getWifiNetworks,
   getWifiPassword,
@@ -21,6 +24,8 @@ import {
   toggleWifi,
 } from "./services/wifiService";
 import { WifiNetwork, WifiStatus } from "./services/types";
+import { SHORTCUTS } from "./utils/shortcuts";
+import { isLatestSsidRequest } from "./utils/wifiState";
 
 function areWifiStatusesEqual(a: WifiStatus, b: WifiStatus): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -45,6 +50,7 @@ export default function WifiCommand() {
   const actionSeqRef = useRef(0);
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
   const pendingRefreshRef = useRef<{ showNotification?: boolean } | null>(null);
+  const connectedSsidRef = useRef<string | undefined>(undefined);
   const queriedPasswordSsidRef = useRef<string | undefined>(undefined);
   const speedTestedSsidRef = useRef<string | undefined>(undefined);
 
@@ -119,7 +125,9 @@ export default function WifiCommand() {
             isTestingSpeed: prev.isTestingSpeed,
             internetSpeed:
               currentStatus.internetSpeed ??
-              (currentStatus.isConnected ? prev.internetSpeed : undefined),
+              (currentStatus.isConnected && prev.ssid === currentStatus.ssid
+                ? prev.internetSpeed
+                : undefined),
           };
           return areWifiStatusesEqual(prev, mergedStatus) ? prev : mergedStatus;
         });
@@ -129,10 +137,24 @@ export default function WifiCommand() {
 
         if (currentStatus.isConnected && currentStatus.ssid) {
           const activeSsid = currentStatus.ssid;
+          if (connectedSsidRef.current !== activeSsid) {
+            connectedSsidRef.current = activeSsid;
+            queriedPasswordSsidRef.current = undefined;
+            setSavedPassword(undefined);
+          }
+
           if (activeSsid !== queriedPasswordSsidRef.current) {
             queriedPasswordSsidRef.current = activeSsid;
             getWifiPassword(activeSsid).then((pwd) => {
-              if (!isMountedRef.current || currentSeq !== actionSeqRef.current)
+              if (
+                !isMountedRef.current ||
+                currentSeq !== actionSeqRef.current ||
+                !isLatestSsidRequest(
+                  activeSsid,
+                  connectedSsidRef.current,
+                  queriedPasswordSsidRef.current,
+                )
+              )
                 return;
               setSavedPassword(pwd);
             });
@@ -141,7 +163,7 @@ export default function WifiCommand() {
           if (currentStatus.ssid !== speedTestedSsidRef.current) {
             speedTestedSsidRef.current = currentStatus.ssid;
             setStatus((prev) => ({ ...prev, isTestingSpeed: true }));
-            getInternetSpeed().then((speed) => {
+            getInternetSpeed(activeSsid).then((speed) => {
               if (!isMountedRef.current || currentSeq !== actionSeqRef.current)
                 return;
               setStatus((prev) =>
@@ -152,6 +174,7 @@ export default function WifiCommand() {
             });
           }
         } else {
+          connectedSsidRef.current = undefined;
           queriedPasswordSsidRef.current = undefined;
           setSavedPassword(undefined);
           speedTestedSsidRef.current = undefined;
@@ -298,16 +321,68 @@ export default function WifiCommand() {
     }
   }
 
+  async function handleForgetNetwork(network: WifiNetwork) {
+    if (isActionInProgressRef.current) return;
+    const confirmed = await confirmAlert({
+      title: `Forget "${network.ssid}"?`,
+      message:
+        "This will remove the saved network. You'll need to enter the password again to reconnect.",
+      primaryAction: {
+        title: "Forget Network",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    actionSeqRef.current++;
+    isActionInProgressRef.current = true;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Forgetting "${network.ssid}"...`,
+    });
+
+    try {
+      await forgetWifiNetwork(network.ssid);
+      if (!isMountedRef.current) return;
+      toast.style = Toast.Style.Success;
+      toast.title = `Forgot "${network.ssid}"`;
+      if (network.isConnected) {
+        setStatus((prev) => ({
+          ...prev,
+          isConnected: false,
+          sessionData: undefined,
+        }));
+      }
+      refresh();
+    } catch (error) {
+      if (!isMountedRef.current) return;
+      toast.style = Toast.Style.Failure;
+      toast.title = `Failed to forget "${network.ssid}"`;
+      toast.message = error instanceof Error ? error.message : String(error);
+    } finally {
+      isActionInProgressRef.current = false;
+    }
+  }
+
   async function handleTestSpeed() {
+    const activeSsid = status.ssid;
+    if (!status.isConnected || !activeSsid) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Connect to Wi-Fi before testing speed",
+      });
+      return;
+    }
+
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Testing Internet Speed...",
     });
     setStatus((prev) => ({ ...prev, isTestingSpeed: true }));
     try {
-      const speed = await getInternetSpeed(true);
+      const speed = await getInternetSpeed(activeSsid, true);
       if (!isMountedRef.current) return;
-      if (speed) {
+      if (speed && connectedSsidRef.current === activeSsid) {
         setStatus((prev) => ({
           ...prev,
           isTestingSpeed: false,
@@ -366,7 +441,7 @@ export default function WifiCommand() {
                 title="Open Wi-fi Settings"
                 onAction={openWifiSettings}
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={SHORTCUTS.openSettings}
               />
             </ActionPanel>
           }
@@ -382,19 +457,19 @@ export default function WifiCommand() {
                 title="Refresh List"
                 icon={Icon.ArrowClockwise}
                 onAction={() => refresh(true)}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={SHORTCUTS.refresh}
               />
               <Action
                 title="Turn Wi-fi Off"
                 icon={Icon.Power}
                 onAction={handleToggleWifi}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={SHORTCUTS.toggleRadio}
               />
               <Action
                 title="Open Wi-fi Settings"
                 icon={Icon.Gear}
                 onAction={openWifiSettings}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={SHORTCUTS.openSettings}
               />
             </ActionPanel>
           }
@@ -448,13 +523,13 @@ export default function WifiCommand() {
                           title="Copy Wi-fi Password"
                           content={savedPassword}
                           icon={Icon.Key}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                          shortcut={SHORTCUTS.copyPassword}
                         />
                       )}
                       <Action
                         title="Test Internet Speed"
                         icon={Icon.Gauge}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                        shortcut={SHORTCUTS.testSpeed}
                         onAction={handleTestSpeed}
                       />
                     </ActionPanel.Section>
@@ -464,7 +539,7 @@ export default function WifiCommand() {
                           title="Copy Ip Address"
                           content={status.ipAddress}
                           icon={Icon.Clipboard}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
+                          shortcut={SHORTCUTS.copyDetails}
                         />
                       )}
                       {status.macAddress && (
@@ -482,24 +557,34 @@ export default function WifiCommand() {
                         />
                       )}
                     </ActionPanel.Section>
+                    {connectedNetwork.isSaved && (
+                      <ActionPanel.Section>
+                        <Action
+                          title="Forget Network"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          onAction={() => handleForgetNetwork(connectedNetwork)}
+                        />
+                      </ActionPanel.Section>
+                    )}
                     <ActionPanel.Section title="Controls">
                       <Action
                         title="Turn Wi-fi Off"
                         icon={Icon.Power}
                         onAction={handleToggleWifi}
-                        shortcut={{ modifiers: ["cmd"], key: "t" }}
+                        shortcut={SHORTCUTS.toggleRadio}
                       />
                       <Action
                         title="Open Wi-fi Settings"
                         icon={Icon.Gear}
                         onAction={openWifiSettings}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        shortcut={SHORTCUTS.openSettings}
                       />
                       <Action
                         title="Refresh List"
                         icon={Icon.ArrowClockwise}
                         onAction={() => refresh(true)}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={SHORTCUTS.refresh}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -540,23 +625,37 @@ export default function WifiCommand() {
                         icon={Icon.Check}
                         onAction={() => handleConnect(net)}
                       />
+                      {status.isConnected && (
+                        <Action
+                          title="Test Internet Speed"
+                          icon={Icon.Gauge}
+                          shortcut={SHORTCUTS.testSpeed}
+                          onAction={handleTestSpeed}
+                        />
+                      )}
+                      <Action
+                        title="Forget Network"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        onAction={() => handleForgetNetwork(net)}
+                      />
                       <Action
                         title="Turn Wi-fi Off"
                         icon={Icon.Power}
                         onAction={handleToggleWifi}
-                        shortcut={{ modifiers: ["cmd"], key: "t" }}
+                        shortcut={SHORTCUTS.toggleRadio}
                       />
                       <Action
                         title="Open Wi-fi Settings"
                         icon={Icon.Gear}
                         onAction={openWifiSettings}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        shortcut={SHORTCUTS.openSettings}
                       />
                       <Action
                         title="Refresh List"
                         icon={Icon.ArrowClockwise}
                         onAction={() => refresh(true)}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={SHORTCUTS.refresh}
                       />
                     </ActionPanel>
                   }
@@ -610,23 +709,31 @@ export default function WifiCommand() {
                             onAction={() => handleConnect(net)}
                           />
                         )}
+                        {status.isConnected && (
+                          <Action
+                            title="Test Internet Speed"
+                            icon={Icon.Gauge}
+                            shortcut={SHORTCUTS.testSpeed}
+                            onAction={handleTestSpeed}
+                          />
+                        )}
                         <Action
                           title="Turn Wi-fi Off"
                           icon={Icon.Power}
                           onAction={handleToggleWifi}
-                          shortcut={{ modifiers: ["cmd"], key: "t" }}
+                          shortcut={SHORTCUTS.toggleRadio}
                         />
                         <Action
                           title="Open Wi-fi Settings"
                           icon={Icon.Gear}
                           onAction={openWifiSettings}
-                          shortcut={{ modifiers: ["cmd"], key: "o" }}
+                          shortcut={SHORTCUTS.openSettings}
                         />
                         <Action
                           title="Refresh List"
                           icon={Icon.ArrowClockwise}
                           onAction={() => refresh(true)}
-                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                          shortcut={SHORTCUTS.refresh}
                         />
                       </ActionPanel>
                     }
@@ -664,23 +771,37 @@ export default function WifiCommand() {
                         icon={Icon.Check}
                         onAction={() => handleConnect(net)}
                       />
+                      {status.isConnected && (
+                        <Action
+                          title="Test Internet Speed"
+                          icon={Icon.Gauge}
+                          shortcut={SHORTCUTS.testSpeed}
+                          onAction={handleTestSpeed}
+                        />
+                      )}
+                      <Action
+                        title="Forget Network"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        onAction={() => handleForgetNetwork(net)}
+                      />
                       <Action
                         title="Turn Wi-fi Off"
                         icon={Icon.Power}
                         onAction={handleToggleWifi}
-                        shortcut={{ modifiers: ["cmd"], key: "t" }}
+                        shortcut={SHORTCUTS.toggleRadio}
                       />
                       <Action
                         title="Open Wi-fi Settings"
                         icon={Icon.Gear}
                         onAction={openWifiSettings}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        shortcut={SHORTCUTS.openSettings}
                       />
                       <Action
                         title="Refresh List"
                         icon={Icon.ArrowClockwise}
                         onAction={() => refresh(true)}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={SHORTCUTS.refresh}
                       />
                     </ActionPanel>
                   }

@@ -1,4 +1,5 @@
 import { execFile } from "child_process";
+import { createHash } from "crypto";
 import { promisify } from "util";
 import type {
   WifiStatus,
@@ -6,6 +7,7 @@ import type {
   BluetoothStatus,
   BluetoothDevice,
   BluetoothDeviceCategory,
+  BluetoothBattery,
 } from "../types";
 import {
   calculateSessionUsage,
@@ -13,16 +15,136 @@ import {
   getCachedInternetSpeed,
   type SessionDataUsage,
 } from "../speedService";
+import { compactBluetoothBattery } from "../../utils/bluetoothBattery";
 
 const execFileAsync = promisify(execFile);
 
 async function runExecFile(file: string, args: string[] = []): Promise<string> {
-  const { stdout } = await execFileAsync(file, args);
+  const { stdout } = await execFileAsync(file, args, {
+    maxBuffer: 10 * 1024 * 1024,
+  });
   return stdout.trim();
 }
 
 const AIRPORT_PATH =
   "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport";
+
+let macConnectionIdentityCache:
+  | {
+      signature: string;
+      key: string;
+      lastCheckedAt: number;
+    }
+  | undefined;
+let pendingMacConnectionIdentity:
+  | {
+      signature: string;
+      promise: Promise<string>;
+    }
+  | undefined;
+
+export function parseMacWifiAssociationKey(
+  output: string,
+  ssid: string,
+  bssid?: string,
+  device?: string,
+): string | undefined {
+  const identifiers = [ssid, bssid, device]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => value.toLowerCase());
+  const associationPattern =
+    /\bassociated\b|\bassociation succeeded\b|\bjoined\b|\broam(?:ed|ing)?\b/i;
+
+  const matchingLine = output
+    .split(/\r?\n/)
+    .reverse()
+    .find((line) => {
+      const lower = line.toLowerCase();
+      return (
+        associationPattern.test(line) &&
+        !lower.includes("disassociated") &&
+        identifiers.some((identifier) => lower.includes(identifier))
+      );
+    });
+
+  if (!matchingLine) return undefined;
+  const digest = createHash("sha256")
+    .update(matchingLine.trim())
+    .digest("hex")
+    .slice(0, 24);
+  return `mac-association:${digest}`;
+}
+
+async function getMacWifiConnectionKey(
+  ssid: string,
+  bssid: string | undefined,
+  device: string,
+): Promise<string> {
+  const signature = [ssid, bssid || "", device]
+    .map((value) => value.toLowerCase())
+    .join("|");
+  const now = Date.now();
+
+  if (
+    macConnectionIdentityCache?.signature === signature &&
+    now - macConnectionIdentityCache.lastCheckedAt < 8000
+  ) {
+    return macConnectionIdentityCache.key;
+  }
+
+  if (pendingMacConnectionIdentity?.signature === signature) {
+    return pendingMacConnectionIdentity.promise;
+  }
+
+  const isInitialLookup = macConnectionIdentityCache?.signature !== signature;
+  const lookupPromise = (async () => {
+    try {
+      const output = await runExecFile("log", [
+        "show",
+        "--style",
+        "compact",
+        "--last",
+        isInitialLookup ? "30d" : "30s",
+        "--predicate",
+        'process == "airportd" AND (eventMessage CONTAINS[c] "assoc" OR eventMessage CONTAINS[c] "join")',
+      ]);
+      const eventKey = parseMacWifiAssociationKey(output, ssid, bssid, device);
+      if (eventKey) {
+        macConnectionIdentityCache = {
+          signature,
+          key: eventKey,
+          lastCheckedAt: now,
+        };
+        return eventKey;
+      }
+    } catch {
+      // Unified logs may be unavailable or redact network details.
+    }
+
+    const fallbackKey =
+      macConnectionIdentityCache?.signature === signature
+        ? macConnectionIdentityCache.key
+        : `mac-signature:${signature}`;
+    macConnectionIdentityCache = {
+      signature,
+      key: fallbackKey,
+      lastCheckedAt: now,
+    };
+    return fallbackKey;
+  })();
+
+  pendingMacConnectionIdentity = {
+    signature,
+    promise: lookupPromise,
+  };
+  try {
+    return await lookupPromise;
+  } finally {
+    if (pendingMacConnectionIdentity?.promise === lookupPromise) {
+      pendingMacConnectionIdentity = undefined;
+    }
+  }
+}
 
 /**
  * Gets the primary Wi-Fi hardware port name (e.g. en0).
@@ -168,19 +290,29 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
     let sessionData: SessionDataUsage | undefined;
     if (isConnected && ssid) {
       try {
-        const netstatOutput = await runExecFile("netstat", ["-ibn"]);
+        const [netstatOutput, connectionKey] = await Promise.all([
+          runExecFile("netstat", ["-ibn"]),
+          getMacWifiConnectionKey(
+            ssid,
+            bssidMatch ? bssidMatch[1].trim() : undefined,
+            device,
+          ),
+        ]);
         const counters = parseNetstatBytes(netstatOutput, device);
         if (counters) {
           sessionData = calculateSessionUsage(
             ssid,
             counters.bytesIn,
             counters.bytesOut,
+            connectionKey,
           );
         }
       } catch {
         // Fallback if netstat fails
       }
     } else {
+      macConnectionIdentityCache = undefined;
+      pendingMacConnectionIdentity = undefined;
       clearSessionBaseline();
     }
 
@@ -193,11 +325,11 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
       signalPercent,
       ipAddress,
       sessionData,
-      internetSpeed: isConnected ? getCachedInternetSpeed() : undefined,
+      internetSpeed:
+        isConnected && ssid ? getCachedInternetSpeed(ssid) : undefined,
     };
-  } catch {
-    clearSessionBaseline();
-    return { isOn: false, isConnected: false };
+  } catch (error) {
+    throw new Error("Failed to query macOS Wi-Fi status", { cause: error });
   }
 }
 
@@ -491,8 +623,8 @@ export async function getMacWifiNetworks(): Promise<WifiNetwork[]> {
 
       return b.signalPercent - a.signalPercent || a.ssid.localeCompare(b.ssid);
     });
-  } catch {
-    return [];
+  } catch (error) {
+    throw new Error("Failed to query macOS Wi-Fi networks", { cause: error });
   }
 }
 
@@ -507,6 +639,15 @@ export async function connectMacWifi(
     args.push(password);
   }
   await runExecFile("networksetup", args);
+}
+
+export async function forgetMacWifiNetwork(ssid: string): Promise<void> {
+  const device = await getMacWifiDevice();
+  await runExecFile("networksetup", [
+    "-removepreferredwirelessnetwork",
+    device,
+    ssid,
+  ]);
 }
 
 export async function disconnectMacWifi(): Promise<void> {
@@ -632,9 +773,14 @@ export async function getMacBluetoothStatus(): Promise<BluetoothStatus> {
       btData?.controller_properties?.controller_state ||
       btData?.controller_state ||
       "";
+    if (!stateStr) {
+      throw new Error("Unable to parse Bluetooth controller state");
+    }
     return { isOn: /attrib_on|on/i.test(stateStr) };
-  } catch {
-    return { isOn: false };
+  } catch (error) {
+    throw new Error("Failed to query macOS Bluetooth status", {
+      cause: error,
+    });
   }
 }
 
@@ -733,6 +879,131 @@ export async function toggleMacBluetooth(
   );
 }
 
+const MAC_BLUETOOTH_BATTERY_CACHE_MS = 30_000;
+let macBluetoothBatteryCache:
+  { levels: Record<string, BluetoothBattery>; timestamp: number } | undefined;
+let pendingMacBluetoothBatteryLookup:
+  Promise<Record<string, BluetoothBattery>> | undefined;
+
+export function normalizeBluetoothAddress(address: string): string {
+  return address.replace(/[^0-9a-f]/gi, "").toLowerCase();
+}
+
+function findProfilerValue(
+  raw: Record<string, unknown>,
+  aliases: string[],
+): unknown {
+  const normalizedAliases = new Set(
+    aliases.map((key) => key.replace(/_/g, "").toLowerCase()),
+  );
+  const entry = Object.entries(raw).find(([key]) =>
+    normalizedAliases.has(key.replace(/_/g, "").toLowerCase()),
+  );
+  return entry?.[1];
+}
+
+export function parseMacBluetoothBatteryLevels(
+  payload: unknown,
+): Record<string, BluetoothBattery> {
+  const levels: Record<string, BluetoothBattery> = {};
+
+  const visit = (value: unknown) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+
+    const raw = value as Record<string, unknown>;
+    const addressValue = findProfilerValue(raw, [
+      "device_address",
+      "device_addr",
+      "address",
+    ]);
+    if (typeof addressValue === "string") {
+      const address = normalizeBluetoothAddress(addressValue);
+      if (address.length === 12) {
+        const battery = compactBluetoothBattery({
+          level: findProfilerValue(raw, [
+            "device_batteryLevelMain",
+            "device_batteryLevel",
+            "batteryLevelMain",
+            "batteryLevel",
+          ]),
+          left: findProfilerValue(raw, [
+            "device_batteryLevelLeft",
+            "batteryLevelLeft",
+          ]),
+          right: findProfilerValue(raw, [
+            "device_batteryLevelRight",
+            "batteryLevelRight",
+          ]),
+          case: findProfilerValue(raw, [
+            "device_batteryLevelCase",
+            "batteryLevelCase",
+          ]),
+        });
+        if (battery) levels[address] = battery;
+      }
+    }
+
+    Object.values(raw).forEach(visit);
+  };
+
+  visit(payload);
+  return levels;
+}
+
+export function attachMacBluetoothBatteryLevels(
+  devices: BluetoothDevice[],
+  levels: Record<string, BluetoothBattery>,
+): BluetoothDevice[] {
+  return devices.map((device) => {
+    if (!device.isConnected || !device.address) {
+      return { ...device, battery: undefined };
+    }
+    const battery = levels[normalizeBluetoothAddress(device.address)];
+    return battery ? { ...device, battery } : { ...device, battery: undefined };
+  });
+}
+
+function cacheMacBluetoothBatteryLevels(
+  payload: unknown,
+): Record<string, BluetoothBattery> {
+  const levels = parseMacBluetoothBatteryLevels(payload);
+  macBluetoothBatteryCache = { levels, timestamp: Date.now() };
+  return levels;
+}
+
+async function getMacBluetoothBatteryLevels(): Promise<
+  Record<string, BluetoothBattery>
+> {
+  const now = Date.now();
+  if (
+    macBluetoothBatteryCache &&
+    now - macBluetoothBatteryCache.timestamp < MAC_BLUETOOTH_BATTERY_CACHE_MS
+  ) {
+    return macBluetoothBatteryCache.levels;
+  }
+  if (pendingMacBluetoothBatteryLookup) {
+    return pendingMacBluetoothBatteryLookup;
+  }
+
+  pendingMacBluetoothBatteryLookup = runExecFile("system_profiler", [
+    "SPBluetoothDataType",
+    "-json",
+  ])
+    .then((output) => cacheMacBluetoothBatteryLevels(JSON.parse(output)))
+    .catch(() => {
+      macBluetoothBatteryCache = { levels: {}, timestamp: Date.now() };
+      return {};
+    })
+    .finally(() => {
+      pendingMacBluetoothBatteryLookup = undefined;
+    });
+  return pendingMacBluetoothBatteryLookup;
+}
+
 export async function getMacBluetoothDevices(): Promise<BluetoothDevice[]> {
   const blueutil = await getBlueutilPath();
   if (blueutil) {
@@ -743,7 +1014,7 @@ export async function getMacBluetoothDevices(): Promise<BluetoothDevice[]> {
         "json",
       ]);
       const parsed = JSON.parse(output);
-      return parsed.map(
+      const devices = parsed.map(
         (item: { address: string; name: string; connected: boolean }) => ({
           id: item.address,
           name: item.name,
@@ -752,6 +1023,10 @@ export async function getMacBluetoothDevices(): Promise<BluetoothDevice[]> {
           isConnected: item.connected,
           isPaired: true,
         }),
+      );
+      return attachMacBluetoothBatteryLevels(
+        devices,
+        await getMacBluetoothBatteryLevels(),
       );
     } catch {
       // Fallback to native
@@ -796,7 +1071,10 @@ return output`;
           isPaired: true,
         });
       }
-      return devices;
+      return attachMacBluetoothBatteryLevels(
+        devices,
+        await getMacBluetoothBatteryLevels(),
+      );
     }
   } catch {
     // Fallback to system_profiler
@@ -809,6 +1087,7 @@ return output`;
       "-json",
     ]);
     const parsed = JSON.parse(output);
+    const batteryLevels = cacheMacBluetoothBatteryLevels(parsed);
     const btData = parsed?.SPBluetoothDataType?.[0];
     const devices: BluetoothDevice[] = [];
 
@@ -850,9 +1129,11 @@ return output`;
       for (const d of btData.devices_list) processDevice(d);
     }
 
-    return devices;
-  } catch {
-    return [];
+    return attachMacBluetoothBatteryLevels(devices, batteryLevels);
+  } catch (error) {
+    throw new Error("Failed to query macOS Bluetooth devices", {
+      cause: error,
+    });
   }
 }
 
@@ -903,6 +1184,44 @@ if devList is not missing value then
       else
         d's closeConnection()
       end if
+      exit repeat
+    end if
+  end repeat
+end if
+if not found then
+  error "Bluetooth device " & normTarget & " not found."
+end if`;
+
+  await runExecFile("osascript", ["-e", script]);
+}
+
+export async function unpairMacBluetoothDevice(address: string): Promise<void> {
+  const blueutil = await getBlueutilPath();
+  if (blueutil) {
+    try {
+      await runExecFile(blueutil, ["--unpair", address]);
+      return;
+    } catch {
+      // Fallback to native
+    }
+  }
+
+  // Stock macOS native unpairing using AppleScript IOBluetooth
+  const normalizedTarget = address.replace(/[:-]/g, "").toLowerCase();
+  const script = `use framework "IOBluetooth"
+use framework "Foundation"
+use scripting additions
+
+set normTarget to "${normalizedTarget}"
+set devList to current application's IOBluetoothDevice's pairedDevices()
+set found to false
+if devList is not missing value then
+  repeat with d in (devList as list)
+    set curAddr to (d's addressString() as string)
+    set cleanAddr to do shell script "echo " & quoted form of curAddr & " | tr -d ':-' | tr '[:upper:]' '[:lower:]'"
+    if cleanAddr is equal to normTarget then
+      set found to true
+      d's removePairing()
       exit repeat
     end if
   end repeat
