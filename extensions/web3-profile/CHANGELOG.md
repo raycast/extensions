@@ -1,5 +1,10 @@
 # Rainbow Profile Changelog
 
+## [ENSv2 Support] - 2026-09-23
+
+- Resolve ENS profiles and records through the Universal Resolver
+- Support exact ENSv2 names while preserving prefix search
+
 ## [Fix] - 2022-10-07
 
 - Fixed a check that was making the Detail View crash in some rare scenarios
