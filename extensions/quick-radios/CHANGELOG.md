@@ -1,12 +1,12 @@
 ﻿# Quick Radios Changelog
 
-## [Bluetooth Battery Levels] - 2026-09-12
+## [Bluetooth Battery Levels] - {PR_MERGE_DATE}
 
 - Added OS-reported battery percentages for connected Bluetooth devices on Windows and macOS
 - Added separate left, right, and case levels for devices that expose component batteries
 - Kept unsupported and disconnected device battery values hidden
 
-## [Reliability and Session Tracking] - 2026-09-12
+## [Reliability and Session Tracking] - {PR_MERGE_DATE}
 
 - Prevented passwords and Wi-Fi QR codes from carrying over when switching networks
 - Scoped internet speed results to the connected SSID and cancelled stale tests during network changes

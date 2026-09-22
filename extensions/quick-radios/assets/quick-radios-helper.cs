@@ -996,42 +996,12 @@ class QuickRadiosHelper {
                     foreach (var device in devices.Values) {
                         bool sameContainer = !string.IsNullOrEmpty(device.ContainerId) &&
                             string.Equals(device.ContainerId, container.Id, StringComparison.OrdinalIgnoreCase);
-                        bool sameName = string.Equals(device.Name, container.Name, StringComparison.OrdinalIgnoreCase);
-                        if (sameContainer || sameName) device.BatteryLevel = batteryLevel;
+                        if (sameContainer) device.BatteryLevel = batteryLevel;
                     }
                 }
             }
 
         } catch {}
-    }
-
-    private static void ApplyContainerBattery(
-        string id,
-        string name,
-        IReadOnlyDictionary<string, object> properties,
-        Dictionary<string, DeviceEntry> devices
-    ) {
-        object batteryValue;
-        if ((!properties.TryGetValue(BluetoothBatteryLevelProperty, out batteryValue) || batteryValue == null) &&
-            (!properties.TryGetValue("System.Devices.BatteryLife", out batteryValue) || batteryValue == null)) return;
-
-        int batteryLevel;
-        try {
-            batteryLevel = Convert.ToInt32(batteryValue);
-        } catch {
-            return;
-        }
-        if (batteryLevel < 0 || batteryLevel > 100) return;
-
-        lock (devices) {
-            foreach (var device in devices.Values) {
-                bool sameContainer = !string.IsNullOrEmpty(device.ContainerId) &&
-                    string.Equals(device.ContainerId, id, StringComparison.OrdinalIgnoreCase);
-                bool sameName = !string.IsNullOrEmpty(name) &&
-                    string.Equals(device.Name, name, StringComparison.OrdinalIgnoreCase);
-                if (sameContainer || sameName) device.BatteryLevel = batteryLevel;
-            }
-        }
     }
 
     private static int GetGattBatteryLevel(ulong address) {

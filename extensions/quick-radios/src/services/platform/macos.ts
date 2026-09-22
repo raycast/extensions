@@ -124,7 +124,7 @@ async function getMacWifiConnectionKey(
     const fallbackKey =
       macConnectionIdentityCache?.signature === signature
         ? macConnectionIdentityCache.key
-        : `mac-signature:${signature}`;
+        : `mac-signature:${signature}:${now}`;
     macConnectionIdentityCache = {
       signature,
       key: fallbackKey,
