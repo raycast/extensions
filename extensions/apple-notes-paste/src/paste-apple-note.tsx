@@ -167,6 +167,7 @@ function NoteItem({
 
   return (
     <List.Item
+      id={note.id}
       icon={Icon.Clipboard}
       title={note.title || "Untitled Note"}
       accessories={[{ text: note.folder }]}
