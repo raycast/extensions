@@ -1,6 +1,6 @@
 # Codex Sessions Changelog
 
-## [Project Browser and Display Titles] - {PR_MERGE_DATE}
+## [Project Browser and Display Titles] - 2026-09-22
 
 - Add Browse Codex Sessions to navigate project folders and their threads, with project-scoped search and session counts.
 - Start a new thread in the selected project with ⌘N, or choose a folder outside session history.
