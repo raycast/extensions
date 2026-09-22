@@ -109,6 +109,13 @@ export function search<T extends object>(collection: T[], keys: string[], search
   );
 }
 
+// A URL is a destination, not a tab identity: several windows can have the
+// same URL open simultaneously. Keep the window-local index in every List ID
+// so actions always address the instance the user selected.
+export function getTabKey(tab: Tab) {
+  return `tab-${tab.window_id}-${tab.tab_index}`;
+}
+
 export function getTitle(tab: Tab) {
   let truncated = tab.title.substring(0, 75);
   if (truncated.length < tab.title.length) {

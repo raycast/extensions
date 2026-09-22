@@ -9,13 +9,18 @@ const activateTab = async (tab: Tab) =>
     const window = orion.windows.byId(${tab.window_id});
     const urls = window.tabs.url();
     const names = window.tabs.name();
-    const targetUrl = String.raw\`${tab.url}\`;
-    const targetName = String.raw\`${tab.title}\`;
-    let index = -1;
-    for (let i = 0; i < urls.length; i++) {
-      if (urls[i] === targetUrl && names[i] === targetName) {
-        index = i;
-        break;
+    const targetUrl = ${JSON.stringify(tab.url)};
+    const targetName = ${JSON.stringify(tab.title)};
+    let index = ${tab.tab_index};
+    // The index preserves duplicate URL instances. If a tab changed or closed
+    // between refresh and action, retain the previous title/URL fallback.
+    if (urls[index] !== targetUrl || names[index] !== targetName) {
+      index = -1;
+      for (let i = 0; i < urls.length; i++) {
+        if (urls[i] === targetUrl && names[i] === targetName) {
+          index = i;
+          break;
+        }
       }
     }
     if (index !== -1) {
