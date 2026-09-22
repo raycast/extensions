@@ -23,6 +23,10 @@ function isUpgradeError(error: unknown) {
   return String(error).includes(UPGRADE_SESH_MESSAGE);
 }
 
+function isSetupError(error: unknown) {
+  return error instanceof SeshNotInstalledError || error instanceof TmuxNotRunningError || isUpgradeError(error);
+}
+
 function getIcon(session: Session) {
   switch (session.Src) {
     case "tmux":
@@ -72,14 +76,14 @@ export default function ConnectCommand() {
     {
       keepPreviousData: true,
       onError: (error) => {
-        if (error instanceof SeshNotInstalledError || error instanceof TmuxNotRunningError || isUpgradeError(error)) {
+        if (isSetupError(error)) {
           return;
         }
         showFailureToast(error, { title: "Couldn't get sessions" });
       },
     },
   );
-  const sessions = data ?? [];
+  const sessions = isSetupError(error) ? [] : (data ?? []);
 
   async function connect(session: string) {
     try {
