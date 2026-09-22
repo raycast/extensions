@@ -32,9 +32,12 @@ import {
   describeYtdlpError,
   looksLikeFilePath,
   hasPlaylist,
+  isLiveStream,
   isMac,
+  isNoisyWarning,
   isValidHHMM,
   isValidUrl,
+  normalizeVideoUrl,
   parseHHMM,
   sanitizeVideoTitle,
 } from "./utils.js";
@@ -92,7 +95,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, values.url], {
+      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, normalizeVideoUrl(values.url)], {
         env: { ...globalThis.process.env, PYTHONUNBUFFERED: "1" },
       });
 
@@ -129,7 +132,7 @@ export default function DownloadVideo() {
         // failure toast — but do NOT touch toast.message here: the running toast
         // is reserved for download progress (stderr would otherwise clobber it
         // on every chunk). The exit code in `close` is the real failure verdict.
-        if (line.startsWith("WARNING:")) {
+        if (line.startsWith("WARNING:") && !isNoisyWarning(line)) {
           setWarning(line);
         }
         if (line.startsWith("ERROR:")) {
@@ -237,7 +240,13 @@ export default function DownloadVideo() {
 
       const result = await execa(
         ytdlPath,
-        [...getCommonArgs({ throttle: true }), "--no-playlist", "--dump-json", "--format-sort=res,ext,tbr", url],
+        [
+          ...getCommonArgs({ throttle: true }),
+          "--no-playlist",
+          "--dump-json",
+          "--format-sort=res,ext,tbr",
+          normalizeVideoUrl(url),
+        ],
         {
           env: {
             ...process.env,
@@ -279,7 +288,7 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     if (video) {
-      if (video.live_status !== "not_live" && video.live_status !== undefined) {
+      if (isLiveStream(video)) {
         setValidationError("url", "Live streams are not supported");
       }
     }
