@@ -229,7 +229,7 @@ export function searchSessions(rawQuery: string, opts: SearchOptions = {}): Sess
     });
     // Pinned first, archived last, otherwise the original recency order (stable sort).
     hits.sort((a, b) => b.score - a.score);
-    return hits;
+    return hits.slice(0, limit);
   }
 
   // 1. Free text via FTS (AND stage, then OR stage when thin).
