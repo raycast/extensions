@@ -7,6 +7,18 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "blindpay",
+    title: "BlindPay",
+    description:
+      "Stablecoin API for global payments. Create receivers and virtual accounts, get FX quotes, run payouts and payins across bank rails and blockchains, and read balances and transaction history. Remote Streamable HTTP server with BlindPay OAuth 2.1 sign-in through `mcp-remote`; no API key needed.",
+    icon: "https://github.com/blindpaylabs.png",
+    homepage: "https://github.com/blindpaylabs/blindpay-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.blindpay.com/mcp"],
+    },
+  },
+  {
     name: "atono",
     title: "Atono",
     description:
