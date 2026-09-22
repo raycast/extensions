@@ -1,6 +1,6 @@
 # AudioCast Control Changelog
 
-## [Import/Export Radio Stations] - {PR_MERGE_DATE}
+## [Import/Export Radio Stations] - 2026-09-22
 
 - Radios list: Export all radio stations to a JSON file in ~/Downloads (⌘S)
 - Radios list: Import radio stations from a JSON file with duplicate detection (⌘⇧I); missing titles fall back to the URL hostname
