@@ -258,20 +258,17 @@ export default function DeployService() {
                         }}
                       />
                     ))}
-                    {/* compose.readLogs requires a containerId this list doesn't collect - same reason services.tsx hides it. */}
-                    {candidate.deployType !== "compose" && (
-                      <Action.Push
-                        icon={Icon.Terminal}
-                        title="View Logs"
-                        target={
-                          <ServiceLogs
-                            service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }}
-                            token={{ url: candidate.url, headers: candidate.headers }}
-                          />
-                        }
-                        onPush={() => visitItem(candidate)}
-                      />
-                    )}
+                    <Action.Push
+                      icon={Icon.Terminal}
+                      title="View Logs"
+                      target={
+                        <ServiceLogs
+                          service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }}
+                          token={{ url: candidate.url, headers: candidate.headers }}
+                        />
+                      }
+                      onPush={() => visitItem(candidate)}
+                    />
                     <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
                   </ActionPanel>
                 }

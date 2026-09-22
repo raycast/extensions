@@ -191,10 +191,7 @@ export default function Services({
                       onAction={() => runServiceAction(url, headers, service, action, revalidate)}
                     />
                   ))}
-                  {/* compose.readLogs requires a containerId, which this screen doesn't have; leave compose out until that's picked. */}
-                  {service.type !== "compose" && (
-                    <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
-                  )}
+                  <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
                   {(service.type === "application" || service.type === "compose") && (
                     <Action.Push
                       icon={Icon.List}
