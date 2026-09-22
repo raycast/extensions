@@ -97,7 +97,9 @@ test("the import filename survives goals that leave nothing to name it after", a
     const rocket = await writeImportFile("\u{1F680}", [], dir);
     const surf = await writeImportFile("\u{1F3C4} Break", [], dir);
     const long = await writeImportFile("x".repeat(250), [], dir);
+    const again = await writeImportFile("\u{1F680}", [], dir);
     assert.equal(basename(rocket), "foqus-focus.json");
+    assert.equal(basename(again), "foqus-focus-2.json", "a repeat export never overwrites the first");
     assert.equal(basename(surf), "foqus-break.json", "a stripped emoji leaves no double dash");
     assert.ok(Buffer.byteLength(basename(long)) <= 255);
   } finally {

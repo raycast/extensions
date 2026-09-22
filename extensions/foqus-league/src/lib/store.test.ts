@@ -561,3 +561,24 @@ test("pending starts with junk beside them are read back one by one", async () =
     assert.deepEqual((await store.readState()).pending, [{ at: T1, goal: "Writing", planned: 1500 }]);
   });
 });
+
+test("a write waits for another command's lock and sweeps one left by a dead process", () =>
+  withStore(async (store, dir) => {
+    const lock = path.join(dir, "store.lock");
+    await fs.writeFile(lock, "");
+    let settled = false;
+    const waiting = store.add([at(T1)]).then((n) => {
+      settled = true;
+      return n;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    assert.equal(settled, false, "the write does not start while another process holds the lock");
+    await fs.rm(lock);
+    assert.equal(await waiting, 1);
+
+    const old = new Date(Date.now() - 60_000);
+    await fs.writeFile(lock, "");
+    await fs.utimes(lock, old, old);
+    assert.equal(await store.add([at(T2)]), 1, "a stale lock is taken over");
+    assert.equal(await exists(lock), false, "the lock is released afterwards");
+  }));

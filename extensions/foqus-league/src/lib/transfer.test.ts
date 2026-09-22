@@ -41,3 +41,16 @@ test("a file that is not an export at all is refused", () => {
 test("an export with no sessions reads as empty rather than failing", () => {
   assert.deepEqual(parseImport(serializeSessions([])), []);
 });
+
+test("imported rows obey the same limits as the session form", () => {
+  const rows = [
+    { ...SESSIONS[0], duration: 0 },
+    { ...SESSIONS[0], start: T1 + 1, duration: 12 * 60 + 1 },
+    { ...SESSIONS[0], start: T1 + 2, duration: 12 * 60 },
+    { ...SESSIONS[0], start: Date.now() + 60_000 },
+  ];
+  assert.deepEqual(
+    parseImport(JSON.stringify(rows)).map((s) => s.start),
+    [T1 + 2],
+  );
+});

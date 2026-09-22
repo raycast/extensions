@@ -81,8 +81,12 @@ export function computeStats(sessions: Session[], opts: StatsOptions): Stats {
   const sorted = [...sessions].sort((a, b) => a.start - b.start);
   const tally = tallyDays(sorted);
 
-  const todayStart = startOfDay(now).getTime();
+  const todayStart = startOfDay(now);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayEnd.getDate() + 1);
   const weekStart = startOfWeek(now, opts.weekStartsOn);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
   const lastWeekStart = new Date(weekStart);
   lastWeekStart.setDate(lastWeekStart.getDate() - 7);
 
@@ -98,8 +102,8 @@ export function computeStats(sessions: Session[], opts: StatsOptions): Stats {
     totalMinutes: sorted.reduce((total, s) => total + s.duration, 0),
     totalSessions: sorted.length,
     firstSessionAt: sorted.length ? sorted[0].start : null,
-    todayMinutes: minutesBetween(sorted, todayStart, todayStart + 86_400_000),
-    weekMinutes: minutesBetween(sorted, weekStart.getTime(), weekStart.getTime() + 7 * 86_400_000),
+    todayMinutes: minutesBetween(sorted, todayStart.getTime(), todayEnd.getTime()),
+    weekMinutes: minutesBetween(sorted, weekStart.getTime(), weekEnd.getTime()),
     lastWeekMinutes: minutesBetween(sorted, lastWeekStart.getTime(), weekStart.getTime()),
     currentStreak: streak.current,
     shieldsLeft: streak.shieldsLeft,

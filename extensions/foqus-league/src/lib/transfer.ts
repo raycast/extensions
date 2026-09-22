@@ -1,3 +1,4 @@
+import { MAX_SESSION_MINUTES } from "./log.ts";
 import { parseSession } from "./store.ts";
 import { dayKey } from "./streaks.ts";
 import type { Session } from "./types.ts";
@@ -30,8 +31,10 @@ function rowsOf(text: string): unknown[] | null {
   }
 }
 
-export function parseImport(text: string): Session[] {
+export function parseImport(text: string, now = Date.now()): Session[] {
   const rows = rowsOf(text.trim());
   if (!rows) throw new Error("Not a Foqus export");
-  return rows.map(parseSession).filter((s): s is Session => s !== null);
+  // The store keeps whatever it is given; the form and this importer are where limits apply.
+  const allowed = (s: Session) => s.duration >= 1 && s.duration <= MAX_SESSION_MINUTES && s.start <= now;
+  return rows.map(parseSession).filter((s): s is Session => s !== null && allowed(s));
 }

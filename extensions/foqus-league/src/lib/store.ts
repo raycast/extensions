@@ -92,6 +92,9 @@ const MAX_TIMESTAMP = 8.64e15;
 
 export const MAX_NOTES = 500;
 
+const LOCK_STALE_MS = 10_000;
+const LOCK_WAIT_MS = 5_000;
+
 let tmpSeq = 0;
 const scratchFor = (target: string) => `${target}.${process.pid}.${Date.now()}.${tmpSeq++}.tmp`;
 
@@ -157,12 +160,44 @@ export class LocalSessionStore implements SessionStore {
   }
 
   private lock<T>(op: () => Promise<T>): Promise<T> {
-    const run = this.queue.then(op, op);
+    const locked = () => this.withFileLock(op);
+    const run = this.queue.then(locked, locked);
     this.queue = run.then(
       () => undefined,
       () => undefined,
     );
     return run;
+  }
+
+  // Each Raycast command runs in its own process, so the in-process queue alone cannot
+  // order a menu-bar append against a view's read-then-rewrite. A lock file does.
+  // ponytail: a lock older than LOCK_STALE_MS is treated as left by a dead process and taken
+  // over; every write here finishes in milliseconds, so a live holder never gets that old.
+  private async withFileLock<T>(op: () => Promise<T>): Promise<T> {
+    await this.ensureDir();
+    const lock = this.file("store.lock");
+    const deadline = Date.now() + LOCK_WAIT_MS;
+    let handle: fs.FileHandle | undefined;
+    while (!handle) {
+      try {
+        handle = await fs.open(lock, "wx");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        const held = (await fs.stat(lock).catch(() => null))?.mtimeMs ?? 0;
+        if (Date.now() - held > LOCK_STALE_MS) {
+          await fs.rm(lock, { force: true });
+          continue;
+        }
+        if (Date.now() > deadline) throw new Error("Another Foqus command is writing sessions. Try again.");
+        await new Promise((resolve) => setTimeout(resolve, 25 + Math.random() * 50));
+      }
+    }
+    try {
+      return await op();
+    } finally {
+      await handle.close();
+      await fs.rm(lock, { force: true });
+    }
   }
 
   private file(name: string): string {

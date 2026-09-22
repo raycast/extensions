@@ -1,6 +1,7 @@
 import { writeFile, readFile } from "fs/promises";
 import { homedir } from "os";
 import * as path from "path";
+import { freePath } from "./shareImage.ts";
 
 export const CATEGORIES_PATH = path.join(
   homedir(),
@@ -86,7 +87,7 @@ export async function writeImportFile(
   stranded: { id: string; app: boolean }[],
   dir = path.join(homedir(), "Downloads"),
 ): Promise<string> {
-  const file = path.join(dir, `foqus-${slugFor(goal)}.json`);
+  const file = await freePath(dir, `foqus-${slugFor(goal)}.json`);
   const category = {
     title: categoryTitleFor(goal),
     iconName: ICON,
