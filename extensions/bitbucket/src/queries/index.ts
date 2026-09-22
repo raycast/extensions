@@ -344,9 +344,16 @@ async function listOpenPullRequestsForRepo(
   involvedUuid?: string,
 ): Promise<OpenPullRequest[]> {
   const pullRequests: OpenPullRequest[] = [];
+  const seenIds = new Set<number>();
   let page = "1";
 
-  for (;;) {
+  // Bitbucket's `page` param is an offset, not a stable cursor. On a repo with PRs
+  // opened continuously during the scan, new PRs pushed to the front shift already-seen
+  // PRs into the next page's offset window, re-returning them (or, in the worst case,
+  // never satisfying `!data.next`). Cap total pages and stop as soon as a page adds
+  // nothing new, instead of risking an unbounded loop and memory growth.
+  const MAX_PR_PAGES = 40;
+  for (let pageCount = 0; pageCount < MAX_PR_PAGES; pageCount++) {
     const { data } = await withRetry(() =>
       bitbucket.pullrequests.list({
         ...defaults,
@@ -373,11 +380,20 @@ async function listOpenPullRequestsForRepo(
       }),
     );
 
+    let newInThisPage = 0;
     for (const pr of data.values ?? []) {
       const author = pr.author as { nickname?: string; links?: { avatar?: { href?: string } } } | undefined;
       if (typeof pr.id !== "number" || typeof pr.title !== "string" || typeof author?.nickname !== "string") {
         continue;
       }
+
+      // The `page` param is an offset, not a stable cursor: a PR opened on this repo
+      // mid-scan shifts already-seen PRs into the next page's window, re-returning them.
+      if (seenIds.has(pr.id)) {
+        continue;
+      }
+      seenIds.add(pr.id);
+      newInThisPage++;
 
       pullRequests.push({
         id: pr.id,
@@ -407,7 +423,7 @@ async function listOpenPullRequestsForRepo(
       });
     }
 
-    if (!data.next) {
+    if (!data.next || newInThisPage === 0) {
       break;
     }
 
