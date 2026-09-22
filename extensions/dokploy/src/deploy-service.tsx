@@ -263,7 +263,12 @@ export default function DeployService() {
                       title="View Logs"
                       target={
                         <ServiceLogs
-                          service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }}
+                          service={{
+                            id: candidate.id,
+                            type: candidate.deployType,
+                            name: candidate.name,
+                            appName: candidate.appName,
+                          }}
                           token={{ url: candidate.url, headers: candidate.headers }}
                         />
                       }

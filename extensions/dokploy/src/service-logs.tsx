@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast
 import { useFetch, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { useToken } from "./instances";
-import { useComposeContainers } from "./compose-containers";
+import { DockerContainer, ErrorResult } from "./interfaces";
 import { parseTrpcTextResponse, trpcQueryUrl } from "./trpc";
 
 const ID_FIELDS: Record<string, string> = {
@@ -22,7 +22,7 @@ export default function ServiceLogs({
   service,
   token,
 }: {
-  service: { id: string; type: string; name: string };
+  service: { id: string; type: string; name: string; appName: string };
   /** Overrides the cached active-instance token - needed by callers (like Deploy Service) that
    * list services from more than one instance, where the service being viewed might not belong
    * to whichever instance happens to be currently active. */
@@ -32,18 +32,19 @@ export default function ServiceLogs({
   const { url, headers } = token ?? activeToken;
   const isCompose = service.type === "compose";
 
-  // "Remember container by name": which container in the stack was last picked, per compose
+  // "Remember container by name": the last-picked container's own Docker containerId, per compose
   // service - shared-cache state, same mechanism useToken()/setToken() already relies on in
   // instances.tsx, so the picker (below) updating this is visible here without prop threading.
-  const [containerName, setContainerName] = useCachedState<string>(`log-container-${service.id}`, "");
+  const [containerId, setContainerId] = useCachedState<string>(`log-container-${service.id}`, "");
+  const [containerLabel, setContainerLabel] = useCachedState<string>(`log-container-label-${service.id}`, "");
   const [following, setFollowing] = useState(false);
 
   // Compose can't read logs until a container is picked; every other kind always can.
-  const canFetch = !isCompose || Boolean(containerName);
+  const canFetch = !isCompose || Boolean(containerId);
 
   const requestUrl = trpcQueryUrl(url, isCompose ? "compose.readLogs" : `${service.type}.readLogs`, {
     [ID_FIELDS[service.type]]: service.id,
-    ...(isCompose ? { containerId: containerName } : {}),
+    ...(isCompose ? { containerId } : {}),
     tail: LOG_TAIL,
     since: "all",
   });
@@ -80,7 +81,7 @@ export default function ServiceLogs({
 
   return (
     <Detail
-      navigationTitle={`${service.name} Logs${following ? " (Following)" : ""}`}
+      navigationTitle={`${service.name}${containerLabel ? ` (${containerLabel})` : ""} Logs${following ? " (Following)" : ""}`}
       isLoading={isLoading}
       markdown={markdown}
       actions={
@@ -96,15 +97,16 @@ export default function ServiceLogs({
           {isCompose && (
             <Action.Push
               icon={Icon.Box}
-              title={containerName ? "Change Container" : "Select Container"}
+              title={containerId ? "Change Container" : "Select Container"}
               target={
                 <ContainerPicker
-                  composeId={service.id}
+                  appName={service.appName}
                   url={url}
                   headers={headers}
-                  onSelect={(name) => {
+                  onSelect={(container) => {
                     setFollowing(false);
-                    setContainerName(name);
+                    setContainerId(container.containerId);
+                    setContainerLabel(container.name);
                   }}
                 />
               }
@@ -117,50 +119,71 @@ export default function ServiceLogs({
   );
 }
 
+/**
+ * The container names `compose.loadServices` returns (used elsewhere for `serviceName` fields on
+ * domains/backups/schedules) are the *logical* docker-compose.yml service names, not real Docker
+ * container ids - `compose.readLogs` needs an actual container, which only shows up in Docker's own
+ * container list. `docker.getContainersByAppNameMatch` (appType "docker-compose") is Dokploy's own
+ * way of finding a compose stack's real containers by its generated appName.
+ */
 function ContainerPicker({
-  composeId,
+  appName,
   url,
   headers,
   onSelect,
 }: {
-  composeId: string;
+  appName: string;
   url: string;
   headers: Record<string, string>;
-  onSelect: (name: string) => void;
+  onSelect: (container: DockerContainer) => void;
 }) {
   const { pop } = useNavigation();
-  const { containers, containersLoading, containersError, retryContainers } = useComposeContainers(
-    url,
-    headers,
-    composeId,
-    true,
+  const {
+    data: containers,
+    isLoading,
+    error,
+    revalidate,
+  } = useFetch<DockerContainer[], DockerContainer[]>(
+    `${url}docker.getContainersByAppNameMatch?appType=docker-compose&appName=${encodeURIComponent(appName)}`,
+    {
+      headers,
+      initialData: [],
+      async parseResponse(response) {
+        if (!response.ok) {
+          const err = (await response.json()) as ErrorResult;
+          throw new Error(err.message);
+        }
+        return (await response.json()) as DockerContainer[];
+      },
+    },
   );
 
   return (
-    <List isLoading={containersLoading} navigationTitle="Select Container">
-      {containersError ? (
+    <List isLoading={isLoading} navigationTitle="Select Container">
+      {error ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Could Not Load Containers"
-          description={`${containersError}`}
+          description={`${error}`}
           actions={
             <ActionPanel>
-              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => retryContainers()} />
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
             </ActionPanel>
           }
         />
       ) : (
-        containers?.map((name) => (
+        containers.map((container) => (
           <List.Item
-            key={name}
+            key={container.containerId}
             icon={Icon.Box}
-            title={name}
+            title={container.name}
+            accessories={[{ tag: container.state }, { text: container.status }]}
             actions={
               <ActionPanel>
                 <Action
                   title="Select"
                   onAction={() => {
-                    onSelect(name);
+                    onSelect(container);
                     pop();
                   }}
                 />
