@@ -125,8 +125,8 @@ function getDetails(playerStatus: UsePromiseReturnType<PlayerStatus>): string {
   return playerStatus.isLoading
     ? "Loading device status…"
     : playerStatus.error
-    ? `## ${playerStatus.error.message}!`
-    : `
+      ? `## ${playerStatus.error.message}!`
+      : `
 ${getHeader(playerStatus)}
 
 ${getCoverArt(playerStatus)}
