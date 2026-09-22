@@ -203,7 +203,7 @@ export function extractTagsFromText(text: string): { title: string; tags: string
     ) {
       return part;
     }
-    return part.replace(/(?:^|[\s,]+)#([a-zA-Z0-9_\u0080-\uFFFF-]+)/g, (match, tag) => {
+    return part.replace(/(?:^|\s|,+)#([a-zA-Z0-9_\u0080-\uFFFF-]+)/g, (match, tag) => {
       if (!tags.includes(tag)) {
         tags.push(tag);
       }
@@ -214,7 +214,9 @@ export function extractTagsFromText(text: string): { title: string; tags: string
   return {
     title: processedParts
       .join("")
+      .replace(/,\s*,+/g, ",")
       .replace(/[,\s]+$/, "")
+      .replace(/^\s*[,\s]+/, "")
       .replace(/\s+/g, " ")
       .trim(),
     tags,

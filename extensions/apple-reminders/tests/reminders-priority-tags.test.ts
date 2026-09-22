@@ -99,6 +99,12 @@ describe("Tag Helpers", () => {
     assert.strictEqual(result3.title, "Buy milk");
     assert.deepStrictEqual(result3.tags, ["work", "urgent"]);
   });
+
+  it("preserves sentence punctuation when tag appears inside the title", () => {
+    const result = extractTagsFromText("Review Q1, #work and send report");
+    assert.strictEqual(result.title, "Review Q1, and send report");
+    assert.deepStrictEqual(result.tags, ["work"]);
+  });
 });
 
 describe("Reminder Creation Tool", () => {
