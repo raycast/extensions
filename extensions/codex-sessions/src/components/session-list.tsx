@@ -252,7 +252,14 @@ function SessionItem({
       id={row.id}
       title={threadTitle(row)}
       subtitle={cwdName || undefined}
-      keywords={[cwdName, row.cwd, row.git_branch || "", row.id, row.first_user_message.slice(0, 200)].filter(Boolean)}
+      keywords={[
+        cwdName,
+        row.cwd,
+        row.git_branch || "",
+        row.id,
+        row.title,
+        row.first_user_message.slice(0, 200),
+      ].filter(Boolean)}
       accessories={[stateAccessory(state), { date: new Date(row.updated_at) }, { tag: sourceLabel(row.source) }].filter(
         (accessory): accessory is NonNullable<typeof accessory> => accessory !== undefined,
       )}
