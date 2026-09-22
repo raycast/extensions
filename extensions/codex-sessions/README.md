@@ -19,9 +19,9 @@ Session lists enrich SQLite session metadata with lightweight `Working` and `Don
 
 Browse project folders, then open a folder to see its sessions. These screenshots use sample data.
 
-![Project folders](screenshots/projects.jpg)
+![Project folders](metadata/codex-sessions-1.png)
 
-![Sessions in a project](screenshots/sessions.jpg)
+![Sessions in a project](metadata/codex-sessions-2.png)
 
 ## Setup
 
