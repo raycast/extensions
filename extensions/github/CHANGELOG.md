@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [My Packages] - {PR_MERGE_DATE}
+
+- Add **My Packages** and **My Packages Menu Bar** to browse the packages you published to GitHub Packages.
+
 ## [Fix Star Action Icon] - 2026-09-09
 
 - Search Repositories: Fix the broken Star action icon
