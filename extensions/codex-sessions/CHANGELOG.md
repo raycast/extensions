@@ -4,9 +4,9 @@
 
 - Add Browse Codex Sessions to navigate project folders and their threads, with project-scoped search and session counts.
 - Start a new thread in the selected project with ⌘N, or choose a folder outside session history.
-- Replace Open Codex Project with Browse Codex Sessions; reassign existing hotkeys and aliases to the new command. Project folders use recent session activity instead of frecency; reopen-by-git-remote is no longer available.
+- Rename Open Codex Project to Browse Codex Sessions while preserving existing hotkeys and aliases. Project folders use recent session activity instead of frecency; reopen-by-git-remote is no longer available.
 - Preserve Search Codex Sessions for searching across all projects.
-- Display and search Codex's saved thread names instead of the original prompt, with fallback support for older databases.
+- Display and search Codex's saved thread names, keep original titles searchable, and support older databases.
 
 ## [Initial Version] - 2026-09-07
 

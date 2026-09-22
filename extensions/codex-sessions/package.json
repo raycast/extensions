@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "browse-sessions",
+      "name": "open-project",
       "title": "Browse Codex Sessions",
       "mode": "view",
       "description": "Browse project folders and drill into their local Codex sessions"

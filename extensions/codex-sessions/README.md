@@ -11,7 +11,7 @@ In Browse Codex Sessions, press **⌘N** on a folder or inside its session list 
 
 To start in a folder that has no session history, use **Choose Another Folder…** in Browse Codex Sessions. The folder picker remains available when the state database cannot be loaded.
 
-**Migrating from Open Codex Project:** use **Browse Codex Sessions** instead. Press Enter to browse a project's threads, or **⌘N** to start a new thread there. Reassign any Raycast hotkey or alias previously attached to Open Codex Project to Browse Codex Sessions. Project folders are now sorted by recent session activity; the old frecency ranking and reopen-by-git-remote action are no longer available. Session history remains browsable for folders that have been moved or deleted.
+**Upgrading from Open Codex Project:** the command is now called **Browse Codex Sessions**, and existing hotkeys and aliases are preserved. Press Enter to browse a project's threads, or **⌘N** to start a new thread there. Project folders are now sorted by recent session activity; the old frecency ranking and reopen-by-git-remote action are no longer available. Session history remains browsable for folders that have been moved or deleted.
 
 Session lists enrich SQLite session metadata with lightweight `Working` and `Done · Unread` state written by Codex hooks. The hook has no notification UI of its own.
 
