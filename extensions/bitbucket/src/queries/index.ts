@@ -442,35 +442,41 @@ async function scanOpenPullRequests(
   const queue = new RepoQueue();
 
   const feedRepos = async () => {
-    const cached = await getCachedRepositories();
-    if (cached) {
-      for (const repo of cached) {
-        queue.push(repo);
-      }
-      queue.close();
-      return;
-    }
-
-    const fetched: RepoWithSlug[] = [];
-    const seenSlugs = new Set<string>();
-    for await (const page of iterateAllRepositories()) {
-      for (const repo of page) {
-        // Sorting by -updated_on while paginating a live, actively-pushed workspace can
-        // shift a repo's rank between page fetches, causing it to reappear on a later
-        // page. De-dupe by slug so its PRs aren't fetched (and shown) twice.
-        if (seenSlugs.has(repo.slug)) {
-          continue;
-        }
-        seenSlugs.add(repo.slug);
-        fetched.push(repo);
-        queue.push(repo);
-      }
-    }
-    queue.close();
+    // Preference reads (e.g. an invalid maxRepoAgeDays) or a repo-listing API call can
+    // throw before every repo is queued — queue.close() must still run so the worker
+    // pool's `queue.next()` calls settle instead of hanging until the process exits.
     try {
-      await setCachedRepositories(fetched);
-    } catch (error) {
-      console.error("[bitbucket] Failed to persist repository list cache:", error);
+      const cached = await getCachedRepositories();
+      if (cached) {
+        for (const repo of cached) {
+          queue.push(repo);
+        }
+        return;
+      }
+
+      const fetched: RepoWithSlug[] = [];
+      const seenSlugs = new Set<string>();
+      for await (const page of iterateAllRepositories()) {
+        for (const repo of page) {
+          // Sorting by -updated_on while paginating a live, actively-pushed workspace can
+          // shift a repo's rank between page fetches, causing it to reappear on a later
+          // page. De-dupe by slug so its PRs aren't fetched (and shown) twice.
+          if (seenSlugs.has(repo.slug)) {
+            continue;
+          }
+          seenSlugs.add(repo.slug);
+          fetched.push(repo);
+          queue.push(repo);
+        }
+      }
+
+      try {
+        await setCachedRepositories(fetched);
+      } catch (error) {
+        console.error("[bitbucket] Failed to persist repository list cache:", error);
+      }
+    } finally {
+      queue.close();
     }
   };
 
