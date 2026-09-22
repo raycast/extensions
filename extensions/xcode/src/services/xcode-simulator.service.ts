@@ -25,49 +25,18 @@ const RECENT_SIMULATOR_KEY_PREFIX = "xcode_recent_simulator_";
  */
 export class XcodeSimulatorService {
   /**
-   * Cached boolean for devicectl availability
-   */
-  private static _isDevicectlAvailable: boolean | undefined;
-
-  /**
-   * Check if `devicectl` is available (Xcode 27+ / Device Hub).
-   * Uses a cached value to avoid repeated checks.
-   */
-  static async isDevicectlAvailable(): Promise<boolean> {
-    if (this._isDevicectlAvailable !== undefined) {
-      return this._isDevicectlAvailable;
-    }
-    try {
-      await execAsync("xcrun devicectl --version");
-      this._isDevicectlAvailable = true;
-    } catch {
-      this._isDevicectlAvailable = false;
-    }
-    return this._isDevicectlAvailable;
-  }
-
-  /**
    * Launches the simulator GUI application.
-   * On Xcode 27+, tries to open Device Hub first, then falls back to Simulator.app.
+   * Xcode 27+ replaced Simulator.app with Device Hub, so try that first
+   * and fall back to Simulator.app on older Xcode versions.
    */
   static async launchSimulatorApplication(): Promise<void> {
-    const isDevicectl = await XcodeSimulatorService.isDevicectlAvailable();
-    if (isDevicectl) {
-      try {
-        // Device Hub (Xcode 27+) — try by bundle id, fall back to app name
-        await execAsync(`open -b "com.apple.dt.DeviceHub"`);
-        return;
-      } catch {
-        try {
-          await execAsync(`open -a "Device Hub"`);
-          return;
-        } catch {
-          // Fall through to legacy Simulator.app
-        }
-      }
+    try {
+      // Device Hub (Xcode 27+)
+      await execAsync(`open -b "com.apple.dt.Devices"`);
+    } catch {
+      // Simulator.app (Xcode 26 and earlier)
+      await execAsync(`open -b "com.apple.iphonesimulator"`);
     }
-    // Legacy: open Simulator.app (pre-Xcode 27)
-    return execAsync(`open -b "com.apple.iphonesimulator"`).then();
   }
 
   /**
@@ -376,30 +345,10 @@ export class XcodeSimulatorService {
 
   /**
    * Toggle the appearance (Dark/Light mode) of a booted Xcode Simulator.
-   * Uses `devicectl` on Xcode 27+ (Device Hub), falls back to `simctl` on older versions.
    * @param xcodeSimulator The booted Xcode Simulator
    * @returns The new appearance ("dark" or "light")
    */
   static async toggleAppearance(xcodeSimulator: XcodeSimulator): Promise<"dark" | "light"> {
-    const isDevicectl = await XcodeSimulatorService.isDevicectlAvailable();
-
-    if (isDevicectl) {
-      try {
-        // devicectl doesn't have a "get current appearance" command,
-        // so we toggle by trying to set dark, then light if already dark.
-        // Use simctl to read current state, then devicectl to set.
-        const { stdout } = await execAsync(`xcrun simctl ui ${xcodeSimulator.udid} appearance`);
-        const currentIsDark = stdout.trim().toLowerCase().includes("dark");
-        const newMode = currentIsDark ? "light" : "dark";
-        await execAsync(`xcrun devicectl device settings appearance --device ${xcodeSimulator.udid} --mode ${newMode}`);
-        await XcodeSimulatorService.trackSimulatorUsage(xcodeSimulator.udid);
-        return newMode;
-      } catch {
-        // Fallback to simctl if devicectl fails
-      }
-    }
-
-    // Legacy: simctl only
     const { stdout } = await execAsync(`xcrun simctl ui ${xcodeSimulator.udid} appearance`);
     const currentIsDark = stdout.trim().toLowerCase().includes("dark");
     const newMode = currentIsDark ? "light" : "dark";

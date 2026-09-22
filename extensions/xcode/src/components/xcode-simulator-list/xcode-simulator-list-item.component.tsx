@@ -1,5 +1,5 @@
 import { XcodeSimulator } from "../../models/xcode-simulator/xcode-simulator.model";
-import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
 import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
@@ -109,16 +109,10 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                     "Please wait",
                     `Appearance switched on ${props.simulator.name}`,
                     `Failed to switch appearance on ${props.simulator.name}`,
-                    async () => {
-                      const newMode = await XcodeSimulatorService.toggleAppearance(props.simulator);
-                      return newMode;
-                    }
-                  ).then(({ isSuccess, result }) => {
+                    () => XcodeSimulatorService.toggleAppearance(props.simulator)
+                  ).then(({ isSuccess, result, toast }) => {
                     if (isSuccess && result) {
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: `Switched to ${result.toUpperCase()} mode`,
-                      });
+                      toast.title = `Switched to ${result} mode on ${props.simulator.name}`;
                     }
                   })
                 }

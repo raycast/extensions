@@ -7,6 +7,12 @@ import { useState, useMemo } from "react";
 import { XcodeSimulatorStateFilter } from "../../models/xcode-simulator/xcode-simulator-state-filter.model";
 import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
 
+/**
+ * Maximum number of simulators shown in the "Recently Used" section.
+ * Keeps the section short instead of gradually mirroring "All Simulators".
+ */
+const MAX_RECENTLY_USED_SIMULATORS = 5;
+
 export function XcodeSimulatorList() {
   const [simulatorStateFilter, setSimulatorStateFilter] = useState<XcodeSimulatorStateFilter>(
     XcodeSimulatorStateFilter.all
@@ -22,19 +28,20 @@ export function XcodeSimulatorList() {
     return xcodeSimulatorGroups.data?.flatMap((group) => group.simulators) ?? [];
   }, [xcodeSimulatorGroups.data]);
 
-  // Split into booted and non-booted
+  // Split into booted, recently used (capped) and the rest
   const { bootedSimulators, recentlyUsedSimulators, otherSimulators } = useMemo(() => {
     const booted = allSimulators.filter((sim) => sim.state === XcodeSimulatorState.booted);
-    const usedButNotBooted = allSimulators
-      .filter((sim) => sim.state !== XcodeSimulatorState.booted && sim.lastUsed && sim.lastUsed > 0)
-      .sort((a, b) => (b.lastUsed ?? 0) - (a.lastUsed ?? 0));
-    const others = allSimulators.filter(
-      (sim) => sim.state !== XcodeSimulatorState.booted && (!sim.lastUsed || sim.lastUsed === 0)
-    );
+    const notBooted = allSimulators.filter((sim) => sim.state !== XcodeSimulatorState.booted);
+    const recentlyUsed = notBooted
+      .filter((sim) => (sim.lastUsed ?? 0) > 0)
+      .sort((a, b) => (b.lastUsed ?? 0) - (a.lastUsed ?? 0))
+      .slice(0, MAX_RECENTLY_USED_SIMULATORS);
+    const recentlyUsedUdids = new Set(recentlyUsed.map((sim) => sim.udid));
+    const others = notBooted.filter((sim) => !recentlyUsedUdids.has(sim.udid));
 
     return {
       bootedSimulators: booted,
-      recentlyUsedSimulators: usedButNotBooted,
+      recentlyUsedSimulators: recentlyUsed,
       otherSimulators: others,
     };
   }, [allSimulators]);
