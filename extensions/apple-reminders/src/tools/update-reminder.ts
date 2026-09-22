@@ -1,7 +1,8 @@
-import { Tool } from "@raycast/api";
+import type { Tool } from "@raycast/api";
 import { updateReminder } from "swift:../../swift/AppleReminders";
 
-import { Frequency } from "../create-reminder";
+import type { Frequency } from "../create-reminder";
+import { parseTags } from "../helpers";
 
 type Input = {
   /**
@@ -24,6 +25,10 @@ type Input = {
    * The new priority of the reminder.
    */
   priority?: "high" | "medium" | "low";
+  /**
+   * The new tags for the reminder. A comma-separated or space-separated list of tags (e.g. "work, urgent" or "#work #urgent").
+   */
+  tags?: string;
   /**
    * Whether the reminder is completed.
    */
@@ -70,6 +75,11 @@ export default async function (input: Input) {
     input.dueDate = new Date(input.dueDate).toISOString();
   }
 
-  const reminder = await updateReminder(input);
+  const payload = {
+    ...input,
+    tags: input.tags ? parseTags(input.tags) : undefined,
+  };
+
+  const reminder = await updateReminder(payload);
   return reminder;
 }
