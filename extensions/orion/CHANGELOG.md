@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-23
 
 - Fix a Top Hit race with fast typing: `useSQL` intentionally keeps its previous history result set visible while a new query runs, but that stale result set could still be scored for Top Hit against the query text currently in the search bar. Track the history query that actually completed and exclude stale history results from Top Hit ranking until the matching result arrives, while still keeping them visible in the History section to avoid unnecessary list reflow.
 
