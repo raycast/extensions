@@ -1,5 +1,12 @@
 # System Monitor Changelog
 
+## [Optional AI Usage] - 2026-09-23
+
+- Add an optional AI Usage tab for Codex and Claude quota windows
+- Keep Codex, Claude, and Spark visibility independently configurable, with Spark hidden by default
+- Collect AI usage only while the AI Usage tab is active
+- Add system uptime to System Info
+
 ## [Menu Bar Process Safety] - 2026-09-21
 
 - Keep background refreshes process-free by collecting CPU and storage without external programs

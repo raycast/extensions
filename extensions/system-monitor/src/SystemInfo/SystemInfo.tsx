@@ -5,6 +5,7 @@ import os from "node:os";
 import { Actions } from "../components/Actions";
 import { MetadataLabel, MetadataSection } from "../components/MetadataLabel";
 import { calculateDiskStorage, getHardwareInfo, getOSInfo, getRootVolumeDetails } from "./SystemUtils";
+import { formatUptime } from "../lib/uptime";
 
 const { displayModeDisk } = getPreferenceValues<ExtensionPreferences>();
 
@@ -34,6 +35,7 @@ function SystemInfoDetail() {
       osInfo,
       storage,
       rootVolume,
+      uptimeSeconds: os.uptime(),
     };
   });
 
@@ -44,6 +46,7 @@ function SystemInfoDetail() {
         <List.Item.Detail.Metadata>
           <MetadataSection title="Software" />
           <MetadataLabel title="macOS" text={data?.osInfo.display ?? "-"} />
+          <MetadataLabel title="Uptime" text={data ? formatUptime(data.uptimeSeconds) : "-"} />
           <List.Item.Detail.Metadata.Separator />
           <MetadataSection title="Hardware Specifications" />
           <MetadataLabel title="Hostname" text={os.hostname().replace(/\.(local|lan)$/, "")} />
