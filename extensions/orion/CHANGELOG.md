@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-23
 
 - Fix typed web address detection recognizing a bare public suffix (e.g. `goog`, `abc`, `app`, `dev`, `github.io`, `co.uk`) as an address. Several brand-owned gTLDs are themselves ordinary words or common file extensions, so a one-word search query could land exactly on a real ICANN or private suffix with no domain label in front of it. Require an actual domain (a label plus the suffix, e.g. `goog.com`) before accepting a bare host as an address; an explicit `http://`/`https://` scheme is unaffected.
 
