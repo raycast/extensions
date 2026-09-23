@@ -11,9 +11,10 @@ export interface ChangelogVersion {
 // The date after a heading's title, which is optional and lenient on purpose. A random 250
 // of the monorepo's changelogs (2026-09-22, 868 headings, every one parsed to a row) had
 // headings with no date (`## [Maintenance]`), single-digit days (`2023-11-5`), parenthesised
-// dates (`(2022-03-19)`) and misspelled placeholders (`{PR_MREGE_DATE}`). A stricter pattern
+// dates (`(2022-03-19)`) and misspelled placeholders (`{PR_MREGE_DATE}`); an en or em dash is
+// accepted as the separator too. A stricter pattern
 // either drops those sections, bullets included, or leaves the date glued to the title.
-const TRAILING_DATE = /\s+-\s+\(?(\{[A-Z_]+\}|\d{4}-\d{1,2}-\d{1,2})\)?$/;
+const TRAILING_DATE = /\s+[-–—]\s+\(?(\{[A-Z_]+\}|\d{4}-\d{1,2}-\d{1,2})\)?$/;
 
 /**
  * A heading's `YYYY-M-D` as local midnight, or undefined if it is not a real date.

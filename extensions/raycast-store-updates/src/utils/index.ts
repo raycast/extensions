@@ -1,5 +1,6 @@
 import { Feed, FeedItem, GitHubPR, GitHubPRFile, StoreItem } from "../types";
-import { Cache, Color, environment, getPreferenceValues, Icon, Image } from "@raycast/api";
+import { Cache, Color, environment, getPreferenceValues, Icon, Image, launchCommand, LaunchType } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -298,12 +299,22 @@ export function createStoreDeeplink(url: string): string {
 }
 
 /**
- * Deeplink to Raycast's built-in "Check for Extension Updates" command, which
- * updates installed Store extensions. This complements the list: the extension
- * SHOWS what changed upstream, but updating is Raycast's own job.
+ * Opens Raycast's built-in "Check for Extension Updates" command.
+ *
+ * Through launchCommand, not a `raycast://` deeplink — the Store's review rule for launching
+ * commands, since a typed call cannot drift the way a hand-built route can.
  */
-export function checkForUpdatesDeeplink(): string {
-  return `${raycastScheme()}://extensions/raycast/raycast/check-for-extension-updates`;
+export async function checkForExtensionUpdates(): Promise<void> {
+  try {
+    await launchCommand({
+      ownerOrAuthorName: "raycast",
+      extensionName: "raycast",
+      name: "check-for-extension-updates",
+      type: LaunchType.UserInitiated,
+    });
+  } catch (error) {
+    await showError(error, { title: "Couldn't Open Check for Extension Updates" });
+  }
 }
 
 /**
@@ -690,6 +701,11 @@ export async function convertPRsToStoreItems(
     // classifies as removals are not (a survey of merged "Remove…" PRs, 2026-09-22, was
     // dominated by "Remove outdated screenshots from … README", "Remove contributor …"),
     // and for those the extension simply answers 200 and is dropped, at no cost.
+    //
+    // A label set is complete, not a sample: Raycast's PR bot (scripts/bots/pr-bot.ts in
+    // raycast/extensions) returns before adding any `extension:` label when a PR touches more
+    // than one extension. So a labelled PR touches exactly one, and a multi-extension removal
+    // arrives unlabelled and takes the /files path below, which finds every slug.
     //
     // Only an unlabelled PR — e.g. a staff bulk removal like "Removed two extensions" —
     // falls back to /files, which requires every file under extensions/<slug>/ on the

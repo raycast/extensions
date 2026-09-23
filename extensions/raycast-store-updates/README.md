@@ -63,9 +63,9 @@ To keep an eye on things passively, enable **Store Updates Menu Bar** — it ref
 | Action | Shortcut | Description |
 | --- | --- | --- |
 | View Changelog | <kbd>⏎</kbd> | Read the extension's changelog inside Raycast |
-| Open in Raycast Store | `Common.Duplicate` | Deep-link straight to the Store page in Raycast |
+| Open in Raycast Store | <kbd>⌥</kbd><kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> | Deep-link straight to the Store page in Raycast |
 | Open in Browser | `Common.Open` | Open the Store listing on the web |
-| Copy Recent Changes | `Common.Copy` | Copy only the latest release's changelog entry |
+| Copy Latest Changes | `Common.Copy` | Copy only the latest release's changelog entry |
 | Copy Extension URL | `Common.CopyName` | Copy the Store URL |
 | Open Changelog in Browser | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>L</kbd> | Open `CHANGELOG.md` on GitHub |
 | Refresh | `Common.Refresh` | Re-fetch the list |

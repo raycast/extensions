@@ -5,7 +5,7 @@ import {
   CATEGORY_COLORS,
   categoryIcon,
   changelogUrl,
-  checkForUpdatesDeeplink,
+  checkForExtensionUpdates,
   createStoreDeeplink,
   extractLatestChanges,
   MACOS_TINT_COLOR,
@@ -155,11 +155,11 @@ export function ExtensionActions({
         {/* Refresh reloads THIS list; this updates the user's installed extensions —
             Raycast's own job, which this command only reports on. ⌘⇧U is free: no
             Common constant binds it, and the panel's hand-written combos use
-            o/c/l/d/r/m/w/f/a/z. */}
-        <Action.Open
+            o/c/l/r/m/w/f/a/z. */}
+        <Action
           title="Check for Extension Updates"
           icon={Icon.Download}
-          target={checkForUpdatesDeeplink()}
+          onAction={checkForExtensionUpdates}
           shortcut={{
             macOS: { modifiers: ["cmd", "shift"], key: "u" },
             Windows: { modifiers: ["ctrl", "shift"], key: "u" },

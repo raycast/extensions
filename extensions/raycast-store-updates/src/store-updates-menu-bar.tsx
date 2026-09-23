@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { StoreItem } from "./types";
 import {
   changelogUrl,
-  checkForUpdatesDeeplink,
+  checkForExtensionUpdates,
   createStoreDeeplink,
   extensionIconImage,
   fetchInstalledExtensionSlugs,
@@ -169,7 +169,13 @@ export default function Command() {
       {/* An untitled Section draws its own divider above itself, which is what the
           deprecated MenuBarExtra.Separator did here. */}
       <MenuBarExtra.Section>
-        {count > 0 && <MenuBarExtra.Item title="Mark All as Seen" icon={Icon.CheckCircle} onAction={markAllSeen} />}
+        {/* Not while My Updates is still resolving: until then the menu shows every item,
+            and marking those seen would advance the watermark past installed updates the
+            scoped list never showed. (Once the lookup settles to null, the full list IS
+            the scope, so the action returns.) */}
+        {count > 0 && (scope !== "my-updates" || installed !== undefined) && (
+          <MenuBarExtra.Item title="Mark All as Seen" icon={Icon.CheckCircle} onAction={markAllSeen} />
+        )}
         <MenuBarExtra.Item
           title="View Store Updates"
           icon={Icon.AppWindowGrid3x3}
@@ -180,7 +186,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Check for Extension Updates"
           icon={Icon.Download}
-          onAction={() => open(checkForUpdatesDeeplink())}
+          onAction={checkForExtensionUpdates}
         />
         <MenuBarExtra.Item
           title="Refresh"
