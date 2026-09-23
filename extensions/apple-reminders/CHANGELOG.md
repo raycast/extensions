@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Create Reminder from Current Tab] - {PR_MERGE_DATE}
+## [Create Reminder from Current Tab] - 2026-09-23
 
 - Add "Create Reminder from Current Tab" command to create reminders directly from the active browser tab.
 - Attach native URL link to created reminders for 1-click opening in Apple Reminders.
