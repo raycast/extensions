@@ -2,6 +2,10 @@
 
 ## [Command Bar] - 2026-09-23
 
+- Fix a Top Hit race with fast typing: `useSQL` intentionally keeps its previous history result set visible while a new query runs, but that stale result set could still be scored for Top Hit against the query text currently in the search bar. Track the history query that actually completed and exclude stale history results from Top Hit ranking until the matching result arrives, while still keeping them visible in the History section to avoid unnecessary list reflow.
+
+## [Command Bar] - 2026-09-23
+
 - Fix typed web address detection: a bare number like `1` was misrecognized as an address (Node's URL parser coerces it to an IPv4-looking hostname), a non-canonical IPv4 octet like `192.168.001.1` was accepted as valid, and bracketed IPv6 literals were not recognized at all. Also trust an explicit `http://`/`https://` scheme for single-label hosts (e.g. an internal hostname with no public TLD) instead of requiring it to pass Public Suffix List validation.
 
 ## [Tabs] - 2026-09-22
