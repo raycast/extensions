@@ -1,6 +1,6 @@
 # X Changelog
 
-## [Fix Long Post Reading] - {PR_MERGE_DATE}
+## [Fix Long Post Reading] - 2026-09-23
 
 - Read full long posts in commands and AI tools instead of shortened previews
 - Find matches beyond the preview in personal-history and bookmark searches
