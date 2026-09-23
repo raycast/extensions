@@ -3,7 +3,7 @@ import { Icon } from "@raycast/api";
 import { useLocalStorage } from "./useLocalStorage";
 
 export type CreateReminderFieldId =
-  "title" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "tags" | "location";
+  "title" | "url" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "tags" | "location";
 
 export type CreateReminderFieldDefinition = {
   id: CreateReminderFieldId;
@@ -36,6 +36,12 @@ export const createReminderFieldDefinitions: CreateReminderFieldDefinition[] = [
     description: "Reminder title. This field is required.",
     icon: Icon.Text,
     required: true,
+  },
+  {
+    id: "url",
+    title: "URL",
+    description: "URL or web link attached to the reminder.",
+    icon: Icon.Link,
   },
   {
     id: "notes",
@@ -128,6 +134,7 @@ function isStoredFieldItem(value: unknown): value is CreateReminderFormFieldItem
 
 export const defaultCreateReminderFormLayout: CreateReminderFormLayoutItem[] = [
   { type: "field", id: "title", enabled: true },
+  { type: "field", id: "url", enabled: true },
   { type: "field", id: "notes", enabled: true },
   createSeparatorItem(),
   { type: "field", id: "dueDate", enabled: true },

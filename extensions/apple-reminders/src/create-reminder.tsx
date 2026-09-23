@@ -190,6 +190,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       }
 
       setValue("title", "");
+      setValue("url", "");
       setValue("notes", "");
       setValue("tags", "");
       setValue("location", "");
@@ -318,6 +319,16 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     switch (fieldId) {
       case "title":
         return [<Form.TextField key="title" {...itemProps.title} title="Title" placeholder="New Reminder" />];
+      case "url":
+        return [
+          <Form.TextField
+            key="url"
+            {...itemProps.url}
+            title="URL"
+            placeholder="https://..."
+            info="URL link attached directly to the reminder in Apple Reminders."
+          />,
+        ];
       case "list":
         return [
           <Form.Dropdown key="listId" {...itemProps.listId} title="List" storeValue>
