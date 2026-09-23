@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Quiet automatic rate-limit retries] - {PR_MERGE_DATE}
+## [Quiet automatic rate-limit retries] - 2026-09-23
 
 - Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
 
