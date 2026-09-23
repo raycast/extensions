@@ -10,7 +10,11 @@ import {
   getPreferenceValues,
   openCommandPreferences,
 } from "@raycast/api";
-import { getProgressIcon, useCachedPromise } from "@raycast/utils";
+import {
+  getProgressIcon,
+  showFailureToast,
+  useCachedPromise,
+} from "@raycast/utils";
 import { fetchMenuRecords } from "./notifications";
 import { confidenceColor, statusIcon } from "./status";
 import {
@@ -245,17 +249,35 @@ export default function Command() {
           title="View Reset Details"
           icon={Icon.Document}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
-          onAction={() =>
-            launchCommand({ name: "latest", type: LaunchType.UserInitiated })
-          }
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "latest",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (error) {
+              await showFailureToast(error, {
+                title: "Failed to open reset details",
+              });
+            }
+          }}
         />
         <MenuBarExtra.Item
           title="Browse Reset History"
           icon={Icon.List}
           shortcut={{ modifiers: ["cmd"], key: "h" }}
-          onAction={() =>
-            launchCommand({ name: "history", type: LaunchType.UserInitiated })
-          }
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "history",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (error) {
+              await showFailureToast(error, {
+                title: "Failed to open reset history",
+              });
+            }
+          }}
         />
         {record?.source?.url && (
           <MenuBarExtra.Item
