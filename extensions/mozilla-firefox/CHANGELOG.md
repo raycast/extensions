@@ -3,8 +3,7 @@
 ## [Edit URL in Search Bar] - {PR_MERGE_DATE}
 
 - Shift+Enter copies a result URL into the search bar (New Tab, Search History, and Search Bookmarks) so it can be edited before opening
-- Open in New Window is the secondary action on Windows (Ctrl+Enter)
-- Pasting a URL into the search bar opens that URL instead of searching for it
+- Pasting or typing a URL in the search bar labels the first item Open URL instead of a search query (Enter still opens it)
 
 ## [Windows Launch Fixes] - 2026-09-21
 

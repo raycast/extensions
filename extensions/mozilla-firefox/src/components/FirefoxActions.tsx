@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { buildNewTabUrl, looksLikeUrl, openHistoryTab, openInNewWindow, openNewTab } from "../actions";
+import { buildNewTabUrl, newTabTitle, openHistoryTab, openInNewWindow, openNewTab } from "../actions";
 import { HistoryEntry } from "../interfaces";
 
 function OpenInNewWindowAction({ url }: { url?: string }) {
@@ -20,10 +20,10 @@ function EditUrlAction({ url, onEditUrl }: { url?: string; onEditUrl?: (url: str
 }
 
 export function NewTabAction({ query }: { query?: string }) {
-  const title = !query ? "Open Empty Tab" : looksLikeUrl(query) ? "Open URL" : `Search "${query}"`;
+  const title = newTabTitle(query);
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item onAction={() => openNewTab(query)} title={title} />
+      <Action onAction={() => openNewTab(query)} title={title} />
       <OpenInNewWindowAction url={buildNewTabUrl(query)} />
     </ActionPanel>
   );
@@ -48,5 +48,5 @@ export function HistoryItemAction({
 }
 
 function MozillaFirefoxHistoryTab({ url }: { url: string }) {
-  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={() => openHistoryTab(url)} />;
+  return <Action title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={() => openHistoryTab(url)} />;
 }
