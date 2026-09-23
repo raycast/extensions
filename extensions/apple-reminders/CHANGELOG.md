@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Default list for Quick Add] - {PR_MERGE_DATE}
+## [Default list for Quick Add] - 2026-09-23
 
 - Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.
 
