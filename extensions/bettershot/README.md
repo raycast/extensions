@@ -46,6 +46,6 @@ npm run lint
 
 Tests cover all seven command-to-URL mappings, awaiting window closure, and launch failures. They mock the Raycast API; final capture testing must happen inside Raycast.
 
-Built against `@raycast/api` 2.4.1 using the [Raycast API documentation](https://developers.raycast.com). Dependencies are pinned by `package-lock.json`. `npm run build` writes bundles into `dist/`; import the extension folder, not an individual bundle.
+Built against `@raycast/api` 2.2.1 (pinned for compatibility with released Raycast clients) using the [Raycast API documentation](https://developers.raycast.com). Dependencies are pinned by `package-lock.json`. `npm run build` writes bundles into `dist/`; import the extension folder, not an individual bundle.
 
 This is an independent integration, not an official BetterShot extension. The Raycast author is `andyli_lfs898`. The official BetterShot app icon is included with upstream attribution in `THIRD_PARTY_NOTICES.md`; the extension code is MIT-licensed.
