@@ -1,5 +1,6 @@
 import { processStart } from "../analysis/notify";
 import { THRESHOLDS } from "../analysis/thresholds";
+import { Lock, noLock } from "./lock";
 import { Sample, Snapshot } from "../types";
 
 export type KeyValueStorage = {
@@ -91,26 +92,23 @@ export async function loadHistory(storage: KeyValueStorage, now: number): Promis
   }
 }
 
-/** Both lists, one sample per time: a sample that two runs both wrote counts once. */
+/**
+ * Appends a sample under the lock, so two runs of the menu bar at once (its timer and a menu open)
+ * cannot both read the old history and have the later write drop the other's sample.
+ */
+export async function appendSample(storage: KeyValueStorage, sample: Sample, lock: Lock = noLock): Promise<Sample[]> {
+  return lock(async () => {
+    const history = prune([...(await loadHistory(storage, sample.t)), sample], sample.t);
+    await storage.setItem(HISTORY_KEY, JSON.stringify(history));
+    return history;
+  });
+}
+
+/** Both lists, one sample per time: a sample in both counts once. */
 function merge(a: Sample[], b: Sample[]): Sample[] {
   const byTime = new Map<number, Sample>();
   for (const s of [...a, ...b]) byTime.set(s.t, s);
   return [...byTime.values()];
-}
-
-/**
- * Appends a sample. LocalStorage has no lock, and the menu bar can run twice at once (its timer and a
- * menu open), so a run that wrote in between could drop this sample: the write is read back, and if
- * another run replaced it, the two lists are merged and written once more.
- */
-export async function appendSample(storage: KeyValueStorage, sample: Sample): Promise<Sample[]> {
-  const history = prune([...(await loadHistory(storage, sample.t)), sample], sample.t);
-  await storage.setItem(HISTORY_KEY, JSON.stringify(history));
-  const stored = await loadHistory(storage, sample.t);
-  if (stored.some((s) => s.t === sample.t)) return stored;
-  const merged = prune(merge(stored, history), sample.t);
-  await storage.setItem(HISTORY_KEY, JSON.stringify(merged));
-  return merged;
 }
 
 /**

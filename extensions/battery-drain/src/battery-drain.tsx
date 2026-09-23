@@ -1,4 +1,4 @@
-import { Color, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { Color, environment, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { groupByApp } from "./analysis/apps";
@@ -9,6 +9,7 @@ import { cpuSeverity } from "./analysis/severity";
 import { visibleRows } from "./analysis/visible";
 import { collectSnapshot } from "./collectors/snapshot";
 import { raycastStorage } from "./history/raycast-storage";
+import { dirLock } from "./history/lock";
 import { appendSample, toSample } from "./history/store";
 import { displayName, ENERGY_TOOLTIP, formatClock, formatDuration, formatUsage, formatWatts } from "./render/format";
 import { batterySummary, sourceWarning } from "./render/summary";
@@ -39,7 +40,7 @@ export default function Command() {
       const snapshot = await collectSnapshot();
       const sample = toSample(snapshot);
       // A storage failure must not hide a good snapshot; fall back to this sample alone, and say so.
-      const history = await appendSample(raycastStorage, sample).catch((e) => {
+      const history = await appendSample(raycastStorage, sample, dirLock(environment.supportPath)).catch((e) => {
         snapshot.errors.push(`history: ${e instanceof Error ? e.message : String(e)}`);
         return [sample];
       });

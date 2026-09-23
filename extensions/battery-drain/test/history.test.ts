@@ -1,4 +1,8 @@
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { dirLock } from "../src/history/lock";
 import {
   appendSample,
   combineHistory,
@@ -73,23 +77,22 @@ describe("prune", () => {
 });
 
 describe("loadHistory / appendSample", () => {
-  it("keeps both samples when another run writes in between (the menu opened while the timer ran)", async () => {
+  it("keeps both samples when two menu bar runs append at once (its timer and a menu open)", async () => {
+    // A slow store, like LocalStorage's round trip to Raycast: both runs would read before either writes.
     const storage = memoryStorage();
-    let raced = false;
-    const racy: KeyValueStorage = {
-      getItem: storage.getItem,
+    const slow: KeyValueStorage = {
+      getItem: async (k) => {
+        await new Promise((r) => setTimeout(r, 20));
+        return storage.getItem(k);
+      },
       setItem: async (k, v) => {
-        await storage.setItem(k, v);
-        // Right after our write, the other run writes the history it read before ours: ours is lost.
-        if (!raced) {
-          raced = true;
-          await storage.setItem(k, JSON.stringify([sample(1500)]));
-        }
+        await new Promise((r) => setTimeout(r, 20));
+        return storage.setItem(k, v);
       },
     };
-    const history = await appendSample(racy, sample(2000));
-    expect(history.map((s) => s.t)).toEqual([1500, 2000]);
-    expect(JSON.parse(storage.data.get(HISTORY_KEY)!).map((s: Sample) => s.t)).toEqual([1500, 2000]);
+    const lock = dirLock(mkdtempSync(join(tmpdir(), "bd-lock-")));
+    await Promise.all([appendSample(slow, sample(1000), lock), appendSample(slow, sample(2000), lock)]);
+    expect((await loadHistory(storage, 2000)).map((s) => s.t)).toEqual([1000, 2000]);
   });
 
   it("round-trips through storage", async () => {
