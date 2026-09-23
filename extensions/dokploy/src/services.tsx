@@ -8,6 +8,7 @@ import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
 import ServiceSchedules from "./service-schedules";
+import Templates from "./templates";
 import { DatabaseActions } from "./database-actions";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
 import type { ServiceScope } from "./utils";
@@ -139,6 +140,14 @@ export default function Services({
                   title="Database"
                   target={<CreateDatabase environment={environment} />}
                 />
+                {environment.environmentId && (
+                  <Action.Push
+                    icon={Icon.Box}
+                    title="From Template"
+                    target={<Templates environmentId={environment.environmentId} />}
+                    onPop={() => revalidate?.()}
+                  />
+                )}
               </ActionPanel.Submenu>
             </ActionPanel>
           }
@@ -180,6 +189,14 @@ export default function Services({
                     title="Database"
                     target={<CreateDatabase environment={environment} />}
                   />
+                  {environment.environmentId && (
+                    <Action.Push
+                      icon={Icon.Box}
+                      title="From Template"
+                      target={<Templates environmentId={environment.environmentId} />}
+                      onPop={() => revalidate?.()}
+                    />
+                  )}
                 </ActionPanel.Submenu>
                 <ActionPanel.Section title="Actions">
                   {SERVICE_ACTIONS[service.type].map((action) => (
