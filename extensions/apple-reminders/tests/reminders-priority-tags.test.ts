@@ -259,6 +259,27 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.deepStrictEqual(resolvedAt.tags, ["urgent"]);
   });
 
+  it("correctly matches punctuated, unicode, and emoji list names with # and @", () => {
+    const lists = [
+      { id: "punct-id", title: "Work!" },
+      { id: "unicode-id", title: "Café" },
+      { id: "emoji-id", title: "⭐" },
+    ];
+
+    const res1 = resolveQuickAddReminder({ title: "Send email #Work!" }, "Send email #Work!", lists);
+    assert.strictEqual(res1.title, "Send email");
+    assert.strictEqual(res1.listId, "punct-id");
+
+    const res2 = resolveQuickAddReminder({ title: "Order beans @Café" }, "Order beans @Café", lists);
+    assert.strictEqual(res2.title, "Order beans");
+    assert.strictEqual(res2.listId, "unicode-id");
+
+    const res3 = resolveQuickAddReminder({ title: "Important task #⭐ #urgent" }, "Important task #⭐ #urgent", lists);
+    assert.strictEqual(res3.title, "Important task");
+    assert.strictEqual(res3.listId, "emoji-id");
+    assert.deepStrictEqual(res3.tags, ["urgent"]);
+  });
+
   it("extracts natural-language due dates and tags when AI omits due date", () => {
     const fakeNow = new Date("2026-09-22T10:00:00.000Z");
     const resolved = resolveQuickAddReminder(
