@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Drive Links & Downloads] - {PR_MERGE_DATE}
+## [Drive Links & Downloads] - 2026-09-23
 
 - Paste a Google Drive, Docs, Sheets or Slides link in `Search Google Drive` to find the file or folder it points to.
 - Add a `Download Google Drive File` command to download a file by searching for it or pasting its link.
