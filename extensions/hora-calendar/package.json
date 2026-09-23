@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hora-calendar",
-  "title": "hora Calendar",
+  "title": "Hora Calendar",
   "description": "The official hora Calendar extension. Create events and tasks in plain language and join your next meeting, without leaving Raycast.",
   "icon": "icon.png",
   "author": "szamski",
@@ -109,6 +109,24 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "dateLocale",
+      "title": "Date and Time Locale",
+      "description": "Locale used to format event dates and times in Raycast.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en-US",
+      "data": [
+        {
+          "title": "English (United States)",
+          "value": "en-US"
+        },
+        {
+          "title": "Polski (Polska)",
+          "value": "pl-PL"
+        }
+      ]
     }
   ],
   "dependencies": {
