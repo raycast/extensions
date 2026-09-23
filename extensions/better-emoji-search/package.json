@@ -3,7 +3,7 @@
   "name": "better-emoji-search",
   "title": "Better Emoji Search",
   "description": "Search and paste emoji with natural-language aliases and recents that reorder on every use.",
-  "icon": "command-icon.png",
+  "icon": "better-emoji-search-icon.png",
   "author": "methodx",
   "platforms": [
     "macOS"
