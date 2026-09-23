@@ -14,7 +14,7 @@
   押したキーをネイティブの半透明パネルで可視化し、自作キーボードが OS レベルで正しく動作しているか確認できます。
 </p>
 
-![押下中・テスト済みのキーが表示されたKeyProbeパネル](metadata/keyprobe-1.png)
+![押下中・テスト済みのキーが表示されたKeyProbeパネル](media/keyprobe-1.png)
 
 ## 機能
 
@@ -35,8 +35,8 @@
 ## レイアウトの選択
 
 <p align="center">
-  <img src="metadata/keyprobe-2.png" width="49%" alt="Select Keyboard Layout の検索UI" />
-  <img src="metadata/keyprobe-3.png" width="49%" alt="カスタム分割キーボードのレイアウト表示例" />
+  <img src="media/keyprobe-2.png" width="49%" alt="Select Keyboard Layout の検索UI" />
+  <img src="media/keyprobe-3.png" width="49%" alt="カスタム分割キーボードのレイアウト表示例" />
 </p>
 
 - Raycast の Preferences にある **Keyboard Layout** で、デフォルトのレイアウト（Auto-detect / ANSI / JIS / ISO）を設定できます

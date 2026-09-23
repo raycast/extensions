@@ -14,7 +14,7 @@
   A native, translucent panel that highlights each key as you press it — confirm a custom keyboard actually works at the OS level.
 </p>
 
-![KeyProbe panel with pressed and tested keys](metadata/keyprobe-1.png)
+![KeyProbe panel with pressed and tested keys](media/keyprobe-1.png)
 
 ## Features
 
@@ -35,8 +35,8 @@
 ## Choosing a layout
 
 <p align="center">
-  <img src="metadata/keyprobe-2.png" width="49%" alt="Select Keyboard Layout search command" />
-  <img src="metadata/keyprobe-3.png" width="49%" alt="A custom split-keyboard layout" />
+  <img src="media/keyprobe-2.png" width="49%" alt="Select Keyboard Layout search command" />
+  <img src="media/keyprobe-3.png" width="49%" alt="A custom split-keyboard layout" />
 </p>
 
 - The **Keyboard Layout** preference sets the default: Auto-detect, ANSI, JIS, or ISO
