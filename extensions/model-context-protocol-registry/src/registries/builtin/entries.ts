@@ -511,6 +511,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "socialfaktory",
+    title: "SocialFaktory",
+    description:
+      "Write, generate, schedule and publish a brand's social content, in its own voice, on every channel: TikTok, Instagram, YouTube, X, LinkedIn, Facebook and Pinterest. Remote Streamable HTTP server with SocialFaktory OAuth 2.1 sign-in through `mcp-remote`; no API key needed.",
+    icon: "https://www.socialfaktory.com/connector-icon-512.png",
+    homepage: "https://www.socialfaktory.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.socialfaktory.com/mcp"],
+    },
+  },
+  {
     name: "square",
     title: "Square",
     description:

@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-23
+
+- Fix typed web address detection: a bare number like `1` was misrecognized as an address (Node's URL parser coerces it to an IPv4-looking hostname), a non-canonical IPv4 octet like `192.168.001.1` was accepted as valid, and bracketed IPv6 literals were not recognized at all. Also trust an explicit `http://`/`https://` scheme for single-label hosts (e.g. an internal hostname with no public TLD) instead of requiring it to pass Public Suffix List validation.
+
 ## [Tabs] - 2026-09-22
 
 - Track each open tab's window-local index and whether it is Orion's current tab. Open Tabs (Search Tabs and Command Bar) now shows a "Current Tab" label, keeps duplicate URLs as separate entries instead of silently collapsing them, and switching to a tab addresses it by that stable index rather than a title/URL scan.
