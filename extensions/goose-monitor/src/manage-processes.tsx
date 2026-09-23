@@ -81,7 +81,7 @@ const netSortsOf = (t: Messages): SortOption[] => [
 
 export default function ManageProcesses() {
   const t = useMessages();
-  const preferences = getPreferenceValues<Preferences & { sharedSettingsFilePath?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   const preferencePath = preferences.sharedSettingsFilePath?.trim() ?? "";
   const { value: overridePath, setValue: setOverridePath } = useLocalStorage<string>("sharedSettingsOverridePath", "");
   const { value: pathMode, setValue: setPathMode } = useLocalStorage<"preference" | "override">(
