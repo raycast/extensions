@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add RemoveDuplicates.org MCP Server] - 2026-09-23
+## [Add RemoveDuplicates.org MCP Server] - {PR_MERGE_DATE}
 
 - Add RemoveDuplicates.org to the official registry: remove duplicate lines or CSV/TSV rows and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in, no API key.
 
