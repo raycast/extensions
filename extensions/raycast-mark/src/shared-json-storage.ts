@@ -108,17 +108,22 @@ export function sharedJsonText(
   const bookmarks = state.bookmarks.map((bookmark) => {
     const icon = bookmark.icon;
     if (!icon) return bookmark;
-    if (icon.type === "custom")
+    if (icon.type === "custom") {
+      if (!icon.data)
+        throw new Error(t`图标数据缺失，拒绝写入共享 JSON：${bookmark.title}`);
       return {
         ...bookmark,
         icon: { ...icon, data: validateIconData(icon.data, bookmark.title) },
       };
+    }
     if (icon.type === "remote" && icon.cache?.startsWith("data:image/"))
       return {
         ...bookmark,
         icon: { ...icon, cache: validateIconData(icon.cache, bookmark.title) },
       };
     if (icon.type !== "file") return bookmark;
+    if (!icon.path)
+      throw new Error(t`图标路径缺失，拒绝写入共享 JSON：${bookmark.title}`);
     const data = iconBytes.get(icon.path);
     if (!data)
       throw new Error(t`图标文件缺失，拒绝写入共享 JSON：${bookmark.title}`);
@@ -170,21 +175,22 @@ export async function exportSharedJson(directory: string, state: LibraryState) {
   for (const bookmark of state.bookmarks) {
     const icon = bookmark.icon;
     if (icon?.type !== "file") continue;
-    if (!path.isAbsolute(icon.path))
+    const file = icon.path;
+    if (!file || !path.isAbsolute(file))
       throw new Error(t`图标路径无效，拒绝写入：${bookmark.title}`);
-    const before = await fs.lstat(icon.path);
+    const before = await fs.lstat(file);
     if (!before.isFile() || before.isSymbolicLink())
       throw new Error(t`图标文件不可用，拒绝写入：${bookmark.title}`);
-    const real = await fs.realpath(icon.path);
+    const real = await fs.realpath(file);
     const relative = path.relative(iconsRoot, real);
     if (relative.startsWith("..") || path.isAbsolute(relative))
       throw new Error(
         t`图标不在本地库 icons 目录，拒绝写入：${bookmark.title}`,
       );
-    const stat = await fs.lstat(icon.path);
+    const stat = await fs.lstat(file);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size > MAX_ICON_BYTES)
       throw new Error(t`图标文件不可用，拒绝写入：${bookmark.title}`);
-    iconBytes.set(icon.path, (await fs.readFile(icon.path)).toString("base64"));
+    iconBytes.set(file, (await fs.readFile(file)).toString("base64"));
   }
   const text = sharedJsonText(state, iconBytes);
   if (Buffer.byteLength(text) > MAX_SHARED_JSON_BYTES)
