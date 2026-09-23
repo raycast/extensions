@@ -1,6 +1,6 @@
 # Quick Radios Changelog
 
-## [Improved Store Discoverability] - {PR_MERGE_DATE}
+## [Improved Store Discoverability] - 2026-09-23
 
 - Added search keywords (wifi, wlan, wireless, network, hotspot) so the extension appears when searching for Wi-Fi
 
