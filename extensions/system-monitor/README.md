@@ -10,11 +10,11 @@ This is a [Raycast](https://raycast.com/) extension that allows you to monitor y
 
 ## Optional AI Usage
 
-The **AI Usage** tab can show the remaining Codex and Claude five-hour and weekly quota windows. Codex and Claude can be disabled independently. When both are disabled, the tab is hidden and no AI usage collector runs.
+The **AI Usage** tab and menu-bar dropdown can show the remaining Codex and Claude five-hour and weekly quota windows. Codex and Claude can be disabled independently. When both are disabled, the AI Usage UI is hidden and no AI usage collector runs.
 
 - Codex usage comes from the signed-in local Codex CLI. Spark windows are hidden unless explicitly enabled.
 - Claude usage comes from Claude Desktop's local plan usage history file.
-- AI usage refreshes only while the AI Usage tab is selected.
+- AI usage refreshes only while the AI Usage tab is selected or the menu-bar dropdown is open.
 
 ## Custom Menubar Text
 

@@ -2,10 +2,10 @@
 
 ## [Optional AI Usage] - 2026-09-23
 
-- Add an optional AI Usage tab for Codex and Claude quota windows
+- Add optional AI Usage views to both the main command and menu-bar dropdown for Codex and Claude quota windows
 - Keep Codex, Claude, and Spark visibility independently configurable, with Spark hidden by default
-- Collect AI usage only while the AI Usage tab is active
-- Add system uptime to System Info
+- Collect AI usage only while the AI Usage tab or menu-bar dropdown is active
+- Add system uptime to System Info and the menu-bar dropdown
 
 ## [Menu Bar Process Safety] - 2026-09-21
 
