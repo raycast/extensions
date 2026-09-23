@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Updated maintainer metadata] - {PR_MERGE_DATE}
+## [Updated maintainer metadata] - 2026-09-23
 
 - Marked a former Apple Reminders maintainer as a past contributor.
 
