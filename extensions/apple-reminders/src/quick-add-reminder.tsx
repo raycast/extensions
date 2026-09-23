@@ -28,7 +28,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await addReminderFromText(props.arguments.text, props.arguments.notes);
+      await addReminderFromText(props.arguments.text, props.arguments.notes, preferences.defaultListName);
       return;
     }
 
@@ -134,14 +134,14 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
     try {
       const { description: aiDescription, ...newReminder } = await askAI(prompt);
       description = aiDescription;
-      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
+      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists, now, preferences.defaultListName);
 
       if (newReminder.dueDate && resolvedReminder.dueDate?.includes("T")) {
         resolvedReminder.dueDate = applyAiLocalTimezone(resolvedReminder.dueDate);
       }
     } catch (error) {
       console.log(error);
-      await addReminderFromText(inputText, props.arguments.notes);
+      await addReminderFromText(inputText, props.arguments.notes, preferences.defaultListName);
       return;
     }
 
@@ -186,9 +186,9 @@ async function askAI(prompt: string): Promise<ParsedQuickAddReminder> {
   throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
 }
 
-async function addReminderFromText(text: string, notes?: string) {
+async function addReminderFromText(text: string, notes?: string, defaultListName?: string) {
   const data: Data = await getData();
-  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists);
+  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists, new Date(), defaultListName);
   const reminder = toNewReminder(resolvedReminder, notes);
 
   await createReminder(reminder);

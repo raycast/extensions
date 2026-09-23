@@ -49,6 +49,7 @@ export function resolveQuickAddReminder(
   inputText: string,
   lists: QuickAddList[],
   now: Date = new Date(),
+  defaultListName?: string,
 ): ParsedQuickAddReminder {
   const mentionedList = findListInText(inputText, lists) ?? findListInText(reminder.title, lists);
   let { title } = reminder;
@@ -67,6 +68,14 @@ export function resolveQuickAddReminder(
 
   if (listId && !lists.some((list) => list.id === listId)) {
     listId = undefined;
+  }
+
+  if (!listId && defaultListName?.trim()) {
+    const trimmedDefault = defaultListName.trim().toLowerCase();
+    const matchedList = lists.find((list) => list.title.trim().toLowerCase() === trimmedDefault);
+    if (matchedList) {
+      listId = matchedList.id;
+    }
   }
 
   if (!dueDate) {

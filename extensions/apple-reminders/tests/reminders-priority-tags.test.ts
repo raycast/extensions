@@ -286,6 +286,67 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.strictEqual(resolved.address, undefined);
     assert.strictEqual(resolved.proximity, undefined);
   });
+
+  it("applies defaultListName when no list is specified in text or AI", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy eggs" },
+      "Buy eggs",
+      [
+        { id: "list-1", title: "Personal" },
+        { id: "list-2", title: "Inbox" },
+      ],
+      new Date(),
+      "Inbox",
+    );
+
+    assert.strictEqual(resolved.title, "Buy eggs");
+    assert.strictEqual(resolved.listId, "list-2");
+  });
+
+  it("matches defaultListName case-insensitively with trimming", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy eggs" },
+      "Buy eggs",
+      [
+        { id: "list-1", title: "Personal" },
+        { id: "list-2", title: "Work Projects" },
+      ],
+      new Date(),
+      "  work projects  ",
+    );
+
+    assert.strictEqual(resolved.title, "Buy eggs");
+    assert.strictEqual(resolved.listId, "list-2");
+  });
+
+  it("prefers explicitly mentioned list over defaultListName", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy milk #Personal" },
+      "Buy milk #Personal",
+      [
+        { id: "list-1", title: "Personal" },
+        { id: "list-2", title: "Inbox" },
+      ],
+      new Date(),
+      "Inbox",
+    );
+
+    assert.strictEqual(resolved.title, "Buy milk");
+    assert.strictEqual(resolved.listId, "list-1");
+  });
+
+  it("falls back to undefined if defaultListName does not match any list", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy eggs" },
+      "Buy eggs",
+      [{ id: "list-1", title: "Personal" }],
+      new Date(),
+      "NonExistentList",
+    );
+
+    assert.strictEqual(resolved.title, "Buy eggs");
+    assert.strictEqual(resolved.listId, undefined);
+  });
 });
 
 describe("Reminder List Item Tag Display", () => {
