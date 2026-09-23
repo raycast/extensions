@@ -10,9 +10,13 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { readFileSync } from "node:fs";
-import type { ConnectionOptions } from "node:tls";
 import { Client } from "ldapts";
+import {
+  connectionHost,
+  formatTargetHost,
+  startTLSWithDeadline,
+  tlsOptions,
+} from "./ldap";
 
 type LdapSecurity = Preferences["ldapSecurity"];
 
@@ -45,14 +49,6 @@ function isLoopbackHost(host: string): boolean {
     normalized === "0:0:0:0:0:0:0:1" ||
     /^127(?:\.\d{1,3}){3}$/.test(normalized)
   );
-}
-
-function formatTargetHost(host: string): string {
-  const trimmed = host.trim();
-  if (trimmed.includes(":") && !trimmed.startsWith("[")) {
-    return `[${trimmed}]`;
-  }
-  return trimmed;
 }
 
 function resolvePort(port: string | undefined, security: LdapSecurity): string {
@@ -94,25 +90,6 @@ function formatPhone(
     return raw.slice(prefix.length);
   }
   return raw;
-}
-
-function tlsOptions(preferences: Preferences): ConnectionOptions | undefined {
-  if (preferences.ldapSecurity === "none") {
-    return undefined;
-  }
-  const options: ConnectionOptions = {
-    rejectUnauthorized: preferences.ldapTLSVerify !== false,
-  };
-  if (preferences.ldapCACert) {
-    try {
-      options.ca = readFileSync(preferences.ldapCACert);
-    } catch {
-      throw new Error(
-        `Unable to read TLS CA certificate file: ${preferences.ldapCACert}`,
-      );
-    }
-  }
-  return options;
 }
 
 export default function Command() {
@@ -157,7 +134,7 @@ export default function Command() {
 
     let client: Client | undefined;
     try {
-      const tls = tlsOptions(preferences);
+      const tls = tlsOptions(preferences, connectionHost(preferences.ldapHost));
       client = new Client({
         url: target,
         timeout: 10000,
@@ -167,7 +144,7 @@ export default function Command() {
       clientRef.current = client;
 
       if (security === "starttls") {
-        await client.startTLS(tls);
+        await startTLSWithDeadline(client, tls);
       }
       await client.bind(preferences.ldapUsername, preferences.ldapPassword);
 

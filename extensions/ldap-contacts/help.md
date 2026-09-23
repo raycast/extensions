@@ -37,6 +37,7 @@ Type at least 2 characters; the query runs once you stop typing. It matches subs
 - **"Plain LDAP is not allowed for remote servers"** — **Security** is set to Plain but the host is not localhost. Switch to StartTLS or LDAPS; the extension refuses to send the bind password unencrypted.
 - **Connection refused / timeout** — wrong **LDAP Host** or port, or a firewall in between. Ports `389` and `636` must be reachable from your Mac.
 - **Certificate errors (self-signed, unable to verify)** — the server certificate isn't trusted. Provide the signing CA via **TLS CA Certificate** (or install it in your system keychain); only disable **Verify TLS Certificate** for throwaway setups.
+- **"StartTLS handshake timed out"** — the server acknowledged the TLS upgrade but never completed it. A firewall or middlebox is usually dropping packets mid-handshake; make sure port 389 is fully reachable, not just accepting connections.
 - **"Unable to read TLS CA certificate file"** — the path in **TLS CA Certificate** doesn't exist or isn't readable. It must be a local file path on your Mac.
 - **Invalid credentials** — check the password and the username format. Active Directory accepts bind DN and UPN; OpenLDAP and friends usually want the full bind DN.
 - **No results** — verify the **Search Base** actually contains the users and that the bind account may read it. Also note: only entries with a `telephoneNumber` show up, and your term must match at least partially.
