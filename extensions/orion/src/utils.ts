@@ -206,10 +206,10 @@ function getRawHost(candidate: string): string | undefined {
   const authority = candidate.replace(/^https?:\/\//i, "").split(/[/?#]/, 1)[0];
   if (!authority || authority.includes("@")) return undefined;
 
-  const ipv6 = authority.match(/^\[([^\]]+)\](?::\d+)?$/);
+  const ipv6 = authority.match(/^\[([^\]]+)\](?::\d*)?$/);
   if (ipv6) return ipv6[1];
 
-  const host = authority.match(/^([^:]+)(?::\d+)?$/);
+  const host = authority.match(/^([^:]+)(?::\d*)?$/);
   return host?.[1]?.toLowerCase();
 }
 
