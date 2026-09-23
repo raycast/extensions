@@ -20,6 +20,7 @@ import {
   catalogMutation,
   TRASH_LOCATION,
 } from "./model.ts";
+import { readLibrary } from "./repository.ts";
 import {
   applyJsonImport,
   exportPortableJson,
@@ -82,10 +83,7 @@ export default function SharedJsonForm({
     void sharedJsonPath().then(setConnectedPath);
   }, []);
   async function connect(file: string) {
-    const stat = await fs.lstat(file);
-    if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 10 * 1024 * 1024)
-      throw new Error(t("请选择未损坏且不超过 10 MiB 的普通 JSON 文件"));
-    const raw = await fs.readFile(file, "utf8");
+    const raw = await readSharedJson(file);
     const plan = previewJsonImport(raw, state);
     const incomingIds = new Set(
       plan.data.bookmarks.map((bookmark) => bookmark.id),
@@ -112,13 +110,19 @@ export default function SharedJsonForm({
         "incoming" as const,
       ]),
     );
-    const result = await withExternalSharedJson(() =>
-      chosen.mutations.length
-        ? applyJsonImport(root, chosen, decisions)
-        : Promise.resolve({ state }),
-    );
-    const local = await exportPortableJson(root, result.state);
-    await setSharedJsonSource(file, raw, local);
+    const result = await withExternalSharedJson(async () => {
+      if (
+        raw !== (await readSharedJson(file)) ||
+        canonical(state) !== canonical(await readLibrary(root))
+      )
+        throw new Error(t("数据已变化，请重新打开表单或预览"));
+      const imported = chosen.mutations.length
+        ? await applyJsonImport(root, chosen, decisions)
+        : { state };
+      const local = await exportPortableJson(root, imported.state);
+      await setSharedJsonSource(file, raw, local);
+      return imported;
+    });
     onSaved(result.state);
     await showToast({
       style: Toast.Style.Success,
@@ -139,48 +143,50 @@ export default function SharedJsonForm({
       name.includes("\0")
     )
       throw new Error(t("请选择目录并输入有效的 .json 文件名"));
-    const target = path.join(directory, name);
-    const raw = await exportPortableJson(root, state);
-    let handle: Awaited<ReturnType<typeof fs.open>> | undefined;
-    let created = false;
-    let owned: { dev: number; ino: number } | undefined;
-    try {
-      handle = await fs.open(target, "wx", 0o600);
-      created = true;
-      owned = await handle.stat();
-      await handle.writeFile(raw, "utf8");
-      await handle.sync();
-    } catch (error) {
-      await handle?.close().catch(() => undefined);
-      handle = undefined;
-      let cleanupFailed = false;
-      if (created && owned) {
-        const current = await fs.lstat(target).catch(() => undefined);
-        if (
-          current?.isFile() &&
-          !current.isSymbolicLink() &&
-          current.dev === owned.dev &&
-          current.ino === owned.ino
-        ) {
-          try {
-            await fs.unlink(target);
-          } catch {
-            cleanupFailed = true;
+    return withExternalSharedJson(async () => {
+      const target = path.join(directory, name);
+      const raw = await exportPortableJson(root, await readLibrary(root));
+      let handle: Awaited<ReturnType<typeof fs.open>> | undefined;
+      let created = false;
+      let owned: { dev: number; ino: number } | undefined;
+      try {
+        handle = await fs.open(target, "wx", 0o600);
+        created = true;
+        owned = await handle.stat();
+        await handle.writeFile(raw, "utf8");
+        await handle.sync();
+      } catch (error) {
+        await handle?.close().catch(() => undefined);
+        handle = undefined;
+        let cleanupFailed = false;
+        if (created && owned) {
+          const current = await fs.lstat(target).catch(() => undefined);
+          if (
+            current?.isFile() &&
+            !current.isSymbolicLink() &&
+            current.dev === owned.dev &&
+            current.ino === owned.ino
+          ) {
+            try {
+              await fs.unlink(target);
+            } catch {
+              cleanupFailed = true;
+            }
           }
         }
+        if (cleanupFailed)
+          throw new Error(t`新文件写入失败且清理失败，请手工检查：${target}`);
+        throw error;
+      } finally {
+        await handle?.close().catch(() => undefined);
       }
-      if (cleanupFailed)
-        throw new Error(t`新文件写入失败且清理失败，请手工检查：${target}`);
-      throw error;
-    } finally {
-      await handle?.close().catch(() => undefined);
-    }
-    await setSharedJsonSource(target, raw, raw);
-    await showToast({
-      style: Toast.Style.Success,
-      title: t("已创建共享 JSON"),
+      await setSharedJsonSource(target, raw, raw);
+      await showToast({
+        style: Toast.Style.Success,
+        title: t("已创建共享 JSON"),
+      });
+      pop();
     });
-    pop();
   }
 
   return (
@@ -266,38 +272,39 @@ export default function SharedJsonForm({
 }
 
 export async function refreshSharedJson(root: string, state: LibraryState) {
-  const file = await sharedJsonPath();
-  if (!file) return state;
-  const raw = await readSharedJson(file);
-  const baseline = await sharedJsonBaseline();
-  if (!baseline.remote || !baseline.local)
-    throw new Error(t("共享 JSON 基线缺失；为避免覆盖，请重新连接文件"));
-  const local = await exportPortableJson(root, state);
-  if (sharedJsonDigest(raw) === baseline.remote) {
+  return withExternalSharedJson(async () => {
+    const file = await sharedJsonPath();
+    if (!file) return state;
+    const current = await readLibrary(root);
+    const raw = await readSharedJson(file);
+    const baseline = await sharedJsonBaseline();
+    if (!baseline.remote || !baseline.local)
+      throw new Error(t("共享 JSON 基线缺失；为避免覆盖，请重新连接文件"));
+    const local = await exportPortableJson(root, current);
+    if (sharedJsonDigest(raw) === baseline.remote) {
+      if (sharedJsonDigest(local) !== baseline.local)
+        throw new Error(
+          t("本地库有尚未写入共享 JSON 的变更；请先导出备份，再重新连接文件"),
+        );
+      return canonical(current) === canonical(state) ? state : current;
+    }
     if (sharedJsonDigest(local) !== baseline.local)
       throw new Error(
-        t("本地库有尚未写入共享 JSON 的变更；请先导出备份，再重新连接文件"),
+        t("共享文件与本地库均有变化；检测到冲突，已阻断同步和写入"),
       );
-    return state;
-  }
-  if (sharedJsonDigest(local) !== baseline.local)
-    throw new Error(
-      t("共享文件与本地库均有变化；检测到冲突，已阻断同步和写入"),
+    const plan = previewJsonImport(raw, current);
+    const chosen = authoritativePlan(plan, current);
+    const decisions = Object.fromEntries(
+      plan.differences.map((difference) => [
+        difference.entityKey,
+        "incoming" as const,
+      ]),
     );
-  const plan = previewJsonImport(raw, state);
-  const chosen = authoritativePlan(plan, state);
-  const decisions = Object.fromEntries(
-    plan.differences.map((difference) => [
-      difference.entityKey,
-      "incoming" as const,
-    ]),
-  );
-  const result = await withExternalSharedJson(() =>
-    chosen.mutations.length
-      ? applyJsonImport(root, chosen, decisions)
-      : Promise.resolve({ state }),
-  );
-  const nextLocal = await exportPortableJson(root, result.state);
-  await updateSharedJsonBaseline(raw, nextLocal);
-  return result.state;
+    const result = chosen.mutations.length
+      ? await applyJsonImport(root, chosen, decisions)
+      : { state: current };
+    const nextLocal = await exportPortableJson(root, result.state);
+    await updateSharedJsonBaseline(raw, nextLocal);
+    return result.state;
+  });
 }

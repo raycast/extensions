@@ -1,4 +1,5 @@
 import { t } from "./i18n.ts";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import * as fs from "node:fs/promises";
 import path from "node:path";
@@ -10,8 +11,16 @@ const BASE_KEY = "sharedJson.baseline";
 const LOCAL_KEY = "sharedJson.localBaseline";
 export const MAX_SHARED_JSON_BYTES = 10 * 1024 * 1024;
 const MAX_ICON_BYTES = 2 * 1024 * 1024;
-let applyingExternal = false;
+const applyingExternal = new AsyncLocalStorage<{ active: boolean }>();
+// ponytail: One process-local queue is enough here; cross-process imports need a shared file lock.
+let pending: Promise<unknown> = Promise.resolve();
 let storage: typeof RaycastStorage | undefined;
+
+function serialize<T>(operation: () => Promise<T>): Promise<T> {
+  const next = pending.then(operation);
+  pending = next.catch(() => undefined);
+  return next;
+}
 
 export function setSharedJsonStorage(value?: typeof RaycastStorage) {
   storage = value;
@@ -24,7 +33,6 @@ function requireStorage() {
 const digest = (text: string) =>
   createHash("sha256").update(text).digest("hex");
 export const sharedJsonDigest = digest;
-export const isApplyingSharedJson = () => applyingExternal;
 
 function validateIconData(value: string, title: string) {
   const match =
@@ -94,9 +102,13 @@ export async function updateSharedJsonBaseline(raw: string, local: string) {
 }
 
 export function withExternalSharedJson<T>(callback: () => Promise<T>) {
-  applyingExternal = true;
-  return callback().finally(() => {
-    applyingExternal = false;
+  return serialize(async () => {
+    const context = { active: true };
+    try {
+      return await applyingExternal.run(context, callback);
+    } finally {
+      context.active = false;
+    }
   });
 }
 
@@ -231,7 +243,13 @@ async function publishLocked(
 export async function withSharedJsonWrite<
   T extends { state: LibraryState; warning?: string },
 >(directory: string, operation: () => Promise<T>): Promise<T> {
-  if (applyingExternal) return operation();
+  if (applyingExternal.getStore()?.active) return operation();
+  return serialize(() => writeSharedJson(directory, operation));
+}
+
+async function writeSharedJson<
+  T extends { state: LibraryState; warning?: string },
+>(directory: string, operation: () => Promise<T>): Promise<T> {
   const file = await sharedJsonPath();
   if (!file) return operation();
   const baseline = await sharedJsonBaseline();

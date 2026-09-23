@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as fs from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { createServer } from "node:http";
 import path from "node:path";
 import {
   AI_MAX_RESPONSE_BYTES,
@@ -21,6 +22,10 @@ import {
   previewJsonImport,
   saveJsonExport,
 } from "../src/import-export.ts";
+import {
+  fetchAndPersistIcon,
+  isPublicIconAddress,
+} from "../src/icon-service.ts";
 import {
   bookmarkMutation,
   canonical,
@@ -42,7 +47,12 @@ import {
   replayEvents,
   resolveConflicts,
 } from "../src/repository.ts";
-import { setSharedJsonSource, setSharedJsonStorage, withSharedJsonWrite } from "../src/shared-json-storage.ts";
+import {
+  setSharedJsonSource,
+  setSharedJsonStorage,
+  withExternalSharedJson,
+  withSharedJsonWrite,
+} from "../src/shared-json-storage.ts";
 
 const bookmark = (id = "b1"): Bookmark => ({
   id,
@@ -94,18 +104,124 @@ test("shared JSON: existing lock is never removed by another writer", async () =
     const items = new Map<string, string>();
     setSharedJsonStorage({
       getItem: async (key: string) => items.get(key),
-      setItem: async (key: string, value: string) => { items.set(key, value); },
+      setItem: async (key: string, value: string) => {
+        items.set(key, value);
+      },
     } as unknown as Parameters<typeof setSharedJsonStorage>[0]);
     try {
       const file = path.join(parent, "shared.json");
-      const initial = JSON.stringify({ schemaVersion: 1, source: "raycast-mark", groups: emptyCatalog().groups, bookmarks: [] });
+      const initial = JSON.stringify({
+        schemaVersion: 1,
+        source: "raycast-mark",
+        groups: emptyCatalog().groups,
+        bookmarks: [],
+      });
       await fs.writeFile(file, initial);
       await setSharedJsonSource(file, initial, initial);
       await fs.writeFile(`${file}.lock`, "another writer");
-      await assert.rejects(withSharedJsonWrite(dir, async () => ({ state: await readLibrary(dir) })));
+      await assert.rejects(
+        withSharedJsonWrite(dir, async () => ({
+          state: await readLibrary(dir),
+        })),
+      );
       assert.equal(await fs.readFile(`${file}.lock`, "utf8"), "another writer");
       assert.equal(await fs.readFile(file, "utf8"), initial);
-    } finally { setSharedJsonStorage(); }
+    } finally {
+      setSharedJsonStorage();
+    }
+  }));
+
+test("favicon lookup never requests loopback addresses", async () => {
+  assert.equal(isPublicIconAddress("127.0.0.1"), false);
+  assert.equal(isPublicIconAddress("::ffff:127.0.0.1"), false);
+  assert.equal(isPublicIconAddress("10.0.0.1"), false);
+  assert.equal(isPublicIconAddress("8.8.8.8"), true);
+  await fixture(async (dir) => {
+    let requests = 0;
+    const server = createServer((_request, response) => {
+      requests++;
+      response.end("private");
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, "127.0.0.1", resolve),
+    );
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address !== "string");
+      const icon = await fetchAndPersistIcon(
+        dir,
+        `http://127.0.0.1:${address.port}/secret`,
+        "Local",
+      );
+      assert.equal(requests, 0);
+      assert.equal(icon.type, "file");
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
+    }
+  });
+});
+
+test("shared JSON: ordinary commit waits for external import and still publishes", async () =>
+  fixture(async (dir, parent) => {
+    const items = new Map<string, string>();
+    setSharedJsonStorage({
+      getItem: async (key: string) => items.get(key),
+      setItem: async (key: string, value: string) => {
+        items.set(key, value);
+      },
+    } as unknown as Parameters<typeof setSharedJsonStorage>[0]);
+    let release!: () => void;
+    try {
+      const file = path.join(parent, "shared.json");
+      const initial = JSON.stringify({
+        schemaVersion: 1,
+        source: "raycast-mark",
+        groups: emptyCatalog().groups,
+        bookmarks: [],
+      });
+      await fs.writeFile(file, initial);
+      await setSharedJsonSource(file, initial, initial);
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let entered!: () => void;
+      const started = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const external = withExternalSharedJson(async () => {
+        entered();
+        await gate;
+      });
+      await started;
+      const write = commit(dir, {
+        mutations: create().mutations,
+        expectedHeads: (await readLibrary(dir)).heads,
+      });
+      try {
+        assert.equal(
+          await Promise.race([
+            write.then(() => true),
+            new Promise<boolean>((resolve) =>
+              setTimeout(() => resolve(false), 30),
+            ),
+          ]),
+          false,
+        );
+      } finally {
+        release();
+      }
+      await external;
+      await write;
+      assert.equal(
+        JSON.parse(await fs.readFile(file, "utf8")).bookmarks[0].id,
+        "b1",
+      );
+    } finally {
+      release?.();
+      setSharedJsonStorage();
+    }
   }));
 
 test("templateFields / resolveLaunchUrl: multiple parameters, safe encoding and authority rejection", () => {
@@ -462,18 +578,31 @@ test("old JSON round trip: trash/prevLocations/multi-location/tags/pinned/times/
     assert.match(plan.warnings.join(), /saved on import/);
     const applied = await applyJsonImport(dir, plan, {});
     const exported = JSON.parse(exportJson(applied.state));
-    const withoutIcon = ({ icon, iconMatchedAt, ...record }: Bookmark) => record;
+    const withoutIcon = ({ icon, iconMatchedAt, ...record }: Bookmark) =>
+      record;
     assert.deepEqual(
       exported.bookmarks.map(withoutIcon),
-      source.bookmarks.sort((a, b) => a.id.localeCompare(b.id)).map(withoutIcon),
+      source.bookmarks
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map(withoutIcon),
     );
-    assert.ok(exported.bookmarks.find((b: Bookmark) => b.id === "b1")?.icon?.path?.startsWith(path.join(dir, "icons")));
-    assert.equal(exported.bookmarks.find((b: Bookmark) => b.id === "deleted")?.icon, undefined);
+    assert.ok(
+      exported.bookmarks
+        .find((b: Bookmark) => b.id === "b1")
+        ?.icon?.path?.startsWith(path.join(dir, "icons")),
+    );
+    assert.equal(
+      exported.bookmarks.find((b: Bookmark) => b.id === "deleted")?.icon,
+      undefined,
+    );
     assert.deepEqual(exported.groups, source.groups);
     assert.equal(exported.source, "raycast-mark");
     assert.ok(!exportJson(applied.state).includes("apiKey"));
     await saveJsonExport(dir, path.join(parent, "backup.json"));
-    await assert.rejects(saveJsonExport(dir, path.join(parent, "backup.json")), errorCode("WRITE_FAILED"));
+    await assert.rejects(
+      saveJsonExport(dir, path.join(parent, "backup.json")),
+      errorCode("WRITE_FAILED"),
+    );
     await assert.rejects(
       saveJsonExport(dir, path.join(dir, "backup.json")),
       errorCode("INVALID_INPUT"),
@@ -486,8 +615,15 @@ test("old JSON round trip: trash/prevLocations/multi-location/tags/pinned/times/
       previewJsonImport(JSON.stringify(exported), await readLibrary(newDir)),
       {},
     );
-    assert.deepEqual(second.state.bookmarks.map(withoutIcon), applied.state.bookmarks.map(withoutIcon));
-    assert.ok(second.state.bookmarks.find((b) => b.id === "b1")?.icon?.path?.startsWith(path.join(newDir, "icons")));
+    assert.deepEqual(
+      second.state.bookmarks.map(withoutIcon),
+      applied.state.bookmarks.map(withoutIcon),
+    );
+    assert.ok(
+      second.state.bookmarks
+        .find((b) => b.id === "b1")
+        ?.icon?.path?.startsWith(path.join(newDir, "icons")),
+    );
   }));
 
 test("JSON import never reads a legacy file icon path outside the library", async () =>
@@ -505,7 +641,9 @@ test("JSON import never reads a legacy file icon path outside the library", asyn
         previewJsonImport(JSON.stringify(source), await readLibrary(dir)),
         {},
       );
-      const imported = result.state.bookmarks.find((item) => item.id === source.bookmarks[0]!.id)!;
+      const imported = result.state.bookmarks.find(
+        (item) => item.id === source.bookmarks[0]!.id,
+      )!;
       assert.notEqual(imported.icon?.path, outsideIcon);
       assert.ok(imported.icon?.path?.startsWith(path.join(dir, "icons")));
       assert.notDeepEqual(await fs.readFile(imported.icon!.path!), secret);
@@ -516,18 +654,30 @@ test("JSON import never reads a legacy file icon path outside the library", asyn
 
 test("portable icon backup round-trips into another library", async () =>
   fixture(async (dir, parent) => {
-    const bytes = Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg'>${" ".repeat(1_100_000)}</svg>`);
+    const bytes = Buffer.from(
+      `<svg xmlns='http://www.w3.org/2000/svg'>${" ".repeat(1_100_000)}</svg>`,
+    );
     const icons = path.join(dir, "icons");
     await fs.mkdir(icons, { recursive: true });
     const file = path.join(icons, "test.svg");
     await fs.writeFile(file, bytes);
     await commit(dir, {
       expectedHeads: (await readLibrary(dir)).heads,
-      mutations: [{ entity: "bookmark", entityId: "b1", baseHeads: [], value: { ...bookmark(), icon: { type: "file", path: file } } }],
+      mutations: [
+        {
+          entity: "bookmark",
+          entityId: "b1",
+          baseHeads: [],
+          value: { ...bookmark(), icon: { type: "file", path: file } },
+        },
+      ],
     });
     const backup = path.join(parent, "portable.json");
     await saveJsonExport(dir, backup);
-    await assert.rejects(saveJsonExport(dir, backup), errorCode("WRITE_FAILED"));
+    await assert.rejects(
+      saveJsonExport(dir, backup),
+      errorCode("WRITE_FAILED"),
+    );
     const json = await fs.readFile(backup, "utf8");
     assert.match(json, /data:image\/svg\+xml;base64,/);
     assert.ok(!json.includes(file));

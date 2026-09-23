@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
+import { lookup } from "node:dns/promises";
 import * as fs from "node:fs/promises";
+import { get as httpGet } from "node:http";
+import { get as httpsGet } from "node:https";
+import { BlockList, isIP } from "node:net";
 import path from "node:path";
 import type { Bookmark, Icon } from "./model.ts";
 import { registeredDomainOf, siteColorOf } from "./site-color.ts";
@@ -9,6 +13,44 @@ const MAX_ICON_BYTES = 2 * 1024 * 1024;
 const MAX_HTML_BYTES = 512 * 1024;
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+const blocked = new BlockList();
+for (const [address, prefix] of [
+  ["0.0.0.0", 8],
+  ["10.0.0.0", 8],
+  ["100.64.0.0", 10],
+  ["127.0.0.0", 8],
+  ["169.254.0.0", 16],
+  ["172.16.0.0", 12],
+  ["192.0.0.0", 24],
+  ["192.0.2.0", 24],
+  ["192.168.0.0", 16],
+  ["198.18.0.0", 15],
+  ["198.51.100.0", 24],
+  ["203.0.113.0", 24],
+  ["224.0.0.0", 4],
+  ["240.0.0.0", 4],
+] as const)
+  blocked.addSubnet(address, prefix);
+for (const [address, prefix] of [
+  ["::", 128],
+  ["::1", 128],
+  ["fc00::", 7],
+  ["fe80::", 10],
+  ["ff00::", 8],
+  ["2001::", 32],
+  ["2001:db8::", 32],
+  ["2002::", 16],
+  ["64:ff9b::", 96],
+] as const)
+  blocked.addSubnet(address, prefix, "ipv6");
+
+export function isPublicIconAddress(address: string): boolean {
+  const family = isIP(address);
+  return (
+    family !== 0 && !blocked.check(address, family === 4 ? "ipv4" : "ipv6")
+  );
+}
 
 export function iconsDirectory(libraryRoot: string): string {
   return path.join(libraryRoot, "icons");
@@ -122,25 +164,75 @@ async function fetchBinary(
   maxBytes: number,
   accept: string,
 ): Promise<{ bytes: Buffer; contentType: string; finalUrl: string } | null> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ICON_FETCH_TIMEOUT_MS);
   try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow",
-      headers: { "User-Agent": USER_AGENT, Accept: accept },
+    const target = new URL(url);
+    if (
+      !["http:", "https:"].includes(target.protocol) ||
+      target.username ||
+      target.password
+    )
+      return null;
+    const host = target.hostname.replace(/^\[|\]$/g, "");
+    if (/(^|\.)(localhost|local|internal|test|invalid)$/i.test(host))
+      return null;
+    const addresses = isIP(host)
+      ? [{ address: host, family: isIP(host) }]
+      : await lookup(host, { all: true });
+    if (
+      !addresses.length ||
+      addresses.some(({ address }) => !isPublicIconAddress(address))
+    )
+      return null;
+    const { address, family } = addresses[0]!;
+    // ponytail: Redirects are refused; supporting them requires validating and pinning every hop.
+    return await new Promise((resolve) => {
+      const get = target.protocol === "https:" ? httpsGet : httpGet;
+      const request = get(
+        target,
+        {
+          headers: { "User-Agent": USER_AGENT, Accept: accept },
+          lookup: (_hostname, _options, callback) =>
+            callback(null, address, family),
+        },
+        async (response) => {
+          if (
+            !response.statusCode ||
+            response.statusCode < 200 ||
+            response.statusCode >= 300 ||
+            Number(response.headers["content-length"] || 0) > maxBytes
+          ) {
+            response.resume();
+            resolve(null);
+            return;
+          }
+          const chunks: Buffer[] = [];
+          let size = 0;
+          try {
+            for await (const chunk of response) {
+              size += chunk.length;
+              if (size > maxBytes) {
+                response.destroy();
+                resolve(null);
+                return;
+              }
+              chunks.push(chunk);
+            }
+            resolve({
+              bytes: Buffer.concat(chunks),
+              contentType: String(response.headers["content-type"] || ""),
+              finalUrl: target.href,
+            });
+          } catch {
+            resolve(null);
+          }
+        },
+      );
+      const timer = setTimeout(() => request.destroy(), ICON_FETCH_TIMEOUT_MS);
+      request.on("close", () => clearTimeout(timer));
+      request.on("error", () => resolve(null));
     });
-    if (!response.ok) return null;
-    const contentType = response.headers.get("content-type") || "";
-    const length = Number(response.headers.get("content-length") || 0);
-    if (Number.isFinite(length) && length > maxBytes) return null;
-    const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.byteLength > maxBytes) return null;
-    return { bytes: buffer, contentType, finalUrl: response.url || url };
   } catch {
     return null;
-  } finally {
-    clearTimeout(timer);
   }
 }
 
