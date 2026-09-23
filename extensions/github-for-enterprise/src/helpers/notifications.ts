@@ -3,8 +3,6 @@ import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
-import { Discussion } from "../generated/graphql";
-
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
@@ -74,13 +72,13 @@ export async function getNotificationIcon(notification: Notification) {
     });
 
     if (pullRequest.data.merged) {
-      return { value: { source: "pull-request-merged.svg", tintColor: Color.Purple }, tooltip: "Merged" };
+      return { value: { source: "pull-request-merge.png", tintColor: Color.Purple }, tooltip: "Merged" };
     } else if (pullRequest.data.state === "closed") {
-      return { value: { source: "pull-request-closed.svg", tintColor: Color.Red }, tooltip: "Closed" };
+      return { value: { source: "pull-request.png", tintColor: Color.Red }, tooltip: "Closed" };
     } else if (pullRequest.data.draft) {
-      return { value: { source: "pull-request-draft.svg", tintColor: Color.SecondaryText }, tooltip: "Draft" };
+      return { value: { source: "pull-request.png", tintColor: Color.SecondaryText }, tooltip: "Draft" };
     } else {
-      return { value: { source: "pull-request-open.svg", tintColor: Color.Green }, tooltip: "Open" };
+      return { value: { source: "pull-request.png", tintColor: Color.Green }, tooltip: "Open" };
     }
   }
 
@@ -94,14 +92,17 @@ export async function getNotificationIcon(notification: Notification) {
 
     if (issue.data.state === "closed") {
       if (issue.data.state_reason === "completed") {
-        return { value: { source: "issue-closed.svg", tintColor: Color.Purple }, tooltip: "Closed as completed" };
+        return { value: { source: "issue-closed.png", tintColor: Color.Purple }, tooltip: "Closed as completed" };
       } else if (issue.data.state_reason === "not_planned") {
-        return { value: { source: "skip.svg", tintColor: Color.SecondaryText }, tooltip: "Closed as not planned" };
+        return {
+          value: { source: Icon.CircleDisabled, tintColor: Color.SecondaryText },
+          tooltip: "Closed as not planned",
+        };
       } else {
-        return { value: { source: "issue-closed.svg", tintColor: Color.Purple }, tooltip: "Closed" };
+        return { value: { source: "issue-closed.png", tintColor: Color.Purple }, tooltip: "Closed" };
       }
     } else {
-      return { value: { source: "issue-open.svg", tintColor: Color.Green }, tooltip: "Open" };
+      return { value: { source: "issue-open.png", tintColor: Color.Green }, tooltip: "Open" };
     }
   }
 
@@ -109,10 +110,10 @@ export async function getNotificationIcon(notification: Notification) {
 
   switch (notification.subject.type) {
     case "Commit":
-      icon = { value: { source: "commit.svg" }, tooltip: "Commit" };
+      icon = { value: { source: Icon.Code }, tooltip: "Commit" };
       break;
     case "Release":
-      icon = { value: { source: "tag.svg", tintColor: Color.Blue }, tooltip: "Release" };
+      icon = { value: { source: Icon.Tag, tintColor: Color.Blue }, tooltip: "Release" };
       break;
     case "CheckSuite":
       icon = {
@@ -121,19 +122,19 @@ export async function getNotificationIcon(notification: Notification) {
           : notification.subject.title.match(/(failed)/i)
           ? { source: Icon.XMarkCircle, tintColor: Color.Red }
           : notification.subject.title.match(/(skipped|cancelled)/i)
-          ? { source: "skip.svg", tintColor: Color.SecondaryText }
+          ? { source: Icon.CircleDisabled, tintColor: Color.SecondaryText }
           : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText },
         tooltip: "Workflow Run",
       };
       break;
     case "Discussion":
-      icon = { value: { source: "comment-discussion.svg" }, tooltip: "Comment" };
+      icon = { value: { source: Icon.SpeechBubble }, tooltip: "Comment" };
       break;
     case "RepositoryInvitation":
-      icon = { value: { source: "mail.svg" }, tooltip: "Repository Invitation" };
+      icon = { value: { source: Icon.Envelope }, tooltip: "Repository Invitation" };
       break;
     case "RepositoryVulnerabilityAlert":
-      icon = { value: { source: "alert.svg" }, tooltip: "Repository} Vulnerability Alert" };
+      icon = { value: { source: Icon.Warning }, tooltip: "Repository} Vulnerability Alert" };
       break;
     default:
       icon = { value: { source: Icon.Circle }, tooltip: "Unknown" };

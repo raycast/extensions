@@ -13,8 +13,8 @@ type CopyFieldItemActionProps = {
 function CopyFieldItemAction({ label, content, type, shortcut }: CopyFieldItemActionProps) {
   const tryCopy = async () => {
     try {
-      const transient = getTransientCopyPreference(type ?? "other");
-      await Clipboard.copy(content, { transient });
+      const concealed = getTransientCopyPreference(type ?? "other");
+      await Clipboard.copy(content, { concealed });
       await showCopySuccessMessage(`Copied ${label}`);
     } catch (error) {
       await showToast(Toast.Style.Failure, `Failed to copy ${label}`);

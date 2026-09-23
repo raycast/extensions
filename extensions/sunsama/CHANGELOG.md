@@ -1,5 +1,21 @@
 # Sunsama Changelog
 
+## [Task Details Pane] - 2026-09-21
+
+- Turn on "Show task details" in View Today's Tasks preferences to open a side
+  pane with the selected task's notes, subtasks, channel, category, planned and
+  tracked time, calendar slots, the linked item, and created/modified dates.
+- Yesterday's calendar events no longer show up in today's list when Sunsama
+  rolls them forward.
+
+## [AI Extension] - 2026-09-11
+
+- Ask Raycast AI to manage your day: mention `@sunsama` in AI Chat to list a
+  day's tasks and channels, add tasks (with notes, a channel, planned time,
+  subtasks, or a pasted link), edit, complete, reschedule, and delete tasks,
+  add subtasks, and start or stop timers. Editing, completing, rescheduling,
+  or deleting a task asks you to confirm first.
+
 ## [Default Channel for Linked Tasks] - 2026-09-09
 
 - A pasted link now keeps whichever channel Sunsama's own automation assigns to

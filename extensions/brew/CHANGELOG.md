@@ -1,5 +1,21 @@
 # Brew Changelog
 
+## [Homebrew 7 support] - 2026-09-21
+
+- Show Installed now lists formulae you asked for and their dependencies in separate sections; a dependency nothing else needs is tagged Unused. ⌘D still hides the dependencies section.
+- New **Run Doctor** command: shows the `brew doctor` report with every recommended fix, and runs them all with one confirmation (Fix All). Needs Homebrew 7.0
+- New **Show Vulnerabilities** command: lists installed formulae with known vulnerabilities from `brew vulns` (Homebrew 7), with per-advisory detail, a Show Details view that expands every advisory in full, and an Upgrade action where the formula is also outdated
+- Installed casks that own symlinks (a `binary`, man pages, shell completions) gained **Link Cask** (⌘L) and **Unlink Cask** (⌘⇧L): each runs `brew --dry-run` first and lists the exact symlinks it would create or remove before you confirm. A cask that is already linked says so instead of running anything. Needs Homebrew 7.0
+- Preview Install (⌘⇧I) on uninstalled packages shows what `brew install --dry-run` would install or upgrade, with Install one keystroke away
+- Preview Upgrades (⌘⇧I) in Show Upgrades shows what `brew upgrade` would actually do: every package with its version transition, its download size, the total to download, and any warning brew raises. It runs `brew upgrade --dry-run` only when you ask for it — the manifest lookups take a while on a long list
+- Preview Upgrade (⌘⌥I) on an outdated package — in Show Upgrades, Show Installed and Search — shows what `brew upgrade <package>` alone would do: its version transition, download size and any warning, with Upgrade one keystroke away. Only offered where there is something to upgrade
+- Cask details now show a Languages row for casks that ship language variants (firefox, thunderbird, libreoffice, and a few others) — 8 or fewer codes list inline, more collapse to a count
+- Search marks packages that can't be installed on this Mac (disabled, Linux-only, macOS version or architecture) with ⊘, says why in the sidebar, and no longer offers Install for them
+- `Upgrade` is now the primary action for the selected formula or cask (nhojb)
+- `Upgrade All` is the secondary action (if available) (nhojb)
+- Selection can be toggled via the `⌘⇧X` shortcut (nhojb)
+- Select/Deselect all can be toggled via the `⌘⇧A` shortcut (nhojb)
+
 ## [Cask pinning, Homebrew 6] - 2026-09-08
 
 - **Casks can now be pinned**, just like formulae — pin a cask and it is locked out of upgrades, gets its own section in Show Installed, and shows the same pin icon everywhere. Homebrew has supported this since 5.1.12

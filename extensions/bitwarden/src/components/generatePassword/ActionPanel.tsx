@@ -13,7 +13,7 @@ const GeneratePasswordActionPanel = (props: GeneratePasswordActionPanelProps) =>
   const { password, regeneratePassword } = props;
 
   const handleCopy = (password: string) => async () => {
-    await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
+    await Clipboard.copy(password, { concealed: getTransientCopyPreference("password") });
     await showCopySuccessMessage("Copied password to clipboard");
   };
 

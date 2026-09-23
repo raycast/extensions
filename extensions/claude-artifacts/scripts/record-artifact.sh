@@ -63,7 +63,24 @@ CWD="$(printf '%s' "${PAYLOAD}" | jq -r '.cwd // empty' 2>/dev/null)"
 # extract via the regex: a string-shaped response embeds the URL in prose
 # ("Published to <url> successfully"), and taking the field whole would drag the
 # trailing words into the id.
-URL_PATTERN='https://claude\.ai/(code/)?artifact/[0-9a-fA-F-]{36}'
+#
+# The id segment is deliberately matched as a LOOSE opaque token, not as a UUID.
+#
+# Until ~2026-09-10 every artifact URL was `/code/artifact/<uuid>`, and this
+# pattern said so: `[0-9a-fA-F-]{36}`. Then the scheme changed to
+# `/artifact/<22-char base62 slug>` — `https://claude.ai/artifact/Xu57qA1gp4AUrcd6bZ9t8V`
+# — and the hook stopped matching anything. It kept exiting 0 (by contract it
+# must never fail a turn), so the only symptom was `~/.claude/artifacts.json`
+# quietly ceasing to grow while every other health check still read green: the
+# script was installed, registered, executable, and running. Nine days of
+# publishes were lost before anyone noticed.
+#
+# The lesson is that the id format is not ours and will change again. Match the
+# SHAPE OF THE URL, which is the stable part, and treat whatever follows the
+# last slash as opaque. The `claude.ai/…/artifact/` prefix is specific enough to
+# carry the whole burden of identification; tightening the tail buys no real
+# precision and is what broke.
+URL_PATTERN='https://claude\.ai/(code/)?artifact/[A-Za-z0-9_-]{16,64}'
 
 CANDIDATE="$(
   printf '%s' "${PAYLOAD}" | jq -r '

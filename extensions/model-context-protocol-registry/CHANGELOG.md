@@ -1,5 +1,21 @@
 # Model Context Protocol Registry Changelog
 
+## [Add QuillHub MCP Server] - 2026-09-23
+
+- Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add SocialFaktory MCP Server] - 2026-09-22
+
+- Add SocialFaktory to the official registry: write, generate, schedule and publish a brand's social content, in its own voice, on every channel. Remote Streamable HTTP server at https://www.socialfaktory.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add BlindPay MCP Server] - 2026-09-22
+
+- Add BlindPay to the official registry: stablecoin global payments (receivers, virtual accounts, FX quotes, payouts, payins, balances, history). Remote Streamable HTTP server at https://mcp.blindpay.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add GTD Brain MCP Server] - 2026-09-21
+
+- Add GTD Brain to the official registry: a Getting Things Done board (capture to Inbox, next actions by context, projects, waiting-for, weekly review) shared with the GTD Brain web, iOS and Android apps. Remote Streamable HTTP server at https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp through `mcp-remote`; OAuth 2.1 sign-in with an email code, no API key.
+
 ## [Add Sitelemetry MCP Server] - 2026-09-19
 
 - Add Sitelemetry to the official registry: authorized website audits (security posture, technical SEO, AI visibility, analytics integrations, WCAG 2.2 accessibility and performance) with evidence-backed findings and fixes in nine languages. Remote Streamable HTTP server at https://sitelemetry.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.

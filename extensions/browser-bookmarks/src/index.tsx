@@ -6,11 +6,12 @@ import {
   List,
   LocalStorage,
   Toast,
+  closeMainWindow,
   getPreferenceValues,
   open,
   showToast,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 
@@ -42,6 +43,15 @@ import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
 import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
+import {
+  getChromiumCurrentTabAppleScript,
+  getChromiumNewTabAppleScript,
+  getChromiumNewWindowAppleScript,
+  getSafariCurrentTabAppleScript,
+  getSafariNewTabAppleScript,
+  getSafariNewWindowAppleScript,
+  runBrowserAutomation,
+} from "./utils/browserOpening";
 import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { getBookmarkIcon } from "./utils/icons";
@@ -54,6 +64,7 @@ type Bookmark = {
   url: string;
   folder: string;
   domain: string;
+  favicon?: string;
   bookmarkFrecency?: BookmarkFrecency;
 };
 
@@ -70,6 +81,70 @@ const LEGACY_WINDOWS_BROWSER_IDS: Record<string, string> = {
   brave: BROWSERS_BUNDLE_ID.brave,
 };
 
+const CHROMIUM_SCRIPTABLE_BROWSER_IDS = new Set<string>([
+  BROWSERS_BUNDLE_ID.brave,
+  BROWSERS_BUNDLE_ID.braveBeta,
+  BROWSERS_BUNDLE_ID.braveNightly,
+  BROWSERS_BUNDLE_ID.chrome,
+  BROWSERS_BUNDLE_ID.chromeBeta,
+  BROWSERS_BUNDLE_ID.chromeDev,
+  BROWSERS_BUNDLE_ID.edge,
+  BROWSERS_BUNDLE_ID.edgeCanary,
+  BROWSERS_BUNDLE_ID.edgeDev,
+  BROWSERS_BUNDLE_ID.vivaldi,
+  BROWSERS_BUNDLE_ID.vivaldiSnapshot,
+]);
+
+const IS_MACOS = process.platform === "darwin";
+
+type BrowserOpenMode = "current-tab" | "new-tab" | "new-window";
+
+function supportsBrowserAutomation(browserBundleId: string) {
+  return (
+    IS_MACOS && (browserBundleId === BROWSERS_BUNDLE_ID.safari || CHROMIUM_SCRIPTABLE_BROWSER_IDS.has(browserBundleId))
+  );
+}
+
+function getBrowserAppleScript(browserBundleId: string, mode: BrowserOpenMode) {
+  if (browserBundleId === BROWSERS_BUNDLE_ID.safari) {
+    const scripts = {
+      "current-tab": getSafariCurrentTabAppleScript,
+      "new-tab": getSafariNewTabAppleScript,
+      "new-window": getSafariNewWindowAppleScript,
+    };
+    return scripts[mode]();
+  }
+
+  if (CHROMIUM_SCRIPTABLE_BROWSER_IDS.has(browserBundleId)) {
+    const scriptFactories = {
+      "current-tab": getChromiumCurrentTabAppleScript,
+      "new-tab": getChromiumNewTabAppleScript,
+      "new-window": getChromiumNewWindowAppleScript,
+    };
+    return scriptFactories[mode](browserBundleId);
+  }
+
+  return undefined;
+}
+
+async function openWithBrowserAutomation(
+  url: string,
+  browserBundleId: string,
+  mode: BrowserOpenMode,
+  fallbackApplication: BrowserApplication | undefined,
+) {
+  const script = getBrowserAppleScript(browserBundleId, mode);
+  if (!script) {
+    throw new Error("This browser does not support the requested opening behavior");
+  }
+
+  await runBrowserAutomation(script, url, {
+    closeWindow: closeMainWindow,
+    runScript: runAppleScript,
+    openFallback: () => open(url, fallbackApplication),
+  });
+}
+
 function normalizeStoredBrowsers(browsers: string[]) {
   return browsers.map((browser) => LEGACY_WINDOWS_BROWSER_IDS[browser] ?? browser);
 }
@@ -78,7 +153,7 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -580,10 +655,12 @@ export default function Command() {
       }
     >
       {filteredBookmarks.slice(0, 100).map((item) => {
+        const bookmarkBrowserApplication = browserBundleToApp(item.browser);
+
         return (
           <List.Item
             key={item.id}
-            icon={getBookmarkIcon(item.url)}
+            icon={getBookmarkIcon(item.url, item.favicon)}
             title={item.title}
             subtitle={showDomain ? item.domain : ""}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
@@ -592,14 +669,25 @@ export default function Command() {
                 {openBookmarkBrowser ? (
                   <Action
                     title="Open in Browser"
+                    icon={Icon.Globe}
                     onAction={async () => {
-                      await open(item.url, browserBundleToApp(item.browser));
+                      if (replaceCurrentTab && supportsBrowserAutomation(item.browser)) {
+                        await openWithBrowserAutomation(
+                          item.url,
+                          item.browser,
+                          "current-tab",
+                          bookmarkBrowserApplication,
+                        );
+                      } else {
+                        await open(item.url, bookmarkBrowserApplication);
+                      }
                       await updateFrecency(item);
                     }}
                   />
                 ) : (
                   <Action
                     title="Open in Browser"
+                    icon={Icon.Globe}
                     onAction={async () => {
                       await open(item.url);
                       await updateFrecency(item);
@@ -607,7 +695,41 @@ export default function Command() {
                   />
                 )}
 
-                <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
+                {/* Raycast only exposes Cmd+Enter for the alternate action directly after the primary action. */}
+                {IS_MACOS && bookmarkBrowserApplication ? (
+                  <Action
+                    title="Open in New Browser Tab"
+                    icon={Icon.NewDocument}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    onAction={async () => {
+                      if (supportsBrowserAutomation(item.browser)) {
+                        await openWithBrowserAutomation(item.url, item.browser, "new-tab", bookmarkBrowserApplication);
+                      } else {
+                        await open(item.url, bookmarkBrowserApplication);
+                      }
+                      await updateFrecency(item);
+                    }}
+                  />
+                ) : null}
+
+                {IS_MACOS && bookmarkBrowserApplication && supportsBrowserAutomation(item.browser) ? (
+                  <Action
+                    title="Open in New Browser Window"
+                    icon={Icon.AppWindow}
+                    shortcut={{ modifiers: ["shift"], key: "enter" }}
+                    onAction={async () => {
+                      await openWithBrowserAutomation(item.url, item.browser, "new-window", bookmarkBrowserApplication);
+                      await updateFrecency(item);
+                    }}
+                  />
+                ) : null}
+
+                <Action.CopyToClipboard
+                  title="Copy Link"
+                  content={item.url}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  onCopy={() => updateFrecency(item)}
+                />
 
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => removeFrecency(item)} />
 

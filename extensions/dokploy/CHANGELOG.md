@@ -1,5 +1,21 @@
 # Dokploy Changelog
 
+## [Runtime Logs: Follow Mode and Compose Support] - 2026-09-23
+
+- `View Logs` now works for Compose stacks: pick a container from its stack to see its logs. Also adds `Start Following`/`Stop Following` to every kind, auto-refreshing the view instead of needing to hit `Refresh` manually.
+
+## [Deploy Service Command] - 2026-09-22
+
+- Add a `Deploy Service` command that searches for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and current status, and offers the full set of lifecycle actions (Deploy, Redeploy/Rebuild, Start, Stop, Reload) plus `View Logs` - the same actions the Services screen already has, sorted by frecency. Always lists matches and waits for an explicit selection - never acts automatically, even when only one service matches.
+
+## [Schedules] - 2026-09-21
+
+- Add a `View Schedules` action to Applications and Compose stacks, listing scheduled shell commands with `Add Schedule`, `Edit Schedule`, `Run Now`, `View Runs` (with logs) and `Delete Schedule` actions.
+
+## [Compose Backups] - 2026-09-21
+
+- Extend the `View Backups` action to Compose stacks: pick a container and which database engine it runs, alongside the same schedule/destination/retention fields the database version already has.
+
 ## [Database Backups] - 2026-09-20
 
 - Add a `View Backups` action to Postgres, MariaDB, MySQL and MongoDB services, listing scheduled S3 backups with `Add Backup`, `Edit Backup`, `Run Backup Now` and `Delete Backup` actions. The backup form can also create a new destination on the spot via `Add Destination`, without leaving to the separate Destinations command.

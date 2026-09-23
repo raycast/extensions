@@ -257,6 +257,21 @@
       "mode": "view"
     },
     {
+      "name": "my-packages",
+      "title": "My Packages",
+      "description": "List packages you published to GitHub Packages",
+      "mode": "view",
+      "keywords": [
+        "container",
+        "npm",
+        "maven",
+        "docker",
+        "nuget",
+        "rubygems",
+        "registry"
+      ]
+    },
+    {
       "name": "workflow-runs",
       "title": "Workflow Runs",
       "description": "Manage workflow runs for a selected GitHub repository.",
@@ -546,6 +561,40 @@
           "required": false,
           "title": "Max Pull Requests per category",
           "placeholder": "5"
+        }
+      ]
+    },
+    {
+      "name": "my-packages-menu",
+      "title": "My Packages Menu Bar",
+      "description": "Display My Packages in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "titlePackage",
+          "description": "Show this package's name and total download count in the menu bar title. Leave empty to show the number of packages instead. GitHub publishes download counts only on public package pages, so a private package shows just its name.",
+          "type": "textfield",
+          "required": false,
+          "title": "Menu Bar Title",
+          "placeholder": "package-name"
+        },
+        {
+          "name": "showtext",
+          "description": "Show packages count with menu bar icon. Ignored when a package name is set above.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum packages shown per package type.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Packages per Package Type",
+          "placeholder": "10"
         }
       ]
     },
@@ -1037,7 +1086,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user. Add read:packages to use the My Packages commands.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
     },
