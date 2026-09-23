@@ -7,7 +7,7 @@ import { AgentId, RefEntry, SessionHit, SessionState } from "./types";
  * Query understanding + ranking.
  *
  *  1. Parse the query into structured intents: PR number (832, #832, PR 832, GitHub PR URL),
- *     Linear issue keys (ZAP-1793), plus free text.
+ *     Linear issue keys (ENG-1793), plus free text.
  *  2. Free text goes through FTS5 (BM25 per message, aggregated per session; tool lines are
  *     down-weighted, the synthetic title/branch/repo doc is up-weighted). Two stages like
  *     Threadlens: AND with prefix on the last term, then OR if the AND stage is thin.

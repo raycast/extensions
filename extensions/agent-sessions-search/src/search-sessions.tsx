@@ -139,7 +139,7 @@ export default function Command() {
       filtering={false}
       throttle
       isShowingDetail={showDetail && hits.length > 0}
-      searchBarPlaceholder="Search sessions: PR 832, ZAP-1793, branch, file, or any text…"
+      searchBarPlaceholder="Search sessions: PR 832, ENG-1793, branch, file, or any text…"
       onSearchTextChange={setQuery}
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}

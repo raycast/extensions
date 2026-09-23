@@ -23,7 +23,7 @@ Resume commands always run inside the session's own working directory, which sev
 
 ## What it does
 
-- **One search box over every historical session**, not only recent ones: PR numbers (`832`, `#832`, `PR 832`, a GitHub PR URL), Linear keys (`ZAP-1793`), branch names, file names, symbols, or any phrase from the conversation.
+- **One search box over every historical session**, not only recent ones: PR numbers (`832`, `#832`, `PR 832`, a GitHub PR URL), Linear keys (`ENG-1793`), branch names, file names, symbols, or any phrase from the conversation.
 - **PR-aware ranking.** A session that actually worked on PR #832 (Claude `pr-link` record, branch `pr-832-…`, the PR URL in your prompt) ranks far above a session where "832" merely appears in some output.
 - **One index across agents.** The same query reaches a Claude Code session, the Cursor chat that followed it and the opencode run that shipped it, grouped by project.
 - **Metadata per session:** agent, title, project/repo, branch, created and last-activity dates, PR and issue tags, message count, the prompt that started it and the last one.
