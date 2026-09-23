@@ -1,5 +1,9 @@
 # Quick Radios Changelog
 
+## [Improved Store Discoverability] - {PR_MERGE_DATE}
+
+- Added search keywords (wifi, wlan, wireless, network, hotspot) so the extension appears when searching for Wi-Fi
+
 ## [Initial Version] - 2026-09-23
 
 - Initial release of Quick Radios, a Wi-Fi manager for Raycast on Windows
