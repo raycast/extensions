@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Template Preview] - {PR_MERGE_DATE}
+## [Template Preview] - 2026-09-23
 
 - Add a `Preview` action to `From Template`, showing the domains, environment variables and file mounts a template will create before deploying it.
 
