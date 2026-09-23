@@ -12,7 +12,9 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Create Database
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
-        - View Service Logs
+        - View Service Logs (Compose stacks pick a container first)
+            - Start / Stop Following
+            - Select / Change Container (Compose stacks)
         - View Deployments (Applications and Compose stacks)
             - View Build Logs
             - Roll Back
