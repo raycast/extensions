@@ -4,6 +4,7 @@
 
 - Resolve ENS profiles and records through the Universal Resolver
 - Support exact ENSv2 names while preserving prefix search
+- Show Ethereum, Bitcoin, Solana, Base, Optimism, and Arbitrum address records
 
 ## [Fix] - 2022-10-07
 
