@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RemoveDuplicates.org MCP Server] - 2026-09-23
+
+- Add RemoveDuplicates.org to the official registry: remove duplicate lines or CSV/TSV rows and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in, no API key.
+
 ## [Add QuillHub MCP Server] - 2026-09-23
 
 - Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
