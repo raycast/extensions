@@ -5,6 +5,7 @@ import {
   CATEGORY_COLORS,
   categoryIcon,
   changelogUrl,
+  checkForExtensionUpdates,
   createStoreDeeplink,
   extractLatestChanges,
   MACOS_TINT_COLOR,
@@ -89,7 +90,7 @@ export function ExtensionActions({
               />
               {latestChanges && (
                 <Action.CopyToClipboard
-                  title="Copy Recent Changes"
+                  title="Copy Latest Changes"
                   content={latestChanges}
                   icon={Icon.Clipboard}
                   shortcut={Keyboard.Shortcut.Common.Copy}
@@ -121,11 +122,16 @@ export function ExtensionActions({
               title="Open in Raycast Store"
               url={storeDeeplink}
               icon={Icon.RaycastLogoNeg}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              // Mirrors the Raycast Store's own "View Developer" (⌥⇧⌘O). Custom on purpose: no
+              // Common constant means "open in the Store".
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt", "shift"], key: "o" },
+                Windows: { modifiers: ["ctrl", "alt", "shift"], key: "o" },
+              }}
             />
             {/*
               CopyName, NOT a hand-written cmd+shift+c — that combo IS Common.Copy,
-              which "Copy Recent Changes" already claims in this same panel. Writing it
+              which "Copy Latest Changes" already claims in this same panel. Writing it
               longhand looks like a distinct shortcut but resolves to the same keys, and
               ray lint does not check the ActionPanel conflict invariant.
             */}
@@ -145,6 +151,19 @@ export function ExtensionActions({
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => !isRefreshing && onRefresh?.()}
+        />
+        {/* Refresh reloads THIS list; this updates the user's installed extensions —
+            Raycast's own job, which this command only reports on. ⌘⇧U is free: no
+            Common constant binds it, and the panel's hand-written combos use
+            o/c/l/r/m/w/f/a/z. */}
+        <Action
+          title="Check for Extension Updates"
+          icon={Icon.Download}
+          onAction={checkForExtensionUpdates}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "u" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+          }}
         />
       </ActionPanel.Section>
 
