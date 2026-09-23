@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Add priority and tags support] - {PR_MERGE_DATE}
+## [Add priority and tags support] - 2026-09-23
 
 - Add support for setting priority (`low`, `medium`, `high`) and tags when creating or updating reminders.
 - Add priority dropdown and tags field to Create Reminder and Edit Reminder forms.
