@@ -22,6 +22,7 @@ import {
   isFolder,
   s,
   sortAddresses,
+  subnetFamily,
   subnetLabel,
   tagColor,
   tagName,
@@ -84,11 +85,14 @@ export async function copyFirstFreeAddress(subnet: Subnet) {
 export function AddressListItem({
   address,
   sectionId,
+  family,
 }: {
   address: IpAddress;
   sectionId?: string;
+  /** From the parent subnet; search results carry no family marker. */
+  family?: 4 | 6;
 }) {
-  const ip = ipOf(address);
+  const ip = ipOf(address, family);
   const state = s(address.state);
   const hostname = s(address.hostname);
   const tag = tagName(state);
@@ -251,8 +255,11 @@ export function SubnetDetailView({
       const subnet = await phpipam.subnet(id);
       // Usage and addresses are supplementary: keep the subnet visible when
       // they fail, but report the failure instead of pretending it is empty.
-      const usage = await settle(phpipam.subnetUsage(id));
-      const addresses = await settle(phpipam.subnetAddresses(id));
+      // They are independent of each other, so start them together.
+      const [usage, addresses] = await Promise.all([
+        settle(phpipam.subnetUsage(id)),
+        settle(phpipam.subnetAddresses(id)),
+      ]);
       return { subnet, usage, addresses };
     },
     [subnetId],
@@ -265,9 +272,10 @@ export function SubnetDetailView({
 
   const subnet = data?.subnet;
   const notFolder = subnet ? !isFolder(subnet) : false;
+  const family = subnet ? subnetFamily(subnet) : undefined;
   const usage = notFolder ? data?.usage.value : undefined;
   const usageError = notFolder ? data?.usage.error : undefined;
-  const addressList = sortAddresses(data?.addresses.value ?? []);
+  const addressList = sortAddresses(data?.addresses.value ?? [], family);
   const addressesError = data?.addresses.error;
   const resolvedSectionId = sectionId ?? s(subnet?.sectionId);
 
@@ -329,6 +337,7 @@ export function SubnetDetailView({
               key={s(address.id)}
               address={address}
               sectionId={resolvedSectionId}
+              family={family}
             />
           ))
         )}

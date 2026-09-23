@@ -10,7 +10,7 @@ import {
   silentPromiseOptions,
 } from "./components";
 import type { SearchResults, Vlan, Vrf } from "./types";
-import { s } from "./utils";
+import { s, subnetFamily } from "./utils";
 
 const MIN_TERM_LENGTH = 3;
 const DEBOUNCE_MS = 300;
@@ -20,6 +20,12 @@ const DEBOUNCE_MS = 300;
  * the query beats scrolling. Subnets/VLANs/VRFs are low-volume: uncapped.
  */
 const MAX_ADDRESSES = 256;
+/**
+ * Search results carry raw decimal IPs without a family marker; only the
+ * parent subnet knows whether "1" is 0.0.0.1 or ::1. Lookups run in parallel
+ * and beyond this many distinct subnets the size heuristic stays in charge.
+ */
+const MAX_FAMILY_LOOKUPS = 12;
 
 function addressesTitle(total: number): string {
   return total > MAX_ADDRESSES
@@ -100,8 +106,24 @@ export default function Command() {
     async (
       searchTerm: string,
       enabled: boolean,
-    ): Promise<SearchResults | null> =>
-      enabled ? phpipam.search(searchTerm) : null,
+    ): Promise<(SearchResults & { families: Map<string, 4 | 6> }) | null> => {
+      if (!enabled) return null;
+      const results = await phpipam.search(searchTerm);
+      const families = new Map<string, 4 | 6>();
+      const subnetIds = [
+        ...new Set(results.addresses.map((a) => s(a.subnetId)).filter(Boolean)),
+      ].slice(0, MAX_FAMILY_LOOKUPS);
+      await Promise.all(
+        subnetIds.map(async (id) => {
+          try {
+            families.set(id, subnetFamily(await phpipam.subnet(id)));
+          } catch {
+            // Unresolved subnets keep the size-based family heuristic.
+          }
+        }),
+      );
+      return { ...results, families };
+    },
     [term, searchable],
     silentPromiseOptions,
   );
@@ -142,7 +164,11 @@ export default function Command() {
         <>
           <List.Section title={addressesTitle(results.addresses.length)}>
             {results.addresses.slice(0, MAX_ADDRESSES).map((address) => (
-              <AddressListItem key={s(address.id)} address={address} />
+              <AddressListItem
+                key={s(address.id)}
+                address={address}
+                family={results.families.get(s(address.subnetId))}
+              />
             ))}
           </List.Section>
           <List.Section title={`Subnets (${results.subnets.length})`}>

@@ -55,20 +55,22 @@ function compressIpv6Hex(hex: string): string {
 /**
  * phpIPAM stores addresses as decimal integers and some endpoints return them
  * untransformed. Convert decimal values to dotted notation, pass through
- * anything that is already dotted.
+ * anything that is already dotted. Values that fit in 32 bits are ambiguous
+ * (::1 and 0.0.0.1 are both "1"), so the family must come from the parent
+ * subnet when it is known; only values beyond the IPv4 range decide alone.
  */
-export function dotted(v: Scalar): string {
+export function dotted(v: Scalar, family?: 4 | 6): string {
   const str = s(v).trim();
   if (!str) return "";
   if (str.includes(":") || str.includes(".")) return str;
   if (!/^\d+$/.test(str)) return str;
   const n = BigInt(str);
-  if (n <= 0xffffffffn) {
-    return [24n, 16n, 8n, 0n]
-      .map((shift) => String((n >> shift) & 0xffn))
-      .join(".");
+  if (family === 6 || n > 0xffffffffn) {
+    return compressIpv6Hex(n.toString(16).padStart(32, "0"));
   }
-  return compressIpv6Hex(n.toString(16).padStart(32, "0"));
+  return [24n, 16n, 8n, 0n]
+    .map((shift) => String((n >> shift) & 0xffn))
+    .join(".");
 }
 
 /** Numeric sort key so subnets and addresses order like they do in the UI. */
@@ -89,15 +91,27 @@ export function ipSortKey(ip: string): bigint {
   return 0n;
 }
 
-export function ipOf(address: IpAddress): string {
-  return dotted(address.ip ?? address.ip_addr) || `#${s(address.id)}`;
+export function ipOf(address: IpAddress, family?: 4 | 6): string {
+  return dotted(address.ip ?? address.ip_addr, family) || `#${s(address.id)}`;
+}
+
+/**
+ * phpIPAM has no address-family column; the parent subnet decides it. A mask
+ * above 32 only fits IPv6, and a subnet value beyond the IPv4 range must be
+ * IPv6. (An IPv6 subnet of ::/N with N ≤ 32 would still be misread — no real
+ * allocation looks like that.)
+ */
+export function subnetFamily(subnet: Subnet): 4 | 6 {
+  const mask = Number(s(subnet.mask));
+  if (Number.isFinite(mask) && mask > 32) return 6;
+  return dotted(subnet.subnet).includes(":") ? 6 : 4;
 }
 
 export function subnetLabel(subnet: Subnet): string {
   if (s(subnet.isFolder) === "1") {
     return s(subnet.description) || "Folder";
   }
-  const network = dotted(subnet.subnet);
+  const network = dotted(subnet.subnet, subnetFamily(subnet));
   return network ? `${network}/${s(subnet.mask)}` : `Subnet #${s(subnet.id)}`;
 }
 
@@ -109,19 +123,22 @@ export function sortSubnets(subnets: Subnet[]): Subnet[] {
   return [...subnets].sort((a, b) => {
     const folderDiff = Number(isFolder(a)) - Number(isFolder(b));
     if (folderDiff !== 0) return folderDiff;
-    const keyA = ipSortKey(dotted(a.subnet));
-    const keyB = ipSortKey(dotted(b.subnet));
+    const keyA = ipSortKey(dotted(a.subnet, subnetFamily(a)));
+    const keyB = ipSortKey(dotted(b.subnet, subnetFamily(b)));
     if (keyA !== keyB) return keyA < keyB ? -1 : 1;
     return subnetLabel(a).localeCompare(subnetLabel(b));
   });
 }
 
-export function sortAddresses(addresses: IpAddress[]): IpAddress[] {
+export function sortAddresses(
+  addresses: IpAddress[],
+  family?: 4 | 6,
+): IpAddress[] {
   return [...addresses].sort((a, b) => {
-    const keyA = ipSortKey(ipOf(a));
-    const keyB = ipSortKey(ipOf(b));
+    const keyA = ipSortKey(ipOf(a, family));
+    const keyB = ipSortKey(ipOf(b, family));
     return keyA === keyB
-      ? ipOf(a).localeCompare(ipOf(b))
+      ? ipOf(a, family).localeCompare(ipOf(b, family))
       : keyA < keyB
         ? -1
         : 1;

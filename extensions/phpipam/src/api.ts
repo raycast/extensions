@@ -265,11 +265,11 @@ export const phpipam = {
         `subnets/${encodeURIComponent(subnetId)}/first_free/`,
       );
     } catch (error) {
-      if (
-        error instanceof ApiError &&
-        (error.code === 404 || error.code === 503)
-      )
+      // Only phpIPAM's explicit "no free" response means full. Other 404s
+      // (invalid subnet id) and outages must surface as errors, not "full".
+      if (error instanceof ApiError && /no free/i.test(error.message)) {
         return null;
+      }
       throw error;
     }
   },
