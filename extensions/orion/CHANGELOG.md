@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-23
 
 - Fix typed web address detection: a bare number like `1` was misrecognized as an address (Node's URL parser coerces it to an IPv4-looking hostname), a non-canonical IPv4 octet like `192.168.001.1` was accepted as valid, and bracketed IPv6 literals were not recognized at all. Also trust an explicit `http://`/`https://` scheme for single-label hosts (e.g. an internal hostname with no public TLD) instead of requiring it to pass Public Suffix List validation.
 
