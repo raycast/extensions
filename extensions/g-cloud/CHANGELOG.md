@@ -1,6 +1,6 @@
 # Google Cloud CLI Changelog
 
-## [Compute Engine Lifecycle Fixes] - {PR_MERGE_DATE}
+## [Compute Engine Lifecycle Fixes] - 2026-09-23
 
 - Fixed Compute Engine lifecycle actions to use state-aware verbs, including resuming suspended instances instead of trying to start them
 - Added Compute Engine suspend and restart actions, improved transitional state handling, and refreshed instance detail state after power actions
