@@ -1,10 +1,10 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { test } from "node:test";
+import { equal, fail, rejects } from "node:assert/strict";
 import { createServer } from "node:net";
-import type { Socket } from "node:net";
+import type { Server, Socket } from "node:net";
 import { once } from "node:events";
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { createSecureContext, TLSSocket } from "node:tls";
 import { Client } from "ldapts";
 import {
@@ -12,7 +12,10 @@ import {
   formatTargetHost,
   startTLSWithDeadline,
   tlsOptions,
-} from "../src/ldap.ts";
+} from "../src/ldap";
+
+// Compiled tests land in dist-tests/tests; the fixtures stay at the source tree.
+const fixturesDir = join(__dirname, "..", "..", "tests", "fixtures");
 
 // LDAPMessage (messageID placeholder) carrying an extendedResp: success (0),
 // empty matchedDN and errorMessage, responseName 1.3.6.1.4.1.1466.20037
@@ -26,25 +29,19 @@ const STARTTLS_SUCCESS_TEMPLATE = Buffer.from(
 function startTlsSuccess(request: Buffer): Buffer {
   // Echo the request's messageID: INTEGER value sits right after the
   // LDAPMessage SEQUENCE header (30 LL 02 01 <id>).
-  assert.equal(request[2], 0x02);
+  equal(request[2], 0x02);
   const response = Buffer.from(STARTTLS_SUCCESS_TEMPLATE);
   response[4] = request[4];
   return response;
 }
 
-async function listen(server: {
-  listen: (port: number, host: string) => void;
-  address: () => { port: number };
-}): Promise<number> {
+async function listen(server: Server): Promise<number> {
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
-  return server.address().port;
+  return (server.address() as { port: number }).port;
 }
 
-async function closeServer(
-  server: import("node:net").Server,
-  sockets: Set<Socket>,
-): Promise<void> {
+async function closeServer(server: Server, sockets: Set<Socket>): Promise<void> {
   for (const socket of sockets) socket.destroy();
   const closed = once(server, "close");
   server.close();
@@ -52,13 +49,13 @@ async function closeServer(
 }
 
 test("host normalization wraps bare IPv6 literals for URLs and unwraps them for TLS", () => {
-  assert.equal(formatTargetHost("::1"), "[::1]");
-  assert.equal(formatTargetHost("[::1]"), "[::1]");
-  assert.equal(formatTargetHost(" 2001:db8::1 "), "[2001:db8::1]");
-  assert.equal(formatTargetHost("dc01.example.com"), "dc01.example.com");
-  assert.equal(connectionHost("[::1]"), "::1");
-  assert.equal(connectionHost("::1"), "::1");
-  assert.equal(connectionHost("dc01.example.com"), "dc01.example.com");
+  equal(formatTargetHost("::1"), "[::1]");
+  equal(formatTargetHost("[::1]"), "[::1]");
+  equal(formatTargetHost(" 2001:db8::1 "), "[2001:db8::1]");
+  equal(formatTargetHost("dc01.example.com"), "dc01.example.com");
+  equal(connectionHost("[::1]"), "::1");
+  equal(connectionHost("::1"), "::1");
+  equal(connectionHost("dc01.example.com"), "dc01.example.com");
 });
 
 test("tls options carry the configured host for certificate verification", () => {
@@ -66,23 +63,23 @@ test("tls options carry the configured host for certificate verification", () =>
     { ldapSecurity: "starttls", ldapTLSVerify: true },
     "127.0.0.1",
   );
-  assert.ok(options);
-  assert.equal(options.host, "127.0.0.1");
-  assert.equal(options.rejectUnauthorized, true);
-  assert.equal(
+  if (!options) {
+    fail("expected TLS options for starttls security");
+  }
+  equal(options.host, "127.0.0.1");
+  equal(options.rejectUnauthorized, true);
+  equal(
     tlsOptions({ ldapSecurity: "starttls", ldapTLSVerify: false }, "127.0.0.1")
       ?.rejectUnauthorized,
     false,
   );
-  assert.equal(tlsOptions({ ldapSecurity: "none" }, "127.0.0.1"), undefined);
+  equal(tlsOptions({ ldapSecurity: "none" }, "127.0.0.1"), undefined);
 });
 
 test("StartTLS verifies a certificate with an IP SAN against the configured host", { timeout: 15000 }, async () => {
-  const certUrl = new URL("./fixtures/localhost-ip-san.pem", import.meta.url);
-  const key = readFileSync(
-    new URL("./fixtures/localhost-ip-san-key.pem", import.meta.url),
-  );
-  const cert = readFileSync(certUrl);
+  const certPath = join(fixturesDir, "localhost-ip-san.pem");
+  const key = readFileSync(join(fixturesDir, "localhost-ip-san-key.pem"));
+  const cert = readFileSync(certPath);
   const secureContext = createSecureContext({ key, cert });
 
   const sockets = new Set<Socket>();
@@ -104,12 +101,14 @@ test("StartTLS verifies a certificate with an IP SAN against the configured host
     {
       ldapSecurity: "starttls",
       ldapTLSVerify: true,
-      ldapCACert: fileURLToPath(certUrl),
+      ldapCACert: certPath,
     },
     "127.0.0.1",
   );
-  assert.ok(options);
-  assert.equal(options.host, "127.0.0.1");
+  if (!options) {
+    fail("expected TLS options for starttls security");
+  }
+  equal(options.host, "127.0.0.1");
 
   const client = new Client({
     url: `ldap://127.0.0.1:${port}`,
@@ -145,14 +144,13 @@ test("a StartTLS handshake that stalls after the upgrade acknowledgement times o
   });
   try {
     const startedAt = Date.now();
-    await assert.rejects(
+    await rejects(
       startTLSWithDeadline(client, { rejectUnauthorized: false }, 500),
       /StartTLS handshake timed out after 500 ms/,
     );
-    assert.ok(
-      Date.now() - startedAt < 4500,
-      "deadline must fire before the client's operation timeouts",
-    );
+    if (!(Date.now() - startedAt < 4500)) {
+      fail("deadline must fire before the client's operation timeouts");
+    }
   } finally {
     client.unbind().catch(() => {});
     await closeServer(server, sockets);

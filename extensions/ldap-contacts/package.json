@@ -116,7 +116,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "test": "node --test tests/",
+    "test": "tsc -p tsconfig.test.json && node --test dist-tests/tests/*.test.js",
     "publish": "ray publish"
   }
 }
