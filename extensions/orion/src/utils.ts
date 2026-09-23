@@ -1,4 +1,5 @@
 import { homedir } from "os";
+import { isIP } from "net";
 import { URL } from "url";
 import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
@@ -201,26 +202,53 @@ export function buildSearchUrl(query: string, engine: SearchEngine = getSearchEn
   return SEARCH_ENGINES[engine].search + encodeURIComponent(query);
 }
 
-// Accept the same kinds of address users commonly enter in a browser's address
-// bar: a hostname (with an optional protocol, port, or path), localhost, or an
-// IPv4 address. A space means this is a search query, not an address.
+function getRawHost(candidate: string): string | undefined {
+  const authority = candidate.replace(/^https?:\/\//i, "").split(/[/?#]/, 1)[0];
+  if (!authority || authority.includes("@")) return undefined;
+
+  const ipv6 = authority.match(/^\[([^\]]+)\](?::\d+)?$/);
+  if (ipv6) return ipv6[1];
+
+  const host = authority.match(/^([^:]+)(?::\d+)?$/);
+  return host?.[1]?.toLowerCase();
+}
+
+function isCanonicalIPv4(host: string): boolean {
+  const parts = host.split(".");
+  return parts.length === 4 && parts.every((part) => /^(?:0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255);
+}
+
+// Accept the address forms people reasonably expect from an omnibox. This
+// deliberately checks the raw hostname before URL parsing: Node's URL parser
+// coerces a bare number such as `1` to an IPv4-looking hostname, even though a
+// user entering just `1` intends to search rather than open `https://1`.
+//
+// A space means this is a search query. A bare hostname must be localhost, a
+// canonical IP address, or a domain with a TLD. Explicit http(s) URLs are
+// accepted as a deliberate navigation request, including single-label hosts
+// used on private networks.
 export function isWebAddress(value: string): boolean {
   const candidate = value.trim();
   if (!candidate || /\s/.test(candidate)) return false;
 
-  const url = parseUrl(/^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`);
+  const hasExplicitProtocol = /^https?:\/\//i.test(candidate);
+  const url = parseUrl(hasExplicitProtocol ? candidate : `https://${candidate}`);
   if (!url) return false;
+  if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+  if (hasExplicitProtocol) return !!url.hostname;
 
-  const hostname = url.hostname;
-  if (hostname === "localhost") return true;
-  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
-    return hostname.split(".").every((part) => Number(part) <= 255);
-  }
+  const host = getRawHost(candidate);
+  if (!host) return false;
+  if (host === "localhost") return true;
+  if (isCanonicalIPv4(host)) return true;
+  if (isIP(host) === 6) return true;
 
   // Validate against the Public Suffix List rather than accepting any
   // "label.2+ letters" shape - that pattern also matches file-like text such
   // as `index.html`, `main.js`, or `file.txt`, which are not web addresses.
-  const { isIcann, isPrivate } = parseTld(hostname, { allowPrivateDomains: true });
+  // Single-label hosts stay searches unless the user deliberately included an
+  // http(s) scheme.
+  const { isIcann, isPrivate } = parseTld(host, { allowPrivateDomains: true });
   return isIcann === true || isPrivate === true;
 }
 
