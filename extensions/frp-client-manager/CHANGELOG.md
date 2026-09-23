@@ -1,6 +1,6 @@
 # Frp Client Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-23
 
 - View frpc process status, version, and admin API connectivity
 - Start, stop, and restart a launchd-managed frpc service
