@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "goose-monitor",
   "title": "Goose Monitor",
-  "description": "按名称、PID 或端口查找应用并结束。辅助进程归到所属应用下。",
+  "description": "Find and quit apps by name, PID, or port, with helper processes grouped under their apps.",
   "icon": "icon.png",
   "author": "eachann_",
   "categories": [
@@ -15,9 +15,9 @@
   "commands": [
     {
       "name": "manage-processes",
-      "title": "管理进程",
-      "subtitle": "goose-monitor",
-      "description": "按名称、PID 或端口查找并结束应用",
+      "title": "Manage Processes",
+      "subtitle": "Goose Monitor",
+      "description": "Find and quit apps by name, PID, or port",
       "mode": "view",
       "keywords": [
         "process",
@@ -26,106 +26,93 @@
         "memory",
         "port",
         "activity",
-        "task",
-        "进程",
-        "结束",
-        "内存",
-        "端口",
-        "活动监视器"
+        "task"
       ]
-    },
-    {
-      "name": "menu-bar-cpu",
-      "title": "CPU 菜单栏",
-      "subtitle": "goose-monitor",
-      "description": "状态栏 CPU 竖胶囊，点开看用户/系统、能效/性能核心与 Top CPU",
-      "mode": "menu-bar",
-      "interval": "10s"
-    },
-    {
-      "name": "menu-bar-mem",
-      "title": "内存菜单栏",
-      "subtitle": "goose-monitor",
-      "description": "状态栏内存直方图，点开查看压力、分解与 Top 内存",
-      "mode": "menu-bar",
-      "interval": "10s"
     }
   ],
   "preferences": [
     {
+      "name": "language",
+      "title": "Interface Language",
+      "description": "Choose the language used inside the extension. Store metadata remains in English.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        }
+      ]
+    },
+    {
+      "name": "sharedSettingsFilePath",
+      "title": "Shared Settings JSON File",
+      "description": "Select an existing shared JSON file. Switch between this preference and an override in Settings; neither path is overwritten automatically.",
+      "type": "file",
+      "required": false,
+      "default": ""
+    },
+    {
       "name": "refreshDuration",
-      "title": "刷新",
-      "description": "进程列表刷新间隔",
+      "title": "Refresh Interval",
+      "description": "How often to refresh the process list",
       "type": "dropdown",
       "required": false,
       "default": "3000",
       "data": [
         {
-          "title": "关闭",
+          "title": "Off",
           "value": "0"
         },
         {
-          "title": "每秒",
+          "title": "Every second",
           "value": "1000"
         },
         {
-          "title": "每 2 秒",
+          "title": "Every 2 seconds",
           "value": "2000"
         },
         {
-          "title": "每 3 秒",
+          "title": "Every 3 seconds",
           "value": "3000"
         },
         {
-          "title": "每 5 秒",
+          "title": "Every 5 seconds",
           "value": "5000"
         }
       ]
     },
     {
       "name": "showPID",
-      "title": "显示",
-      "label": "显示 PID",
-      "description": "在列表中显示进程 PID",
+      "title": "Show PID",
+      "label": "Show PID",
+      "description": "Show the process PID in the list",
       "type": "checkbox",
       "required": false,
       "default": false
     },
     {
       "name": "showPath",
-      "title": "",
-      "label": "显示路径",
-      "description": "在列表中显示可执行路径",
+      "title": "Show Path",
+      "label": "Show Path",
+      "description": "Show the executable path in the list",
       "type": "checkbox",
       "required": false,
       "default": false
     },
     {
       "name": "closeWindowAfterQuit",
-      "title": "结束后",
-      "label": "关闭窗口",
-      "description": "结束进程后关闭 Raycast 窗口",
+      "title": "After Quitting",
+      "label": "Close Window",
+      "description": "Close the Raycast window after quitting a process",
       "type": "checkbox",
       "required": false,
       "default": false
-    },
-    {
-      "name": "showCpuMenuBar",
-      "title": "菜单栏",
-      "label": "显示 CPU 菜单栏",
-      "description": "在 macOS 菜单栏显示 CPU 胶囊；只隐藏菜单栏图标，命令本身仍启用",
-      "type": "checkbox",
-      "required": false,
-      "default": true
-    },
-    {
-      "name": "showMemoryMenuBar",
-      "title": "",
-      "label": "显示内存菜单栏",
-      "description": "在 macOS 菜单栏显示内存压力胶囊；只隐藏菜单栏图标，命令本身仍启用",
-      "type": "checkbox",
-      "required": false,
-      "default": true
     }
   ],
   "dependencies": {

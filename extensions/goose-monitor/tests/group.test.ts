@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { appBundle, groupProcesses } from "../src/lib/group";
+import { markVisibleWindows } from "../src/lib/windows";
 import type { AppRow, RawProc } from "../src/lib/types";
 
 const MIB = 1024 * 1024;
@@ -83,13 +84,20 @@ describe("groupProcesses", () => {
       proc({ pid: 51, exe: "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder", name: "Finder" }),
       proc({ pid: 52, exe: "/Applications/Slack.app/Contents/MacOS/Slack", name: "Slack" }),
       proc({ pid: 53, exe: "/opt/homebrew/bin/node", name: "node", commandLine: "node server.js" }),
+      proc({ pid: 54, exe: "/System/Library/CoreServices/XProtect.app/Contents/MacOS/XProtect", name: "XProtect" }),
+      proc({ pid: 55, exe: "/System/Library/Frameworks/Foo.framework/XPCServices/Agent.app/Contents/MacOS/Agent", name: "Agent" }),
     ]));
 
     expect(rows.sshd.kind).toBe("bg");
     expect(rows.Finder.kind).toBe("app");       // 图形系统应用不算后台
     expect(rows.Slack.kind).toBe("app");
     expect(rows.node.kind).toBe("other");
+    expect(rows.XProtect.kind).toBe("bg");
+    expect(rows.Agent.kind).toBe("bg");
     expect(rows.sshd.hasWindow).toBe(false);
+    markVisibleWindows(Object.values(rows), [55]);
+    expect(rows.Agent.kind).toBe("app");
+    expect(rows.XProtect.kind).toBe("bg");
   });
 
   test("protected：内核、关键进程名、非当前用户所有，附带英文原因", () => {

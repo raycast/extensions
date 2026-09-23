@@ -104,24 +104,26 @@ export async function killProcess(row: AppRow, options: KillOptions = {}): Promi
   const pendingPids: number[] = [];
   const errors: string[] = [];
 
-  // 发信号前再采一轮：PID 可能已复用，startedAt 对不上就跳过。
-  const plannedStarted = new Map<number, string>();
+  // 每个 PID 发信号前独立复核，避免前一个目标退出后 PID 被复用。
+  let changed = false;
   for (const pid of order) {
-    const proc = byPid.get(pid);
-    if (proc) plannedStarted.set(pid, proc.startedAt);
-  }
-  let liveRaw: RawProc[];
-  try {
-    liveRaw = await enumerate();
-  } catch (error) {
-    return { ok: false, killed: [], error: (error as Error).message || "Failed to re-inspect processes." };
-  }
-  const liveByPid = new Map(liveRaw.map((proc) => [proc.pid, proc]));
-
-  for (const pid of order) {
-    const planned = plannedStarted.get(pid);
-    const live = liveByPid.get(pid);
-    if (!planned || !live || live.startedAt !== planned) continue;
+    const planned = byPid.get(pid)?.startedAt;
+    let live: RawProc | undefined;
+    try {
+      live = (await enumerate()).find((proc) => proc.pid === pid);
+    } catch (error) {
+      errors.push((error as Error).message || "Failed to re-inspect processes.");
+      break;
+    }
+    // 已退出的目标无需再杀；同 PID 的新进程则必须报告冲突。
+    if (!live) {
+      deadPids.add(pid);
+      continue;
+    }
+    if (!planned || live.startedAt !== planned) {
+      changed = true;
+      continue;
+    }
     try {
       process.kill(pid, signal);
       pendingPids.push(pid);
@@ -132,6 +134,7 @@ export async function killProcess(row: AppRow, options: KillOptions = {}): Promi
     }
   }
 
+  if (changed) errors.push(CHANGED);
   if (errors.length) return { ok: false, killed: [...deadPids], error: errors.join("; ") };
 
   const remaining = new Set(pendingPids);

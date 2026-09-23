@@ -100,6 +100,31 @@ describe("killProcess 校验", () => {
     }
   });
 
+  test("逐 PID 复核：前一个信号后复用的 PID 不再收到信号", async () => {
+    const procs = [foo(100), foo(101, 100)];
+    const row = groupProcesses(procs)[0];
+    const signals: number[] = [];
+    const origKill = process.kill;
+    let samples = 0;
+    try {
+      process.kill = ((pid: number, signal?: string | number) => {
+        if (signal === "SIGTERM") signals.push(pid);
+        if (signal === 0) throw Object.assign(new Error("kill ESRCH"), { code: "ESRCH" });
+        return true;
+      }) as typeof process.kill;
+
+      const result = await killProcess(row, {
+        enumerate: async () => ++samples < 3 ? procs : [foo(101, 100), { ...foo(100), startedAt: "reused" }],
+      });
+      expect(signals).toEqual([101]);
+      expect(samples).toBe(3);
+      expect(result.ok).toBe(false);
+      expect(result.error).toContain("Target process changed");
+    } finally {
+      process.kill = origKill;
+    }
+  });
+
   test("传入的 allPids 与当前组无交集 → 拒绝", async () => {
     const procs = [foo(100), foo(101, 100)];
     const row = groupProcesses(procs)[0];

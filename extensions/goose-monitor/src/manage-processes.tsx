@@ -6,6 +6,7 @@ import {
   Keyboard,
   LaunchType,
   List,
+  LocalStorage,
   Toast,
   closeMainWindow,
   environment,
@@ -19,12 +20,21 @@ import { GENERIC_APP_ICON } from "./lib/app-icon";
 import { defaultSort, filterRows, sortRows, visibleCategories, type SortDir, type SortKey } from "./lib/categories";
 import { run } from "./lib/exec";
 import { cpuExact, fmtCpu, fmtMem, fmtPorts, fmtRate, memExact } from "./lib/format";
-import { formatHelperRole, formatKillError, formatProtectedReason, type Messages } from "./lib/i18n";
+import {
+  formatHelperRole,
+  formatKillError,
+  formatProtectedReason,
+  formatTransferError,
+  type Messages,
+} from "./lib/i18n";
 import { killProcess } from "./lib/kill";
 import { keywordsForRow } from "./lib/search";
 import { refreshSnapshot } from "./lib/snapshot";
 import type { AppRow, Capabilities, CategoryId, Helper } from "./lib/types";
 import { useMessages } from "./locale";
+import SettingsTransfer from "./settings-transfer";
+import { readSharedSettings, replaceSharedSettings, type SharedSettingsFile } from "./lib/shared-settings";
+import type { PortableSettings } from "./lib/settings-transfer";
 
 type Sort = { key: SortKey; dir: SortDir };
 type SortOption = Sort & { title: string };
@@ -71,7 +81,14 @@ const netSortsOf = (t: Messages): SortOption[] => [
 
 export default function ManageProcesses() {
   const t = useMessages();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences & { sharedSettingsFilePath?: string }>();
+  const preferencePath = preferences.sharedSettingsFilePath?.trim() ?? "";
+  const { value: overridePath, setValue: setOverridePath } = useLocalStorage<string>("sharedSettingsOverridePath", "");
+  const { value: pathMode, setValue: setPathMode } = useLocalStorage<"preference" | "override">(
+    "sharedSettingsPathMode",
+    "preference",
+  );
+  const sharedPath = pathMode === "override" ? (overridePath?.trim() ?? "") : preferencePath;
   const { value: storedCategory, setValue: setStoredCategory } = useLocalStorage<CategoryId>("category", "all");
   const category = storedCategory ?? "all";
 
@@ -103,11 +120,116 @@ export default function ManageProcesses() {
   );
 
   // 排序选择按普通 / 网络两组分别持久化，没选过就用该分类的默认排序。
-  const { value: storedSort, setValue: setStoredSort } = useLocalStorage<Sort>(
-    isNet ? "sortNetwork" : "sort",
-    defaultSort(activeCategory),
+  const { value: storedSort, setValue: setStoredSort } = useLocalStorage<Sort>("sort", defaultSort("all"));
+  const { value: storedNetworkSort, setValue: setStoredNetworkSort } = useLocalStorage<Sort>(
+    "sortNetwork",
+    defaultSort("net"),
   );
-  const sort = storedSort ?? defaultSort(activeCategory);
+  const sort = (isNet ? storedNetworkSort : storedSort) ?? defaultSort(activeCategory);
+  const sharedBaseline = useRef<SharedSettingsFile | null>(null);
+  const [sharedStatus, setSharedStatus] = useState(sharedPath ? t.waitingShared : t.noSharedPath);
+  const applyPortableLocally = (settings: PortableSettings) => {
+    void LocalStorage.setItem("category", JSON.stringify(settings.category));
+    void LocalStorage.setItem("sort", JSON.stringify(settings.sort));
+    void LocalStorage.setItem("sortNetwork", JSON.stringify(settings.networkSort));
+    setStoredCategory(settings.category);
+    setStoredSort(settings.sort);
+    setStoredNetworkSort(settings.networkSort);
+  };
+  const portable: PortableSettings = {
+    category,
+    sort: storedSort ?? defaultSort("all"),
+    networkSort: storedNetworkSort ?? defaultSort("net"),
+  };
+  const persistPortableChange = async (settings: PortableSettings) => {
+    if (!sharedPath) return;
+    const baseline = sharedBaseline.current;
+    if (!baseline) {
+      setSharedStatus(t.sharedUnavailable);
+      return;
+    }
+    try {
+      sharedBaseline.current = await replaceSharedSettings(sharedPath, baseline.digest, settings);
+      setSharedStatus(t.sharedSynced);
+    } catch (error) {
+      sharedBaseline.current = null;
+      setSharedStatus(`${formatTransferError(error, t)}; ${t.notOverwritten}`);
+      await showToast({ style: Toast.Style.Failure, title: t.sharedNotSaved, message: formatTransferError(error, t) });
+    }
+  };
+  useEffect(() => {
+    sharedBaseline.current = null;
+    if (!sharedPath) {
+      setSharedStatus(t.noSharedPath);
+      return;
+    }
+    let active = true;
+    const poll = async () => {
+      try {
+        const next = await readSharedSettings(sharedPath);
+        if (!active) return;
+        if (sharedBaseline.current?.digest !== next.digest) {
+          sharedBaseline.current = next;
+          applyPortableLocally(next.settings);
+        }
+        setSharedStatus(t.sharedConnected);
+      } catch (error) {
+        if (!active) return;
+        sharedBaseline.current = null;
+        setSharedStatus(`${formatTransferError(error, t)}; ${t.notOverwritten}`);
+      }
+    };
+    void poll();
+    const timer = setInterval(() => void poll(), 2000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [sharedPath, t]);
+  const createShared = async () => {
+    const { createSharedSettings } = await import("./lib/shared-settings");
+    sharedBaseline.current = await createSharedSettings(sharedPath, portable);
+    setSharedStatus(t.sharedFileCreated);
+  };
+  const selectOverride = async (filePath: string) => {
+    if (!filePath.toLowerCase().endsWith(".json")) throw new Error(t.selectDotJson);
+    await setOverridePath(filePath);
+    await setPathMode("override");
+  };
+  const createAt = async (filePath: string) => {
+    if (!filePath.toLowerCase().endsWith(".json")) throw new Error(t.nameDotJson);
+    const created = await import("./lib/shared-settings").then(({ createSharedSettings }) =>
+      createSharedSettings(filePath, portable),
+    );
+    sharedBaseline.current = created;
+    await setOverridePath(filePath);
+    await setPathMode("override");
+    setSharedStatus(t.createdAndSwitched);
+  };
+  const applyShared = async () => {
+    if (!sharedBaseline.current) throw new Error(t.sharedNotRead);
+    sharedBaseline.current = await replaceSharedSettings(sharedPath, sharedBaseline.current.digest, portable);
+    setSharedStatus(t.localApplied);
+  };
+  const settingsView = (
+    <SettingsTransfer
+      sharedPath={sharedPath}
+      sharedStatus={sharedStatus}
+      preferencePath={preferencePath}
+      overridePath={overridePath ?? ""}
+      pathMode={pathMode ?? "preference"}
+      onUsePreference={() => void setPathMode("preference")}
+      onUseOverride={() => void setPathMode("override")}
+      onSelectOverride={selectOverride}
+      onCreateAt={createAt}
+      onImport={(next) => {
+        applyPortableLocally(next);
+        void persistPortableChange(next);
+      }}
+      onCreate={createShared}
+      onApplyLocal={applyShared}
+    />
+  );
   const rows = data ? sortRows(filterRows(data.rows, activeCategory), sort.key, sort.dir) : [];
 
   // 行序会随排序与刷新变化：把选择固定在进程 id 上，回车永远落在用户选中的那个进程。
@@ -183,7 +305,11 @@ export default function ManageProcesses() {
         <List.Dropdown
           tooltip={t.category}
           value={activeCategory}
-          onChange={(next) => void setStoredCategory(next as CategoryId)}
+          onChange={(next) => {
+            const nextCategory = next as CategoryId;
+            void setStoredCategory(nextCategory);
+            void persistPortableChange({ ...portable, category: nextCategory });
+          }}
         >
           {categories.map((item) => (
             <List.Dropdown.Item
@@ -196,7 +322,9 @@ export default function ManageProcesses() {
         </List.Dropdown>
       }
     >
-      {!isLoading && <List.EmptyView title={t.noProcesses} description={t.noProcessesHint} />}
+      {!isLoading && rows.length === 0 && (
+        <List.Item title={t.noProcesses} subtitle={t.noProcessesHint} icon={Icon.Info} />
+      )}
       {rows.map((row) => (
         <List.Item
           key={row.id}
@@ -241,7 +369,15 @@ export default function ManageProcesses() {
                     key={`${option.key}-${option.dir}`}
                     title={option.title}
                     icon={isCurrentSort(option, sort) ? Icon.CheckCircle : undefined}
-                    onAction={() => void setStoredSort(option)}
+                    onAction={() => {
+                      void (isNet ? setStoredNetworkSort(option) : setStoredSort(option));
+                      const next = {
+                        ...portable,
+                        category: activeCategory,
+                        ...(isNet ? { networkSort: option } : { sort: option }),
+                      };
+                      void persistPortableChange(next);
+                    }}
                   />
                 ))}
               </ActionPanel.Section>
@@ -252,11 +388,22 @@ export default function ManageProcesses() {
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={() => void refresh()}
                 />
+                <Action.Push title={t.settingsAndTransfer} icon={Icon.Gear} target={settingsView} />
               </ActionPanel.Section>
             </ActionPanel>
           }
         />
       ))}
+      <List.Item
+        id="settings"
+        title={t.settingsAndTransfer}
+        icon={Icon.Gear}
+        actions={
+          <ActionPanel>
+            <Action.Push title={t.settingsAndTransfer} icon={Icon.Gear} target={settingsView} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }

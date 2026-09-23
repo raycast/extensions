@@ -41,5 +41,6 @@ export function markVisibleWindows(rows: AppRow[], pids: readonly number[]): voi
   const visible = new Set(pids);
   for (const row of rows) {
     row.hasWindow = (row.allPids.length ? row.allPids : [row.pid]).some((pid) => visible.has(pid));
+    if (row.hasWindow && row.kind === "bg" && row.identity.startsWith("app:")) row.kind = "app";
   }
 }

@@ -18,7 +18,7 @@ export function appBundle(exe: string): { bundle: string; name: string } | null 
   return null;
 }
 
-/** 系统自有路径：真实图标缺失时用系统图标，且不进界面分类。 */
+/** 系统自有路径：真实图标缺失时用系统图标。 */
 function isSystemPath(exe: string, name: string): boolean {
   if (!exe) return true;
   if (name === "kernel_task") return true;
@@ -34,13 +34,17 @@ function isSystemPath(exe: string, name: string): boolean {
 }
 
 /* 图形应用判定：macOS 大量系统守护进程也住在 .app 包里（XProtect、XPC 服务），
-   但它们装在 /System、/Library、/usr 下，不是用户应用。
+   但它们装在 /System、/Library、/usr 下，不是用户应用；Finder 是已知图形例外。
    ponytail: 非 bundle 的可执行一律不算界面应用（mac 上 GUI 必然有 .app），
-   因此丢掉了 goose-monitor 里给 Linux /opt、/snap 的启发式。 */
+   因此丢掉了 goose-monitor 里给 Linux /opt、/snap 的启发式。
+   ponytail: 无窗口时仅静态识别 Finder；其他系统图形 app 可在有可靠的 bundle 类型信息后扩展。 */
 function isGraphicalApp(exe: string): boolean {
   if (!exe) return false;
   if (!exe.includes(".app/") && !exe.endsWith(".app")) return false;
-  return !(exe.startsWith("/System/") || exe.startsWith("/Library/") || exe.startsWith("/usr/"));
+  return (
+    exe.startsWith("/System/Library/CoreServices/Finder.app/") ||
+    !(exe.startsWith("/System/") || exe.startsWith("/Library/") || exe.startsWith("/usr/"))
+  );
 }
 
 /** 非 bundle 程序只归并同一 exe 的同一棵进程树，避免把两个独立的 node/python 实例一起结束。 */
@@ -113,7 +117,7 @@ export function groupProcesses(raw: RawProc[]): AppRow[] {
       key = identity;
       display = bundle.name;
       bundlePath = bundle.bundle;
-      // 系统路径下的无头 .app（XProtect 等）不当界面应用；isGraphicalApp 已排除 /System|/Library|/usr。
+      // 系统路径下的无头 .app（XProtect 等）先算后台；窗口扫描会提升有窗口的 bundle。
       graphical = isGraphicalApp(proc.exe);
     } else if (proc.exe) {
       identity = `exe:${proc.exe}`;
