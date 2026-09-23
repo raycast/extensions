@@ -3,20 +3,13 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import type {
-  WifiStatus,
-  WifiNetwork,
-  BluetoothStatus,
-  BluetoothDevice,
-  BluetoothDeviceCategory,
-} from "../types";
+import type { WifiStatus, WifiNetwork } from "../types";
 import {
   calculateSessionUsage,
   clearSessionBaseline,
   getCachedInternetSpeed,
   type SessionDataUsage,
 } from "../speedService";
-import { compactBluetoothBattery } from "../../utils/bluetoothBattery";
 
 let environmentAssetsPath: string | undefined;
 try {
@@ -149,31 +142,23 @@ function getHelperExePath(): string | undefined {
 }
 
 /**
- * Toggles or sets a Windows radio state (Wi-Fi = 1, Bluetooth = 3) via compiled WinRT helper with PowerShell fallback.
+ * Toggles or sets the Windows Wi-Fi radio state via compiled WinRT helper with PowerShell fallback.
  */
-async function toggleWindowsRadio(
-  kind: 1 | 3,
-  targetState?: boolean,
-): Promise<boolean> {
+async function toggleWindowsWifiRadio(targetState?: boolean): Promise<boolean> {
   invalidateWindowsWifiCache();
 
   const helperExe = getHelperExePath();
-  const kindArg = kind === 1 ? "wifi" : "bt";
   const stateArg = targetState === undefined ? "" : targetState ? "on" : "off";
 
   if (helperExe) {
     try {
-      const args = stateArg
-        ? ["toggle", kindArg, stateArg]
-        : ["toggle", kindArg];
+      const args = stateArg ? ["toggle", "wifi", stateArg] : ["toggle", "wifi"];
       const { stdout } = await execFileAsync(helperExe, args, {
         windowsHide: true,
       });
       const trimmed = stdout.trim();
       if (trimmed === "NotFound") {
-        throw new Error(
-          `${kind === 1 ? "Wi-Fi" : "Bluetooth"} radio adapter not found on this system`,
-        );
+        throw new Error("Wi-Fi radio adapter not found on this system");
       }
       if (trimmed === "On" || trimmed === "Off") {
         return trimmed === "On";
@@ -195,7 +180,7 @@ async function toggleWindowsRadio(
 ${WINRT_ASYNC_PREAMBLE}
 [Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null
 $radios = Await ([Windows.Devices.Radios.Radio]::GetRadiosAsync()) ([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
-$radio = $radios | Where-Object { $_.Kind -eq ${kind} }
+$radio = $radios | Where-Object { $_.Kind -eq 1 }
 if ($radio) {
     $target = '${targetStr}'
     if ($target -eq '') {
@@ -210,9 +195,7 @@ if ($radio) {
 `;
   const result = await runPowerShell(script);
   if (result === "NotFound") {
-    throw new Error(
-      `${kind === 1 ? "Wi-Fi" : "Bluetooth"} radio adapter not found on this system`,
-    );
+    throw new Error("Wi-Fi radio adapter not found on this system");
   }
   return result === "On" || result === "1";
 }
@@ -563,7 +546,7 @@ export async function getWindowsWifiStatus(): Promise<WifiStatus> {
 export async function toggleWindowsWifi(
   targetState?: boolean,
 ): Promise<boolean> {
-  const result = await toggleWindowsRadio(1, targetState);
+  const result = await toggleWindowsWifiRadio(targetState);
   if (!result) {
     clearSessionBaseline();
   }
@@ -1030,382 +1013,8 @@ export async function getWindowsWifiPassword(
 }
 
 /**
- * Gets the current Bluetooth radio power state using WinRT Radio API.
- */
-export async function getWindowsBluetoothStatus(): Promise<BluetoothStatus> {
-  const helperExe = getHelperExePath();
-  if (helperExe) {
-    try {
-      const { stdout } = await execFileAsync(helperExe, ["status", "bt"], {
-        windowsHide: true,
-      });
-      const trimmed = stdout.trim();
-      if (trimmed === "On" || trimmed === "Off") {
-        return { isOn: trimmed === "On" };
-      }
-    } catch {
-      // Fallback to PowerShell
-    }
-  }
-
-  const script = `
-${WINRT_ASYNC_PREAMBLE}
-[Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null
-$radios = Await ([Windows.Devices.Radios.Radio]::GetRadiosAsync()) ([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
-$bt = $radios | Where-Object { $_.Kind -eq 3 }
-if ($bt) { $bt.State.ToString() } else { 'Unknown' }
-`;
-  try {
-    const result = await runPowerShell(script);
-    const normalized = result.toLowerCase();
-    if (
-      normalized !== "on" &&
-      normalized !== "off" &&
-      result !== "1" &&
-      result !== "0"
-    ) {
-      throw new Error(`Unexpected Bluetooth radio state: ${result || "empty"}`);
-    }
-    return { isOn: result === "1" || normalized === "on" };
-  } catch (error) {
-    throw new Error("Failed to query Windows Bluetooth status", {
-      cause: error,
-    });
-  }
-}
-
-/**
- * Toggles Bluetooth radio power on or off without requiring admin privileges.
- */
-export async function toggleWindowsBluetooth(
-  targetState?: boolean,
-): Promise<boolean> {
-  return toggleWindowsRadio(3, targetState);
-}
-
-/**
- * Retrieves all paired Bluetooth devices with connection status and categorized types.
- */
-export async function getWindowsBluetoothDevices(): Promise<BluetoothDevice[]> {
-  const helperExe = getHelperExePath();
-  if (helperExe) {
-    try {
-      const { stdout } = await execFileAsync(helperExe, ["devices"], {
-        windowsHide: true,
-      });
-      const trimmed = stdout.trim();
-      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-        const list = JSON.parse(trimmed);
-        if (Array.isArray(list)) {
-          return parseWindowsBluetoothDevices(list);
-        }
-      }
-    } catch {
-      // Fall back to PowerShell if helper fails
-    }
-  }
-
-  const script = `
-${WINRT_ASYNC_PREAMBLE}
-[Windows.Devices.Bluetooth.BluetoothDevice,Windows.Devices.Bluetooth,ContentType=WindowsRuntime] | Out-Null
-[Windows.Devices.Bluetooth.BluetoothLEDevice,Windows.Devices.Bluetooth,ContentType=WindowsRuntime] | Out-Null
-[Windows.Devices.Enumeration.DeviceInformation,Windows.Devices.Enumeration,ContentType=WindowsRuntime] | Out-Null
-[Windows.Devices.Enumeration.DeviceInformationCollection,Windows.Devices.Enumeration,ContentType=WindowsRuntime] | Out-Null
-[Windows.Devices.Enumeration.DeviceInformationKind,Windows.Devices.Enumeration,ContentType=WindowsRuntime] | Out-Null
-[Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null
-
-$radios = Await ([Windows.Devices.Radios.Radio]::GetRadiosAsync()) ([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
-$bt = $radios | Where-Object { $_.Kind -eq 3 }
-$isBtOn = if ($bt) { $bt.State.ToString() -eq '1' -or $bt.State.ToString() -eq 'On' } else { $true }
-
-$batteryByMac = @{}
-if ($isBtOn) {
-    $requestedProperties = [System.Collections.Generic.List[string]]::new()
-    $requestedProperties.Add('System.Devices.Aep.DeviceAddress')
-    $requestedProperties.Add('{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2')
-    $requestedProperties.Add('System.Devices.BatteryLife')
-    $queries = @(
-        @{ Selector = [Windows.Devices.Bluetooth.BluetoothDevice]::GetDeviceSelectorFromPairingState($true); AssociationEndpoint = $false },
-        @{ Selector = [Windows.Devices.Bluetooth.BluetoothLEDevice]::GetDeviceSelectorFromPairingState($true); AssociationEndpoint = $false },
-        @{ Selector = 'System.Devices.Aep.ProtocolId:="{e0cbf06c-cd8b-4647-bb8a-263b43f0f974}"'; AssociationEndpoint = $true }
-    )
-    foreach ($query in $queries) {
-        try {
-            if ($query.AssociationEndpoint) {
-                $operation = [Windows.Devices.Enumeration.DeviceInformation]::FindAllAsync($query.Selector, $requestedProperties, [Windows.Devices.Enumeration.DeviceInformationKind]::AssociationEndpoint)
-            } else {
-                $operation = [Windows.Devices.Enumeration.DeviceInformation]::FindAllAsync($query.Selector, $requestedProperties)
-            }
-            $infos = Await $operation ([Windows.Devices.Enumeration.DeviceInformationCollection])
-            foreach ($info in $infos) {
-                $addressValue = [string]$info.Properties['System.Devices.Aep.DeviceAddress']
-                $cleanAddress = $addressValue -replace '[^0-9A-Fa-f]', ''
-                if ($cleanAddress -notmatch '^[0-9A-Fa-f]{12}$' -and $info.Id -match '(?i)(?:DEV_|#)([0-9a-f]{12})(?:[^0-9a-f]|$)') {
-                    $cleanAddress = $Matches[1]
-                }
-                $batteryValue = $info.Properties['{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2']
-                if ($null -eq $batteryValue) {
-                    $batteryValue = $info.Properties['System.Devices.BatteryLife']
-                }
-                if ($cleanAddress -match '^[0-9A-Fa-f]{12}$' -and $null -ne $batteryValue) {
-                    $batteryNumber = [int]$batteryValue
-                    if ($batteryNumber -ge 0 -and $batteryNumber -le 100) {
-                        $batteryByMac[$cleanAddress.ToUpper()] = $batteryNumber
-                    }
-                }
-            }
-        } catch {}
-    }
-}
-
-try {
-    Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue | Where-Object { $_.InstanceId -like 'BTHENUM\\*' } | ForEach-Object {
-        if ($_.InstanceId -match '(?:^|[\\\\&_])([0-9A-Fa-f]{12})(?=[\\\\&_]|$)') {
-            $mac = $Matches[1].ToUpper()
-            if (-not $batteryByMac.ContainsKey($mac)) {
-                $prop = Get-PnpDeviceProperty -InstanceId $_.InstanceId -KeyName '{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2' -ErrorAction SilentlyContinue
-                if ($prop -and $null -ne $prop.Data) {
-                    $level = [int]$prop.Data
-                    if ($level -ge 0 -and $level -le 100) { $batteryByMac[$mac] = $level }
-                }
-            }
-        }
-    }
-} catch {}
-
-$pnpDevices = Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | Where-Object { $_.InstanceId -like 'BTHENUM\\DEV_*' }
-$results = @()
-
-foreach ($dev in $pnpDevices) {
-    $macRaw = $dev.InstanceId -replace '.*DEV_([0-9A-Fa-f]{12}).*', '$1'
-    $isConnected = $false
-    
-    if ($isBtOn -and ($macRaw -match '^[0-9A-Fa-f]{12}$')) {
-        try {
-            $macNum = [Convert]::ToUInt64($macRaw, 16)
-            $btDev = Await ([Windows.Devices.Bluetooth.BluetoothDevice]::FromBluetoothAddressAsync($macNum)) ([Windows.Devices.Bluetooth.BluetoothDevice])
-            if ($btDev -and $btDev.ConnectionStatus -eq [Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected) {
-                $isConnected = $true
-            }
-        } catch {}
-        if (-not $isConnected) {
-            try {
-                $btLeDev = Await ([Windows.Devices.Bluetooth.BluetoothLEDevice]::FromBluetoothAddressAsync($macNum)) ([Windows.Devices.Bluetooth.BluetoothLEDevice])
-                if ($btLeDev -and $btLeDev.ConnectionStatus -eq [Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected) {
-                    $isConnected = $true
-                }
-            } catch {}
-        }
-    }
-
-    $formattedMac = if ($macRaw -match '^[0-9A-Fa-f]{12}$') {
-        ($macRaw -split '(?<=\\G..)(?!$)' -join ':').ToUpper()
-    } else { $macRaw }
-
-    $results += [PSCustomObject]@{
-        Id = $dev.InstanceId
-        Name = $dev.FriendlyName
-        Address = $formattedMac
-        IsConnected = $isConnected
-        BatteryLevel = $batteryByMac[$macRaw.ToUpper()]
-    }
-}
-$results | ConvertTo-Json -Depth 2
-`;
-
-  try {
-    const jsonOutput = await runPowerShell(script);
-    if (!jsonOutput) return [];
-    const parsed = JSON.parse(jsonOutput);
-    const list = Array.isArray(parsed) ? parsed : [parsed];
-
-    return parseWindowsBluetoothDevices(list);
-  } catch (error) {
-    throw new Error("Failed to query Windows Bluetooth devices", {
-      cause: error,
-    });
-  }
-}
-
-interface WindowsBluetoothDevicePayload {
-  Id: string;
-  Name: string;
-  Address: string;
-  IsConnected: boolean;
-  BatteryLevel?: unknown;
-}
-
-export function parseWindowsBluetoothDevices(
-  payload: unknown,
-): BluetoothDevice[] {
-  if (!Array.isArray(payload)) return [];
-
-  return payload.map((raw) => {
-    const item = raw as WindowsBluetoothDevicePayload;
-    const isConnected = Boolean(item.IsConnected);
-    return {
-      id: item.Id,
-      name: item.Name,
-      address: item.Address,
-      category: categorizeBluetoothDevice(item.Name),
-      isConnected,
-      battery: isConnected
-        ? compactBluetoothBattery({ level: item.BatteryLevel })
-        : undefined,
-    };
-  });
-}
-
-function categorizeBluetoothDevice(name: string): BluetoothDeviceCategory {
-  const lower = name.toLowerCase();
-  if (
-    /buds|headset|headphones|speaker|earphones|airpods|audio|echo|sound/i.test(
-      lower,
-    )
-  ) {
-    return "audio";
-  }
-  if (/controller|gamepad|xbox|dualsense|playstation|joystick/i.test(lower)) {
-    return "controller";
-  }
-  if (/mouse|keyboard|pen|trackpad|stylus|input/i.test(lower)) {
-    return "peripheral";
-  }
-  if (/phone|galaxy|iphone|pixel|android/i.test(lower)) {
-    return "phone";
-  }
-  return "other";
-}
-
-/**
- * Connects or disconnects a Bluetooth device on Windows.
- */
-export async function toggleWindowsBluetoothDeviceConnection(
-  deviceId: string,
-  connect: boolean,
-): Promise<void> {
-  const macMatch = deviceId.match(/DEV_([0-9A-Fa-f]{12})/i);
-  const cleanMac = deviceId.replace(/[^0-9A-Fa-f]/g, "");
-  const macHex = macMatch
-    ? macMatch[1]
-    : cleanMac.length === 12
-      ? cleanMac
-      : undefined;
-
-  if (!macHex) {
-    throw new Error(
-      `Unable to identify Bluetooth device hardware MAC address for: ${deviceId}`,
-    );
-  }
-
-  const helperExe = getHelperExePath();
-  if (!helperExe) {
-    throw new Error("Quick Radios helper executable not found");
-  }
-
-  let stdout = "";
-  try {
-    const res = await execFileAsync(
-      helperExe,
-      [connect ? "connect" : "disconnect", macHex],
-      { windowsHide: true },
-    );
-    stdout = res.stdout;
-  } catch (err: unknown) {
-    const execErr = err as { stdout?: string | Buffer; message?: string };
-    stdout = (execErr?.stdout ?? "").toString();
-    if (!stdout && err instanceof Error) {
-      throw err;
-    }
-  }
-
-  const trimmed = stdout.trim();
-  if (connect) {
-    if (trimmed.includes("Connected")) {
-      return;
-    }
-    if (trimmed.includes("Timeout") || trimmed.includes("FailedToConnect")) {
-      throw new Error(
-        "Device did not respond or is not in range. Ensure it is turned on and ready to connect.",
-      );
-    }
-    if (trimmed.startsWith("Error:")) {
-      throw new Error(trimmed);
-    }
-    throw new Error(trimmed || "Failed to connect device");
-  } else {
-    if (trimmed.includes("Disconnected")) {
-      return;
-    }
-    if (trimmed.includes("FailedToDisconnect")) {
-      throw new Error("Failed to disconnect device");
-    }
-    if (trimmed.startsWith("Error:")) {
-      throw new Error(trimmed);
-    }
-    throw new Error(trimmed || "Failed to disconnect device");
-  }
-}
-
-/**
- * Unpairs (forgets) a Bluetooth device.
- */
-export async function unpairWindowsBluetoothDevice(
-  deviceId: string,
-): Promise<void> {
-  const macMatch = deviceId.match(/DEV_([0-9A-Fa-f]{12})/i);
-  const cleanMac = deviceId.replace(/[^0-9A-Fa-f]/g, "");
-  const macHex = macMatch
-    ? macMatch[1]
-    : cleanMac.length === 12
-      ? cleanMac
-      : undefined;
-
-  if (!macHex) {
-    throw new Error(
-      `Unable to identify Bluetooth device hardware MAC address for: ${deviceId}`,
-    );
-  }
-
-  const helperExe = getHelperExePath();
-  if (!helperExe) {
-    throw new Error("Quick Radios helper executable not found");
-  }
-
-  let stdout = "";
-  try {
-    const res = await execFileAsync(helperExe, ["unpair", macHex], {
-      windowsHide: true,
-    });
-    stdout = res.stdout;
-  } catch (err: unknown) {
-    const execErr = err as { stdout?: string | Buffer; message?: string };
-    stdout = (execErr?.stdout ?? "").toString();
-    if (!stdout && err instanceof Error) {
-      throw err;
-    }
-  }
-
-  const trimmed = stdout.trim();
-  if (trimmed.includes("Unpaired")) {
-    return;
-  }
-  if (trimmed.startsWith("Error:")) {
-    throw new Error(trimmed);
-  }
-  throw new Error(trimmed || "Failed to unpair device");
-}
-
-/**
  * Opens Windows Wi-Fi Settings directly.
  */
 export async function openWindowsWifiSettings(): Promise<void> {
   await runCmd("start ms-settings:network-wifi");
-}
-
-/**
- * Opens Windows Bluetooth Settings directly.
- */
-export async function openWindowsBluetoothSettings(): Promise<void> {
-  await runCmd("start ms-settings:bluetooth");
 }

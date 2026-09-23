@@ -1,38 +1,36 @@
 # Quick Radios - Raycast Extension
 
-Control your **Wi-Fi** and **Bluetooth** connections directly from the Raycast search window without digging through settings or system flyouts.
+A **Windows Wi-Fi manager** for Raycast. Scan, join, share, and inspect Wi-Fi networks from the Raycast search window without opening the Windows quick settings flyout or the Settings app.
 
 <p align="center">
   <img src="assets/icon.png" width="128" height="128" alt="Quick Radios Icon" />
 </p>
 
+## Why Windows
+
+Quick Radios is scoped to Raycast for Windows and does not run on macOS. It is built entirely on Windows-native APIs:
+
+- `netsh wlan` for interfaces, profiles, connection, and saved-password lookup
+- The WLAN API (`WlanScan`) for active hardware scans, so newly broadcasting hotspots appear without waiting on the OS cache
+- The WinRT `Windows.Devices.Radios` API for turning the Wi-Fi radio on or off without administrator rights
+
 ## ✨ Features
 
 ### 📶 Manage Wi-Fi (`wifi`)
-- **4-Tier Network Sections**:
-  1. **Connected Wi-Fi Network**: Currently active connection with live IP, MAC, gateway, and high-res status badge.
-  2. **Saved and in Range**: Saved profiles currently broadcasting nearby with 1-click reconnect.
-  3. **In Range**: Available nearby broadcast networks with password prompts.
-  4. **Saved but Not in Range**: Saved profiles that are not currently detected nearby.
-- **Active Hardware Scanning**: Commands the Wi-Fi card to broadcast 802.11 active probe scans (via `wlanapi.dll` `WlanScan`), ensuring newly broadcasting hotspots and networks appear live without OS caching stalls.
-- **Two-Pane Detail View**: Inspect IP address, MAC address, default gateway, and encryption type directly beside the list.
-- **1-Click Connect**: Instantly reconnect to any of your saved/known Wi-Fi networks.
-- **Join New Networks**: Scan nearby networks and connect with a secure password prompt.
-- **Share Wi-Fi via QR Code**: Automatically generate phone-scannable QR codes and retrieve cleartext passwords for saved networks.
-- **Radio Toggle**: Turn Wi-Fi radio on/off without needing administrator rights.
-- **Copy Shortcuts**: Rapidly copy IP address (`Cmd/Ctrl + C`), MAC address, or gateway to clipboard.
+- **Network Sections**:
+  1. **Connected Wi-Fi Network**: The active connection with IP, MAC, gateway, and signal details.
+  2. **Saved and in Range**: Saved profiles broadcasting nearby, with 1-click reconnect.
+  3. **In Range**: Nearby networks, with a password prompt for secured networks.
+  4. **Saved but Not in Range**: Saved profiles that are not currently detected.
+- **Detail View**: IP address, MAC address, default gateway, band, channel, radio standard, and encryption beside the list.
+- **Join New Networks**: Connect to WPA2/WPA3-Personal and open networks with a password prompt.
+- **Share via QR Code**: Generate a phone-scannable QR code locally and copy the saved password.
+- **Internet Speed & Session Data**: Run a speed test and see data transferred during the current connection.
+- **Forget Network**: Remove a saved Wi-Fi profile.
+- **Radio Toggle**: Turn the Wi-Fi radio on or off without administrator rights.
 
-### ᛒ Manage Bluetooth (`bluetooth`)
-- **Paired Devices Dashboard**: See all paired Bluetooth devices categorized into **Audio & Headphones**, **Keyboards, Mice & Controllers**, and **Other Paired Devices**.
-- **Live Connection State**: Instantly see which devices are currently connected (🟢) vs paired/disconnected (⚪).
-- **Battery Levels**: View OS-reported battery percentages for connected devices, including separate left, right, and case levels when available.
-- **1-Click Connect / Disconnect**: Toggle connection state for audio headsets and peripherals.
-- **Radio Toggle**: Turn Bluetooth on/off directly from search (`Cmd/Ctrl + T`).
-- **Pair New Devices**: Quick shortcut to launch OS Bluetooth pairing settings (`Cmd/Ctrl + O`).
-
-### ⚡ Instant Quick Toggles (No-View Commands)
-- **Toggle Wi-Fi** (`toggle-wifi`): One-shot command to toggle Wi-Fi radio with a HUD notification.
-- **Toggle Bluetooth** (`toggle-bluetooth`): One-shot command to toggle Bluetooth radio with a HUD notification.
+### ⚡ Toggle Wi-Fi (`toggle-wifi`)
+- One-shot command that toggles the Wi-Fi radio and confirms with a HUD notification.
 
 ---
 
@@ -41,18 +39,20 @@ Control your **Wi-Fi** and **Bluetooth** connections directly from the Raycast s
 | Action | Shortcut |
 | :--- | :--- |
 | **Connect / Disconnect** | `Enter` |
-| **Toggle Radio (On / Off)** | `Cmd/Ctrl + T` |
-| **Copy Wi-Fi Password** | `Cmd/Ctrl + Shift + P` |
-| **Copy IP / MAC Address** | `Cmd/Ctrl + C` |
-| **Open System Settings** | `Cmd/Ctrl + O` |
-| **Refresh List** | `Cmd/Ctrl + R` |
+| **Toggle Wi-Fi Radio** | `Ctrl + T` |
+| **Copy Wi-Fi Password** | `Ctrl + Shift + P` |
+| **Copy IP Address** | `Ctrl + C` |
+| **Test Internet Speed** | `Ctrl + Shift + S` |
+| **Open Wi-Fi Settings** | `Ctrl + O` |
+| **Refresh List** | `Ctrl + R` |
 
 ---
 
 ## 🖥️ Platform Support
 
-- **Windows 10 / 11**: Fully supported using native PowerShell WinRT Radios and `netsh` (no external binaries or admin privileges required).
-- **macOS**: Supported using native `networksetup` and `blueutil`.
+- **Windows 10 / 11** only. No administrator privileges required.
+
+The bundled `assets/quick-radios-helper.exe` is compiled from [`assets/quick-radios-helper.cs`](assets/quick-radios-helper.cs). It only triggers WLAN scans and reads or sets the Wi-Fi radio state. If the helper is unavailable, the extension falls back to equivalent PowerShell WinRT calls.
 
 ---
 
@@ -68,6 +68,23 @@ npm run dev
 # Run type check and lint
 npm run lint
 
+# Run unit tests
+npm test
+
+# Run live checks against the local Wi-Fi adapter
+npm run test:integration:windows
+
 # Build extension
 npm run build
+```
+
+### Rebuilding the helper
+
+```powershell
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /nologo /optimize+ /target:exe `
+  /out:assets\quick-radios-helper.exe `
+  /r:C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.dll `
+  /r:C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Runtime.WindowsRuntime.dll `
+  "/r:C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.26100.0\Windows.winmd" `
+  assets\quick-radios-helper.cs
 ```

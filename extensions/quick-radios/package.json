@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-radios",
   "title": "Quick Radios",
-  "description": "Control Wi-Fi and Bluetooth connections directly from Raycast search.",
+  "description": "Manage Windows Wi-Fi from Raycast: scan, connect, share via QR, and inspect connection details.",
   "icon": "icon.png",
   "author": "tejas911",
   "categories": [
@@ -11,7 +11,6 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macOS",
     "Windows"
   ],
   "commands": [
@@ -22,21 +21,9 @@
       "mode": "view"
     },
     {
-      "name": "bluetooth",
-      "title": "Manage Bluetooth",
-      "description": "View status, connect paired devices, and manage Bluetooth.",
-      "mode": "view"
-    },
-    {
       "name": "toggle-wifi",
       "title": "Toggle Wi-Fi",
       "description": "Instantly turn Wi-Fi on or off.",
-      "mode": "no-view"
-    },
-    {
-      "name": "toggle-bluetooth",
-      "title": "Toggle Bluetooth",
-      "description": "Instantly turn Bluetooth on or off.",
       "mode": "no-view"
     }
   ],
@@ -59,7 +46,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node --experimental-strip-types tests/session-data-test.mjs && node --experimental-strip-types tests/bluetooth-battery-test.mjs",
+    "test": "node --experimental-strip-types tests/session-data-test.mjs",
     "test:integration:windows": "node --experimental-strip-types tests/windows-integration-test.mjs",
     "publish": "npx @raycast/api@latest publish"
   }

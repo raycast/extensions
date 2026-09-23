@@ -1,58 +1,43 @@
 import * as windows from "./platform/windows";
-import * as macos from "./platform/macos";
 import { WifiStatus, WifiNetwork } from "./types";
 
-const isWindows = process.platform === "win32";
-
 export async function getWifiStatus(): Promise<WifiStatus> {
-  return isWindows ? windows.getWindowsWifiStatus() : macos.getMacWifiStatus();
+  return windows.getWindowsWifiStatus();
 }
 
 export async function toggleWifi(targetState?: boolean): Promise<boolean> {
-  return isWindows
-    ? windows.toggleWindowsWifi(targetState)
-    : macos.toggleMacWifi(targetState);
+  return windows.toggleWindowsWifi(targetState);
 }
 
 export async function getWifiNetworks(
   activeScan = true,
 ): Promise<WifiNetwork[]> {
-  return isWindows
-    ? windows.getWindowsWifiNetworks(activeScan)
-    : macos.getMacWifiNetworks();
+  return windows.getWindowsWifiNetworks(activeScan);
 }
 
 export async function connectWifi(
   ssid: string,
   password?: string,
 ): Promise<void> {
-  return isWindows
-    ? windows.connectWindowsWifi(ssid, password)
-    : macos.connectMacWifi(ssid, password);
+  return windows.connectWindowsWifi(ssid, password);
 }
 
 export async function disconnectWifi(): Promise<void> {
-  return isWindows
-    ? windows.disconnectWindowsWifi()
-    : macos.disconnectMacWifi();
+  return windows.disconnectWindowsWifi();
 }
 
 export async function forgetWifiNetwork(ssid: string): Promise<void> {
-  return isWindows
-    ? windows.forgetWindowsWifiNetwork(ssid)
-    : macos.forgetMacWifiNetwork(ssid);
+  return windows.forgetWindowsWifiNetwork(ssid);
 }
 
 export async function getWifiPassword(
   ssid: string,
 ): Promise<string | undefined> {
-  return isWindows ? windows.getWindowsWifiPassword(ssid) : undefined;
+  return windows.getWindowsWifiPassword(ssid);
 }
 
 export async function openWifiSettings(): Promise<void> {
-  return isWindows
-    ? windows.openWindowsWifiSettings()
-    : macos.openMacWifiSettings();
+  return windows.openWindowsWifiSettings();
 }
 
 export {

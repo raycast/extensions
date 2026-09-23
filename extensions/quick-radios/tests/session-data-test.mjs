@@ -14,9 +14,6 @@ const {
 const { parseSubinterfaceBytes } = await import(
   "../src/services/platform/windows.ts"
 );
-const { parseNetstatBytes, parseMacWifiAssociationKey } = await import(
-  "../src/services/platform/macos.ts"
-);
 const { isLatestSsidRequest } = await import("../src/utils/wifiState.ts");
 
 console.log("==================================================");
@@ -333,52 +330,9 @@ assert.equal(
 console.log("✓ Windows netsh parser tests passed!");
 
 // ---------------------------------------------------------------
-// 4. Test macOS Netstat Parser
+// 4. Test WLAN Event Multi-Adapter & SSID Isolation
 // ---------------------------------------------------------------
-console.log("\n--- 4. Testing macOS netstat parser ---");
-
-const sampleMacNetstat = `
-Name  Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
-en0   1500  <Link#14>     38:f9:d3:a1:b2:c3 234123     0  987654321   123456     0   12345678     0
-en0   1500  fe80::1%en0   fe80::...         234123     -  987654321   123456     -   12345678     -
-en0   1500  192.168.1     192.168.1.50      234123     -  987654321   123456     -   12345678     -
-`;
-
-const macCounters = parseNetstatBytes(sampleMacNetstat, "en0");
-assert.deepEqual(macCounters, { bytesIn: 987654321, bytesOut: 12345678 });
-
-// Test Prefix Collision Prevention:
-// If en10 appears before en1, querying en1 must NOT match en10!
-const sampleMacPrefixCollision = `
-Name  Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
-en10  1500  <Link#20>     00:11:22:33:44:55    100     0      11111       50     0      22222     0
-en1   1500  <Link#15>     66:77:88:99:aa:bb  50000     0  999999999    25000     0   88888888     0
-`;
-const en1Counters = parseNetstatBytes(sampleMacPrefixCollision, "en1");
-assert.deepEqual(
-  en1Counters,
-  { bytesIn: 999999999, bytesOut: 88888888 },
-  "Querying 'en1' must not mistakenly match 'en10' even when en10 precedes it!",
-);
-
-// Test Inactive Device Marker (en0*):
-const sampleMacDown = `
-Name  Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll
-en0*  1500  <Link#14>     38:f9:d3:a1:b2:c3  10000     0   50000000     5000     0    5000000     0
-`;
-const en0DownCounters = parseNetstatBytes(sampleMacDown, "en0");
-assert.deepEqual(
-  en0DownCounters,
-  { bytesIn: 50000000, bytesOut: 5000000 },
-  "Device name with trailing asterisk (en0*) must be parsed correctly",
-);
-
-console.log("✓ macOS netstat parser tests passed!");
-
-// ---------------------------------------------------------------
-// 5. Test WLAN Event Multi-Adapter & SSID Isolation
-// ---------------------------------------------------------------
-console.log("\n--- 5. Testing WLAN event multi-adapter isolation ---");
+console.log("\n--- 4. Testing WLAN event multi-adapter isolation ---");
 
 function unescapeXml(str) {
   return str
@@ -498,9 +452,9 @@ assert.equal(
 console.log("✓ WLAN event multi-adapter isolation tests passed!");
 
 // ---------------------------------------------------------------
-// 6. Test SSID-scoped internet speed cache
+// 5. Test SSID-scoped internet speed cache
 // ---------------------------------------------------------------
-console.log("\n--- 6. Testing SSID-scoped speed cache ---");
+console.log("\n--- 5. Testing SSID-scoped speed cache ---");
 
 const originalFetch = globalThis.fetch;
 let fetchCalls = 0;
@@ -539,53 +493,9 @@ try {
 console.log("✓ SSID-scoped speed cache tests passed!");
 
 // ---------------------------------------------------------------
-// 7. Test macOS Wi-Fi association identity parsing
+// 6. Test stale SSID request rejection
 // ---------------------------------------------------------------
-console.log("\n--- 7. Testing macOS association identity parser ---");
-
-const firstAssociationLog = `
-2026-09-12 10:00:00.000 airportd: en0 associated with SSID HomeFiber BSSID aa:bb:cc:dd:ee:ff
-`;
-const secondAssociationLog = `${firstAssociationLog}
-2026-09-12 12:00:00.000 airportd: en0 associated with SSID HomeFiber BSSID aa:bb:cc:dd:ee:ff
-`;
-const firstAssociationKey = parseMacWifiAssociationKey(
-  firstAssociationLog,
-  "HomeFiber",
-  "aa:bb:cc:dd:ee:ff",
-  "en0",
-);
-const secondAssociationKey = parseMacWifiAssociationKey(
-  secondAssociationLog,
-  "HomeFiber",
-  "aa:bb:cc:dd:ee:ff",
-  "en0",
-);
-assert(firstAssociationKey);
-assert(secondAssociationKey);
-assert.notEqual(
-  firstAssociationKey,
-  secondAssociationKey,
-  "Reconnect to the same SSID and BSSID must produce a fresh connection key",
-);
-
-const redactedAssociationKey = parseMacWifiAssociationKey(
-  "2026-09-12 12:00:00.000 airportd: en0 joined <private>",
-  "HomeFiber",
-  undefined,
-  "en0",
-);
-assert(
-  redactedAssociationKey,
-  "Interface identity should support redacted SSID logs",
-);
-
-console.log("✓ macOS association identity parser tests passed!");
-
-// ---------------------------------------------------------------
-// 8. Test stale SSID request rejection
-// ---------------------------------------------------------------
-console.log("\n--- 8. Testing stale SSID request rejection ---");
+console.log("\n--- 6. Testing stale SSID request rejection ---");
 
 assert.equal(
   isLatestSsidRequest("Network-A", "Network-A", "Network-A"),

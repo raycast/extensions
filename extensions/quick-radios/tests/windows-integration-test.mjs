@@ -55,24 +55,12 @@ if (process.platform !== "win32") {
     new URL("../assets/quick-radios-helper.exe", import.meta.url),
   );
   if (existsSync(helperPath)) {
-    const { stdout } = await execFileAsync(helperPath, ["devices"]);
-    const devices = JSON.parse(stdout);
-    assert(Array.isArray(devices), "Bluetooth helper should return an array");
-    for (const device of devices) {
-      assert(
-        Object.hasOwn(device, "BatteryLevel"),
-        "Every helper device should include the optional battery field",
-      );
-      assert(
-        device.BatteryLevel === null ||
-          (Number.isInteger(device.BatteryLevel) &&
-            device.BatteryLevel >= 0 &&
-            device.BatteryLevel <= 100),
-        "Reported Bluetooth battery levels should be integers from 0 to 100",
-      );
-    }
-    console.log(
-      `Windows Bluetooth helper contract passed for ${devices.length} paired device(s).`,
+    const { stdout } = await execFileAsync(helperPath, ["status", "wifi"]);
+    const state = stdout.trim();
+    assert(
+      ["On", "Off", "NotFound"].includes(state),
+      `Helper Wi-Fi radio status should be On, Off, or NotFound (got ${state})`,
     );
+    console.log(`Windows helper Wi-Fi radio contract passed (${state}).`);
   }
 }

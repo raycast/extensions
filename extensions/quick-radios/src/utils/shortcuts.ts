@@ -16,7 +16,7 @@ export function createPlatformShortcut(
 }
 
 export const SHORTCUTS = {
-  /** Toggle Wi-Fi or Bluetooth radio (Cmd+T on Mac, Ctrl+T on Windows) */
+  /** Toggle Wi-Fi radio (Cmd+T on Mac, Ctrl+T on Windows) */
   toggleRadio: createPlatformShortcut(["cmd"], ["ctrl"], "t"),
 
   /** Open OS settings (Cmd+O on Mac, Ctrl+O on Windows) */

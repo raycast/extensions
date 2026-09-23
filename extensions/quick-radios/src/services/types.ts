@@ -38,27 +38,3 @@ export interface WifiNetwork {
   isConnected: boolean;
   band?: string;
 }
-
-export interface BluetoothStatus {
-  isOn: boolean;
-}
-
-export type BluetoothDeviceCategory =
-  "audio" | "peripheral" | "controller" | "phone" | "other";
-
-export interface BluetoothBattery {
-  level?: number;
-  left?: number;
-  right?: number;
-  case?: number;
-}
-
-export interface BluetoothDevice {
-  id: string;
-  name: string;
-  address?: string;
-  category: BluetoothDeviceCategory;
-  isConnected: boolean;
-  isPaired?: boolean;
-  battery?: BluetoothBattery;
-}
