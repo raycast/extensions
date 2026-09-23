@@ -115,8 +115,9 @@ export default function Command(props: LaunchProps) {
     try {
       setContent(props.fallbackText || (await readContent(preferredSource)));
     } catch (error) {
-      setContent("");
-      if (!(error instanceof NoTextError)) {
+      if (error instanceof NoTextError) {
+        setContent("");
+      } else {
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to read text",
