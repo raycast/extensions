@@ -1,6 +1,6 @@
 # desk.ly Changelog
 
-## [Less Dependencies] - {PR_MERGE_DATE}
+## [Less Dependencies] - 2026-09-23
 
 - Removed an external library for image-processing so map rendering is done via SVG now
 - Better error messages when an invalid desk.ly URL was entered
