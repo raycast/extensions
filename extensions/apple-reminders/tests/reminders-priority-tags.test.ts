@@ -237,28 +237,26 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.deepStrictEqual(resolved.tags, ["errands", "shopping"]);
   });
 
-  it("matches @list while extracting #tags separately", () => {
-    const resolved = resolveQuickAddReminder(
-      { title: "Finish presentation @Work #urgent" },
-      "Finish presentation @Work #urgent",
-      [{ id: "work-id", title: "Work" }],
-    );
-
-    assert.strictEqual(resolved.title, "Finish presentation");
-    assert.strictEqual(resolved.listId, "work-id");
-    assert.deepStrictEqual(resolved.tags, ["urgent"]);
-  });
-
-  it("treats #word as a tag even if a list with that name exists", () => {
-    const resolved = resolveQuickAddReminder(
+  it("preserves list hashtags and at-mentions while extracting non-list hashtags as tags", () => {
+    const resolvedHash = resolveQuickAddReminder(
       { title: "Finish presentation #Work #urgent" },
       "Finish presentation #Work #urgent",
       [{ id: "work-id", title: "Work" }],
     );
 
-    assert.strictEqual(resolved.title, "Finish presentation");
-    assert.strictEqual(resolved.listId, undefined);
-    assert.deepStrictEqual(resolved.tags, ["Work", "urgent"]);
+    assert.strictEqual(resolvedHash.title, "Finish presentation");
+    assert.strictEqual(resolvedHash.listId, "work-id");
+    assert.deepStrictEqual(resolvedHash.tags, ["urgent"]);
+
+    const resolvedAt = resolveQuickAddReminder(
+      { title: "Finish presentation @Work #urgent" },
+      "Finish presentation @Work #urgent",
+      [{ id: "work-id", title: "Work" }],
+    );
+
+    assert.strictEqual(resolvedAt.title, "Finish presentation");
+    assert.strictEqual(resolvedAt.listId, "work-id");
+    assert.deepStrictEqual(resolvedAt.tags, ["urgent"]);
   });
 
   it("extracts natural-language due dates and tags when AI omits due date", () => {
