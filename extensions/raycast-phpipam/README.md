@@ -38,6 +38,7 @@ The extension never modifies data in phpIPAM. Every data request is an HTTP `GET
 | Username / Password | Local phpIPAM user permitted to use the API (not used for app-code apps) |
 | API App Code | Only for apps with **SSL with App code token** security: the App code from the app's edit dialog |
 | Ignore TLS errors | Optional: allow self-signed certificates |
+| Allow unencrypted (HTTP) connections | Optional: allow plain `http://` instances (credentials are sent unencrypted — trusted internal networks only) |
 
 The extension authenticates on first use, caches the API token and transparently re-authenticates when it expires. Note that the API requires a **local** phpIPAM user — SAML users cannot authenticate via the API.
 

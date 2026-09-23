@@ -79,10 +79,19 @@
     },
     {
       "name": "ignoreTlsErrors",
-      "title": "Ignore TLS certificate errors",
+      "title": "Ignore TLS Certificate Errors",
       "description": "Allow self-signed certificates. Use with caution.",
       "type": "checkbox",
       "label": "Ignore TLS errors",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "allowHttp",
+      "title": "Allow Unencrypted (HTTP) Connections",
+      "description": "Allow connecting to plain http:// instances. Credentials are sent unencrypted; only enable on trusted internal networks.",
+      "type": "checkbox",
+      "label": "Allow HTTP",
       "required": false,
       "default": false
     }

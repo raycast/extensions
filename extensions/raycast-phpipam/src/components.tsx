@@ -229,6 +229,16 @@ function InfoRow({ title, value }: { title: string; value?: string }) {
   );
 }
 
+/** Result of a supplementary request: its value, or the error it failed with. */
+type Supplementary<T> = { value?: T; error?: unknown };
+
+function settle<T>(request: Promise<T>): Promise<Supplementary<T>> {
+  return request.then(
+    (value) => ({ value }),
+    (error: unknown) => ({ error }),
+  );
+}
+
 export function SubnetDetailView({
   subnetId,
   sectionId,
@@ -239,10 +249,10 @@ export function SubnetDetailView({
   const { isLoading, data, error, revalidate } = usePromise(
     async (id: string) => {
       const subnet = await phpipam.subnet(id);
-      const usage = await phpipam.subnetUsage(id).catch(() => undefined);
-      const addresses = await phpipam
-        .subnetAddresses(id)
-        .catch(() => [] as IpAddress[]);
+      // Usage and addresses are supplementary: keep the subnet visible when
+      // they fail, but report the failure instead of pretending it is empty.
+      const usage = await settle(phpipam.subnetUsage(id));
+      const addresses = await settle(phpipam.subnetAddresses(id));
       return { subnet, usage, addresses };
     },
     [subnetId],
@@ -254,8 +264,11 @@ export function SubnetDetailView({
   }
 
   const subnet = data?.subnet;
-  const usage = subnet && !isFolder(subnet) ? data?.usage : undefined;
-  const addresses = sortAddresses(data?.addresses ?? []);
+  const notFolder = subnet ? !isFolder(subnet) : false;
+  const usage = notFolder ? data?.usage.value : undefined;
+  const usageError = notFolder ? data?.usage.error : undefined;
+  const addressList = sortAddresses(data?.addresses.value ?? []);
+  const addressesError = data?.addresses.error;
   const resolvedSectionId = sectionId ?? s(subnet?.sectionId);
 
   return (
@@ -264,7 +277,11 @@ export function SubnetDetailView({
       navigationTitle={subnet ? subnetLabel(subnet) : "Subnet"}
       searchBarPlaceholder="Filter addresses…"
     >
-      {usage ? (
+      {usageError ? (
+        <List.Section title="Usage">
+          <LoadErrorRow what="Usage" error={usageError} onRetry={revalidate} />
+        </List.Section>
+      ) : usage ? (
         <List.Section title="Usage">
           <InfoRow title="Hosts" value={fmtNum(usage.max_hosts)} />
           <InfoRow
@@ -295,16 +312,52 @@ export function SubnetDetailView({
           ) : null}
         </List.Section>
       ) : null}
-      <List.Section title={`Addresses (${addresses.length})`}>
-        {addresses.map((address) => (
-          <AddressListItem
-            key={s(address.id)}
-            address={address}
-            sectionId={resolvedSectionId}
+      <List.Section
+        title={
+          addressesError ? "Addresses" : `Addresses (${addressList.length})`
+        }
+      >
+        {addressesError ? (
+          <LoadErrorRow
+            what="Addresses"
+            error={addressesError}
+            onRetry={revalidate}
           />
-        ))}
+        ) : (
+          addressList.map((address) => (
+            <AddressListItem
+              key={s(address.id)}
+              address={address}
+              sectionId={resolvedSectionId}
+            />
+          ))
+        )}
       </List.Section>
     </List>
+  );
+}
+
+/** A failed supplementary load (usage/addresses) inside an otherwise working detail view. */
+function LoadErrorRow({
+  what,
+  error,
+  onRetry,
+}: {
+  what: string;
+  error: unknown;
+  onRetry: () => void;
+}) {
+  return (
+    <List.Item
+      icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+      title={`${what} unavailable`}
+      subtitle={errorMessage(error)}
+      actions={
+        <ActionPanel>
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+        </ActionPanel>
+      }
+    />
   );
 }
 

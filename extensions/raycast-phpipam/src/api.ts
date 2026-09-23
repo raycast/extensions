@@ -10,16 +10,6 @@ import type {
   Vrf,
 } from "./types";
 
-export interface Preferences {
-  phpipamUrl: string;
-  appId: string;
-  username: string;
-  password: string;
-  /** Set for API apps with "SSL with App code" security (ssl_code). */
-  appCode?: string;
-  ignoreTlsErrors?: boolean;
-}
-
 interface ApiEnvelope<T> {
   code?: number;
   success?: boolean;
@@ -39,6 +29,20 @@ export class ApiError extends Error {
 
 const TOKEN_KEY = "phpipam_token";
 const EXPIRY_KEY = "phpipam_token_expires";
+const SCOPE_KEY = "phpipam_token_scope";
+
+/**
+ * A cached token is only valid for the instance, API app and user it was
+ * issued for; anything else must re-authenticate instead of sending a live
+ * token from a previous setup to the current URL.
+ */
+function tokenScope(): string {
+  return [
+    webBaseUrl(),
+    preferences.appId.trim(),
+    preferences.username ?? "",
+  ].join("|");
+}
 
 /** Re-authenticate well before the server-side expiry to avoid clock drift. */
 const EXPIRY_MARGIN_MS = 5 * 60 * 1000;
@@ -56,7 +60,16 @@ export function webBaseUrl(): string {
 }
 
 function apiUrl(): string {
-  return `${webBaseUrl()}/api/${encodeURIComponent(preferences.appId.trim())}`;
+  const base = webBaseUrl();
+  // Login sends reusable credentials and every request carries the token, so
+  // plain http:// must be an explicit opt-in, not a silent fallback.
+  if (/^http:\/\//i.test(base) && !preferences.allowHttp) {
+    throw new ApiError(
+      'The phpIPAM URL uses unencrypted http:// — enable "Allow Unencrypted (HTTP) Connections" in the extension preferences (trusted internal networks only), or use an https:// URL.',
+      400,
+    );
+  }
+  return `${base}/api/${encodeURIComponent(preferences.appId.trim())}`;
 }
 
 /** phpIPAM's API management page (Administration → API). */
@@ -117,6 +130,7 @@ async function authenticate(): Promise<string> {
     body && typeof body.data?.expires === "string" ? body.data.expires : "";
   await LocalStorage.setItem(TOKEN_KEY, token);
   await LocalStorage.setItem(EXPIRY_KEY, expires);
+  await LocalStorage.setItem(SCOPE_KEY, tokenScope());
   return token;
 }
 
@@ -135,11 +149,18 @@ async function getToken(force = false): Promise<string> {
     return appCode;
   }
   if (!force) {
-    const [token, expiry] = await Promise.all([
+    const [token, expiry, scope] = await Promise.all([
       LocalStorage.getItem(TOKEN_KEY),
       LocalStorage.getItem(EXPIRY_KEY),
+      LocalStorage.getItem(SCOPE_KEY),
     ]);
-    if (
+    if (scope !== tokenScope()) {
+      await Promise.all([
+        LocalStorage.removeItem(TOKEN_KEY),
+        LocalStorage.removeItem(EXPIRY_KEY),
+        LocalStorage.removeItem(SCOPE_KEY),
+      ]);
+    } else if (
       typeof token === "string" &&
       token &&
       parseExpiry(typeof expiry === "string" ? expiry : "") - Date.now() >

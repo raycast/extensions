@@ -22,6 +22,7 @@ This extension talks to your phpIPAM instance through its API. You need an API a
 - **phpIPAM URL**: the full base URL, e.g. `https://phpipam.example.com`. Use the final URL — if the server redirects (for example from `http://` to `https://`), the login fails because web servers drop the `Authorization` header on redirects.
 - **Username**: must be a **local** phpIPAM user with API access. SAML users cannot authenticate against the API.
 - **Ignore TLS errors**: only for internal instances with self-signed certificates that you trust. Leave off otherwise.
+- **Allow unencrypted (HTTP) connections**: off by default. `http://` URLs are rejected unless you enable this — credentials and tokens would be sent unencrypted, so only turn it on for trusted internal networks.
 
 The extension logs in on first use, caches the API token and re-authenticates automatically when it expires.
 
