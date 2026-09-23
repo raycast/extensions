@@ -58,6 +58,7 @@ export default function Command() {
 
           const payload: NewReminder = {
             title: activeTab.title,
+            url: activeTab.url,
             notes: activeTab.url,
             listId,
             dueDate,
@@ -108,6 +109,7 @@ export default function Command() {
       key={tab ? `${tab.browser}-${tab.url}` : "empty-form"}
       draftValues={{
         title: tab?.title ?? "",
+        url: tab?.url ?? "",
         notes: tab?.url ?? "",
         dueDate: defaultDueDate,
       }}

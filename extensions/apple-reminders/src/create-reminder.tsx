@@ -63,8 +63,12 @@ type CreateReminderValues = {
   radius: string;
 };
 
+export type CreateReminderDraftValues = Partial<CreateReminderValues> & {
+  url?: string;
+};
+
 type CreateReminderFormProps = {
-  draftValues?: Partial<CreateReminderValues>;
+  draftValues?: CreateReminderDraftValues;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
@@ -110,6 +114,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         title: values.title,
         listId: values.listId,
       };
+
+      if (draftValues?.url?.trim()) {
+        payload.url = draftValues.url.trim();
+      }
 
       if (values.notes?.trim()) {
         payload.notes = values.notes.trim();
@@ -508,6 +516,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   );
 }
 
-export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderValues }>) {
+export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderDraftValues }>) {
   return <CreateReminderForm draftValues={draftValues} />;
 }
