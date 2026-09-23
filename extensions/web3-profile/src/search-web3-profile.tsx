@@ -91,22 +91,17 @@ function useEnsProfile(name: string) {
 
     async function loadProfile() {
       const normalizedName = normalizeEnsName(name);
-      const [avatarText, records] = await Promise.all([
-        mainnetClient.getEnsText({ name: normalizedName, key: "avatar" }).catch(() => null),
+      const [avatar, records] = await Promise.all([
+        mainnetClient.getEnsAvatar({ name: normalizedName }).catch(() => null),
         fetchEnsRecords(normalizedName),
       ]);
       const address = records.addresses.ethereum as Address | undefined;
-      const [avatar, balance] = await Promise.all([
-        avatarText && !avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")
-          ? mainnetClient.getEnsAvatar({ name: normalizedName }).catch(() => null)
-          : null,
-        address
-          ? mainnetClient
-              .getBalance({ address })
-              .then(formatEther)
-              .catch(() => undefined)
-          : undefined,
-      ]);
+      const balance = address
+        ? await mainnetClient
+            .getBalance({ address })
+            .then(formatEther)
+            .catch(() => undefined)
+        : undefined;
 
       if (!cancelled) {
         setProfile({
