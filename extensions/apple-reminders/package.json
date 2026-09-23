@@ -9,7 +9,6 @@
     "tm.wrnr",
     "ir4n",
     "jondelgado",
-    "phil_s",
     "michalzuch",
     "ridemountainpig",
     "maxnyby",
@@ -20,6 +19,7 @@
     "kendaniels",
     "isabhiii"
   ],
+  "pastContributors": ["phil_s"],
   "owner": "raycast",
   "access": "public",
   "categories": [
