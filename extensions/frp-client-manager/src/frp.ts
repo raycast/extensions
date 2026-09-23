@@ -580,37 +580,40 @@ async function pointPlistAtBinary(
   plistPath: string,
   newBinary: string,
 ): Promise<void> {
-  if (await plistEntryExists(plistPath, "ProgramArguments:0")) {
-    await plistSetOrAdd(plistPath, "ProgramArguments:0", newBinary);
-    return;
+  const hasArgsArray = await plistEntryExists(plistPath, "ProgramArguments");
+  const hasProgram = await plistEntryExists(plistPath, "Program");
+  if (hasArgsArray) {
+    if (await plistEntryExists(plistPath, "ProgramArguments:0")) {
+      await plistSetOrAdd(plistPath, "ProgramArguments:0", newBinary);
+    } else {
+      // The array exists but has no entries yet.
+      await execFile(
+        PLIST_BUDDY,
+        ["-c", `Add :ProgramArguments:0 string ${newBinary}`, plistPath],
+        { timeout: 5000 },
+      );
+    }
   }
-  if (await plistEntryExists(plistPath, "ProgramArguments")) {
-    // The array exists but has no entries yet.
+  if (hasProgram) {
+    // When both Program and ProgramArguments exist, launchd executes Program,
+    // so it must be updated too — otherwise the old binary stays live while
+    // the upgrade reports success.
+    await plistSetOrAdd(plistPath, "Program", newBinary);
+  }
+  if (!hasArgsArray && !hasProgram) {
+    await execFile(
+      PLIST_BUDDY,
+      ["-c", "Add :ProgramArguments array", plistPath],
+      {
+        timeout: 5000,
+      },
+    );
     await execFile(
       PLIST_BUDDY,
       ["-c", `Add :ProgramArguments:0 string ${newBinary}`, plistPath],
       { timeout: 5000 },
     );
-    return;
   }
-  if (await plistEntryExists(plistPath, "Program")) {
-    // Some plists launch via a single Program string instead of
-    // ProgramArguments.
-    await plistSetOrAdd(plistPath, "Program", newBinary);
-    return;
-  }
-  await execFile(
-    PLIST_BUDDY,
-    ["-c", "Add :ProgramArguments array", plistPath],
-    {
-      timeout: 5000,
-    },
-  );
-  await execFile(
-    PLIST_BUDDY,
-    ["-c", `Add :ProgramArguments:0 string ${newBinary}`, plistPath],
-    { timeout: 5000 },
-  );
 }
 
 export async function upgradeFrpc(
