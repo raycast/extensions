@@ -37,8 +37,19 @@ export function parseAIResponse(response: string): ParsedQuickAddReminder {
     throw new Error("Invalid result returned from AI");
   }
 
-  if (parsed.recurrence && !parsed.dueDate) {
-    throw new Error("Recurrence without dueDate");
+  const isValidRecurrence =
+    parsed.recurrence &&
+    typeof parsed.recurrence === "object" &&
+    parsed.recurrence.frequency &&
+    typeof parsed.recurrence.frequency === "string" &&
+    ["daily", "weekly", "monthly", "yearly"].includes(parsed.recurrence.frequency);
+
+  if (isValidRecurrence) {
+    if (!parsed.dueDate) {
+      throw new Error("Recurrence without dueDate");
+    }
+  } else {
+    parsed.recurrence = undefined;
   }
 
   return parsed;

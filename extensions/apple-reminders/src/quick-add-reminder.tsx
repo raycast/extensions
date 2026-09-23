@@ -216,11 +216,24 @@ function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewRemin
     tags: parsed.tags && parsed.tags.length > 0 ? parsed.tags : undefined,
     address: parsed.address || undefined,
     proximity: parsed.proximity || undefined,
-    radius: parsed.radius || undefined,
+    radius: typeof parsed.radius === "number" && !isNaN(parsed.radius) && parsed.radius > 0 ? parsed.radius : undefined,
   };
 
-  if (parsed.recurrence) {
-    reminder.recurrence = parsed.recurrence as NewReminder["recurrence"];
+  if (
+    parsed.recurrence &&
+    typeof parsed.recurrence === "object" &&
+    parsed.recurrence.frequency &&
+    typeof parsed.recurrence.frequency === "string" &&
+    ["daily", "weekly", "monthly", "yearly"].includes(parsed.recurrence.frequency)
+  ) {
+    reminder.recurrence = {
+      frequency: parsed.recurrence.frequency as Frequency,
+      interval:
+        typeof parsed.recurrence.interval === "number" && parsed.recurrence.interval > 0
+          ? parsed.recurrence.interval
+          : 1,
+      endDate: parsed.recurrence.endDate || undefined,
+    };
   }
 
   return reminder;
