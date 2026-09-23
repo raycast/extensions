@@ -1,5 +1,10 @@
 # Sesh Changelog
 
+## [Search and connect to windows] - {PR_MERGE_DATE}
+
+- Add a Connect to Window command that lists every tmux window, grouped by session, and jumps straight to the one you pick, even when several windows share a name
+- Add a Search Windows action (⌘↵) on tmux sessions that lists just that session's windows, and creates a new window when none has the name you typed
+
 ## [Helpful empty states] - 2026-09-22
 
 - Show a dedicated empty state when the sesh CLI isn't installed, with a copyable Homebrew install command and a link to sesh on GitHub
