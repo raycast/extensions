@@ -261,6 +261,17 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
 
 export async function startService(): Promise<void> {
   const label = requireLabel();
+  const status = await getServiceStatus();
+  if (status.managed) {
+    // The job is already loaded but frpc has exited (e.g. KeepAlive is not
+    // true): bootstrap would fail with "already loaded", so kickstart it.
+    await execFile(
+      "/bin/launchctl",
+      ["kickstart", "-k", launchdTarget(label)],
+      { timeout: 8000 },
+    );
+    return;
+  }
   await execFile(
     "/bin/launchctl",
     ["bootstrap", launchdDomain(), getPlistPath(label)],
@@ -537,6 +548,71 @@ export async function checkForUpdates(
   }
 }
 
+const PLIST_BUDDY = "/usr/libexec/PlistBuddy";
+
+async function plistEntryExists(
+  plistPath: string,
+  entry: string,
+): Promise<boolean> {
+  try {
+    await execFile(PLIST_BUDDY, ["-c", `Print :${entry}`, plistPath], {
+      timeout: 5000,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function plistSetOrAdd(
+  plistPath: string,
+  entry: string,
+  value: string,
+): Promise<void> {
+  // `Set` errors when the key is absent, so add it instead when missing.
+  const verb = (await plistEntryExists(plistPath, entry)) ? "Set" : "Add";
+  const command =
+    verb === "Set" ? `Set :${entry} ${value}` : `Add :${entry} string ${value}`;
+  await execFile(PLIST_BUDDY, ["-c", command, plistPath], { timeout: 5000 });
+}
+
+async function pointPlistAtBinary(
+  plistPath: string,
+  newBinary: string,
+): Promise<void> {
+  if (await plistEntryExists(plistPath, "ProgramArguments:0")) {
+    await plistSetOrAdd(plistPath, "ProgramArguments:0", newBinary);
+    return;
+  }
+  if (await plistEntryExists(plistPath, "ProgramArguments")) {
+    // The array exists but has no entries yet.
+    await execFile(
+      PLIST_BUDDY,
+      ["-c", `Add :ProgramArguments:0 string ${newBinary}`, plistPath],
+      { timeout: 5000 },
+    );
+    return;
+  }
+  if (await plistEntryExists(plistPath, "Program")) {
+    // Some plists launch via a single Program string instead of
+    // ProgramArguments.
+    await plistSetOrAdd(plistPath, "Program", newBinary);
+    return;
+  }
+  await execFile(
+    PLIST_BUDDY,
+    ["-c", "Add :ProgramArguments array", plistPath],
+    {
+      timeout: 5000,
+    },
+  );
+  await execFile(
+    PLIST_BUDDY,
+    ["-c", `Add :ProgramArguments:0 string ${newBinary}`, plistPath],
+    { timeout: 5000 },
+  );
+}
+
 export async function upgradeFrpc(
   downloadUrl: string,
   version: string,
@@ -600,20 +676,8 @@ export async function upgradeFrpc(
 
     if (plistPath && bakPath && existsSync(plistPath)) {
       await copyFile(plistPath, bakPath);
-      await execFile(
-        "/usr/libexec/PlistBuddy",
-        ["-c", `Set :ProgramArguments:0 ${newBinary}`, plistPath],
-        {
-          timeout: 5000,
-        },
-      );
-      await execFile(
-        "/usr/libexec/PlistBuddy",
-        ["-c", `Set :WorkingDirectory ${destDir}`, plistPath],
-        {
-          timeout: 5000,
-        },
-      );
+      await pointPlistAtBinary(plistPath, newBinary);
+      await plistSetOrAdd(plistPath, "WorkingDirectory", destDir);
 
       try {
         await stopService();
