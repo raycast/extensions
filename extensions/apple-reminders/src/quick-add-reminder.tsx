@@ -58,26 +58,26 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     const nextRecentDate = format(addYears(recentDate, 1), "yyyy-MM-dd");
 
     // Pick an upcoming day. When referring to "next <day>" we should pick a week from then
-    const upcoming = addDays(now, 2);
-    const upcomingDate = format(upcoming, "yyyy-MM-dd");
-    const upcomingDateWeekday = format(upcoming, "EEEE");
-    const upcomingDateWeekdayNext = format(addDays(now, 9), "yyyy-MM-dd");
+    const upcomingDateObj = addDays(now, 2);
+    const upcomingDate = format(upcomingDateObj, "yyyy-MM-dd");
+    const upcomingDateWeekday = format(upcomingDateObj, "eeee");
+    const upcomingDateWeekdayNext = format(addDays(upcomingDateObj, 7), "yyyy-MM-dd");
 
-    // Pick a recent time. When referring to that time we should pick tomorrow
-    const oneHourAgo = format(subHours(now, 1), "haa"); // won't work well 12:00am-12:59am
+    const oneHourAgo = format(subHours(now, 1), "haa");
     const oneHourAgoTomorrow = format(addDays(subHours(now, 1), 1), "yyyy-MM-dd'T'HH:00:ss");
-    const oneHourFromNow = format(addHours(now, 1), "haa"); // won't work well 11:00pm-11:59pm
+    const oneHourFromNow = format(addHours(now, 1), "haa");
     const oneHourFromNowToday = format(addHours(now, 1), "yyyy-MM-dd'T'HH:mm:ss");
 
     const locations = await LocalStorage.getItem("saved-locations");
 
-    const prompt = `Act as a NLP parser for tasks. I'll give you a task text and you'll return me only a parsable and minified JSON object.\n
+    const prompt = `You are a helpful assistant that uses natural language processing to create a task in Apple Reminders based on the user's input. Parse the user's input into a valid, parsable JSON object, using empty strings for any fields not specified by the user.\n
 
 Here's the JSON Object structure:
 {
   "title": <Task title>,
   "description": <Task description. A human-readable description of the task. Use relative dates when appropriate. Include the task name in single quotes. Always include the list (or "default list" if none is specified). Always include the priority level if specified. Always include the recurrence if specified.>,
   "priority": <Task priority. Only pick the value from this list: "low", "medium", "high". Use the "high" priority if the task text specifies a word such as "urgent", "important", or an exclamation mark.>,
+  "tags": <Task tags as an array of strings, e.g. ["work", "urgent"]. Only include if specified in the task text.>,
   "listId": <Task list ID. Pick it from the following table by finding the list name corresponding to an ID: ${lists}. Don't add a listId if the user hasn't specified a list name. Note that the user can prepend the "#" or "@" symbols to list names, for example, "#work" or "@work".>,
   "dueDate": <Task due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. Never use dates before ${today} unless the specific month/day/year is provided. If the user includes a time before ${currentTime} and no date, assume they mean tomorrow>,
   "recurrence": {
@@ -86,13 +86,13 @@ Here's the JSON Object structure:
     "endDate": <Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.>
   },
   "address": <Task address. If the task text specifies an address, include it here.>,
-  "proximity": <Task proximity. Only pick the value from this list: "enter", "leave".>
+  "proximity": <Task proximity. Only pick the value from this list: "enter", "leave".>,
   "radius": <Task radius. A number that specifies the radius around the location in meters.>
 }
 
 Here are the rules you must follow:
 - You MUST return a valid, parsable JSON object.
-- Any text in quotes should be taken in its entirely as the task's title, and not interpreted for dates, priority, lists, etc.
+- Any text in quotes should be taken in its entirety as the task's title, and not interpreted for dates, priority, lists, tags, etc.
 - The title is made up of all the words you can't parse, in order. NEVER drop words.
 - Always capitalize weekday, month, and list names in your output.
 - Don't include a time unless specifically indicated by the user.
@@ -114,10 +114,10 @@ Here are some examples to help you out:
 - Eat ${oneHourFromNow} nachos: {"title":"Eat nachos","description":"'Eat nachos' today at ${oneHourFromNow} to default list","dueDate":"${oneHourFromNowToday}"}
 - Get groceries ${upcomingDateWeekday}: {"title":"Get groceries","description":"'Get groceries' on ${upcomingDate} to default list","dueDate":"${upcomingDate}"}
 - Get groceries next ${upcomingDateWeekday}: {"title":"Get groceries","description":"'Get groceries' on ${upcomingDateWeekdayNext} to default list","dueDate":"${upcomingDateWeekdayNext}"}
-- Read a book every day: {"title":"Read a book","description":"'Read a book' daily to default list","dueDate":"${today}","recurrence":{"frequency":"daily","interval":1}, }
+- Read a book every day: {"title":"Read a book","description":"'Read a book' daily to default list","dueDate":"${today}","recurrence":{"frequency":"daily","interval":1}}
 - Read every book fri: {"title":"Read every book","description":"'Read every book' on Friday to default list","dueDate":"${friday}"}
 - Read books every fri: {"title":"Read books","description":"'Read books' weekly on Fridays to default list","dueDate":"${friday}","recurrence":{"frequency":"weekly","interval":1}}
-- Clean the house every sunday: {"title":"Clean the house","description":"'Clean the house' weekly on Sundays to default list","dueDate":"${sunday}","recurrence":{"frequency":"weekly","interval":1}
+- Clean the house every sunday: {"title":"Clean the house","description":"'Clean the house' weekly on Sundays to default list","dueDate":"${sunday}","recurrence":{"frequency":"weekly","interval":1}}
 - Call mom monthly on sunday: {"title":"Call mom","description":"'Call mom' monthly starting ${sunday} to default list","dueDate":"${sunday}","recurrence":{"frequency":"monthly","interval":1}}
 - Dad's birthday on ${recentDateMonth} ${recentDateDay}: {"title":"Dad's birthday","description":"'Dad's birthday' on ${nextRecentDate} to default list","dueDate":"${nextRecentDate}"}
 - Monthly breakfast with friends Saturday: {"title":"Monthly breakfast with friends","description":"'Monthly breakfast with friends' recurring monthly starting ${saturday} to default list","dueDate":"${saturday}","recurrence":{"frequency":"monthly","interval":1}}
@@ -128,7 +128,6 @@ Here are some examples to help you out:
 Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
     const inputText = props.fallbackText ?? props.arguments.text;
-
     let description: string | undefined;
     let resolvedReminder: ParsedQuickAddReminder;
 
@@ -210,13 +209,14 @@ async function runStoredPostCreateActions() {
 function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewReminder {
   const reminder: NewReminder = {
     title: parsed.title,
-    listId: parsed.listId,
-    dueDate: parsed.dueDate,
-    notes: notes ?? parsed.notes,
-    priority: parsed.priority,
-    address: parsed.address,
-    proximity: parsed.proximity,
-    radius: parsed.radius,
+    listId: parsed.listId || undefined,
+    dueDate: parsed.dueDate || undefined,
+    notes: notes || parsed.notes || undefined,
+    priority: parsed.priority || undefined,
+    tags: parsed.tags && parsed.tags.length > 0 ? parsed.tags : undefined,
+    address: parsed.address || undefined,
+    proximity: parsed.proximity || undefined,
+    radius: parsed.radius || undefined,
   };
 
   if (parsed.recurrence) {

@@ -19,22 +19,23 @@ import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
 import CustomizeCreateReminderForm from "./customize-create-reminder-form";
-import { getIntervalValidationError, getPriorityIcon } from "./helpers";
+import { getIntervalValidationError, getPriorityIcon, parseTags } from "./helpers";
 import useCreateReminderFormLayout from "./hooks/useCreateReminderFormLayout";
-import { List, Reminder, useData } from "./hooks/useData";
+import { Frequency, List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import ManageCreateActions from "./manage-create-actions";
 import { ParsedDueDate, parseDueDate } from "./parse-due-date";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
-export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+export type { Frequency };
 export type NewReminder = {
   title: string;
   listId?: string;
   notes?: string;
   dueDate?: string;
   priority?: string;
+  tags?: string[];
   recurrence?: {
     frequency: Frequency;
     interval: number;
@@ -50,6 +51,7 @@ type CreateReminderValues = {
   notes: string;
   dueDate: Date | null;
   priority: string;
+  tags: string;
   listId: string;
   isRecurring: boolean;
   frequency: string;
@@ -129,6 +131,13 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         payload.priority = values.priority;
       }
 
+      if (values.tags) {
+        const parsedTags = parseTags(values.tags);
+        if (parsedTags.length > 0) {
+          payload.tags = parsedTags;
+        }
+      }
+
       if (values.location === "custom" || values.address) {
         payload.address = values.address;
 
@@ -176,6 +185,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
       setValue("title", "");
       setValue("notes", "");
+      setValue("tags", "");
       setValue("location", "");
       setValue("address", "");
       setValue("radius", "");
@@ -202,6 +212,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       notes: draftValues?.notes ?? "",
       dueDate: initialDueDate,
       priority: draftValues?.priority,
+      tags: draftValues?.tags ?? "",
       listId: initialListId,
       isRecurring: draftValues?.isRecurring ?? false,
       frequency: draftValues?.frequency,
@@ -369,6 +380,16 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
             <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
           </Form.Dropdown>,
+        ];
+      case "tags":
+        return [
+          <Form.TextField
+            key="tags"
+            {...itemProps.tags}
+            title="Tags"
+            placeholder="work, urgent or #work #urgent"
+            info="Supports comma- or space-separated tags with or without #. Stored in Apple Reminders native tag format."
+          />,
         ];
       case "location":
         return [
