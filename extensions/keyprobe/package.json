@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keyprobe",
+  "title": "KeyProbe",
+  "description": "Visually test every key on your keyboard in a native macOS panel launched from Raycast.",
+  "icon": "icon.png",
+  "author": "yuzukq",
+  "license": "MIT",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open KeyProbe",
+      "subtitle": "KeyProbe",
+      "description": "Open the key test panel (focuses the existing panel if already open)",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-layout",
+      "title": "Select Keyboard Layout",
+      "subtitle": "KeyProbe",
+      "description": "Search and pick which keyboard layout to test (overrides the Keyboard Layout preference; includes an entry to revert to it)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layoutMode",
+      "title": "Keyboard Layout",
+      "description": "Which board to draw. Auto detects the attached keyboard's hardware type — but that reports ANSI for an ANSI-shaped board even if its firmware sends JIS-mapped combos (英数/かな/¥/_), so force JIS here to test those.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "ANSI",
+          "value": "ansi"
+        },
+        {
+          "title": "JIS",
+          "value": "jis"
+        },
+        {
+          "title": "ISO",
+          "value": "iso"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.0.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build-helper": "cd swift/keyprobe-helper && swift build -c release --scratch-path ../../.raycast-swift-build/keyprobe-helper && cp ../../.raycast-swift-build/keyprobe-helper/release/KeyProbeHelper ../../assets/KeyProbeHelper",
+    "build-helper-universal": "cd swift/keyprobe-helper && swift build -c release --arch arm64 --arch x86_64 --scratch-path ../../.raycast-swift-build/keyprobe-helper && cp ../../.raycast-swift-build/keyprobe-helper/apple/Products/Release/KeyProbeHelper ../../assets/KeyProbeHelper",
+    "predev": "npm run build-helper",
+    "prebuild": "npm run build-helper-universal && test -f assets/KeyProbeHelper && shasum -a 256 assets/KeyProbeHelper > assets/KeyProbeHelper.sha256 && shasum -a 256 -c assets/KeyProbeHelper.sha256",
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
