@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-23
 
 - Show an empty state when no text is available instead of a list of blank conversions that silently paste nothing
 
