@@ -48,10 +48,12 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.14.1",
     "@types/react": "^19.2.14",
+    "@types/react-test-renderer": "19.1.0",
     "eslint": "^8.57.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.5.3",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.8.2",
     "vitest": "^4.1.11"
   },
@@ -63,11 +65,12 @@
     "prepare": "husky",
     "prepublishOnly": "echo \"Error: no publish\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "e2e:fixture": "deno run --allow-env --allow-net ${INOH_BACKEND_DIR:-../inoh-backend}/supabase/e2e/cli.ts",
+    "e2e:fixture": "deno run --allow-env --allow-net \"${INOH_BACKEND_DIR:-../inoh-backend}/supabase/e2e/cli.ts\"",
     "e2e:doctor": "npm run --silent e2e:fixture -- doctor",
     "e2e:test": "vitest run --config e2e/vitest.config.ts",
     "e2e:run": "npm run e2e:doctor && npm run e2e:test",
-    "e2e:test:ui": "INOH_RAYCAST_UI=1 vitest run --config e2e/vitest.config.ts"
+    "e2e:test:ui": "INOH_RAYCAST_UI=1 vitest run --config e2e/vitest.config.ts",
+    "test": "vitest run tests"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

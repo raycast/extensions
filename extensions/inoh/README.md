@@ -29,12 +29,32 @@ yourself without leaving Raycast.
 - Make the card yourself when the dictionary doesn't have the word: your own private card in about a minute, or a request for the public dictionary
 - Save a word for later instead, and finish it on the web, on your phone, or from an AI assistant
 
+Open the actions panel and choose **Apps → [Connect to Claude](https://docs.inoh.app/#claude)** to set up practice with your Inoh deck. **AI Assistants** stays in the same section for all connection guides.
+
 ## Getting Started
 
 Searching is free and needs no account. To **add** cards to a deck, sign in
 when prompted: enter your Inoh email, then the one-time code sent to your
 inbox — no password needed. The same step signs you in or creates your
 account automatically.
+
+## Search Word from Screenshot
+
+![Capturing the word shriek from a video caption and adding it to a deck](./media/search-word-from-screenshot.gif)
+
+For words you can't select: video captions, PDFs, ebooks, video calls, games.
+The command draws a crosshair, you drag a box around the word, and the search
+list opens with it already looked up. Recognition runs on-device through Apple
+Vision, so no image ever leaves your Mac.
+
+Draw the box around a **single word**. Inoh matches against the word itself, so
+capturing a whole sentence finds nothing.
+
+macOS needs **Screen Recording** permission for Raycast the first time you run
+it. One caveat worth knowing: macOS blanks DRM-protected video before anything
+can capture it, so subtitles in Netflix and Apple TV+ come through as a black
+rectangle. The command tells you when that happens. YouTube, local video files,
+and everything else work normally.
 
 ## Generate
 
@@ -64,7 +84,6 @@ cards — leaves the word waiting in your drafts, so nothing you typed is lost.
 | --------------------------- | ----------- | ------------- | -------------- |
 | Cards in your decks         | 300         | 1,000         | Unlimited      |
 | Cards you generate yourself | 50 a month  | 300 a month   | 1,000 a month  |
-| Daily reviews               | 50          | Unlimited     | Unlimited      |
 | Pronunciation practice      | 100 a month | 1,000 a month | 10,000 a month |
 
 Searching the dictionary is free and needs no account at all. Everything in
@@ -75,3 +94,14 @@ accounts get an **Upgrade Plan** action that opens the plans page in your
 browser; paid accounts get **Manage Subscription**, which opens your account
 settings on [app.inoh.app](https://app.inoh.app) to change or cancel. After
 you upgrade, the badge updates the next time you open the extension.
+
+## Development Checks
+
+Install dependencies with `npm ci`. Run `npm test` for definition-field regression
+tests, `npm run lint` for linting and formatting, `npx tsc --noEmit` for type
+checking, and `npm run build` to compile the extension. The hook tests use React
+Test Renderer with controlled suggestion responses and timers.
+
+The existing backend tests run with `npm run e2e:run` against a local Inoh
+Supabase stack. Set `INOH_BACKEND_DIR` to the backend checkout when it is not
+at `../inoh-backend`.

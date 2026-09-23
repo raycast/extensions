@@ -1,5 +1,12 @@
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
-import { CHROME_EXTENSION_URL, CONNECT_AN_AI_URL, IOS_APP_URL, OBSIDIAN_PLUGIN_URL, WEB_APP_URL } from "../constants";
+import {
+  CHROME_EXTENSION_URL,
+  CONNECT_AN_AI_URL,
+  CONNECT_CLAUDE_URL,
+  IOS_APP_URL,
+  OBSIDIAN_PLUGIN_URL,
+  WEB_APP_URL,
+} from "../constants";
 
 /**
  * Cross-promotion links to the other Inoh apps, shown in every ActionPanel.
@@ -12,6 +19,11 @@ import { CHROME_EXTENSION_URL, CONNECT_AN_AI_URL, IOS_APP_URL, OBSIDIAN_PLUGIN_U
 export function AppsActionSection() {
   return (
     <ActionPanel.Section title="Apps">
+      <Action.OpenInBrowser
+        title="Connect to Claude"
+        icon={{ source: "claude.svg", tintColor: Color.PrimaryText }}
+        url={CONNECT_CLAUDE_URL}
+      />
       {/* eslint-disable @raycast/prefer-title-case -- "iOS" is Apple's casing, which the rule mangles */}
       <Action.OpenInBrowser
         title="iOS App"

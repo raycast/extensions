@@ -10,7 +10,7 @@ import { foldTextForComparison } from "../lib/text-comparison";
  * Reason: the word is typed a letter at a time, so asking on every change
  * would spend a request per letter on prefixes nobody meant.
  */
-const SUGGEST_AFTER_IDLE_MS = 500;
+export const SUGGEST_AFTER_IDLE_MS = 500;
 
 /**
  * A first draft of what one word means, for a field that is about to ask.
@@ -74,6 +74,11 @@ export function useSuggestedDefinition(word: string, isSignedIn: boolean) {
   latestAskAboutWord.current = askAboutWord;
 
   useEffect(() => {
+    // Reason: an old answer can arrive during the next word's debounce,
+    // before its request starts. Invalidate it as soon as the input changes.
+    activeRequestId.current += 1;
+    setSuggestion(NO_SUGGESTION);
+
     const trimmedWord = word.trim();
     if (!isSignedIn || trimmedWord === "") return;
 
@@ -85,7 +90,11 @@ export function useSuggestedDefinition(word: string, isSignedIn: boolean) {
       void latestAskAboutWord.current(trimmedWord);
     }, SUGGEST_AFTER_IDLE_MS);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Reason: unmounting has no next effect to invalidate an in-flight answer.
+      activeRequestId.current += 1;
+    };
   }, [isSignedIn, word]);
 
   return suggestion;

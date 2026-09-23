@@ -2,6 +2,11 @@
 
 ## [Generate Command] - {PR_MERGE_DATE}
 
+- Added **Connect to Claude** to the Apps actions, with a Claude icon and a
+  direct setup guide. **AI Assistants** remains available for other connections
+- Changing or clearing the word immediately invalidates pending definition
+  suggestions, including while the next word is still waiting to be requested
+
 - New **Generate** command: pick a dictionary, type a word the dictionary
   doesn't have, say which meaning its card should teach, and Inoh makes the
   card without leaving Raycast — a private card of your own, or a request for

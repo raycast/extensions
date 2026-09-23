@@ -46,6 +46,9 @@ export const OBSIDIAN_PLUGIN_URL = "https://obsidian.md/plugins?id=inoh";
  */
 export const CONNECT_AN_AI_URL = "https://docs.inoh.app";
 
+/** Opens the Claude connection guide directly. */
+export const CONNECT_CLAUDE_URL = `${CONNECT_AN_AI_URL}/#claude`;
+
 /**
  * The two halves of the library in the Inoh web app: the shared dictionary
  * every card is drawn from, and the user's own deck of them. Offered from a
