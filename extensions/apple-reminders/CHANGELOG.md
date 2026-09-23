@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Updated maintainer metadata] - {PR_MERGE_DATE}
+
+- Marked a former Apple Reminders maintainer as a past contributor.
+
 ## [Display tags in My Reminders] - 2026-09-23
 
 - Display attached tags as accessories in the "My Reminders" list view.
