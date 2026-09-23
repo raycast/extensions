@@ -1,5 +1,9 @@
 # YouTrack Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support
+
 ## [Update] - 2026-08-14
 
 - Add server-side issue search with YouTrack query suggestions
