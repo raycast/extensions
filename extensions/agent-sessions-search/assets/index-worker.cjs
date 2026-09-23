@@ -2136,9 +2136,15 @@ async function refreshIndex(opts = {}) {
   try {
     const existing = loadAllStates();
     const discovered = [];
+    const failed = /* @__PURE__ */ new Set();
     for (const p of providers) {
-      await p.prepare();
-      discovered.push(...await p.discover());
+      try {
+        await p.prepare();
+        discovered.push(...await p.discover());
+      } catch (e) {
+        failed.add(p.id);
+        console.error(`discovery failed for ${p.id}`, e);
+      }
     }
     const seen = /* @__PURE__ */ new Set();
     const work = [];
@@ -2150,8 +2156,8 @@ async function refreshIndex(opts = {}) {
       work.push({ file: f, previous: append ? prev : null, append });
     }
     let removed = 0;
-    for (const file of existing.keys()) {
-      if (!seen.has(file)) {
+    for (const [file, state] of existing) {
+      if (!seen.has(file) && !failed.has(state.agent)) {
         deleteSessionByFile(file);
         removed++;
       }

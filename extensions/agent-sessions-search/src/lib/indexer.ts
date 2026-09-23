@@ -12,7 +12,7 @@ import {
 import { resolveRepo } from "./git";
 import { seenLinearWorkspaces } from "./refs";
 import { providers } from "./providers";
-import { DiscoveredFile, ProviderContext, SessionState } from "./types";
+import { AgentId, DiscoveredFile, ProviderContext, SessionState } from "./types";
 
 export interface IndexProgress {
   done: number;
@@ -49,9 +49,17 @@ export async function refreshIndex(
   try {
     const existing = loadAllStates();
     const discovered: DiscoveredFile[] = [];
+    // An agent whose store cannot be read right now (locked database, unexpected schema) must not
+    // abort indexing for every other agent, and its sessions are not "gone" either.
+    const failed = new Set<AgentId>();
     for (const p of providers) {
-      await p.prepare();
-      discovered.push(...(await p.discover()));
+      try {
+        await p.prepare();
+        discovered.push(...(await p.discover()));
+      } catch (e) {
+        failed.add(p.id);
+        console.error(`discovery failed for ${p.id}`, e);
+      }
     }
     const seen = new Set<string>();
     const work: { file: DiscoveredFile; previous: SessionState | null; append: boolean }[] = [];
@@ -63,8 +71,8 @@ export async function refreshIndex(
       work.push({ file: f, previous: append ? prev : null, append });
     }
     let removed = 0;
-    for (const file of existing.keys()) {
-      if (!seen.has(file)) {
+    for (const [file, state] of existing) {
+      if (!seen.has(file) && !failed.has(state.agent)) {
         deleteSessionByFile(file);
         removed++;
       }
