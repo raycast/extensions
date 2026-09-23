@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add QuillHub MCP Server] - {PR_MERGE_DATE}
+## [Add QuillHub MCP Server] - 2026-09-23
 
 - Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
 
