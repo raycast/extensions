@@ -191,7 +191,7 @@ export default function Command() {
                       <List.Item.Detail.Metadata.Label
                         icon={Icon.Star}
                         title="Rating"
-                        text={`${show.rating?.aggregateRating?.toFixed(1) || "N/A"} (${show.rating?.voteCount.toLocaleString() || "N/A"} votes)`}
+                        text={`${show.rating?.aggregateRating?.toFixed(1) || "N/A"} (${show.rating?.voteCount?.toLocaleString() || "N/A"} votes)`}
                       />
                     </List.Item.Detail.Metadata>
                   }
