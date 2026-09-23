@@ -96,9 +96,15 @@ export function Tiny() {
       return;
     }
     if (searchText.includes(".") && searchText.length > 2) {
+      let name: string;
+      try {
+        name = normalize(searchText);
+      } catch {
+        return;
+      }
       setIsLoadingEnsAddress(true);
       mainnetClient
-        .getEnsAddress({ name: normalize(searchText) })
+        .getEnsAddress({ name })
         .then((address) => {
           if (!cancelled && address) setEnsAddress(address);
         })

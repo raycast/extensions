@@ -19,17 +19,9 @@ const ENS_SUGGESTIONS = gql`
   }
 `;
 
-export const fetchSuggestions = async (
-  recipient: string,
-  setSuggestions: (suggestions: string[]) => void,
-  setIsFetching: (arg: boolean) => void = () => null
-) => {
-  if (recipient.length <= 2) {
-    setSuggestions([]);
-    return;
-  }
+export const fetchSuggestions = async (recipient: string): Promise<string[]> => {
+  if (recipient.length <= 2) return [];
 
-  setIsFetching(true);
   try {
     const query = recipient.toLowerCase();
     const exactLookup = async () => {
@@ -56,10 +48,8 @@ export const fetchSuggestions = async (
       .map(({ name }) => name)
       .sort((a, b) => a.length - b.length)
       .slice(0, 40);
-    setSuggestions([...new Set(exactName ? [exactName, ...indexedNames] : indexedNames)]);
+    return [...new Set(exactName ? [exactName, ...indexedNames] : indexedNames)];
   } catch {
-    setSuggestions([]);
-  } finally {
-    setIsFetching(false);
+    return [];
   }
 };

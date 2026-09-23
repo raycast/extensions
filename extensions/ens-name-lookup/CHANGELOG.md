@@ -1,6 +1,6 @@
 # ENS extension Changelog
 
-## [ENSv2 Support] - 2026-09-23
+## [ENSv2 Support] - {PR_MERGE_DATE}
 
 - Resolve names through the ENS Universal Resolver
 - Support imported DNS names in addition to `.eth` names

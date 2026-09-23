@@ -10,15 +10,25 @@ export default function Command() {
   const [ensSuggestions, setEnsSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
+    let cancelled = false;
     setEnsSuggestions([]);
+    if (searchTerm.length <= 2) {
+      setIsLoading(false);
+      return;
+    }
 
-    fetchSuggestions(
-      searchTerm,
-      (results: string[]) => {
-        setEnsSuggestions(results);
-      },
-      setIsLoading
-    );
+    setIsLoading(true);
+    fetchSuggestions(searchTerm)
+      .then((results) => {
+        if (!cancelled) setEnsSuggestions(results);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchTerm]);
 
   let title;
@@ -88,7 +98,12 @@ function useEnsProfile(name: string) {
         avatarText && !avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")
           ? mainnetClient.getEnsAvatar({ name: normalizedName }).catch(() => null)
           : null,
-        address ? mainnetClient.getBalance({ address }).then(formatEther) : undefined,
+        address
+          ? mainnetClient
+              .getBalance({ address })
+              .then(formatEther)
+              .catch(() => undefined)
+          : undefined,
       ]);
 
       if (!cancelled) {
