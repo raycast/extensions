@@ -85,7 +85,7 @@
     "@raycast/utils": "^1.16.1",
     "abi-coder": "^5.0.0",
     "axios": "^1.8.4",
-    "ethers": "^6.11.1"
+    "ethers": "^6.17.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
