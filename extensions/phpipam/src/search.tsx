@@ -9,7 +9,7 @@ import {
   SubnetListItem,
   silentPromiseOptions,
 } from "./components";
-import type { SearchResults, Vlan, Vrf } from "./types";
+import type { IpAddress, SearchResults, Vlan, Vrf } from "./types";
 import { s, subnetFamily } from "./utils";
 
 const MIN_TERM_LENGTH = 3;
@@ -22,8 +22,9 @@ const DEBOUNCE_MS = 300;
 const MAX_ADDRESSES = 256;
 /**
  * Search results carry raw decimal IPs without a family marker; only the
- * parent subnet knows whether "1" is 0.0.0.1 or ::1. Lookups run in parallel
- * and beyond this many distinct subnets the size heuristic stays in charge.
+ * parent subnet knows whether "1" is 0.0.0.1 or ::1. Lookups run in the
+ * background, and beyond this many distinct subnets the size heuristic
+ * stays in charge.
  */
 const MAX_FAMILY_LOOKUPS = 12;
 
@@ -40,6 +41,13 @@ function useDebouncedValue<T>(value: T, delay: number): T {
     return () => clearTimeout(timer);
   }, [value, delay]);
   return debounced;
+}
+
+/** Distinct parent-subnet ids of the address hits, capped for family lookups. */
+function familyLookupKey(addresses: IpAddress[]): string {
+  return [...new Set(addresses.map((a) => s(a.subnetId)).filter(Boolean))]
+    .slice(0, MAX_FAMILY_LOOKUPS)
+    .join(",");
 }
 
 function VlanListItem({ vlan }: { vlan: Vlan }) {
@@ -106,24 +114,8 @@ export default function Command() {
     async (
       searchTerm: string,
       enabled: boolean,
-    ): Promise<(SearchResults & { families: Map<string, 4 | 6> }) | null> => {
-      if (!enabled) return null;
-      const results = await phpipam.search(searchTerm);
-      const families = new Map<string, 4 | 6>();
-      const subnetIds = [
-        ...new Set(results.addresses.map((a) => s(a.subnetId)).filter(Boolean)),
-      ].slice(0, MAX_FAMILY_LOOKUPS);
-      await Promise.all(
-        subnetIds.map(async (id) => {
-          try {
-            families.set(id, subnetFamily(await phpipam.subnet(id)));
-          } catch {
-            // Unresolved subnets keep the size-based family heuristic.
-          }
-        }),
-      );
-      return { ...results, families };
-    },
+    ): Promise<SearchResults | null> =>
+      enabled ? phpipam.search(searchTerm) : null,
     [term, searchable],
     silentPromiseOptions,
   );
@@ -133,6 +125,29 @@ export default function Command() {
   }
 
   const results = searchable ? (data ?? null) : null;
+  // Families resolve in the background so results never wait on them; items
+  // re-render with correct formatting once the parent subnets arrive.
+  const familyKey = results ? familyLookupKey(results.addresses) : "";
+  const { data: families } = usePromise(
+    async (ids: string): Promise<Map<string, 4 | 6>> => {
+      const map = new Map<string, 4 | 6>();
+      await Promise.all(
+        ids
+          .split(",")
+          .filter(Boolean)
+          .map(async (id) => {
+            try {
+              map.set(id, subnetFamily(await phpipam.subnet(id)));
+            } catch {
+              // Unresolved subnets keep the size-based family heuristic.
+            }
+          }),
+      );
+      return map;
+    },
+    [familyKey],
+    silentPromiseOptions,
+  );
   const isEmptyResult =
     results !== null &&
     results.addresses.length === 0 &&
@@ -167,7 +182,7 @@ export default function Command() {
               <AddressListItem
                 key={s(address.id)}
                 address={address}
-                family={results.families.get(s(address.subnetId))}
+                family={families?.get(s(address.subnetId))}
               />
             ))}
           </List.Section>
