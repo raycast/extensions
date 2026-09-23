@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Display tags in My Reminders] - 2026-09-23
+
+- Display attached tags as accessories in the "My Reminders" list view.
+- Support filtering reminders by tag names in "My Reminders".
+
 ## [Add priority and tags support] - 2026-09-23
 
 - Add support for setting priority (`low`, `medium`, `high`) and tags when creating or updating reminders.

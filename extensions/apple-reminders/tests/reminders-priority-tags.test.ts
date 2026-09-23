@@ -288,3 +288,47 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
   });
 });
 
+describe("Reminder List Item Tag Display", () => {
+  it("extracts tags for accessories while keeping notes intact", () => {
+    const rawNotes = "Meeting preparation\n\n#work #urgent";
+    const { tags } = extractTagsFromNotes(rawNotes);
+
+    assert.deepStrictEqual(tags, ["work", "urgent"]);
+
+    const accessoryText = tags.map((t) => `#${t}`).join(" ");
+    const accessoryTooltip = `Tags: ${tags.map((t) => `#${t}`).join(", ")}`;
+
+    assert.strictEqual(accessoryText, "#work #urgent");
+    assert.strictEqual(accessoryTooltip, "Tags: #work, #urgent");
+  });
+
+  it("builds keywords containing both hashed and unhashed tags plus full note tokens", () => {
+    const reminder = {
+      title: "Review PR",
+      notes: "Important items\n\n#engineering #v2",
+    };
+
+    const keywords = [reminder.title];
+    const { tags } = extractTagsFromNotes(reminder.notes);
+
+    if (tags.length > 0) {
+      keywords.push(...tags.map((t) => `#${t}`), ...tags);
+    }
+    if (reminder.notes) {
+      keywords.push(...reminder.notes.split(" "));
+    }
+
+    assert.deepStrictEqual(keywords, [
+      "Review PR",
+      "#engineering",
+      "#v2",
+      "engineering",
+      "v2",
+      "Important",
+      "items\n\n#engineering",
+      "#v2",
+    ]);
+  });
+});
+
+
