@@ -1,6 +1,6 @@
 # Coast Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-23
 
 - Search recorded text and inspect screenshots and accessibility content.
 - Explore application usage, sessions, grouped moments, and surrounding activity.
