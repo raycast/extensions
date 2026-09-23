@@ -1,11 +1,11 @@
 # Ray.so Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2026-09-23
 
 - Create code images from Raycast AI using saved defaults or per-snippet overrides, with an option to return only the editor link.
 - Ask Raycast AI for available themes, languages, padding, and your saved image settings.
 
-## [Shared Image Defaults] - {PR_MERGE_DATE}
+## [Shared Image Defaults] - 2026-09-23
 
 - Configure a default theme, padding, dark mode, and background for both image commands in extension preferences.
 - Override the defaults for an individual snippet and open default settings directly from the form.
