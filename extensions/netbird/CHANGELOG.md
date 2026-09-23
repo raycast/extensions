@@ -1,5 +1,9 @@
 # NetBird Changelog
 
+## [Fix double SSO login page] - {PR_MERGE_DATE}
+
+- Fixed SSO login page opening twice when connecting to NetBird.
+
 ## [Toggle Connection] - 2026-09-16
 
 - Added `Toggle Connection` command which connects to NetBird when disconnected and disconnects when connected.
