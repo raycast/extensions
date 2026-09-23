@@ -26,6 +26,12 @@ export type QuickAddList = {
   isDefault?: boolean;
 };
 
+export const VALID_FREQUENCIES: readonly Frequency[] = ["daily", "weekdays", "weekends", "weekly", "monthly", "yearly"];
+
+export function isValidFrequency(value: unknown): value is Frequency {
+  return typeof value === "string" && (VALID_FREQUENCIES as readonly string[]).includes(value);
+}
+
 export function parseAIResponse(response: string): ParsedQuickAddReminder {
   const json = extractFirstJSONObject(response);
   if (!json) {
@@ -38,11 +44,7 @@ export function parseAIResponse(response: string): ParsedQuickAddReminder {
   }
 
   const isValidRecurrence =
-    parsed.recurrence &&
-    typeof parsed.recurrence === "object" &&
-    parsed.recurrence.frequency &&
-    typeof parsed.recurrence.frequency === "string" &&
-    ["daily", "weekly", "monthly", "yearly"].includes(parsed.recurrence.frequency);
+    parsed.recurrence && typeof parsed.recurrence === "object" && isValidFrequency(parsed.recurrence.frequency);
 
   if (isValidRecurrence) {
     if (!parsed.dueDate) {

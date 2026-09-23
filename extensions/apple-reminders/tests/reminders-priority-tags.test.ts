@@ -8,7 +8,7 @@ import {
   formatTags,
   parseTags,
 } from "../src/helpers";
-import { resolveQuickAddReminder } from "../src/quick-add-reminder-parser";
+import { parseAIResponse, resolveQuickAddReminder } from "../src/quick-add-reminder-parser";
 import createReminderTool from "../src/tools/create-reminder";
 import updateReminderTool from "../src/tools/update-reminder";
 // @ts-expect-error Mock module
@@ -346,6 +346,34 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
 
     assert.strictEqual(resolved.title, "Buy eggs");
     assert.strictEqual(resolved.listId, undefined);
+  });
+
+  it("validates recurrence with weekdays and weekends frequencies", () => {
+    const aiWeekday = JSON.stringify({
+      title: "Daily standup",
+      dueDate: "2026-09-24",
+      recurrence: { frequency: "weekdays", interval: 1 },
+    });
+    const parsedWeekday = parseAIResponse(aiWeekday);
+    assert.deepStrictEqual(parsedWeekday.recurrence, { frequency: "weekdays", interval: 1 });
+
+    const aiWeekend = JSON.stringify({
+      title: "Weekly chores",
+      dueDate: "2026-09-26",
+      recurrence: { frequency: "weekends", interval: 1 },
+    });
+    const parsedWeekend = parseAIResponse(aiWeekend);
+    assert.deepStrictEqual(parsedWeekend.recurrence, { frequency: "weekends", interval: 1 });
+  });
+
+  it("clears invalid recurrence frequency in parseAIResponse", () => {
+    const aiInvalid = JSON.stringify({
+      title: "Task",
+      dueDate: "2026-09-24",
+      recurrence: { frequency: "invalid_freq", interval: 1 },
+    });
+    const parsed = parseAIResponse(aiInvalid);
+    assert.strictEqual(parsed.recurrence, undefined);
   });
 });
 
