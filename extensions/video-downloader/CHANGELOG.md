@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-23
 
 - Fixed unlisted Vimeo links (`vimeo.com/<id>/<hash>`) failing with "The web client only works when logged-in". They are now downloaded through the public player URL, so no Vimeo login or browser cookies are needed.
 - Fixed Vimeo videos being wrongly rejected as "Live streams are not supported". Vimeo leaves the live status empty; only videos that are actually live or upcoming are rejected now.
