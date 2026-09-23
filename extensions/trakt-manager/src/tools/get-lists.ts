@@ -1,7 +1,7 @@
 import { TraktListEntry } from "../lib/schema";
 import { CompactList, CompactListEntry, toCompactList, toCompactListEntry } from "./compact-media";
 import { fetchAllLists, fetchListItems, getOwnList } from "./list-api";
-import { listNameContains, listNameEquals, resolveListItemQuery } from "./list-matching";
+import { listNameContains, listNameEquals, membershipEntryTypes, resolveListItemQuery } from "./list-matching";
 import { isMatchableTitle, partitionByLookup, resolveLookupQuery } from "./title-text";
 
 type ItemType = "movies" | "shows" | "seasons" | "episodes";
@@ -80,13 +80,6 @@ type Output = {
   /** For an item check: entries matching the title, the ID, or containing the title. */
   matchedItems?: CompactListEntry[];
   totalItems?: number;
-};
-
-const ENTRY_TYPE: Record<ItemType, string> = {
-  movies: "movie",
-  shows: "show",
-  seasons: "season",
-  episodes: "episode",
 };
 
 function entryTitles(entry: TraktListEntry): Array<string | undefined> {
@@ -170,13 +163,7 @@ async function checkMembership(
   }
 
   const fetched = await fetchListItems(list.listId, list.name);
-  const wantedTypes = itemType
-    ? [ENTRY_TYPE[itemType]]
-    : seasonNumber !== undefined || episodeNumber !== undefined
-      ? episodeNumber !== undefined
-        ? ["episode"]
-        : ["season", "episode"]
-      : ["movie", "show"];
+  const wantedTypes = membershipEntryTypes(itemType, seasonNumber, episodeNumber);
 
   let candidates = fetched.items.filter((entry) => wantedTypes.includes(entry.type));
   const compact = new Map(candidates.map((entry) => [entry, toCompactListEntry(entry)]));

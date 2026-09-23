@@ -232,6 +232,24 @@ export function resolveListItemQuery(
   return { text: trimmed, seasonNumber, episodeNumber };
 }
 
+/**
+ * Which list entry types a membership check may count as a hit. A season question only counts
+ * season entries: an episode of that season on the list is not the season itself.
+ */
+export function membershipEntryTypes(
+  itemType: "movies" | "shows" | "seasons" | "episodes" | undefined,
+  seasonNumber?: number,
+  episodeNumber?: number,
+): string[] {
+  if (itemType === "movies") return ["movie"];
+  if (itemType === "shows") return ["show"];
+  if (itemType === "seasons") return ["season"];
+  if (itemType === "episodes") return ["episode"];
+  if (episodeNumber !== undefined) return ["episode"];
+  if (seasonNumber !== undefined) return ["season"];
+  return ["movie", "show"];
+}
+
 /** Join every resolved title for confirmations — never truncate a batch the user is approving. */
 export function summarizeLabels(labels: string[]): string {
   return labels.join(", ");

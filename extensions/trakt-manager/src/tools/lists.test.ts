@@ -7,6 +7,7 @@ import {
   listNameContains,
   listNameEquals,
   listNameSimilar,
+  membershipEntryTypes,
   parseEpisodeKeys,
   parseSeasonKeys,
   parseTraktIds,
@@ -24,6 +25,17 @@ test("list names fold case and accents but keep emoji apart", () => {
   assert.equal(listNameEquals("🎬", "🍿"), false);
   assert.equal(listNameContains("🎬 Oscars 2026", "oscars"), true);
   assert.equal(listNameContains("Oscars 2026", ""), false);
+});
+
+test("a season membership check never counts an episode of that season", () => {
+  const season = resolveListItemQuery("Severance season 2");
+  assert.deepEqual(membershipEntryTypes(undefined, season.seasonNumber, season.episodeNumber), ["season"]);
+
+  const episode = resolveListItemQuery("Severance S02E03");
+  assert.deepEqual(membershipEntryTypes(undefined, episode.seasonNumber, episode.episodeNumber), ["episode"]);
+
+  assert.deepEqual(membershipEntryTypes(undefined), ["movie", "show"]);
+  assert.deepEqual(membershipEntryTypes("episodes", 2), ["episode"]);
 });
 
 test("list IDs must be a numeric ID or a slug", () => {
