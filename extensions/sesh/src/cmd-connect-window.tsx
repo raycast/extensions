@@ -1,6 +1,6 @@
-import { Icon, List, Action, ActionPanel } from "@raycast/api";
+import { Icon, List, Action, ActionPanel, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions, getWindows, Window } from "./sesh";
+import { getSessions, getWindows } from "./sesh";
 import { checkSetup, isSetupError, renderSetupEmptyView } from "./setup";
 import { WindowItem, useWindowConnect } from "./windows";
 
@@ -11,12 +11,17 @@ export default function ConnectWindowCommand() {
     async () => {
       await checkSetup();
       const sessions = (await getSessions({ tmuxOnly: true })) ?? [];
-      return Promise.all(
-        sessions.map(async (session) => ({
-          name: session.Name,
-          windows: await getWindows(session.Name).catch((): Window[] => []),
-        })),
-      );
+      const results = await Promise.allSettled(sessions.map((session) => getWindows(session.Name)));
+      const failure = results.find((result) => result.status === "rejected");
+      if (failure && results.every((result) => result.status === "rejected")) {
+        throw failure.reason;
+      }
+      return sessions.map((session, i) => {
+        const result = results[i];
+        return result.status === "fulfilled"
+          ? { name: session.Name, windows: result.value, error: undefined }
+          : { name: session.Name, windows: [], error: String(result.reason) };
+      });
     },
     [],
     {
@@ -70,6 +75,15 @@ export default function ConnectWindowCommand() {
       {renderEmptyView()}
       {sessions.map((session) => (
         <List.Section key={session.name} title={session.name}>
+          {session.error && (
+            <List.Item
+              title="Couldn't load windows"
+              subtitle={session.error}
+              icon={{ source: Icon.Warning, tintColor: Color.Red }}
+              keywords={[session.name]}
+              actions={<ActionPanel>{refreshAction}</ActionPanel>}
+            />
+          )}
           {session.windows.map((window) => (
             <WindowItem
               key={window.Index}
