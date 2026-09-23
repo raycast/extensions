@@ -85,6 +85,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   const { locations, addLocation } = useLocations();
   const [dateText, setDateText] = useState("");
+  const [draftUrl, setDraftUrl] = useState(draftValues?.url ?? "");
   const nlpParseRef = useRef<ParsedDueDate | null>(null);
 
   const defaultList = data?.lists.find((list) => list.isDefault);
@@ -115,8 +116,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         listId: values.listId,
       };
 
-      if (draftValues?.url?.trim()) {
-        payload.url = draftValues.url.trim();
+      if (draftUrl.trim()) {
+        payload.url = draftUrl.trim();
       }
 
       if (values.notes?.trim()) {
@@ -199,6 +200,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("address", "");
       setValue("radius", "");
       setDateText("");
+      setDraftUrl("");
       nlpParseRef.current = null;
       setValue("dueDate", selectTodayAsDefault ? addMilliseconds(startOfToday(), 1) : null);
 
