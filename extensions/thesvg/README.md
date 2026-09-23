@@ -10,15 +10,19 @@ Browse and search the full theSVG library. Filter by category, preview icons, an
 
 **Actions:**
 
-- **Copy SVG** (`Cmd+C`) - Copy the SVG source code to clipboard
-- **Copy Direct URL** (`Cmd+Shift+C`) - Copy the theSVG direct URL
-- **Copy jsDelivr URL** (`Cmd+Option+C`) - Copy the jsDelivr CDN URL
-- **Open on theSVG** (`Cmd+O`) - Open the icon page in your browser
-- **View Details** (`Cmd+D`) - See all variants, SVG source, and metadata
-- **Copy as JSX** (`Cmd+Shift+J`) - Copy as a React JSX component
-- **Copy as HTML** (`Cmd+Shift+H`) - Copy as an `<img>` tag
-- **Copy as Data URI** (`Cmd+Shift+D`) - Copy as inline data URI
-- **Copy Hex Color** (`Cmd+Shift+X`) - Copy brand color
+| Name | macOS shortcut | Windows shortcut | Description |
+| ---- | -------------- | ---------------- | ----------- |
+| Copy SVG | `↵` or `⌘` `↵` | `↵` or `Ctrl` `↵` | Copy the SVG source code to clipboard |
+| Show Details | `⌘` `↵` or `↵` | `Ctrl` `↵` or `↵` | Show information about the SVG |
+| Copy Direct URL | `⌘` `⇧` `C` | `Ctrl` `Shift` `C` | Copy the theSVG direct URL |
+| Copy jsDelivr URL | `⌘` `⌥` `C` | `Ctrl` `Alt` `C` | Copy the jsDelivr CDN URL |
+| Open on theSVG | `⌘` `O` | `Ctrl` `O` | Open the icon page in your browser |
+| Open Brand Website | `⌘` `⇧` `O` | `Ctrl` `Shift` `O` | Open the brand website in your browser |
+| Toggle Layout | `⌘` `L` | `Ctrl` `L` | Toggle the layout between `List` and `Grid` |
+| Copy as JSX | `⌘` `⇧` `J` | `Ctrl` `Shift` `J` | Copy as a React JSX component |
+| Copy as HTML | `⌘` `⇧` `H` | `Ctrl` `Shift` `H` | Copy as an `<img>` tag |
+| Copy as Data URI | `⌘` `⇧` `D` | `Ctrl` `Shift` `D` | Copy as inline data URI |
+| Copy Hex Color | `⌘` `⇧` `X` | `Ctrl` `Shift` `X` | Copy brand color |
 
 ### Quick Copy
 

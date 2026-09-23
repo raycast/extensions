@@ -9,9 +9,12 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  Keyboard,
+  Grid,
+  LocalStorage,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import {
   searchIcons,
   getIcon,
@@ -46,12 +49,91 @@ export default function SearchIcons() {
 
   const icons = data?.icons ?? [];
 
+  const preferences = getPreferenceValues<Preferences.SearchIcons>();
+
+  const defaultLayout = preferences.layout ?? "grid";
+  const [layout, setLayout] = useCachedState("layout", defaultLayout);
+
+  useEffect(() => {
+    (async () => {
+      const lastLayoutPref = await LocalStorage.getItem<string>("layout-pref");
+      if (lastLayoutPref !== defaultLayout) {
+        setLayout(defaultLayout);
+        await LocalStorage.setItem("layout-pref", defaultLayout);
+      }
+    })();
+  }, [defaultLayout]);
+
+  const toggleLayout = () =>
+    setLayout((current: string) => (current === "grid" ? "list" : "grid"));
+
+  if (layout === "grid") {
+    return (
+      <Grid
+        isLoading={isLoading}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        searchBarPlaceholder="Search 5,600+ brand icons…"
+        filtering={false}
+        searchBarAccessory={
+          <Grid.Dropdown
+            tooltip="Filter by category"
+            value={category}
+            onChange={setCategory}
+          >
+            <Grid.Dropdown.Item title="All Categories" value="all" />
+            <Grid.Dropdown.Section title="Categories">
+              {(categories ?? []).map((cat) => (
+                <List.Dropdown.Item
+                  key={cat.name}
+                  title={`${cat.name} (${cat.count})`}
+                  value={cat.name}
+                />
+              ))}
+            </Grid.Dropdown.Section>
+          </Grid.Dropdown>
+        }
+      >
+        {icons.map((icon) => (
+          <IconGridItem
+            key={icon.slug}
+            icon={icon}
+            layout={layout}
+            toggleLayout={toggleLayout}
+          />
+        ))}
+        {icons.length === 0 &&
+          !isLoading &&
+          (loadError ? (
+            <Grid.EmptyView
+              title="Could not load icons"
+              description={
+                loadError instanceof Error
+                  ? loadError.message
+                  : String(loadError)
+              }
+            />
+          ) : (
+            <Grid.EmptyView
+              title="No icons found"
+              description={
+                searchText
+                  ? `No results for "${searchText}"`
+                  : "Try a different category"
+              }
+              icon={Icon.MagnifyingGlass}
+            />
+          ))}
+      </Grid>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search 5,600+ brand icons..."
+      searchBarPlaceholder="Search 5,600+ brand icons…"
       filtering={false}
       searchBarAccessory={
         <List.Dropdown
@@ -73,7 +155,12 @@ export default function SearchIcons() {
       }
     >
       {icons.map((icon) => (
-        <IconListItem key={icon.slug} icon={icon} />
+        <IconListItem
+          key={icon.slug}
+          icon={icon}
+          layout={layout}
+          toggleLayout={toggleLayout}
+        />
       ))}
       {icons.length === 0 &&
         !isLoading &&
@@ -99,7 +186,37 @@ export default function SearchIcons() {
   );
 }
 
-function IconListItem({ icon }: { icon: IconEntry }) {
+function ToggleLayoutAction({
+  layout,
+  onToggleLayout,
+}: {
+  layout: string;
+  onToggleLayout: () => void;
+}) {
+  return (
+    <Action
+      title="Toggle Layout"
+      icon={layout === "grid" ? Icon.AppWindowList : Icon.AppWindowGrid3x3}
+      onAction={onToggleLayout}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "l" },
+        Windows: { modifiers: ["ctrl"], key: "l" },
+      }}
+    />
+  );
+}
+
+function IconListItem({
+  icon,
+  layout,
+  toggleLayout,
+}: {
+  icon: IconEntry;
+  layout: string;
+  toggleLayout: () => void;
+}) {
+  const { primaryAction } = getPreferenceValues<Preferences.SearchIcons>();
+
   const iconUrl = getIconUrl(icon.slug);
 
   return (
@@ -116,33 +233,120 @@ function IconListItem({ icon }: { icon: IconEntry }) {
       keywords={[icon.slug, ...icon.categories, ...icon.aliases]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Copy">
-            <CopySvgAction slug={icon.slug} title={icon.title} />
+          {primaryAction === "showDetails" ? (
+            <ActionPanel.Section>
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Sidebar}
+                target={<IconDetailView slug={icon.slug} />}
+              />
+              <CopySvgAction slug={icon.slug} title={icon.title} />
+            </ActionPanel.Section>
+          ) : (
+            <ActionPanel.Section>
+              <CopySvgAction slug={icon.slug} title={icon.title} />
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Sidebar}
+                target={<IconDetailView slug={icon.slug} />}
+              />
+            </ActionPanel.Section>
+          )}
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Direct URL"
               content={getIconUrl(icon.slug)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action.CopyToClipboard
               title="Copy JsDelivr URL"
               content={getCdnUrl(icon.slug)}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Open">
+          <ActionPanel.Section>
             <Action.OpenInBrowser
               title="Open on TheSVG"
               url={getIconPageUrl(icon.slug)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="View">
-            <Action.Push
-              title="View Details"
-              icon={Icon.Eye}
-              target={<IconDetailView slug={icon.slug} />}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+          <ActionPanel.Section>
+            <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function IconGridItem({
+  icon,
+  layout,
+  toggleLayout,
+}: {
+  icon: IconEntry;
+  layout: string;
+  toggleLayout: () => void;
+}) {
+  const { primaryAction } = getPreferenceValues<Preferences.SearchIcons>();
+
+  const iconUrl = getIconUrl(icon.slug);
+
+  return (
+    <Grid.Item
+      id={icon.slug}
+      title={icon.title}
+      subtitle={icon.categories.slice(0, 2).join(", ")}
+      content={{ source: iconUrl, fallback: Icon.Image }}
+      accessory={
+        icon.variants.length > 1
+          ? { tooltip: `${icon.variants.length} variants`, icon: Icon.Layers }
+          : undefined
+      }
+      keywords={[icon.slug, ...icon.categories, ...icon.aliases]}
+      actions={
+        <ActionPanel>
+          {primaryAction === "showDetails" ? (
+            <ActionPanel.Section>
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Sidebar}
+                target={<IconDetailView slug={icon.slug} />}
+              />
+              <CopySvgAction slug={icon.slug} title={icon.title} />
+            </ActionPanel.Section>
+          ) : (
+            <ActionPanel.Section>
+              <CopySvgAction slug={icon.slug} title={icon.title} />
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Sidebar}
+                target={<IconDetailView slug={icon.slug} />}
+              />
+            </ActionPanel.Section>
+          )}
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Direct URL"
+              content={getIconUrl(icon.slug)}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
+            <Action.CopyToClipboard
+              title="Copy JsDelivr URL"
+              content={getCdnUrl(icon.slug)}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Open on TheSVG"
+              url={getIconPageUrl(icon.slug)}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -157,12 +361,11 @@ function CopySvgAction({ slug, title }: { slug: string; title: string }) {
     <Action
       title="Copy SVG"
       icon={Icon.Clipboard}
-      shortcut={{ modifiers: ["cmd"], key: "c" }}
       onAction={async () => {
         try {
           const toast = await showToast({
             style: Toast.Style.Animated,
-            title: "Fetching SVG...",
+            title: "Fetching SVG…",
           });
           const detail = await getIcon(slug);
           const variant =
@@ -205,19 +408,28 @@ function CopyFormatsSection({
         title="Copy as JSX Component"
         content={toJsx(svg, icon.slug)}
         icon={Icon.Code}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "j" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "j" },
+        }}
       />
       <Action.CopyToClipboard
         title="Copy as HTML Img Tag"
         content={toHtmlImg(icon.slug, icon.title)}
         icon={Icon.Globe}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "h" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+        }}
       />
       <Action.CopyToClipboard
         title="Copy as Data URI"
         content={toDataUri(svg)}
         icon={Icon.Link}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "d" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+        }}
       />
       {hexVisible && (
         <Action.CopyToClipboard
@@ -227,7 +439,10 @@ function CopyFormatsSection({
             source: Icon.CircleFilled,
             tintColor: `#${icon.hex}` as Color,
           }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "x" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "x" },
+          }}
         />
       )}
     </ActionPanel.Section>
@@ -252,7 +467,7 @@ function IconDetailView({ slug }: { slug: string }) {
   const { data: icon, isLoading } = useCachedPromise(getIcon, [slug]);
 
   if (!icon) {
-    return <Detail isLoading={isLoading} markdown="Loading icon details..." />;
+    return <Detail isLoading={isLoading} markdown="Loading icon details…" />;
   }
 
   const variantKeys = Object.keys(icon.variants);
@@ -274,7 +489,7 @@ ${variantKeys.map((v) => `- \`${escapeMarkdown(v)}\` - [Preview](${getIconUrl(en
 ## SVG Source
 
 \`\`\`xml
-${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)" : ""}
+${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n… (truncated)" : ""}
 \`\`\`
 `;
 
@@ -327,7 +542,7 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy SVG">
-            {variantKeys.map((variant) => (
+            {variantKeys.map((variant, index) => (
               <Action
                 key={variant}
                 title={`Copy ${variant} SVG`}
@@ -348,6 +563,14 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
                     });
                   }
                 }}
+                shortcut={
+                  index === 2
+                    ? {
+                        macOS: { modifiers: ["cmd", "shift"], key: "return" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                      }
+                    : undefined
+                }
               />
             ))}
           </ActionPanel.Section>
@@ -356,19 +579,26 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
             <Action.CopyToClipboard
               title="Copy Direct URL"
               content={getIconUrl(slug)}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action.CopyToClipboard
               title="Copy JsDelivr URL"
               content={getCdnUrl(slug)}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open">
             <Action.OpenInBrowser
               title="Open on TheSVG"
               url={getIconPageUrl(slug)}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             {icon.url && (
-              <Action.OpenInBrowser title="Open Brand Website" url={icon.url} />
+              <Action.OpenInBrowser
+                title="Open Brand Website"
+                url={icon.url}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>

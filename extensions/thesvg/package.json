@@ -16,7 +16,45 @@
       "title": "Search Brand Icons",
       "subtitle": "theSVG",
       "description": "Search 5,600+ brand SVG icons. Copy SVG, download, or open in browser.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "layout",
+          "description": "Choose how to display results",
+          "type": "dropdown",
+          "required": false,
+          "title": "Layout",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ],
+          "default": "list"
+        },
+        {
+          "name": "primaryAction",
+          "description": "The action to perform when selecting an item",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "data": [
+            {
+              "title": "Copy SVG",
+              "value": "copySvg"
+            },
+            {
+              "title": "Show Details",
+              "value": "showDetails"
+            }
+          ],
+          "default": "copySvg"
+        }
+      ]
     },
     {
       "name": "copy-icon",
@@ -27,7 +65,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "github, vercel, openai...",
+          "placeholder": "github, vercel, openai…",
           "type": "text",
           "required": true
         }
@@ -63,16 +101,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.92.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.14",
-    "@types/react": "19.0.12",
-    "eslint": "^9.23.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -83,10 +121,14 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "overrides": {
     "brace-expansion": "5.0.9",
     "js-yaml@4": "4.3.1"
+  },
+  "allowScripts": {
+    "esbuild": true
   }
 }

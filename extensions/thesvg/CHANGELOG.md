@@ -1,5 +1,12 @@
 # theSVG Raycast Extension Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Add support for Windows platform
+- Add `Grid` view, preference and action to toggle the layout
+- Improve keyboard shortcuts
+- Bump all dependencies to the latest
+
 ## [1.1.0] - 2026-04-12
 
 ### Fixed

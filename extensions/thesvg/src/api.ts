@@ -134,7 +134,7 @@ export async function getIcon(slug: string): Promise<IconDetail> {
 export async function getCategories(): Promise<Category[]> {
   const res = await fetch(`${BASE_URL}/api/categories.json`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  const data: { categories: Category[] } = await res.json();
+  const data = (await res.json()) as { categories: Category[] };
   return data.categories;
 }
 
