@@ -21,35 +21,43 @@ function encode(svg: string): string {
 // Static top image — only changes when a new scramble is generated, so it never flickers.
 export function scrambleImage(scramble: string, appearance: Appearance): string {
   const W = 1000;
-  const H = 140;
+  const H = 130;
   const c = colors(appearance);
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-<text x="${W / 2}" y="60" text-anchor="middle" font-size="30" font-family="${FONT}" font-weight="600" fill="${c.text}">${escapeXml(scramble)}</text>
-<line x1="16" y1="105" x2="${W - 16}" y2="105" stroke="${c.line}" stroke-width="3"/>
+<text x="${W / 2}" y="42" text-anchor="middle" font-size="30" font-family="${FONT}" font-weight="600" fill="${c.text}">${escapeXml(scramble)}</text>
+<line x1="16" y1="72" x2="${W - 16}" y2="72" stroke="${c.line}" stroke-width="3"/>
 </svg>`;
 
   return encode(svg);
 }
 
-// Bottom image — updates every tick while running, but on its own so the scramble stays put.
-export function timerImage(centerText: string, big: boolean, appearance: Appearance, footer?: string): string {
+// Just the timer number/prompt. Rendered with a fixed height so it never collapses on reload,
+// which keeps the text stats below it from jumping.
+export function timerImage(centerText: string, big: boolean, appearance: Appearance): string {
   const W = 1000;
-  const H = 420;
+  const H = 150;
   const c = colors(appearance);
-  const fontSize = big ? 84 : 34;
-
-  const boxTop = 30;
-  const boxHeight = 260;
-  const centerY = boxTop + boxHeight / 2 + fontSize * 0.34;
-
-  const footerLine = footer
-    ? `<text x="${W / 2}" y="${H - 36}" text-anchor="middle" font-size="24" font-family="${FONT}" fill="${c.muted}">${escapeXml(footer)}</text>`
-    : "";
+  const fontSize = big ? 120 : 60;
+  const y = H / 2 + fontSize * 0.34;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-<text x="${W / 2}" y="${centerY}" text-anchor="middle" font-size="${fontSize}" font-family="${FONT}" font-weight="600" fill="${c.text}">${escapeXml(centerText)}</text>
-${footerLine}
+<text x="${W / 2}" y="${y}" text-anchor="middle" font-size="${fontSize}" font-family="${FONT}" font-weight="600" fill="${c.text}">${escapeXml(centerText)}</text>
+</svg>`;
+
+  return encode(svg);
+}
+
+// Stats line, shown only at rest (never while the timer is reloading), so it stays put.
+export function statsImage(text: string, appearance: Appearance): string {
+  const W = 1000;
+  const H = 56;
+  const c = colors(appearance);
+  const fontSize = 30;
+  const y = H / 2 + fontSize * 0.34;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<text x="${W / 2}" y="${y}" text-anchor="middle" font-size="${fontSize}" font-family="${FONT}" fill="${c.muted}">${escapeXml(text)}</text>
 </svg>`;
 
   return encode(svg);
