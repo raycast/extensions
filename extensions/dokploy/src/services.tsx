@@ -1,4 +1,15 @@
-import { Alert, confirmAlert, showToast, Toast, popToRoot, Icon, List, ActionPanel, Action, Form } from "@raycast/api";
+import {
+  Alert,
+  confirmAlert,
+  showToast,
+  Toast,
+  Icon,
+  List,
+  ActionPanel,
+  Action,
+  Form,
+  useNavigation,
+} from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
 import { Server, Service, ErrorResult, DatabaseKind } from "./interfaces";
@@ -100,7 +111,11 @@ export default function Services({
         }
         toast.style = Toast.Style.Success;
         toast.title = "Deleted service";
-        await popToRoot();
+        // Same live-status-update mechanism the lifecycle actions above already use - unlike
+        // Create, delete never navigates anywhere, so there's no unmount race to work around; it
+        // just needed to actually call revalidate instead of popToRoot(), which exited the whole
+        // screen and made the list look stale until Raycast was fully restarted.
+        revalidate?.();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not delete service";
@@ -134,11 +149,13 @@ export default function Services({
                   icon="folder-input.svg"
                   title="Application"
                   target={<CreateApplication environment={environment} />}
+                  onPop={() => revalidate?.()}
                 />
                 <Action.Push
                   icon="database.svg"
                   title="Database"
                   target={<CreateDatabase environment={environment} />}
+                  onPop={() => revalidate?.()}
                 />
                 {environment.environmentId && (
                   <Action.Push
@@ -183,11 +200,13 @@ export default function Services({
                     icon="folder-input.svg"
                     title="Application"
                     target={<CreateApplication environment={environment} />}
+                    onPop={() => revalidate?.()}
                   />
                   <Action.Push
                     icon="database.svg"
                     title="Database"
                     target={<CreateDatabase environment={environment} />}
+                    onPop={() => revalidate?.()}
                   />
                   {environment.environmentId && (
                     <Action.Push
@@ -263,6 +282,7 @@ export default function Services({
 
 function CreateApplication({ environment }: { environment: ServiceScope }) {
   const { url, headers } = useToken();
+  const { pop } = useNavigation();
 
   interface FormValues {
     name: string;
@@ -292,7 +312,11 @@ function CreateApplication({ environment }: { environment: ServiceScope }) {
         }
         toast.style = Toast.Style.Success;
         toast.title = "Created Application";
-        await popToRoot();
+        // Pops back to Services instead of popToRoot() - the Action.Push that opened this form
+        // has its own onPop calling revalidate, which only actually refreshes what's on screen if
+        // Services stays mounted (popToRoot() tore it down before the fire-and-forget revalidate
+        // could land, confirmed live for the same popToRoot()-based pattern on Deploy Template).
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create Application";
@@ -336,6 +360,7 @@ function CreateApplication({ environment }: { environment: ServiceScope }) {
 
 function CreateDatabase({ environment }: { environment: ServiceScope }) {
   const { url, headers } = useToken();
+  const { pop } = useNavigation();
   interface FormValues {
     dbType: string;
 
@@ -390,7 +415,9 @@ function CreateDatabase({ environment }: { environment: ServiceScope }) {
         }
         toast.style = Toast.Style.Success;
         toast.title = "Created Database";
-        await popToRoot();
+        // See the matching comment in CreateApplication - pops back to Services instead of
+        // popToRoot() so the Action.Push's onPop-triggered revalidate actually lands.
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create Database";
