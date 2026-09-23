@@ -2,7 +2,7 @@
 
 ## [Fix] - {PR_MERGE_DATE}
 
-- Copied passwords and other secrets are now marked confidential using `concealed`, replacing the deprecated `transient` flag that kept them out of the Clipboard History
+- Copied passwords and other secrets are now marked confidential with `concealed`, which keeps them out of the Clipboard History, instead of the deprecated `transient` flag
 
 ## [Fix Authenticator TOTP] - 2026-07-13
 
