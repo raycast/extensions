@@ -9,6 +9,7 @@ import {
   Icon,
   launchCommand,
   LaunchType,
+  popToRoot,
 } from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
 import {
@@ -215,20 +216,24 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
   );
 }
 
+function parseVolumeLevel(level: string): number | undefined {
+  if (!/^-?\d+$/.test(level)) return undefined;
+  return Number(level);
+}
+
 export function SilentVolume({ ioType, level }: { ioType: IOType; level: string }) {
   useEffect(() => {
     (async () => {
       const config = ioConfig[ioType];
-      const parsed = parseInt(level, 10);
-
-      if (isNaN(parsed)) {
-        await showToast(Toast.Style.Failure, "Invalid volume", `"${level}" is not a number between 0 and 100`);
-        return;
-      }
-
-      const clamped = Math.max(0, Math.min(100, parsed));
 
       try {
+        const parsed = parseVolumeLevel(level);
+        if (parsed == null) {
+          await showToast(Toast.Style.Failure, "Invalid volume", `"${level}" is not a number between 0 and 100`);
+          return;
+        }
+
+        const clamped = Math.max(0, Math.min(100, parsed));
         const device = await config.getDefault();
         const deviceId = String(device.id);
 
@@ -250,6 +255,8 @@ export function SilentVolume({ ioType, level }: { ioType: IOType; level: string 
           `Failed to set ${ioType} volume`,
           error instanceof Error ? error.message : String(error),
         );
+      } finally {
+        await popToRoot({ clearSearchBar: true });
       }
     })();
   }, [ioType, level]);
