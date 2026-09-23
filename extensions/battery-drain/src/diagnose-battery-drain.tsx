@@ -14,7 +14,7 @@ import { collectSnapshot, mergeSnapshot } from "./collectors/snapshot";
 import { AppItem } from "./components/app-item";
 import { ProcessActions } from "./components/process-actions";
 import { raycastStorage } from "./history/raycast-storage";
-import { loadHistory } from "./history/store";
+import { combineHistory, loadHistory, MAX_AGE_MS, toSample } from "./history/store";
 import { chartMarkdown } from "./render/chart-markdown";
 import { ChartPoint, chartSvg, DETAIL_CHART_HEIGHT } from "./render/chart-svg";
 import {
@@ -53,6 +53,8 @@ export default function Command() {
   const [history, setHistory] = useState<Sample[]>([]);
   const [snapshot, setSnapshot] = useState<Snapshot>();
   const [live, setLive] = useState<ChartPoint[]>([]);
+  // Process samples from this view's own full polls: runaways and process charts work without the menu bar.
+  const [localSamples, setLocalSamples] = useState<Sample[]>([]);
   const [tick, setTick] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [historyError, setHistoryError] = useState<string>();
@@ -110,6 +112,10 @@ export default function Command() {
       }
       if (s) {
         setSnapshot((prev) => mergeSnapshot(prev, s));
+        if (processes) {
+          const sample = toSample(s);
+          setLocalSamples((prev) => [...prev.filter((x) => sample.t - x.t <= MAX_AGE_MS), sample]);
+        }
         const w = s.battery.systemLoadW;
         // Key each reading by when it was measured: live SMC readings each add a point, while ioreg's
         // repeat until macOS refreshes them, and repeats add none.
@@ -126,7 +132,10 @@ export default function Command() {
   }, [tick]);
 
   const th = thresholds();
-  const runaways: Runaway[] = snapshot ? detectRunaways(history, snapshot, th) : [];
+  // Runaways and process charts also use this view's own samples; drain and sustained-draw checks keep
+  // the menu bar's two-minute history, whose pace their thresholds assume.
+  const processHistory = combineHistory(history, localSamples, snapshot?.t ?? 0);
+  const runaways: Runaway[] = snapshot ? detectRunaways(processHistory, snapshot, th) : [];
   const runawayByPid = new Map(runaways.map((r) => [r.pid, r]));
 
   const historyPoints: ChartPoint[] = history.flatMap((h) =>
@@ -258,7 +267,7 @@ export default function Command() {
       <List.Section title="Apps">
         {snapshot &&
           visibleRows(groupByApp(snapshot.processes, snapshot.processInfo)).map((app) => (
-            <AppItem key={app.name} app={app} snapshot={snapshot} history={history} onRefresh={refresh} />
+            <AppItem key={app.name} app={app} snapshot={snapshot} history={processHistory} onRefresh={refresh} />
           ))}
       </List.Section>
 
@@ -274,7 +283,7 @@ export default function Command() {
             if (r) accessories.unshift({ tag: { value: `Runaway ${formatDuration(r.sinceSec)}`, color: Color.Red } });
             else if (p.energy >= th.highEnergy) accessories.unshift({ tag: { value: "High", color: Color.Orange } });
             const cpuChart = chartMarkdown(
-              chartSvg(processCpuSeries(history, p, chartAt ?? snapshot.t), environment.appearance, {
+              chartSvg(processCpuSeries(processHistory, p, chartAt ?? snapshot.t), environment.appearance, {
                 unit: "%",
                 height: DETAIL_CHART_HEIGHT,
                 tone: cpuSeverity(p.cpu, Boolean(r)),

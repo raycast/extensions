@@ -65,6 +65,17 @@ describe("detectRunaways", () => {
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
   });
 
+  it("does not let a new process on a reused PID inherit an old process's streak of the same name", () => {
+    // An old "yes" ran hot from minute 0 and exited; a new "yes" got pid 42 a minute ago (started at 15 min).
+    const history = [0, 5, 10, 15].map((m) => ({ ...hot(m * MIN), procs: [{ ...hot(0).procs[0], start: 0 }] }));
+    expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
+  });
+
+  it("still counts samples stored before start times were recorded", () => {
+    const history = [0, 5, 10, 15].map((m) => hot(m * MIN));
+    expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toHaveLength(1);
+  });
+
   it("ignores a process that is idle now even if its lifetime ratio is high", () => {
     const s = snap(0, [{ pid: 7, command: "idle", cpu: 1 }], [[7, { etimeSec: 3600, cpuTimeSec: 3500, user: "me" }]]);
     expect(detectRunaways([], s)).toEqual([]);

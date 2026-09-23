@@ -62,7 +62,8 @@ export type Snapshot = {
   processesAt?: number; // epoch ms of the full poll the processes come from
 };
 
-export type SampleProc = { pid: number; cmd: string; cpu: number; energy: number };
+// start: when the process started (epoch ms, to the minute), so a reused pid is not taken for it.
+export type SampleProc = { pid: number; cmd: string; cpu: number; energy: number; start?: number };
 
 export type Sample = {
   t: number;

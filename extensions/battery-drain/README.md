@@ -26,7 +26,7 @@ SMC keys are undocumented and differ between models, so each reading is checked:
 - **Rows** show CPU as a share of one core, colored green, yellow or orange by level; red is kept for runaway processes. "+GPU/wakeups" marks a row whose energy impact clearly exceeds its CPU: it costs battery in other ways too.
 - **Energy impact** is Activity Monitor's relative score for a process. It has no unit and is not watts; higher means the process costs more battery. CPU is shown next to it as a percentage of one core. Apps add up their helper processes; system processes (such as WindowServer) and command-line tools are listed under Processes only.
 - **Battery drain** is how many percent of charge the battery loses per hour, measured over the time the Mac was awake on battery.
-- **History** (the two-hour chart, battery drain, and runaways caught over time) is recorded by the menu bar command. With it turned off, Diagnose Battery Drain still works, but its chart covers only the time it is open and drain shows "—". The menu's Battery tooltip names the processes with the most energy impact over the last 30 minutes.
+- **History** (the two-hour chart, battery drain, and runaways caught over time) is recorded by the menu bar command. With it turned off, Diagnose Battery Drain still works and still catches runaways from its own samples while it is open, but its charts cover only that time and drain shows "—". The menu's Battery tooltip names the processes with the most energy impact over the last 30 minutes.
 
 ## macOS quirks you may notice
 

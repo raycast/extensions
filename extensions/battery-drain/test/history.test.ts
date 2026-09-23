@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   appendSample,
+  combineHistory,
   HISTORY_KEY,
   KeyValueStorage,
   loadHistory,
@@ -26,6 +27,20 @@ function memoryStorage(initial?: string): KeyValueStorage & { data: Map<string, 
 const sample = (t: number, extra: Partial<Sample> = {}): Sample => ({ t, procs: [], ...extra });
 
 describe("toSample", () => {
+  it("records when each process started, so a reused pid is not mistaken for it later", () => {
+    const snap: Snapshot = {
+      t: 10 * 60_000,
+      battery: {},
+      processes: [{ pid: 42, command: "yes", energy: 99, cpu: 99 }],
+      processInfo: new Map([
+        [42, { etimeSec: 120, cpuTimeSec: 118, user: "me", ppid: 1, command: "yes", path: "/usr/bin/yes" }],
+      ]),
+      blockers: [],
+      errors: [],
+    };
+    expect(toSample(snap).procs[0].start).toBe(8 * 60_000);
+  });
+
   it("keeps the ten most energetic processes", () => {
     const processes = Array.from({ length: 15 }, (_, i) => ({ pid: i + 1, command: `p${i}`, energy: i, cpu: i }));
     const snap: Snapshot = {
@@ -58,6 +73,25 @@ describe("prune", () => {
 });
 
 describe("loadHistory / appendSample", () => {
+  it("keeps both samples when another run writes in between (the menu opened while the timer ran)", async () => {
+    const storage = memoryStorage();
+    let raced = false;
+    const racy: KeyValueStorage = {
+      getItem: storage.getItem,
+      setItem: async (k, v) => {
+        await storage.setItem(k, v);
+        // Right after our write, the other run writes the history it read before ours: ours is lost.
+        if (!raced) {
+          raced = true;
+          await storage.setItem(k, JSON.stringify([sample(1500)]));
+        }
+      },
+    };
+    const history = await appendSample(racy, sample(2000));
+    expect(history.map((s) => s.t)).toEqual([1500, 2000]);
+    expect(JSON.parse(storage.data.get(HISTORY_KEY)!).map((s: Sample) => s.t)).toEqual([1500, 2000]);
+  });
+
   it("round-trips through storage", async () => {
     const storage = memoryStorage();
     await appendSample(storage, sample(1000));
@@ -95,5 +129,18 @@ describe("loadHistory / appendSample", () => {
       good,
     ];
     expect(await loadHistory(memoryStorage(JSON.stringify(stored)), 100)).toEqual([good]);
+  });
+});
+
+describe("combineHistory", () => {
+  it("adds Diagnose's own process samples to the stored history, so runaways are caught with the menu bar off", () => {
+    const stored = [sample(1000), sample(3000)];
+    const local = [sample(2000), sample(3000), sample(4000)];
+    expect(combineHistory(stored, local, 4000).map((s) => s.t)).toEqual([1000, 2000, 3000, 4000]);
+  });
+
+  it("drops samples older than the history keeps", () => {
+    const now = 3 * 60 * 60 * 1000;
+    expect(combineHistory([sample(0)], [sample(now)], now).map((s) => s.t)).toEqual([now]);
   });
 });
