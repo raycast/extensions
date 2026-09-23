@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Fix double SSO login page] - {PR_MERGE_DATE}
+## [Fix double SSO login page] - 2026-09-23
 
 - Fixed SSO login page opening twice when connecting to NetBird.
 
