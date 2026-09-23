@@ -4,6 +4,16 @@
   "title": "Quick Radios",
   "description": "Manage Windows Wi-Fi from Raycast: scan, connect, share via QR, and inspect connection details.",
   "icon": "icon.png",
+  "keywords": [
+    "wifi",
+    "wi-fi",
+    "wlan",
+    "wireless",
+    "network",
+    "hotspot",
+    "internet",
+    "qr code"
+  ],
   "author": "tejas911",
   "categories": [
     "System",
@@ -18,12 +28,25 @@
       "name": "wifi",
       "title": "Manage Wi-Fi",
       "description": "View status, connect to networks, and manage Wi-Fi.",
+      "keywords": [
+        "wifi",
+        "wlan",
+        "wireless",
+        "network",
+        "connect"
+      ],
       "mode": "view"
     },
     {
       "name": "toggle-wifi",
       "title": "Toggle Wi-Fi",
       "description": "Instantly turn Wi-Fi on or off.",
+      "keywords": [
+        "wifi",
+        "wlan",
+        "wireless",
+        "radio"
+      ],
       "mode": "no-view"
     }
   ],
