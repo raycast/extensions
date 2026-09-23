@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Deploy from Template] - 2026-09-23
+
+- Add a `From Template` action to the `Create` menu on the **Services** screen, browsing Dokploy's public template registry (500+ templates) with search, `Add Bookmark`/`Remove Bookmark`, and a one-action `Deploy` that hands off to Dokploy's own template processing.
+
 ## [Runtime Logs: Follow Mode and Compose Support] - 2026-09-23
 
 - `View Logs` now works for Compose stacks: pick a container from its stack to see its logs. Also adds `Start Following`/`Stop Following` to every kind, auto-refreshing the view instead of needing to hit `Refresh` manually.

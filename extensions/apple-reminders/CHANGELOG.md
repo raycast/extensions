@@ -4,6 +4,10 @@
 
 - Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.
 
+## [Updated maintainer metadata] - 2026-09-23
+
+- Marked a former Apple Reminders maintainer as a past contributor.
+
 ## [Display tags in My Reminders] - 2026-09-23
 
 - Display attached tags as accessories in the "My Reminders" list view.
