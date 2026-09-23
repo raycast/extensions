@@ -84,7 +84,15 @@ export async function showInExplorer(path: string, preferences: Preferences) {
   } else {
     // Explorer stops reading the path at the first comma unless it is quoted, and it parses
     // its own command line, so the quotes have to reach it unescaped.
-    spawn("explorer.exe", [`/select,"${path}"`], { windowsVerbatimArguments: true });
+    const explorer = spawn("explorer.exe", [`/select,"${path}"`], { windowsVerbatimArguments: true });
+    explorer.on("error", async (error) => {
+      console.log(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error Opening in Explorer",
+        message: error.message,
+      });
+    });
   }
 }
 
