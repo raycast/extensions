@@ -422,6 +422,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "removeduplicates",
+    title: "RemoveDuplicates.org",
+    description:
+      "Remove duplicate lines from a text list, or duplicate rows from CSV/TSV text such as rows copied from Excel or Google Sheets, and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in and no API key, and text is never stored.",
+    icon: "https://removeduplicates.org/icon-512.png",
+    homepage: "https://removeduplicates.org/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://removeduplicates.org/mcp"],
+    },
+  },
+  {
     name: "Rube",
     title: "Rube - by Composio",
     description:
