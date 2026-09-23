@@ -1,7 +1,9 @@
+import { getEnsAddress } from "@wagmi/core";
 import { zeroAddress } from "viem";
+import { mainnet } from "viem/chains";
 import gql from "graphql-tag";
 import { ensClient } from "./apollo";
-import { mainnetClient, normalizeEnsName } from "./ens";
+import { normalizeEnsName, wagmiConfig } from "./ens";
 
 const ENS_SUGGESTIONS = gql`
   query lookup($name: String!) {
@@ -27,7 +29,7 @@ export const fetchSuggestions = async (recipient: string): Promise<string[]> => 
     const exactLookup = async () => {
       try {
         const name = normalizeEnsName(recipient.includes(".") ? recipient : `${recipient}.eth`);
-        const address = await mainnetClient.getEnsAddress({ name });
+        const address = await getEnsAddress(wagmiConfig, { name, chainId: mainnet.id });
         return address ? name : null;
       } catch {
         return null;

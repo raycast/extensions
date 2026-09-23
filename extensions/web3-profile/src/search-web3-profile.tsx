@@ -1,35 +1,55 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActionPanel, List, Action, Image, Icon, useNavigation } from "@raycast/api";
+import { QueryClient, QueryClientProvider, useQueries, useQuery } from "@tanstack/react-query";
+import {
+  getBalanceQueryOptions,
+  getEnsAddressQueryOptions,
+  getEnsAvatarQueryOptions,
+  getEnsTextQueryOptions,
+  hashFn,
+  structuralSharing,
+} from "@wagmi/core/query";
 import { fetchSuggestions } from "./lib/fetchSuggestions";
-import { formatEther, type Address } from "viem";
-import { ENS_ADDRESS_RECORDS, fetchEnsRecords, mainnetClient, normalizeEnsName, type EnsRecords } from "./lib/ens";
+import { type Address } from "viem";
+import { mainnet } from "viem/chains";
+import {
+  decodeEnsAddress,
+  ENS_ADDRESS_RECORD_ENTRIES,
+  ENS_ADDRESS_RECORDS,
+  ENS_TEXT_RECORD_KEYS,
+  normalizeEnsName,
+  wagmiConfig,
+  type EnsRecords,
+} from "./lib/ens";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryKeyHashFn: hashFn,
+      retry: 1,
+      staleTime: 60_000,
+      structuralSharing,
+    },
+  },
+});
 
 export default function Command() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SearchWeb3Profile />
+    </QueryClientProvider>
+  );
+}
+
+function SearchWeb3Profile() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [ensSuggestions, setEnsSuggestions] = useState<string[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    setEnsSuggestions([]);
-    if (searchTerm.length <= 2) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    fetchSuggestions(searchTerm)
-      .then((results) => {
-        if (!cancelled) setEnsSuggestions(results);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [searchTerm]);
+  const suggestionsQuery = useQuery({
+    queryKey: ["ensSuggestions", searchTerm.toLowerCase()],
+    queryFn: () => fetchSuggestions(searchTerm),
+    enabled: searchTerm.length > 2,
+  });
+  const ensSuggestions = suggestionsQuery.data ?? [];
+  const isLoading = suggestionsQuery.isFetching;
 
   let title;
 
@@ -79,52 +99,61 @@ interface EnsProfile {
   records: EnsRecords;
 }
 
-const EMPTY_ENS_RECORDS: EnsRecords = { texts: {}, addresses: {} };
-
 function useEnsProfile(name: string) {
-  const [profile, setProfile] = useState<EnsProfile>({ records: EMPTY_ENS_RECORDS });
-  const [isLoading, setIsLoading] = useState(true);
+  let normalizedName: string | undefined;
+  try {
+    normalizedName = normalizeEnsName(name);
+  } catch {
+    normalizedName = undefined;
+  }
+  const enabled = normalizedName !== undefined;
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
+  const avatarQuery = useQuery({
+    ...getEnsAvatarQueryOptions(wagmiConfig, { name: normalizedName, chainId: mainnet.id }),
+    enabled,
+  });
+  const textQueries = useQueries({
+    queries: ENS_TEXT_RECORD_KEYS.map((key) => ({
+      ...getEnsTextQueryOptions(wagmiConfig, { name: normalizedName, key, chainId: mainnet.id }),
+      enabled,
+    })),
+  });
+  const addressQueries = useQueries({
+    queries: ENS_ADDRESS_RECORD_ENTRIES.map(([, { coinType }]) => ({
+      ...getEnsAddressQueryOptions(wagmiConfig, { name: normalizedName, coinType, chainId: mainnet.id }),
+      enabled,
+    })),
+  });
 
-    async function loadProfile() {
-      const normalizedName = normalizeEnsName(name);
-      const [avatar, records] = await Promise.all([
-        mainnetClient.getEnsAvatar({ name: normalizedName }).catch(() => null),
-        fetchEnsRecords(normalizedName),
-      ]);
-      const address = records.addresses.ethereum as Address | undefined;
-      const balance = address
-        ? await mainnetClient
-            .getBalance({ address })
-            .then(formatEther)
-            .catch(() => undefined)
-        : undefined;
-
-      if (!cancelled) {
-        setProfile({
-          address: address ?? undefined,
-          avatar: avatar ?? undefined,
-          balance,
-          records,
-        });
-      }
-    }
-
-    loadProfile()
-      .catch(() => {
-        if (!cancelled) setProfile({ records: EMPTY_ENS_RECORDS });
+  const records: EnsRecords = {
+    texts: Object.fromEntries(
+      ENS_TEXT_RECORD_KEYS.flatMap((key, index) => (textQueries[index].data ? [[key, textQueries[index].data]] : []))
+    ),
+    addresses: Object.fromEntries(
+      ENS_ADDRESS_RECORD_ENTRIES.flatMap(([key, { coinType }], index) => {
+        const rawAddress = addressQueries[index].data;
+        const address = rawAddress ? decodeEnsAddress(rawAddress, coinType) : undefined;
+        return address ? [[key, address]] : [];
       })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [name]);
+    ),
+  };
+  const address = records.addresses.ethereum as Address | undefined;
+  const balanceQuery = useQuery({
+    ...getBalanceQueryOptions(wagmiConfig, { address, chainId: mainnet.id }),
+    enabled: address !== undefined,
+  });
+  const profile: EnsProfile = {
+    address,
+    avatar: avatarQuery.data ?? undefined,
+    balance: balanceQuery.data?.formatted,
+    records,
+  };
+  const isLoading =
+    enabled &&
+    (avatarQuery.isPending ||
+      textQueries.some((query) => query.isPending) ||
+      addressQueries.some((query) => query.isPending) ||
+      (address !== undefined && balanceQuery.isPending));
 
   return { profile, isLoading };
 }
