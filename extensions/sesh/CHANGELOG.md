@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Search and connect to windows] - {PR_MERGE_DATE}
+## [Search and connect to windows] - 2026-09-23
 
 - Add a Connect to Window command that lists every tmux window, grouped by session, and jumps straight to the one you pick, even when several windows share a name
 - Add a Search Windows action (⌘↵) on tmux sessions that lists just that session's windows, and creates a new window when none has the name you typed
