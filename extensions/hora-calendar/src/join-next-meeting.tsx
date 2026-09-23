@@ -1,10 +1,22 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, closeMainWindow, showToast, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  closeMainWindow,
+  showToast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { showFailure } from "./feedback";
 import { HoraEvent, HoraNotInstalledError, HoraOutdatedError, joinConference, upcomingEvents } from "./hora";
 import { HoraRequired } from "./hora-required";
 
 export default function Command() {
+  const { dateLocale } = getPreferenceValues<Preferences.JoinNextMeeting>();
   const { data, isLoading, error, revalidate } = useCachedPromise(
     () => upcomingEvents({ limit: 25, withMeetingLinks: true }),
     [],
@@ -47,7 +59,9 @@ export default function Command() {
           title={event.title}
           subtitle={event.accountEmail}
           icon={{ source: Icon.Dot, tintColor: event.calendarColorHex ?? Color.SecondaryText }}
-          accessories={[{ text: relativeWhen(event), tooltip: new Date(event.start).toLocaleString() }]}
+          accessories={[
+            { text: relativeWhen(event, dateLocale), tooltip: new Date(event.start).toLocaleString(dateLocale) },
+          ]}
           actions={
             <ActionPanel>
               <Action title="Join Meeting" icon={Icon.Video} onAction={() => join(event)} />
@@ -73,7 +87,7 @@ export default function Command() {
 }
 
 /** "in 20 min", "14:30", "Thu 09:00" — whichever tells you the most at a glance. */
-function relativeWhen(event: HoraEvent): string {
+function relativeWhen(event: HoraEvent, locale: string): string {
   const start = new Date(event.start);
   const minutesAway = Math.round((start.getTime() - Date.now()) / 60_000);
 
@@ -82,6 +96,6 @@ function relativeWhen(event: HoraEvent): string {
 
   const isToday = start.toDateString() === new Date().toDateString();
   return isToday
-    ? start.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-    : start.toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit" });
+    ? start.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
+    : start.toLocaleString(locale, { weekday: "short", hour: "2-digit", minute: "2-digit" });
 }

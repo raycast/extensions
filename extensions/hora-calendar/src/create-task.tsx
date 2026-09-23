@@ -32,10 +32,16 @@ export default function Command() {
   if (error instanceof HoraNotInstalledError) return <HoraRequired reason="missing" />;
   if (error instanceof HoraOutdatedError) return <HoraRequired reason="outdated" />;
 
-  async function submit(values: { title: string; listName: string; due: Date | null; notes: string }) {
+  async function submit(values: { title: string; listSelection: string; due: Date | null; notes: string }) {
     const title = values.title.trim();
     if (!title) {
       setTitleError("Give the task a title");
+      return;
+    }
+
+    const selectedList = lists.find((list) => taskListValue(list) === values.listSelection);
+    if (values.listSelection && !selectedList) {
+      await showFailure(new Error("Refresh the command and select a task list again."), "Task list unavailable");
       return;
     }
 
@@ -45,7 +51,9 @@ export default function Command() {
       const task = await addTask({
         title,
         due: values.due ?? undefined,
-        listName: values.listName || undefined,
+        listName: selectedList?.name,
+        listID: selectedList?.id,
+        accountEmail: selectedList?.accountEmail,
         notes: values.notes.trim() || undefined,
       });
       toast.style = Toast.Style.Success;
@@ -76,9 +84,13 @@ export default function Command() {
         error={titleError}
         onChange={() => setTitleError(undefined)}
       />
-      <Form.Dropdown id="listName" title="List">
+      <Form.Dropdown id="listSelection" title="List">
         {lists.map((list) => (
-          <Form.Dropdown.Item key={list.id} value={list.name} title={list.name} />
+          <Form.Dropdown.Item
+            key={taskListValue(list)}
+            value={taskListValue(list)}
+            title={`${list.name} — ${list.accountEmail}`}
+          />
         ))}
       </Form.Dropdown>
       {/* Google Tasks records the day only, so there is no time picker here. */}
@@ -86,4 +98,8 @@ export default function Command() {
       <Form.TextArea id="notes" title="Notes" placeholder="Anything worth remembering" />
     </Form>
   );
+}
+
+function taskListValue(list: { id: string; accountEmail: string }): string {
+  return JSON.stringify([list.accountEmail, list.id]);
 }

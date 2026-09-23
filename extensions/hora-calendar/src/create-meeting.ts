@@ -8,7 +8,7 @@ import { addEventForEditing } from "./hora";
  * saved. Raycast gets out of the way first, since hora is about to take over
  * the screen.
  */
-export default async function Command(props: { arguments: { sentence: string } }) {
+export default async function Command(props: { arguments: Arguments.CreateMeeting }) {
   try {
     await closeMainWindow();
     await addEventForEditing(props.arguments.sentence);
