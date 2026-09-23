@@ -1,11 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@raycast/api", () => ({
-  closeMainWindow: vi.fn().mockResolvedValue(undefined),
-  open: vi.fn().mockResolvedValue(undefined),
-  showHUD: vi.fn().mockResolvedValue(undefined),
-}));
-
 import { closeMainWindow, open, showHUD } from "@raycast/api";
 import manifest from "../package.json";
 
@@ -19,7 +13,9 @@ const routes = {
   "open-settings": "settings",
 };
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+});
 
 describe("BetterShot commands", () => {
   it.each(Object.entries(routes))(
@@ -31,7 +27,8 @@ describe("BetterShot commands", () => {
         "no-view",
       );
       expect(closeMainWindow).toHaveBeenCalledWith({ clearRootSearch: true });
-      expect(open).toHaveBeenCalledExactlyOnceWith(`bettershot://${route}`);
+      expect(open).toHaveBeenCalledTimes(1);
+      expect(open).toHaveBeenCalledWith(`bettershot://${route}`);
       expect(
         vi.mocked(closeMainWindow).mock.invocationCallOrder[0],
       ).toBeLessThan(vi.mocked(open).mock.invocationCallOrder[0]);
@@ -52,10 +49,10 @@ describe("BetterShot commands", () => {
     expect(open).not.toHaveBeenCalled();
     finishClosing();
     await pending;
-    expect(open).toHaveBeenCalledOnce();
+    expect(open).toHaveBeenCalledTimes(1);
   });
 
-  it("shows actionable feedback when the URL cannot be opened", async () => {
+  it("shows recovery guidance when the URL cannot be opened", async () => {
     vi.mocked(open).mockRejectedValueOnce(new Error("No URL handler"));
     const { default: command } = await import("../src/capture-region");
     await expect(command()).resolves.toBeUndefined();
@@ -69,6 +66,6 @@ describe("BetterShot commands", () => {
     const { default: command } = await import("../src/capture-region");
     await command();
     expect(open).not.toHaveBeenCalled();
-    expect(showHUD).toHaveBeenCalledOnce();
+    expect(showHUD).toHaveBeenCalledTimes(1);
   });
 });
