@@ -28,6 +28,19 @@ declare namespace Preferences {
   export type DaySummaryView = ExtensionPreferences & {}
   /** Preferences accessible in the `dailyStandupSpeechView` command */
   export type DailyStandupSpeechView = ExtensionPreferences & {}
+  /** Preferences accessible in the `logReminder` command */
+  export type LogReminder = ExtensionPreferences & {
+  /** Enable Reminders - Periodically remind you to log your activity */
+  "reminderEnabled"?: boolean,
+  /** Working Hours Only - Only send reminders during working hours (e.g. 9 AM - 6 PM on weekdays) */
+  "workingHoursOnly"?: boolean,
+  /** Work Start Hour (0-23) - Starting hour for work reminders (24h format, default: 9) */
+  "startHour"?: string,
+  /** Work End Hour (0-23) - Ending hour for work reminders (24h format, default: 18) */
+  "endHour"?: string,
+  /** Inactivity Threshold (Minutes) - Only remind if no log was created in the last N minutes */
+  "thresholdMinutes"?: string
+}
 }
 
 declare namespace Arguments {
@@ -49,4 +62,6 @@ declare namespace Arguments {
   export type DaySummaryView = {}
   /** Arguments passed to the `dailyStandupSpeechView` command */
   export type DailyStandupSpeechView = {}
+  /** Arguments passed to the `logReminder` command */
+  export type LogReminder = {}
 }

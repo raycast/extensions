@@ -1,5 +1,9 @@
 # my-daily-log Changelog
 
+## [Add Log Reminder Scheduler] - {PR_MERGE_DATE}
+
+- Added periodic background log reminder command (`logReminder`) with configurable work hours and inactivity threshold
+
 ## [Fixes] - 2023-09-08
 
 - Fixed a bug where if the folder for logs did not exist, the extension would crash

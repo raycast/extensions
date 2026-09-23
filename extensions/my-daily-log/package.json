@@ -58,6 +58,57 @@
       "title": "Day Standup Speech",
       "description": "Creates a speech that you can use for your daily standup meeting",
       "mode": "view"
+    },
+    {
+      "name": "logReminder",
+      "title": "Log Reminder",
+      "description": "Periodically reminds you to log your daily activity.",
+      "mode": "no-view",
+      "interval": "1h",
+      "preferences": [
+        {
+          "name": "reminderEnabled",
+          "title": "Enable Reminders",
+          "description": "Periodically remind you to log your activity",
+          "type": "checkbox",
+          "label": "Enable periodic log reminders",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "workingHoursOnly",
+          "title": "Working Hours Only",
+          "description": "Only send reminders during working hours (e.g. 9 AM - 6 PM on weekdays)",
+          "type": "checkbox",
+          "label": "Only remind during working hours (Mon-Fri, 9:00 - 18:00)",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "startHour",
+          "title": "Work Start Hour (0-23)",
+          "description": "Starting hour for work reminders (24h format, default: 9)",
+          "type": "textfield",
+          "default": "9",
+          "required": false
+        },
+        {
+          "name": "endHour",
+          "title": "Work End Hour (0-23)",
+          "description": "Ending hour for work reminders (24h format, default: 18)",
+          "type": "textfield",
+          "default": "18",
+          "required": false
+        },
+        {
+          "name": "thresholdMinutes",
+          "title": "Inactivity Threshold (Minutes)",
+          "description": "Only remind if no log was created in the last N minutes",
+          "type": "textfield",
+          "default": "60",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
