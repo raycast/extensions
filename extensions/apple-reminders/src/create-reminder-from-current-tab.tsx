@@ -6,6 +6,7 @@ import { CreateReminderForm, NewReminder } from "./create-reminder";
 import { BrowserTab, getActiveBrowserTab } from "./helpers/browser";
 import { useData } from "./hooks/useData";
 import usePostCreateActions from "./hooks/usePostCreateActions";
+import { formatDueDate, parseDueDate } from "./parse-due-date";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
 export default function Command() {
@@ -47,10 +48,20 @@ export default function Command() {
             }
           }
 
+          let dueDate: string | undefined;
+          if (preferences.defaultDueDate?.trim()) {
+            const parsedDue = parseDueDate(preferences.defaultDueDate.trim());
+            if (parsedDue) {
+              dueDate = formatDueDate(parsedDue);
+            }
+          }
+
           const payload: NewReminder = {
             title: activeTab.title,
             notes: activeTab.url,
+            url: activeTab.url,
             listId,
+            dueDate,
           };
 
           await createReminder(payload);
@@ -89,11 +100,17 @@ export default function Command() {
     return <CreateReminderForm draftValues={{}} />;
   }
 
+  const defaultDueDate = preferences.defaultDueDate?.trim()
+    ? parseDueDate(preferences.defaultDueDate.trim())?.date
+    : undefined;
+
   return (
     <CreateReminderForm
       draftValues={{
         title: tab?.title ?? "",
         notes: tab?.url ?? "",
+        url: tab?.url ?? "",
+        dueDate: defaultDueDate,
       }}
     />
   );

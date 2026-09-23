@@ -81,3 +81,27 @@ describe("Browser Tab Extraction Helpers", () => {
     }
   });
 });
+
+describe("Current Tab Reminder Payload & Default Due Date", () => {
+  it("formats default due date using natural language parse", async () => {
+    const { parseDueDate } = await import("../src/parse-due-date");
+    const parsed = parseDueDate("today 6pm");
+    assert.ok(parsed);
+    assert.strictEqual(parsed.isDateTime, true);
+    assert.strictEqual(parsed.date.getHours(), 18);
+  });
+
+  it("sets native url property when creating reminder from tab", async () => {
+    const { createReminder } = await import("swift:../swift/AppleReminders");
+    const reminder = await createReminder({
+      title: "GitHub Pull Request",
+      notes: "https://github.com/raycast/extensions/pull/31436",
+      url: "https://github.com/raycast/extensions/pull/31436",
+    });
+
+    assert.strictEqual(reminder.title, "GitHub Pull Request");
+    assert.deepStrictEqual(reminder.attachedUrls, ["https://github.com/raycast/extensions/pull/31436"]);
+    assert.strictEqual(reminder.url, "https://github.com/raycast/extensions/pull/31436");
+  });
+});
+

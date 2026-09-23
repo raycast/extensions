@@ -109,6 +109,15 @@
           "placeholder": "e.g. Inbox, Work, or Reminders",
           "description": "Default list to add tab reminders to. Leave empty to use Reminders' default list.",
           "required": false
+        },
+        {
+          "name": "defaultDueDate",
+          "type": "textfield",
+          "title": "Default Due Date & Time",
+          "label": "Default Due Date & Time",
+          "placeholder": "e.g. 6pm, in 2 hours, tomorrow 9am, tonight",
+          "description": "Optional default due date or time for tab reminders (e.g. \"6pm\", \"tonight\", \"tomorrow 9am\", \"in 2 hours\"). Leave empty for no due date.",
+          "required": false
         }
       ]
     },

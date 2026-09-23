@@ -44,6 +44,7 @@ export type NewReminder = {
   address?: string;
   proximity?: string;
   radius?: number;
+  url?: string;
 };
 
 type CreateReminderValues = {
@@ -60,6 +61,7 @@ type CreateReminderValues = {
   address: string;
   proximity: string;
   radius: string;
+  url?: string;
 };
 
 type CreateReminderFormProps = {
@@ -112,6 +114,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
       if (values.notes) {
         payload.notes = values.notes;
+      }
+
+      if (values.url || draftValues?.url) {
+        payload.url = values.url || draftValues?.url;
       }
 
       if (values.dueDate) {
@@ -221,6 +227,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       address: draftValues?.address,
       proximity: draftValues?.proximity,
       radius: draftValues?.radius,
+      url: draftValues?.url ?? "",
     },
     validation: {
       title: FormValidation.Required,

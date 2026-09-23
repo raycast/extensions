@@ -42,6 +42,10 @@ type Input = {
    */
   radius?: number;
   /**
+   * Optional URL / link attached to the reminder.
+   */
+  url?: string;
+  /**
    * The recurrence settings.
    * Only include this when the user explicitly asks for a repeating reminder (for example: "every day", "weekly", "monthly", "yearly", "weekdays", or "weekends").
    * Omit this for normal one-off reminders, including title-only, Inbox, Backlog, or generic capture reminders.

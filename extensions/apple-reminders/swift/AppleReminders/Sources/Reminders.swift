@@ -123,6 +123,7 @@ struct NewReminder: Decodable {
   let address: String?
   let proximity: String?
   let radius: Double?
+  let url: String?
 }
 
 struct Recurrence: Decodable {
@@ -136,6 +137,10 @@ struct Recurrence: Decodable {
   let reminder = EKReminder(eventStore: eventStore)
 
   reminder.title = newReminder.title
+
+  if let urlString = newReminder.url, let url = URL(string: urlString) {
+    reminder.url = url
+  }
 
   var fullNotes = newReminder.notes
   if let tags = newReminder.tags, !tags.isEmpty {
@@ -499,6 +504,7 @@ struct UpdateReminderPayload: Decodable {
   let tags: [String]?
   let isCompleted: Bool?
   let recurrence: Recurrence?
+  let url: String?
 }
 
 @raycast func updateReminder(payload: UpdateReminderPayload) throws {
@@ -514,6 +520,10 @@ struct UpdateReminderPayload: Decodable {
 
   if let title = payload.title {
     item.title = title
+  }
+
+  if let urlString = payload.url {
+    item.url = urlString.isEmpty ? nil : URL(string: urlString)
   }
 
   if payload.notes != nil || payload.tags != nil {
