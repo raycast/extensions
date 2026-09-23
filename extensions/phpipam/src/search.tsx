@@ -120,13 +120,10 @@ export default function Command() {
     silentPromiseOptions,
   );
 
-  if (error) {
-    return <ErrorView error={error} onRetry={revalidate} />;
-  }
-
   const results = searchable ? (data ?? null) : null;
   // Families resolve in the background so results never wait on them; items
-  // re-render with correct formatting once the parent subnets arrive.
+  // re-render with correct formatting once the parent subnets arrive. This
+  // hook must run on every path, so the error return stays below it.
   const familyKey = results ? familyLookupKey(results.addresses) : "";
   const { data: families } = usePromise(
     async (ids: string): Promise<Map<string, 4 | 6>> => {
@@ -148,6 +145,10 @@ export default function Command() {
     [familyKey],
     silentPromiseOptions,
   );
+
+  if (error) {
+    return <ErrorView error={error} onRetry={revalidate} />;
+  }
   const isEmptyResult =
     results !== null &&
     results.addresses.length === 0 &&
