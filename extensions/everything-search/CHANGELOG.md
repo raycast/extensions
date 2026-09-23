@@ -1,5 +1,8 @@
 # Everything Search Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+- Fixed `Show in Explorer` opening the Documents folder when the file name contains a comma
+
 ## [Fix] - 2026-09-11
 - Fixed `Show in Explorer` opening the containing folder without selecting the file
 
