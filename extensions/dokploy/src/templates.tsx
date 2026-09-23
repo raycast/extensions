@@ -104,7 +104,12 @@ function TemplateDeployForm({ environmentId, template }: { environmentId: string
     serverId: string;
   }
 
-  const { isLoading, data: servers } = useFetch<Server[], Server[]>(url + "server.all", {
+  const {
+    isLoading,
+    data: servers,
+    error: serversError,
+    revalidate: retryServers,
+  } = useFetch<Server[], Server[]>(url + "server.all", {
     headers,
     initialData: [],
   });
@@ -152,20 +157,31 @@ function TemplateDeployForm({ environmentId, template }: { environmentId: string
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Plus} title="Deploy" onSubmit={handleSubmit} />
+          {/* A failed server list must never silently fall through to deploying on whatever
+           * server Dokploy defaults to - if the fetch failed, retrying it is the only action
+           * offered until it succeeds. */}
+          {serversError ? (
+            <Action icon={Icon.ArrowClockwise} title="Retry Loading Servers" onAction={() => retryServers()} />
+          ) : (
+            <Action.SubmitForm icon={Icon.Plus} title="Deploy" onSubmit={handleSubmit} />
+          )}
         </ActionPanel>
       }
     >
       <Form.Description title="Deploy" text={`Deploy ${template.name} to this environment.`} />
-      <Form.Dropdown
-        title="Select a Server (Optional)"
-        info="If no server is selected, the template will be deployed on the server where the user is logged in."
-        {...itemProps.serverId}
-      >
-        {servers.map((server) => (
-          <Form.Dropdown.Item key={server.id} title={server.name} value={server.id} />
-        ))}
-      </Form.Dropdown>
+      {serversError ? (
+        <Form.Description title="Server" text={`Could not load servers: ${serversError}`} />
+      ) : (
+        <Form.Dropdown
+          title="Select a Server (Optional)"
+          info="If no server is selected, the template will be deployed on the server where the user is logged in."
+          {...itemProps.serverId}
+        >
+          {servers.map((server) => (
+            <Form.Dropdown.Item key={server.id} title={server.name} value={server.id} />
+          ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }
