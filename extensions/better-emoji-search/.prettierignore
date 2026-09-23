@@ -1,0 +1,4 @@
+# Generated or vendored data; regenerate with npm run generate.
+src/generated/
+assets/catalogs/
+data/

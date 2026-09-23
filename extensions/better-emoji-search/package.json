@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-emoji-search",
+  "title": "Better Emoji Search",
+  "description": "Search and paste emoji with natural-language aliases and recents that reorder on every use.",
+  "icon": "command-icon.png",
+  "author": "methodx",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Fun",
+    "Productivity"
+  ],
+  "keywords": [
+    "emoji",
+    "emoji search",
+    "emoji picker",
+    "recent emoji",
+    "emoticon"
+  ],
+  "commands": [
+    {
+      "name": "emoji",
+      "title": "Search Emoji",
+      "subtitle": "Better Emoji Search",
+      "description": "Find emoji by name or everyday phrase, then paste or copy them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "description": "Choose whether Return pastes or copies the selected emoji.",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste in Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "unicodeVersion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unicode Version",
+      "description": "Unicode version to use (default: 15.1)",
+      "default": "15.1",
+      "data": [
+        {
+          "title": "15.1",
+          "value": "15.1"
+        },
+        {
+          "title": "15.0",
+          "value": "15.0"
+        },
+        {
+          "title": "14.0",
+          "value": "14.0"
+        },
+        {
+          "title": "13.1",
+          "value": "13.1"
+        },
+        {
+          "title": "13.0",
+          "value": "13.0"
+        },
+        {
+          "title": "12.1",
+          "value": "12.1"
+        },
+        {
+          "title": "12.0",
+          "value": "12.0"
+        },
+        {
+          "title": "11.0",
+          "value": "11.0"
+        },
+        {
+          "title": "5.0",
+          "value": "5.0"
+        },
+        {
+          "title": "4.0",
+          "value": "4.0"
+        }
+      ]
+    },
+    {
+      "name": "shortCodes",
+      "type": "checkbox",
+      "required": false,
+      "title": "Shortcodes",
+      "label": "Show Shortcodes",
+      "default": false,
+      "description": "Show shortcode labels and a Copy Shortcode action. Shortcodes are always searchable."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.3.0",
+    "emojilib": "^3.0.12",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.8",
+    "react": "^19.3.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-catalogs.mjs",
+    "prebuild": "npm run generate",
+    "predev": "npm run generate",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
