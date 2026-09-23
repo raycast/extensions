@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Runtime Logs: Follow Mode and Compose Support] - {PR_MERGE_DATE}
+## [Runtime Logs: Follow Mode and Compose Support] - 2026-09-23
 
 - `View Logs` now works for Compose stacks: pick a container from its stack to see its logs. Also adds `Start Following`/`Stop Following` to every kind, auto-refreshing the view instead of needing to hit `Refresh` manually.
 
