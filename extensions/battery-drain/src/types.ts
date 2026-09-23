@@ -72,4 +72,5 @@ export type Sample = {
   percent?: number;
   onAC?: boolean;
   procs: SampleProc[];
+  procsMissing?: true; // top failed on this run: the watts are real, the (empty) process list is not
 };

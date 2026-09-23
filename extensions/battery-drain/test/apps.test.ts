@@ -33,6 +33,11 @@ describe("appCpuSeries", () => {
       { t: 180_000, w: 31 },
     ]);
   });
+
+  it("leaves out samples whose processes were not measured", () => {
+    const history: Sample[] = [{ t: 0, procs: [], procsMissing: true }];
+    expect(appCpuSeries(history, [1], 60_000, 5)).toEqual([{ t: 60_000, w: 5 }]);
+  });
 });
 import { ProcessInfo } from "../src/types";
 

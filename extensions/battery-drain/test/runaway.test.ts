@@ -71,6 +71,45 @@ describe("detectRunaways", () => {
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
   });
 
+  it("keeps the streak when the same process's rounded start drifts by a minute between runs", () => {
+    // Snapshot time is taken before top and ps, etime after: collection delay can move the rounded start
+    // across a minute boundary.
+    const history = [0, 5, 10, 15].map((m) => ({ ...hot(m * MIN), procs: [{ ...hot(0).procs[0], start: 14 * MIN }] }));
+    const old: [number, ProcessInfo][] = [[42, { etimeSec: 16 * 60, cpuTimeSec: 60, user: "me" }]];
+    const now = snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], old);
+    // Started at 0 by etime; the stored samples say 14 min: far apart, so they are different processes.
+    expect(detectRunaways(history, now)).toEqual([]);
+    const drifted = history.map((h) => ({ ...h, procs: [{ ...h.procs[0], start: -1 * MIN }] }));
+    expect(detectRunaways(drifted, now)).toHaveLength(1);
+  });
+
+  it("skips samples whose process list was not measured instead of ending the streak there", () => {
+    // top failed on one menu bar run: its sample has watts but no processes.
+    const history = [0, 5, 10, 15].map((m) =>
+      m === 10 ? { t: m * MIN, procs: [], procsMissing: true as const } : hot(m * MIN),
+    );
+    expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toHaveLength(1);
+  });
+
+  it("keeps the streak of a long-named process while ps is down and top's name is truncated", () => {
+    const history = [0, 5, 10, 15].map((m) => hot(m * MIN, 42, m === 10 ? "Example Sync Ser" : "Example Sync Service"));
+    const now = snap(16 * MIN, [{ pid: 42, command: "Example Sync Service", cpu: 99 }], young);
+    expect(detectRunaways(history, now)).toHaveLength(1);
+  });
+
+  it("matches starts a minute apart either way, but not three minutes apart", () => {
+    const at = (start: number) =>
+      [0, 5, 10, 15].map((m) => ({ ...hot(m * MIN), procs: [{ ...hot(0).procs[0], start }] }));
+    const now = snap(
+      16 * MIN,
+      [{ pid: 42, command: "yes", cpu: 99 }],
+      [[42, { etimeSec: 16 * 60, cpuTimeSec: 60, user: "me" }]],
+    );
+    expect(detectRunaways(at(MIN), now)).toHaveLength(1);
+    expect(detectRunaways(at(2 * MIN), now)).toHaveLength(1);
+    expect(detectRunaways(at(3 * MIN), now)).toEqual([]);
+  });
+
   it("still counts samples stored before start times were recorded", () => {
     const history = [0, 5, 10, 15].map((m) => hot(m * MIN));
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toHaveLength(1);
@@ -83,6 +122,18 @@ describe("detectRunaways", () => {
 });
 
 describe("level", () => {
+  it("does not count an unmeasured sample against a sustained energy hog", () => {
+    const hog = (t: number): Sample => ({ t, systemW: 10, procs: [{ pid: 7, cmd: "hog", cpu: 60, energy: 60 }] });
+    const history = [
+      hog(0),
+      hog(60_000),
+      hog(120_000),
+      { t: 180_000, systemW: 10, procs: [], procsMissing: true as const },
+    ];
+    const s = snap(240_000, [{ pid: 7, command: "hog", cpu: 60, energy: 60 }]);
+    expect(level(history, s, [])).toBe("high");
+  });
+
   it("is runaway when any runaway exists", () => {
     expect(level([], snap(0, []), [{ pid: 1, command: "x", cpu: 99, sinceSec: 999 }])).toBe("runaway");
   });

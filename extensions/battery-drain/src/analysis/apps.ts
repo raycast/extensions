@@ -9,7 +9,7 @@ export function appName(path: string | undefined, fallback: string): string {
 }
 
 /**
- * Sums each app's processes so helpers count toward the app the user recognises. Only processes inside
+ * Sums each app's processes so helpers count toward the app the user recognizes. Only processes inside
  * an .app bundle count: system processes and command-line tools are listed under Processes instead.
  */
 export function groupByApp(processes: ProcessEnergy[], info: Map<number, ProcessInfo>): AppUsage[] {
@@ -40,9 +40,12 @@ export function bundlePath(path: string | undefined): string | undefined {
 export function appCpuSeries(history: Sample[], pids: number[], now: number, cpu: number): { t: number; w: number }[] {
   const mine = new Set(pids);
   // Samples keep the top 10 processes by energy; an app with none among them reads 0, not a gap.
-  const past = history.map((s) => ({
-    t: s.t,
-    w: s.procs.filter((p) => mine.has(p.pid)).reduce((sum, p) => sum + p.cpu, 0),
-  }));
+  // Samples whose processes were not measured (top failed) are skipped rather than drawn as 0.
+  const past = history
+    .filter((s) => !s.procsMissing)
+    .map((s) => ({
+      t: s.t,
+      w: s.procs.filter((p) => mine.has(p.pid)).reduce((sum, p) => sum + p.cpu, 0),
+    }));
   return [...past, { t: now, w: cpu }];
 }

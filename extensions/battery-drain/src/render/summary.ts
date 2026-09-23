@@ -1,3 +1,4 @@
+import { sameCommand, sameStart } from "../analysis/notify";
 import { ChargeState, chargeState, chargingLabel, healthPercent } from "../analysis/battery";
 import { drainRate } from "../analysis/drain";
 import { BatteryTelemetry, PowerSource, Sample, Snapshot } from "../types";
@@ -48,18 +49,24 @@ export function sourceWarning(errors: string[]): string | undefined {
   return `${names.length} data source${names.length === 1 ? "" : "s"} failed: ${names.join(", ")}`;
 }
 
-/** A process's CPU in every stored sample (matched on pid and command, so a reused pid reads 0), then now. */
+/**
+ * A process's CPU in every measured sample, then now. Matched on pid, name and start time, so an older
+ * process that had the same pid reads 0.
+ */
 export function processCpuSeries(
   history: Sample[],
   p: { pid: number; command: string; cpu: number },
   now: number,
+  start?: number,
 ): ChartPoint[] {
-  // A sample keeps only the top 10 processes by energy; one that is missing was using too little to
-  // make the list, so it reads 0 rather than a gap in the chart.
-  const past = history.map((s) => ({
-    t: s.t,
-    w: s.procs.find((x) => x.pid === p.pid && x.cmd === p.command)?.cpu ?? 0,
-  }));
+  // A sample keeps only the top processes; one that is missing was using too little to make the list,
+  // so it reads 0 rather than a gap. A sample whose processes were not measured (top failed) is skipped.
+  const past = history
+    .filter((s) => !s.procsMissing)
+    .map((s) => ({
+      t: s.t,
+      w: s.procs.find((x) => x.pid === p.pid && sameCommand(x.cmd, p.command) && sameStart(x.start, start))?.cpu ?? 0,
+    }));
   return [...past, { t: now, w: p.cpu }];
 }
 

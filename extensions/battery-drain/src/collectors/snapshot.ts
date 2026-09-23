@@ -125,8 +125,15 @@ export async function collectSnapshot(
 // Collectors a power-only poll skips; their last failures still apply.
 const PROCESS_COLLECTORS = /^(top|ps|ps ancestors|pmset assertions):/;
 
-/** A power-only poll's fresh readings over the last full poll's processes, sleep blockers and their failures. */
+/**
+ * A power-only poll's fresh readings over the last full poll's processes, sleep blockers and their
+ * failures. A full poll whose top failed keeps the last process list too, with its error shown, rather
+ * than emptying Apps and Processes until the next full poll.
+ */
 export function mergeSnapshot(prev: Snapshot | undefined, next: Snapshot): Snapshot {
+  if (prev && !next.partial && next.errors.some((e) => e.startsWith("top:"))) {
+    return { ...next, processes: prev.processes, processInfo: prev.processInfo, processesAt: prev.processesAt };
+  }
   if (!next.partial || !prev) return next;
   return {
     ...next,
@@ -138,3 +145,5 @@ export function mergeSnapshot(prev: Snapshot | undefined, next: Snapshot): Snaps
     partial: undefined,
   };
 }
+
+export { hasProcessSample } from "../history/store";

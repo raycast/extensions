@@ -38,14 +38,15 @@ export default function Command() {
     (async () => {
       const th = thresholds();
       const snapshot = await collectSnapshot();
-      const sample = toSample(snapshot);
+      const sample = toSample(snapshot, th.runawayCpu);
       // A storage failure must not hide a good snapshot; fall back to this sample alone, and say so.
       const history = await appendSample(raycastStorage, sample, dirLock(environment.supportPath)).catch((e) => {
         snapshot.errors.push(`history: ${e instanceof Error ? e.message : String(e)}`);
         return [sample];
       });
       // appendSample returns the history including this snapshot's sample; analysis takes the snapshot separately.
-      const previous = history.slice(0, -1);
+      // By time, not position: after the clock is set back, this sample need not sort last.
+      const previous = history.filter((s) => s.t !== sample.t);
       const runaways = detectRunaways(previous, snapshot, th);
       // Notify before rendering: once isLoading turns false, Raycast may unload the command.
       // Best effort: a failed notification must not break the menu bar.

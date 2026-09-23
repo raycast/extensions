@@ -12,18 +12,34 @@ export const HISTORY_KEY = "history.v1";
 export const MAX_AGE_MS = 2 * 60 * 60 * 1000;
 export const MAX_SAMPLES = 150;
 const PROCS_PER_SAMPLE = 10;
+// Tolerated difference between two clocks reading the same moment (menu bar run vs this one).
+const CLOCK_SLACK_MS = 60_000;
 
-export function toSample(s: Snapshot): Sample {
-  const procs = [...s.processes]
-    .sort((a, b) => b.energy - a.energy)
-    .slice(0, PROCS_PER_SAMPLE)
-    .map((p) => ({
-      pid: p.pid,
-      cmd: p.command,
-      cpu: p.cpu,
-      energy: p.energy,
-      start: processStart(s.t, s.processInfo.get(p.pid)),
-    }));
+/**
+ * Whether the snapshot's process list is a real measurement. A failed top leaves it empty, which history
+ * would read as every process having stopped, ending their hot streaks and drawing drops to 0.
+ */
+export function hasProcessSample(s: Snapshot): boolean {
+  return !s.partial && !s.errors.some((e) => e.startsWith("top:"));
+}
+
+/**
+ * The top 10 processes by energy, plus any at the runaway CPU share: a runaway ranks by CPU, and a busy
+ * build of many compilers can push it out of the energy top 10.
+ */
+export function toSample(s: Snapshot, runawayCpu: number = THRESHOLDS.runawayCpu): Sample {
+  const byEnergy = [...s.processes].sort((a, b) => b.energy - a.energy);
+  const kept = [
+    ...byEnergy.slice(0, PROCS_PER_SAMPLE),
+    ...byEnergy.slice(PROCS_PER_SAMPLE).filter((p) => p.cpu >= runawayCpu),
+  ];
+  const procs = kept.map((p) => ({
+    pid: p.pid,
+    cmd: p.command,
+    cpu: p.cpu,
+    energy: p.energy,
+    start: processStart(s.t, s.processInfo.get(p.pid)),
+  }));
   return {
     t: s.t,
     wAt: s.battery.updatedAt,
@@ -32,14 +48,18 @@ export function toSample(s: Snapshot): Sample {
     percent: s.source?.percent ?? s.battery.percent,
     onAC: s.source ? s.source.source === "ac" : s.battery.externalConnected,
     procs,
+    procsMissing: hasProcessSample(s) ? undefined : true,
   };
 }
 
 export function prune(samples: Sample[], now: number): Sample[] {
-  return samples
-    .filter((s) => now - s.t <= MAX_AGE_MS)
-    .sort((a, b) => a.t - b.t)
-    .slice(-MAX_SAMPLES);
+  return (
+    samples
+      // A sample dated after now was written before the clock was set back.
+      .filter((s) => now - s.t <= MAX_AGE_MS && s.t - now <= CLOCK_SLACK_MS)
+      .sort((a, b) => a.t - b.t)
+      .slice(-MAX_SAMPLES)
+  );
 }
 
 const optional = (v: unknown, type: "number" | "boolean") => v === undefined || typeof v === type;
@@ -66,7 +86,8 @@ function isSample(v: unknown): v is Sample {
     optional(s.percent, "number") &&
     optional(s.onAC, "boolean") &&
     Array.isArray(s.procs) &&
-    s.procs.every(isProc)
+    s.procs.every(isProc) &&
+    optional(s.procsMissing, "boolean")
   );
 }
 

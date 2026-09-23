@@ -1,5 +1,5 @@
 import { Sample, Snapshot } from "../types";
-import { processStart } from "./notify";
+import { processStart, sameCommand, sameStart } from "./notify";
 import { THRESHOLDS, Thresholds } from "./thresholds";
 
 export type Runaway = { pid: number; command: string; cpu: number; sinceSec: number };
@@ -20,10 +20,10 @@ function streakSec(
   let newer = now;
   for (let i = samples.length - 1; i >= 0; i--) {
     const s = samples[i];
+    // top failed on that run: no process was measured, which says nothing about this one.
+    if (s.procsMissing) continue;
     if (newer - s.t > th.maxGapMs) break;
-    const p = s.procs.find(
-      (x) => x.pid === pid && x.cmd === command && (x.start === undefined || start === undefined || x.start === start),
-    );
+    const p = s.procs.find((x) => x.pid === pid && sameCommand(x.cmd, command) && sameStart(x.start, start));
     if (!p || p.cpu < th.runawayCpu) break;
     oldest = s.t;
     newer = s.t;

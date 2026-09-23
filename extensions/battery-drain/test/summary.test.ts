@@ -84,6 +84,22 @@ describe("processCpuSeries", () => {
       0.3, 0, 4.2, 0.5,
     ]);
   });
+
+  it("leaves out samples whose processes were not measured, rather than drawing a drop to 0", () => {
+    const history: Sample[] = [
+      { t: 0, procs: [{ pid: 42, cmd: "yes", cpu: 90, energy: 90 }] },
+      { t: 60_000, procs: [], procsMissing: true },
+    ];
+    expect(processCpuSeries(history, { pid: 42, command: "yes", cpu: 95 }, 120_000).map((p) => p.t)).toEqual([
+      0, 120_000,
+    ]);
+  });
+
+  it("reads 0 for an older process that had the same pid and name", () => {
+    const history: Sample[] = [{ t: 0, procs: [{ pid: 42, cmd: "yes", cpu: 90, energy: 90, start: -60 * 60_000 }] }];
+    const series = processCpuSeries(history, { pid: 42, command: "yes", cpu: 95 }, 120_000, 60_000);
+    expect(series[0].w).toBe(0);
+  });
 });
 
 describe("sourceWarning", () => {

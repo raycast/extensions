@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { Runner } from "../src/collectors/exec";
-import { collectSnapshot, mergeSnapshot } from "../src/collectors/snapshot";
+import { collectSnapshot, hasProcessSample, mergeSnapshot } from "../src/collectors/snapshot";
 
 const fixture = (name: string) => readFileSync(join(__dirname, "fixtures", name), "utf8");
 
@@ -209,6 +209,15 @@ describe("collectSnapshot", () => {
       expect(mergeSnapshot(full, light).errors).toEqual(["top: timeout"]);
     });
 
+    it("keeps the last process list when a full poll's top failed, instead of emptying it", async () => {
+      const full = await collectSnapshot(fakeRunner(), 1000);
+      const failed = await collectSnapshot(fakeRunner(["/usr/bin/top"]), 16000);
+      const merged = mergeSnapshot(full, failed);
+      expect(merged.processes).toBe(full.processes);
+      expect(merged.processesAt).toBe(1000);
+      expect(merged.errors).toEqual(["top: timeout"]);
+    });
+
     it("takes a full poll as it is", async () => {
       const first = await collectSnapshot(fakeRunner(), 1000);
       const second = await collectSnapshot(fakeRunner(), 6000);
@@ -222,5 +231,19 @@ describe("collectSnapshot", () => {
     const s = await collectSnapshot(fakeRunner([], { "/usr/bin/top": top }), 1000);
     expect(s.processes.some((p) => p.command === "top")).toBe(false);
     expect(s.processes).toHaveLength(6);
+  });
+});
+
+describe("hasProcessSample", () => {
+  it("is a real process sample when top ran and succeeded", async () => {
+    expect(hasProcessSample(await collectSnapshot(fakeRunner(), 1000))).toBe(true);
+  });
+
+  it("is not a sample when top failed: its empty list would read as every process having stopped", async () => {
+    expect(hasProcessSample(await collectSnapshot(fakeRunner(["/usr/bin/top"]), 1000))).toBe(false);
+  });
+
+  it("is not a sample for a power-only poll, which does not collect processes", async () => {
+    expect(hasProcessSample(await collectSnapshot(fakeRunner(), 1000, { processes: false }))).toBe(false);
   });
 });

@@ -1,4 +1,5 @@
 import { Sample, Snapshot } from "../types";
+import { sameCommand } from "./notify";
 import { Runaway } from "./runaway";
 import { THRESHOLDS, Thresholds } from "./thresholds";
 
@@ -48,12 +49,16 @@ function spacedSamples(samples: Sample[], now: number, count: number, th: Thresh
 
 /** The same process (pid + command) at high energy now and in spaced samples over the last minutes. */
 function sustainedHog(samples: Sample[], snapshot: Snapshot, th: Thresholds): boolean {
-  const previous = spacedSamples(samples, snapshot.t, th.highWattsPoints - 1, th);
+  // Samples whose processes were not measured (top failed) cannot confirm or deny a hog.
+  const measured = samples.filter((s) => !s.procsMissing);
+  const previous = spacedSamples(measured, snapshot.t, th.highWattsPoints - 1, th);
   if (previous.length < th.highWattsPoints - 1) return false;
   return snapshot.processes.some(
     (p) =>
       p.energy >= th.highEnergy &&
-      previous.every((s) => s.procs.some((x) => x.pid === p.pid && x.cmd === p.command && x.energy >= th.highEnergy)),
+      previous.every((s) =>
+        s.procs.some((x) => x.pid === p.pid && sameCommand(x.cmd, p.command) && x.energy >= th.highEnergy),
+      ),
   );
 }
 

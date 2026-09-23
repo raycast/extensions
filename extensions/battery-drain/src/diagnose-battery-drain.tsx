@@ -6,11 +6,12 @@ import { drainRate } from "./analysis/drain";
 import { level } from "./analysis/level";
 import { detectRunaways, Runaway } from "./analysis/runaway";
 import { cpuSeverity, wattSeverity } from "./analysis/severity";
+import { processStart } from "./analysis/notify";
 import { startedBy } from "./analysis/started-by";
 import { processKind } from "./actions/process";
 import { visibleRows } from "./analysis/visible";
 import { nextPollDelay, timeWeightedAverage } from "./analysis/stats";
-import { collectSnapshot, mergeSnapshot } from "./collectors/snapshot";
+import { collectSnapshot, hasProcessSample, mergeSnapshot } from "./collectors/snapshot";
 import { AppItem } from "./components/app-item";
 import { ProcessActions } from "./components/process-actions";
 import { raycastStorage } from "./history/raycast-storage";
@@ -103,17 +104,21 @@ export default function Command() {
         setRefreshing(false);
       } else if (first && tick > 0) {
         setRefreshing(false);
-        showToast({
-          style: Toast.Style.Success,
-          title: "Refreshed",
-          // Without SMC, watts barely move between refreshes (macOS updates them once a minute).
-          message: s?.battery.systemLoadLive ? undefined : "System watts update about once a minute",
-        });
+        showToast(
+          s
+            ? {
+                style: Toast.Style.Success,
+                title: "Refreshed",
+                // Without SMC, watts barely move between refreshes (macOS updates them once a minute).
+                message: s.battery.systemLoadLive ? undefined : "System watts update about once a minute",
+              }
+            : { style: Toast.Style.Failure, title: "Could not refresh", message: "Showing the last readings" },
+        );
       }
       if (s) {
         setSnapshot((prev) => mergeSnapshot(prev, s));
-        if (processes) {
-          const sample = toSample(s);
+        if (hasProcessSample(s)) {
+          const sample = toSample(s, thresholds().runawayCpu);
           setLocalSamples((prev) => [...prev.filter((x) => sample.t - x.t <= MAX_AGE_MS), sample]);
         }
         const w = s.battery.systemLoadW;
@@ -283,11 +288,15 @@ export default function Command() {
             if (r) accessories.unshift({ tag: { value: `Runaway ${formatDuration(r.sinceSec)}`, color: Color.Red } });
             else if (p.energy >= th.highEnergy) accessories.unshift({ tag: { value: "High", color: Color.Orange } });
             const cpuChart = chartMarkdown(
-              chartSvg(processCpuSeries(processHistory, p, chartAt ?? snapshot.t), environment.appearance, {
-                unit: "%",
-                height: DETAIL_CHART_HEIGHT,
-                tone: cpuSeverity(p.cpu, Boolean(r)),
-              }),
+              chartSvg(
+                processCpuSeries(processHistory, p, chartAt ?? snapshot.t, processStart(snapshot.t, info)),
+                environment.appearance,
+                {
+                  unit: "%",
+                  height: DETAIL_CHART_HEIGHT,
+                  tone: cpuSeverity(p.cpu, Boolean(r)),
+                },
+              ),
             );
             return (
               <List.Item

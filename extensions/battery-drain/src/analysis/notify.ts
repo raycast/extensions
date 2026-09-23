@@ -13,14 +13,31 @@ export function processStart(now: number, info: ProcessInfo | undefined): number
 }
 
 /**
+ * Whether two start times belong to the same process. Starts are reconstructed from ps's elapsed time
+ * and rounded to the minute, and collection delay can put the same start on either side of a minute,
+ * so they match within a tolerance. An unknown start (older data) matches anything.
+ */
+export function sameStart(a: number | undefined, b: number | undefined): boolean {
+  return a === undefined || b === undefined || Math.abs(a - b) <= START_TOLERANCE_MS;
+}
+
+// top truncates names to 16 characters; ps has the full name (and is missing when ps fails).
+const TOP_NAME_LENGTH = 16;
+
+/** Whether two names are the same process's: equal, or top's truncated name and ps's full one. */
+export function sameCommand(a: string, b: string): boolean {
+  if (a === b) return true;
+  const [short, long] = a.length < b.length ? [a, b] : [b, a];
+  return short.length >= TOP_NAME_LENGTH && long.startsWith(short);
+}
+
+/**
  * Identity is pid plus start time, not the name: a collector hiccup can drop a runaway for one run or
  * swap ps's full name for top's short one, and neither may notify again. A new process on a reused
  * pid has a different start time and does notify.
  */
 function isSame(entry: NotifiedEntry, pid: number, start: number | undefined): boolean {
-  if (entry.pid !== pid) return false;
-  if (entry.start === undefined || start === undefined) return true;
-  return Math.abs(entry.start - start) <= START_TOLERANCE_MS;
+  return entry.pid === pid && sameStart(entry.start, start);
 }
 
 export function newRunaways(

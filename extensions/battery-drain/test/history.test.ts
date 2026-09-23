@@ -64,6 +64,31 @@ describe("toSample", () => {
   });
 });
 
+describe("toSample when processes were not measured", () => {
+  const base = (errors: string[]): Snapshot => ({
+    t: 5,
+    battery: { systemLoadW: 12.3, percent: 50 },
+    source: { source: "battery" },
+    processes: [],
+    processInfo: new Map(),
+    blockers: [],
+    errors,
+  });
+
+  it("keeps watts and charge but marks the process list as not measured when top failed", () => {
+    const s = toSample(base(["top: timeout"]));
+    expect(s).toMatchObject({ systemW: 12.3, percent: 50, procsMissing: true });
+  });
+
+  it("keeps a process hot enough to become a runaway even when it ranks below the top 10 by energy", () => {
+    const processes = Array.from({ length: 12 }, (_, i) => ({ pid: i + 1, command: `p${i}`, energy: 50 + i, cpu: 5 }));
+    processes.push({ pid: 99, command: "compiler", energy: 10, cpu: 95 });
+    const s = toSample({ ...base([]), processes });
+    expect(s.procs.some((p) => p.pid === 99)).toBe(true);
+    expect(s.procsMissing).toBeUndefined();
+  });
+});
+
 describe("prune", () => {
   it("drops samples older than two hours and caps the count", () => {
     const now = 10 * MAX_AGE_MS;
@@ -73,6 +98,11 @@ describe("prune", () => {
     expect(kept).toHaveLength(MAX_SAMPLES);
     expect(kept.some((s) => s.t === old.t)).toBe(false);
     expect(kept[kept.length - 1].t).toBe(now); // oldest first, newest last
+  });
+
+  it("drops samples dated in the future, left by a clock that was set back", () => {
+    const now = 10 * MAX_AGE_MS;
+    expect(prune([sample(now - 1000), sample(now + 10 * 60_000)], now).map((s) => s.t)).toEqual([now - 1000]);
   });
 });
 
