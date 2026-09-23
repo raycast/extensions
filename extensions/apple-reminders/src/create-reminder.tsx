@@ -61,7 +61,6 @@ type CreateReminderValues = {
   address: string;
   proximity: string;
   radius: string;
-  url?: string;
 };
 
 type CreateReminderFormProps = {
@@ -111,10 +110,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         title: values.title,
         listId: values.listId,
       };
-
-      if (values.url?.trim()) {
-        payload.url = values.url.trim();
-      }
 
       if (values.notes?.trim()) {
         payload.notes = values.notes.trim();
@@ -190,7 +185,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       }
 
       setValue("title", "");
-      setValue("url", "");
       setValue("notes", "");
       setValue("tags", "");
       setValue("location", "");
@@ -228,7 +222,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       address: draftValues?.address,
       proximity: draftValues?.proximity,
       radius: draftValues?.radius,
-      url: draftValues?.url ?? "",
     },
     validation: {
       title: FormValidation.Required,
@@ -319,16 +312,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     switch (fieldId) {
       case "title":
         return [<Form.TextField key="title" {...itemProps.title} title="Title" placeholder="New Reminder" />];
-      case "url":
-        return [
-          <Form.TextField
-            key="url"
-            {...itemProps.url}
-            title="URL"
-            placeholder="https://..."
-            info="URL link attached directly to the reminder in Apple Reminders."
-          />,
-        ];
       case "list":
         return [
           <Form.Dropdown key="listId" {...itemProps.listId} title="List" storeValue>

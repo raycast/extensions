@@ -96,7 +96,7 @@
         {
           "name": "createImmediately",
           "type": "checkbox",
-          "label": "Create reminder immediately",
+          "label": "Create Reminder Immediately",
           "description": "When enabled, the reminder is created immediately in your default list without opening the form.",
           "default": false,
           "required": false
