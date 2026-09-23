@@ -30,4 +30,4 @@ You'll need a Public API Access token. To create access token:
 Adding metadata to your note can make the note triaging in Productboard easier. You can set default presets for them:
 
 - Default tags – adds a default set of tags in add note dialog. Can be overriden.
-- Default Said by – adds a default email to _Said by_ field in add note dialog. Can be overriden.
+- Default Said by – adds a default email to _Said by_ field in add note dialog. The email must belong to an existing Productboard user; API v2 does not create users. Can be overriden.
