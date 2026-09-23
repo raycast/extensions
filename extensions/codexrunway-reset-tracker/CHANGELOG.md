@@ -1,6 +1,6 @@
 # CodexRunway Reset Tracker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-23
 
 - Add menu bar reset status, latest reset detail, and history commands
 - Track upcoming resets with plan filtering and opt-in completion notifications
