@@ -1,6 +1,6 @@
 # Changelog
 
-## [Generate Command] - {PR_MERGE_DATE}
+## [Generate Command] - 2026-09-23
 
 - Adding a card after signing in waits for the account's decks and uses its
   first deck, without needing a second press. An empty deck list or failed
@@ -50,7 +50,7 @@
   found it, and the button becomes **Generate Anyway** or **Request Anyway** so
   the second press goes through. Editing the word or the meaning asks again
 
-## [Drafts Link and AI Assistants] - {PR_MERGE_DATE}
+## [Drafts Link and AI Assistants] - 2026-09-23
 
 - The action panel now opens with ⌘K before a word is typed: **Open
   Dictionary** and **Open Deck** lead it, with the account and the other Inoh
@@ -62,7 +62,7 @@
 - The Apps section now links **AI Assistants**: how to connect Claude, ChatGPT,
   Cursor, and the rest to Inoh over MCP
 
-## [Drafts for Missing Words] - {PR_MERGE_DATE}
+## [Drafts for Missing Words] - 2026-09-23
 
 - A word the dictionary doesn't have can now be saved to your Inoh drafts from
   the empty search results, instead of being requested through a form
