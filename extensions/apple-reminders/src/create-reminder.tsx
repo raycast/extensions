@@ -112,12 +112,14 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         listId: values.listId,
       };
 
-      if (values.notes) {
-        payload.notes = values.notes;
-      }
-
       if (values.url?.trim()) {
         payload.url = values.url.trim();
+      }
+
+      if (values.notes?.trim()) {
+        payload.notes = values.notes.trim();
+      } else if (payload.url) {
+        payload.notes = payload.url;
       }
 
       if (values.dueDate) {

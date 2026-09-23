@@ -143,6 +143,9 @@ struct Recurrence: Decodable {
   }
 
   var fullNotes = newReminder.notes
+  if (fullNotes == nil || fullNotes?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true), let urlString = newReminder.url {
+    fullNotes = urlString
+  }
   if let tags = newReminder.tags, !tags.isEmpty {
     let formattedTags = tags.map { tag in
       let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)

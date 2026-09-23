@@ -59,6 +59,7 @@ export default function Command() {
           const payload: NewReminder = {
             title: activeTab.title,
             url: activeTab.url,
+            notes: activeTab.url,
             listId,
             dueDate,
           };
@@ -109,7 +110,7 @@ export default function Command() {
       draftValues={{
         title: tab?.title ?? "",
         url: tab?.url ?? "",
-        notes: "",
+        notes: tab?.url ?? "",
         dueDate: defaultDueDate,
       }}
     />
