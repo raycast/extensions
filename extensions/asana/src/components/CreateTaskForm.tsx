@@ -21,7 +21,7 @@ import { useSections } from "../hooks/useSections";
 import { useTags } from "../hooks/useTags";
 import { getErrorMessage } from "../helpers/errors";
 import { TaskFormValues } from "../create-task";
-import { getProjectIcon } from "../helpers/project";
+import { getProjectIcon, getProjectTitle } from "../helpers/project";
 import { escapeHtml } from "../helpers/task";
 import TaskDetail from "./TaskDetail";
 import { createTask, TaskPayload } from "../api/tasks";
@@ -187,7 +187,7 @@ export default function CreateTaskForm(props: {
             <Form.TagPicker.Item
               key={project.gid}
               icon={getProjectIcon(project)}
-              title={project.name}
+              title={getProjectTitle(project)}
               value={project.gid}
             />
           );

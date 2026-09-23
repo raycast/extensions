@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { request, requestAll } from "./request";
 import { Task, CustomField } from "./tasks";
 
@@ -12,6 +13,7 @@ export type Project = {
   name: string;
   icon: string | null;
   color: string | null;
+  archived?: boolean;
   custom_field_settings: {
     gid: string;
     custom_field: CustomField;
@@ -19,14 +21,17 @@ export type Project = {
 };
 
 export async function getProjects(workspace: string) {
+  const { showArchivedProjects } = getPreferenceValues<Preferences>();
+
   // Use the `/projects` listing endpoint (paginated) instead of `/typeahead`.
   // Typeahead without a query only returns a small set of recently accessed
   // projects, so most of the workspace's projects were missing from the picker.
   return requestAll<Project>("/projects", {
     params: {
       workspace,
-      archived: false,
-      opt_fields: "id,name,icon,color,custom_field_settings.custom_field",
+      // Omitting `archived` returns both active and archived projects.
+      ...(showArchivedProjects ? {} : { archived: false }),
+      opt_fields: "id,name,icon,color,archived,custom_field_settings.custom_field",
     },
   });
 }

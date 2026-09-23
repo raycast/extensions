@@ -60,6 +60,17 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "showArchivedProjects",
+      "type": "checkbox",
+      "label": "Show archived projects",
+      "title": "Projects",
+      "description": "When enabled, archived projects are included in the project pickers.",
+      "required": false,
+      "default": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.7",

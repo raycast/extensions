@@ -20,6 +20,7 @@ import { useSections } from "../hooks/useSections";
 import { useTags } from "../hooks/useTags";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
+import { getProjectTitle } from "../helpers/project";
 import {
   Task,
   updateTask,
@@ -475,7 +476,7 @@ function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
               {projectsToAdd.map((project) => (
                 <Action
                   key={project.gid}
-                  title={project.name}
+                  title={getProjectTitle(project)}
                   icon={getAvatarIcon(project.name)}
                   onAction={() => changeProject(project, "add")}
                 />

@@ -8,3 +8,7 @@ export function getProjectIcon(project: Project) {
     tintColor: project.color ? asanaToRaycastColor(project.color) : Color.PrimaryText,
   };
 }
+
+export function getProjectTitle(project: Project) {
+  return project.archived ? `${project.name} (archived)` : project.name;
+}
