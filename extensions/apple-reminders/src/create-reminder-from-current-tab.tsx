@@ -11,7 +11,7 @@ import { runPostCreateActions } from "./post-create-shortcuts";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.CreateReminderFromCurrentTab>();
   const { data, isLoading: isLoadingData } = useData();
-  const { value: postCreateActions } = usePostCreateActions();
+  const { value: postCreateActions, isLoading: isLoadingPostCreateActions } = usePostCreateActions();
 
   const [tab, setTab] = useState<BrowserTab | undefined>(undefined);
   const [isLoadingTab, setIsLoadingTab] = useState(true);
@@ -80,12 +80,12 @@ export default function Command() {
       }
     }
 
-    if (!isLoadingData) {
+    if (!isLoadingData && !isLoadingPostCreateActions) {
       init();
     }
-  }, [isLoadingData]);
+  }, [isLoadingData, isLoadingPostCreateActions]);
 
-  if (isLoadingTab || isLoadingData) {
+  if (isLoadingTab || isLoadingData || isLoadingPostCreateActions) {
     return <CreateReminderForm draftValues={{}} />;
   }
 

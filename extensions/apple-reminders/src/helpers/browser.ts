@@ -26,12 +26,14 @@ export const CHROMIUM_BROWSERS = [
 
 export const ALL_SUPPORTED_BROWSERS = [...WEBKIT_BROWSERS, ...CHROMIUM_BROWSERS] as const;
 
+export const TAB_DELIMITER = "\n---RAYCAST_TAB_SEPARATOR---\n";
+
 export function getTabAppleScript(browserName: string): string {
   if (WEBKIT_BROWSERS.includes(browserName as (typeof WEBKIT_BROWSERS)[number])) {
     return `tell application "${browserName}"
       if (count of windows) > 0 then
         set currentTab to current tab of front window
-        return (name of currentTab) & "|||" & (URL of currentTab)
+        return (name of currentTab) & "${TAB_DELIMITER}" & (URL of currentTab)
       end if
     end tell`;
   }
@@ -39,18 +41,18 @@ export function getTabAppleScript(browserName: string): string {
   return `tell application "${browserName}"
     if (count of windows) > 0 then
       set currentTab to active tab of front window
-      return (title of currentTab) & "|||" & (URL of currentTab)
+      return (title of currentTab) & "${TAB_DELIMITER}" & (URL of currentTab)
     end if
   end tell`;
 }
 
 export async function getRunningSupportedBrowsers(): Promise<string[]> {
   try {
-    const script = `tell application "System Events" to get name of every application process`;
+    const script = `tell application "System Events" to get name of every application process whose background only is false`;
     const res = await runAppleScript(script);
     if (!res) return [];
-    const running = res.split(", ").map((name) => name.trim());
-    return (ALL_SUPPORTED_BROWSERS as readonly string[]).filter((browser) => running.includes(browser));
+    const ordered = res.split(", ").map((name) => name.trim());
+    return ordered.filter((browser) => (ALL_SUPPORTED_BROWSERS as readonly string[]).includes(browser));
   } catch {
     return [];
   }
@@ -67,10 +69,10 @@ export async function getActiveBrowserTab(): Promise<BrowserTab | undefined> {
       if (tab) return tab;
     }
   } catch {
-    // Continue to running browsers check
+    // Continue to ordered running browsers check
   }
 
-  // 2. Check running supported browsers
+  // 2. Query running supported browsers in macOS MRU / z-order
   const runningBrowsers = await getRunningSupportedBrowsers();
   for (const browserName of runningBrowsers) {
     try {
@@ -87,13 +89,13 @@ export async function getActiveBrowserTab(): Promise<BrowserTab | undefined> {
 }
 
 export function parseTabResult(rawResult: string | undefined, browserName: string): BrowserTab | undefined {
-  if (!rawResult || !rawResult.includes("|||")) {
+  if (!rawResult || !rawResult.includes(TAB_DELIMITER)) {
     return undefined;
   }
 
-  const [rawTitle, rawUrl] = rawResult.split("|||");
-  const title = (rawTitle ?? "").trim();
-  const url = (rawUrl ?? "").trim();
+  const lastIdx = rawResult.lastIndexOf(TAB_DELIMITER);
+  const title = rawResult.slice(0, lastIdx).trim();
+  const url = rawResult.slice(lastIdx + TAB_DELIMITER.length).trim();
 
   if (!title && !url) {
     return undefined;

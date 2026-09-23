@@ -6,6 +6,7 @@ import {
   CHROMIUM_BROWSERS,
   getTabAppleScript,
   parseTabResult,
+  TAB_DELIMITER,
   WEBKIT_BROWSERS,
 } from "../src/helpers/browser";
 
@@ -31,7 +32,7 @@ describe("Browser Tab Extraction Helpers", () => {
   });
 
   it("parses valid raw result with title and URL", () => {
-    const raw = "GitHub - Raycast Extensions|||https://github.com/raycast/extensions";
+    const raw = `GitHub - Raycast Extensions${TAB_DELIMITER}https://github.com/raycast/extensions`;
     const parsed = parseTabResult(raw, "Safari");
 
     assert.deepStrictEqual(parsed, {
@@ -41,8 +42,19 @@ describe("Browser Tab Extraction Helpers", () => {
     });
   });
 
+  it("handles titles containing pipes and special characters without corrupting URL", () => {
+    const raw = `Project A ||| Project B (v2.0)${TAB_DELIMITER}https://github.com/raycast/extensions/pull/123`;
+    const parsed = parseTabResult(raw, "Arc");
+
+    assert.deepStrictEqual(parsed, {
+      title: "Project A ||| Project B (v2.0)",
+      url: "https://github.com/raycast/extensions/pull/123",
+      browser: "Arc",
+    });
+  });
+
   it("falls back to URL as title when title is empty", () => {
-    const raw = "|||https://raycast.com";
+    const raw = `${TAB_DELIMITER}https://raycast.com`;
     const parsed = parseTabResult(raw, "Google Chrome");
 
     assert.deepStrictEqual(parsed, {
@@ -56,7 +68,7 @@ describe("Browser Tab Extraction Helpers", () => {
     assert.strictEqual(parseTabResult("", "Safari"), undefined);
     assert.strictEqual(parseTabResult(undefined, "Safari"), undefined);
     assert.strictEqual(parseTabResult("No delimiter here", "Arc"), undefined);
-    assert.strictEqual(parseTabResult("   |||   ", "Brave Browser"), undefined);
+    assert.strictEqual(parseTabResult(`   ${TAB_DELIMITER}   `, "Brave Browser"), undefined);
   });
 
   it("includes major macOS browsers in ALL_SUPPORTED_BROWSERS", () => {
