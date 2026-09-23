@@ -1,7 +1,7 @@
 import { TraktListEntry } from "../lib/schema";
 import { CompactList, CompactListEntry, toCompactList, toCompactListEntry } from "./compact-media";
 import { fetchAllLists, fetchListItems, getOwnList } from "./list-api";
-import { listNameContains, listNameEquals } from "./list-matching";
+import { listNameContains, listNameEquals, resolveListItemQuery } from "./list-matching";
 import { isMatchableTitle, partitionByLookup, resolveLookupQuery } from "./title-text";
 
 type ItemType = "movies" | "shows" | "seasons" | "episodes";
@@ -41,9 +41,21 @@ type Input = {
   itemTraktId?: number;
   /**
    * Which item type `itemQuery` / `itemTraktId` targets: "movies", "shows", "seasons" or
-   * "episodes". Defaults to movies and shows. Seasons and episodes are matched by show title.
+   * "episodes". Defaults to movies and shows. Seasons and episodes are matched by show title
+   * (and by `seasonNumber` / `episodeNumber` when supplied).
    */
   itemType?: ItemType;
+  /**
+   * Season number for season/episode checks. Other tools expose a show ID + season number,
+   * not a season Trakt ID — pass both here (`itemTraktId` = show ID, `itemType: "seasons"`,
+   * `seasonNumber`) so membership is exact. Also parsed from `itemQuery` ("Severance season 2").
+   */
+  seasonNumber?: number;
+  /**
+   * Episode number for episode checks. Use with `seasonNumber` and `itemType: "episodes"`.
+   * Also parsed from `itemQuery` ("Severance S01E03").
+   */
+  episodeNumber?: number;
 };
 
 type Output = {
@@ -80,8 +92,20 @@ const ENTRY_TYPE: Record<ItemType, string> = {
 function entryTitles(entry: TraktListEntry): Array<string | undefined> {
   if (entry.type === "movie") return [entry.movie?.title];
   if (entry.type === "show") return [entry.show?.title];
-  if (entry.type === "episode") return [entry.show?.title, entry.episode?.title ?? undefined];
-  return [entry.show?.title];
+
+  const show = entry.show?.title;
+  if (entry.type === "episode" && entry.episode) {
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const code = `S${pad(entry.episode.season)}E${pad(entry.episode.number)}`;
+    return [show, entry.episode.title ?? undefined, show ? `${show} ${code}` : code];
+  }
+
+  if (entry.type === "season" && entry.season) {
+    const n = entry.season.number;
+    return [show, show ? `${show} Season ${n}` : undefined, show ? `${show} (Season ${n})` : undefined];
+  }
+
+  return [show];
 }
 
 function plural(count: number, one: string, many: string): string {
@@ -92,7 +116,11 @@ async function checkMembership(
   list: CompactList,
   input: Input,
 ): Promise<Pick<Output, "inList" | "exhaustive" | "message" | "matchedItems" | "totalItems">> {
-  const { itemQuery, itemYear, itemTraktId, itemType } = input;
+  const { itemYear, itemTraktId, itemType } = input;
+  const scoped = resolveListItemQuery(input.itemQuery, input.seasonNumber, input.episodeNumber);
+  const itemQuery = scoped.text;
+  const seasonNumber = scoped.seasonNumber;
+  const episodeNumber = scoped.episodeNumber;
 
   if (itemTraktId !== undefined && !itemType) {
     return {
@@ -104,26 +132,83 @@ async function checkMembership(
     };
   }
 
+  if (episodeNumber !== undefined && seasonNumber === undefined) {
+    return {
+      inList: false,
+      exhaustive: false,
+      message:
+        `Episode ${episodeNumber} needs a \`seasonNumber\` (or an \`itemQuery\` like "Show S01E03") ` +
+        `before membership can be checked on "${list.name}".`,
+    };
+  }
+
+  if (episodeNumber !== undefined && itemType && itemType !== "episodes") {
+    return {
+      inList: false,
+      exhaustive: false,
+      message: `\`episodeNumber\` only applies when \`itemType\` is "episodes".`,
+    };
+  }
+
+  if (seasonNumber !== undefined && itemType === "movies") {
+    return {
+      inList: false,
+      exhaustive: false,
+      message: `\`seasonNumber\` does not apply to movies.`,
+    };
+  }
+
   const lookup = resolveLookupQuery(itemQuery, itemYear);
   if (itemQuery && itemTraktId === undefined && !isMatchableTitle(lookup.text ?? itemQuery)) {
     return {
       inList: false,
       exhaustive: false,
       message:
-        `The title ${JSON.stringify(itemQuery)} cannot be compared: after normalization it has no letters or ` +
+        `The title ${JSON.stringify(input.itemQuery)} cannot be compared: after normalization it has no letters or ` +
         `digits. This is NOT a confirmed absence from "${list.name}".`,
     };
   }
 
   const fetched = await fetchListItems(list.listId, list.name);
-  const wantedTypes = itemType ? [ENTRY_TYPE[itemType]] : ["movie", "show"];
-  const candidates = fetched.items.filter((entry) => wantedTypes.includes(entry.type));
+  const wantedTypes = itemType
+    ? [ENTRY_TYPE[itemType]]
+    : seasonNumber !== undefined || episodeNumber !== undefined
+      ? episodeNumber !== undefined
+        ? ["episode"]
+        : ["season", "episode"]
+      : ["movie", "show"];
+
+  let candidates = fetched.items.filter((entry) => wantedTypes.includes(entry.type));
   const compact = new Map(candidates.map((entry) => [entry, toCompactListEntry(entry)]));
+
+  if (seasonNumber !== undefined) {
+    candidates = candidates.filter((entry) => compact.get(entry)?.seasonNumber === seasonNumber);
+  }
+  if (episodeNumber !== undefined) {
+    candidates = candidates.filter((entry) => compact.get(entry)?.episodeNumber === episodeNumber);
+  }
+
+  // Write tools address seasons/episodes as showTraktId + numbers. When those are supplied,
+  // treat a matching parent show ID as an exact hit — season Trakt IDs are not what callers have.
+  const idOf = (entry: TraktListEntry): number => {
+    const item = compact.get(entry);
+    if (!item) return 0;
+    if (
+      itemTraktId !== undefined &&
+      seasonNumber !== undefined &&
+      item.showTraktId === itemTraktId &&
+      item.seasonNumber === seasonNumber &&
+      (episodeNumber === undefined || item.episodeNumber === episodeNumber)
+    ) {
+      return itemTraktId;
+    }
+    return item.traktId;
+  };
 
   const pick = partitionByLookup(
     candidates,
     entryTitles,
-    (entry) => compact.get(entry)?.traktId ?? 0,
+    idOf,
     (entry) => compact.get(entry)?.year,
     itemQuery,
     itemTraktId,
@@ -135,7 +220,13 @@ async function checkMembership(
   const yearHeldBy = toCompact(pick.yearHeldBy);
   const yearUnknown = toCompact(pick.yearUnknown);
   const related = toCompact(pick.related);
-  const target = itemQuery ? `"${itemQuery}"` : `Trakt ID ${itemTraktId}`;
+  const scope =
+    episodeNumber !== undefined && seasonNumber !== undefined
+      ? ` S${String(seasonNumber).padStart(2, "0")}E${String(episodeNumber).padStart(2, "0")}`
+      : seasonNumber !== undefined
+        ? ` season ${seasonNumber}`
+        : "";
+  const target = itemQuery ? `"${itemQuery}"${scope}` : `Trakt ID ${itemTraktId}${scope}`;
   const yearLabel = lookup.year !== undefined && itemQuery ? ` (${lookup.year})` : "";
   const inList = exact.length > 0;
   const exhaustive = fetched.exhaustive && (inList || (yearHeldBy.length === 0 && yearUnknown.length === 0));

@@ -1,3 +1,5 @@
+import { isMatchableTitle } from "./title-text";
+
 /**
  * Normalize a personal list name for comparison: case and accents are folded, and runs of
  * punctuation or symbols collapse into single spaces.
@@ -194,4 +196,43 @@ export function parseEpisodeKeys(value?: string): { keys: EpisodeKey[]; invalid:
 
 export function episodeCode(seasonNumber: number, episodeNumber: number): string {
   return `S${String(seasonNumber).padStart(2, "0")}E${String(episodeNumber).padStart(2, "0")}`;
+}
+
+/**
+ * Pull a trailing "season N" / "S01E03" off a membership query so title matching stays on the
+ * show name while the number filters the list entry. Explicit `seasonNumber` / `episodeNumber`
+ * arguments win over anything parsed from the text.
+ */
+export function resolveListItemQuery(
+  query: string | undefined,
+  seasonNumber?: number,
+  episodeNumber?: number,
+): { text: string | undefined; seasonNumber?: number; episodeNumber?: number } {
+  if (!query) return { text: undefined, seasonNumber, episodeNumber };
+
+  const trimmed = query.trim();
+  const episode = trimmed.match(/^(.*?)\s+S(\d+)E(\d+)\s*$/i);
+  if (episode && isMatchableTitle(episode[1])) {
+    return {
+      text: episode[1].trim(),
+      seasonNumber: seasonNumber ?? Number(episode[2]),
+      episodeNumber: episodeNumber ?? Number(episode[3]),
+    };
+  }
+
+  const season = trimmed.match(/^(.*?)\s+season\s*(\d+)\s*$/i);
+  if (season && isMatchableTitle(season[1])) {
+    return {
+      text: season[1].trim(),
+      seasonNumber: seasonNumber ?? Number(season[2]),
+      episodeNumber,
+    };
+  }
+
+  return { text: trimmed, seasonNumber, episodeNumber };
+}
+
+/** Join every resolved title for confirmations — never truncate a batch the user is approving. */
+export function summarizeLabels(labels: string[]): string {
+  return labels.join(", ");
 }

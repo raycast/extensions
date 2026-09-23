@@ -23,6 +23,8 @@ import {
   toolTraktClient,
 } from "./tool-client";
 
+export { summarizeLabels } from "./list-matching";
+
 /** Upper bound on items resolved for one add/remove call, so a confirmation stays bounded. */
 export const LIST_BATCH_CAP = 50;
 
@@ -246,9 +248,4 @@ export async function resolveListSelection(input: ListSelectionInput): Promise<R
     },
     total,
   };
-}
-
-export function summarizeLabels(labels: string[], cap = 5): string {
-  if (labels.length <= cap) return labels.join(", ");
-  return `${labels.slice(0, cap).join(", ")} and ${labels.length - cap} more`;
 }

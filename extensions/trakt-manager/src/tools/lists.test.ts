@@ -10,6 +10,8 @@ import {
   parseEpisodeKeys,
   parseSeasonKeys,
   parseTraktIds,
+  resolveListItemQuery,
+  summarizeLabels,
 } from "./list-matching";
 import { assertListAdded, readListWrite, totalCount } from "./list-write";
 import { partitionByLookup } from "./title-text";
@@ -124,5 +126,57 @@ test("list membership keeps a sequel out of an exact title hit", () => {
   assert.deepEqual(
     pick.yearHeldBy.map((e) => e.traktId),
     [1],
+  );
+});
+
+test("membership queries parse season and episode numbers off the title", () => {
+  assert.deepEqual(resolveListItemQuery("Severance season 2"), {
+    text: "Severance",
+    seasonNumber: 2,
+    episodeNumber: undefined,
+  });
+  assert.deepEqual(resolveListItemQuery("Severance S01E03"), {
+    text: "Severance",
+    seasonNumber: 1,
+    episodeNumber: 3,
+  });
+  assert.deepEqual(resolveListItemQuery("Severance season 2", 9), {
+    text: "Severance",
+    seasonNumber: 9,
+    episodeNumber: undefined,
+  });
+  assert.deepEqual(resolveListItemQuery("Severance"), {
+    text: "Severance",
+    seasonNumber: undefined,
+    episodeNumber: undefined,
+  });
+});
+
+test("list confirmations name every resolved title", () => {
+  const labels = ["A", "B", "C", "D", "E", "F"];
+  assert.equal(summarizeLabels(labels), "A, B, C, D, E, F");
+});
+
+test("season entries match by show title plus season number labels", () => {
+  const show = { title: "Severance", year: 2022, ids: { trakt: 154784 } };
+  const entries = [
+    { id: 1, type: "season" as const, show, season: { number: 1, ids: { trakt: 88 } } },
+    { id: 2, type: "season" as const, show, season: { number: 2, ids: { trakt: 89 } } },
+  ];
+  const titlesOf = (entry: (typeof entries)[number]) => {
+    const n = entry.season.number;
+    return [entry.show.title, `${entry.show.title} Season ${n}`, `${entry.show.title} (Season ${n})`];
+  };
+  const season2 = entries.filter((entry) => entry.season.number === 2);
+  const pick = partitionByLookup(
+    season2,
+    titlesOf,
+    (entry) => entry.season.ids.trakt,
+    (entry) => entry.show.year,
+    "Severance",
+  );
+  assert.deepEqual(
+    pick.exact.map((entry) => entry.season.number),
+    [2],
   );
 });

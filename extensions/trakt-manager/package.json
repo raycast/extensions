@@ -228,7 +228,8 @@
     "fmt": "prettier '**/*' -wu && syncpack-format",
     "lint": "ray lint",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "npx --yes tsx --test src/tools/*.test.ts"
   },
   "title": "Trakt Manager"
 }
