@@ -290,7 +290,9 @@ export async function addTask(input: {
         sameName[0].id !== input.listID ||
         sameName[0].accountEmail.toLowerCase() !== input.accountEmail.toLowerCase()
       ) {
-        throw error;
+        throw new Error(
+          "This hora build cannot safely select that task list. Update to a build with account-specific task lists.",
+        );
       }
       parts.push(`in list ${quote(input.listName)}`);
     }
