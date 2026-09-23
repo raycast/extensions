@@ -7,6 +7,10 @@
 - Support interactive form mode with pre-filled title and URL as well as instant background reminder creation.
 - Add "Default Due Date & Time" preference to schedule reminders with natural language (e.g. `6pm`, `in 2 hours`, `tonight`, `tomorrow 9am`).
 
+## [Updated maintainer metadata] - 2026-09-23
+
+- Marked a former Apple Reminders maintainer as a past contributor.
+
 ## [Display tags in My Reminders] - 2026-09-23
 
 - Display attached tags as accessories in the "My Reminders" list view.
