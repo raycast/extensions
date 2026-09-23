@@ -32,9 +32,12 @@ import {
   describeYtdlpError,
   looksLikeFilePath,
   hasPlaylist,
+  isLiveStream,
   isMac,
+  isNoisyWarning,
   isValidHHMM,
   isValidUrl,
+  normalizeVideoUrl,
   parseHHMM,
   sanitizeVideoTitle,
 } from "./utils.js";
@@ -92,7 +95,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, values.url], {
+      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, normalizeVideoUrl(values.url)], {
         env: { ...globalThis.process.env, PYTHONUNBUFFERED: "1" },
       });
 
@@ -102,6 +105,25 @@ export default function DownloadVideo() {
       // in the toast body when the download fails.
       const logLines: string[] = [];
       let lastErrorLine = "";
+      // stderr emits chunks, which can hold several lines or end mid-line.
+      // Classify only complete lines so a noisy warning cannot hide another
+      // warning or error that arrived in the same chunk.
+      let pendingStderr = "";
+
+      const consumeStderrLine = (line: string) => {
+        if (!line) return;
+
+        // Surface warnings inline, and remember the last error line for the
+        // failure toast — but do NOT touch toast.message here: the running toast
+        // is reserved for download progress (stderr would otherwise clobber it
+        // on every chunk). The exit code in `close` is the real failure verdict.
+        if (line.startsWith("WARNING:") && !isNoisyWarning(line)) {
+          setWarning(line);
+        }
+        if (line.startsWith("ERROR:")) {
+          lastErrorLine = line.trim();
+        }
+      };
 
       downloadProcess.stdout.on("data", (data) => {
         const line = data.toString() as string;
@@ -122,22 +144,20 @@ export default function DownloadVideo() {
       });
 
       downloadProcess.stderr.on("data", (data) => {
-        const line = data.toString();
-        logLines.push(line);
+        const chunk = data.toString();
+        logLines.push(chunk);
 
-        // Surface warnings inline, and remember the last error line for the
-        // failure toast — but do NOT touch toast.message here: the running toast
-        // is reserved for download progress (stderr would otherwise clobber it
-        // on every chunk). The exit code in `close` is the real failure verdict.
-        if (line.startsWith("WARNING:")) {
-          setWarning(line);
-        }
-        if (line.startsWith("ERROR:")) {
-          lastErrorLine = line.trim();
-        }
+        const parts = (pendingStderr + chunk).split(/\r?\n/);
+        pendingStderr = parts.pop() ?? "";
+        for (const line of parts) consumeStderrLine(line);
       });
 
       downloadProcess.on("close", (code) => {
+        if (pendingStderr) {
+          consumeStderrLine(pendingStderr);
+          pendingStderr = "";
+        }
+
         // The exit code is the sole success/failure verdict: 0 is success,
         // anything else (including null, i.e. killed by a signal) is a failure.
         if (code !== 0) {
@@ -237,7 +257,13 @@ export default function DownloadVideo() {
 
       const result = await execa(
         ytdlPath,
-        [...getCommonArgs({ throttle: true }), "--no-playlist", "--dump-json", "--format-sort=res,ext,tbr", url],
+        [
+          ...getCommonArgs({ throttle: true }),
+          "--no-playlist",
+          "--dump-json",
+          "--format-sort=res,ext,tbr",
+          normalizeVideoUrl(url),
+        ],
         {
           env: {
             ...process.env,
@@ -279,7 +305,7 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     if (video) {
-      if (video.live_status !== "not_live" && video.live_status !== undefined) {
+      if (isLiveStream(video)) {
         setValidationError("url", "Live streams are not supported");
       }
     }
