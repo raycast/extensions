@@ -28,7 +28,7 @@
           "name": "openWithApp",
           "type": "appPicker",
           "required": true,
-          "title": "Open with (required)",
+          "title": "Open With (Required)",
           "description": "Open with",
           "default": "Terminal"
         },
@@ -54,7 +54,7 @@
           "name": "openWithApp",
           "type": "appPicker",
           "required": true,
-          "title": "Open with (required)",
+          "title": "Open With (Required)",
           "description": "Open with",
           "default": "Terminal"
         },
