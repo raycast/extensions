@@ -10,7 +10,6 @@ import {
   getCachedInternetSpeed,
   type SessionDataUsage,
 } from "../speedService";
-import { isEnterpriseAuth } from "../../utils/wifiState";
 
 let environmentAssetsPath: string | undefined;
 try {
@@ -857,9 +856,8 @@ function buildWpaPskXml(
 }
 
 /**
- * Connects to a Wi-Fi network by SSID. Supports Open, WPA/WPA2/WPA3-Personal networks with
- * appropriate profile generation, and reconnecting to saved Enterprise (802.1X) profiles.
- * Unsaved Enterprise networks must be joined once through Windows (see openWindowsAvailableNetworks).
+ * Connects to a Wi-Fi network by SSID. Supports Open, WPA3-Personal, Enterprise (802.1X),
+ * and WPA/WPA2-Personal networks with appropriate profile generation.
  */
 export async function connectWindowsWifi(
   ssid: string,
@@ -870,22 +868,16 @@ export async function connectWindowsWifi(
   if (!profileExists || password) {
     const sec = await getVisibleNetworkSecurity(ssid);
     const auth = (sec?.authentication || "").toUpperCase();
-    const isEnterprise = isEnterpriseAuth(auth);
-    if (isEnterprise && !profileExists) {
-      throw new Error(
-        `"${ssid}" uses 802.1X (Enterprise) sign-in. Join it once from the Windows network list, then reconnect here.`,
-      );
-    }
-    const isOpen = auth.includes("OPEN") || (!password && !isEnterprise);
+    const isOpen =
+      auth.includes("OPEN") || (!password && !auth.includes("ENTERPRISE"));
+    const isEnterprise = auth.includes("ENTERPRISE");
     const isWpa3 = auth.includes("WPA3") || auth.includes("SAE");
     const isWpa1 = auth.startsWith("WPA-") || auth === "WPAPSK";
 
     const escapedSsid = escapeXml(ssid);
     const hexSsid = Buffer.from(ssid, "utf-8").toString("hex");
 
-    if (isEnterprise) {
-      // Saved Enterprise profile: keep its EAP settings and stored credentials untouched.
-    } else if (isOpen) {
+    if (isOpen) {
       const openXml = `<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
     <name>${escapedSsid}</name>
@@ -908,6 +900,29 @@ export async function connectWindowsWifi(
     </MSM>
 </WLANProfile>`;
       await addWindowsWifiProfileXml(openXml);
+    } else if (isEnterprise) {
+      const entXml = `<?xml version="1.0"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+    <name>${escapedSsid}</name>
+    <SSIDConfig>
+        <SSID>
+            <hex>${hexSsid}</hex>
+            <name>${escapedSsid}</name>
+        </SSID>
+    </SSIDConfig>
+    <connectionType>ESS</connectionType>
+    <connectionMode>auto</connectionMode>
+    <MSM>
+        <security>
+            <authEncryption>
+                <authentication>${isWpa3 ? "WPA3" : "WPA2"}</authentication>
+                <encryption>AES</encryption>
+                <useOneX>true</useOneX>
+            </authEncryption>
+        </security>
+    </MSM>
+</WLANProfile>`;
+      await addWindowsWifiProfileXml(entXml);
     } else if (password) {
       const escapedPassword = escapeXml(password);
       if (isWpa3) {
@@ -995,13 +1010,6 @@ export async function getWindowsWifiPassword(
   } catch {
     return undefined;
   }
-}
-
-/**
- * Opens the Windows network flyout, which handles 802.1X credential prompts natively.
- */
-export async function openWindowsAvailableNetworks(): Promise<void> {
-  await runCmd("start ms-availablenetworks:");
 }
 
 /**

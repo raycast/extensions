@@ -11,10 +11,10 @@ const {
   clearSessionBaseline,
   getInternetSpeed,
 } = await import("../src/services/speedService.ts");
-const { parseSubinterfaceBytes } =
-  await import("../src/services/platform/windows.ts");
-const { isEnterpriseAuth, isLatestSsidRequest } =
-  await import("../src/utils/wifiState.ts");
+const { parseSubinterfaceBytes } = await import(
+  "../src/services/platform/windows.ts"
+);
+const { isLatestSsidRequest } = await import("../src/utils/wifiState.ts");
 
 console.log("==================================================");
 console.log("RUNNING COMPREHENSIVE SESSION DATA VERIFICATION");
@@ -117,16 +117,8 @@ assert.equal(res2.totalBytesOut, 5_000_000);
 
 // Test D: User switches to CoffeeShop (SSID switch resets delta)
 const res3 = calculateSessionUsage("CoffeeShop", 30_000_000, 6_000_000);
-assert.equal(
-  res3.downloadedBytes,
-  0,
-  "Delta should reset when switching to new SSID",
-);
-assert.equal(
-  res3.uploadedBytes,
-  0,
-  "Delta should reset when switching to new SSID",
-);
+assert.equal(res3.downloadedBytes, 0, "Delta should reset when switching to new SSID");
+assert.equal(res3.uploadedBytes, 0, "Delta should reset when switching to new SSID");
 assert.equal(res3.totalBytesIn, 30_000_000);
 assert.equal(res3.totalBytesOut, 6_000_000);
 
@@ -146,16 +138,8 @@ assert.equal(resBack.uploadedBytes, 0);
 
 // Test G: Counter wrap / reboot scenario (counters drop below baseline)
 const resWrap = calculateSessionUsage("MyHomeNet", 500_000, 100_000);
-assert.equal(
-  resWrap.downloadedBytes,
-  0,
-  "Delta should reset on counter wrap/reboot",
-);
-assert.equal(
-  resWrap.uploadedBytes,
-  0,
-  "Delta should reset on counter wrap/reboot",
-);
+assert.equal(resWrap.downloadedBytes, 0, "Delta should reset on counter wrap/reboot");
+assert.equal(resWrap.uploadedBytes, 0, "Delta should reset on counter wrap/reboot");
 assert.equal(resWrap.totalBytesIn, 500_000);
 assert.equal(resWrap.totalBytesOut, 100_000);
 
@@ -167,27 +151,11 @@ assert.equal(resSanitized.downloadedBytes, 0);
 assert.equal(resSanitized.uploadedBytes, 0);
 
 // Test I: Disconnecting and reconnecting to the SAME SSID must establish a fresh session starting at zero
-const resSameInitial = calculateSessionUsage(
-  "WorkOffice",
-  50_000_000,
-  10_000_000,
-);
-assert.equal(
-  resSameInitial.downloadedBytes,
-  0,
-  "Initial WorkOffice delta should be 0",
-);
-assert.equal(
-  resSameInitial.uploadedBytes,
-  0,
-  "Initial WorkOffice delta should be 0",
-);
+const resSameInitial = calculateSessionUsage("WorkOffice", 50_000_000, 10_000_000);
+assert.equal(resSameInitial.downloadedBytes, 0, "Initial WorkOffice delta should be 0");
+assert.equal(resSameInitial.uploadedBytes, 0, "Initial WorkOffice delta should be 0");
 
-const resSameTraffic = calculateSessionUsage(
-  "WorkOffice",
-  56_000_000,
-  12_000_000,
-);
+const resSameTraffic = calculateSessionUsage("WorkOffice", 56_000_000, 12_000_000);
 assert.equal(
   resSameTraffic.downloadedBytes,
   6_000_000,
@@ -201,16 +169,8 @@ assert.equal(
 
 // User disconnects from Wi-Fi (disconnected state observation)
 const resDisconn = calculateSessionUsage(undefined, 56_000_000, 12_000_000);
-assert.equal(
-  resDisconn.downloadedBytes,
-  0,
-  "Disconnected state delta should be 0",
-);
-assert.equal(
-  resDisconn.uploadedBytes,
-  0,
-  "Disconnected state delta should be 0",
-);
+assert.equal(resDisconn.downloadedBytes, 0, "Disconnected state delta should be 0");
+assert.equal(resDisconn.uploadedBytes, 0, "Disconnected state delta should be 0");
 
 // User reconnects to the SAME SSID ("WorkOffice")
 const resSameReconnect = calculateSessionUsage(
@@ -248,41 +208,22 @@ assert.equal(
 
 // Test J: Explicit clearSessionBaseline() resets active SSID and baseline
 clearSessionBaseline();
-const resAfterClear = calculateSessionUsage(
-  "WorkOffice",
-  65_000_000,
-  15_000_000,
-);
+const resAfterClear = calculateSessionUsage("WorkOffice", 65_000_000, 15_000_000);
 assert.equal(
   resAfterClear.downloadedBytes,
   0,
   "Observation following explicit clearSessionBaseline() must start at 0",
 );
 // Test K: Reconnecting to SAME SSID with a new connectionKey (e.g. reconnect outside Raycast)
-const resKey1 = calculateSessionUsage(
-  "HomeFiber",
-  100_000_000,
-  20_000_000,
-  "conn_0x1",
-);
+const resKey1 = calculateSessionUsage("HomeFiber", 100_000_000, 20_000_000, "conn_0x1");
 assert.equal(resKey1.downloadedBytes, 0);
 
-const resKey1Traffic = calculateSessionUsage(
-  "HomeFiber",
-  110_000_000,
-  25_000_000,
-  "conn_0x1",
-);
+const resKey1Traffic = calculateSessionUsage("HomeFiber", 110_000_000, 25_000_000, "conn_0x1");
 assert.equal(resKey1Traffic.downloadedBytes, 10_000_000);
 assert.equal(resKey1Traffic.uploadedBytes, 5_000_000);
 
 // Disconnect & reconnect occurred outside Raycast (new connectionKey without passing undefined)
-const resKey2 = calculateSessionUsage(
-  "HomeFiber",
-  110_000_000,
-  25_000_000,
-  "conn_0x2",
-);
+const resKey2 = calculateSessionUsage("HomeFiber", 110_000_000, 25_000_000, "conn_0x2");
 assert.equal(
   resKey2.downloadedBytes,
   0,
@@ -290,12 +231,7 @@ assert.equal(
 );
 assert.equal(resKey2.uploadedBytes, 0);
 
-const resKey2Traffic = calculateSessionUsage(
-  "HomeFiber",
-  115_000_000,
-  27_000_000,
-  "conn_0x2",
-);
+const resKey2Traffic = calculateSessionUsage("HomeFiber", 115_000_000, 27_000_000, "conn_0x2");
 assert.equal(resKey2Traffic.downloadedBytes, 5_000_000);
 assert.equal(resKey2Traffic.uploadedBytes, 2_000_000);
 
@@ -340,10 +276,7 @@ const sampleWithVirtualFirst = `
       1500                5             0             0  Wi-Fi Direct Virtual Adapter
       1500                1    5555555555    6666666666  Wi-Fi
 `;
-const exactWifiCounters = parseSubinterfaceBytes(
-  sampleWithVirtualFirst,
-  "Wi-Fi",
-);
+const exactWifiCounters = parseSubinterfaceBytes(sampleWithVirtualFirst, "Wi-Fi");
 assert.deepEqual(
   exactWifiCounters,
   { bytesIn: 5555555555, bytesOut: 6666666666 },
@@ -420,12 +353,18 @@ function parseWlanEventBlocks(rawXml, currentGuid, currentSsid) {
     const evGuid = evXml.match(
       /<Data Name=['"]InterfaceGuid['"]>([^<]+)<\/Data>/i,
     )?.[1];
-    const evSsid = evXml.match(/<Data Name=['"]SSID['"]>([^<]+)<\/Data>/i)?.[1];
+    const evSsid = evXml.match(
+      /<Data Name=['"]SSID['"]>([^<]+)<\/Data>/i,
+    )?.[1];
 
     const cleanEvGuid = evGuid
       ? (evGuid.startsWith("{") ? evGuid : `{${evGuid}}`).trim().toLowerCase()
       : undefined;
-    if (currentGuid && cleanEvGuid && cleanEvGuid !== currentGuid) {
+    if (
+      currentGuid &&
+      cleanEvGuid &&
+      cleanEvGuid !== currentGuid
+    ) {
       continue;
     }
 
@@ -446,7 +385,9 @@ function parseWlanEventBlocks(rawXml, currentGuid, currentSsid) {
       const connId = evXml.match(
         /<Data Name=['"]ConnectionId['"]>([^<]+)<\/Data>/i,
       )?.[1];
-      const recId = evXml.match(/<EventRecordID>(\d+)<\/EventRecordID>/i)?.[1];
+      const recId = evXml.match(
+        /<EventRecordID>(\d+)<\/EventRecordID>/i,
+      )?.[1];
       const time = evXml.match(
         /<TimeCreated SystemTime=['"]([^'"]+)['"]/i,
       )?.[1];
@@ -556,7 +497,10 @@ console.log("✓ SSID-scoped speed cache tests passed!");
 // ---------------------------------------------------------------
 console.log("\n--- 6. Testing stale SSID request rejection ---");
 
-assert.equal(isLatestSsidRequest("Network-A", "Network-A", "Network-A"), true);
+assert.equal(
+  isLatestSsidRequest("Network-A", "Network-A", "Network-A"),
+  true,
+);
 assert.equal(
   isLatestSsidRequest("Network-A", "Network-B", "Network-B"),
   false,
@@ -569,25 +513,6 @@ assert.equal(
 );
 
 console.log("✓ stale SSID request rejection tests passed!");
-
-// ---------------------------------------------------------------
-// 7. Test 802.1X (Enterprise) authentication detection
-// ---------------------------------------------------------------
-console.log("\n--- 7. Testing Enterprise authentication detection ---");
-
-for (const auth of [
-  "WPA2-Enterprise",
-  "WPA3-Enterprise",
-  "WPA3-Enterprise 192 Bits",
-  "WPA-Enterprise",
-]) {
-  assert.equal(isEnterpriseAuth(auth), true, `${auth} must be Enterprise`);
-}
-for (const auth of ["WPA2-Personal", "WPA3-Personal", "Open", "", undefined]) {
-  assert.equal(isEnterpriseAuth(auth), false, `${auth} must not be Enterprise`);
-}
-
-console.log("✓ Enterprise authentication detection tests passed!");
 
 console.log("\n==================================================");
 console.log("ALL VERIFICATION TESTS PASSED SUCCESSFULLY! 🎉");

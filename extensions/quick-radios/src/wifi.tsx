@@ -20,13 +20,12 @@ import {
   getWifiNetworks,
   getWifiPassword,
   getWifiStatus,
-  openAvailableNetworks,
   openWifiSettings,
   toggleWifi,
 } from "./services/wifiService";
 import { WifiNetwork, WifiStatus } from "./services/types";
 import { SHORTCUTS } from "./utils/shortcuts";
-import { isEnterpriseAuth, isLatestSsidRequest } from "./utils/wifiState";
+import { isLatestSsidRequest } from "./utils/wifiState";
 
 function areWifiStatusesEqual(a: WifiStatus, b: WifiStatus): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -267,15 +266,6 @@ export default function WifiCommand() {
     } finally {
       isActionInProgressRef.current = false;
     }
-  }
-
-  async function handleJoinEnterprise() {
-    await openAvailableNetworks();
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Finish sign-in in the Windows network list",
-      message: "802.1X networks can be reconnected here once saved",
-    });
   }
 
   async function handleConnect(network: WifiNetwork) {
@@ -680,7 +670,6 @@ export default function WifiCommand() {
                 const isEncrypted =
                   net.authentication &&
                   !net.authentication.toLowerCase().includes("open");
-                const isEnterprise = isEnterpriseAuth(net.authentication);
                 return (
                   <List.Item
                     key={net.ssid}
@@ -702,13 +691,7 @@ export default function WifiCommand() {
                     detail={<WifiDetail network={net} status={status} />}
                     actions={
                       <ActionPanel>
-                        {isEnterprise ? (
-                          <Action
-                            title="Join Enterprise Network"
-                            icon={Icon.Key}
-                            onAction={handleJoinEnterprise}
-                          />
-                        ) : isEncrypted ? (
+                        {isEncrypted ? (
                           <Action.Push
                             title="Join Network"
                             icon={Icon.Key}

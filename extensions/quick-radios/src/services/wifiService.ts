@@ -40,10 +40,6 @@ export async function openWifiSettings(): Promise<void> {
   return windows.openWindowsWifiSettings();
 }
 
-export async function openAvailableNetworks(): Promise<void> {
-  return windows.openWindowsAvailableNetworks();
-}
-
 export {
   getInternetSpeed,
   getCachedInternetSpeed,
