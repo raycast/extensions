@@ -8,7 +8,7 @@ import {
   formatTags,
   parseTags,
 } from "../src/helpers";
-import { resolveQuickAddReminder } from "../src/quick-add-reminder-parser";
+import { parseAIResponse, resolveQuickAddReminder } from "../src/quick-add-reminder-parser";
 import createReminderTool from "../src/tools/create-reminder";
 import updateReminderTool from "../src/tools/update-reminder";
 // @ts-expect-error Mock module
@@ -237,16 +237,71 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.deepStrictEqual(resolved.tags, ["errands", "shopping"]);
   });
 
-  it("preserves list hashtags while extracting non-list hashtags as tags", () => {
-    const resolved = resolveQuickAddReminder(
+  it("preserves list hashtags and at-mentions while extracting non-list hashtags as tags", () => {
+    const resolvedHash = resolveQuickAddReminder(
       { title: "Finish presentation #Work #urgent" },
       "Finish presentation #Work #urgent",
       [{ id: "work-id", title: "Work" }],
     );
 
-    assert.strictEqual(resolved.title, "Finish presentation");
-    assert.strictEqual(resolved.listId, "work-id");
-    assert.deepStrictEqual(resolved.tags, ["urgent"]);
+    assert.strictEqual(resolvedHash.title, "Finish presentation");
+    assert.strictEqual(resolvedHash.listId, "work-id");
+    assert.deepStrictEqual(resolvedHash.tags, ["urgent"]);
+
+    const resolvedAt = resolveQuickAddReminder(
+      { title: "Finish presentation @Work #urgent" },
+      "Finish presentation @Work #urgent",
+      [{ id: "work-id", title: "Work" }],
+    );
+
+    assert.strictEqual(resolvedAt.title, "Finish presentation");
+    assert.strictEqual(resolvedAt.listId, "work-id");
+    assert.deepStrictEqual(resolvedAt.tags, ["urgent"]);
+  });
+
+  it("correctly matches punctuated, unicode, and emoji list names with # and @", () => {
+    const lists = [
+      { id: "punct-id", title: "Work!" },
+      { id: "unicode-id", title: "Café" },
+      { id: "emoji-id", title: "⭐" },
+    ];
+
+    const res1 = resolveQuickAddReminder({ title: "Send email #Work!" }, "Send email #Work!", lists);
+    assert.strictEqual(res1.title, "Send email");
+    assert.strictEqual(res1.listId, "punct-id");
+
+    const res2 = resolveQuickAddReminder({ title: "Order beans @Café" }, "Order beans @Café", lists);
+    assert.strictEqual(res2.title, "Order beans");
+    assert.strictEqual(res2.listId, "unicode-id");
+
+    const res3 = resolveQuickAddReminder({ title: "Important task #⭐ #urgent" }, "Important task #⭐ #urgent", lists);
+    assert.strictEqual(res3.title, "Important task");
+    assert.strictEqual(res3.listId, "emoji-id");
+    assert.deepStrictEqual(res3.tags, ["urgent"]);
+  });
+
+  it("correctly matches list names followed by punctuation separators", () => {
+    const lists = [{ id: "work-id", title: "Work" }];
+
+    const res1 = resolveQuickAddReminder({ title: "Buy milk #Work," }, "Buy milk #Work,", lists);
+    assert.strictEqual(res1.title, "Buy milk");
+    assert.strictEqual(res1.listId, "work-id");
+
+    const res2 = resolveQuickAddReminder(
+      { title: "Buy milk #Work, and bread" },
+      "Buy milk #Work, and bread",
+      lists,
+    );
+    assert.strictEqual(res2.title, "Buy milk, and bread");
+    assert.strictEqual(res2.listId, "work-id");
+
+    const res3 = resolveQuickAddReminder(
+      { title: "Review document @Work. Please finish soon" },
+      "Review document @Work. Please finish soon",
+      lists,
+    );
+    assert.strictEqual(res3.title, "Review document. Please finish soon");
+    assert.strictEqual(res3.listId, "work-id");
   });
 
   it("extracts natural-language due dates and tags when AI omits due date", () => {
@@ -285,6 +340,95 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.strictEqual(resolved.priority, undefined);
     assert.strictEqual(resolved.address, undefined);
     assert.strictEqual(resolved.proximity, undefined);
+  });
+
+  it("applies defaultListName when no list is specified in text or AI", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy eggs" },
+      "Buy eggs",
+      [
+        { id: "list-1", title: "Personal" },
+        { id: "list-2", title: "Inbox" },
+      ],
+      new Date(),
+      "Inbox",
+    );
+
+    assert.strictEqual(resolved.title, "Buy eggs");
+    assert.strictEqual(resolved.listId, "list-2");
+  });
+
+  it("matches defaultListName case-insensitively with trimming", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy eggs" },
+      "Buy eggs",
+      [
+        { id: "list-1", title: "Personal" },
+        { id: "list-2", title: "Work Projects" },
+      ],
+      new Date(),
+      "  work projects  ",
+    );
+
+    assert.strictEqual(resolved.title, "Buy eggs");
+    assert.strictEqual(resolved.listId, "list-2");
+  });
+
+  it("prefers explicitly mentioned list over defaultListName", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy milk @Personal" },
+      "Buy milk @Personal",
+      [
+        { id: "list-1", title: "Personal" },
+        { id: "list-2", title: "Inbox" },
+      ],
+      new Date(),
+      "Inbox",
+    );
+
+    assert.strictEqual(resolved.title, "Buy milk");
+    assert.strictEqual(resolved.listId, "list-1");
+  });
+
+  it("falls back to undefined if defaultListName does not match any list", () => {
+    const resolved = resolveQuickAddReminder(
+      { title: "Buy eggs" },
+      "Buy eggs",
+      [{ id: "list-1", title: "Personal" }],
+      new Date(),
+      "NonExistentList",
+    );
+
+    assert.strictEqual(resolved.title, "Buy eggs");
+    assert.strictEqual(resolved.listId, undefined);
+  });
+
+  it("validates recurrence with weekdays and weekends frequencies", () => {
+    const aiWeekday = JSON.stringify({
+      title: "Daily standup",
+      dueDate: "2026-09-24",
+      recurrence: { frequency: "weekdays", interval: 1 },
+    });
+    const parsedWeekday = parseAIResponse(aiWeekday);
+    assert.deepStrictEqual(parsedWeekday.recurrence, { frequency: "weekdays", interval: 1 });
+
+    const aiWeekend = JSON.stringify({
+      title: "Weekly chores",
+      dueDate: "2026-09-26",
+      recurrence: { frequency: "weekends", interval: 1 },
+    });
+    const parsedWeekend = parseAIResponse(aiWeekend);
+    assert.deepStrictEqual(parsedWeekend.recurrence, { frequency: "weekends", interval: 1 });
+  });
+
+  it("clears invalid recurrence frequency in parseAIResponse", () => {
+    const aiInvalid = JSON.stringify({
+      title: "Task",
+      dueDate: "2026-09-24",
+      recurrence: { frequency: "invalid_freq", interval: 1 },
+    });
+    const parsed = parseAIResponse(aiInvalid);
+    assert.strictEqual(parsed.recurrence, undefined);
   });
 });
 

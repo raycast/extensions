@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Default list for Quick Add] - 2026-09-23
+
+- Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.
+
 ## [Create Reminder from Current Tab] - 2026-09-23
 
 - Add "Create Reminder from Current Tab" command to create reminders directly from the active browser tab.

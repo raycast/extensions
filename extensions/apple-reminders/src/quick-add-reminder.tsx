@@ -15,7 +15,12 @@ import { NewReminder } from "./create-reminder";
 import { Data } from "./hooks/useData";
 import { normalizePostCreateActions, STORAGE_KEY } from "./hooks/usePostCreateActions";
 import { runPostCreateActions } from "./post-create-shortcuts";
-import { ParsedQuickAddReminder, parseAIResponse, resolveQuickAddReminder } from "./quick-add-reminder-parser";
+import {
+  ParsedQuickAddReminder,
+  isValidFrequency,
+  parseAIResponse,
+  resolveQuickAddReminder,
+} from "./quick-add-reminder-parser";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
   try {
@@ -28,7 +33,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await addReminderFromText(props.arguments.text, props.arguments.notes);
+      await addReminderFromText(props.arguments.text, props.arguments.notes, preferences.defaultListName);
       return;
     }
 
@@ -78,10 +83,10 @@ Here's the JSON Object structure:
   "description": <Task description. A human-readable description of the task. Use relative dates when appropriate. Include the task name in single quotes. Always include the list (or "default list" if none is specified). Always include the priority level if specified. Always include the recurrence if specified.>,
   "priority": <Task priority. Only pick the value from this list: "low", "medium", "high". Use the "high" priority if the task text specifies a word such as "urgent", "important", or an exclamation mark.>,
   "tags": <Task tags as an array of strings, e.g. ["work", "urgent"]. Only include if specified in the task text.>,
-  "listId": <Task list ID. Pick it from the following table by finding the list name corresponding to an ID: ${lists}. Don't add a listId if the user hasn't specified a list name. Note that the user can prepend the "#" or "@" symbols to list names, for example, "#work" or "@work".>,
+  "listId": <Task list ID. Pick it from the following table by finding the list name corresponding to an ID: ${lists}. Don't add a listId if the user hasn't specified a list name. Note that the user can prepend the "#" or "@" symbols to list names or use phrases like "in the <list> list", for example, "#work", "@work", or "in Work list". Words with "#" that do not match any list name (e.g. "#urgent") are tags and should be placed in "tags">,
   "dueDate": <Task due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. Never use dates before ${today} unless the specific month/day/year is provided. If the user includes a time before ${currentTime} and no date, assume they mean tomorrow>,
   "recurrence": {
-    "frequency": <Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".>,
+    "frequency": <Recurrence frequency. Only pick the value from this list: "daily", "weekdays", "weekends", "weekly", "monthly", "yearly".>,
     "interval": <Recurrence interval. An integer greater than 0 that specifies how often a pattern repeats. If a recurrence frequency is "weekly" rule and the interval is 1, then the pattern repeats every week. If a recurrence frequency is "monthly" rule and the interval is 3, then the pattern repeats every 3 months.>,
     "endDate": <Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.>
   },
@@ -134,14 +139,14 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
     try {
       const { description: aiDescription, ...newReminder } = await askAI(prompt);
       description = aiDescription;
-      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
+      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists, now, preferences.defaultListName);
 
       if (newReminder.dueDate && resolvedReminder.dueDate?.includes("T")) {
         resolvedReminder.dueDate = applyAiLocalTimezone(resolvedReminder.dueDate);
       }
     } catch (error) {
       console.log(error);
-      await addReminderFromText(inputText, props.arguments.notes);
+      await addReminderFromText(inputText, props.arguments.notes, preferences.defaultListName);
       return;
     }
 
@@ -186,9 +191,9 @@ async function askAI(prompt: string): Promise<ParsedQuickAddReminder> {
   throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
 }
 
-async function addReminderFromText(text: string, notes?: string) {
+async function addReminderFromText(text: string, notes?: string, defaultListName?: string) {
   const data: Data = await getData();
-  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists);
+  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists, new Date(), defaultListName);
   const reminder = toNewReminder(resolvedReminder, notes);
 
   await createReminder(reminder);
@@ -216,11 +221,19 @@ function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewRemin
     tags: parsed.tags && parsed.tags.length > 0 ? parsed.tags : undefined,
     address: parsed.address || undefined,
     proximity: parsed.proximity || undefined,
-    radius: parsed.radius || undefined,
+    radius: typeof parsed.radius === "number" && !isNaN(parsed.radius) && parsed.radius > 0 ? parsed.radius : undefined,
   };
 
-  if (parsed.recurrence) {
-    reminder.recurrence = parsed.recurrence as NewReminder["recurrence"];
+  if (parsed.recurrence && typeof parsed.recurrence === "object" && isValidFrequency(parsed.recurrence.frequency)) {
+    const rawInterval = parsed.recurrence.interval;
+    const interval =
+      typeof rawInterval === "number" && Number.isInteger(rawInterval) && rawInterval > 0 ? rawInterval : 1;
+
+    reminder.recurrence = {
+      frequency: parsed.recurrence.frequency,
+      interval,
+      endDate: parsed.recurrence.endDate || undefined,
+    };
   }
 
   return reminder;
