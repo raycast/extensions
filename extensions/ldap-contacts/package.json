@@ -118,5 +118,8 @@
     "lint": "ray lint",
     "test": "tsc -p tsconfig.test.json && node --test dist-tests/tests/*.test.js",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
