@@ -26,22 +26,24 @@ export const CHROMIUM_BROWSERS = [
 
 export const ALL_SUPPORTED_BROWSERS = [...WEBKIT_BROWSERS, ...CHROMIUM_BROWSERS] as const;
 
-export const TAB_DELIMITER = "\n---RAYCAST_TAB_SEPARATOR---\n";
+export const TAB_DELIMITER = "---RAYCAST_TAB_SEPARATOR---";
 
 export function getTabAppleScript(browserName: string): string {
   if (WEBKIT_BROWSERS.includes(browserName as (typeof WEBKIT_BROWSERS)[number])) {
     return `tell application "${browserName}"
       if (count of windows) > 0 then
-        set currentTab to current tab of front window
-        return (name of currentTab) & "${TAB_DELIMITER}" & (URL of currentTab)
+        tell front window
+          return (get name of current tab) & "${TAB_DELIMITER}" & (get URL of current tab)
+        end tell
       end if
     end tell`;
   }
 
   return `tell application "${browserName}"
     if (count of windows) > 0 then
-      set currentTab to active tab of front window
-      return (title of currentTab) & "${TAB_DELIMITER}" & (URL of currentTab)
+      tell front window
+        return (get title of active tab) & "${TAB_DELIMITER}" & (get URL of active tab)
+      end tell
     end if
   end tell`;
 }

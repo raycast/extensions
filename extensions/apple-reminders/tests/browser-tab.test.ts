@@ -15,9 +15,9 @@ describe("Browser Tab Extraction Helpers", () => {
     for (const browser of WEBKIT_BROWSERS) {
       const script = getTabAppleScript(browser);
       assert.ok(script.includes(`tell application "${browser}"`));
-      assert.ok(script.includes("current tab of front window"));
-      assert.ok(script.includes("name of currentTab"));
-      assert.ok(script.includes("URL of currentTab"));
+      assert.ok(script.includes("tell front window"));
+      assert.ok(script.includes("get name of current tab"));
+      assert.ok(script.includes("get URL of current tab"));
     }
   });
 
@@ -25,9 +25,9 @@ describe("Browser Tab Extraction Helpers", () => {
     for (const browser of CHROMIUM_BROWSERS) {
       const script = getTabAppleScript(browser);
       assert.ok(script.includes(`tell application "${browser}"`));
-      assert.ok(script.includes("active tab of front window"));
-      assert.ok(script.includes("title of currentTab"));
-      assert.ok(script.includes("URL of currentTab"));
+      assert.ok(script.includes("tell front window"));
+      assert.ok(script.includes("get title of active tab"));
+      assert.ok(script.includes("get URL of active tab"));
     }
   });
 
