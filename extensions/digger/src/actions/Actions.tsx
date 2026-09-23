@@ -1,10 +1,10 @@
-import { ActionPanel } from "@raycast/api";
 import { ReactNode } from "react";
+import { ActionPanel } from "@raycast/api";
 import { DiggerResult } from "../types";
 import { BrowserActions } from "./BrowserActions";
+import { CacheActions } from "./CacheActions";
 import { CopyActions } from "./CopyActions";
 import { ExternalActions } from "./ExternalActions";
-import { CacheActions } from "./CacheActions";
 
 interface ActionsProps {
   data: DiggerResult;
@@ -14,13 +14,17 @@ interface ActionsProps {
 }
 
 export function Actions({ data, url, onRefresh, sectionActions }: ActionsProps) {
+  const section = sectionActions && <ActionPanel.Section title="View">{sectionActions}</ActionPanel.Section>;
   return (
     <ActionPanel>
+      {/* Browser stays first, so a section's own actions are APPENDED and the
+          default action of every section is unchanged. Section actions that
+          deserve one-keystroke access carry their own shortcut instead. */}
       <ActionPanel.Section title="Browser">
         <BrowserActions url={url} />
       </ActionPanel.Section>
 
-      {sectionActions && <ActionPanel.Section title="View">{sectionActions}</ActionPanel.Section>}
+      {section}
 
       <ActionPanel.Section title="Copy">
         <CopyActions data={data} url={url} />
@@ -30,7 +34,7 @@ export function Actions({ data, url, onRefresh, sectionActions }: ActionsProps) 
         <ExternalActions url={url} />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Cache">
+      <ActionPanel.Section>
         <CacheActions onRefresh={onRefresh} />
       </ActionPanel.Section>
     </ActionPanel>

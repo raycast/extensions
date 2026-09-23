@@ -3,22 +3,26 @@
  * abort propagates into the winget process, so fast scrolling cannot queue
  * orphaned `winget show` runs) and a small sequential prefetch ring around the
  * selection.
+ *
+ * Cache hits resolve synchronously during render and fetch results are keyed
+ * to the row they were fetched for — a selection change can never paint one
+ * row with another row's details, not even for a single frame.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { showPackageDetails } from "../cli/commands";
 import { type WingetPackageDetails, type WingetSource } from "../cli/types";
 
 const PREFETCH_RADIUS = 5;
 
-const detailsCache = new Map<string, WingetPackageDetails | null>();
+const detailsCache = new Map<string, WingetPackageDetails>();
 
 function cacheKey(id: string, source: WingetSource): string {
   return `${source}|${id}`;
 }
 
-function getCachedDetails(id: string, source: WingetSource): WingetPackageDetails | null | undefined {
+function getCachedDetails(id: string, source: WingetSource): WingetPackageDetails | undefined {
   return detailsCache.get(cacheKey(id, source));
 }
 
@@ -33,40 +37,33 @@ interface UseDetailsResult {
 }
 
 function useDetails(selected: DetailTarget | undefined, neighbors: DetailTarget[] = []): UseDetailsResult {
-  const [details, setDetails] = useState<WingetPackageDetails | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  const generationRef = useRef(0);
+  // Fetch outcomes the cache cannot answer (winget returned nothing, or the
+  // fetch failed); keyed so a completion for a previous selection is ignored.
+  const [fetched, setFetched] = useState<{ key: string; details?: WingetPackageDetails }>();
+
+  const key = selected ? cacheKey(selected.id, selected.source) : null;
+  const cached = key ? detailsCache.get(key) : undefined;
 
   useEffect(() => {
-    const generation = ++generationRef.current;
-    const controller = new AbortController();
-
     if (!selected) {
-      setDetails(undefined);
-      setIsLoading(false);
       return;
     }
+    const controller = new AbortController();
+    const targetKey = cacheKey(selected.id, selected.source);
 
-    const cached = detailsCache.get(cacheKey(selected.id, selected.source));
-    if (cached !== undefined) {
-      setDetails(cached ?? undefined);
-      setIsLoading(false);
-    } else {
-      setDetails(undefined);
-      setIsLoading(true);
+    if (!detailsCache.has(targetKey)) {
       showPackageDetails(selected.id, selected.source, controller.signal)
         .then((result) => {
           if (result !== null) {
-            detailsCache.set(cacheKey(selected.id, selected.source), result);
+            detailsCache.set(targetKey, result);
           }
-          if (generationRef.current === generation) {
-            setDetails(result ?? undefined);
-            setIsLoading(false);
+          if (!controller.signal.aborted) {
+            setFetched({ key: targetKey, details: result ?? undefined });
           }
         })
         .catch(() => {
-          if (generationRef.current === generation) {
-            setIsLoading(false);
+          if (!controller.signal.aborted) {
+            setFetched({ key: targetKey });
           }
         });
     }
@@ -97,7 +94,10 @@ function useDetails(selected: DetailTarget | undefined, neighbors: DetailTarget[
     };
   }, [selected?.id, selected?.source]);
 
-  return { details, isLoading };
+  return {
+    details: cached ?? (fetched?.key === key ? fetched.details : undefined),
+    isLoading: key !== null && cached === undefined && fetched?.key !== key,
+  };
 }
 
 export { getCachedDetails, useDetails, type DetailTarget };

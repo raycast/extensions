@@ -29,7 +29,18 @@ import { closeSync, fstatSync, openSync, readSync } from "node:fs";
 import {
   CancelledError,
   COMMAND_REQUIRES_ADMIN,
+  CTRL_SIGNAL_RECEIVED,
+  DOWNLOAD_FAILED,
   getExitCodeMessage,
+  INSTALL_CANCELLED_BY_USER,
+  INSTALL_DISK_FULL,
+  INSTALL_FILE_IN_USE,
+  INSTALL_INSTALL_IN_PROGRESS,
+  INSTALL_INSUFFICIENT_MEMORY,
+  INSTALL_NO_NETWORK,
+  INSTALL_PACKAGE_IN_USE,
+  INSTALL_PACKAGE_IN_USE_BY_APPLICATION,
+  INSTALL_REBOOT_REQUIRED_FOR_INSTALL,
   NO_APPLICATIONS_FOUND,
   PORTABLE_UNINSTALL_FAILED,
   toUnsignedHResult,
@@ -47,6 +58,7 @@ import {
 import { WingetProgressDetector } from "./progress";
 import { runWinget, runWingetElevated, UAC_DECLINED_EXIT_CODE, withQuerySlot } from "./spawn";
 import {
+  type ExecutorResult,
   type WingetExecutorOptions,
   type WingetInstalledPackage,
   type WingetOperationResult,
@@ -218,7 +230,7 @@ async function executeOperation(args: string[], options: WingetExecutorOptions =
     const execResult = await runWinget(args, {
       signal: options.signal,
       timeout: options.timeout,
-      staleWatchdog: true,
+      onSilence: (silentMinutes) => options.onProgress?.({ type: "stalled", silentMinutes }),
       onSpawn: options.onSpawn,
       onStdout: (chunk) => detector.feed(chunk),
       onStderr: (chunk) => detector.feed(chunk),
@@ -255,6 +267,29 @@ async function isWingetAvailable(): Promise<boolean> {
 }
 
 /**
+ * A zero-row parse plus a nonzero exit means the query itself failed (source
+ * update error, cache corruption) — not that the table was empty. Throw so
+ * callers keep their previous data instead of caching the failure as absence;
+ * same contract as the showPackage* transient-failure guards.
+ * NO_APPLICATIONS_FOUND is winget's own "nothing matched" answer, the one
+ * legitimate empty-table exit (empty `pin list` and no-upgrades exit 0).
+ */
+function ensureTableQuerySucceeded<T>(
+  result: ExecutorResult,
+  parsed: TableParseResult<T>,
+  fallbackMessage: string,
+): TableParseResult<T> {
+  if (
+    parsed.items.length === 0 &&
+    result.exitCode !== 0 &&
+    toUnsignedHResult(result.exitCode) !== NO_APPLICATIONS_FOUND
+  ) {
+    throw new Error(getExitCodeMessage(result.exitCode) ?? fallbackMessage);
+  }
+  return parsed;
+}
+
+/**
  * The full catalog. Requires an explicit empty query — winget lists the whole
  * source only for `search -q ""` (and cmd.exe would drop the empty arg, which
  * is one reason we spawn winget directly).
@@ -265,7 +300,7 @@ async function searchAllPackages(signal?: AbortSignal): Promise<TableParseResult
       timeout: CATALOG_TIMEOUT_MS,
       signal,
     });
-    return parseSearchResults(result.stdout);
+    return ensureTableQuerySucceeded(result, parseSearchResults(result.stdout), "Failed to load the package catalog");
   });
 }
 
@@ -275,7 +310,11 @@ async function listInstalledPackages(signal?: AbortSignal): Promise<TableParseRe
       timeout: QUERY_TIMEOUT_MS,
       signal,
     });
-    return parseInstalledPackages(result.stdout);
+    return ensureTableQuerySucceeded(
+      result,
+      parseInstalledPackages(result.stdout),
+      "Failed to list installed packages",
+    );
   });
 }
 
@@ -285,7 +324,7 @@ async function listUpgradePackages(signal?: AbortSignal): Promise<TableParseResu
       timeout: QUERY_TIMEOUT_MS,
       signal,
     });
-    return parseUpgradePackages(result.stdout);
+    return ensureTableQuerySucceeded(result, parseUpgradePackages(result.stdout), "Failed to list available updates");
   });
 }
 
@@ -295,7 +334,7 @@ async function listPinnedPackages(signal?: AbortSignal): Promise<TableParseResul
       timeout: QUERY_TIMEOUT_MS,
       signal,
     });
-    return parsePinnedPackages(result.stdout);
+    return ensureTableQuerySucceeded(result, parsePinnedPackages(result.stdout), "Failed to list pinned packages");
   });
 }
 
@@ -334,12 +373,17 @@ async function showPackageDetails(
   id: string,
   source: WingetSource,
   signal?: AbortSignal,
+  version?: string,
 ): Promise<WingetPackageDetails | null> {
   return withQuerySlot(async () => {
-    const result = await runWinget(withSource(["show", ...EXACT_ID_FLAGS, id, ...BASE_FLAGS], source), {
-      timeout: DETAILS_TIMEOUT_MS,
-      signal,
-    });
+    const versionFlags = version ? ["--version", version] : [];
+    const result = await runWinget(
+      withSource(["show", ...EXACT_ID_FLAGS, id, ...versionFlags, ...BASE_FLAGS], source),
+      {
+        timeout: DETAILS_TIMEOUT_MS,
+        signal,
+      },
+    );
     const details = parsePackageDetails(result.stdout);
     if (details === null && result.exitCode !== 0 && toUnsignedHResult(result.exitCode) !== NO_APPLICATIONS_FOUND) {
       // Transient failure (network/source), not a definitive "no such
@@ -440,66 +484,130 @@ function delay(ms: number, signal?: AbortSignal): Promise<"elapsed" | "aborted">
   });
 }
 
-/**
- * Retry once when the installer failed only because the Windows Installer
- * mutex was busy — a transient collision, not a package problem. The wait
- * gives the other installation time to finish; a cancel during the wait
- * returns the original failure immediately.
- */
-async function executeWithBusyRetry(
-  run: () => Promise<WingetOperationResult>,
-  options: WingetExecutorOptions,
-): Promise<WingetOperationResult> {
-  const result = await run();
-  if (!isInstallerBusyFailure(result)) {
-    return result;
-  }
-  if ((await delay(INSTALLER_BUSY_RETRY_DELAY_MS, options.signal)) === "aborted") {
-    return result;
-  }
-  return run();
+/** One winget invocation: argv, plus whether winget itself runs elevated. */
+interface Attempt {
+  args: string[];
+  elevated?: boolean;
 }
 
 /**
- * Last-resort retry for the requires-administrator class: relaunch winget
- * itself elevated. The UAC prompt is the confirmation — no dialog precedes
- * it — and a decline surfaces as a normal per-package failure, so bulk runs
- * carry on with the next package. `elevatedArgs` is a thunk resolved after
- * `run` settles, so retry chains can elevate with the arguments of whichever
- * attempt ran last (e.g. upgrade's --force retry).
+ * One failure class and its remedy. Rules are consulted in order after every
+ * failed attempt; the first unspent match yields the next attempt, and each
+ * rule fires at most once per operation. `disclose` annotates the eventual
+ * success so overrides (e.g. --force) stay visible to the user.
  */
-async function executeWithElevatedFallback(
-  run: () => Promise<WingetOperationResult>,
-  elevatedArgs: () => string[],
-  options: WingetExecutorOptions,
-): Promise<WingetOperationResult> {
-  const result = await run();
-  if (!isElevationFailure(result)) {
-    return result;
-  }
-  return executeElevatedOperation(elevatedArgs(), options);
+interface RecoveryRule {
+  matches(result: WingetOperationResult): boolean;
+  /** Wait before retrying (cancellable; a cancelled wait keeps the failure). */
+  waitMs?: number;
+  next(current: Attempt): Attempt;
+  disclose?: string;
 }
 
 /**
- * Run an install/repair invocation silent-first; when it fails with the
- * requires-administrator class, retry once without --silent so the installer
- * can raise its own UAC prompt, then fall back to relaunching winget itself
- * elevated (machine-scope MSIX packages accept nothing less).
+ * The recovery engine: execute, and while the failure matches an unspent
+ * rule, escalate to the rule's next attempt. Attempt state threads through
+ * rules, so a later retry keeps what an earlier rule established — flags
+ * (an elevated retry after --force keeps --force) and PRIVILEGE (a retry
+ * after an elevated attempt stays elevated; the runner suspends cancellation
+ * for the rest of the package once elevation starts, so a demoted attempt
+ * would run uncancellable). Elevated attempts have no observable output —
+ * their result comes from the exit code alone.
  */
-async function executeWithElevationRetry(
-  argsFor: (flags: string[]) => string[],
-  silentFlags: string[],
+async function executeWithRecovery(
+  first: Attempt,
+  rules: RecoveryRule[],
   options: WingetExecutorOptions,
 ): Promise<WingetOperationResult> {
-  const result = await executeOperation(argsFor(silentFlags), options);
-  if (!isElevationFailure(result)) {
-    return result;
+  const run = (attempt: Attempt) =>
+    attempt.elevated ? executeElevatedOperation(attempt.args, options) : executeOperation(attempt.args, options);
+
+  const spent = new Set<RecoveryRule>();
+  const disclosures: string[] = [];
+  let attempt = first;
+  let result = await run(attempt);
+  for (;;) {
+    if (result.success) {
+      if (disclosures.length === 0 || result.noop) {
+        return result;
+      }
+      const note = disclosures.join("; ");
+      return {
+        ...result,
+        message: result.message ? `${result.message} (${note})` : note.charAt(0).toUpperCase() + note.slice(1),
+      };
+    }
+    if (result.cancelled) {
+      return result;
+    }
+    const rule = rules.find((r) => !spent.has(r) && r.matches(result));
+    if (!rule) {
+      return result;
+    }
+    spent.add(rule);
+    if (rule.waitMs && (await delay(rule.waitMs, options.signal)) === "aborted") {
+      return result;
+    }
+    if (rule.disclose) {
+      disclosures.push(rule.disclose);
+    }
+    attempt = rule.next(attempt);
+    result = await run(attempt);
   }
-  return executeWithElevatedFallback(
-    () => executeOperation(argsFor(ELEVATION_RETRY_FLAGS), options),
-    () => argsFor(silentFlags),
-    options,
-  );
+}
+
+// The failure classes and their remedies. Adding a class = one classifier
+// predicate + one rule here + the rule's slot in the operations' policies.
+
+/**
+ * ERROR_INSTALL_ALREADY_RUNNING (1618): the Windows Installer mutex was held
+ * by another installation — a transient collision, not a package problem.
+ * Wait it out and retry the same attempt.
+ */
+const installerBusyRule: RecoveryRule = {
+  matches: isInstallerBusyFailure,
+  waitMs: INSTALLER_BUSY_RETRY_DELAY_MS,
+  next: (current) => current,
+};
+
+/**
+ * Silent mode suppressed the installer's own UAC prompt (the root cause
+ * behind upgrade's no---silent policy): retry without --silent.
+ */
+function unsilencedRetryRule(argsFor: (flags: string[]) => string[]): RecoveryRule {
+  return {
+    matches: isElevationFailure,
+    next: (current) => ({ ...current, args: argsFor(ELEVATION_RETRY_FLAGS) }),
+  };
+}
+
+/**
+ * Nothing unelevated can install this package (machine-scope MSIX): relaunch
+ * winget itself elevated — the UAC prompt is the confirmation, and a decline
+ * is a normal per-package failure so bulk runs carry on. `args` overrides the
+ * attempt (install/repair re-elevate their SILENT argv: the installer needs
+ * no prompt of its own once winget is elevated); by default the current
+ * attempt's argv is kept (upgrade's --force retry must survive elevation).
+ */
+function elevatedRetryRule(args?: () => string[]): RecoveryRule {
+  return {
+    matches: isElevationFailure,
+    next: (current) => ({ args: args?.() ?? current.args, elevated: true }),
+  };
+}
+
+/**
+ * A modified portable package refuses removal during upgrade; winget's
+ * printed remedy is --force (an upgrade replaces the package either way).
+ * Uninstall deliberately has no such rule — forced removal deletes the
+ * user's modifications, so it runs only after an explicit confirmation.
+ */
+function forceRetryRule(argsFor: (extra: string[]) => string[]): RecoveryRule {
+  return {
+    matches: isModifiedPortableFailure,
+    next: (current) => ({ ...current, args: argsFor(["--force"]) }),
+    disclose: "modified portable package, used --force",
+  };
 }
 
 async function installPackage(
@@ -507,13 +615,10 @@ async function installPackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  return executeWithBusyRetry(
-    () =>
-      executeWithElevationRetry(
-        (flags) => withSource(["install", ...EXACT_ID_FLAGS, id, ...flags], source),
-        INSTALL_FLAGS,
-        options,
-      ),
+  const argsFor = (flags: string[]) => withSource(["install", ...EXACT_ID_FLAGS, id, ...flags], source);
+  return executeWithRecovery(
+    { args: argsFor(INSTALL_FLAGS) },
+    [installerBusyRule, unsilencedRetryRule(argsFor), elevatedRetryRule(() => argsFor(INSTALL_FLAGS))],
     options,
   );
 }
@@ -529,13 +634,11 @@ async function installPackageVersion(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  const result = await executeWithBusyRetry(
-    () =>
-      executeWithElevationRetry(
-        (flags) => withSource(["install", ...EXACT_ID_FLAGS, id, "--version", version, ...flags], source),
-        INSTALL_FLAGS,
-        options,
-      ),
+  const argsFor = (flags: string[]) =>
+    withSource(["install", ...EXACT_ID_FLAGS, id, "--version", version, ...flags], source);
+  const result = await executeWithRecovery(
+    { args: argsFor(INSTALL_FLAGS) },
+    [installerBusyRule, unsilencedRetryRule(argsFor), elevatedRetryRule(() => argsFor(INSTALL_FLAGS))],
     options,
   );
   if (!result.success) {
@@ -563,30 +666,27 @@ async function installPackageVersion(
   return result;
 }
 
-/**
- * Upgrade-specific exit-code remap: with a `--source` filter, winget reports
- * an installed-but-up-to-date package as NO_APPLICATIONS_FOUND ("No installed
- * package found matching input criteria") instead of UPDATE_NOT_APPLICABLE —
- * verified live (winget 1.28: 0x8A15002B without --source, 0x8A150014 with).
- * For an upgrade that is a no-op, not a failure. (For uninstall the same code
- * genuinely means "not installed" and stays a failure.)
- */
-function remapUpgradeNotFound(result: WingetOperationResult): WingetOperationResult {
+/** NO_APPLICATIONS_FOUND as a no-op — the meaning differs per operation. */
+function remapNotFoundAsNoop(result: WingetOperationResult, message: string): WingetOperationResult {
   if (
     !result.success &&
     !result.cancelled &&
     result.exitCode !== undefined &&
     toUnsignedHResult(result.exitCode) === NO_APPLICATIONS_FOUND
   ) {
-    return {
-      ...result,
-      success: true,
-      noop: true,
-      message: "No applicable update",
-      errorCode: undefined,
-    };
+    return { ...result, success: true, noop: true, message, errorCode: undefined };
   }
   return result;
+}
+
+/**
+ * Upgrade-specific: with a `--source` filter, winget reports an
+ * installed-but-up-to-date package as NO_APPLICATIONS_FOUND ("No installed
+ * package found matching input criteria") instead of UPDATE_NOT_APPLICABLE —
+ * verified live (winget 1.28: 0x8A15002B without --source, 0x8A150014 with).
+ */
+function remapUpgradeNotFound(result: WingetOperationResult): WingetOperationResult {
+  return remapNotFoundAsNoop(result, "No applicable update");
 }
 
 /**
@@ -606,32 +706,37 @@ function isModifiedPortableFailure(result: WingetOperationResult): boolean {
 }
 
 /**
- * Run an upgrade invocation normally; when it fails because a portable
- * package was modified after install, retry once with --force (the remedy
- * winget itself prints — an upgrade replaces the package either way). The
- * success message discloses the override. Uninstall deliberately does NOT
- * auto-force: forced removal deletes the user's modifications, so it runs
- * only after the runner's explicit confirmation prompt.
+ * Failure classes caused by the environment or the user's own choice
+ * (declines, busy installers, disk/memory/network, reboot pending), not by
+ * the offered installer. A later attempt can succeed with the SAME version,
+ * so these must never produce a failed-upgrade marker.
  */
-async function executeWithForceRetry(
-  argsFor: (extra: string[]) => string[],
-  options: WingetExecutorOptions,
-): Promise<WingetOperationResult> {
-  const result = await executeOperation(argsFor([]), options);
-  if (!isModifiedPortableFailure(result)) {
-    return result;
+const RETRYABLE_FAILURE_CODES: ReadonlySet<number> = new Set([
+  CTRL_SIGNAL_RECEIVED,
+  INSTALL_CANCELLED_BY_USER,
+  COMMAND_REQUIRES_ADMIN,
+  INSTALL_PACKAGE_IN_USE,
+  INSTALL_INSTALL_IN_PROGRESS,
+  INSTALL_FILE_IN_USE,
+  INSTALL_PACKAGE_IN_USE_BY_APPLICATION,
+  INSTALL_DISK_FULL,
+  INSTALL_INSUFFICIENT_MEMORY,
+  INSTALL_NO_NETWORK,
+  DOWNLOAD_FAILED,
+  INSTALL_REBOOT_REQUIRED_FOR_INSTALL,
+]);
+
+/** True when the same operation may succeed later without a version change. */
+function isRetryableFailure(result: WingetOperationResult): boolean {
+  if (result.cancelled || result.exitCode === UAC_DECLINED_EXIT_CODE) {
+    return true;
   }
-  const retried = await executeOperation(argsFor(["--force"]), options);
-  if (retried.success && !retried.noop) {
-    // Append rather than replace: a successful retry can carry its own
-    // message (e.g. "Restart your PC to finish") that must stay visible.
-    const disclosure = "modified portable package, used --force";
-    return {
-      ...retried,
-      message: retried.message ? `${retried.message} (${disclosure})` : "Modified portable package, used --force",
-    };
+  if (result.exitCode !== undefined && RETRYABLE_FAILURE_CODES.has(toUnsignedHResult(result.exitCode))) {
+    return true;
   }
-  return retried;
+  // Installer-level busy states surface as embedded codes or as the curated
+  // app-in-use message (silent installers only disclose it in their logs).
+  return isInstallerBusyFailure(result) || /^App in use/.test(result.message ?? "");
 }
 
 async function upgradePackage(
@@ -639,21 +744,25 @@ async function upgradePackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  // Track the last attempt's arguments so an elevated retry keeps the
-  // --force flag when the force retry is what hit the administrator wall.
-  let lastAttemptArgs = withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS], source);
   const argsFor = (extra: string[]) =>
-    (lastAttemptArgs = withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source));
-  const result = await executeWithBusyRetry(
-    () =>
-      executeWithElevatedFallback(
-        () => executeWithForceRetry(argsFor, options),
-        () => lastAttemptArgs,
-        options,
-      ),
+    withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source);
+  const result = await executeWithRecovery(
+    { args: argsFor([]) },
+    [installerBusyRule, forceRetryRule(argsFor), elevatedRetryRule()],
     options,
   );
   return remapUpgradeNotFound(result);
+}
+
+/**
+ * Uninstall-specific exit-code remap: NO_APPLICATIONS_FOUND means winget has
+ * no such installed package — the index row that offered the uninstall was a
+ * ghost (the package was removed outside this extension, or a prior uninstall
+ * finished without the index catching up). Not a failure: report a no-op so
+ * the optimistic patch drops the row and the index self-heals.
+ */
+function remapUninstallNotFound(result: WingetOperationResult): WingetOperationResult {
+  return remapNotFoundAsNoop(result, "Not installed");
 }
 
 /**
@@ -676,15 +785,8 @@ async function uninstallPackage(
     ["uninstall", ...EXACT_ID_FLAGS, id, ...versionFlags, ...UNINSTALL_FLAGS, ...forceFlags],
     source,
   );
-  return executeWithBusyRetry(
-    () =>
-      executeWithElevatedFallback(
-        () => executeOperation(args, options),
-        () => args,
-        options,
-      ),
-    options,
-  );
+  const result = await executeWithRecovery({ args }, [installerBusyRule, elevatedRetryRule()], options);
+  return remapUninstallNotFound(result);
 }
 
 async function repairPackage(
@@ -692,13 +794,10 @@ async function repairPackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  return executeWithBusyRetry(
-    () =>
-      executeWithElevationRetry(
-        (flags) => withSource(["repair", ...EXACT_ID_FLAGS, id, ...flags], source),
-        REPAIR_FLAGS,
-        options,
-      ),
+  const argsFor = (flags: string[]) => withSource(["repair", ...EXACT_ID_FLAGS, id, ...flags], source);
+  return executeWithRecovery(
+    { args: argsFor(REPAIR_FLAGS) },
+    [installerBusyRule, unsilencedRetryRule(argsFor), elevatedRetryRule(() => argsFor(REPAIR_FLAGS))],
     options,
   );
 }
@@ -758,9 +857,12 @@ async function importPackages(
 }
 
 export {
+  ensureTableQuerySucceeded,
   isElevationFailure,
   isInstallerBusyFailure,
   isModifiedPortableFailure,
+  isRetryableFailure,
+  remapUninstallNotFound,
   remapUpgradeNotFound,
   downloadInstaller,
   exportPackages,

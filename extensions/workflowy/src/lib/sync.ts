@@ -33,6 +33,7 @@ export function syncCache(onEvent?: (event: SyncProgressEvent) => void): Promise
         NODE_NO_WARNINGS: "1",
       },
       stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
     });
 
     let stderr = "";

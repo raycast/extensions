@@ -94,15 +94,34 @@ const BYPASS_METHODS: BypassMethod[] = [
 ];
 
 /**
- * Tries each bypass method in turn, returning the first that yields content.
+ * Validates a fetched candidate before the waterfall accepts it.
+ *
+ * A bypass method returning HTTP 200 does NOT mean it beat the paywall: sites answer a
+ * crawler UA with a challenge page, or the very same truncated preview, at 200. Without
+ * this check the first such response would win and suppress every later method — so the
+ * caller passes a validator that parses the candidate and judges it (e.g. "meaningfully
+ * longer than the preview we already have"). Returning a non-null value ACCEPTS the
+ * candidate and hands that value back to the caller (typically the parsed article, so it
+ * is not parsed a second time); returning null REJECTS it and the waterfall continues.
+ *
+ * Memory: the validator is called once per candidate and its return is the only thing
+ * retained. A rejected candidate's parse falls out of scope before the next fetch begins,
+ * so at most one parsed DOM is live at a time — parsing stays serial, never stacked.
+ */
+export type BypassValidator<T> = (html: string, source: PaywallBypassSource) => T | null;
+
+/**
+ * Tries each bypass method in turn, returning the first whose content the validator accepts
+ * (or, with no validator, the first that yields any content).
  *
  * This can run for a while — every method is a network fetch, and the archives are
  * slow — so `onProgress` reports which one is in flight rather than leaving the UI blank.
  */
-export async function tryBypassPaywall(
+export async function tryBypassPaywall<T = never>(
   url: string,
   onProgress?: (status: string) => void,
-): Promise<PaywallHopperResult> {
+  validate?: BypassValidator<T>,
+): Promise<PaywallHopperResult & { validated?: T }> {
   paywallLog.log("hopper:start", { url });
 
   const failures: string[] = [];
@@ -114,13 +133,26 @@ export async function tryBypassPaywall(
     const result = await method.attempt(url);
 
     if (result.success && result.html) {
+      // A 200 is not a win until the content clears the caller's bar. Reject and keep going
+      // otherwise, so a stalled first method can't shadow a working later one.
+      const validated = validate ? validate(result.html, method.source) : undefined;
+      if (validate && validated === null) {
+        paywallLog.log("hopper:rejected", {
+          url,
+          method: method.source,
+          contentLength: result.html.length,
+        });
+        failures.push(`${method.source}: rejected (no usable content)`);
+        continue;
+      }
+
       paywallLog.log("hopper:success", {
         url,
         method: method.source,
         contentLength: result.html.length,
         archiveUrl: result.archiveUrl,
       });
-      return { ...result, source: method.source };
+      return { ...result, source: method.source, validated: validated ?? undefined };
     }
 
     failures.push(`${method.source}: ${result.error ?? "no content"}`);

@@ -3,7 +3,6 @@
  * MIT License
  */
 import querystring from "querystring";
-import { request, ProxyAgent } from "undici";
 import { TranslateOption, TranslateResponse } from "./types";
 import { isSupported, getISOCode } from "./languages";
 import { tokenGenerator } from "./tokenGenerator";
@@ -45,7 +44,7 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // URL & query string required by Google Translate.
     let baseUrl = "https://translate.google.com/translate_a/single";
     let data: any = {
-        client: "gtx",
+        client: "dict-chrome-ex",
         sl: options.from,
         tl: options.to,
         hl: options.to,
@@ -63,32 +62,37 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // Append query string to the request URL.
     let url = `${baseUrl}?${querystring.stringify(data)}`;
 
-    let requestOptions: any;
     let requestUrl = url;
+    let method: "GET" | "POST" = "GET";
+    let requestBody: string | undefined;
+    const headers: Record<string, string> = {};
     // If request URL is greater than 2048 characters, use POST method.
     if (url.length > 2048) {
         delete data.q;
         requestUrl = `${baseUrl}?${querystring.stringify(data)}`;
-        requestOptions = {
-            method: "POST",
-            body: new URLSearchParams({ q: text }).toString(),
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            },
-        };
-        if (options.proxy) {
-            requestOptions.dispatcher = new ProxyAgent(options.proxy);
-        }
-    }
-    else {
-        if (options.proxy) {
-            requestOptions = { dispatcher: new ProxyAgent(options.proxy) };
-        }
+        method = "POST";
+        requestBody = new URLSearchParams({ q: text }).toString();
+        headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
     }
 
-    // Request translation from Google Translate.
-    let response = await request(requestUrl, requestOptions);
-    let body: any = await response.body.json();
+    // Use the platform's built-in fetch. undici is loaded lazily and only when a
+    // proxy is configured, so the common path never pulls it in.
+    let body: any;
+    if (options.proxy) {
+        // Global fetch stays the default; only the proxy path pulls in undici, and it
+        // uses undici's own request() (not an imported fetch) so a dispatcher can be set.
+        const { request, ProxyAgent } = await import("undici");
+        const response = await request(requestUrl, {
+            method,
+            body: requestBody,
+            headers,
+            dispatcher: new ProxyAgent(options.proxy),
+        });
+        body = await response.body.json();
+    } else {
+        const response = await fetch(requestUrl, { method, body: requestBody, headers });
+        body = await response.json();
+    }
 
     let result: TranslateResponse = {
         text: "",

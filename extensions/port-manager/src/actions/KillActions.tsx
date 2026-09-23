@@ -1,23 +1,26 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { ProcessInfo } from "../models/interfaces";
-import { KillSignal, killProcess } from "../utilities/killProcess";
+import { KillSignal, Survivor, killProcess, resolveKillSignal } from "../utilities/killProcess";
+import { isWindows } from "../utilities/platform";
 
 const preferences = getPreferenceValues<Preferences>();
 
 export default function KillActions(props: {
   process: ProcessInfo;
   onKilled?: () => Promise<void> | void;
+  onSurvived?: (survivor: Survivor) => Promise<void> | void;
   onError?: (err: unknown) => Promise<void> | void;
 }) {
-  if (preferences.killSignal === KillSignal.TERM || preferences.killSignal === KillSignal.KILL) {
+  if (isWindows || preferences.killSignal === KillSignal.TERM || preferences.killSignal === KillSignal.KILL) {
     return (
       <Action
         title="Kill"
         icon={Icon.ExclamationMark}
         onAction={async () =>
           await killProcess(props.process, {
-            killSignal: preferences.killSignal,
+            killSignal: resolveKillSignal(preferences.killSignal),
             onKilled: props.onKilled,
+            onSurvived: props.onSurvived,
             onError: props.onError,
           })
         }
@@ -26,13 +29,14 @@ export default function KillActions(props: {
   }
 
   return (
-    <ActionPanel.Submenu title="Kill" icon={Icon.ExclamationMark}>
+    <ActionPanel.Submenu title="Kill…" icon={Icon.ExclamationMark}>
       <Action
         title="With SIGTERM"
         onAction={async () =>
           await killProcess(props.process, {
             killSignal: KillSignal.TERM,
             onKilled: props.onKilled,
+            onSurvived: props.onSurvived,
             onError: props.onError,
           })
         }
@@ -43,6 +47,7 @@ export default function KillActions(props: {
           await killProcess(props.process, {
             killSignal: KillSignal.KILL,
             onKilled: props.onKilled,
+            onSurvived: props.onSurvived,
             onError: props.onError,
           })
         }

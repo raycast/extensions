@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "id": "work",
+      "name": "Work",
+      "links": [
+        { "title": "Gmail", "url": "https://mail.google.com" },
+        { "title": "Slack", "url": "https://slack.com" },
+        { "title": "Calendar", "url": "https://calendar.google.com" }
+      ]
+    },
+    {
+      "id": "dev",
+      "name": "Development",
+      "links": [
+        { "title": "GitHub", "url": "https://github.com" },
+        { "title": "Raycast Docs", "url": "https://developers.raycast.com" }
+      ]
+    },
+    {
+      "id": "read",
+      "name": "Reading",
+      "links": [
+        { "title": "Hacker News", "url": "https://news.ycombinator.com" },
+        { "title": "Raycast Blog", "url": "https://raycast.com/blog" }
+      ]
+    }
+  ]
+}

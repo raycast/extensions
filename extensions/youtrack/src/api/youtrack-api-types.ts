@@ -7,6 +7,7 @@ import type {
   issueWorkItemFields,
   userFields,
   commandListFields,
+  searchSuggestionsFields,
   commentFields,
 } from "./youtrack-api-fields";
 
@@ -18,6 +19,7 @@ export type WorkItemFields = typeof workItemFields;
 export type IssueWorkItemFields = typeof issueWorkItemFields;
 export type UserFields = typeof userFields;
 export type CommandListFields = typeof commandListFields;
+export type SearchSuggestionsFields = typeof searchSuggestionsFields;
 
 export type ReducedApiIssue = Pick<
   Issue,

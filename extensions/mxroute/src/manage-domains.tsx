@@ -21,6 +21,7 @@ import EmailForwarders from "./email-forwarders";
 import Advanced from "./advanced";
 import DNSInfo from "./dns-info";
 import { Domain, DomainVerificationKey } from "./types";
+import SpamFilters from "./spam-filters";
 
 const { server } = getPreferenceValues<Preferences>();
 
@@ -130,8 +131,30 @@ export default function ManageDomains() {
                   onAction={() => toggleMailHostingStatus(domain)}
                 />
               </ActionPanel.Submenu>
+              <Action.Push icon={Icon.Shield} title="Spam Filters" target={<SpamFilters domain={domain.domain} />} />
               <ActionPanel.Submenu icon={Icon.Window} title="Email Clients">
-                <Action.OpenInBrowser title="Webmail (No DNS Required)" url={`https://${server}/webmail`} />
+                <ActionPanel.Section title="Webmail (No DNS Required)">
+                  <Action.OpenInBrowser
+                    icon={getFavicon(`https://${server}/webmail`)}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title={`${server}/webmail`}
+                    url={`https://${server}/webmail`}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Webmail (requires MX records)">
+                  <Action.OpenInBrowser
+                    icon={getFavicon("https://mail.mxlogin.com/")}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="mail.mxlogin.com"
+                    url="https://mail.mxlogin.com/"
+                  />
+                  <Action.OpenInBrowser
+                    icon={getFavicon("https://webmail.mxroute.com/")}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="webmail.mxroute.com"
+                    url="https://webmail.mxroute.com/"
+                  />
+                </ActionPanel.Section>
               </ActionPanel.Submenu>
               <ActionPanel.Section>
                 <Action.Push

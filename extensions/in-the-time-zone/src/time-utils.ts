@@ -2,6 +2,16 @@ export function getCurrentTimeISO(): string {
   return new Date().toISOString();
 }
 
+export type ClockFormatPreference = "system" | "12-hour" | "24-hour";
+
+export function resolveTimeFormat(preference: ClockFormatPreference): string {
+  if (preference === "12-hour") return "h:mm a";
+  if (preference === "24-hour") return "HH:mm";
+
+  const systemFormat = new Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions();
+  return systemFormat.hour12 === false || systemFormat.hourCycle?.startsWith("h2") ? "HH:mm" : "h:mm a";
+}
+
 export function formatGmtOffset(offsetMinutes: number): string {
   const sign = offsetMinutes >= 0 ? "+" : "-";
   const abs = Math.abs(offsetMinutes);

@@ -21,7 +21,6 @@ export default async function DailyNote() {
     let noteId = existingNote?._id;
 
     if (!noteId) {
-      // Create new note
       noteId = await remoApi.createNote({
         title: title,
         content: `# ${title}\n\n`,

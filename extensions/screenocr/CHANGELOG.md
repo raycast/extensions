@@ -1,5 +1,25 @@
 # ScreenOCR Changelog
 
+## [Windows Support] - 2026-09-20
+
+- Added Windows support for region, full-desktop and clipboard-image recognition using the local Windows OCR engine.
+- Added installed Windows OCR-language selection with separate Windows and macOS preferences.
+- Added optional paste/copy-and-paste result actions on Windows; macOS retains its existing copy behavior.
+- Preserved existing command IDs and the cross-extension result shape; Windows callbacks distinguish cancellation and failure from recognized text.
+- Preserved the existing macOS Swift source, recognition settings and command behavior.
+- Kept barcode and QR-code recognition available on macOS with an explicit Windows limitation.
+
+## [Fix macOS 26 (Tahoe) and macOS 27 (Golden Gate) Support] - 2026-07-23
+
+- Fixed all commands failing with "Failed to recognize text" on macOS 26 (Tahoe) and macOS 27 (Golden Gate). The system text recognition models log diagnostics to stdout, which the extension uses to return its result, corrupting the output; recognition now runs with stdout muted.
+- Fixed full-screen recognition returning no image: replaced the deprecated `CGWindowListCreateImage` with ScreenCaptureKit (`SCScreenshotManager`), capturing at native pixel resolution for better accuracy.
+- Migrated text and barcode recognition to the modern Vision Swift API (`RecognizeTextRequest` / `DetectBarcodesRequest`).
+- Raised the minimum macOS version to 15.0.
+
+## [Improvements] - 2026-07-22
+
+- Added more Apple Vision recognition languages to the primary and additional language selectors
+
 ## [Improvements] - 2026-01-19
 
 - Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions

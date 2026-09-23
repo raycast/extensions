@@ -1,5 +1,14 @@
 # Readwise Reader Changelog
 
+## [Add sorting and random shuffle to List Documents] - 2026-08-14
+
+- Add a `Sort Documents By…` action to `List Documents` supporting Date Moved, Date Saved, Date Published, Date Last Opened, Author, Category, Length, Progress, Title, and Random
+- Add `Toggle Sort Direction` and, for Random, `Reshuffle`
+- Add a `Default sort` preference
+- Sort the full loaded list instead of sorting each page independently
+- Fix a crash when viewing a document whose author, website, or category is empty
+- Remove duplicate documents that could appear in the list after loading more pages
+
 ## [Add Windows support] - 2026-07-07
 
 - Add Windows to supported platforms

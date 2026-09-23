@@ -2,7 +2,7 @@ import { Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { chain } from "lodash";
 import { useState } from "react";
-import { getTabs } from "./arc";
+import { getTabsWithSpaceInfo } from "./arc";
 import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
 import { searchArcPreferences } from "./preferences";
 import { useHistorySearch } from "./history";
@@ -21,7 +21,7 @@ import { VersionCheck } from "./version";
 function SearchArc(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
-  const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
+  const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabsWithSpaceInfo);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
   if (permissionView) {
@@ -59,7 +59,8 @@ function TabListSections(props: { tabs?: Tab[]; mutateTabs: MutatePromise<Tab[] 
     .filter(
       (tab) =>
         tab.title.toLowerCase().includes(props.searchText.toLowerCase()) ||
-        tab.url.toLowerCase().includes(props.searchText.toLowerCase()),
+        tab.url.toLowerCase().includes(props.searchText.toLowerCase()) ||
+        (tab.spaceName?.toLowerCase().includes(props.searchText.toLowerCase()) ?? false),
     )
     .groupBy((tab) => tab.location)
     .value();

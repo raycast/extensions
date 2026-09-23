@@ -1,5 +1,20 @@
 # Bitbucket Changelog
 
+## [Update] - 2026-09-19
+
+- Add Approve / Decline / Request Changes actions for pull requests
+- Open pull request details on Enter, open in browser on Cmd+Enter (or Enter again from the detail view), with a hint icon on each row
+- Fix "Search My Open Pull Requests" failing to load pull requests missing `destination.repository.slug`
+- Fix reviewer status staying stale on the list row after approving or requesting changes from the detail view
+
+## [Update] - 2026-09-16
+
+- Speed up "Search All Open Pull Requests" cold start: cross-session cache, slimmer API payload, progressive results as repos finish loading
+
+## [Update] - 2026-08-22
+
+- Added Search All Open Pull Requests command to browse open PRs across the workspace
+
 ## [Update] - 2025-11-17
 
 - Update shortcuts to be consistent across MacOS and Windows

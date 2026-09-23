@@ -7,7 +7,8 @@
   "author": "plonq",
   "contributors": [
     "erics118",
-    "gianni_sanrochman"
+    "gianni_sanrochman",
+    "ponyma"
   ],
   "categories": [
     "Web"
@@ -91,6 +92,36 @@
       ]
     },
     {
+      "name": "suggestionLimit",
+      "title": "Suggestions",
+      "description": "Number of live search suggestions shown in Command Bar. Set to 0 to disable suggestions and their network requests.",
+      "type": "dropdown",
+      "required": false,
+      "default": "6",
+      "data": [
+        {
+          "title": "Disabled (0)",
+          "value": "0"
+        },
+        {
+          "title": "3 Suggestions",
+          "value": "3"
+        },
+        {
+          "title": "6 Suggestions",
+          "value": "6"
+        },
+        {
+          "title": "9 Suggestions",
+          "value": "9"
+        },
+        {
+          "title": "12 Suggestions",
+          "value": "12"
+        }
+      ]
+    },
+    {
       "name": "autoCloseLauncherTabs",
       "title": "Command Bar",
       "label": "Auto-close launcher tabs",
@@ -103,7 +134,10 @@
   "dependencies": {
     "@raycast/api": "^1.104.9",
     "@raycast/utils": "^2.2.6",
-    "bplist-parser": "^0.3.2"
+    "bplist-parser": "^0.3.2",
+    "fuse.js": "^7.1.0",
+    "pinyin-pro": "^3.27.0",
+    "tldts": "^7.4.13"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -124,5 +158,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
+  }
 }

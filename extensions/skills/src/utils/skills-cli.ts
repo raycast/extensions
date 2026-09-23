@@ -4,9 +4,12 @@ import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
 import {
   InvalidCustomNpxPathError,
   NpxResolutionError,
+  SkillsCliBusyError,
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
+  isSkillsCliBusyError,
   runSkillsCli,
+  type SkillsCliRunner,
 } from "./skills-cli-runner";
 
 const home = homedir();
@@ -14,8 +17,10 @@ const home = homedir();
 export {
   InvalidCustomNpxPathError,
   NpxResolutionError,
+  SkillsCliBusyError,
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
+  isSkillsCliBusyError,
   KNOWN_AGENT_NAMES,
 };
 
@@ -40,8 +45,8 @@ function parseSkillsListJson(stdout: string): InstalledSkill[] {
   }));
 }
 
-export async function listInstalledSkills(): Promise<InstalledSkill[]> {
-  const stdout = await runSkillsCli(["list", "-g", "--json"]);
+export async function listInstalledSkills(runCli: SkillsCliRunner = runSkillsCli): Promise<InstalledSkill[]> {
+  const stdout = await runCli(["list", "-g", "--json"], { readOnly: true });
   try {
     return parseSkillsListJson(stdout);
   } catch {

@@ -1,4 +1,4 @@
-import { validateSelectedText } from "./validation";
+import { validateCopiedText, validateSelectedText } from "./validation";
 
 describe("validateSelectedText", () => {
   it("should return valid text unchanged", () => {
@@ -16,5 +16,17 @@ describe("validateSelectedText", () => {
 
   it("should throw error for null or undefined", () => {
     expect(() => validateSelectedText(undefined as unknown as string)).toThrow("No text selected");
+  });
+});
+
+describe("validateCopiedText", () => {
+  it("should return valid text unchanged", () => {
+    const text = "Hello world";
+    expect(validateCopiedText(text)).toBe(text);
+  });
+
+  it("should throw error for empty clipboard text", () => {
+    expect(() => validateCopiedText(undefined)).toThrow("No text copied");
+    expect(() => validateCopiedText("   ")).toThrow("No text copied");
   });
 });

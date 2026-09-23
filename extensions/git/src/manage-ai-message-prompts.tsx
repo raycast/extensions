@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, List, Form, useNavigation, confirmAlert, Alert, AI, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  Form,
+  useNavigation,
+  confirmAlert,
+  Alert,
+  AI,
+  Color,
+  Keyboard,
+} from "@raycast/api";
 import { useState } from "react";
 import { useAiPromptPresets, AiPromptPreset } from "./hooks/useAiPromptPresets";
 
@@ -14,7 +26,7 @@ export default function ManageAiMessagePrompts() {
           <Action.Push
             title="Add New Preset"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             target={<AiMessagePresetEditorForm />}
           />
         </ActionPanel>
@@ -87,7 +99,7 @@ function PresetListItem({
               title="Edit Preset"
               icon={Icon.Pencil}
               target={<AiMessagePresetEditorForm initialPreset={preset} />}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action.Push
               title="Duplicate Preset"
@@ -125,7 +137,7 @@ function AddNewPresetAction() {
     <Action.Push
       title="Add New Preset"
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
       target={<AiMessagePresetEditorForm />}
     />
   );

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "menucloak",
+  "title": "MenuCloak",
+  "description": "Control MenuCloak focus, cloak, and Google Calendar settings",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "menu bar",
+    "focus",
+    "one thing",
+    "application menus",
+    "cloak"
+  ],
+  "version": "1.0.0",
+  "author": "dans_huang",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-focus",
+      "title": "Set Focus Text",
+      "description": "Set the focus shown by MenuCloak",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle MenuCloak",
+      "description": "Show or hide the application menu cloak",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-on",
+      "title": "Turn on MenuCloak",
+      "description": "Cover application menus and show your focus",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn off MenuCloak",
+      "description": "Reveal application menus",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open MenuCloak Settings",
+      "description": "Edit focus text or connect Google Calendar",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo 'Use npm run publish to submit this extension to Raycast.' && exit 1"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}

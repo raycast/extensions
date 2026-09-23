@@ -113,7 +113,7 @@ async function installBinary(customDownloadDir?: string, onProgress?: ProgressCa
     // Set up progress tracking
     const contentLength = response.headers["content-length"];
     let downloadedBytes = 0;
-    const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+    const totalBytes = contentLength ? parseInt(String(contentLength), 10) : 0;
 
     if (onProgress && totalBytes > 0) {
       onProgress(0); // Start at 0%

@@ -36,14 +36,32 @@
     },
     {
       "name": "replace",
-      "title": "Replace File(s) Characters",
+      "title": "Replace in File Names",
       "description": "Replace characters in file(s) names.",
       "mode": "view"
     },
     {
       "name": "advanced-rename",
       "title": "Advanced Batch Rename",
-      "description": "Rename files using a powerful rule-based engine.",
+      "description": "Rename files and folders using a powerful rule-based engine.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Rename History",
+      "description": "View and undo recent rename operations.",
+      "mode": "view"
+    },
+    {
+      "name": "rename-folders",
+      "title": "Rename Folder(s)",
+      "description": "Rename the folders selected in Finder in a batch.",
+      "mode": "view"
+    },
+    {
+      "name": "replace-folders",
+      "title": "Replace in Folder Names",
+      "description": "Replace characters in the names of the selected folders.",
       "mode": "view"
     }
   ],

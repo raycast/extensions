@@ -2,8 +2,9 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { findFFmpegPath } from "./ffmpeg";
-import { execPromise } from "./exec";
 import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
+import { formatProcessForDisplay, runProcess } from "./process";
+import { recordMergeHistory } from "./historyRecording";
 import { AllOutputExtension, OutputVideoExtension, OutputAudioExtension, getOutputCategory } from "../types/media";
 
 export type MergeOptions = {
@@ -14,6 +15,7 @@ export type MergeOptions = {
   outputFileName?: string;
   /** When true, skip stream-copy detection and always re-encode. */
   forceReencode?: boolean;
+  signal?: AbortSignal;
 };
 
 export type StreamInfo = {
@@ -34,7 +36,7 @@ export type StreamInfo = {
 export async function probeStreamInfo(ffmpegPath: string, filePath: string): Promise<StreamInfo> {
   let stderr = "";
   try {
-    await execPromise(`"${ffmpegPath}" -hide_banner -i "${filePath}"`);
+    await runProcess({ command: ffmpegPath, args: ["-hide_banner", "-i", filePath] });
   } catch (err: unknown) {
     // ffmpeg with only -i exits non-zero; the useful info is in stderr
     const s =
@@ -116,13 +118,13 @@ export function buildReencodeConcatGraph(
   inputCount: number,
   outCategory: ReturnType<typeof getOutputCategory>,
   streams: StreamInfo[] = [],
-): { filter: string; mapArgs: string } {
+): { filter: string; mapArgs: string[] } {
   if (outCategory === "audio") {
     const filterParts: string[] = [];
     for (let i = 0; i < inputCount; i++) filterParts.push(`[${i}:a:0]`);
     return {
       filter: `${filterParts.join("")}concat=n=${inputCount}:v=0:a=1[a]`,
-      mapArgs: ` -map "[a]"`,
+      mapArgs: ["-map", "[a]"],
     };
   }
 
@@ -134,7 +136,7 @@ export function buildReencodeConcatGraph(
 
   return {
     filter: `${filterParts.join("")}concat=n=${inputCount}:v=1:a=${includeAudio ? 1 : 0}${includeAudio ? "[v][a]" : "[v]"}`,
-    mapArgs: includeAudio ? ` -map "[v]" -map "[a]"` : ` -map "[v]"`,
+    mapArgs: includeAudio ? ["-map", "[v]", "-map", "[a]"] : ["-map", "[v]"],
   };
 }
 
@@ -152,38 +154,76 @@ function getUniqueMergePath(dir: string, baseName: string, ext: string): string 
   return candidate;
 }
 
-function buildCodecArgs(outputFormat: AllOutputExtension): string {
+export function normaliseMergeBaseName(value: string | undefined, outputFormat: AllOutputExtension): string {
+  const requested = value?.trim() || "merged";
+  if (requested === "." || requested === ".." || path.basename(requested) !== requested) {
+    throw new Error("Output filename must be a bare filename without folders.");
+  }
+  const withoutExtension = requested.toLowerCase().endsWith(outputFormat.toLowerCase())
+    ? requested.slice(0, -outputFormat.length)
+    : requested;
+  if (!withoutExtension) throw new Error("Output filename is required.");
+  return withoutExtension;
+}
+
+function buildCodecArgs(outputFormat: AllOutputExtension): string[] {
   const category = getOutputCategory(outputFormat);
   if (category === "audio") {
     switch (outputFormat as OutputAudioExtension) {
       case ".mp3":
-        return " -c:a libmp3lame -b:a 192k";
+        return ["-c:a", "libmp3lame", "-b:a", "192k"];
       case ".aac":
       case ".m4a":
-        return " -c:a aac -b:a 192k";
+        return ["-c:a", "aac", "-b:a", "192k"];
       case ".wav":
-        return " -c:a pcm_s16le -ar 44100";
+        return ["-c:a", "pcm_s16le", "-ar", "44100"];
       case ".flac":
-        return " -c:a flac";
+        return ["-c:a", "flac"];
     }
   }
   if (category === "video") {
     switch (outputFormat as OutputVideoExtension) {
       case ".mp4":
-        return " -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k -pix_fmt yuv420p";
+        return [
+          "-c:v",
+          "libx264",
+          "-preset",
+          "medium",
+          "-crf",
+          "23",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "192k",
+          "-pix_fmt",
+          "yuv420p",
+        ];
       case ".mkv":
-        return " -c:v libx265 -preset medium -crf 28 -c:a aac -b:a 192k -pix_fmt yuv420p";
+        return [
+          "-c:v",
+          "libx265",
+          "-preset",
+          "medium",
+          "-crf",
+          "28",
+          "-c:a",
+          "aac",
+          "-b:a",
+          "192k",
+          "-pix_fmt",
+          "yuv420p",
+        ];
       case ".mov":
-        return " -c:v prores -profile:v 2 -c:a pcm_s16le";
+        return ["-c:v", "prores", "-profile:v", "2", "-c:a", "pcm_s16le"];
       case ".webm":
-        return " -c:v libvpx-vp9 -b:v 0 -crf 30 -c:a libopus -b:a 128k";
+        return ["-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "30", "-c:a", "libopus", "-b:a", "128k"];
       case ".avi":
-        return " -c:v libxvid -q:v 6 -c:a mp3";
+        return ["-c:v", "mpeg4", "-q:v", "6", "-c:a", "mp3"];
       case ".mpg":
-        return " -c:v mpeg2video -q:v 6 -c:a mp3";
+        return ["-c:v", "mpeg2video", "-q:v", "6", "-c:a", "mp3"];
     }
   }
-  return "";
+  return [];
 }
 
 export type MergeStrategy = "stream-copy" | "reencode";
@@ -203,6 +243,7 @@ export async function mergeMedia(
   outputFormat: AllOutputExtension,
   opts: MergeOptions = {},
 ): Promise<MergeResult> {
+  const startedAt = Date.now();
   if (inputs.length < 2) {
     throw new Error("At least 2 files are required to merge.");
   }
@@ -213,9 +254,9 @@ export async function mergeMedia(
   }
 
   const outputDir = opts.outputDir && opts.outputDir.length > 0 ? opts.outputDir : path.dirname(inputs[0]);
-  const baseName = (opts.outputFileName && opts.outputFileName.trim()) || "merged";
+  const baseName = normaliseMergeBaseName(opts.outputFileName, outputFormat);
   const outputPath = getUniqueMergePath(outputDir, baseName, outputFormat);
-  const metadataFlag = opts.stripMetadata ? " -map_metadata -1" : "";
+  const metadataArgs = opts.stripMetadata ? ["-map_metadata", "-1"] : [];
 
   // Decide strategy
   let strategy: MergeStrategy = "reencode";
@@ -238,13 +279,20 @@ export async function mergeMedia(
     const listContents = inputs.map((p) => `file '${p.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`).join("\n");
     try {
       fs.writeFileSync(listFile, listContents);
-      const cmd = `"${ffmpegPath.path}" -f concat -safe 0 -i "${listFile}" -c copy${metadataFlag} -y "${outputPath}"`;
+      const spec = {
+        command: ffmpegPath.path,
+        args: ["-f", "concat", "-safe", "0", "-i", listFile, "-c", "copy", ...metadataArgs, "-y", outputPath],
+      };
       const total = await sumDurations(ffmpegPath.path, inputs);
-      console.log(`Executing FFmpeg stream-copy merge: ${cmd}`);
+      console.log(`Executing FFmpeg stream-copy merge: ${formatProcessForDisplay(spec)}`);
       if (opts.onProgress) {
-        await runFFmpegWithProgress(cmd, { totalDurationSec: total, onProgress: opts.onProgress });
+        await runFFmpegWithProgress(spec, {
+          totalDurationSec: total,
+          onProgress: opts.onProgress,
+          signal: opts.signal,
+        });
       } else {
-        await execPromise(cmd);
+        await runProcess(spec, opts.signal);
       }
     } finally {
       try {
@@ -253,6 +301,7 @@ export async function mergeMedia(
         /* ignore */
       }
     }
+    await recordMergeBestEffort(inputs, outputPath, outputFormat, opts, startedAt);
     return { outputPath, strategy };
   }
 
@@ -260,19 +309,48 @@ export async function mergeMedia(
   // listed in its pattern must actually have a stream of that type, so we
   // tailor the graph to the output category (audio-only vs video+audio).
   const n = inputs.length;
-  const inputsArg = inputs.map((p) => `-i "${p}"`).join(" ");
+  const inputArgs = inputs.flatMap((p) => ["-i", p]);
   const outCategory = getOutputCategory(outputFormat);
   const { filter, mapArgs } = buildReencodeConcatGraph(n, outCategory, streams);
   const codecArgs = buildCodecArgs(outputFormat);
-  const cmd = `"${ffmpegPath.path}" ${inputsArg} -filter_complex "${filter}"${mapArgs}${codecArgs}${metadataFlag} -y "${outputPath}"`;
+  const spec = {
+    command: ffmpegPath.path,
+    args: [...inputArgs, "-filter_complex", filter, ...mapArgs, ...codecArgs, ...metadataArgs, "-y", outputPath],
+  };
   const total = await sumDurations(ffmpegPath.path, inputs);
-  console.log(`Executing FFmpeg re-encode merge: ${cmd}`);
+  console.log(`Executing FFmpeg re-encode merge: ${formatProcessForDisplay(spec)}`);
   if (opts.onProgress) {
-    await runFFmpegWithProgress(cmd, { totalDurationSec: total, onProgress: opts.onProgress });
+    await runFFmpegWithProgress(spec, {
+      totalDurationSec: total,
+      onProgress: opts.onProgress,
+      signal: opts.signal,
+    });
   } else {
-    await execPromise(cmd);
+    await runProcess(spec, opts.signal);
   }
+  await recordMergeBestEffort(inputs, outputPath, outputFormat, opts, startedAt);
   return { outputPath, strategy };
+}
+
+async function recordMergeBestEffort(
+  inputs: string[],
+  output: string,
+  outputFormat: AllOutputExtension,
+  opts: MergeOptions,
+  startedAt: number,
+): Promise<void> {
+  try {
+    await recordMergeHistory({
+      inputs,
+      output,
+      outputFormat,
+      stripMetadata: opts.stripMetadata,
+      outputDir: opts.outputDir,
+      durationMs: Date.now() - startedAt,
+    });
+  } catch (error) {
+    console.warn("Failed to write merge history:", error);
+  }
 }
 
 async function sumDurations(ffmpegPath: string, inputs: string[]): Promise<number | undefined> {

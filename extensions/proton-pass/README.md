@@ -15,7 +15,7 @@ This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
 
 The extension automatically downloads and installs the Proton Pass CLI on first use. No manual installation required!
 
-If you prefer to install manually, you can use Homebrew:
+If you prefer to install manually on macOS, you can use Homebrew:
 
 ```bash
 brew install protonmail/proton/pass-cli
@@ -54,6 +54,7 @@ pass-cli vault list
 - **Default Password Type**: Random characters or memorable passphrase
 - **Transient Clipboard**: Clear password from clipboard after pasting
 - **Background Refresh**: Automatically refresh cached vault and item data
+- **Cache Expiration**: How long cached metadata stays usable (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes)
 - **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
 
 ## Troubleshooting
@@ -68,6 +69,14 @@ export PROTON_PASS_KEY_PROVIDER=fs
 pass-cli login
 ```
 
+On Windows, if session persistence through Windows Credential Manager reports a `keyring_error`, retry from PowerShell:
+
+```powershell
+pass-cli logout --force
+$env:PROTON_PASS_KEY_PROVIDER = "fs"
+pass-cli login
+```
+
 ### CLI Not Found
 
 If the CLI is installed but not detected, set the full path in extension preferences:
@@ -79,3 +88,21 @@ If the CLI is installed but not detected, set the full path in extension prefere
 ### Re-download CLI
 
 If the auto-installed CLI becomes corrupted or you want to force a re-download, use the "Clear CLI Cache" action available in the error screens.
+
+## Platform Verification
+
+Run on Windows x86_64 from this extension directory:
+
+```powershell
+npm ci; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm test; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npx tsc --noEmit
+```
+
+Then verify a fresh automatic install keeps `pass-cli.exe` beside `libcrypto-3-x64.dll`, browser login persists through Windows Credential Manager (or shows the documented `keyring_error` guidance), search/copy/TOTP work, shortcuts display Ctrl-based keys, and Browser Extension plus Terminal fallback actions stay absent.
+
+Run on macOS:
+
+```bash
+npm ci && npm test && npm run lint && npm run build
+```
+
+Then verify a fresh install passes Gatekeeper after chmod/quarantine removal, browser re-login works with CLI 2.3.3, and all commands complete a smoke test. Sessions from CLI 1.4.1 may require login again.

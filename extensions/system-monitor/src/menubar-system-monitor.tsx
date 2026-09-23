@@ -12,37 +12,15 @@ import {
 } from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
-import { cpus } from "os";
 
-import { calculateDiskStorage, getOSInfo } from "./SystemInfo/SystemUtils";
-import { getMemoryUsage } from "./Memory/MemoryUtils";
-import { getNetworkData } from "./Network/NetworkUtils";
-import { getBatteryData } from "./Power/PowerUtils";
-import { getTemperatureData, formatTemperature } from "./Temperature/TemperatureUtils";
-
-import { formatBytes, isObjectEmpty, openActivityMonitorAppleScript } from "./utils";
+import { formatTemperature } from "./Temperature/TemperatureUtils";
+import { formatBytes, openActivityMonitorAppleScript } from "./utils";
 import { DiskInterface } from "./Interfaces";
+import { loadMenuBarSnapshot, PINNED_STAT_KEY } from "./menubar/load-snapshot";
+import { readMenuBarSnapshot } from "./menubar/snapshot-cache";
+import { PinnedStat, snapshotValue } from "./menubar/types";
 
-type PinnedStat = "cpu" | "temperature" | "memory" | "battery" | "network" | "storage" | "none";
-
-const PINNED_STAT_KEY = "menubarPinnedStat";
 const cache = new Cache();
-const CACHE_KEY = "menubar-data";
-
-// CPU usage needs a previous snapshot to compute deltas.
-// Module-level so it survives across interval restarts within the same process.
-let prevCpuIdle = 0;
-let prevCpuTotal = 0;
-(() => {
-  for (const core of cpus()) {
-    const { user, nice, sys, irq, idle } = core.times;
-    prevCpuIdle += idle;
-    prevCpuTotal += user + nice + sys + irq + idle;
-  }
-})();
-
-// Network needs previous snapshot for delta calculation
-let prevNetProcess: { [key: string]: number[] } = {};
 
 export default function Command() {
   const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
@@ -51,16 +29,36 @@ export default function Command() {
   const { cpuMenubarFormat, memoryMenubarFormat, powerMenubarFormat, networkMenubarFormat, diskMenubarFormat } =
     getPreferenceValues<Preferences.MenubarSystemMonitor>();
 
-  const { data: pinnedStat, revalidate: revalidatePinned } = usePromise(async () => {
-    const value = await LocalStorage.getItem<string>(PINNED_STAT_KEY);
-    return (value as PinnedStat) ?? "none";
-  });
+  const {
+    data: loaded,
+    isLoading,
+    revalidate,
+  } = usePromise(
+    () =>
+      loadMenuBarSnapshot({
+        launchType: environment.launchType,
+        supportPath: environment.supportPath,
+        cache,
+      }),
+    [],
+  );
+  const pinnedStat = loaded?.pinnedStat ?? "none";
+  const snapshot = loaded?.snapshot ?? readMenuBarSnapshot(cache);
+  const data = {
+    osInfo: snapshotValue(snapshot?.values.osInfo),
+    storage: snapshotValue(snapshot?.values.storage),
+    cpuUsage: snapshotValue(snapshot?.values.cpuUsage),
+    memory: snapshotValue(snapshot?.values.memory),
+    networkUsage: snapshotValue(snapshot?.values.networkUsage),
+    batteryData: snapshotValue(snapshot?.values.batteryData),
+    temperatureData: snapshotValue(snapshot?.values.temperatureData),
+  };
 
   const togglePin = useCallback(
     async (stat: PinnedStat) => {
       const next = pinnedStat === stat ? "none" : stat;
       await LocalStorage.setItem(PINNED_STAT_KEY, next);
-      revalidatePinned();
+      revalidate();
       if (next === "none") {
         await showHUD("Unpinned from menu bar");
       } else {
@@ -76,104 +74,10 @@ export default function Command() {
         await showHUD(`Pinned ${labels[next]} to menu bar`);
       }
     },
-    [pinnedStat, revalidatePinned],
+    [pinnedStat, revalidate],
   );
 
   const pinIcon = (stat: PinnedStat) => (pinnedStat === stat ? { source: Icon.Pin, tintColor: "#007AFF" } : undefined);
-
-  // Restore previous data from disk cache so the menubar title doesn't
-  // flicker to empty between interval restarts.
-  const cached = (() => {
-    try {
-      const raw = cache.get(CACHE_KEY);
-      return raw ? JSON.parse(raw) : undefined;
-    } catch {
-      return undefined;
-    }
-  })();
-
-  // Fetch all data in parallel. Raycast menu-bar commands are short-lived:
-  // they load, render, and unload once isLoading becomes false.
-  // Raycast's "interval": "10s" in package.json re-launches the command
-  // every 10 seconds for background updates — no in-process polling needed.
-  const {
-    data: freshData,
-    isLoading,
-    revalidate,
-  } = usePromise(async () => {
-    const [osInfo, storage, memoryUsage, networkData, batteryData, temperatureData] = await Promise.all([
-      getOSInfo(),
-      calculateDiskStorage(),
-      getMemoryUsage(),
-      getNetworkData(),
-      getBatteryData(),
-      getTemperatureData(),
-    ]);
-
-    // CPU usage from os.cpus() delta
-    let idle = 0;
-    let total = 0;
-    for (const core of cpus()) {
-      const { user, nice, sys, irq, idle: coreIdle } = core.times;
-      idle += coreIdle;
-      total += user + nice + sys + irq + coreIdle;
-    }
-    const dIdle = idle - prevCpuIdle;
-    const dTotal = total - prevCpuTotal;
-    prevCpuIdle = idle;
-    prevCpuTotal = total;
-    const cpuUsage = dTotal === 0 ? "0" : Math.round((1 - dIdle / dTotal) * 100).toString();
-
-    // Memory
-    const memTotal = memoryUsage.memTotal;
-    const memUsed = memoryUsage.memUsed;
-    const freeMem = memTotal - memUsed;
-    const memory = {
-      totalMem: Math.round(memTotal / 1024).toString(),
-      freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-      freeMem: Math.round(freeMem / 1024).toString(),
-    };
-
-    // Battery
-    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
-
-    // Network delta
-    let upload = 0;
-    let download = 0;
-    if (!isObjectEmpty(prevNetProcess)) {
-      for (const key in networkData) {
-        let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
-        if (down < 0) down = 0;
-        let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
-        if (up < 0) up = 0;
-        download += down;
-        upload += up;
-      }
-    }
-    prevNetProcess = networkData;
-
-    return {
-      osInfo,
-      storage,
-      cpuUsage,
-      memory,
-      networkUsage: { upload, download },
-      batteryData,
-      isOnAC,
-      temperatureData,
-    };
-  }, []);
-
-  const data = freshData ?? cached;
-
-  // Persist to disk cache so next interval restart has instant data
-  if (freshData) {
-    try {
-      cache.set(CACHE_KEY, JSON.stringify(freshData));
-    } catch {
-      /* ignore */
-    }
-  }
 
   // When the user clicks the menubar icon, the command stays in memory
   // while the menu is open. Poll for live updates only in that case.
@@ -182,7 +86,7 @@ export default function Command() {
   const isRevalidating = useRef(false);
   useInterval(
     () => {
-      if (!isUserLaunch || isRevalidating.current) return;
+      if (!isUserLaunch || isLoading || isRevalidating.current) return;
       isRevalidating.current = true;
       revalidate().finally(() => {
         isRevalidating.current = false;

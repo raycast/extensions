@@ -11,7 +11,8 @@
     "Developer Tools"
   ],
   "contributors": [
-    "xmok"
+    "xmok",
+    "tarps"
   ],
   "license": "MIT",
   "commands": [
@@ -41,6 +42,32 @@
       "default": "ploi",
       "description": "Change the SSH user to login with",
       "placeholder": "SSH User"
+    },
+    {
+      "name": "ploi_ssh_terminal",
+      "type": "dropdown",
+      "required": false,
+      "title": "SSH Terminal",
+      "default": "default",
+      "description": "The terminal app to open SSH connections in",
+      "data": [
+        {
+          "title": "System Default (ssh:// Handler)",
+          "value": "default"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iterm"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -71,6 +98,8 @@
   ],
   "overrides": {
     "minimatch": "^10.0.1",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.4",
+    "brace-expansion": "5.0.8",
+    "js-yaml@4": "4.3.1"
   }
 }

@@ -1,7 +1,7 @@
 import { ActionPanel, Form, Action, Icon, useNavigation } from "@raycast/api";
 import { showToast, Toast } from "@raycast/api";
 
-export const ImportForm = (props: { moduleName: string; onSubmit: (file: string) => Promise<void> }) => {
+export const ImportForm = (props: { moduleName: string; onSubmit: (file: string) => Promise<boolean> }) => {
   const { pop } = useNavigation();
   return (
     <Form
@@ -10,7 +10,7 @@ export const ImportForm = (props: { moduleName: string; onSubmit: (file: string)
           <Action.SubmitForm
             title={`Import ${props.moduleName}`}
             icon={Icon.Download}
-            onSubmit={(values: { files: string[] }) => {
+            onSubmit={async (values: { files: string[] }) => {
               const file = values.files[0];
               if (!file) {
                 showToast({
@@ -20,8 +20,11 @@ export const ImportForm = (props: { moduleName: string; onSubmit: (file: string)
                 });
                 return;
               }
-              props.onSubmit(file);
-              pop();
+              try {
+                if (await props.onSubmit(file)) pop();
+              } catch (error) {
+                await showToast({ title: "Import failed", message: String(error), style: Toast.Style.Failure });
+              }
             }}
           />
         </ActionPanel>

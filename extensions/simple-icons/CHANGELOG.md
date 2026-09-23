@@ -1,5 +1,9 @@
 # Brand Icons Changelog
 
+## [Bugfix] - 2026-09-16
+
+- Fix `ENOENT` errors when copying icons from an incompletely downloaded asset pack (e.g. interrupted download on Windows); the pack is now re-downloaded automatically
+
 ## [Enhancement] - 2026-07-04
 
 - Use `process.env.RAYCAST_SCHEME` for deeplink instead of `raycast:` or `raycast-x:`

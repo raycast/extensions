@@ -1,9 +1,10 @@
-import { Icon, Color, List, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { getModelPageUrl } from "../../ai-gateway";
 import useVercel from "../../hooks/use-vercel-info";
 import { AIGatewayLogItem, Team } from "../../types";
-import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import { fetchAIGatewayLogs, fetchAICreditsBalance } from "../../vercel";
-import { usePromise } from "@raycast/utils";
+import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 
 function StatusIcon(httpStatus: number) {
   if (httpStatus >= 200 && httpStatus < 300) {
@@ -46,6 +47,17 @@ function formatTimestamp(timestamp: string): string {
 function formatFullTimestamp(timestamp: string): string {
   const date = new Date(timestamp.replace(" ", "T") + "Z");
   return date.toLocaleString();
+}
+
+function canonicalModelId(log: AIGatewayLogItem): string | undefined {
+  for (const candidate of [log.aiGatewayModelId, log.aiModel]) {
+    const modelId = candidate.trim();
+    const segments = modelId.split("/");
+    if (segments.length >= 2 && segments.every(Boolean)) {
+      return modelId;
+    }
+  }
+  return undefined;
 }
 
 function LogDetail({ log }: { log: AIGatewayLogItem }) {
@@ -126,29 +138,47 @@ const AIGatewayLogsList = () => {
         title="No AI Gateway Logs"
         description="No inference requests found in the past 12 hours"
       />
-      {logs?.map((log, index) => (
-        <List.Item
-          key={`${log.timestamp}-${index}`}
-          title={formatTimestamp(log.timestamp)}
-          subtitle={`${log.aiModel} · ${capitalizeFirst(log.aiProvider)}`}
-          icon={StatusIcon(log.httpStatus)}
-          keywords={[log.aiModel, log.aiProvider, log.aiGatewayModelId]}
-          detail={<LogDetail log={log} />}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Visit on Vercel"
-                url={getVercelAIGatewayUrl()}
-                icon={Icon.Globe}
-                shortcut={{
-                  macOS: { modifiers: ["cmd", "opt"], key: "v" },
-                  Windows: { modifiers: ["ctrl", "opt"], key: "v" },
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {logs?.map((log, index) => {
+        const modelId = canonicalModelId(log);
+        return (
+          <List.Item
+            key={`${log.timestamp}-${index}`}
+            title={formatTimestamp(log.timestamp)}
+            subtitle={`${log.aiModel} · ${capitalizeFirst(log.aiProvider)}`}
+            icon={StatusIcon(log.httpStatus)}
+            keywords={[log.aiModel, log.aiProvider, log.aiGatewayModelId]}
+            detail={<LogDetail log={log} />}
+            actions={
+              <ActionPanel>
+                {modelId && <Action.CopyToClipboard title="Copy Model ID" content={modelId} />}
+                {modelId && <Action.OpenInBrowser title="Open Model Page" url={getModelPageUrl(modelId)} />}
+                {modelId && log.aiModelType.toLocaleLowerCase() === "language" && (
+                  <Action
+                    title="Use in Playground"
+                    icon={Icon.Play}
+                    onAction={() =>
+                      launchCommand({
+                        name: "ai-gateway-playground",
+                        type: LaunchType.UserInitiated,
+                        context: { modelId },
+                      })
+                    }
+                  />
+                )}
+                <Action.OpenInBrowser
+                  title="Visit on Vercel"
+                  url={getVercelAIGatewayUrl()}
+                  icon={Icon.Globe}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "opt"], key: "v" },
+                    Windows: { modifiers: ["ctrl", "opt"], key: "v" },
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 };

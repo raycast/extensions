@@ -22,7 +22,26 @@ function getWindowsLocalAppData() {
   return "";
 }
 
+function getWindowsRoamingAppData() {
+  if (process.env.APPDATA) {
+    return process.env.APPDATA;
+  }
+
+  if (process.env.USERPROFILE) {
+    return join(process.env.USERPROFILE, "AppData", "Roaming");
+  }
+
+  const homeDirectory = homedir();
+
+  if (homeDirectory) {
+    return join(homeDirectory, "AppData", "Roaming");
+  }
+
+  return "";
+}
+
 const WINDOWS_LOCAL_APPDATA = process.platform === "win32" ? getWindowsLocalAppData() : "";
+const WINDOWS_ROAMING_APPDATA = process.platform === "win32" ? getWindowsRoamingAppData() : "";
 
 export const BROWSERS_BUNDLE_ID = {
   arc: "company.thebrowser.browser",
@@ -81,7 +100,14 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
       : undefined,
   },
   { id: BROWSERS_BUNDLE_ID.braveBeta, name: "Brave Beta", macBundleId: "com.brave.browser.beta" },
-  { id: BROWSERS_BUNDLE_ID.braveNightly, name: "Brave Nightly", macBundleId: "com.brave.browser.nightly" },
+  {
+    id: BROWSERS_BUNDLE_ID.braveNightly,
+    name: "Brave Nightly",
+    macBundleId: "com.brave.browser.nightly",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA
+      ? join(WINDOWS_LOCAL_APPDATA, "BraveSoftware", "Brave-Browser-Nightly", "User Data")
+      : undefined,
+  },
   {
     id: BROWSERS_BUNDLE_ID.chrome,
     name: "Chrome",
@@ -95,9 +121,29 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.chromeBeta, name: "Chrome Beta", macBundleId: "com.google.chrome.beta" },
   { id: BROWSERS_BUNDLE_ID.chromeDev, name: "Chrome Dev", macBundleId: "com.google.chrome.dev" },
   { id: BROWSERS_BUNDLE_ID.comet, name: "Comet", macBundleId: "ai.perplexity.comet" },
-  { id: BROWSERS_BUNDLE_ID.dia, name: "Dia", macBundleId: "company.thebrowser.dia" },
+  {
+    id: BROWSERS_BUNDLE_ID.dia,
+    name: "Dia",
+    macBundleId: "company.thebrowser.dia",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA
+      ? join(
+          WINDOWS_LOCAL_APPDATA,
+          "Packages",
+          "TheBrowserCompany.Dia_ttt1ap7aakyb4",
+          "LocalCache",
+          "Local",
+          "Dia",
+          "User Data",
+        )
+      : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.chatGPTAtlas, name: "ChatGPT Atlas", macBundleId: "com.openai.atlas" },
-  { id: BROWSERS_BUNDLE_ID.firefox, name: "Firefox", macBundleId: "org.mozilla.firefox" },
+  {
+    id: BROWSERS_BUNDLE_ID.firefox,
+    name: "Firefox",
+    macBundleId: "org.mozilla.firefox",
+    windowsUserDataPath: WINDOWS_ROAMING_APPDATA ? join(WINDOWS_ROAMING_APPDATA, "Mozilla", "Firefox") : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.firefoxDev, name: "Firefox Dev", macBundleId: "org.mozilla.firefoxdeveloperedition" },
   { id: BROWSERS_BUNDLE_ID.ghostBrowser, name: "Ghost Browser", macBundleId: "com.ghostbrowser.gb1" },
   { id: BROWSERS_BUNDLE_ID.island, name: "Island", macBundleId: "io.island.island" },
@@ -116,12 +162,29 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.edgeDev, name: "Edge Dev", macBundleId: "com.microsoft.edgemac.dev" },
   { id: BROWSERS_BUNDLE_ID.edgeCanary, name: "Edge Canary", macBundleId: "com.microsoft.edgemac.canary" },
   { id: BROWSERS_BUNDLE_ID.prismaAccess, name: "Prisma Access", macBundleId: "com.talon-sec.work" },
-  { id: BROWSERS_BUNDLE_ID.vivaldi, name: "Vivaldi", macBundleId: "com.vivaldi.vivaldi" },
+  {
+    id: BROWSERS_BUNDLE_ID.vivaldi,
+    name: "Vivaldi",
+    macBundleId: "com.vivaldi.vivaldi",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA ? join(WINDOWS_LOCAL_APPDATA, "Vivaldi", "User Data") : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.vivaldiSnapshot, name: "Vivaldi Snapshot", macBundleId: "com.vivaldi.vivaldi.snapshot" },
-  { id: BROWSERS_BUNDLE_ID.zen, name: "Zen", macBundleId: "app.zen-browser.zen" },
+  {
+    id: BROWSERS_BUNDLE_ID.zen,
+    name: "Zen",
+    macBundleId: "app.zen-browser.zen",
+    windowsUserDataPath: WINDOWS_ROAMING_APPDATA ? join(WINDOWS_ROAMING_APPDATA, "zen") : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.libreWolf, name: "LibreWolf", macBundleId: "org.mozilla.librewolf" },
   { id: BROWSERS_BUNDLE_ID.whale, name: "Whale", macBundleId: "com.naver.whale" },
-  { id: BROWSERS_BUNDLE_ID.helium, name: "Helium", macBundleId: "net.imput.helium" },
+  {
+    id: BROWSERS_BUNDLE_ID.helium,
+    name: "Helium",
+    macBundleId: "net.imput.helium",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA
+      ? join(WINDOWS_LOCAL_APPDATA, "imput", "Helium", "User Data")
+      : undefined,
+  },
 ];
 
 const BROWSER_DEFINITION_BY_ID = new Map(BROWSER_DEFINITIONS.map((definition) => [definition.id, definition]));

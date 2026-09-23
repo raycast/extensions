@@ -1,5 +1,9 @@
 # Search Router Changelog
 
+## [Fix Missing Query Prompt on Shortcut Launch] - 2026-08-16
+
+- Fix the issue where executing the command "Search the Web" via a shortcut key would bypass the ability to enter a search query altogether (because the `query` argument is no longer required). It now shows a query form when "Search the Web" is launched from a keyboard shortcut, while preserving fallback search.
+
 ## [Bug Fixes & Improvements] - 2026-06-03
 
 - Fix fallback search support — `query` argument is no longer required, so the command works when launched as a Raycast fallback search

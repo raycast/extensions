@@ -1,5 +1,34 @@
 # Changelog
 
+## [Separate Chat Models and AI Commands] - 2026-09-17
+
+- Show base models in Ask Question, Full Text Input and Summarize Website. Add Ask with This Command in Models to start a command conversation.
+- Preserve command settings when continuing a conversation and identify the command with a `Command:` prefix. Saved conversations retain their settings if the command is deleted.
+- Keep the last selected base model when starting or continuing a command conversation. Resolve old command selections to their base model, or Default when unavailable.
+
+## [Feature] - 2026-09-15
+
+- Create and edit AI commands in Models, including creating a command from the selected model.
+- Remove the standalone Create AI Command entry. Create commands through the Models action menu; replace shortcuts or deep links to the removed entry with Models.
+- Rename Search AI Command to AI Commands, preserving existing command shortcuts and quicklinks.
+- Let commands configure their own model settings or inherit a base model with per-setting overrides; migrate existing commands independently without adding presets or changing their settings.
+- Add navigation from Models to Ask and editing from Ask, retaining model selection, drafts and existing messages.
+- Keep Ask's remembered model when continuing an AI command or a saved conversation; update it only when a model is explicitly selected.
+- Keep model and command edits synchronized across open forms, and prevent removal of models still used by commands.
+- Preserve newer model and command settings when saving from a previously opened command.
+- Pin and unpin models without overwriting newer settings or restoring deleted models.
+- Use platform-appropriate shortcuts for creating, editing and duplicating models and AI commands on macOS and Windows.
+
+## [Feature] - 2026-09-11
+
+- Model and AI Command forms now combine API model discovery and manual model ID entry in one searchable dropdown.
+- Removed the separate `Custom model` preference; saved model IDs remain available when model discovery fails or omits them.
+- Model management no longer waits for the remote model list; each form loads its own options in the background.
+
+## [Fix] - 2026-09-10
+
+- Fix: Reuse Raycast's HTTP(S) agents when no custom proxy is configured, so the system certificate store is trusted and OpenAI-compatible endpoints behind a TLS-inspecting corporate proxy work
+
 ## [Feature] - 2026-03-09
 
 - Feature: Added a per-model `Reasoning` toggle with an `Effort` selector (`none`, `low`, `medium`, `high`) in the model form.

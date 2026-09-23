@@ -14,23 +14,25 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast, useExec } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { EditCallMetadata, SummarizeCall } from "./call-ai";
 import { CallDraft } from "./lib/ai";
 import { TupleErrorDetail, TupleErrorEmptyView } from "./lib/empty-state";
-import { tupleExecOptions, useTupleJson } from "./lib/hooks";
+import { useTupleJson } from "./lib/hooks";
+import { escapeMarkdownText } from "./lib/capture";
 import {
   classifyError,
-  deleteTranscript,
-  exportTranscripts,
-  getBinaryPath,
+  deleteCapture,
+  exportCapture,
+  getLocalClockCaptureMarkdown,
   getConnectPrompt,
   stripAnsi,
   stripMatchMarkers,
-  toFtsQuery,
+  captureSearchArgs,
+  getCall,
 } from "./lib/tuple";
-import { StoredCall, TranscriptMatch, TupleErrorKind } from "./lib/types";
+import { StoredCall, CaptureMatch, TupleErrorKind } from "./lib/types";
 
 /** Export destination: the user's preference, or ~/Downloads when unset. */
 function exportDir(): string {
@@ -40,20 +42,16 @@ function exportDir(): string {
 
 export default function SearchCalls() {
   const [searchText, setSearchText] = useState("");
-  const query = searchText.trim();
-  const searching = query.length > 0;
-  // The CLI's `transcription search` parses FTS5 syntax, so raw input with hyphens, colons, or
-  // operator keywords would error. Quote each term (same path the AI tool uses) before searching.
-  const ftsQuery = toFtsQuery(query);
-
+  const query = searchText;
+  const searching = query.trim().length > 0;
   // Always loaded: drives the browse list and, while searching, resolves call titles for the
   // result sections (kept warm by keepPreviousData, so it doesn't re-run on each keystroke).
-  const calls = useTupleJson<StoredCall[]>(["transcription", "list"], {
+  const calls = useTupleJson<StoredCall[]>(["capture", "list", "--limit", "100"], {
     failureTitle: "Could Not Load Calls",
   });
 
-  const matches = useTupleJson<TranscriptMatch[]>(["transcription", "search", ftsQuery, "--limit", "50"], {
-    execute: searching && ftsQuery.length > 0,
+  const matches = useTupleJson<CaptureMatch[]>(captureSearchArgs(query), {
+    execute: searching,
     failureTitle: "Search Failed",
   });
 
@@ -72,6 +70,7 @@ export default function SearchCalls() {
     <List
       isLoading={isLoading}
       throttle
+      filtering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Browse recent calls, or search what was said"
     >
@@ -90,13 +89,13 @@ export default function SearchCalls() {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No Matches"
-          description="No transcript segments match your search."
+          description="No captured conversations or shared content match your search."
         />
       ) : (
         <List.EmptyView
           icon={Icon.Phone}
           title="No Recent Calls"
-          description="Recorded calls with transcripts will appear here."
+          description="Calls with stored Capture will appear here."
         />
       )}
     </List>
@@ -126,13 +125,13 @@ function CallItem({ call, onChange }: { call: StoredCall; onChange: () => void }
   );
 }
 
-function MatchItem({ match, call, onChange }: { match: TranscriptMatch; call?: StoredCall; onChange: () => void }) {
+function MatchItem({ match, call, onChange }: { match: CaptureMatch; call?: StoredCall; onChange: () => void }) {
   const time = toValidDate(match.time);
   return (
     <List.Item
       icon={Icon.SpeechBubble}
       title={cleanSnippet(match.snippet)}
-      subtitle={match.speaker}
+      subtitle={match.kind === "content" ? match.app_name || "Shared Content" : match.speaker}
       accessories={time ? [{ date: time }] : []}
       actions={<CallActions callId={match.call_id} call={call} onChange={onChange} />}
     />
@@ -144,14 +143,14 @@ interface MatchGroup {
   call?: StoredCall;
   title: string;
   subtitle: string;
-  matches: TranscriptMatch[];
+  matches: CaptureMatch[];
   latest: number;
 }
 
 /** Group search hits by call — newest call first, each call's hits newest-first. */
-function groupMatchesByCall(matches: TranscriptMatch[], calls: StoredCall[]): MatchGroup[] {
+function groupMatchesByCall(matches: CaptureMatch[], calls: StoredCall[]): MatchGroup[] {
   const callsById = new Map(calls.map((call) => [call.call_id, call]));
-  const byCall = new Map<string, TranscriptMatch[]>();
+  const byCall = new Map<string, CaptureMatch[]>();
   for (const match of matches) {
     const existing = byCall.get(match.call_id);
     if (existing) {
@@ -200,16 +199,36 @@ function summarizeAction({
 
 /** "Edit Title & Summary" action. Seeds the form with the raw stored title (empty when none), not the
  *  participant-derived display `title`, so editing never writes a fallback name back as a real title. */
-function editMetadataAction({ callId, title, storedTitle, summary, onApplied }: MetadataActionParams) {
+function editMetadataAction({ callId, title, onApplied }: MetadataActionParams) {
   return (
     <Action.Push
       key="edit-metadata"
       title="Edit Title & Summary"
       icon={Icon.Pencil}
       shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
-      target={
-        <EditCallMetadata callId={callId} title={title} draft={{ title: storedTitle, summary }} onApplied={onApplied} />
-      }
+      target={<StoredCallEditor callId={callId} title={title} onApplied={onApplied} />}
+    />
+  );
+}
+
+function StoredCallEditor({
+  callId,
+  title,
+  onApplied,
+}: {
+  callId: string;
+  title: string;
+  onApplied: (draft: CallDraft) => void;
+}) {
+  const metadata = usePromise(getCall, [callId], { onError: () => {} });
+  if (metadata.error) return <TupleErrorDetail error={metadata.error} onRetry={metadata.revalidate} />;
+  if (!metadata.data) return <Detail isLoading />;
+  return (
+    <EditCallMetadata
+      callId={callId}
+      title={title}
+      draft={{ title: metadata.data.title ?? "", summary: metadata.data.summary ?? "" }}
+      onApplied={onApplied}
     />
   );
 }
@@ -217,7 +236,6 @@ function editMetadataAction({ callId, title, storedTitle, summary, onApplied }: 
 interface MetadataActionParams {
   callId: string;
   title: string;
-  storedTitle: string;
   summary: string;
   onApplied: (applied: CallDraft) => void;
 }
@@ -242,16 +260,15 @@ function metadataActions(params: MetadataActionParams) {
 
 function CallActions({ callId, call, onChange }: { callId: string; call?: StoredCall; onChange: () => void }) {
   const title = call ? callTitle(call) : "Call";
-  const storedTitle = call?.title?.trim() ?? "";
   const summary = call?.summary?.trim() ?? "";
   return (
     <ActionPanel>
       <Action.Push
-        title="View Transcript"
+        title="View Capture"
         icon={Icon.Text}
-        target={<TranscriptDetail callId={callId} call={call} onChange={onChange} />}
+        target={<CaptureDetail callId={callId} call={call} onChange={onChange} />}
       />
-      {metadataActions({ callId, title, storedTitle, summary, onApplied: onChange })}
+      {metadataActions({ callId, title, summary, onApplied: onChange })}
       <Action
         title="Copy AI Context"
         icon={Icon.Clipboard}
@@ -259,14 +276,14 @@ function CallActions({ callId, call, onChange }: { callId: string; call?: Stored
         onAction={() => copyAiContext(callId)}
       />
       <Action
-        title="Export Transcript"
+        title="Export Capture"
         icon={Icon.Download}
         shortcut={{ modifiers: ["cmd"], key: "e" }}
         onAction={() => exportWithFeedback(callId)}
       />
       <Action.CopyToClipboard title="Copy Call ID" content={callId} />
       <Action
-        title="Delete Transcript"
+        title="Delete Capture"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -278,8 +295,8 @@ function CallActions({ callId, call, onChange }: { callId: string; call?: Stored
 
 async function deleteWithConfirm(callId: string, title: string, onChange: () => void) {
   const confirmed = await confirmAlert({
-    title: "Delete Transcript?",
-    message: `This permanently deletes the recording and transcript for “${title}”. This cannot be undone.`,
+    title: "Delete Capture?",
+    message: `This permanently deletes the full stored Capture — conversation, events, shared content, and retained media — for “${title}”. This cannot be undone.`,
     icon: Icon.Trash,
     primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
   });
@@ -287,54 +304,57 @@ async function deleteWithConfirm(callId: string, title: string, onChange: () => 
     return;
   }
   try {
-    await deleteTranscript(callId);
-    await showToast({ style: Toast.Style.Success, title: "Transcript Deleted" });
+    await deleteCapture(callId);
+    await showToast({ style: Toast.Style.Success, title: "Capture Deleted" });
     onChange();
   } catch (error) {
-    await showFailureToast(error, { title: "Could Not Delete Transcript" });
+    await showFailureToast(error, { title: "Could Not Delete Capture" });
   }
 }
 
-function TranscriptDetail({ callId, call, onChange }: { callId: string; call?: StoredCall; onChange?: () => void }) {
-  const fallbackTitle = call ? callTitle(call) : "Transcript";
-  // Title/summary come from the (frozen) call prop, so hold them in state and update on apply —
-  // there's no metadata hook on this view to revalidate, and the transcript text itself doesn't change.
-  // storedTitle is the call's raw title (empty when none); the displayed title falls back to participants.
-  const [storedTitle, setStoredTitle] = useState(call?.title?.trim() ?? "");
-  const [summary, setSummary] = useState(call?.summary?.trim() ?? "");
-  const title = storedTitle || fallbackTitle;
-
-  const handleApplied = (applied: { title: string; summary: string }) => {
-    setStoredTitle(applied.title);
-    setSummary(applied.summary);
+function CaptureDetail({ callId, call, onChange }: { callId: string; call?: StoredCall; onChange?: () => void }) {
+  const metadata = usePromise(getCall, [callId], { onError: () => {} });
+  const [applied, setApplied] = useState<CallDraft>();
+  const storedTitle = applied?.title ?? metadata.data?.title?.trim() ?? call?.title?.trim() ?? "";
+  const summary = applied?.summary ?? metadata.data?.summary?.trim() ?? call?.summary?.trim() ?? "";
+  const title = storedTitle || (call ? callTitle(call) : "Capture");
+  const handleApplied = (draft: CallDraft) => {
+    setApplied({ title: draft.title || storedTitle, summary: draft.summary });
+    metadata.revalidate();
     onChange?.();
   };
 
-  const { data, isLoading, error, revalidate } = useExec(getBinaryPath(), ["transcription", "show", callId], {
-    ...tupleExecOptions(),
-    keepPreviousData: true,
+  const { data, isLoading, error, revalidate } = usePromise(getLocalClockCaptureMarkdown, [callId], {
     onError: async (error) => {
       if (classifyError(error).kind === TupleErrorKind.Unknown) {
-        await showFailureToast(error, { title: "Could Not Load Transcript" });
+        await showFailureToast(error, { title: "Could Not Load Capture" });
       }
     },
   });
 
-  if (error) {
-    return <TupleErrorDetail error={error} onRetry={revalidate} />;
+  if (error || metadata.error) {
+    return (
+      <TupleErrorDetail
+        error={error || metadata.error!}
+        onRetry={() => {
+          revalidate();
+          metadata.revalidate();
+        }}
+      />
+    );
   }
 
   return (
     <Detail
-      isLoading={isLoading}
+      isLoading={isLoading || metadata.isLoading}
       navigationTitle={title}
-      markdown={buildTranscriptMarkdown(title, summary, data)}
+      markdown={buildCaptureMarkdown(title, summary, data)}
       actions={
         <ActionPanel>
-          {metadataActions({ callId, title, storedTitle, summary, onApplied: handleApplied })}
+          {metadataActions({ callId, title, summary, onApplied: handleApplied })}
           <Action title="Copy AI Context" icon={Icon.Clipboard} onAction={() => copyAiContext(callId)} />
           <Action
-            title="Export Transcript"
+            title="Export Capture"
             icon={Icon.Download}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
             onAction={() => exportWithFeedback(callId)}
@@ -363,12 +383,13 @@ async function copyAiContext(callId: string) {
 
 async function exportWithFeedback(callId: string) {
   const dir = exportDir();
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Exporting transcript…" });
+  const file = join(dir, `tuple-capture-${callId.replace(/[^a-zA-Z0-9-]/g, "_")}-${Date.now()}.jsonl`);
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Exporting Capture…" });
   try {
-    await exportTranscripts(dir, callId);
+    await exportCapture(file, callId);
     toast.style = Toast.Style.Success;
-    toast.title = "Transcript Exported";
-    toast.message = dir;
+    toast.title = "Capture Exported";
+    toast.message = file;
     toast.primaryAction = {
       title: "Open Folder",
       onAction: () => {
@@ -377,38 +398,38 @@ async function exportWithFeedback(callId: string) {
     };
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Could Not Export Transcript";
+    toast.title = "Could Not Export Capture";
     toast.message = error instanceof Error ? error.message : String(error);
   }
 }
 
-function buildTranscriptMarkdown(title: string, summary: string, transcript: string | undefined): string {
-  const heading = `# ${title}`;
-  const summaryBlock = summary.trim() ? `\n\n${summary.trim()}` : "";
-  const cleaned = transcript ? formatTranscript(transcript) : "";
-  const body = cleaned ? `\n\n---\n\n${cleaned}` : "\n\n_No transcript text available._";
+function buildCaptureMarkdown(title: string, summary: string, capture: string | undefined): string {
+  const heading = `# ${escapeMarkdownText(title)}`;
+  const summaryBlock = summary.trim() ? `\n\n${escapeMarkdownText(summary.trim())}` : "";
+  const cleaned = capture ? formatCaptureText(capture) : "";
+  const body = cleaned ? `\n\n---\n\n${cleaned}` : "\n\n_No Capture records available._";
   return `${heading}${summaryBlock}${body}`;
 }
 
 /** Strip the CLI's ANSI color codes and put each utterance on its own line so markdown doesn't run them together. */
-function formatTranscript(raw: string): string {
+function formatCaptureText(raw: string): string {
   return stripAnsi(raw)
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
+    .map(escapeMarkdownText)
     .join("\n\n");
 }
 
 /**
- * Most-recent first. The CLI's `transcription search` returns matches in FTS-rank order, not by
- * time, so the view sorts them — within the returned page (`--limit`); a term with more matches than
- * the limit is still capped by the CLI's own ordering before this runs.
+ * The CLI caps search by FTS rank before returning a page, while this occurrence view presents that
+ * returned page newest-first. Sorting here cannot recover newer matches outside the CLI limit.
  */
-function byTimeDesc(a: TranscriptMatch, b: TranscriptMatch): number {
+function byTimeDesc(a: CaptureMatch, b: CaptureMatch): number {
   return matchTime(b) - matchTime(a);
 }
 
-function matchTime(match: TranscriptMatch): number {
+function matchTime(match: CaptureMatch): number {
   const time = new Date(match.time).getTime();
   return Number.isNaN(time) ? 0 : time;
 }

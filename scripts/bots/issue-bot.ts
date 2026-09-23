@@ -64,7 +64,7 @@ export default async ({ github, context }: API) => {
       newMatchGitHub.exec(context.payload.issue.body) || oldMatchGithub.exec(context.payload.issue.body) || [];
     extensionFolder = x;
 
-    extension = Object.values(extensionName2Folder).find(([_, folder]) => folder === extensionFolder)?.[0];
+    extension = Object.entries(extensionName2Folder).find(([, folder]) => folder === extensionFolder)?.[0];
 
     if (!extension) {
       console.log(`could not find the extension in the body`);

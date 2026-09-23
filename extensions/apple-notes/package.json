@@ -20,7 +20,8 @@
     "andreaselia",
     "fhf1121",
     "charlesharries",
-    "janosorcsik"
+    "janosorcsik",
+    "bitforger"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -72,7 +73,7 @@
       "name": "ai",
       "title": "AI Note",
       "subtitle": "Apple Notes",
-      "description": "Create a new note filled with AI in your Apple notes.",
+      "description": "Create a new note filled with AI in your Apple notes, or add to an existing one.",
       "mode": "no-view",
       "arguments": [
         {
@@ -85,6 +86,11 @@
           "name": "instructions",
           "type": "text",
           "placeholder": "Additional instructions"
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "placeholder": "Existing note (optional)"
         }
       ]
     },
@@ -150,10 +156,35 @@
       "name": "update-note",
       "title": "Update Note",
       "description": "Update the content of a specific note in Apple Notes."
+    },
+    {
+      "name": "append-to-note",
+      "title": "Append to Note",
+      "description": "Add content to the end of a specific note in Apple Notes, keeping its existing content."
+    },
+    {
+      "name": "delete-note",
+      "title": "Delete Note",
+      "description": "Delete a specific note in Apple Notes."
+    },
+    {
+      "name": "restore-note",
+      "title": "Restore Note",
+      "description": "Restore a previously deleted note in Apple Notes."
+    },
+    {
+      "name": "move-note",
+      "title": "Move Note",
+      "description": "Move a specific note to a different folder in Apple Notes."
+    },
+    {
+      "name": "list-folders",
+      "title": "List Folders",
+      "description": "List the available folders in Apple Notes."
     }
   ],
   "ai": {
-    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.\\n- When calling get-note-content or update-note from search-notes results, use the note's id field and not UUID.",
+    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.\\n- When calling get-note-content, update-note, append-to-note, delete-note, or move-note from search-notes results, use the note's id field and not UUID.\\n- Use update-note to replace a note's whole content, and append-to-note to add new content while keeping what's already there.\\n- Before calling move-note, call list-folders to find a valid folder name; move-note will fail if the folder doesn't exist. If list-folders shows the folder name in more than one account, pass that account as move-note's accountName, or it will fail with a duplicate-folder error.\\n- delete-note is destructive and asks the user to confirm; if a note was deleted by mistake, restore-note can bring it back.",
     "evals": [
       {
         "input": "@apple-notes what's on my grocery list",
@@ -360,6 +391,152 @@
                 "noteId": "birthday-gifts"
               },
               "name": "update-note"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes delete my grocery list note",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            }
+          ],
+          "delete-note": "Successfully called \"delete-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "grocery-list"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes what folders do I have in Apple Notes?",
+        "mocks": {
+          "list-folders": [
+            {
+              "account": "iCloud",
+              "folder": "Notes"
+            },
+            {
+              "account": "iCloud",
+              "folder": "Work"
+            },
+            {
+              "account": "iCloud",
+              "folder": "Recipes"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-folders"
+          },
+          {
+            "meetsCriteria": "Returns a list of 3 folders."
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes move my grocery list note to the Work folder",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            }
+          ],
+          "list-folders": [
+            {
+              "account": "iCloud",
+              "folder": "Home"
+            },
+            {
+              "account": "iCloud",
+              "folder": "Work"
+            }
+          ],
+          "move-note": "Successfully called \"move-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "move-note",
+              "arguments": {
+                "noteId": "grocery-list",
+                "folderName": "Work"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes add milk to my grocery list without removing what's already there",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            }
+          ],
+          "append-to-note": "Successfully called \"append-to-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "append-to-note",
+              "arguments": {
+                "noteId": "grocery-list"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes find my work notes tagged urgent",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "project-milestones",
+              "folder": "Work",
+              "modifiedAt": "2025-01-19 16:45:22",
+              "snippet": "- Design review - User testing - Launch prep",
+              "title": "Q1 Project Milestones"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-notes",
+              "arguments": {
+                "tags": "urgent"
+              }
             }
           }
         ]

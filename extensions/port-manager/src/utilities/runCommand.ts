@@ -22,20 +22,28 @@ export class CommandExitError extends Error {
     public readonly stdout: string,
     public readonly stderr: string,
     public readonly exitCode: number | null,
-    public readonly signal: NodeJS.Signals | null
+    public readonly signal: NodeJS.Signals | null,
   ) {
     super(stderr || stdout || `${file} exited with code ${exitCode ?? signal}`);
   }
 }
 
 export class CommandTimeoutError extends Error {
-  constructor(public readonly file: string, public readonly args: string[], public readonly timeout: number) {
+  constructor(
+    public readonly file: string,
+    public readonly args: string[],
+    public readonly timeout: number,
+  ) {
     super(`${file} timed out after ${timeout}ms`);
   }
 }
 
 export class CommandBufferError extends Error {
-  constructor(public readonly file: string, public readonly args: string[], public readonly maxBuffer: number) {
+  constructor(
+    public readonly file: string,
+    public readonly args: string[],
+    public readonly maxBuffer: number,
+  ) {
     super(`${file} exceeded ${maxBuffer} bytes of output`);
   }
 }

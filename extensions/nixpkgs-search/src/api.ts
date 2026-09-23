@@ -97,6 +97,7 @@ export async function parseSearchResponse(response: Response, branchName: string
       platforms: result.package_platforms.filter((platform) =>
         SUPPORTED_PLATFORMS.includes(platform as (typeof SUPPORTED_PLATFORMS)[number]),
       ),
+      system: result.package_system || null,
       licenses: result.package_license.map((license) => {
         let url: string | null;
         try {

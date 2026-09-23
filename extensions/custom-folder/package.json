@@ -45,7 +45,7 @@
     "emoji-datasource-apple": "^15.1.2",
     "execa": "^9.5.2",
     "jimp": "^0.22.10",
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -61,5 +61,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1",
+    "sharp": "^0.35.3"
   }
 }

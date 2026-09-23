@@ -15,13 +15,19 @@ export function ExternalActions({ url }: ExternalActionsProps) {
         title="Open in Wayback Machine"
         url={waybackUrl}
         icon={Icon.Clock}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "w" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+        }}
       />
       <Action.OpenInBrowser
         title="View on Google"
         url={googleSearchUrl}
         icon={Icon.MagnifyingGlass}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "g" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "g" },
+        }}
       />
     </>
   );

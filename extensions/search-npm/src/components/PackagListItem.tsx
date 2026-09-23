@@ -1,5 +1,5 @@
 import tinyRelativeDate from "tiny-relative-date";
-import { Action, ActionPanel, Icon, Keyboard, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import type { Downloads, Package } from "@/model/npmResponse.model";
 import { addFavorite, removeAllItemsFromFavorites, removeItemFromFavorites } from "@/utils/favorite-storage";
 import { formatDownloads } from "@/utils/format";
@@ -166,7 +166,7 @@ export const PackageListItem = ({
       key={pkg.name}
       title={pkg.name}
       subtitle={subtitle}
-      icon={Icon.Box}
+      icon={{ source: Icon.Box, tintColor: Color.SecondaryText }}
       accessories={accessories}
       keywords={keywords}
       actions={
@@ -194,10 +194,7 @@ export const PackageListItem = ({
                 title="Remove from Favorites"
                 onAction={handleRemoveFromFaves}
                 icon={Icon.StarDisabled}
-                shortcut={{
-                  macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Duplicate}
                 style={Action.Style.Destructive}
               />
             ) : (
@@ -205,10 +202,7 @@ export const PackageListItem = ({
                 title="Add to Favorites"
                 onAction={handleAddToFaves}
                 icon={Icon.Star}
-                shortcut={{
-                  macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Duplicate}
               />
             )}
             {isViewingFavorites ? (
@@ -272,10 +266,7 @@ export const PackageListItem = ({
                     dark: "github-dark.png",
                   },
                 }}
-                shortcut={{
-                  macOS: { modifiers: ["cmd"], key: "." },
-                  Windows: { modifiers: ["ctrl"], key: "." },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
               />
             ) : null}
             {type === "github" || (type === "gitlab" && owner && name) ? (

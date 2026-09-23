@@ -12,7 +12,7 @@ interface NoteListItemProps {
   onRefresh: () => void;
   isShowingDetail: boolean;
   onToggleDetail: () => void;
-  mutate?: MutatePromise<Note[] | undefined>;
+  mutate?: MutatePromise<Note[]> | MutatePromise<Note[] | undefined>;
   folders?: Folder[];
 }
 
@@ -24,7 +24,7 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail,
     try {
       if (mutate) {
         await mutate(remoApi.togglePin(note._id), {
-          optimisticUpdate: (data) =>
+          optimisticUpdate: (data: Note[] | undefined) =>
             (data ?? []).map((n) => (n._id === note._id ? { ...n, isPinned: !n.isPinned } : n)),
         });
       } else {
@@ -61,7 +61,7 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail,
     try {
       if (mutate) {
         await mutate(remoApi.softDeleteNote(note._id), {
-          optimisticUpdate: (data) => (data ?? []).filter((n) => n._id !== note._id),
+          optimisticUpdate: (data: Note[] | undefined) => (data ?? []).filter((n) => n._id !== note._id),
         });
       } else {
         await remoApi.softDeleteNote(note._id);

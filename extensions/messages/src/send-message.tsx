@@ -56,6 +56,7 @@ export default function Command({
         text: values.text,
         service_name: recipient.service_name,
         group_name: recipient.group_name,
+        chat_guid: recipient.chat_guid,
       });
       if (result !== "Success") {
         await showToast({ style: Toast.Style.Failure, title: "Could not send message", message: result });

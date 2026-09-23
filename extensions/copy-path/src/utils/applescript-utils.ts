@@ -263,3 +263,81 @@ export const copySafariWebAppPath = async (app: string) => {
     return "";
   }
 };
+
+// Arc popup views: "Little Arc" windows and "Peek" previews.
+// Arc's scripting dictionary only knows about full tabs, so
+// "URL of active tab of front window" returns the underlying tab (or fails)
+// while a Little Arc window or a Peek preview is what the user is looking at.
+// Both are plain Chromium web areas in the accessibility tree, so read the
+// AXURL of the focused web area through the accessibility C API
+// (System Events cannot coerce Chromium's AXURL value).
+export const scriptArcFocusedPageUrl = `
+ObjC.import("Cocoa");
+ObjC.import("ApplicationServices");
+ObjC.bindFunction("AXUIElementCreateApplication", ["id", ["int"]]);
+ObjC.bindFunction("AXUIElementCopyAttributeValue", ["int", ["id", "id", "id*"]]);
+function attr(el, name) {
+  if (!el) return null;
+  const ref = Ref();
+  const err = $.AXUIElementCopyAttributeValue(el, $(name), ref);
+  return err === 0 ? ref[0] : null;
+}
+function str(v) {
+  if (!v) return null;
+  try {
+    return ObjC.unwrap(v.isKindOfClass($.NSURL) ? v.absoluteString : v);
+  } catch (e) {
+    return null;
+  }
+}
+function isWebArea(el) {
+  return str(attr(el, "AXRole")) === "AXWebArea";
+}
+function collectWebAreas(el, depth, acc) {
+  if (!el || depth > 10 || acc.visited > 4000) return;
+  acc.visited++;
+  if (isWebArea(el)) {
+    acc.areas.push(el);
+    return;
+  }
+  const kids = attr(el, "AXChildren");
+  if (!kids) return;
+  const n = kids.count;
+  for (let i = 0; i < n; i++) collectWebAreas(kids.objectAtIndex(i), depth + 1, acc);
+}
+function urlOf(el) {
+  const u = str(attr(el, "AXURL"));
+  return u && u.indexOf("http") === 0 ? u : "";
+}
+const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("company.thebrowser.Browser");
+let result = "";
+if (apps.count > 0) {
+  const app = $.AXUIElementCreateApplication(apps.objectAtIndex(0).processIdentifier);
+  // 1. the focused element, or its nearest enclosing web area
+  let el = attr(app, "AXFocusedUIElement");
+  for (let i = 0; el && i < 30 && !isWebArea(el); i++) el = attr(el, "AXParent");
+  if (el) result = urlOf(el);
+  // 2. otherwise the focused web area of the focused window; a lone web area also counts
+  if (!result) {
+    const win = attr(app, "AXFocusedWindow") || attr(app, "AXMainWindow");
+    const acc = { visited: 0, areas: [] };
+    collectWebAreas(win, 0, acc);
+    const focused = acc.areas.filter(function (a) { return str(attr(a, "AXFocused")) === true || str(attr(a, "AXFocused")) === 1; });
+    if (focused.length === 1) result = urlOf(focused[0]);
+    else if (acc.areas.length === 1) result = urlOf(acc.areas[0]);
+  }
+}
+result;
+`;
+
+export const getArcFocusedPageUrl = async () => {
+  try {
+    const url = await runAppleScript(scriptArcFocusedPageUrl, {
+      language: "JavaScript",
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+    return url.trim().startsWith("http") ? url.trim() : "";
+  } catch (e) {
+    return "";
+  }
+};

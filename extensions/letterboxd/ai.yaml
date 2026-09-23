@@ -1,0 +1,79 @@
+instructions: |
+  Use search-movies when the user wants to find, identify, compare, or get public information about movies on Letterboxd. Results can include release year, director, rating, runtime, genres, Top 250 position, and Letterboxd, IMDb, and TMDB links.
+  Use get-movie-details when the user asks for a synopsis, cast, production companies, languages, countries, exact release date, aggregate rating, or popular review excerpts. Unless an exact Letterboxd film path is already present in a preceding result, call search-movies first and pass its exact detailsPath to get-movie-details. Never invent or derive a film path from a title.
+  When multiple films have the same title, use the release year and director to distinguish them. Ask the user to clarify only when the intended result cannot be determined from their request.
+  Ratings and rankings are snapshots of public Letterboxd data and may change. Include the Letterboxd URL in answers when useful.
+  These tools are read-only and only expose public movie information. They cannot inspect or modify a user's account, watchlist, diary, ratings, reviews, lists, likes, or streaming-service preferences. Do not claim that an account action was performed.
+evals:
+  - input: "@letterboxd Find the 2010 movie Inception and give me its Letterboxd rating and IMDb link."
+    mocks:
+      search-movies:
+        query: "Inception"
+        count: 1
+        results:
+          - id: "1skk"
+            title: "Inception"
+            releaseYear: 2010
+            director: "Christopher Nolan"
+            rating: 4.24
+            runtimeMinutes: 148
+            genres: ["Action", "Adventure", "Science Fiction"]
+            top250Position: 249
+            detailsPath: "/film/inception/"
+            letterboxdUrl: "https://letterboxd.com/film/inception/"
+            imdbUrl: "https://www.imdb.com/title/tt1375666/"
+            tmdbUrl: "https://www.themoviedb.org/movie/27205"
+    expected:
+      - callsTool:
+          name: "search-movies"
+          arguments:
+            query:
+              includes: "Inception"
+      - includes: "4.24"
+      - includes: "imdb.com"
+  - input: "@letterboxd Tell me about Inception from 2010, including its synopsis, main cast, languages, and production companies."
+    mocks:
+      search-movies:
+        query: "Inception 2010"
+        count: 1
+        results:
+          - id: "1skk"
+            title: "Inception"
+            releaseYear: 2010
+            director: "Christopher Nolan"
+            rating: 4.24
+            runtimeMinutes: 148
+            genres: ["Action", "Adventure", "Science Fiction"]
+            detailsPath: "/film/inception/"
+            letterboxdUrl: "https://letterboxd.com/film/inception/"
+      get-movie-details:
+        id: "inception"
+        title: "Inception"
+        director: "Christopher Nolan"
+        releaseYear: 2010
+        releaseDate: "2010-07-08"
+        runtimeMinutes: 148
+        rating:
+          average: 4.24
+          count: 2500000
+        genres: ["Action", "Adventure", "Science Fiction"]
+        languages: ["en", "fr", "ja", "sw"]
+        countries: ["UK", "USA"]
+        description: "A skilled extractor is offered a chance to erase his past crimes."
+        cast:
+          - name: "Leonardo DiCaprio"
+            url: "https://letterboxd.com/actor/leonardo-dicaprio/"
+          - name: "Joseph Gordon-Levitt"
+        productionCompanies:
+          - name: "Syncopy"
+            url: "https://letterboxd.com/studio/syncopy/"
+        reviews: []
+        letterboxdUrl: "https://letterboxd.com/film/inception/"
+    expected:
+      - callsTool: "search-movies"
+      - callsTool:
+          name: "get-movie-details"
+          arguments:
+            filmPath: "/film/inception/"
+      - includes: "Leonardo DiCaprio"
+      - includes: "Syncopy"

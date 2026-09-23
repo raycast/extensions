@@ -101,7 +101,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
     initialValues: {
       teamId: props.issue.team.id,
       title: props.issue.title,
-      description: issue.description,
+      description: issue.description ?? undefined,
       priority: String(props.issue.priority),
       stateId: props.issue.state.id,
       estimate: props.issue.estimate ? String(props.issue.estimate) : undefined,

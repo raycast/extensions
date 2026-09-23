@@ -50,8 +50,9 @@ export default function ShowUpgradable() {
       }
       bulkTargets={(index, lookups) => ({
         // Always from the full index slice — never the filtered/rendered rows.
+        // Same exclusions as the engine's own target derivation.
         upgradeAllTargets: upgradableRows(index, lookups)
-          .filter((row) => !row.isPinned)
+          .filter((row) => !row.isPinned && !row.updatePreviouslyFailed)
           .map((row) => ({ id: row.id, name: row.name, source: row.source })),
       })}
     />

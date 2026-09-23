@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clerk",
+  "title": "Clerk",
+  "description": "Interface with Clerk",
+  "icon": "extension-icon.png",
+  "author": "filiph",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-apps",
+      "title": "Manage Apps",
+      "description": "Add, edit, remove, and activate Clerk instances",
+      "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "description": "Search and manage users in the active Clerk instance",
+      "mode": "view"
+    },
+    {
+      "name": "search-organizations",
+      "title": "Search Organizations",
+      "description": "Search organizations and manage members in the active Clerk instance",
+      "mode": "view"
+    },
+    {
+      "name": "invitations",
+      "title": "Invitations",
+      "description": "View and manage invitations in the active Clerk instance",
+      "mode": "view"
+    },
+    {
+      "name": "access-lists",
+      "title": "Access Lists",
+      "description": "Manage allowlist and blocklist identifiers in the active Clerk instance",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@clerk/backend": "^3.7.0",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.8"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
+}

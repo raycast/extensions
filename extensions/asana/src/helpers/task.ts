@@ -8,12 +8,7 @@ import { AsanaColors, asanaToRaycastColor } from "./colors";
  * This is needed when sending text content to Asana's html_notes field.
  */
 export function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 export function getTaskSubtitle(task: Task): { value: string; tooltip: string } | string {

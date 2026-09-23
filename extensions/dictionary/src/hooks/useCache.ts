@@ -20,11 +20,9 @@ const useCache = (key: string) => {
 };
 
 export const useStatedCache = <T = undefined>(
-  key: string | undefined
+  key: string | undefined,
 ): [T | undefined, Dispatch<SetStateAction<T | undefined>>] => {
-  const cache = key
-    ? useCache(key)
-    : { get: () => undefined, set: (_data: string) => undefined, on: (_sub: Cache.Subscriber) => () => undefined };
+  const cache = key ? useCache(key) : { get: () => undefined, set: () => undefined, on: () => () => undefined };
   const v = cache.get();
   const [value, setValue] = useState<T | undefined>(v ? JSON.parse(v) : undefined);
   useEffect(() => {

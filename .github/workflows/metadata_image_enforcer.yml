@@ -16,36 +16,38 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          metadata_paths=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files | jq -r '
-            .files[]
-            | select(
-                (.path | test("^extensions/[^/]+/metadata/.+"))
-                and ((.path | endswith(".png")) or (.path | endswith(".jpg")) or (.path | endswith(".jpeg")) or (.path | endswith(".webp")) or (.path | endswith(".gif")) or (.path | endswith(".bmp")))
-              )
-            | .path
-          ' | sort)
+          changed_files=$(gh api --paginate \
+            "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+            --jq '.[] | select(
+              (.filename | test("^extensions/[^/]+/metadata/.+")) or
+              ((.previous_filename // "") | test("^extensions/[^/]+/metadata/.+"))
+            ) | [.status, .filename, (.previous_filename // "")] | @tsv')
 
-          if [[ -z "$metadata_paths" ]]; then
-            echo "No changed metadata images in this PR — skipping validation." >&2
+          if [[ -z "$changed_files" ]]; then
+            echo "No metadata changes in this PR — skipping validation." >&2
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          extension_paths=$(printf '%s\n' "$changed_files" \
+            | awk -F '\t' '{ print $2; if ($3 != "") print $3 }' \
+            | awk -F/ '{ print $1 "/" $2 }' \
+            | sort -u)
+
           {
             echo "skip=false"
-            echo "metadata_count=$(printf '%s\n' "$metadata_paths" | sed '/^$/d' | wc -l | tr -d ' ')"
-            echo "metadata_paths<<EOF"
-            printf '%s\n' "$metadata_paths"
+            echo "changed_files<<EOF"
+            printf '%s\n' "$changed_files" | sed $'s/\t$//'
             echo "EOF"
             echo "sparse_paths<<EOF"
             echo "scripts"
-            printf '%s\n' "$metadata_paths"
+            printf '%s\n' "$extension_paths"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         if: steps.sparse_paths.outputs.skip != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
           sparse-checkout: ${{ steps.sparse_paths.outputs.sparse_paths }}
@@ -53,7 +55,7 @@ jobs:
 
       - name: Set up Python
         if: steps.sparse_paths.outputs.skip != 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -61,9 +63,13 @@ jobs:
         if: steps.sparse_paths.outputs.skip != 'true'
         run: python3 -m pip install --disable-pip-version-check numpy pillow
 
+      - name: Test metadata image checks
+        if: steps.sparse_paths.outputs.skip != 'true'
+        run: python3 -m unittest discover -s scripts/tests -v
+
       - name: Validate metadata images
         if: steps.sparse_paths.outputs.skip != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          METADATA_IMAGE_PATHS: ${{ steps.sparse_paths.outputs.metadata_paths }}
+          METADATA_CHECK_CHANGED_FILES: ${{ steps.sparse_paths.outputs.changed_files }}
         run: python3 scripts/check_metadata_images.py

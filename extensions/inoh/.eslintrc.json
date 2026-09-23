@@ -1,0 +1,5 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "ignorePatterns": ["raycast-env.d.ts"]
+}

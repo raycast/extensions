@@ -5,7 +5,7 @@ import Docker from "./docker";
 import Users from "./users";
 import Destinations from "./destinations";
 
-interface Instance {
+export interface Instance {
   key: string;
   url: string;
   name: string;
@@ -18,6 +18,16 @@ export function useToken() {
   const [token] = useCachedState<CachedToken>("token", { url: "", headers: {} });
   return token;
 }
+/** Builds the same `{ url, headers }` request token `useToken()` caches, for any stored instance. */
+export function tokenForInstance(instance: Instance): CachedToken {
+  return {
+    url: new URL("api/", instance.url).toString(),
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": instance.key,
+    },
+  };
+}
 export default function Instances() {
   const [, setToken] = useCachedState<CachedToken>("token");
 
@@ -25,14 +35,9 @@ export default function Instances() {
 
   function onSelectionChange(key: string | null) {
     if (!key) return;
-    const token = instances.find((i) => i.key === key);
-    if (!token) return;
-    const url = new URL("api/", token.url).toString();
-    const headers = {
-      "Content-Type": "application/json",
-      "x-api-key": token.key,
-    };
-    setToken({ url, headers });
+    const instance = instances.find((i) => i.key === key);
+    if (!instance) return;
+    setToken(tokenForInstance(instance));
   }
 
   return (
@@ -80,7 +85,7 @@ export default function Instances() {
   );
 }
 
-function AddInstance() {
+export function AddInstance() {
   const { value = [], setValue } = useLocalStorage<Instance[]>("instances");
   const { handleSubmit, itemProps } = useForm<Instance>({
     async onSubmit(values) {

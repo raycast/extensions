@@ -38,7 +38,9 @@ export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?:
           <Action.SubmitForm
             title="Submit Terminal App Name"
             onSubmit={async (values) => {
-              LocalStorage.setItem("terminalAppBundleId", values.terminalAppBundleId);
+              // Await persistence so consumers that re-read LocalStorage right
+              // after setup (e.g. reloading terminal capabilities) see the value
+              await LocalStorage.setItem("terminalAppBundleId", values.terminalAppBundleId);
               const toast = await showToast({
                 style: Toast.Style.Animated,
                 title: "Setup Terminal",

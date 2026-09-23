@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Quit exact application bundle] - 2026-08-27
+
+- Target the selected bundle path when quitting or restarting and only report success after the exact application exits.
+
 ## [Show menu bar apps] - 2026-07-01
 
 - Switched running-app discovery to NSWorkspace so menu bar / accessory (LSUIElement) apps now appear in the list, while system agents and helper processes stay hidden.

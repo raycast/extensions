@@ -13,7 +13,8 @@
     "sebastiankranz",
     "kosha",
     "Olivier-OG",
-    "Krosnoz"
+    "Krosnoz",
+    "ahetzm"
   ],
   "license": "MIT",
   "platforms": [
@@ -55,16 +56,12 @@
   ],
   "preferences": [
     {
-      "description": "Path to Docker socket",
+      "description": "Path or URL of the Docker socket (e.g. /var/run/docker.sock, unix:///path/to/docker.sock, tcp://host:2375). Leave empty to use the current Docker CLI context, falling back to the platform default.",
       "name": "socketPath",
-      "placeholder": "Leave empty for default",
+      "placeholder": "Leave empty to use the current Docker context",
       "required": false,
       "title": "Socket path",
-      "type": "textfield",
-      "default": {
-        "macOS": "/var/run/docker.sock",
-        "Windows": "//./pipe/docker_engine"
-      }
+      "type": "textfield"
     }
   ],
   "dependencies": {
@@ -73,7 +70,11 @@
     "node-fetch": "^3.0.0"
   },
   "overrides": {
-    "tar-fs": ">=3.1.1"
+    "tar-fs": ">=3.1.1",
+    "js-yaml@4": "4.3.1",
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

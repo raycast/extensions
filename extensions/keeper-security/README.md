@@ -13,7 +13,7 @@
 
 ## Overview
 
-A comprehensive [Raycast](https://www.raycast.com/) extension that provides seamless access to your Keeper Security vault directly to your macOS desktop. Manage records, generate secure credentials, and access your vault records without leaving your workflow.
+A comprehensive [Raycast](https://www.raycast.com/) extension that provides seamless access to your Keeper Security vault on **macOS** and **Windows**. Manage records, generate secure credentials, and access your vault records without leaving your workflow.
 
 ## Features
 
@@ -23,6 +23,7 @@ A comprehensive [Raycast](https://www.raycast.com/) extension that provides seam
 
 ## Prerequisites
 
+- **Raycast**: Installed on macOS or Windows
 - **Keeper Commander CLI**: Must be installed and authenticated on your system
 - **Keeper Security Account**: Active subscription with vault access (Consumer, B2B, MSP)
 
@@ -38,10 +39,7 @@ Or, open **Raycast Settings > Extensions > Click "+" button > Install from Store
 
 ### Step 2: Install the Keeper Commander CLI
 
-Follow the [Keeper Commander Installation Guide](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup) to download and install the binary for your operating system. For macOS, you have 2 options:
-
-- [Install the Commander CLI using pip3](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/installation-on-mac#python-pip3-installation-method)
-- [Install in developer mode](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup/developer-mode)
+Follow the [Keeper Commander Installation Guide](https://docs.keeper.io/en/keeperpam/commander-cli/commander-installation-setup) to download and install the binary for your operating system.
 
 ### Step 3: Authenticate with Keeper Commander CLI
 

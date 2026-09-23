@@ -1,5 +1,16 @@
 # GitLab Changelog
 
+## [Squash commits checkbox in MR create form] - 2026-09-11
+
+- Add "Squash commits when merge request is accepted" checkbox to the MR create and edit forms
+- Fix boolean form values being dropped on submit
+
+## [Simplified authentication] - 2026-08-12
+
+- Remove the `Sign out of GitLab` command. Raycast adds a logout option to the extension preferences once you have signed in with OAuth
+- Remove the `Authentication` preference. The extension uses the `API Token` when one is set and OAuth otherwise
+- Clear the `API Token` field to keep using OAuth if both are configured
+
 ## [MR todos, project search, and API logging] - 2026-07-17
 
 - Show MR todo state from the list query; add or mark todos done without loading the full todos list

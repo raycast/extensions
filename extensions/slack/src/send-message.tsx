@@ -1,9 +1,10 @@
 import { Form, ActionPanel, Action, showToast, Toast, showHUD, PopToRootType, Image } from "@raycast/api";
 import { useState } from "react";
-import { User, useChannels } from "./shared/client";
+import { User, useDirectorySearch } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
 import { handleError } from "./shared/utils";
+import { isSlackUserId } from "./shared/client/directory";
 
 interface FormValues {
   recipient: string;
@@ -15,28 +16,15 @@ interface FormValues {
 
 interface SendMessageProps {
   recipient?: string;
+  recipientName?: string;
 }
 
 const selectRecipient = "SELECT_RECIPIENT";
 
-function foldForSearch(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-}
-
-function matchesAllWords(text: string, searchText: string): boolean {
-  if (!searchText.trim()) return true;
-  const words = foldForSearch(searchText).split(/\s+/).filter(Boolean);
-  const folded = foldForSearch(text);
-  return words.every((word) => folded.includes(word));
-}
-
-function SendMessage({ recipient }: SendMessageProps) {
+function SendMessage({ recipient, recipientName }: SendMessageProps) {
   const [sendNow, setSendNow] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const { data: channels, isLoading } = useChannels();
+  const { data: channels, isLoading } = useDirectorySearch(searchText);
 
   async function handleSubmit(values: FormValues) {
     const [recipientId, recipientTitle] = values.recipient.split("|");
@@ -102,11 +90,8 @@ function SendMessage({ recipient }: SendMessageProps) {
     const privateChannels: DropdownItem[] = [];
 
     channels.flat().forEach((item) => {
-      const isUser = item.id.startsWith("U");
+      const isUser = isSlackUserId(item.id);
       const itemName = isUser ? (item as User).name : item.name || "";
-
-      // Filter by search text
-      if (!matchesAllWords(itemName, searchText)) return;
 
       // Handle the icon which can be a string or an object with source property
       let iconValue = item.icon;
@@ -139,6 +124,11 @@ function SendMessage({ recipient }: SendMessageProps) {
   };
 
   const { users, publicChannels, privateChannels } = categorizeItems();
+  const selectedRecipientTitle =
+    recipient && (channels?.flat().find((item) => item.id === recipient)?.name ?? recipientName ?? recipient);
+  if (recipient && selectedRecipientTitle && !users.some((item) => item.value === recipient)) {
+    users.unshift({ title: selectedRecipientTitle, value: recipient, icon: undefined });
+  }
 
   return (
     <Form
@@ -153,12 +143,9 @@ function SendMessage({ recipient }: SendMessageProps) {
         id="recipient"
         title="Send to"
         filtering={false}
+        throttle
         onSearchTextChange={setSearchText}
-        defaultValue={
-          recipient
-            ? `${recipient}|${channels?.flat().find((item) => item.id === recipient)?.name || recipient}`
-            : selectRecipient
-        }
+        defaultValue={recipient && selectedRecipientTitle ? `${recipient}|${selectedRecipientTitle}` : selectRecipient}
       >
         <Form.Dropdown.Item title="Select a channel or user..." value={selectRecipient} />
 

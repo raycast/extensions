@@ -1,5 +1,36 @@
 # Clockify Changelog
 
+## [Reduce menu bar data usage while no timer is running] - 2026-09-22
+
+- The menu bar no longer refetches the full time entry list every 10 seconds while no timer is running. That request returns 500 hydrated entries — roughly 1.2MB — so keeping the five-item "Recent Timers" list up to date cost in the order of 450MB per hour. It is now refreshed at most every 10 minutes, or as soon as the "Time Tracking" command reloads it. The list still appears immediately from cache, so there is no visible change.
+- Fixed an entry started from the menu bar's "Recent Timers" showing without its project name or colour. Clockify does not return the project on the response to creating an entry, so the project is now filled in from the already-cached copy before the entry is stored.
+
+## [Fix stale menu bar state and menu bar actions doing nothing] - 2026-09-19
+
+- The menu bar now reflects timers started or stopped outside the extension, such as in the Clockify web app. It previously determined the running timer from a local cache that could not see those changes, so a timer started elsewhere took two refresh cycles to appear, and one stopped elsewhere could keep counting up indefinitely. The running timer is now read from Clockify on each refresh, so it updates within one 10-second refresh interval.
+- Fixed "Stop Timer" and the recent-timer restarts in the menu bar silently doing nothing. Menu bar commands run in the background, where the Toast API is unavailable and throws; as both actions began by showing a toast, they aborted before the request was ever sent.
+- Fixed the menu bar title briefly flashing "No Timer" every 10 seconds while a timer was running.
+- The running timer is no longer offered among the restartable "Recent Timers".
+
+## [Fix time entries always being created as non-billable] - 2026-09-09
+
+- Time entries now follow the project's "billable by default" setting instead of always being created as non-billable. Clockify treats an absent `billable` field as `false` rather than inheriting it from the project, so the value is now sent explicitly.
+- Applies to starting a new timer, restarting a recent entry, and adding a completed entry with "Add Time Entry".
+
+## [Fix requests being sent to an undefined workspace] - 2026-09-09
+
+- Fixed commands failing with "User doesn't belong to Workspace" and "Timer could not be started" when the stored workspace id was missing. The id is now resolved and repaired on demand rather than read straight from `LocalStorage`, which can drop a key when several values are written concurrently.
+- Fixed the menu bar command being unable to recover from that state on its own, as it never bootstrapped the workspace id itself.
+- Added a fallback to the active workspace, and then to the first available workspace, for accounts where Clockify returns no default workspace.
+- Hardened API key validation so an unset key shows the invalid-key screen instead of failing to render.
+- The "Timer could not be started" toast now reports the reason returned by Clockify.
+
+## [Fix project selection resetting and timer failing to start] - 2026-09-08
+
+- Fixed the project dropdown resetting to the first project on every selection in both "Start New Timer" and "Add Time Entry".
+- Fixed "Timer could not be started" caused by the selected project never reaching the form values.
+- Fixed the resulting loop of task requests, which triggered Clockify rate limiting (HTTP 429).
+
 ## [Fix cached workspace data] - 2026-05-15
 
 - Fixed cached projects, tags, and tasks falling back incorrectly when Clockify returns no data.

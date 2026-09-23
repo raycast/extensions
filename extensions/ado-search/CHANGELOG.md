@@ -1,5 +1,8 @@
 # Azure DevOps Repository Search
 
+## [Optional assigned-to-me filter for My Work Items] - 2026-09-10
+Added a setting to My Work Items to browse work items assigned to anyone, not just yourself. It is on by default (assigned-to-me only); when turned off, a project, state, or type filter is required to keep the result set bounded, and each item's assignee is shown in the list.
+
 ## [Fix My Work Items settings not saving] - 2026-06-24
 Fixed the My Work Items setup form silently discarding selections (project, states, types, default repository, default base branch) that were made while option lists were still loading, which caused Save to persist the defaults.
 

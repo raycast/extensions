@@ -20,9 +20,9 @@
   "preferences": [
     {
       "name": "trackReadStatus",
-      "title": "Track Read/Unread Status",
-      "label": "Enable",
-      "description": "When enabled, items can be marked as read and hidden from the list",
+      "title": "Read Status",
+      "label": "Enable read/unread statuses",
+      "description": "Mark items as read and hide them from the list.",
       "type": "checkbox",
       "required": false,
       "default": false
@@ -30,9 +30,36 @@
     {
       "name": "githubToken",
       "title": "GitHub Token",
-      "description": "Optional GitHub personal access token. The extension reads merged pull requests from the GitHub API to detect extension updates and removals; without a token this is capped at 60 requests/hour. A classic token with no scopes (public read only) raises the limit to 5,000 requests/hour. Create one at github.com/settings/tokens.",
+      "description": "Optional. Raises the GitHub API limit from 60 to 5,000 requests/hour. A classic token with no scopes is enough.",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "useGraphQL",
+      "title": "GraphQL",
+      "label": "Use GraphQL (experimental)",
+      "description": "Fetch pull requests via GraphQL. Requires a token; falls back to REST without one.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuBarScope",
+      "title": "Menu Bar",
+      "description": "Which updates the menu bar counts. Does not affect the main list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Updates",
+          "value": "all"
+        },
+        {
+          "title": "My Updates (installed only)",
+          "value": "my-updates"
+        }
+      ]
     }
   ],
   "commands": [
@@ -53,16 +80,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^2.2.2"
+    "@chrismessina/raycast-kit": "^0.1.4",
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

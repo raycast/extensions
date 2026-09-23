@@ -149,16 +149,16 @@ export async function updateRecentFavicon(
   let changed = false;
   for (const r of recents) {
     if (canonicalCwd(r.cwd) !== target) continue;
-    if (favicon && r.favicon !== favicon) {
-      r.favicon = favicon;
-      r.cwd = target;
-      changed = true;
-    }
-    if (faviconRaster && r.faviconRaster !== faviconRaster) {
-      r.faviconRaster = faviconRaster;
-      r.cwd = target;
-      changed = true;
-    }
+    const newFavicon = favicon !== undefined && r.favicon !== favicon;
+    const newRaster =
+      faviconRaster !== undefined && r.faviconRaster !== faviconRaster;
+    if (!newFavicon && !newRaster) continue;
+    if (newFavicon) r.favicon = favicon;
+    if (newRaster) r.faviconRaster = faviconRaster;
+    // Normalize the key while we're writing anyway; reads always compare
+    // through canonicalCwd, so this only saves them the realpath.
+    r.cwd = target;
+    changed = true;
   }
   if (changed) await writeAll(recents);
 }

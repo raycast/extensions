@@ -1,23 +1,30 @@
-import {
-  Alert,
-  confirmAlert,
-  showToast,
-  Toast,
-  popToRoot,
-  Icon,
-  List,
-  ActionPanel,
-  Action,
-  Color,
-  Form,
-} from "@raycast/api";
+import { Alert, confirmAlert, showToast, Toast, popToRoot, Icon, List, ActionPanel, Action, Form } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
-import { Server, Service, ErrorResult } from "./interfaces";
+import { Server, Service, ErrorResult, DatabaseKind } from "./interfaces";
+import ServiceLogs from "./service-logs";
+import DeploymentHistory from "./deployment-history";
+import ServiceEnv from "./service-env";
+import ServiceDomains from "./service-domains";
+import ServiceBackups, { BackupableKind } from "./service-backups";
+import ServiceSchedules from "./service-schedules";
+import { DatabaseActions } from "./database-actions";
+import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
 
-export default function Services({ environment }: { environment: ServiceScope }) {
+const DATABASE_KINDS: DatabaseKind[] = ["mariadb", "mongo", "mysql", "postgres", "redis"];
+// Redis has no `databaseType` value in Dokploy's backup API - only these four take one.
+const BACKUPABLE_KINDS: BackupableKind[] = ["mariadb", "mongo", "mysql", "postgres"];
+
+export default function Services({
+  environment,
+  revalidate,
+}: {
+  environment: ServiceScope;
+  /** Refetches the project tree this screen's data came from, so a lifecycle action's effect on status is reflected without leaving the screen. */
+  revalidate?: () => void;
+}) {
   const { url, headers } = useToken();
 
   interface GroupedService extends Service {
@@ -25,6 +32,7 @@ export default function Services({ environment }: { environment: ServiceScope })
     id: string;
     status: "idle" | "done";
   }
+
   const services: GroupedService[] = [
     ...environment.applications.map((a) => ({
       ...a,
@@ -141,12 +149,7 @@ export default function Services({ environment }: { environment: ServiceScope })
             key={service.id}
             icon={SERVICE_ICONS[service.type]}
             title={service.name}
-            accessories={[
-              {
-                icon: { source: Icon.CircleFilled, tintColor: service.status === "done" ? Color.Green : "#18181B" },
-                tooltip: service.status,
-              },
-            ]}
+            accessories={[statusAccessory(service.status)]}
             detail={
               <List.Item.Detail
                 markdown={service.description}
@@ -178,6 +181,54 @@ export default function Services({ environment }: { environment: ServiceScope })
                     target={<CreateDatabase environment={environment} />}
                   />
                 </ActionPanel.Submenu>
+                <ActionPanel.Section title="Actions">
+                  {SERVICE_ACTIONS[service.type].map((action) => (
+                    <Action
+                      key={action}
+                      icon={ACTION_ICONS[action]}
+                      title={ACTION_LABELS[action]}
+                      style={action === "stop" ? Action.Style.Destructive : undefined}
+                      onAction={() => runServiceAction(url, headers, service, action, revalidate)}
+                    />
+                  ))}
+                  <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.List}
+                      title="View Deployments"
+                      target={<DeploymentHistory service={{ ...service, type: service.type }} />}
+                    />
+                  )}
+                  <Action.Push
+                    icon={Icon.LockUnlocked}
+                    title="View Environment"
+                    target={<ServiceEnv service={service} />}
+                  />
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.Globe}
+                      title="View Domains"
+                      target={<ServiceDomains service={{ ...service, type: service.type }} />}
+                    />
+                  )}
+                  {(BACKUPABLE_KINDS.includes(service.type as BackupableKind) || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.Cloud}
+                      title="View Backups"
+                      target={<ServiceBackups service={{ ...service, type: service.type as BackupableKind }} />}
+                    />
+                  )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.Clock}
+                      title="View Schedules"
+                      target={<ServiceSchedules service={{ ...service, type: service.type }} />}
+                    />
+                  )}
+                </ActionPanel.Section>
+                {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
+                  <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
+                )}
                 <Action
                   icon={Icon.Trash}
                   title="Delete"

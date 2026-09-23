@@ -12,9 +12,13 @@
     "samuelkraft",
     "benoit.grelard",
     "sdorra",
-    "sebdanielsson"
+    "sebdanielsson",
+    "ray.dhruv"
   ],
   "license": "MIT",
+  "categories": [
+    "Design Tools"
+  ],
   "commands": [
     {
       "name": "create-a-snippet",
@@ -28,211 +32,237 @@
       "title": "Generate Image",
       "subtitle": "ray.so",
       "description": "Use Ray.so to create beautiful images of your code",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "theme",
-          "title": "Theme",
-          "type": "dropdown",
-          "required": false,
-          "description": "Change the background color",
-          "default": "candy",
-          "data": [
-            {
-              "title": "Vercel",
-              "value": "vercel"
-            },
-            {
-              "title": "Evil Rabbit",
-              "value": "rabbit"
-            },
-            {
-              "title": "Supabase",
-              "value": "supabase"
-            },
-            {
-              "title": "Tailwind",
-              "value": "tailwind"
-            },
-            {
-              "title": "OpenAI",
-              "value": "openai"
-            },
-            {
-              "title": "Mintlify",
-              "value": "mintlify"
-            },
-            {
-              "title": "Prisma",
-              "value": "prisma"
-            },
-            {
-              "title": "Clerk",
-              "value": "clerk"
-            },
-            {
-              "title": "ElevenLabs",
-              "value": "elevenlabs"
-            },
-            {
-              "title": "Resend",
-              "value": "resend"
-            },
-            {
-              "title": "Trigger.dev",
-              "value": "triggerdev"
-            },
-            {
-              "title": "Nuxt",
-              "value": "nuxt"
-            },
-            {
-              "title": "Browserbase",
-              "value": "browserbase"
-            },
-            {
-              "title": "Cloudflare",
-              "value": "cloudflare"
-            },
-            {
-              "title": "Gemini",
-              "value": "gemini"
-            },
-            {
-              "title": "Stripe",
-              "value": "stripe"
-            },
-            {
-              "title": "Firecrawl",
-              "value": "firecrawl"
-            },
-            {
-              "title": "Bitmap",
-              "value": "bitmap"
-            },
-            {
-              "title": "Noir",
-              "value": "noir"
-            },
-            {
-              "title": "Ice",
-              "value": "ice"
-            },
-            {
-              "title": "Sand",
-              "value": "sand"
-            },
-            {
-              "title": "Forest",
-              "value": "forest"
-            },
-            {
-              "title": "Mono",
-              "value": "mono"
-            },
-            {
-              "title": "Breeze",
-              "value": "breeze"
-            },
-            {
-              "title": "Candy",
-              "value": "candy"
-            },
-            {
-              "title": "Crimson",
-              "value": "crimson"
-            },
-            {
-              "title": "Falcon",
-              "value": "falcon"
-            },
-            {
-              "title": "Meadow",
-              "value": "meadow"
-            },
-            {
-              "title": "Midnight",
-              "value": "midnight"
-            },
-            {
-              "title": "Raindrop",
-              "value": "raindrop"
-            },
-            {
-              "title": "Sunset",
-              "value": "sunset"
-            }
-          ]
-        },
-        {
-          "name": "padding",
-          "title": "Padding",
-          "type": "dropdown",
-          "required": false,
-          "description": "Set the padding around the code",
-          "default": "64",
-          "data": [
-            {
-              "title": "16",
-              "value": "16"
-            },
-            {
-              "title": "32",
-              "value": "32"
-            },
-            {
-              "title": "64",
-              "value": "64"
-            },
-            {
-              "title": "128",
-              "value": "128"
-            }
-          ]
-        },
-        {
-          "name": "darkMode",
-          "title": "Dark Mode",
-          "type": "checkbox",
-          "description": "Set the theme to light or dark mode",
-          "required": false,
-          "default": true,
-          "label": "Enabled"
-        },
-        {
-          "name": "background",
-          "title": "Background",
-          "type": "checkbox",
-          "description": "Select whether you want a gradient background or not",
-          "required": false,
-          "default": true,
-          "label": "Enabled"
-        }
-      ]
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "~1.102.3",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/api": "~2.4.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.17.0",
-    "@types/react": "^19.1.1",
-    "eslint": "^9.32.0",
-    "prettier": "^3.6.2",
-    "react": "^19.1.1",
-    "typescript": "~5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@typescript/native": "npm:typescript@~7.0.2",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
+    "react": "^19.3.0",
+    "typescript": "npm:@typescript/typescript6@~6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  },
+  "preferences": [
+    {
+      "name": "theme",
+      "title": "Theme",
+      "type": "dropdown",
+      "required": false,
+      "description": "Default color theme for commands and AI tools",
+      "default": "candy",
+      "data": [
+        {
+          "title": "Vercel",
+          "value": "vercel"
+        },
+        {
+          "title": "Evil Rabbit",
+          "value": "rabbit"
+        },
+        {
+          "title": "Supabase",
+          "value": "supabase"
+        },
+        {
+          "title": "Tailwind",
+          "value": "tailwind"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Mintlify",
+          "value": "mintlify"
+        },
+        {
+          "title": "Prisma",
+          "value": "prisma"
+        },
+        {
+          "title": "Clerk",
+          "value": "clerk"
+        },
+        {
+          "title": "ElevenLabs",
+          "value": "elevenlabs"
+        },
+        {
+          "title": "Resend",
+          "value": "resend"
+        },
+        {
+          "title": "Trigger.dev",
+          "value": "triggerdev"
+        },
+        {
+          "title": "Nuxt",
+          "value": "nuxt"
+        },
+        {
+          "title": "Browserbase",
+          "value": "browserbase"
+        },
+        {
+          "title": "Cloudflare",
+          "value": "cloudflare"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Stripe",
+          "value": "stripe"
+        },
+        {
+          "title": "Firecrawl",
+          "value": "firecrawl"
+        },
+        {
+          "title": "Auth0",
+          "value": "auth0"
+        },
+        {
+          "title": "AWS",
+          "value": "aws"
+        },
+        {
+          "title": "Bitmap",
+          "value": "bitmap"
+        },
+        {
+          "title": "Noir",
+          "value": "noir"
+        },
+        {
+          "title": "Ice",
+          "value": "ice"
+        },
+        {
+          "title": "Sand",
+          "value": "sand"
+        },
+        {
+          "title": "Forest",
+          "value": "forest"
+        },
+        {
+          "title": "Mono",
+          "value": "mono"
+        },
+        {
+          "title": "Breeze",
+          "value": "breeze"
+        },
+        {
+          "title": "Candy",
+          "value": "candy"
+        },
+        {
+          "title": "Crimson",
+          "value": "crimson"
+        },
+        {
+          "title": "Falcon",
+          "value": "falcon"
+        },
+        {
+          "title": "Meadow",
+          "value": "meadow"
+        },
+        {
+          "title": "Midnight",
+          "value": "midnight"
+        },
+        {
+          "title": "Raindrop",
+          "value": "raindrop"
+        },
+        {
+          "title": "Sunset",
+          "value": "sunset"
+        }
+      ]
+    },
+    {
+      "name": "padding",
+      "title": "Padding",
+      "type": "dropdown",
+      "required": false,
+      "description": "Default padding around your code in commands and AI tools",
+      "default": "64",
+      "data": [
+        {
+          "title": "16",
+          "value": "16"
+        },
+        {
+          "title": "32",
+          "value": "32"
+        },
+        {
+          "title": "64",
+          "value": "64"
+        },
+        {
+          "title": "128",
+          "value": "128"
+        }
+      ]
+    },
+    {
+      "name": "darkMode",
+      "title": "Dark Mode",
+      "type": "checkbox",
+      "description": "Use dark mode by default in commands and AI tools",
+      "required": false,
+      "default": true,
+      "label": "Enabled"
+    },
+    {
+      "name": "background",
+      "title": "Background",
+      "type": "checkbox",
+      "description": "Show the gradient background by default in commands and AI tools",
+      "required": false,
+      "default": true,
+      "label": "Enabled"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-code-image",
+      "title": "Create Code Image",
+      "description": "Create and optionally open a ray.so editor link for code, using saved image defaults and optional overrides. Export the image from the editor."
+    },
+    {
+      "name": "get-image-options",
+      "title": "Get Image Options",
+      "description": "List current ray.so themes, languages, padding options, and the user's saved image defaults."
+    }
   ]
 }

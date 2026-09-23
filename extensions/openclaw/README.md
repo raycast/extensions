@@ -1,192 +1,128 @@
 # OpenClaw for Raycast
 
-Chat with your local [OpenClaw](https://github.com/openclaw/openclaw) AI assistant directly from Raycast.
+Monitor and chat with an [OpenClaw](https://github.com/openclaw/openclaw) Gateway from Raycast. The extension uses OpenClaw's native WebSocket protocol and works with local, LAN, Tailscale, and Cloudflare Access connections.
 
-## Features
+## What you can do
 
-- **Ask OpenClaw** - Quick question and answer
-- **Chat with OpenClaw** - Persistent conversations with history
-- **Ask About Clipboard** - Analyze clipboard content with custom prompts
-- **Process Selected Text** - Summarize, explain, translate, fix grammar, and more
+| Command | Purpose |
+| --- | --- |
+| OpenClaw Control Center | Monitor Gateway health, tasks, sessions, agents, nodes, channels, and usage |
+| Ask OpenClaw | Ask a question in a new Gateway session |
+| Chat with OpenClaw | Start or continue Gateway-backed conversations |
+| Ask About Clipboard | Send clipboard text to OpenClaw with a question |
+| Process Selected Text | Summarize, explain, translate, rewrite, or review selected text |
+| Gateway Status | Check the authenticated connection, pairing, and protocol details |
+| Open OpenClaw Control UI | Open the configured Control UI in your browser |
+
+The Control Center is a fast operational view, not a replacement for OpenClaw's administrative UI. It requests only `operator.read` and `operator.write`. Approval management, configuration changes, and other administrative operations remain in OpenClaw.
 
 ## Requirements
 
-- [OpenClaw](https://github.com/openclaw/openclaw) installed and running locally
-- OpenClaw Gateway with HTTP API enabled
+- OpenClaw `2026.9.4` or a protocol-compatible Gateway
+- A reachable local loopback `ws://` Gateway or remote `wss://` endpoint
+- A Gateway token or password when bootstrap authentication is required
+- `cloudflared` on the Raycast Mac for Cloudflare Access browser sign-in
 
-## Setup
+The optional HTTP Chat Completions endpoint is not required.
 
-### 1. Enable the OpenClaw HTTP API
+## Connect
 
-Add this to your `~/.openclaw/openclaw.json`:
+Raycast asks how it should reach OpenClaw on first launch.
 
-```json
-{
-  "gateway": {
-    "http": {
-      "endpoints": {
-        "chatCompletions": {
-          "enabled": true
-        }
-      }
-    }
-  }
-}
-```
+| Connection | Gateway URL | Notes |
+| --- | --- | --- |
+| OpenClaw Configuration | Read from `~/.openclaw/openclaw.json` | Uses the local or remote mode in the file |
+| Local Gateway | `ws://127.0.0.1:18789` | Gateway runs on the same Mac |
+| Local Network | Private `wss://` URL | Use TLS even on a trusted LAN |
+| Tailscale | OpenClaw-managed `wss://<machine>.<tailnet>.ts.net` URL | Requires Tailscale access on both machines |
+| Cloudflare Tunnel and Access | Tunnel `wss://` hostname | Supports browser sign-in or a service token |
 
-The gateway will hot-reload the config automatically.
+Remote modes validate the configured URL before connecting and require `wss://`. Plain `ws://` is accepted only for a loopback Gateway on the same Mac. If the URL field is empty, a matching `gateway.remote.url` from OpenClaw's configuration can be used.
 
-### 2. Find Your API Token
+## Pair the Raycast device
 
-Your token is in `~/.openclaw/openclaw.json` under `gateway.auth.token`:
+Run **Gateway Status**. If approval is required, the error shows the current request ID and approval command. On the Gateway host, review and approve that exact request:
 
 ```bash
-cat ~/.openclaw/openclaw.json | grep -A 2 '"auth"' | grep token
+openclaw devices list
+openclaw devices approve <requestId>
 ```
 
-### 3. Choose Your Connection Method
+Refresh **Gateway Status** after approval. Raycast requests only `operator.read` and `operator.write` and stores the durable device credential returned by OpenClaw. See OpenClaw's [pairing guide](https://docs.openclaw.ai/pairing).
 
-When you first run a command, Raycast will prompt for your API Endpoint and Token. The endpoint depends on where OpenClaw is running relative to Raycast:
+## Remote connections
 
-#### Option A: Same Machine (Local)
+### Tailscale
 
-**Use when:** Raycast and OpenClaw are on the same computer.
+Use OpenClaw-managed Tailscale Serve:
 
-| Setting | Value |
-|---------|-------|
-| API Endpoint | `http://127.0.0.1:18789` |
+```bash
+openclaw gateway --tailscale serve
+```
 
-This is the default - no configuration changes needed on OpenClaw.
+Choose **Tailscale** in Raycast and enter the resulting secure endpoint. Keep the Gateway listener on loopback. See OpenClaw's [Connect and pair](https://docs.openclaw.ai/web/control-ui/connect-and-pair) and [Remote access](https://docs.openclaw.ai/gateway/remote) guides.
 
----
+### Cloudflare Access
 
-#### Option B: Local Network (Same WiFi/LAN)
+Choose **Cloudflare Tunnel and Access** and enter the tunnel's `wss://` hostname.
 
-**Use when:** OpenClaw runs on another computer on your home/office network.
+- **Browser sign-in** runs `cloudflared access login`. Cloudflare opens the identity provider allowed by the Access policy, such as GitHub or Google. A valid cached Access session is reused.
+- **Service token** sends the configured client ID and secret as Cloudflare Access headers. Use this option for unattended connections.
 
-| Setting | Value |
-|---------|-------|
-| API Endpoint | `http://<openclaw-machine-ip>:18789` |
+Install the Cloudflare helper before using browser sign-in:
 
-**Setup required on the OpenClaw machine:**
+```bash
+brew install cloudflared
+```
 
-1. Find the machine's local IP:
-   ```bash
-   ipconfig getifaddr en0   # WiFi
-   # or
-   ipconfig getifaddr en1   # Ethernet
-   ```
+Run **Gateway Status** to sign in. Raycast does not store the Access JWT or print `cloudflared` output. Cloudflare authenticates access to the tunnel; OpenClaw device pairing and Gateway authorization still apply. Follow OpenClaw's [Cloudflare Tunnel and Access guide](https://docs.openclaw.ai/gateway/cloudflare-access), and do not expose the Gateway port directly.
 
-2. Edit `~/.openclaw/openclaw.json` and change the gateway bind setting:
-   ```json
-   {
-     "gateway": {
-       "bind": "0.0.0.0"
-     }
-   }
-   ```
+### SSH forwarding
 
-3. Restart OpenClaw gateway for changes to take effect.
+Forward the remote loopback Gateway, then choose **Local Gateway on This Mac**:
 
-4. Use the local IP as your endpoint, e.g., `http://192.168.1.50:18789`
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@gateway-host
+```
 
-> **⚠️ Security Warning:** Binding to `0.0.0.0` exposes the gateway to your entire local network. Risks include:
-> - Anyone on the same WiFi can attempt connections
-> - Public WiFi = public exposure
-> - If port forwarding is enabled on your router, it could be internet-accessible
->
-> The token provides some protection, but **Tailscale (Option C) is strongly recommended** for accessing OpenClaw from other machines. Only use this option on trusted private networks.
+## Credentials and local data
 
----
+Raycast preferences take precedence over `~/.openclaw/openclaw.json`. Configuration discovery supports JSON5 comments and trailing commas.
 
-#### Option C: Remote via Tailscale (Recommended for Remote Access)
+- Local mode reads `gateway.auth.token` or `gateway.auth.password`.
+- Remote mode reads `gateway.remote.url`, `gateway.remote.token`, or `gateway.remote.password`.
+- File credentials are reused for an explicit remote connection only when its normalized URL matches `gateway.remote.url`.
+- Secret references are not resolved. Enter the credential in Raycast or use an already paired device token.
 
-**Use when:** You want secure access from anywhere - home, office, mobile, etc.
-
-| Setting | Value |
-|---------|-------|
-| API Endpoint | `https://<machine-name>.<tailnet>.ts.net` |
-
-**Setup required on the OpenClaw machine:**
-
-1. Install [Tailscale](https://tailscale.com) on both machines and sign in to the same account.
-
-2. On the OpenClaw machine, set up Tailscale serve:
-   ```bash
-   tailscale serve --bg 18789
-   ```
-
-3. Get your serve URL:
-   ```bash
-   tailscale serve status
-   ```
-   Output: `https://machine-name.tailca3a37.ts.net`
-
-4. Use that URL as your API Endpoint.
-
-**Benefits:**
-- Encrypted connection (HTTPS)
-- Works from anywhere (coffee shop, mobile hotspot, etc.)
-- Only accessible to devices on your Tailscale network
-- No need to open firewall ports
-
----
-
-#### Connection Method Comparison
-
-| Method | Security | Works Remotely | Setup Complexity | Recommended |
-|--------|----------|----------------|------------------|-------------|
-| Local | High (localhost only) | No | None | ✅ Yes |
-| Local Network | ⚠️ Low (LAN exposure) | No | Low | Only on trusted networks |
-| Tailscale | High (encrypted, private) | Yes | Medium | ✅ Yes - best for remote |
-
-## Commands
-
-### Ask OpenClaw
-Quick Q&A - type a question, get an answer. Supports passing a question as an argument for automation.
-
-### Chat with OpenClaw
-Full conversation interface with:
-- Persistent chat history
-- Multiple conversations
-- Streaming responses
-- Newest messages shown first
-
-### Ask About Clipboard
-Reads your clipboard and lets you ask questions about it. Great for:
-- Explaining code snippets
-- Summarizing copied text
-- Translating content
-
-### Process Selected Text
-Select text in any app, then run this command to:
-- Explain
-- Summarize
-- Fix Grammar
-- Improve Writing
-- Simplify
-- Expand
-- Translate to English
-- Explain Code
-- Review Code
-- Make Bullet Points
-
-**Tip:** Assign a keyboard shortcut in Raycast preferences for quick access.
+Raycast's encrypted local extension storage holds the device identity, paired device tokens, local conversation history, and the cached Control Center snapshot. The snapshot contains operational metadata, not credentials. Clipboard or selected text is sent only when its command is used. The extension has no analytics service or intermediary server.
 
 ## Troubleshooting
 
-### "API error: 405 - Method Not Allowed"
-The HTTP API endpoint isn't enabled. Add the config shown in Setup step 1.
+### Pairing required
 
-### "Failed to connect"
-Make sure OpenClaw gateway is running:
+List pending devices, verify that the Raycast request asks for `operator.read` and `operator.write`, approve the current request ID, and refresh **Gateway Status**. A retry with a changed identity or scope can replace an older request.
+
+### Gateway unavailable
+
+- Local: run `openclaw gateway status` on the same Mac.
+- Node-only Mac: use the main Gateway's secure remote URL or an SSH forward. Do not start a second Gateway.
+- Remote: confirm that the route is reachable and accepts secure WebSocket traffic.
+- Cloudflare browser sign-in: install `cloudflared`, then choose **Sign In to Cloudflare Access** in Gateway Status.
+- Cloudflare service token: confirm that both fields are set and accepted by a Service Auth policy.
+
+### Authentication rejected
+
+Configure bootstrap authentication through OpenClaw, then let device pairing mint the durable client token. Do not hand-create per-client tokens in `openclaw.json`. See [Building a Gateway client](https://docs.openclaw.ai/gateway/clients).
+
+## Development
+
 ```bash
-openclaw gateway status
+npm install
+npm run check
 ```
 
-### Token errors
-Verify your token matches `gateway.auth.token` in your OpenClaw config.
+The OpenClaw Gateway packages are pinned so client and protocol changes are reviewed together. The bundle check loads every command from an isolated production bundle.
 
 ## Acknowledgments
 
-Thanks to [@asaphko](https://github.com/asaphko) for the original extension icon and inspiration for the Gateway Status and Open Webchat commands.
+Thanks to [@asaphko](https://github.com/asaphko) for the original icon and the first Gateway Status and web chat commands.

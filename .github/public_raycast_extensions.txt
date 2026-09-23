@@ -74,4 +74,8 @@ pieces-raycast
 saasflow
 globalping
 mymind
+buffer
+mutedeck
 nocal
+openqr
+done-bear

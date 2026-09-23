@@ -46,7 +46,8 @@
   },
   "overrides": {
     "@types/react": "18.2.27",
-    "@types/react-dom": "18.2.7"
+    "@types/react-dom": "18.2.7",
+    "brace-expansion": "5.0.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

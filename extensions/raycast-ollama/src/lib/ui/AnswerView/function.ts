@@ -6,7 +6,7 @@ import { CommandAnswer } from "../../settings/enum";
 import { AddSettingsCommandChat, GetOllamaServerByName, GetSettingsCommandAnswer } from "../../settings/settings";
 import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { GetAvailableModel, PromptTokenImageParser, PromptTokenParser } from "../function";
-import { Creativity } from "../../enum";
+import { Creativity, PromptInputSource } from "../../enum";
 import { RaycastChat, SettingsCommandAnswer } from "../../settings/types";
 import { OllamaApiChatMessageRole } from "../../ollama/enum";
 import { RaycastImage } from "../../types";
@@ -91,9 +91,16 @@ export async function convertAnswerToChat(
   await AddSettingsCommandChat(chat);
   if (openCommand) {
     try {
-      await launchCommand({ name: "ollama-chat", type: LaunchType.UserInitiated });
+      await launchCommand({
+        name: "ollama-chat",
+        type: LaunchType.UserInitiated,
+      });
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Error", message: String(e) });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: String(e),
+      });
     }
   }
 }
@@ -137,7 +144,10 @@ async function Inference(
         // showToast when thinking process started
         if (!thinkingStarted) {
           thinkingStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "🤔 Thinking...",
+          });
         }
         setThinking((prevState) => prevState + data);
       });
@@ -147,7 +157,10 @@ async function Inference(
         // showToast when  process started
         if (!responseStarted) {
           responseStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "✍️ Typing...",
+          });
         }
         setAnswer((prevState) => prevState + data);
       });
@@ -178,6 +191,7 @@ export async function Run(
   prompt: string,
   query: React.MutableRefObject<undefined | string>,
   images: React.MutableRefObject<undefined | RaycastImage[]>,
+  inputSource: React.MutableRefObject<PromptInputSource>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setImageView: React.Dispatch<React.SetStateAction<string>>,
   setThinking: React.Dispatch<React.SetStateAction<string>>,
@@ -202,8 +216,10 @@ export async function Run(
   }
 
   // Loading query
-  prompt = await PromptTokenParser(prompt);
+  const [parsed, source] = await PromptTokenParser(prompt);
+  prompt = parsed;
   query.current = prompt;
+  inputSource.current = source;
 
   // Start Inference
   setAnswer("");

@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "swr": "^2.1.5"
   },
   "devDependencies": {
@@ -49,5 +49,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5"
   }
 }

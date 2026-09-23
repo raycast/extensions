@@ -1,46 +1,26 @@
-import { Clipboard, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
-import { createSecret, formatDuration, parseDuration } from "./shared";
+import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { copyConcealed, createSecret, formatDuration, getDefaults } from "./shared";
 
-const DEFAULT_DURATION_SECONDS = 3600; // 1 hour
+// Argument types come from `Arguments.Whisper`, generated from package.json,
+// so they cannot drift from the manifest.
+export default async function main(props: LaunchProps<{ arguments: Arguments.Whisper }>) {
+  const secret = props.arguments.secret;
 
-function parseCommand(text: string): { secret: string; durationSeconds: number; selfDestruct: boolean } {
-  const tokens = text.trim().split(/\s+/);
-  let selfDestruct = true;
-  let durationSeconds = DEFAULT_DURATION_SECONDS;
-  let end = tokens.length;
-
-  if (end > 1 && tokens[end - 1].toLowerCase() === "false") {
-    selfDestruct = false;
-    end--;
-  }
-
-  if (end > 1) {
-    const parsed = parseDuration(tokens[end - 1]);
-    if (parsed) {
-      durationSeconds = parsed;
-      end--;
-    }
-  }
-
-  const secret = tokens.slice(0, end).join(" ");
-  return { secret, durationSeconds, selfDestruct };
-}
-
-export default async function main(props: LaunchProps<{ arguments: { text: string } }>) {
-  const input = props.arguments.text.trim();
-
-  if (!input) {
+  if (!secret.trim()) {
     await showToast({ style: Toast.Style.Failure, title: "Secret cannot be empty" });
     return;
   }
 
-  const { secret, durationSeconds, selfDestruct } = parseCommand(input);
+  // Expiration and self-destruct come from preferences only. Raycast remembers
+  // command arguments between launches, so a dropdown here would keep sending a
+  // stale choice long after the user changed their defaults.
+  const { durationSeconds, selfDestruct } = getDefaults();
 
   try {
-    await showToast({ style: Toast.Style.Animated, title: "Creating secret..." });
+    await showToast({ style: Toast.Style.Animated, title: "Encrypting secret..." });
     const expirationTimestamp = Math.floor(Date.now() / 1000) + durationSeconds;
     const shareUrl = await createSecret(secret, expirationTimestamp, selfDestruct);
-    await Clipboard.copy(shareUrl);
+    await copyConcealed(shareUrl);
 
     const durationDisplay = formatDuration(durationSeconds);
     const destructNote = selfDestruct ? "Self-destructs after first view." : "Can be viewed multiple times.";

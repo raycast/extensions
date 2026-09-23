@@ -1,16 +1,18 @@
-import { List, ActionPanel, Action, Icon, Detail, showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import { countOf, showError } from "@chrismessina/raycast-kit";
+import { logger } from "@chrismessina/raycast-logger";
+import { useCallback, useMemo, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo, useCallback } from "react";
-import type { Meeting, Team } from "./types/Types";
-import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
 import { MeetingDetailActions } from "./actions/MeetingActions";
-import { useCachedMeetings } from "./hooks/useCachedMeetings";
-import { getUserFriendlyError, classifyError, ErrorType } from "./utils/errorHandling";
-import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
-
-import { MeetingListItem } from "./components/MeetingListItem";
 import { RefreshCacheAction } from "./actions/RefreshCacheAction";
+import { MeetingListItem } from "./components/MeetingListItem";
+import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
+import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
+import { useCachedMeetings } from "./hooks/useCachedMeetings";
+import type { Meeting, Team } from "./types/Types";
 import { getDateRanges } from "./utils/dates";
+import { classifyError, ErrorType, getUserFriendlyError } from "./utils/errorHandling";
+import { loadTranscript } from "./utils/transcriptStore";
 
 function getErrorDisplay(error: Error): { icon: Icon; title: string; description: string; isAuth: boolean } {
   const errorType = classifyError(error);
@@ -123,6 +125,22 @@ function Command() {
     await loadMore();
   }, [apiKeyPresent, loadMore]);
 
+  // Reaching further back is MANUAL, and deliberately so.
+  //
+  // Raycast fires `pagination.onLoadMore` on scroll near the bottom of the
+  // RENDERED list. With `filtering={false}` that is the FILTERED set, so a query
+  // matching one meeting renders one row, there is nothing to scroll, and the
+  // searchable corpus stays frozen at whatever is cached — every older meeting
+  // invisible to search.
+  //
+  // An automatic version of this was tried and removed. Each pass walks up to 5
+  // pages with `include_transcript=true`, and the effect re-fired the instant
+  // `isFetchingBackground` went false — including right after a failure — so a
+  // rate-limited API got a fresh burst in the same second it rejected the last
+  // one. Measured 2026-09-17: three passes, nine 429s, and an error screen.
+  // A keypress per batch is the backpressure; do not make this automatic again
+  // without a real cooldown and a rate-limit circuit breaker.
+
   // Combine error sources: explicit missing key OR runtime API error
   const error: Error | undefined = !apiKeyPresent
     ? new Error("API_KEY_MISSING: No API key configured. Please set your Fathom API Key in Extension Preferences.")
@@ -198,6 +216,37 @@ function Command() {
       previousMonth.sort(sortByDate);
       older.sort(sortByDate);
 
+      // Full accounting of the grouping step.
+      //
+      // This is the narrowest point at which a large cache can become a short
+      // list: every meeting must land in exactly one bucket, and the buckets
+      // must sum to the input. A shortfall here means either a date failed to
+      // parse or the ranges have a gap.
+      const grouped = thisWeek.length + lastWeek.length + previousMonth.length + older.length;
+      // Verbose-only. Kept because it is the line that finally localized the
+      // vanishing-meetings bug: if `input` and `grouped` ever disagree, the
+      // grouping step is dropping records.
+      logger.log("[search-meetings] Grouped meetings", {
+        input: allMeetings.length,
+        thisWeek: thisWeek.length,
+        lastWeek: lastWeek.length,
+        previousMonth: previousMonth.length,
+        older: older.length,
+        grouped,
+        lost: allMeetings.length - grouped,
+      });
+
+      // Duplicate React keys collapse a list silently — N items render as one.
+      const ids = allMeetings.map((m) => m.id);
+      const uniqueIds = new Set(ids);
+      if (uniqueIds.size !== ids.length) {
+        logger.error("[search-meetings] DUPLICATE meeting ids — React will collapse these rows", {
+          total: ids.length,
+          unique: uniqueIds.size,
+          sample: ids.slice(0, 8),
+        });
+      }
+
       return {
         thisWeekMeetings: thisWeek,
         lastWeekMeetings: lastWeek,
@@ -212,6 +261,15 @@ function Command() {
       ? allFilteredMeetings.length
       : thisWeekMeetings.length + lastWeekMeetings.length + previousMonthMeetings.length + olderMeetings.length;
 
+  const loadOlderAction = hasMore ? (
+    <Action
+      title="Search Older Meetings"
+      icon={Icon.Clock}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+      onAction={() => void loadMoreMeetings()}
+    />
+  ) : null;
+
   return (
     <List
       isLoading={isLoading}
@@ -222,6 +280,7 @@ function Command() {
       navigationTitle={filterDisplayName ? `Meetings: ${filterDisplayName}` : "Search Meetings"}
       actions={
         <ActionPanel>
+          {loadOlderAction}
           <RefreshCacheAction onRefresh={refreshCache} onStop={stopFetch} isFetchingBackground={isFetchingBackground} />
         </ActionPanel>
       }
@@ -254,11 +313,14 @@ function Command() {
             filterDisplayName
               ? `No meetings found for ${filterDisplayName}`
               : searchText
-                ? "No meetings match your search"
+                ? hasMore
+                  ? "Nothing in the meetings loaded so far. Use Search Older Meetings to look further back."
+                  : "No meetings match your search."
                 : "Your recent meetings will appear here"
           }
           actions={
             <ActionPanel>
+              {loadOlderAction}
               <Action title="Refresh Cache" icon={Icon.ArrowClockwise} onAction={refreshCache} />
             </ActionPanel>
           }
@@ -267,7 +329,7 @@ function Command() {
         // Flat chronological list (when searching or team-filtering)
         <List.Section
           title={searchText ? "Search Results" : filterDisplayName || "Filtered Meetings"}
-          subtitle={`${totalMeetings} meetings`}
+          subtitle={countOf(totalMeetings, "meeting")}
         >
           {allFilteredMeetings.map((meeting) => (
             <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
@@ -277,7 +339,7 @@ function Command() {
         // Grouped view (default browse)
         <>
           {thisWeekMeetings.length > 0 && (
-            <List.Section title="This Week" subtitle={`${thisWeekMeetings.length} meetings`}>
+            <List.Section title="This Week" subtitle={countOf(thisWeekMeetings.length, "meeting")}>
               {thisWeekMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -285,7 +347,7 @@ function Command() {
           )}
 
           {lastWeekMeetings.length > 0 && (
-            <List.Section title="Last Week" subtitle={`${lastWeekMeetings.length} meetings`}>
+            <List.Section title="Last Week" subtitle={countOf(lastWeekMeetings.length, "meeting")}>
               {lastWeekMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -293,7 +355,7 @@ function Command() {
           )}
 
           {previousMonthMeetings.length > 0 && (
-            <List.Section title="Previous Month" subtitle={`${previousMonthMeetings.length} meetings`}>
+            <List.Section title="Previous Month" subtitle={countOf(previousMonthMeetings.length, "meeting")}>
               {previousMonthMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -301,7 +363,7 @@ function Command() {
           )}
 
           {olderMeetings.length > 0 && (
-            <List.Section title="Older" subtitle={`${olderMeetings.length} meetings`}>
+            <List.Section title="Older" subtitle={countOf(olderMeetings.length, "meeting")}>
               {olderMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -322,11 +384,7 @@ export function MeetingSummaryDetail({ meeting, recordingId }: { meeting: Meetin
   } = useCachedPromise(async (id: string) => getMeetingSummary(id), [recordingId], {
     onError: (err) => {
       const { message } = getUserFriendlyError(err);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Load Summary",
-        message,
-      });
+      void showError(err, { title: "Failed to Load Summary", message, copyContext: `Recording: ${recordingId}` });
     },
   });
 
@@ -387,16 +445,23 @@ export function MeetingTranscriptDetail({ meeting, recordingId }: { meeting: Mee
     data: transcript,
     isLoading,
     error,
-  } = useCachedPromise(async (id: string) => getMeetingTranscript(id), [recordingId], {
-    onError: (err) => {
-      const { message } = getUserFriendlyError(err);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Load Transcript",
-        message,
-      });
+  } = useCachedPromise(
+    async (id: string) => {
+      // Prefer the on-disk copy: transcripts moved out of LocalStorage because
+      // it silently dropped writes past ~500 kB. A local hit avoids a network
+      // round-trip entirely.
+      const stored = loadTranscript(id);
+      if (stored) return { text: stored };
+      return getMeetingTranscript(id);
     },
-  });
+    [recordingId],
+    {
+      onError: (err) => {
+        const { message } = getUserFriendlyError(err);
+        void showError(err, { title: "Failed to Load Transcript", message, copyContext: `Recording: ${recordingId}` });
+      },
+    },
+  );
 
   const markdown = error
     ? `# Error\n\n${error instanceof Error ? error.message : String(error)}`

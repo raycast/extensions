@@ -52,5 +52,6 @@ export function mapDevice(deviceData: RawDeviceData): Device {
     actions: [],
     accessories: [],
     rawDeviceData: deviceProperties,
+    controllable: deviceProperties["device_controllable"] !== "false",
   });
 }

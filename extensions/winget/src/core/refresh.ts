@@ -20,6 +20,8 @@
 import { randomUUID } from "node:crypto";
 
 import { listInstalledPackages, listPinnedPackages, listUpgradePackages, searchAllPackages } from "../cli/commands";
+import { CancelledError } from "../cli/errors";
+import { type TableParseResult } from "../cli/parser";
 import { type WingetInstalledPackage, type WingetUpgradePackage } from "../cli/types";
 
 import {
@@ -29,6 +31,7 @@ import {
   patchMutable,
   type IndexPaths,
   type MutableSlices,
+  type PackageIndex,
 } from "./index-store";
 import { acquireLock, heartbeatLock, inspectLock, releaseLock, DEFAULT_ENV } from "./lock";
 import { inspectOperationGate } from "./operations";
@@ -45,6 +48,11 @@ type RefreshOutcome = "refreshed" | "refreshed-elsewhere" | "skipped-busy" | "sk
 
 /** How stale the mutable slices may get before a view mount refreshes them. */
 const MUTABLE_STALENESS_MS = 10 * 60 * 1000;
+
+/** True when the index's mutable slices are due a refresh (or absent). */
+function isMutableDataStale(index: PackageIndex | null): boolean {
+  return !index?.mutableAt || Date.now() - index.mutableAt > MUTABLE_STALENESS_MS;
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -103,6 +111,8 @@ interface SliceRefreshGuards {
   startEpoch?: number;
   /** Ownership check for the op-lock holder; false fences the commit. */
   stillOwned?: () => boolean;
+  /** Aborts the queries (a failed refresh rolls back and rethrows). */
+  signal?: AbortSignal;
 }
 
 interface SliceRefreshResult {
@@ -151,19 +161,35 @@ async function refreshSlicesIncrementally(paths: IndexPaths, guards: SliceRefres
     return outcome === "committed";
   };
 
+  // One retry per slice: winget queries fail transiently (observed live: a
+  // source-cache update mid-query) and succeed immediately after. A retry
+  // here saves the whole refresh from rollback for a per-slice hiccup.
+  const query = async <T>(
+    list: (signal?: AbortSignal) => Promise<TableParseResult<T>>,
+  ): Promise<TableParseResult<T>> => {
+    try {
+      return await list(guards.signal);
+    } catch (error) {
+      if (error instanceof CancelledError) {
+        throw error;
+      }
+      return await list(guards.signal);
+    }
+  };
+
   const committed = { installed: false, upgradable: false, pinned: false };
   let installed: WingetInstalledPackage[] = [];
   let upgradable: WingetUpgradePackage[] = [];
   const settled = await Promise.allSettled([
-    listInstalledPackages().then((r) => {
+    query(listInstalledPackages).then((r) => {
       installed = r.items;
       committed.installed = commit({}, (s) => ({ ...s, installed: r.items }));
     }),
-    listUpgradePackages().then((r) => {
+    query(listUpgradePackages).then((r) => {
       upgradable = r.items;
       committed.upgradable = commit({}, (s) => ({ ...s, upgradable: r.items }));
     }),
-    listPinnedPackages().then((r) => {
+    query(listPinnedPackages).then((r) => {
       committed.pinned = commit({}, (s) => ({ ...s, pinned: r.items }));
     }),
   ]);
@@ -232,8 +258,7 @@ async function rebuildFullIndex(paths: IndexPaths, stillNeeded: () => boolean = 
 
     // Skip the mutable stage when those slices are already fresh — e.g. the
     // mount policy refreshed them moments ago and only the catalog was stale.
-    const current = loadIndex(paths);
-    if (current?.mutableAt && Date.now() - current.mutableAt < MUTABLE_STALENESS_MS) {
+    if (!isMutableDataStale(loadIndex(paths))) {
       return "refreshed";
     }
 
@@ -251,6 +276,7 @@ async function rebuildFullIndex(paths: IndexPaths, stillNeeded: () => boolean = 
 }
 
 export {
+  isMutableDataStale,
   MUTABLE_STALENESS_MS,
   rebuildFullIndex,
   refreshMutableSlices,

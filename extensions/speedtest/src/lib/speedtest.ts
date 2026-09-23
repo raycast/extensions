@@ -61,21 +61,47 @@ export const SpeedtestResultDefaultValue: SpeedtestResult = {
 
 export type SpeedtestResultType = "download" | "upload" | "ping" | "testStart";
 export type SpeedtestStdoutResult = SpeedtestResult & { type: SpeedtestResultType };
+export type SpeedSampleCallback = (type: "download" | "upload", bandwidth: number) => void;
+
+/** Turn the CLI's stderr into something the user can act on. */
+export function describeCliFailure(stderr: string, code: number | null): string {
+  if (stderr.includes("NoNetworkConnection")) {
+    return "The Internet connection appears to be offline.";
+  }
+  if (/Too many requests|Limit reached/i.test(stderr)) {
+    return "Speedtest rate limit reached. Ookla blocks frequent tests from the same network, wait a few minutes before running it again.";
+  }
+  // The CLI logs lines like "[2026-09-02 21:11:53.387] [error] Configuration - client error (UnknownException)".
+  const firstError = stderr
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\[[^\]]*\]\s*\[error\]\s*/, "").trim())
+    .find((line) => line.length > 0);
+  return firstError
+    ? `Speedtest failed: ${firstError}`
+    : `Something went wrong (speedtest exited with code ${code ?? "unknown"}). Please try again.`;
+}
 
 export function isSpeedtestCliInstalled(): boolean {
   return fs.existsSync(speedtestCLIFilepath());
 }
+
+export type SpeedtestHandle = {
+  /** Kill the CLI and silence every callback. Safe to call more than once. */
+  cancel: () => void;
+};
 
 export function runSpeedTest(
   partialUpdateCallback: (result: SpeedtestResult) => void,
   resultCallback: (result: SpeedtestResult) => void,
   errorCallback: (error: Error) => void,
   progressCallback: (resultProgress: ResultProgress) => void,
-) {
+  sampleCallback?: SpeedSampleCallback,
+): SpeedtestHandle {
   const exePath = speedtestCLIFilepath();
   const pro = spawn(exePath, ["--format", "json", "--progress", "--accept-license", "--accept-gdpr"]);
   const result: SpeedtestResult = { ...SpeedtestResultDefaultValue };
   const resultProgress: ResultProgress = { download: undefined, upload: undefined, ping: undefined };
+  let cancelled = false;
 
   const sendProgress = (type: string, val: number | undefined) => {
     if (val) {
@@ -99,10 +125,12 @@ export function runSpeedTest(
   };
 
   pro.on("uncaughtException", function (err) {
+    if (cancelled) return;
     errorCallback(err instanceof Error ? err : new Error("unknown error"));
   });
 
   pro.on("error", function (err) {
+    if (cancelled) return;
     errorCallback(err);
   });
 
@@ -113,16 +141,13 @@ export function runSpeedTest(
   });
 
   pro.on("exit", (code) => {
+    if (cancelled) return;
     if (code === 0) {
       console.log("Child process completed successfully.");
     } else {
       console.log("Stderr output:", stderrOutput);
 
-      const errorMessage = stderrOutput.includes("NoNetworkConnection")
-        ? "The Internet connection appears to be offline."
-        : "Something went wrong. Please try again.";
-
-      resultCallback({ ...SpeedtestResultDefaultValue, error: errorMessage });
+      resultCallback({ ...SpeedtestResultDefaultValue, error: describeCliFailure(stderrOutput, code) });
       console.error(`Child process exited with code ${code}`);
     }
   });
@@ -130,12 +155,15 @@ export function runSpeedTest(
   const handleSpeedtestEvent = (speedtestEventData: SpeedtestResultResponse) => {
     const { type } = speedtestEventData;
 
-    if (type) {
+    if (type && !cancelled) {
       if (type === "download" || type === "upload") {
         const speed = speedtestEventData[type];
         result[type] = speed;
 
         sendProgress(type, speed.progress);
+        if (speed.bandwidth) {
+          sampleCallback?.(type, speed.bandwidth);
+        }
         partialUpdateCallback(result);
       } else if (type === "testStart") {
         result.interface = {
@@ -183,7 +211,7 @@ export function runSpeedTest(
       try {
         handleSpeedtestEvent(JSON.parse(line) as SpeedtestResultResponse);
       } catch {
-        errorCallback(Error("Could not read data from Speedtest"));
+        if (!cancelled) errorCallback(Error("Could not read data from Speedtest"));
         return;
       }
     }
@@ -198,7 +226,17 @@ export function runSpeedTest(
     try {
       handleSpeedtestEvent(JSON.parse(line) as SpeedtestResultResponse);
     } catch {
-      errorCallback(Error("Could not read data from Speedtest"));
+      if (!cancelled) errorCallback(Error("Could not read data from Speedtest"));
     }
   });
+
+  return {
+    cancel: () => {
+      if (cancelled) return;
+      cancelled = true;
+      if (pro.exitCode === null && !pro.killed) {
+        pro.kill();
+      }
+    },
+  };
 }

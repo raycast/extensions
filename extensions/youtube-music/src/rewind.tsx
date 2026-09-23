@@ -34,6 +34,10 @@ export default async () => {
   const seconds = parseInt(secValue, 10);
   try {
     const result = await runJSInYouTubeMusicTab(rewind(seconds));
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "rewind-video-not-found":
         await showHUD("❌ Video not found");
@@ -47,6 +51,6 @@ export default async () => {
     // allow ability to find particular spot
     setTimeout(closeMainWindow, 500);
   } catch (error) {
-    // do nothing if error is thrown because it will be handled by the toast
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

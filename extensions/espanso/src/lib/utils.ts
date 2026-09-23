@@ -85,9 +85,23 @@ export function formatCategoryName(category: string, separator: string = " · ")
   return formatted;
 }
 
+// Raycast is launched by launchd, so extensions inherit launchd's PATH —
+// /usr/bin:/bin:/usr/sbin:/sbin — and never the interactive shell's. Homebrew's
+// bin is not on it, so a bare `espanso` is unresolvable no matter how the user's
+// zsh is set up. Probing absolute locations is the only lookup that works here.
+//
+// The app bundle comes last but matters most: it is what the Homebrew symlink
+// points at, and it is the only path that survives a Homebrew-less install.
+const ESPANSO_CANDIDATES = [
+  "/opt/homebrew/bin/espanso",
+  "/usr/local/bin/espanso",
+  "/Applications/Espanso.app/Contents/MacOS/espanso",
+];
+
 export function getEspansoCmd(): string {
   const { espansoPath } = getPreferenceValues<{ espansoPath?: string }>();
-  return espansoPath && espansoPath.trim() !== "" ? espansoPath : "espanso";
+  if (espansoPath && espansoPath.trim() !== "") return espansoPath.trim();
+  return ESPANSO_CANDIDATES.find((candidate) => fse.existsSync(candidate)) ?? "espanso";
 }
 
 export const execPromise = promisify(exec);
@@ -385,3 +399,22 @@ export const resolveImagePath = (imagePath: string, configDir: string): string =
   const withHome = withConfig.startsWith("~") ? withConfig.replace("~", process.env.HOME ?? "") : withConfig;
   return path.resolve(withHome);
 };
+
+// Raycast's built-in list filter only reads `title`, `subtitle` and `keywords`. A match with a
+// label puts the label in the title, so its triggers are searchable only if they also land in
+// `keywords`. Punctuation-heavy triggers like `;;email.ooo` are additionally split into their
+// alphanumeric parts, because keyword matching does not reliably reach a term sitting mid-string.
+const MAX_REPLACE_KEYWORD_LENGTH = 200;
+
+export const buildSearchKeywords = (triggers: string[], replace: string | undefined): string[] => {
+  const triggerKeywords = triggers.flatMap((trigger) => [
+    trigger,
+    ...trigger.split(/[^a-zA-Z0-9]+/).filter((part) => part.length > 1),
+  ]);
+  const replaceKeywords =
+    replace && replace.length <= MAX_REPLACE_KEYWORD_LENGTH && replace.trim().length ? [replace] : [];
+  return [...new Set([...triggerKeywords, ...replaceKeywords])];
+};
+
+export const truncate = (text: string, maxLength: number): string =>
+  text.length <= maxLength ? text : `${text.slice(0, maxLength - 1).trimEnd()}…`;

@@ -39,6 +39,25 @@ describe("Helium profile helpers", () => {
     expect(getCandidateProfileNames(root)).toEqual(["Profile 2", "Default", "Profile 3"]);
   });
 
+  it("prefers the last used profile over other candidates", () => {
+    const root = makeProfileRoot();
+    mkdirSync(join(root, "Default"), { recursive: true });
+    mkdirSync(join(root, "Profile 2"), { recursive: true });
+    writeFileSync(join(root, "Default", "Preferences"), "{}");
+    writeFileSync(join(root, "Default", "History"), "");
+    writeFileSync(join(root, "Profile 2", "Preferences"), "{}");
+    writeFileSync(join(root, "Profile 2", "History"), "");
+    writeFileSync(
+      join(root, "Local State"),
+      JSON.stringify({
+        profile: { last_used: "Profile 2", last_active_profiles: ["Default"], info_cache: { Default: {} } },
+      }),
+    );
+
+    expect(getCandidateProfileNames(root)).toEqual(["Profile 2", "Default"]);
+    expect(findHistoryDatabasePath(root)).toBe(join(root, "Profile 2", "History"));
+  });
+
   it("finds history database in an active profile", () => {
     const root = makeProfileRoot();
     mkdirSync(join(root, "Profile 2"), { recursive: true });

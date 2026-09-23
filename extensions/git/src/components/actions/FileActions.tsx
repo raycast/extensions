@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Keyboard } from "@raycast/api";
 import { existsSync } from "fs";
 
 /**
@@ -13,11 +13,11 @@ export function FileManagerActions({ filePath, onOpen }: { filePath: string; onO
         title="Open"
         target={filePath}
         icon={Icon.Document}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.Open}
         onOpen={onOpen}
       />
       <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd", "opt"], key: "o" }} onOpen={onOpen} />
-      <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+      <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
     </>
   );
 }

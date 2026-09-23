@@ -1,5 +1,38 @@
 # System Monitor Changelog
 
+## [Menu Bar Process Safety] - 2026-09-21
+
+- Keep background refreshes process-free by collecting CPU and storage without external programs
+- Keep the menu-bar Memory reading consistent with the Memory tab; the background refresh reuses the last value collected when the menu was opened
+- Reuse cached network, temperature, and battery values until the menu is opened instead of starting `nettop` or `temperature-reader` every 10 seconds
+- Prevent overlapping background workers with a stale-recoverable cross-process lease
+- Validate and bound the versioned menu-bar snapshot cache
+
+## [Disk Tab] - 2026-08-05
+
+- Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
+- Show SMART disk health, medium type and physical disk details
+- Distinguish "no throughput sample yet" from "zero throughput" so the first render never claims a fabricated 0 MB/s
+- Poll disk throughput only while the Disk tab is active, like the other tabs
+
+## [Apple Silicon Fan Monitoring] - 2026-08-04
+
+- Add fan RPM readings to the CPU view via a bundled SMC reader helper (`tools/smc-fan-reader.m`), following the same pattern as the existing temperature reader
+- Report fanless Macs as "Not available on this Mac" instead of showing an error or empty state
+
+## [Improvements] - 2026-08-03
+
+- Extract parsing and stat derivation into a tested `src/lib/` layer with a vitest harness
+- Poll only the active tab; inactive monitors stop shelling out to system tools
+- Reset rate baselines on tab switch so the first reading after switching back is a real measurement
+- Add per-core CPU usage and CPU hardware context (chip and core count) to the CPU view
+- Add GPU / unified memory reporting and model year to System Info
+- Expand Memory view with active, inactive, wired, compressed, purgeable, swap, and memory pressure stats
+- Add Copy System Report, Open System Settings, and Open System Information actions
+- Add semantic color highlighting for percentages and unavailable values across detail views
+- Fix process rows with narrow PIDs being dropped from top-process lists
+- Document what the extension reads and what the system report contains in a README privacy section
+
 ## [Eliminate Zombie Processes] - 2026-03-20
 
 - Replace all `exec()` calls with `execFile()` to avoid spawning shell processes

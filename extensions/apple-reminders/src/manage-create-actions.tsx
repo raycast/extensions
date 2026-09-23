@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 
 import usePostCreateActions, {
@@ -200,7 +200,7 @@ export default function Command() {
                   }
                 />
                 <Action
-                  title={action.enabled ? "Turn Off" : "Turn On"}
+                  title={action.enabled ? "Turn off" : "Turn on"}
                   icon={action.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
                   onAction={() =>
                     setValue(
@@ -209,15 +209,15 @@ export default function Command() {
                   }
                 />
                 <Action
-                  title="Move Up"
+                  title="Move up"
                   icon={Icon.ArrowUp}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                  shortcut={Keyboard.Shortcut.Common.MoveUp}
                   onAction={() => setValue(moveAction(actions, index, -1))}
                 />
                 <Action
                   title="Move Down"
                   icon={Icon.ArrowDown}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                  shortcut={Keyboard.Shortcut.Common.MoveDown}
                   onAction={() => setValue(moveAction(actions, index, 1))}
                 />
                 <Action

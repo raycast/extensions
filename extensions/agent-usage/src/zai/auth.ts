@@ -1,6 +1,7 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { readOpencodeAuthToken } from "../agents/opencode-auth";
+
+import { readOpencodeAuthToken } from "../agents/opencode-auth.ts";
 
 /**
  * Auto-discover ZAI API key from multiple sources:
@@ -40,21 +41,32 @@ function extractMarkedValue(output: string, startMarker: string, endMarker: stri
 }
 
 function parseShellLookupOutput(output: string): { zaiToken: string | null; glmToken: string | null } {
+  const zaiToken = extractMarkedValue(output, ZAI_START_MARKER, ZAI_END_MARKER);
+  const glmToken = extractMarkedValue(output, GLM_START_MARKER, GLM_END_MARKER);
+
   return {
-    zaiToken: extractMarkedValue(output, ZAI_START_MARKER, ZAI_END_MARKER),
-    glmToken: extractMarkedValue(output, GLM_START_MARKER, GLM_END_MARKER),
+    zaiToken: zaiToken === "%ZAI_API_KEY%" ? null : zaiToken,
+    glmToken: glmToken === "%GLM_API_KEY%" ? null : glmToken,
   };
 }
 
 async function readShellEnvTokens(): Promise<{ zaiToken: string | null; glmToken: string | null }> {
   try {
-    const shell = process.env.SHELL || "/bin/zsh";
-    const lookupScript = [
-      `printf '${ZAI_START_MARKER}%s${ZAI_END_MARKER}\\n' "$ZAI_API_KEY"`,
-      `printf '${GLM_START_MARKER}%s${GLM_END_MARKER}\\n' "$GLM_API_KEY"`,
-    ].join("; ");
+    const shell = process.env.SHELL || (process.platform === "win32" ? process.env.ComSpec || "cmd.exe" : "/bin/zsh");
+    const shellName = shell.replaceAll("\\", "/").split("/").pop()?.toLowerCase() ?? "";
+    const isCommandShell = shellName === "cmd.exe" || shellName.endsWith(".cmd") || shellName.endsWith(".bat");
+    const lookupScript = isCommandShell
+      ? `echo ${ZAI_START_MARKER}%ZAI_API_KEY%${ZAI_END_MARKER} & echo ${GLM_START_MARKER}%GLM_API_KEY%${GLM_END_MARKER}`
+      : [
+          `printf '${ZAI_START_MARKER}%s${ZAI_END_MARKER}\\n' "$ZAI_API_KEY"`,
+          `printf '${GLM_START_MARKER}%s${GLM_END_MARKER}\\n' "$GLM_API_KEY"`,
+        ].join("; ");
+    const shellArgs = isCommandShell ? ["/d", "/s", "/c", lookupScript] : ["-ilc", lookupScript];
+    const isBatchShell = shellName.endsWith(".cmd") || shellName.endsWith(".bat");
+    const executable = isBatchShell ? process.env.ComSpec || "cmd.exe" : shell;
+    const executableArgs = isBatchShell ? ["/d", "/c", shell] : shellArgs;
 
-    const { stdout } = await execFileAsync(shell, ["-ilc", lookupScript], {
+    const { stdout } = await execFileAsync(executable, executableArgs, {
       encoding: "utf-8",
       timeout: SHELL_LOOKUP_TIMEOUT_MS,
       maxBuffer: 64 * 1024,

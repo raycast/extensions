@@ -50,19 +50,28 @@ export async function fetchModules(preferredModule: string): Promise<ModuleFetch
     }
 
     // Fetch fresh data from Accordance
+    // Wrap the whole tell block in try: on macOS 26+ a failing raw Apple event
+    // throws -2753 outside an inner try, so only an outer try catches it.
     const appleScript = `
-      tell application "Accordance"
-        if not running then launch
-        try
+      try
+        tell application "Accordance"
+          if not running then launch
           set moduleList to «event AccdVerL»
           return moduleList
-        on error errMsg
-          return "Error: " & errMsg
-        end try
-      end tell
+        end tell
+      on error errorMessage number errorNumber
+        return "Error: [" & errorNumber & "] " & errorMessage
+      end try
     `;
 
     const stdout = await runAppleScript(appleScript);
+
+    // The AppleScript handler reports failures as "Error: ..." output; treat that as
+    // a rejected call so the error text is never parsed or cached as a module list.
+    if (stdout.trim().startsWith("Error:")) {
+      throw new Error(stdout.trim());
+    }
+
     const modules = stdout.trim().split(", ");
 
     // Cache the modules with timestamp
@@ -119,15 +128,15 @@ export async function isEnglishModule(moduleName: string): Promise<boolean> {
   try {
     const escapedModule = escapeForAppleScript(moduleName);
     const appleScript = `
-      tell application "Accordance"
-        if not running then launch
-        try
-          set result to «event AccdIsEg» {"${escapedModule}"}
-          return result
-        on error errMsg
-          return "Error: " & errMsg
-        end try
-      end tell
+      try
+        tell application "Accordance"
+          if not running then launch
+          set englishCheck to «event AccdIsEg» {"${escapedModule}"}
+          return englishCheck
+        end tell
+      on error errorMessage number errorNumber
+        return "Error: [" & errorNumber & "] " & errorMessage
+      end try
     `;
 
     const stdout = await runAppleScript(appleScript);

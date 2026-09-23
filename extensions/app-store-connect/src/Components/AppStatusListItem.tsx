@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+} from "@raycast/api";
 import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
 import { getCompactStatusLabel, getPlatformIcon, getPlatformLabel, getStatusInfo } from "../Utils/statusHelpers";
@@ -77,7 +89,11 @@ export default function AppStatusListItem({
               <Action
                 key={filter.value}
                 title={filter.label}
-                icon={statusFilter === filter.value ? Icon.CheckCircle : filter.icon}
+                icon={
+                  statusFilter === filter.value
+                    ? { source: Icon.Checkmark, tintColor: Color.Green }
+                    : { source: filter.icon, tintColor: filter.tintColor }
+                }
                 onAction={() => onFilterChange(filter.value)}
               />
             ))}
@@ -177,7 +193,7 @@ function ReleaseAllAppsAction({ pending }: { pending: PendingRelease[] }) {
         if (failures.length === 0) {
           toast.style = Toast.Style.Success;
           toast.title = "Apps released";
-          toast.message = `${releasedCount} apps released successfully`;
+          toast.message = `${releasedCount} ${releasedCount === 1 ? "app" : "apps"} released successfully`;
           return;
         }
 
@@ -187,6 +203,15 @@ function ReleaseAllAppsAction({ pending }: { pending: PendingRelease[] }) {
           failures.length === pending.length
             ? "No apps were released"
             : `${releasedCount} released, ${failures.length} failed`;
+        // The per-app reasons are the only way to tell which app failed and why —
+        // without this they were collected above and then discarded.
+        toast.primaryAction = {
+          title: "Copy Error",
+          shortcut: Keyboard.Shortcut.Common.Copy,
+          onAction: () => {
+            Clipboard.copy(failures.join("\n"));
+          },
+        };
       }}
     />
   );

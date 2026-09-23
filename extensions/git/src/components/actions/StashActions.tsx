@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, confirmAlert, Alert, Form, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Icon, confirmAlert, Alert, Form, useNavigation, Keyboard } from "@raycast/api";
 import { useState } from "react";
 import { FileStatus, StashScope, Stash } from "../../types";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
@@ -83,7 +83,7 @@ export function StashDropAction(context: RepositoryContext & NavigationContext &
 
 export function StashCreateAction(context: RepositoryContext & { file?: FileStatus }) {
   return (
-    <ActionPanel.Submenu title="Create Stash" icon={Icon.Bookmark} shortcut={{ modifiers: ["cmd"], key: "s" }}>
+    <ActionPanel.Submenu title="Create Stash" icon={Icon.Bookmark} shortcut={Keyboard.Shortcut.Common.Save}>
       <Action.Push title="All Changes" target={<StashCreateForm scope="all" {...context} />} />
       {context.file && (
         <Action.Push
@@ -141,7 +141,7 @@ export function StashRenameAction(context: RepositoryContext & NavigationContext
     <Action.Push
       title="Rename Stash"
       icon={Icon.Pencil}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={Keyboard.Shortcut.Common.Edit}
       target={<StashRenameForm {...context} />}
     />
   );

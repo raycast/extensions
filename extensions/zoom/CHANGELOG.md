@@ -1,5 +1,9 @@
 # Zoom Changelog
 
+## [Personal Meeting ID Support] - 2026-08-10
+
+- Added a `Personal Meeting ID` preference to the Start Meeting command so you can always start your own personal meeting room with a consistent meeting ID.
+
 ## [Improvements] - 2026-06-29
 
 - Retry meeting list requests when Zoom rate limits the API

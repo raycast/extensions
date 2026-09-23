@@ -8,13 +8,18 @@ import {
   showToast,
   Toast,
   Keyboard,
+  Clipboard,
   launchCommand,
   LaunchType,
+  Form,
+  confirmAlert,
+  Alert,
+  useNavigation,
   type LaunchProps,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
-import { fetchPRsWithActivity } from "./api";
+import { useState, useEffect, useCallback } from "react";
+import { fetchPRsWithActivity, getFetchLimits } from "./api";
 import { loadSeen, saveSeen, markItemSeen, markPRSeen, markAllSeen } from "./seen";
 import { loadCachedPRs, saveCachedPRs } from "./cache";
 import { getDemoPRs } from "./demo-data";
@@ -31,9 +36,48 @@ import {
   renderActivityMarkdown,
   renderPRSummaryMarkdown,
   computePrsWithUnseen,
+  toMenuBarPrs,
+  type MenuBarPr,
 } from "./utils";
 import type { ActivityItem, PRWithActivity, SeenMap } from "./types";
 import { prKey } from "./types";
+import { viewLog as log, getErrorMessage } from "./logger";
+import { writeMenuBarCache } from "./menu-bar-cache";
+import {
+  loadPrFilters,
+  savePrFilters,
+  loadActiveFilterId,
+  saveActiveFilterId,
+  resolveActivePrFilter,
+  type PrFilter,
+} from "./pr-filters";
+import type { CompiledPrFilter } from "./pr-filter-query";
+
+type FetchResult = Awaited<ReturnType<typeof fetchPRsWithActivity>>;
+
+// Raycast's development renderer replays effect setup in the same microtask. Keep that one
+// expensive request shared; a later user revalidate must still start a fresh request.
+let viewMountFetch: Promise<FetchResult> | undefined;
+
+// Monotonic counter identifying the newest fetch. Results from an older generation are discarded
+// rather than published — see the guard in fetchAndSync.
+let latestFetchGeneration = 0;
+
+function fetchLatestPRs(): Promise<FetchResult> {
+  if (viewMountFetch) return viewMountFetch;
+
+  const request = (async () => {
+    const seen = await loadSeen();
+    const filters = await loadEventFilters();
+    const prFilter = await resolveActivePrFilter();
+    return fetchPRsWithActivity({ seen, filters, prFilter, source: "view" });
+  })();
+  viewMountFetch = request;
+  queueMicrotask(() => {
+    if (viewMountFetch === request) viewMountFetch = undefined;
+  });
+  return request;
+}
 
 // ─── Review state → color mapping ───────────────────────────────────────────
 
@@ -80,21 +124,40 @@ function isReplyComment(item: ActivityItem, pr: PRWithActivity): boolean {
 // ─── Main command ────────────────────────────────────────────────────────────
 
 /**
- * Nudge the menu-bar command to recompute from the shared cache/seen (no network fetch).
- * Called only on data fetches (view open / revalidate) — NOT on mark-as-read, which stays a
- * purely local update so rapid marking isn't blocked by the launchCommand spawn cost. The
- * badge otherwise refreshes on the menu bar's own interval and whenever the user clicks it
- * (a click re-reads the cache+seen, so it reflects marks immediately).
+ * Push the freshly computed unread list to the menu-bar command so it re-renders.
+ * Called after data fetches (view open / revalidate) and after mark-as-read actions, so the
+ * badge count stays in sync with what the list shows. Mark handlers call this fire-and-forget
+ * (see syncMenuBar) so the local UI update isn't blocked by the launchCommand spawn cost.
+ *
+ * The computed list is passed via launchContext (not just a "refresh" flag) so the menu-bar
+ * command can render synchronously from it. A background-launched menu-bar command only gets a
+ * short execution window; if it had to await an async cache read before rendering, that read
+ * would race the window and the badge would keep its stale value (observed in Store builds,
+ * whose window is tighter than local development's).
  */
-async function refreshMenuBar(): Promise<void> {
+async function refreshMenuBar(items: MenuBarPr[]): Promise<void> {
+  // Publish to the shared Cache FIRST, so the payload is available synchronously even if the
+  // launch below throws — which it does in Store installs where the menu-bar command has not yet
+  // been activated for background refresh (§1). The cache write is the durable half of this
+  // handoff; launchCommand is only the nudge to re-render.
+  writeMenuBarCache(items);
   try {
+    log.debug("Pushing unread list to menu bar", { count: items.length });
     await launchCommand({
       name: "unread-menu-bar",
       type: LaunchType.Background,
-      context: { source: "view-refresh" },
+      context: { source: "view-refresh", items },
     });
-  } catch {
-    // menu-bar command may be disabled; ignore
+    log.debug("Menu bar launch succeeded");
+  } catch (error) {
+    // The menu-bar command may be disabled, or — in a Store install — not yet activated for
+    // background refresh, in which case launchCommand throws. Swallowing this silently is what
+    // made the "badge never updates in Store builds" bug undiagnosable; log it, don't toast
+    // (this fires on every refresh and is non-fatal to the list itself).
+    log.warn("Menu bar launch failed — badge will be stale", {
+      error: getErrorMessage(error),
+      itemCount: items.length,
+    });
   }
 }
 
@@ -108,35 +171,55 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
   const [demoMode, setDemoMode] = useState(false);
   const [demoSeenMap, setDemoSeenMap] = useState<SeenMap>({});
   const [eventFilters, setEventFilters] = useState<EventFilters>(defaultFilters());
+  const [prFilters, setPrFilters] = useState<PrFilter[]>([]);
+  const [activeFilterId, setActiveFilterId] = useState<string | undefined>(undefined);
 
-  // Load cached PRs, seen state, and event filters on mount
+  // Load cached PRs, seen state, event filters, and saved PR filters on mount
   useEffect(() => {
-    Promise.all([loadCachedPRs(), loadSeen(), loadEventFilters()]).then(([cached, seen, filters]) => {
-      setSeenMap(seen);
-      setEventFilters(filters);
-      if (cached) {
-        setDisplayPrs(cached);
-        const allCollapsed: Record<string, boolean> = {};
-        for (const pr of cached) allCollapsed[prKey(pr)] = prKey(pr) !== focusPrKey;
-        setCollapsed(allCollapsed);
-      }
-    });
+    Promise.all([loadCachedPRs(), loadSeen(), loadEventFilters(), loadPrFilters(), loadActiveFilterId()]).then(
+      ([cached, seen, filters, savedFilters, activeId]) => {
+        setSeenMap(seen);
+        setEventFilters(filters);
+        setPrFilters(savedFilters);
+        setActiveFilterId(activeId);
+        if (cached) {
+          setDisplayPrs(cached);
+          const allCollapsed: Record<string, boolean> = {};
+          for (const pr of cached) allCollapsed[prKey(pr)] = prKey(pr) !== focusPrKey;
+          setCollapsed(allCollapsed);
+        }
+      },
+    );
   }, []);
 
-  const { isLoading, revalidate, error } = usePromise(async () => {
-    const fetchedPrs = await fetchPRsWithActivity();
-    // Load seen state after the fetch so marks made during the fetch aren't overwritten
-    const fetchedSeen = await loadSeen();
-    // Prune seen entries for PRs no longer in the open set
-    const activePrKeys = new Set(fetchedPrs.map((pr) => prKey(pr)));
-    for (const key of Object.keys(fetchedSeen)) {
-      if (!activePrKeys.has(key)) delete fetchedSeen[key];
+  // usePromise treats its function as a latest-value ref; its documented trigger is the argument
+  // array, not function identity. This callback only keeps `focusPrKey` current for the local
+  // collapsed-state update below.
+  const fetchAndSync = useCallback(async () => {
+    // Generation guard: ⌘R during an in-flight fetch starts a second one. Without this, whichever
+    // finishes LAST wins — and that can be the OLDER request, overwriting newer data in the cache,
+    // LocalStorage, and React state. Only the newest generation is allowed to publish.
+    const generation = ++latestFetchGeneration;
+    const { prs: fetchedPrs, activeKeys, activeKeysComplete } = await fetchLatestPRs();
+    if (generation !== latestFetchGeneration) {
+      log.debug("Discarding superseded fetch result", { generation, latest: latestFetchGeneration });
+      return;
     }
-    await saveSeen(fetchedSeen);
+
+    // Reload seen + filters after the (potentially long) fetch so marks and filter toggles made
+    // during it aren't overwritten, and the pushed menu-bar count matches what the list now renders.
+    const fetchedSeen = await loadSeen();
+    const freshFilters = await loadEventFilters();
+    const freshPrFilter = await resolveActivePrFilter();
+    if (generation !== latestFetchGeneration) return;
+    // Only prune closed-PR seen state when the fetch walked every open PR. Pruning against a
+    // partial key set deletes read history for still-open PRs that simply weren't scanned.
+    await saveSeen(fetchedSeen, activeKeysComplete ? new Set(activeKeys) : undefined);
     setSeenMap(fetchedSeen);
     await saveCachedPRs(fetchedPrs);
-    // Nudge the menu-bar command to re-render from the fresh shared cache.
-    await refreshMenuBar();
+    // Push the freshly computed unread list to the menu-bar command so it re-renders
+    // synchronously — see refreshMenuBar for why.
+    await refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(fetchedPrs, fetchedSeen, freshFilters, freshPrFilter)));
 
     setDisplayPrs(fetchedPrs);
     // Preserve existing collapsed state; default new PRs to collapsed
@@ -144,26 +227,82 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
       const updated: Record<string, boolean> = {};
       for (const pr of fetchedPrs) {
         const key = prKey(pr);
-        updated[key] = key === focusPrKey ? false : prev[key] !== undefined ? prev[key] : true;
+        // DO NOT change to force-expand focusPrKey here (AI reviewers keep suggesting this).
+        // The mount effect (~line 120) already expands the focused PR via
+        // `allCollapsed[prKey(pr)] = prKey(pr) !== focusPrKey`. This updater must ONLY
+        // preserve existing collapsed state and default NEW PRs to collapsed. Forcing
+        // focusPrKey to expanded on every revalidate (Cmd+R) re-expands PRs the user
+        // deliberately collapsed — a regression, not a fix.
+        updated[key] = prev[key] !== undefined ? prev[key] : key !== focusPrKey;
       }
       return updated;
     });
-  });
+    // focusPrKey is the only outer value read here; everything else is a setState or module import.
+  }, [focusPrKey]);
+
+  const { isLoading, revalidate, error } = usePromise(fetchAndSync);
 
   useEffect(() => {
     if (error) {
+      const isRateLimit = error.message.includes("rate limit");
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to fetch PR data",
+        title: isRateLimit ? "GitHub rate limit reached" : "Failed to fetch PR data",
         message: error.message,
+        primaryAction: {
+          title: "Copy Error",
+          shortcut: Keyboard.Shortcut.Common.Copy,
+          onAction: () => Clipboard.copy(error.message),
+        },
       });
     }
   }, [error]);
 
+  const activeFilter = prFilters.find((f) => f.id === activeFilterId);
+  const [compiledFilter, setCompiledFilter] = useState<CompiledPrFilter | undefined>(undefined);
+
+  // Recompiles whenever the active filter selection changes (dropdown) or the active filter's
+  // own query is edited. Re-reads from storage via resolveActivePrFilter rather than deriving
+  // from `activeFilter` directly, so it's correct even on a render where prFilters/activeFilterId
+  // haven't both settled from the mount load yet. Also re-syncs the menu-bar badge once the new
+  // filter is ready, mirroring how Event Filter toggles and mark-as-read actions already push a
+  // fresh count — skipped before the first fetch resolves, since the mount fetch's own push (in
+  // fetchAndSync) covers that case.
+  useEffect(() => {
+    let cancelled = false;
+    resolveActivePrFilter().then((compiled) => {
+      if (cancelled) return;
+      setCompiledFilter(compiled);
+      if (displayPrs !== undefined) {
+        void refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(displayPrs, seenMap, eventFilters, compiled)));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeFilterId, prFilters]);
+
   const activePrs = demoMode ? getDemoPRs() : displayPrs;
   const activeSeenMap = demoMode ? demoSeenMap : seenMap;
+  const { maxUnread } = getFetchLimits();
 
-  const prsWithUnseen = computePrsWithUnseen(activePrs ?? [], activeSeenMap, eventFilters);
+  const prsWithUnseen = computePrsWithUnseen(activePrs ?? [], activeSeenMap, eventFilters, compiledFilter).slice(
+    0,
+    maxUnread,
+  );
+
+  // Distinguishes "genuinely caught up" from "you filtered everything out" — otherwise hiding
+  // every event type produces an "All caught up!" screen that is actively misleading.
+  const allFiltersOff = Object.values(eventFilters).every((enabled) => !enabled);
+
+  // A PR filter is active, event filters aren't the (more fundamental) cause, and nothing remains
+  // after narrowing — whether the filter hit zero at fetch time or display time, show the same
+  // actionable empty state.
+  const prFilterExcludedEverything = !!compiledFilter && !allFiltersOff && prsWithUnseen.length === 0;
+
+  // The last refresh errored AND left nothing to show. Distinguishes an outage from a genuine
+  // zero, which are otherwise identical once the failure toast has faded.
+  const fetchFailed = !demoMode && error !== undefined && displayPrs === undefined;
 
   const toggleCollapse = (pr: PRWithActivity) => {
     const key = prKey(pr);
@@ -180,6 +319,13 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
 
   const expandAll = () => {
     setCollapsed({});
+  };
+
+  // Keep the menu-bar badge in sync with mark actions. Fire-and-forget: the local seen state is
+  // already updated for instant UI, so pushing to the menu bar must not block the handler.
+  // refreshMenuBar swallows its own errors, so the floating promise is safe.
+  const syncMenuBar = (seen: SeenMap) => {
+    void refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(displayPrs ?? [], seen, eventFilters, compiledFilter)));
   };
 
   const handleMarkItemSeen = async (pr: PRWithActivity, item: ActivityItem) => {
@@ -202,6 +348,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     }
     const updated = await markItemSeen(pr, item);
     setSeenMap(updated);
+    syncMenuBar(updated);
     await showToast({
       style: Toast.Style.Success,
       title: "Item marked as seen",
@@ -225,6 +372,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     }
     const updated = await markPRSeen(pr);
     setSeenMap(updated);
+    syncMenuBar(updated);
     await showToast({
       style: Toast.Style.Success,
       title: "PR marked as caught up",
@@ -248,6 +396,7 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     if (!displayPrs) return;
     const updated = await markAllSeen(displayPrs);
     setSeenMap(updated);
+    syncMenuBar(updated);
     await showToast({ style: Toast.Style.Success, title: "All caught up!" });
   };
 
@@ -270,19 +419,102 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     const updated = { ...eventFilters, [type]: !eventFilters[type] };
     setEventFilters(updated);
     await saveEventFilters(updated);
+    // Filters change the unread COUNT, not just the view — hiding the only visible activity type
+    // empties the list immediately, so the badge must follow or it keeps a number the list no
+    // longer shows. Fire-and-forget, matching the mark-as-read handlers.
+    void refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(displayPrs ?? [], seenMap, updated, compiledFilter)));
+  };
+
+  const handleSelectFilter = async (id: string | undefined) => {
+    await saveActiveFilterId(id);
+    setActiveFilterId(id);
+  };
+
+  // Shared by both Create and Edit: PrFilterForm already persisted the record itself, so this
+  // only needs to mirror it into local state and make it the active selection.
+  const handleFilterSaved = async (saved: PrFilter) => {
+    setPrFilters((prev) => {
+      const exists = prev.some((f) => f.id === saved.id);
+      return exists ? prev.map((f) => (f.id === saved.id ? saved : f)) : [...prev, saved];
+    });
+    await handleSelectFilter(saved.id);
+  };
+
+  const handleDeleteFilter = async () => {
+    const target = prFilters.find((f) => f.id === activeFilterId);
+    if (!target) return;
+    const confirmed = await confirmAlert({
+      title: `Delete "${target.name}"?`,
+      message: "This can't be undone.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    const next = prFilters.filter((f) => f.id !== target.id);
+    setPrFilters(next);
+    await savePrFilters(next);
+    await handleSelectFilter(undefined);
+    await showToast({ style: Toast.Style.Success, title: "Filter deleted" });
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter PR updates…">
-      {prsWithUnseen.length === 0 && !isLoading && !demoMode && (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter PR updates…"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="PR Filter"
+          value={activeFilterId ?? ""}
+          onChange={(id) => handleSelectFilter(id === "" ? undefined : id)}
+        >
+          <List.Dropdown.Item title="All Pull Requests" value="" />
+          {prFilters.map((f) => (
+            <List.Dropdown.Item key={f.id} title={f.name} value={f.id} />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      {/* Render whenever there is nothing to list — including mid-refresh and in demo mode.
+          Gating this on `!isLoading` left a completely blank window after "Mark All as Caught
+          Up" (which triggers a revalidate), and gating on `!demoMode` did the same once every
+          demo PR was marked read. A List with no children and no EmptyView renders empty. */}
+      {prsWithUnseen.length === 0 && (
         <List.EmptyView
-          icon={Icon.Checkmark}
-          title="All caught up!"
-          description="No unread PR updates"
+          // A failed fetch with no cached data must NOT claim "All caught up!" — the toast that
+          // reported the failure disappears, and the user is then left with a screen asserting
+          // something the extension does not actually know.
+          icon={isLoading ? Icon.ArrowClockwise : fetchFailed ? Icon.Warning : Icon.Checkmark}
+          title={isLoading ? "Checking for updates…" : fetchFailed ? "Couldn’t reach GitHub" : "All caught up!"}
+          description={
+            isLoading
+              ? "Looking for new pull request activity."
+              : fetchFailed
+                ? `${error?.message ?? "The last refresh failed."} Refresh to try again.`
+                : allFiltersOff
+                  ? "Every event type is hidden. Turn one back on in Event Filters to see activity."
+                  : prFilterExcludedEverything
+                    ? `No unread activity matches "${activeFilter?.name}". Switch filters, or Refresh for a deeper scan.`
+                    : demoMode
+                      ? "No unread activity in the demo data. Exit demo mode to see your real pull requests."
+                      : "No unread pull request activity. Refresh to check again."
+          }
           actions={
             <ActionPanel>
+              {/* Refresh is primary: "all caught up" and "the fetch failed" look identical here,
+                  so the first thing a user needs is a way to re-check. */}
               <Action
-                title="Demo Mode"
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+              <FilterSubmenu filters={eventFilters} onToggle={handleToggleFilter} />
+              <PrFiltersSubmenu
+                activeFilter={activeFilter}
+                onSaved={handleFilterSaved}
+                onDeleted={handleDeleteFilter}
+              />
+              <Action
+                title={demoMode ? "Exit Demo Mode" : "Demo Mode"}
                 icon={Icon.Wand}
                 shortcut={{
                   modifiers: ["cmd", "opt", "ctrl", "shift"],
@@ -327,15 +559,24 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
                   <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />
                   <Action.OpenInBrowser title="Open PR on GitHub" url={pr.html_url} />
                   <Action
-                    title="Mark PR as Caught up"
+                    // "as" is a preposition — AP, Chicago, and Apple's HIG all lowercase short
+                    // prepositions in Title Case ("Save as…"). The linter wants "As"; we don't.
+                    // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+                    title="Mark PR as Caught Up"
                     icon={Icon.Checkmark}
                     shortcut={Keyboard.Shortcut.Common.Save}
                     onAction={() => handleMarkPRSeen(pr)}
                   />
                   <Action
-                    title="Mark All as Caught up"
+                    // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+                    title="Mark All as Caught Up"
                     icon={Icon.CheckCircle}
-                    shortcut={Keyboard.Shortcut.Common.Duplicate}
+                    // Intentional custom shortcut — do NOT replace with Keyboard.Shortcut.Common.*
+                    // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep cmd+shift+s on purpose
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                    }}
                     onAction={handleMarkAllSeen}
                   />
                   <Action
@@ -363,6 +604,11 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
                     onAction={toggleDemoMode}
                   />
                   <FilterSubmenu filters={eventFilters} onToggle={handleToggleFilter} />
+                  <PrFiltersSubmenu
+                    activeFilter={activeFilter}
+                    onSaved={handleFilterSaved}
+                    onDeleted={handleDeleteFilter}
+                  />
                 </ActionPanel>
               }
             />
@@ -381,6 +627,9 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
                   onToggleDemoMode={toggleDemoMode}
                   eventFilters={eventFilters}
                   onToggleFilter={handleToggleFilter}
+                  activeFilter={activeFilter}
+                  onFilterSaved={handleFilterSaved}
+                  onFilterDeleted={handleDeleteFilter}
                 />
               ))}
           </List.Section>
@@ -478,6 +727,9 @@ function ActivityListItem({
   onToggleDemoMode,
   eventFilters,
   onToggleFilter,
+  activeFilter,
+  onFilterSaved,
+  onFilterDeleted,
 }: {
   item: ActivityItem;
   pr: PRWithActivity;
@@ -489,6 +741,9 @@ function ActivityListItem({
   onToggleDemoMode: () => void;
   eventFilters: EventFilters;
   onToggleFilter: (type: ActivityItem["type"]) => void;
+  activeFilter: PrFilter | undefined;
+  onFilterSaved: (filter: PrFilter) => void;
+  onFilterDeleted: () => void;
 }) {
   const isReply = isReplyComment(item, pr);
   const isCodeComment = item.type === "review_comment" && !isReply;
@@ -552,15 +807,22 @@ function ActivityListItem({
             onAction={onMarkItemSeen}
           />
           <Action
-            title="Mark Entire PR as Caught up"
+            // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+            title="Mark Entire PR as Caught Up"
             icon={Icon.Checkmark}
             shortcut={Keyboard.Shortcut.Common.Save}
             onAction={onMarkPRSeen}
           />
           <Action
-            title="Mark All as Caught up"
+            // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+            title="Mark All as Caught Up"
             icon={Icon.CheckCircle}
-            shortcut={Keyboard.Shortcut.Common.Duplicate}
+            // Intentional custom shortcut — do NOT replace with Keyboard.Shortcut.Common.*
+            // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep cmd+shift+s on purpose
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "s" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+            }}
             onAction={onMarkAllSeen}
           />
           <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />
@@ -577,6 +839,7 @@ function ActivityListItem({
             onAction={onToggleDemoMode}
           />
           <FilterSubmenu filters={eventFilters} onToggle={onToggleFilter} />
+          <PrFiltersSubmenu activeFilter={activeFilter} onSaved={onFilterSaved} onDeleted={onFilterDeleted} />
         </ActionPanel>
       }
     />
@@ -677,6 +940,95 @@ function FilterSubmenu({
         />
       ))}
     </ActionPanel.Submenu>
+  );
+}
+
+// ─── PR filter submenu & form ────────────────────────────────────────────────
+
+function PrFiltersSubmenu({
+  activeFilter,
+  onSaved,
+  onDeleted,
+}: {
+  activeFilter: PrFilter | undefined;
+  onSaved: (filter: PrFilter) => void | Promise<void>;
+  onDeleted: () => void;
+}) {
+  return (
+    <ActionPanel.Submenu title="PR Filters" icon={Icon.Filter}>
+      <Action.Push title="Create Filter…" icon={Icon.Plus} target={<PrFilterForm onSaved={onSaved} />} />
+      {activeFilter && (
+        <Action.Push
+          title={`Edit "${activeFilter.name}"…`}
+          icon={Icon.Pencil}
+          target={<PrFilterForm filter={activeFilter} onSaved={onSaved} />}
+        />
+      )}
+      {activeFilter && (
+        <Action
+          title={`Delete "${activeFilter.name}"…`}
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={onDeleted}
+        />
+      )}
+    </ActionPanel.Submenu>
+  );
+}
+
+/** Not crypto.randomUUID() — avoids depending on that global's availability in every Raycast
+ *  runtime version; a short, cheap, collision-safe-enough id for a locally-stored list. */
+function generateFilterId(): string {
+  return `pf_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function PrFilterForm({ filter, onSaved }: { filter?: PrFilter; onSaved: (filter: PrFilter) => void | Promise<void> }) {
+  const { pop } = useNavigation();
+  const [nameError, setNameError] = useState<string | undefined>();
+
+  async function handleSubmit(values: { name: string; query: string }) {
+    const trimmedName = values.name.trim();
+    if (!trimmedName) {
+      setNameError("Name is required");
+      return;
+    }
+    const now = new Date().toISOString();
+    const saved: PrFilter = filter
+      ? { ...filter, name: trimmedName, query: values.query, updatedAt: now }
+      : { id: generateFilterId(), name: trimmedName, query: values.query, createdAt: now, updatedAt: now };
+    const all = await loadPrFilters();
+    const next = filter ? all.map((f) => (f.id === saved.id ? saved : f)) : [...all, saved];
+    await savePrFilters(next);
+    await onSaved(saved);
+    await showToast({ style: Toast.Style.Success, title: filter ? "Filter updated" : "Filter created" });
+    pop();
+  }
+
+  return (
+    <Form
+      navigationTitle={filter ? "Edit Filter" : "Create Filter"}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Filter" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text='GitHub-style qualifiers: assignee:, author:, involves:, review-requested:, label:, draft:true|false. Prefix "-" to exclude, use "@me" for yourself, quote multi-word labels: label:"needs review".' />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="My Reviews"
+        defaultValue={filter?.name}
+        error={nameError}
+        onChange={() => setNameError(undefined)}
+      />
+      <Form.TextField
+        id="query"
+        title="Query"
+        placeholder="assignee:@me -author:dependabot label:bug draft:false"
+        defaultValue={filter?.query}
+      />
+    </Form>
   );
 }
 

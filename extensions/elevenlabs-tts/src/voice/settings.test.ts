@@ -1,13 +1,10 @@
-import { prepareVoiceSettings, validatePlaybackSpeed } from "./settings";
+import { prepareVoiceSettings, validatePlaybackSpeed, VoiceSettingsPreferences } from "./settings";
 
 describe("prepareVoiceSettings", () => {
   it("should handle valid preference values", () => {
-    const prefs: Preferences.SpeakSelected = {
+    const prefs: VoiceSettingsPreferences = {
       stability: "0.7",
       similarityBoost: "0.8",
-      elevenLabsApiKey: "dummy",
-      voiceId: "nPczCjzI2devNBz1zQrb",
-      playbackSpeed: "1.00",
     };
 
     const settings = prepareVoiceSettings(prefs);
@@ -16,12 +13,9 @@ describe("prepareVoiceSettings", () => {
   });
 
   it("should clamp values above 1", () => {
-    const prefs: Preferences.SpeakSelected = {
+    const prefs: VoiceSettingsPreferences = {
       stability: "1.5",
       similarityBoost: "2.0",
-      elevenLabsApiKey: "dummy",
-      voiceId: "nPczCjzI2devNBz1zQrb",
-      playbackSpeed: "1.00",
     };
 
     const settings = prepareVoiceSettings(prefs);
@@ -30,12 +24,9 @@ describe("prepareVoiceSettings", () => {
   });
 
   it("should clamp values below 0", () => {
-    const prefs: Preferences.SpeakSelected = {
+    const prefs: VoiceSettingsPreferences = {
       stability: "-0.5",
       similarityBoost: "-1.0",
-      elevenLabsApiKey: "dummy",
-      voiceId: "nPczCjzI2devNBz1zQrb",
-      playbackSpeed: "1.00",
     };
 
     const settings = prepareVoiceSettings(prefs);
@@ -44,12 +35,9 @@ describe("prepareVoiceSettings", () => {
   });
 
   it("should handle invalid number strings", () => {
-    const prefs: Preferences.SpeakSelected = {
+    const prefs: VoiceSettingsPreferences = {
       stability: "invalid",
       similarityBoost: "not a number",
-      elevenLabsApiKey: "dummy",
-      voiceId: "nPczCjzI2devNBz1zQrb",
-      playbackSpeed: "1.00",
     };
 
     const settings = prepareVoiceSettings(prefs);

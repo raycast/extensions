@@ -11,6 +11,7 @@ import {
 import { Ollama } from "../ollama/ollama";
 import { GetOllamaServerByName, GetOllamaServers } from "../settings/settings";
 import { RaycastImage } from "../types";
+import { PromptInputSource } from "../enum";
 import {
   ErrorRaycastBrowserExtantion,
   ErrorRaycastClipboardTextEmpty,
@@ -90,7 +91,11 @@ export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
       const tags = await s[1].OllamaApiTags().catch(async (e: Error) => {
-        await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `'${s[0]}' Server`,
+          message: e.message,
+        });
         return undefined;
       });
       if (tags)
@@ -99,7 +104,11 @@ export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
           await Promise.all(
             tags.models.map(async (tag): Promise<UiModelDetails> => {
               const show = await s[1].OllamaApiShow(tag.name).catch(async (e: Error) => {
-                await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: `'${s[0]}' Server`,
+                  message: e.message,
+                });
                 return undefined;
               });
               return {
@@ -129,13 +138,14 @@ export async function GetAvailableModel(server: string): Promise<OllamaApiTagsRe
 /**
  * Return prompt with all token replaced with text.
  * @param prompt.
+ * @returns Parsed prompt and the source that filled the {selection} token.
  */
-export async function PromptTokenParser(prompt: string): Promise<string> {
-  const pts = await PromptTokenSelectionParser(prompt);
-  if (pts) prompt = pts;
+export async function PromptTokenParser(prompt: string): Promise<[string, PromptInputSource]> {
+  const [parsed, source] = await PromptTokenSelectionParser(prompt);
+  prompt = parsed;
   const pbt = await PromptTokenBrowserTabParser(prompt);
   if (pbt) prompt = pbt;
-  return prompt;
+  return [prompt, source];
 }
 
 /**
@@ -155,14 +165,14 @@ export async function PromptTokenImageParser(prompt: string): Promise<[string, R
 /**
  * Return prompt with {selection} token replaced with selected text or clipboard text.
  * @param prompt.
+ * @returns Parsed prompt and the source the replacement text actually came from.
  */
-async function PromptTokenSelectionParser(prompt: string): Promise<string | undefined> {
+async function PromptTokenSelectionParser(prompt: string): Promise<[string, PromptInputSource]> {
   const r = /{[ ]*selection[ ]*}/i;
-  if (prompt.match(r)) {
-    const t = await GetPromptTokenSelectionText();
-    if (t) prompt = prompt.replace(r, t);
-  }
-  return prompt;
+  if (!prompt.match(r)) return [prompt, PromptInputSource.None];
+  const [text, source] = await GetPromptTokenSelectionText();
+  if (!text) return [prompt, PromptInputSource.None];
+  return [prompt.replace(r, text), source];
 }
 
 /**
@@ -263,41 +273,42 @@ async function GetImageFromUrl(url: string): Promise<RaycastImage | undefined> {
  * Get Selected Text.
  * @param fallback - set to `true` for enable fallback to clipboard.
  */
-async function GetSelectedText(fallback = false): Promise<string | undefined> {
+async function GetSelectedText(fallback = false): Promise<[string | undefined, PromptInputSource]> {
   if (!environment.canAccess(getSelectedText)) throw ErrorRaycastPermissionAccessibility;
-  return await getSelectedText().catch(async () => {
+  try {
+    return [await getSelectedText(), PromptInputSource.SelectedText];
+  } catch {
     if (!fallback) throw ErrorRaycastSelectedTextEmpty;
     return await GetClipboardText();
-  });
+  }
 }
 
 /**
  * Get Clipboard Text.
  * @param fallback - set to `true` for enable fallback to selected text.
  */
-async function GetClipboardText(fallback = false): Promise<string | undefined> {
+async function GetClipboardText(fallback = false): Promise<[string | undefined, PromptInputSource]> {
   if (!environment.canAccess(Clipboard)) throw ErrorRaycastPermissionAccessibility;
-  return await Clipboard.readText().catch(async () => {
+  try {
+    return [await Clipboard.readText(), PromptInputSource.Clipboard];
+  } catch {
     if (!fallback) throw ErrorRaycastClipboardTextEmpty;
     return await GetSelectedText();
-  });
+  }
 }
 
 /**
  * Get Text for {selection} token.
  */
-async function GetPromptTokenSelectionText(): Promise<string | undefined> {
-  let query: string | undefined;
+async function GetPromptTokenSelectionText(): Promise<[string | undefined, PromptInputSource]> {
   const p = getPreferenceValues<Preferences>();
   switch (p.ollamaResultViewInput) {
     case "SelectedText":
-      query = await GetSelectedText(p.ollamaResultViewInputFallback);
-      break;
+      return await GetSelectedText(p.ollamaResultViewInputFallback);
     case "Clipboard":
-      query = await GetClipboardText(p.ollamaResultViewInputFallback);
-      break;
+      return await GetClipboardText(p.ollamaResultViewInputFallback);
   }
-  return query;
+  return [undefined, PromptInputSource.None];
 }
 
 /**
@@ -318,4 +329,22 @@ export function isThinkingModel(models?: Map<string, UiModelDetails[]>, server?:
   if (!capabilities || !capabilities.includes("thinking")) return false;
 
   return true;
+}
+
+/**
+ * Strip inline thinking blocks emitted by models that don't use Ollama's native thinking field.
+ * @param text - Generated answer.
+ * @returns Answer without inline thinking blocks.
+ */
+export function StripThinkTags(text: string): string {
+  return text.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, "").trim();
+}
+
+/**
+ * Verify if an unclosed inline thinking block is left over, which means the answer is truncated.
+ * @param text - Generated answer.
+ * @returns True if an opening thinking tag survives stripping.
+ */
+export function HasUnclosedThinkTag(text: string): boolean {
+  return /<think(?:ing)?>/i.test(StripThinkTags(text));
 }

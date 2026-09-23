@@ -341,5 +341,11 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1",
+    "fast-uri": "3.1.5",
+    "sharp": "0.35.3"
+  }
 }

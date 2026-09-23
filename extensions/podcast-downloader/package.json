@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "podcast-downloader",
+  "private": true,
+  "title": "Podcast Downloader",
+  "description": "Find podcast episodes, copy their audio URLs, and download them.",
+  "icon": "podcast-downloader.png",
+  "author": "volkmar_eich",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-podcasts",
+      "title": "Find Podcast Episode",
+      "description": "Search podcasts and download or copy episode audio URLs",
+      "mode": "view",
+      "keywords": [
+        "podcast",
+        "episode",
+        "rss",
+        "audio",
+        "download"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "podcastIndexApiKey",
+      "title": "Podcast Index API Key",
+      "description": "Free API key from api.podcastindex.org. Direct RSS works without it.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "podcastIndexApiSecret",
+      "title": "Podcast Index API Secret",
+      "description": "API secret from Podcast Index.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Folder",
+      "description": "Folder where podcast episodes are saved.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "fast-xml-parser": "^5.10.1",
+    "ipaddr.js": "^2.4.0",
+    "undici": "^8.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "~6.0.3"
+  }
+}

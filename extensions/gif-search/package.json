@@ -20,7 +20,8 @@
     "thomas",
     "tim_gailey",
     "clins1994",
-    "0xdhrv"
+    "0xdhrv",
+    "Olli0103"
   ],
   "license": "MIT",
   "categories": [
@@ -393,6 +394,7 @@
     "@giphy/js-types": "^5.1.0"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

@@ -1,21 +1,28 @@
 import { useCachedPromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
-import { getBoundedPreferenceNumber } from "../components/Menu";
+import { getSearchPageSize } from "../components/Menu";
+import { DiscussionFieldsFragment } from "../generated/graphql";
+import { compactFragmentNodes } from "../helpers";
 
 export function useDiscussions(query: string) {
   const { github } = getGitHubClient();
 
-  const { data, isLoading } = useCachedPromise(
-    async (query) => {
-      const result = await github.searchDiscussions({
-        query,
-        numberOfOpenItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-      });
-      return result.openDiscussions;
-    },
+  return useCachedPromise(
+    (query) =>
+      async ({ cursor }) => {
+        const result = await github.searchDiscussions({
+          query,
+          numberOfItems: getSearchPageSize(),
+          after: cursor,
+        });
+
+        return {
+          data: compactFragmentNodes<DiscussionFieldsFragment>(result.searchDiscussions.nodes),
+          hasMore: result.searchDiscussions.pageInfo.hasNextPage,
+          cursor: result.searchDiscussions.pageInfo.endCursor ?? undefined,
+        };
+      },
     [query],
   );
-
-  return { data, isLoading };
 }

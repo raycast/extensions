@@ -1,5 +1,57 @@
 # Slack Changelog
 
+## [Fix recipient search, AI file uploads, and attachment downloads] - 2026-09-10
+
+- Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
+- Keep frequently opened **Open Channel** results visible when they fall outside the initial directory page by retaining the latest 100 visited rows and merging them into empty-query results before frecency sorting.
+- Continue member searches past hidden-profile matches so people whose visible names occur later in Slack's unordered directory can still be found.
+- Show channel search results independently of group DM name lookup.
+- Resolve direct messages when opening browser links or creating Quicklinks and Huddle links.
+- Correctly recognize Slack member IDs that begin with `W` so those people appear as message recipients instead of channels.
+- Show Slack's requested retry delay when API calls are rate-limited, then retry automatically instead of failing immediately.
+- Fix **Upload Files** failing with a bare `internal_error` when a message was attached, caused by Slack rejecting the newer `markdown` block in `files.completeUploadExternal`; the AI message signature now uses upload-safe blocks for file uploads.
+- Return an actionable message when Slack still responds with `internal_error` so the AI can recover instead of retrying blindly or re-encoding files.
+- Add a **Download Files** AI tool that saves Slack attachments to `~/Downloads` (or a chosen folder) by their file IDs.
+- Surface attachment metadata (id, name, mimetype, size) in **Read Conversation**, **Read Thread**, and **Get Channel History** so attachments can be discovered and downloaded.
+- Add a **Download Attachment** action to **Search Messages** results that saves the file and reveals it in Finder.
+- Request the `files:read` scope so private files can be downloaded; existing OAuth users will be asked to re-authorize.
+- Add `files:read` to the manual access-token setup instructions.
+
+## [Keep Set Status responsive in large workspaces] - 2026-08-29
+
+- Load custom workspace emojis only when opening the emoji picker and render them in bounded slices to prevent Set Status from exceeding the extension memory limit.
+
+## [Fix Search Emojis crash in large workspaces] - 2026-08-12
+
+- Fix a "Worker terminated due to reaching memory limit: JS heap out of memory" crash in the Search Emojis command by rendering emojis in slices with a "Show More" item instead of rendering every custom emoji at once.
+
+## [Add expiration argument to Set Status] - 2026-08-12
+
+- The **Set Status** command now accepts an optional `expiration` argument — any number of minutes, or `today` / `week` — so a deep link or Quicklink can set a self-clearing status in one step (e.g. `"expiration":"90"` for an hour and a half).
+
+## [Broadcast Slack thread replies to channels] - 2026-07-21
+
+- Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.
+
+## [Add Slack reaction AI tool] - 2026-07-21
+
+- Add an `add-reaction` AI tool that adds an emoji reaction to a Slack message and returns its permalink.
+- Request Slack's `reactions:write` OAuth scope for adding reactions.
+
+## [Add Slack group DM AI tool] - 2026-07-21
+
+- Add an `open-group-dm` AI tool that opens or resumes a group DM with 2 to 8 users and returns its conversation ID for messaging or file uploads.
+
+## [Add Slack Huddle link AI tool] - 2026-07-21
+
+- Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.
+
+## [Fix AI signatures on file uploads] - 2026-07-21
+
+- Show the “Sent via Raycast” signature on Slack messages that include uploaded files.
+- Prompt existing OAuth users to reauthorize Slack when file-upload permission is missing.
+- Add the required `files:write` scope to the manual access-token setup instructions.
+
 ## [Add Slack file upload AI tool] - 2026-07-18
 
 - Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.

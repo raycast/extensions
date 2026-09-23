@@ -8,7 +8,8 @@
   "author": "rodolfo_lopez",
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity",
@@ -186,6 +187,7 @@
     "lint": "npm exec -- ray lint",
     "publish": "npm exec -- ray publish",
     "check": "tsc --noEmit",
+    "test:sync-worker": "node --no-warnings tests/sync-worker-smoke.js",
     "format": "prettier --check ."
   },
   "dependencies": {

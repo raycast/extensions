@@ -24,7 +24,7 @@ const useAutoComplete = ({ query, prefix = "-" }: AutoCompleteHookProps) => {
       : Object.keys(queryOptions).filter(
           (token) =>
             token.includes(currKey) ||
-            (!queryOptions[token].strict && queryOptions[token].title.toLowerCase().includes(currKey))
+            (!queryOptions[token].strict && queryOptions[token].title.toLowerCase().includes(currKey)),
         );
     if (!currKey || !possible.length) {
       Object.entries(queryOptions).forEach((entry) => {

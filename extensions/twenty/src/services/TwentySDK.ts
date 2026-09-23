@@ -1,11 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPreferenceValues } from "@raycast/api";
 import { Api } from "../enum/api";
-import fetch from "node-fetch";
-import { getActiveDataModelsSchema } from "./zod/schema/dataModelSchema";
-import { getDataModelWithFieldsSchema } from "./zod/schema/recordFieldSchema";
+import fetch, { Response } from "node-fetch";
+import { z } from "zod";
+import { DataModelItem, extractDataModels, getActiveDataModelsSchema } from "./zod/schema/dataModelSchema";
+import { extractDataModelWithFields, getDataModelWithFieldsSchema } from "./zod/schema/recordFieldSchema";
 import { removeTrailingSlash } from "../helper/removeTrailingSlash";
 import { isUrl } from "../helper/isUrl";
+
+// `QUERY_MAX_RECORDS` on the Twenty API — larger values are clamped server side.
+const METADATA_PAGE_SIZE = 200;
+// Safety net so a server that never clears `hasNextPage` cannot loop forever.
+const MAX_METADATA_PAGES = 25;
+
+function describeError(err: unknown) {
+  if (err instanceof z.ZodError) {
+    const [issue] = err.issues;
+    const path = issue?.path.join(".") || "response";
+    return `Unexpected response from the Twenty API at "${path}": ${issue?.message ?? "invalid data"}`;
+  }
+
+  return err instanceof Error ? err.message : String(err);
+}
 
 class TwentySDK {
   private url!: string;
@@ -18,26 +34,60 @@ class TwentySDK {
     this.url = isUrl(url) ? `${url}/rest` : `https://api.twenty.com/rest`;
   }
 
+  private get headers() {
+    return {
+      "Content-Type": "application/json",
+      [Api.KEY]: this.token,
+    };
+  }
+
+  private async describeResponseError(response: Response) {
+    const body = await response.text().catch(() => "");
+
+    try {
+      const parsed = JSON.parse(body);
+      const detail = parsed?.messages ?? parsed?.message ?? parsed?.error;
+
+      if (Array.isArray(detail) && detail.length > 0) return detail.join(", ");
+      if (typeof detail === "string" && detail.length > 0) return detail;
+    } catch {
+      // Body was not JSON, fall through to the status text.
+    }
+
+    return response.statusText || `Request failed with status ${response.status}`;
+  }
+
   async getActiveDataModels() {
     try {
-      const response = await fetch(this.url + "/metadata/objects", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          [Api.KEY]: this.token,
-        },
-      });
+      const dataModels: DataModelItem[] = [];
+      let startingAfter: string | undefined;
 
-      if (response.ok) {
-        const rawData = await response.json();
-        const data = getActiveDataModelsSchema.parse(rawData);
-        const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
-        return activeDataModel;
+      for (let page = 0; page < MAX_METADATA_PAGES; page++) {
+        const query = new URLSearchParams({ limit: String(METADATA_PAGE_SIZE) });
+        if (startingAfter) query.set("starting_after", startingAfter);
+
+        const response = await fetch(`${this.url}/metadata/objects?${query.toString()}`, {
+          method: "GET",
+          headers: this.headers,
+        });
+
+        if (!response.ok) {
+          return await this.describeResponseError(response);
+        }
+
+        const parsed = getActiveDataModelsSchema.parse(await response.json());
+        dataModels.push(...extractDataModels(parsed));
+
+        const { pageInfo } = parsed;
+        if (!pageInfo?.hasNextPage || !pageInfo.endCursor) break;
+        startingAfter = pageInfo.endCursor;
       }
 
-      return response.statusText;
+      // `isSystem` / `isActive` are optional on newer servers, so only exclude
+      // models that explicitly opt out.
+      return dataModels.filter((model) => model.isSystem !== true && model.isActive !== false);
     } catch (err) {
-      return err instanceof Error ? err.message : String(err);
+      return describeError(err);
     }
   }
 
@@ -45,28 +95,28 @@ class TwentySDK {
     try {
       const response = await fetch(this.url + `/metadata/objects/${id}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          [Api.KEY]: this.token,
-        },
+        headers: this.headers,
       });
 
-      if (response.ok) {
-        const rawData = await response.json();
-        const objectRecordWithFieldsMetadata = getDataModelWithFieldsSchema.parse(rawData);
-        const excludeFieldsWithName = ["updatedAt", "deletedAt"];
-        objectRecordWithFieldsMetadata.data.object.fields = objectRecordWithFieldsMetadata.data.object.fields
-          .filter((object) => !object.isSystem)
-          .filter((object) => object.isActive)
-          .filter((object) => object.type !== "RELATION" && object.type !== "ACTOR") // handle relation later
-          .filter((object) => !excludeFieldsWithName.includes(object.name));
-
-        return objectRecordWithFieldsMetadata.data.object;
+      if (!response.ok) {
+        return await this.describeResponseError(response);
       }
 
-      return response.statusText;
+      const objectRecordMetadata = extractDataModelWithFields(
+        getDataModelWithFieldsSchema.parse(await response.json()),
+      );
+      const excludeFieldsWithName = ["updatedAt", "deletedAt"];
+
+      return {
+        ...objectRecordMetadata,
+        fields: objectRecordMetadata.fields
+          .filter((field) => field.isSystem !== true)
+          .filter((field) => field.isActive !== false)
+          .filter((field) => field.type !== "RELATION" && field.type !== "ACTOR") // handle relation later
+          .filter((field) => !excludeFieldsWithName.includes(field.name)),
+      };
     } catch (err) {
-      return err instanceof Error ? err.message : String(err);
+      return describeError(err);
     }
   }
 
@@ -74,10 +124,7 @@ class TwentySDK {
     try {
       const response = await fetch(this.url + `/${namePlural}`, {
         method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          [Api.KEY]: this.token,
-        },
+        headers: this.headers,
         body: JSON.stringify({
           ...bodyParam,
         }),

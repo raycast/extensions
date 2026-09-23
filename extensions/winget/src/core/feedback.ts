@@ -69,6 +69,8 @@ function progressMessage(progress: WingetProgressState): string | undefined {
       return "Uninstalling…";
     case "repairing":
       return "Repairing…";
+    case "stalled":
+      return `No output for ${progress.silentMinutes} min — still running, cancel if it looks stuck`;
     case "complete":
       return progress.message;
   }
@@ -116,7 +118,8 @@ function noopTitle(state: OperationState): string {
   const name = state.target?.name ?? "Package";
   if (state.bulk && state.bulk.skipped > 0) {
     // Everything was skipped: winget had no applicable action for any target.
-    return `Nothing ${bulkVerb(state)}, ${state.bulk.skipped} skipped (no applicable update)`;
+    const reason = state.kind === "uninstall-all" ? "not installed" : "no applicable update";
+    return `Nothing ${bulkVerb(state)}, ${state.bulk.skipped} skipped (${reason})`;
   }
   switch (state.kind) {
     case "install":
@@ -126,6 +129,8 @@ function noopTitle(state: OperationState): string {
       return `${name} is already up to date`;
     case "upgrade-all":
       return "All packages are up to date";
+    case "uninstall":
+      return `${name} was not installed`;
     case "pin":
       return `${name} is already pinned`;
     case "unpin":

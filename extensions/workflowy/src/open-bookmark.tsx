@@ -4,6 +4,7 @@ import { QuickCaptureForm } from "./components/QuickCaptureForm";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
 import { deleteBookmark, getChildren, listBookmarks, getAllShortcuts } from "./lib/cache";
 import { getPreferences, hasApiKey } from "./lib/preferences";
+import { platformShortcut } from "./lib/shortcuts";
 import { getWorkflowyAppUrl, getWorkflowyWebUrl } from "./lib/urls";
 import { maybeStartBackgroundSync } from "./lib/sync";
 import { truncate } from "./lib/nodes";
@@ -65,7 +66,7 @@ function BookmarksView() {
                   {renderOpenActions(shortcut.nodeId ?? shortcut.name)}
                   <Action.Push
                     title="Add Item Here"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={platformShortcut(["cmd", "shift"], "a")}
                     target={<QuickCaptureForm fixedDestination={{ title: shortcut.label, target: shortcut.name, targetNodeId: shortcut.nodeId }} />}
                   />
                 </ActionPanel>
@@ -90,13 +91,13 @@ function BookmarksView() {
                   {renderOpenActions(bookmark.nodeId)}
                   <Action.Push
                     title="Add Item Here"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={platformShortcut(["cmd", "shift"], "a")}
                     target={<QuickCaptureForm fixedDestination={{ title: bookmark.name, target: bookmark.nodeId, targetNodeId: bookmark.nodeId }} />}
                   />
                   <Action
                     title="Delete Bookmark"
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={platformShortcut(["cmd"], "d")}
                     onAction={async () => {
                       const confirmed = await confirmAlert({
                         title: `Delete bookmark \"${bookmark.name}\"?`,

@@ -1,5 +1,11 @@
 # Claude Code Launcher
 
+## [Claude Sessions] - 2026-08-10
+
+### Added
+- New "Claude Sessions" command to manage Claude Code sessions and background agents: live status list (busy/idle/done), attach or resume background agents in your terminal, stop sessions, delete completed ones, fork interactive sessions, and dispatch new background agents (`claude --bg`) with a prompt
+- Optional "Claude CLI Path" preference on the new command for setups where the `claude` binary is not auto-detected
+
 ## [1.0.4] - 2026-03-24
 
 ### Added

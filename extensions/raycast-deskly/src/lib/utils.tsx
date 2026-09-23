@@ -15,6 +15,13 @@ export function renderBookingDate(booking: Booking): string {
   return range ? `${bookingDate} (${range})` : bookingDate;
 }
 
+/** Turns an in-progress toast into a failure toast with a consistently-normalized error message. */
+export function failToast(toast: Toast, title: string, error: unknown): void {
+  toast.style = Toast.Style.Failure;
+  toast.title = title;
+  toast.message = error instanceof Error ? error.message : String(error);
+}
+
 export function profileIcon(profileImage: string | undefined | null, apiUrl: string): Icon | Image.ImageLike {
   if (profileImage) {
     const src = profileImage.startsWith("http") ? profileImage : apiUrl + profileImage;
@@ -45,9 +52,7 @@ export async function confirmDeleteBooking(booking: Booking, onDeleted: () => vo
     onDeleted();
     await launchCommand({ name: "todays-booking", type: LaunchType.Background });
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to delete booking";
-    toast.message = String(error);
+    failToast(toast, "Failed to delete booking", error);
   }
 }
 

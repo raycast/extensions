@@ -1,7 +1,7 @@
-# Claude Code Usage (ccusage)
+# Claude Usage (ccusage)
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/4ae63a5c-3064-4050-8077-45b508dcc4ff" alt="Claude Code Usage Icon" width="128" height="128">
+  <img src="https://github.com/user-attachments/assets/4ae63a5c-3064-4050-8077-45b508dcc4ff" alt="Claude Usage Icon" width="128" height="128">
   
   A Raycast extension that provides real-time monitoring of Claude Code usage statistics using the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool.
   
@@ -16,9 +16,10 @@ Monitor your Claude Code usage with comprehensive real-time statistics:
 - **Today Usage**: Track input/output tokens and costs for today with visual intensity indicators
 - **Session History**: View recent usage sessions with model-specific breakdown and icons
 - **Cost Analysis**: Detailed cost tracking with monthly projections and spending insights
-- **Model Statistics**: Usage analytics by Claude model (Opus, Sonnet, Haiku) with tier grouping
-- **Usage Limits**: OAuth-backed 5-hour and 7-day Claude usage limits when Claude Code is authenticated with Claude OAuth
+- **Model Statistics**: Usage analytics by Claude model (Fable, Opus, Sonnet, Haiku) with tier grouping
+- **Usage Limits**: OAuth-backed 5-hour, 7-day, and per-model Claude usage limits when Claude Code is authenticated with Claude OAuth
 - **Menu Bar Integration**: Quick access to usage stats directly from your system menu bar
+- **Pie Chart Icon**: Menu bar icon that fills clockwise with a pie chart showing 5-hour usage utilization
 - **AI Extension Support**: Comprehensive integration with Raycast AI Extensions for Claude models
 - **Default View Preference**: Choose which section to display first when opening the extension
 - **Custom npx Path**: Support for custom npx installations and non-standard Node.js setups
@@ -27,7 +28,7 @@ Monitor your Claude Code usage with comprehensive real-time statistics:
 
 ### Main Usage View
 
-![Claude Code Usage](metadata/ccusage-2.png)
+![Claude Usage](metadata/ccusage-2.png)
 
 ## Requirements
 
@@ -67,7 +68,7 @@ Access preferences with **Cmd+Shift+,** when the extension is open.
 
 ## Support
 
-If you encounter any issues or have suggestions, please [create an issue](<https://github.com/raycast/extensions/issues/new?title=%5BClaude+Code+Usage+(ccusage)%5D+...&template=extension_bug_report.yml&labels=extension,bug&extension-url=https://www.raycast.com/nyatinte/ccusage&body=%0A%3C!--%0APlease+update+the+title+above+to+consisely+describe+the+issue%0A--%3E%0A%0A%23%23%23+Extension%0A%0Ahttps://raycast.com/%23%7Bextension_path(extension)%7D%0A%0A%23%23%23+Description%0A%0A%3C!--%0APlease+provide+a+clear+and+concise+description+of+what+the+bug+is.+Include+screenshots+if+needed.+Please+test+using+the+latest+version+of+the+extension,+Raycast+and+API.%0A--%3E%0A%0A%23%23%23+Steps+To+Reproduce%0A%0A%3C!--%0AYour+bug+will+get+fixed+much+faster+if+the+extension+author+can+easily+reproduce+it.+Issues+without+reproduction+steps+may+be+immediately+closed+as+not+actionable.%0A--%3E%0A%0A1.+In+this+environment...%0A2.+With+this+config...%0A3.+Run+'...'%0A4.+See+error...%0A%0A%23%23%23+Current+Behavior%0A%0A%23%23%23+Expected+Behavior%0A%0A>) in the repository.
+If you encounter any issues or have suggestions, please [create an issue](<https://github.com/raycast/extensions/issues/new?title=%5BClaude+Usage+(ccusage)%5D+...&template=extension_bug_report.yml&labels=extension,bug&extension-url=https://www.raycast.com/nyatinte/ccusage&body=%0A%3C!--%0APlease+update+the+title+above+to+consisely+describe+the+issue%0A--%3E%0A%0A%23%23%23+Extension%0A%0Ahttps://raycast.com/%23%7Bextension_path(extension)%7D%0A%0A%23%23%23+Description%0A%0A%3C!--%0APlease+provide+a+clear+and+concise+description+of+what+the+bug+is.+Include+screenshots+if+needed.+Please+test+using+the+latest+version+of+the+extension,+Raycast+and+API.%0A--%3E%0A%0A%23%23%23+Steps+To+Reproduce%0A%0A%3C!--%0AYour+bug+will+get+fixed+much+faster+if+the+extension+author+can+easily+reproduce+it.+Issues+without+reproduction+steps+may+be+immediately+closed+as+not+actionable.%0A--%3E%0A%0A1.+In+this+environment...%0A2.+With+this+config...%0A3.+Run+'...'%0A4.+See+error...%0A%0A%23%23%23+Current+Behavior%0A%0A%23%23%23+Expected+Behavior%0A%0A>) in the repository.
 
 ## Credits
 

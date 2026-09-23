@@ -2,7 +2,8 @@ import { Icon } from "@raycast/api";
 
 import { useLocalStorage } from "./useLocalStorage";
 
-export type CreateReminderFieldId = "title" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "location";
+export type CreateReminderFieldId =
+  "title" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "tags" | "location";
 
 export type CreateReminderFieldDefinition = {
   id: CreateReminderFieldId;
@@ -45,7 +46,7 @@ export const createReminderFieldDefinitions: CreateReminderFieldDefinition[] = [
   {
     id: "dueDate",
     title: "Date",
-    description: "Set a due date or date and time.",
+    description: "Set a due date with natural language (1h, in 10 minutes, tomorrow 3:45pm) or the calendar.",
     icon: Icon.Calendar,
   },
   {
@@ -66,6 +67,12 @@ export const createReminderFieldDefinitions: CreateReminderFieldDefinition[] = [
     title: "Priority",
     description: "Choose a reminder priority.",
     icon: Icon.ExclamationMark,
+  },
+  {
+    id: "tags",
+    title: "Tags",
+    description: "Add tags using Apple Reminders' native format.",
+    icon: Icon.Tag,
   },
   {
     id: "location",
@@ -127,6 +134,7 @@ export const defaultCreateReminderFormLayout: CreateReminderFormLayoutItem[] = [
   { type: "field", id: "recurrence", enabled: true },
   { type: "field", id: "list", enabled: true },
   { type: "field", id: "priority", enabled: true },
+  { type: "field", id: "tags", enabled: true },
   createSeparatorItem(),
   { type: "field", id: "location", enabled: true },
 ];

@@ -50,6 +50,38 @@ function valueAtPath(root: unknown, path: ReadonlyArray<string | number>): unkno
   return current;
 }
 
+// `useExec` invokes `parseOutput` even when the process failed: spawn errors
+// (e.g. npx missing from PATH), non-zero exits, kill signals, and timeouts all
+// arrive here with an empty stdout. Checking stdout alone would report every
+// one of them as "no output", hiding the actual failure from the user.
+
+type ExecOutcome = {
+  error?: Error;
+  exitCode: number | null;
+  signal: NodeJS.Signals | null;
+  timedOut: boolean;
+  stderr: string;
+};
+
+const STDERR_TAIL_LINES = 5;
+
+export function describeExecFailure(label: string, outcome: ExecOutcome): string | null {
+  const reason = outcome.timedOut
+    ? "timed out"
+    : outcome.error
+      ? `failed to start (${outcome.error.message})`
+      : outcome.signal
+        ? `was terminated by signal ${outcome.signal}`
+        : outcome.exitCode !== null && outcome.exitCode !== 0
+          ? `exited with code ${outcome.exitCode}`
+          : null;
+
+  if (!reason) return null;
+
+  const stderrTail = outcome.stderr.trim().split("\n").slice(-STDERR_TAIL_LINES).join("\n").trim();
+  return stderrTail ? `${label} ${reason}:\n${stderrTail}` : `${label} ${reason}.`;
+}
+
 /**
  * Builds a privacy-preserving, traceable error message for a ccusage schema
  * mismatch: the ccusage version, the overall output shape, and the actual key

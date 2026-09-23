@@ -45,7 +45,11 @@ const formatDate = (value?: string): string => {
   return date.toLocaleDateString();
 };
 
-export default function Command() {
+import { withGranolaAuth } from "./utils/withGranolaAuth";
+
+export default withGranolaAuth(Command);
+
+function Command() {
   const { noteData, isLoading, hasError, error } = useGranolaData();
 
   // Handle loading and error states
@@ -224,7 +228,8 @@ function BulkExportList({ notes, untitledNoteTitle }: { notes: Doc[]; untitledNo
         const panelData = panels[note.id][panelId];
         if (panelData.content) {
           enhancedNotes = convertDocumentToMarkdown(panelData.content);
-        } else if (panelData.original_content) {
+        }
+        if (!enhancedNotes.trim() && panelData.original_content) {
           // Convert HTML to markdown if it's HTML content
           enhancedNotes = convertHtmlToMarkdown(panelData.original_content);
         }

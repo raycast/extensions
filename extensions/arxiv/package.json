@@ -86,6 +86,8 @@
     "test:coverage": "jest --coverage"
   },
   "overrides": {
-    "uuid": "^11.1.1"
+    "uuid": "^11.1.1",
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5"
   }
 }

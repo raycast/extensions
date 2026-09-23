@@ -69,6 +69,8 @@ export const Keyboard = {
 
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const popToRoot = vi.fn().mockResolvedValue(undefined);
+export const launchCommand = vi.fn().mockResolvedValue(undefined);
+export const LaunchType = { UserInitiated: "userInitiated", Background: "background" } as const;
 export const confirmAlert = vi.fn().mockResolvedValue(true);
 export const trash = vi.fn().mockResolvedValue(undefined);
 export const open = vi.fn().mockResolvedValue(undefined);

@@ -34,6 +34,25 @@ export interface AuthData {
 export interface Location {
   id: string;
   name: string;
+  floors: Floor[];
+  timeframes: Timeframe[];
+}
+
+export interface Timeframe {
+  name: string;
+  from: string;
+  until: string;
+}
+
+export interface Floor {
+  id: string;
+  name: string;
+  rooms: Room[];
+}
+
+export interface Room {
+  id: string;
+  name: string;
 }
 
 export interface PresentBooking {
@@ -73,4 +92,12 @@ export interface Information {
     maxBookingDays: number | null;
   };
   availableLocations: Location[];
+}
+
+export interface Resource {
+  resource: string;
+  resourceName: string;
+  characteristics: string[];
+  bookedBySelf: boolean;
+  availability: string;
 }

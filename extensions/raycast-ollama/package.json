@@ -5,6 +5,12 @@
   "description": "Perform Local Inference with Ollama",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
+  "contributors": [
+    "0xdhrv",
+    "ashokbaruaakas",
+    "pernielsentikaer",
+    "kud"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -100,7 +106,18 @@
       "title": "Change Tone to Casual",
       "subtitle": "Ollama",
       "description": "Make selected text more casual",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-code-explain",
@@ -114,7 +131,18 @@
       "title": "Change Tone to Confident",
       "subtitle": "Ollama",
       "description": "Make selected text more confident",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-explain",
@@ -128,14 +156,36 @@
       "title": "Fix Spelling and Grammar",
       "subtitle": "Ollama",
       "description": "Fix selected text from spelling and grammar error",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-friendly",
       "title": "Change Tone to Friendly",
       "subtitle": "Ollama",
       "description": "Make selected text more friendly",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-image-describe",
@@ -156,28 +206,72 @@
       "title": "Improve Writing",
       "subtitle": "Ollama",
       "description": "Improve writing of selected text",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-longer",
       "title": "Make Longer",
       "subtitle": "Ollama",
       "description": "Make selected text longer",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-professional",
       "title": "Change Tone to Professional",
       "subtitle": "Ollama",
       "description": "Make selected text more professional",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-shorter",
       "title": "Make Shorter",
       "subtitle": "Ollama",
       "description": "Make selected text shorter",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-translate",
@@ -185,6 +279,17 @@
       "subtitle": "Ollama",
       "description": "Translate selected text",
       "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ],
       "arguments": [
         {
           "name": "source",
@@ -4857,7 +4962,18 @@
       "title": "Rephrase as Tweet",
       "subtitle": "Ollama",
       "description": "Rephrase selected text as Tweet",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ollamaAutoReplace",
+          "description": "Replace the selected text with the result as soon as it is generated, instead of showing the answer to copy or paste yourself. Only applies when the selection supplied the input; if the clipboard did, the answer is shown instead.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Replace Selected Text",
+          "label": "Replace the selected text automatically",
+          "default": false
+        }
+      ]
     },
     {
       "name": "ollama-models",
@@ -4916,18 +5032,18 @@
     }
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
-    "@raycast/api": "^1.103.7",
-    "@raycast/utils": "^2.2.2",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1",
     "file-type": "^21.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/mime-types": "^2.1.4",
-    "@types/node": "^22.13.14",
-    "@types/react": "^19.2.6",
-    "eslint": "^8.57.0",
-    "prettier": "^3.8.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3"
   },
   "scripts": {

@@ -1,16 +1,34 @@
-import { showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { TweetList } from "./tweet";
-import { Tweet } from "../lib/twitter";
-import { clientV2, useRefresher } from "../lib/twitterapi_v2";
+import { clientV2, Fetcher } from "../lib/twitterapi_v2";
 
 export function AuthorTweetList(props: { authorID: string }) {
-  const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
-    async (): Promise<Tweet[] | undefined> => {
-      return await clientV2.getTweetsFromAuthor(props.authorID);
+  const { data, error, isLoading, pagination, revalidate } = usePromise(
+    (authorId: string) => async (options: { cursor?: string }) => {
+      const page = await clientV2.getTweetsFromAuthor(authorId, [], options.cursor);
+      return { data: page.items, hasMore: Boolean(page.nextToken), cursor: page.nextToken };
     },
+    [props.authorID],
+    { failureToastOptions: { title: "Could not load recent posts" } },
   );
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
-  }
-  return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
+  const fetcher: Fetcher = {
+    updateInline: async () => {
+      clientV2.clearCache();
+      await revalidate();
+    },
+    refresh: async () => {
+      clientV2.clearCache();
+      await revalidate();
+    },
+  };
+  return (
+    <TweetList
+      isLoading={isLoading}
+      tweets={data}
+      error={error}
+      fetcher={fetcher}
+      pagination={pagination}
+      emptyViewTitle="No Recent Posts Found"
+    />
+  );
 }

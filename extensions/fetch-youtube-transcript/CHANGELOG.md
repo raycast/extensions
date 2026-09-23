@@ -1,5 +1,25 @@
 # Fetch Youtube Transcript Changelog
 
+## [2.1.0] - 2026-08-16
+
+### Added
+
+- Added an AI tool, so Raycast AI can fetch a video's transcript and summarise it, translate it, or turn it into notes. Ask it something like "summarise this video" with a YouTube link, or reference the extension directly with `@fetch-youtube-transcript`.
+- The AI tool can request a specific language per question (for example "get the Hindi transcript of this video") without changing your Default Language preference.
+- Long videos are handled by letting the AI read the transcript in chunks, so a summary is never silently based on only part of a video.
+
+### Fixed
+
+- Share links copied from YouTube's own share button (`watch?feature=shared&v=...`), Shorts links, and livestream (`/live/`) links are now recognised. Previously they were rejected as invalid URLs.
+- Transcripts are now downloaded into a private temporary directory, so two runs started at the same moment can no longer overwrite or delete each other's file.
+- If the configured download folder has been deleted or is unavailable, the transcript is now saved to your Downloads folder instead of being lost after a successful fetch.
+
+### Changed
+
+- Updated dependencies and removed a stale dependency override block.
+
+**Note:** the existing command is unchanged. Transcripts saved to your download folder are still saved in full, in your preferred language, for videos of any length.
+
 ## [2.0.2] - 2025-10-17
 
 ### 2.0.2 Added

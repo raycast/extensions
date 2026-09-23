@@ -83,6 +83,7 @@ if cmp -s "$PRODUCT_BIN" "$OUTPUT_BIN"; then
   printf "Bundled release helper is unchanged at %s\n" "$OUTPUT_BIN"
 else
   cp "$PRODUCT_BIN" "$OUTPUT_BIN"
-  chmod +x "$OUTPUT_BIN"
   printf "Bundled universal release build at %s\n" "$OUTPUT_BIN"
 fi
+
+chmod +x "$OUTPUT_BIN"

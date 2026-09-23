@@ -68,7 +68,8 @@ export type ProgressBarStyle =
   | "squares"
   | "diamonds"
   | "stars"
-  | "braille";
+  | "braille"
+  | "pies";
 
 const PROGRESS_BAR_CHARS: Record<ProgressBarStyle, [string, string]> = {
   blocks: ["▰", "▱"],
@@ -80,6 +81,7 @@ const PROGRESS_BAR_CHARS: Record<ProgressBarStyle, [string, string]> = {
   diamonds: ["◆", "◇"],
   stars: ["★", "☆"],
   braille: ["⣿", "⣀"],
+  pies: ["●", "○"],
 };
 
 export const createProgressBar = (

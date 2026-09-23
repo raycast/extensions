@@ -3,7 +3,9 @@ import { withCache } from "@raycast/utils";
 import { getGithubToken } from "../preferences";
 import { type Skill, type SkillFrontmatter, parseFrontmatter } from "../shared";
 
-type SkillContentResult = {
+const ROOT_SKILL_MD_PATH = "SKILL.md";
+
+export type SkillContentResult = {
   frontmatter: SkillFrontmatter;
   body: string;
   raw: string;
@@ -95,17 +97,33 @@ const fetchRepoSkillMdEntries = withCache(
     const { tree } = (await response.json()) as { tree?: GitTreeEntry[] };
     return (tree ?? [])
       .filter((entry): entry is GitTreeEntry & { url: string } =>
-        Boolean(entry.type === "blob" && entry.path.endsWith("/SKILL.md") && entry.url),
+        // The bare "SKILL.md" match covers single-skill repos, which keep the
+        // file at the repo root so no enclosing folder carries the skill name.
+        Boolean(
+          entry.type === "blob" && (entry.path === ROOT_SKILL_MD_PATH || entry.path.endsWith("/SKILL.md")) && entry.url,
+        ),
       )
       .map((entry) => ({ path: entry.path, url: entry.url }));
   },
   { maxAge: 10 * 60 * 1000 },
 );
 
+async function fetchBlobContent(entry: SkillMdEntry): Promise<SkillContentResult | undefined> {
+  const blobResponse = await fetch(entry.url, { headers: githubHeaders() });
+  if (!blobResponse.ok) return undefined;
+
+  const blob = (await blobResponse.json()) as { content?: string; encoding?: string };
+  if (!blob.content) return undefined;
+
+  const text = blob.encoding === "base64" ? Buffer.from(blob.content, "base64").toString("utf-8") : blob.content;
+  return parseSkillContent(text);
+}
+
 /**
  * Repo-tree lookup: read the repo's SKILL.md index and locate the one whose
  * enclosing folder matches the skill. Handles skills nested at any depth that
- * the flat-path guesses can't reach.
+ * the flat-path guesses can't reach, plus single-skill repos with SKILL.md at
+ * the root.
  */
 async function fetchSkillContentFromTree(skill: Skill): Promise<SkillContentResult | undefined> {
   const entries = await fetchRepoSkillMdEntries(skill.source);
@@ -125,14 +143,15 @@ async function fetchSkillContentFromTree(skill: Skill): Promise<SkillContentResu
       )[0];
     if (!match) continue;
 
-    const blobResponse = await fetch(match.url, { headers: githubHeaders() });
-    if (!blobResponse.ok) continue;
+    const content = await fetchBlobContent(match);
+    if (content) return content;
+  }
 
-    const blob = (await blobResponse.json()) as { content?: string; encoding?: string };
-    if (!blob.content) continue;
-
-    const text = blob.encoding === "base64" ? Buffer.from(blob.content, "base64").toString("utf-8") : blob.content;
-    return parseSkillContent(text);
+  // Single-skill repos keep SKILL.md at the root, so its (empty) folder name
+  // never matches a candidate. Only trust it when it is the repo's sole skill,
+  // otherwise a multi-skill repo's top-level README-style SKILL.md would win.
+  if (entries.length === 1 && entries[0].path === ROOT_SKILL_MD_PATH) {
+    return fetchBlobContent(entries[0]);
   }
 
   return undefined;

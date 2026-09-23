@@ -1,0 +1,239 @@
+# Batched PR activity — replaces the 5-calls-per-PR REST fan-out in src/api.ts.
+# See docs/PERFORMANCE-FINDINGS.md §3 (measurements) and §5.5 (truncation policy).
+#
+# Every connection requests `totalCount` alongside `nodes` so truncation is DETECTABLE: when
+# totalCount exceeds the page size we know to fall back rather than silently dropping activity.
+
+# Actor is polymorphic (User, Bot, Mannequin, Organization, EnterpriseUserAccount) and NULLABLE
+# for deleted accounts. Callers must normalize to a display-safe fallback — see §5.2.
+fragment ActorFields on Actor {
+  login
+  avatarUrl(size: 64)
+}
+
+fragment PRActivityFields on PullRequest {
+  number
+  title
+  url
+  createdAt
+  updatedAt
+  state
+  author {
+    ...ActorFields
+  }
+
+  # Feeds saved PR filters (assignee:/review-requested:/label:/draft: qualifiers — see
+  # src/pr-filter-query.ts). GitHub caps assignees at 10 per PR, so this connection can never
+  # truncate.
+  assignees(first: 10) {
+    totalCount
+    nodes {
+      login
+      avatarUrl(size: 64)
+    }
+  }
+
+  # `RequestedReviewer` is a `User | Team` union (GitHub GraphQL reference, Pull Requests
+  # category). Team-requested reviews are out of scope for the `review-requested:` filter, so
+  # only the `User` branch is selected.
+  reviewRequests(first: 15) {
+    totalCount
+    nodes {
+      requestedReviewer {
+        __typename
+        ... on User {
+          login
+          avatarUrl(size: 64)
+        }
+      }
+    }
+  }
+
+  labels(first: 20) {
+    totalCount
+    nodes {
+      name
+      color
+    }
+  }
+
+  isDraft
+
+  # itemKey: ic-<fullDatabaseId>
+  comments(last: 20) {
+    totalCount
+    nodes {
+      fullDatabaseId
+      body
+      createdAt
+      updatedAt
+      url
+      author {
+        ...ActorFields
+      }
+    }
+  }
+
+  # itemKey: review-<fullDatabaseId>
+  reviews(last: 20) {
+    totalCount
+    nodes {
+      fullDatabaseId
+      state
+      body
+      submittedAt
+      url
+      author {
+        ...ActorFields
+      }
+    }
+  }
+
+  # itemKey: rc-<fullDatabaseId>. Nested comments also carry totalCount — a thread with more
+  # than the page size would otherwise truncate silently (§5.5).
+  reviewThreads(last: 50) {
+    totalCount
+    nodes {
+      comments(last: 20) {
+        totalCount
+        nodes {
+          fullDatabaseId
+          body
+          path
+          line
+          originalLine
+          diffHunk
+          createdAt
+          updatedAt
+          url
+          author {
+            ...ActorFields
+          }
+          replyTo {
+            fullDatabaseId
+          }
+          pullRequestReview {
+            fullDatabaseId
+          }
+        }
+      }
+    }
+  }
+
+  # itemKey: commit-<oid>
+  commits(last: 50) {
+    totalCount
+    nodes {
+      commit {
+        oid
+        message
+        committedDate
+        url
+        author {
+          name
+          date
+          user {
+            ...ActorFields
+          }
+        }
+      }
+    }
+  }
+
+  # Label and force-push events expose only an opaque GraphQL `id` — no database ID — so their
+  # itemKeys are derived synthetically from (actor, createdAt, label). See §5.1.
+  timelineItems(last: 30, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, HEAD_REF_FORCE_PUSHED_EVENT]) {
+    totalCount
+    nodes {
+      __typename
+      ... on LabeledEvent {
+        createdAt
+        actor {
+          ...ActorFields
+        }
+        label {
+          name
+          color
+        }
+      }
+      ... on UnlabeledEvent {
+        createdAt
+        actor {
+          ...ActorFields
+        }
+        label {
+          name
+          color
+        }
+      }
+      ... on HeadRefForcePushedEvent {
+        createdAt
+        actor {
+          ...ActorFields
+        }
+      }
+    }
+  }
+}
+
+# --- METADATA OPERATION ---
+# This cheap ordered index decides which PRs may have changed before activity is requested.
+query PRMetadata($owner: String!, $name: String!, $first: Int!, $after: String) {
+  rateLimit {
+    cost
+    remaining
+    nodeCount
+  }
+  repository(owner: $owner, name: $name) {
+    pullRequests(states: OPEN, first: $first, after: $after, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        number
+        updatedAt
+      }
+    }
+  }
+}
+
+# --- PAGE OPERATION ---
+# The page form is retained for code generation and manual diagnostics. The transport normally
+# uses the metadata query below and then requests this fragment only for candidate PR numbers.
+query PRActivity($owner: String!, $name: String!, $first: Int!, $after: String) {
+  rateLimit {
+    cost
+    remaining
+    nodeCount
+  }
+  repository(owner: $owner, name: $name) {
+    pullRequests(states: OPEN, first: $first, after: $after, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      totalCount
+      # Cursors are required: maxScan defaults to 150 and the preference allows up to 1000,
+      # while GitHub caps a connection page at 100 (§5.5).
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        ...PRActivityFields
+      }
+    }
+  }
+}
+
+# --- BY-NUMBER OPERATION ---
+# Fetch activity only after the cheap metadata pass establishes that the PR may have changed.
+query PRActivityByNumber($owner: String!, $name: String!, $number: Int!) {
+  rateLimit {
+    cost
+    remaining
+    nodeCount
+  }
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      ...PRActivityFields
+    }
+  }
+}

@@ -2,8 +2,8 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast 
 import BookingDetail from "./BookingDetail";
 import { checkInBooking } from "../api/deskly";
 import { Booking } from "../lib/types";
-import { confirmDeleteBooking, profileIcon } from "../lib/utils";
-import { isSameDay } from "../lib/format";
+import { confirmDeleteBooking, failToast, profileIcon } from "../lib/utils";
+import { isSameDay, toISODate } from "../lib/format";
 
 export interface OfficeListItem {
   key: string;
@@ -25,6 +25,31 @@ export interface OfficeListSection {
   key: string;
   title: string;
   items: OfficeListItem[];
+}
+
+/**
+ * Groups `items` by `keyOf` (preserving first-seen order) and maps each group into an
+ * `OfficeListSection`. The group key doubles as the section key. Shared by the list commands so the
+ * grouping/section-building logic lives in one place.
+ */
+export function buildSections<T>(
+  items: T[],
+  keyOf: (item: T) => string,
+  sectionTitle: (first: T, groupKey: string) => string,
+  toItem: (item: T) => OfficeListItem
+): OfficeListSection[] {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const key = keyOf(item);
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  }
+  return [...groups.entries()].map(([key, group]) => ({
+    key,
+    title: sectionTitle(group[0], key),
+    items: group.map(toItem),
+  }));
 }
 
 export default function OfficeList({ sections }: { sections: OfficeListSection[] }) {
@@ -76,9 +101,7 @@ export default function OfficeList({ sections }: { sections: OfficeListSection[]
                               toast.style = Toast.Style.Success;
                               toast.title = "Checked in";
                             } catch (error) {
-                              toast.style = Toast.Style.Failure;
-                              toast.title = "Check-in failed";
-                              toast.message = String(error);
+                              failToast(toast, "Check-in failed", error);
                             }
                           }}
                         />
@@ -86,7 +109,7 @@ export default function OfficeList({ sections }: { sections: OfficeListSection[]
                       <Action.OpenInBrowser
                         title="Open in Browser"
                         icon={Icon.Globe}
-                        url={`${apiUrl}/en/overview/${booking.date.toISOString().substring(0, 10)}`}
+                        url={`${apiUrl}/en/overview/${toISODate(booking.date)}`}
                       />
                       {item.onDeleted && (
                         <Action

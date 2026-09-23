@@ -18,8 +18,8 @@ List by FullForms brings your [FullForms](https://fullforms.com) List glossaries
 
 ## Setup
 
-1. Sign in to https://list.fullforms.com.
-2. Open Account, scroll to **API tokens**, click **Generate token**, and copy the value. It appears only once, so copy before closing.
+1. Open https://list.fullforms.com/account?token_client=raycast and sign in if prompted. The **Generate API token** dialog opens with the name pre-filled, and the minted token is tagged as Raycast's, so entries you add from Raycast read "via Raycast" in the web app's history panel.
+2. Click **Generate** and copy the value. It appears only once, so copy before closing.
 3. In Raycast, open this extension's preferences and paste the token into **API Token**.
 
 ## Commands
@@ -27,6 +27,8 @@ List by FullForms brings your [FullForms](https://fullforms.com) List glossaries
 ### Search Entries
 
 Type to search across your lists and entries. By default it searches every workspace you belong to in a single query; use the dropdown (shown when you belong to more than one workspace) to narrow to a single workspace.
+
+Before you type anything, the command shows **Recently Added by You**: your own newest entries, newest first, scoped by the same workspace dropdown. Every row works exactly like a search result (detail pane, star, edit, notes, report, copy, speech), so the entry you added a moment ago is one keystroke away. The section lists entries you created; teammates' additions don't appear in it.
 
 Results group by their parent list under section headers. When the same list name exists in more than one workspace, the workspace name is added to the header (`Glossary · FullForms` vs `Glossary · Personal`) so they stay distinct. Each row carries the list's colour and icon from the web, plus accessory markers for `⭐ starred` entries and `📄 entries with a private note`.
 
@@ -43,6 +45,7 @@ Shortcuts (on Windows, `Cmd` is `Ctrl` and `Opt` is `Alt`):
 - `Cmd+Shift+R` reports the entry to its list owner's moderation queue: pick a reason (typo, factual error, inappropriate, duplicate, other) and optionally add a note. Reporting has to be enabled on the list by its owner; if it isn't, you'll get a message saying so.
 - `Cmd+C` copies the entry term.
 - `Cmd+.` copies the definition.
+- `Cmd+Shift+M` copies the entry as a mention token (`[term](#id)`). Paste it into any entry description (here or on the web) and the web app renders it as a link to this entry.
 
 When a search returns no matches, an **Add Entry** action appears, pre-filled with your search term, so you can create the missing entry without leaving Search; it opens the same Quick Add form described below.
 
@@ -57,6 +60,8 @@ Field order is List → Type → Entry → Definition → Description → Tags (
 **Tags** is a single comma-separated field covering both existing and new tags. Type tag names separated by commas; on save each name is matched case-insensitively against the list's existing tags (reusing that tag) or created as a new one, so you never make an accidental duplicate. When the list already has tags, they are listed in the field's info tooltip (the ⓘ) so you can see what to reuse. The field clears when you switch lists. (Raycast's tag picker can only select from predefined items and can't create new ones by typing, so a single text field with server-side name resolution is the closest single-field port of the web's tag input.)
 
 **Duplicate detection** runs as you type: if an entry with the same term (case-insensitive exact match) already exists on the selected list, a soft `⚠` warning appears under the Entry field and a `Cmd+Shift+O · View Existing Entry` action shows up in the panel deep-linking to the duplicate. Same shape on the Definition field for definition-text matches. Partial matches don't warn (`open` won't flag an existing `Open AI`).
+
+**Description callouts and mentions**: the description field speaks the same lightweight markup as the web editor. `Cmd+Shift+E` / `Cmd+Shift+N` / `Cmd+Shift+R` append an Example, Note, or Reference callout (`> Example: ` and friends) as a new block and focus the field so you can keep typing; the web app and the Search detail pane render these as styled callouts. To mention another entry, copy its token from a Search Entries result with `Cmd+Shift+M` and paste it where you want the link. (The web's inline `@` and `/` popups can't exist in a native Raycast form, so these are the action-panel and clipboard equivalents.) The field's ⓘ tooltip carries a syntax cheat sheet. The same insert actions are available in the entry edit form.
 
 **AI helpers** (Raycast AI, requires a Raycast account with AI access): the action panel offers **Generate Definition** (`Cmd+G`), which writes a concise definition from the term, and **Generate Description** (`Cmd+Shift+G`), which writes a longer description from the term and definition. The result drops straight into the field, where you can edit it before saving. These actions only appear when your account has AI access. To dictate instead of typing, use Raycast's built-in dictation in any text field; it needs no setup here.
 

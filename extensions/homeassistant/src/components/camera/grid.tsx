@@ -1,8 +1,9 @@
 import { EntityStandardActionSections } from "@components/entity";
-import { useHAStates } from "@components/hooks";
+import { useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
+import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { State } from "@lib/haapi";
-import { getFriendlyName } from "@lib/utils";
+import { getDisplayName } from "@lib/utils";
 import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import React from "react";
 import {
@@ -35,10 +36,11 @@ export function getCameraRefreshInterval(): number | null {
 
 function CameraGridItem(props: { state: State }): React.ReactElement {
   const s = props.state;
+  const { getAlias } = useEntityOverrides();
   const { localFilepath, imageFilepath } = useImage(s.entity_id);
   const content: Image.ImageLike =
     s.state === "unavailable" ? { source: "video.svg", tintColor: Color.Blue } : { source: localFilepath || "" };
-  const titleParts = [getFriendlyName(s)];
+  const titleParts = [getDisplayName(s, getAlias(s.entity_id))];
   if (s.state === "unavailable") {
     titleParts.push("❌");
   }
@@ -55,7 +57,7 @@ function CameraGridItem(props: { state: State }): React.ReactElement {
     <Grid.Item
       content={content}
       title={titleParts.join(" ")}
-      quickLook={imageFilepath ? { name: getFriendlyName(s), path: imageFilepath } : undefined}
+      quickLook={imageFilepath ? { name: getDisplayName(s, getAlias(s.entity_id)), path: imageFilepath } : undefined}
       accessory={{ icon: motionIcon() }}
       actions={
         <ActionPanel>
@@ -76,8 +78,9 @@ function CameraGridItem(props: { state: State }): React.ReactElement {
 }
 
 export function CameraGrid(): React.ReactElement {
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(undefined, "camera", "", allStates);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(undefined, "camera", "", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -91,6 +94,8 @@ export function CameraGrid(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
+  const { favorites, others } = partitionFavoriteStates(states, favoriteEntityIds);
+
   return (
     <Grid
       searchBarPlaceholder="Filter by Name"
@@ -99,9 +104,18 @@ export function CameraGrid(): React.ReactElement {
       columns={3}
       fit={Grid.Fit.Fill}
     >
-      {states?.map((s) => (
-        <CameraGridItem key={s.entity_id} state={s} />
-      ))}
+      {favorites.length > 0 && (
+        <Grid.Section title="Favorites" subtitle={`${favorites.length}`}>
+          {favorites.map((s) => (
+            <CameraGridItem key={s.entity_id} state={s} />
+          ))}
+        </Grid.Section>
+      )}
+      <Grid.Section title={favorites.length > 0 ? "Cameras" : undefined} subtitle={`${others.length}`}>
+        {others.map((s) => (
+          <CameraGridItem key={s.entity_id} state={s} />
+        ))}
+      </Grid.Section>
     </Grid>
   );
 }

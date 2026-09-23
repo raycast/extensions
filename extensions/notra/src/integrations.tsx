@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { CreateGitHubIntegrationForm } from "./components/create-git-hub-integration-form";
 import { useIntegrations } from "./hooks/use-integrations";
 import { notraUrl } from "./utils";
@@ -41,14 +41,14 @@ export default function Command() {
                   )}
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.OpenWith}
                     title="View on Notra"
                     url={notraUrl("/settings/integrations")}
                   />
                   <Action.CopyToClipboard content={gh.displayName} title="Copy Display Name" />
                   <Action.Push
                     icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                     target={<CreateGitHubIntegrationForm onCreated={revalidate} />}
                     title="Create GitHub Integration"
                   />
@@ -72,7 +72,7 @@ export default function Command() {
                 <ActionPanel>
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.OpenWith}
                     title="Manage on Notra"
                     url={notraUrl("/settings/integrations")}
                   />

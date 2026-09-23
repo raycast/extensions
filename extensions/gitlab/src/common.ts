@@ -5,30 +5,19 @@ import fetch from "node-fetch";
 
 import os from "os";
 import path from "path";
-import { getHttpAgent, GitLab } from "./gitlabapi";
+import { Credential, getHttpAgent, GitLab } from "./gitlabapi";
 import { authorize, refreshToken } from "./oauth";
-import {
-  getInstance,
-  getPreferences,
-  isOAuthEnabled,
-  parseCommaSeparatedPreference,
-  requirePersonalAccessToken,
-} from "./utils";
+import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference } from "./utils";
 
 let gitlabClient: GitLab | undefined;
 
-export async function resolveToken(): Promise<string> {
-  if (isOAuthEnabled()) return authorize();
-  return requirePersonalAccessToken();
+export async function resolveCredential(): Promise<Credential> {
+  const token = getPersonalAccessToken();
+  return token === undefined ? { authType: "oauth", token: await authorize() } : { authType: "pat", token };
 }
 
 function createGitLabClient(): GitLab {
-  return new GitLab(
-    getInstance(),
-    isOAuthEnabled()
-      ? { authType: "oauth", resolve: resolveToken, refresh: refreshToken }
-      : { authType: "pat", resolve: resolveToken },
-  );
+  return new GitLab(getInstance(), { resolve: resolveCredential, refresh: refreshToken });
 }
 
 function getGitLabClient(): GitLab {
@@ -59,11 +48,14 @@ function createGitLabGQLClient(): GitLabGQL {
   });
 
   const authLink = setContext(async (_, prevContext) => {
-    const token = await resolveToken();
+    const credential = await resolveCredential();
     return {
+      // Carried so the 401 retry below gates on the credential this request
+      // actually sent rather than re-reading preferences that may have changed.
+      gitlabAuthType: credential.authType,
       headers: {
         ...(prevContext.headers ?? {}),
-        authorization: token ? `Bearer ${token}` : "",
+        authorization: `Bearer ${credential.token}`,
       },
     };
   });
@@ -92,7 +84,8 @@ function createGitLabGQLClient(): GitLabGQL {
         `GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""} (${operation.operationName ?? "anonymous"}): ${networkError.message}`,
         result ?? "",
       );
-      if (statusCode === 401 && isOAuthEnabled() && !operation.getContext().gitlabAuthRetried && forward) {
+      const context = operation.getContext();
+      if (statusCode === 401 && context.gitlabAuthType === "oauth" && !context.gitlabAuthRetried && forward) {
         operation.setContext({ gitlabAuthRetried: true });
         return fromPromise(refreshToken()).flatMap(() => forward(operation));
       }

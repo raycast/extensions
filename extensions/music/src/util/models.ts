@@ -37,6 +37,33 @@ export interface Album {
   count?: string;
 }
 
+export interface CatalogSong {
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  durationMs: number | null;
+  /** Artwork URL template containing {w}/{h} placeholders — render with artworkUrl(). */
+  artwork: string | null;
+  /** music.apple.com page for the song — opens Music.app. */
+  url: string | null;
+  contentRating: "clean" | "explicit" | null;
+  /** Without playParams the catalog entry is a listed husk — visible but not
+   * playable/addable. Gate add actions on this. */
+  playable: boolean;
+}
+
+export interface CatalogAlbum {
+  id: string;
+  title: string;
+  artist: string;
+  trackCount: number;
+  releaseDate: string | null;
+  artwork: string | null;
+  url: string | null;
+  contentRating: "clean" | "explicit" | null;
+}
+
 export interface ScriptError extends Error {
   shortMessage: string;
   command: string;

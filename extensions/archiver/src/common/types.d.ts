@@ -5,6 +5,7 @@ interface ICompressPreferences {
   deleteAfterCompression: boolean;
   locationSaveCompressed: string;
   defaultCompressionFormat: CompressFormat;
+  revealInFinder: boolean;
   useOriginalNameWhenSingle: boolean;
   useParentFolderNameWhenMultiple: boolean;
 }
@@ -13,6 +14,7 @@ interface IExtractPreferences {
   defaultExtractSelected: boolean;
   deleteAfterExtraction: boolean;
   locationSaveExtracted: string;
+  revealExtracted: boolean;
 }
 
 interface IFileInfo {

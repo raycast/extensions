@@ -1,5 +1,11 @@
 # Remo Changelog
 
+## [Infinite scroll and clearer search] - 2026-07-21
+
+- Folders and Trash now load more notes as you scroll, instead of stopping at the first batch
+- Search shows your 20 most recent notes by default, then searches note titles and content as you type
+- Removed the Inbox and Quick Capture shortcuts from the Folders view
+
 ## [Pinned notes & improved rendering] - 2026-06-30
 
 - Pinned notes now appear in a dedicated "Pinned" section in search and folders, with a count

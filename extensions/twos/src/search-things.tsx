@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, listWebUrl, TwosList, TwosThing } from "./api";
+import { api, listDeepLink, listWebUrl, TwosList, TwosThing } from "./api";
+import { resolveOpenTarget, useDesktopApp } from "./useDesktopApp";
 
 // Search matches the mobile app's behavior (apps/mobile/components/SearchResults.tsx):
 //   - Both lists AND things are shown; lists rank above things.
@@ -21,7 +32,48 @@ type ThingRow = {
 };
 type Row = ListRow | ThingRow;
 
+/**
+ * The open actions for one row, in priority order — whichever comes first is
+ * what Enter does.
+ *
+ * When NewTwos is installed we lead with the desktop app: it opens the list
+ * scrolled to and flashing the matched thing, which the browser can't do as
+ * well. The browser stays on ⌘↵. When it isn't installed the app action is
+ * hidden entirely, since firing an unhandled `twos://` URL raises a system
+ * "no app registered for this URL" dialog.
+ */
+function OpenActions(props: {
+  listId?: string | null;
+  thingId?: string | null;
+  target: "app" | "browser";
+  app: Application | null;
+  browserTitle: string;
+}) {
+  const { listId, thingId, target, app, browserTitle } = props;
+  const deepLink = listDeepLink(listId, thingId);
+  const browser = <Action.OpenInBrowser url={listWebUrl(listId, thingId)} title={browserTitle} />;
+  // No deep link means the thing has no parent list to open — browser only.
+  if (target !== "app" || !deepLink) return browser;
+  return (
+    <>
+      <Action.Open
+        target={deepLink}
+        // Pin to the detected bundle so a stale local dev build that also
+        // claims the twos: scheme can't intercept. Undefined when the user
+        // forced "app" without us detecting one — then the system decides.
+        application={app?.path}
+        title="Open in NewTwos"
+        icon={Icon.AppWindow}
+      />
+      {browser}
+    </>
+  );
+}
+
 export default function SearchThings() {
+  const { openIn } = getPreferenceValues<Preferences.SearchThings>();
+  const { app, ready } = useDesktopApp();
+  const target = resolveOpenTarget(openIn, app, ready);
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
@@ -152,7 +204,7 @@ export default function SearchThings() {
               accessories={[{ tag: "List" }]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={listWebUrl(list.id)} title="Open List in Twos" />
+                  <OpenActions listId={list.id} target={target} app={app} browserTitle="Open List in Browser" />
                   <Action.CopyToClipboard content={list.title} title="Copy Title" />
                 </ActionPanel>
               }
@@ -162,41 +214,70 @@ export default function SearchThings() {
       )}
       {thingRows.length > 0 && (
         <List.Section title="Things">
-          {thingRows.map(({ thing, listTitle, urlMatched }) => (
-            <List.Item
-              key={`thing-${thing.id}`}
-              icon={
-                thing.completed
-                  ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                  : thing.type === "todo"
-                    ? Icon.Circle
-                    : Icon.Dot
-              }
-              title={thing.text || "(empty)"}
-              subtitle={listTitle}
-              accessories={[
-                ...(urlMatched ? [{ text: thing.url, icon: Icon.Link }] : []),
-                ...(thing.tags?.map((t) => ({ tag: `#${t}` })) || []),
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={listWebUrl(thing.list_id)} title="Open List in Twos" />
-                  {thing.type === "todo" &&
-                    (thing.completed ? (
-                      <Action title="Mark Incomplete" icon={Icon.Circle} onAction={() => setCompleted(thing, false)} />
-                    ) : (
-                      <Action
-                        title="Mark Complete"
-                        icon={Icon.CheckCircle}
-                        onAction={() => setCompleted(thing, true)}
-                      />
-                    ))}
-                  <Action.CopyToClipboard content={thing.text} title="Copy Text" />
-                  {thing.url ? <Action.OpenInBrowser url={thing.url} title="Open Hyperlink" /> : null}
-                </ActionPanel>
-              }
-            />
-          ))}
+          {thingRows.map(({ thing, listTitle, urlMatched }) => {
+            // A thing can be JUST a photo — empty `text`. Search matches the text
+            // read out of the image, so those rows come back and rendered as
+            // "(empty)", which looks like a bug rather than a photo. Fall back to
+            // that OCR text, then to a plain "Photo" label when the image has no
+            // legible text (it matched on what the picture depicts instead).
+            const hasPhotos = (thing.photos?.length ?? 0) > 0;
+            const ocr = (thing.photo_text || "").replace(/\s+/g, " ").trim();
+            const title = thing.text?.trim() || ocr || (hasPhotos ? "Photo" : "(empty)");
+            return (
+              <List.Item
+                key={`thing-${thing.id}`}
+                icon={
+                  thing.completed
+                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                    : hasPhotos && !thing.text?.trim()
+                      ? Icon.Image
+                      : thing.type === "todo"
+                        ? Icon.Circle
+                        : Icon.Dot
+                }
+                title={title}
+                subtitle={listTitle}
+                accessories={[
+                  ...(urlMatched ? [{ text: thing.url, icon: Icon.Link }] : []),
+                  // Mark rows carrying a photo whose own text is what's displayed,
+                  // so it's clear there's an image behind the result.
+                  ...(hasPhotos && thing.text?.trim() ? [{ icon: Icon.Image }] : []),
+                  ...(thing.tags?.map((t) => ({ tag: `#${t}` })) || []),
+                ]}
+                actions={
+                  <ActionPanel>
+                    {/* Passing the thing id opens the parent list AND scrolls to
+                      + flashes this exact row, in the app or the browser. */}
+                    <OpenActions
+                      listId={thing.list_id}
+                      thingId={thing.id}
+                      target={target}
+                      app={app}
+                      browserTitle="Open in Browser"
+                    />
+                    {thing.type === "todo" &&
+                      (thing.completed ? (
+                        <Action
+                          title="Mark Incomplete"
+                          icon={Icon.Circle}
+                          onAction={() => setCompleted(thing, false)}
+                        />
+                      ) : (
+                        <Action
+                          title="Mark Complete"
+                          icon={Icon.CheckCircle}
+                          onAction={() => setCompleted(thing, true)}
+                        />
+                      ))}
+                    {/* Copy whatever the row is actually showing — on a photo-only
+                      thing `text` is empty, so copying it silently yielded "". */}
+                    <Action.CopyToClipboard content={title} title="Copy Text" />
+                    {thing.url ? <Action.OpenInBrowser url={thing.url} title="Open Hyperlink" /> : null}
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
       {!loading && rows.length === 0 && (

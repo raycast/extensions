@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import type { ActivityItem } from "./types";
+import { storeLog as log, getErrorMessage } from "./logger";
 
 export type ActivityType = ActivityItem["type"];
 
@@ -34,12 +35,15 @@ export async function loadEventFilters(): Promise<EventFilters> {
     // Merge with defaults so new types are enabled by default
     const filters = defaultFilters();
     for (const key of Object.keys(saved) as ActivityType[]) {
-      if (key in filters) {
-        filters[key] = saved[key] ?? true;
+      // Only adopt real booleans — a corrupt value would otherwise become truthy/falsy by
+      // accident and silently hide an entire activity type.
+      if (key in filters && typeof saved[key] === "boolean") {
+        filters[key] = saved[key];
       }
     }
     return filters;
-  } catch {
+  } catch (error) {
+    log.warn("Event filters are corrupt and were reset to defaults", { error: getErrorMessage(error) });
     return defaultFilters();
   }
 }

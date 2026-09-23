@@ -35,7 +35,7 @@ Press `⌘+G` to clone a git repository. Supports:
 - **Open With** - Open directory with default app (updates last accessed time)
 - **Show in Finder** - Reveal in Finder
 - **Copy Path** - Copy directory path to clipboard
-- **Delete** - Remove directory (with confirmation)
+- **Move to Trash** - Move directory to the system Trash, where it can be restored
 
 ## Configuration
 

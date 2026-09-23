@@ -6,7 +6,10 @@ export function ActionOpenPreferences() {
       <Action
         icon={Icon.Gear}
         title="Configure Extension"
-        shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+        shortcut={{
+          macOS: { modifiers: ["shift", "cmd"], key: "," },
+          Windows: { modifiers: ["shift", "ctrl"], key: "," },
+        }}
         onAction={openExtensionPreferences}
       />
     </ActionPanel.Section>

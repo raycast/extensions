@@ -2,12 +2,14 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  Color,
   List,
   Toast,
   closeMainWindow,
   getPreferenceValues,
   showHUD,
   showToast,
+  Keyboard,
 } from "@raycast/api";
 import { existsSync } from "fs";
 import { useEffect, useState } from "react";
@@ -25,7 +27,7 @@ import {
 } from "./utils";
 
 export default function Command() {
-  const { iconColor, fontName } = getPreferenceValues<Preferences.List>();
+  const { fontName } = getPreferenceValues<Preferences.List>();
   const [allGlyphs, setAllGlyphs] = useState<Glyph[]>([]);
   const [results, setResults] = useState<Glyph[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,17 +96,17 @@ export default function Command() {
       isShowingDetail
     >
       {results.map((g) => {
-        const iconUri = glyphToDataUri(g, iconColor);
-        const detailUri = glyphToDetailUri(g, iconColor);
+        const iconUri = glyphToDataUri(g);
+        const detailUri = glyphToDetailUri(g);
         return (
           <List.Item
             key={g.codepoint}
-            icon={{ source: iconUri }}
+            icon={{ source: iconUri, tintColor: Color.PrimaryText }}
             title={g.name}
             subtitle={g.codepoint}
             detail={
               <List.Item.Detail
-                markdown={`![${g.name}](${detailUri})\n`}
+                markdown={`![${g.name}](${detailUri}?raycast-tint-color=${Color.PrimaryText})\n`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={g.name} />
@@ -122,7 +124,7 @@ export default function Command() {
                 <Action title="Copy Glyph & Close" onAction={() => copyAndClose(g.glyph)} />
                 <Action
                   title="Copy Glyph"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                   onAction={() => copyAndStay(g.glyph)}
                 />
                 <ActionPanel.Section>

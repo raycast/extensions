@@ -14,6 +14,21 @@ A [Raycast](https://raycast.com) extension for the Twos public API
 Set the **API Key** preference to a `twos_…` key from
 **Twos → Settings → Advanced → API Keys** (sent as `Authorization: Bearer …`).
 
+## Opening results
+
+**Search Things** opens a result in the NewTwos desktop app when it's installed,
+falling back to the browser when it isn't. Opening a thing lands on its list
+scrolled to that row.
+
+The **Open Results In** preference overrides this: `Automatic` (the default),
+`NewTwos Desktop App`, or `Browser`. Whichever isn't primary stays available as
+the second action (`⌘↵`).
+
+Detection looks for the app's bundle id (`com.twosballer.mobile`) among
+installed applications, and the deep link it fires is
+`twos://list/<listId>?focus=<thingId>` — registered by the Electron main process
+in `apps/desktop/electron/main.js`.
+
 ## Develop
 
 ```bash

@@ -1,8 +1,11 @@
+import { Icon } from "@raycast/api";
+
 export type TweakCategory =
   | "finder"
   | "dock"
   | "screenshots"
   | "desktop"
+  | "windows"
   | "animations"
   | "keyboard"
   | "trackpad"
@@ -64,19 +67,20 @@ export interface TweakState extends TweakDefinition {
   isModified: boolean;
 }
 
-export const CATEGORY_META: Record<TweakCategory, { title: string; icon: string }> = {
-  finder: { title: "Finder", icon: "folder" },
-  dock: { title: "Dock", icon: "app-window" },
-  screenshots: { title: "Screenshots", icon: "image" },
-  desktop: { title: "Desktop & Spaces", icon: "desktop-computer" },
-  animations: { title: "Animations", icon: "bolt" },
-  keyboard: { title: "Keyboard & Input", icon: "text-cursor" },
-  trackpad: { title: "Trackpad & Mouse", icon: "cursor-ray" },
-  safari: { title: "Safari", icon: "globe-01" },
-  mail: { title: "Mail", icon: "envelope" },
-  security: { title: "Security & Privacy", icon: "lock" },
-  menubar: { title: "Menu Bar & UI", icon: "bar-chart-01" },
-  apps: { title: "Apps", icon: "app-window-grid-3x3" },
-  sound: { title: "Sound", icon: "speaker-loud" },
-  misc: { title: "Miscellaneous", icon: "gear" },
+export const CATEGORY_META: Record<TweakCategory, { title: string; icon: Icon }> = {
+  finder: { title: "Finder", icon: Icon.Finder },
+  dock: { title: "Dock", icon: Icon.AppWindowList },
+  screenshots: { title: "Screenshots", icon: Icon.Image },
+  desktop: { title: "Desktop & Spaces", icon: Icon.Desktop },
+  windows: { title: "Windows & Stage Manager", icon: Icon.Window },
+  animations: { title: "Animations", icon: Icon.Bolt },
+  keyboard: { title: "Keyboard & Input", icon: Icon.Keyboard },
+  trackpad: { title: "Trackpad & Mouse", icon: Icon.Mouse },
+  safari: { title: "Safari", icon: Icon.Compass },
+  mail: { title: "Mail", icon: Icon.Envelope },
+  security: { title: "Security & Privacy", icon: Icon.Lock },
+  menubar: { title: "Menu Bar & UI", icon: Icon.Sidebar },
+  apps: { title: "Apps", icon: Icon.AppWindowGrid3x3 },
+  sound: { title: "Sound", icon: Icon.Speaker },
+  misc: { title: "Miscellaneous", icon: Icon.Gear },
 };

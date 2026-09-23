@@ -1,9 +1,10 @@
-import { closeMainWindow } from "@raycast/api";
 import { withShottrCheck } from "./utils/checkInstall";
+import { withCloseMainWindow } from "./utils/withCloseMainWindow";
 import { execSync } from "child_process";
 
-export default withShottrCheck(async function () {
-  const url = "shottr://grab/area";
-  await closeMainWindow();
-  execSync(`open -g ${url}`);
-});
+export default withShottrCheck(
+  withCloseMainWindow(async function () {
+    const url = "shottr://grab/area";
+    execSync(`open -g ${url}`);
+  }),
+);

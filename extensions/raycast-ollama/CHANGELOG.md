@@ -1,5 +1,19 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-09-22
+
+- [Improvement] new per-command "Auto-Replace Selected Text" preference on the commands that rewrite their input: when enabled, the generated answer replaces the selected text automatically instead of waiting for you to copy or paste it. Disabled by default, and skipped when the answer did not complete cleanly or when the input came from the clipboard rather than a selection.
+- [Improvement] Command "Create Custom Command": new "Auto-Replace" option, so a custom command can replace the selected text automatically too.
+
+## [Improvement] - 2026-09-07
+
+- [Improvement] added "Paste in Active App" action for all commands, which pastes the answer on the active application.
+
+## [Fix] - 2026-09-04
+
+- Fixed model discovery timing out too quickly and showing connection failures as an empty installed-model list.
+- Fixed Manage Models and Loaded Models crashing when a remote Ollama server omits a loaded model's context length.
+
 ## [Fix] - 2026-06-16
 
 - [Fix] Command "Chat with Ollama" and "Answer" commands: fixed a bug in the thinking rendering during streaming. The thinking text could stop updating mid-generation while the stream continued and the final answer appeared. The root cause was a missing flush of the pending `textThinkingBuffer` on stream termination (`emitDone`) combined with a `else if` in the throttle path that prevented symmetric flushing of thinking and content buffers.

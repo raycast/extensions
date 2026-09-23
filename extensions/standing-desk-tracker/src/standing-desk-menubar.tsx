@@ -15,6 +15,7 @@ import {
   calculateStats,
   formatDuration,
   getCurrentSessionElapsedTime,
+  getCurrentSessionElapsedTimeForPeriod,
   type DeskState,
 } from "./utils/standing-desk-utils";
 
@@ -80,7 +81,7 @@ export default function Command() {
       setElapsedTime(0);
     }
 
-    await loadDailyStats();
+    await loadDailyStats(state);
     // Check motivation after stats are loaded
     await checkAndShowMotivation(state);
     setIsLoading(false);
@@ -149,7 +150,8 @@ export default function Command() {
 
       let totalStanding = stats.totalStanding;
       if (currentState === "standing") {
-        const currentElapsed = await getCurrentSessionElapsedTime();
+        const currentElapsed =
+          await getCurrentSessionElapsedTimeForPeriod("day");
         totalStanding += currentElapsed;
       }
 
@@ -201,7 +203,7 @@ export default function Command() {
     }
   }
 
-  async function loadDailyStats() {
+  async function loadDailyStats(activeState: DeskState | null) {
     try {
       const allSessions = await getSessions();
       const daySessions = getSessionsForPeriod(allSessions, "day");
@@ -211,9 +213,10 @@ export default function Command() {
       let totalStanding = stats.totalStanding;
       let totalSitting = stats.totalSitting;
 
-      if (currentState) {
-        const currentElapsed = await getCurrentSessionElapsedTime();
-        if (currentState === "standing") {
+      if (activeState) {
+        const currentElapsed =
+          await getCurrentSessionElapsedTimeForPeriod("day");
+        if (activeState === "standing") {
           totalStanding += currentElapsed;
         } else {
           totalSitting += currentElapsed;
@@ -241,7 +244,7 @@ export default function Command() {
       await setState(newState, now);
       setCurrentState(newState);
       setElapsedTime(0);
-      await loadDailyStats();
+      await loadDailyStats(newState);
       await showHUD(
         `Started ${newState === "standing" ? "Standing" : "Sitting"}`,
       );

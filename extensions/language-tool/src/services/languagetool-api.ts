@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, PREMIUM_API_ENDPOINTS } from "../config/api";
 import type { CheckTextResponse } from "../types";
 import { isEmpty } from "../utils/string-utils";
 
@@ -63,10 +63,13 @@ export async function checkTextWithAPI(
     params.data = options.data;
   }
 
-  // Add Premium credentials if they exist
-  if (preferences.username && preferences.apiKey) {
-    params.username = preferences.username;
-    params.apiKey = preferences.apiKey;
+  // Add Premium credentials if they exist. These only work against the
+  // Premium host, so the endpoint is chosen to match.
+  const { username, apiKey } = preferences;
+  const usePremium = Boolean(username && apiKey);
+  if (username && apiKey) {
+    params.username = username;
+    params.apiKey = apiKey;
   }
 
   // Add all advanced options if provided
@@ -118,7 +121,11 @@ export async function checkTextWithAPI(
 
   const formData = new URLSearchParams(params);
 
-  const response = await fetch(API_ENDPOINTS.CHECK, {
+  const endpoint = usePremium
+    ? PREMIUM_API_ENDPOINTS.CHECK
+    : API_ENDPOINTS.CHECK;
+
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

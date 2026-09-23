@@ -22,7 +22,26 @@ import {
   numberToDayString,
 } from "./utils";
 import { extractSchedule } from "./extractSchedule";
-import { checkSchedule } from "./status";
+import { activateScheduleMonitor, checkSchedule, isScheduleMonitorActivated } from "./status";
+
+async function getScheduleMonitorActivationChoice(): Promise<boolean | null> {
+  if (await isScheduleMonitorActivated()) return false;
+
+  const confirmed = await confirmAlert({
+    title: "Enable Automatic Scheduling?",
+    message: "Coffee needs Background Refresh to start schedules at their configured times. This is a one-time setup.",
+    icon: Icon.Clock,
+    primaryAction: {
+      title: "Enable and Continue",
+    },
+    dismissAction: {
+      title: "Cancel",
+      style: Alert.ActionStyle.Cancel,
+    },
+  });
+
+  return confirmed ? true : null;
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -38,6 +57,10 @@ export default function Command() {
       if (!parsedSchedule) {
         return;
       }
+
+      const shouldActivateMonitor = await getScheduleMonitorActivationChoice();
+      if (shouldActivateMonitor === null) return;
+
       const { days, from, to } = parsedSchedule;
       const newSchedules = days.map((day) => ({ day, from, to, IsManuallyDecafed: false, IsRunning: false }));
 
@@ -63,9 +86,21 @@ export default function Command() {
 
       await showToast(Toast.Style.Success, "Caffeination schedule set successfully.");
       setSearchText("");
+
+      if (shouldActivateMonitor && !(await activateScheduleMonitor(true))) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Schedule saved, but automatic scheduling is not enabled",
+          message: "Enable Caffeinate Status in Raycast Settings, then run it once.",
+        });
+      }
     } catch (error) {
       console.error("Failed to set schedule:", error);
-      await showToast(Toast.Style.Failure, "Failed to set schedule.");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn’t save the schedule",
+        message: "Please try again.",
+      });
     }
   };
 
@@ -97,13 +132,17 @@ export default function Command() {
         setSchedules(updatedSchedules);
       } catch (error) {
         console.error("Failed to delete schedule:", error);
-        await showToast(Toast.Style.Failure, "Failed to delete schedule.");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn’t delete the schedule",
+          message: "Please try again.",
+        });
       }
     }
   };
 
   const handlePauseSchedule = async (schedule: Schedule) => {
-    changeScheduleState("decaffeinate", schedule);
+    await changeScheduleState("decaffeinate", schedule);
     await showToast(
       Toast.Style.Success,
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now paused`,
@@ -120,7 +159,7 @@ export default function Command() {
   };
 
   const handleResumeSchedule = async (schedule: Schedule) => {
-    changeScheduleState("caffeinate", schedule);
+    await changeScheduleState("caffeinate", schedule);
     await showToast(
       Toast.Style.Success,
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`,
@@ -145,7 +184,7 @@ export default function Command() {
       filtering={false}
       actions={
         <ActionPanel>
-          <Action autoFocus title="Set Schedule" icon={Icon.Calendar} onAction={handleSetSchedule} />
+          <Action autoFocus title="Set Caffeination Schedule" icon={Icon.Calendar} onAction={handleSetSchedule} />
         </ActionPanel>
       }
     >
@@ -191,7 +230,6 @@ export default function Command() {
                   icon={Icon.Calendar}
                   actions={
                     <ListActionPanel
-                      searchText={searchText}
                       schedule={schedule}
                       onSetScheduleAction={handleSetSchedule}
                       onDeleteScheduleAction={handleDeleteSchedule}

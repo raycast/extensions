@@ -1,4 +1,4 @@
-import { getSlackWebClient } from "../shared/client/WebClient";
+import { getSlackWebClient, slack } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
 import { getAiMessageBlocks } from "./message-signature";
 import { access } from "node:fs/promises";
@@ -13,6 +13,7 @@ type Input = {
   channel: string;
   /**
    * Absolute local paths of the files to upload, one path per line. Use the path from an attachment supplied by the user when available.
+   * Slack accepts common file types (images such as png/jpg/gif, pdf, text, etc.) as-is; do not convert, re-encode, or copy files to change their format before uploading.
    */
   filePaths: string;
   /**
@@ -39,7 +40,32 @@ type FileShares = {
 const CONVERSATION_ID_PATTERN = /^[CDG][A-Z0-9]{8,}$/;
 const MESSAGE_TIMESTAMP_PATTERN = /^\d+\.\d+$/;
 
+/**
+ * Slack often surfaces cryptic, non-actionable error codes for uploads (e.g.
+ * `internal_error`). Translate the ones we understand into messages the model can
+ * act on, and preserve the original code so nothing is lost.
+ */
+function mapUploadError(error: unknown): Error {
+  if (!(error instanceof Error)) {
+    return new Error("Slack failed to upload the files");
+  }
+
+  if (error.message.includes("internal_error")) {
+    return new Error(
+      "Slack rejected the upload with 'internal_error'. This is usually a transient Slack-side failure, " +
+        "not a problem with the file or its format. Retry the same upload; if it keeps failing, try uploading " +
+        "without accompanying message text.",
+    );
+  }
+
+  return error;
+}
+
 async function uploadFiles(input: Input) {
+  return performUploadFiles(input);
+}
+
+async function performUploadFiles(input: Input, retried = false) {
   const channel = input.channel.trim();
   if (!CONVERSATION_ID_PATTERN.test(channel)) {
     throw new Error("Invalid Slack conversation ID");
@@ -71,22 +97,37 @@ async function uploadFiles(input: Input) {
     }
   }
 
-  const messageBlocks = text ? getAiMessageBlocks(text) : undefined;
+  // Slack's files.completeUploadExternal (used by filesUploadV2) rejects the newer
+  // `markdown` block type with a bare `internal_error`, so request upload-safe blocks.
+  const messageBlocks = text ? getAiMessageBlocks(text, "sent", { allowMarkdownBlock: false }) : undefined;
 
   const slackWebClient = getSlackWebClient();
-  const response = await slackWebClient.filesUploadV2({
-    channel_id: channel,
-    ...(threadTs ? { thread_ts: threadTs } : {}),
-    ...(text ? { initial_comment: text, ...(messageBlocks ? { blocks: messageBlocks } : {}) } : {}),
-    file_uploads: filePaths.map((filePath) => ({
-      file: filePath,
-      filename: path.basename(filePath),
-      title: path.basename(filePath),
-    })),
-  });
+  let response;
+
+  try {
+    response = await slackWebClient.filesUploadV2({
+      channel_id: channel,
+      ...(threadTs ? { thread_ts: threadTs } : {}),
+      ...(messageBlocks ? { blocks: messageBlocks } : text ? { initial_comment: text } : {}),
+      file_uploads: filePaths.map((filePath) => ({
+        file: filePath,
+        filename: path.basename(filePath),
+        title: path.basename(filePath),
+      })),
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("missing_scope") && !retried) {
+      const isUsingOAuth = !!(await slack.client.getTokens());
+      if (isUsingOAuth) {
+        await slack.client.removeTokens();
+        return withSlackClient((input: Input) => performUploadFiles(input, true))(input);
+      }
+    }
+    throw mapUploadError(error);
+  }
 
   if (!response.ok) {
-    throw new Error(response.error || "Slack failed to upload the files");
+    throw mapUploadError(new Error(response.error || "Slack failed to upload the files"));
   }
 
   const files = response.files.flatMap((completion) => completion.files ?? []);

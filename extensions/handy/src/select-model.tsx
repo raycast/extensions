@@ -3,13 +3,14 @@ import {
   ActionPanel,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getDownloadedModels, ModelInfo } from "./lib/models";
 import { readSettings, writeSettings } from "./lib/settings";
+import { selectModelInHandy } from "./lib/handy";
+import { applyLiveOrRestart } from "./lib/apply-selection";
 
 export default function SelectModel() {
   const [models, setModels] = useState<ModelInfo[]>([]);
@@ -37,9 +38,15 @@ export default function SelectModel() {
 
   async function handleSelect(model: ModelInfo) {
     try {
-      writeSettings({ selected_model: model.id });
-      setCurrentId(model.id);
-      await showHUD(`Model changed to ${model.name}`);
+      await applyLiveOrRestart({
+        isCurrent: model.id === currentId,
+        alreadyActiveMessage: `${model.name} is already active`,
+        persist: () => writeSettings({ selected_model: model.id }),
+        markCurrent: () => setCurrentId(model.id),
+        liveSwitch: () => selectModelInHandy(model.name),
+        successMessage: `Model changed to ${model.name}`,
+        failureTitle: "Couldn't switch model in Handy",
+      });
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

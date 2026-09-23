@@ -1,5 +1,15 @@
 # proton-pass Changelog
 
+## [Improvements] - 2026-09-19
+
+- Add a Cache Expiration preference for cached vault and item metadata: 5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days (default: 5 minutes)
+
+## [Windows Support] - 2026-08-30
+
+- Add macOS and Windows x86_64 support with Proton Pass CLI 2.3.3
+- Stream secure browser login URLs and use platform-native keyboard shortcuts
+- Update passphrase generation for Proton Pass CLI 2.x
+
 ## [Improvements] - 2026-05-01
 
 - Fix: Search Items command could show results from only one vault when "All Vaults" was selected (vault share_id now used as fallback during item normalization)

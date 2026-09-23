@@ -39,7 +39,7 @@ export function getServiceTitle(service?: ServiceName) {
 const preferences = getPreferenceValues<Preferences>();
 
 export function getDefaultAction(): string {
-  return preferences.defaultAction;
+  return getPreferenceValues<Preferences>().defaultAction;
 }
 
 export function getMaxResults(): number {

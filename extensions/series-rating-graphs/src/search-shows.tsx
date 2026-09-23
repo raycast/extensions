@@ -12,13 +12,13 @@ import {
   ActionToggleLayout,
 } from "./components/Actions";
 import { SearchResult } from "./types";
-
-const API_BASE_URL = "https://api.imdbapi.dev";
+import { getApiBaseUrl } from "./utils/api";
 
 export default function Command() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const viewMode = preferences.viewMode;
   const preferredWebsite = preferences.preferredWebsite;
+  const apiBaseUrl = getApiBaseUrl();
 
   const [layout, setLayout] = useState<string>(viewMode);
   const [columns, setColumns] = useState(5);
@@ -26,13 +26,14 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   const res = useFetch<{ titles: SearchResult[] }>(
-    `${API_BASE_URL}/search/titles?query=${searchText ? searchText : `""`}`,
+    `${apiBaseUrl}/search/titles?query=${encodeURIComponent(searchText)}`,
     {
       keepPreviousData: true,
       execute: searchText.length > 0,
     },
   );
   const filteredShows = res.data?.titles?.filter((item) => item.type === "tvSeries") || [];
+  const hasError = Boolean(res.error);
 
   const shiftEnterShortcut: Keyboard.Shortcut = {
     macOS: { modifiers: ["shift"], key: "return" },
@@ -70,6 +71,12 @@ export default function Command() {
       >
         {res.isLoading && searchText ? (
           <Grid.EmptyView title="Loading…" icon={Icon.Hourglass} description="Fetching results…" />
+        ) : hasError && searchText ? (
+          <Grid.EmptyView
+            title="Failed to fetch data"
+            icon={Icon.ExclamationMark}
+            description={res.error?.message ?? "Could not reach the ratings API. Try again."}
+          />
         ) : searchText ? (
           <Grid.Section>
             {filteredShows.map((show) => (
@@ -132,6 +139,12 @@ export default function Command() {
     <List isLoading={res.isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
       {res.isLoading && searchText ? (
         <List.EmptyView title="Loading…" icon={Icon.Hourglass} description="Fetching results…" />
+      ) : hasError && searchText ? (
+        <List.EmptyView
+          title="Failed to fetch data"
+          icon={Icon.ExclamationMark}
+          description={res.error?.message ?? "Could not reach the ratings API. Try again."}
+        />
       ) : searchText ? (
         <List.Section>
           {filteredShows.map((show) => (

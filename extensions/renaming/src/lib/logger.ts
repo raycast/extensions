@@ -77,4 +77,5 @@ export function createLogger(module: string) {
 export const log = {
   files: createLogger("files"),
   rename: createLogger("rename"),
+  history: createLogger("history"),
 };

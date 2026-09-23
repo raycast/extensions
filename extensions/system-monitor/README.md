@@ -11,3 +11,10 @@ This is a [Raycast](https://raycast.com/) extension that allows you to monitor y
 ## Custom Menubar Text
 
 ❕ You can customise the menubar dropdown text in `Preferences`. Hover over the textbox to see what tags are available for each module. There are two tags that are always available: `<BR>` adds a linebreak, and `<MODE>` shows "Free" and "Used" depending on display mode.
+
+The 10-second background refresh updates CPU and storage without starting external programs. Memory uses the same macOS accounting as the Memory tab and updates when you open the menu. Between openings, the menu-bar title keeps the last Memory value. Network, temperature, and battery work the same way. These values remain unavailable until the first user-opened collection.
+
+## Data and Privacy
+
+- All system data (CPU, memory, disk, battery, processes) is read locally via macOS tools (`system_profiler`, `sysctl`, `ps`, `pmset`, `iostat`, `diskutil`); the extension makes no network requests.
+- **System Info** and the **Copy System Report** action include your Mac's serial number and hostname. Review the report before sharing it.

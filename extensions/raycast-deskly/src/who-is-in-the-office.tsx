@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { fetchInformation, fetchPresentResources } from "./api/deskly";
 import { Booking, PresentBooking, PresentPerson } from "./lib/types";
-import OfficeList, { OfficeListSection } from "./components/OfficeList";
+import OfficeList, { buildSections } from "./components/OfficeList";
 import { renderTimeRange, toISODate } from "./lib/format";
 
 function presentPersonToBooking(person: PresentPerson, pb: PresentBooking): Booking {
@@ -39,43 +39,38 @@ export default function Command() {
     revalidate,
   } = useCachedPromise(fetchPresentResources, [effectiveLocation ?? "", dateStr], { execute: !!effectiveLocation });
 
-  const byRoom = new Map<string, PresentPerson[]>();
-  for (const person of presentPeople ?? []) {
-    const resource = person.dayBookings[0]?.resource;
-    const key = `${resource?.floorName ?? ""}::${resource?.roomName ?? "Unknown"}`;
-    const group = byRoom.get(key) ?? [];
-    group.push(person);
-    byRoom.set(key, group);
-  }
-
-  const sections: OfficeListSection[] = [...byRoom.entries()].map(([key, people]) => {
-    const resource = people[0]?.dayBookings[0]?.resource;
-    return {
-      key,
-      title: resource?.floorName ? `${resource.floorName} · ${resource.roomName}` : resource?.roomName ?? "Unknown",
-      items: people.map((person) => {
-        const pb = person.dayBookings[0];
-        const booking = pb ? presentPersonToBooking(person, pb) : undefined;
-        const isCurrentUser = !!information?.user.id && person.userId === information.user.id;
-        return {
-          key: person.userId,
-          profileImage: person.profileImage,
-          title: `${person.firstName} ${person.lastName}`,
-          personName: `${person.firstName} ${person.lastName}`,
-          subtitle: pb?.resource.name ?? "",
-          isCheckedIn: person.isCheckedIn || checkedInIds.has(pb?.id ?? ""),
-          timeRange: renderTimeRange(pb?.from ?? null, pb?.until ?? null),
-          booking,
-          ...(isCurrentUser && booking
-            ? {
-                onCheckedIn: (id: string) => setCheckedInIds((prev) => new Set([...prev, id])),
-                onDeleted: () => revalidate(),
-              }
-            : {}),
-        };
-      }),
-    };
-  });
+  const sections = buildSections(
+    presentPeople ?? [],
+    (person) => {
+      const resource = person.dayBookings[0]?.resource;
+      return `${resource?.floorName ?? ""}::${resource?.roomName ?? "Unknown"}`;
+    },
+    (first) => {
+      const resource = first.dayBookings[0]?.resource;
+      return resource?.floorName ? `${resource.floorName} · ${resource.roomName}` : resource?.roomName ?? "Unknown";
+    },
+    (person) => {
+      const pb = person.dayBookings[0];
+      const booking = pb ? presentPersonToBooking(person, pb) : undefined;
+      const isCurrentUser = !!information?.user.id && person.userId === information.user.id;
+      return {
+        key: person.userId,
+        profileImage: person.profileImage,
+        title: `${person.firstName} ${person.lastName}`,
+        personName: `${person.firstName} ${person.lastName}`,
+        subtitle: pb?.resource.name ?? "",
+        isCheckedIn: person.isCheckedIn || checkedInIds.has(pb?.id ?? ""),
+        timeRange: renderTimeRange(pb?.from ?? null, pb?.until ?? null),
+        booking,
+        ...(isCurrentUser && booking
+          ? {
+              onCheckedIn: (id: string) => setCheckedInIds((prev) => new Set([...prev, id])),
+              onDeleted: () => revalidate(),
+            }
+          : {}),
+      };
+    }
+  );
 
   return (
     <List

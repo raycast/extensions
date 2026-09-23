@@ -3,10 +3,11 @@ import { useState } from "react";
 import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { getZshrcPath } from "./lib/zsh";
 import { MODERN_COLORS } from "./constants";
-import { getSectionIcon } from "./lib/section-icons";
+import { getSectionImage } from "./lib/section-icons";
 import { SectionDetail } from "./section-detail";
 import { useZshrcLoader } from "./hooks/useZshrcLoader";
 import { generateSectionAccessories, calculateTotalEntries } from "./utils/section-accessories";
+import { maskSecretsInContent } from "./utils/secrets";
 import BrowseAliases from "./browse-aliases";
 
 /**
@@ -91,17 +92,14 @@ Each section contains related configuration:
       {labeledSections.length > 0 && (
         <List.Section title="Labeled Sections">
           {labeledSections.map((section) => {
-            const sectionIcon = getSectionIcon(section.label);
+            const sectionIcon = getSectionImage(section.label);
             const totalEntries = calculateTotalEntries(section);
 
             return (
               <List.Item
                 key={section.label}
                 title={section.label}
-                icon={{
-                  source: sectionIcon.icon,
-                  tintColor: sectionIcon.color,
-                }}
+                icon={sectionIcon}
                 accessories={generateSectionAccessories(section)}
                 detail={
                   <List.Item.Detail
@@ -122,7 +120,7 @@ Each section contains related configuration:
 
 ## 📋 Content Preview
 \`\`\`zsh
-${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\n").length > 10 ? "\n..." : ""}
+${maskSecretsInContent(section.content.split("\n").slice(0, 10).join("\n"))}${section.content.split("\n").length > 10 ? "\n..." : ""}
 \`\`\`
                     `}
                   />
@@ -158,17 +156,14 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
       {unlabeledSections.length > 0 && (
         <List.Section title="Unlabeled Sections">
           {unlabeledSections.map((section, index) => {
-            const sectionIcon = getSectionIcon(section.label);
+            const sectionIcon = getSectionImage(section.label);
             const totalEntries = calculateTotalEntries(section);
 
             return (
               <List.Item
                 key={`unlabeled-${index}`}
                 title={`Unlabeled Section ${index + 1}`}
-                icon={{
-                  source: sectionIcon.icon,
-                  tintColor: sectionIcon.color,
-                }}
+                icon={sectionIcon}
                 accessories={generateSectionAccessories(section)}
                 detail={
                   <List.Item.Detail
@@ -193,7 +188,7 @@ This section doesn't have a descriptive label. Consider adding a section header 
 
 ## 📋 Content Preview
 \`\`\`zsh
-${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\n").length > 10 ? "\n..." : ""}
+${maskSecretsInContent(section.content.split("\n").slice(0, 10).join("\n"))}${section.content.split("\n").length > 10 ? "\n..." : ""}
 \`\`\`
                     `}
                   />

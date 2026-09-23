@@ -1,34 +1,48 @@
 import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
+import { buildNewTabUrl, openHistoryTab, openInNewWindow, openNewTab, setActiveTab } from "../actions";
 import { HistoryEntry, Tab } from "../interfaces";
 
-export const NewTabAction = NewTabActionComponent;
-export const HistoryItemAction = HistoryItemActionComponent;
-export const TabListItemAction = TabListItemActionComponent;
+function OpenInNewWindowAction({ url }: { url?: string }) {
+  if (process.platform !== "win32") return null;
+  return (
+    <Action
+      title="Open in New Window"
+      icon={{ source: Icon.Window }}
+      shortcut={{
+        macOS: { modifiers: ["ctrl"], key: "enter" },
+        Windows: { modifiers: ["ctrl"], key: "enter" },
+      }}
+      onAction={() => openInNewWindow(url)}
+    />
+  );
+}
 
-function NewTabActionComponent({ query }: { query?: string }) {
+export function NewTabAction({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
+      <OpenInNewWindowAction url={buildNewTabUrl(query)} />
     </ActionPanel>
   );
 }
 
-function HistoryItemActionComponent({ entry: { title, url } }: { entry: HistoryEntry }) {
+export function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
       <MozillaFirefoxHistoryTab url={url} />
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+      {url ? <OpenInNewWindowAction url={url} /> : null}
     </ActionPanel>
   );
 }
 
-function TabListItemActionComponent(props: { tab: Tab }) {
+export function TabListItemAction(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
       <MozillaFirefoxGoToTab tab={props.tab} />
       <Action.CopyToClipboard title="Copy URL" content={props.tab.url} />
+      {props.tab.url ? <OpenInNewWindowAction url={props.tab.url} /> : null}
     </ActionPanel>
   );
 }
@@ -42,9 +56,5 @@ function MozillaFirefoxGoToTab(props: { tab: Tab }) {
 }
 
 function MozillaFirefoxHistoryTab({ url }: { url: string }) {
-  async function handleAction() {
-    await openHistoryTab(url);
-    await closeMainWindow();
-  }
-  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={() => openHistoryTab(url)} />;
 }

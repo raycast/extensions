@@ -46,16 +46,29 @@ export function quickLookPath(id: string): string {
  * Pre-render every cursor to a PNG so Quick Look (⌘Y) has a file ready the
  * instant it's toggled. Idempotent — re-rendering overwrites in place. Runs
  * once on grid mount; the whole set is ~40 small PNGs.
+ *
+ * Each cursor renders independently: one failure never blocks the rest, and
+ * only the ids that actually landed on disk are returned. Callers must gate a
+ * tile's Quick Look on membership in this set — a cursor missing from it has no
+ * file to preview. Rejects only if the WASM renderer itself can't load (in
+ * which case nothing rendered).
  */
-export async function prepareQuickLook(cursors: Cursor[]): Promise<void> {
+export async function prepareQuickLook(cursors: Cursor[]): Promise<Set<string>> {
   await ensureWasm(loadWasm);
   const dir = pngDir();
   await mkdir(dir, { recursive: true });
 
-  await Promise.all(
+  const results = await Promise.all(
     cursors.map(async (cursor) => {
-      const png = renderCursorPng(cursor.svg, QUICK_LOOK_SIZE);
-      await writeFile(join(dir, `${cursor.id}-${QUICK_LOOK_SIZE}.png`), png);
+      try {
+        const png = renderCursorPng(cursor.svg, QUICK_LOOK_SIZE);
+        await writeFile(join(dir, `${cursor.id}-${QUICK_LOOK_SIZE}.png`), png);
+        return cursor.id;
+      } catch {
+        return null;
+      }
     }),
   );
+
+  return new Set(results.filter((id): id is string => id !== null));
 }

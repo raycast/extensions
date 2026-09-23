@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { FormValidation, getFavicon, useCachedPromise, useForm } from "@raycast/utils";
+import { getDomains } from "../utils/api";
 
-const DOMAINS = getPreferenceValues<Preferences>().domains;
 type Props = {
   onDomainSelected: (domain: string) => void;
 };
@@ -9,6 +9,11 @@ export default function DomainSelector({ onDomainSelected }: Props) {
   type FormValues = {
     domain: string;
   };
+
+  const { isLoading, data: domains = [] } = useCachedPromise(async () => {
+    const response = await getDomains();
+    if (!("error" in response)) return response.domains;
+  });
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit(values) {
@@ -21,6 +26,7 @@ export default function DomainSelector({ onDomainSelected }: Props) {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Check} />
@@ -28,11 +34,14 @@ export default function DomainSelector({ onDomainSelected }: Props) {
       }
     >
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {DOMAINS.replaceAll(" ", "")
-          .split(",")
-          .map((domain) => (
-            <Form.Dropdown.Item value={domain} title={domain} icon={getFavicon(`https://${domain}`)} key={domain} />
-          ))}
+        {domains.map((domain) => (
+          <Form.Dropdown.Item
+            value={domain.name}
+            title={domain.name}
+            icon={getFavicon(`https://${domain.name}`)}
+            key={domain.name}
+          />
+        ))}
       </Form.Dropdown>
     </Form>
   );

@@ -6,5 +6,11 @@
     "types": ["node"],
     "jsx": "react-jsx"
   },
-  "include": ["src/lib/pass-cli-normalize.test.ts", "src/lib/pass-cli-normalize.ts", "src/lib/types.ts"]
+  "include": [
+    "src/lib/core/**/*.ts",
+    "src/lib/pass-cli-normalize.test.ts",
+    "src/lib/pass-cli-normalize.ts",
+    "src/lib/shortcuts*.ts",
+    "src/lib/types.ts"
+  ]
 }

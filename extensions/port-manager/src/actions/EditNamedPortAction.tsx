@@ -24,7 +24,7 @@ export function EditNamedPortAction(props: { port: number }) {
                 showToast(Toasts.EditNamedPort.Success(v.name));
                 pop();
               }}
-            />
+            />,
           );
         }
       }}

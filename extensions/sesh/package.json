@@ -7,7 +7,8 @@
   "author": "joshmedeski",
   "contributors": [
     "sebastian_gunnarsson",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "tharropoulos"
   ],
   "categories": [
     "Developer Tools",
@@ -43,7 +44,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.0"
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -62,5 +64,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

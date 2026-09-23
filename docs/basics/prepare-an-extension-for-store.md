@@ -78,8 +78,9 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
 - Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
+- For instructions shown directly beside the required preferences form, add an optional [`help.md` file](../api-reference/preferences.md#help-for-required-preferences) at the root of your extension. Use it to explain setup steps such as obtaining an API token. When help content is provided, the form displays it in place of the "About this Extension" link.
 
-![Onboarding button linking to the README file](../.gitbook/assets/required-preference.webp)
+![Onboarding button linking to the README file](../.gitbook/assets/required-preferences-2.webp)
 
 ## Categories
 
@@ -122,29 +123,10 @@ In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect scree
 
 #### How to use it?
 
-{% tabs %}
-{% tab title="Raycast v1" %}
-
 1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
 2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
 3. Open the command
 4. Press the hotkey, remember to tick `Save to Metadata`
-
-{% endtab %}
-
-{% tab title="Raycast v2" %}
-
-1. Set a hotkey for the command `Capture Window`  
-2. Open the command you want to take a screenshot of and run your hotkey  
-3. Remember to tick the `Save to Metadata` checkbox and click the camera button  
-4. Continue for all the commands you want screenshots of
-
-{% hint style="info" %}
-This only works if you have a `metadata` folder in your extension; if not, create it manually before doing the steps above.
-{% endhint %}
-
-{% endtab %}
-{% endtabs %}
 
 {% hint style="info" %}
 This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.

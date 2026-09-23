@@ -36,6 +36,10 @@ export default function Command() {
       setSearchBrowser(browserTabs?.find((item) => item.browser.name === selectedBrowser)?.browser);
     }
     const filteredTabs = browserTabs?.filter((item) => {
+      // cached data may come from an older extension version with a different shape
+      if (!item?.browser || !Array.isArray(item.tabs)) {
+        return false;
+      }
       if (selectedBrowser === "") {
         return true;
       }
@@ -144,7 +148,15 @@ export default function Command() {
             title={tabItem.title}
             subtitle={showDomain ? { value: tabItem.domain, tooltip: tabItem.url } : undefined}
             accessories={[{ tag: browserItem.browser.name, icon: { fileIcon: browserItem.browser.path } }]}
-            icon={getFavicon(tabItem.url, { fallback: Icon.Link, mask: Image.Mask.RoundedRectangle })}
+            icon={
+              // Windows reads the icon out of the browser's own store; macOS has no such
+              // file and falls back to the URL, which a tab does not always have
+              tabItem.favicon
+                ? { source: tabItem.favicon, mask: Image.Mask.RoundedRectangle }
+                : tabItem.url
+                  ? getFavicon(tabItem.url, { fallback: Icon.Link, mask: Image.Mask.RoundedRectangle })
+                  : Icon.Link
+            }
             actions={
               <ActionPanel>
                 <ActionTab

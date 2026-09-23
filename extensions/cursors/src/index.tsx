@@ -22,25 +22,29 @@ export default function Command() {
   const inset = activeBackdrop === DEFAULT_BACKDROP ? Grid.Inset.Large : undefined;
 
   // Pre-render PNGs once so Quick Look (⌘Y) has a file ready to preview. The
-  // path is deterministic, but the file doesn't exist until this resolves —
-  // gate the `quickLook` prop on `quickLookReady` so ⌘Y can't point at a
-  // missing file on first launch.
-  const [quickLookReady, setQuickLookReady] = useState(false);
+  // path is deterministic, but the file doesn't exist until it's rendered, so
+  // track two things separately: whether prep has finished (drives the spinner)
+  // and which cursors actually landed on disk (gates each tile's `quickLook`).
+  // A per-cursor render failure must not expose ⌘Y on a missing file, and the
+  // spinner must clear regardless — the tiles work fine without Quick Look.
+  const [prepDone, setPrepDone] = useState(false);
+  const [readyIds, setReadyIds] = useState<Set<string>>(new Set());
   useEffect(() => {
     prepareQuickLook(cursors)
-      .then(() => setQuickLookReady(true))
-      .catch((error) => reportFailure("Couldn't prepare Quick Look previews", error));
+      .then(setReadyIds)
+      .catch((error) => reportFailure("Couldn't prepare Quick Look previews", error))
+      .finally(() => setPrepDone(true));
   }, []);
 
   return (
-    <Grid columns={columns} inset={inset} isLoading={isLoading || !quickLookReady}>
+    <Grid columns={columns} inset={inset} isLoading={isLoading || !prepDone}>
       {cursors.map((cursor) => (
         <Grid.Item
           key={cursor.id}
           title={cursor.name}
           subtitle={cursor.nonStandard ? "macOS-only" : undefined}
           content={{ value: svgToDataUri(withBackdrop(cursor.svg, activeBackdrop)), tooltip: cursor.name }}
-          quickLook={quickLookReady ? { path: quickLookPath(cursor.id), name: cursor.name } : undefined}
+          quickLook={readyIds.has(cursor.id) ? { path: quickLookPath(cursor.id), name: cursor.name } : undefined}
           accessory={
             cursor.nonStandard ? { icon: Icon.Star, tooltip: "macOS-specific cursor (no CSS equivalent)" } : undefined
           }

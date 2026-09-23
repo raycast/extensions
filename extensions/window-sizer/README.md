@@ -14,6 +14,7 @@
 ### Resize Window
 
 - Quickly resize a window to predefined sizes
+- Shrink maximized windows around their center; other windows resize around their top center, moving inside screen bounds when needed
 - Add and save custom window sizes
 - Star your frequently used window sizes
 - Search sizes by aspect ratio (`r16:9`)

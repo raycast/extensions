@@ -5,9 +5,19 @@
  * to show stale data while revalidating.
  */
 
+import { useMemo } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchInstalled, InstalledMap, isBrewLockError, getErrorMessage, brewLogger } from "../utils";
+import {
+  brewFetchInstallableResults,
+  brewMapInstalled,
+  asInstallableResults,
+  InstallableResults,
+  isBrewLockError,
+  getErrorMessage,
+  brewLogger,
+  copyLogsAction,
+} from "../utils";
 
 /**
  * Hook to fetch and cache installed brew packages.
@@ -17,12 +27,17 @@ import { brewFetchInstalled, InstalledMap, isBrewLockError, getErrorMessage, bre
  * - Fetches fresh data in background
  * - Loading state is true until data is available
  *
+ * The cached value is the serialisable `InstallableResults` rather than the
+ * `InstalledMap` consumers want: useCachedPromise persists through a JSON
+ * cache, and `JSON.stringify(new Map())` is `{}`, so caching the mapped form
+ * loses every package. The lookup maps are rebuilt on read instead.
+ *
  * @returns Object containing loading state, data, and revalidate function
  */
 export function useBrewInstalled() {
   const result = useCachedPromise(
-    async (): Promise<InstalledMap | undefined> => {
-      return await brewFetchInstalled(true);
+    async (): Promise<InstallableResults | undefined> => {
+      return await brewFetchInstallableResults(true);
     },
     [],
     {
@@ -48,10 +63,17 @@ export function useBrewInstalled() {
               result.revalidate();
             },
           },
+          secondaryAction: copyLogsAction(message, { hideToast: true }),
         });
       },
     },
   );
 
-  return result;
+  // Rebuild the name-keyed lookups on every change of the cached value. An
+  // entry written by an earlier version of the extension holds `{}` in place
+  // of each Map, which asInstallableResults rejects so the stale value is
+  // re-fetched rather than rendered as an empty list.
+  const data = useMemo(() => brewMapInstalled(asInstallableResults(result.data)), [result.data]);
+
+  return { ...result, data };
 }

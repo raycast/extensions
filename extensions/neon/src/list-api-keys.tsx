@@ -17,14 +17,14 @@ import { FormValidation, getAvatarIcon, showFailureToast, useCachedPromise, useF
 import { neon } from "./neon";
 import { formatDate } from "./utils";
 import { OpenInNeon } from "./components";
-import { ApiKeyCreateRequest } from "@neondatabase/api-client";
+import { ApiKeyCreateRequest } from "@neon/sdk";
 import { useState } from "react";
 
 export default function ListAPIKeys() {
   const { isLoading, data, revalidate, mutate } = useCachedPromise(
     async () => {
-      const res = await neon.listApiKeys();
-      return res.data;
+      const res = await neon.apiKeys.list();
+      return res;
     },
     [],
     {
@@ -44,7 +44,7 @@ export default function ListAPIKeys() {
     };
 
     if (await confirmAlert(options)) {
-      await mutate(neon.revokeApiKey(keyId), {
+      await mutate(neon.apiKeys.revoke(keyId), {
         optimisticUpdate(data) {
           return data.filter((key) => key.id !== keyId);
         },
@@ -95,8 +95,8 @@ function CreateAPIKey({ onCreate }: { onCreate: () => void }) {
     async onSubmit(values) {
       try {
         setIsLoading(true);
-        const res = await neon.createApiKey({ key_name: values.key_name });
-        await Clipboard.copy(res.data.key);
+        const res = await neon.apiKeys.create(values.key_name);
+        await Clipboard.copy(res.key);
         await showToast(Toast.Style.Success, `'${values.key_name}' created`, "Copied to Clipboard");
         onCreate();
         pop();

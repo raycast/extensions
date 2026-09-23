@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "link-commands",
+  "title": "Link Commands",
+  "description": "Quicklinks as real files. Turn any link, folder or search into a Script Command you can version, grep and sync — then browse them grouped by environment, brand and category.",
+  "icon": "extension-icon.png",
+  "author": "kud",
+  "license": "MIT",
+  "keywords": [
+    "link",
+    "links",
+    "quicklink",
+    "quicklinks",
+    "script commands",
+    "bookmark",
+    "launcher",
+    "shortcut"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-link-commands",
+      "title": "Search Link Commands",
+      "subtitle": "Link Commands",
+      "description": "Browse the link commands in your script directories, grouped by environment, brand and category, and run them.",
+      "mode": "view"
+    },
+    {
+      "name": "create-link-command",
+      "title": "Create Link Command",
+      "subtitle": "Link Commands",
+      "description": "Turn a link, a folder or a search URL into a Script Command, with its icon, brand, category and argument header filled in.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "scriptDirectories",
+      "title": "Script Directories",
+      "description": "The folders holding your Script Commands, separated by a comma, a semicolon or a line break. These are the same folders you added under Raycast Settings > Extensions > Script Commands > Add Directories. You have to enter them again here because that list is stored in Raycast's encrypted database, and no public API exposes it — an extension simply cannot read it.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/scripts, ~/work/scripts"
+    },
+    {
+      "name": "showBodyPreview",
+      "title": "Detail Pane",
+      "label": "Show the script source as well as the target",
+      "description": "A link command's facts already sit in the table beside it, so its source is hidden by default — the body is a single open call and its header repeats the metadata. Turn this on to show it anyway. Commands that are not links always show their source.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "groupCommands",
+      "title": "Grouping",
+      "label": "Group commands by environment, brand and category",
+      "description": "Read the naming convention out of each command's title and subtitle — an @environment prefix on the title, a brand and a #category on the subtitle — and use it to build sections and filters. Commands that follow no convention are still listed; they simply have no environment or category.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "terminalApplication",
+      "title": "Terminal",
+      "description": "The application used by the Run in Terminal action, which runs a script with its output left on screen — useful when a command misbehaves and you need to see its errors.",
+      "type": "appPicker",
+      "required": false,
+      "default": "Terminal"
+    },
+    {
+      "name": "defaultAuthor",
+      "title": "Author",
+      "description": "Written into the @raycast.author header of Script Commands you create. Leave empty to omit it.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Your Name"
+    },
+    {
+      "name": "defaultAuthorURL",
+      "title": "Author URL",
+      "description": "Written into the @raycast.authorURL header of Script Commands you create. Leave empty to omit it.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://github.com/you"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.24",
+    "@raycast/utils": "2.2.7",
+    "react": "19.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.0.15",
+    "@types/react": "19.1.8",
+    "eslint": "9.31.0",
+    "prettier": "3.6.2",
+    "typescript": "5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "demo": "node scripts/build-demo.mjs",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

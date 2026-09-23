@@ -152,20 +152,20 @@ interface SelectedTag {
 function Body(props: { onlyPop?: boolean }) {
   const { onlyPop = false } = props;
   const { pop } = useNavigation();
-  // 두 개의 제목 소스: 자동 감지된 "Page title" (브라우저 프리필 또는 URL fetch 결과) vs
-  // 사용자가 직접 입력한 "Custom title". 드롭다운으로 어떤 걸 사용할지 선택한다.
+  // Two title sources: the auto-detected "Page title" (browser prefill or URL fetch result) vs
+  // the user-entered "Custom title". A dropdown selects which one to use.
   const [userTitle, setUserTitle] = useState<string>("");
   const [browserTitle, setBrowserTitle] = useState<string>("");
-  // 기본은 "Page title" — URL/브라우저 prefill 에서 자동으로 제목이 들어가도록.
-  // fetch 실패하고 browser prefill 도 없으면 useEffect 가 자동으로 "Custom title" 로 전환.
+  // Defaults to "Page title" so the title is filled automatically from the URL/browser prefill.
+  // If the fetch fails and there is no browser prefill, a useEffect switches to "Custom title" automatically.
   const [titleSource, setTitleSource] = useState<"auto" | "manual">("auto");
   const [url, setUrl] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  // URL blur 시 fetchPageTitle 요청을 띄우는 트리거. 이 값이 곧 queryKey 가
-  // 되므로, URL을 빠르게 두 번 바꿔도 react-query 가 latest key 의 결과만 hook 에
-  // 반영해 stale 결과 race 가 자연스럽게 막힌다 (이슈 #300).
+  // Trigger that fires the fetchPageTitle request on URL blur. Since this value is the
+  // queryKey itself, even if the URL changes twice in quick succession react-query only
+  // surfaces the result for the latest key, which naturally prevents stale-result races (issue #300).
   const [titleFetchUrl, setTitleFetchUrl] = useState<string>("");
-  // 사용자가 직접 입력했는지 판단할 때 최신 값 비교용.
+  // Holds the latest value for checking whether the user has typed a title manually.
   const userTitleRef = useRef(userTitle);
   userTitleRef.current = userTitle;
   const [selectedSpace, setSelectedSpace] = useCachedState(CACHED_KEY_RECENT_SELECTED_SPACE, "");
@@ -186,7 +186,7 @@ function Body(props: { onlyPop?: boolean }) {
 
   const tags = useMyTags();
   const { enabledSpaces } = useEnabledSpaces();
-  // READ 권한 스페이스는 북마크 추가 대상에서 제외
+  // Exclude READ-only spaces from bookmark creation targets
   const writableSpaces = useMemo(() => enabledSpaces?.filter((s) => s.myRole !== "READ"), [enabledSpaces]);
 
   const spaceTags = useMemo(() => {
@@ -206,18 +206,18 @@ function Body(props: { onlyPop?: boolean }) {
   });
   const fetchedTitle = titleQuery.data ?? null;
   const isFetchingTitle = titleQuery.isFetching;
-  // 자동 감지된 페이지 제목: URL 에서 갓 fetch 한 것이 우선, 없으면 브라우저 프리필.
+  // Auto-detected page title: the freshly fetched one from the URL takes priority, otherwise the browser prefill.
   const autoTitle = fetchedTitle ?? browserTitle;
 
-  // 자동 제목이 채워지고 사용자가 직접 입력한 게 없으면 자동으로 "Page title" 로 전환.
+  // Once an auto title is available and the user hasn't typed anything, switch to "Page title" automatically.
   useEffect(() => {
     if (!autoTitle) return;
     if (userTitleRef.current.trim().length > 0) return;
     setTitleSource("auto");
   }, [autoTitle]);
 
-  // fetch 가 끝났는데 결과가 없거나 (null) 에러이고 browser prefill 도 없으면
-  // 자동으로 "Custom title" 모드로 전환해 사용자가 즉시 직접 입력할 수 있게 한다.
+  // If the fetch has finished with no result (null) or an error, and there is no browser prefill,
+  // switch to "Custom title" mode automatically so the user can start typing right away.
   useEffect(() => {
     if (!titleFetchUrl) return;
     if (titleQuery.isFetching) return;
@@ -226,13 +226,13 @@ function Body(props: { onlyPop?: boolean }) {
     }
   }, [titleFetchUrl, titleQuery.isFetching, titleQuery.isError, titleQuery.data, autoTitle]);
 
-  // URL 입력이 멈춘 뒤 500ms 가 지나면 자동으로 페이지 제목을 가져온다 (debounce).
-  // 이전엔 blur 시점에 fetch 했지만, 사용자가 URL 만 입력하고 다른 필드로 이동하지
-  // 않아도 자동으로 동작하도록 변경.
+  // Fetch the page title automatically 500ms after the user stops typing the URL (debounce).
+  // Previously this fetched on blur, but it was changed so it also works when the user only
+  // enters a URL without moving to another field.
   useEffect(() => {
     const trimmed = url.trim();
     if (!trimmed) {
-      // URL 이 비워지면 캐시된 페이지 제목도 의미 없음 → 초기 상태로 리셋.
+      // If the URL is cleared, the cached page title is meaningless too → reset to the initial state.
       if (titleFetchUrl) setTitleFetchUrl("");
       return;
     }
@@ -250,19 +250,19 @@ function Body(props: { onlyPop?: boolean }) {
 
   const handleUserTitleChange = (value: string) => {
     setUserTitle(value);
-    // 사용자가 직접 입력하기 시작하면 자동으로 "Custom title" 로 스위치.
+    // Switch to "Custom title" automatically as soon as the user starts typing.
     setTitleSource("manual");
   };
 
   const effectiveTitle = titleSource === "auto" ? autoTitle : userTitle;
 
-  // "Page title" 필드에 보여줄 텍스트.
+  // Text to show in the "Page title" field.
   const autoTitleDisplay = isFetchingTitle
     ? "Loading title from URL…"
     : autoTitle || (titleFetchUrl ? "(Couldn't get page title. Please enter manually.)" : "(Enter a URL first)");
 
   const handleSubmit = () => {
-    // Form 의 error prop 은 메시지만 보여주고 submit 자체는 막지 않으므로 직접 가드.
+    // The Form's error prop only shows a message and doesn't block submit itself, so guard manually.
     if (!effectiveTitle.trim()) {
       showToast({
         style: Toast.Style.Failure,

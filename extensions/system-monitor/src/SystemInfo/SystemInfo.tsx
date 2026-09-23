@@ -3,14 +3,15 @@ import { usePromise } from "@raycast/utils";
 import os from "node:os";
 
 import { Actions } from "../components/Actions";
-import { calculateDiskStorage, getOSInfo, getSerialNumber } from "./SystemUtils";
+import { MetadataLabel, MetadataSection } from "../components/MetadataLabel";
+import { calculateDiskStorage, getHardwareInfo, getOSInfo, getRootVolumeDetails } from "./SystemUtils";
 
 const { displayModeDisk } = getPreferenceValues<ExtensionPreferences>();
 
 export default function SystemInfo() {
   return (
     <List.Item
-      id="info-panel"
+      id="system-info"
       title="System Info"
       icon={Icon.Finder}
       detail={<SystemInfoDetail />}
@@ -21,14 +22,18 @@ export default function SystemInfo() {
 
 function SystemInfoDetail() {
   const { data, isLoading } = usePromise(async () => {
-    const serialNumber = await getSerialNumber();
-    const storage = await calculateDiskStorage();
-    const osInfo = await getOSInfo();
+    const [hardware, storage, osInfo, rootVolume] = await Promise.all([
+      getHardwareInfo(),
+      calculateDiskStorage(),
+      getOSInfo(),
+      getRootVolumeDetails(),
+    ]);
 
     return {
+      hardware,
       osInfo,
-      serialNumber,
       storage,
+      rootVolume,
     };
   });
 
@@ -37,19 +42,32 @@ function SystemInfoDetail() {
       isLoading={isLoading}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Hardware Specifications" />
-          <List.Item.Detail.Metadata.Label title="Hostname" text={os.hostname().replace(/\.(local|lan)/g, "")} />
-          <List.Item.Detail.Metadata.Label title="Chip" text={os.cpus()[0].model} />
-          <List.Item.Detail.Metadata.Label title="Serial Number" text={data?.serialNumber || "-"} />
-          <List.Item.Detail.Metadata.Label
-            title="macOS"
-            text={data ? `${data?.osInfo.codename} ${data?.osInfo.release}` : "-"}
-          />
+          <MetadataSection title="Software" />
+          <MetadataLabel title="macOS" text={data?.osInfo.display ?? "-"} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Storage" />
+          <MetadataSection title="Hardware Specifications" />
+          <MetadataLabel title="Hostname" text={os.hostname().replace(/\.(local|lan)$/, "")} />
+          <MetadataLabel title="Model" text={data?.hardware.modelName ?? "-"} />
+          <MetadataLabel title="Model Year" text={data?.hardware.modelYear ?? "-"} />
+          <MetadataLabel title="Model Identifier" text={data?.hardware.modelIdentifier ?? "-"} />
+          <MetadataLabel title="Model Number" text={data?.hardware.modelNumber ?? "-"} />
+          <MetadataLabel title="Chip" text={data?.hardware.chip ?? "-"} />
+          <MetadataLabel title="CPU Cores" text={data?.hardware.totalCores ?? "-"} />
+          <MetadataLabel title="GPU" text={data?.hardware.gpuChipset ?? "-"} />
+          <MetadataLabel title="GPU Cores" text={data?.hardware.gpuCores ?? "-"} />
+          <MetadataLabel title="GPU Memory" text={data?.hardware.gpuMemory ?? "-"} />
+          <MetadataLabel title="Memory" text={data?.hardware.memory ?? "-"} />
+          <MetadataLabel title="Serial Number" text={data?.hardware.serialNumber ?? "-"} />
+          <List.Item.Detail.Metadata.Separator />
+          <MetadataSection title="Storage" />
+          <MetadataLabel title="Volume" text={data?.rootVolume.volumeName ?? "-"} />
+          <MetadataLabel title="File System" text={data?.rootVolume.fileSystem ?? "-"} />
+          <MetadataLabel title="Media Type" text={data?.rootVolume.mediaType ?? "-"} />
+          <MetadataLabel title="Protocol" text={data?.rootVolume.protocol ?? "-"} />
+          <MetadataLabel title="Physical Store" text={data?.rootVolume.physicalStore ?? "-"} />
           {data?.storage.map((disk, index) => {
             return (
-              <List.Item.Detail.Metadata.Label
+              <MetadataLabel
                 key={index}
                 title={disk.diskName}
                 text={

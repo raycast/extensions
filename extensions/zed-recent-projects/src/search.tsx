@@ -11,6 +11,7 @@ import { closeZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/
 import { showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
+import { openProject } from "./lib/open-project";
 
 const isMac = platform() === "darwin";
 
@@ -213,8 +214,7 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        await closeMainWindow();
-        await openWithZedCli(cliPath, entry.paths);
+        await openProject(() => openWithZedCli(cliPath, entry.paths), closeMainWindow);
         triggerRevalidation();
       } catch (error) {
         await showToast({
@@ -245,8 +245,7 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   if (cliPath) {
     const openSingleFolder = async () => {
       try {
-        await closeMainWindow();
-        await openWithZedCli(cliPath!, [entry.paths[0]]);
+        await openProject(() => openWithZedCli(cliPath!, [entry.paths[0]]), closeMainWindow);
         triggerRevalidation();
       } catch (error) {
         await showToast({

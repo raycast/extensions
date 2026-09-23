@@ -101,11 +101,15 @@
         "mocks": {
           "search-events": [
             {
-              "arguments": { "query": "Raycast Glaze Sessions" },
+              "arguments": {
+                "query": "Raycast Glaze Sessions"
+              },
               "response": "{\"query\":\"Raycast Glaze Sessions\",\"total\":1,\"events\":[{\"name\":\"Raycast Glaze Sessions\",\"url\":\"https://luma.com/raycast-glaze-sessions\",\"startAt\":\"2026-03-20T18:00:00-07:00\",\"timezone\":\"America/Los_Angeles\",\"locationType\":\"physical\",\"location\":\"San Francisco, CA\",\"organizer\":{\"name\":\"Raycast Glaze Sessions\",\"slug\":\"raycast-glaze-sessions\"},\"hosts\":[{\"name\":\"Thomas Paul Mann\",\"bio\":\"Raycast Glaze Sessions founder\"}],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":30,\"price\":null,\"maxPrice\":null},\"guestCount\":70,\"coverUrl\":\"https://example.com/cover5.jpg\"}]}"
             },
             {
-              "arguments": { "query": "Raycafé" },
+              "arguments": {
+                "query": "Raycafé"
+              },
               "response": "{\"query\":\"Raycafé\",\"total\":1,\"events\":[{\"name\":\"Raycafé Morning Coffee\",\"url\":\"https://luma.com/raycafe-coffee\",\"startAt\":\"2026-03-21T09:00:00-07:00\",\"timezone\":\"America/Los_Angeles\",\"locationType\":\"physical\",\"location\":\"San Francisco, CA\",\"organizer\":{\"name\":\"Raycast Team\",\"slug\":\"raycast-team\"},\"hosts\":[],\"ticketInfo\":{\"isFree\":true,\"isSoldOut\":false,\"isNearCapacity\":false,\"requireApproval\":false,\"spotsRemaining\":20,\"price\":null,\"maxPrice\":null},\"guestCount\":15,\"coverUrl\":\"https://example.com/cover13.jpg\"}]}"
             }
           ]
@@ -154,5 +158,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

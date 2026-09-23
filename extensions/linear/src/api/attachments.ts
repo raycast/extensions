@@ -2,11 +2,49 @@ import { readFile } from "fs/promises";
 import path from "path";
 
 import { UploadFile } from "@linear/sdk";
-import { fileTypeFromFile } from "file-type";
 
 import { getLinearClient } from "./linearClient";
 
 const DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  ".apng": "image/apng",
+  ".avif": "image/avif",
+  ".bmp": "image/bmp",
+  ".csv": "text/csv",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".gif": "image/gif",
+  ".gz": "application/gzip",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".json": "application/json",
+  ".md": "text/markdown",
+  ".mov": "video/quicktime",
+  ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".svg": "image/svg+xml",
+  ".tar": "application/x-tar",
+  ".tif": "image/tiff",
+  ".tiff": "image/tiff",
+  ".txt": "text/plain",
+  ".webm": "video/webm",
+  ".webp": "image/webp",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".zip": "application/zip",
+};
+
+function getContentType(filePath: string) {
+  return CONTENT_TYPES[path.extname(filePath).toLowerCase()] ?? DEFAULT_CONTENT_TYPE;
+}
 
 type FileUploadVariables = {
   size: number;
@@ -24,8 +62,7 @@ export async function uploadFile(filePath: string): Promise<UploadedFile> {
   const { graphQLClient } = getLinearClient();
 
   const buffer = await readFile(filePath);
-  const type = await fileTypeFromFile(filePath);
-  const contentType = type?.mime ?? DEFAULT_CONTENT_TYPE;
+  const contentType = getContentType(filePath);
   const name = path.basename(filePath);
 
   const { data } = await graphQLClient.rawRequest<
@@ -104,51 +141,20 @@ export type CreateAttachmentPayload = {
 };
 
 export async function createAttachment(payload: CreateAttachmentPayload) {
-  const { graphQLClient } = getLinearClient();
-
+  const { linearClient } = getLinearClient();
   const file = await uploadFile(payload.url);
+  const result = await linearClient.createAttachment({
+    issueId: payload.issueId,
+    title: file.name,
+    url: file.assetUrl,
+  });
 
-  const attachmentInput = `issueId: "${payload.issueId}", title: "${file.name}", url: "${file.assetUrl}"`;
-
-  const { data } = await graphQLClient.rawRequest<
-    { attachmentCreate: { success: boolean; attachment: { id: string } } },
-    Record<string, unknown>
-  >(
-    `
-      mutation {
-        attachmentCreate(input: { ${attachmentInput} }) {
-          success
-          attachment {
-            id
-          }
-        }
-      }
-    `,
-  );
-
-  return { success: data?.attachmentCreate.success, id: data?.attachmentCreate.attachment.id };
+  return { success: result.success, id: result.attachmentId };
 }
 
 export async function attachLinkUrl(payload: CreateAttachmentPayload) {
-  const { graphQLClient } = getLinearClient();
+  const { linearClient } = getLinearClient();
+  const result = await linearClient.attachmentLinkURL(payload.issueId, payload.url);
 
-  const attachmentInput = `issueId: "${payload.issueId}", url: "${payload.url}"`;
-
-  const { data } = await graphQLClient.rawRequest<
-    { attachmentLinkURL: { success: boolean; attachment: { id: string } } },
-    Record<string, unknown>
-  >(
-    `
-      mutation {
-        attachmentLinkURL(${attachmentInput}) {
-          success
-          attachment {
-            id
-          }
-        }
-      }
-    `,
-  );
-
-  return { success: data?.attachmentLinkURL.success, id: data?.attachmentLinkURL.attachment.id };
+  return { success: result.success, id: result.attachmentId };
 }

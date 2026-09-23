@@ -1,5 +1,11 @@
 # App Icon Generator Changelog
 
+## [1.2.0] - 2026-08-19
+
+- Added Windows support
+- Fixed ICO icon generation when the ICO platform is selected
+- Updated to the latest Raycast API and dependencies
+
 ## [1.1.0] - 2024-08-21
 
 - Added support for multiple new platforms:

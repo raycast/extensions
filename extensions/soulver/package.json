@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "soulver",
+  "title": "Soulver",
+  "description": "Leverage the Soulver CLI to solve expressions and manage your Soulver sheetbooks using Raycast and Raycast AI.",
+  "icon": "extension-icon.png",
+  "author": "bitforger",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "soulver",
+      "title": "Solve Expression",
+      "subtitle": "Soulver CLI",
+      "description": "Runs Soulver CLI to evaluate passed expression or clipboard contents",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "expression",
+          "placeholder": "Expression (e.g. $100 + £50 in EUR)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "solve",
+      "title": "Solve Expression",
+      "description": "Evaluates a mathematical, financial, unit conversion, or natural language calculation expression using Soulver CLI."
+    },
+    {
+      "name": "list-sheets",
+      "title": "List Soulver Sheets",
+      "description": "Lists all sheets in the active Soulver sheetbook."
+    },
+    {
+      "name": "create-sheet",
+      "title": "Create Soulver Sheet",
+      "description": "Creates a new sheet in the Soulver sheetbook."
+    },
+    {
+      "name": "delete-sheet",
+      "title": "Delete Soulver Sheet",
+      "description": "Deletes a sheet from the Soulver sheetbook."
+    },
+    {
+      "name": "duplicate-sheet",
+      "title": "Duplicate Soulver Sheet",
+      "description": "Duplicates an existing sheet in the Soulver sheetbook."
+    },
+    {
+      "name": "move-sheet",
+      "title": "Move Soulver Sheet",
+      "description": "Moves a sheet into a specified folder in the Soulver sheetbook."
+    },
+    {
+      "name": "pin-sheet",
+      "title": "Pin Soulver Sheet",
+      "description": "Pins or toggles pin status of a sheet in the Soulver sheetbook."
+    },
+    {
+      "name": "archive-sheet",
+      "title": "Archive Soulver Sheet",
+      "description": "Archives a sheet in the Soulver sheetbook."
+    },
+    {
+      "name": "read-sheet",
+      "title": "Read Soulver Sheet",
+      "description": "Reads all lines and evaluated answers from a specific Soulver sheet."
+    },
+    {
+      "name": "append-line",
+      "title": "Append Line to Soulver Sheet",
+      "description": "Appends a new line or calculation expression to a specified Soulver sheet."
+    },
+    {
+      "name": "insert-line",
+      "title": "Insert Line into Soulver Sheet",
+      "description": "Inserts a new line or calculation at a specific 1-based index in a Soulver sheet."
+    },
+    {
+      "name": "update-line",
+      "title": "Update Soulver Sheet Line",
+      "description": "Updates an existing line content in a Soulver sheet."
+    },
+    {
+      "name": "delete-line",
+      "title": "Delete Soulver Sheet Line",
+      "description": "Deletes a line from a Soulver sheet by its 1-based line number."
+    },
+    {
+      "name": "mark-line",
+      "title": "Mark Soulver Sheet Line",
+      "description": "Marks a line behavior in a Soulver sheet (e.g. subtotal, running-total, running-budget, timepoint, expression)."
+    },
+    {
+      "name": "inspect-line",
+      "title": "Inspect Soulver Line",
+      "description": "Inspects structured JSON metadata of a specific line in a Soulver sheet."
+    },
+    {
+      "name": "search-sheets",
+      "title": "Search Soulver Sheets",
+      "description": "Searches for text, numbers, or expressions across Soulver sheets."
+    },
+    {
+      "name": "manage-variables",
+      "title": "Manage Soulver Global Variables",
+      "description": "Lists, sets, or deletes global variables in the Soulver sheetbook."
+    },
+    {
+      "name": "manage-definitions",
+      "title": "Manage Soulver Custom Definitions",
+      "description": "Shows or appends custom definitions and unit rules in Soulver."
+    },
+    {
+      "name": "export-sheet",
+      "title": "Export Soulver Sheet",
+      "description": "Exports a Soulver sheet to TXT, CSV, HTML, or PNG format or copies it to the clipboard."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

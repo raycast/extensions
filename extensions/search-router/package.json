@@ -36,7 +36,7 @@
       ],
       "subtitle": "Search the Web with !bangs",
       "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs and custom search engines",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "query",

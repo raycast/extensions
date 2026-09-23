@@ -1,6 +1,5 @@
 import { Note } from "@/obsidian";
 import { getPreferenceValues, getSelectedText, Icon } from "@raycast/api";
-import fs from "fs";
 import { homedir } from "os";
 import path from "path";
 import {
@@ -44,13 +43,11 @@ export function readingTime(str: string) {
 }
 
 export function createdDateFor(note: Note) {
-  const { birthtime } = fs.statSync(note.path);
-  return birthtime;
+  return note.createdAt ?? note.lastModified;
 }
 
 export function fileSizeFor(note: Note) {
-  const { size } = fs.statSync(note.path);
-  return size / BYTES_PER_KILOBYTE;
+  return (note.fileSize ?? 0) / BYTES_PER_KILOBYTE;
 }
 
 export function trimPathToMaxLength(path: string, maxLength: number) {

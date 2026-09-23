@@ -2,16 +2,16 @@ import { ActionPanel, Action, Icon, Keyboard, Color } from "@raycast/api";
 import { StoreItem } from "../types";
 import { FilterToggles } from "../hooks/useFilterToggles";
 import {
+  CATEGORY_COLORS,
+  categoryIcon,
+  changelogUrl,
   createStoreDeeplink,
   extractLatestChanges,
-  CATEGORY_COLORS,
   MACOS_TINT_COLOR,
   WINDOWS_TINT_COLOR,
 } from "../utils";
 import { useChangelog } from "../hooks/useChangelog";
 import { ChangelogDetail } from "./ChangelogDetail";
-
-const GITHUB_EXTENSIONS_BASE = "https://github.com/raycast/extensions/blob/main/extensions";
 
 interface ExtensionActionsProps {
   item: StoreItem;
@@ -53,9 +53,7 @@ export function ExtensionActions({
   isRefreshing,
 }: ExtensionActionsProps) {
   const storeDeeplink = createStoreDeeplink(item.url);
-  const changelogBrowserUrl = item.extensionSlug
-    ? `${GITHUB_EXTENSIONS_BASE}/${item.extensionSlug}/CHANGELOG.md`
-    : undefined;
+  const changelogBrowserUrl = item.extensionSlug ? changelogUrl(item.extensionSlug) : undefined;
 
   const { data: changelog } = useChangelog(item.extensionSlug);
   const latestChanges = changelog ? extractLatestChanges(changelog) : null;
@@ -123,18 +121,18 @@ export function ExtensionActions({
               title="Open in Raycast Store"
               url={storeDeeplink}
               icon={Icon.RaycastLogoNeg}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Duplicate}
             />
+            {/*
+              CopyName, NOT a hand-written cmd+shift+c — that combo IS Common.Copy,
+              which "Copy Recent Changes" already claims in this same panel. Writing it
+              longhand looks like a distinct shortcut but resolves to the same keys, and
+              ray lint does not check the ActionPanel conflict invariant.
+            */}
             <Action.CopyToClipboard
               title="Copy Extension URL"
               content={item.url}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
               icon={Icon.Clipboard}
             />
           </ActionPanel.Section>
@@ -187,11 +185,15 @@ export function ExtensionActions({
               <Action title="All Categories" icon={Icon.XMarkCircle} onAction={() => onSetCategory(null)} />
             )}
             {availableCategories.map((category) => (
+              // The icon slot always shows the category's own glyph — the same one the
+              // Categories tags use in the detail panel — so a category reads identically
+              // wherever it appears. Selection is a ✓ appended to the title instead of
+              // replacing the glyph, which keeps both signals visible at once.
               <Action
                 key={category}
-                title={category}
+                title={categoryFilter === category ? `${category} ✓` : category}
                 icon={{
-                  source: categoryFilter === category ? Icon.CheckCircle : Icon.Circle,
+                  source: categoryIcon(category),
                   tintColor: CATEGORY_COLORS[category] ?? Color.SecondaryText,
                 }}
                 onAction={() => onSetCategory(category)}

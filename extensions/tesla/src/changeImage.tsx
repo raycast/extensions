@@ -68,7 +68,7 @@ export default function ChangeImage() {
           keywords={item.keywords}
           actions={
             <ActionPanel>
-              <Action.SubmitForm title="Submit Answer" onSubmit={() => changeImage(item.content)} />
+              <Action title="Select Image" onAction={() => changeImage(item.content)} />
             </ActionPanel>
           }
         />

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { Booking } from "../lib/types";
-import { confirmDeleteBooking, profileIcon } from "../lib/utils";
-import { isSameDay, renderTimeRange } from "../lib/format";
+import { confirmDeleteBooking, failToast, profileIcon } from "../lib/utils";
+import { isSameDay, renderTimeRange, toISODate } from "../lib/format";
 import { checkInBooking, fetchRoomPlanImage } from "../api/deskly";
 
 export default function BookingDetail({
@@ -54,7 +54,7 @@ export default function BookingDetail({
           <Action.OpenInBrowser
             title="Open in Browser"
             icon={Icon.Globe}
-            url={`${apiUrl}/en/overview/${booking.date.toISOString().substring(0, 10)}`}
+            url={`${apiUrl}/en/overview/${toISODate(booking.date)}`}
           />
           {isToday && !checkedIn && (
             <Action
@@ -68,9 +68,7 @@ export default function BookingDetail({
                   toast.style = Toast.Style.Success;
                   toast.title = "Booking confirmed";
                 } catch (error) {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Check-in failed";
-                  toast.message = String(error);
+                  failToast(toast, "Check-in failed", error);
                 }
               }}
             />

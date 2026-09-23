@@ -10,6 +10,7 @@ import {
   Toast,
   Detail,
   Cache,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
@@ -22,6 +23,7 @@ import { type Feed, getFeeds } from "./feeds";
 import AddFeedForm from "./subscription-form";
 
 const parser = new Parser({});
+const preference = getPreferenceValues();
 const storiesCache = new Cache({ namespace: "stories" });
 const STORIES_FILTER_CACHE_KEY = "selected-filter";
 const STORIES_FILTER_TTL_MS = 15 * 60 * 1000;
@@ -91,7 +93,7 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
     <List.Item
       icon={props.item.icon}
       title={props.item.title}
-      subtitle={props.item.subtitle}
+      subtitle={preference.showSubtitle ? props.item.subtitle : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

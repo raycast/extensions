@@ -35,7 +35,7 @@
       "subtitle": "Everhour",
       "description": "View, Start, Stop the current timer",
       "mode": "no-view",
-      "interval": "10s",
+      "interval": "1m",
       "arguments": [
         {
           "name": "quickAction",

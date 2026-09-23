@@ -2,11 +2,6 @@ import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { ReactElement } from "react";
 
-export interface Preferences {
-  readonly searchEngine: string;
-  readonly browserApp: string;
-}
-
 export interface Tab {
   readonly title: string;
   readonly url: string;

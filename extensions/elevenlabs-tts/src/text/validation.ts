@@ -18,3 +18,10 @@ export function validateSelectedText(text: string): string {
     throw error;
   }
 }
+
+export function validateCopiedText(text: string | undefined): string {
+  if (!text?.trim()) {
+    throw new Error("No text copied");
+  }
+  return text;
+}

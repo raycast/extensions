@@ -1,5 +1,35 @@
 # Skills Changelog
 
+## [Fix Commands Waiting Forever Behind Each Other] - 2026-09-12
+
+- Stop a second command from waiting indefinitely behind a running one: opening Manage Skills during "Update All Skills" now either gets its turn or reports that another skills command is still running, instead of showing an empty list and spinning for minutes
+- Fail immediately on a permanent problem such as a support directory that cannot be written, which was previously retried forever
+- Stop the running command when it loses its lock, rather than letting it keep changing the same skills another process is now free to change, and stop a failed lock release from replacing the real error
+- Give read-only commands room for the initial download of the `skills` CLI, so an ordinary first run on a slow connection no longer fails
+- Point a timed-out command at the custom package registry setup as well as the network, since a proxied registry is a common cause
+
+## [Fix Update All Skills Timing Out] - 2026-09-11
+
+- Allow `add`, `remove`, and `update` up to 5 minutes instead of 30 seconds, so "Update All Skills" no longer fails with a bare "Command failed: npx -y skills@latest update -g -y" once checking every installed skill's source takes longer than that
+- Report that the `skills` CLI timed out, including whatever it printed before being stopped, instead of only the command that failed
+- Include the CLI output in the logs copied by the failure toast's "Report Error" action, which previously carried only the original message
+- Stop retrying a timed-out `bunx` run through `npx`, which only doubled the wait
+
+## [Serialize Concurrent CLI Commands] - 2026-08-24
+
+- Prevent simultaneous Raycast commands from racing in the shared `npx` cache and intermittently failing with `ENOTEMPTY`
+- Read the installed-skill list and metadata from one locked snapshot so Manage Skills does not show mismatched data
+
+## [Updated contributor] - 2026-08-18
+
+## [Fix Runtime Detection and Skill Lookup] - 2026-07-30
+
+- Detect `bun`/`node` installed outside a version manager or Homebrew, so "Unable to find a working bunx or npx command" no longer appears for Bun's official installer (`~/.bun/bin`), Nix / nix-darwin profiles, mise, and asdf
+- Report what the `skills` CLI printed when it exits non-zero, instead of only "Command failed: bunx --silent skills@latest …" with no reason — the CLI writes its errors to stdout, which was being discarded
+- Fall back to `npx` when `bunx` dies without printing anything at all, limited to read-only commands so a mutating `add`/`remove`/`update` is never run twice
+- Resolve skills whose `SKILL.md` sits at the repository root (single-skill repos), which previously failed to load in the detail view
+- Make the `read-skill` AI tool use the same repo-layout resolution as the detail view, so nested and root-level skills are readable
+
 ## [Document Custom Registry Configuration] - 2026-07-03
 
 - Add README guidance for pointing `bunx`/`npx` at a custom package registry (corporate proxy) via `~/.npmrc` and `~/.bunfig.toml`, since Raycast does not inherit shell environment variables

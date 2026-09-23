@@ -1,7 +1,7 @@
 import type { Keyboard } from "@raycast/api";
 import { Action, getPreferenceValues } from "@raycast/api";
 
-type Registries = "yarn" | "npm" | "pnpm" | "bun";
+type Registries = "yarn" | "npm" | "pnpm" | "bun" | "aube";
 interface RegistryItem {
   name: string;
   registry: Registries;
@@ -26,6 +26,11 @@ const registries: RegistryItem[] = [
   {
     name: "bun",
     registry: "bun",
+    installCommand: "add",
+  },
+  {
+    name: "Aube",
+    registry: "aube",
     installCommand: "add",
   },
 ];

@@ -26,6 +26,7 @@ export function useTeakAuth(): TeakAuthState {
     setReloadNonce((value) => value + 1);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reloadNonce is the intentional manual refresh trigger
   useEffect(() => {
     let active = true;
 

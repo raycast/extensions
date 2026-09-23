@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "awork",
   "title": "awork",
-  "description": "Search for tasks & projects and log time in awork.",
+  "description": "Search projects and tasks, create tasks, and log time in awork.",
   "icon": "icon.png",
   "access": "public",
   "owner": "hypercode",
@@ -23,14 +23,14 @@
   "commands": [
     {
       "name": "projects",
-      "title": "Projects",
+      "title": "Search Projects",
       "subtitle": "awork",
       "description": "Search your projects",
       "mode": "view"
     },
     {
       "name": "tasks",
-      "title": "Tasks",
+      "title": "Search Tasks",
       "subtitle": "awork",
       "description": "Search your tasks",
       "mode": "view"
@@ -40,6 +40,13 @@
       "title": "Log Time",
       "subtitle": "awork",
       "description": "Log time on a project or task",
+      "mode": "view"
+    },
+    {
+      "name": "createTask",
+      "title": "Create Task",
+      "subtitle": "awork",
+      "description": "Create a project or private task",
       "mode": "view"
     }
   ],
@@ -95,40 +102,74 @@
       "description": "Gets awork types of work"
     },
     {
+      "name": "get-task-lists",
+      "title": "Get Task Lists",
+      "description": "Gets the available task lists for an awork project"
+    },
+    {
+      "name": "get-task-statuses",
+      "title": "Get Task Statuses",
+      "description": "Gets the available awork task statuses for a project or private tasks"
+    },
+    {
+      "name": "get-project-members",
+      "title": "Get Project Members",
+      "description": "Gets the assignable members of an awork project"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Creates a project or private task in awork after user confirmation"
+    },
+    {
+      "name": "edit-task",
+      "title": "Edit Task",
+      "description": "Edits an awork task after user confirmation"
+    },
+    {
       "name": "log-time",
       "title": "Log Time",
       "description": "Log time for an awork project or task"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^2.2.3"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@jest/globals": "^30.3.0",
-    "@raycast/eslint-config": "^2.1.1",
+    "@eslint/js": "^9.39.5",
+    "@jest/globals": "^30.4.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "24.10.1",
-    "@types/react": "19.2.14",
-    "@typescript-eslint/parser": "^8.57.2",
-    "eslint": "^9.39.1",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^9.39.5",
     "eslint-plugin-import": "^2.32.0",
-    "globals": "^17.4.0",
-    "jest": "^30.3.0",
-    "prettier": "^3.8.1",
-    "react": "^19.2.4",
-    "ts-jest": "^29.4.6",
+    "globals": "^17.11.0",
+    "jest": "^30.4.2",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "ts-jest": "^29.4.12",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
+    "dev:raycast2": "RAY_Target=x ray develop",
     "test": "jest",
     "testAi": "ray evals",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tests/tsconfig.json",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "js-yaml@4": "4.3.1"
   }
 }

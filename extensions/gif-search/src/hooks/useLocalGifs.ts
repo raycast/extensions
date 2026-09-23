@@ -1,10 +1,19 @@
 import { useCachedPromise } from "@raycast/utils";
 import { LocalType, get, getAll } from "../lib/localGifs";
-import { GRID_COLUMNS, ServiceName } from "../preferences";
+import { showToast, Toast } from "@raycast/api";
+import { GRID_COLUMNS, ServiceName, getServiceTitle } from "../preferences";
 import { getAPIByServiceName } from "./useSearchAPI";
 import dedupe from "../lib/dedupe";
+import { IGif } from "../models/gif";
 
 type ItemSize = "small" | "medium" | "large";
+
+type ResolvedGifs = readonly [ServiceName, IGif[]];
+type ProviderFailure = { service: ServiceName; error: Error };
+
+function isFailure(result: ResolvedGifs | ProviderFailure): result is ProviderFailure {
+  return "error" in result;
+}
 
 export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize) {
   const isAllFavsOrRecents = service === "favorites" || service === "recents";
@@ -46,16 +55,37 @@ export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize)
       else return [];
 
       const all = await getAll(type);
+      // Empty providers make no lookup and must not count as successful recovery.
+      const populatedProviders = all.filter(([, ids]) => ids.length > 0);
       // Populate all gifs using the API
-      const promises = all.map(async ([service, ids]) => {
+      const promises = populatedProviders.map(async ([service, ids]): Promise<ResolvedGifs | ProviderFailure> => {
         const api = await getAPIByServiceName(service);
-        if (api === null) return [];
-        const gifs = await api.gifs(ids);
-        return [service, dedupe(gifs)] as const;
+        if (api === null) return [service, [] as IGif[]] as const;
+        try {
+          const gifs = await api.gifs(ids);
+          return [service, dedupe(gifs)] as const;
+        } catch (error) {
+          console.error(`Failed to load saved GIFs for ${service}:`, error);
+          return { service, error: error instanceof Error ? error : new Error(String(error)) };
+        }
       });
 
       const results = await Promise.all(promises);
-      return results;
+      const failures = results.filter(isFailure);
+
+      // Every populated provider failing looks identical to having saved nothing, and the empty result
+      // would be cached over the last good one. Rejecting instead keeps the cached GIFs on
+      // screen and gives the hook's own toast a Retry action.
+      if (failures.length && failures.length === results.length) {
+        throw failures[0].error;
+      }
+
+      if (failures.length) {
+        const names = failures.map((failure) => getServiceTitle(failure.service)).join(", ");
+        await showToast({ style: Toast.Style.Failure, title: `Could not load saved GIFs from ${names}` });
+      }
+
+      return results.filter((result): result is ResolvedGifs => !isFailure(result));
     },
     [service],
     { execute: isAllFavsOrRecents },

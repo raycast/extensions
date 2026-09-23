@@ -10,12 +10,46 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - View Services
         - Create Application
         - Create Database
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Service Logs (Compose stacks pick a container first)
+            - Start / Stop Following
+            - Select / Change Container (Compose stacks)
+        - View Deployments (Applications and Compose stacks)
+            - View Build Logs
+            - Roll Back
+            - Cancel / Delete
+        - View Environment
+            - Edit Variables
+            - Copy Environment File
+        - View Domains (Applications and Compose stacks)
+            - Open Domain
+            - Copy URL
+            - Delete Domain
+            - Add Domain
+        - View Backups (Databases and Compose stacks)
+            - Add Backup
+            - Edit Backup
+            - Run Backup Now
+            - Delete Backup
+        - View Schedules (Applications and Compose stacks)
+            - Add Schedule
+            - Edit Schedule
+            - Run Now
+            - View Runs
+            - Delete Schedule
+        - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)
         - View Docker Config
     - View S3 Destinations
         - Delete S3 Destination
     - View Users
+- Deploy Service
+    - Search for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and status, sorted by frecency.
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
 
 ## 🚀 Getting Started
 

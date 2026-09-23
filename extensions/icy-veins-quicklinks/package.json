@@ -75,7 +75,7 @@
     "@types/sharp": "^0.31.1",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
     "typescript": "^5.8.2",
     "vitest": "^4.1.0"
   },
@@ -97,5 +97,10 @@
   "categories": [
     "Web"
   ],
-  "version": "2.4.0"
+  "version": "2.4.0",
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1",
+    "sharp": "^0.35.3"
+  }
 }

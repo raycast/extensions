@@ -10,7 +10,8 @@
   "contributors": [
     "danielferguson",
     "pernielsentikaer",
-    "thomas"
+    "thomas",
+    "0xdhrv"
   ],
   "categories": [
     "Productivity",
@@ -90,26 +91,564 @@
     {
       "name": "create-draft",
       "title": "Create Draft",
-      "description": "Create a new social media draft on Typefully. Provide either content (full draft text) or prompt (idea to generate). Use --- on its own line to split threads. Supports X (Twitter), LinkedIn, Threads, Bluesky, and Mastodon."
+      "description": "Create one cross-platform Typefully draft from exact text. Supports threads, media IDs, tags, scratchpad, X replies, quotes, communities, disclosures, scheduling, and publishing."
+    },
+    {
+      "name": "get-draft",
+      "title": "Get Draft",
+      "description": "Get the complete content and metadata for one Typefully draft. Use this for dropped Typefully draft URLs and before editing."
+    },
+    {
+      "name": "update-draft",
+      "title": "Update Draft",
+      "description": "Update an existing Typefully draft, including platform content, tags, scratchpad, schedule, sharing, and X-only options."
+    },
+    {
+      "name": "delete-draft",
+      "title": "Delete Draft",
+      "description": "Permanently delete a Typefully draft."
     },
     {
       "name": "list-drafts",
       "title": "List Drafts",
-      "description": "List unpublished, scheduled, or published drafts from Typefully."
-    },
-    {
-      "name": "list-social-sets",
-      "title": "List Social Sets",
-      "description": "List available Typefully social sets (accounts/profiles) the user can post to."
+      "description": "List Typefully drafts, scheduled posts, published posts, errors, or publishing posts."
     },
     {
       "name": "schedule-draft",
       "title": "Schedule Draft",
-      "description": "Schedule an existing Typefully draft for a specific date and time."
+      "description": "Schedule an existing Typefully draft for an ISO time or the next free slot."
+    },
+    {
+      "name": "publish-draft",
+      "title": "Publish Draft",
+      "description": "Publish an existing Typefully draft immediately."
+    },
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Get the authenticated Typefully user and account metadata."
+    },
+    {
+      "name": "get-social-set",
+      "title": "Get Social Set",
+      "description": "Get one Typefully account, connected platforms, and publishing quota."
+    },
+    {
+      "name": "list-social-sets",
+      "title": "List Social Sets",
+      "description": "List available Typefully accounts and connected platforms. Use when no default is configured or the user asks about accounts."
+    },
+    {
+      "name": "set-default-social-set",
+      "title": "Set Default Social Set",
+      "description": "Set the default Typefully account used when social_set_id is omitted."
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List tags for a Typefully social set."
+    },
+    {
+      "name": "create-tag",
+      "title": "Create Tag",
+      "description": "Create a tag in a Typefully social set."
+    },
+    {
+      "name": "get-queue",
+      "title": "Get Queue",
+      "description": "Get free queue slots and scheduled Typefully drafts for a date range."
+    },
+    {
+      "name": "get-queue-schedule",
+      "title": "Get Queue Schedule",
+      "description": "Get publishing queue schedule rules for a Typefully social set."
+    },
+    {
+      "name": "update-queue-schedule",
+      "title": "Update Queue Schedule",
+      "description": "Replace publishing queue schedule rules for a Typefully social set."
+    },
+    {
+      "name": "upload-media",
+      "title": "Upload Media",
+      "description": "Upload a local image, video, GIF, or PDF to Typefully and wait until it is ready."
+    },
+    {
+      "name": "get-media-status",
+      "title": "Get Media Status",
+      "description": "Check whether uploaded Typefully media is ready."
+    },
+    {
+      "name": "get-x-post-analytics",
+      "title": "Get X Post Analytics",
+      "description": "Get X post impressions and engagement metrics for an inclusive date range."
+    },
+    {
+      "name": "get-x-follower-analytics",
+      "title": "Get X Follower Analytics",
+      "description": "Get X follower totals and daily counts."
+    },
+    {
+      "name": "resolve-linkedin-organization",
+      "title": "Resolve LinkedIn Organization",
+      "description": "Resolve a LinkedIn company or school URL to Typefully mention syntax."
+    },
+    {
+      "name": "list-comments",
+      "title": "List Draft Comments",
+      "description": "List unresolved, resolved, or all comment threads on a Typefully draft."
+    },
+    {
+      "name": "create-comment",
+      "title": "Create Draft Comment",
+      "description": "Create a comment thread anchored to exact text in a Typefully draft."
+    },
+    {
+      "name": "reply-to-comment",
+      "title": "Reply to Draft Comment",
+      "description": "Reply to a Typefully draft comment thread."
+    },
+    {
+      "name": "resolve-comment",
+      "title": "Resolve Draft Comment",
+      "description": "Resolve a Typefully draft comment thread and remove its anchor."
+    },
+    {
+      "name": "update-comment",
+      "title": "Update Draft Comment",
+      "description": "Edit the text of a Typefully draft comment authored by the user."
+    },
+    {
+      "name": "delete-comment",
+      "title": "Delete Draft Comment",
+      "description": "Delete a Typefully draft comment or entire comment thread."
+    },
+    {
+      "name": "create-x-article",
+      "title": "Create X Article",
+      "description": "Create a standalone long-form X Article draft with canonical markdown and optional cover media."
+    },
+    {
+      "name": "update-x-article",
+      "title": "Update X Article",
+      "description": "Update a standalone X Article draft, cover, metadata, or schedule."
     }
   ],
   "ai": {
-    "instructions": "You help users create and manage social media drafts on Typefully. When creating a draft, always call create-draft; if you have exact draft text, pass it in content, otherwise pass the idea in prompt and let the tool generate the draft. The account and platforms are resolved automatically — do NOT call list-social-sets before creating a draft, and do NOT ask the user which platforms to target unless they explicitly mention one. For threads, separate posts with --- on its own line inside content. When scheduling, call list-drafts first to get the draft ID and social_set_id."
+    "instructions": "Use Typefully tools whenever the user asks to create, edit, schedule, publish, inspect, or analyze social media content for X, LinkedIn, Threads, Bluesky, or Mastodon, or provides a Typefully draft URL.\n\nAccount resolution:\n* Omit social_set_id to use the saved default. If the tool reports that multiple social sets exist without a default, call list-social-sets and ask the user to choose, then offer set-default-social-set. Reuse the chosen ID for the rest of the conversation.\n* A Typefully URL like https://typefully.com/?a=123&d=456 maps a to social_set_id and d to draft_id. Call get-draft rather than browsing the web UI.\n\nDraft creation:\n* Always create one draft per piece of content, even when targeting several platforms. Never create separate drafts merely to tailor copy.\n* create-draft requires final exact text. Write or adapt the copy before calling it. Separate thread posts with --- on its own line.\n* If platforms are omitted, create-draft uses every connected post platform. If the user names platforms, pass only those.\n* Tailored platform versions belong in the same draft. Create the first version, then call update-draft for each additional platform version.\n* X Articles are standalone. Use create-x-article or update-x-article and never mix x_article with post platforms.\n* Put private notes and ideas in scratchpad, not local files.\n\nPlatform rules:\n* X supports threads, replies, quote posts, communities, paid partnership, and made-with-AI labels.\n* LinkedIn supports one post. To mention a company or school, call resolve-linkedin-organization and insert the returned mention_text. Do not invent URNs.\n* Platform character limits are X 280 per post, LinkedIn 3,000, Threads 500, Bluesky 300, and Mastodon 500.\n\nEditing and comments:\n* Call get-draft before editing. Draft content can contain <typ:comment-thread> anchors. Preserve and reposition every anchor when changing text. Use exclude_comment_markers only for read-only display or export, never for content that will be patched back.\n* Use update-draft with append=true only to add posts to an existing thread. It is not supported for LinkedIn.\n* Never resolve or delete comments without explicit user instruction. After applying feedback, ask whether to resolve it.\n* force_overwrite_comments is a destructive last resort. First call list-comments with unresolved status, tell the user which threads will be resolved, and wait for explicit confirmation.\n\nScheduling and publishing:\n* If no exact time is provided, inspect recent comparable X analytics and get-queue before choosing a time. If evidence is sparse, say so. next-free-slot is available when the user wants Typefully to choose.\n* Publishing is irreversible and public. Use publish-draft or schedule=now only when the user explicitly asks to publish immediately. Otherwise create a draft or schedule it. Tool confirmation is still required.\n* Retweets, reposts, quote posts, and replies are X-only unless the user explicitly asks for separate cross-platform versions.\n* Call get-social-set when the user asks about publishing quota or when scheduling or publishing fails because of quota.\n\nAuthentication and safety:\n* On a missing, invalid, expired, or unauthorized API key error, tell the user to update the Typefully API Key in extension preferences using a key from https://typefully.com/?settings=api, then stop. Do not search for credentials, scrape Typefully, or use a localhost fallback.\n* Respect rate limits. Do not automate unsolicited replies, duplicate content across accounts, fake engagement, or trending manipulation.",
+    "evals": [
+      {
+        "input": "@typefully Create an X draft that says: Shipping the new Raycast integration today.",
+        "mocks": {
+          "create-draft": {
+            "id": 1001,
+            "social_set_id": 42,
+            "status": "draft",
+            "title": null,
+            "preview": "Shipping the new Raycast integration today.",
+            "url": "https://typefully.com/?a=42&d=1001",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-draft",
+              "arguments": {
+                "content": {
+                  "includes": "Shipping the new Raycast integration today"
+                },
+                "platforms": {
+                  "includes": "x"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully Create an X thread with: First post about launch day --- Second post with the details --- Third post with a CTA",
+        "mocks": {
+          "create-draft": {
+            "id": 1002,
+            "social_set_id": 42,
+            "status": "draft",
+            "preview": "First post about launch day",
+            "url": "https://typefully.com/?a=42&d=1002",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-draft",
+              "arguments": {
+                "content": {
+                  "includes": "---"
+                },
+                "platforms": {
+                  "includes": "x"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully Open https://typefully.com/?a=42&d=456 and summarize the draft",
+        "mocks": {
+          "get-draft": {
+            "id": 456,
+            "social_set_id": 42,
+            "status": "draft",
+            "preview": "Draft about our Q3 roadmap",
+            "private_url": "https://typefully.com/?a=42&d=456",
+            "draft_title": "Q3 roadmap",
+            "platforms": {
+              "x": {
+                "enabled": true,
+                "posts": [
+                  {
+                    "text": "Here is our Q3 roadmap in three bullets."
+                  }
+                ]
+              }
+            },
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-draft",
+              "arguments": {
+                "draft_id": 456,
+                "social_set_id": 42
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully What are my unpublished drafts?",
+        "mocks": {
+          "list-drafts": [
+            {
+              "id": 101,
+              "social_set_id": 42,
+              "title": "Launch post",
+              "preview": "Shipping today...",
+              "status": "Draft",
+              "url": "https://typefully.com/?a=42&d=101",
+              "tags": []
+            },
+            {
+              "id": 102,
+              "social_set_id": 42,
+              "title": "Follow-up thread",
+              "preview": "A few more details...",
+              "status": "Draft",
+              "url": "https://typefully.com/?a=42&d=102",
+              "tags": []
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-drafts"
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@typefully Show my scheduled posts",
+        "mocks": {
+          "list-drafts": [
+            {
+              "id": 201,
+              "social_set_id": 42,
+              "title": "Morning update",
+              "preview": "Good morning builders...",
+              "status": "Scheduled",
+              "date": "2026-07-29T14:00:00.000Z",
+              "url": "https://typefully.com/?a=42&d=201",
+              "tags": []
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-drafts",
+              "arguments": {
+                "status": "scheduled"
+              }
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@typefully Schedule draft 456 for 2026-07-29T15:00:00Z",
+        "mocks": {
+          "schedule-draft": {
+            "id": 456,
+            "social_set_id": 42,
+            "status": "scheduled",
+            "preview": "Draft about our Q3 roadmap",
+            "url": "https://typefully.com/?a=42&d=456",
+            "scheduled_date": "2026-07-29T15:00:00Z",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "schedule-draft",
+              "arguments": {
+                "draft_id": 456,
+                "schedule_date": {
+                  "includes": "2026-07-29"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully Publish draft 456 now",
+        "mocks": {
+          "publish-draft": {
+            "id": 456,
+            "social_set_id": 42,
+            "status": "published",
+            "preview": "Draft about our Q3 roadmap",
+            "url": "https://typefully.com/?a=42&d=456",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "publish-draft",
+              "arguments": {
+                "draft_id": 456
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully Save this as a draft for X, do not publish: Quiet progress compounds.",
+        "mocks": {
+          "create-draft": {
+            "id": 1003,
+            "social_set_id": 42,
+            "status": "draft",
+            "preview": "Quiet progress compounds.",
+            "url": "https://typefully.com/?a=42&d=1003",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-draft",
+              "arguments": {
+                "content": {
+                  "includes": "Quiet progress compounds"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "publish-draft"
+            }
+          },
+          {
+            "not": {
+              "callsTool": {
+                "name": "create-draft",
+                "arguments": {
+                  "schedule": "now"
+                }
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@typefully Which Typefully accounts do I have?",
+        "mocks": {
+          "list-social-sets": [
+            {
+              "id": 42,
+              "name": "Personal",
+              "username": "demo",
+              "team": null,
+              "platforms": [
+                "X",
+                "LinkedIn"
+              ]
+            },
+            {
+              "id": 99,
+              "name": "Company",
+              "username": "acme",
+              "team": "Acme",
+              "platforms": [
+                "X",
+                "Threads"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-social-sets"
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@typefully Show unresolved comments on draft 456 in social set 42",
+        "mocks": {
+          "list-comments": {
+            "results": [
+              {
+                "id": "thread-1",
+                "status": "unresolved",
+                "selected_text": "Q3 roadmap",
+                "comments": [
+                  {
+                    "id": "c1",
+                    "text": "Can we make this punchier?"
+                  }
+                ]
+              }
+            ],
+            "count": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-comments",
+              "arguments": {
+                "draft_id": 456,
+                "social_set_id": 42
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": "resolve-comment"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully When should I schedule my next X post this week? Check my queue and recent performance.",
+        "mocks": {
+          "get-queue": {
+            "free_slots": [
+              "2026-07-29T14:00:00Z",
+              "2026-07-30T16:00:00Z"
+            ],
+            "scheduled": []
+          },
+          "get-x-post-analytics": {
+            "results": [
+              {
+                "published_at": "2026-07-21T14:00:00Z",
+                "impressions": 12000,
+                "engagements": 480,
+                "text": "Last week's top post"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-queue"
+          },
+          {
+            "callsTool": "get-x-post-analytics"
+          }
+        ]
+      },
+      {
+        "input": "@typefully Create a LinkedIn draft thanking https://www.linkedin.com/company/typefully/ — resolve the company mention first.",
+        "mocks": {
+          "resolve-linkedin-organization": {
+            "urn": "urn:li:organization:86779668",
+            "mention_text": "@[Typefully](urn:li:organization:86779668)",
+            "name": "Typefully"
+          },
+          "create-draft": {
+            "id": 1004,
+            "social_set_id": 42,
+            "status": "draft",
+            "preview": "Thanks @[Typefully](urn:li:organization:86779668) for the support!",
+            "url": "https://typefully.com/?a=42&d=1004",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "resolve-linkedin-organization",
+              "arguments": {
+                "organization_url": {
+                  "includes": "linkedin.com/company/typefully"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-draft",
+              "arguments": {
+                "platforms": {
+                  "includes": "linkedin"
+                },
+                "content": {
+                  "includes": "@[Typefully](urn:li:organization:86779668)"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@typefully Create an X Article titled Shipping Agents with markdown body about why agents need evals.",
+        "mocks": {
+          "create-x-article": {
+            "id": 1005,
+            "social_set_id": 42,
+            "status": "draft",
+            "title": "Shipping Agents",
+            "preview": "Shipping Agents",
+            "url": "https://typefully.com/?a=42&d=1005",
+            "tags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-x-article",
+              "arguments": {
+                "content_markdown": {
+                  "matches": "^#\\s+"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
   },
   "preferences": [
     {
@@ -122,13 +661,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.4",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^18.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -138,6 +677,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

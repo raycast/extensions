@@ -1,6 +1,19 @@
 # Zed Recent Projects Changelog
 
+## [Fix Missing PATH Entries from ~/.zshrc] - 2026-09-10
+
+- Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login *and* interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
+
+## [Fix Project Launch in Raycast 2] - 2026-08-15
+
+- Open projects before closing Raycast so CLI launches complete reliably.
+
+## [Fix Nix aware `$PATH` lookup] - 2026-07-21
+
+- Fix an issue where nix-managed language tooling (e.g. LSPs) could never be resolved from `$PATH` due to the missing `$USER` env var
+
 ## [Fix Remote Project Launch] - 2026-06-29
+
 - Fix an issue where remote projects fail to launch from "Search Recent Projects" menu.
 
 ## [Fix Stale Project Status in Search Menu] - 2026-06-07
