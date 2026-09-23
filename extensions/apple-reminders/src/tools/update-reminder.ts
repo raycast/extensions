@@ -34,6 +34,10 @@ type Input = {
    */
   isCompleted?: boolean;
   /**
+   * The new URL / link attached to the reminder.
+   */
+  url?: string;
+  /**
    * The recurrence settings.
    * Only include this when the user explicitly asks to add or change recurrence.
    */
