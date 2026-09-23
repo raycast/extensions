@@ -280,7 +280,17 @@ export async function startService(): Promise<void> {
 }
 
 export async function stopService(): Promise<void> {
-  const label = requireLabel();
+  const label = getPrefs().launchdLabel;
+  if (!label) {
+    // No launchd label configured: terminate the running frpc from the
+    // configured frp directory so Stop never kills an unrelated instance.
+    const status = await pgrepStatus(getPrefs().frpDir);
+    if (status.running && status.pid) {
+      await execFile("/bin/kill", [String(status.pid)], { timeout: 5000 });
+      return;
+    }
+    throw new Error("frpc is not running");
+  }
   try {
     await execFile("/bin/launchctl", ["bootout", launchdTarget(label)], {
       timeout: 8000,
@@ -758,10 +768,12 @@ export async function rollbackPlist(): Promise<UpgradeResult> {
 }
 
 export async function confirmStop(): Promise<boolean> {
+  const managed = Boolean(getPrefs().launchdLabel);
   return confirmAlert({
     title: "Stop frpc?",
-    message:
-      "The launchd job will be unloaded. KeepAlive will not relaunch it until you start it again.",
+    message: managed
+      ? "The launchd job will be unloaded. KeepAlive will not relaunch it until you start it again."
+      : "The frpc process will be terminated. Start it again manually to bring it back.",
     primaryAction: { title: "Stop", style: Alert.ActionStyle.Destructive },
   });
 }

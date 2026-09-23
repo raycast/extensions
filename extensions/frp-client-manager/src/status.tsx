@@ -168,7 +168,7 @@ function StatusActions({
               }}
             />
           ) : null}
-          {running ? (
+          {running && managed ? (
             <Action
               title="Restart"
               icon={Icon.ArrowClockwise}

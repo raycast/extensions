@@ -50,7 +50,7 @@ export default function Command() {
       ) : null}
       {(data ?? []).map((item) => (
         <List.Item
-          key={item.config.name}
+          key={`${item.visitor ? "visitor" : "proxy"}-${item.config.name}`}
           title={item.config.name}
           subtitle={`${item.localAddress} → ${item.remoteAddress}`}
           icon={proxyIcon(item)}

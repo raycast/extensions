@@ -119,7 +119,7 @@ export default function Command() {
         </MenuBarExtra.Section>
       ) : null}
       <MenuBarExtra.Section>
-        {running ? (
+        {running && data?.managed ? (
           <MenuBarExtra.Item
             title="Restart"
             icon={Icon.ArrowClockwise}
