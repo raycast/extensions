@@ -11,13 +11,20 @@ export interface ChangelogVersion {
 // The date after a heading's title, which is optional and lenient on purpose. A random 250
 // of the monorepo's changelogs (2026-09-22, 868 headings, every one parsed to a row) had
 // headings with no date (`## [Maintenance]`), single-digit days (`2023-11-5`), parenthesised
-// dates (`(2022-03-19)`) and misspelled placeholders (`{PR_MREGE_DATE}`); an en or em dash is
-// accepted as the separator too. A stricter pattern
-// either drops those sections, bullets included, or leaves the date glued to the title.
-const TRAILING_DATE = /\s+[-–—]\s+\(?(\{[A-Z_]+\}|\d{4}-\d{1,2}-\d{1,2})\)?$/;
+// dates (`(2022-03-19)`) and misspelled placeholders (`{PR_MREGE_DATE}`); a reviewer later
+// found a month-name form (`- March, 4 2024`, extensions/turso). En and em dashes are accepted
+// as the separator too. A stricter pattern either drops those sections, bullets included, or
+// leaves the date glued to the title. The month alternative names real months only, so a
+// title ending "- Release 12 2024" keeps its text.
+const MONTH =
+  "(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?";
+const MONTH_DATE = `${MONTH},?\\s+\\d{1,2},?\\s+\\d{4}|\\d{1,2}\\s+${MONTH},?\\s+\\d{4}`;
+const TRAILING_DATE = new RegExp(`\\s+[-–—]\\s+\\(?(\\{[A-Z_]+\\}|\\d{4}-\\d{1,2}-\\d{1,2}|${MONTH_DATE})\\)?$`, "i");
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
 /**
- * A heading's `YYYY-M-D` as local midnight, or undefined if it is not a real date.
+ * A heading's date as local midnight, or undefined if it is not a real date. Accepts
+ * `YYYY-M-D` and the month-name forms TRAILING_DATE admits.
  *
  * Built from numeric parts, NOT `new Date(`${stamp}T00:00:00`)`: that string form requires
  * two-digit fields, so `2023-11-5` — which appears in published changelogs — comes back
@@ -26,7 +33,14 @@ const TRAILING_DATE = /\s+[-–—]\s+\(?(\{[A-Z_]+\}|\d{4}-\d{1,2}-\d{1,2})\)?$
  * rejects rollovers too: `2023-02-31` would otherwise quietly become March 3.
  */
 function calendarDate(stamp: string): Date | undefined {
-  const [year, month, day] = stamp.split("-").map(Number);
+  const iso = stamp.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  const [year, month, day] = iso
+    ? iso.slice(1).map(Number)
+    : [
+        Number(stamp.match(/\d{4}/)?.[0]),
+        MONTHS.indexOf((stamp.match(/[a-z]+/i)?.[0] ?? "").slice(0, 3).toLowerCase()) + 1,
+        Number(stamp.match(/(?<!\d)\d{1,2}(?!\d)/)?.[0]),
+      ];
   const date = new Date(year, month - 1, day);
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : undefined;
 }

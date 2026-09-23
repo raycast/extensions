@@ -124,6 +124,13 @@ export default function Command() {
       ? `${count} new or updated extension${count !== 1 ? "s" : ""}`
       : "No new store updates";
 
+  // "Mark All as Seen" means ALL, deliberately — the RSS-reader model, chosen by Chris
+  // (2026-09-23): it advances the watermark past every item in the current list, including
+  // those beyond the MAX_ITEMS the menu displays. This menu is "Store Updates", not a
+  // My-Updates-only view, so when the installed lookup has settled to null (could not tell)
+  // the full list IS what the user is looking at, and marking it all seen is the intent.
+  // The one exclusion is the render below: while My Updates is still RESOLVING, the action is
+  // hidden, because that list is about to change under the user.
   const markAllSeen = () => {
     // Seed from 0, not Date.now(): Date.now() always wins the Math.max, so the watermark
     // jumped to "now" and silently marked items seen that were never in the scoped list
