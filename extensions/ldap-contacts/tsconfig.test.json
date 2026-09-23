@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension/tsconfig.json",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist-tests",
+    "rootDir": ".",
+    "module": "commonjs",
+    "moduleResolution": "node10"
+  },
+  "include": ["src/ldap.ts", "tests"]
+}
