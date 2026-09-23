@@ -21,7 +21,7 @@ brew install ghq
 Raycast does not load your shell `PATH`, so set the absolute path to `ghq` once.
 
 1. Run `which ghq` and copy the path (for example `/opt/homebrew/bin/ghq`).
-2. Open **Raycast Settings > Extensions > ghq** and paste it into **ghq Path**.
+2. Open **Raycast Settings > Extensions > ghq** and paste it into **Ghq Path**.
 3. Choose an **Editor**, a **Terminal**, or both. **List Repositories** needs at least one.
 
    ```bash
@@ -35,7 +35,7 @@ Raycast does not load your shell `PATH`, so set the absolute path to `ghq` once.
    | `go install`             | `~/go/bin/ghq`           |
    | Nix                      | `~/.nix-profile/bin/ghq` |
 
-4. Run **List Repositories** or **Get Repository**. The first time, Raycast asks for the required **ghq Path** preference: paste the output of `which ghq`. A leading `~/` is expanded to your home directory.
+4. Run **List Repositories** or **Get Repository**. The first time, Raycast asks for the required **Ghq Path** preference: paste the output of `which ghq`. A leading `~/` is expanded to your home directory.
 5. Open the extension preferences (**Raycast Settings > Extensions > ghq**) and choose an **Editor**, a **Terminal**, or both. **List Repositories** needs at least one of them; until then it shows **Editor or Terminal Not Configured**, and `↵` takes you to the same preferences. **Get Repository** works without them.
 6. Optional: turn on **Clone Protocol** > **Clone with SSH** if you normally clone over SSH.
 
@@ -88,7 +88,7 @@ After a success, the repositories that `ghq get` produced are listed with the sa
 
 | Preference                              | Required | Description                                                                                        |
 | --------------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| **ghq Path**                            | Yes      | Absolute path to the ghq binary (the output of `which ghq`).                                       |
+| **Ghq Path**                            | Yes      | Absolute path to the ghq binary (the output of `which ghq`).                                       |
 | **Editor**                              | No\*     | Application that opens the selected repository with `↵`.                                           |
 | **Terminal**                            | No\*     | Application that opens the selected repository with `⌘ ↵` (`↵` when no Editor is set).             |
 | **Clone Protocol** > **Clone with SSH** | No       | Off by default. When on, **Get Repository** starts with **Clone with SSH** checked (`ghq get -p`). |
@@ -105,7 +105,7 @@ Each of these views has a single action, **Open Extension Preferences** (`↵`).
 
 | Title                                 | Meaning                                                                                                                     |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **ghq Path Not Configured**           | The **ghq Path** preference is blank. Paste the output of `which ghq`.                                                      |
+| **Ghq Path Not Configured**           | The **Ghq Path** preference is blank. Paste the output of `which ghq`.                                                      |
 | **Editor or Terminal Not Configured** | **List Repositories** has no application to open repositories with. Choose an **Editor**, a **Terminal**, or both.          |
 | **Failed to Run ghq**                 | `ghq root --all` or `ghq list --full-path` failed, or took longer than 10 seconds. The description is the underlying error. |
 
@@ -113,9 +113,9 @@ Each of these views has a single action, **Open Extension Preferences** (`↵`).
 
 **Get Repository** reports the same problem as a **Failed to run ghq** toast. Typical messages:
 
-- `spawn ... ENOENT`: there is no file at the configured path. Run `which ghq` again and update **ghq Path**. See the typical paths in [Setup](#setup).
+- `spawn ... ENOENT`: there is no file at the configured path. Run `which ghq` again and update **Ghq Path**. See the typical paths in [Setup](#setup).
 - `spawn ... EACCES`: the path is a directory or is not executable.
-- A Git error: the **ghq Path** is fine, but Git does not work. ghq needs Git to read its configuration, and the listing and lookup commands run with the `PATH` Raycast provides (system directories only), so they use `/usr/bin/git`. Check that `/usr/bin/git --version` works; if it asks for developer tools, install the Xcode Command Line Tools (`xcode-select --install`).
+- A Git error: the **Ghq Path** is fine, but Git does not work. ghq needs Git to read its configuration, and the listing and lookup commands run with the `PATH` Raycast provides (system directories only), so they use `/usr/bin/git`. Check that `/usr/bin/git --version` works; if it asks for developer tools, install the Xcode Command Line Tools (`xcode-select --install`).
 
 ### The list differs from `ghq list` in my terminal
 

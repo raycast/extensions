@@ -70,7 +70,7 @@
       "name": "ghqPath",
       "type": "textfield",
       "required": true,
-      "title": "ghq Path",
+      "title": "Ghq Path",
       "description": "Absolute path to the ghq binary (the output of `which ghq`).",
       "placeholder": "/opt/homebrew/bin/ghq"
     },

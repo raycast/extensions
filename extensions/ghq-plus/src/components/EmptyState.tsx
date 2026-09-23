@@ -4,7 +4,7 @@ import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@rayc
 export function GhqPathNotConfigured() {
   return (
     <EmptyState
-      title="ghq Path Not Configured"
+      title="Ghq Path Not Configured"
       description="Set the absolute path to the ghq binary in the extension preferences."
     />
   );
