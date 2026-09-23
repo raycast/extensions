@@ -280,6 +280,30 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.deepStrictEqual(res3.tags, ["urgent"]);
   });
 
+  it("correctly matches list names followed by punctuation separators", () => {
+    const lists = [{ id: "work-id", title: "Work" }];
+
+    const res1 = resolveQuickAddReminder({ title: "Buy milk #Work," }, "Buy milk #Work,", lists);
+    assert.strictEqual(res1.title, "Buy milk");
+    assert.strictEqual(res1.listId, "work-id");
+
+    const res2 = resolveQuickAddReminder(
+      { title: "Buy milk #Work, and bread" },
+      "Buy milk #Work, and bread",
+      lists,
+    );
+    assert.strictEqual(res2.title, "Buy milk, and bread");
+    assert.strictEqual(res2.listId, "work-id");
+
+    const res3 = resolveQuickAddReminder(
+      { title: "Review document @Work. Please finish soon" },
+      "Review document @Work. Please finish soon",
+      lists,
+    );
+    assert.strictEqual(res3.title, "Review document. Please finish soon");
+    assert.strictEqual(res3.listId, "work-id");
+  });
+
   it("extracts natural-language due dates and tags when AI omits due date", () => {
     const fakeNow = new Date("2026-09-22T10:00:00.000Z");
     const resolved = resolveQuickAddReminder(
