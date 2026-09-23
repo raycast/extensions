@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hora-calendar",
+  "title": "hora Calendar",
+  "description": "The official hora Calendar extension. Create events and tasks in plain language and join your next meeting, without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "szamski",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-calendar-event",
+      "title": "Create Calendar Event",
+      "subtitle": "hora Calendar",
+      "description": "Describe an event in plain language and save it straight to your Google Calendar.",
+      "mode": "no-view",
+      "keywords": [
+        "quick add",
+        "new event",
+        "add event",
+        "schedule",
+        "appointment",
+        "calendar",
+        "book time"
+      ],
+      "arguments": [
+        {
+          "name": "sentence",
+          "placeholder": "lunch with Kuba on Thursday at 1pm",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-meeting",
+      "title": "Create Meeting",
+      "subtitle": "hora Calendar",
+      "description": "Parse a sentence, then open it in hora to add guests, a room or a call before saving.",
+      "mode": "no-view",
+      "keywords": [
+        "new meeting",
+        "add meeting",
+        "invite",
+        "guests",
+        "schedule meeting",
+        "event details"
+      ],
+      "arguments": [
+        {
+          "name": "sentence",
+          "placeholder": "design review Thursday 2pm with Ania",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "hora Calendar",
+      "description": "Add a task to one of your Google Tasks lists, with a due date and notes.",
+      "mode": "view",
+      "keywords": [
+        "add task",
+        "todo",
+        "to do",
+        "reminder",
+        "google tasks",
+        "task list"
+      ]
+    },
+    {
+      "name": "join-next-meeting",
+      "title": "Join Next Meeting",
+      "subtitle": "hora Calendar",
+      "description": "Find an upcoming meeting and open its link in the right app and the right account.",
+      "mode": "view",
+      "keywords": [
+        "join meeting",
+        "zoom",
+        "google meet",
+        "teams",
+        "video call",
+        "conference",
+        "standup"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "calendarName",
+      "title": "Default Calendar",
+      "description": "Calendar that Quick Add Event writes to. Leave empty to use the primary calendar of your first connected account.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "closeWindowOnAdd",
+      "label": "Close Raycast after adding",
+      "description": "Dismiss the Raycast window as soon as a quick add is sent.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
