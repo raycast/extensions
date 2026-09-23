@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Display tags in My Reminders] - {PR_MERGE_DATE}
+## [Display tags in My Reminders] - 2026-09-23
 
 - Display attached tags as accessories in the "My Reminders" list view.
 - Support filtering reminders by tag names in "My Reminders".
