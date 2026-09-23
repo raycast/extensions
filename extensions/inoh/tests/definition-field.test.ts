@@ -1,3 +1,4 @@
+import "./support/act-environment";
 import { createElement } from "react";
 import { act, create, type ReactTestRenderer } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -6,8 +7,6 @@ import { SUGGEST_AFTER_IDLE_MS } from "../src/hooks/useSuggestedDefinition";
 import { suggestDefinition, type DefinitionSuggestionAnswer } from "../src/lib/suggested-definitions";
 
 vi.mock("../src/lib/suggested-definitions", () => ({ suggestDefinition: vi.fn() }));
-
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const APPLE_DEFINITION = "a round fruit";
 const BANANA_DEFINITION = "a long yellow fruit";

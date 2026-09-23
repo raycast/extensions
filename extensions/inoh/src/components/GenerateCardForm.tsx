@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useDefinitionField } from "../hooks/useDefinitionField";
 import { usePrivateCardQuota } from "../hooks/usePrivateCardQuota";
@@ -52,22 +52,7 @@ export function GenerateCardForm({ initialWord }: { initialWord?: string }) {
     word,
     user !== null,
   );
-  /** Whether a submit is waiting on the sign-in view to come back. */
-  const isSubmitPendingRef = useRef(false);
   const { push, pop } = useNavigation();
-
-  async function handleAuthenticated(signedInUser: User) {
-    await refreshAuth();
-    pop();
-
-    // Reason: a ref rather than state. The sign-in view closed over this
-    // function when it was pushed, so a flag set after that point is only
-    // visible through a ref.
-    if (isSubmitPendingRef.current) {
-      isSubmitPendingRef.current = false;
-      await _requestCardFor(signedInUser.id);
-    }
-  }
 
   // Reason: the button says what the next press will do. Once the card has
   // been shown, the next press goes ahead in spite of it, and the label is the
@@ -77,8 +62,21 @@ export function GenerateCardForm({ initialWord }: { initialWord?: string }) {
   const submitTitle = isHoldingThisAsk ? goAheadTitle : DESTINATION_COPY[destination].submitTitle;
 
   /** Nothing here reaches the database without an account, so this is the way in. */
-  function promptSignIn() {
-    push(<SignInView onAuthenticated={handleAuthenticated} />);
+  function promptSignIn(afterSignIn?: (signedInUser: User) => Promise<void>) {
+    // Reason: submission belongs to this sign-in attempt. Backing out discards
+    // its callback, so a later Account sign-in cannot submit an abandoned form.
+    let hasResumed = false;
+    push(
+      <SignInView
+        onAuthenticated={async (signedInUser) => {
+          if (hasResumed) return;
+          hasResumed = true;
+          await refreshAuth();
+          pop();
+          await afterSignIn?.(signedInUser);
+        }}
+      />,
+    );
   }
 
   async function handleSubmit() {
@@ -91,10 +89,9 @@ export function GenerateCardForm({ initialWord }: { initialWord?: string }) {
     // Reason: the account is needed for the row, not for the form, so the
     // sign-in step comes after the user has said what they want. What they
     // typed survives the sign-in view, which is pushed over this form rather
-    // than replacing it, and `_resumeAfterSignIn` finishes the submit for them.
+    // than replacing it, and this sign-in attempt finishes the submit for them.
     if (!user) {
-      isSubmitPendingRef.current = true;
-      promptSignIn();
+      promptSignIn((signedInUser) => _requestCardFor(signedInUser.id));
       return;
     }
 

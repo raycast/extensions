@@ -97,10 +97,11 @@ you upgrade, the badge updates the next time you open the extension.
 
 ## Development Checks
 
-Install dependencies with `npm ci`. Run `npm test` for definition-field regression
-tests, `npm run lint` for linting and formatting, `npx tsc --noEmit` for type
-checking, and `npm run build` to compile the extension. The hook tests use React
-Test Renderer with controlled suggestion responses and timers.
+Install dependencies with `npm ci`. Run `npm test` for definition-field and sign-in
+regression tests, `npm run lint` for linting and formatting, `npm run typecheck`
+for strict type checking of the extension and tests, and `npm run build` to
+compile the extension. The tests use React Test Renderer with controlled
+suggestion responses, deck loading, sign-in callbacks, and timers.
 
 The existing backend tests run with `npm run e2e:run` against a local Inoh
 Supabase stack. Set `INOH_BACKEND_DIR` to the backend checkout when it is not

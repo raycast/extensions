@@ -70,7 +70,8 @@
     "e2e:test": "vitest run --config e2e/vitest.config.ts",
     "e2e:run": "npm run e2e:doctor && npm run e2e:test",
     "e2e:test:ui": "INOH_RAYCAST_UI=1 vitest run --config e2e/vitest.config.ts",
-    "test": "vitest run tests"
+    "test": "vitest run tests",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.tests.json"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

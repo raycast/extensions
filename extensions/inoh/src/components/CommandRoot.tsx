@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, open, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { List, Action, ActionPanel, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useDecks } from "../hooks/useDecks";
@@ -7,8 +7,7 @@ import { useUserCardIds } from "../hooks/useUserCardIds";
 import { useSubscriptionState } from "../hooks/useSubscriptionState";
 import { useDraftWord } from "../hooks/useDraftWord";
 import { describeAccountHeader } from "../lib/subscription";
-import { PLANS_URL } from "../constants";
-import { addCardToDeck, removeCardFromDeck } from "../lib/card";
+import { addCardAfterSignIn, addCardWithFeedback } from "../lib/card-actions";
 import { pronounceWord } from "../lib/audio";
 import { AccountActionSection } from "./AccountActionSection";
 import { AppsActionSection } from "./AppsActionSection";
@@ -133,23 +132,7 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
    */
   async function handleAddCard(entry: DictionaryEntry) {
     if (!user) {
-      promptSignIn((signedInUser) => addCardFor(signedInUser.id, entry));
-      return;
-    }
-
-    await addCardFor(user.id, entry);
-  }
-
-  /**
-   * Adds the card to the selected deck.
-   *
-   * @param signedInUserId - Whose deck, passed in because a card added right
-   *   after signing in knows the new account before this component's state does
-   * @param entry - The dictionary entry to add
-   */
-  async function addCardFor(signedInUserId: string, entry: DictionaryEntry) {
-    if (!selectedDeckId) {
-      await showToast({ style: Toast.Style.Failure, title: "No deck selected" });
+      promptSignIn((signedInUser) => addCardAfterSignIn(signedInUser.id, entry, revalidateUserCards));
       return;
     }
 
@@ -162,52 +145,7 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
       return;
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Adding card..." });
-
-    const result = await addCardToDeck(signedInUserId, entry, selectedDeckId);
-
-    if (result.success) {
-      const addedCardId = result.cardId;
-      toast.style = Toast.Style.Success;
-      toast.title = "Card added";
-      toast.message = `${entry.word} · press ⌘Z to undo`;
-      toast.primaryAction = {
-        title: "Undo",
-        shortcut: { modifiers: ["cmd"], key: "z" },
-        onAction: async (addedToast) => {
-          addedToast.style = Toast.Style.Animated;
-          addedToast.title = "Undoing...";
-          const undo = await removeCardFromDeck(addedCardId);
-          if (undo.success) {
-            addedToast.style = Toast.Style.Success;
-            addedToast.title = "Card removed";
-            addedToast.message = entry.word;
-            addedToast.primaryAction = undefined;
-            revalidateUserCards();
-          } else {
-            addedToast.style = Toast.Style.Failure;
-            addedToast.title = "Couldn't undo";
-            addedToast.message = undo.error;
-          }
-        },
-      };
-      revalidateUserCards();
-      return;
-    }
-
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to add card";
-    toast.message = result.error;
-
-    if (result.isPlanLimit) {
-      toast.primaryAction = {
-        title: "Upgrade Plan",
-        onAction: async (limitToast) => {
-          await open(PLANS_URL);
-          await limitToast.hide();
-        },
-      };
-    }
+    await addCardWithFeedback(user.id, entry, selectedDeckId, revalidateUserCards);
   }
 
   const panelSections = { accountActions, appsActions };

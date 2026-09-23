@@ -2,6 +2,12 @@
 
 ## [Generate Command] - {PR_MERGE_DATE}
 
+- Adding a card after signing in waits for the account's decks and uses its
+  first deck, without needing a second press. An empty deck list or failed
+  load is reported without attempting to add the card
+- Canceling Generate's sign-in no longer leaves a pending submission for a
+  later Account sign-in, even if the form has been edited
+
 - Added **Connect to Claude** to the Apps actions, with a Claude icon and a
   direct setup guide. **AI Assistants** remains available for other connections
 - Changing or clearing the word immediately invalidates pending definition
