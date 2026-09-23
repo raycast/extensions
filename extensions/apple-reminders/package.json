@@ -5,6 +5,8 @@
   "description": "Manage Apple Reminders.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "owner": "raycast",
+  "access": "public",
   "contributors": [
     "tm.wrnr",
     "ir4n",
@@ -19,9 +21,12 @@
     "kendaniels",
     "isabhiii"
   ],
-  "pastContributors": ["phil_s"],
-  "owner": "raycast",
-  "access": "public",
+  "pastContributors": [
+    "phil_s"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Applications"
@@ -795,8 +800,5 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "node --experimental-strip-types --import ./tests/register-mocks.mjs --test tests/**/*.test.ts"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }
