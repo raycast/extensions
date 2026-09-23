@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parseQuery, rankResults } from "./search";
+import { itemIdentity } from "./library";
 import type { RefData } from "./zoteroApi";
 
 const item = (over: Partial<RefData>): RefData => ({
@@ -43,6 +44,31 @@ describe("rankResults", () => {
     const recent = item({ title: "Recent", added: new Date("2022-01-01") });
     const out = rankResults([old, recent, mid], "", { limit: 2 });
     expect(out.map((i) => i.title)).toEqual(["Recent", "Mid"]);
+  });
+
+  it("empty query puts recently opened entries first, then the rest by date added", () => {
+    const a = item({ title: "Opened Older", added: new Date("2019-01-01") });
+    const b = item({ title: "Opened Later", added: new Date("2019-06-01") });
+    const c = item({ title: "Never Opened", added: new Date("2022-01-01") });
+    const interactions = { [itemIdentity(a)]: 1000, [itemIdentity(b)]: 2000 };
+    const out = rankResults([a, c, b], "", { interactions });
+    expect(out.map((i) => i.title)).toEqual(["Opened Later", "Opened Older", "Never Opened"]);
+  });
+
+  it("non-empty query ignores interactions and stays relevance-ranked", () => {
+    const openedOld = item({ title: "Quantum Notes", added: new Date("2019-01-01") });
+    const neverOpened = item({ title: "Quantum Notes", added: new Date("2022-01-01") });
+    const interactions = { [itemIdentity(openedOld)]: 2000 };
+    const out = rankResults([openedOld, neverOpened], "quantum", { interactions });
+    expect(out.map((i) => i.added)).toEqual([new Date("2022-01-01"), new Date("2019-01-01")]);
+  });
+
+  it("tag-only query keeps date-added order, not open history", () => {
+    const a = item({ title: "Opened Old", tags: ["physics"], added: new Date("2019-01-01") });
+    const b = item({ title: "Never Opened", tags: ["physics"], added: new Date("2022-01-01") });
+    const interactions = { [itemIdentity(a)]: 2000 };
+    const out = rankResults([a, b], ".physics", { interactions });
+    expect(out.map((i) => i.title)).toEqual(["Never Opened", "Opened Old"]);
   });
 
   it("matches a subsequence in the title", () => {

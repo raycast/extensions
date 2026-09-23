@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 import { extractDomainName } from "../utils";
@@ -9,10 +9,11 @@ import OpenInOrionAction from "./OpenInOrionAction";
 
 export type UrlItem = { title?: string; url: string };
 
-const UrlListItem = (props: { item: UrlItem; accessory?: string }) => {
-  const { item, accessory } = props;
+const UrlListItem = (props: { item: UrlItem; accessory?: string; id?: string }) => {
+  const { item, accessory, id } = props;
   return (
     <List.Item
+      id={id}
       icon={getFavicon(item.url)}
       title={item.title || item.url}
       subtitle={extractDomainName(item.url)}
@@ -21,6 +22,7 @@ const UrlListItem = (props: { item: UrlItem; accessory?: string }) => {
         <ActionPanel>
           <ActionPanel.Section>
             <OpenInOrionAction url={item.url} />
+            <Action.OpenInBrowser title="Open in Default Browser" url={item.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyUrlAction url={item.url} />

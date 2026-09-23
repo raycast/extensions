@@ -3,6 +3,9 @@
 export interface Category {
   name: string;
   id: string;
+  // Stable slug (e.g. "world", "technology") that persists across batches, unlike `id`
+  // which is a per-batch UUID. Favorites must be keyed on this, not on `id`.
+  categoryId: string;
 }
 
 export interface Source {
@@ -10,10 +13,8 @@ export interface Source {
   url: string;
 }
 
-export interface CategoryItem {
-  id: string;
-  name: string;
-}
+// Same shape as Category; kept as a separate name for readability where it's used for a batch's categories
+export type CategoryItem = Category;
 
 export interface BatchItem {
   id: string;

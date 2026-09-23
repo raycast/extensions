@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { Tab } from "../types";
 import { getTitle, getUrlDomain } from "../utils";
@@ -12,6 +12,7 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
   <ActionPanel>
     <ActionPanel.Section>
       <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} />
+      <Action.OpenInBrowser title="Open in Default Browser" url={props.tab.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.tab.url} />
@@ -26,24 +27,36 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CloseTabAction tab={props.tab} refresh={props.refresh} />
+      <Action
+        title="Refresh Open Tabs"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={() => props.refresh()}
+      />
     </ActionPanel.Section>
   </ActionPanel>
 );
 
-const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean }) => {
+const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean; id?: string }) => {
   const url = props.tab.url;
+  const accessories: List.Item.Accessory[] = [
+    {
+      text: getUrlDomain(url),
+      tooltip: props.tab.url,
+    },
+  ];
+
+  if (props.tab.is_current) {
+    accessories.push({ text: "Current Tab", tooltip: "Currently active in Orion" });
+  }
 
   return (
     <List.Item
+      id={props.id}
       title={getTitle(props.tab)}
       icon={getFavicon(props.tab.url)}
       actions={<Actions tab={props.tab} refresh={props.refresh} closeLaunchers={props.closeLaunchers} />}
-      accessories={[
-        {
-          text: getUrlDomain(url),
-          tooltip: props.tab.url,
-        },
-      ]}
+      accessories={accessories}
     />
   );
 };

@@ -1,13 +1,21 @@
-import { Action, Alert, Color, confirmAlert, Icon, Keyboard, popToRoot, showToast, Toast } from "@raycast/api";
-import { ReactElement, useEffect, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { JSX, ReactElement, useEffect, useState } from "react";
 import { Tweet, User } from "../lib/twitter";
 import { resetOAuthTokens } from "../lib/oauth";
-import { TweetDetail } from "./detail";
-import { TweetSendForm, TweetSendThreadFormV2 } from "./send";
 import { clientV2, Fetcher } from "../lib/twitterapi_v2";
 import { getErrorMessage, sleep } from "../../utils";
-import { AuthorTweetList } from "./author";
-import { PostEngagementList } from "./engagement";
+import { postViewTargets } from "./post-view-targets";
 
 export function LogoutAction(): ReactElement {
   const handle = async () => {
@@ -24,11 +32,7 @@ export function ShowDetailV2Action(props: {
   canModerateReply?: boolean;
 }): ReactElement {
   return (
-    <Action.Push
-      title="Show Post"
-      icon={Icon.AppWindowSidebarRight}
-      target={<TweetDetail tweet={props.tweet} fetcher={props.fetcher} canModerateReply={props.canModerateReply} />}
-    />
+    <Action.Push title="Show Post" icon={Icon.AppWindowSidebarRight} target={postViewTargets().showDetail(props)} />
   );
 }
 
@@ -38,17 +42,11 @@ export function OpenTweetInBrowerAction(props: { tweet: Tweet }): ReactElement {
 }
 
 export function ReplyTweetAction(props: { tweet: Tweet }): ReactElement {
-  return <Action.Push title="Reply" target={<TweetSendForm replyTweet={props.tweet} />} icon={Icon.Reply} />;
+  return <Action.Push title="Reply" target={postViewTargets().reply(props.tweet)} icon={Icon.Reply} />;
 }
 
 export function QuoteTweetAction(props: { tweet: Tweet }): ReactElement {
-  return (
-    <Action.Push
-      title="Quote Post"
-      target={<TweetSendThreadFormV2 quotePostId={props.tweet.id} />}
-      icon={Icon.QuotationMarks}
-    />
-  );
+  return <Action.Push title="Quote Post" target={postViewTargets().quote(props.tweet.id)} icon={Icon.QuotationMarks} />;
 }
 
 export function BookmarkTweetAction(props: { tweet: Tweet; remove?: boolean; fetcher?: Fetcher }): ReactElement {
@@ -98,12 +96,12 @@ export function ShowPostEngagementAction(props: { tweet: Tweet; kind: "likes" | 
     <Action.Push
       title={titles[props.kind]}
       icon={icons[props.kind]}
-      target={<PostEngagementList postId={props.tweet.id} kind={props.kind} />}
+      target={postViewTargets().engagement(props.tweet.id, props.kind)}
     />
   );
 }
 
-export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undefined }): ReactElement {
+export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher }): ReactElement {
   const handle = async () => {
     try {
       await clientV2.likeTweet(props.tweet);
@@ -129,7 +127,7 @@ export function LikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undef
   );
 }
 
-export function UnlikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher | undefined }): ReactElement {
+export function UnlikeTweetAction(props: { tweet: Tweet; fetcher?: Fetcher }): ReactElement {
   const handle = async () => {
     try {
       await clientV2.unlikeTweet(props.tweet);
@@ -212,18 +210,15 @@ export function DeleteTweetAction(props: { tweet: Tweet }) {
       showToast({ style: Toast.Style.Failure, title: "Could not delete post", message: getErrorMessage(error) });
     }
   };
-  if (user === t.user.username) {
-    return (
-      <Action
-        title="Delete Post"
-        icon={{ source: Icon.Trash, tintColor: Color.Red }}
-        shortcut={Keyboard.Shortcut.Common.Remove}
-        onAction={deleteTweet}
-      />
-    );
-  } else {
-    return null;
-  }
+  if (user !== t.user.username) return null;
+  return (
+    <Action
+      title="Delete Post"
+      icon={{ source: Icon.Trash, tintColor: Color.Red }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      onAction={deleteTweet}
+    />
+  );
 }
 
 export function ShowAuthorTweetsAction(props: { tweet: Tweet }): ReactElement {
@@ -231,7 +226,7 @@ export function ShowAuthorTweetsAction(props: { tweet: Tweet }): ReactElement {
     <Action.Push
       // eslint-disable-next-line @raycast/prefer-title-case
       title={`Posts From @${props.tweet.user.username}`}
-      target={<AuthorTweetList authorID={props.tweet.user.id} />}
+      target={postViewTargets().authorTweets(props.tweet.user.id)}
       icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "a" },
@@ -245,7 +240,7 @@ export function OpenUserProfileInBrowserAction(props: { user: User }): ReactElem
   return <Action.OpenInBrowser title="Open Author Profile" url={`https://twitter.com/${props.user.username}`} />;
 }
 
-export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher | undefined }): ReactElement | null {
+export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher }): ReactElement | null {
   const f = props.fetcher;
   if (!f) {
     return null;
@@ -266,7 +261,7 @@ export function RefreshExistingTweetsAction(props: { fetcher?: Fetcher | undefin
   );
 }
 
-export function RefreshTweetsAction(props: { fetcher?: Fetcher | undefined }): ReactElement | null {
+export function RefreshTweetsAction(props: { fetcher?: Fetcher }): ReactElement | null {
   const f = props.fetcher;
   if (!f) {
     return null;
@@ -282,4 +277,23 @@ export function RefreshTweetsAction(props: { fetcher?: Fetcher | undefined }): R
       onAction={handle}
     />
   );
+}
+
+export function engagementAndModerationSections(tweet: Tweet, canModerateReply?: boolean): JSX.Element[] {
+  const sections = [
+    <ActionPanel.Section title="Engagement" key="engagement">
+      <ShowPostEngagementAction tweet={tweet} kind="likes" />
+      <ShowPostEngagementAction tweet={tweet} kind="reposts" />
+      <ShowPostEngagementAction tweet={tweet} kind="quotes" />
+    </ActionPanel.Section>,
+  ];
+  if (canModerateReply) {
+    sections.push(
+      <ActionPanel.Section title="Moderation" key="moderation">
+        <SetReplyHiddenAction tweet={tweet} hidden />
+        <SetReplyHiddenAction tweet={tweet} hidden={false} />
+      </ActionPanel.Section>,
+    );
+  }
+  return sections;
 }

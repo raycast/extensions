@@ -2,7 +2,8 @@ import { Icon } from "@raycast/api";
 
 import { useLocalStorage } from "./useLocalStorage";
 
-export type CreateReminderFieldId = "title" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "location";
+export type CreateReminderFieldId =
+  "title" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "tags" | "location";
 
 export type CreateReminderFieldDefinition = {
   id: CreateReminderFieldId;
@@ -68,6 +69,12 @@ export const createReminderFieldDefinitions: CreateReminderFieldDefinition[] = [
     icon: Icon.ExclamationMark,
   },
   {
+    id: "tags",
+    title: "Tags",
+    description: "Add tags using Apple Reminders' native format.",
+    icon: Icon.Tag,
+  },
+  {
     id: "location",
     title: "Location",
     description: "Location-based reminder fields and saved locations.",
@@ -127,6 +134,7 @@ export const defaultCreateReminderFormLayout: CreateReminderFormLayoutItem[] = [
   { type: "field", id: "recurrence", enabled: true },
   { type: "field", id: "list", enabled: true },
   { type: "field", id: "priority", enabled: true },
+  { type: "field", id: "tags", enabled: true },
   createSeparatorItem(),
   { type: "field", id: "location", enabled: true },
 ];

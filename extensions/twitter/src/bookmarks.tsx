@@ -3,8 +3,10 @@ import { Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { TweetList } from "./v2/components/tweet";
+import "./v2/components/register-post-views";
 import { filterBookmarks } from "./v2/lib/bookmark_search";
-import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
+import { refreshingFetcher } from "./v2/lib/tweet-page";
+import { clientV2 } from "./v2/lib/twitterapi_v2";
 
 function BookmarksCommand() {
   const [query, setQuery] = useState("");
@@ -17,16 +19,7 @@ function BookmarksCommand() {
     { failureToastOptions: { title: "Could not load bookmarks" } },
   );
 
-  const fetcher: Fetcher = {
-    updateInline: async () => {
-      clientV2.clearCache();
-      await revalidate();
-    },
-    refresh: async () => {
-      clientV2.clearCache();
-      await revalidate();
-    },
-  };
+  const fetcher = refreshingFetcher(revalidate);
 
   return (
     <TweetList

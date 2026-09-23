@@ -16,6 +16,12 @@
       "title": "Instances",
       "description": "Manage Instances and their Projects, Services and more",
       "mode": "view"
+    },
+    {
+      "name": "deploy-service",
+      "title": "Deploy Service",
+      "description": "Search for a service by name across all configured instances and deploy the one you pick",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions, connectToSession, isTmuxRunning, Session } from "./sesh";
+import { getSessions, connectToSession, isTmuxRunning, getSeshVersion, UPGRADE_SESH_MESSAGE, Session } from "./sesh";
 import { openApp } from "./app";
 
 export class TmuxNotRunningError extends Error {
@@ -10,6 +10,21 @@ export class TmuxNotRunningError extends Error {
     super("Please start tmux before using this command.");
     this.name = "TmuxNotRunningError";
   }
+}
+
+export class SeshNotInstalledError extends Error {
+  constructor() {
+    super("Please install the sesh CLI before using this command.");
+    this.name = "SeshNotInstalledError";
+  }
+}
+
+function isUpgradeError(error: unknown) {
+  return String(error).includes(UPGRADE_SESH_MESSAGE);
+}
+
+function isSetupError(error: unknown) {
+  return error instanceof SeshNotInstalledError || error instanceof TmuxNotRunningError || isUpgradeError(error);
 }
 
 function getIcon(session: Session) {
@@ -49,6 +64,9 @@ export default function ConnectCommand() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
+      if ((await getSeshVersion()) === null) {
+        throw new SeshNotInstalledError();
+      }
       if (!(await isTmuxRunning())) {
         throw new TmuxNotRunningError();
       }
@@ -58,13 +76,14 @@ export default function ConnectCommand() {
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, {
-          title: error instanceof TmuxNotRunningError ? "tmux isn't running" : "Couldn't get sessions",
-        });
+        if (isSetupError(error)) {
+          return;
+        }
+        showFailureToast(error, { title: "Couldn't get sessions" });
       },
     },
   );
-  const sessions = data ?? [];
+  const sessions = isSetupError(error) ? [] : (data ?? []);
 
   async function connect(session: string) {
     try {
@@ -89,20 +108,72 @@ export default function ConnectCommand() {
     />
   );
 
-  return (
-    <List isLoading={isLoading || isConnecting}>
+  function renderEmptyView() {
+    if (error instanceof SeshNotInstalledError) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="sesh isn't installed"
+          description="Install the sesh CLI with Homebrew, then press ⌘R to retry."
+          actions={
+            <ActionPanel>
+              {refreshAction}
+              <Action.CopyToClipboard title="Copy Brew Install Command" content="brew install joshmedeski/sesh/sesh" />
+              <Action.OpenInBrowser title="Open Sesh on GitHub" url="https://github.com/joshmedeski/sesh" />
+            </ActionPanel>
+          }
+        />
+      );
+    }
+    if (error instanceof TmuxNotRunningError) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="tmux isn't running"
+          description="Start tmux in your terminal first — Raycast can't start it for you. Then press ⌘R to retry."
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      );
+    }
+    if (isUpgradeError(error)) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Please upgrade to the latest version of the sesh CLI"
+          description="Couldn't read sessions from sesh. Upgrade sesh, then press ⌘R to retry."
+          actions={
+            <ActionPanel>
+              {refreshAction}
+              <Action.CopyToClipboard title="Copy Brew Upgrade Command" content="brew upgrade joshmedeski/sesh/sesh" />
+              <Action.OpenInBrowser title="Open Sesh on GitHub" url="https://github.com/joshmedeski/sesh" />
+            </ActionPanel>
+          }
+        />
+      );
+    }
+    if (error) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load sessions"
+          description="Press ⌘R to retry."
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      );
+    }
+    return (
       <List.EmptyView
-        icon={error ? Icon.Warning : Icon.MagnifyingGlass}
-        title={error ? "Couldn't load sessions" : "No sessions found"}
-        description={
-          error
-            ? error instanceof TmuxNotRunningError
-              ? "Start tmux, then press ⌘R to retry."
-              : "Press ⌘R to retry."
-            : "Press ⌘R to refresh."
-        }
+        icon={Icon.MagnifyingGlass}
+        title="No sessions found"
+        description="Press ⌘R to refresh."
         actions={<ActionPanel>{refreshAction}</ActionPanel>}
       />
+    );
+  }
+
+  return (
+    <List isLoading={isLoading || isConnecting}>
+      {renderEmptyView()}
       {sessions.map((session, index) => {
         const accessories = [];
 

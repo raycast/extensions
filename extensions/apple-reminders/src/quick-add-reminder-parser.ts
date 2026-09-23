@@ -1,3 +1,5 @@
+import { extractTagsFromText, parseTags } from "./helpers";
+import type { Frequency } from "./hooks/useData";
 import { extractDueDateFromText, formatDueDate } from "./parse-due-date";
 
 export type ParsedQuickAddReminder = {
@@ -7,8 +9,9 @@ export type ParsedQuickAddReminder = {
   dueDate?: string;
   notes?: string;
   priority?: string;
+  tags?: string[];
   recurrence?: {
-    frequency: string;
+    frequency: Frequency;
     interval: number;
     endDate?: string;
   };
@@ -48,7 +51,14 @@ export function resolveQuickAddReminder(
   now: Date = new Date(),
 ): ParsedQuickAddReminder {
   const mentionedList = findListInText(inputText, lists) ?? findListInText(reminder.title, lists);
-  let { title, listId, dueDate } = reminder;
+  let { title } = reminder;
+  let listId = reminder.listId || undefined;
+  let dueDate = reminder.dueDate || undefined;
+  const notes = reminder.notes || undefined;
+  const priority = reminder.priority || undefined;
+  const address = reminder.address || undefined;
+  const proximity = reminder.proximity || undefined;
+  const radius = reminder.radius || undefined;
 
   if (mentionedList) {
     listId = mentionedList.id;
@@ -67,11 +77,22 @@ export function resolveQuickAddReminder(
     }
   }
 
+  const extractedTags = extractTagsFromText(title);
+  title = extractedTags.title;
+  const initialTags = parseTags(reminder.tags);
+  const combinedTags = Array.from(new Set([...initialTags, ...extractedTags.tags]));
+
   return {
     ...reminder,
     title: title.replace(/\s+/g, " ").trim() || reminder.title.trim(),
     listId,
     dueDate,
+    notes,
+    priority,
+    address,
+    proximity,
+    radius,
+    tags: combinedTags.length > 0 ? combinedTags : undefined,
   };
 }
 

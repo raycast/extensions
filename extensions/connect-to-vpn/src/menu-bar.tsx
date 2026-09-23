@@ -1,12 +1,17 @@
-import { MenuBarExtra, showToast, Toast, environment, LaunchType } from "@raycast/api";
-import { NetworkService, normalizeHardwarePort, openNetworkSettings, useNetworkServices } from "./network-services";
+import { MenuBarExtra, environment, Color, LaunchType } from "@raycast/api";
+import {
+  NetworkService,
+  normalizeHardwarePort,
+  openNetworkSettings,
+  transitionLabel,
+  useNetworkServices,
+} from "./network-services";
 import { useRef, useEffect, useState } from "react";
 import { getVpnStatus, getMenuBarRefreshTimestamp } from "./store";
 
 export default function Command() {
   const {
     isLoading,
-    error,
     favoriteServices,
     invalidServices,
     otherServices,
@@ -19,8 +24,9 @@ export default function Command() {
   const [isBackgroundRunning, setIsBackgroundRunning] = useState(environment.launchType === LaunchType.Background);
   const isChecking = useRef(false);
 
-  // State to track the last refresh timestamp
-  const [lastRefreshTimestamp, setLastRefreshTimestamp] = useState<number>(0);
+  // State to track the last refresh timestamp. null until the first check has read what is
+  // already stored, so a stale timestamp from an earlier run is not mistaken for a new signal.
+  const [lastRefreshTimestamp, setLastRefreshTimestamp] = useState<number | null>(null);
   const refreshCheckInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Track if we need to force refresh all services
@@ -56,6 +62,14 @@ export default function Command() {
       try {
         // Check for timestamp updates
         const timestamp = await getMenuBarRefreshTimestamp();
+
+        if (lastRefreshTimestamp === null) {
+          // Whatever is stored now is where this run starts from. The command already loaded fresh
+          // status on launch, so acting on it would only repeat that work.
+          setLastRefreshTimestamp(timestamp);
+          return;
+        }
+
         if (timestamp > lastRefreshTimestamp) {
           console.log(`Refresh signal detected: ${new Date(timestamp).toISOString()}`);
           setLastRefreshTimestamp(timestamp);
@@ -145,13 +159,12 @@ export default function Command() {
     }
   };
 
-  if (error && environment.launchType !== LaunchType.Background) {
-    showToast(Toast.Style.Failure, "Something went wrong", error.message);
-  }
-
   return (
     <MenuBarExtra
-      icon={isConnected ? "network-connected.png" : "network-disconnected.png"}
+      icon={{
+        source: isConnected ? "network-connected.png" : "network-disconnected.png",
+        tintColor: Color.PrimaryText,
+      }}
       tooltip="Network Services"
       isLoading={isLoading || isBackgroundRunning || needsFullRefresh}
     >
@@ -215,7 +228,7 @@ export default function Command() {
       <MenuBarExtra.Item
         icon={actionDetails.icon}
         title={service.name}
-        subtitle={normalizeHardwarePort(service.hardwarePort, service.name)}
+        subtitle={transitionLabel(service.status) ?? normalizeHardwarePort(service.hardwarePort, service.name)}
         onAction={actionDetails.action}
       />
     );

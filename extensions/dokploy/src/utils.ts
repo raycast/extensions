@@ -20,7 +20,13 @@ export function isLegacyProject(project: Project): project is LegacyProject {
   return !isModernProject(project);
 }
 
-export type ServiceScope = Pick<Environment, "name" | "projectId"> & ServiceCollections;
+// `environmentId` is optional here (unlike the rest of `Environment`) because legacy projects - the
+// pre-v0.25.0 `Project -> Services` shape, with no environments at all - use `LegacyProject` itself
+// as their scope, which has no such field. Anything that needs a real environment id (like deploying
+// a template) must check for it rather than assume it's always present.
+export type ServiceScope = Pick<Environment, "name" | "projectId"> &
+  Partial<Pick<Environment, "environmentId">> &
+  ServiceCollections;
 
 /**
  * Returns a scope that can be rendered by the Services screen.

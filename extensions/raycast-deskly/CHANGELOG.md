@@ -1,5 +1,10 @@
 # desk.ly Changelog
 
+## [Less Dependencies] - 2026-09-23
+
+- Removed an external library for image-processing so map rendering is done via SVG now
+- Better error messages when an invalid desk.ly URL was entered
+
 ## [Seat Availability + Descriptive Errors] - 2026-08-18
 
 - Book a Seat: seat list now correctly excludes seats that are occupied or not allowed to be booked

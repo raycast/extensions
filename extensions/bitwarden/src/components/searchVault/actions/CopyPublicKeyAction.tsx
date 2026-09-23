@@ -20,7 +20,7 @@ function CopyPublicKeyAction() {
         "Getting public key..."
       );
       if (publicKey) {
-        await Clipboard.copy(publicKey, { transient: getTransientCopyPreference("other") });
+        await Clipboard.copy(publicKey, { concealed: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied public key to clipboard");
       }
     } catch (error) {

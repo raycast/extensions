@@ -93,6 +93,14 @@
           "default": false,
           "label": "Show completed tasks",
           "description": "Show today's completed tasks (at the bottom of the list)."
+        },
+        {
+          "name": "showDetails",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show Task Details",
+          "description": "Open a side pane with the selected task's notes, subtasks, times, and linked item."
         }
       ]
     },

@@ -1,5 +1,20 @@
 # Apple Reminders Changelog
 
+## [Updated maintainer metadata] - 2026-09-23
+
+- Marked a former Apple Reminders maintainer as a past contributor.
+
+## [Display tags in My Reminders] - 2026-09-23
+
+- Display attached tags as accessories in the "My Reminders" list view.
+- Support filtering reminders by tag names in "My Reminders".
+
+## [Add priority and tags support] - 2026-09-23
+
+- Add support for setting priority (`low`, `medium`, `high`) and tags when creating or updating reminders.
+- Add priority dropdown and tags field to Create Reminder and Edit Reminder forms.
+- Support priority and tags in AI tools and Quick Add natural language parser.
+
 ## [Display due time in menu bar] - 2026-09-07
 
 - Display scheduled due time before reminder titles in menu bar items.

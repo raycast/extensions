@@ -50,7 +50,7 @@ describe("thread query builders", () => {
   it("searches every user-visible thread field and applies the requested limit", () => {
     const query = searchAllThreadsQuery("日本語", "Interactive", 37);
 
-    for (const column of ["title", "first_user_message", "preview", "cwd", "git_branch", "id"]) {
+    for (const column of ["name", "title", "first_user_message", "preview", "cwd", "git_branch", "id"]) {
       expect(query).toContain(`${column} LIKE '%日本語%'`);
     }
     expect(query).toContain(interactiveWhere);
@@ -106,7 +106,15 @@ describe("thread query builders", () => {
 describe("thread title precedence", () => {
   const base = { id: "thread-id", title: "", first_user_message: "", preview: "" };
 
-  it("uses a nonempty trimmed title first", () => {
+  it("prefers the display name over a title containing the original prompt", () => {
+    expect(threadTitle({ ...base, name: "  表示タイトル  ", title: "全部直して" })).toBe("表示タイトル");
+  });
+
+  it.each([null, "", " \n\t "])("falls through an empty name (%j) to the legacy title", (name) => {
+    expect(threadTitle({ ...base, name, title: "旧タイトル" })).toBe("旧タイトル");
+  });
+
+  it("uses a nonempty trimmed title when name is absent", () => {
     expect(threadTitle({ ...base, title: "  手動タイトル  ", first_user_message: "message", preview: "preview" })).toBe(
       "手動タイトル",
     );
@@ -173,8 +181,9 @@ describe("degraded-mode search filter", () => {
       row({ id: "a", first_user_message: "Fix the RETRY logic" }),
       row({ id: "b", cwd: "/Users/demo/dev/acme-web" }),
       row({ id: "c", preview: "unrelated" }),
+      row({ id: "d", name: "Repair RETRY handling", title: "original prompt" }),
     ];
-    expect(filterThreadRows(rows, "retry").map((r) => r.id)).toEqual(["a"]);
+    expect(filterThreadRows(rows, "retry").map((r) => r.id)).toEqual(["a", "d"]);
     expect(filterThreadRows(rows, "ACME").map((r) => r.id)).toEqual(["b"]);
   });
 
