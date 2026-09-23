@@ -1,13 +1,10 @@
 # Changelog
 
-## [Unreleased]
-
-- Added custom project categories: create, rename, and safely delete categories from Projects.
-- Updated project pickers, work logs, and reports to use custom category names.
-
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Add client and internal project management.
+- Add custom project categories that can be created, renamed, and safely deleted.
+- Use custom categories in project pickers, work logs, and reports.
 - Allow multiple projects to use the same display name.
 - Add a preferred project for quick timer starts.
 - Keep project selection focused consistently when starting work.

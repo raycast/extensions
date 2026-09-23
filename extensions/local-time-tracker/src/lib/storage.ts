@@ -5,9 +5,12 @@ export const STORAGE_KEYS = {
   schemaVersion: "schemaVersion",
   projects: "projects",
   projectCategories: "projectCategories",
-  workLogs: "workLogs",
+  legacyWorkLogs: "workLogs",
+  workLogsMigrationComplete: "workLogsMigrationComplete",
   activeTimer: "activeTimer",
 } as const;
+
+const WORK_LOG_KEY_PREFIX = "workLog:";
 
 export const SCHEMA_VERSION = 1;
 
@@ -59,33 +62,37 @@ export async function saveProjectCategories(categories: ProjectCategory[]): Prom
 
 export async function getWorkLogs(): Promise<WorkLog[]> {
   await initializeStorage();
-  return readArray(STORAGE_KEYS.workLogs, isWorkLog, "work logs");
-}
+  await migrateLegacyWorkLogs();
 
-export async function saveWorkLogs(workLogs: WorkLog[]): Promise<void> {
-  await initializeStorage();
-  await LocalStorage.setItem(STORAGE_KEYS.workLogs, JSON.stringify(workLogs));
-}
+  const storedItems = await LocalStorage.allItems<Record<string, string>>();
+  const workLogs: WorkLog[] = [];
 
-export async function upsertWorkLog(workLog: WorkLog): Promise<WorkLog[]> {
-  const workLogs = await getWorkLogs();
-  const index = workLogs.findIndex((item) => item.id === workLog.id);
-
-  if (index === -1) {
+  for (const [key, rawValue] of Object.entries(storedItems)) {
+    if (!key.startsWith(WORK_LOG_KEY_PREFIX)) continue;
+    const workLog = parseJson(rawValue, `work log ${key.slice(WORK_LOG_KEY_PREFIX.length)}`);
+    if (!isWorkLog(workLog)) {
+      throw new StorageDataError(
+        `Saved work log ${key.slice(WORK_LOG_KEY_PREFIX.length)} is invalid. Existing data was not overwritten.`,
+      );
+    }
     workLogs.push(workLog);
-  } else {
-    workLogs[index] = workLog;
   }
 
-  await saveWorkLogs(workLogs);
   return workLogs;
 }
 
+export async function upsertWorkLog(workLog: WorkLog): Promise<WorkLog[]> {
+  await initializeStorage();
+  await migrateLegacyWorkLogs();
+  await LocalStorage.setItem(getWorkLogKey(workLog.id), JSON.stringify(workLog));
+  return getWorkLogs();
+}
+
 export async function deleteWorkLog(id: string): Promise<WorkLog[]> {
-  const workLogs = await getWorkLogs();
-  const nextLogs = workLogs.filter((workLog) => workLog.id !== id);
-  await saveWorkLogs(nextLogs);
-  return nextLogs;
+  await initializeStorage();
+  await migrateLegacyWorkLogs();
+  await LocalStorage.removeItem(getWorkLogKey(id));
+  return getWorkLogs();
 }
 
 export async function getActiveTimer(): Promise<ActiveTimer | null> {
@@ -132,6 +139,21 @@ async function readArray<T>(key: string, validator: (value: unknown) => value is
     throw new StorageDataError(`Some saved ${label} are invalid. Existing data was not overwritten.`);
   }
   return validItems;
+}
+
+async function migrateLegacyWorkLogs(): Promise<void> {
+  const migrationComplete = await LocalStorage.getItem<boolean>(STORAGE_KEYS.workLogsMigrationComplete);
+  if (migrationComplete === true) return;
+
+  const legacyWorkLogs = await readArray(STORAGE_KEYS.legacyWorkLogs, isWorkLog, "work logs");
+  await Promise.all(
+    legacyWorkLogs.map((workLog) => LocalStorage.setItem(getWorkLogKey(workLog.id), JSON.stringify(workLog))),
+  );
+  await LocalStorage.setItem(STORAGE_KEYS.workLogsMigrationComplete, true);
+}
+
+function getWorkLogKey(id: string): string {
+  return `${WORK_LOG_KEY_PREFIX}${id}`;
 }
 
 function parseJson(value: string, label: string): unknown {

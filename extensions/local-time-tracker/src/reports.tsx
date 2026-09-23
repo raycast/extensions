@@ -19,6 +19,7 @@ export default function ReportsCommand() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [activeTimer, setActiveTimer] = useState<ActiveTimer | null>(null);
+  const [now, setNow] = useState(() => new Date());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,9 +45,17 @@ export default function ReportsCommand() {
     void load();
   }, []);
 
+  useEffect(() => {
+    if (!activeTimer) return;
+
+    setNow(new Date());
+    const refreshInterval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(refreshInterval);
+  }, [activeTimer]);
+
   const report = useMemo(
-    () => createReport(period, workLogs, projects, activeTimer),
-    [period, workLogs, projects, activeTimer],
+    () => createReport(period, workLogs, projects, activeTimer, now),
+    [period, workLogs, projects, activeTimer, now],
   );
 
   return (
