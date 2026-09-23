@@ -1,43 +1,66 @@
-import { existsSync, readFileSync } from "fs";
-import { getCodexPaths } from "./codex-paths";
+import { createReadStream } from "fs";
+import { stat } from "fs/promises";
+import { createInterface } from "readline";
+import { getCodexPaths, type CodexPaths } from "./codex-paths";
 import type { DictationEntry, LoadState } from "./types";
 
-export function loadDictationHistory(): LoadState {
-  const paths = getCodexPaths();
+const MAX_ENTRIES = 1_000;
 
+export async function loadDictationHistory(
+  paths: CodexPaths = getCodexPaths(),
+  signal?: AbortSignal,
+): Promise<LoadState> {
   try {
-    if (!existsSync(paths.codexHome)) {
-      return { status: "codex-missing", paths };
-    }
-
-    if (!existsSync(paths.historyPath)) {
-      return { status: "history-missing", paths };
-    }
-
-    const contents = readFileSync(paths.historyPath, "utf8");
+    const input = createReadStream(paths.historyPath, {
+      encoding: "utf8",
+      signal,
+    });
+    const lines = createInterface({ input, crlfDelay: Infinity });
+    const entries: DictationEntry[] = [];
     let skippedLines = 0;
-    const entries = contents
-      .split("\n")
-      .flatMap((line) => {
-        const trimmedLine = line.trim();
 
-        if (trimmedLine.length === 0) {
-          return [];
-        }
+    try {
+      for await (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.length === 0) continue;
 
         const entry = parseDictationEntry(trimmedLine);
-
         if (!entry) {
           skippedLines += 1;
-          return [];
+          continue;
         }
 
-        return [entry];
-      })
-      .sort((left, right) => right.createdAtMs - left.createdAtMs);
+        entries.push(entry);
+        // Bound retained entries even for imported histories, without assuming file order.
+        if (entries.length === MAX_ENTRIES * 2) {
+          entries.sort((left, right) => right.createdAtMs - left.createdAtMs);
+          entries.length = MAX_ENTRIES;
+        }
+      }
+    } finally {
+      lines.close();
+      input.destroy();
+    }
+
+    entries.sort((left, right) => right.createdAtMs - left.createdAtMs);
+    entries.length = Math.min(entries.length, MAX_ENTRIES);
 
     return { status: "loaded", entries, skippedLines, paths };
   } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      try {
+        await stat(paths.codexHome);
+        return { status: "history-missing", paths };
+      } catch (homeError) {
+        if (
+          homeError instanceof Error &&
+          "code" in homeError &&
+          homeError.code === "ENOENT"
+        ) {
+          return { status: "codex-missing", paths };
+        }
+      }
+    }
     return {
       status: "error",
       paths,
@@ -70,7 +93,7 @@ function isDictationEntry(value: unknown): value is DictationEntry {
   return (
     typeof candidate.id === "string" &&
     typeof candidate.createdAtMs === "number" &&
-    Number.isFinite(candidate.createdAtMs) &&
+    Number.isFinite(new Date(candidate.createdAtMs).getTime()) &&
     typeof candidate.text === "string"
   );
 }

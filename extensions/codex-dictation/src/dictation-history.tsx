@@ -7,15 +7,13 @@ import {
   ErrorItem,
   SkippedLinesItem,
 } from "./components/status-items";
-import { loadDictationHistory } from "./history";
+import { watchDictationHistory } from "./watch-history";
 import type { LoadState } from "./types";
 
 export default function Command() {
   const [state, setState] = useState<LoadState>({ status: "loading" });
 
-  useEffect(() => {
-    setState(loadDictationHistory());
-  }, []);
+  useEffect(() => watchDictationHistory(setState), []);
 
   const entries = state.status === "loaded" ? state.entries : [];
 

@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.test-build
 
 # Raycast specific files
 raycast-env.d.ts

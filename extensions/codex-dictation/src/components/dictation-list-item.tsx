@@ -16,6 +16,7 @@ export function DictationListItem({ entry }: DictationListItemProps) {
   return (
     <List.Item
       title={summarize(entry.text)}
+      keywords={[entry.text]}
       detail={<DictationDetail entry={entry} />}
       actions={
         <ActionPanel>
