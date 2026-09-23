@@ -23,7 +23,7 @@ Quick Radios is scoped to Raycast for Windows and does not run on macOS. It is b
   3. **In Range**: Nearby networks, with a password prompt for secured networks.
   4. **Saved but Not in Range**: Saved profiles that are not currently detected.
 - **Detail View**: IP address, MAC address, default gateway, band, channel, radio standard, and encryption beside the list.
-- **Join New Networks**: Connect to WPA2/WPA3-Personal and open networks with a password prompt.
+- **Join New Networks**: Connect to WPA2/WPA3-Personal and open networks with a password prompt. Enterprise (802.1X) networks such as campus or corporate Wi-Fi are joined once through the Windows network list, which handles their sign-in; after that they reconnect in 1 click from Raycast.
 - **Share via QR Code**: Generate a phone-scannable QR code locally and copy the saved password.
 - **Internet Speed & Session Data**: Run a speed test and see data transferred during the current connection.
 - **Forget Network**: Remove a saved Wi-Fi profile.
