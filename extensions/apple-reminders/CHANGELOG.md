@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Create Reminder from Current Tab] - {PR_MERGE_DATE}
+
+- Add "Create Reminder from Current Tab" command to create reminders directly from the active browser tab.
+- Support interactive form mode with pre-filled title and URL as well as instant background reminder creation.
+
 ## [Display tags in My Reminders] - 2026-09-23
 
 - Display attached tags as accessories in the "My Reminders" list view.
