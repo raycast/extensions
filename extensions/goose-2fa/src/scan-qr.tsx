@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
 import { unlinkSync } from "node:fs";
 import { useEffect, useState } from "react";
-import { parseImportBundle } from "../vendor/lib/data-transfer";
+import { deduplicateImports, parseImportBundle } from "../vendor/lib/data-transfer";
 import type { NewAccountInput } from "../vendor/lib/types";
 import { t } from "./lib/i18n";
 import { commit } from "./lib/commit";
 import { captureScreenToTempFile, detectBarcodes } from "./lib/helper";
 import { addAccounts } from "./lib/vault-ops";
-import { useVault } from "./lib/vault-store";
+import { getVaultState, useVault } from "./lib/vault-store";
 
 interface ScannedEntry {
   input: NewAccountInput;
@@ -18,6 +18,7 @@ export default function ScanQr() {
   const vault = useVault();
   const [entries, setEntries] = useState<ScannedEntry[]>([]);
   const [status, setStatus] = useState<"scanning" | "ready" | "empty">("scanning");
+  const newInputs = new Set(deduplicateImports(entries.map((entry) => entry.input), vault.accounts).newAccounts);
 
   useEffect(() => {
     let active = true;
@@ -61,9 +62,15 @@ export default function ScanQr() {
 
   const importEntries = async (chosen: ScannedEntry[]) => {
     if (chosen.length === 0) return;
+    const inputs = chosen.map((entry) => entry.input);
+    const preview = deduplicateImports(inputs, getVaultState().accounts);
+    if (!preview.newAccounts.length) {
+      await showToast({ style: Toast.Style.Success, title: t("Accounts Already Exist", "账户已存在"), message: t("No duplicate accounts were imported.", "未重复导入账户。") });
+      return;
+    }
     const ok = await commit(
-      (snapshot) => addAccounts(snapshot, chosen.map((entry) => entry.input), null),
-      t(`Imported ${chosen.length} accounts`, `已导入 ${chosen.length} 个账户`),
+      (snapshot) => addAccounts(snapshot, deduplicateImports(inputs, snapshot.accounts).newAccounts, null),
+      t(`Imported ${preview.newAccounts.length} accounts (${preview.dupeCount} skipped)`, `已导入 ${preview.newAccounts.length} 个账户（跳过 ${preview.dupeCount} 个重复项）`),
     );
     if (ok) await popToRoot();
   };
@@ -88,7 +95,7 @@ export default function ScanQr() {
           icon={Icon.Key}
           title={entry.input.name}
           subtitle={entry.input.issuer}
-          accessories={[{ text: entry.input.type.toUpperCase() }]}
+          accessories={[{ text: newInputs.has(entry.input) ? entry.input.type.toUpperCase() : t("Already Added", "已存在") }]}
           actions={
             <ActionPanel>
               <Action title={t("Import This Account", "导入这个账户")} icon={Icon.Download} onAction={() => void importEntries([entry])} />
