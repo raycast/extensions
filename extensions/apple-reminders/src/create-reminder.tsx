@@ -44,6 +44,7 @@ export type NewReminder = {
   address?: string;
   proximity?: string;
   radius?: number;
+  url?: string;
 };
 
 type CreateReminderValues = {
@@ -62,8 +63,12 @@ type CreateReminderValues = {
   radius: string;
 };
 
+export type CreateReminderDraftValues = Partial<CreateReminderValues> & {
+  url?: string;
+};
+
 type CreateReminderFormProps = {
-  draftValues?: Partial<CreateReminderValues>;
+  draftValues?: CreateReminderDraftValues;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
@@ -80,6 +85,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   const { locations, addLocation } = useLocations();
   const [dateText, setDateText] = useState("");
+  const [draftUrl, setDraftUrl] = useState(draftValues?.url ?? "");
   const nlpParseRef = useRef<ParsedDueDate | null>(null);
 
   const defaultList = data?.lists.find((list) => list.isDefault);
@@ -110,8 +116,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         listId: values.listId,
       };
 
-      if (values.notes) {
-        payload.notes = values.notes;
+      if (draftUrl.trim()) {
+        payload.url = draftUrl.trim();
+      }
+
+      if (values.notes?.trim()) {
+        payload.notes = values.notes.trim();
       }
 
       if (values.dueDate) {
@@ -190,6 +200,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("address", "");
       setValue("radius", "");
       setDateText("");
+      setDraftUrl("");
       nlpParseRef.current = null;
       setValue("dueDate", selectTodayAsDefault ? addMilliseconds(startOfToday(), 1) : null);
 
@@ -507,6 +518,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   );
 }
 
-export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderValues }>) {
+export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderDraftValues }>) {
   return <CreateReminderForm draftValues={draftValues} />;
 }

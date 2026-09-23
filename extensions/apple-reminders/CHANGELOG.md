@@ -1,5 +1,12 @@
 # Apple Reminders Changelog
 
+## [Create Reminder from Current Tab] - 2026-09-23
+
+- Add "Create Reminder from Current Tab" command to create reminders directly from the active browser tab.
+- Attach native URL link to created reminders for 1-click opening in Apple Reminders.
+- Support interactive form mode with pre-filled title and URL as well as instant background reminder creation.
+- Add "Default Due Date & Time" preference to schedule reminders with natural language (e.g. `6pm`, `in 2 hours`, `tonight`, `tomorrow 9am`).
+
 ## [Updated maintainer metadata] - 2026-09-23
 
 - Marked a former Apple Reminders maintainer as a past contributor.
