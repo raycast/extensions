@@ -172,7 +172,7 @@ function findListInText(text: string, lists: QuickAddList[]): QuickAddList | und
   for (const list of sortedLists) {
     const escapedTitle = escapeRegExp(list.title);
     const patterns = [
-      new RegExp(`(?:^|\\s)[#@]${escapedTitle}\\b`, "i"),
+      new RegExp(`(?:^|\\s)@${escapedTitle}\\b`, "i"),
       new RegExp(`\\bin the ${escapedTitle} list\\b`, "i"),
       new RegExp(`\\bin ${escapedTitle} list\\b`, "i"),
     ];
@@ -192,7 +192,7 @@ function stripListMentions(text: string, list?: QuickAddList): string {
 
   const escapedTitle = escapeRegExp(list.title);
   return text
-    .replace(new RegExp(`(?:^|\\s)[#@]${escapedTitle}\\b`, "ig"), " ")
+    .replace(new RegExp(`(?:^|\\s)@${escapedTitle}\\b`, "ig"), " ")
     .replace(new RegExp(`\\bin the ${escapedTitle} list\\b`, "ig"), " ")
     .replace(new RegExp(`\\bin ${escapedTitle} list\\b`, "ig"), " ")
     .replace(/\s+/g, " ")
