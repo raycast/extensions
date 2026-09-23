@@ -47,6 +47,7 @@ export default function BookingDetail({
 
   return (
     <Detail
+      navigationTitle={`Booking Detail: ${personName ?? "Unknown Seat"}`}
       isLoading={isLoadingImage}
       markdown={imageMarkdown}
       actions={
