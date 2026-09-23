@@ -1,5 +1,12 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-09-23
+
+### Added
+
+- **AI tools for personal lists** — Raycast AI can now read your Trakt lists, check whether a title is on one, create, rename or delete a list, and add or remove movies, shows, seasons and episodes. Building a themed list takes a single batched call, and every change asks for confirmation naming the list and the items as Trakt holds them.
+- List names keep their emoji and non-Latin characters when matched, so "🎬 Oscars 2026" and "Oscars 2026" stay distinct lists.
+
 ## [Update] - 2026-09-19
 
 ### Added
