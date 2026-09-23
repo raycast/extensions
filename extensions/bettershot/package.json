@@ -3,7 +3,7 @@
   "name": "bettershot",
   "title": "BetterShot",
   "description": "Capture screenshots, scan text, pick colors, and open recording options with BetterShot.",
-  "icon": "extension-icon.png",
+  "icon": "bettershot-icon.png",
   "author": "andyli_lfs898",
   "license": "MIT",
   "platforms": [

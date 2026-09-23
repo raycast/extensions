@@ -2,7 +2,7 @@
 
 ## BetterShot app icon
 
-`assets/extension-icon.png` is the unmodified official 512 × 512 BetterShot app icon, by Kartik Labhshetwar.
+`assets/bettershot-icon.png` is the unmodified official 512 × 512 BetterShot app icon, by Kartik Labhshetwar.
 
 Source: https://github.com/KartikLabhshetwar/better-shot/blob/b04e99611eff55c5163e84d4c50b1769e546b76b/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png
 
