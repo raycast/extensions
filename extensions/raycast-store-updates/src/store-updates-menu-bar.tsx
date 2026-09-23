@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { StoreItem } from "./types";
 import {
   changelogUrl,
+  checkForUpdatesDeeplink,
   createStoreDeeplink,
   extensionIconImage,
-  getInstalledExtensionSlugs,
+  fetchInstalledExtensionSlugs,
   scanStoreUpdates,
 } from "./utils";
 import { getStoredItemsSync, storeItems, getLastSeen, setLastSeen } from "./utils/store-cache";
@@ -88,14 +89,30 @@ export default function Command() {
   // scoped that way — a "new" extension is by definition not installed yet, so including
   // new items under this scope would contradict the filter it is named after.
   const scope = getPreferenceValues<Preferences>().menuBarScope ?? "all";
+
+  // Installed extensions are read from disk asynchronously (every installed extension's
+  // package.json). Same three states as the main list: undefined is
+  // "still resolving", null is "could not tell", and only a Set is authoritative.
+  // Both non-Set states leave the menu unscoped — a badge that under-counts is worse
+  // than one that briefly over-counts, because the whole point is to surface things.
+  const [installed, setInstalled] = useState<Set<string> | null | undefined>(undefined);
+  useEffect(() => {
+    // Clear on the way out, not just on the way in. Leaving a previous resolution
+    // in place lets a scope change apply a stale set before the fresh lookup lands.
+    setInstalled(undefined);
+    if (scope !== "my-updates") return;
+    let cancelled = false;
+    fetchInstalledExtensionSlugs().then((slugs) => {
+      if (!cancelled) setInstalled(slugs);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [scope]);
+
   const scoped =
-    scope === "my-updates"
-      ? (() => {
-          const installed = getInstalledExtensionSlugs();
-          return items.filter(
-            (item) => item.type === "updated" && item.extensionSlug && installed.has(item.extensionSlug),
-          );
-        })()
+    scope === "my-updates" && installed
+      ? items.filter((item) => item.type === "updated" && item.extensionSlug && installed.has(item.extensionSlug))
       : items;
 
   const unseen = scoped.filter((item) => new Date(item.date).getTime() > lastSeen);
@@ -120,7 +137,7 @@ export default function Command() {
   const shown = (count > 0 ? unseen : scoped).slice(0, MAX_ITEMS);
 
   return (
-    <MenuBarExtra icon="store-updates-icon.png" title={title} tooltip={tooltip} isLoading={isLoading}>
+    <MenuBarExtra icon={Icon.Store} title={title} tooltip={tooltip} isLoading={isLoading}>
       {scoped.length === 0 && !isLoading && (
         <MenuBarExtra.Item
           title={scope === "my-updates" ? "No updates for your extensions" : "No store updates"}
@@ -149,22 +166,31 @@ export default function Command() {
         </MenuBarExtra.Section>
       )}
 
-      <MenuBarExtra.Separator />
-
-      {count > 0 && <MenuBarExtra.Item title="Mark All as Seen" icon={Icon.CheckCircle} onAction={markAllSeen} />}
-      <MenuBarExtra.Item
-        title="View Store Updates"
-        icon={Icon.AppWindowGrid3x3}
-        onAction={() => launchCommand({ name: "view-store-updates", type: LaunchType.UserInitiated })}
-      />
-      <MenuBarExtra.Item
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        // Common.Refresh, not a bare {cmd+r}: this extension ships to Windows, where
-        // cmd does not exist. The Common constant is platform-aware by construction.
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={scan}
-      />
+      {/* An untitled Section draws its own divider above itself, which is what the
+          deprecated MenuBarExtra.Separator did here. */}
+      <MenuBarExtra.Section>
+        {count > 0 && <MenuBarExtra.Item title="Mark All as Seen" icon={Icon.CheckCircle} onAction={markAllSeen} />}
+        <MenuBarExtra.Item
+          title="View Store Updates"
+          icon={Icon.AppWindowGrid3x3}
+          onAction={() => launchCommand({ name: "view-store-updates", type: LaunchType.UserInitiated })}
+        />
+        {/* Updating installed extensions is Raycast's own command; this one only
+            reports what changed upstream. */}
+        <MenuBarExtra.Item
+          title="Check for Extension Updates"
+          icon={Icon.Download}
+          onAction={() => open(checkForUpdatesDeeplink())}
+        />
+        <MenuBarExtra.Item
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          // Common.Refresh, not a bare {cmd+r}: this extension ships to Windows, where
+          // cmd does not exist. The Common constant is platform-aware by construction.
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={scan}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
