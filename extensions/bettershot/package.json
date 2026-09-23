@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bettershot",
+  "title": "BetterShot",
+  "description": "Capture screenshots, scan text, pick colors, and open recording options with BetterShot.",
+  "icon": "extension-icon.png",
+  "author": "andyli_lfs898",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Design Tools"
+  ],
+  "commands": [
+    {
+      "name": "capture-region",
+      "title": "Capture Region",
+      "subtitle": "BetterShot",
+      "description": "Select a region to capture with BetterShot",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "area",
+        "selection"
+      ]
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "BetterShot",
+      "description": "Capture the full screen with BetterShot",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "display",
+        "screen"
+      ]
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "BetterShot",
+      "description": "Choose a window to capture with BetterShot",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "window"
+      ]
+    },
+    {
+      "name": "scan-text",
+      "title": "Scan Text (OCR)",
+      "subtitle": "BetterShot",
+      "description": "Select text on screen to recognize with BetterShot",
+      "mode": "no-view",
+      "keywords": [
+        "text",
+        "ocr",
+        "extract"
+      ]
+    },
+    {
+      "name": "pick-color",
+      "title": "Pick Color",
+      "subtitle": "BetterShot",
+      "description": "Pick a color from the screen with BetterShot",
+      "mode": "no-view",
+      "keywords": [
+        "color",
+        "hex",
+        "eyedropper"
+      ]
+    },
+    {
+      "name": "record-screen",
+      "title": "Open Recording Options",
+      "subtitle": "BetterShot",
+      "description": "Open BetterShot recording options to choose what to record",
+      "mode": "no-view",
+      "keywords": [
+        "video",
+        "record",
+        "screen"
+      ]
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "BetterShot",
+      "description": "Open BetterShot settings",
+      "mode": "no-view",
+      "keywords": [
+        "preferences",
+        "settings"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
