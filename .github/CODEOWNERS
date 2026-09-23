@@ -446,6 +446,7 @@
 /extensions/cloudstash                                              @bohdanbirdie
 /extensions/cmux                                                    @stevenocchipinti
 /extensions/cnpj-lookup                                             @xilopaint
+/extensions/coast                                                   @jerichosequitin
 /extensions/cobalt                                                  @aelew @aelew @Just-Me-22
 /extensions/cobalt-finance                                          @Sriketk
 /extensions/cocart-docs                                             @seb86
@@ -470,6 +471,7 @@
 /extensions/codex-manager                                           @josedefreitas91 @pernielsentikaer
 /extensions/codex-reset-forecast                                    @Astatine-213-Tian
 /extensions/codex-sessions                                          @jomatsu
+/extensions/codexrunway-reset-tracker                               @EvilMouth
 /extensions/coffee                                                  @mooxl @bibixx @GastroGeek @pernielsentikaer @pernielsentikaer @xilopaint @ridemountainpig @zakj @IKatsuba @alexibuild @mbuvarp @frederikobermaier-lab @bsradcliffe @adbcodes @muhammadrizo-y @aaronjensen @DimiM99
 /extensions/cognimemo                                               @Sami-Ullah-Tufail
 /extensions/coin-caster                                             @chase-manning
@@ -975,6 +977,7 @@
 /extensions/frill                                                   @xmok
 /extensions/from                                                    @albertolezaun-afk
 /extensions/fronius-inverter                                        @Olli0103
+/extensions/frp-client-manager                                      @bluenight91
 /extensions/ftrack                                                  @lucaas
 /extensions/fuelix                                                  @jfernandogt
 /extensions/fuelx                                                   @naz3eh
@@ -2225,6 +2228,7 @@
 /extensions/quick-open-project                                      @zerowidth @bjw-s @pernielsentikaer @mattstein @canac @iml885203
 /extensions/quick-quit                                              @SriramHQ
 /extensions/quick-quote                                             @kumamaki
+/extensions/quick-radios                                            @tejas-911
 /extensions/quick-references                                        @HardwareWolf
 /extensions/quick-search                                            @iwfan
 /extensions/quick-toshl                                             @hoandesign
@@ -2600,7 +2604,7 @@
 /extensions/skills                                                  @keito4 @keito4 @keito4 @raulgg @DaleSeo @pernielsentikaer @kayotimoteo @alexibuild @alastairsounds
 /extensions/skills-re                                               @escwxyz
 /extensions/skyscanner-flights                                      @ayushtom
-/extensions/slack                                                   @momme-rtf @jfkisafk @RobErskine @y0ngha @erayack @clins1994 @sleicht @artistro08 @andreaselia @0xdhrv
+/extensions/slack                                                   @momme-rtf @jfkisafk @RobErskine @y0ngha @erayack @clins1994 @sleicht @artistro08 @andreaselia @0xdhrv @0xdhrv
 /extensions/slack-status                                            @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer @ramsaysewell @henrik
 /extensions/slack-summarizer                                        @zahassanyum
 /extensions/slack-templated-message                                 @koh-sh

@@ -92,6 +92,41 @@
       ]
     },
     {
+      "name": "create-reminder-from-current-tab",
+      "title": "Create Reminder from Current Tab",
+      "subtitle": "Apple Reminders",
+      "description": "Create a reminder from the active browser tab.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "createImmediately",
+          "type": "checkbox",
+          "label": "Create Reminder Immediately",
+          "description": "When enabled, the reminder is created immediately in your default list without opening the form.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "defaultListName",
+          "type": "textfield",
+          "title": "Default List",
+          "label": "Default List",
+          "placeholder": "e.g. Inbox, Work, or Reminders",
+          "description": "Default list to add tab reminders to. Leave empty to use Reminders' default list.",
+          "required": false
+        },
+        {
+          "name": "defaultDueDate",
+          "type": "textfield",
+          "title": "Default Due Date & Time",
+          "label": "Default Due Date & Time",
+          "placeholder": "e.g. 6pm, in 2 hours, tomorrow 9am, tonight",
+          "description": "Optional default due date or time for tab reminders (e.g. \"6pm\", \"tonight\", \"tomorrow 9am\", \"in 2 hours\"). Leave empty for no due date.",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "menu-bar",
       "title": "Menu Bar Reminders",
       "icon": "icon.png",
