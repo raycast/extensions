@@ -109,7 +109,7 @@ function NotationHelp() {
 
 type ImportOptions = { replace: boolean; minSeconds: number };
 
-function ImportForm({ onImport }: { onImport: (solves: Solve[], options: ImportOptions) => void }) {
+function ImportForm({ onImport }: { onImport: (solves: Solve[], options: ImportOptions) => Promise<boolean> }) {
   const { pop } = useNavigation();
 
   return (
@@ -130,9 +130,11 @@ function ImportForm({ onImport }: { onImport: (solves: Solve[], options: ImportO
               try {
                 const text = await fs.readFile(file, "utf8");
                 const imported = importFromCsTimer(text);
-                onImport(imported, { replace: values.replace, minSeconds });
-                await showToast({ style: Toast.Style.Success, title: `Imported ${imported.length} solves` });
-                pop();
+                const applied = await onImport(imported, { replace: values.replace, minSeconds });
+                if (applied) {
+                  await showToast({ style: Toast.Style.Success, title: `Imported ${imported.length} solves` });
+                  pop();
+                }
               } catch (error) {
                 await showToast({ style: Toast.Style.Failure, title: "Import failed", message: String(error) });
               }
@@ -173,7 +175,8 @@ function ExportForm({ solves }: { solves: Solve[] }) {
             onSubmit={async (values: { minSeconds: string }) => {
               const parsed = Number.parseFloat(values.minSeconds);
               const minMs = Number.isFinite(parsed) && parsed > 0 ? parsed * 1000 : 0;
-              const filtered = minMs > 0 ? solves.filter((s) => s.time >= minMs) : solves;
+              // Filter on effective time so +2 (and DNF) match the value users see.
+              const filtered = minMs > 0 ? solves.filter((s) => effectiveTime(s) >= minMs) : solves;
               try {
                 const json = exportToCsTimer(filtered);
                 const file = join(homedir(), "Downloads", `cstimer_${timestamp()}.txt`);
@@ -210,11 +213,7 @@ export default function command() {
     precision = "tenths",
     inspection = false,
     inspectionSeconds = "15",
-  } = getPreferenceValues<{
-    precision?: Precision;
-    inspection?: boolean;
-    inspectionSeconds?: string;
-  }>();
+  } = getPreferenceValues<Preferences.RubiksCubeTimer>();
   const step = STEP_SECONDS[precision] ?? STEP_SECONDS.tenths;
   const intervalMs = STEP_INTERVAL_MS[precision] ?? STEP_INTERVAL_MS.tenths;
 
@@ -322,13 +321,32 @@ export default function command() {
     }
   }
 
-  function handleImport(imported: Solve[], options: ImportOptions) {
+  async function handleImport(imported: Solve[], options: ImportOptions): Promise<boolean> {
     // "replace" starts from an empty list (forgets local solves); otherwise merge into existing.
     const base = options.replace ? [] : solves;
     const merged = mergeSolves(base, imported);
     const minMs = options.minSeconds * 1000;
-    const result = minMs > 0 ? merged.filter((s) => s.time >= minMs) : merged;
-    setSolves(result);
+    // Filter on effective time so +2 (and DNF) match the value users see.
+    const result = minMs > 0 ? merged.filter((s) => effectiveTime(s) >= minMs) : merged;
+
+    // Replacing, or a filter/empty import that would wipe the saved list, is as destructive as
+    // "Clear All Times" — confirm before discarding existing solves.
+    const discardsHistory = solves.length > 0 && (options.replace || result.length === 0);
+    if (discardsHistory) {
+      const confirmed = await confirmAlert({
+        title: result.length === 0 ? "This import removes all your solves" : "Replace saved solves?",
+        message:
+          result.length === 0
+            ? `Your ${solves.length} saved solves would be discarded with nothing kept. Export first if you want a backup.`
+            : `Your ${solves.length} saved solves will be replaced by ${result.length} imported. Export first if you want a backup.`,
+        icon: Icon.Trash,
+        primaryAction: { title: "Replace", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return false;
+    }
+
+    await setSolves(result);
+    return true;
   }
 
   // Scramble image only depends on the scramble, so memoizing keeps a byte-identical data URI while
