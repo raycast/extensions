@@ -54,14 +54,14 @@ export default function Templates({ environmentId }: { environmentId: string }) 
         actions={
           <ActionPanel>
             <Action.Push
-              icon={Icon.Eye}
-              title="Preview"
-              target={<TemplatePreview environmentId={environmentId} template={template} />}
-            />
-            <Action.Push
               icon={Icon.Plus}
               title="Deploy"
               target={<TemplateDeployForm environmentId={environmentId} template={template} />}
+            />
+            <Action.Push
+              icon={Icon.Eye}
+              title="Preview"
+              target={<TemplatePreview environmentId={environmentId} template={template} />}
             />
             <Action
               icon={isBookmarked ? Icon.StarDisabled : Icon.Star}
@@ -213,6 +213,7 @@ function TemplatePreview({ environmentId, template }: { environmentId: string; t
     data: dockerCompose,
     isLoading: composeLoading,
     error: composeError,
+    revalidate: retryCompose,
   } = useFetch<string, string>(`${TEMPLATES_BASE_URL}/blueprints/${template.id}/docker-compose.yml`, {
     initialData: "",
     async parseResponse(response) {
@@ -225,6 +226,7 @@ function TemplatePreview({ environmentId, template }: { environmentId: string; t
     data: templateToml,
     isLoading: tomlLoading,
     error: tomlError,
+    revalidate: retryToml,
   } = useFetch<string, string>(`${TEMPLATES_BASE_URL}/blueprints/${template.id}/template.toml`, {
     initialData: "",
     async parseResponse(response) {
@@ -264,6 +266,21 @@ function TemplatePreview({ environmentId, template }: { environmentId: string; t
 
   const isLoading = filesLoading || (filesReady && previewLoading);
   const error = filesError ?? previewError;
+
+  // `regeneratePreview` alone would loop forever on a failed source-file fetch: it's gated on
+  // `filesReady`, which a failed file fetch never becomes, so retrying only the preview call left
+  // Retry stuck showing the same error. If a file failed, retry both file fetches instead (doesn't
+  // matter which one specifically failed) and let `execute: filesReady` fire the preview call once
+  // they succeed - calling `regeneratePreview` immediately here would just reuse the still-stale
+  // (pre-retry) file contents captured in this render, not the ones on the way.
+  function retry() {
+    if (filesError) {
+      retryCompose();
+      retryToml();
+    } else {
+      regeneratePreview();
+    }
+  }
 
   // Metadata.Label's own `icon` renders at a small, fixed size Raycast doesn't expose any control
   // over (confirmed live - it came out barely bigger than a favicon) - too small to read as an
@@ -308,9 +325,9 @@ function TemplatePreview({ environmentId, template }: { environmentId: string; t
             target={<TemplateDeployForm environmentId={environmentId} template={template} />}
           />
           {error ? (
-            <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => regeneratePreview()} />
+            <Action icon={Icon.ArrowClockwise} title="Retry" onAction={retry} />
           ) : (
-            <Action icon={Icon.ArrowClockwise} title="Regenerate Preview" onAction={() => regeneratePreview()} />
+            <Action icon={Icon.ArrowClockwise} title="Regenerate Preview" onAction={retry} />
           )}
           <Action.OpenInBrowser title="Open on GitHub" url={template.links.github} />
         </ActionPanel>
@@ -326,7 +343,10 @@ function formatPreview({ template: processed }: TemplatePreviewResult): string {
     sections.push(
       "## Domains\n" +
         processed.domains
-          .map((domain) => `- **${domain.serviceName}** → \`${domain.host ?? "(no host)"}\` (port ${domain.port})`)
+          .map((domain) => {
+            const path = domain.path && domain.path !== "/" ? domain.path : "";
+            return `- **${domain.serviceName}** → \`${domain.host ?? "(no host)"}${path}\` (port ${domain.port})`;
+          })
           .join("\n"),
     );
   }
