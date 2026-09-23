@@ -47,6 +47,14 @@ function isLoopbackHost(host: string): boolean {
   );
 }
 
+function formatTargetHost(host: string): string {
+  const trimmed = host.trim();
+  if (trimmed.includes(":") && !trimmed.startsWith("[")) {
+    return `[${trimmed}]`;
+  }
+  return trimmed;
+}
+
 function resolvePort(port: string | undefined, security: LdapSecurity): string {
   const trimmed = port?.trim();
   if (trimmed) {
@@ -116,14 +124,6 @@ export default function Command() {
   const abortRef = useRef<AbortController | undefined>(undefined);
   const clientRef = useRef<Client | undefined>(undefined);
 
-  useEffect(
-    () => () => {
-      abortRef.current?.abort();
-      clientRef.current?.unbind().catch(() => {});
-    },
-    [],
-  );
-
   async function search(text: string) {
     abortRef.current?.abort();
     clientRef.current?.unbind().catch(() => {});
@@ -153,7 +153,7 @@ export default function Command() {
 
     const scheme = security === "ldaps" ? "ldaps" : "ldap";
     const port = resolvePort(preferences.ldapPort, security);
-    const target = `${scheme}://${preferences.ldapHost}:${port}`;
+    const target = `${scheme}://${formatTargetHost(preferences.ldapHost)}:${port}`;
 
     let client: Client | undefined;
     try {
@@ -264,7 +264,11 @@ export default function Command() {
 
   useEffect(() => {
     const timer = setTimeout(() => search(searchText), 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      abortRef.current?.abort();
+      clientRef.current?.unbind().catch(() => {});
+    };
   }, [searchText]);
 
   return (
