@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-mark",
-  "title": "Mark",
+  "title": "Goose Mark",
   "description": "Local bookmarks with favicon persistence and template URLs",
   "version": "0.1.0",
   "private": false,
@@ -17,25 +17,31 @@
       "title": "Search Marks",
       "description": "Search local bookmarks",
       "mode": "view"
-    },
-    {
-      "name": "add-bookmark",
-      "title": "Add Bookmark",
-      "description": "Add a local bookmark",
-      "mode": "view"
-    },
-    {
-      "name": "manage-data",
-      "title": "Manage Marks Data",
-      "description": "Manage local library and conflicts",
-      "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "language",
+      "title": "Language",
+      "description": "Choose the language for extension screens and messages. English is the default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Simplified Chinese",
+          "value": "zh-Hans"
+        }
+      ]
+    },
+    {
       "name": "dataDirectory",
       "title": "Dedicated Data Directory",
-      "description": "专用数据目录。留空则用 supportPath/marks-library。",
+      "description": "Dedicated data directory. Leave blank to use supportPath/marks-library.",
       "type": "textfield",
       "required": false
     },

@@ -1,3 +1,4 @@
+import { t } from "./i18n.ts";
 import { normalizeBookmarkUrl } from "./bookmark-utils.ts";
 
 export type ErrorCode =
@@ -123,7 +124,7 @@ export interface LibraryState {
   baseBookmarks: Record<string, Bookmark>;
   visitCounts: Record<string, number>;
 }
-export function invalid(message = "数据格式无效"): never {
+export function invalid(message = t("数据格式无效")): never {
   throw new LibraryError("INVALID_INPUT", message);
 }
 export function object(value: unknown): Record<string, unknown> {
@@ -151,7 +152,7 @@ export function timestamp(value: unknown): number {
     value < 0 ||
     value > 8640000000000000
   )
-    invalid("时间或计数无效");
+    invalid(t("时间或计数无效"));
   return value;
 }
 export function array(value: unknown, max = 10000): unknown[] {
@@ -160,7 +161,7 @@ export function array(value: unknown, max = 10000): unknown[] {
 }
 export function keys(value: Record<string, unknown>, allowed: string[]) {
   if (Object.keys(value).some((k) => !allowed.includes(k)))
-    invalid("含未知字段，请移除设置或秘密字段");
+    invalid(t("含未知字段，请移除设置或秘密字段"));
 }
 export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -191,7 +192,7 @@ export function locations(raw: unknown): Location[] {
     return { groupId: id(o.groupId), subGroupId: id(o.subGroupId) };
   });
   if (new Set(result.map(canonical)).size !== result.length)
-    invalid("位置重复");
+    invalid(t("位置重复"));
   return result;
 }
 export function validateBookmark(value: unknown): Bookmark {
@@ -221,7 +222,7 @@ export function validateBookmark(value: unknown): Bookmark {
   try {
     url = normalizeBookmarkUrl(text(raw.url, 8192));
   } catch {
-    invalid("不支持的网址或模板");
+    invalid(t("不支持的网址或模板"));
   }
   const b: Bookmark = {
     id: id(raw.id),
@@ -256,7 +257,7 @@ export function validateBookmark(value: unknown): Bookmark {
       type !== "text" &&
       type !== "custom"
     )
-      invalid("图标类型无效");
+      invalid(t("图标类型无效"));
     const fields = {
       file: ["path", "hash"],
       remote: ["src", "cache"],
@@ -267,10 +268,15 @@ export function validateBookmark(value: unknown): Bookmark {
     const icon: Icon = { type };
     for (const k of [...fields, "bgColor"])
       if (i[k] !== undefined)
-        Object.assign(icon, { [k]: text(i[k], 1024 * 1024) });
+        Object.assign(icon, {
+          [k]: text(
+            i[k],
+            k === "data" || k === "cache" ? 3 * 1024 * 1024 : 1024 * 1024,
+          ),
+        });
     if (i.fetchedAt !== undefined) icon.fetchedAt = timestamp(i.fetchedAt);
     if (typeof i[fields[0]] !== "string" || !i[fields[0]])
-      invalid("图标字段无效");
+      invalid(t("图标字段无效"));
     b.icon = icon;
   }
   return b;
@@ -293,7 +299,7 @@ export function validateCatalog(value: unknown): Catalog {
       ...(group ? ["children"] : []),
     ]);
     const item: SubGroup = { id: id(o.id), name: id(o.name), ...times(o) };
-    if (seen.has(item.id)) invalid("分类 ID 重复");
+    if (seen.has(item.id)) invalid(t("分类 ID 重复"));
     seen.add(item.id);
     if (o.lastSyncedAt !== undefined)
       item.lastSyncedAt = timestamp(o.lastSyncedAt);
@@ -315,7 +321,7 @@ export function validateCatalog(value: unknown): Catalog {
     groups: array(raw.groups, 1000).map((g) => parse(g, true) as Group),
   };
   for (const loc of [DEFAULT_LOCATION, TRASH_LOCATION])
-    if (!hasLocation(catalog, loc)) invalid("默认分类与回收站必须保留");
+    if (!hasLocation(catalog, loc)) invalid(t("默认分类与回收站必须保留"));
   return catalog;
 }
 export function hasLocation(c: Catalog, l: Location): boolean {
@@ -393,7 +399,7 @@ export function restoreBookmark(
   state: LibraryState,
   bookmark: Bookmark,
 ): Mutation {
-  if (!bookmark.isDeleted) invalid("书签不是删除状态");
+  if (!bookmark.isDeleted) invalid(t("书签不是删除状态"));
   const restored = bookmark.prevLocations?.filter(
     (l) =>
       l.groupId !== TRASH_LOCATION.groupId && hasLocation(state.catalog, l),
@@ -413,14 +419,14 @@ export function removeCategory(
   target: "default" | "trash" = "default",
 ): { affectedCount: number; mutations: Mutation[] } {
   if ([DEFAULT_LOCATION.groupId, TRASH_LOCATION.groupId].includes(groupId))
-    invalid("默认分类与回收站禁止删除");
+    invalid(t("默认分类与回收站禁止删除"));
   const catalog = structuredClone(state.catalog);
   const group = catalog.groups.find((g) => g.id === groupId);
   if (
     !group ||
     (subGroupId && !group.children.some((s) => s.id === subGroupId))
   )
-    invalid("分类不存在");
+    invalid(t("分类不存在"));
   if (subGroupId)
     group.children = group.children.filter((s) => s.id !== subGroupId);
   else catalog.groups = catalog.groups.filter((g) => g.id !== groupId);
