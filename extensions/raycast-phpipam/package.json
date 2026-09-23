@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-phpipam",
+  "title": "PhpIPAM",
+  "description": "Search and browse your phpIPAM instance: addresses, subnets, sections, VLANs and VRFs.",
+  "icon": "icon.png",
+  "author": "frdmn",
+  "categories": [
+    "System",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search IPAM",
+      "description": "Search phpIPAM for addresses, subnets, VLANs and VRFs",
+      "mode": "view"
+    },
+    {
+      "name": "browse-sections",
+      "title": "Browse Sections",
+      "description": "Browse phpIPAM sections and drill into their subnets",
+      "mode": "view"
+    },
+    {
+      "name": "browse-subnets",
+      "title": "Browse Subnets",
+      "description": "List and filter all subnets across all sections",
+      "mode": "view"
+    },
+    {
+      "name": "first-free",
+      "title": "First Free Address",
+      "description": "Find and copy the first free IP address of a subnet",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "phpipamUrl",
+      "title": "phpIPAM URL",
+      "description": "Base URL of your phpIPAM instance, e.g. https://phpipam.example.com",
+      "type": "textfield",
+      "placeholder": "https://phpipam.example.com",
+      "required": true
+    },
+    {
+      "name": "appId",
+      "title": "API App ID",
+      "description": "The application ID created in phpIPAM under Administration → API",
+      "type": "textfield",
+      "placeholder": "raycast",
+      "required": true
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "phpIPAM user with API permissions (local user, not SAML). Not needed when an App Code is set.",
+      "type": "textfield",
+      "placeholder": "admin",
+      "required": false
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Password of the phpIPAM user. Not needed when an App Code is set.",
+      "type": "password",
+      "placeholder": "Your phpIPAM password",
+      "required": false
+    },
+    {
+      "name": "appCode",
+      "title": "API App Code",
+      "description": "Only for apps with 'SSL with App code token' security: the App code (from the app's edit dialog in phpIPAM) is used as token instead of username/password. Leave empty for 'SSL with User token' or 'User token'.",
+      "type": "password",
+      "placeholder": "Only for 'SSL with App code token' apps",
+      "required": false
+    },
+    {
+      "name": "ignoreTlsErrors",
+      "title": "Ignore TLS certificate errors",
+      "description": "Allow self-signed certificates. Use with caution.",
+      "type": "checkbox",
+      "label": "Ignore TLS errors",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.2.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.9.8",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
