@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Template Preview] - 2026-09-23
+
+- Add a `Preview` action to `From Template`, showing the domains, environment variables and file mounts a template will create before deploying it.
+
 ## [Deploy from Template] - 2026-09-23
 
 - Add a `From Template` action to the `Create` menu on the **Services** screen, browsing Dokploy's public template registry (500+ templates) with search, `Add Bookmark`/`Remove Bookmark`, and a one-action `Deploy` that hands off to Dokploy's own template processing.

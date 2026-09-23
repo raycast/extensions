@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedState, useFetch, useForm } from "@raycast/utils";
 import { useToken } from "./instances";
 import { ErrorResult, Server } from "./interfaces";
@@ -57,6 +57,11 @@ export default function Templates({ environmentId }: { environmentId: string }) 
               icon={Icon.Plus}
               title="Deploy"
               target={<TemplateDeployForm environmentId={environmentId} template={template} />}
+            />
+            <Action.Push
+              icon={Icon.Eye}
+              title="Preview"
+              target={<TemplatePreview environmentId={environmentId} template={template} />}
             />
             <Action
               icon={isBookmarked ? Icon.StarDisabled : Icon.Star}
@@ -183,5 +188,188 @@ function TemplateDeployForm({ environmentId, template }: { environmentId: string
         </Form.Dropdown>
       )}
     </Form>
+  );
+}
+
+interface TemplatePreviewResult {
+  template: {
+    domains: { serviceName: string; port: number; path?: string | null; host?: string | null }[];
+    envs: string[];
+    mounts: { filePath: string; content: string }[];
+  };
+}
+
+/**
+ * `compose.previewTemplate` doesn't fetch a template by id itself - unlike `deployTemplate`, it takes
+ * the raw `docker-compose.yml`/`template.toml` text from the caller, base64-encoded together as
+ * `{ compose, config }`. It then runs the exact same generator-token processing `deployTemplate` uses
+ * server-side, so no TOML parsing is needed on this end either - just fetching and re-packaging the
+ * same two files Deploy already knows how to find.
+ */
+function TemplatePreview({ environmentId, template }: { environmentId: string; template: TemplateMetadata }) {
+  const { url, headers } = useToken();
+
+  const {
+    data: dockerCompose,
+    isLoading: composeLoading,
+    error: composeError,
+    revalidate: retryCompose,
+  } = useFetch<string, string>(`${TEMPLATES_BASE_URL}/blueprints/${template.id}/docker-compose.yml`, {
+    initialData: "",
+    async parseResponse(response) {
+      if (!response.ok) throw new Error(`Could not load docker-compose.yml (status ${response.status})`);
+      return response.text();
+    },
+  });
+
+  const {
+    data: templateToml,
+    isLoading: tomlLoading,
+    error: tomlError,
+    revalidate: retryToml,
+  } = useFetch<string, string>(`${TEMPLATES_BASE_URL}/blueprints/${template.id}/template.toml`, {
+    initialData: "",
+    async parseResponse(response) {
+      if (!response.ok) throw new Error(`Could not load template.toml (status ${response.status})`);
+      return response.text();
+    },
+  });
+
+  const filesLoading = composeLoading || tomlLoading;
+  const filesError = composeError ?? tomlError;
+  const filesReady = !filesLoading && !filesError && Boolean(dockerCompose) && Boolean(templateToml);
+
+  const {
+    data: preview,
+    isLoading: previewLoading,
+    error: previewError,
+    revalidate: regeneratePreview,
+  } = useFetch<TemplatePreviewResult, TemplatePreviewResult | undefined>(`${url}compose.previewTemplate`, {
+    method: "POST",
+    headers,
+    // `appName` here only steers generator tokens like `${APP_NAME}`/domain generation for this
+    // preview - the real deploy generates its own unique one server-side, so a stable placeholder
+    // (the template id) is fine; it doesn't need to match what deployTemplate ends up using.
+    body: JSON.stringify({
+      base64: Buffer.from(JSON.stringify({ compose: dockerCompose, config: templateToml })).toString("base64"),
+      appName: template.id,
+    }),
+    execute: filesReady,
+    async parseResponse(response) {
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      return (await response.json()) as TemplatePreviewResult;
+    },
+  });
+
+  const isLoading = filesLoading || (filesReady && previewLoading);
+  const error = filesError ?? previewError;
+
+  // `regeneratePreview` alone would loop forever on a failed source-file fetch: it's gated on
+  // `filesReady`, which a failed file fetch never becomes, so retrying only the preview call left
+  // Retry stuck showing the same error. If a file failed, retry both file fetches instead (doesn't
+  // matter which one specifically failed) and let `execute: filesReady` fire the preview call once
+  // they succeed - calling `regeneratePreview` immediately here would just reuse the still-stale
+  // (pre-retry) file contents captured in this render, not the ones on the way.
+  function retry() {
+    if (filesError) {
+      retryCompose();
+      retryToml();
+    } else {
+      regeneratePreview();
+    }
+  }
+
+  // Metadata.Label's own `icon` renders at a small, fixed size Raycast doesn't expose any control
+  // over (confirmed live - it came out barely bigger than a favicon) - too small to read as an
+  // actual logo. Markdown's `raycast-width` is the only place logo size is actually controllable,
+  // so it lives there instead, just at a modest width rather than the earlier 160 (too dominant).
+  const header = template.logo
+    ? `![${template.name}](${TEMPLATES_BASE_URL}/blueprints/${template.id}/${template.logo}?raycast-width=64)\n\n`
+    : "";
+  const body = error
+    ? `**Could not load preview.**\n\n${error}`
+    : preview
+      ? formatPreview(preview)
+      : "Loading preview…";
+  const markdown = `${header}# ${template.name}\n\n${template.description}\n\n---\n\n${body}`;
+
+  return (
+    <Detail
+      navigationTitle={`${template.name} Preview`}
+      isLoading={isLoading}
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Version" text={template.version} />
+          <Detail.Metadata.TagList title="Tags">
+            {template.tags.map((tag) => (
+              <Detail.Metadata.TagList.Item key={tag} text={tag} />
+            ))}
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="GitHub" target={template.links.github} text="Open" />
+          {template.links.website && (
+            <Detail.Metadata.Link title="Website" target={template.links.website} text="Open" />
+          )}
+          {template.links.docs && <Detail.Metadata.Link title="Docs" target={template.links.docs} text="Open" />}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Plus}
+            title="Deploy"
+            target={<TemplateDeployForm environmentId={environmentId} template={template} />}
+          />
+          {error ? (
+            <Action icon={Icon.ArrowClockwise} title="Retry" onAction={retry} />
+          ) : (
+            <Action icon={Icon.ArrowClockwise} title="Regenerate Preview" onAction={retry} />
+          )}
+          <Action.OpenInBrowser title="Open on GitHub" url={template.links.github} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function formatPreview({ template: processed }: TemplatePreviewResult): string {
+  const sections: string[] = [];
+
+  if (processed.domains.length > 0) {
+    sections.push(
+      "## Domains\n" +
+        processed.domains
+          .map((domain) => {
+            const path = domain.path && domain.path !== "/" ? domain.path : "";
+            return `- **${domain.serviceName}** → \`${domain.host ?? "(no host)"}${path}\` (port ${domain.port})`;
+          })
+          .join("\n"),
+    );
+  }
+
+  if (processed.envs.length > 0) {
+    sections.push("## Environment Variables\n```\n" + processed.envs.join("\n") + "\n```");
+  }
+
+  if (processed.mounts.length > 0) {
+    sections.push(
+      "## Mounts\n" +
+        processed.mounts
+          .map((mount) => `### \`${mount.filePath}\`\n\`\`\`\n${mount.content.replace(/```/g, "\\`\\`\\`")}\n\`\`\``)
+          .join("\n\n"),
+    );
+  }
+
+  if (sections.length === 0) {
+    sections.push("_This template doesn't define any domains, environment variables, or file mounts._");
+  }
+
+  return (
+    "_Generated values below (passwords, domains) are a random sample - deploying generates fresh ones, not these exact values._\n\n" +
+    sections.join("\n\n")
   );
 }

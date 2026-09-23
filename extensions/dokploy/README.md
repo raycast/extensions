@@ -11,6 +11,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Create Application
         - Create Database
         - Create From Template (browse Dokploy's public template registry, bookmark favorites, deploy with one action)
+            - Preview (which domains, environment variables and file mounts the template creates)
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Service Logs (Compose stacks pick a container first)
