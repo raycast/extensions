@@ -289,11 +289,10 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
 });
 
 describe("Reminder List Item Tag Display", () => {
-  it("cleans note subtitle and produces tag accessories when tags are present", () => {
+  it("extracts tags for accessories while keeping notes intact", () => {
     const rawNotes = "Meeting preparation\n\n#work #urgent";
-    const { notes: cleanNotes, tags } = extractTagsFromNotes(rawNotes);
+    const { tags } = extractTagsFromNotes(rawNotes);
 
-    assert.strictEqual(cleanNotes, "Meeting preparation");
     assert.deepStrictEqual(tags, ["work", "urgent"]);
 
     const accessoryText = tags.map((t) => `#${t}`).join(" ");
@@ -303,31 +302,20 @@ describe("Reminder List Item Tag Display", () => {
     assert.strictEqual(accessoryTooltip, "Tags: #work, #urgent");
   });
 
-  it("omits subtitle when notes contain only tags", () => {
-    const rawNotes = "#personal #errands";
-    const { notes: cleanNotes, tags } = extractTagsFromNotes(rawNotes);
-
-    assert.strictEqual(cleanNotes, "");
-    assert.deepStrictEqual(tags, ["personal", "errands"]);
-
-    const subtitle = cleanNotes || undefined;
-    assert.strictEqual(subtitle, undefined);
-  });
-
-  it("builds keywords containing both hashed and unhashed tags plus note tokens", () => {
+  it("builds keywords containing both hashed and unhashed tags plus full note tokens", () => {
     const reminder = {
       title: "Review PR",
       notes: "Important items\n\n#engineering #v2",
     };
 
     const keywords = [reminder.title];
-    const { notes: cleanNotes, tags } = extractTagsFromNotes(reminder.notes);
+    const { tags } = extractTagsFromNotes(reminder.notes);
 
     if (tags.length > 0) {
       keywords.push(...tags.map((t) => `#${t}`), ...tags);
     }
-    if (cleanNotes) {
-      keywords.push(...cleanNotes.split(" "));
+    if (reminder.notes) {
+      keywords.push(...reminder.notes.split(" "));
     }
 
     assert.deepStrictEqual(keywords, [
@@ -337,7 +325,8 @@ describe("Reminder List Item Tag Display", () => {
       "engineering",
       "v2",
       "Important",
-      "items",
+      "items\n\n#engineering",
+      "#v2",
     ]);
   });
 });

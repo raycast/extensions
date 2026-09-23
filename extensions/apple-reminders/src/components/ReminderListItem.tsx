@@ -101,7 +101,7 @@ export default function ReminderListItem({
     keywords.push(reminder.priority);
   }
 
-  const { notes: cleanNotes, tags } = extractTagsFromNotes(reminder.notes);
+  const { tags } = extractTagsFromNotes(reminder.notes);
 
   if (tags.length > 0) {
     accessories.push({
@@ -122,8 +122,8 @@ export default function ReminderListItem({
     keywords.push(reminder.list.title);
   }
 
-  if (cleanNotes) {
-    keywords.push(...cleanNotes.split(" "));
+  if (reminder.notes) {
+    keywords.push(...reminder.notes.split(" "));
   }
 
   return (
@@ -131,7 +131,7 @@ export default function ReminderListItem({
       icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
       key={reminder.id}
       title={reminder.title}
-      subtitle={cleanNotes || undefined}
+      subtitle={reminder.notes}
       accessories={accessories}
       keywords={keywords}
       actions={<ReminderActions reminder={reminder} viewProps={viewProps} listId={listId} mutate={mutate} />}
