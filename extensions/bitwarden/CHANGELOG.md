@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2026-09-23
+
+- Copied passwords and other secrets are now marked confidential with `concealed`, which keeps them out of the Clipboard History, instead of the deprecated `transient` flag
+
 ## [Fix Authenticator TOTP] - 2026-07-13
 
 - Fix authenticator failing when TOTP secrets contain spaces
