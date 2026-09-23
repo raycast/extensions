@@ -6,6 +6,7 @@
 - "My Tasks" now loads through Asana's search endpoint and, by default, shows only tasks due within 3 days of today (from 3 days overdue to 3 days ahead), capped at 100 results
 - Typing in the search bar now searches across all of your tasks by name and lifts the default due-date window
 - Fixed the project picker only listing a handful of recently used projects by loading the full (paginated) workspace project list instead of typeahead results
+- Archived projects are now hidden from the project pickers by default; enable the new "Show archived projects" preference to include them (marked as "archived")
 
 ## [Fix pagination error in large workspaces] - 2026-07-01
 
