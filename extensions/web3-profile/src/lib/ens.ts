@@ -16,14 +16,10 @@ export const ENS_TEXT_RECORD_KEYS = [
   "url",
   "website",
   "email",
-  "pronouns",
-  "keywords",
   "com.github",
-  "com.instagram",
   "com.twitter",
   "com.discord",
   "org.telegram",
-  "com.telegram",
 ] as const;
 
 export const ENS_ADDRESS_RECORDS = {

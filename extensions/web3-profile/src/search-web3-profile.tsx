@@ -133,7 +133,7 @@ function ProfileDetail({ name }: { name: string }) {
   const { profile, isLoading } = useEnsProfile(name);
   const { address: ensAddress, avatar: ensAvatar, records: ensRecords, balance } = profile;
   const { texts: ensTextRecords, addresses: ensAddresses } = ensRecords;
-  const telegram = ensTextRecords["org.telegram"] ?? ensTextRecords["com.telegram"];
+  const telegram = ensTextRecords["org.telegram"];
   const { pop } = useNavigation();
 
   return isLoading ? (
@@ -173,13 +173,6 @@ function ProfileDetail({ name }: { name: string }) {
                   url={`https://github.com/${ensTextRecords["com.github"]}`}
                 />
               )}
-              {ensTextRecords["com.instagram"] && (
-                <Action.OpenInBrowser
-                  title="Open on Instagram"
-                  icon="instagram.png"
-                  url={`https://instagram.com/${ensTextRecords["com.instagram"]}`}
-                />
-              )}
               {ensTextRecords["com.twitter"] && (
                 <Action.OpenInBrowser
                   title="Open on Twitter"
@@ -203,16 +196,6 @@ function ProfileDetail({ name }: { name: string }) {
                   {ensTextRecords.description && (
                     <List.Item.Detail.Metadata.Label title="Description" text={ensTextRecords.description} />
                   )}
-                  {ensTextRecords.pronouns && (
-                    <List.Item.Detail.Metadata.Label title="Pronouns" text={ensTextRecords.pronouns} />
-                  )}
-                  {ensTextRecords.keywords && (
-                    <List.Item.Detail.Metadata.TagList title="Keywords">
-                      {ensTextRecords.keywords.split(",").map((keyword) => (
-                        <List.Item.Detail.Metadata.TagList.Item key={keyword} text={keyword.trim()} />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
-                  )}
                   {ensTextRecords.url && (
                     <List.Item.Detail.Metadata.Link title="URL" text={ensTextRecords.url} target={ensTextRecords.url} />
                   )}
@@ -231,13 +214,6 @@ function ProfileDetail({ name }: { name: string }) {
                       title="GitHub"
                       text={ensTextRecords["com.github"]}
                       target={`https://github.com/${ensTextRecords["com.github"]}`}
-                    />
-                  )}
-                  {ensTextRecords["com.instagram"] && (
-                    <List.Item.Detail.Metadata.Link
-                      title="Instagram"
-                      text={ensTextRecords["com.instagram"]}
-                      target={`https://instagram.com/${ensTextRecords["com.instagram"]}`}
                     />
                   )}
                   {ensTextRecords["com.twitter"] && (
