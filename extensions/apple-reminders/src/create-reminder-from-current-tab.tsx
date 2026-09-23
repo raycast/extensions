@@ -1,4 +1,4 @@
-import { closeMainWindow, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, Form, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createReminder } from "swift:../swift/AppleReminders";
 
@@ -96,7 +96,7 @@ export default function Command() {
   }, [isLoadingData, isLoadingPostCreateActions]);
 
   if (isLoadingTab || isLoadingData || isLoadingPostCreateActions) {
-    return <CreateReminderForm draftValues={{}} />;
+    return <Form isLoading={true} />;
   }
 
   const defaultDueDate = preferences.defaultDueDate?.trim()
@@ -105,6 +105,7 @@ export default function Command() {
 
   return (
     <CreateReminderForm
+      key={tab ? `${tab.browser}-${tab.url}` : "empty-form"}
       draftValues={{
         title: tab?.title ?? "",
         url: tab?.url ?? "",
