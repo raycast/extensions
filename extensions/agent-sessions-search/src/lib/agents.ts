@@ -1,6 +1,7 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { expandHome } from "./config";
+import { claudeDesktopSessionId } from "./desktop";
 import { AgentId } from "./types";
 
 /**
@@ -20,7 +21,13 @@ export interface AgentDescriptor {
   /** Installed app bundles whose real icon we prefer over the bundled one, best first. */
   appBundles: string[];
   /** Desktop app that can open a session directly, when the agent has one. */
-  app: { name: string; deepLink: (sessionId: string) => string } | null;
+  app: {
+    name: string;
+    /** Link that opens (importing if needed) the session; also what "Copy Deep Link" copies. */
+    deepLink: (sessionId: string) => string;
+    /** Link to the app's *existing* copy of the session, or null when it has none. */
+    existingDeepLink?: (sessionId: string) => Promise<string | null>;
+  } | null;
   /** Default CLI binary used to resume in a terminal. */
   command: string;
   /** Absolute paths tried when the binary is not on PATH. */
@@ -56,7 +63,16 @@ export const AGENTS: AgentDescriptor[] = [
     label: "Claude Code",
     icon: "claude.png",
     appBundles: [join(APPLICATIONS, "Claude.app")],
-    app: { name: "Claude Desktop", deepLink: (id) => `claude://resume?session=${encodeURIComponent(id)}` },
+    app: {
+      name: "Claude Desktop",
+      // `resume` always imports the CLI transcript as a new desktop session (a duplicate when one
+      // exists); `code/continue` navigates to the desktop session that already owns it.
+      deepLink: (id) => `claude://resume?session=${encodeURIComponent(id)}`,
+      existingDeepLink: async (id) => {
+        const desktopId = await claudeDesktopSessionId(id);
+        return desktopId ? `claude://code/continue?session=${encodeURIComponent(desktopId)}` : null;
+      },
+    },
     command: "claude",
     commandFallbacks: [join(homedir(), ".local", "bin", "claude"), "/opt/homebrew/bin/claude"],
     resume: (command, id) => `${command} --resume ${id}`,

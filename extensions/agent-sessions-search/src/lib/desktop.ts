@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
 /**
  * Claude Desktop sidebar state. The app keeps one JSON file per session under
@@ -10,7 +10,9 @@ import { join } from "node:path";
  * changing, so they are read at query time rather than indexed. The directory is large (~600 files of ~150 KB, MCP tool schemas are inlined), so
  * the scan is asynchronous, files are matched as bytes (see `flagsIn`), and a file is re-read only
  * when its mtime or size changed. `claudeDesktopState()` is synchronous and returns the last completed scan;
- * the UI calls `refreshClaudeDesktopState()` and re-queries when the sets changed.
+ * the UI calls `refreshClaudeDesktopState()` and re-queries when the sets changed. The same scan
+ * records which desktop session owns each transcript so "Open in Claude Desktop" can navigate to it
+ * (see `claudeDesktopSessionId`) instead of importing a duplicate.
  *
  * Only the session's *current* `cliSessionId` counts as pinned. `priorCliSessionIds` (transcripts
  * the same desktop session used before a /clear) are deliberately not included, so one pinned
@@ -24,7 +26,7 @@ export function claudeDesktopSessionsDir(): string {
 interface FileCache {
   mtime: number;
   size: number;
-  /** Current transcript uuid, or null when the file has neither flag set. */
+  /** Current transcript uuid, or null when the file has none. */
   id: string | null;
   starred: boolean;
   archived: boolean;
@@ -35,11 +37,13 @@ export interface ClaudeDesktopState {
   pinned: Set<string>;
   /** Transcript uuids of archived sidebar sessions. */
   archived: Set<string>;
+  /** Transcript uuid -> desktop session id (`local_<uuid>`), for `claude://code/continue`. */
+  desktopIds: Map<string, string>;
 }
 
 const fileCache = new Map<string, FileCache>();
 let lastScan = 0;
-let lastResult: ClaudeDesktopState = { pinned: new Set(), archived: new Set() };
+let lastResult: ClaudeDesktopState = { pinned: new Set(), archived: new Set(), desktopIds: new Map() };
 let inflight: Promise<boolean> | null = null;
 const SCAN_TTL_MS = 5000;
 
@@ -64,7 +68,6 @@ async function flagsIn(file: string): Promise<Pick<FileCache, "id" | "starred" |
   }
   const starred = bytes.includes(STARRED);
   const archived = bytes.includes(ARCHIVED);
-  if (!starred && !archived) return { id: null, starred: false, archived: false };
   const at = bytes.indexOf(CLI_SESSION_ID);
   if (at === -1) return { id: null, starred, archived };
   const start = at + CLI_SESSION_ID.length;
@@ -74,6 +77,10 @@ async function flagsIn(file: string): Promise<Pick<FileCache, "id" | "starred" |
 
 function sameSet(a: Set<string>, b: Set<string>): boolean {
   return a.size === b.size && [...a].every((id) => b.has(id));
+}
+
+function sameMap(a: Map<string, string>, b: Map<string, string>): boolean {
+  return a.size === b.size && [...a].every(([k, v]) => b.get(k) === v);
 }
 
 async function listSessionFiles(): Promise<string[]> {
@@ -109,7 +116,7 @@ async function listSessionFiles(): Promise<string[]> {
 async function scan(): Promise<boolean> {
   const files = await listSessionFiles();
   const seen = new Set(files);
-  const result: ClaudeDesktopState = { pinned: new Set(), archived: new Set() };
+  const result: ClaudeDesktopState = { pinned: new Set(), archived: new Set(), desktopIds: new Map() };
   const CONCURRENCY = 32;
   for (let i = 0; i < files.length; i += CONCURRENCY) {
     await Promise.all(
@@ -126,15 +133,28 @@ async function scan(): Promise<boolean> {
           fileCache.set(file, entry);
         }
         if (!entry.id) return;
+        result.desktopIds.set(entry.id, basename(file, ".json"));
         if (entry.starred) result.pinned.add(entry.id);
         if (entry.archived) result.archived.add(entry.id);
       }),
     );
   }
   for (const file of fileCache.keys()) if (!seen.has(file)) fileCache.delete(file);
-  const changed = !sameSet(result.pinned, lastResult.pinned) || !sameSet(result.archived, lastResult.archived);
+  const changed =
+    !sameSet(result.pinned, lastResult.pinned) ||
+    !sameSet(result.archived, lastResult.archived) ||
+    !sameMap(result.desktopIds, lastResult.desktopIds);
   lastResult = result;
   return changed;
+}
+
+/**
+ * Desktop session id (`local_<uuid>`) that currently owns this transcript, or null when the
+ * transcript was never opened in Claude Desktop. Rescans first so a session imported moments ago is found.
+ */
+export async function claudeDesktopSessionId(cliSessionId: string): Promise<string | null> {
+  await refreshClaudeDesktopState(true);
+  return lastResult.desktopIds.get(cliSessionId) ?? null;
 }
 
 /** Pinned and archived transcript uuids from the Claude Desktop sidebar, as of the last completed scan. */

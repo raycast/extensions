@@ -8,7 +8,8 @@ import { SessionHit } from "./types";
 
 /**
  * Resuming strategies (see `AGENTS` in agents.ts for the per-agent details):
- *  - desktop apps handle a deep link (`claude://resume?session=<uuid>`, `codex://threads/<uuid>`, …)
+ *  - desktop apps handle a deep link (`claude://resume?session=<uuid>`, `codex://threads/<uuid>`, …);
+ *    an agent may also resolve a link to its existing copy of the session, tried first
  *  - terminal: the agent's own resume invocation, run inside the session's cwd
  * Terminal launchers follow the patterns used by ClaudeCast, claude-code-launcher and
  * heyitaki's search-agent-sessions extension.
@@ -85,8 +86,9 @@ export function preferredTarget(hit: SessionHit): "app" | "terminal" {
 }
 
 export async function openInApp(hit: SessionHit): Promise<void> {
-  const link = appDeepLink(hit);
-  if (!link) throw new Error(`${agent(hit.agent).label} has no desktop app to open`);
+  const d = agent(hit.agent);
+  if (!d.app) throw new Error(`${d.label} has no desktop app to open`);
+  const link = (await d.app.existingDeepLink?.(hit.sessionId)) ?? d.app.deepLink(hit.sessionId);
   await open(link);
 }
 
