@@ -1,6 +1,6 @@
 # Quick Radios Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-23
 
 - Initial release of Quick Radios, a Wi-Fi manager for Raycast on Windows
 - Added Manage Wi-Fi command to inspect connection details (IP, MAC, gateway, signal strength, 5 GHz/6 GHz band, channel)
