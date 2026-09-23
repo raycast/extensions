@@ -11,7 +11,20 @@ export const mainnetClient = createPublicClient({
 
 export const normalizeEnsName = (name: string) => normalize(name.trim());
 
-export const ENS_TEXT_RECORD_KEYS = ["description", "url", "org.telegram", "com.telegram", "com.twitter"] as const;
+export const ENS_TEXT_RECORD_KEYS = [
+  "description",
+  "url",
+  "website",
+  "email",
+  "pronouns",
+  "keywords",
+  "com.github",
+  "com.instagram",
+  "com.twitter",
+  "com.discord",
+  "org.telegram",
+  "com.telegram",
+] as const;
 
 export const ENS_ADDRESS_RECORDS = {
   ethereum: { label: "Ethereum", coinType: 60n },

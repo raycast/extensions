@@ -171,6 +171,20 @@ function ProfileDetail({ name }: { name: string }) {
                   url={`https://opensea.io/${ensAddress}`}
                 />
               )}
+              {ensTextRecords["com.github"] && (
+                <Action.OpenInBrowser
+                  title="Open on GitHub"
+                  icon={{ source: { light: "github.png", dark: "github-dark.png" } }}
+                  url={`https://github.com/${ensTextRecords["com.github"]}`}
+                />
+              )}
+              {ensTextRecords["com.instagram"] && (
+                <Action.OpenInBrowser
+                  title="Open on Instagram"
+                  icon="instagram.png"
+                  url={`https://instagram.com/${ensTextRecords["com.instagram"]}`}
+                />
+              )}
               {ensTextRecords["com.twitter"] && (
                 <Action.OpenInBrowser
                   title="Open on Twitter"
@@ -194,8 +208,42 @@ function ProfileDetail({ name }: { name: string }) {
                   {ensTextRecords.description && (
                     <List.Item.Detail.Metadata.Label title="Description" text={ensTextRecords.description} />
                   )}
+                  {ensTextRecords.pronouns && (
+                    <List.Item.Detail.Metadata.Label title="Pronouns" text={ensTextRecords.pronouns} />
+                  )}
+                  {ensTextRecords.keywords && (
+                    <List.Item.Detail.Metadata.TagList title="Keywords">
+                      {ensTextRecords.keywords.split(",").map((keyword) => (
+                        <List.Item.Detail.Metadata.TagList.Item key={keyword} text={keyword.trim()} />
+                      ))}
+                    </List.Item.Detail.Metadata.TagList>
+                  )}
                   {ensTextRecords.url && (
                     <List.Item.Detail.Metadata.Link title="URL" text={ensTextRecords.url} target={ensTextRecords.url} />
+                  )}
+                  {ensTextRecords.website && (
+                    <List.Item.Detail.Metadata.Link
+                      title="Website"
+                      text={ensTextRecords.website}
+                      target={ensTextRecords.website}
+                    />
+                  )}
+                  {ensTextRecords.email && (
+                    <List.Item.Detail.Metadata.Label title="Email" text={ensTextRecords.email} />
+                  )}
+                  {ensTextRecords["com.github"] && (
+                    <List.Item.Detail.Metadata.Link
+                      title="GitHub"
+                      text={ensTextRecords["com.github"]}
+                      target={`https://github.com/${ensTextRecords["com.github"]}`}
+                    />
+                  )}
+                  {ensTextRecords["com.instagram"] && (
+                    <List.Item.Detail.Metadata.Link
+                      title="Instagram"
+                      text={ensTextRecords["com.instagram"]}
+                      target={`https://instagram.com/${ensTextRecords["com.instagram"]}`}
+                    />
                   )}
                   {ensTextRecords["com.twitter"] && (
                     <List.Item.Detail.Metadata.Link
@@ -203,6 +251,9 @@ function ProfileDetail({ name }: { name: string }) {
                       text={`@${ensTextRecords["com.twitter"]}`}
                       target={`https://twitter.com/${ensTextRecords["com.twitter"]}`}
                     />
+                  )}
+                  {ensTextRecords["com.discord"] && (
+                    <List.Item.Detail.Metadata.Label title="Discord" text={ensTextRecords["com.discord"]} />
                   )}
                   {telegram && (
                     <List.Item.Detail.Metadata.Link
