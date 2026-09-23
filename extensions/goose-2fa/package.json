@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "goose-2fa",
   "title": "Goose 2FA",
-  "description": "与 uTools 端共用同一份数据源 JSON 的双因素验证码管理器：验证码、分组、回收站、导入导出、截图识码与真实输入",
+  "description": "Two-factor code manager sharing a JSON data source with uTools: codes, groups, trash, import/export, screenshot scanning and direct typing",
   "icon": "icon.png",
   "author": "eachann_",
   "categories": [
@@ -16,9 +16,9 @@
   "commands": [
     {
       "name": "codes",
-      "title": "验证码",
+      "title": "Codes",
       "subtitle": "Goose 2FA",
-      "description": "搜索账户；带参数且唯一命中时直接粘贴验证码",
+      "description": "Search accounts; press Return to copy or paste codes according to preferences",
       "mode": "view",
       "keywords": [
         "2fa",
@@ -32,49 +32,83 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "账户名",
+          "placeholder": "Account name",
           "type": "text",
           "required": false
         }
-      ]
-    },
-    {
-      "name": "manage-data",
-      "title": "账户与数据",
-      "subtitle": "Goose 2FA",
-      "description": "账户、分组、回收站、导入导出与数据源文件状态",
-      "mode": "view",
-      "keywords": [
-        "账户",
-        "分组",
-        "回收站",
-        "导入",
-        "导出",
-        "数据源"
-      ]
-    },
-    {
-      "name": "scan-qr",
-      "title": "截图识码",
-      "subtitle": "Goose 2FA",
-      "description": "截屏识别二维码或迁移码并导入账户",
-      "mode": "view",
-      "keywords": [
-        "扫码",
-        "截图",
-        "qr",
-        "二维码",
-        "迁移"
       ]
     }
   ],
   "preferences": [
     {
+      "name": "viewMode",
+      "title": "Main View Layout",
+      "description": "Choose a list or grid for the main view.",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "data": [
+        {
+          "title": "List (arrow-key navigation)",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "enterAction",
+      "title": "Return Action",
+      "description": "Choose whether Return copies the code or pastes it into the previous field.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy Code",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into Previous Field",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "closeAfterCopy",
+      "title": "After Copy",
+      "description": "Close Raycast and return to the previous app after copying a code.",
+      "label": "Close Raycast and return to desktop",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "dataFile",
-      "title": "数据源文件",
-      "description": "指定 JSON 文件后即以它为准（与 uTools 端同一个文件，保存也回写它）。留空则该端只用本地库。",
+      "title": "Data Source File",
+      "description": "Choose an existing JSON file. Or create one in a chosen folder from Settings & Data. Select the same iCloud file on both clients to sync. The file contains plaintext 2FA secrets.",
       "type": "file",
       "required": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Choose the language used inside the extension; English is the default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Simplified Chinese",
+          "value": "zh-Hans"
+        }
+      ]
     }
   ],
   "scripts": {

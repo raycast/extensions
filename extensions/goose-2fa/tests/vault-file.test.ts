@@ -11,6 +11,7 @@ import {
   readVaultFile,
   readVaultLock,
   resolveVaultPath,
+  writeBackupFile,
   writeVaultFile,
 } from "../src/lib/vault-file";
 
@@ -29,6 +30,13 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(directory, { recursive: true, force: true });
+});
+
+test("敏感备份以 0600 新建且拒绝覆盖已有文件", () => {
+  writeBackupFile(target, "first");
+  expect(statSync(target).mode & 0o777).toBe(0o600);
+  expect(() => writeBackupFile(target, "second")).toThrow();
+  expect(readFileSync(target, "utf8")).toBe("first");
 });
 
 describe("数据源文件读写（与 uTools 端同一把锁）", () => {
@@ -91,6 +99,20 @@ describe("数据源文件读写（与 uTools 端同一把锁）", () => {
     expect(readdirSync(directory)).toEqual(["sync.json"]);
   });
 
+  test("新建数据源只允许空路径，不能覆盖已有内容", async () => {
+    const content = exportAsSyncJson([], [], []);
+    expect((await writeVaultFile(target, content, null, true)).status).toBe("ok");
+    expect(statSync(target).mode & 0o777).toBe(0o600);
+    expect((await writeVaultFile(target, "changed", null, true)).status).toBe("conflict");
+    expect(readFileSync(target, "utf8")).toBe(content);
+    expect(readdirSync(directory)).toEqual(["sync.json"]);
+  });
+
+  test("超出数据源上限时不创建文件", async () => {
+    expect((await writeVaultFile(target, "x".repeat(5 * 1024 * 1024 + 1), null, true)).status).toBe("error");
+    expect(readVaultFile(target).status).toBe("missing");
+  });
+
   test("另一个进程持锁时拒绝写入，且绝不按时间抢锁", async () => {
     writeFileSync(target, "old");
     const lockPath = `${target}.lock`;
@@ -133,5 +155,12 @@ describe("数据源文件读写（与 uTools 端同一把锁）", () => {
     const gone = path.join(directory, "gone.json");
     expect(await writeVaultFile(gone, "new", "old")).toEqual({ status: "conflict" });
     expect(readdirSync(directory).sort()).toEqual(["sync.json"]);
+  });
+
+  test("相同的 HOTP 增量也不能用旧版本重复提交", async () => {
+    writeFileSync(target, "counter=3");
+    expect((await writeVaultFile(target, "counter=4", "counter=3")).status).toBe("ok");
+    expect((await writeVaultFile(target, "counter=4", "counter=3")).status).toBe("conflict");
+    expect(readFileSync(target, "utf8")).toBe("counter=4");
   });
 });

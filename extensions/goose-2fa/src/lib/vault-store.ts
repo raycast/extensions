@@ -1,4 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
+import { t } from "./i18n";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import path from "node:path";
 import { useEffect, useState } from "react";
 import { exportAsSyncJson, type SyncSnapshot } from "../../vendor/lib/data-transfer";
 import type { AccountData, VaultGroup } from "../../vendor/lib/types";
@@ -10,7 +12,7 @@ import {
   type SyncLockInfo,
 } from "../../vendor/shared/sync-protocol";
 import { readLocalVault, writeLocalVault } from "./local-vault";
-import { clearVaultLock, readVaultFile, resolveVaultPath, writeVaultFile, type VaultFileRead } from "./vault-file";
+import { clearVaultLock, normalizePath, readVaultFile, resolveVaultPath, writeVaultFile, type VaultFileRead } from "./vault-file";
 import { mergeExternalSnapshot } from "./vault-ops";
 
 export type VaultSyncStatus = "idle" | "loading" | "writing" | "success" | "error" | "conflict";
@@ -19,6 +21,20 @@ export interface VaultConflict {
   snapshot: SyncSnapshot;
   content: string;
   stat: SyncFileStat;
+}
+
+const SOURCE_OVERRIDE_KEY = "goose-2fa-data-source-override";
+
+/** 界面新建文件时保存路径；用户后来修改扩展文件偏好时让新偏好优先。 */
+export async function selectCreatedSource(filePath: string): Promise<void> {
+  const preference = getPreferenceValues<Preferences>().dataFile || "";
+  await LocalStorage.setItem(SOURCE_OVERRIDE_KEY, JSON.stringify({ filePath, preference }));
+  await loadVault();
+}
+
+export async function clearCreatedSource(): Promise<void> {
+  await LocalStorage.removeItem(SOURCE_OVERRIDE_KEY);
+  await loadVault();
 }
 
 export interface VaultState {
@@ -41,7 +57,7 @@ export interface VaultState {
   conflict: VaultConflict | null;
 }
 
-const FILE_MISSING_MESSAGE = "数据源文件不存在或为空，未写入以免清空数据。可选择「新建数据源文件」。";
+const fileMissingMessage = () => t("Data source file is missing or empty. No changes were saved to prevent data loss. You can create a new data source file.", "数据源文件不存在或为空，未写入以免清空数据。可选择「新建数据源文件」。");
 const WATCH_INTERVAL = 3000;
 
 let state: VaultState = {
@@ -78,13 +94,13 @@ function messageForRead(read: Exclude<VaultFileRead, { status: "ok" }>): string 
   switch (read.status) {
     case "missing":
     case "empty":
-      return FILE_MISSING_MESSAGE;
+      return fileMissingMessage();
     case "invalid":
-      return "数据源文件不是 goose-2fa 数据源格式，已保留当前数据且不会写入。请确认文件路径。";
+      return t("File is not a goose-2fa data source. Current data was preserved and writes are disabled. Check the file path.", "数据源文件不是 goose-2fa 数据源格式，已保留当前数据且不会写入。请确认文件路径。");
     case "too-large":
-      return "数据源文件超过 5MB 上限，已停止读写。";
+      return t("Data source exceeds the 5 MB limit. Reading and writing are disabled.", "数据源文件超过 5MB 上限，已停止读写。");
     default:
-      return "数据源文件无法读取，已停止写入。请检查路径权限。";
+      return t("Cannot read data source. Writes are disabled. Check path permissions.", "数据源文件无法读取，已停止写入。请检查路径权限。");
   }
 }
 
@@ -103,7 +119,16 @@ function useVaultSnapshot(): VaultState {
 /** 读取数据源文件并以它为准；未配置路径时使用 Raycast 本地库。 */
 export async function loadVault(): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
-  const filePath = preferences.dataFile ? resolveVaultPath(preferences.dataFile) : "";
+  let selected = preferences.dataFile?.trim() || "";
+  try {
+    const override = JSON.parse((await LocalStorage.getItem<string>(SOURCE_OVERRIDE_KEY)) || "null") as { filePath?: unknown; preference?: unknown } | null;
+    if (override && override.preference === (preferences.dataFile || "") && typeof override.filePath === "string") selected = override.filePath;
+  } catch { /* 无效的路径偏好不会覆盖已选文件 */ }
+  if (selected && (!path.isAbsolute(normalizePath(selected)) || path.extname(selected).toLowerCase() !== ".json")) {
+    setState({ status: "ready", syncStatus: "error", message: t("Data source must be an absolute path to a .json file; existing data was not written.", "数据源须为绝对路径的 .json 文件；原有数据未写入。"), needsCreate: false });
+    return;
+  }
+  const filePath = selected ? resolveVaultPath(selected) : "";
   if (!filePath) {
     const read = await readLocalVault();
     baseline = null;
@@ -116,7 +141,7 @@ export async function loadVault(): Promise<void> {
         source: "local",
         status: "ready",
         syncStatus: "error",
-        message: "Raycast 本地库有无法解析的数据，已保留原值且不会写入。可在扩展设置里改用数据源文件，或显式重建本地库。",
+        message: t("Raycast Local Vault contains invalid data. Original values were preserved and writes are disabled. Choose a data source file in preferences or explicitly rebuild the vault.", "Raycast 本地库有无法解析的数据，已保留原值且不会写入。可在扩展设置里改用数据源文件，或显式重建本地库。"),
         notice: null,
         needsCreate: false,
         localBroken: true,
@@ -131,7 +156,7 @@ export async function loadVault(): Promise<void> {
       status: "ready",
       syncStatus: "success",
       message: null,
-      notice: "未配置数据源文件，使用 Raycast 本地库。",
+      notice: t("No data source file configured; using Raycast Local Vault.", "未配置数据源文件，使用 Raycast 本地库。"),
       needsCreate: false,
       localBroken: false,
       conflict: null,
@@ -150,11 +175,11 @@ export async function loadVault(): Promise<void> {
       status: "ready",
       syncStatus: "success",
       message: null,
-      notice: corrected ? "已按 30 天回收站规则与 HOTP 高水位纠正数据源文件。" : null,
+      notice: corrected ? t("Data source corrected using the 30-day trash rule and HOTP counter floor.", "已按 30 天回收站规则与 HOTP 高水位纠正数据源文件。") : null,
       needsCreate: false,
       conflict: null,
     });
-    if (corrected) void persist(snapshot, { allowCreate: true, overwrite: true });
+    if (corrected) void persist(snapshot);
     return;
   }
 
@@ -197,11 +222,11 @@ export async function refreshVault(): Promise<void> {
     status: "ready",
     syncStatus: "success",
     message: null,
-    notice: corrected ? "已按回收站规则与 HOTP 高水位纠正数据源文件。" : "已按数据源文件重新载入。",
+    notice: corrected ? t("Data source corrected using trash rules and the HOTP counter floor.", "已按回收站规则与 HOTP 高水位纠正数据源文件。") : t("Reloaded from data source file.", "已按数据源文件重新载入。"),
     needsCreate: false,
     conflict: null,
   });
-  if (corrected) void persist(snapshot, { allowCreate: true, overwrite: true });
+  if (corrected) void persist(snapshot);
 }
 
 /** 轮询数据源文件，自动载入外部改动；自身写入不回环。 */
@@ -228,29 +253,36 @@ async function pollExternal(): Promise<void> {
     status: "ready",
     syncStatus: "success",
     message: null,
-    notice: "已载入数据源文件的外部改动。",
+    notice: t("Loaded external changes to the data source file.", "已载入数据源文件的外部改动。"),
     needsCreate: false,
     conflict: null,
   });
-  if (corrected) void persist(snapshot, { allowCreate: true, overwrite: true });
+  if (corrected) void persist(snapshot);
 }
 
 async function persist(
   snapshot: SyncSnapshot,
-  options: { allowCreate?: boolean; overwrite?: boolean } = {},
+  options: { allowCreate?: boolean; overwrite?: boolean; createOnly?: boolean } = {},
 ): Promise<boolean> {
+  if (state.syncStatus === "writing") return false;
   if (!state.filePath) {
     if (state.localBroken && !options.allowCreate) {
       setState({
         syncStatus: "error",
-        message: "本地库有无法解析的数据，已停止写入。请显式重建本地库或改用数据源文件。",
+        message: t("Local Vault contains invalid data; writes are disabled. Explicitly rebuild it or use a data source file.", "本地库有无法解析的数据，已停止写入。请显式重建本地库或改用数据源文件。"),
         notice: null,
       });
       return false;
     }
-    await writeLocalVault(snapshot);
-    setState({ ...snapshot, syncStatus: "success", message: null, notice: null, conflict: null, localBroken: false });
-    return true;
+    setState({ syncStatus: "writing" });
+    try {
+      await writeLocalVault(snapshot);
+      setState({ ...snapshot, syncStatus: "success", message: null, notice: null, conflict: null, localBroken: false });
+      return true;
+    } catch {
+      setState({ syncStatus: "error", message: t("Could not save the local vault.", "无法保存本地保险柜。") });
+      return false;
+    }
   }
 
   setState({ syncStatus: "writing", lockHeld: null });
@@ -271,7 +303,7 @@ async function persist(
     if (!baseline) {
       setState({
         syncStatus: "conflict",
-        message: "尚未确认过数据源文件内容，已停止写入。请先重新读取文件。",
+        message: t("Data source has not been verified; writes are disabled. Reload it first.", "尚未确认过数据源文件内容，已停止写入。请先重新读取文件。"),
         notice: null,
         conflict: { snapshot: fresh.snapshot, content: fresh.content, stat: { mtimeMs: fresh.mtimeMs, size: fresh.size } },
       });
@@ -280,7 +312,7 @@ async function persist(
     if (!isSameSyncContent(fresh.content, baseline.content)) {
       setState({
         syncStatus: "conflict",
-        message: "数据源文件已被其他程序修改，本次改动没有写入。请选择以哪边为准。",
+        message: t("Another app changed the data source. Your changes were not saved. Choose which version to keep.", "数据源文件已被其他程序修改，本次改动没有写入。请选择以哪边为准。"),
         notice: null,
         conflict: { snapshot: fresh.snapshot, content: fresh.content, stat: { mtimeMs: fresh.mtimeMs, size: fresh.size } },
       });
@@ -291,7 +323,7 @@ async function persist(
   const serialized = exportAsSyncJson(snapshot.accounts, snapshot.groups, snapshot.trash);
   // 版本依据是逐字节内容，不是 mtime/size：锁内比对，外部一改就拒绝。
   const expectedContent = !options.overwrite && baseline ? baseline.content : null;
-  const result = await writeVaultFile(state.filePath, serialized, expectedContent);
+  const result = await writeVaultFile(state.filePath, serialized, expectedContent, options.createOnly);
   if (result.status === "ok") {
     baseline = { content: serialized, stat: { mtimeMs: result.mtimeMs, size: result.size } };
     setState({
@@ -307,15 +339,10 @@ async function persist(
   }
   if (result.status === "conflict") {
     const reread = readVaultFile(state.filePath);
-    if (reread.status === "ok" && isSameSyncContent(reread.content, serialized)) {
-      baseline = { content: serialized, stat: { mtimeMs: reread.mtimeMs, size: reread.size } };
-      setState({ ...snapshot, syncStatus: "success", message: null, conflict: null });
-      return true;
-    }
     if (reread.status === "ok") {
       setState({
         syncStatus: "conflict",
-        message: "数据源文件在写入前被其他程序修改，本次改动没有写入。请选择以哪边为准。",
+        message: t("Another app changed the data source before saving. Your changes were not saved. Choose which version to keep.", "数据源文件在写入前被其他程序修改，本次改动没有写入。请选择以哪边为准。"),
         conflict: { snapshot: reread.snapshot, content: reread.content, stat: { mtimeMs: reread.mtimeMs, size: reread.size } },
       });
       return false;
@@ -326,7 +353,7 @@ async function persist(
   const lock = result.status === "locked" ? parseSyncLockInfo(result.lockContent) : null;
   setState({
     syncStatus: "error",
-    message: result.status === "locked" ? lockMessage(lock) : "写入数据源文件失败，原有文件未被覆盖。",
+    message: result.status === "locked" ? lockMessage(lock) : t("Could not write data source; existing file was not overwritten.", "写入数据源文件失败，原有文件未被覆盖。"),
     notice: null,
     lockHeld: lock,
     conflict: null,
@@ -336,9 +363,12 @@ async function persist(
 
 /** 锁不会按时间自动清理，只能由用户确认后显式清理。 */
 function lockMessage(lock: SyncLockInfo | null): string {
-  const holder = lock?.pid ? `持有者进程 ${lock.pid}` : "持有者未知";
-  const created = lock?.createdAt ? `，创建于 ${new Date(lock.createdAt).toLocaleString()}` : "";
-  return `另一个程序正在写入数据源文件（${holder}${created}），本次改动没有写入。残留锁不会被自动清理：确认没有任何一端在写入后可清理锁文件，再重试。`;
+  const holder = lock?.pid ? t(`process ${lock.pid}`, `持有者进程 ${lock.pid}`) : t("unknown owner", "持有者未知");
+  const created = lock?.createdAt ? t(`, created ${new Date(lock.createdAt).toLocaleString("en-US")}`, `，创建于 ${new Date(lock.createdAt).toLocaleString("zh-CN")}`) : "";
+  return t(
+    `Another app is writing the data source (${holder}${created}). Your changes were not saved. Stale locks are never removed automatically: confirm no client is writing before removing the lock and retrying.`,
+    `另一个程序正在写入数据源文件（${holder}${created}），本次改动没有写入。残留锁不会被自动清理：确认没有任何一端在写入后可清理锁文件，再重试。`,
+  );
 }
 
 /** 所有改动的唯一入口：只有写盘成功才更新内存，避免出现没保存的“影子数据”。 */
@@ -351,10 +381,10 @@ export async function updateVault(
 
 /** 用户显式确认：在缺失/空路径上新建数据源文件（写入当前数据）。 */
 export async function createDataSource(): Promise<boolean> {
-  if (!state.filePath) return false;
+  if (!state.filePath || !state.needsCreate) return false;
   return persist(
     { accounts: state.accounts, groups: state.groups, trash: state.trash },
-    { allowCreate: true, overwrite: true },
+    { allowCreate: true, overwrite: true, createOnly: true },
   );
 }
 
@@ -396,11 +426,11 @@ export async function resolveConflict(choice: "file" | "local"): Promise<void> {
       ...snapshot,
       syncStatus: "success",
       message: null,
-      notice: "已按数据源文件内容覆盖本地。",
+      notice: t("Local data replaced with file contents.", "已按数据源文件内容覆盖本地。"),
       needsCreate: false,
       conflict: null,
     });
-    if (corrected) void persist(snapshot, { allowCreate: true, overwrite: true });
+    if (corrected) void persist(snapshot);
     return;
   }
   const merged = {
@@ -411,9 +441,9 @@ export async function resolveConflict(choice: "file" | "local"): Promise<void> {
     groups: state.groups,
     trash: state.trash,
   };
-  baseline = null;
-  setState({ conflict: null, message: null, notice: "将以本地数据覆盖数据源文件。" });
-  await persist(merged, { allowCreate: true, overwrite: true });
+  baseline = { content: conflict.content, stat: conflict.stat };
+  setState({ conflict: null, message: null, notice: t("Local data will replace the data source file.", "将以本地数据覆盖数据源文件。") });
+  await persist(merged);
 }
 
 /** 视图存活期间轮询外部改动；命令被卸载即停止。 */

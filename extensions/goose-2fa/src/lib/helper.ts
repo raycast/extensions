@@ -1,3 +1,4 @@
+import { isChinese, t } from "./i18n";
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -14,19 +15,19 @@ export function helperPath(): string {
 
 /** 真实键盘输入到最前台应用；缺少辅助功能权限时 helper 会返回明确原因。 */
 export async function typeText(text: string): Promise<{ ok: true } | { ok: false; message: string }> {
-  if (!text) return { ok: false, message: "没有可输入的验证码。" };
+  if (!text) return { ok: false, message: t("No code available to type.", "没有可输入的验证码。") };
   try {
-    await execFileAsync(helperPath(), ["type", text]);
+    await execFileAsync(helperPath(), ["type", text], { env: { ...process.env, GOOSE_2FA_LANG: isChinese() ? "zh-Hans" : "en" } });
     return { ok: true };
   } catch (error) {
     const stderr = (error as { stderr?: string }).stderr?.trim();
-    return { ok: false, message: stderr || "真实输入失败：请确认已给 Raycast 辅助功能权限。" };
+    return { ok: false, message: stderr || t("Typing failed: grant Raycast Accessibility permission.", "真实输入失败：请确认已给 Raycast 辅助功能权限。") };
   }
 }
 
 /** 用 Vision 识别图片里的二维码/条码，逐行返回 payload。 */
 export async function detectBarcodes(imagePath: string): Promise<string[]> {
-  const { stdout } = await execFileAsync(helperPath(), ["qr", imagePath], { maxBuffer: 1024 * 1024 });
+  const { stdout } = await execFileAsync(helperPath(), ["qr", imagePath], { maxBuffer: 1024 * 1024, env: { ...process.env, GOOSE_2FA_LANG: isChinese() ? "zh-Hans" : "en" } });
   return stdout
     .split("\n")
     .map((line) => line.trim())

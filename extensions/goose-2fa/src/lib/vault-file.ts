@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
   closeSync,
   fsyncSync,
+  linkSync,
   openSync,
   readFileSync,
   realpathSync,
@@ -33,6 +34,11 @@ export type VaultFileWrite =
 /** 纯词法规范化（展开 `~`、折叠 `.`/`..`），非数据源文件路径也用它。 */
 export function normalizePath(input: string): string {
   return normalizeSyncPath(input, homedir());
+}
+
+/** 本地敏感备份只新建 0600 文件；路径已存在时拒绝覆盖。 */
+export function writeBackupFile(filePath: string, content: string): void {
+  writeFileSync(filePath, content, { flag: "wx", mode: 0o600 });
 }
 
 /**
@@ -120,18 +126,28 @@ async function acquireLock(lockPath: string): Promise<boolean> {
 }
 
 /**
- * 原子写入数据源文件：与 uTools 端同样的 temp → fsync → rename，同一把锁。
+ * 原子写入数据源文件：覆盖走 temp → fsync → rename；新建走 temp → fsync → link（不覆盖），同一把锁。
  * expectedContent 非 null 时在锁内逐字节比对当前文件内容，不一致即 conflict（mtime/size 不是版本依据）。
  */
 export async function writeVaultFile(
   filePath: string,
   content: string,
   expectedContent: string | null,
+  createOnly = false,
 ): Promise<VaultFileWrite> {
+  if (Buffer.byteLength(content) > SYNC_MAX_BYTES) return { status: "error" };
   const target = resolveVaultPath(filePath);
   const lockPath = lockPathFor(target);
   if (!(await acquireLock(lockPath))) return { status: "locked", lockContent: readVaultLock(target) };
   try {
+    if (createOnly) {
+      try {
+        statSync(target);
+        return { status: "conflict" };
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") return { status: "error" };
+      }
+    }
     if (expectedContent !== null) {
       let current: string | null = null;
       try {
@@ -151,13 +167,19 @@ export async function writeVaultFile(
       } finally {
         closeSync(fd);
       }
-      renameSync(tempPath, target);
+      if (createOnly) {
+        linkSync(tempPath, target);
+        unlinkSync(tempPath);
+      } else {
+        renameSync(tempPath, target);
+      }
     } catch (error) {
       try {
         unlinkSync(tempPath);
       } catch {
         /* 临时文件可能未创建成功 */
       }
+      if (createOnly && (error as NodeJS.ErrnoException).code === "EEXIST") return { status: "conflict" };
       throw error;
     }
     const written = statSync(target);

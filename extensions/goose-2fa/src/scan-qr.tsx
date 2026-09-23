@@ -3,6 +3,7 @@ import { unlinkSync } from "node:fs";
 import { useEffect, useState } from "react";
 import { parseImportBundle } from "../vendor/lib/data-transfer";
 import type { NewAccountInput } from "../vendor/lib/types";
+import { t } from "./lib/i18n";
 import { commit } from "./lib/commit";
 import { captureScreenToTempFile, detectBarcodes } from "./lib/helper";
 import { addAccounts } from "./lib/vault-ops";
@@ -24,7 +25,7 @@ export default function ScanQr() {
       const imagePath = await captureScreenToTempFile();
       if (!active) return;
       if (!imagePath) {
-        await showToast({ style: Toast.Style.Failure, title: "已取消截屏" });
+        await showToast({ style: Toast.Style.Failure, title: t("Screenshot cancelled", "已取消截屏") });
         await popToRoot();
         return;
       }
@@ -41,7 +42,7 @@ export default function ScanQr() {
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "识别失败",
+          title: t("Scan Failed", "识别失败"),
           message: error instanceof Error ? error.message : String(error),
         });
         setStatus("empty");
@@ -62,21 +63,21 @@ export default function ScanQr() {
     if (chosen.length === 0) return;
     const ok = await commit(
       (snapshot) => addAccounts(snapshot, chosen.map((entry) => entry.input), null),
-      `已导入 ${chosen.length} 个账户`,
+      t(`Imported ${chosen.length} accounts`, `已导入 ${chosen.length} 个账户`),
     );
     if (ok) await popToRoot();
   };
 
   return (
-    <List isLoading={status === "scanning" || vault.syncStatus === "writing"} searchBarPlaceholder="搜索识别结果">
+    <List isLoading={status === "scanning" || vault.syncStatus === "writing"} searchBarPlaceholder={t("Search scan results", "搜索识别结果")}>
       {status === "empty" ? (
         <List.Item
           icon={Icon.MagnifyingGlass}
-          title="没有识别到二维码"
-          subtitle="截屏区域里没有可解析的 otpauth 码"
+          title={t("No QR Code Found", "没有识别到二维码")}
+          subtitle={t("No parseable otpauth code in the captured area", "截屏区域里没有可解析的 otpauth 码")}
           actions={
             <ActionPanel>
-              <Action title="重新截屏" icon={Icon.Camera} onAction={() => void popToRoot()} />
+              <Action title={t("Capture Again", "重新截屏")} icon={Icon.Camera} onAction={() => void popToRoot()} />
             </ActionPanel>
           }
         />
@@ -90,9 +91,9 @@ export default function ScanQr() {
           accessories={[{ text: entry.input.type.toUpperCase() }]}
           actions={
             <ActionPanel>
-              <Action title="导入这个账户" icon={Icon.Download} onAction={() => void importEntries([entry])} />
-              <Action title="导入全部" icon={Icon.Download} onAction={() => void importEntries(entries)} />
-              <Action.CopyToClipboard title="复制二维码内容" content={entry.payload} />
+              <Action title={t("Import This Account", "导入这个账户")} icon={Icon.Download} onAction={() => void importEntries([entry])} />
+              <Action title={t("Import All", "导入全部")} icon={Icon.Download} onAction={() => void importEntries(entries)} />
+              <Action.CopyToClipboard title={t("Copy QR Content", "复制二维码内容")} content={entry.payload} />
             </ActionPanel>
           }
         />
@@ -100,10 +101,10 @@ export default function ScanQr() {
       {status === "ready" ? (
         <List.Item
           icon={Icon.Download}
-          title={`导入全部 ${entries.length} 个账户`}
+          title={t(`Import All ${entries.length} Accounts`, `导入全部 ${entries.length} 个账户`)}
           actions={
             <ActionPanel>
-              <Action title="导入全部" icon={Icon.Download} onAction={() => void importEntries(entries)} />
+              <Action title={t("Import All", "导入全部")} icon={Icon.Download} onAction={() => void importEntries(entries)} />
             </ActionPanel>
           }
         />
