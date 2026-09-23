@@ -3,14 +3,9 @@ import os from "os";
 import path from "path";
 import { resolveIcloudDir } from "./paths";
 
-export const MOBILE_DOCUMENTS_DIR = path.join(
-  os.homedir(),
-  "Library",
-  "Mobile Documents",
-);
+export const MOBILE_DOCUMENTS_DIR = path.join(os.homedir(), "Library", "Mobile Documents");
 
-export type IcloudSetupIssue =
-  "no-icloud" | "no-timeatlas" | "not-directory" | "unreadable";
+export type IcloudSetupIssue = "no-icloud" | "no-timeatlas" | "not-directory" | "unreadable";
 
 export interface IcloudSetupOk {
   ok: true;
@@ -27,18 +22,12 @@ export interface IcloudSetupFail {
 
 export type IcloudSetup = IcloudSetupOk | IcloudSetupFail;
 
-async function pathKind(
-  target: string,
-): Promise<"missing" | "directory" | "file" | "unreadable"> {
+async function pathKind(target: string): Promise<"missing" | "directory" | "file" | "unreadable"> {
   try {
     const stat = await fs.stat(target);
     return stat.isDirectory() ? "directory" : "file";
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      (error as NodeJS.ErrnoException).code === "ENOENT"
-    ) {
+    if (error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT") {
       return "missing";
     }
     return "unreadable";
@@ -49,9 +38,7 @@ async function pathKind(
  * Diagnose whether Time Atlas iCloud Documents are available.
  * `override` is the optional preference path (same as resolveIcloudDir).
  */
-export async function checkIcloudSetup(
-  override?: string,
-): Promise<IcloudSetup> {
+export async function checkIcloudSetup(override?: string): Promise<IcloudSetup> {
   const trimmed = override?.trim();
   const usingOverride = Boolean(trimmed);
   const target = resolveIcloudDir(override);
@@ -97,10 +84,7 @@ export async function checkIcloudSetup(
       ok: false,
       issue: kind === "file" ? "not-directory" : "unreadable",
       path: target,
-      title:
-        kind === "file"
-          ? "Time Atlas path is not a folder"
-          : "Can’t read Time Atlas folder",
+      title: kind === "file" ? "Time Atlas path is not a folder" : "Can’t read Time Atlas folder",
       description:
         kind === "file"
           ? `Expected a directory but found a file:\n${target}`
@@ -112,7 +96,6 @@ export async function checkIcloudSetup(
 }
 
 /** Deep link into Apple ID / iCloud settings (best-effort across macOS versions). */
-export const ICLOUD_SETTINGS_URL =
-  "x-apple.systempreferences:com.apple.systempreferences.AppleIDSettings";
+export const ICLOUD_SETTINGS_URL = "x-apple.systempreferences:com.apple.systempreferences.AppleIDSettings";
 
 export const TIME_ATLAS_SITE = "https://timeatlas.app";

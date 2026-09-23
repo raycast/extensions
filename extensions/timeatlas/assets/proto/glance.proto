@@ -41,11 +41,17 @@ message TimestampWithOffset {
 
 message DateEvent {
   string date = 1;
+  optional ExternalData external_data = 11;
+}
+
+message ExternalData {
+  uint32 steps = 1;
 }
 
 message PlaceVisit {
   optional string name = 2;
   optional string secondary_name = 3;
+  repeated MoveActivity inside_activities = 102;
 }
 
 message MoveActivity {

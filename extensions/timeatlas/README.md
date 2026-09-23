@@ -1,6 +1,6 @@
 # Timeatlas
 
-Use [Time Atlas](https://timeatlas.app) from Raycast: jot a note for any day, or open a quick summary of today — sleep, places, distance, and notes.
+Use [Time Atlas](https://timeatlas.app) from Raycast: jot a note for any day, or open a quick summary of today — sleep, places, steps, distance, and notes.
 
 No API keys, no database, no extra install. If Time Atlas is signed in to iCloud on your Mac, this extension just works.
 
@@ -23,12 +23,13 @@ The note is saved into your Time Atlas iCloud folder. Time Atlas picks it up on 
 
 ### Today at a Glance
 
-Open a list + detail view of **today**:
+Open a list + detail view of **today** (rows with no data are hidden):
 
 - **Overview** — one-line summary of the day, plus notes
-- **Sleep** — total sleep
-- **Places** — first / last place (or a single place if you stayed put)
-- **Distance** — distance moved
+- **Sleep** — total sleep (wake-day night, matching Time Atlas)
+- **Places** — visit path for the day
+- **Steps** — synced day step total (at-place walks as a breakdown)
+- **Distance** — active distance moved
 - **Notes** — journal notes for today (including ones you just added from Raycast)
 
 Useful shortcuts:

@@ -1,29 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  open,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, open, popToRoot, showToast, Toast, Keyboard } from "@raycast/api";
 import { promises as fs } from "fs";
 import path from "path";
 import { useEffect, useState } from "react";
-import {
-  checkIcloudSetup,
-  ICLOUD_SETTINGS_URL,
-  TIME_ATLAS_SITE,
-  type IcloudSetup,
-} from "./lib/icloud-status";
+import { checkIcloudSetup, ICLOUD_SETTINGS_URL, TIME_ATLAS_SITE, type IcloudSetup } from "./lib/icloud-status";
 import { getExtensionPreferences, toLocalDateString } from "./lib/paths";
 
-async function writeNote(
-  icloudDir: string,
-  dateStr: string,
-  text: string,
-): Promise<string> {
+async function writeNote(icloudDir: string, dateStr: string, text: string): Promise<string> {
   const now = new Date();
   const record = {
     text,
@@ -92,35 +74,18 @@ export default function AddNoteCommand() {
       isLoading={setup === null}
       actions={
         <ActionPanel>
-          {!blocked ? (
-            <Action.SubmitForm title="Add Note" onSubmit={handleSubmit} />
-          ) : null}
+          {!blocked ? <Action.SubmitForm title="Add Note" onSubmit={handleSubmit} /> : null}
           {setup && !setup.ok && setup.issue === "no-icloud" ? (
-            <Action
-              title="Open System Settings"
-              icon={Icon.Gear}
-              onAction={() => open(ICLOUD_SETTINGS_URL)}
-            />
+            <Action title="Open System Settings" icon={Icon.Gear} onAction={() => open(ICLOUD_SETTINGS_URL)} />
           ) : null}
-          {setup &&
-          !setup.ok &&
-          (setup.issue === "no-timeatlas" ||
-            setup.issue === "not-directory") ? (
-            <Action.OpenInBrowser
-              title="Open Time Atlas Website"
-              url={TIME_ATLAS_SITE}
-            />
+          {setup && !setup.ok && (setup.issue === "no-timeatlas" || setup.issue === "not-directory") ? (
+            <Action.OpenInBrowser title="Open Time Atlas Website" url={TIME_ATLAS_SITE} />
           ) : null}
-          {setup ? (
-            <Action.CopyToClipboard
-              title="Copy Expected Folder Path"
-              content={setup.path}
-            />
-          ) : null}
+          {setup ? <Action.CopyToClipboard title="Copy Expected Folder Path" content={setup.path} /> : null}
           <Action
             title="Recheck Setup"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={() => {
               setSetup(null);
               setSetupKey((k) => k + 1);
@@ -131,27 +96,13 @@ export default function AddNoteCommand() {
     >
       {blocked ? (
         <>
-          <Form.Description
-            title={setup.title}
-            text={`${setup.description}\n\nExpected folder:\n${setup.path}`}
-          />
+          <Form.Description title={setup.title} text={`${setup.description}\n\nExpected folder:\n${setup.path}`} />
         </>
       ) : (
         <>
           <Form.Description text="Notes are saved to your Time Atlas iCloud folder. No extra setup needed if Time Atlas is signed in to iCloud." />
-          <Form.DatePicker
-            id="date"
-            title="Date"
-            type={Form.DatePicker.Type.Date}
-            defaultValue={new Date()}
-          />
-          <Form.TextArea
-            id="text"
-            title="Note"
-            placeholder="What happened?"
-            enableMarkdown={false}
-            autoFocus
-          />
+          <Form.DatePicker id="date" title="Date" type={Form.DatePicker.Type.Date} defaultValue={new Date()} />
+          <Form.TextArea id="text" title="Note" placeholder="What happened?" enableMarkdown={false} autoFocus />
         </>
       )}
     </Form>
