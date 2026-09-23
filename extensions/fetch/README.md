@@ -78,6 +78,9 @@
 | Stall Timeout | seconds | `300` |
 | Max Parallel Downloads | 1–10 | `3` |
 | Debug Logging | on / off | off |
+| Strict Redaction | on / off | off |
+
+**Strict Redaction** also masks every URL query string and fragment in the logs, not just values it recognizes as secrets by name. Turn it on before reproducing a problem you plan to share a log of.
 
 **Stall Timeout is an idle limit, not a time limit.** It is the number of seconds a transfer may go without receiving *any* data before it is abandoned. A large file downloading slowly is left alone for as long as it keeps making progress.
 

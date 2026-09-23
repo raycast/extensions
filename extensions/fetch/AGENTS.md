@@ -137,9 +137,9 @@ value, supports descending ranges, and is capped at 500 URLs.
 result. Use `getPreferences()` everywhere. `maxParallelDownloads` is capped at 10
 regardless of user input.
 
-The debug toggle **must** stay named exactly `verboseLogging` — that is the key
-`@chrismessina/raycast-logger` reads internally. A renamed toggle silently does
-nothing. `src/lib/logger.ts` deliberately does not read preferences itself, which also
+The two logging toggles **must** keep their exact names — `verboseLogging` and
+`strictRedaction` are the keys `@chrismessina/raycast-logger` reads internally, the
+second per call from 1.5.0 on. A renamed toggle silently does nothing. `src/lib/logger.ts` deliberately does not read preferences itself, which also
 avoids a circular import.
 
 ### History
