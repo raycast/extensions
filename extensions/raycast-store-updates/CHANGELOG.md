@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Version History, Working My Updates, and Update Checks] - {PR_MERGE_DATE}
+## [Version History, Working My Updates, and Update Checks] - 2026-09-23
 
 - New extension icon
 - The changelog view is now a Version History: one row per version, dated where the changelog gives a date, with the full notes in a side pane
