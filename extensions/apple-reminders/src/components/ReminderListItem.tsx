@@ -4,6 +4,7 @@ import { format, formatDistanceToNow } from "date-fns";
 
 import {
   displayDueDate,
+  extractTagsFromNotes,
   formatReminderTime,
   getLocationDescription,
   getPriorityIcon,
@@ -100,6 +101,18 @@ export default function ReminderListItem({
     keywords.push(reminder.priority);
   }
 
+  const { notes: cleanNotes, tags } = extractTagsFromNotes(reminder.notes);
+
+  if (tags.length > 0) {
+    accessories.push({
+      icon: Icon.Tag,
+      text: tags.map((t) => `#${t}`).join(" "),
+      tooltip: `Tags: ${tags.map((t) => `#${t}`).join(", ")}`,
+    });
+
+    keywords.push(...tags.map((t) => `#${t}`), ...tags);
+  }
+
   if (listId === "all" && reminder.list) {
     accessories.push({
       icon: { source: Icon.Dot, tintColor: reminder.list.color },
@@ -109,8 +122,8 @@ export default function ReminderListItem({
     keywords.push(reminder.list.title);
   }
 
-  if (reminder.notes) {
-    keywords.push(...reminder.notes.split(" "));
+  if (cleanNotes) {
+    keywords.push(...cleanNotes.split(" "));
   }
 
   return (
@@ -118,7 +131,7 @@ export default function ReminderListItem({
       icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
       key={reminder.id}
       title={reminder.title}
-      subtitle={reminder.notes}
+      subtitle={cleanNotes || undefined}
       accessories={accessories}
       keywords={keywords}
       actions={<ReminderActions reminder={reminder} viewProps={viewProps} listId={listId} mutate={mutate} />}
