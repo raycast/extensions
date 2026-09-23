@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { Booking } from "../lib/types";
-import { confirmDeleteBooking, failToast, profileIcon } from "../lib/utils";
+import { confirmDeleteBooking, failToast, profileIcon, renderBookingDate } from "../lib/utils";
 import { isSameDay, renderTimeRange, toISODate } from "../lib/format";
 import { checkInBooking, fetchRoomPlanImage } from "../api/deskly";
 
@@ -47,7 +47,7 @@ export default function BookingDetail({
 
   return (
     <Detail
-      navigationTitle={`Booking Detail: ${personName ?? "Unknown Seat"}`}
+      navigationTitle={personName ?? renderBookingDate(booking)}
       isLoading={isLoadingImage}
       markdown={imageMarkdown}
       actions={
