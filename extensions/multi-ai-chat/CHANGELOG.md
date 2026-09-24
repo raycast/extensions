@@ -1,6 +1,6 @@
 # Multi AI Chat Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-24
 
 - Open one prompt in ChatGPT, Claude, Grok, and Perplexity using existing browser sessions.
 - Choose zero to five tabs for each supported provider.
