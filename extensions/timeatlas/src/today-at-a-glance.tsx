@@ -435,7 +435,11 @@ export default function Command() {
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
       {notesText ? (
-        <Action.CopyToClipboard title="Copy Notes" content={notesText} shortcut={Keyboard.Shortcut.Common.Copy} />
+        <Action.CopyToClipboard
+          title="Copy Notes"
+          content={notesText}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
       ) : null}
       <Action
         title="Refresh"

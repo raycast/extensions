@@ -666,6 +666,9 @@ export function summarizeDay(
     let placeSteps = 0;
     let placeMeters = 0;
     for (const act of e.insideActivities ?? []) {
+      // Prefer activity start inside the day; fall back to parent visit overlap.
+      // Overnight visits otherwise double-count the same activity on both days.
+      if (act.start != null && (act.start < from || act.start > to)) continue;
       placeSteps += act.steps ?? 0;
       placeMeters += act.distanceMeters;
     }
