@@ -162,6 +162,18 @@
       {
         "name": "exa-source-research",
         "title": "Research with Sources"
+      },
+      {
+        "name": "company-research",
+        "title": "Company Research"
+      },
+      {
+        "name": "lead-generation",
+        "title": "Lead Generation"
+      },
+      {
+        "name": "build-with-exa",
+        "title": "Build with Exa"
       }
     ]
   }

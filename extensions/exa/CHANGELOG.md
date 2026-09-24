@@ -1,8 +1,13 @@
 # Exa Changelog
 
-## Add Research with Sources Skill - {PR_MERGE_DATE}
+## Add Exa Research Skills - {PR_MERGE_DATE}
 
-- Research questions using retrieved sources and inline citations. Available through the bundled Research with Sources skill in Raycast AI.
+- Research questions using retrieved sources and inline citations.
+- Research companies, competitors, funding, news, and leadership.
+- Build a sourced prospect list from an ideal customer profile.
+- Look up current Exa docs and write a minimal integration example.
+
+Available through the bundled skills in Raycast AI.
 
 ## [Update] - 2026-05-15
 
