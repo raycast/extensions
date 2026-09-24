@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-24
 
 - Keep Open Tabs current while the Command Bar stays open: poll for tab changes at a modest cadence so opening or closing a tab directly in Orion is reflected without a manual refresh, and update the cached "Current Tab" immediately after switching to a tab from the Command Bar instead of waiting for the next poll. The standalone Search Tabs command is unaffected.
 
