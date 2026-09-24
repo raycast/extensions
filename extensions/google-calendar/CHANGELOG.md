@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## Add Week Planning Skill - {PR_MERGE_DATE}
+
+- Plan a week and suggest available meeting slots around existing commitments. Available through the bundled Week Planning skill in Raycast AI.
+
 ## [Hide contact birthdays from List Events by default] - 2026-09-19
 
 - Exclude Google `birthday` events from List Events on the primary calendar so contact birthdays no longer flood the upcoming schedule

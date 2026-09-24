@@ -275,7 +275,7 @@
   "dependencies": {
     "@googleapis/calendar": "^15.0.0",
     "@googleapis/people": "^7.0.1",
-    "@raycast/api": "^1.104.16",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.4",
     "chrono-node": "^2.9.1",
     "date-fns": "^4.1.0",
@@ -308,5 +308,13 @@
     "esbuild@0.27.7": true,
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true
+  },
+  "ai": {
+    "skills": [
+      {
+        "name": "calendar-week-planning",
+        "title": "Week Planning"
+      }
+    ]
   }
 }
