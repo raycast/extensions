@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Move reminder to list action] - {PR_MERGE_DATE}
+## [Move reminder to list action] - 2026-09-24
 
 - Add "Move to List" action submenu (`Cmd + Shift + M`) to easily move reminders between lists in My Reminders.
 - Support moving reminders to a different list via AI update tool.
