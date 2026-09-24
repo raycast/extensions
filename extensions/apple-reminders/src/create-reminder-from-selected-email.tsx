@@ -9,6 +9,22 @@ import usePostCreateActions from "./hooks/usePostCreateActions";
 import { formatDueDate, parseDueDate } from "./parse-due-date";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
+function getResolvedListId(
+  defaultListName?: string,
+  lists?: { id: string; title: string; isDefault: boolean }[],
+): string | undefined {
+  if (!lists) return undefined;
+  const targetDefaultName = defaultListName?.trim().toLowerCase();
+  if (targetDefaultName) {
+    const matched = lists.find((l) => l.title.trim().toLowerCase() === targetDefaultName);
+    if (matched) {
+      return matched.id;
+    }
+  }
+  const defaultList = lists.find((l) => l.isDefault);
+  return defaultList?.id;
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.CreateReminderFromSelectedEmail>();
   const { data, isLoading: isLoadingData } = useData();
@@ -33,20 +49,7 @@ export default function Command() {
             return;
           }
 
-          let listId: string | undefined;
-          const targetDefaultName = preferences.defaultListName?.trim().toLowerCase();
-          if (targetDefaultName && data?.lists) {
-            const matched = data.lists.find((l) => l.title.trim().toLowerCase() === targetDefaultName);
-            if (matched) {
-              listId = matched.id;
-            }
-          }
-          if (!listId && data?.lists) {
-            const defaultList = data.lists.find((l) => l.isDefault);
-            if (defaultList) {
-              listId = defaultList.id;
-            }
-          }
+          const listId = getResolvedListId(preferences.defaultListName, data?.lists);
 
           let dueDate: string | undefined;
           if (preferences.defaultDueDate?.trim()) {
@@ -110,6 +113,8 @@ export default function Command() {
     ? parseDueDate(preferences.defaultDueDate.trim())?.date
     : undefined;
 
+  const resolvedListId = getResolvedListId(preferences.defaultListName, data?.lists);
+
   const senderDisplayName = getSenderDisplayName(email?.sender);
   const initialTitle = email
     ? email.subject || (senderDisplayName ? `Email from ${senderDisplayName}` : "Email Reminder")
@@ -123,11 +128,13 @@ export default function Command() {
   return (
     <CreateReminderForm
       key={email ? `email-${email.messageId}` : "empty-email-form"}
+      listId={resolvedListId}
       draftValues={{
         title: initialTitle,
         url: email?.url ?? "",
         notes: initialNotes,
         dueDate: defaultDueDate,
+        listId: resolvedListId,
       }}
     />
   );

@@ -1,11 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { getSenderDisplayName, MAIL_DELIMITER, parseSelectedEmailResult } from "../src/helpers/mail";
+import { getSenderDisplayName, parseSelectedEmailResult } from "../src/helpers/mail";
 
 describe("Mail Extraction Helpers", () => {
   it("parses valid raw result with subject, message id, and sender", () => {
-    const raw = `Project Planning Meeting${MAIL_DELIMITER}CAB12345@mail.example.com${MAIL_DELIMITER}Alice Smith <alice@example.com>`;
+    const raw = JSON.stringify({
+      status: "OK",
+      subject: "Project Planning Meeting",
+      messageId: "CAB12345@mail.example.com",
+      sender: "Alice Smith <alice@example.com>",
+    });
     const parsed = parseSelectedEmailResult(raw);
 
     assert.ok(parsed);
@@ -16,7 +21,12 @@ describe("Mail Extraction Helpers", () => {
   });
 
   it("strips wrapping angle brackets from message id", () => {
-    const raw = `Invoice #1024${MAIL_DELIMITER}<INV-987654@billing.org>${MAIL_DELIMITER}billing@billing.org`;
+    const raw = JSON.stringify({
+      status: "OK",
+      subject: "Invoice #1024",
+      messageId: "<INV-987654@billing.org>",
+      sender: "billing@billing.org",
+    });
     const parsed = parseSelectedEmailResult(raw);
 
     assert.ok(parsed);
@@ -26,7 +36,12 @@ describe("Mail Extraction Helpers", () => {
   });
 
   it("handles empty subject cleanly", () => {
-    const raw = `   ${MAIL_DELIMITER}NOMSGID-123@example.com${MAIL_DELIMITER}noreply@example.com`;
+    const raw = JSON.stringify({
+      status: "OK",
+      subject: "   ",
+      messageId: "NOMSGID-123@example.com",
+      sender: "noreply@example.com",
+    });
     const parsed = parseSelectedEmailResult(raw);
 
     assert.ok(parsed);
@@ -35,16 +50,32 @@ describe("Mail Extraction Helpers", () => {
     assert.equal(parsed.url, "message://%3CNOMSGID-123@example.com%3E");
   });
 
+  it("handles subjects with arbitrary special characters, quotes, and separator-like strings without corruption", () => {
+    const raw = JSON.stringify({
+      status: "OK",
+      subject: 'Special "Subject" with ---RAYCAST_MAIL_SEPARATOR--- & { json: "test" }',
+      messageId: "SECURE-100@domain.org",
+      sender: "security@domain.org",
+    });
+    const parsed = parseSelectedEmailResult(raw);
+
+    assert.ok(parsed);
+    assert.equal(parsed.subject, 'Special "Subject" with ---RAYCAST_MAIL_SEPARATOR--- & { json: "test" }');
+    assert.equal(parsed.messageId, "SECURE-100@domain.org");
+    assert.equal(parsed.url, "message://%3CSECURE-100@domain.org%3E");
+  });
+
   it("returns null when Mail is not running or no selection exists", () => {
-    assert.equal(parseSelectedEmailResult("MAIL_NOT_RUNNING"), null);
-    assert.equal(parseSelectedEmailResult("NO_SELECTION"), null);
+    assert.equal(parseSelectedEmailResult(JSON.stringify({ status: "MAIL_NOT_RUNNING" })), null);
+    assert.equal(parseSelectedEmailResult(JSON.stringify({ status: "NO_SELECTION" })), null);
     assert.equal(parseSelectedEmailResult(undefined), null);
     assert.equal(parseSelectedEmailResult(""), null);
   });
 
-  it("returns null when message id is empty or delimiter missing", () => {
-    assert.equal(parseSelectedEmailResult("Invalid text without delimiter"), null);
-    assert.equal(parseSelectedEmailResult(`Subject only${MAIL_DELIMITER}`), null);
+  it("returns null when message id is empty or invalid JSON", () => {
+    assert.equal(parseSelectedEmailResult("Invalid text not JSON"), null);
+    assert.equal(parseSelectedEmailResult(JSON.stringify({ status: "OK", subject: "Test", messageId: "" })), null);
+    assert.equal(parseSelectedEmailResult(JSON.stringify({ status: "OK", subject: "Test", messageId: "<>" })), null);
   });
 
   it("extracts clean sender display name without email address", () => {
