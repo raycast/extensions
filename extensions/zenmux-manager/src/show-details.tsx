@@ -209,6 +209,13 @@ export default function Command() {
           snapshot={snapshot}
           onRefresh={() => void refresh(true)}
         />
+        <ConsoleLinkItem
+          title="Model Catalog"
+          icon={Icon.AppWindowList}
+          url="https://zenmux.ai/models"
+          snapshot={snapshot}
+          onRefresh={() => void refresh(true)}
+        />
       </List.Section>
     </List>
   );
@@ -312,7 +319,7 @@ function UsageActions(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Settings">
-        <Action title="Configure Platform API Key" icon={Icon.Gear} onAction={() => void openExtensionPreferences()} />
+        <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={() => void openExtensionPreferences()} />
       </ActionPanel.Section>
     </ActionPanel>
   );
