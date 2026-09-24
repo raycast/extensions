@@ -10,7 +10,7 @@ export function isDayFirst(preference?: string): boolean {
     return preference === "dmy";
   }
   try {
-    const prefs = getPreferenceValues<{ dateFormat?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     return prefs?.dateFormat === "dmy";
   } catch {
     return false;
