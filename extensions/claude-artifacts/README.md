@@ -95,7 +95,7 @@ Registration takes effect in a **new** Claude Code session — restart it before
 
 The hook only records artifacts published _after_ you install it. To backfill, ask Claude Code in an interactive session:
 
-> List my artifacts and write them to `~/.claude/artifacts.json` using the schema in this repo's README.
+> List my artifacts and write them to `~/.claude/artifacts.json` using the schema in this repo's README. Set each row's `id` to the **last path segment of the artifact's URL** — not to any internal artifact id the publishing tool reports, which is a different value.
 
 **3. Search**
 
@@ -104,6 +104,8 @@ Open Raycast → **Search Artifacts**. Sorted most-recent-first, because the one
 ### Index format
 
 `~/.claude/artifacts.json`. Only `id`, `title`, and `url` are required; the rest are optional, because shared artifacts carry no date and seeded rows have no project.
+
+`id` is the **last path segment of `url`**, always. The publishing tool also reports an internal artifact id; it is a different value and using it here creates a second row for an artifact the hook will later record under its URL tail.
 
 ```jsonc
 {

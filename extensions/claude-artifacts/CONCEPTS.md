@@ -77,8 +77,9 @@ witness to a publish other than the Index itself.
 Because the Recording Hook cannot announce its own failures, the Transcript is what
 makes a missed publish recoverable at all. It is an append-only byproduct nobody
 curates, so it accumulates indefinitely and a scan of it is a scan of the whole
-history — but it records an instant without a timezone, so a date recovered from it
-can disagree by a day with what the hook would have written at the time.
+history — but it records each instant in UTC and never the publisher's local offset,
+so a calendar date recovered from it resolves in whatever timezone the Backfill runs
+in, and can land a day off from what the Recording Hook wrote at the time.
 
 ### Backfill
 
