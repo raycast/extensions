@@ -5,6 +5,7 @@ import {
   Color,
   confirmAlert,
   Detail,
+  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -23,6 +24,11 @@ import {
   updateModelSettings,
   type OmlxModelStatus,
 } from "./lib/omlx";
+
+function getDashboardUrl(): string {
+  const { serverUrl } = getPreferenceValues<ExtensionPreferences>();
+  return `${serverUrl.replace(/\/v1\/?$/, "")}/admin`;
+}
 
 type ViewState = "loading" | "not-installed" | "offline" | "ready";
 
@@ -72,7 +78,7 @@ export default function ManageModels() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Download Omlx"
+                title="Download oMLX"
                 url="https://omlx.com"
               />
             </ActionPanel>
@@ -144,7 +150,7 @@ function ModelItem({
   const accessories: List.Item.Accessory[] = [];
 
   if (model.pinned) {
-    accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
+    accessories.push({ icon: Icon.Tack, tooltip: "Pinned" });
   }
 
   return (
@@ -208,7 +214,7 @@ function ModelItem({
           )}
           <Action
             title={model.pinned ? "Unpin from Memory" : "Pin to Memory"}
-            icon={Icon.Pin}
+            icon={Icon.Tack}
             onAction={async () => {
               const toast = await showToast({
                 style: Toast.Style.Animated,
@@ -228,6 +234,16 @@ function ModelItem({
                   error instanceof Error ? error.message : "Unknown error";
               }
             }}
+          />
+          <Action.CopyToClipboard title="Copy Name" content={model.id} />
+          <Action.OpenInBrowser
+            title="Open Web Dashboard"
+            url={getDashboardUrl()}
+          />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={onRefresh}
           />
           <Action
             title="Delete Model"
@@ -261,12 +277,6 @@ function ModelItem({
               }
             }}
           />
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={onRefresh}
-          />
-          <Action.CopyToClipboard title="Copy Model Id" content={model.id} />
         </ActionPanel>
       }
     />
@@ -290,7 +300,9 @@ function ModelDetail({ model: m }: { model: OmlxModelStatus }) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Status" text={status} />
-          {m.pinned && <Detail.Metadata.Label title="Pinned" icon={Icon.Pin} />}
+          {m.pinned && (
+            <Detail.Metadata.Label title="Pinned" icon={Icon.Tack} />
+          )}
           <Detail.Metadata.Label
             title="Type"
             text={`${m.model_type.toUpperCase()} (${m.config_model_type})`}
@@ -335,7 +347,10 @@ function ModelDetail({ model: m }: { model: OmlxModelStatus }) {
 
           <Detail.Metadata.Separator />
 
-          <Detail.Metadata.Label title="Path" text={m.model_path} />
+          <Detail.Metadata.Label
+            title="Path"
+            text={m.model_path.replace(/^\/Users\/[^/]+/, "~")}
+          />
         </Detail.Metadata>
       }
     />

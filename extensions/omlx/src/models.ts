@@ -7,11 +7,6 @@ import {
   type OmlxModelStatus,
 } from "./lib/omlx";
 
-interface Preferences {
-  serverUrl: string;
-  apiKey: string;
-}
-
 function buildDescription(model: OmlxModelStatus): string {
   const parts: string[] = [];
   if (model.model_type === "vlm") parts.push("Vision");
@@ -99,7 +94,7 @@ export const streamCompletion: AI.StreamCompletion = async function* (
   model,
   request,
 ) {
-  const { serverUrl, apiKey } = getPreferenceValues<Preferences>();
+  const { serverUrl, apiKey } = getPreferenceValues<ExtensionPreferences>();
 
   const body: Record<string, unknown> = {
     model: model.id,
@@ -124,6 +119,9 @@ export const streamCompletion: AI.StreamCompletion = async function* (
   const openaiTools = convertTools(request.tools);
   if (openaiTools?.length) {
     body.tools = openaiTools;
+    if (request.toolChoice) {
+      body.tool_choice = request.toolChoice;
+    }
   }
 
   const response = await fetch(`${serverUrl}/chat/completions`, {

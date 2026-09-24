@@ -25,7 +25,7 @@ import {
 } from "./lib/omlx";
 
 function getDashboardUrl(): string {
-  const { serverUrl } = getPreferenceValues<{ serverUrl: string }>();
+  const { serverUrl } = getPreferenceValues<ExtensionPreferences>();
   return `${serverUrl.replace(/\/v1\/?$/, "")}/admin`;
 }
 
@@ -71,14 +71,14 @@ export default function ServingStats() {
 
   const actions = (
     <ActionPanel>
+      <Action.OpenInBrowser
+        title="Open Web Dashboard"
+        url={getDashboardUrl()}
+      />
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
         onAction={loadStatus}
-      />
-      <Action.OpenInBrowser
-        title="Open Web Dashboard"
-        url={getDashboardUrl()}
       />
     </ActionPanel>
   );
@@ -93,7 +93,7 @@ export default function ServingStats() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Download Omlx"
+                title="Download oMLX"
                 url="https://omlx.com"
               />
             </ActionPanel>
@@ -254,7 +254,7 @@ export default function ServingStats() {
                   />
                   <Action
                     title="Pin to Memory"
-                    icon={Icon.Pin}
+                    icon={Icon.Tack}
                     shortcut={{ modifiers: ["cmd"], key: "p" }}
                     onAction={async () => {
                       const toast = await showToast({
@@ -275,16 +275,16 @@ export default function ServingStats() {
                       }
                     }}
                   />
+                  <Action.CopyToClipboard title="Copy Name" content={m} />
+                  <Action.OpenInBrowser
+                    title="Open Web Dashboard"
+                    url={getDashboardUrl()}
+                  />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={loadStatus}
                   />
-                  <Action.OpenInBrowser
-                    title="Open Web Dashboard"
-                    url={getDashboardUrl()}
-                  />
-                  <Action.CopyToClipboard title="Copy Model Id" content={m} />
                 </ActionPanel>
               }
             />
@@ -383,7 +383,9 @@ function ModelDetail({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Status" text={status} />
-          {m.pinned && <Detail.Metadata.Label title="Pinned" icon={Icon.Pin} />}
+          {m.pinned && (
+            <Detail.Metadata.Label title="Pinned" icon={Icon.Tack} />
+          )}
           <Detail.Metadata.Label
             title="Type"
             text={`${m.model_type.toUpperCase()} (${m.config_model_type})`}
@@ -428,7 +430,10 @@ function ModelDetail({
 
           <Detail.Metadata.Separator />
 
-          <Detail.Metadata.Label title="Path" text={m.model_path} />
+          <Detail.Metadata.Label
+            title="Path"
+            text={m.model_path.replace(/^\/Users\/[^/]+/, "~")}
+          />
         </Detail.Metadata>
       }
       actions={
@@ -458,7 +463,7 @@ function ModelDetail({
           )}
           <Action
             title={m.pinned ? "Unpin from Memory" : "Pin to Memory"}
-            icon={Icon.Pin}
+            icon={Icon.Tack}
             onAction={async () => {
               const toast = await showToast({
                 style: Toast.Style.Animated,
@@ -476,11 +481,11 @@ function ModelDetail({
               }
             }}
           />
+          <Action.CopyToClipboard title="Copy Name" content={m.id} />
           <Action.OpenInBrowser
             title="Open Web Dashboard"
             url={getDashboardUrl()}
           />
-          <Action.CopyToClipboard title="Copy Model Id" content={m.id} />
         </ActionPanel>
       }
     />

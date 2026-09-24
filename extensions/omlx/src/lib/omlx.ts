@@ -3,11 +3,6 @@ import { existsSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
-interface Preferences {
-  serverUrl: string;
-  apiKey: string;
-}
-
 export interface OmlxModelStatus {
   id: string;
   model_type: "vlm" | "llm";
@@ -65,17 +60,17 @@ export interface OmlxHealthResponse {
 }
 
 function getBaseUrl(): string {
-  const { serverUrl } = getPreferenceValues<Preferences>();
+  const { serverUrl } = getPreferenceValues<ExtensionPreferences>();
   return serverUrl.replace(/\/v1\/?$/, "");
 }
 
 function getV1Url(): string {
-  const { serverUrl } = getPreferenceValues<Preferences>();
+  const { serverUrl } = getPreferenceValues<ExtensionPreferences>();
   return serverUrl.replace(/\/?$/, "");
 }
 
 function getApiKey(): string {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
   return apiKey;
 }
 
@@ -88,6 +83,38 @@ function authHeaders(): Record<string, string> {
   return {
     Authorization: `Bearer ${getApiKey()}`,
     "Content-Type": "application/json",
+  };
+}
+
+let adminSessionCookie: string | null = null;
+
+async function getAdminSession(): Promise<string> {
+  if (adminSessionCookie) return adminSessionCookie;
+
+  const response = await fetch(`${getBaseUrl()}/admin/api/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key: getApiKey() }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to authenticate with oMLX admin API");
+  }
+
+  const setCookie = response.headers.get("set-cookie");
+  const match = setCookie?.match(/omlx_admin_session=([^;]+)/);
+  if (!match) {
+    throw new Error("No admin session cookie returned");
+  }
+
+  adminSessionCookie = match[1];
+  return adminSessionCookie;
+}
+
+async function adminHeaders(): Promise<Record<string, string>> {
+  const session = await getAdminSession();
+  return {
+    "Content-Type": "application/json",
+    Cookie: `omlx_admin_session=${session}`,
   };
 }
 
@@ -166,11 +193,12 @@ export async function updateModelSettings(
     `${getBaseUrl()}/admin/api/models/${encodeURIComponent(modelId)}/settings`,
     {
       method: "PUT",
-      headers: authHeaders(),
+      headers: await adminHeaders(),
       body: JSON.stringify(settings),
     },
   );
   if (!response.ok) {
+    if (response.status === 401) adminSessionCookie = null;
     const text = await response.text();
     throw new Error(`Failed to update settings: ${text.slice(0, 200)}`);
   }
@@ -181,10 +209,11 @@ export async function deleteModel(modelId: string): Promise<void> {
     `${getBaseUrl()}/admin/api/hf/models/${encodeURIComponent(modelId)}`,
     {
       method: "DELETE",
-      headers: authHeaders(),
+      headers: await adminHeaders(),
     },
   );
   if (!response.ok) {
+    if (response.status === 401) adminSessionCookie = null;
     const text = await response.text();
     throw new Error(`Failed to delete model: ${text.slice(0, 200)}`);
   }

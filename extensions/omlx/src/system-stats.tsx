@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { execSync } from "child_process";
 
 function getDashboardUrl(): string {
-  const { serverUrl } = getPreferenceValues<{ serverUrl: string }>();
+  const { serverUrl } = getPreferenceValues<ExtensionPreferences>();
   return `${serverUrl.replace(/\/v1\/?$/, "")}/admin`;
 }
 
@@ -157,11 +157,11 @@ export default function SystemStatsCommand() {
 
   const actions = (
     <ActionPanel>
-      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
       <Action.OpenInBrowser
         title="Open Web Dashboard"
         url={getDashboardUrl()}
       />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
     </ActionPanel>
   );
 
