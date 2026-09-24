@@ -54,11 +54,13 @@ export function parseSelectedEmailResult(rawResult: string | undefined): Selecte
       return null;
     }
 
+    const escapedId = cleanId.replace(/%/g, "%25");
+
     return {
       subject: String(parsed.subject ?? "").trim(),
       messageId: cleanId,
       sender: String(parsed.sender ?? "").trim(),
-      url: `message://%3C${cleanId}%3E`,
+      url: `message://%3C${escapedId}%3E`,
     };
   } catch {
     return null;

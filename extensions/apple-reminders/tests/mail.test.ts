@@ -35,6 +35,21 @@ describe("Mail Extraction Helpers", () => {
     assert.equal(parsed.url, "message://%3CINV-987654@billing.org%3E");
   });
 
+  it("escapes percent signs in message IDs when constructing URL", () => {
+    const raw = JSON.stringify({
+      status: "OK",
+      subject: "Exchange Update",
+      messageId: "<D22041DC.25F53%person@company.com>",
+      sender: "person@company.com",
+    });
+    const parsed = parseSelectedEmailResult(raw);
+
+    assert.ok(parsed);
+    assert.equal(parsed.subject, "Exchange Update");
+    assert.equal(parsed.messageId, "D22041DC.25F53%person@company.com");
+    assert.equal(parsed.url, "message://%3CD22041DC.25F53%25person@company.com%3E");
+  });
+
   it("handles empty subject cleanly", () => {
     const raw = JSON.stringify({
       status: "OK",

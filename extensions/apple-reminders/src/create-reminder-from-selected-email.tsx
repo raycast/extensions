@@ -45,7 +45,7 @@ export default function Command() {
               title: "No selected email found in Apple Mail",
               message: "Make sure Apple Mail is open with an email selected.",
             });
-            setIsLoadingEmail(false);
+            await closeMainWindow();
             return;
           }
 
@@ -104,6 +104,10 @@ export default function Command() {
       init();
     }
   }, [isLoadingData, isLoadingPostCreateActions]);
+
+  if (preferences.createImmediately) {
+    return null;
+  }
 
   if (isLoadingEmail || isLoadingData || isLoadingPostCreateActions) {
     return <Form isLoading={true} />;
