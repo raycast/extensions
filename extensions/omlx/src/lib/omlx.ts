@@ -118,6 +118,18 @@ async function adminHeaders(): Promise<Record<string, string>> {
   };
 }
 
+async function adminFetch(url: string, init: RequestInit): Promise<Response> {
+  const response = await fetch(url, {
+    ...init,
+    headers: await adminHeaders(),
+  });
+  if (response.status === 401) {
+    adminSessionCookie = null;
+    return fetch(url, { ...init, headers: await adminHeaders() });
+  }
+  return response;
+}
+
 export async function fetchHealth(): Promise<OmlxHealthResponse> {
   const response = await fetch(`${getBaseUrl()}/health`, {
     signal: AbortSignal.timeout(3000),
@@ -189,31 +201,22 @@ export async function updateModelSettings(
   modelId: string,
   settings: Record<string, unknown>,
 ): Promise<void> {
-  const response = await fetch(
+  const response = await adminFetch(
     `${getBaseUrl()}/admin/api/models/${encodeURIComponent(modelId)}/settings`,
-    {
-      method: "PUT",
-      headers: await adminHeaders(),
-      body: JSON.stringify(settings),
-    },
+    { method: "PUT", body: JSON.stringify(settings) },
   );
   if (!response.ok) {
-    if (response.status === 401) adminSessionCookie = null;
     const text = await response.text();
     throw new Error(`Failed to update settings: ${text.slice(0, 200)}`);
   }
 }
 
 export async function deleteModel(modelId: string): Promise<void> {
-  const response = await fetch(
+  const response = await adminFetch(
     `${getBaseUrl()}/admin/api/hf/models/${encodeURIComponent(modelId)}`,
-    {
-      method: "DELETE",
-      headers: await adminHeaders(),
-    },
+    { method: "DELETE" },
   );
   if (!response.ok) {
-    if (response.status === 401) adminSessionCookie = null;
     const text = await response.text();
     throw new Error(`Failed to delete model: ${text.slice(0, 200)}`);
   }

@@ -43,12 +43,6 @@
       "mode": "view"
     },
     {
-      "name": "system-stats",
-      "title": "System Stats",
-      "description": "View CPU, GPU, memory, and thermal stats for your Mac",
-      "mode": "view"
-    },
-    {
       "name": "open-dashboard",
       "title": "Open Web Dashboard",
       "description": "Open the oMLX web dashboard in your browser",

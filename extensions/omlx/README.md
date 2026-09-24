@@ -30,10 +30,6 @@ Browse all available models. Load, eject, pin to memory, or delete models direct
 
 View speed (prompt processing / token generation), cache efficiency, memory usage, active models, and request counts.
 
-### System Stats
-
-View CPU (P-cores / E-cores, load average), GPU (utilization, memory), system memory (wired, active, compressed, free), thermal state, and uptime.
-
 ### Start/Stop Server
 
 Start, stop, or restart the oMLX server without leaving Raycast.
