@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// @page-scanner/cli 0.3.1, Apache-2.0, bundled by scripts/vendor-cli.mjs.
+// @page-scanner/cli 0.3.2, Apache-2.0, bundled by scripts/vendor-cli.mjs.
 import { createRequire as __psCreateRequire } from 'node:module';
 import { fileURLToPath as __psFileURLToPath } from 'node:url';
 import { dirname as __psDirname } from 'node:path';
@@ -284,7 +284,7 @@ function cliBuild() {
 var CLI_VERSION, build;
 var init_version = __esm({
   "node_modules/@page-scanner/cli/dist/version.js"() {
-    CLI_VERSION = "0.3.1";
+    CLI_VERSION = "0.3.2";
   }
 });
 
@@ -7268,6 +7268,8 @@ import { homedir as homedir3 } from "node:os";
 import { dirname as dirname3, isAbsolute, join as join5, win32 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 var STORE_EXTENSION_ID = "oinkohacnbkapdnnhpidmoidmidlgaoj";
+var EDGE_STORE_EXTENSION_ID = "edlmbcahnbpdfibbimdkdbgiemadanhh";
+var STORE_EXTENSION_IDS = [STORE_EXTENSION_ID, EDGE_STORE_EXTENSION_ID];
 var EXTENSION_ID = /^[a-p]{32}$/;
 function currentPlatform() {
   return {
@@ -7451,7 +7453,7 @@ function checkIds(ids) {
       throw new PageScannerError("BAD_REQUEST", `--extension-id must be 32 letters from a to p (got ${JSON.stringify(id)}).`, "chrome://extensions shows the id under the extension, with Developer mode on.");
     }
   }
-  return [.../* @__PURE__ */ new Set([STORE_EXTENSION_ID, ...ids])];
+  return [.../* @__PURE__ */ new Set([...STORE_EXTENSION_IDS, ...ids])];
 }
 function targetsFor(platform, dirs, exists) {
   if (dirs.length > 0)
@@ -7562,7 +7564,8 @@ function nativeHostReport(platform = currentPlatform()) {
     try {
       const manifest = JSON.parse(readFileSync4(manifestPath, "utf8"));
       installed = manifest.path === wrapper;
-      allowsStore = Array.isArray(manifest.allowed_origins) && manifest.allowed_origins.includes(`chrome-extension://${STORE_EXTENSION_ID}/`);
+      const origins = manifest.allowed_origins;
+      allowsStore = Array.isArray(origins) && STORE_EXTENSION_IDS.every((id) => origins.includes(`chrome-extension://${id}/`));
     } catch {
     }
     return { id: browser.id, name: browser.name, manifestPath, installed, allowsStore };
