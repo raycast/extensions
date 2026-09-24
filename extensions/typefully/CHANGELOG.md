@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## [Voice Drafting Skill] - {PR_MERGE_DATE}
+
+- Add a skill for drafting posts and threads in your voice, using writing samples and tailored platform versions while preserving existing draft content and comments.
+
 ## [Windows Support] - 2026-08-07
 
 - Add Windows as a supported platform
