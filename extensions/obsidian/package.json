@@ -360,6 +360,22 @@
       ]
     },
     {
+      "name": "previousDailyNoteCommand",
+      "title": "Previous Daily Note",
+      "subtitle": "Obsidian",
+      "description": "Open the previous daily note in Obsidian.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Obsidian Vault",
+          "required": false,
+          "description": "Name of Obsidian vault. If not given, a selector is presented."
+        }
+      ]
+    },
+    {
       "name": "createNoteCommand",
       "title": "Create Note",
       "subtitle": "Obsidian",

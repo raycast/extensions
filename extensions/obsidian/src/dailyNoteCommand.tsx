@@ -4,13 +4,23 @@ import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMess
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { useObsidianVaults, useVaultPluginCheck } from "./utils/hooks";
 import { DailyNotePreferences } from "./utils/preferences";
-import { Obsidian, ObsidianTargetType } from "@/obsidian";
+import { Obsidian, ObsidianTargetType, type ObsidianVault } from "@/obsidian";
 
-export default function Command() {
+interface DailyNoteProps {
+  actionTitle?: string;
+  commandId?: string;
+}
+
+export function DailyNote({ actionTitle = "Daily Note", commandId }: DailyNoteProps) {
   const { vaults, ready } = useObsidianVaults();
   const { vaultName } = getPreferenceValues<DailyNotePreferences>();
   const preselectedVault = vaults.find((vault) => vault.name === vaultName);
 
+
+  const getTarget = (vault: ObsidianVault) =>
+    commandId
+      ? Obsidian.getTarget({ type: ObsidianTargetType.Command, vault, commandId })
+      : Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault });
   const { vaultsWithPlugin } = useVaultPluginCheck({
     vaults: vaults,
     communityPlugins: ["obsidian-advanced-uri"],
@@ -29,7 +39,7 @@ export default function Command() {
 
   if (preselectedVault || vaultsWithPlugin.length == 1) {
     const vaultToUse = preselectedVault || vaultsWithPlugin[0];
-    const target = Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault: vaultToUse });
+    const target = getTarget(vaultToUse);
     open(target);
     popToRoot();
     closeMainWindow();
@@ -44,8 +54,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Open
-                title="Daily Note"
-                target={Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault: vault })}
+                title={actionTitle}
+                target={getTarget(vault)}
               />
             </ActionPanel>
           }
@@ -53,4 +63,8 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+export default function Command() {
+  return <DailyNote />;
 }
