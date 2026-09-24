@@ -199,26 +199,19 @@ export const addTask = async (data: {
   if (!installed) return undefined;
 
   try {
-    if (nlp !== undefined && !(await supportsNLP())) {
-      await showToast(
-        Toast.Style.Failure,
-        "Please upgrade TickTick",
-        "This version of TickTick does not support the NLP parameter. Please update the TickTick macOS app."
-      );
-      return undefined;
-    }
+    const useNLP = nlp === true && (await supportsNLP().catch(() => false));
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
       dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
-    } ${priority ? ` priority "${priority}"` : ""}${nlp !== undefined ? ` nlp ${nlp}` : ""} from "raycast"
+    } ${priority ? ` priority "${priority}"` : ""}${useNLP ? " nlp true" : ""} from "raycast"
     end tell
   `)) as string;
     if (result === "missing value") {
       return false;
     }
-    if (result === "true") return true;
+    if (result === "true") return nlp && !useNLP ? "added-without-nlp" : true;
     return false;
   } catch (e) {
     errorHandler(e);

@@ -18,10 +18,16 @@ export default async function QuickAddTask(props: LaunchProps) {
       description,
       dueDate: formatToServerDate(getDefaultDate()),
       isAllDay: false,
-      nlp: nlpEnabled,
+      ...(nlpEnabled ? { nlp: true } : {}),
     });
 
     switch (result) {
+      case "added-without-nlp": {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Task added without NLP";
+        toast.message = "Upgrade TickTick to enable natural language recognition.";
+        break;
+      }
       case true: {
         toast.style = Toast.Style.Success;
         toast.title = "Add success";
