@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { execFileSync, spawn } from "child_process";
 import { environment } from "@raycast/api";
 import path from "path";
 import fs from "fs";
@@ -21,21 +21,31 @@ function getLayoutDir(): string {
   return path.join(environment.assetsPath, "layouts");
 }
 
+// A crash or SIGKILL leaves the PID file behind, and macOS may since have
+// reused that PID for an unrelated process — which SIGUSR1/SIGTERM would
+// then kill. Checking liveness alone can't tell the two apart.
+function isKeyProbeHelper(pid: number): boolean {
+  try {
+    const command = execFileSync("ps", ["-p", String(pid), "-o", "comm="], {
+      encoding: "utf8",
+    }).trim();
+    return path.basename(command) === "KeyProbeHelper";
+  } catch {
+    return false;
+  }
+}
+
 function readPid(): number | null {
   try {
     const pid = parseInt(fs.readFileSync(PID_FILE, "utf8").trim(), 10);
     if (isNaN(pid)) return null;
+    if (isKeyProbeHelper(pid)) return pid;
     try {
-      process.kill(pid, 0); // check alive
-      return pid;
+      fs.unlinkSync(PID_FILE);
     } catch {
-      try {
-        fs.unlinkSync(PID_FILE);
-      } catch {
-        // ignore
-      }
-      return null;
+      // ignore
     }
+    return null;
   } catch {
     return null;
   }
