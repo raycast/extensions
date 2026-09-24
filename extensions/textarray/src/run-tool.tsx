@@ -321,6 +321,7 @@ export default function Command() {
         }
         actions={
           <ActionPanel>
+            {/* The original four, in their original order — new actions are appended after them. */}
             <ActionPanel.Section>
               <Action
                 title="Paste Result to App"
@@ -336,6 +337,23 @@ export default function Command() {
                 }}
                 onAction={() => copy(tool)}
               />
+              <Action.OpenInBrowser
+                title="Open on Textarray.com"
+                url={toolUrl(tool, input)}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+              <Action
+                title="Reload Input from Selection"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={async () => {
+                  setLoadingInput(true);
+                  setInput(await readInput());
+                  setLoadingInput(false);
+                }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
               <Action.Push
                 title="Preview Result"
                 icon={Icon.Eye}
@@ -354,33 +372,16 @@ export default function Command() {
                 shortcut={USE_AS_INPUT}
                 onAction={() => useAsInput(tool)}
               />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
               <Action
                 title={isPinned ? "Unpin Tool" : "Pin Tool"}
                 icon={isPinned ? Icon.PinDisabled : Icon.Pin}
                 shortcut={Keyboard.Shortcut.Common.Pin}
                 onAction={() => togglePin(tool)}
               />
-              <Action.OpenInBrowser
-                title="Open on Textarray.com"
-                url={toolUrl(tool, input)}
-                shortcut={Keyboard.Shortcut.Common.Open}
-              />
               <Action.CopyToClipboard
                 title="Copy Tool Link"
                 content={`${SITE}/${tool.slug}`}
                 shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
-              />
-              <Action
-                title="Reload Input from Selection"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={async () => {
-                  setLoadingInput(true);
-                  setInput(await readInput());
-                  setLoadingInput(false);
-                }}
               />
             </ActionPanel.Section>
           </ActionPanel>
