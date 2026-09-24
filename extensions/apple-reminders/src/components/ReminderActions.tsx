@@ -36,25 +36,43 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
     if (targetList.id === reminder.list?.id) return;
 
     try {
-      await mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
-        optimisticUpdate(data) {
-          if (!data) return;
+      if (reminder.isCompleted && viewProps.completed.mutate) {
+        await viewProps.completed.mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
 
-          return {
-            ...data,
-            reminders: data.reminders.map((r) => {
+            return data.map((r) => {
               if (reminder.id === r.id) {
                 return {
                   ...r,
                   list: targetList,
                 };
               }
-
               return r;
-            }),
-          };
-        },
-      });
+            });
+          },
+        });
+      } else {
+        await mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return {
+              ...data,
+              reminders: data.reminders.map((r) => {
+                if (reminder.id === r.id) {
+                  return {
+                    ...r,
+                    list: targetList,
+                  };
+                }
+
+                return r;
+              }),
+            };
+          },
+        });
+      }
       await showToast({
         style: Toast.Style.Success,
         title: "Moved Reminder",
@@ -290,24 +308,6 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           shortcut={Keyboard.Shortcut.Common.Edit}
         />
 
-        {lists.length > 0 ? (
-          <ActionPanel.Submenu
-            title="Move to List"
-            icon={Icon.Folder}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-          >
-            {lists.map((list) => (
-              <Action
-                key={list.id}
-                title={list.title}
-                icon={{ source: Icon.Circle, tintColor: list.color }}
-                autoFocus={list.id === reminder.list?.id}
-                onAction={() => moveReminderToList(list)}
-              />
-            ))}
-          </ActionPanel.Submenu>
-        ) : null}
-
         <ActionPanel.Submenu
           title="Set Priority"
           icon={Icon.Exclamationmark}
@@ -342,6 +342,24 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
             target={<LocationForm onSubmit={setReminderLocation} isCustomLocation />}
           />
         </ActionPanel.Submenu>
+
+        {lists.length > 0 ? (
+          <ActionPanel.Submenu
+            title="Move to List"
+            icon={Icon.Folder}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          >
+            {lists.map((list) => (
+              <Action
+                key={list.id}
+                title={list.title}
+                icon={{ source: Icon.Circle, tintColor: list.color }}
+                autoFocus={list.id === reminder.list?.id}
+                onAction={() => moveReminderToList(list)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        ) : null}
 
         <Action
           title="Delete Reminder"
