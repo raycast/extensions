@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Restore My Repositories Filter] - {PR_MERGE_DATE}
+## [Restore My Repositories Filter] - 2026-09-24
 
 - Search Repositories, Issues, Pull Requests and Discussions: Restore the **My Repositories** filter, which searches repositories owned by your personal account and your organizations. **My Organizations** is still available for organization-only results.
 - Search Repositories: Fix recently visited repositories matching the wrong owners when an owner filter is selected.
