@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "socialfaktory",
+  "title": "SocialFaktory",
+  "description": "Write X and LinkedIn posts in your brand's voice, and track scheduled posts and credits across TikTok, Instagram, YouTube, X, LinkedIn, Facebook and Pinterest.",
+  "icon": "extension-icon.png",
+  "author": "adif_sgaid",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "social media",
+    "scheduler",
+    "content",
+    "copywriting",
+    "marketing",
+    "tiktok",
+    "instagram",
+    "youtube",
+    "x",
+    "linkedin",
+    "facebook",
+    "pinterest"
+  ],
+  "commands": [
+    {
+      "name": "write-post",
+      "title": "Write Post",
+      "subtitle": "SocialFaktory",
+      "description": "Write three post variants in your brand's voice from a short brief, for X or LinkedIn.",
+      "mode": "view"
+    },
+    {
+      "name": "scheduled-posts",
+      "title": "Scheduled Posts",
+      "subtitle": "SocialFaktory",
+      "description": "Browse your scheduled, published and failed posts with their time, release link and metrics.",
+      "mode": "view"
+    },
+    {
+      "name": "credit-balance",
+      "title": "Credit Balance",
+      "subtitle": "SocialFaktory",
+      "description": "Show the credits available, reserved and in total in your SocialFaktory wallet.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-brands",
+      "title": "List Brands",
+      "description": "List the SocialFaktory brands the user can act for, with their ID, name, description, language and status. Call it first to find the brand ID that writing a post needs."
+    },
+    {
+      "name": "list-posts",
+      "title": "List Posts",
+      "description": "List the user's social media posts with their status, scheduled time, publish time, platform, caption, release link and metrics. Can filter by brand and status."
+    },
+    {
+      "name": "write-post",
+      "title": "Write Post",
+      "description": "Write up to three post variants in a brand's voice from a brief, for X or LinkedIn, and return their text. A new brief reserves 3 SocialFaktory credits; the same brand, platform and brief again within 30 minutes returns the same write and reserves nothing, unless you signed in again in between. It never publishes or schedules anything."
+    },
+    {
+      "name": "get-wallet",
+      "title": "Get Credit Balance",
+      "description": "Read the user's SocialFaktory credit balance: the credits available to spend, the credits reserved by work in progress, and the total."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Optional. A personal access token from SocialFaktory Settings > API tokens. Leave it empty to sign in with your browser.",
+      "type": "password",
+      "required": false,
+      "placeholder": "sfp_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./test/resolve.mjs --test test/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
