@@ -107,7 +107,7 @@
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",
-    "@raycast/api": "^1.104.25",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.3.1",
     "@types/turndown": "^5.0.5",
     "archiver": "^7.0.1",
@@ -140,5 +140,13 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "ai": {
+    "skills": [
+      {
+        "name": "granola-meeting-actions",
+        "title": "Meeting Actions"
+      }
+    ]
+  }
 }

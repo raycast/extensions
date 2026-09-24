@@ -1,5 +1,9 @@
 # Granola Changelog
 
+## Add Meeting Actions Skill - {PR_MERGE_DATE}
+
+- Extract meeting decisions and action items from notes and transcripts. Available through the bundled Meeting Actions skill in Raycast AI.
+
 ## [2.2.0 - OAuth Authentication] - 2026-09-07
 
 - Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.

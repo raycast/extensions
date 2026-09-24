@@ -15,3 +15,4 @@ compiled_raycast_rust
 
 # Local diagnostics/smoke-test scripts
 /scripts/
+.npmrc
