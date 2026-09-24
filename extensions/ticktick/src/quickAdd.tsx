@@ -16,9 +16,10 @@ export default async function QuickAddTask(props: LaunchProps) {
       projectId: getProjects().find((project) => project.name === "Inbox")?.id || "",
       title,
       description,
-      dueDate: formatToServerDate(getDefaultDate()),
       isAllDay: false,
-      ...(nlpEnabled ? { nlp: true } : {}),
+      // The TickTick macOS app handles NLP and does not return the parsed date to this extension.
+      // Omit the default date to avoid competing with NLP; ideally, use it when NLP finds no date
+      ...(nlpEnabled ? { nlp: true } : { dueDate: formatToServerDate(getDefaultDate()) }),
     });
 
     switch (result) {
