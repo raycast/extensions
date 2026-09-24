@@ -10,7 +10,7 @@ export interface ChangelogVersion {
 
 // The date after a heading's title, which is optional and lenient on purpose. A random 250
 // of the monorepo's changelogs (2026-09-22, 868 headings, every one parsed to a row) had
-// headings with no date (`## [Maintenance]`), single-digit days (`2023-11-5`), parenthesised
+// headings with no date (`## [Maintenance]`), single-digit days (`2023-11-5`), parenthesized
 // dates (`(2022-03-19)`) and misspelled placeholders (`{PR_MREGE_DATE}`); a reviewer later
 // found a month-name form (`- March, 4 2024`, extensions/turso). En and em dashes are accepted
 // as the separator too. A stricter pattern either drops those sections, bullets included, or
@@ -48,7 +48,7 @@ function calendarDate(stamp: string): Date | undefined {
 /**
  * Splits a CHANGELOG.md into its version sections, newest first (source order).
  *
- * Returns an empty array for anything it cannot recognise — a changelog with no `##`
+ * Returns an empty array for anything it cannot recognize — a changelog with no `##`
  * headings at all, or an empty file — which is the caller's signal to fall back to
  * rendering the raw markdown rather than showing an empty list.
  */

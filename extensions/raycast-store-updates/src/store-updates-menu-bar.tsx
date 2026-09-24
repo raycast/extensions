@@ -101,12 +101,12 @@ export default function Command() {
     // in place lets a scope change apply a stale set before the fresh lookup lands.
     setInstalled(undefined);
     if (scope !== "my-updates") return;
-    let cancelled = false;
+    let canceled = false;
     fetchInstalledExtensionSlugs().then((slugs) => {
-      if (!cancelled) setInstalled(slugs);
+      if (!canceled) setInstalled(slugs);
     });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [scope]);
 

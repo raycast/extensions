@@ -153,13 +153,13 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
       setInstalledSlugs(undefined);
       return;
     }
-    let cancelled = false;
+    let canceled = false;
     setInstalledSlugs(undefined);
     fetchInstalledExtensionSlugs().then((slugs) => {
-      if (!cancelled) setInstalledSlugs(slugs);
+      if (!canceled) setInstalledSlugs(slugs);
     });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [filter, installedNonce]);
 
@@ -184,7 +184,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
   // Build new items and fetch their platforms from package.json
   useEffect(() => {
     if (!feedData) return;
-    let cancelled = false;
+    let canceled = false;
     // asArray, not `?? []`: a 200 body of {"items":{}} passes the null check and then
     // throws in the mapper below.
     const items = asArray<FeedItem>(feedData.items);
@@ -212,14 +212,14 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
       };
     })
       .then((results) => {
-        if (cancelled) return;
+        if (canceled) return;
         setNewItems(results.filter((item): item is NonNullable<typeof item> => item !== null));
       })
       .finally(() => {
-        if (!cancelled) setIsProcessingNew(false);
+        if (!canceled) setIsProcessingNew(false);
       });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [feedData]);
 
@@ -249,19 +249,19 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
   // Fetch updated and removed items from PRs (async because we need to fetch package.json for each)
   useEffect(() => {
     if (!prsData) return;
-    let cancelled = false;
+    let canceled = false;
     setIsProcessingPRs(true);
     convertPRsToStoreItems(prsData, newItemDates)
       .then(({ updated, removed }) => {
-        if (cancelled) return;
+        if (canceled) return;
         setUpdatedItems(updated);
         setRemovedItems(removed);
       })
       .finally(() => {
-        if (!cancelled) setIsProcessingPRs(false);
+        if (!canceled) setIsProcessingPRs(false);
       });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [prsData, newItemDates]);
 
