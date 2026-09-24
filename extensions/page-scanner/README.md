@@ -43,5 +43,5 @@ editor to add any of it.
 The helper is the same one `npx @page-scanner/cli install` sets up, so a machine that already has
 it skips step 2.
 
-Running a command from outside Raycast (`open raycast://extensions/page-scanner/page-scanner/...`) makes
+Running a command from outside Raycast (`open raycast://extensions/sbd530/page-scanner/...`) makes
 Raycast ask first; run it from Raycast's search instead.

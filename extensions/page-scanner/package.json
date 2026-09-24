@@ -5,8 +5,6 @@
   "description": "Capture the tab in front as a vector PDF, through the Page Scanner Chrome extension.",
   "icon": "icon.png",
   "author": "sbd530",
-  "owner": "page-scanner",
-  "access": "public",
   "categories": [
     "Productivity",
     "Web"
