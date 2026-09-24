@@ -1,6 +1,6 @@
 # theSVG for Raycast
 
-Search, preview, and copy 5,600+ brand SVG icons from [thesvg.org](https://thesvg.org) directly in Raycast.
+Search, preview, and copy 7,400+ brand SVG icons from [thesvg.org](https://thesvg.org) directly in Raycast.
 
 ## Commands
 
@@ -34,7 +34,7 @@ Example: `Copy Brand Icon` > `github` copies the GitHub SVG to your clipboard.
 
 ## Features
 
-- Search 5,600+ brand icons with alias matching
+- Search 7,400+ brand icons with alias matching
 - Filter by 100+ categories (AI, Design, DevTool, Cloud, etc.)
 - Preview icon thumbnails in the list
 - View all available variants (up to 7 per icon)
