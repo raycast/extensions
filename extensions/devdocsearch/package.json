@@ -1,0 +1,53 @@
+{
+  "name": "devdocsearch",
+  "title": "DevDocSearch",
+  "description": "Download documentation and search it offline",
+  "version": "0.1.0",
+  "author": "nachiketh_reddy",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "icon": "docsearch-icon.png",
+  "commands": [
+    {
+      "name": "documentation",
+      "title": "Download Docs",
+      "description": "Download and index documentation for offline search",
+      "icon": "docsearch-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "description": "Search downloaded documentation offline",
+      "icon": "docsearch-icon.png",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build:worker": "esbuild src/crawl-worker.ts --bundle --platform=node --format=cjs --target=node24 --minify --outfile=assets/crawl-worker.cjs",
+    "predev": "npm run build:worker",
+    "dev": "ray develop",
+    "prebuild": "npm run build:worker",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "cheerio": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.3"
+  }
+}
