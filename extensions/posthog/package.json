@@ -96,7 +96,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.20",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
@@ -220,6 +220,12 @@
             "tables": []
           }
         }
+      }
+    ],
+    "skills": [
+      {
+        "name": "posthog-metrics-analysis",
+        "title": "Metrics Analysis"
       }
     ]
   },

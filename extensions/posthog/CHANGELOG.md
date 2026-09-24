@@ -1,5 +1,9 @@
 # PostHog Changelog
 
+## Add Metrics Analysis Skill - {PR_MERGE_DATE}
+
+- Answer product-metrics questions with verified schema and reproducible HogQL queries. Available through the bundled Metrics Analysis skill in Raycast AI.
+
 ## [Add AI Analytics Tools] - 2026-06-23
 
 - Add read-only AI tools for PostHog analytics, including project discovery, HogQL queries, schema lookup, events, persons, insights, and feature flags.
