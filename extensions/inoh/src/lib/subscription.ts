@@ -84,6 +84,23 @@ const formatPeriodEnd = (isoDate: string | null): string | null =>
   isoDate ? new Date(isoDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
 
 /**
+ * The command header: the account, plus a plan badge once the plan has been
+ * read (e.g. "Inoh · me@example.com · Plus"). The header is the one place a
+ * List shows something at all times without spending a row, so it carries the
+ * badge; the matching plan action lives in the Account section.
+ *
+ * @param email - The signed-in account's email, or undefined when signed out
+ * @param state - The account's subscription state, once it has been read
+ * @returns The header text, or undefined when there is no account to name
+ */
+export function describeAccountHeader(email: string | undefined, state: SubscriptionState | undefined) {
+  if (!email) return undefined;
+  const parts = ["Inoh", email];
+  if (state) parts.push(describePlanBadge(state));
+  return parts.join(" · ");
+}
+
+/**
  * The plan badge for the command header: the tier, plus the one thing that
  * changes it ("Plus · ends 1 Sep", "Pro · Plus from 1 Sep", "Plus · payment failed").
  *

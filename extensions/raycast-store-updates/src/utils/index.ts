@@ -1,7 +1,9 @@
 import { Feed, FeedItem, GitHubPR, GitHubPRFile, StoreItem } from "../types";
-import { Cache, Color, environment, getPreferenceValues, Icon, Image } from "@raycast/api";
-import { readdirSync, readFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
+import { Cache, Color, environment, getPreferenceValues, Icon, Image, launchCommand, LaunchType } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
+import { readdir, readFile } from "fs/promises";
+import { homedir } from "os";
+import { join } from "path";
 import { fetchMergedPRsViaGraphQL, isGraphQLEnabled } from "./graphql";
 
 export const RAW_CONTENT_BASE = "https://raw.githubusercontent.com/raycast/extensions/main/extensions";
@@ -273,6 +275,17 @@ export function parseExtensionUrl(url: string): { author: string; extension: str
 }
 
 /**
+ * The URL scheme of the running Raycast app.
+ *
+ * NOT always "raycast": the internal/beta build registers `raycast-x` and reads
+ * its data from a separate directory. Hardcoding either one breaks the deeplink
+ * for every user of the other build, so always go through this.
+ */
+function raycastScheme(): string {
+  return process.env.RAYCAST_SCHEME ?? "raycast";
+}
+
+/**
  * Creates a Raycast deeplink to open an extension in the Store.
  * Format: raycast://extensions/{author}/{extension}
  * Returns original URL if parsing fails.
@@ -282,7 +295,26 @@ export function createStoreDeeplink(url: string): string {
   if (!parsed) {
     return url;
   }
-  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${parsed.author}/${parsed.extension}`;
+  return `${raycastScheme()}://extensions/${parsed.author}/${parsed.extension}`;
+}
+
+/**
+ * Opens Raycast's built-in "Check for Extension Updates" command.
+ *
+ * Through launchCommand, not a `raycast://` deeplink — the Store's review rule for launching
+ * commands, since a typed call cannot drift the way a hand-built route can.
+ */
+export async function checkForExtensionUpdates(): Promise<void> {
+  try {
+    await launchCommand({
+      ownerOrAuthorName: "raycast",
+      extensionName: "raycast",
+      name: "check-for-extension-updates",
+      type: LaunchType.UserInitiated,
+    });
+  } catch (error) {
+    await showError(error, { title: "Couldn't Open Check for Extension Updates" });
+  }
 }
 
 /**
@@ -441,7 +473,10 @@ export function extractLatestChanges(changelog: string): string {
   const result: string[] = [];
 
   for (const line of lines) {
-    if (line.startsWith("## ")) {
+    // Same heading rule as parseChangelog() in ./changelog, so "Copy Latest Changes" and the
+    // top row of the Version History can never disagree: `##` then any whitespace except a
+    // line break — which admits the non-breaking space some changelogs use.
+    if (/^##[^\S\r\n]/.test(line)) {
       if (started) break; // We've hit the next section
       started = true;
       result.push(line);
@@ -604,8 +639,20 @@ export async function convertPRsToStoreItems(
   // scan. With a token the ceiling is 5,000/hour and the cap can be far looser.
   const filesBudget = createFilesBudget(hasGitHubToken() ? 50 : 5);
 
-  const seen = new Set<string>();
-  const updateCandidates: { pr: GitHubPR; slug: string }[] = [];
+  // One update per extension, and it must be the NEWEST merge — compared explicitly, never
+  // left to input order. The list is fetched with `sort=updated` (last activity), so a
+  // comment or label on an old PR moves it to the top: measured 2026-09-22, 12 of 42
+  // merged PRs in one window had merged over a week earlier, and Hide My Email's Sep 2 PR
+  // sat ahead of its Sep 22 one and hid that day's update under first-seen-wins. Sorting
+  // the input first is not enough either, because a PR needing the file fallback only
+  // gets its slug in the second pass, after an older PR may already have claimed it.
+  const updateBySlug = new Map<string, { pr: GitHubPR; slug: string }>();
+  const addUpdate = (pr: GitHubPR, slug: string) => {
+    const existing = updateBySlug.get(slug);
+    if (!existing || new Date(pr.merged_at!).getTime() > new Date(existing.pr.merged_at!).getTime()) {
+      updateBySlug.set(slug, { pr, slug });
+    }
+  };
   const removalCandidatePRs: GitHubPR[] = [];
   const needsFileFallback: GitHubPR[] = [];
 
@@ -623,13 +670,109 @@ export async function convertPRsToStoreItems(
       // Skip if this extension is in the "new" list and the PR is not newer
       const feedDate = newItemDates.get(slug);
       if (feedDate && new Date(pr.merged_at).getTime() <= new Date(feedDate).getTime()) continue;
-      if (seen.has(slug)) continue;
-      seen.add(slug);
-      updateCandidates.push({ pr, slug });
+      addUpdate(pr, slug);
     } else {
       needsFileFallback.push(pr);
     }
   }
+
+  // Process removal PRs: find their deleted slugs, confirm via 404, emit one item per slug.
+  //
+  // This runs BEFORE the update fallbacks below, so removals get first claim on the shared
+  // /files budget (5 per scan without a token). A starved update merely keeps its
+  // title-derived slug; a starved removal vanishes without a word, indistinguishable from
+  // "nothing was removed". Silence is the worse failure, so removals go first.
+  //
+  // Keyed by slug, this memoizes the in-flight confirmation rather than merely recording
+  // "seen". A Set cannot express what is needed: two removal PRs deleting the same
+  // extension run concurrently, and the second reaches its check BEFORE the first's
+  // confirmation resolves, so with a Set the second skips outright.
+  //
+  // The memoized value must be a TRI-STATE. A boolean conflates "present" with "could
+  // not tell", and sharing that ambiguity reproduces the bug in a new shape: a transient
+  // 5xx on whichever PR wins the race would be inherited by a sibling that would have
+  // received a real 404. Only a DEFINITIVE answer ("gone" / "present") is worth sharing;
+  // "unknown" is discarded so the next PR for that slug retries independently.
+  const removalConfirmations = new Map<string, Promise<RemovalCheck>>();
+  const removalResults = await mapWithConcurrency(removalCandidatePRs, 8, async (pr) => {
+    // Which slugs to check. An `extension:` label names them for free, and the definitive
+    // 404 from isExtensionGone() below is the actual proof of removal — so a labelled PR
+    // needs no billed request at all. That matters more than it looks: most PRs this
+    // classifies as removals are not (a survey of merged "Remove…" PRs, 2026-09-22, was
+    // dominated by "Remove outdated screenshots from … README", "Remove contributor …"),
+    // and for those the extension simply answers 200 and is dropped, at no cost.
+    //
+    // A label set is complete, not a sample: Raycast's PR bot (scripts/bots/pr-bot.ts in
+    // raycast/extensions) returns before adding any `extension:` label when a PR touches more
+    // than one extension. So a labelled PR touches exactly one, and a multi-extension removal
+    // arrives unlabelled and takes the /files path below, which finds every slug.
+    //
+    // Only an unlabelled PR — e.g. a staff bulk removal like "Removed two extensions" —
+    // falls back to /files, which requires every file under extensions/<slug>/ on the
+    // first page of the PR's file list (100; it does not paginate) to be deleted. That
+    // call is budgeted like every other.
+    let slugs = labelSlugs(pr);
+    if (slugs.length === 0) {
+      if (!filesBudget.spend()) return [];
+      slugs = await fetchRemovedSlugsFromPR(pr.number);
+    }
+    const items: StoreItem[] = [];
+    for (const slug of slugs) {
+      // Only the PR that starts the confirmation may emit; a concurrent PR for the same
+      // slug awaits the same promise and stays silent. That gives dedup (one item) and
+      // retry-safety (a transient failure does not suppress the other PR's answer,
+      // because there is only ever one answer).
+      // Resolve this slug to a definitive verdict, retrying past inconclusive answers.
+      //
+      // The loop is load-bearing. A sibling PR reaches this point while the owner's
+      // confirmation is still in flight, so it cannot simply skip — by the time the
+      // owner discovers "unknown" and clears the entry, a skipping sibling has already
+      // moved on and the genuine removal is lost. Awaiting the shared promise and
+      // looping means whoever is still here retries, while a definitive answer is
+      // resolved exactly once and shared.
+      let verdict: RemovalCheck = "unknown";
+      let owned = false;
+      for (;;) {
+        const inFlight = removalConfirmations.get(slug);
+        if (inFlight) {
+          const shared = await inFlight;
+          if (shared !== "unknown") {
+            verdict = shared; // someone else got a definitive answer; they emit, not us
+            break;
+          }
+          // Inconclusive and already cleared by its owner — fall through and retry.
+          if (removalConfirmations.get(slug) === inFlight) removalConfirmations.delete(slug);
+          continue;
+        }
+        const confirmation = isExtensionGone(slug);
+        removalConfirmations.set(slug, confirmation);
+        verdict = await confirmation;
+        if (verdict === "unknown") {
+          removalConfirmations.delete(slug);
+          break; // our own attempt failed; do not spin on a persistent outage
+        }
+        owned = true; // we produced the definitive answer, so we are the one who emits
+        break;
+      }
+      if (!owned || verdict !== "gone") continue;
+      const title = titleFromSlug(slug);
+      items.push({
+        id: `pr-${pr.number}-removed-${slug}`,
+        title,
+        summary: `This extension has been removed from the Raycast Store.`,
+        image: pr.user.avatar_url,
+        date: pr.merged_at!,
+        authorName: pr.user.login,
+        authorUrl: pr.user.html_url,
+        url: pr.html_url,
+        type: "removed" as const,
+        extensionSlug: slug,
+        prUrl: pr.html_url,
+        platforms: ["macOS"],
+      });
+    }
+    return items;
+  });
 
   // Batch fetch file-based slugs for regular update PRs with bounded concurrency
   if (needsFileFallback.length > 0) {
@@ -643,14 +786,12 @@ export async function convertPRsToStoreItems(
       if (!slug) continue;
       const feedDate = newItemDates.get(slug);
       if (feedDate && new Date(pr.merged_at!).getTime() <= new Date(feedDate).getTime()) continue;
-      if (seen.has(slug)) continue;
-      seen.add(slug);
-      updateCandidates.push({ pr, slug });
+      addUpdate(pr, slug);
     }
   }
 
   // Fetch package.json for all update candidates with bounded concurrency
-  const updatedItems = await mapWithConcurrency(updateCandidates, 8, async ({ pr, slug }) => {
+  const updatedItems = await mapWithConcurrency([...updateBySlug.values()], 8, async ({ pr, slug }) => {
     let resolvedSlug = slug;
     let pkgInfo = await fetchExtensionPackageInfo(resolvedSlug);
 
@@ -717,82 +858,6 @@ export async function convertPRsToStoreItems(
       categories: pkgInfo?.categories,
       extensionIcon: pkgInfo?.icon,
     };
-  });
-
-  // Process removal PRs: fetch their deleted slugs, confirm via 404, emit one item per slug.
-  //
-  // Keyed by slug, this memoizes the in-flight confirmation rather than merely recording
-  // "seen". A Set cannot express what is needed: two removal PRs deleting the same
-  // extension run concurrently, and the second reaches its check BEFORE the first's
-  // confirmation resolves, so with a Set the second skips outright.
-  //
-  // The memoized value must be a TRI-STATE. A boolean conflates "present" with "could
-  // not tell", and sharing that ambiguity reproduces the bug in a new shape: a transient
-  // 5xx on whichever PR wins the race would be inherited by a sibling that would have
-  // received a real 404. Only a DEFINITIVE answer ("gone" / "present") is worth sharing;
-  // "unknown" is discarded so the next PR for that slug retries independently.
-  const removalConfirmations = new Map<string, Promise<RemovalCheck>>();
-  const removalResults = await mapWithConcurrency(removalCandidatePRs, 8, async (pr) => {
-    // Budgeted like every other /files call — removal PRs were previously exempt, so a
-    // scan with six removals issued six billed requests despite the cap.
-    if (!filesBudget.spend()) return [];
-    const slugs = await fetchRemovedSlugsFromPR(pr.number);
-    const items: StoreItem[] = [];
-    for (const slug of slugs) {
-      // Only the PR that starts the confirmation may emit; a concurrent PR for the same
-      // slug awaits the same promise and stays silent. That gives dedup (one item) and
-      // retry-safety (a transient failure does not suppress the other PR's answer,
-      // because there is only ever one answer).
-      // Resolve this slug to a definitive verdict, retrying past inconclusive answers.
-      //
-      // The loop is load-bearing. A sibling PR reaches this point while the owner's
-      // confirmation is still in flight, so it cannot simply skip — by the time the
-      // owner discovers "unknown" and clears the entry, a skipping sibling has already
-      // moved on and the genuine removal is lost. Awaiting the shared promise and
-      // looping means whoever is still here retries, while a definitive answer is
-      // resolved exactly once and shared.
-      let verdict: RemovalCheck = "unknown";
-      let owned = false;
-      for (;;) {
-        const inFlight = removalConfirmations.get(slug);
-        if (inFlight) {
-          const shared = await inFlight;
-          if (shared !== "unknown") {
-            verdict = shared; // someone else got a definitive answer; they emit, not us
-            break;
-          }
-          // Inconclusive and already cleared by its owner — fall through and retry.
-          if (removalConfirmations.get(slug) === inFlight) removalConfirmations.delete(slug);
-          continue;
-        }
-        const confirmation = isExtensionGone(slug);
-        removalConfirmations.set(slug, confirmation);
-        verdict = await confirmation;
-        if (verdict === "unknown") {
-          removalConfirmations.delete(slug);
-          break; // our own attempt failed; do not spin on a persistent outage
-        }
-        owned = true; // we produced the definitive answer, so we are the one who emits
-        break;
-      }
-      if (!owned || verdict !== "gone") continue;
-      const title = titleFromSlug(slug);
-      items.push({
-        id: `pr-${pr.number}-removed-${slug}`,
-        title,
-        summary: `This extension has been removed from the Raycast Store.`,
-        image: pr.user.avatar_url,
-        date: pr.merged_at!,
-        authorName: pr.user.login,
-        authorUrl: pr.user.html_url,
-        url: pr.html_url,
-        type: "removed" as const,
-        extensionSlug: slug,
-        prUrl: pr.html_url,
-        platforms: ["macOS"],
-      });
-    }
-    return items;
   });
 
   const removedItems = removalResults.flat();
@@ -863,47 +928,86 @@ export async function scanStoreUpdates(): Promise<StoreItem[]> {
 }
 
 /**
- * Gets the set of installed extension slugs by reading from the Raycast
- * support directory. Each extension directory contains a package.json with a
- * `name` field.
+ * Where Raycast keeps installed extensions: `~/.config/<config-dir>/extensions`, one
+ * folder per extension, each holding that extension's built `package.json`.
  *
- * The location is derived relatively from environment.assetsPath
- * (.../extensions/<ext-id>/assets -> .../extensions) so it does not hardcode a
- * platform-specific path. On macOS this resolves under
- * ~/Library/Application Support/com.raycast.macos/extensions/; the Windows
- * layout has not been verified, so callers should treat an empty result as
- * "unknown" rather than "no matching extensions" on Windows.
+ * The config-dir name follows from the running build's bundle id, which is the path
+ * segment after "Application Support" (macOS) or "Roaming" (Windows) in supportPath:
+ * `com.<product>.<platform>[.<variant>]` becomes `<product>[-<variant>]`, so
+ * `com.raycast.macos` -> `raycast` and `com.raycast-x.macos.internal` ->
+ * `raycast-x-internal`. That one rule reproduces all twelve entries of the lookup table
+ * in the published `installed-extensions` extension, which this approach comes from.
  */
-export function getInstalledExtensionSlugs(): Set<string> {
-  const slugs = new Set<string>();
+function installedExtensionsDir(): string | null {
+  const bundleId = environment.supportPath.split(/[\\/]/).find((segment) => segment.startsWith("com.raycast"));
+  const match = bundleId?.match(/^com\.([^.]+)\.(?:macos|windows)(?:\.(.+))?$/);
+  if (!match) return null;
+  const configDir = match[2] ? `${match[1]}-${match[2]}` : match[1];
+  return join(homedir(), ".config", configDir, "extensions");
+}
 
+/**
+ * The slugs of every installed extension, or null when the answer is not knowable.
+ *
+ * Read from each installed extension's own `package.json` `name`, which IS its slug —
+ * for Store installs (folders named by UUID) and local `ray develop` builds (folders
+ * named by slug) alike, so nothing needs resolving over the network.
+ *
+ * Do NOT read `~/Library/Application Support/com.raycast.macos/extensions/` instead. It
+ * looks like a registry and is not one: Raycast creates an extension's folder there the
+ * first time it RUNS (it holds supportPath and the Cache store), so an extension that is
+ * installed but never opened is absent, and its updates would be filtered out of My
+ * Updates. Verified 2026-09-22: Hide My Email was installed, never run, and absent there
+ * — but present here. Its Store folders also carry no package.json, so slugs could only
+ * come from a network lookup.
+ *
+ * Null, never an empty or partial Set, whenever the read cannot be trusted — a filter
+ * that fails closed looks exactly like "you have no updates":
+ * - the bundle id is unrecognised, or the directory is missing or unreadable;
+ * - the result does not contain THIS extension. It is necessarily installed while it
+ *   runs, so its absence means we are reading the wrong directory. That check is what
+ *   makes an empty Set impossible, and it catches a relayout or an unanticipated
+ *   platform path without having to predict one.
+ */
+export async function fetchInstalledExtensionSlugs(): Promise<Set<string> | null> {
+  const dir = installedExtensionsDir();
+  if (!dir) return null;
+
+  let entries: string[];
   try {
-    // environment.assetsPath is like:
-    // ~/Library/Application Support/com.raycast.macos/extensions/<ext-id>/assets
-    // We go up to the extensions directory
-    const assetsPath = environment.assetsPath;
-    const extensionsDir = dirname(dirname(assetsPath));
-
-    if (!existsSync(extensionsDir)) return slugs;
-
-    const entries = readdirSync(extensionsDir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      const pkgPath = join(extensionsDir, entry.name, "package.json");
-      try {
-        if (!existsSync(pkgPath)) continue;
-        const raw = readFileSync(pkgPath, "utf-8");
-        const pkg = JSON.parse(raw) as { name?: string };
-        if (pkg.name) {
-          slugs.add(pkg.name);
-        }
-      } catch {
-        // Skip unreadable extensions
-      }
-    }
+    entries = await readdir(dir);
   } catch {
-    // If we can't read the directory, return empty set
+    return null;
   }
 
-  return slugs;
+  // Two different failures, deliberately handled differently. A MISSING manifest means
+  // the entry is not an extension: the folder always holds Raycast's shared
+  // `node_modules`, and can hold leftovers with no manifest (observed: `raycast-fly`,
+  // only `assets/`), plus stray files. Those are skipped. A manifest that EXISTS but
+  // cannot be read or parsed, or has no name, is an extension we cannot identify — a
+  // half-written install, say — and skipping it would silently hide its updates, so the
+  // whole answer becomes unknowable instead.
+  let names: (string | undefined)[];
+  try {
+    names = await Promise.all(
+      entries.map(async (entry) => {
+        let manifest: string;
+        try {
+          manifest = await readFile(join(dir, entry, "package.json"), "utf8");
+        } catch (error) {
+          const code = (error as NodeJS.ErrnoException).code;
+          if (code === "ENOENT" || code === "ENOTDIR") return undefined;
+          throw error;
+        }
+        const { name } = JSON.parse(manifest) as { name?: unknown };
+        if (typeof name !== "string" || !name) throw new Error(`${entry}/package.json has no name`);
+        return name;
+      }),
+    );
+  } catch {
+    return null;
+  }
+
+  const slugs = new Set(names.filter((name): name is string => name !== undefined));
+  return slugs.has(environment.extensionName) ? slugs : null;
 }
