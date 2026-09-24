@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-24
 
 - Always return to Raycast's root search immediately after opening a Tab, Bookmark, Reading List item, History entry, or address from the Command Bar, regardless of the "Pop to Root Search" preference. Previously, a delayed preference could leave the Command Bar's background process lingering instead of resetting, so reopening it soon after could show a tab list that had not picked up a change made directly in Orion in the meantime.
 
