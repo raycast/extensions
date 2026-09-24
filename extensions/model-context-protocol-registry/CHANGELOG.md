@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Engine DJ, Serato DJ and Bandcamp MCP Servers] - {PR_MERGE_DATE}
+
+- Add Engine DJ, Serato DJ and Bandcamp to the community registry: ask an AI assistant about your Engine DJ (Denon) or Serato DJ library (harmonic BPM and Camelot key search, duplicate and missing-file audits, playlists and crates built on request) or dig Bandcamp without an account. Open-source local stdio servers started with `npx`; not affiliated with inMusic, Serato or Bandcamp.
+
 ## [Add AI Applyd MCP Server] - 2026-09-24
 
 - Add AI Applyd to the official registry: search jobs matched to your resume, tailor the resume and cover letter to a posting, and submit the application on the employer's own hiring system across 15 ATS platforms; score a resume against a job and get interview prep. Hosted remote Streamable HTTP server at https://mcp.aiapplyd.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
