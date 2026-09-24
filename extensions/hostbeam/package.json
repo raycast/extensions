@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hostbeam",
+  "title": "Hostbeam",
+  "description": "Beam the screenshot on your clipboard to a remote host over SSH, and get the paste-ready path back.",
+  "icon": "icon.png",
+  "author": "PunkABeat",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "ssh",
+    "screenshot",
+    "remote",
+    "scp",
+    "clipboard"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "beam-clipboard",
+      "title": "Beam Clipboard",
+      "subtitle": "Hostbeam",
+      "description": "Send the screenshot on your clipboard to your current host.",
+      "mode": "no-view"
+    },
+    {
+      "name": "beam-selected-files",
+      "title": "Beam Selected Files",
+      "subtitle": "Hostbeam",
+      "description": "Send the images selected in Finder to your current host.",
+      "mode": "no-view"
+    },
+    {
+      "name": "recent-beams",
+      "title": "Recent Beams",
+      "subtitle": "Hostbeam",
+      "description": "Browse what you have beamed and copy a path back to the clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-host",
+      "title": "Switch Host",
+      "subtitle": "Hostbeam",
+      "description": "Choose which host your beams go to.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
