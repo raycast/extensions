@@ -3,7 +3,7 @@
 # Raycast Store Updates
 
 [![Raycast Store](https://img.shields.io/badge/Raycast-Store-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/chrismessina/raycast-store-updates)
-[![Licence MIT](https://img.shields.io/badge/Licence-MIT-22C55E?style=flat-square)](LICENSE)
+[![License MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 [![Follow @chrismessina](https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social)](https://github.com/chrismessina)
 [![Stars](https://img.shields.io/github/stars/chrismessina/raycast-store-updates?style=social)](https://github.com/chrismessina/raycast-store-updates/stargazers)
 

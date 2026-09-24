@@ -1,5 +1,9 @@
 # Raycast Store Updates Changelog
 
+## [US English] - 2026-09-24
+
+- Use US English spelling throughout the extension and its README
+
 ## [Version History, Working My Updates, and Update Checks] - 2026-09-23
 
 - New extension icon
