@@ -1,5 +1,15 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [Stop Speaking] - {PR_MERGE_DATE}
+
+### Added
+
+- Stop Speaking command to stop playback without re-running a speak command
+
+### Fixed
+
+- Stopping playback now also stops generating the rest of the audio, so long texts no longer keep using credits after they are stopped
+
 ## [Fix Repeated Already Reading] - 2026-08-17
 
 ### Fixed

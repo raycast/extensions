@@ -27,6 +27,12 @@
       "title": "Speak Copied Text",
       "description": "Speak text from the clipboard using ElevenLabs TTS",
       "mode": "no-view"
+    },
+    {
+      "name": "stop-speaking",
+      "title": "Stop Speaking",
+      "description": "Stop the current ElevenLabs TTS playback",
+      "mode": "no-view"
     }
   ],
   "preferences": [
