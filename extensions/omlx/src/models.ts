@@ -84,6 +84,82 @@ function convertTools(
   }));
 }
 
+function convertMessages(
+  messages: NonNullable<Parameters<AI.StreamCompletion>[1]["messages"]>,
+): unknown[] {
+  return messages
+    .map((msg) => {
+      if (msg.role === "user" && Array.isArray(msg.content)) {
+        const parts = msg.content.map((part: Record<string, unknown>) => {
+          if (part.type === "file" && part.data && part.mediaType) {
+            let base64: string;
+            if (typeof part.data === "string") {
+              base64 = part.data;
+            } else if (
+              part.data instanceof Uint8Array ||
+              part.data instanceof ArrayBuffer
+            ) {
+              const bytes =
+                part.data instanceof ArrayBuffer
+                  ? new Uint8Array(part.data)
+                  : part.data;
+              base64 = Buffer.from(bytes).toString("base64");
+            } else {
+              return part;
+            }
+            return {
+              type: "image_url",
+              image_url: { url: `data:${part.mediaType};base64,${base64}` },
+            };
+          }
+          return part;
+        });
+        return { ...msg, content: parts };
+      }
+
+      if (msg.role === "assistant" && Array.isArray(msg.content)) {
+        const textParts = msg.content
+          .filter(
+            (p: Record<string, unknown>) =>
+              p.type === "text" || p.type === "reasoning",
+          )
+          .map((p: Record<string, unknown>) => p.text ?? "")
+          .join("");
+        const toolCalls = msg.content
+          .filter((p: Record<string, unknown>) => p.type === "tool-call")
+          .map((p: Record<string, unknown>, i: number) => ({
+            id: p.toolCallId,
+            type: "function",
+            index: i,
+            function: {
+              name: p.toolName,
+              arguments: JSON.stringify(p.input ?? {}),
+            },
+          }));
+        return {
+          role: "assistant",
+          content: textParts || null,
+          ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
+        };
+      }
+
+      if (msg.role === "tool" && Array.isArray(msg.content)) {
+        return msg.content.map((part: Record<string, unknown>) => ({
+          role: "tool",
+          tool_call_id: part.toolCallId,
+          content: JSON.stringify(
+            (part.output as Record<string, unknown>)?.value ??
+              part.output ??
+              "",
+          ),
+        }));
+      }
+
+      return msg;
+    })
+    .flat();
+}
+
 interface ToolCallAccumulator {
   id: string;
   name: string;
@@ -102,7 +178,7 @@ export const streamCompletion: AI.StreamCompletion = async function* (
       ...(request.system
         ? [{ role: "system" as const, content: request.system }]
         : []),
-      ...(request.messages ?? []),
+      ...convertMessages(request.messages ?? []),
     ],
     stream: true,
   };

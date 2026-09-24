@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Color,
   Detail,
-  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -11,10 +10,15 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
+  type AdminStats,
+  checkForUpdate,
+  fetchAdminStats,
+  fetchLogs,
   fetchModelsStatus,
   fetchServerStatus,
   formatBytes,
   formatModelName,
+  getDashboardUrl,
   isOmlxInstalled,
   isServerRunning,
   formatUptime,
@@ -22,21 +26,24 @@ import {
   updateModelSettings,
   type OmlxModelStatus,
   type OmlxServerStatus,
+  type UpdateCheckResponse,
 } from "./lib/omlx";
-
-function getDashboardUrl(): string {
-  const { serverUrl } = getPreferenceValues<ExtensionPreferences>();
-  return `${serverUrl.replace(/\/v1\/?$/, "")}/admin`;
-}
 
 type ViewState = "loading" | "not-installed" | "offline" | "error" | "ready";
 
+type StatsScope = "session" | "alltime";
+
 export default function ServingStats() {
   const [status, setStatus] = useState<OmlxServerStatus | null>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [scope, setScope] = useState<StatsScope>("session");
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResponse | null>(
+    null,
+  );
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  async function loadStatus() {
+  async function loadStatus(statsScope?: StatsScope) {
     setViewState("loading");
     setErrorMessage("");
 
@@ -51,8 +58,15 @@ export default function ServingStats() {
         setViewState("offline");
         return;
       }
-      const data = await fetchServerStatus();
-      setStatus(data);
+      const [serverData, statsData] = await Promise.all([
+        fetchServerStatus(),
+        fetchAdminStats(statsScope ?? scope),
+      ]);
+      setStatus(serverData);
+      setStats(statsData);
+      checkForUpdate()
+        .then(setUpdateInfo)
+        .catch(() => {});
       setViewState("ready");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unknown error");
@@ -65,6 +79,12 @@ export default function ServingStats() {
     }
   }
 
+  function onScopeChange(newScope: string) {
+    const s = newScope as StatsScope;
+    setScope(s);
+    loadStatus(s);
+  }
+
   useEffect(() => {
     loadStatus();
   }, []);
@@ -73,12 +93,17 @@ export default function ServingStats() {
     <ActionPanel>
       <Action.OpenInBrowser
         title="Open Web Dashboard"
-        url={getDashboardUrl()}
+        url={getDashboardUrl({ tab: "status" })}
       />
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
         onAction={loadStatus}
+      />
+      <Action.Push
+        title="View Logs"
+        icon={Icon.Terminal}
+        target={<LogsView />}
       />
     </ActionPanel>
   );
@@ -130,28 +155,41 @@ export default function ServingStats() {
   }
 
   const s = status;
-  if (!s) return <List isLoading />;
+  const st = stats;
+  if (!s || !st) return <List isLoading />;
 
-  const totalTokens = n(s.total_prompt_tokens) + n(s.total_completion_tokens);
+  const totalTokens = n(st.total_prompt_tokens) + n(st.total_completion_tokens);
   const memoryPercent =
     s.model_memory_max > 0
       ? Math.round((s.model_memory_used / s.model_memory_max) * 100)
       : 0;
 
   return (
-    <List isLoading={viewState === "loading"}>
+    <List
+      isLoading={viewState === "loading"}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Stats Scope"
+          value={scope}
+          onChange={onScopeChange}
+        >
+          <List.Dropdown.Item title="Session" value="session" />
+          <List.Dropdown.Item title="All Time" value="alltime" />
+        </List.Dropdown>
+      }
+    >
       <List.Section title="Speed">
         <List.Item
           icon={Icon.Bolt}
           title="Prompt Processing"
-          accessories={[{ text: `${n(s.avg_prefill_tps).toFixed(1)} tok/s` }]}
+          accessories={[{ text: `${n(st.avg_prefill_tps).toFixed(1)} tok/s` }]}
           actions={actions}
         />
         <List.Item
           icon={Icon.Bolt}
           title="Token Generation"
           accessories={[
-            { text: `${n(s.avg_generation_tps).toFixed(1)} tok/s` },
+            { text: `${n(st.avg_generation_tps).toFixed(1)} tok/s` },
           ]}
           actions={actions}
         />
@@ -167,7 +205,7 @@ export default function ServingStats() {
         <List.Item
           icon={Icon.Document}
           title="Cached Tokens"
-          accessories={[{ text: formatTokens(n(s.total_cached_tokens)) }]}
+          accessories={[{ text: formatTokens(n(st.total_cached_tokens)) }]}
           actions={actions}
         />
         <List.Item
@@ -176,11 +214,11 @@ export default function ServingStats() {
           accessories={[
             {
               tag: {
-                value: `${n(s.cache_efficiency).toFixed(1)}%`,
+                value: `${n(st.cache_efficiency).toFixed(1)}%`,
                 color:
-                  n(s.cache_efficiency) > 50
+                  n(st.cache_efficiency) > 50
                     ? Color.Green
-                    : n(s.cache_efficiency) > 20
+                    : n(st.cache_efficiency) > 20
                       ? Color.Yellow
                       : Color.SecondaryText,
               },
@@ -224,9 +262,9 @@ export default function ServingStats() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="View Model Details"
-                    icon={Icon.Eye}
-                    target={<ModelDetail modelId={m} onBack={loadStatus} />}
+                    title="View Model Stats"
+                    icon={Icon.BarChart}
+                    target={<ModelStats modelId={m} scope={scope} />}
                   />
                   <Action
                     title="Eject Model"
@@ -275,16 +313,21 @@ export default function ServingStats() {
                       }
                     }}
                   />
-                  <Action.CopyToClipboard title="Copy Name" content={m} />
+                  <Action.Push
+                    title="View Model Details"
+                    icon={Icon.Eye}
+                    target={<ModelDetail modelId={m} onBack={loadStatus} />}
+                  />
                   <Action.OpenInBrowser
                     title="Open Web Dashboard"
-                    url={getDashboardUrl()}
+                    url={getDashboardUrl({ tab: "status" })}
                   />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={loadStatus}
                   />
+                  <Action.CopyToClipboard title="Copy Name" content={m} />
                 </ActionPanel>
               }
             />
@@ -302,15 +345,7 @@ export default function ServingStats() {
         <List.Item
           icon={Icon.Network}
           title="Total"
-          accessories={[{ text: n(s.total_requests).toLocaleString() }]}
-          actions={actions}
-        />
-        <List.Item
-          icon={Icon.Clock}
-          title="Active / Waiting"
-          accessories={[
-            { text: `${n(s.active_requests)} / ${n(s.waiting_requests)}` },
-          ]}
+          accessories={[{ text: n(st.total_requests).toLocaleString() }]}
           actions={actions}
         />
       </List.Section>
@@ -325,6 +360,35 @@ export default function ServingStats() {
           ]}
           actions={actions}
         />
+        {updateInfo?.update_available && (
+          <List.Item
+            icon={{ source: Icon.ArrowUp, tintColor: Color.Orange }}
+            title="Update Available"
+            accessories={[
+              {
+                tag: {
+                  value: updateInfo.latest_version ?? "New version",
+                  color: Color.Orange,
+                },
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                {updateInfo.release_url && (
+                  <Action.OpenInBrowser
+                    title="View Release"
+                    url={updateInfo.release_url}
+                  />
+                )}
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={loadStatus}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
       </List.Section>
     </List>
   );
@@ -484,7 +548,127 @@ function ModelDetail({
           <Action.CopyToClipboard title="Copy Name" content={m.id} />
           <Action.OpenInBrowser
             title="Open Web Dashboard"
-            url={getDashboardUrl()}
+            url={getDashboardUrl({ tab: "status" })}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function ModelStats({
+  modelId,
+  scope: initialScope,
+}: {
+  modelId: string;
+  scope: StatsScope;
+}) {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  async function load() {
+    setIsLoading(true);
+    try {
+      const data = await fetchAdminStats(initialScope, modelId);
+      setStats(data);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch model stats",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  if (!stats) {
+    return <Detail isLoading={isLoading} markdown="" />;
+  }
+
+  const totalTokens =
+    n(stats.total_prompt_tokens) + n(stats.total_completion_tokens);
+  const markdown = `# ${formatModelName(modelId)}\n\n*${initialScope === "alltime" ? "All Time" : "Session"} stats*`;
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Prompt Processing"
+            text={`${n(stats.avg_prefill_tps).toFixed(1)} tok/s`}
+          />
+          <Detail.Metadata.Label
+            title="Token Generation"
+            text={`${n(stats.avg_generation_tps).toFixed(1)} tok/s`}
+          />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title="Requests"
+            text={n(stats.total_requests).toLocaleString()}
+          />
+          <Detail.Metadata.Label
+            title="Tokens Processed"
+            text={formatTokens(totalTokens)}
+          />
+          <Detail.Metadata.Label
+            title="Cached Tokens"
+            text={formatTokens(n(stats.total_cached_tokens))}
+          />
+          <Detail.Metadata.Label
+            title="Cache Efficiency"
+            text={`${n(stats.cache_efficiency).toFixed(1)}%`}
+          />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function LogsView() {
+  const [logs, setLogs] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  async function load() {
+    setIsLoading(true);
+    try {
+      const data = await fetchLogs();
+      setLogs(data.logs);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch logs",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={"```\n" + logs + "\n```"}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Logs" content={logs} />
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+          <Action.OpenInBrowser
+            title="Open Logs in Dashboard"
+            url={getDashboardUrl({ tab: "logs" })}
           />
         </ActionPanel>
       }

@@ -43,6 +43,24 @@
       "mode": "view"
     },
     {
+      "name": "download-model",
+      "title": "Download Model",
+      "description": "Search and download models from HuggingFace",
+      "mode": "view"
+    },
+    {
+      "name": "manage-downloads",
+      "title": "Manage Downloads",
+      "description": "View download progress, cancel, retry, or remove downloads",
+      "mode": "view"
+    },
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "description": "Check if a new version of oMLX is available",
+      "mode": "view"
+    },
+    {
       "name": "open-dashboard",
       "title": "Open Web Dashboard",
       "description": "Open the oMLX web dashboard in your browser",
