@@ -248,8 +248,24 @@
       "description": "Download one or more files (attachments) from Slack to a local folder. Pass Slack file IDs, one per line; file IDs start with F and appear in the `files` array returned by Read Conversation, Read Thread, Get Channel History, or Search Messages. Files are saved to the user's ~/Downloads folder by default, or to an optional destination directory. Returns the saved absolute paths."
     }
   ],
+  "ai": {
+    "skills": [
+      {
+        "name": "slack-catch-up",
+        "title": "Catch up on Slack"
+      },
+      {
+        "name": "slack-decision-research",
+        "title": "Find Discussions and Decisions"
+      },
+      {
+        "name": "slack-standup-draft",
+        "title": "Draft a Standup Update"
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.104.6",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.2",
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",

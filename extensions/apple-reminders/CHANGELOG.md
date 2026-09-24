@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Weekly Review and Action Capture Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Review completed and outstanding reminders and capture supplied action items without inventing deadlines.
+
 ## [Date Format Preference] - 2026-09-24
 
 - Add extension-level "Date Format" preference (`Month / Day (MM/DD)` and `Day / Month (DD/MM)`).

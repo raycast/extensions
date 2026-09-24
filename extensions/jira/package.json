@@ -258,6 +258,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "jira-bug-triage",
+        "title": "Triage Bug Reports"
+      }
+    ],
     "instructions": "- Always format object titles and names as markdown links using the object's URL. Example: Instead of saying \"Issue **Implement user profile page** has been created', say \"Issue [Implement user profile page](https://linear.app/company/issue/ISS-2) has been created\"\\n- Do not use names or titles as IDs in the system. Use the actual ID of the object\\n- When there is no exact match of issue titles with the provided name, analyze the input and titles of existing objects and use such objects only if the meaning is the same. Do not use objects that are not related to the input\\n- Do not set any fields when creating issues if the user didn't specify any. For example, if the user didn't specify a due date, do not set it.",
     "evals": [
       {
@@ -574,7 +580,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.103.9",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "filesize": "^11.0.13",
