@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## Add Bug Triage Skill - {PR_MERGE_DATE}
+
+- Triage bugs, compare possible duplicates, and file or update issues from verified details. Available through the bundled Bug Triage skill in Raycast AI.
+
 ## [Search input available immediately] - 2026-09-20
 
 - Fixed commands blocking keyboard input on launch: the Jira site and user details are now cached, so the view renders right away while authentication requests run in the background
