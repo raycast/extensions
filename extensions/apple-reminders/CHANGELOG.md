@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Natural Language Recurrence in Create Reminder] - {PR_MERGE_DATE}
+
+- Support natural language recurrence patterns (e.g. `every day`, `every Friday 10am`, `every 2 weeks`, `weekdays`, `monthly`) in the Create Reminder free-text date field.
+- Automatically populate recurrence frequency, interval, and start date from text input.
+
 ## [Weekly Review and Action Capture Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

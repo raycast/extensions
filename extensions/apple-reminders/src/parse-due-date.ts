@@ -44,7 +44,7 @@ export function extractDueDateFromText(text: string, now: Date = new Date(), dat
   }
 
   const parser = isDayFirst(dateFormatPreference) ? chrono.en.GB : chrono.en;
-  const chronoMatch = parser.parse(text, now)[0];
+  const chronoMatch = parser.parse(text, now, { forwardDate: true })[0];
   if (chronoMatch) {
     return {
       title: stripMatchedText(text, chronoMatch.text, chronoMatch.index),
@@ -61,7 +61,7 @@ export function formatDueDate(parsed: ParsedDueDate): string {
 
 function parseChronoDate(text: string, now: Date, dateFormatPreference?: string): ParsedDueDate | null {
   const parser = isDayFirst(dateFormatPreference) ? chrono.en.GB : chrono.en;
-  const chronoMatch = parser.parse(text, now)[0];
+  const chronoMatch = parser.parse(text, now, { forwardDate: true })[0];
   if (!chronoMatch) {
     return null;
   }

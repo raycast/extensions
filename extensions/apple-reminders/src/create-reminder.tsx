@@ -26,6 +26,7 @@ import useLocations, { Location } from "./hooks/useLocations";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import ManageCreateActions from "./manage-create-actions";
 import { ParsedDueDate, parseDueDate } from "./parse-due-date";
+import { parseRecurrence } from "./parse-recurrence";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
 export type { Frequency };
@@ -255,13 +256,34 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     if (!value.trim()) {
       nlpParseRef.current = null;
       setValue("dueDate", null);
+      setValue("isRecurring", false);
       return;
+    }
+
+    const recurrence = parseRecurrence(value);
+    if (recurrence) {
+      setValue("isRecurring", true);
+      setValue("frequency", recurrence.frequency);
+      setValue("interval", recurrence.interval.toString());
+    } else {
+      setValue("isRecurring", false);
     }
 
     const parsed = parseDueDate(value);
     if (parsed) {
       nlpParseRef.current = parsed;
       setValue("dueDate", parsed.date);
+      return;
+    }
+
+    if (recurrence) {
+      const now = new Date();
+      nlpParseRef.current = {
+        date: now,
+        isDateTime: false,
+        matchedText: recurrence.matchedText,
+      };
+      setValue("dueDate", now);
       return;
     }
 
@@ -345,10 +367,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             key="dueDateText"
             id="dueDateText"
             title="Date"
-            placeholder="1h, in 10 minutes, tomorrow 3:45pm"
+            placeholder="tomorrow 3:45pm, every Friday 10am, daily 9am, every 2 weeks"
             value={dateText}
             onChange={handleDueDateTextChange}
-            info="Supports 1h, 3 hours, 30 minutes, 3 days, 1 year, and times like 3:45pm. The h shortcut means hours."
+            info="Supports natural language dates (e.g. 'tomorrow 3:45pm', 'in 2 hours') and recurrence (e.g. 'every day', 'every Friday 10am', 'every 2 weeks', 'weekdays')."
           />,
           <Form.DatePicker
             key="dueDate"
