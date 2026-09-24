@@ -1,6 +1,6 @@
 # Quick Groups Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-24
 
 - Search user-defined things and their fields from local YAML groups.
 - Act on projects, machines, writing, clients, and other concepts from one searchable place.
