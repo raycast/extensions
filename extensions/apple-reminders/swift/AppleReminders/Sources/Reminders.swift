@@ -42,6 +42,7 @@ enum RemindersError: Error {
   case accessDenied
   case noRemindersFound
   case noReminderFound
+  case noListFound
   case unableToSaveReminder
   case other
 }
@@ -165,7 +166,7 @@ struct Recurrence: Decodable {
   if let listId = newReminder.listId {
     let calendars = eventStore.calendars(for: .reminder)
     guard let calendar = (calendars.first { $0.calendarIdentifier == listId }) else {
-      throw RemindersError.noReminderFound
+      throw RemindersError.noListFound
     }
     reminder.calendar = calendar
   } else {
@@ -311,7 +312,7 @@ struct MoveToListPayload: Decodable {
 
   let calendars = eventStore.calendars(for: .reminder)
   guard let newCalendar = (calendars.first { $0.calendarIdentifier == payload.listId }) else {
-    throw RemindersError.noReminderFound
+    throw RemindersError.noListFound
   }
 
   item.calendar = newCalendar
@@ -518,7 +519,7 @@ struct UpdateReminderPayload: Decodable {
   if let listId = payload.listId {
     let calendars = eventStore.calendars(for: .reminder)
     guard let newCalendar = (calendars.first { $0.calendarIdentifier == listId }) else {
-      throw RemindersError.noReminderFound
+      throw RemindersError.noListFound
     }
     item.calendar = newCalendar
   }
