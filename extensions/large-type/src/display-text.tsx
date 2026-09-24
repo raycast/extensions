@@ -203,7 +203,7 @@ export default function DisplayText({ inputText }: DisplayTextProps) {
       alignment-baseline="middle"
       dominant-baseline="middle"
       text-anchor="middle"
-    >${addLineBreaks(text)}</text>`;
+    >${encodeForSVG(addLineBreaks(text))}</text>`;
 
     svg += `</svg>`;
 
