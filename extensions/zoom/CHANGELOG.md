@@ -1,6 +1,6 @@
 # Zoom Changelog
 
-## [Meeting Prep Skill] - {PR_MERGE_DATE}
+## [Meeting Prep Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for preparing upcoming-meeting briefs with Zoom details, join links, and suggested questions.

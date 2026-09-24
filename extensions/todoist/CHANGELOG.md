@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Daily Planning and Inbox Triage Skill] - {PR_MERGE_DATE}
+## [Daily Planning and Inbox Triage Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for building a realistic daily plan and organizing Inbox tasks with suggested priorities, destinations, and next actions.

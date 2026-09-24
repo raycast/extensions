@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Meeting Notes to Actions Skill] - {PR_MERGE_DATE}
+## [Meeting Notes to Actions Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Extract decisions and action items from meeting notes and save requested summaries with source links.

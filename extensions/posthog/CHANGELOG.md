@@ -1,6 +1,6 @@
 # PostHog Changelog
 
-## [Product Metrics Skill] - {PR_MERGE_DATE}
+## [Product Metrics Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for answering product-metrics questions and investigating changes with saved insight definitions, scoped HogQL queries, and explicit data limitations.

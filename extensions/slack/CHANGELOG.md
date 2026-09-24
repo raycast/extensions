@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Catch-up, Decisions, and Standup Skills] - {PR_MERGE_DATE}
+## [Catch-up, Decisions, and Standup Skills] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.

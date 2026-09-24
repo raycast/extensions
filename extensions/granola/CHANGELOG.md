@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [Meeting Actions Skill] - {PR_MERGE_DATE}
+## [Meeting Actions Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for extracting decisions, action items, and open questions from meeting notes or a weekly review.

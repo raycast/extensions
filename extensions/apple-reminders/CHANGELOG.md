@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Weekly Review and Action Capture Skill] - {PR_MERGE_DATE}
+## [Weekly Review and Action Capture Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Review completed and outstanding reminders and capture supplied action items without inventing deadlines.

@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Plan My Week Skill] - {PR_MERGE_DATE}
+## [Plan My Week Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for reviewing the week, finding meeting and focus-time slots, and booking requested events with availability checks.

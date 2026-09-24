@@ -1,6 +1,6 @@
 # Typefully Changelog
 
-## [Voice Drafting Skill] - {PR_MERGE_DATE}
+## [Voice Drafting Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for drafting posts and threads in your voice, using writing samples and tailored platform versions while preserving existing draft content and comments.

@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Knowledge Capture Skill] - {PR_MERGE_DATE}
+## [Knowledge Capture Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for saving conversations, decisions, how-tos, and FAQs as database pages or additions to existing pages.
