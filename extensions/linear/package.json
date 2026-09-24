@@ -677,5 +677,13 @@
   "overrides": {
     "brace-expansion": "5.0.9",
     "js-yaml@4": "4.3.1"
+  },
+  "ai": {
+    "skills": [
+      {
+        "name": "linear-work-planning",
+        "title": "Plan and Review Work"
+      }
+    ]
   }
 }
