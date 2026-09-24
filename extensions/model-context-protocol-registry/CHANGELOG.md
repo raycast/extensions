@@ -4,6 +4,14 @@
 
 - Add Clera to the official registry: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles and request intros; candidates search open startup jobs, read full listings and save the good ones. Hosted remote Streamable HTTP server at https://mcp.getclera.com through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key; free during the beta.
 
+## [Add RemoveDuplicates.org MCP Server] - 2026-09-24
+
+- Add RemoveDuplicates.org to the official registry: remove duplicate lines or CSV/TSV rows and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add Codex Reset MCP Server] - 2026-09-24
+
+- Add Codex Reset to the official registry: OpenAI Codex usage-limit reset forecast for the next 24 and 48 hours, the verified reset record with source links, and Codex service status. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.
+
 ## [Add QuillHub MCP Server] - 2026-09-23
 
 - Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.

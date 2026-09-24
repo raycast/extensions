@@ -1,4 +1,16 @@
-import { showToast, Toast, Form, ActionPanel, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
+import {
+  showToast,
+  showHUD,
+  Toast,
+  Detail,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  launchCommand,
+  LaunchType,
+  popToRoot,
+} from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
 import {
   type AudioDevice,
@@ -15,7 +27,7 @@ import {
   setInputDeviceMute,
 } from "./audio-device";
 import { getPinnedVolume, setPinnedVolume, clearPinnedVolume } from "./device-preferences";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ioConfig = {
   output: {
@@ -202,4 +214,52 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       />
     </Form>
   );
+}
+
+function parseVolumeLevel(level: string): number | undefined {
+  if (!/^-?\d+$/.test(level)) return undefined;
+  return Number(level);
+}
+
+export function SilentVolume({ ioType, level }: { ioType: IOType; level: string }) {
+  useEffect(() => {
+    (async () => {
+      const config = ioConfig[ioType];
+
+      try {
+        const parsed = parseVolumeLevel(level);
+        if (parsed == null) {
+          await showToast(Toast.Style.Failure, "Invalid volume", `"${level}" is not a number between 0 and 100`);
+          return;
+        }
+
+        const clamped = Math.max(0, Math.min(100, parsed));
+        const device = await config.getDefault();
+        const deviceId = String(device.id);
+
+        if ((await config.getVolume(deviceId)) == null) {
+          await showToast(
+            Toast.Style.Failure,
+            "Volume not supported",
+            `${device.name} does not support volume control`,
+          );
+          return;
+        }
+
+        if (clamped > 0) await config.setMute(deviceId, false).catch(() => {});
+        await config.setVolume(deviceId, clamped / 100);
+        await showHUD(`${device.name}: ${clamped}%`);
+      } catch (error) {
+        await showToast(
+          Toast.Style.Failure,
+          `Failed to set ${ioType} volume`,
+          error instanceof Error ? error.message : String(error),
+        );
+      } finally {
+        await popToRoot({ clearSearchBar: true });
+      }
+    })();
+  }, [ioType, level]);
+
+  return <Detail isLoading markdown="" />;
 }

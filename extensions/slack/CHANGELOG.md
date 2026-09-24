@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Quiet automatic rate-limit retries] - 2026-09-23
+
+- Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
+
 ## [Fix recipient search, AI file uploads, and attachment downloads] - 2026-09-10
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.

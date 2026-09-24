@@ -40,6 +40,8 @@ const defaultFields: TTweetv2TweetField[] = [
   "created_at",
   "id",
   "entities",
+  "note_tweet",
+  "referenced_tweets",
   "conversation_id",
 ];
 
@@ -49,6 +51,7 @@ const defaultExpansions: TTweetv2Expansion[] = [
   "in_reply_to_user_id",
   "entities.mentions.username",
   "referenced_tweets.id",
+  "referenced_tweets.id.author_id",
 ];
 
 const defaultMediaFields: TTweetv2MediaField[] = ["url", "type", "media_key", "preview_image_url"];
@@ -195,21 +198,21 @@ export class TwitterAPIError extends Error {
   }
 }
 
-export class TwitterAuthenticationError extends TwitterAPIError {
+class TwitterAuthenticationError extends TwitterAPIError {
   constructor(message: string, payload: XErrorPayload, options?: ErrorOptions) {
     super(message, 401, payload, options);
     this.name = "TwitterAuthenticationError";
   }
 }
 
-export class TwitterForbiddenError extends TwitterAPIError {
+class TwitterForbiddenError extends TwitterAPIError {
   constructor(message: string, payload: XErrorPayload, options?: ErrorOptions) {
     super(message, 403, payload, options);
     this.name = "TwitterForbiddenError";
   }
 }
 
-export class TwitterRateLimitError extends TwitterAPIError {
+class TwitterRateLimitError extends TwitterAPIError {
   constructor(
     message: string,
     payload: XErrorPayload,
@@ -339,6 +342,7 @@ function requireUsername(value: string): string {
   return username;
 }
 
+// fallow-ignore-next-line unused-export -- tests/load.cjs compiles this module and calls the export directly
 export function normalizePostInput(input: CreatePostInput): CreatePostInput {
   const text = input.text?.trim() ?? "";
   const mediaPaths = [...new Set((input.mediaPaths ?? []).map((path) => path.trim()).filter(Boolean))];
@@ -436,6 +440,7 @@ export function postInputError(input: CreatePostInput): string | undefined {
   }
 }
 
+// fallow-ignore-next-line unused-export -- tests/load.cjs compiles this module and constructs the export directly
 export class ClientV2 {
   private async getAPI(): Promise<TwitterApi> {
     await authorize();
@@ -865,17 +870,19 @@ export class ClientV2 {
 
       return {
         candidates: page.tweets.map((tweet) => {
-          const mentionedUsers = (tweet.entities?.mentions ?? [])
+          const mentions = [...(tweet.entities?.mentions ?? []), ...(tweet.note_tweet?.entities?.mentions ?? [])];
+          const mentionedUsers = mentions
             .map((mention) => includes.userById(mention.id))
             .filter((user): user is UserV2 => user !== undefined);
           const repliedToAuthor = includes.repliedToAuthor(tweet);
           const relatedUsers = [...mentionedUsers, ...(repliedToAuthor ? [repliedToAuthor] : [])];
 
+          const post = this.tweetV2ToTweet(tweet, includes);
           return {
-            post: this.tweetV2ToTweet(tweet, includes),
+            post,
             fields: [
-              tweet.text,
-              ...(tweet.entities?.mentions ?? []).map((mention) => mention.username),
+              post.text,
+              ...mentions.map((mention) => mention.username),
               ...relatedUsers.flatMap((user) => [user.name, user.username]),
             ],
           };
@@ -1063,6 +1070,14 @@ export class ClientV2 {
     const author = includes.author(tweet);
     if (!author) throw new Error(`X did not include the author for post ${tweet.id}`);
 
+    // The top-level text can be a shortened preview, even for ordinary reposts.
+    let text = tweet.note_tweet?.text ?? tweet.text;
+    const original = includes.retweet(tweet);
+    if (original) {
+      const username = includes.author(original)?.username ?? /^RT @([^:]+):/.exec(tweet.text)?.[1];
+      if (username) text = `RT @${username}: ${original.note_tweet?.text ?? original.text}`;
+    }
+
     const firstMedia = includes.medias(tweet)[0];
     const imageUrl =
       firstMedia?.type === "animated_gif" || firstMedia?.type === "video"
@@ -1088,7 +1103,7 @@ export class ClientV2 {
 
     return {
       id: tweet.id,
-      text: tweet.text,
+      text,
       created_at: tweet.created_at,
       conversation_id: tweet.conversation_id,
       source: tweet.source ?? "",
@@ -1318,7 +1333,7 @@ export class ClientV2 {
   }
 }
 
-export function createClientV2(): ClientV2 {
+function createClientV2(): ClientV2 {
   return new ClientV2();
 }
 

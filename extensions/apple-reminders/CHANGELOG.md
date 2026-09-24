@@ -1,5 +1,31 @@
 # Apple Reminders Changelog
 
+## [Default list for Quick Add] - 2026-09-23
+
+- Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.
+
+## [Create Reminder from Current Tab] - 2026-09-23
+
+- Add "Create Reminder from Current Tab" command to create reminders directly from the active browser tab.
+- Attach native URL link to created reminders for 1-click opening in Apple Reminders.
+- Support interactive form mode with pre-filled title and URL as well as instant background reminder creation.
+- Add "Default Due Date & Time" preference to schedule reminders with natural language (e.g. `6pm`, `in 2 hours`, `tonight`, `tomorrow 9am`).
+
+## [Updated maintainer metadata] - 2026-09-23
+
+- Marked a former Apple Reminders maintainer as a past contributor.
+
+## [Display tags in My Reminders] - 2026-09-23
+
+- Display attached tags as accessories in the "My Reminders" list view.
+- Support filtering reminders by tag names in "My Reminders".
+
+## [Add priority and tags support] - 2026-09-23
+
+- Add support for setting priority (`low`, `medium`, `high`) and tags when creating or updating reminders.
+- Add priority dropdown and tags field to Create Reminder and Edit Reminder forms.
+- Support priority and tags in AI tools and Quick Add natural language parser.
+
 ## [Display due time in menu bar] - 2026-09-07
 
 - Display scheduled due time before reminder titles in menu bar items.
