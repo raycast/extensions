@@ -2,12 +2,14 @@ export let createdReminders = [];
 export let updatedReminders = [];
 export let priorityUpdates = [];
 export let titleAndNotesUpdates = [];
+export let moveToListUpdates = [];
 
 export function resetMockState() {
   createdReminders = [];
   updatedReminders = [];
   priorityUpdates = [];
   titleAndNotesUpdates = [];
+  moveToListUpdates = [];
 }
 
 export async function createReminder(payload) {
@@ -63,7 +65,7 @@ export async function updateReminder(payload) {
     completionDate: "",
     isRecurring: Boolean(payload.recurrence),
     recurrenceRule: payload.recurrence ? `Repeats ${payload.recurrence.frequency}` : "",
-    list: null,
+    list: payload.listId ? { id: payload.listId, title: "Updated List", color: "#000000", isDefault: false } : null,
     location: null,
     creationDate: new Date(),
   };
@@ -80,7 +82,9 @@ export async function setTitleAndNotes(payload) {
   titleAndNotesUpdates.push(payload);
 }
 
-export async function moveToList() {}
+export async function moveToList(payload) {
+  moveToListUpdates.push(payload);
+}
 export async function toggleCompletionStatus() {}
 export async function setDueDate() {}
 export async function deleteReminder() {}
