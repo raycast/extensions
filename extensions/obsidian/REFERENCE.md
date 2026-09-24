@@ -120,6 +120,16 @@ Many commands use a note list.
 - [ ] preferences
   - [ ] default vault -> skips vault selection
 
+
+## Previous Daily Note Command
+
+- [ ] see vault selection
+- [ ] shows subset of vaults that have both:
+  - [ ] advanced URI community plugin installed
+  - [ ] daily notes core plugin enabled
+- [ ] opens the previous existing daily note
+- [ ] preferences
+  - [ ] default vault -> skips vault selection
 ## Append To Daily Note Command
 
 - [ ] see vault selection

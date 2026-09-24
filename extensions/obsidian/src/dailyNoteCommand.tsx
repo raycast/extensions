@@ -16,7 +16,6 @@ export function DailyNote({ actionTitle = "Daily Note", commandId }: DailyNotePr
   const { vaultName } = getPreferenceValues<DailyNotePreferences>();
   const preselectedVault = vaults.find((vault) => vault.name === vaultName);
 
-
   const getTarget = (vault: ObsidianVault) =>
     commandId
       ? Obsidian.getTarget({ type: ObsidianTargetType.Command, vault, commandId })
@@ -53,10 +52,7 @@ export function DailyNote({ actionTitle = "Daily Note", commandId }: DailyNotePr
           key={vault.key}
           actions={
             <ActionPanel>
-              <Action.Open
-                title={actionTitle}
-                target={getTarget(vault)}
-              />
+              <Action.Open title={actionTitle} target={getTarget(vault)} />
             </ActionPanel>
           }
         />
