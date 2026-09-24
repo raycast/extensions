@@ -57,6 +57,7 @@ function isActiveInstance(instance: Instance, token: CachedToken): boolean {
 }
 export default function Instances() {
   const [token, setToken] = useCachedState<CachedToken>("token", { url: "", headers: {} });
+  const { pop } = useNavigation();
 
   const { isLoading, value: instances = [], setValue } = useLocalStorage<Instance[]>("instances");
 
@@ -97,7 +98,11 @@ export default function Instances() {
           description="Add an instance to get started"
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Plus} title="Add Instance" target={<AddInstance />} />
+              <Action.Push
+                icon={Icon.Plus}
+                title="Add Instance"
+                target={<InstanceForm instances={instances} setInstances={setValue} onSaved={pop} />}
+              />
             </ActionPanel>
           }
         />
@@ -121,13 +126,15 @@ export default function Instances() {
                   <Action.Push
                     icon={Icon.Plus}
                     title="Add Instance"
-                    target={<InstanceForm />}
+                    target={<InstanceForm instances={instances} setInstances={setValue} onSaved={pop} />}
                     shortcut={Keyboard.Shortcut.Common.New}
                   />
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Edit Instance"
-                    target={<InstanceForm initial={instance} />}
+                    target={
+                      <InstanceForm initial={instance} instances={instances} setInstances={setValue} onSaved={pop} />
+                    }
                     shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                 </ActionPanel.Section>
@@ -148,10 +155,25 @@ export default function Instances() {
   );
 }
 
-function InstanceForm({ initial }: { initial?: Instance }) {
-  const { value = [], setValue } = useLocalStorage<Instance[]>("instances");
+function InstanceForm({
+  initial,
+  instances,
+  setInstances,
+  onSaved,
+}: {
+  initial?: Instance;
+  /**
+   * Owned by whichever caller rendered this form - `useLocalStorage` has no cache shared across
+   * separate call sites (unlike `useCachedState`, which is why `token` syncs fine on its own), so
+   * this form must never keep its own independent copy: saving there wouldn't reach a caller's
+   * already-mounted list, leaving it showing the pre-edit row until it happened to remount.
+   */
+  instances: Instance[];
+  setInstances: (instances: Instance[]) => Promise<void>;
+  /** How to leave the form once saved - `pop()` back to a caller with live state, or `popToRoot()` for a caller (like `AddInstance`'s standalone use) with no shared state to reveal fresh. */
+  onSaved: () => void | Promise<void>;
+}) {
   const [token, setToken] = useCachedState<CachedToken>("token", { url: "", headers: {} });
-  const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<Pick<Instance, "name" | "url" | "key">>({
     async onSubmit(values) {
@@ -168,15 +190,14 @@ function InstanceForm({ initial }: { initial?: Instance }) {
         const record: Instance = { ...values, id: initial?.id ?? crypto.randomUUID() };
         const wasActive = !!initial && isActiveInstance(initial, token);
         const next = initial
-          ? value.map((i) => (instanceId(i) === instanceId(initial) ? record : i))
-          : [...value, record];
-        await setValue(next);
+          ? instances.map((i) => (instanceId(i) === instanceId(initial) ? record : i))
+          : [...instances, record];
+        await setInstances(next);
         if (wasActive) setToken(tokenForInstance(record));
 
         toast.style = Toast.Style.Success;
         toast.title = initial ? "Saved" : "Added";
-        if (initial) pop();
-        else await popToRoot();
+        await onSaved();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = initial ? "Could not save" : "Could not add";
@@ -232,5 +253,6 @@ function InstanceForm({ initial }: { initial?: Instance }) {
 }
 
 export function AddInstance() {
-  return <InstanceForm />;
+  const { value = [], setValue } = useLocalStorage<Instance[]>("instances");
+  return <InstanceForm instances={value} setInstances={setValue} onSaved={popToRoot} />;
 }
