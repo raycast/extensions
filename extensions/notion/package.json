@@ -216,6 +216,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "notion-knowledge-capture",
+        "title": "Capture Knowledge in Notion"
+      }
+    ],
     "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.",
     "evals": [
       {
