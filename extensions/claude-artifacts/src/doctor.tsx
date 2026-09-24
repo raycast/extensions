@@ -184,7 +184,7 @@ function RemedyActions({ check, scriptPath }: { check: Check; scriptPath: string
     case "show-index":
       return (
         <ActionPanel.Section>
-          <Action.ShowInFinder title="Show Index in Finder" icon={Icon.Finder} path={INDEX_PATH} />
+          <Action.ShowInFinder path={INDEX_PATH} />
         </ActionPanel.Section>
       );
 
@@ -255,7 +255,7 @@ export default function Doctor() {
   //
   // Ownership is per-effect-run, not global. A toast handle carries no identity,
   // so a bare `hide()` in cleanup can dismiss a LATER toast that replaced this
-  // one; the `cancelled` flag plus the locally-scoped handle mean each run only
+  // one; the `canceled` flag plus the locally-scoped handle mean each run only
   // ever hides the toast it created, including when `showToast` resolves after
   // the scan already finished.
   useEffect(() => {
@@ -263,16 +263,16 @@ export default function Doctor() {
     // revalidation's toast would immediately paint over "Adding N artifacts…".
     if (!isLoading || backfilling.current) return;
 
-    let cancelled = false;
+    let canceled = false;
     let handle: Toast | undefined;
 
     showToast({ style: Toast.Style.Animated, title: "Running Doctor…" }).then((toast) => {
-      if (cancelled) void toast.hide();
+      if (canceled) void toast.hide();
       else handle = toast;
     });
 
     return () => {
-      cancelled = true;
+      canceled = true;
       void handle?.hide();
     };
   }, [isLoading]);

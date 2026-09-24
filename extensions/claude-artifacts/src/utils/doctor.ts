@@ -131,8 +131,8 @@ async function isReadable(file: string): Promise<boolean> {
  * 2026-09 outage. Every *structural* signal was green throughout it — the
  * script was installed, executable, registered, and running on every publish —
  * and the index still stopped growing, because the hook could no longer
- * recognise the URL format and its contract requires it to exit 0 regardless.
- * Presence tells you nothing; only behaviour does.
+ * recognize the URL format and its contract requires it to exit 0 regardless.
+ * Presence tells you nothing; only behavior does.
  *
  * Confinement, stated precisely. `HOME` is an environment variable, not a
  * sandbox. Redirecting it works because the SHIPPED recorder derives both its
@@ -142,7 +142,7 @@ async function isReadable(file: string): Promise<boolean> {
  *
  * So this refuses to run a script it cannot confine: the text has to show the
  * index being derived from `$HOME` before it is executed. Fails closed — an
- * unrecognised recorder is reported as unverifiable rather than exercised,
+ * unrecognized recorder is reported as unverifiable rather than exercised,
  * because the cost of guessing wrong is a junk row written into the user's
  * real index by their own script.
  */
@@ -234,7 +234,7 @@ async function runHookSelfTest(scriptPath: string, launcher?: string): Promise<{
         recorded: false,
         detail:
           exitCode === 0
-            ? "The hook ran and exited cleanly but wrote nothing — it did not recognise the artifact URL."
+            ? "The hook ran and exited cleanly but wrote nothing — it did not recognize the artifact URL."
             : `The hook exited ${exitCode} without writing an index.`,
       };
     }
@@ -387,7 +387,7 @@ export async function diagnose(): Promise<Diagnosis> {
             : "Check that ~/.claude/settings.json exists and is valid JSON.",
   });
 
-  // --- The behavioural check ----------------------------------------------
+  // --- The behavioral check ----------------------------------------------
   const selfTest = scriptRunnable
     ? await runHookSelfTest(scriptPath, launcher)
     : { recorded: false, detail: "Skipped — there is no runnable script to test." };
@@ -497,7 +497,7 @@ export async function diagnose(): Promise<Diagnosis> {
  * so a "backfill" could delete rows, contradicting the guarantee this function
  * advertises. And overlaying new fields onto an existing row means a snapshot
  * taken before the lock can overwrite a *newer* value the hook wrote in the
- * meantime; the lock serialises writes, it does not make a stale read fresh.
+ * meantime; the lock serializes writes, it does not make a stale read fresh.
  *
  * Appending only removes both. Callers pass rows already determined to be
  * absent, so there is nothing legitimate to overlay — and an id that appeared
@@ -580,7 +580,7 @@ jq -s -f "$DOCTOR_PROGRAM" "$INDEX" "$DOCTOR_NEW" >"$TMP" 2>/dev/null || { rm -f
 [ -s "$TMP" ] || { rm -f "$TMP"; exit 1; }
 
 # Report what LANDED, not what was asked for. The merge drops any requested row
-# whose id the hook wrote between the scan and the lock — correct behaviour, but
+# whose id the hook wrote between the scan and the lock — correct behavior, but
 # it means the requested count is not the added count, and a toast claiming
 # otherwise is the UI lying about its own state.
 # Normalize both accepted shapes. readIndex takes a bare array too, and the
