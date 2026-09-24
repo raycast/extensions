@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Catch-up, Decisions, and Standup Skills] - {PR_MERGE_DATE}
+
+- Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.
+- Include source references and coverage limits, with Slack delivery only when requested.
+
 ## [Quiet automatic rate-limit retries] - 2026-09-23
 
 - Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
