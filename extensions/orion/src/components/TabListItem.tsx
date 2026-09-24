@@ -7,17 +7,24 @@ import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
 import OpenTabAction from "./OpenTabAction";
+import OpenInDefaultBrowserAction from "./OpenInDefaultBrowserAction";
 
 const Actions = (props: {
   tab: Tab;
   refresh: () => void;
   closeLaunchers?: boolean;
+  immediatePopToRoot?: boolean;
   onActivate?: (tab: Tab) => void;
 }) => (
   <ActionPanel>
     <ActionPanel.Section>
-      <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} onActivate={props.onActivate} />
-      <Action.OpenInBrowser title="Open in Default Browser" url={props.tab.url} />
+      <OpenTabAction
+        tab={props.tab}
+        closeLaunchers={props.closeLaunchers}
+        immediatePopToRoot={props.immediatePopToRoot}
+        onActivate={props.onActivate}
+      />
+      <OpenInDefaultBrowserAction url={props.tab.url} immediatePopToRoot={props.immediatePopToRoot} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.tab.url} />
@@ -46,6 +53,7 @@ const TabListItem = (props: {
   tab: Tab;
   refresh: () => void;
   closeLaunchers?: boolean;
+  immediatePopToRoot?: boolean;
   id?: string;
   onActivate?: (tab: Tab) => void;
 }) => {
@@ -71,6 +79,7 @@ const TabListItem = (props: {
           tab={props.tab}
           refresh={props.refresh}
           closeLaunchers={props.closeLaunchers}
+          immediatePopToRoot={props.immediatePopToRoot}
           onActivate={props.onActivate}
         />
       }
