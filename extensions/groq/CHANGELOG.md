@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Raycast Model Provider] - {PR_MERGE_DATE}
+## [Raycast Model Provider] - 2026-09-24
 
 - Use available models directly in Raycast AI with streaming, conversation history, and supported model capabilities.
 
