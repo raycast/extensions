@@ -88,6 +88,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "clera",
+    title: "Clera",
+    description:
+      "Hire from Raycast: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles, and request intros. Candidates search open startup jobs, read full listings and save the good ones. Hosted remote server with OAuth 2.1 sign-in (dynamic client registration), no API key to paste; free during the beta.",
+    icon: "https://www.getclera.com/images/icon-512x512.png",
+    homepage: "https://www.getclera.com/mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.getclera.com"],
+    },
+  },
+  {
     name: "codex-reset",
     title: "Codex Reset",
     description:

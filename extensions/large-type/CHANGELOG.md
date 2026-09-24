@@ -1,5 +1,9 @@
 # Large Type Changelog
 
+## [Fix special characters in non-indexed mode] - 2026-09-24
+
+- Fixed text after `&`, `<` or `>` disappearing when not using the indexed display
+
 ## [Added Selected Text Viewer] - 2026-06-09
 
 - New command "Show Selected Text" to display the selected text of the frontmost application in large type

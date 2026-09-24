@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-24
+
+- Keep Open Tabs current while the Command Bar stays open: poll for tab changes at a modest cadence so opening or closing a tab directly in Orion is reflected without a manual refresh, and update the cached "Current Tab" immediately after switching to a tab from the Command Bar instead of waiting for the next poll. The standalone Search Tabs command is unaffected.
+
 ## [Command Bar] - 2026-09-23
 
 - Fix typed web address detection recognizing a bare public suffix (e.g. `goog`, `abc`, `app`, `dev`, `github.io`, `co.uk`) as an address. Several brand-owned gTLDs are themselves ordinary words or common file extensions, so a one-word search query could land exactly on a real ICANN or private suffix with no domain label in front of it. Require an actual domain (a label plus the suffix, e.g. `goog.com`) before accepting a bare host as an address; an explicit `http://`/`https://` scheme is unaffected.

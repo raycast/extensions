@@ -5,6 +5,11 @@
 - Update to Raycast API 2.5.0 for public bundled-skill support.
 - Review completed and outstanding reminders and capture supplied action items without inventing deadlines.
 
+## [Move reminder to list action] - 2026-09-24
+
+- Add "Move to List" action submenu (`Cmd + Shift + M`) to easily move reminders between lists in My Reminders.
+- Support moving reminders to a different list via AI update tool.
+
 ## [Default list for Quick Add] - 2026-09-23
 
 - Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.

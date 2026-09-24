@@ -33,8 +33,8 @@ const activateTab = async (tab: Tab) =>
 
 // `closeLaunchers` is opt-in (the Command Bar passes it) so the standalone
 // "Search Tabs" command doesn't make an extra AppleScript call on every open.
-const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean }) => {
-  const { tab, closeLaunchers } = props;
+const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean; onActivate?: (tab: Tab) => void }) => {
+  const { tab, closeLaunchers, onActivate } = props;
   return (
     <Action
       title="Open in Browser"
@@ -47,6 +47,10 @@ const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean }) => {
           await closeLauncherTabs();
         }
         await activateTab(tab);
+        // The tabs cache only learns this switch from its next AppleScript
+        // refresh. Update it locally right away so a Command Bar reopened
+        // before that refresh completes already shows `tab` as current.
+        onActivate?.(tab);
         await closeMainWindow({ clearRootSearch: true });
       }}
     />
