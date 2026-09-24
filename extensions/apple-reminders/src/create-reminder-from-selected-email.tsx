@@ -58,11 +58,12 @@ export default function Command() {
 
           const reminderTitle =
             selectedEmail.subject || (selectedEmail.sender ? `Email from ${selectedEmail.sender}` : "Email Reminder");
+          const reminderNotes = selectedEmail.sender ? `From: ${selectedEmail.sender}` : undefined;
 
           const payload: NewReminder = {
             title: reminderTitle,
             url: selectedEmail.url,
-            notes: selectedEmail.url,
+            notes: reminderNotes,
             listId,
             dueDate,
           };
@@ -108,6 +109,7 @@ export default function Command() {
     : undefined;
 
   const initialTitle = email ? email.subject || (email.sender ? `Email from ${email.sender}` : "Email Reminder") : "";
+  const initialNotes = email?.sender ? `From: ${email.sender}` : "";
 
   return (
     <CreateReminderForm
@@ -115,7 +117,7 @@ export default function Command() {
       draftValues={{
         title: initialTitle,
         url: email?.url ?? "",
-        notes: email?.url ?? "",
+        notes: initialNotes,
         dueDate: defaultDueDate,
       }}
     />
