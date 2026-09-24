@@ -8,7 +8,7 @@ export default async function QuickAddTask(props: LaunchProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
   try {
-    const { nlpEnabled = true } = getPreferenceValues<{ nlpEnabled?: boolean }>();
+    const { nlpEnabled = true } = getPreferenceValues<Preferences.QuickAdd>();
     await initGlobalProjectInfo();
     const title = (props.arguments.text ?? props.fallbackText).replace(/"/g, `\\"`);
     const description = props.arguments.description?.replace(/"/g, `\\"`);
