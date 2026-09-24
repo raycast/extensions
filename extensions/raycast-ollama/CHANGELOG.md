@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Raycast Model Provider] - {PR_MERGE_DATE}
+## [Raycast Model Provider] - 2026-09-24
 
 - Use models from your local and remote Ollama servers directly in Raycast AI, with streamed responses, conversation history, vision, and tool calling when supported.
 
