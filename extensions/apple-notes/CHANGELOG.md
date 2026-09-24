@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## Add Meeting Actions Skill - {PR_MERGE_DATE}
+
+- Extract decisions and action items from meeting notes, with an option to append the summary. Available through the bundled Meeting Actions skill in Raycast AI.
+
 ## [AI Extension Improvements] - 2026-09-01
 
 - Add `delete-note`, `restore-note`, `move-note`, `append-to-note`, and `list-folders` AI tools

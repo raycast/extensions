@@ -541,6 +541,12 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "notes-meeting-actions",
+        "title": "Meeting Actions"
+      }
     ]
   },
   "preferences": [
@@ -636,7 +642,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.6",
     "date-fns": "^4.4.0",
     "node-html-markdown": "^2.0.0",
