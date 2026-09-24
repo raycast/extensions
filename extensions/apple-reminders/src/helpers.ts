@@ -1,8 +1,19 @@
 import { UTCDate } from "@date-fns/utc";
 import { Color, Icon } from "@raycast/api";
+import * as chrono from "chrono-node";
 import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
 import type { Location, Priority, Reminder } from "./hooks/useData";
+
+export function isDayFirst(preference?: string): boolean {
+  return preference === "dmy";
+}
+
+export function parseChronoDate(text: string, preference?: string) {
+  const dayFirst = isDayFirst(preference);
+  const parser = dayFirst ? chrono.en.GB : chrono.en;
+  return parser.parse(text);
+}
 
 export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);

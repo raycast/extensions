@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Quick Add Date Format Preference] - {PR_MERGE_DATE}
+
+- Add "Date Format" preference (`System Default`, `Day / Month (DD/MM)`, `Month / Day (MM/DD)`) to Quick Add Reminder command.
+- Interpret ambiguous numeric dates (such as `1/11`) as Day/Month for `DD/MM` users in both AI and fallback parsing modes.
+
 ## [Move reminder to list action] - 2026-09-24
 
 - Add "Move to List" action submenu (`Cmd + Shift + M`) to easily move reminders between lists in My Reminders.
