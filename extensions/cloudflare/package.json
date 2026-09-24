@@ -232,7 +232,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^1.19.1",
     "axios": "^1.8.4"
   },
@@ -256,5 +256,13 @@
   "platforms": [
     "Windows",
     "macOS"
-  ]
+  ],
+  "ai": {
+    "skills": [
+      {
+        "name": "cloudflare-health-check",
+        "title": "DNS and Deployment Health"
+      }
+    ]
+  }
 }

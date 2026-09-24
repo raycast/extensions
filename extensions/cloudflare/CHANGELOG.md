@@ -1,5 +1,9 @@
 # Cloudflare Changelog
 
+## Add DNS and Deployment Health Skill - {PR_MERGE_DATE}
+
+- Inspect DNS configuration and deployment health without changing infrastructure. Available through the bundled DNS and Deployment Health skill in Raycast AI.
+
 ## [OAuth Support] - 2026-09-05
 
 - Added OAuth sign-in with secure token storage and automatic token refresh while preserving API tokens as an optional fallback.
