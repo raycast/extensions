@@ -37,4 +37,4 @@ The results show the Gregorian date, the full Latin form, and the abbreviated La
 
 ## Development
 
-Install Node.js 22.14 or newer, then run `npm install` and `npm run dev`. Run `npm test` for the calendar's date and parser regressions, and `npm run build` to validate a distribution build.
+Install Node.js 22.22.2 or newer, as required by the Raycast 2 CLI, then run `npm install` and `npm run dev`. Run `npm test` for the calendar's date and parser regressions, and `npm run build` to validate a distribution build.

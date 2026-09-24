@@ -1,5 +1,9 @@
 # Roman Calendar Changelog
 
+## [Update Raycast API Compatibility] - {PR_MERGE_DATE}
+
+- Require the current Raycast API package and document the Raycast 2 CLI's Node.js minimum.
+
 ## [Add Calendar Regression Tests] - {PR_MERGE_DATE}
 
 - Add repeatable tests for leap February, the BCE/CE boundary, December 9999, and Roman date parser round trips.

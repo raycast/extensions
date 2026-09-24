@@ -27,7 +27,7 @@
     "test": "tsc src/calendar.ts --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build && node --test tests/*.test.cjs"
   },
   "dependencies": {
-    "@raycast/api": "^1.102.0",
+    "@raycast/api": "^1.104.25",
     "react": "^19.0.0"
   },
   "devDependencies": {
