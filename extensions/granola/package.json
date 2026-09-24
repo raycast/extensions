@@ -95,6 +95,14 @@
       "description": "List and search Granola recipes"
     }
   ],
+  "ai": {
+    "skills": [
+      {
+        "name": "granola-meeting-actions",
+        "title": "Turn Meeting Notes into Actions"
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "notionMaxBatchSize",

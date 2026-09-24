@@ -1,5 +1,10 @@
 # Granola Changelog
 
+## [Meeting Actions Skill] - {PR_MERGE_DATE}
+
+- Add a skill for extracting decisions, action items, and open questions from meeting notes or a weekly review.
+- Include source references, stated owners and deadlines, and clear gaps when notes or attribution are unavailable.
+
 ## [2.2.0 - OAuth Authentication] - 2026-09-07
 
 - Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.
