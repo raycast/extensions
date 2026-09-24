@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Copy Link Shortcut Preference] - {PR_MERGE_DATE}
+
+- Added a preference to choose the Copy Link shortcut: ⌘ C, ⌘ ⇧ C or ⌘ ⌥ C
+
 ## [Bug Fix] - 2026-09-22
 
 - Fixed the new-tab keyboard shortcut and clarified the browser action icons
