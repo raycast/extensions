@@ -1,0 +1,109 @@
+{
+  "name": "ask-codex-raycast",
+  "title": "Ask Codex CLI",
+  "description": "Ask ChatGPT/OpenAI through your locally authenticated Codex CLI, with streaming answers, follow-ups, steering, and local history.",
+  "icon": "command-icon.png",
+  "author": "bbfss",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ask Codex",
+      "subtitle": "Local Codex CLI",
+      "description": "Ask ChatGPT/OpenAI through your local Codex CLI and continue the conversation.",
+      "mode": "view",
+      "keywords": [
+        "chat",
+        "ai",
+        "terminal",
+        "codex"
+      ],
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Optional question to start with",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "liveSearch",
+      "type": "checkbox",
+      "title": "Web Search",
+      "description": "Allow Codex to search the live web for current information.",
+      "label": "Enable live web search",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sandboxMode",
+      "type": "dropdown",
+      "title": "Sandbox Mode",
+      "description": "Controls what Codex may do while answering.",
+      "required": false,
+      "data": [
+        {
+          "title": "Read-only (recommended)",
+          "value": "read-only"
+        },
+        {
+          "title": "Workspace write",
+          "value": "workspace-write"
+        },
+        {
+          "title": "Full access",
+          "value": "danger-full-access"
+        }
+      ],
+      "default": "read-only"
+    },
+    {
+      "name": "workingDirectory",
+      "type": "textfield",
+      "title": "Working Directory",
+      "description": "Optional absolute path for repository-aware questions. Leave empty to use Codex's default.",
+      "required": false,
+      "placeholder": "C:\\Users\\you\\project or /Users/you/project",
+      "default": ""
+    },
+    {
+      "name": "codexPath",
+      "type": "textfield",
+      "title": "Codex Path",
+      "description": "Optional absolute path to codex, codex.exe, or codex.cmd. Leave empty for automatic discovery.",
+      "required": false,
+      "placeholder": "Optional absolute executable path",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test tests/*.test.cjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
