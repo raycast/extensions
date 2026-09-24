@@ -88,6 +88,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "codex-reset",
+    title: "Codex Reset",
+    description:
+      "Ask whether OpenAI Codex usage limits are likely to reset: the reset probability for the next 24 and 48 hours, the dated record of verified resets with source links, and Codex service status to tell an outage from a usage limit. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://codex-reset.com/icon-512.png",
+    homepage: "https://codex-reset.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://codex-reset.com/mcp"],
+    },
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:
