@@ -1,4 +1,4 @@
-import { closeMainWindow, Icon, Action } from "@raycast/api";
+import { closeMainWindow, Icon, Action, PopToRootType } from "@raycast/api";
 
 import { Tab } from "../types";
 import { closeLauncherTabs, executeJxa, getOrionAppIdentifier } from "../utils";
@@ -51,7 +51,12 @@ const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean; onActivate?:
         // refresh. Update it locally right away so a Command Bar reopened
         // before that refresh completes already shows `tab` as current.
         onActivate?.(tab);
-        await closeMainWindow({ clearRootSearch: true });
+        // Opening a result completes this Command Bar interaction. Return to
+        // root immediately so the next hotkey starts a fresh command session,
+        // independent of the user's delayed Pop to Root Search preference -
+        // otherwise a lingering session can resume without noticing a tab
+        // opened or closed directly in Orion in the meantime.
+        await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
       }}
     />
   );

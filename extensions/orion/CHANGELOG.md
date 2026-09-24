@@ -2,6 +2,10 @@
 
 ## [Command Bar] - 2026-09-24
 
+- Always return to Raycast's root search immediately after opening a Tab, Bookmark, Reading List item, History entry, or address from the Command Bar, regardless of the "Pop to Root Search" preference. Previously, a delayed preference could leave the Command Bar's background process lingering instead of resetting, so reopening it soon after could show a tab list that had not picked up a change made directly in Orion in the meantime.
+
+## [Command Bar] - 2026-09-24
+
 - Keep Open Tabs current while the Command Bar stays open: poll for tab changes at a modest cadence so opening or closing a tab directly in Orion is reflected without a manual refresh, and update the cached "Current Tab" immediately after switching to a tab from the Command Bar instead of waiting for the next poll. The standalone Search Tabs command is unaffected.
 
 ## [Command Bar] - 2026-09-23

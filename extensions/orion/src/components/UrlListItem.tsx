@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 import { extractDomainName } from "../utils";
@@ -6,6 +6,7 @@ import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
 import OpenInOrionAction from "./OpenInOrionAction";
+import OpenInDefaultBrowserAction from "./OpenInDefaultBrowserAction";
 
 export type UrlItem = { title?: string; url: string };
 
@@ -22,7 +23,7 @@ const UrlListItem = (props: { item: UrlItem; accessory?: string; id?: string }) 
         <ActionPanel>
           <ActionPanel.Section>
             <OpenInOrionAction url={item.url} />
-            <Action.OpenInBrowser title="Open in Default Browser" url={item.url} />
+            <OpenInDefaultBrowserAction url={item.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyUrlAction url={item.url} />

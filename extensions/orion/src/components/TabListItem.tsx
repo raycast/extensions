@@ -7,6 +7,7 @@ import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
 import OpenTabAction from "./OpenTabAction";
+import OpenInDefaultBrowserAction from "./OpenInDefaultBrowserAction";
 
 const Actions = (props: {
   tab: Tab;
@@ -17,7 +18,7 @@ const Actions = (props: {
   <ActionPanel>
     <ActionPanel.Section>
       <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} onActivate={props.onActivate} />
-      <Action.OpenInBrowser title="Open in Default Browser" url={props.tab.url} />
+      <OpenInDefaultBrowserAction url={props.tab.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.tab.url} />

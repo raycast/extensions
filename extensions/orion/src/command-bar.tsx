@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
 import useBookmarks from "./hooks/useBookmarks";
@@ -13,6 +13,7 @@ import TabListItem from "./components/TabListItem";
 import UrlListItem, { UrlItem } from "./components/UrlListItem";
 import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
+import OpenInDefaultBrowserAction from "./components/OpenInDefaultBrowserAction";
 import { searchTabsWithFallback } from "./tabSearch";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
@@ -438,7 +439,7 @@ export default function Command() {
             subtitle={address}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Default Browser" url={address} />
+                <OpenInDefaultBrowserAction url={address} />
               </ActionPanel>
             }
           />
