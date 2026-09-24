@@ -58,8 +58,13 @@ async function getCurrentTabLocation(): Promise<CurrentTabLocation | undefined> 
   }
 }
 
-async function fetchLocalTabs(): Promise<Tab[]> {
-  const res = await executeJxa(`
+// Returns `undefined` when the underlying JXA call itself failed (Orion quit,
+// or briefly declined the request), as distinct from a successful call that
+// legitimately found zero tabs. Callers that poll in the background need
+// that distinction so a transient failure doesn't wipe a known-good snapshot.
+async function fetchLocalTabsRaw(options?: { silent?: boolean }): Promise<Tab[] | undefined> {
+  const res = await executeJxa(
+    `
     const orion = Application("${getOrionAppIdentifier()}");
     const result = { tabs: [], needsCurrentTabResolution: false };
     orion.windows().forEach(window => {
@@ -115,8 +120,10 @@ async function fetchLocalTabs(): Promise<Tab[]> {
       }
     });
     result
-  `);
-  if (!res) return [];
+  `,
+    options,
+  );
+  if (!res) return undefined;
 
   const snapshot = JSON.parse(res) as TabSnapshot;
   if (!snapshot.needsCurrentTabResolution) return snapshot.tabs;
@@ -128,6 +135,10 @@ async function fetchLocalTabs(): Promise<Tab[]> {
     ...tab,
     is_current: tab.window_id === currentTab.windowId && tab.tab_index === currentTab.tabIndex,
   }));
+}
+
+async function fetchLocalTabs(): Promise<Tab[]> {
+  return (await fetchLocalTabsRaw()) ?? [];
 }
 
 const COMMAND_BAR_REFRESH_INTERVAL_MS = 1000;
@@ -155,6 +166,11 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
   const tabs = useCachedPromise(fetchLocalTabs, [], { keepPreviousData: true });
   const refreshInFlight = useRef(false);
   const latestTabsRef = useRef<Tab[] | undefined>(undefined);
+  // Bumped by every authoritative local write (currently just markTabActive).
+  // A poll captures this at the start of its JXA round trip; if it has moved
+  // by the time the poll resolves, a more recent local change already
+  // superseded whatever the poll saw, so that stale result must be discarded.
+  const mutationVersionRef = useRef(0);
 
   useEffect(() => {
     latestTabsRef.current = tabs.data;
@@ -168,8 +184,15 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
     if (refreshInFlight.current) return;
 
     refreshInFlight.current = true;
+    const versionAtStart = mutationVersionRef.current;
     try {
-      const nextTabs = await fetchLocalTabs();
+      // Silent: a background poll failing (Orion quit, or briefly declined
+      // the request) must not spam a failure toast every interval tick, and
+      // must not be treated as "zero tabs" - keep the last known-good
+      // snapshot instead of wiping it.
+      const nextTabs = await fetchLocalTabsRaw({ silent: true });
+      if (nextTabs === undefined) return;
+      if (mutationVersionRef.current !== versionAtStart) return;
       if (tabsAreEqual(latestTabsRef.current, nextTabs)) return;
 
       await tabs.mutate(Promise.resolve(nextTabs), {
@@ -194,6 +217,10 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
       const current = latestTabsRef.current;
       if (!current) return;
 
+      // A poll already in flight may have started reading Orion before this
+      // switch happened, and would otherwise resolve afterward and overwrite
+      // this optimistic update with its now-stale snapshot.
+      mutationVersionRef.current += 1;
       const next = current.map((t) => ({
         ...t,
         is_current: t.window_id === tab.window_id && t.tab_index === tab.tab_index,
