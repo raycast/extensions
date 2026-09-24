@@ -315,10 +315,16 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "zoom-meeting-prep",
+        "title": "Meeting Prep"
+      }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.20",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.7",
     "date-fns": "^4.4.0",
     "lodash": "^4.18.1"

@@ -1,5 +1,9 @@
 # Zoom Changelog
 
+## Add Meeting Prep Skill - {PR_MERGE_DATE}
+
+- Prepare briefs from upcoming meetings and their available agenda details. Available through the bundled Meeting Prep skill in Raycast AI.
+
 ## [Personal Meeting ID Support] - 2026-08-10
 
 - Added a `Personal Meeting ID` preference to the Start Meeting command so you can always start your own personal meeting room with a consistent meeting ID.
