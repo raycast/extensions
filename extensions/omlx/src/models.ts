@@ -107,7 +107,7 @@ export const streamCompletion: AI.StreamCompletion = async function* (
       ...(request.system
         ? [{ role: "system" as const, content: request.system }]
         : []),
-      ...request.messages,
+      ...(request.messages ?? []),
     ],
     stream: true,
   };

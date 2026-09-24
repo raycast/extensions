@@ -1,6 +1,6 @@
 # oMLX Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-24
 
 - AI Model Provider: use oMLX models natively in AI Chat, Quick AI, and AI Commands
 - Manage Models: load, eject, pin, and delete models

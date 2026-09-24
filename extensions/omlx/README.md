@@ -48,22 +48,3 @@ Open the oMLX web dashboard in your browser for full access to settings, system 
 2. Install this extension
 3. Enter your oMLX API key (found in `~/.omlx/settings.json` under `auth.api_key`)
 
-## Future ideas
-
-### Admin API authentication (unlocks everything below)
-
-oMLX has a rich admin API at `/admin/api/*` that requires session auth. The regular API key can obtain a session cookie via `POST /admin/api/login` with `{"api_key": "..."}` — returns an `omlx_admin_session` cookie valid for 24 hours. Once implemented in the client, all features below become available.
-
-### With admin auth
-
-- **Session vs All-Time stats** — `GET /admin/api/stats?scope=session` / `?scope=alltime` with toggle in Serving Stats
-- **Per-model stats** — `GET /admin/api/stats?model=<id>` for filtered speed/token/cache stats
-- **Search and download models** — `GET /admin/api/hf/search` + `POST /admin/api/hf/download` + `GET /admin/api/hf/tasks` for progress
-- **Manage downloads** — view progress, cancel, retry (`/admin/api/hf/tasks`, `/admin/api/hf/cancel`, `/admin/api/hf/retry`)
-- **Cache observability** — SSD cache stats, hot cache, probe per-prompt cache state
-- **Benchmark models** — throughput, accuracy, context benchmarks with SSE progress
-
-### Without admin auth
-
-- Model profiles (named setting presets per model)
-- Idle TTL configuration (auto-unload after timeout)

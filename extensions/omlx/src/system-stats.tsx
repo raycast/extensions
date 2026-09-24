@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -9,6 +10,11 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { execSync } from "child_process";
+
+function getDashboardUrl(): string {
+  const { serverUrl } = getPreferenceValues<{ serverUrl: string }>();
+  return `${serverUrl.replace(/\/v1\/?$/, "")}/admin`;
+}
 
 interface SystemStats {
   cpu: {
@@ -154,7 +160,7 @@ export default function SystemStatsCommand() {
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
       <Action.OpenInBrowser
         title="Open Web Dashboard"
-        url="http://127.0.0.1:8000/admin"
+        url={getDashboardUrl()}
       />
     </ActionPanel>
   );

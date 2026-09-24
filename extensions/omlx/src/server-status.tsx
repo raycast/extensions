@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Detail,
+  getPreferenceValues,
   Icon,
   List,
   showToast,
@@ -22,6 +23,11 @@ import {
   type OmlxModelStatus,
   type OmlxServerStatus,
 } from "./lib/omlx";
+
+function getDashboardUrl(): string {
+  const { serverUrl } = getPreferenceValues<{ serverUrl: string }>();
+  return `${serverUrl.replace(/\/v1\/?$/, "")}/admin`;
+}
 
 type ViewState = "loading" | "not-installed" | "offline" | "error" | "ready";
 
@@ -72,7 +78,7 @@ export default function ServingStats() {
       />
       <Action.OpenInBrowser
         title="Open Web Dashboard"
-        url="http://127.0.0.1:8000/admin"
+        url={getDashboardUrl()}
       />
     </ActionPanel>
   );
@@ -276,7 +282,7 @@ export default function ServingStats() {
                   />
                   <Action.OpenInBrowser
                     title="Open Web Dashboard"
-                    url="http://127.0.0.1:8000/admin"
+                    url={getDashboardUrl()}
                   />
                   <Action.CopyToClipboard title="Copy Model Id" content={m} />
                 </ActionPanel>
@@ -472,7 +478,7 @@ function ModelDetail({
           />
           <Action.OpenInBrowser
             title="Open Web Dashboard"
-            url="http://127.0.0.1:8000/admin"
+            url={getDashboardUrl()}
           />
           <Action.CopyToClipboard title="Copy Model Id" content={m.id} />
         </ActionPanel>
