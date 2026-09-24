@@ -71,6 +71,8 @@ export const LocalStorage = {
   removeItem: async () => {},
   clear: async () => {},
 };
+export const getFrontmostApplication = async () => ({ name: "Safari" });
+export const showHUD = async () => {};
 export const OAuth = {};
 
 

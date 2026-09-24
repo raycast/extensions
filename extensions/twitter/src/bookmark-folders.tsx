@@ -2,33 +2,21 @@ import { withXAuth } from "./v2/lib/with_x_auth";
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { TweetList } from "./v2/components/tweet";
-import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
+import "./v2/components/register-post-views";
+import { clientV2 } from "./v2/lib/twitterapi_v2";
+import { useTweetPage } from "./v2/lib/tweet-page";
 import { deduplicateById } from "./v2/lib/twitter";
 
 function BookmarkFolderPosts({ folderId, folderName }: { folderId: string; folderName: string }) {
-  const { data, error, isLoading, pagination, revalidate } = usePromise(
-    (id: string) => async (options: { cursor?: string }) => {
-      const page = await clientV2.bookmarksInFolder(id, options.cursor);
-      return { data: page.items, hasMore: Boolean(page.nextToken), cursor: page.nextToken };
-    },
-    [folderId],
-    { failureToastOptions: { title: "Could not load folder" } },
+  const { tweets, error, isLoading, pagination, fetcher } = useTweetPage(
+    (id, cursor) => clientV2.bookmarksInFolder(id, cursor),
+    folderId,
+    "Could not load folder",
   );
-
-  const fetcher: Fetcher = {
-    updateInline: async () => {
-      clientV2.clearCache();
-      await revalidate();
-    },
-    refresh: async () => {
-      clientV2.clearCache();
-      await revalidate();
-    },
-  };
 
   return (
     <TweetList
-      tweets={data}
+      tweets={tweets}
       error={error}
       isLoading={isLoading}
       fetcher={fetcher}

@@ -2,6 +2,10 @@
 
 ## [Command Bar] - 2026-09-23
 
+- Fix typed web address detection recognizing a bare public suffix (e.g. `goog`, `abc`, `app`, `dev`, `github.io`, `co.uk`) as an address. Several brand-owned gTLDs are themselves ordinary words or common file extensions, so a one-word search query could land exactly on a real ICANN or private suffix with no domain label in front of it. Require an actual domain (a label plus the suffix, e.g. `goog.com`) before accepting a bare host as an address; an explicit `http://`/`https://` scheme is unaffected.
+
+## [Command Bar] - 2026-09-23
+
 - Fix a Top Hit race with fast typing: `useSQL` intentionally keeps its previous history result set visible while a new query runs, but that stale result set could still be scored for Top Hit against the query text currently in the search bar. Track the history query that actually completed and exclude stale history results from Top Hit ranking until the matching result arrives, while still keeping them visible in the History section to avoid unnecessary list reflow.
 
 ## [Command Bar] - 2026-09-23

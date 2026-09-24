@@ -17,7 +17,7 @@ export default function Command() {
   const { sections, viewProps } = useViewReminders(listId, { data });
 
   const placeholder =
-    listId === "all" ? "Filter by title, notes, priority or list" : "Filter by title, notes or priority";
+    listId === "all" ? "Filter by title, notes, priority, tags or list" : "Filter by title, notes, priority or tags";
 
   return (
     <List
