@@ -326,6 +326,9 @@ describe("looksLikeUrl", () => {
     expect(looksLikeUrl("index.html")).toBe(false);
     expect(looksLikeUrl("node.js")).toBe(false);
     expect(looksLikeUrl("package.json")).toBe(false);
+    expect(looksLikeUrl("foo.py")).toBe(false);
+    expect(looksLikeUrl("app.rs")).toBe(false);
+    expect(looksLikeUrl("data.csv")).toBe(false);
   });
 });
 

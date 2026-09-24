@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { buildNewTabUrl, newTabTitle, openHistoryTab, openInNewWindow, openNewTab } from "../actions";
 import { HistoryEntry } from "../interfaces";
 
@@ -41,7 +41,7 @@ export function HistoryItemAction({
       <MozillaFirefoxHistoryTab url={url} />
       {url ? <OpenInNewWindowAction url={url} /> : null}
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
-      <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
       <EditUrlAction url={url} onEditUrl={onEditUrl} />
     </ActionPanel>
   );
