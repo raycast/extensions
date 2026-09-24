@@ -1,6 +1,6 @@
 # LM Studio Changelog
 
-## [Raycast Model Provider] - {PR_MERGE_DATE}
+## [Raycast Model Provider] - 2026-09-24
 
 - Use downloaded LM Studio language models directly in Raycast AI, with streamed responses, vision, and tool calling when supported.
 
