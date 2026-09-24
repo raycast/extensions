@@ -307,6 +307,12 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "notion-knowledge-capture",
+        "title": "Knowledge Capture"
+      }
     ]
   },
   "preferences": [
@@ -339,7 +345,7 @@
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
     "@notionhq/client": "^5.9.0",
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.2",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^4.1.0",

@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## Add Knowledge Capture Skill - {PR_MERGE_DATE}
+
+- Capture sourced knowledge in a new page or append it to an existing page. Available through the bundled Knowledge Capture skill in Raycast AI.
+
 ## [Fix Open in App for notion.com URLs and Windows deep links] - 2026-08-28
 
 - Fix `Open in App` deep-link generation only matching `notion.so` URLs: since Notion's domain migration, page URLs are served from `notion.com` hosts (e.g. `app.notion.com`), so the `notion://` deep link was never built and the desktop app opened the last viewed page instead of the target ([#30540](https://github.com/raycast/extensions/issues/30540))
