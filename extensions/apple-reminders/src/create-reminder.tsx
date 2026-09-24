@@ -25,8 +25,8 @@ import { Frequency, List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import ManageCreateActions from "./manage-create-actions";
-import { ParsedDueDate, parseDueDate } from "./parse-due-date";
-import { parseRecurrence } from "./parse-recurrence";
+import type { ParsedDueDate } from "./parse-due-date";
+import { resolveDueDateFromNlp } from "./parse-recurrence";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
 export type { Frequency };
@@ -264,7 +264,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       return;
     }
 
-    const recurrence = parseRecurrence(value);
+    const { dueDate, parsedDueDate, recurrence } = resolveDueDateFromNlp(value);
+
     if (recurrence) {
       setValue("isRecurring", true);
       setValue("frequency", recurrence.frequency);
@@ -275,26 +276,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       recurrenceSetByNlpRef.current = false;
     }
 
-    const parsed = parseDueDate(value);
-    if (parsed) {
-      nlpParseRef.current = parsed;
-      setValue("dueDate", parsed.date);
-      return;
-    }
-
-    if (recurrence) {
-      const now = new Date();
-      nlpParseRef.current = {
-        date: now,
-        isDateTime: false,
-        matchedText: recurrence.matchedText,
-      };
-      setValue("dueDate", now);
-      return;
-    }
-
-    nlpParseRef.current = null;
-    setValue("dueDate", null);
+    nlpParseRef.current = parsedDueDate;
+    setValue("dueDate", dueDate);
   }
 
   async function submitWithOptions(values: CreateReminderValues, options?: SubmitOptions) {

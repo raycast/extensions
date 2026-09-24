@@ -1,3 +1,5 @@
+import { type ParsedDueDate, parseDueDate } from "./parse-due-date";
+
 export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 
 export type ParsedRecurrence = {
@@ -115,4 +117,58 @@ export function parseRecurrence(text: string): ParsedRecurrence | null {
   }
 
   return null;
+}
+
+export type NlpDueDateResolution = {
+  dueDate: Date | null;
+  parsedDueDate: ParsedDueDate | null;
+  recurrence: ParsedRecurrence | null;
+};
+
+export function resolveDueDateFromNlp(
+  value: string,
+  now: Date = new Date(),
+  dateFormatPreference?: string,
+): NlpDueDateResolution {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { dueDate: null, parsedDueDate: null, recurrence: null };
+  }
+
+  const recurrence = parseRecurrence(trimmed);
+  const parsed = parseDueDate(trimmed, now, dateFormatPreference);
+
+  if (parsed) {
+    const isOnlyRecurrenceInterval =
+      recurrence &&
+      parsed.matchedText &&
+      recurrence.matchedText.toLowerCase().includes(parsed.matchedText.toLowerCase().trim());
+
+    if (!isOnlyRecurrenceInterval) {
+      return {
+        dueDate: parsed.date,
+        parsedDueDate: parsed,
+        recurrence,
+      };
+    }
+  }
+
+  if (recurrence) {
+    const fallbackParsed: ParsedDueDate = {
+      date: now,
+      isDateTime: false,
+      matchedText: recurrence.matchedText,
+    };
+    return {
+      dueDate: now,
+      parsedDueDate: fallbackParsed,
+      recurrence,
+    };
+  }
+
+  return {
+    dueDate: null,
+    parsedDueDate: null,
+    recurrence: null,
+  };
 }
