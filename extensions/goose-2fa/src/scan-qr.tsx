@@ -3,7 +3,6 @@ import { unlinkSync } from "node:fs";
 import { useEffect, useState } from "react";
 import { deduplicateImports, parseImportBundle } from "../vendor/lib/data-transfer";
 import type { NewAccountInput } from "../vendor/lib/types";
-import { t } from "./lib/i18n";
 import { commit } from "./lib/commit";
 import { captureScreenToTempFile, detectBarcodes } from "./lib/helper";
 import { addAccounts } from "./lib/vault-ops";
@@ -26,7 +25,7 @@ export default function ScanQr() {
       const imagePath = await captureScreenToTempFile();
       if (!active) return;
       if (!imagePath) {
-        await showToast({ style: Toast.Style.Failure, title: t("Screenshot cancelled", "已取消截屏") });
+        await showToast({ style: Toast.Style.Failure, title: "Screenshot cancelled" });
         await popToRoot();
         return;
       }
@@ -43,7 +42,7 @@ export default function ScanQr() {
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t("Scan Failed", "识别失败"),
+          title: "Scan Failed",
           message: error instanceof Error ? error.message : String(error),
         });
         setStatus("empty");
@@ -65,26 +64,26 @@ export default function ScanQr() {
     const inputs = chosen.map((entry) => entry.input);
     const preview = deduplicateImports(inputs, getVaultState().accounts);
     if (!preview.newAccounts.length) {
-      await showToast({ style: Toast.Style.Success, title: t("Accounts Already Exist", "账户已存在"), message: t("No duplicate accounts were imported.", "未重复导入账户。") });
+      await showToast({ style: Toast.Style.Success, title: "Accounts Already Exist", message: "No duplicate accounts were imported." });
       return;
     }
     const ok = await commit(
       (snapshot) => addAccounts(snapshot, deduplicateImports(inputs, snapshot.accounts).newAccounts, null),
-      t(`Imported ${preview.newAccounts.length} accounts (${preview.dupeCount} skipped)`, `已导入 ${preview.newAccounts.length} 个账户（跳过 ${preview.dupeCount} 个重复项）`),
+      `Imported ${preview.newAccounts.length} accounts (${preview.dupeCount} skipped)`,
     );
     if (ok) await popToRoot();
   };
 
   return (
-    <List isLoading={status === "scanning" || vault.syncStatus === "writing"} searchBarPlaceholder={t("Search scan results", "搜索识别结果")}>
+    <List isLoading={status === "scanning" || vault.syncStatus === "writing"} searchBarPlaceholder={"Search scan results"}>
       {status === "empty" ? (
         <List.Item
           icon={Icon.MagnifyingGlass}
-          title={t("No QR Code Found", "没有识别到二维码")}
-          subtitle={t("No parseable otpauth code in the captured area", "截屏区域里没有可解析的 otpauth 码")}
+          title={"No QR Code Found"}
+          subtitle={"No parseable otpauth code in the captured area"}
           actions={
             <ActionPanel>
-              <Action title={t("Capture Again", "重新截屏")} icon={Icon.Camera} onAction={() => void popToRoot()} />
+              <Action title={"Capture Again"} icon={Icon.Camera} onAction={() => void popToRoot()} />
             </ActionPanel>
           }
         />
@@ -95,12 +94,12 @@ export default function ScanQr() {
           icon={Icon.Key}
           title={entry.input.name}
           subtitle={entry.input.issuer}
-          accessories={[{ text: newInputs.has(entry.input) ? entry.input.type.toUpperCase() : t("Already Added", "已存在") }]}
+          accessories={[{ text: newInputs.has(entry.input) ? entry.input.type.toUpperCase() : "Already Added" }]}
           actions={
             <ActionPanel>
-              <Action title={t("Import This Account", "导入这个账户")} icon={Icon.Download} onAction={() => void importEntries([entry])} />
-              <Action title={t("Import All", "导入全部")} icon={Icon.Download} onAction={() => void importEntries(entries)} />
-              <Action.CopyToClipboard title={t("Copy QR Content", "复制二维码内容")} content={entry.payload} />
+              <Action title={"Import This Account"} icon={Icon.Download} onAction={() => void importEntries([entry])} />
+              <Action title={"Import All"} icon={Icon.Download} onAction={() => void importEntries(entries)} />
+              <Action.CopyToClipboard title={"Copy QR Content"} content={entry.payload} />
             </ActionPanel>
           }
         />
@@ -108,10 +107,10 @@ export default function ScanQr() {
       {status === "ready" ? (
         <List.Item
           icon={Icon.Download}
-          title={t(`Import All ${entries.length} Accounts`, `导入全部 ${entries.length} 个账户`)}
+          title={`Import All ${entries.length} Accounts`}
           actions={
             <ActionPanel>
-              <Action title={t("Import All", "导入全部")} icon={Icon.Download} onAction={() => void importEntries(entries)} />
+              <Action title={"Import All"} icon={Icon.Download} onAction={() => void importEntries(entries)} />
             </ActionPanel>
           }
         />

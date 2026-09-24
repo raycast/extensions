@@ -1,4 +1,3 @@
-import { t } from "./i18n";
 import { Toast, showToast } from "@raycast/api";
 import type { SyncSnapshot } from "../../vendor/lib/data-transfer";
 import { getVaultState, updateVault } from "./vault-store";
@@ -15,8 +14,8 @@ export async function commit(
   }
   await showToast({
     style: Toast.Style.Failure,
-    title: t("Not Saved", "没有保存"),
-    message: getVaultState().message ?? t("Check the data source file and retry.", "请检查数据源文件后重试。"),
+    title: "Not Saved",
+    message: getVaultState().message ?? "Check the data source file and retry.",
   });
   return false;
 }

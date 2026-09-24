@@ -12,10 +12,6 @@ import CoreGraphics
 import Foundation
 import Vision
 
-func tr(_ english: String, _ chinese: String) -> String {
-    ProcessInfo.processInfo.environment["GOOSE_2FA_LANG"] == "zh-Hans" ? chinese : english
-}
-
 func fail(_ code: Int32, _ message: String) -> Never {
     FileHandle.standardError.write(Data((message + "\n").utf8))
     exit(code)
@@ -24,16 +20,16 @@ func fail(_ code: Int32, _ message: String) -> Never {
 /// 用 CGEvent 逐字符输入：与剪贴板无关，不污染剪贴板历史。
 func typeText(_ text: String) {
     guard AXIsProcessTrusted() else {
-        fail(3, tr("Accessibility permission required: allow Raycast in System Settings → Privacy & Security → Accessibility.", "缺少辅助功能权限：请在系统设置 → 隐私与安全性 → 辅助功能中允许 Raycast。"))
+        fail(3, "Accessibility permission required: allow Raycast in System Settings → Privacy & Security → Accessibility.")
     }
     guard let source = CGEventSource(stateID: .combinedSessionState) else {
-        fail(4, tr("Could not create keyboard event source.", "无法创建键盘事件源。"))
+        fail(4, "Could not create keyboard event source.")
     }
     for character in Array(text.utf16) {
         var unit = character
         for isDown in [true, false] {
             guard let event = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: isDown) else {
-                fail(4, tr("Could not create keyboard event.", "无法创建键盘事件。"))
+                fail(4, "Could not create keyboard event.")
             }
             event.keyboardSetUnicodeString(stringLength: 1, unicodeString: &unit)
             event.post(tap: .cghidEventTap)
@@ -47,7 +43,7 @@ func detectBarcodes(_ imagePath: String) {
     let url = URL(fileURLWithPath: imagePath)
     guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
           let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-        fail(5, tr("Could not read image: \(imagePath)", "无法读取图片：\(imagePath)"))
+        fail(5, "Could not read image: \(imagePath)")
     }
     let request = VNDetectBarcodesRequest()
     request.symbologies = [.qr, .aztec, .code128]
@@ -55,7 +51,7 @@ func detectBarcodes(_ imagePath: String) {
     do {
         try handler.perform([request])
     } catch {
-        fail(6, tr("Barcode scan failed: \(error.localizedDescription)", "条码识别失败：\(error.localizedDescription)"))
+        fail(6, "Barcode scan failed: \(error.localizedDescription)")
     }
     let observations = request.results ?? []
     for observation in observations {
@@ -67,16 +63,16 @@ func detectBarcodes(_ imagePath: String) {
 
 let arguments = CommandLine.arguments
 guard arguments.count >= 2 else {
-    fail(2, tr("Usage: goose-2fa-helper type <text> | qr <image>", "用法：goose-2fa-helper type <text> | qr <image>"))
+    fail(2, "Usage: goose-2fa-helper type <text> | qr <image>")
 }
 
 switch arguments[1] {
 case "type":
-    guard arguments.count >= 3 else { fail(2, tr("Missing text to type.", "缺少要输入的文本。")) }
+    guard arguments.count >= 3 else { fail(2, "Missing text to type.") }
     typeText(arguments[2])
 case "qr":
-    guard arguments.count >= 3 else { fail(2, tr("Missing image path.", "缺少图片路径。")) }
+    guard arguments.count >= 3 else { fail(2, "Missing image path.") }
     detectBarcodes(arguments[2])
 default:
-    fail(2, tr("Unknown subcommand: \(arguments[1])", "未知子命令：\(arguments[1])"))
+    fail(2, "Unknown subcommand: \(arguments[1])")
 }

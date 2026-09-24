@@ -2,7 +2,7 @@
 
 A local two-factor code manager for Raycast. Open **Codes** to search accounts, copy codes, or paste them into the previous app. Use the command's action panel to manage accounts, scan QR codes, and import or export a JSON backup.
 
-Choose a list or grid and configure Return behavior in the extension preferences. English is the default; Simplified Chinese is optional.
+Choose a list or grid and configure Return behavior in the extension preferences. The interface is in English; account names may contain Chinese text.
 
 ## Shared data source
 

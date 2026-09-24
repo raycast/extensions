@@ -5,7 +5,6 @@ import { buildGroupTallies, filterByGroup, UNGROUPED_KEY } from "../vendor/lib/g
 import { formatCode } from "../vendor/lib/otp";
 import { filterAccounts } from "../vendor/lib/search";
 import type { AccountData, VaultGroup } from "../vendor/lib/types";
-import { syncStatus, t } from "./lib/i18n";
 import { commit } from "./lib/commit";
 import { deliverCode } from "./lib/deliver";
 import { useOtpCodes } from "./lib/use-otp";
@@ -45,35 +44,23 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
 
   const issueActions = (
     <ActionPanel>
-      <Action title={t("Reload Data Source", "重新读取数据源文件")} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
+      <Action title={"Reload Data Source"} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
       {vault.lockHeld !== null && (
         <Action
-          title={t("Remove Stale Lock (ensure no other client is writing)", "清理残留锁文件（确认没有其他端在写）")}
+          title={"Remove Stale Lock (ensure no other client is writing)"}
           icon={Icon.LockUnlocked}
           style={Action.Style.Destructive}
           onAction={async () => {
             const removed = await clearSyncLock();
             await showToast(
               removed
-                ? { style: Toast.Style.Success, title: t("Stale lock removed", "已清理残留锁"), message: t("Please retry your last change.", "请重新执行刚才的改动。") }
-                : { style: Toast.Style.Failure, title: t("Lock file not found", "没有找到锁文件"), message: t("It may have been released by its owner.", "可能已被持有者释放。") },
+                ? { style: Toast.Style.Success, title: "Stale lock removed", message: "Please retry your last change." }
+                : { style: Toast.Style.Failure, title: "Lock file not found", message: "It may have been released by its owner." },
             );
           }}
         />
       )}
-      <Action.Push title={t("Open Settings & Data", "打开设置与数据")} icon={Icon.Gear} target={<ManageData />} />
-    </ActionPanel>
-  );
-  const sourceActions = (
-    <ActionPanel>
-      <Action title={t("Reload Data Source", "重新读取数据源文件")} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
-      <Action.Push title={t("Open Settings & Data", "打开设置与数据")} icon={Icon.Gear} target={<ManageData />} />
-    </ActionPanel>
-  );
-  const gridSourceActions = (
-    <ActionPanel>
-      <Action.Push title={t("Open Settings & Data", "打开设置与数据")} icon={Icon.Gear} target={<ManageData />} />
-      <Action title={t("Reload Data Source", "重新读取数据源文件")} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
+      <Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} />
     </ActionPanel>
   );
 
@@ -85,22 +72,23 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
         filtering={false}
         searchText={query}
         onSearchTextChange={setQuery}
-        searchBarPlaceholder={t("Search accounts, issuers, notes or groups", "搜索账户、发行方、备注或分组")}
+        searchBarPlaceholder={"Search accounts, issuers, notes or groups"}
         searchBarAccessory={
-          <Grid.Dropdown tooltip={t("Groups", "分组")} value={group} onChange={setGroup}>
-            <Grid.Dropdown.Item title={t(`All Accounts (${vault.accounts.length})`, `全部账户 (${vault.accounts.length})`)} value={ALL_GROUPS} />
+          <Grid.Dropdown tooltip={"Groups"} value={group} onChange={setGroup}>
+            <Grid.Dropdown.Item title={`All Accounts (${vault.accounts.length})`} value={ALL_GROUPS} />
             {tallies.map((tally) => (
-              <Grid.Dropdown.Item key={tally.id} title={`${tally.id === UNGROUPED_KEY ? t("Ungrouped", "未分组") : tally.name} (${tally.count})`} value={tally.id} />
+              <Grid.Dropdown.Item key={tally.id} title={`${tally.id === UNGROUPED_KEY ? "Ungrouped" : tally.name} (${tally.count})`} value={tally.id} />
             ))}
           </Grid.Dropdown>
         }
       >
+        <Grid.EmptyView title={"No Accounts"} actions={<ActionPanel><Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} /></ActionPanel>} />
         {vault.message && (
-          <Grid.Section title={t("Action Required", "需要处理")}>
-            <Grid.Item content={Icon.Warning} title={t("Data Source", "数据源")} subtitle={vault.message} actions={issueActions} />
+          <Grid.Section title={"Action Required"}>
+            <Grid.Item content={Icon.Warning} title={"Data Source"} subtitle={vault.message} actions={issueActions} />
           </Grid.Section>
         )}
-        <Grid.Section title={t(`Codes (${visible.length})`, `验证码 (${visible.length})`)}>
+        <Grid.Section title={`Codes (${visible.length})`}>
           {visible.map((account) => {
             const code = codes[account.id]?.code ?? "------";
             return (
@@ -116,14 +104,6 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
             );
           })}
         </Grid.Section>
-        <Grid.Section title={t("Data Source", "数据源")}>
-          <Grid.Item
-            content={Icon.HardDrive}
-            title={t("Settings & Data", "设置与数据")}
-            subtitle={vault.source === "file" ? vault.filePath : t("Raycast Local Vault", "Raycast 本地库")}
-            actions={gridSourceActions}
-          />
-        </Grid.Section>
       </Grid>
     );
   }
@@ -133,36 +113,32 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
       isLoading={vault.status === "loading" || vault.syncStatus === "writing"}
       searchText={query}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder={t("Search accounts, issuers, notes or groups", "搜索账户、发行方、备注或分组")}
+      searchBarPlaceholder={"Search accounts, issuers, notes or groups"}
       searchBarAccessory={
-        <List.Dropdown tooltip={t("Groups", "分组")} value={group} onChange={setGroup}>
-          <List.Dropdown.Item title={t(`All Accounts (${vault.accounts.length})`, `全部账户 (${vault.accounts.length})`)} value={ALL_GROUPS} />
+        <List.Dropdown tooltip={"Groups"} value={group} onChange={setGroup}>
+          <List.Dropdown.Item title={`All Accounts (${vault.accounts.length})`} value={ALL_GROUPS} />
           {tallies.map((tally) => (
             <List.Dropdown.Item
               key={tally.id}
-              title={`${tally.id === UNGROUPED_KEY ? t("Ungrouped", "未分组") : tally.name} (${tally.count})`}
+              title={`${tally.id === UNGROUPED_KEY ? "Ungrouped" : tally.name} (${tally.count})`}
               value={tally.id === UNGROUPED_KEY ? UNGROUPED_KEY : tally.id}
             />
           ))}
         </List.Dropdown>
       }
     >
+      <List.EmptyView title={"No Accounts"} actions={<ActionPanel><Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} /></ActionPanel>} />
       {vault.message ? (
-        <List.Section title={t("Action Required", "需要处理")}>
+        <List.Section title={"Action Required"}>
           <List.Item
             icon={Icon.Warning}
-            title={vault.source === "file" ? t("Data Source File", "数据源文件") : t("Local Vault", "本地库")}
+            title={vault.source === "file" ? "Data Source File" : "Local Vault"}
             subtitle={vault.message}
             actions={issueActions}
           />
         </List.Section>
       ) : null}
-      {vault.notice ? (
-        <List.Section title={t("Status", "状态")}>
-          <List.Item icon={Icon.CheckCircle} title={vault.notice} subtitle={vault.source === "file" ? vault.filePath : t("Raycast Local Vault", "Raycast 本地库")} />
-        </List.Section>
-      ) : null}
-      <List.Section title={t("Codes", "验证码")} subtitle={t(`${visible.length} accounts`, `${visible.length} 个账户`)}>
+      <List.Section title={"Codes"} subtitle={`${visible.length} accounts`}>
         {visible.map((account) => (
           <CodeItem
             key={account.id}
@@ -174,14 +150,6 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
             closeAfterCopy={preferences.closeAfterCopy ?? true}
           />
         ))}
-      </List.Section>
-      <List.Section title={t("Data Source", "数据源")}>
-        <List.Item
-          icon={Icon.HardDrive}
-          title={vault.source === "file" ? vault.filePath : t("No file configured (using Raycast Local Vault)", "未配置文件（使用 Raycast 本地库）")}
-          subtitle={t(`Sync status: ${syncStatus(vault.syncStatus)}`, `同步状态：${syncStatus(vault.syncStatus)}`)}
-          actions={sourceActions}
-        />
       </List.Section>
     </List>
   );
@@ -234,30 +202,29 @@ function CodeActions({ account, code, enterAction, closeAfterCopy }: {
   return (
     <ActionPanel>
       <Action
-        title={enterAction === "copy" ? t("Copy Code", "复制验证码") : t("Paste into Previous Field", "粘贴到上一个输入框")}
+        title={enterAction === "copy" ? "Copy Code" : "Paste into Previous Field"}
         icon={Icon.Clipboard}
         onAction={() => void deliverCode(account, code, enterAction, closeAfterCopy)}
       />
       <Action
-        title={enterAction === "copy" ? t("Paste into Previous Field", "粘贴到上一个输入框") : t("Copy Code", "复制验证码")}
+        title={enterAction === "copy" ? "Paste into Previous Field" : "Copy Code"}
         icon={Icon.Clipboard}
         shortcut={{ modifiers: ["cmd"], key: "return" }}
         onAction={() => void deliverCode(account, code, enterAction === "copy" ? "paste" : "copy", closeAfterCopy)}
       />
       <Action
-        title={t("Type into Frontmost App", "真实输入到前台应用")}
+        title={"Type into Frontmost App"}
         icon={Icon.Keyboard}
         onAction={() => void deliverCode(account, code, "type")}
       />
       <ActionPanel.Section>
-        <Action title={t("Reload Data Source", "重新读取数据源文件")} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
         <Action
-          title={t("Move to Trash", "移入回收站")}
+          title={"Move to Trash"}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          onAction={() => void commit((snapshot) => moveToTrash(snapshot, account.id), t("Moved to Trash", "已移入回收站"))}
+          onAction={() => void commit((snapshot) => moveToTrash(snapshot, account.id), "Moved to Trash")}
         />
-        <Action.Push title={t("Open Settings & Data", "打开设置与数据")} icon={Icon.Gear} target={<ManageData />} />
+        <Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} />
       </ActionPanel.Section>
     </ActionPanel>
   );

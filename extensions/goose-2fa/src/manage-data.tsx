@@ -16,7 +16,6 @@ import { useState } from "react";
 import { normalizeNewAccountInput } from "../vendor/lib/account-validation";
 import { exportAsSyncJson } from "../vendor/lib/data-transfer";
 import type { AccountData, NewAccountInput, VaultGroup } from "../vendor/lib/types";
-import { syncStatus, t } from "./lib/i18n";
 import { commit } from "./lib/commit";
 import { normalizePath, resolveVaultPath, writeBackupFile, writeVaultFile } from "./lib/vault-file";
 import {
@@ -35,114 +34,122 @@ import {
 import { clearCreatedSource, createDataSource, clearSyncLock, getVaultState, refreshVault, resetLocalVault, resolveConflict, selectCreatedSource, useVault } from "./lib/vault-store";
 import ScanQr from "./scan-qr";
 
+const statusLabel = { idle: "Idle", loading: "Loading", writing: "Saving", success: "Up to date", error: "Error", conflict: "Conflict" };
+
 export default function ManageData() {
   const vault = useVault();
   const { push } = useNavigation();
 
   return (
-    <List navigationTitle={t("Settings & Data", "设置与数据")} isLoading={vault.status === "loading" || vault.syncStatus === "writing"} searchBarPlaceholder={t("Search accounts or groups", "搜索账户或分组")}>
-      <List.Section title={t("Settings", "设置")}>
+    <List navigationTitle={"Settings & Data"} isLoading={vault.status === "loading" || vault.syncStatus === "writing"} searchBarPlaceholder={"Search accounts or groups"}>
+      <List.Section title={"Settings"}>
         <List.Item
           icon={Icon.Gear}
-          title={t("Layout, Return Action & Close After Copy", "布局、回车动作与复制后关闭")}
-          subtitle={t("Choose list or grid, copy or paste in extension preferences; reopen the main view afterward", "在扩展设置中选择列表或宫格、复制或粘贴；更改后重新打开主界面")}
-          actions={<ActionPanel><Action title={t("Open Extension Preferences", "打开扩展设置")} icon={Icon.Gear} onAction={openExtensionPreferences} /></ActionPanel>}
+          title={"Layout, Return Action & Close After Copy"}
+          subtitle={"Choose list or grid, copy or paste in extension preferences; reopen the main view afterward"}
+          actions={<ActionPanel><Action title={"Open Extension Preferences"} icon={Icon.Gear} onAction={openExtensionPreferences} /></ActionPanel>}
         />
       </List.Section>
-      <List.Section title={t("Data Source", "数据源")}>
+      <List.Section title={"Data Source"}>
+        <List.Item
+          icon={Icon.SaveDocument}
+          title={"Save Current Data as a Sync File"}
+          subtitle={"Choose a folder and filename; the new file becomes the data source"}
+          actions={<ActionPanel><Action.Push title={"Save Current Data"} icon={Icon.SaveDocument} target={<CreateSourceForm />} /></ActionPanel>}
+        />
         <List.Item
           icon={vault.source === "file" ? Icon.HardDrive : Icon.Desktop}
-          title={vault.source === "file" ? vault.filePath : t("No file configured; using Raycast Local Vault", "未配置文件，使用 Raycast 本地库")}
-          subtitle={vault.message ?? vault.notice ?? t(`Sync status: ${syncStatus(vault.syncStatus)}`, `同步状态：${syncStatus(vault.syncStatus)}`)}
-          accessories={vault.conflict ? [{ text: t("Conflict Needs Resolution", "冲突待处理"), icon: Icon.Warning }] : undefined}
+          title={vault.source === "file" ? vault.filePath : "No file configured; using Raycast Local Vault"}
+          subtitle={vault.message ?? vault.notice ?? `Sync status: ${statusLabel[vault.syncStatus]}`}
+          accessories={vault.conflict ? [{ text: "Conflict Needs Resolution", icon: Icon.Warning }] : undefined}
           actions={
             <ActionPanel>
               <Action
-                title={t("Reload Data Source", "重新读取数据源文件")}
+                title={"Reload Data Source"}
                 icon={Icon.ArrowClockwise}
                 onAction={() => void refreshVault()}
               />
-              <Action title={t("Open Extension Preferences", "打开扩展设置")} icon={Icon.Gear} onAction={openExtensionPreferences} />
-              <Action.Push title={t("Create Data Source in Folder", "指定目录新建数据源")} icon={Icon.NewDocument} target={<CreateSourceForm />} />
-              <Action title={t("Use File or Local Vault from Extension Preferences", "改用扩展设置选择的文件或本地库")} icon={Icon.ArrowCounterClockwise} onAction={() => void clearCreatedSource()} />
+              <Action title={"Open Extension Preferences"} icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.Push title={"Save Current Data as a Sync File"} icon={Icon.SaveDocument} target={<CreateSourceForm />} />
+              <Action title={"Use File or Local Vault from Extension Preferences"} icon={Icon.ArrowCounterClockwise} onAction={() => void clearCreatedSource()} />
               {vault.source === "file" && vault.needsCreate && (
                 <Action
-                  title={t("Create Data Source File (save current data)", "新建数据源文件（写入当前数据）")}
+                  title={"Create Data Source File (save current data)"}
                   icon={Icon.NewDocument}
                   onAction={() => void createDataSource()}
                 />
               )}
               {vault.localBroken && (
-                <ActionPanel.Section title={t("Local Vault Corrupted", "本地库损坏")}>
+                <ActionPanel.Section title={"Local Vault Corrupted"}>
                   <Action
-                    title={t("Open Extension Preferences (use a data source file)", "打开扩展偏好设置（改用数据源文件）")}
+                    title={"Open Extension Preferences (use a data source file)"}
                     icon={Icon.Gear}
                     onAction={() => void openExtensionPreferences()}
                   />
                   <Action
-                    title={t("Rebuild Local Vault (discard corrupted data)", "重建本地库（放弃损坏的旧数据）")}
+                    title={"Rebuild Local Vault (discard corrupted data)"}
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={async () => {
                       const ok = await resetLocalVault();
                       await showToast(
                         ok
-                          ? { style: Toast.Style.Success, title: t("Local vault rebuilt", "本地库已重建") }
-                          : { style: Toast.Style.Failure, title: t("Local vault not rebuilt", "本地库未重建"), message: getVaultState().message ?? t("Please try again.", "请重试。") },
+                          ? { style: Toast.Style.Success, title: "Local vault rebuilt" }
+                          : { style: Toast.Style.Failure, title: "Local vault not rebuilt", message: getVaultState().message ?? "Please try again." },
                       );
                     }}
                   />
                 </ActionPanel.Section>
               )}
               {vault.lockHeld !== null && (
-                <ActionPanel.Section title={t("Stale Lock", "残留锁")}>
+                <ActionPanel.Section title={"Stale Lock"}>
                   <Action
-                    title={t("Remove Stale Lock (ensure no other client is writing)", "清理残留锁文件（确认没有其他端在写）")}
+                    title={"Remove Stale Lock (ensure no other client is writing)"}
                     icon={Icon.LockUnlocked}
                     style={Action.Style.Destructive}
                     onAction={async () => {
                       const removed = await clearSyncLock();
                       await showToast(
                         removed
-                          ? { style: Toast.Style.Success, title: t("Stale lock removed", "已清理残留锁"), message: t("Please retry your last change.", "请重新执行刚才的改动。") }
-                          : { style: Toast.Style.Failure, title: t("Lock file not found", "没有找到锁文件"), message: t("It may have been released by its owner.", "可能已被持有者释放。") },
+                          ? { style: Toast.Style.Success, title: "Stale lock removed", message: "Please retry your last change." }
+                          : { style: Toast.Style.Failure, title: "Lock file not found", message: "It may have been released by its owner." },
                       );
                     }}
                   />
                 </ActionPanel.Section>
               )}
               {vault.conflict && (
-                <ActionPanel.Section title={t("Conflict", "冲突")}>
-                  <Action title={t("Use File Version", "以文件为准")} icon={Icon.Download} onAction={() => void resolveConflict("file")} />
+                <ActionPanel.Section title={"Conflict"}>
+                  <Action title={"Use File Version"} icon={Icon.Download} onAction={() => void resolveConflict("file")} />
                   <Action
-                    title={t("Use Local Version (overwrite file)", "以本地为准（覆盖文件）")}
+                    title={"Use Local Version (overwrite file)"}
                     icon={Icon.Upload}
                     style={Action.Style.Destructive}
                     onAction={() => void resolveConflict("local")}
                   />
                 </ActionPanel.Section>
               )}
-              <ActionPanel.Section title={t("Accounts", "账户")}>
-                <Action title={t("Add Account", "添加账户")} icon={Icon.Plus} onAction={() => push(<AccountForm mode="create" />)} />
+              <ActionPanel.Section title={"Accounts"}>
+                <Action title={"Add Account"} icon={Icon.Plus} onAction={() => push(<AccountForm mode="create" />)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
         />
       </List.Section>
 
-      <List.Section title={t(`Accounts (${vault.accounts.length})`, `账户 (${vault.accounts.length})`)}>
+      <List.Section title={`Accounts (${vault.accounts.length})`}>
         {vault.accounts.map((account) => (
           <AccountItem key={account.id} account={account} groups={vault.groups} push={push} />
         ))}
       </List.Section>
 
-      <List.Section title={t(`Groups (${vault.groups.length})`, `分组 (${vault.groups.length})`)}>
+      <List.Section title={`Groups (${vault.groups.length})`}>
         <List.Item
           icon={Icon.Plus}
-          title={t("New Group", "新建分组")}
+          title={"New Group"}
           actions={
             <ActionPanel>
-              <Action title={t("New Group", "新建分组")} icon={Icon.Plus} onAction={() => push(<GroupForm mode="create" />)} />
+              <Action title={"New Group"} icon={Icon.Plus} onAction={() => push(<GroupForm mode="create" />)} />
             </ActionPanel>
           }
         />
@@ -151,15 +158,15 @@ export default function ManageData() {
             key={group.id}
             icon={Icon.Folder}
             title={group.name}
-            subtitle={t(`${vault.accounts.filter((account) => account.groupId === group.id).length} accounts`, `${vault.accounts.filter((account) => account.groupId === group.id).length} 个账户`)}
+            subtitle={`${vault.accounts.filter((account) => account.groupId === group.id).length} accounts`}
             actions={
               <ActionPanel>
-                <Action title={t("Rename Group", "重命名分组")} icon={Icon.Pencil} onAction={() => push(<GroupForm mode="rename" group={group} />)} />
+                <Action title={"Rename Group"} icon={Icon.Pencil} onAction={() => push(<GroupForm mode="rename" group={group} />)} />
                 <Action
-                  title={t("Delete Group (accounts become ungrouped)", "删除分组（账户回到未分组）")}
+                  title={"Delete Group (accounts become ungrouped)"}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  onAction={() => void commit((snapshot) => removeGroup(snapshot, group.id), t("Group deleted", "已删除分组"))}
+                  onAction={() => void commit((snapshot) => removeGroup(snapshot, group.id), "Group deleted")}
                 />
               </ActionPanel>
             }
@@ -167,18 +174,18 @@ export default function ManageData() {
         ))}
       </List.Section>
 
-      <List.Section title={t(`Trash (${vault.trash.length})`, `回收站 (${vault.trash.length})`)}>
+      <List.Section title={`Trash (${vault.trash.length})`}>
         <List.Item
           icon={Icon.Trash}
-          title={t("Empty Trash", "清空回收站")}
-          subtitle={t("Items older than 30 days are removed on load", "30 天前的条目在每次载入时自动清理")}
+          title={"Empty Trash"}
+          subtitle={"Items older than 30 days are removed on load"}
           actions={
             <ActionPanel>
               <Action
-                title={t("Empty Trash", "清空回收站")}
+                title={"Empty Trash"}
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                onAction={() => void commit((snapshot) => emptyTrash(snapshot), t("Trash emptied", "回收站已清空"))}
+                onAction={() => void commit((snapshot) => emptyTrash(snapshot), "Trash emptied")}
               />
             </ActionPanel>
           }
@@ -188,19 +195,19 @@ export default function ManageData() {
             key={account.id}
             icon={Icon.Trash}
             title={account.note || account.name}
-            subtitle={t(`${account.issuer} · Deleted ${new Date(account.deletedAt ?? 0).toLocaleString("en-US")}`, `${account.issuer} · 删除于 ${new Date(account.deletedAt ?? 0).toLocaleString("zh-CN")}`)}
+            subtitle={`${account.issuer} · Deleted ${new Date(account.deletedAt ?? 0).toLocaleString("en-US")}`}
             actions={
               <ActionPanel>
                 <Action
-                  title={t("Restore Account", "恢复账户")}
+                  title={"Restore Account"}
                   icon={Icon.ArrowCounterClockwise}
-                  onAction={() => void commit((snapshot) => restoreFromTrash(snapshot, account.id), t("Account restored", "已恢复账户"))}
+                  onAction={() => void commit((snapshot) => restoreFromTrash(snapshot, account.id), "Account restored")}
                 />
                 <Action
-                  title={t("Delete Permanently", "永久删除")}
+                  title={"Delete Permanently"}
                   icon={Icon.DeleteDocument}
                   style={Action.Style.Destructive}
-                  onAction={() => void commit((snapshot) => deleteForever(snapshot, account.id), t("Permanently deleted", "已永久删除"))}
+                  onAction={() => void commit((snapshot) => deleteForever(snapshot, account.id), "Permanently deleted")}
                 />
               </ActionPanel>
             }
@@ -208,30 +215,30 @@ export default function ManageData() {
         ))}
       </List.Section>
 
-      <List.Section title={t("Import & Export", "导入导出")}>
+      <List.Section title={"Import & Export"}>
         <List.Item
           icon={Icon.Camera}
-          title={t("Scan Screenshot", "截图识码")}
-          subtitle={t("Capture and scan QR or migration codes", "截屏识别二维码或迁移码")}
-          actions={<ActionPanel><Action.Push title={t("Scan Screenshot", "截图识码")} icon={Icon.Camera} target={<ScanQr />} /></ActionPanel>}
+          title={"Scan Screenshot"}
+          subtitle={"Capture and scan QR or migration codes"}
+          actions={<ActionPanel><Action.Push title={"Scan Screenshot"} icon={Icon.Camera} target={<ScanQr />} /></ActionPanel>}
         />
         <List.Item
           icon={Icon.Download}
-          title={t("Import from Clipboard", "从剪贴板导入")}
-          subtitle={t("Supports otpauth://, Google migration codes and goose-2fa JSON backups", "支持 otpauth://、Google 迁移码与 goose-2fa JSON 备份")}
+          title={"Import from Clipboard"}
+          subtitle={"Supports otpauth://, Google migration codes and goose-2fa JSON backups"}
           actions={
             <ActionPanel>
               <Action
-                title={t("Import from Clipboard", "从剪贴板导入")}
+                title={"Import from Clipboard"}
                 icon={Icon.Download}
                 onAction={async () => {
                   const text = await Clipboard.readText();
                   if (!text) {
-                    await showToast({ style: Toast.Style.Failure, title: t("Clipboard contains no text", "剪贴板没有文本") });
+                    await showToast({ style: Toast.Style.Failure, title: "Clipboard contains no text" });
                     return;
                   }
                   if (!previewImport(text, getVaultState())) {
-                    await showToast({ style: Toast.Style.Failure, title: t("Could not parse clipboard content", "无法解析剪贴板内容") });
+                    await showToast({ style: Toast.Style.Failure, title: "Could not parse clipboard content" });
                     return;
                   }
                   push(<ImportPreview text={text} />);
@@ -242,19 +249,19 @@ export default function ManageData() {
         />
         <List.Item
           icon={Icon.Upload}
-          title={t("Import from File", "从文件导入")}
+          title={"Import from File"}
           actions={
             <ActionPanel>
-              <Action title={t("Choose Backup File", "选择备份文件")} icon={Icon.Upload} onAction={() => push(<ImportForm />)} />
+              <Action title={"Choose Backup File"} icon={Icon.Upload} onAction={() => push(<ImportForm />)} />
             </ActionPanel>
           }
         />
         <List.Item
           icon={Icon.SaveDocument}
-          title={t("Export to File", "导出到文件")}
+          title={"Export to File"}
           actions={
             <ActionPanel>
-              <Action title={t("Choose Export Path", "选择导出路径")} icon={Icon.SaveDocument} onAction={() => push(<ExportForm />)} />
+              <Action title={"Choose Export Path"} icon={Icon.SaveDocument} onAction={() => push(<ExportForm />)} />
             </ActionPanel>
           }
         />
@@ -281,28 +288,28 @@ function AccountItem({
       accessories={[{ text: account.type.toUpperCase() }]}
       actions={
         <ActionPanel>
-          <Action title={t("Edit Note & Name", "编辑备注与名称")} icon={Icon.Pencil} onAction={() => push(<AccountForm mode="edit" account={account} />)} />
-          <ActionPanel.Section title={t("Move to Group", "移动到分组")}>
+          <Action title={"Edit Note & Name"} icon={Icon.Pencil} onAction={() => push(<AccountForm mode="edit" account={account} />)} />
+          <ActionPanel.Section title={"Move to Group"}>
             <Action
-              title={t("Ungrouped", "未分组")}
+              title={"Ungrouped"}
               icon={Icon.Folder}
-              onAction={() => void commit((snapshot) => setAccountGroup(snapshot, account.id, null), t("Account moved", "已移动账户"))}
+              onAction={() => void commit((snapshot) => setAccountGroup(snapshot, account.id, null), "Account moved")}
             />
             {groups.map((group) => (
               <Action
                 key={group.id}
                 title={group.name}
                 icon={Icon.Folder}
-                onAction={() => void commit((snapshot) => setAccountGroup(snapshot, account.id, group.id), t("Account moved", "已移动账户"))}
+                onAction={() => void commit((snapshot) => setAccountGroup(snapshot, account.id, group.id), "Account moved")}
               />
             ))}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title={t("Move to Trash", "移入回收站")}
+              title={"Move to Trash"}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              onAction={() => void commit((snapshot) => moveToTrash(snapshot, account.id), t("Moved to Trash", "已移入回收站"))}
+              onAction={() => void commit((snapshot) => moveToTrash(snapshot, account.id), "Moved to Trash")}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -315,11 +322,11 @@ function AccountForm({ mode, account }: { mode: "create" | "edit"; account?: Acc
   const { pop } = useNavigation();
   return (
     <Form
-      navigationTitle={mode === "create" ? t("Add Account", "添加账户") : t("Edit Account", "编辑账户")}
+      navigationTitle={mode === "create" ? "Add Account" : "Edit Account"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={mode === "create" ? t("Add", "添加") : t("Save", "保存")}
+            title={mode === "create" ? "Add" : "Save"}
             onSubmit={async (values: FormValues) => {
               if (mode === "create") {
                 const input = normalizeNewAccountInput({
@@ -334,11 +341,11 @@ function AccountForm({ mode, account }: { mode: "create" | "edit"; account?: Acc
                   remark: values.remark,
                 });
                 if (!input) {
-                  await showToast({ style: Toast.Style.Failure, title: t("Invalid account details", "账户信息不合法"), message: t("Check the Base32 secret, digits and period.", "请检查 Base32 密钥、位数与周期。") });
+                  await showToast({ style: Toast.Style.Failure, title: "Invalid account details", message: "Check the Base32 secret, digits and period." });
                   return;
                 }
                 const groupId = values.group === UNGROUPED ? null : values.group;
-                const ok = await commit((snapshot) => addAccounts(snapshot, [input], groupId ?? null), t("Account added", "已添加账户"));
+                const ok = await commit((snapshot) => addAccounts(snapshot, [input], groupId ?? null), "Account added");
                 if (ok) pop();
                 return;
               }
@@ -351,7 +358,7 @@ function AccountForm({ mode, account }: { mode: "create" | "edit"; account?: Acc
                     note: values.note,
                     remark: values.remark,
                   }),
-                t("Account saved", "已保存账户"),
+                "Account saved",
               );
               if (ok) pop();
             }}
@@ -359,33 +366,33 @@ function AccountForm({ mode, account }: { mode: "create" | "edit"; account?: Acc
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={t("Name", "名称")} defaultValue={account?.name} placeholder="alice@example.com" />
-      <Form.TextField id="issuer" title={t("Issuer", "发行方")} defaultValue={account?.issuer} placeholder="GitHub" />
+      <Form.TextField id="name" title={"Name"} defaultValue={account?.name} placeholder="alice@example.com" />
+      <Form.TextField id="issuer" title={"Issuer"} defaultValue={account?.issuer} placeholder="GitHub" />
       {mode === "create" && (
-        <Form.TextField id="secret" title={t("Base32 Secret", "Base32 密钥")} placeholder="JBSWY3DPEHPK3PXP" />
+        <Form.TextField id="secret" title={"Base32 Secret"} placeholder="JBSWY3DPEHPK3PXP" />
       )}
       {mode === "create" && (
-        <Form.Dropdown id="type" title={t("Type", "类型")} defaultValue="totp">
-          <Form.Dropdown.Item value="totp" title={t("TOTP (time-based)", "TOTP（基于时间）")} />
-          <Form.Dropdown.Item value="hotp" title={t("HOTP (counter-based)", "HOTP（基于计数器）")} />
+        <Form.Dropdown id="type" title={"Type"} defaultValue="totp">
+          <Form.Dropdown.Item value="totp" title={"TOTP (time-based)"} />
+          <Form.Dropdown.Item value="hotp" title={"HOTP (counter-based)"} />
         </Form.Dropdown>
       )}
       {mode === "create" && (
-        <Form.Dropdown id="digits" title={t("Digits", "位数")} defaultValue="6">
-          <Form.Dropdown.Item value="6" title={t("6 digits", "6 位")} />
-          <Form.Dropdown.Item value="8" title={t("8 digits", "8 位")} />
+        <Form.Dropdown id="digits" title={"Digits"} defaultValue="6">
+          <Form.Dropdown.Item value="6" title={"6 digits"} />
+          <Form.Dropdown.Item value="8" title={"8 digits"} />
         </Form.Dropdown>
       )}
-      {mode === "create" && <Form.TextField id="period" title={t("Period (seconds)", "周期（秒）")} defaultValue="30" />}
+      {mode === "create" && <Form.TextField id="period" title={"Period (seconds)"} defaultValue="30" />}
       {mode === "create" && (
-        <Form.Dropdown id="algorithm" title={t("Algorithm", "算法")} defaultValue="SHA-1">
+        <Form.Dropdown id="algorithm" title={"Algorithm"} defaultValue="SHA-1">
           <Form.Dropdown.Item value="SHA-1" title="SHA-1" />
           <Form.Dropdown.Item value="SHA-256" title="SHA-256" />
           <Form.Dropdown.Item value="SHA-512" title="SHA-512" />
         </Form.Dropdown>
       )}
-      <Form.TextArea id="note" title={t("Note", "备注")} defaultValue={account?.note} />
-      <Form.TextArea id="remark" title={t("Remark", "标记")} defaultValue={account?.remark} />
+      <Form.TextArea id="note" title={"Note"} defaultValue={account?.note} />
+      <Form.TextArea id="remark" title={"Remark"} defaultValue={account?.remark} />
     </Form>
   );
 }
@@ -394,23 +401,23 @@ function GroupForm({ mode, group }: { mode: "create" | "rename"; group?: VaultGr
   const { pop } = useNavigation();
   return (
     <Form
-      navigationTitle={mode === "create" ? t("New Group", "新建分组") : t("Rename Group", "重命名分组")}
+      navigationTitle={mode === "create" ? "New Group" : "Rename Group"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={mode === "create" ? t("Create", "新建") : t("Save", "保存")}
+            title={mode === "create" ? "Create" : "Save"}
             onSubmit={async (values: FormValues) => {
               const name = values.name ?? "";
               const ok = mode === "create"
-                ? await commit((snapshot) => addGroup(snapshot, name).snapshot, t("Group created", "已新建分组"))
-                : await commit((snapshot) => renameGroup(snapshot, group?.id ?? "", name), t("Group renamed", "已重命名分组"));
+                ? await commit((snapshot) => addGroup(snapshot, name).snapshot, "Group created")
+                : await commit((snapshot) => renameGroup(snapshot, group?.id ?? "", name), "Group renamed");
               if (ok) pop();
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title={t("Group Name", "分组名")} defaultValue={group?.name} placeholder={t("Work", "工作")} />
+      <Form.TextField id="name" title={"Group Name"} defaultValue={group?.name} placeholder={"Work"} />
     </Form>
   );
 }
@@ -419,24 +426,24 @@ function ImportForm() {
   const { push } = useNavigation();
   return (
     <Form
-      navigationTitle={t("Import from File", "从文件导入")}
+      navigationTitle={"Import from File"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("Import", "导入")}
+            title={"Import"}
             onSubmit={async (values: FormValues) => {
               const target = normalizePath(values.path ?? "");
               if (!target) return;
               let text: string;
               try {
-                if (statSync(target).size > 5 * 1024 * 1024) throw new Error(t("Backup exceeds 5 MB", "备份文件超过 5MB"));
+                if (statSync(target).size > 5 * 1024 * 1024) throw new Error("Backup exceeds 5 MB");
                 text = readFileSync(target, "utf8");
               } catch {
-                await showToast({ style: Toast.Style.Failure, title: t("Could Not Read File", "无法读取文件"), message: t("Check the path, permissions and 5 MB limit.", "请检查文件路径、权限和 5MB 大小限制。") });
+                await showToast({ style: Toast.Style.Failure, title: "Could Not Read File", message: "Check the path, permissions and 5 MB limit." });
                 return;
               }
               if (!previewImport(text, getVaultState())) {
-                await showToast({ style: Toast.Style.Failure, title: t("Could not parse backup file", "无法解析备份文件") });
+                await showToast({ style: Toast.Style.Failure, title: "Could not parse backup file" });
                 return;
               }
               push(<ImportPreview text={text} />);
@@ -445,7 +452,7 @@ function ImportForm() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="path" title={t("Backup File Path", "备份文件路径")} placeholder="~/Downloads/goose-2fa-backup.json" />
+      <Form.TextField id="path" title={"Backup File Path"} placeholder="~/Downloads/goose-2fa-backup.json" />
     </Form>
   );
 }
@@ -453,31 +460,31 @@ function ImportForm() {
 function ImportPreview({ text }: { text: string }) {
   const { pop } = useNavigation();
   const preview = previewImport(text, getVaultState());
-  if (!preview) return <List.EmptyView title={t("Could Not Parse Backup", "备份无法解析")} />;
+  if (!preview) return <List.EmptyView title={"Could Not Parse Backup"} />;
   const current = getVaultState();
   const imported = preview.snapshot.accounts.slice(current.accounts.length);
   const groupCount = preview.snapshot.groups.length - current.groups.length;
   return (
-    <List navigationTitle={t("Import Preview", "导入预览")} searchBarPlaceholder={t("Search accounts to import", "搜索待导入账户")}>
-      <List.Section title={t(`Accounts: ${preview.added} new, ${preview.dupeCount} duplicates skipped`, `账户：新增 ${preview.added}，重复跳过 ${preview.dupeCount}`)}>
+    <List navigationTitle={"Import Preview"} searchBarPlaceholder={"Search accounts to import"}>
+      <List.Section title={`Accounts: ${preview.added} new, ${preview.dupeCount} duplicates skipped`}>
         {imported.map((account: NewAccountInput, index) => (
           <List.Item key={`${account.issuer}:${account.name}:${index}`} icon={Icon.Key} title={account.note || account.name} subtitle={account.issuer} />
         ))}
       </List.Section>
-      <List.Section title={t(`${groupCount} groups will be added`, `将新增 ${groupCount} 个分组`)}>
+      <List.Section title={`${groupCount} groups will be added`}>
         {preview.snapshot.groups.slice(current.groups.length).map((group) => <List.Item key={group.id} icon={Icon.Folder} title={group.name} />)}
       </List.Section>
       <List.Item
         icon={Icon.Warning}
-        title={t("Confirm Import", "确认导入")}
-        subtitle={t("Secrets are hidden; they will be available in your local data source after import.", "验证码密钥不会显示；导入后可在本机数据源中查看。")}
-        actions={<ActionPanel><Action title={t(`Import ${preview.added} accounts`, `导入 ${preview.added} 个账户`)} icon={Icon.Download} onAction={async () => {
+        title={"Confirm Import"}
+        subtitle={"Secrets are hidden; they will be available in your local data source after import."}
+        actions={<ActionPanel><Action title={`Import ${preview.added} accounts`} icon={Icon.Download} onAction={async () => {
           const currentPreview = previewImport(text, getVaultState());
           if (!currentPreview) {
-            await showToast({ style: Toast.Style.Failure, title: t("Could Not Parse Backup", "备份无法解析") });
+            await showToast({ style: Toast.Style.Failure, title: "Could Not Parse Backup" });
             return;
           }
-          const ok = await commit(() => currentPreview.snapshot, t(`Imported ${currentPreview.added} accounts`, `已导入 ${currentPreview.added} 个账户`));
+          const ok = await commit(() => currentPreview.snapshot, `Imported ${currentPreview.added} accounts`);
           if (ok) pop();
         }} /></ActionPanel>}
       />
@@ -490,11 +497,11 @@ function ExportForm() {
   const [path, setPath] = useState(`~/Downloads/goose-2fa-backup-${new Date().toISOString().slice(0, 10)}.json`);
   return (
     <Form
-      navigationTitle={t("Export to File", "导出到文件")}
+      navigationTitle={"Export to File"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("Export", "导出")}
+            title={"Export"}
             onSubmit={async () => {
               const target = normalizePath(path);
               if (!target) return;
@@ -504,20 +511,20 @@ function ExportForm() {
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("Export Failed", "导出失败"),
+                  title: "Export Failed",
                   message: error instanceof Error ? error.message : String(error),
                 });
                 return;
               }
-              await showToast({ style: Toast.Style.Success, title: t("Full backup exported", "已导出完整备份"), message: target });
+              await showToast({ style: Toast.Style.Success, title: "Full backup exported", message: target });
               pop();
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="path" title={t("Export Path", "导出路径")} value={path} onChange={setPath} />
-      <Form.Description text={t("The full data source (including IDs and trash) can be used as a data source on another device.", "导出的是完整数据源格式（含 id 与回收站），可直接作为另一台设备的数据源文件。")} />
+      <Form.TextField id="path" title={"Export Path"} value={path} onChange={setPath} />
+      <Form.Description text={"The full data source (including IDs and trash) can be used as a data source on another device."} />
     </Form>
   );
 }
@@ -526,30 +533,30 @@ const UNGROUPED = "__ungrouped__";
 
 function CreateSourceForm() {
   const { pop } = useNavigation();
-  return <Form navigationTitle={t("Create Data Source at Location", "指定位置新建数据源")} actions={<ActionPanel><Action.SubmitForm title={t("Create and Use This File", "新建并使用此文件")} onSubmit={async (values: { directory?: string[]; fileName?: string }) => {
+  return <Form navigationTitle={"Save Current Data as a Sync File"} actions={<ActionPanel><Action.SubmitForm title={"Save and Use This File"} onSubmit={async (values: { directory?: string[]; fileName?: string }) => {
     const directory = values.directory?.[0];
     const name = values.fileName?.trim() || "goose-2fa.json";
     if (!directory || !path.isAbsolute(directory) || !/^[^/\\\0]+\.json$/i.test(name)) {
-      await showToast({ style: Toast.Style.Failure, title: t("Choose a folder and enter a .json filename", "请选择目录并填写 .json 文件名") });
+      await showToast({ style: Toast.Style.Failure, title: "Choose a folder and enter a .json filename" });
       return;
     }
     try {
-      if (!statSync(directory).isDirectory()) throw new Error(t("Folder does not exist", "目录不存在"));
+      if (!statSync(directory).isDirectory()) throw new Error("Folder does not exist");
       const target = resolveVaultPath(path.join(realpathSync.native(directory), name));
-      if (getVaultState().localBroken) throw new Error(t("Local vault is corrupted; incomplete data cannot be written to a new file", "本地库已损坏；不能把不完整数据写成新文件"));
+      if (getVaultState().localBroken) throw new Error("Local vault is corrupted; incomplete data cannot be written to a new file");
       const current = getVaultState();
       const result = await writeVaultFile(target, exportAsSyncJson(current.accounts, current.groups, current.trash), null, true);
-      if (result.status !== "ok") throw new Error(result.status === "conflict" ? t("File already exists; select it in extension preferences", "文件已存在，请在扩展设置中选择它") : t("Could not create file; check folder permissions or write lock", "无法创建文件，请检查目录权限或写入锁"));
+      if (result.status !== "ok") throw new Error(result.status === "conflict" ? "File already exists; select it in extension preferences" : "Could not create file; check folder permissions or write lock");
       await selectCreatedSource(target);
-      await showToast({ style: Toast.Style.Success, title: t("Data source created", "已新建数据源"), message: target });
+      await showToast({ style: Toast.Style.Success, title: "Data source created", message: target });
       pop();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: t("Creation Failed", "新建失败"), message: error instanceof Error ? error.message : String(error) });
+      await showToast({ style: Toast.Style.Failure, title: "Creation Failed", message: error instanceof Error ? error.message : String(error) });
     }
   }} /></ActionPanel>}>
-    <Form.FilePicker id="directory" title={t("Save Folder", "保存目录")} allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
-    <Form.TextField id="fileName" title={t("Filename", "文件名")} defaultValue="goose-2fa.json" />
-    <Form.Description text={t("File contains plaintext 2FA secrets. Select the same iCloud file on another computer to sync. Existing files are never overwritten.", "文件含明文 2FA 密钥；在另一台电脑选择同一 iCloud 文件即可读取。已有文件不会被覆盖。")} />
+    <Form.FilePicker id="directory" title={"Save Folder"} allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
+    <Form.TextField id="fileName" title={"Filename"} defaultValue="goose-2fa.json" />
+    <Form.Description text={"File contains plaintext 2FA secrets. Select the same iCloud file on another computer to sync. Existing files are never overwritten."} />
   </Form>;
 }
 
