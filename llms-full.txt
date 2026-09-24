@@ -70,6 +70,228 @@ Alternatively, you can open Raycast's AI Chat and start chatting to your AI Exte
 🎉 Congratulations! You built your first AI extension. Now you can start adding more tools to your extension to make it more powerful.
 
 
+# Evals
+
+Evals test how Raycast AI uses your extension. They combine a prompt, simulated tool results, and expectations about the response and tool calls. They also provide suggested prompts that help users discover what your extension can do.
+
+Define evals in the `ai.evals` array in your extension manifest.
+
+## Add an Eval
+
+Run `npx ray develop`, then start a new conversation in Quick AI or AI Chat and mention your extension in a single prompt. Once Raycast AI has finished using your tools, open the Actions panel and choose **Copy Eval**. The action copies JSON containing the prompt, tool-result mocks, and tool-call expectations.
+
+Copy Eval supports conversations with one prompt. Start a new conversation if you have sent follow-up messages. If a tool is called more than once, the copied eval keeps the first successful result for that tool as its mock. Review the mocks and remove personal information or credentials before committing them.
+
+
+
+You can then paste the eval into the `evals` array in the `package.json` file.
+
+```json
+{
+  "ai": {
+    "evals": [
+      {
+        "input": "@todo-list what are my open todos",
+        "mocks": {
+          "get-todos": [
+            {
+              "id": "Z5lF8F-lSvGCD6e3uZwkL",
+              "isCompleted": false,
+              "title": "Buy oat milk"
+            },
+            {
+              "id": "69Ag2mfaDakC3IP8XxpXU",
+              "isCompleted": false,
+              "title": "Play with my cat"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-todos"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Eval Format
+
+An eval consists of the following parts:
+
+- `input` is the prompt to test. Include an `@` mention using your extension’s `name` from `package.json`, for example `@todo-list What are my todos?`.
+- `mocks` maps tool names to their simulated return values. Use the tool’s `name` from `package.json`, such as `get-todos`, without an extension prefix. The eval runner uses these values instead of executing your tools.
+- `expected` is an array of expectations that must all pass, similar to assertions in integration tests.
+- `usedAsExample` controls whether the input is shown as a suggested prompt. Defaults to `true`.
+
+## Expectations
+
+Expectations are used to check if the AI response matches the expected behavior. You have different options to choose from:
+
+- `includes`: Check that AI response includes some substring (case-insensitive), for example `{"includes": "added" }`
+- `matches`: Check that AI response matches some regexp, for example check if response contains a Markdown link `{ "matches": "\\[([^\\]]+)\\]\\(([^\\s\\)]+)(?:\\s+\"([^\"]+)\")?\\)" }`
+- `meetsCriteria`: Check that AI response meets some plain-text criteria (validated using AI). Useful when AI varies the response and it is hard to match it using `includes` or `matches`. Example: `{ "meetsCriteria": "Tells that label with this name doesn't exist" }`
+- `callsTool`: Check that during the request AI called some tool included from your AI extension. There are two forms:
+  - Short form to check if AI tool with specific name was called. Example: `{ "callsTool": "get-todos" }`
+  - Long form to check tool arguments: `{ callsTool: { name: "name", arguments: { arg1: matcher, arg2: matcher } } }`. Matches could be complex and combine any supported rules:
+    - `eq` (used by default for any value that is not object or array)
+    - `includes`
+    - `matches`
+    - `and` (used by default if array is used)
+    - `or`
+    - `not`
+- `not`: Invert an expectation, for example `{ "not": { "callsTool": "delete-todo" } }`.
+
+### Examples
+
+{% tabs %}
+{% tab title="Simple Expectation" %}
+
+```json
+{
+  "ai": {
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "greet",
+              "arguments": {
+                "name": "thomas"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+{% endtab %}
+{% tab title="Nested Expectations" %}
+
+```json
+{
+  "ai": {
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-comment",
+              "arguments": {
+                "issueId": "ISS-1",
+                "body": {
+                  "includes": "waiting for design"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+{% endtab %}
+{% tab title="Nested Expectations With Dot Notation" %}
+
+```json
+{
+  "ai": {
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "greet",
+              "arguments": {
+                "user.name": "thomas"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+{% endtab %}
+{% tab title="Negative Expectation" %}
+
+```json
+{
+  "ai": {
+    "evals": [
+      {
+        "expected": [
+          {
+            "not": {
+              "callsTool": "create-issue"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+## Matching Tool Arguments
+
+Use the long form of `callsTool` to check arguments. Primitive values use equality by default; an array of matchers means all of them must match. Wrap a literal array in `eq` so it is compared as a value:
+
+```json
+{
+  "callsTool": {
+    "name": "create-todo",
+    "arguments": {
+      "title": { "includes": "milk" },
+      "labels": { "eq": ["shopping", "home"] },
+      "priority": { "or": ["high", "urgent"] },
+      "description": [{ "includes": "milk" }, { "not": { "includes": "bread" } }]
+    }
+  }
+}
+```
+
+Use dot notation to match a nested argument, such as `"user.name": "thomas"`. `includes` checks a substring without case sensitivity; `matches` accepts a regular expression; `and`, `or`, and `not` combine or invert matchers.
+
+## Suggested Prompts
+
+Evals are used as suggested prompts by default. Add `"usedAsExample": false` to an eval for edge cases or internal tests that should not appear as suggestions. The eval still runs.
+
+## Run Evals
+
+From your extension directory, run:
+
+```sh
+npx ray evals
+```
+
+The CLI builds the extension, runs the evals remotely, and prints which evals passed or failed. Use the results to improve your tool names, descriptions, and instructions. Sign in with `npx ray login` if needed. To run selected evals, use their zero-based indexes:
+
+```sh
+npx ray evals --only 0,2
+```
+
+## Best Practices
+
+- Develop and debug your tools with `npx ray develop`, then use **Copy Eval** on a successful single-prompt conversation to capture a starting point.
+- Review the generated expectations. Add response checks and argument matchers that describe the behavior you want to preserve.
+- Keep mocks small and remove personal information, credentials, and unrelated data before committing them.
+- Describe argument formats and dependencies in your tools. For example, explain that an ID must come from `get-todos` before calling `toggle-todo`.
+- Put shared behavior, response formats, and tool-ordering guidance in `ai.instructions`.
+
+
 # Follow Best Practices for AI Extensions
 
 Working with LLMs can be tricky. Here are some best practices to make the most out of your AI Extension.
@@ -218,138 +440,13 @@ Sometimes you want to provide additional instructions to the AI that are not spe
 }
 ```
 
-A user can use multiple AI Extensions in a conversation. Therefore, you should make sure that your instructions don't conflict with the instructions of other AI Extensions. For example, avoid phrases like "You are a ... assistant" because other AI Extensions might provide different capabilities. Instead, you should focus on providing general instructions that describe the specifics of your AI Extension. For example, describe the relationship between issues, projects, and teams for a project management app.
+A user can use multiple AI Extensions in a conversation. Therefore, you should make sure that your instructions don't conflict with the instructions of other AI Extensions. For example, avoid phrases like "You are a ... assistant" because other AI Extensions might provide a different skill set. Instead, you should focus on providing general instructions that describe the specifics of your AI Extension. For example, describe the relationship between issues, projects, and teams for a project management app.
 
 ## Evals
 
 Evals are a way to test your AI extension. Think of them as integrations tests. They are defined in the `package.json` file under the `ai` key. They are also used as suggested prompts for the user to learn how to make the most out of your AI Extension.
 
-## Structure
-
-An eval consists of the following parts:
-
-- `input` is a text prompt that you expect from users of your AI Extension. It should include `@` mention the name of your extension (`name` from `package.json`).
-- `mocks` – mocked results of tool calls. It is required to give AI the context, i.e. if you write an eval for `@todo-list What are my todos?` you need to provide the actual list in `get-todos` mock.
-- `expected` – array of expectations, similar to `expect` statements in unit / integration tests.
-- `usedAsExample` – if true, the eval will be used as an example prompt for the user. True by default.
-
-## Expectations
-
-Expectations are used to check if the AI response matches the expected behavior. You have different options to choose from:
-
-- `includes`: Check that AI response includes some substring (case-insensitive), for example `{"includes": "added" }`
-- `matches`: Check that AI response matches some regexp, for example check if response contains a Markdown link `{ "matches": "\\[([^\\]]+)\\]\\(([^\\s\\)]+)(?:\\s+\"([^\"]+)\")?\\)" }`
-- `meetsCriteria`: Check that AI response meets some plain-text criteria (validated using AI). Useful when AI varies the response and it is hard to match it using `includes` or `matches`. Example: `{ "meetsCriteria": "Tells that label with this name doesn't exist" }`
-- `callsTool`: Check that during the request AI called some tool included from your AI extension. There are two forms:
-  - Short form to check if AI tool with specific name was called. Example: `{ "callsTool": "get-todos" }`
-  - Long form to check tool arguments: `{ callsTool: { name: "name", arguments: { arg1: matcher, arg2: matcher } } }`. Matches could be complex and combine any supported rules:
-    - `eq` (used by default for any value that is not object or array)
-    - `includes`
-    - `matches`
-    - `and` (used by default if array is used)
-    - `or`
-    - `not`
-
-#### Example
-
-{% tabs %}
-{% tab title="Simple Expectation" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "callsTool": {
-              "name": "greet",
-              "arguments": {
-                "name": "thomas"
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% tab title="Nested Expectations" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "callsTool": {
-              "name": "create-comment",
-              "arguments": {
-                "issueId": "ISS-1",
-                "body": {
-                  "includes": "waiting for design"
-                }
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% tab title="Nested Expectations With Dot Notation" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "callsTool": {
-              "name": "greet",
-              "arguments": {
-                "user.name": "thomas"
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% tab title="Negative Expectation" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "not": {
-              "callsTool": "create-issue"
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% endtabs %}
+See Evals to write your first eval and learn about the format, supported expectations, and suggested prompts.
 
 ## AI File
 
@@ -367,54 +464,191 @@ instructions: |
 {% endtabs %}
 
 
-# Write Evals For Your AI Extension
+# Provide AI Models
 
-We all know that AI is not always reliable. This is why it's important to write evals for your AI Extension. Evals allow you to test your AI Extension and make sure it behaves as expected.
+Extensions can act as model providers: they tell Raycast which AI models they can serve, and Raycast makes those models available everywhere users pick a model — AI Chat, Quick AI, and AI Commands. This is how local model runtimes (such as Ollama or other on-device inference engines) or custom gateways integrate with Raycast.
 
-## Add an Eval
+{% hint style="info" %}
 
-The easiest way to add an eval is to first use your AI Extension. Then, once Raycast AI used your tools to finish its response, you can use the Copy Eval action to copy the eval to your clipboard.
+Using models provided by extensions requires a Raycast Pro plan.
 
+Provided models run through your extension's code. After installing the extension, users allow it to provide models from the model picker or with the "Allow AI Models" toggle in the extension's settings. Either action immediately discovers models, guiding users through required preferences and sign-in only when needed. If setup is interrupted, users can return to the picker to finish it. Once setup is complete, Raycast periodically runs the provider entry point in the background to discover and refresh models.
 
+{% endhint %}
 
-You can then paste the eval into the `evals` array in the `package.json` file.
+## Declare the entry point
+
+Add `ai.modelProvider` to your extension's manifest. The value maps to a file in `src`, like command entry points:
 
 ```json
 {
   "ai": {
-    "evals": [
-      {
-        "input": "@todo-list what are my open todos",
-        "mocks": {
-          "get-todos": [
-            {
-              "id": "Z5lF8F-lSvGCD6e3uZwkL",
-              "isCompleted": false,
-              "title": "Buy oat milk"
-            },
-            {
-              "id": "69Ag2mfaDakC3IP8XxpXU",
-              "isCompleted": false,
-              "title": "Play with my cat"
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": "get-todos"
-          }
-        ]
-      }
-    ]
+    "modelProvider": "models"
   }
 }
 ```
 
-## Run Your Evals
+The entry point file (here `src/models.ts`) must have two named exports: `getModels` and `streamCompletion`.
 
-To run your evals, you can use the `npx ray evals` command. This will run the evals and print the results to the console. You get an overview of the evals that failed and the ones that passed. From here you can start improving the names and descriptions of your tools.
+## getModels
 
-Visit Learn Core Concepts of AI Extensions to learn more about the different types of evals you can write.
+Raycast calls `getModels` to discover the models your extension currently provides — during user-initiated setup, periodically in the background after the user has allowed access and completed setup, and whenever you call `AI.refreshModels` for an enabled provider.
+
+```typescript
+import { AI } from "@raycast/api";
+
+export const getModels: AI.GetModels = () => {
+  return [
+    {
+      id: "llama-3.3-70b",
+      title: "Llama 3.3 70B",
+      isLocal: true,
+      description: "Runs fully on-device.",
+      capabilities: {
+        systemMessage: { supported: true },
+        temperature: { supported: true },
+        streaming: { supported: true },
+        tools: { supported: true },
+        vision: { mediaTypes: ["image/png", "image/jpeg"] },
+      },
+      contextWindow: 128000,
+      sizeInBytes: 40_000_000_000,
+    },
+  ];
+};
+```
+
+Each model is an `AI.RegisteredModel`. The `id` only needs to be unique within your extension.
+
+## streamCompletion
+
+Raycast calls `streamCompletion` whenever a user sends a request to one of your models. It receives the model and the request, and returns a stream of the response.
+
+The request messages follow the [Vercel AI SDK](https://sdk.vercel.ai) `ModelMessage` shape, so the simplest implementation forwards them to an AI SDK provider and returns the result directly:
+
+{% tabs %} {% tab title="AI SDK" %}
+
+```typescript
+import { AI } from "@raycast/api";
+import { streamText } from "ai";
+import { createOllama } from "ollama-ai-provider";
+
+const ollama = createOllama();
+
+export const streamCompletion: AI.StreamCompletion = (model, request) => {
+  return streamText({
+    model: ollama(model.id),
+    system: request.system,
+    messages: request.messages,
+    temperature: request.temperature,
+    tools: request.tools,
+  });
+};
+```
+
+{% endtab %} {% tab title="Text stream" %}
+
+```typescript
+import { AI } from "@raycast/api";
+
+export const streamCompletion: AI.StreamCompletion = async function* (model, request) {
+  const response = await fetch("http://localhost:11434/api/chat", {
+    method: "POST",
+    body: JSON.stringify({ model: model.id, messages: request.messages }),
+  });
+
+  // Yield plain strings to stream text chunks.
+  for await (const chunk of parseChunks(response)) {
+    yield chunk;
+  }
+};
+```
+
+{% endtab %} {% endtabs %}
+
+You can return an AI SDK `streamText` result, a `ReadableStream`, or an async iterable. Streamed values can be plain strings or AI SDK stream parts (`text-delta`, `reasoning-delta`, `tool-call`, `source`, `finish`, …), so reasoning, tool calls, and citations are forwarded to the Raycast UI.
+
+### Vision
+
+Declare the `vision` capability to receive user image attachments. Attachments arrive as `file` content parts on user messages, with base64 `data` and a `mediaType` matching one of your declared formats:
+
+```typescript
+{
+  role: "user",
+  content: [
+    { type: "text", text: "What is in this image?" },
+    { type: "file", data: "<base64>", mediaType: "image/png" },
+  ],
+}
+```
+
+Attachments in formats you don't declare are dropped, and models without the `vision` capability receive text-only messages.
+
+### Tools
+
+Declare the `tools` capability to receive tool definitions on the request when users bring AI Extensions into the conversation. Emit standard AI SDK tool-call parts in your stream; Raycast executes the tools and continues the conversation.
+
+## Refreshing models
+
+When the set of available models changes outside a regular refresh — for example after the user downloads a new local model through one of your commands — call `AI.refreshModels` to make Raycast re-run `getModels`:
+
+```typescript
+import { AI, showHUD } from "@raycast/api";
+
+export default async function command() {
+  await downloadModel("llama-3.3-70b");
+  await AI.refreshModels();
+  await showHUD("Model installed");
+}
+```
+
+`AI.refreshModels` is available in commands and tools, not inside the provider entry point itself.
+
+## Using your models with AI.ask
+
+Your extension can target its own provided models from `AI.ask` by passing the local model `id`:
+
+```typescript
+const answer = await AI.ask("Suggest 5 jazz songs", { model: { id: "llama-3.3-70b" } });
+```
+
+Other extensions cannot use your models through `AI.ask`; users can select them anywhere models are picked.
+
+## Types
+
+### AI.RegisteredModel
+
+A serializable description of a model your extension provides.
+
+| Property | Description | Type |
+| :-- | :-- | :-- |
+| id<mark style="color:red;">\*</mark> | Unique identifier within your extension. | `string` |
+| title<mark style="color:red;">\*</mark> | Display name shown in model pickers. | `string` |
+| icon | Icon shown in model pickers. | `Image.ImageLike` |
+| description | Short description shown in model pickers. | `string` |
+| isLocal | Whether the model runs on-device. | `boolean` |
+| capabilities | What the model supports. See below. | `AI.RegisteredModel["capabilities"]` |
+| contextWindow | The context window of the model in tokens. | `number` |
+| sizeInBytes | The size of the model on disk. Mostly relevant for local models. | `number` |
+
+#### Capabilities
+
+| Property | Description | Type |
+| :-- | :-- | :-- |
+| systemMessage | Whether the model accepts a system prompt. | `{ supported: boolean }` |
+| temperature | Whether the model accepts a temperature. | `{ supported: boolean }` |
+| streaming | Whether the model streams its responses. | `{ supported: boolean }` |
+| tools | Whether the model supports tool calling. | `{ supported: boolean }` |
+| reasoningEffort | Reasoning effort levels the model exposes. | `{ supported: boolean; options: string[]; default: string }` |
+| vision | Image media types the model accepts. | `{ mediaTypes: ("image/png" \| "image/jpeg" \| "image/webp" \| "image/gif")[] }` |
+
+### AI.GetModels
+
+The type of the `getModels` export: `() => AI.RegisteredModel[] | Promise<AI.RegisteredModel[]>`.
+
+### AI.StreamCompletion
+
+The type of the `streamCompletion` export: `(model: AI.RegisteredModel, request: AI.ModelRequest) => AI.ModelStream | Promise<AI.ModelStream>`.
 
 
 # AI
@@ -550,6 +784,91 @@ export default async function main() {
 
 A Promise that resolves with a prompt completion.
 
+### AI.refreshModels
+
+Refreshes the models provided by this extension. Only relevant for extensions that provide AI models: call it after changing locally available models, for example from a Manage Models command.
+
+#### Signature
+
+```typescript
+async function refreshModels(): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { AI, showHUD } from "@raycast/api";
+
+export default async function command() {
+  await downloadModel("llama-3.3-70b");
+  await AI.refreshModels();
+  await showHUD("Model installed");
+}
+```
+
+#### Return
+
+A Promise that resolves when Raycast has re-run your extension's `getModels` export.
+
+### AI.experimental_decide
+
+Answer typed questions about a shared state in one request. Use a `noul` question for a yes/no probability, a `choice` question to select from named options, or a `score` question to rate against ordered levels.
+
+{% hint style="warning" %}
+
+This API is experimental. Its signature, question types, and response format may change in future releases.
+
+{% endhint %}
+
+Pass `{ state, questions }` as the first argument and an optional `{ signal }` as the second. Answer types are inferred from the questions you pass.
+
+#### Example
+
+```typescript
+import { AI, showHUD } from "@raycast/api";
+
+export default async function command() {
+  const answers = await AI.experimental_decide({
+    state: {
+      message: "The app crashes whenever I open the billing page. Please fix it today!",
+      page: "billing",
+    },
+    questions: {
+      urgent: { type: "noul", instructions: "Does this need urgent attention?" },
+      severity: {
+        type: "score",
+        instructions: "How severe is the issue?",
+        criteria: ["Cosmetic", "Workaround available", "Blocking"],
+      },
+      category: {
+        type: "choice",
+        instructions: "Classify the request.",
+        criteria: {
+          bug: "A defect or crash in the product",
+          billing: "A question about charges or subscriptions",
+          other: null,
+        },
+      },
+    },
+  });
+
+  // Typed as "bug" | "billing" | "other" when questions are passed as a literal.
+  await showHUD(`${answers.category.choice}: severity ${answers.severity.score}`);
+}
+```
+
+`input.state` is the JSON-serializable value all questions are evaluated against. Strings are passed as is; other values are serialized with `JSON.stringify`. Values that cannot be serialized, such as circular objects, BigInts, or top-level `undefined`, reject the promise.
+
+`input.questions` maps your question names to one of these shapes:
+
+- `{ type: "noul", instructions: string }`: returns `{ type: "noul", noul: number }`, where `noul` is a probability between 0 and 1.
+- `{ type: "choice", instructions: string, criteria: Record<string, string | null> }`: returns `{ type: "choice", choice, confidence: number, probabilities }`. Each criteria key is an allowed choice; its value describes that choice, or is `null` when the name is sufficient. `probabilities` contains a probability between 0 and 1 for each offered choice.
+- `{ type: "score", instructions: string, criteria: readonly string[] }`: `criteria` contains 2–10 non-empty descriptions in order from low to high. Returns `{ type: "score", score: number, confidence: number, legend, probabilities }`. The score ranges from `0` to `criteria.length - 1` and can be fractional. `legend` maps level indices (string keys such as `"0"`) to descriptions; `probabilities` maps those indices to probabilities between 0 and 1.
+
+The result is the answers object, keyed directly by your question names. Unlike `AI.ask`, this method returns a single result and does not stream text.
+
+Pass `options.signal` to stop waiting for a result, for example `{ signal: AbortSignal.timeout(10_000) }`. The backend may finish a request that has already been submitted.
+
 ## Types
 
 ### AI.Creativity
@@ -570,35 +889,38 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | --- | --- |
 | OpenAI_GPT-5_mini | OpenAI's compact model, great for well-defined tasks and precise prompts. |
 | OpenAI_GPT-5_nano | OpenAI's lightweight model, great for summarization and classification tasks. |
-| OpenAI_GPT-4.1 | OpenAI's flagship model optimized for complex problem solving. |
+| OpenAI_GPT-4.1 | OpenAI's previous generation flagship model optimized for complex problem solving. |
 | OpenAI_GPT-4.1_mini | Balanced GPT-4.1 variant optimized for speed and cost efficiency. |
 | OpenAI_GPT-4.1_nano | Fastest and most cost-effective GPT-4.1 variant. |
 | OpenAI_GPT-4 | Previous generation GPT-4 model with broad knowledge and complex instruction handling. |
 | OpenAI_GPT-4o | Advanced OpenAI model optimized for speed and complex problem solving. |
 | OpenAI_GPT-4o_mini | Fast and intelligent model for everyday tasks. |
 | OpenAI_GPT-5.1 | OpenAI's model with adaptive reasoning, great for coding and agentic tasks across domains. |
-| OpenAI_GPT-5.2 | OpenAI's most capable model for professional work and long-running agents with state-of-the-art tool-calling. |
+| OpenAI_GPT-5.2 | OpenAI's GPT-5.2-class model for professional work and long-running agents with strong tool-calling. |
 | OpenAI_GPT-5.3_Instant | OpenAI's fast, capable GPT-5.3-class model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.3_Codex | A version of GPT-5.3 optimized for agentic coding tasks in Codex or similar environments. |
 | OpenAI_GPT-5.4 | OpenAI's high-performance GPT-5.4-class model for professional work and long-running agents with state-of-the-art tool-calling. |
 | OpenAI_GPT-5.4_mini | OpenAI's strongest mini model yet for coding and agentic workflows. |
 | OpenAI_GPT-5.4_nano | OpenAI's cheapest GPT-5.4-class model for simpler tasks. |
-| OpenAI_GPT-5.5 | OpenAI's most capable model for complex reasoning and long-running agentic work. |
+| OpenAI_GPT-5.5 | OpenAI's high-performance GPT-5.5-class model for complex reasoning and long-running agentic work. |
 | OpenAI_GPT-5.5_Instant | OpenAI's fast, capable model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.6_Sol | OpenAI's frontier GPT-5.6 model for complex, professional-grade reasoning and long-running agentic work. |
 | OpenAI_GPT-5.6_Terra | OpenAI's balanced GPT-5.6 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-5.6_Luna | OpenAI's fastest GPT-5.6 model for responsive everyday tasks. |
 | OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
+| OpenAI_GPT-6_Sol | OpenAI's GPT-6 model for complex coding and agentic workflows. |
+| OpenAI_GPT-6_Luna | OpenAI's efficient GPT-6 model for focused, high-volume tasks. |
 | OpenAI_o4-mini | Fast, efficient model optimized for coding and visual tasks. |
 | OpenAI_o3-mini | Fast reasoning model optimized for STEM tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
 | Groq_GPT-OSS_120b | OpenAI's first open-source model, 120b variant. |
 | Anthropic_Claude_Haiku_4.5 | Anthropic's offering focusing on being the best combination of performance and speed. |
-| Anthropic_Claude_Sonnet_4.6 | Anthropic's most intelligent model with the highest intelligence across most tasks. |
+| Anthropic_Claude_Sonnet_4.6 | Anthropic's previous generation Sonnet model with high intelligence across most tasks. |
 | Anthropic_Claude_Sonnet_5 | Anthropic's best combination of speed and intelligence, with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_4.7 | Anthropic's previous generation Opus model with combined reasoning and non-reasoning capabilities. |
-| Anthropic_Claude_Opus_4.8 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
-| Anthropic_Claude_Opus_5 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
+| Anthropic_Claude_Opus_4.8 | Anthropic's previous generation Opus model with combined reasoning and non-reasoning capabilities. |
+| Anthropic_Claude_Opus_5 | Anthropic's previous flagship Opus model with combined reasoning and non-reasoning capabilities. |
+| Anthropic_Claude_Opus_5.5 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Fable_5.1 | Anthropic's Mythos-class model for complex tasks, with safeguards for general use. |
 | Perplexity_Sonar | Fast Perplexity model with integrated search capabilities. |
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
@@ -618,10 +940,11 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | Google_Gemini_2.5_Pro | Previous generation thinking model for complex problem solving. |
 | Google_Gemini_2.5_Flash | Fast, well-rounded thinking model. |
 | Google_Gemini_2.5_Flash_Lite | Fast model optimized for large-scale text output. |
-| xAI_Grok-4.6 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
-| xAI_Grok-4.5 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
+| xAI_Grok-4.7 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
+| xAI_Grok-4.6 | xAI's previous flagship Grok model with frontier reasoning, strong coding, and multimodal understanding. |
+| xAI_Grok-4.5 | xAI's earlier flagship Grok model with strong reasoning, coding, and multimodal understanding. |
 | xAI_Grok-4.3 | xAI's advanced reasoning model with enhanced capabilities. |
-| Vercel_GLM-5.2 | Z.AI's next-generation flagship model with MoE + DSA architecture for efficient long-context coding, agentic, and reasoning tasks. |
+| Vercel_GLM-5.2 | Z.AI's previous flagship model with MoE + DSA architecture for efficient long-context coding, agentic, and reasoning tasks. |
 | Vercel_GLM-5.3 | Z.AI's flagship model with stronger coding and agent capabilities than GLM-5.2, driven by post-training on the same base. |
 | Vercel_GLM-5.3_Flash | Z.AI's native multimodal coding model with hybrid attention, visual coding, and agentic tool use. |
 | Vercel_Kimi_K2.7_Code | Moonshot AI's code-optimized trillion-parameter multimodal model with enhanced coding capabilities and agentic tool-calling. |
@@ -636,6 +959,16 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 
 If a model isn't available to the user (or has been disabled by the user), Raycast will fallback to a similar one.
 
+### AI.ModelSelector
+
+The AI model to use to answer the prompt.
+
+```typescript
+type ModelSelector = AI.Model | { id: string };
+```
+
+Pass an `AI.Model``.
+
 ### AI.AskOptions
 
 #### Properties
@@ -643,7 +976,7 @@ If a model isn't available to the user (or has been disabled by the user), Rayca
 | Property | Description | Type |
 | :--- | :--- | :--- |
 | creativity | Concrete tasks, such as fixing grammar, require less creativity while open-ended questions, such as generating ideas, require more.  If a number is passed, it needs to be in the range 0-2. For larger values, 2 will be used. For lower values, 0 will be used. | <code>AI.Creativity</code> |
-| model | The AI model to use to answer to the prompt. | <code>AI.Model</code> |
+| model | The AI model to use to answer to the prompt.    Pass an `AI.Model` value to use a Raycast-hosted model, or `{ id: "..." }`  to use a model provided by this extension through `ai.modelProvider`.  The ID is the local model `id` returned by `getModels()`. | <code>AI.ModelSelector</code> |
 | signal | Abort signal to cancel the request. | <code>[AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)</code> |
 
 ## Rate Limit
@@ -2889,12 +3222,14 @@ Required preferences need to be set by the user before a command opens. They are
 
 ## Help for Required Preferences
 
+
+
 Add an optional `help.md` file to the root of your extension, next to `package.json`, to explain how to fill in required preferences. Raycast renders its Markdown beside the setup form when a command or tool needs required preferences that haven't been set. The same help file is used throughout the extension, so include any instructions needed for both shared and command-specific preferences.
 
 For example, a `help.md` file for an extension that requires an API key could contain:
 
 ```markdown
-# Set Up Your API Key
+### Set Up Your API Key
 
 1. Sign in to your account on the service's website.
 2. Open **Settings → API Keys** and create a key with read access.
@@ -9036,7 +9371,7 @@ All published extensions are open-source and can be found in [this repository](h
 
 ## Get source code
 
-First, you need to find the source code of the extension. The easiest way to do this is to use the `Fork Extension` action in the Raycast's root search.
+First, you need to find the source code of the extension. The easiest way to do this is to use the `Fork Extension` action on a command of the extension in the Raycast's root search.
 
 
 
@@ -10959,6 +11294,10 @@ extension
 ├── package-lock.json
 ├── package.json
 ├── README.md
+├── skills
+│   └── triage-inbox
+│       ├── SKILL.md
+│       └── references
 ├── src
 │   ├── command.tsx
 │   └── tools
@@ -10976,13 +11315,55 @@ The directory contains all source files, assets, and a few support files. Let's 
 
 Put all your source files into the `src` folder. We recommend using TypeScript as a programming language. Our API is fully typed, which helps you catch errors at compile time rather than runtime. `ts`, `tsx`, `js` and `jsx` are supported as file extensions. As a rule of thumb, use `tsx` or `jsx` for commands with a UI.
 
-An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands and tools. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some additional properties, in particular, the `commands` properties which describes the entry points exposed by the extension.
+An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands, tools, and skills. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some additional properties, in particular, the `commands` properties which describes the entry points exposed by the extension.
 
 Each command has a property `name` that maps to its main entry point file in the `src` folder. For example, a command with the name `create` in the `package.json` file, maps to the file `src/create{.ts,.tsx,.js,.jsx}`.
 
 ### Tools
 
 Put tool entry points in `src/tools`. Tools expose functionality that Raycast AI can call, such as searching data or creating an item. Declare each tool in the `tools` array in `package.json`; its `name` maps to a `.ts` or `.tsx` file in this folder. For example, a tool named `search` maps to `src/tools/search.ts`. See Create an AI Extension for a walkthrough.
+
+## Skills
+
+Extensions can bundle [Agent Skills](https://agentskills.io/specification) in `skills`. Each skill uses the standard directory format:
+
+```bash
+skills/<skill-name>/SKILL.md
+```
+
+`SKILL.md` must start with YAML frontmatter containing a lowercase, hyphenated `name` that matches its directory and a non-empty `description`. The skill directory can also contain scripts, references, assets, and other files referenced by the skill.
+
+Every skill must also be declared in `ai.skills` in the extension’s `package.json`, or in the top-level `skills` array of an AI configuration file. The declaration's `name` identifies the matching directory, while `title` provides the human-readable label shown in Raycast. Raycast reads the skill’s description from its `SKILL.md` frontmatter. An optional `icon` overrides the extension icon for skill mentions..
+
+```json
+{
+  "ai": {
+    "skills": [
+      {
+        "name": "triage-inbox",
+        "title": "Triage Inbox"
+      }
+    ]
+  }
+}
+```
+
+For example, the same declaration can live in `ai.json` instead:
+
+```json
+{
+  "skills": [
+    {
+      "name": "triage-inbox",
+      "title": "Triage Inbox"
+    }
+  ]
+}
+```
+
+The CLI also supports `ai.json5`, `ai.yaml`, and `ai.yml`. Properties from the AI file override matching properties in `package.json`'s `ai` object; a file's `skills` array replaces the manifest's array. The merged configuration is validated and included in the built manifest, including for extensions without tools.
+
+Raycast catalogs declared skills from enabled extensions so users and AI agents can discover them. This does not load their instructions. Mentioning an extension activates its tools but does not load its skills. Mentioning a skill, or loading it through AI routing, loads only that skill and makes its owning extension's tools available for the task. This lets the user select a workflow while Raycast resolves the tools it depends on.
 
 ## Assets
 
@@ -10994,7 +11375,7 @@ The optional **help.md** file contains Markdown instructions for configuring req
 
 ## AI Configuration
 
-The optional **ai.yaml** file contains AI configuration, including additional `instructions` and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See AI File.
+The optional **ai.yaml** file contains AI configuration, including `skills`, additional `instructions`, and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See AI File.
 
 ## Metadata
 
@@ -11456,8 +11837,37 @@ All properties for the AI capabilities of the extension. This object should be w
 
 | Property | Description |
 | --- | --- |
+| skills | An array of Agent Skills bundled by the extension, see Skill properties. |
+| mcp | A single MCP server configuration. Its tools are merged with declared tools. See MCP server. |
+| modelProvider | The entry point that provides AI models to Raycast. A value of `models` maps to `src/models.ts`. Using models provided by extensions requires a Raycast Pro plan. More details |
 | instructions | A string containing additional instructions for the AI. It will be added as a system message whenever the extension is mentioned. It can for example be used to help the AI respond with a format that makes more sense for the extension: `Always format pull requests and issues as markdown links: [pull-request-title](https://github.com/:org/:repo/pull/:number) and [issue-title](https://github.com/:org/:repo/issues/:number)` |
-| evals | Evals for AI Extension. [More details](https://raycastapp.notion.site/AI-Extensions-Evals-15fd6e4a8215800598cad77d8afb5dc8?pvs=73) |
+| evals | Evals for AI Extension. More details |
+
+### Skill properties
+
+All properties for an [Agent Skill](https://agentskills.io/specification) declared in `ai.skills` in `package.json` or the top-level `skills` array of an AI configuration file, and bundled in `skills/<name>` at the extension root. The skill’s description is read from `SKILL.md` frontmatter.
+
+| Property | Description |
+| --- | --- |
+| name<mark style="color:red;">\*</mark> | The stable lowercase, hyphenated skill identifier. It must match both the skill directory and the `name` in `SKILL.md` frontmatter. |
+| title<mark style="color:red;">\*</mark> | The human-readable skill title shown in Raycast's mention menus, composer pills, and chat messages. |
+| icon | <p>An optional reference to an icon file in the assets folder. Use png format with a size of at least 512 x 512 pixels. Light and dark variants use the same naming convention as command icons.</p><p>If no icon is specified, the extension icon will be used.</p> |
+
+### MCP Server
+
+Set `ai.mcp` in `package.json` (or `mcp` in `ai.yaml`) to an [MCP server](https://modelcontextprotocol.io) configuration:
+
+```json
+{
+  "ai": {
+    "mcp": { "url": "https://example.com/mcp" }
+  }
+}
+```
+
+HTTP servers support `url`, optional `type` (`http` or `sse`), and `headers`. Stdio servers support `command`, optional `type` (`stdio`), `args`, and `env`. Raycast also supports `oauth: { "type": "dynamic" }` or `oauth: { "type": "static", "clientId": "…", "clientSecret": "…", "scopes": ["read"] }` for HTTP servers; `clientSecret` and `scopes` are optional. HTTP servers can request OAuth sign-in without an explicit `oauth` setting.
+
+An MCP configuration adds **Ask Extension**, even when the extension has no declared tools or commands. MCP tools and declared tools share the extension's AI identity. If names match, the declared tool takes precedence, including its schema, execution, and confirmation behavior.
 
 
 # Security

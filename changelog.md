@@ -1,6 +1,20 @@
 # Changelog
 
-## 2.3.0
+## 2.5.0 - 2026-09-24
+
+### ✨ New
+
+- **AI Models**: Extensions can now provide models for AI Chat, Quick AI, and AI Commands. Declare `ai.modelProvider` in your manifest and export `getModels` and `streamCompletion` from its entry point. Use `AI.refreshModels()` when the available models change, and `AI.ask(prompt, { model: { id: "..." } })` to use one of your extension's own models. Using extension-provided models requires Raycast Pro. See [Provide AI Models](./ai/provide-ai-models.md).
+- **MCP**: Extensions can now declare an MCP server with `ai.mcp` in `package.json` or `mcp` in `ai.yaml`. Connect a remote HTTP server or a local stdio server, with OAuth support for HTTP servers. Its tools are available alongside your extension's declared tools. See [MCP Server](./information/manifest.md#mcp-server).
+- **Skills**: Extensions can now bundle Agent Skills to teach Raycast AI how to carry out specific tasks. Declare them in `ai.skills` in `package.json` or `skills` in `ai.yaml`, and add a `SKILL.md` file in `skills/<name>` for each skill. Users can mention these skills in AI Chat. See [Skill Properties](./information/manifest.md#skill-properties).
+- **AI**: Added [`AI.experimental_decide`](./api-reference/ai.md#ai.experimental_decide) to answer multiple typed questions about shared input in one request. Get yes/no probabilities, choose between named options, or score against ordered criteria. This API is experimental and may change in future releases.
+
+### 💎 Improvements
+
+- **Developer Tools**: Added **Fork Extension** to Store search results for extensions from the Raycast extensions repository.
+- **CLI**: Git errors during publishing no longer repeat the same error output.
+
+## 2.3.0 - 2026-09-11
 
 ### 💎 Improvements
 
@@ -10,7 +24,7 @@
 
 - **AI**: `AI.ask` now respects a numeric `creativity` value.
 
-## 2.0.0
+## 2.0.0 - 2026-08-25
 
 Raycast 2.0 brings the extension API to the new Raycast desktop app on macOS and Windows. The CLI requires Node.js 22.22.2 or later.
 
