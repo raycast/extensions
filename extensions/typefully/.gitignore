@@ -45,3 +45,4 @@ compiled_raycast_rust
 
 # Conductor
 .context/
+.npmrc

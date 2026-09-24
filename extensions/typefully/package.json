@@ -648,6 +648,12 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "typefully-thread-draft",
+        "title": "Thread Drafting"
+      }
     ]
   },
   "preferences": [
@@ -661,7 +667,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {

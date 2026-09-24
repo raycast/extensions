@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## Add Thread Drafting Skill - {PR_MERGE_DATE}
+
+- Draft threads using writing examples and save them as unscheduled drafts. Available through the bundled Thread Drafting skill in Raycast AI.
+
 ## [Windows Support] - 2026-08-07
 
 - Add Windows as a supported platform
