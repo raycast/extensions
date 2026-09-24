@@ -4,6 +4,7 @@
 
 - Add `Edit Instance` and `Delete Instance` actions to the **Instances** screen. Editing re-verifies the API key the same way adding one does; deleting only removes the instance from Raycast and doesn't revoke the key or change anything on the Dokploy server.
 - Editing or deleting the currently active instance keeps the extension's cached connection in sync automatically.
+- Fix **Services** failing to load for any project managed with Dokploy's environments feature - entering it from **Projects** or **Environments** errored instead of showing the service list.
 
 ## [Fix Services list not refreshing after Create/Delete] - 2026-09-24
 
