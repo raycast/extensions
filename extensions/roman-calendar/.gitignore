@@ -2,3 +2,4 @@ node_modules/
 dist/
 .pnpm-store/
 .DS_Store
+.test-build/

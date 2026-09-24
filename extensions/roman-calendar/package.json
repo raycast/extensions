@@ -23,7 +23,8 @@
     "dev": "ray develop",
     "build": "ray build",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "tsc src/calendar.ts --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build && node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@raycast/api": "^1.102.0",

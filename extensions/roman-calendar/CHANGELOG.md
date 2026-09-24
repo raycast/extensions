@@ -1,5 +1,9 @@
 # Roman Calendar Changelog
 
+## [Add Calendar Regression Tests] - {PR_MERGE_DATE}
+
+- Add repeatable tests for leap February, the BCE/CE boundary, December 9999, and Roman date parser round trips.
+
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - Convert Gregorian dates to full and abbreviated Latin Roman dates.
