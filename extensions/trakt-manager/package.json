@@ -161,6 +161,36 @@
       "name": "get-user-stats",
       "title": "Get User Stats",
       "description": "Get your lifetime Trakt viewing statistics including watch times, movies, shows, and ratings counts"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Personal Lists",
+      "description": "Get your Trakt personal lists, read a list's items, or check whether a title is on a list"
+    },
+    {
+      "name": "create-list",
+      "title": "Create Personal List",
+      "description": "Create a new personal list on your Trakt account, with optional privacy, numbering and sorting"
+    },
+    {
+      "name": "update-list",
+      "title": "Update Personal List",
+      "description": "Rename a Trakt personal list or change its description, privacy, numbering or sorting"
+    },
+    {
+      "name": "delete-list",
+      "title": "Delete Personal List",
+      "description": "Permanently delete a Trakt personal list and every item on it"
+    },
+    {
+      "name": "add-to-list",
+      "title": "Add to Personal List",
+      "description": "Add movies, TV shows, seasons and episodes to a Trakt personal list in a single batch"
+    },
+    {
+      "name": "remove-from-list",
+      "title": "Remove from Personal List",
+      "description": "Remove movies, TV shows, seasons and episodes from a Trakt personal list"
     }
   ],
   "contributors": [
@@ -198,7 +228,8 @@
     "fmt": "prettier '**/*' -wu && syncpack-format",
     "lint": "ray lint",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "npx --yes tsx --test src/tools/*.test.ts"
   },
   "title": "Trakt Manager"
 }

@@ -19,7 +19,7 @@ import {
   FEED_URL,
   fetchExtensionPackageInfo,
   fetchMergedPRs,
-  getInstalledExtensionSlugs,
+  fetchInstalledExtensionSlugs,
   GITHUB_PRS_URL,
   mapWithConcurrency,
   parseExtensionUrl,
@@ -102,6 +102,12 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
   }, [changelogSlug, changelogTitle, push]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // Bumped by Refresh so the installed-extension lookup below re-runs with it.
+  // Without this, installing or removing an extension while the view stays mounted
+  // leaves the old Set in place: the new extension's updates stay hidden and the
+  // removed one's keep showing, and Refresh — the one affordance that looks like it
+  // should fix that — only revalidates the feed and the PRs.
+  const [installedNonce, setInstalledNonce] = useState(0);
   const [isProcessingNew, setIsProcessingNew] = useState(false);
   const [isProcessingPRs, setIsProcessingPRs] = useState(false);
 
@@ -122,6 +128,7 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
 
     setIsRefreshing(true);
     try {
+      setInstalledNonce((n) => n + 1);
       await Promise.all([revalidateFeed(), revalidatePRs()]);
       await showToast({
         style: Toast.Style.Success,
@@ -132,6 +139,30 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
     }
   };
 
+  // Get installed extensions if filter is enabled. The lookup reads every installed
+  // extension's package.json from disk, so it is async and gets its own loading state.
+  //
+  // Three states, and the difference between the last two is the whole point:
+  //   undefined -> still resolving. Show a spinner, not an empty list.
+  //   null      -> could not be determined. Do NOT filter; showing every update
+  //                is honest, showing none would claim you have no updates.
+  //   Set       -> resolved. An empty Set now genuinely means "nothing installed".
+  const [installedSlugs, setInstalledSlugs] = useState<Set<string> | null | undefined>(undefined);
+  useEffect(() => {
+    if (filter !== "my-updates") {
+      setInstalledSlugs(undefined);
+      return;
+    }
+    let cancelled = false;
+    setInstalledSlugs(undefined);
+    fetchInstalledExtensionSlugs().then((slugs) => {
+      if (!cancelled) setInstalledSlugs(slugs);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [filter, installedNonce]);
+
   // Reflect the async post-processing (and the LocalStorage-backed hooks) in the
   // loading state so the list doesn't flash "No Extensions Found" prematurely.
   const isLoading =
@@ -140,13 +171,11 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
     isProcessingNew ||
     isProcessingPRs ||
     !togglesLoaded ||
-    (trackReadStatus && !readLoaded);
-
-  // Get installed extensions if filter is enabled
-  const installedSlugs = useMemo(() => {
-    if (filter !== "my-updates") return null;
-    return getInstalledExtensionSlugs();
-  }, [filter]);
+    (trackReadStatus && !readLoaded) ||
+    // The installed-slug lookup gates the My Updates list, so a spinner has to
+    // cover it too — otherwise selecting the filter shows "No Extensions Found"
+    // for as long as the Store request takes.
+    (filter === "my-updates" && installedSlugs === undefined);
 
   const [updatedItems, setUpdatedItems] = useState<StoreItem[]>([]);
   const [removedItems, setRemovedItems] = useState<StoreItem[]>([]);
@@ -266,7 +295,12 @@ export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUp
       case "my-updates":
         items = installedSlugs
           ? updatedItems.filter((item) => (item.extensionSlug ? installedSlugs.has(item.extensionSlug) : false))
-          : [];
+          : // undefined -> the lookup is in flight and isLoading is showing a
+            // spinner; null -> it failed, so fall through unfiltered rather than
+            // asserting you have no updates.
+            installedSlugs === null
+            ? updatedItems
+            : [];
         break;
       case "removed":
         items = removedItems;

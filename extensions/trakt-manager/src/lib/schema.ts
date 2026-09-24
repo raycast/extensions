@@ -402,6 +402,132 @@ export const TraktUserStatsSchema = z.object({
 
 export type TraktUserStats = z.infer<typeof TraktUserStatsSchema>;
 
+export const TraktListPrivacySchema = z.enum(["private", "link", "friends", "public"]);
+
+export const TraktListSortBySchema = z.enum([
+  "rank",
+  "added",
+  "title",
+  "released",
+  "runtime",
+  "popularity",
+  "random",
+  "percentage",
+  "imdb_rating",
+  "tmdb_rating",
+  "rt_tomatometer",
+  "rt_audience",
+  "metascore",
+  "votes",
+  "imdb_votes",
+  "tmdb_votes",
+  "my_rating",
+  "watched",
+  "collected",
+]);
+
+export const TraktListSortHowSchema = z.enum(["asc", "desc"]);
+
+export const TraktListSchema = z.object({
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  privacy: z.string().optional(),
+  share_link: z.string().optional().nullable(),
+  type: z.string().optional(),
+  display_numbers: z.boolean().optional(),
+  allow_comments: z.boolean().optional(),
+  sort_by: z.string().optional(),
+  sort_how: z.string().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  item_count: z.number().optional(),
+  comment_count: z.number().optional(),
+  likes: z.number().optional(),
+  ids: z.object({
+    trakt: z.number(),
+    slug: z.string().optional().nullable(),
+  }),
+});
+
+export const TraktListsSchema = z.array(TraktListSchema);
+
+export const TraktListWriteBodySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  privacy: TraktListPrivacySchema.optional(),
+  display_numbers: z.boolean().optional(),
+  allow_comments: z.boolean().optional(),
+  sort_by: TraktListSortBySchema.optional(),
+  sort_how: TraktListSortHowSchema.optional(),
+});
+
+/**
+ * List entries return lightweight media objects, so external ids may be missing or null.
+ */
+const TraktListMediaIdsSchema = z.object({
+  trakt: z.number(),
+  slug: z.string().optional().nullable(),
+  tvdb: z.number().optional().nullable(),
+  imdb: z.string().optional().nullable(),
+  tmdb: z.number().optional().nullable(),
+});
+
+export const TraktListEntrySchema = z.object({
+  id: z.number(),
+  rank: z.number().optional().nullable(),
+  listed_at: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  type: z.string(),
+  movie: z
+    .object({
+      title: z.string(),
+      year: z.number().optional().nullable(),
+      ids: TraktListMediaIdsSchema,
+    })
+    .optional(),
+  show: z
+    .object({
+      title: z.string(),
+      year: z.number().optional().nullable(),
+      ids: TraktListMediaIdsSchema,
+    })
+    .optional(),
+  season: z
+    .object({
+      number: z.number(),
+      ids: TraktListMediaIdsSchema.partial().optional(),
+    })
+    .optional(),
+  episode: z
+    .object({
+      season: z.number(),
+      number: z.number(),
+      title: z.string().optional().nullable(),
+      ids: TraktListMediaIdsSchema,
+    })
+    .optional(),
+});
+
+export const TraktListEntriesSchema = z.array(TraktListEntrySchema);
+
+export const TraktListItemIdSchema = z.object({
+  ids: z.object({
+    trakt: z.number(),
+  }),
+});
+
+export const TraktListItemsBodySchema = z.object({
+  movies: z.array(TraktListItemIdSchema).optional(),
+  shows: z.array(TraktListItemIdSchema).optional(),
+  seasons: z.array(TraktListItemIdSchema).optional(),
+  episodes: z.array(TraktListItemIdSchema).optional(),
+});
+
+export type TraktList = z.infer<typeof TraktListSchema>;
+export type TraktListEntry = z.infer<typeof TraktListEntrySchema>;
+export type TraktListItemsBody = z.infer<typeof TraktListItemsBodySchema>;
+export type TraktListWriteBody = z.infer<typeof TraktListWriteBodySchema>;
+
 export const TraktPaginationHeaderSchema = z.object({
   "x-pagination-page": z.coerce.number().default(0),
   "x-pagination-limit": z.coerce.number().default(0),

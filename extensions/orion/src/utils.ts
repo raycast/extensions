@@ -248,8 +248,13 @@ export function isWebAddress(value: string): boolean {
   // as `index.html`, `main.js`, or `file.txt`, which are not web addresses.
   // Single-label hosts stay searches unless the user deliberately included an
   // http(s) scheme.
-  const { isIcann, isPrivate } = parseTld(host, { allowPrivateDomains: true });
-  return isIcann === true || isPrivate === true;
+  //
+  // A bare public suffix (`domain` null) is not a website: some brand-owned
+  // gTLDs are themselves ordinary words (`goog`, `abc`, `app`, `dev`), so a
+  // one-word search query can otherwise land exactly on a real ICANN suffix
+  // with no domain label in front of it.
+  const { isIcann, isPrivate, domain } = parseTld(host, { allowPrivateDomains: true });
+  return domain !== null && (isIcann === true || isPrivate === true);
 }
 
 export function normalizeWebAddress(value: string): string {

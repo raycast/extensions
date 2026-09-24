@@ -1,5 +1,6 @@
 import { withXAuth } from "./v2/lib/with_x_auth";
 import { ReactElement } from "react";
+import "./v2/components/register-post-views";
 import { SearchUserListV2 } from "./v2/components/user_search";
 
 function UserSearchRoot(): ReactElement {

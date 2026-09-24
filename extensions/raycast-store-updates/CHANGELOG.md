@@ -1,5 +1,18 @@
 # Raycast Store Updates Changelog
 
+## [Version History, Working My Updates, and Update Checks] - 2026-09-23
+
+- New extension icon
+- The changelog view is now a Version History: one row per version, dated where the changelog gives a date, with the full notes in a side pane
+- Copy the version you are looking at with "Copy Changes" (⌘⇧C), the newest one with "Copy Latest Changes", or the entire file with "Copy Changelog"
+- Fix "My Updates" and the menu bar's "My Updates" scope showing nothing: installed extensions are now identified correctly, including ones installed from the Store and ones you have never opened
+- If installed extensions cannot be determined, "My Updates" now shows all updates instead of wrongly claiming you have none
+- Refresh now re-checks which extensions you have installed, so a newly installed extension's updates appear without reopening the command
+- Fix an extension's newest update sometimes being hidden behind an older one, when the older pull request had seen more recent activity
+- Fix removed extensions sometimes not being reported when used without a GitHub token
+- Add a "Check for Extension Updates" action to the list (⌘⇧U) and the menu bar
+- "Open in Raycast Store" is now ⌥⇧⌘O, matching the Store's own shortcut
+
 ## [Raycast 2 Compatibility] - 2026-08-27
 
 - Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x

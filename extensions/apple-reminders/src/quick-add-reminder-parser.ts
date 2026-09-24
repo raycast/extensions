@@ -26,6 +26,12 @@ export type QuickAddList = {
   isDefault?: boolean;
 };
 
+export const VALID_FREQUENCIES: readonly Frequency[] = ["daily", "weekdays", "weekends", "weekly", "monthly", "yearly"];
+
+export function isValidFrequency(value: unknown): value is Frequency {
+  return typeof value === "string" && (VALID_FREQUENCIES as readonly string[]).includes(value);
+}
+
 export function parseAIResponse(response: string): ParsedQuickAddReminder {
   const json = extractFirstJSONObject(response);
   if (!json) {
@@ -37,8 +43,15 @@ export function parseAIResponse(response: string): ParsedQuickAddReminder {
     throw new Error("Invalid result returned from AI");
   }
 
-  if (parsed.recurrence && !parsed.dueDate) {
-    throw new Error("Recurrence without dueDate");
+  const isValidRecurrence =
+    parsed.recurrence && typeof parsed.recurrence === "object" && isValidFrequency(parsed.recurrence.frequency);
+
+  if (isValidRecurrence) {
+    if (!parsed.dueDate) {
+      throw new Error("Recurrence without dueDate");
+    }
+  } else {
+    parsed.recurrence = undefined;
   }
 
   return parsed;
@@ -49,6 +62,7 @@ export function resolveQuickAddReminder(
   inputText: string,
   lists: QuickAddList[],
   now: Date = new Date(),
+  defaultListName?: string,
 ): ParsedQuickAddReminder {
   const mentionedList = findListInText(inputText, lists) ?? findListInText(reminder.title, lists);
   let { title } = reminder;
@@ -67,6 +81,14 @@ export function resolveQuickAddReminder(
 
   if (listId && !lists.some((list) => list.id === listId)) {
     listId = undefined;
+  }
+
+  if (!listId && defaultListName?.trim()) {
+    const trimmedDefault = defaultListName.trim().toLowerCase();
+    const matchedList = lists.find((list) => list.title.trim().toLowerCase() === trimmedDefault);
+    if (matchedList) {
+      listId = matchedList.id;
+    }
   }
 
   if (!dueDate) {
@@ -150,7 +172,7 @@ function findListInText(text: string, lists: QuickAddList[]): QuickAddList | und
   for (const list of sortedLists) {
     const escapedTitle = escapeRegExp(list.title);
     const patterns = [
-      new RegExp(`(?:^|\\s)[#@]${escapedTitle}\\b`, "i"),
+      new RegExp(`(?:^|\\s)[#@]${escapedTitle}(?=$|[\\s\\p{P}])`, "iu"),
       new RegExp(`\\bin the ${escapedTitle} list\\b`, "i"),
       new RegExp(`\\bin ${escapedTitle} list\\b`, "i"),
     ];
@@ -170,9 +192,10 @@ function stripListMentions(text: string, list?: QuickAddList): string {
 
   const escapedTitle = escapeRegExp(list.title);
   return text
-    .replace(new RegExp(`(?:^|\\s)[#@]${escapedTitle}\\b`, "ig"), " ")
+    .replace(new RegExp(`(?:^|\\s)[#@]${escapedTitle}(?=$|[\\s\\p{P}])`, "igu"), " ")
     .replace(new RegExp(`\\bin the ${escapedTitle} list\\b`, "ig"), " ")
     .replace(new RegExp(`\\bin ${escapedTitle} list\\b`, "ig"), " ")
+    .replace(/\s+([,;.!?:])/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
 }

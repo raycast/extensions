@@ -22,7 +22,8 @@ export async function createReminder(payload) {
   const reminder = {
     id: `reminder-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     openUrl: "x-apple-reminderkit://REMCDReminder/123",
-    attachedUrls: [],
+    attachedUrls: payload.url ? [payload.url] : [],
+    url: payload.url,
     title: payload.title,
     notes: notes ?? "",
     dueDate: payload.dueDate ?? "",
@@ -52,7 +53,8 @@ export async function updateReminder(payload) {
   const reminder = {
     id: payload.reminderId,
     openUrl: `x-apple-reminderkit://REMCDReminder/${payload.reminderId}`,
-    attachedUrls: [],
+    attachedUrls: payload.url ? [payload.url] : [],
+    url: payload.url,
     title: payload.title ?? "Updated Reminder",
     notes: notes ?? "",
     dueDate: payload.dueDate ?? "",
