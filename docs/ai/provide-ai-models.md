@@ -62,24 +62,39 @@ Each model is an [`AI.RegisteredModel`](#ai.registeredmodel). The `id` only need
 
 Raycast calls `streamCompletion` whenever a user sends a request to one of your models. It receives the model and the request, and returns a stream of the response.
 
-The request messages follow the [Vercel AI SDK](https://sdk.vercel.ai) `ModelMessage` shape, so the simplest implementation forwards them to an AI SDK provider and returns the result directly:
+The request messages follow the [Vercel AI SDK](https://sdk.vercel.ai) `ModelMessage` shape. Tool input schemas arrive as plain JSON Schema objects, so wrap them with the AI SDK's `jsonSchema()` helper before passing them to `streamText`:
 
 {% tabs %} {% tab title="AI SDK" %}
 
 ```typescript
 import { AI } from "@raycast/api";
-import { streamText } from "ai";
+import { jsonSchema, streamText } from "ai";
 import { createOllama } from "ollama-ai-provider";
 
 const ollama = createOllama();
 
 export const streamCompletion: AI.StreamCompletion = (model, request) => {
+  const tools = request.tools
+    ? Object.fromEntries(
+        Object.entries(request.tools).map(([name, tool]) => [
+          name,
+          {
+            ...tool,
+            inputSchema: jsonSchema(
+              (tool.inputSchema ?? { type: "object", properties: {} }) as Parameters<typeof jsonSchema>[0],
+            ),
+          },
+        ]),
+      )
+    : undefined;
+
   return streamText({
     model: ollama(model.id),
     system: request.system,
-    messages: request.messages,
+    messages: request.messages ?? [],
     temperature: request.temperature,
-    tools: request.tools,
+    tools,
+    toolChoice: request.toolChoice,
   });
 };
 ```
@@ -125,6 +140,25 @@ Attachments in formats you don't declare are dropped, and models without the `vi
 ### Tools
 
 Declare the `tools` capability to receive tool definitions on the request when users bring AI Extensions into the conversation. Emit standard AI SDK tool-call parts in your stream; Raycast executes the tools and continues the conversation.
+
+### Provider options
+
+Raycast passes request context in `request.providerOptions.raycast`. The options and their individual fields are optional:
+
+| Property | Description | Type |
+| :-- | :-- | :-- |
+| `locale` | The locale supplied with the request. | `string` |
+| `currentDate` | The current date supplied with the request. | `string` |
+| `reasoningEffort` | The reasoning effort requested for the model. Declare the supported levels with `capabilities.reasoningEffort`. | `string` |
+
+The `raycast` namespace carries Raycast context; AI SDK providers do not automatically translate it into their own options. Read the values you support and map them to your provider's namespace and accepted values. For example, when using the [AI SDK OpenAI provider](https://ai-sdk.dev/providers/ai-sdk-providers/openai) with a model that accepts the same reasoning effort values:
+
+```typescript
+const reasoningEffort = request.providerOptions?.raycast.reasoningEffort;
+const providerOptions = reasoningEffort === undefined ? undefined : { openai: { reasoningEffort } };
+```
+
+Pass the resulting `providerOptions` to `streamText`. Other providers may use a different namespace, option name, or value format. Forwarding `request.providerOptions` unchanged will not apply Raycast's reasoning effort setting to those providers.
 
 ## Refreshing models
 
