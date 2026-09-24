@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add RemoveDuplicates.org MCP Server] - 2026-09-24
+
+- Add RemoveDuplicates.org to the official registry: remove duplicate lines or CSV/TSV rows and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in, no API key.
+
 ## [Add Codex Reset MCP Server] - 2026-09-24
 
 - Add Codex Reset to the official registry: OpenAI Codex usage-limit reset forecast for the next 24 and 48 hours, the verified reset record with source links, and Codex service status. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.
