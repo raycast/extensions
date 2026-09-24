@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Form, Icon, Keyboard, List, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  popToRoot,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
 import Projects from "./projects";
 import Docker from "./docker";
@@ -6,6 +19,8 @@ import Users from "./users";
 import Destinations from "./destinations";
 
 export interface Instance {
+  /** Absent on instances stored before Edit/Delete existed - never backfilled in bulk, see `instanceId`. */
+  id?: string;
   key: string;
   url: string;
   name: string;
@@ -28,16 +43,45 @@ export function tokenForInstance(instance: Instance): CachedToken {
     },
   };
 }
+/** `key` (the API secret) is the only identifier instances stored before this had - fall back to it. */
+function instanceId(instance: Instance): string {
+  return instance.id ?? instance.key;
+}
+/** Whether `token` (the cached active connection) is currently pointed at `instance`. */
+function isActiveInstance(instance: Instance, token: CachedToken): boolean {
+  return (
+    !!token.headers["x-api-key"] &&
+    token.headers["x-api-key"] === instance.key &&
+    token.url === tokenForInstance(instance).url
+  );
+}
 export default function Instances() {
-  const [, setToken] = useCachedState<CachedToken>("token");
+  const [token, setToken] = useCachedState<CachedToken>("token", { url: "", headers: {} });
 
-  const { isLoading, value: instances = [] } = useLocalStorage<Instance[]>("instances");
+  const { isLoading, value: instances = [], setValue } = useLocalStorage<Instance[]>("instances");
 
   function onSelectionChange(key: string | null) {
     if (!key) return;
-    const instance = instances.find((i) => i.key === key);
+    const instance = instances.find((i) => instanceId(i) === key);
     if (!instance) return;
     setToken(tokenForInstance(instance));
+  }
+
+  async function deleteInstance(instance: Instance) {
+    const wasActive = isActiveInstance(instance, token);
+    const options: Alert.Options = {
+      title: "Delete Instance",
+      message: `This removes "${instance.name}" from Raycast only - it doesn't revoke the API key or change anything on the Dokploy server. You'll need to re-enter the URL and API key to reconnect.`,
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Delete",
+      },
+    };
+    if (await confirmAlert(options)) {
+      await setValue(instances.filter((i) => instanceId(i) !== instanceId(instance)));
+      if (wasActive) setToken({ url: "", headers: {} });
+      await showToast(Toast.Style.Success, "Deleted", instance.name);
+    }
   }
 
   return (
@@ -55,8 +99,8 @@ export default function Instances() {
       ) : (
         instances.map((instance) => (
           <List.Item
-            key={instance.key}
-            id={instance.key}
+            key={instanceId(instance)}
+            id={instanceId(instance)}
             icon={Icon.Key}
             title={instance.name}
             subtitle={instance.url}
@@ -72,8 +116,22 @@ export default function Instances() {
                   <Action.Push
                     icon={Icon.Plus}
                     title="Add Instance"
-                    target={<AddInstance />}
+                    target={<InstanceForm />}
                     shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Edit Instance"
+                    target={<InstanceForm initial={instance} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete Instance"
+                    style={Action.Style.Destructive}
+                    onAction={() => deleteInstance(instance)}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -85,11 +143,14 @@ export default function Instances() {
   );
 }
 
-export function AddInstance() {
+function InstanceForm({ initial }: { initial?: Instance }) {
   const { value = [], setValue } = useLocalStorage<Instance[]>("instances");
-  const { handleSubmit, itemProps } = useForm<Instance>({
+  const [token, setToken] = useCachedState<CachedToken>("token", { url: "", headers: {} });
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<Pick<Instance, "name" | "url" | "key">>({
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Adding", values.name);
+      const toast = await showToast(Toast.Style.Animated, initial ? "Saving" : "Adding", values.name);
       try {
         const res = await fetch(new URL("api/user.all", values.url).toString(), {
           headers: {
@@ -98,15 +159,29 @@ export function AddInstance() {
           },
         });
         if (!res.ok) throw new Error(res.statusText);
-        await setValue([...value, values]);
+
+        const record: Instance = { ...values, id: initial?.id ?? crypto.randomUUID() };
+        const wasActive = !!initial && isActiveInstance(initial, token);
+        const next = initial
+          ? value.map((i) => (instanceId(i) === instanceId(initial) ? record : i))
+          : [...value, record];
+        await setValue(next);
+        if (wasActive) setToken(tokenForInstance(record));
+
         toast.style = Toast.Style.Success;
-        toast.title = "Added";
-        await popToRoot();
+        toast.title = initial ? "Saved" : "Added";
+        if (initial) pop();
+        else await popToRoot();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Could not add";
+        toast.title = initial ? "Could not save" : "Could not add";
         toast.message = `${error}`;
       }
+    },
+    initialValues: {
+      name: initial?.name ?? "",
+      url: initial?.url ?? "",
+      key: initial?.key ?? "",
     },
     validation: {
       key: FormValidation.Required,
@@ -123,9 +198,14 @@ export function AddInstance() {
   });
   return (
     <Form
+      navigationTitle={initial ? "Edit Instance" : "Add Instance"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Plus} title="Verify & Add" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={initial ? Icon.Check : Icon.Plus}
+            title={initial ? "Save Instance" : "Verify & Add"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
@@ -144,4 +224,8 @@ export function AddInstance() {
       <Form.PasswordField title="API Key" placeholder="Xx...XXX" {...itemProps.key} />
     </Form>
   );
+}
+
+export function AddInstance() {
+  return <InstanceForm />;
 }

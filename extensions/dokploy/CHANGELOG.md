@@ -1,5 +1,10 @@
 # Dokploy Changelog
 
+## [Edit and Delete Instances] - {PR_MERGE_DATE}
+
+- Add `Edit Instance` and `Delete Instance` actions to the **Instances** screen. Editing re-verifies the API key the same way adding one does; deleting only removes the instance from Raycast and doesn't revoke the key or change anything on the Dokploy server.
+- Editing or deleting the currently active instance keeps the extension's cached connection in sync automatically.
+
 ## [Fix Services list not refreshing after Create/Delete] - 2026-09-24
 
 - `Create Application`, `Create Database` and `Delete` popped back to Raycast's root (or, for Delete, stopped there without navigating at all) before the refreshed list actually loaded, so the change only showed up after fully restarting Raycast. Fixed so the **Services** list updates immediately.
