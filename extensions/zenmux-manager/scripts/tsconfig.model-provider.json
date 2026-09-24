@@ -4,7 +4,7 @@
     "moduleResolution": "node",
     "target": "ES2023",
     "strict": true,
-    "outDir": "/tmp/zenmux-model-provider-test",
+    "noEmitOnError": true,
     "rootDir": "..",
     "skipLibCheck": true,
     "esModuleInterop": true,

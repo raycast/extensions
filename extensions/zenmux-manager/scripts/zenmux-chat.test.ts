@@ -9,6 +9,7 @@ import {
   parseModelCatalog,
   partsFromCompletion,
   readApiErrorMessage,
+  readSseData,
   requireModelApiKey,
   takeSseData,
   toRegisteredModels,
@@ -25,7 +26,7 @@ describe("ZenMux model catalog", () => {
             owned_by: "openai",
             input_modalities: ["text", "image"],
             output_modalities: ["text"],
-            capabilities: { reasoning: true },
+            capabilities: { reasoning: true, tools: true },
             context_length: 400000,
           },
           {
@@ -115,7 +116,12 @@ describe("ZenMux chat request", () => {
           {
             role: "tool",
             content: [
-              { type: "tool-result", toolCallId: "call_1", toolName: "lookup", output: { type: "json", value: { ok: true } } },
+              {
+                type: "tool-result",
+                toolCallId: "call_1",
+                toolName: "lookup",
+                output: { type: "json", value: { ok: true } },
+              },
             ],
           },
         ],
@@ -201,7 +207,7 @@ describe("ZenMux chat stream", () => {
   it("reassembles split server-sent events", () => {
     const first = takeSseData('data: {"choices":[{"delta":{"content":"Hel');
     assert.deepEqual(first.data, []);
-    const second = takeSseData(`${first.rest}lo"}}]}\n\ndata: [DONE]\n`);
+    const second = takeSseData(`${first.rest}lo"}}]}\n\ndata: [DONE]\n\n`);
     assert.deepEqual(second.data, ['{"choices":[{"delta":{"content":"Hello"}}]}', "[DONE]"]);
   });
 
@@ -221,7 +227,9 @@ describe("ZenMux chat stream", () => {
       ],
     });
     parser.push({
-      choices: [{ delta: { tool_calls: [{ index: 0, function: { arguments: '"x"}' } }] }, finish_reason: "tool_calls" }],
+      choices: [
+        { delta: { tool_calls: [{ index: 0, function: { arguments: '"x"}' } }] }, finish_reason: "tool_calls" },
+      ],
       usage: { prompt_tokens: 3, completion_tokens: 4, total_tokens: 7 },
     });
     const finished = parser.finish();
@@ -267,5 +275,166 @@ describe("ZenMux model key", () => {
     assert.equal(error instanceof ZenMuxModelConfigError, true);
     assert.equal(error.message.includes("sk-secret"), false);
     assert.match(error.message, /Platform API key/);
+  });
+});
+
+describe("ZenMux stream regressions", () => {
+  it("rejects EOF before a terminal finish reason", () => {
+    const parser = createChatStreamParser();
+    parser.push({ choices: [{ delta: { content: "Partial answer" } }] });
+    assert.throws(() => parser.finish(), /before completion/);
+  });
+
+  it("does not execute tool calls cut short by a token limit or filter", () => {
+    for (const reason of ["length", "content_filter", "error"]) {
+      const parser = createChatStreamParser();
+      parser.push({
+        choices: [
+          {
+            delta: { tool_calls: [{ index: 0, id: "call_1", function: { name: "lookup", arguments: '{"q":' } }] },
+            finish_reason: reason,
+          },
+        ],
+      });
+      assert.deepEqual(parser.finish(), [
+        { type: "finish", finishReason: reason === "content_filter" ? "content-filter" : reason },
+      ]);
+    }
+  });
+
+  it("rejects malformed or missing tool arguments and identities", () => {
+    for (const call of [
+      { id: "call_1", function: { name: "lookup", arguments: '{"q":' } },
+      { id: "call_1", function: { name: "lookup" } },
+      { function: { name: "lookup", arguments: "{}" } },
+      { id: "call_1", function: { arguments: "{}" } },
+    ]) {
+      const parser = createChatStreamParser();
+      parser.push({ choices: [{ delta: { tool_calls: [{ index: 0, ...call }] }, finish_reason: "tool_calls" }] });
+      assert.throws(() => parser.finish(), /tool call/);
+    }
+  });
+
+  it("preserves non-streaming refusals", () => {
+    assert.deepEqual(
+      partsFromCompletion({ choices: [{ message: { refusal: "Cannot comply" }, finish_reason: "stop" }] }),
+      [
+        { type: "text-delta", id: "text", text: "Cannot comply" },
+        { type: "finish", finishReason: "stop" },
+      ],
+    );
+  });
+
+  it("joins multiline SSE data at the event boundary", () => {
+    const first = takeSseData('data: {"choices":\ndata: []}\n');
+    assert.deepEqual(first.data, []);
+    assert.deepEqual(takeSseData(`${first.rest}\n`).data, ['{"choices":\n[]}']);
+  });
+
+  it("reads UTF-8, CRLF boundaries and comments one byte at a time", async () => {
+    const wire = ': keepalive\r\ndata: {"text":"你好"}\r\ndata: second line\r\n\r\ndata: [DONE]\r\n\r\n';
+    const bytes = new TextEncoder().encode(wire);
+    let offset = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (offset === bytes.length) controller.close();
+        else controller.enqueue(bytes.slice(offset, ++offset));
+      },
+    });
+    const events: string[] = [];
+    for await (const data of readSseData(body)) events.push(data);
+    assert.deepEqual(events, ['{"text":"你好"}\nsecond line', "[DONE]"]);
+  });
+
+  it("cancels the response body when the consumer stops", async () => {
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("data: [DONE]\n\n"));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    for await (const data of readSseData(body)) {
+      assert.equal(data, "[DONE]");
+      break;
+    }
+    assert.equal(cancelled, true);
+    assert.equal(body.locked, false);
+  });
+});
+
+describe("ZenMux tool capability", () => {
+  it("requires explicit catalog support for tools", () => {
+    const models = toRegisteredModels([
+      { id: "missing" },
+      { id: "reasoning", capabilities: { reasoning: true } },
+      { id: "supported", capabilities: { tools: true } },
+      { id: "legacy", capabilities: { function_calling: true } },
+      { id: "disabled", capabilities: { tools: false, function_calling: true } },
+    ]);
+    const support = Object.fromEntries(models.map((model) => [model.id, model.capabilities.tools.supported]));
+    assert.deepEqual(support, { disabled: false, legacy: true, missing: false, reasoning: false, supported: true });
+    const body = buildChatCompletionRequest(models.find((model) => model.id === "missing")!, {
+      messages: [{ role: "user", content: [{ type: "text", text: "Hi" }] }],
+      tools: { lookup: { inputSchema: { type: "object" } } },
+      toolChoice: "required",
+    });
+    assert.equal(body.tools, undefined);
+    assert.equal(body.tool_choice, undefined);
+  });
+});
+
+describe("ZenMux completion markers", () => {
+  it("accepts DONE after text without a finish chunk", () => {
+    const parser = createChatStreamParser();
+    parser.push({ choices: [{ delta: { content: "Done" } }] });
+    assert.deepEqual(parser.finish(true), [{ type: "finish", finishReason: "stop" }]);
+  });
+
+  it("keeps tool calls separate when their argument deltas interleave", () => {
+    const parser = createChatStreamParser();
+    parser.push({
+      choices: [
+        {
+          delta: {
+            tool_calls: [
+              { index: 1, id: "second", function: { name: "lookup", arguments: '{"q":' } },
+              { index: 0, id: "first", function: { name: "lookup", arguments: '{"q":' } },
+            ],
+          },
+        },
+      ],
+    });
+    parser.push({
+      choices: [
+        {
+          delta: {
+            tool_calls: [
+              { index: 0, function: { arguments: '"one"}' } },
+              { index: 1, function: { arguments: '"two"}' } },
+            ],
+          },
+          finish_reason: "tool_calls",
+        },
+      ],
+    });
+    assert.deepEqual(parser.finish(), [
+      { type: "tool-call", toolCallId: "first", toolName: "lookup", input: { q: "one" } },
+      { type: "tool-call", toolCallId: "second", toolName: "lookup", input: { q: "two" } },
+      { type: "finish", finishReason: "tool-calls" },
+    ]);
+  });
+
+  it("preserves a body read failure and releases its reader", async () => {
+    const failure = new Error("connection lost");
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.error(failure);
+      },
+    });
+    await assert.rejects(readSseData(body).next(), (error) => error === failure);
+    assert.equal(body.locked, false);
   });
 });

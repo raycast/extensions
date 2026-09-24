@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",
-    "test": "node scripts/verify-llm-knowledge.mjs && tsc -p scripts/tsconfig.model-provider.json && node --test /tmp/zenmux-model-provider-test/scripts/zenmux-chat.test.js",
+    "test": "node scripts/verify-llm-knowledge.mjs && node scripts/test-model-provider.mjs",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "build": "ray build",
@@ -13,7 +13,7 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "dependencies": {
-    "@raycast/api": "^2.5.1",
+    "@raycast/api": "2.5.0",
     "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {

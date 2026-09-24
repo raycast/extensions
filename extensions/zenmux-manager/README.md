@@ -48,7 +48,7 @@ This extension includes AI tools that let Raycast AI answer questions about your
 
 Raycast AI features may require Raycast Pro access and are currently unavailable on Raycast for Windows. On Windows, use the account commands and links; AI chat tools and extension-provided models are available on macOS only.
 
-ZenMux models stream text, reasoning, images, and tool calls when the selected model supports them. Models with reasoning enabled in the ZenMux catalog offer Minimal, Low, Medium, and High effort in Raycast. Medium is the default. Raycast does not pass a provider's reasoning signature back to the extension, so a later tool-calling turn can fail on a model that requires that signature.
+ZenMux models stream text and reasoning, and accept image attachments when the catalog declares image input. Image generation is not supported. Tool calling is enabled only when the catalog explicitly reports tool support; the current catalog does not report this, so extension-provided models do not offer tools. Models with reasoning enabled in the ZenMux catalog offer Minimal, Low, Medium, and High effort in Raycast. Medium is the default. Accepted effort levels vary by model and are not listed in the catalog; a model may reject a selected level. Raycast does not pass a provider's reasoning signature back to the extension, so a later tool-calling turn can fail on a model that requires that signature.
 
 ## Links
 

@@ -200,7 +200,10 @@ export function toRegisteredModels(models: ZenMuxCatalogModel[]): ProvidedModel[
     }
 
     const reasoning = model.capabilities?.reasoning === true;
-    const toolsSupported = model.capabilities?.tools !== false && model.capabilities?.function_calling !== false;
+    const toolsSupported =
+      (model.capabilities?.tools === true || model.capabilities?.function_calling === true) &&
+      model.capabilities?.tools !== false &&
+      model.capabilities?.function_calling !== false;
     const contextWindow =
       typeof model.context_length === "number" && Number.isFinite(model.context_length) && model.context_length > 0
         ? model.context_length
@@ -266,23 +269,25 @@ export function buildChatCompletionRequest(model: ProviderModelRef, request: Pro
 }
 
 export function takeSseData(buffer: string): { data: string[]; rest: string } {
-  const lines = buffer.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-  const rest = lines.pop() ?? "";
   const data: string[] = [];
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith("data:")) {
-      continue;
-    }
-
-    const payload = trimmed.slice(5).trim();
-    if (payload) {
-      data.push(payload);
+  let eventStart = 0;
+  let lineStart = 0;
+  let fields: string[] = [];
+  // Keep a trailing CR until the next chunk so a split CRLF stays one delimiter.
+  const lineEndings = /\r\n|\r(?!$)|\n/g;
+  for (const match of buffer.matchAll(lineEndings)) {
+    const line = buffer.slice(lineStart, match.index);
+    lineStart = match.index + match[0].length;
+    if (line === "") {
+      if (fields.length > 0) data.push(fields.join("\n"));
+      fields = [];
+      eventStart = lineStart;
+    } else if (line === "data" || line.startsWith("data:")) {
+      fields.push(line.slice(5).replace(/^ /, ""));
     }
   }
 
-  return { data, rest };
+  return { data, rest: buffer.slice(eventStart) };
 }
 
 export async function* readSseData(body: ReadableStream<Uint8Array>): AsyncGenerator<string> {
@@ -295,7 +300,7 @@ export async function* readSseData(body: ReadableStream<Uint8Array>): AsyncGener
       const { done, value } = await reader.read();
       if (done) {
         buffer += decoder.decode();
-        yield* takeSseData(`${buffer}\n`).data;
+        yield* takeSseData(`${buffer}\n\n`).data;
         return;
       }
 
@@ -305,7 +310,13 @@ export async function* readSseData(body: ReadableStream<Uint8Array>): AsyncGener
       yield* consumed.data;
     }
   } finally {
-    reader.releaseLock();
+    try {
+      await reader.cancel();
+    } catch {
+      // Preserve the original read/parse error if the stream has already failed.
+    } finally {
+      reader.releaseLock();
+    }
   }
 }
 
@@ -372,8 +383,12 @@ export function createChatStreamParser() {
       return parts;
     },
 
-    finish(): ChatStreamPart[] {
-      const toolCalls = flushToolCalls(pending);
+    finish(receivedDone = false): ChatStreamPart[] {
+      if (!finishReason && !receivedDone) {
+        throw new Error("ZenMux stream ended before completion. Please try again.");
+      }
+      const canCallTools = !finishReason || ["stop", "tool_calls", "function_call"].includes(finishReason);
+      const toolCalls = canCallTools ? flushToolCalls(pending) : [];
       if (!sawText && !sawReasoning && toolCalls.length === 0 && !finishReason) {
         throw new Error("ZenMux returned an empty model response.");
       }
@@ -401,6 +416,7 @@ export function partsFromCompletion(payload: unknown): ChatStreamPart[] {
       finish_reason?: string | null;
       message?: {
         content?: string | null;
+        refusal?: string | null;
         reasoning?: string | null;
         reasoning_content?: string | null;
         tool_calls?: Array<{ id?: string; function?: { name?: string; arguments?: string } }>;
@@ -418,6 +434,7 @@ export function partsFromCompletion(payload: unknown): ChatStreamPart[] {
         finish_reason: choice?.finish_reason,
         delta: {
           content: choice?.message?.content,
+          refusal: choice?.message?.refusal,
           reasoning: choice?.message?.reasoning,
           reasoning_content: choice?.message?.reasoning_content,
           tool_calls: choice?.message?.tool_calls?.map((call, index) => ({
@@ -741,23 +758,21 @@ function flushToolCalls(pending: Map<number, PendingToolCall>): ChatStreamPart[]
   return [...pending.values()]
     .sort((left, right) => left.index - right.index)
     .flatMap((call) => {
-      if (!call.name) {
-        return [];
+      if (!call.name || !call.id) {
+        throw new Error("ZenMux returned an incomplete tool call.");
       }
 
-      let input: unknown = {};
-      if (call.arguments) {
-        try {
-          input = JSON.parse(call.arguments) as unknown;
-        } catch {
-          input = call.arguments;
-        }
+      let input: unknown;
+      try {
+        input = JSON.parse(call.arguments) as unknown;
+      } catch {
+        throw new Error("ZenMux returned invalid JSON arguments for a tool call.");
       }
 
       return [
         {
           type: "tool-call" as const,
-          toolCallId: call.id || `call_${call.index}`,
+          toolCallId: call.id,
           toolName: call.name,
           input,
         },

@@ -15,15 +15,11 @@ import {
 } from "./zenmux-chat";
 
 const cache = new Cache();
-const MODEL_CACHE_KEY = "zenmux-provided-models";
+const MODEL_CACHE_KEY = "zenmux-provided-models-v2";
 const MODEL_ICON = "extension-icon.png";
 
-type ModelPreferences = Preferences & {
-  modelApiKey?: string;
-};
-
 export const getModels: AI.GetModels = async () => {
-  const apiKey = requireModelApiKey(getPreferenceValues<ModelPreferences>().modelApiKey);
+  const apiKey = requireModelApiKey(getPreferenceValues<Preferences>().modelApiKey);
 
   try {
     const response = await fetch(MODELS_URL, {
@@ -69,7 +65,7 @@ export const getModels: AI.GetModels = async () => {
 };
 
 export const streamCompletion: AI.StreamCompletion = async function* (model, request) {
-  const apiKey = requireModelApiKey(getPreferenceValues<ModelPreferences>().modelApiKey);
+  const apiKey = requireModelApiKey(getPreferenceValues<Preferences>().modelApiKey);
   const controller = new AbortController();
 
   try {
@@ -99,15 +95,17 @@ export const streamCompletion: AI.StreamCompletion = async function* (model, req
     }
 
     const parser = createChatStreamParser();
+    let receivedDone = false;
     for await (const data of readSseData(response.body)) {
       if (data === "[DONE]") {
+        receivedDone = true;
         break;
       }
 
       yield* parser.push(parseJson(data));
     }
 
-    yield* parser.finish();
+    yield* parser.finish(receivedDone);
   } catch (error) {
     if (controller.signal.aborted || (error instanceof Error && error.name === "AbortError")) {
       return;
