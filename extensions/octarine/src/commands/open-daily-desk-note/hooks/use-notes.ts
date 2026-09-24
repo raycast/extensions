@@ -19,7 +19,7 @@ type Options = {
 };
 
 type Result = {
-  dropdown: string[];
+  dropdown: Workspace[];
   sections: WorkspaceSection[];
   hasNotes: boolean;
   isLoading: boolean;
@@ -75,10 +75,10 @@ export function useDailyNotes({
     },
   );
   const noteSections = useNoteSections(notes, {
+    workspaces,
     selectedWorkspace,
     matches: search.matches,
   });
-  const dropdown = useMemo(() => Array.from(new Set(workspaces.map((workspace) => workspace.name))), [workspaces]);
   const appliedRequestedWorkspace = useRef("");
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export function useDailyNotes({
     }
 
     appliedRequestedWorkspace.current = requestedWorkspace;
-    setSelectedWorkspace(workspace.name);
+    setSelectedWorkspace(workspace.path);
   }, [enabled, requestedWorkspace, workspaces]);
 
   const prioritized = useMemo(() => {
@@ -109,7 +109,7 @@ export function useDailyNotes({
   }, [noteSections.sections, search.query]);
 
   return {
-    dropdown,
+    dropdown: workspaces,
     sections: prioritized.sections,
     hasNotes: noteSections.dropdown.length > 0,
     isLoading: !enabled || isLoading,

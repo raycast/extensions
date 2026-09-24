@@ -27,7 +27,7 @@ Press `⌘ K` in any command to open the Action Panel.
 
 Select a [workspace](https://docs.octarine.app/core-concepts/workspaces) to open its [Daily Desk](https://docs.octarine.app/daily-desk/) note for today.
 
-![Open Workspace listing available Octarine workspaces](./metadata/06-open-workspace.png)
+![Open Workspace listing available Octarine workspaces](./media/open-workspace.png)
 
 **Arguments**
 
@@ -45,7 +45,7 @@ Select a [workspace](https://docs.octarine.app/core-concepts/workspaces) to open
 
 Open a Daily Desk note by date, or browse daily and weekly notes in the `Daily` folder of each workspace.
 
-![Daily and weekly notes grouped by workspace](./metadata/05-daily-desk-browse.png)
+![Daily and weekly notes grouped by workspace](./media/daily-desk-browse.png)
 
 **Arguments**
 
@@ -134,7 +134,7 @@ Search notes by title, path, or workspace name. Enable content search to include
 
 Browse [files attached](https://docs.octarine.app/editor/attachments) to notes across your workspaces. Search by filename, extension, or workspace name, then preview or open a file. Choose Grid for image previews or List for compact system file icons from the Action Panel.
 
-![Search Attachments in Grid view with image previews across workspaces](./metadata/02-search-attachments-grid.png)
+![Search Attachments in Grid view with image previews across workspaces](./media/search-attachments-grid.png)
 
 **Actions**
 

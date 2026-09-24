@@ -52,12 +52,23 @@ export async function getWorkspaces(options?: { refresh?: boolean }): Promise<In
   }
 
   const names = await readWorkspaceNames();
-  return workspaces
+  const indexed = workspaces
     .map((workspace) => {
       const name = names.get(path.resolve(workspace.path)) ?? path.basename(workspace.path);
       return { ...workspace, name, ignored: workspace.ignored || excludedDirectories.has(name.toLowerCase()) };
     })
     .sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path));
+
+  const workspaceIndexByName = new Map<string, number>();
+  return indexed.map((workspace) => {
+    if (workspace.invalid || workspace.ignored) {
+      return workspace;
+    }
+
+    const index = workspaceIndexByName.get(workspace.name) ?? 0;
+    workspaceIndexByName.set(workspace.name, index + 1);
+    return index === 0 ? workspace : { ...workspace, display: `${workspace.name} (${index + 1})` };
+  });
 }
 
 async function scanWorkspaces(roots: string[], excludedDirectories: Set<string>): Promise<IndexedWorkspace[]> {

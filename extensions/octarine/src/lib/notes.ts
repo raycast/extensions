@@ -229,7 +229,7 @@ function buildFolder(workspace: Workspace, folderPath: string): Folder {
   return {
     name: folderPath === ROOT_FOLDER_PATH ? "" : path.posix.basename(folderPath),
     path: folderPath,
-    workspace,
+    workspace: { name: workspace.name, path: workspace.path },
   };
 }
 

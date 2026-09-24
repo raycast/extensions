@@ -39,11 +39,9 @@ export function AttachmentsGridView({
     ? sections.map((section) => (
         <Grid.Section
           key={section.workspace.path}
-          title={
-            showWorkspaceAttachmentCount
-              ? `${section.workspace.name} (${section.attachments.length})`
-              : section.workspace.name
-          }
+          title={`${section.workspace.display ?? section.workspace.name}${
+            showWorkspaceAttachmentCount ? ` (${section.attachments.length})` : ""
+          }`}
         >
           {section.attachments.map(renderAttachment)}
         </Grid.Section>

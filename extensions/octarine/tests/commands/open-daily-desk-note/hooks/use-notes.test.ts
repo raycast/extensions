@@ -64,7 +64,7 @@ describe("useDailyNotes", () => {
       searchText: "",
     });
 
-    expect(result.dropdown).toEqual(["Alpha", "Empty"]);
+    expect(result.dropdown).toEqual(workspaces);
     expect(result.hasNotes).toBe(false);
   });
 
@@ -75,12 +75,12 @@ describe("useDailyNotes", () => {
       searchText: "",
     });
 
-    expect(setSelectedWorkspace).toHaveBeenCalledWith("Empty");
+    expect(setSelectedWorkspace).toHaveBeenCalledWith(empty.path);
   });
 
   it("keeps the global empty state tied to indexed Daily notes", () => {
     useNoteSections.mockReturnValue({
-      dropdown: ["Alpha"],
+      dropdown: [alpha],
       sections: [],
     });
 
@@ -90,7 +90,7 @@ describe("useDailyNotes", () => {
       searchText: "missing",
     });
 
-    expect(result.dropdown).toEqual(["Alpha", "Empty"]);
+    expect(result.dropdown).toEqual(workspaces);
     expect(result.hasNotes).toBe(true);
   });
 });

@@ -32,6 +32,7 @@ type Result = {
 type BuildAttachmentSectionsInput = {
   selectedExtension: string;
   searchText: string;
+  workspacesByPath: ReadonlyMap<string, Workspace>;
 };
 
 function extensionNames(attachments: IndexedAttachment[]): string[] {
@@ -50,7 +51,7 @@ function buildSections(
   attachments: IndexedAttachment[],
   input: BuildAttachmentSectionsInput,
 ): WorkspaceAttachmentsSection[] {
-  const { selectedExtension, searchText } = input;
+  const { selectedExtension, searchText, workspacesByPath } = input;
   const grouped = new Map<string, WorkspaceAttachmentsSection>();
 
   for (const attachment of attachments) {
@@ -65,7 +66,7 @@ function buildSections(
     let section = grouped.get(attachment.workspace.path);
     if (!section) {
       section = {
-        workspace: attachment.workspace,
+        workspace: workspacesByPath.get(attachment.workspace.path) ?? attachment.workspace,
         attachments: [],
       };
       grouped.set(attachment.workspace.path, section);
@@ -74,7 +75,9 @@ function buildSections(
     section.attachments.push(attachment);
   }
 
-  return Array.from(grouped.values()).sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
+  return Array.from(grouped.values()).sort(
+    (a, b) => a.workspace.name.localeCompare(b.workspace.name) || a.workspace.path.localeCompare(b.workspace.path),
+  );
 }
 
 export function useAttachments({
@@ -124,11 +127,13 @@ export function useAttachments({
   });
 
   const { dropdown, sections } = useMemo(() => {
+    const workspacesByPath = new Map(workspaces.map((workspace) => [workspace.path, workspace]));
+
     return {
       dropdown: extensionNames(attachments),
-      sections: buildSections(attachments, { selectedExtension, searchText }),
+      sections: buildSections(attachments, { selectedExtension, searchText, workspacesByPath }),
     };
-  }, [attachments, searchText, selectedExtension]);
+  }, [attachments, searchText, selectedExtension, workspaces]);
 
   return {
     dropdown,

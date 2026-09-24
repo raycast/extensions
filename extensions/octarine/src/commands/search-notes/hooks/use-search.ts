@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useWorkspaces } from "@hooks/use-workspaces";
 import { ALL_WORKSPACES, type IndexedNote, type WorkspaceSection } from "@type/notes";
+import type { Workspace } from "@type/octarine";
 import type { NoteMatch } from "../lib/note-search";
 import { useContentSearch } from "./use-content-search";
 import { useNotes } from "./use-notes";
@@ -27,7 +28,7 @@ type Result = {
   isLoading: boolean;
   search: { text: string };
   mode: SearchNotesMode;
-  workspace: { dropdown: string[]; selected: string; grouped: boolean };
+  workspace: { dropdown: Workspace[]; selected: string; grouped: boolean };
   results: { sections: WorkspaceSection[]; matchOf: (note: IndexedNote) => NoteMatch | undefined };
   actions: SearchNotesActions;
 };

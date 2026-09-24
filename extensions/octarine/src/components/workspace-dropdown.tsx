@@ -1,18 +1,19 @@
 import { List } from "@raycast/api";
 import { ALL_WORKSPACES } from "@type/notes";
+import type { Workspace } from "@type/octarine";
 
 type Props = {
-  sections: string[];
+  workspaces: Workspace[];
   value: string;
   onChange: (value: string) => void;
 };
 
-export function WorkspaceDropdown({ sections, value, onChange }: Props) {
+export function WorkspaceDropdown({ workspaces, value, onChange }: Props) {
   return (
     <List.Dropdown tooltip="Filter by workspace" value={value} onChange={onChange}>
       <List.Dropdown.Item title="All Workspaces" value={ALL_WORKSPACES} />
-      {sections.map((section) => (
-        <List.Dropdown.Item title={section} key={section} value={section} />
+      {workspaces.map((workspace) => (
+        <List.Dropdown.Item title={workspace.display ?? workspace.name} key={workspace.path} value={workspace.path} />
       ))}
     </List.Dropdown>
   );

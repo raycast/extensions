@@ -24,7 +24,7 @@ type Options = {
 };
 
 type Result = {
-  dropdown: string[];
+  dropdown: Workspace[];
   sections: WorkspaceSection[];
   isLoading: boolean;
   revalidate: () => void;
@@ -89,6 +89,7 @@ export function useNotes({
     return notes.toSorted((a, b) => Number(!matchesMetadata(a)) - Number(!matchesMetadata(b)));
   }, [contentMatches, matchesMetadata, notes]);
   const { dropdown, sections } = useNoteSections(orderedNotes, {
+    workspaces,
     selectedWorkspace,
     matches,
     showPinnedNotesFirst,

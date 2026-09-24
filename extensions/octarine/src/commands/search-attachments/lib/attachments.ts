@@ -11,7 +11,7 @@ async function scanWorkspaceAttachments(
   excludedDirectoryNames: Set<string>,
 ): Promise<IndexedAttachment[]> {
   const normalizedWorkspacePath = path.normalize(path.resolve(workspace.path));
-  const normalizedWorkspace = { ...workspace, path: normalizedWorkspacePath };
+  const normalizedWorkspace = { name: workspace.name, path: normalizedWorkspacePath };
   if (!(await isDirectoryPath(normalizedWorkspacePath))) {
     console.warn("Skipping workspace path because it is not an accessible directory", {
       workspacePath: normalizedWorkspacePath,

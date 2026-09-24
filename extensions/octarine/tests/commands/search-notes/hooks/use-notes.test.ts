@@ -73,16 +73,21 @@ describe("useNotes", () => {
     expect(result.sections[0].notes.map((item) => item.title)).toEqual(["Alpha note"]);
   });
 
-  it("builds a unique workspace dropdown", () => {
-    const duplicate = { name: "Alpha", path: "/tmp/alpha-2" };
-    const result = renderNotes([note(alpha, "Alpha note"), note(duplicate, "Other")]);
+  it("keeps same-named workspaces as separate dropdown filters", () => {
+    const duplicate: Workspace = { name: "Alpha", path: "/tmp/alpha-2", display: "Alpha (2)" };
+    const result = renderNotes([note(alpha, "Alpha note"), note(duplicate, "Other")], {
+      workspaces: [alpha, duplicate],
+      selectedWorkspace: duplicate.path,
+    });
 
-    expect(result.dropdown).toEqual(["Alpha"]);
+    expect(result.dropdown).toEqual([alpha, duplicate]);
+    expect(result.sections[0].name).toBe("Alpha (2)");
+    expect(result.sections.flatMap((section) => section.notes.map((item) => item.title))).toEqual(["Other"]);
   });
 
   it("filters by workspace and drops empty sections", () => {
     const result = renderNotes([note(alpha, "Alpha note"), note(beta, "Beta note")], {
-      selectedWorkspace: "Beta",
+      selectedWorkspace: beta.path,
     });
 
     expect(result.sections.map((section) => section.name)).toEqual(["Beta"]);
@@ -141,7 +146,7 @@ describe("useNotes", () => {
       filter: (item) => item.pinned,
       searchText: "needle",
       contentMatches,
-      selectedWorkspace: "Alpha",
+      selectedWorkspace: alpha.path,
     });
 
     expect(result.sections).toHaveLength(1);
@@ -150,8 +155,8 @@ describe("useNotes", () => {
 
   it("sorts pinned notes first only when requested", () => {
     const notes = [note(alpha, "Alpha regular"), note(alpha, "Alpha pinned", { pinned: true })];
-    const sorted = renderNotes(notes, { selectedWorkspace: "Alpha", showPinnedNotesFirst: true });
-    const unsorted = renderNotes(notes, { selectedWorkspace: "Alpha" });
+    const sorted = renderNotes(notes, { selectedWorkspace: alpha.path, showPinnedNotesFirst: true });
+    const unsorted = renderNotes(notes, { selectedWorkspace: alpha.path });
 
     expect(sorted.sections[0].notes.map((item) => item.title)).toEqual(["Alpha pinned", "Alpha regular"]);
     expect(unsorted.sections[0].notes.map((item) => item.title)).toEqual(["Alpha regular", "Alpha pinned"]);

@@ -35,7 +35,7 @@ export default function SearchNotesCommand() {
       searchBarPlaceholder={searchPlaceholder(mode.contentEnabled)}
       searchBarAccessory={
         <WorkspaceDropdown
-          sections={workspace.dropdown}
+          workspaces={workspace.dropdown}
           value={workspace.selected}
           onChange={actions.onWorkspaceChange}
         />

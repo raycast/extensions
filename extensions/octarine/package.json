@@ -16,7 +16,7 @@
       "name": "workspaceRoots",
       "type": "textfield",
       "required": true,
-      "title": "Workspace paths",
+      "title": "Workspace Paths",
       "description": "Paths to Octarine workspaces or folders containing them, separated by commas.",
       "placeholder": "~/path/to/workspace, ~/path/to/folder"
     },
@@ -24,7 +24,7 @@
       "name": "excludedWorkspaces",
       "type": "textfield",
       "placeholder": "Workspace A, Workspace B",
-      "title": "Workspaces to exclude",
+      "title": "Workspaces to Exclude",
       "required": false,
       "description": "Workspace names Raycast should skip, separated by commas."
     },
@@ -32,7 +32,7 @@
       "name": "excludedFoldersInWorkspaces",
       "type": "textfield",
       "placeholder": "Folder A, Folder B",
-      "title": "Folders to exclude",
+      "title": "Folders to Exclude",
       "required": false,
       "description": "Folder names to exclude from note and attachment results across all workspaces, separated by commas."
     }
@@ -63,7 +63,7 @@
         {
           "name": "showWorkspaceNoteCount",
           "type": "checkbox",
-          "title": "Search results",
+          "title": "Search Results",
           "description": "Adds a note count to each workspace section title.",
           "label": "Show a note count in each workspace section",
           "default": false,
@@ -107,7 +107,7 @@
         {
           "name": "showWorkspaceAttachmentCount",
           "type": "checkbox",
-          "title": "Attachment results",
+          "title": "Attachment Results",
           "description": "Adds an attachment count to each workspace section title.",
           "label": "Show an attachment count in each workspace section",
           "default": false,
@@ -134,7 +134,7 @@
         {
           "name": "excludeFileExtensions",
           "type": "textfield",
-          "title": "File extensions to exclude",
+          "title": "File Extensions to Exclude",
           "description": "Extensions to omit from results, separated by commas. A leading dot is optional.",
           "placeholder": "png, mp4, pdf",
           "required": false
@@ -164,7 +164,7 @@
         {
           "name": "defaultWorkspace",
           "type": "textfield",
-          "title": "Default workspace",
+          "title": "Default Workspace",
           "required": false,
           "description": "Enter a workspace name to select when the command opens. Leave blank to show notes from all workspaces.",
           "placeholder": "Workspace name"
@@ -172,7 +172,7 @@
         {
           "name": "showFilename",
           "type": "checkbox",
-          "title": "Daily note titles",
+          "title": "Daily Note Titles",
           "label": "Use the file name as the result title",
           "required": false,
           "default": false,
@@ -181,7 +181,7 @@
         {
           "name": "useLastWorkspace",
           "type": "checkbox",
-          "title": "Date suggestions",
+          "title": "Date Suggestions",
           "label": "Use the last workspace for date suggestions",
           "required": false,
           "default": true,

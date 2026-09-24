@@ -50,7 +50,7 @@ beforeEach(() => {
   useWorkspaces.mockReturnValue({ workspaces: [], status: { isLoading: false }, revalidate: vi.fn() });
   useContentSearch.mockReturnValue({ matches: new Map(), isLoading: false, revalidate: revalidateContent });
   useNotes.mockReturnValue({
-    dropdown: ["Alpha"],
+    dropdown: [{ name: "Alpha", path: "/tmp/alpha" }],
     sections: [],
     isLoading: false,
     revalidate: revalidateNotes,

@@ -1,6 +1,8 @@
 export type Workspace = {
   name: string;
   path: string;
+  /** Optional UI label for disambiguating workspaces with the same name. */
+  display?: string;
 };
 
 export type Folder = {
@@ -37,7 +39,11 @@ export function isWorkspace(value: unknown): value is Workspace {
     return false;
   }
 
-  return hasStringProperty(value, "name") && hasStringProperty(value, "path");
+  return (
+    hasStringProperty(value, "name") &&
+    hasStringProperty(value, "path") &&
+    (value.display === undefined || typeof value.display === "string")
+  );
 }
 
 export function isFolder(value: unknown): value is Folder {

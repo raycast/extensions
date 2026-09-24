@@ -56,7 +56,7 @@ export function DailyDeskSearch({ requestedWorkspace }: SearchProps) {
       searchBarPlaceholder="Search Daily Desk notes or type a date"
       searchBarAccessory={
         <WorkspaceDropdown
-          sections={workspace.dropdown}
+          workspaces={workspace.dropdown}
           value={workspace.selected}
           onChange={viewActions.onWorkspaceChange}
         />
@@ -118,7 +118,9 @@ function DailyDeskResults({ query, workspace, results, actions, showFilename }: 
   ) : null;
   const suggestionSection =
     suggestionItem && workspace.grouped ? (
-      <List.Section title={workspace.target?.name ?? "Choose a Workspace"}>{suggestionItem}</List.Section>
+      <List.Section title={workspace.target?.display ?? workspace.target?.name ?? "Choose a Workspace"}>
+        {suggestionItem}
+      </List.Section>
     ) : (
       suggestionItem
     );

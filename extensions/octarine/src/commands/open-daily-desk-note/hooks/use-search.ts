@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useWorkspaces } from "@hooks/use-workspaces";
 import { formatDateLabel, formatWeekLabel, type DateQuery } from "@lib/daily-desk";
-import { findWorkspaceByName } from "@lib/workspaces";
 import { ALL_WORKSPACES, type WorkspaceSection } from "@type/notes";
 import type { Workspace } from "@type/octarine";
 import { useLastWorkspace } from "./use-last-workspace";
@@ -26,7 +25,7 @@ export type DailyDeskSearchQuery = {
 export type DailyDeskSearchWorkspace = {
   workspaces: Workspace[];
   isLoading: boolean;
-  dropdown: string[];
+  dropdown: Workspace[];
   selected: string;
   grouped: boolean;
   target?: Workspace;
@@ -110,7 +109,7 @@ export function useDailyDeskSearch({ requestedWorkspace, useLastWorkspaceEnabled
     enabled: false,
   });
   const grouped = selectedWorkspace === ALL_WORKSPACES;
-  const chosen = grouped ? undefined : findWorkspaceByName(workspaces, selectedWorkspace);
+  const chosen = grouped ? undefined : workspaces.find((workspace) => workspace.path === selectedWorkspace);
   const targetWorkspace = chosen ?? (isLastWorkspaceLoading ? undefined : lastWorkspace);
   const suggestion: DailyDeskSuggestion | undefined =
     dateQuery && suggestedDate && !hasExactMatch
@@ -124,9 +123,10 @@ export function useDailyDeskSearch({ requestedWorkspace, useLastWorkspaceEnabled
       : undefined;
   const visibleSections =
     suggestion && grouped && targetWorkspace && !sections.some((section) => section.path === targetWorkspace.path)
-      ? [...sections, { name: targetWorkspace.name, path: targetWorkspace.path, notes: [] }].sort((a, b) =>
-          a.name.localeCompare(b.name),
-        )
+      ? [
+          ...sections,
+          { name: targetWorkspace.display ?? targetWorkspace.name, path: targetWorkspace.path, notes: [] },
+        ].sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path))
       : sections;
   const suggestionInSection = suggestion?.sectionPath !== undefined;
 

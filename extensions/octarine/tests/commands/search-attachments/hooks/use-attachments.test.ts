@@ -99,10 +99,18 @@ describe("useAttachments", () => {
     expect(result.sections[0].attachments.map((item) => item.name)).toEqual(["report.pdf"]);
   });
 
-  it("groups by workspace and sorts sections by name", () => {
-    const result = renderAttachments([attachment(beta, "beta.png", "png"), attachment(alpha, "alpha.png", "png")]);
+  it("labels sections separately for workspaces with the same name", () => {
+    const first: Workspace = { name: "Octarine", path: "/tmp/one" };
+    const second: Workspace = { name: "Octarine", path: "/tmp/two", display: "Octarine (2)" };
+    const result = renderAttachments([attachment(second, "second.png", "png"), attachment(first, "first.png", "png")], {
+      workspaces: [first, second],
+    });
 
-    expect(result.sections.map((section) => section.workspace.name)).toEqual(["Alpha", "Beta"]);
+    expect(result.sections.map(({ workspace }) => workspace.display ?? workspace.name)).toEqual([
+      "Octarine",
+      "Octarine (2)",
+    ]);
+    expect(result.sections.map((section) => section.workspace.path)).toEqual([first.path, second.path]);
   });
 
   it("drops sections without matching attachments", () => {

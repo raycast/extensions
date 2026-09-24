@@ -160,7 +160,7 @@ describe("getWorkspaces", () => {
 
     expect(result).toEqual([
       { name: "Alpha", path: "/tmp/other/Alpha", ignored: false, invalid: false },
-      { name: "Alpha", path: "/tmp/root/Alpha", ignored: false, invalid: false },
+      { name: "Alpha", path: "/tmp/root/Alpha", ignored: false, invalid: false, display: "Alpha (2)" },
       { name: "Beta", path: "/tmp/root/Beta", ignored: false, invalid: false },
       { name: "missing", path: invalidRoot, ignored: false, invalid: true },
     ]);

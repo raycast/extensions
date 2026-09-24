@@ -1,28 +1,39 @@
 import { useMemo } from "react";
 import { ALL_WORKSPACES, type IndexedNote, type WorkspaceSection } from "@type/notes";
+import type { Workspace } from "@type/octarine";
 
 type Options = {
+  workspaces: Workspace[];
   selectedWorkspace: string;
   matches: (note: IndexedNote) => boolean;
   showPinnedNotesFirst?: boolean;
 };
 
 type Result = {
-  dropdown: string[];
+  dropdown: Workspace[];
   sections: WorkspaceSection[];
 };
 
-type BuildOptions = Required<Options>;
+type BuildOptions = {
+  workspacesByPath: ReadonlyMap<string, Workspace>;
+  selectedWorkspace: string;
+  matches: (note: IndexedNote) => boolean;
+  showPinnedNotesFirst: boolean;
+};
 
 export function useNoteSections(
   notes: IndexedNote[],
-  { selectedWorkspace, matches, showPinnedNotesFirst = false }: Options,
+  { workspaces, selectedWorkspace, matches, showPinnedNotesFirst = false }: Options,
 ): Result {
   const grouped = useMemo(() => groupByWorkspace(notes), [notes]);
-  const dropdown = useMemo(() => workspaceNames(grouped), [grouped]);
+  const workspacesByPath = useMemo(
+    () => new Map(workspaces.map((workspace) => [workspace.path, workspace])),
+    [workspaces],
+  );
+  const dropdown = useMemo(() => workspaceOptions(grouped, workspacesByPath), [grouped, workspacesByPath]);
   const sections = useMemo(
-    () => buildSections(grouped, { selectedWorkspace, matches, showPinnedNotesFirst }),
-    [grouped, selectedWorkspace, matches, showPinnedNotesFirst],
+    () => buildSections(grouped, { workspacesByPath, selectedWorkspace, matches, showPinnedNotesFirst }),
+    [grouped, selectedWorkspace, matches, showPinnedNotesFirst, workspacesByPath],
   );
 
   return { dropdown, sections };
@@ -45,24 +56,27 @@ function groupByWorkspace(notes: IndexedNote[]): WorkspaceSection[] {
     }
   }
 
-  return Array.from(grouped.values()).sort((a, b) => a.name.localeCompare(b.name));
+  return Array.from(grouped.values()).sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path));
 }
 
-function workspaceNames(workspaces: WorkspaceSection[]): string[] {
-  return Array.from(new Set(workspaces.map((workspace) => workspace.name)));
+function workspaceOptions(sections: WorkspaceSection[], workspacesByPath: ReadonlyMap<string, Workspace>): Workspace[] {
+  return sections.flatMap((section) => {
+    const workspace = workspacesByPath.get(section.path);
+    return workspace ? [workspace] : [];
+  });
 }
 
 function buildSections(
   workspaces: WorkspaceSection[],
-  { selectedWorkspace, matches, showPinnedNotesFirst }: BuildOptions,
+  { workspacesByPath, selectedWorkspace, matches, showPinnedNotesFirst }: BuildOptions,
 ): WorkspaceSection[] {
   return workspaces
-    .filter((workspace) => selectedWorkspace === ALL_WORKSPACES || workspace.name === selectedWorkspace)
+    .filter((workspace) => selectedWorkspace === ALL_WORKSPACES || workspace.path === selectedWorkspace)
     .map((workspace) => {
       const notes = workspace.notes.filter(matches);
 
       return {
-        name: workspace.name,
+        name: workspacesByPath.get(workspace.path)?.display ?? workspace.name,
         path: workspace.path,
         notes: showPinnedNotesFirst ? sortPinnedFirst(notes) : notes,
       };
