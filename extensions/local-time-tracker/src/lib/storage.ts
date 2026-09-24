@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { copyMissingLegacyWorkLogs } from "./storage-migration";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./types";
 
 export const STORAGE_KEYS = {
@@ -146,9 +147,7 @@ async function migrateLegacyWorkLogs(): Promise<void> {
   if (migrationComplete === true) return;
 
   const legacyWorkLogs = await readArray(STORAGE_KEYS.legacyWorkLogs, isWorkLog, "work logs");
-  await Promise.all(
-    legacyWorkLogs.map((workLog) => LocalStorage.setItem(getWorkLogKey(workLog.id), JSON.stringify(workLog))),
-  );
+  await copyMissingLegacyWorkLogs(legacyWorkLogs, LocalStorage, getWorkLogKey);
   await LocalStorage.setItem(STORAGE_KEYS.workLogsMigrationComplete, true);
 }
 
