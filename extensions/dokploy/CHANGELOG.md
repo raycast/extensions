@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Fix Services list not refreshing after Create/Delete] - {PR_MERGE_DATE}
+## [Fix Services list not refreshing after Create/Delete] - 2026-09-24
 
 - `Create Application`, `Create Database` and `Delete` popped back to Raycast's root (or, for Delete, stopped there without navigating at all) before the refreshed list actually loaded, so the change only showed up after fully restarting Raycast. Fixed so the **Services** list updates immediately.
 
