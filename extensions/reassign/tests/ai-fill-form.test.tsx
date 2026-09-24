@@ -37,11 +37,19 @@ vi.mock("../src/lib/api", () => ({ previewBlock: mock.preview }));
 import { AiFillForm } from "../src/components/ai-fill-form";
 const response = {
   ok: true,
-  data: { applied: false, intents: [{ op: "create", name: "Work", date: "2026-09-22", start: "09:00", end: "11:00" }] },
+  data: {
+    intents: [{ op: "create", name: "Work", start: "2026-09-22T09:00", end: "2026-09-22T11:00" }],
+  },
 };
 function render() {
   mock.cursor = 0;
-  return AiFillForm({ initialText: "work tomorrow morning", areas: [], activityTypes: [], onFill: mock.fill });
+  return AiFillForm({
+    initialText: "work tomorrow morning",
+    areas: [],
+    activityTypes: [],
+    calendars: [],
+    onFill: mock.fill,
+  });
 }
 beforeEach(() => {
   mock.slots = [];
@@ -84,6 +92,16 @@ it("retains the description after an AI failure", async () => {
 });
 it("does not offer an unrepresentable or ambiguous draft", async () => {
   mock.preview.mockResolvedValue({ ok: true, data: { ...response.data, questions: ["Which day?"] } });
+  await render().props.actions.props.children[1].props.onAction();
+  expect(render().props.actions.props.children[0]).toBeNull();
+  expect(mock.fill).not.toHaveBeenCalled();
+});
+
+it("refuses a suggested calendar that is not writable", async () => {
+  mock.preview.mockResolvedValue({
+    ok: true,
+    data: { ...response.data, intents: [{ ...response.data.intents[0], calendarId: "shared" }] },
+  });
   await render().props.actions.props.children[1].props.onAction();
   expect(render().props.actions.props.children[0]).toBeNull();
   expect(mock.fill).not.toHaveBeenCalled();

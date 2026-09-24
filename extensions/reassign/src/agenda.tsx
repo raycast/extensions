@@ -9,6 +9,7 @@ import {
   useAgendaMutations,
 } from "./components/agenda-actions";
 import { AgendaItem } from "./components/agenda-item";
+import { useCalendars } from "./components/calendar-fields";
 import { SearchView } from "./components/search-view";
 import { refusalView } from "./components/states";
 import { reassignProvider } from "./lib/oauth";
@@ -20,6 +21,7 @@ import {
   collectAgendaFilters,
   DayAgenda,
   eventMatchesFilter,
+  nowWallClock,
   passesKindFilter,
   TodaySection,
 } from "./lib/schedule-model";
@@ -120,12 +122,12 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
   });
   const {
     mutate: applyMutation,
-    applyEdit,
     lastUndoToken,
     runUndo,
   } = useAgendaMutations({ revalidate, optimistic: { mutate, forOps: buildOptimistic } });
+  const { calendars, defaultId: defaultCalendarId } = useCalendars();
 
-  const todayIso = data?.ok ? data.data.now.todayIso : todayISO();
+  const todayIso = data?.ok ? nowWallClock(data.data.now).date : todayISO();
   const dayLabel = relativeDayLabel(date, todayIso);
 
   if (data && !data.ok) return refusalView(data, revalidate);
@@ -233,6 +235,8 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
                   event={event}
                   areas={model.areas}
                   activityTypes={model.activityTypes}
+                  calendars={calendars}
+                  defaultCalendarId={defaultCalendarId}
                   isShowingDetail={showingDetail}
                   actions={
                     <AgendaActions
@@ -241,7 +245,6 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
                       areas={model.areas}
                       activityTypes={model.activityTypes}
                       mutate={applyMutation}
-                      onEdit={(id, patch) => applyEdit("Saving…", "Saved changes", id, patch)}
                       lastUndoToken={lastUndoToken}
                       runUndo={runUndo}
                       nav={navSection()}
@@ -298,7 +301,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
 /**
  * Build an optimistic cache transform from a 1-op reflect / delete / shift batch.
  * The row updates instantly; `mutate` reconciles or rolls back after the call.
- * A move op returns undefined — it goes through the plain (revalidate) path.
+ * An update op returns undefined — it goes through the plain (revalidate) path.
  */
 const buildOptimistic: OptimisticForOps<ScheduleData> = (ops) => {
   if (ops.length !== 1) return undefined;
@@ -353,10 +356,11 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
   } = useCachedPromise(loadWeek, [todayISO()], {
     keepPreviousData: true,
   });
-  const { mutate, applyEdit, lastUndoToken, runUndo } = useAgendaMutations<WeekResult | undefined>({
+  const { mutate, lastUndoToken, runUndo } = useAgendaMutations<WeekResult | undefined>({
     revalidate,
     optimistic: { mutate: cacheMutate, forOps: buildWeekOptimistic },
   });
+  const { calendars, defaultId: defaultCalendarId } = useCalendars();
 
   if (data && !data.ok) return refusalView(data, revalidate);
 
@@ -428,6 +432,8 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
                 event={event}
                 areas={day.model.areas}
                 activityTypes={day.model.activityTypes}
+                calendars={calendars}
+                defaultCalendarId={defaultCalendarId}
                 isShowingDetail={showingDetail}
                 actions={
                   <AgendaActions
@@ -436,7 +442,6 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
                     areas={day.model.areas}
                     activityTypes={day.model.activityTypes}
                     mutate={mutate}
-                    onEdit={(id, patch) => applyEdit("Saving…", "Saved changes", id, patch)}
                     lastUndoToken={lastUndoToken}
                     runUndo={runUndo}
                     nav={navSection()}
@@ -460,7 +465,7 @@ async function loadWeek(startISO: string): Promise<WeekResult> {
   const dates = Array.from({ length: WEEK_DAYS }, (_, i) => addDaysISO(startISO, i));
   const result = await getScheduleRange(startISO, dates[dates.length - 1]);
   if (!result.ok) return result;
-  const todayIso = result.data.now.todayIso;
+  const todayIso = nowWallClock(result.data.now).date;
   const days = buildRangeAgenda(result.data, dates).map((model) => ({ date: model.date, model }));
   return { ok: true, todayIso, days };
 }

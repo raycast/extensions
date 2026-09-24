@@ -32,14 +32,18 @@ export type ErrorCode =
   | "not_found"
   | "validation"
   | "conflict"
-  | "ambiguous"
+  | "batch_rejected"
   | "rate_limited"
   | "internal";
+
+// Server text limits (characters). A longer value is a 422, so check first.
+export const MAX_NAME_LENGTH = 200;
+export const MAX_NOTES_LENGTH = 2000;
+export const MAX_FEEDBACK_LENGTH = 4000;
 
 export const PATHS = {
   schedule: "/schedule",
   events: "/events",
-  eventsBatch: "/events/batch",
   eventsSearch: "/events/search",
   schedulePlan: "/schedule/plan",
   scheduleConfirm: "/schedule/confirm",

@@ -5,7 +5,7 @@ import { listCalendars } from "../lib/api";
 import type { Calendar } from "../lib/schedule-model";
 
 // Picker values that are not calendar ids. "" keeps the server default (omit
-// `syncTo`); NONE keeps the block in Reassign only (`syncTo: null`).
+// `calendarId`); NONE keeps the block in Reassign only (`calendarId: null`).
 export const CALENDAR_DEFAULT = "";
 export const CALENDAR_NONE = "__none";
 
@@ -17,8 +17,8 @@ export interface CalendarFormValues {
 
 /** The write fields a calendar choice maps to. Both are omitted when unchanged. */
 export interface CalendarWriteFields {
-  syncTo?: string | null;
-  mirrorTo?: string[];
+  calendarId?: string | null;
+  mirrorCalendarIds?: string[];
 }
 
 /** The connected calendars, cached across launches. Empty until the first read. */
@@ -31,45 +31,45 @@ export function useCalendars() {
 }
 
 /**
- * Translate the picker values into `syncTo` / `mirrorTo` for a create. A kept
+ * Translate the picker values into `calendarId` / `mirrorCalendarIds` for a create. A kept
  * default sends nothing, so the server picks its own home calendar. The mirror
  * list drops the home calendar, so a block never mirrors to itself.
  */
 export function calendarCreateFields(values: CalendarFormValues): CalendarWriteFields {
   const out: CalendarWriteFields = {};
-  if (values.calendarId === CALENDAR_NONE) out.syncTo = null;
-  else if (values.calendarId) out.syncTo = values.calendarId;
+  if (values.calendarId === CALENDAR_NONE) out.calendarId = null;
+  else if (values.calendarId) out.calendarId = values.calendarId;
   // The mirror picker hides for a Reassign-only block, so no mirrors ride.
   const mirrors = (values.mirrorIds ?? []).filter((id) => id !== values.calendarId);
-  if (mirrors.length > 0) out.mirrorTo = mirrors;
+  if (mirrors.length > 0) out.mirrorCalendarIds = mirrors;
   return out;
 }
 
 /** The same translation for an edit: send only what differs from the block. */
 export function calendarEditFields(
   values: CalendarFormValues,
-  current: { calendarId?: string; mirrorIds?: string[] },
+  current: { calendarId?: string | null; mirrorIds?: string[] },
 ): CalendarWriteFields {
   const out: CalendarWriteFields = {};
   // A hidden picker (no writable calendar) changes nothing.
   if (values.calendarId === undefined) return out;
   const currentCal = current.calendarId ?? CALENDAR_NONE;
   if (values.calendarId !== currentCal) {
-    out.syncTo = values.calendarId === CALENDAR_NONE ? null : values.calendarId;
+    out.calendarId = values.calendarId === CALENDAR_NONE ? null : values.calendarId;
   }
-  const home = out.syncTo ?? current.calendarId;
+  const home = out.calendarId === undefined ? current.calendarId : out.calendarId;
   // The mirror picker hides for a Reassign-only block (then the mirrors go) and
   // when only one calendar is writable (then the current mirrors stay).
   const picked = values.mirrorIds ?? (values.calendarId === CALENDAR_NONE ? [] : undefined);
   if (picked === undefined) return out;
   const mirrors = picked.filter((id) => id !== home);
-  if (!sameSet(mirrors, current.mirrorIds ?? [])) out.mirrorTo = mirrors;
+  if (!sameSet(mirrors, current.mirrorIds ?? [])) out.mirrorCalendarIds = mirrors;
   return out;
 }
 
 /** True when a choice asks for a calendar change (so a no-op form can skip it). */
 export function hasCalendarChange(fields: CalendarWriteFields): boolean {
-  return fields.syncTo !== undefined || fields.mirrorTo !== undefined;
+  return fields.calendarId !== undefined || fields.mirrorCalendarIds !== undefined;
 }
 
 function sameSet(a: string[], b: string[]): boolean {
@@ -97,7 +97,7 @@ export function CalendarFields(props: {
   const [chosen, setChosen] = useState(calendarDefault);
   const [mirrors, setMirrors] = useState(mirrorDefault);
   if (writable.length === 0) return null;
-  const home = writable.find((c) => c.id === defaultId) ?? writable.find((c) => c.isDefault);
+  const home = writable.find((c) => c.id === defaultId);
   const homeId = chosen === CALENDAR_DEFAULT ? home?.id : chosen;
   const mirrorChoices = writable.filter((c) => c.id !== homeId);
   const showMirrors = chosen !== CALENDAR_NONE && mirrorChoices.length > 0;

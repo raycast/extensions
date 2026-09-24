@@ -127,7 +127,7 @@ it("shows the 'Search your blocks' empty state after a matching query is cleared
   expect(tree.filter((n) => n.type === "Item")).toHaveLength(0);
   expect(tree.find((n) => n.type === "EmptyView")?.props.title).toBe("Search your blocks");
   expect(tree.find((n) => n.type === "EmptyView")?.props.description).toBe(
-    "Type a word to find any block in your schedule, on any day.",
+    "Type a word to find a block by name, from the last 7 days to the next 30.",
   );
 
   // Type a word that returns >= 1 hit; laggyDataRef is now pinned to these hits.
@@ -143,7 +143,7 @@ it("shows the 'Search your blocks' empty state after a matching query is cleared
   expect(tree.filter((n) => n.type === "Item")).toHaveLength(0);
   expect(tree.find((n) => n.type === "EmptyView")?.props.title).toBe("Search your blocks");
   expect(tree.find((n) => n.type === "EmptyView")?.props.description).toBe(
-    "Type a word to find any block in your schedule, on any day.",
+    "Type a word to find a block by name, from the last 7 days to the next 30.",
   );
 });
 

@@ -4,6 +4,6 @@
 
 export interface ScheduleContext {
   name?: string;
-  durationHours?: number;
+  durationMinutes?: number;
   date?: string; // YYYY-MM-DD
 }

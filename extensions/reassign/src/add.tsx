@@ -16,10 +16,33 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import { randomUUID } from "node:crypto";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { backlogCapture, confirmSchedule, createEvent, getSchedule, planSchedule, updateEvent } from "./lib/api";
+import {
+  type ApiError,
+  backlogCapture,
+  confirmSchedule,
+  getSchedule,
+  planSchedule,
+  PlanRequest,
+  writeEvents,
+} from "./lib/api";
+import { batchFailure } from "./lib/envelope";
 import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
-import { clockHM, combineDateTime, humanDuration, humanHours, isIsoDate, parseDuration, todayISO } from "./lib/format";
+import {
+  addDaysISO,
+  textLimitError,
+  addMinutesLocal,
+  clockHM,
+  combineDateTime,
+  datePart,
+  formatRange,
+  humanDuration,
+  isIsoDate,
+  parseDuration,
+  todayISO,
+  toLocalDateTime,
+} from "./lib/format";
 import { refusalView } from "./components/states";
 import { reassignProvider } from "./lib/oauth";
 import {
@@ -76,8 +99,8 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const parsed = argText ? parseCapture(argText) : null;
   const { push } = useNavigation();
 
-  // The areas and activity types for the pickers. A compact read is enough.
-  const { data: taxonomy, isLoading, revalidate } = useCachedPromise((d: string) => getSchedule(d, true), [todayISO()]);
+  // The areas and activity types for the pickers come with the day read.
+  const { data: taxonomy, isLoading, revalidate } = useCachedPromise(getSchedule, [todayISO()]);
   const areas = taxonomy?.ok ? (taxonomy.data.areas ?? []) : [];
   const activityTypes = taxonomy?.ok ? (taxonomy.data.activityTypes ?? []) : [];
   const { writable: calendars, defaultId: defaultCalendarId } = useCalendars();
@@ -96,8 +119,8 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   }, []);
 
   const ctxDate = isIsoDate(ctx?.date) ? ctx.date : undefined;
-  const durationDefault = ctx?.durationHours
-    ? humanHours(ctx.durationHours)
+  const durationDefault = ctx?.durationMinutes
+    ? humanDuration(ctx.durationMinutes)
     : parsed?.durationMinutes
       ? humanDuration(parsed.durationMinutes)
       : "";
@@ -115,6 +138,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     calendarId: CALENDAR_DEFAULT,
     mirrorIds: [],
   });
+  const [calendarRevision, setCalendarRevision] = useState(0);
   const [aiDestination, setAiDestination] = useState<"inbox" | "schedule" | null>(null);
   const submitting = useRef(false);
   const saved = useRef(false);
@@ -174,6 +198,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     setPlanningDate((current) => (draft.start ? todayISO(draft.start) : current));
     setHasNamedDate((current) => Boolean(draft.start) || current);
     setDetails({ areaId: draft.areaId, activityTypeId: draft.activityTypeId, kind: draft.kind, notes: draft.notes });
+    if (draft.calendarId) {
+      setCalendarValues({ calendarId: draft.calendarId, mirrorIds: [] });
+      // The picker keeps its own state, so remount it to show the suggestion.
+      setCalendarRevision((n) => n + 1);
+    }
     // Keep every AI-suggested field visible for review; preserve calendar choices.
     setShowDetails(true);
   }
@@ -195,6 +224,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
 
   async function handleSchedule(values: FormValues) {
     const finalName = values.name.trim() || "(untitled)";
+    const tooLong = textLimitError(finalName, values.notes);
+    if (tooLong) {
+      await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
+      return;
+    }
     const extras = optionalFields(values);
     const calendar = calendarCreateFields(values);
     let timing: BlockTiming;
@@ -213,18 +247,17 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
       return;
     }
     if (timing.kind === "exact") {
-      const date = todayISO(timing.start);
       const result = await runMutation("Scheduling…", `Scheduled “${finalName}”`, () =>
-        createEvent({
-          op: "create",
-          date,
-          start: clockHM(timing.start),
-          end: clockHM(timing.end),
-          name: finalName,
-          ...(todayISO(timing.end) !== date ? { endNextDay: true } : {}),
-          ...extras,
-          ...calendar,
-        }),
+        writeEvents([
+          {
+            op: "create",
+            start: toLocalDateTime(timing.start),
+            end: toLocalDateTime(timing.end),
+            name: finalName,
+            ...extras,
+            ...calendar,
+          },
+        ]),
       );
       if (result.ok) await onSaved();
       return;
@@ -255,6 +288,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
 
   async function handleInbox(values: FormValues) {
     const finalName = values.name.trim() || "(untitled)";
+    const tooLong = textLimitError(finalName, values.notes);
+    if (tooLong) {
+      await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
+      return;
+    }
     let timing: BlockTiming;
     try {
       timing = resolveBlockTiming({
@@ -270,21 +308,21 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
       });
       return;
     }
-    const minutes = timing.kind === "inbox" ? undefined : timing.minutes;
-    const durationHours = minutes ? Math.round((minutes / 60) * 100) / 100 : ctx?.durationHours;
+    const durationMinutes = timing.kind === "inbox" ? ctx?.durationMinutes : timing.minutes;
     // Keep a chosen or named day as the planned date; do not tag with today by default.
     const plannedDate =
       timing.kind === "exact" ? todayISO(timing.start) : (timing.date ?? (hasNamedDate ? planningDate : undefined));
-    const { notes, areaId, activityTypeId } = optionalFields(values);
+    const { notes, areaId, activityTypeId, kind } = optionalFields(values);
     const result = await runMutation("Saving…", `Saved “${finalName}” to Inbox`, () =>
       backlogCapture({
         op: "capture",
         name: finalName,
-        durationHours,
+        durationMinutes,
         plannedDate,
         notes,
         areaId,
         activityTypeId,
+        kind,
       }),
     );
     if (result.ok) await onSaved();
@@ -363,6 +401,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
                 initialText={`${name}${hasNamedDate && planningDate ? ` on ${planningDate}` : ""}${hasStartTime && start ? ` at ${clockHM(start)}` : ""}${hasEndTime && end ? ` until ${todayISO(end)} ${clockHM(end)}` : duration ? ` for ${duration}` : ""}`}
                 areas={areas}
                 activityTypes={activityTypes}
+                calendars={calendars}
                 onFill={fillDraft}
               />
             }
@@ -444,10 +483,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
             onChange={(kind) => setDetails((current) => ({ ...current, kind }))}
           >
             <Form.Dropdown.Item value="blocking" title="Blocking" />
-            <Form.Dropdown.Item value="non-blocking" title="Non-blocking" />
+            <Form.Dropdown.Item value="non_blocking" title="Non-blocking" />
             <Form.Dropdown.Item value="reference" title="Reference" />
           </Form.Dropdown>
           <CalendarFields
+            key={calendarRevision}
             writable={calendars}
             defaultId={defaultCalendarId}
             allowDefault
@@ -485,34 +525,49 @@ interface FlexibleArgs {
   onSaved: () => Promise<void>;
 }
 
-/** The `/schedule/plan` request. Reused to re-plan when a proposal set expires. */
-interface PlanRequest {
-  name: string;
-  duration: string;
-  date: string;
-  earliest?: string;
-  latest?: string;
-  areaId?: string;
-  activityTypeId?: string;
-  kind?: string;
-  notes?: string;
-  autoCommitBest: boolean;
+/**
+ * The search window as local datetimes. A parsed window ("morning") keeps its
+ * clocks on the day; a latest at or before the earliest is on the next day.
+ * A missing bound falls back to the working day (08:00–22:00), the old server
+ * default, so a night slot is never offered.
+ */
+export function planWindow(
+  date: string,
+  earliest?: string,
+  latest?: string,
+  now = new Date(),
+): { earliest: string; latest: string; nextDay: boolean } {
+  const from = earliest ?? "08:00";
+  const to = latest ?? "22:00";
+  const span = { earliest: `${date}T${from}`, latest: `${to > from ? date : addDaysISO(date, 1)}T${to}` };
+  // The server refuses a window that ends before now + its 5-minute lead. For
+  // today, look at the same window tomorrow, not refuse the request.
+  const soonest = toLocalDateTime(new Date(now.getTime() + 5 * 60_000));
+  if (date !== todayISO(now) || span.latest > soonest) return { ...span, nextDay: false };
+  return {
+    earliest: addMinutesLocal(span.earliest, 1440),
+    latest: addMinutesLocal(span.latest, 1440),
+    nextDay: true,
+  };
 }
 
 /** Find concrete time proposals for the user to review before committing. */
 async function runFlexible(args: FlexibleArgs): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Finding a slot…" });
+  const searchWindow = planWindow(args.date, args.earliest, args.latest);
   const request: PlanRequest = {
     name: args.name,
-    duration: `${args.minutes}m`,
-    date: args.date,
-    earliest: args.earliest,
-    latest: args.latest,
+    durationMinutes: args.minutes,
+    earliest: searchWindow.earliest,
+    latest: searchWindow.latest,
     areaId: args.areaId,
     activityTypeId: args.activityTypeId,
     kind: args.kind,
     notes: args.notes,
     autoCommitBest: false,
+    // The key of this plan: the 503 retry sends it again, and the server
+    // replays the first result. The server replays only by this key.
+    requestId: randomUUID(),
   };
   const result = await planSchedule([request]);
   if (!result.ok) {
@@ -530,7 +585,11 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
     return;
   }
   if (outcome.kind === "proposals") {
-    await toast.hide();
+    if (searchWindow.nextDay) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Showing tomorrow";
+      toast.message = "Today's time window has passed.";
+    } else await toast.hide();
     args.push(
       <ProposalsList
         name={args.name}
@@ -546,9 +605,7 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
     );
     return;
   }
-  toast.style = Toast.Style.Failure;
-  toast.title = "No slot found";
-  toast.message = "Try a different day or a shorter block.";
+  showNoSlot(toast, outcome.error);
 }
 
 interface ProposalState {
@@ -568,11 +625,10 @@ function ProposalsList(props: {
   // One confirm at a time. A double-tap must never send two commits of one token.
   const confirming = useRef(false);
 
-  // Re-run the plan and re-present fresh proposals on the same toast. Force
-  // re-present (autoCommitBest off) so the expired confirm never auto-books a
-  // slot the user did not pick.
+  // Re-run the plan and re-present fresh proposals on the same toast. With
+  // autoCommitBest off the server never books; it returns the options.
   async function replan(toast: Toast): Promise<void> {
-    const result = await planSchedule([{ ...props.request, autoCommitBest: false }]);
+    const result = await planSchedule([{ ...props.request, requestId: randomUUID(), autoCommitBest: false }]);
     if (!result.ok) {
       failToast(toast, result);
       return;
@@ -597,12 +653,10 @@ function ProposalsList(props: {
       toast.message = "The earlier ones expired.";
       return;
     }
-    toast.style = Toast.Style.Failure;
-    toast.title = "No slot found";
-    toast.message = "Try a different day or a shorter block.";
+    showNoSlot(toast, outcome.error);
   }
 
-  async function confirm(option: Proposal, index: number): Promise<void> {
+  async function confirm(index: number): Promise<void> {
     if (confirming.current) return;
     confirming.current = true;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Confirming…" });
@@ -614,8 +668,15 @@ function ProposalsList(props: {
         await replan(toast);
         return;
       }
-      const result = await confirmSchedule([{ token: state.commitToken, choice: option.choice ?? index }]);
+      const result = await confirmSchedule([{ token: state.commitToken, choice: index }]);
       const outcome = result.ok ? readOutcome(result.data) : undefined;
+      // The server refuses an expired token with `not_found`; re-plan as above.
+      const failure = !result.ok ? result : outcome?.kind === "failed" ? outcome.error : undefined;
+      if (failure?.code === "not_found") {
+        toast.title = "Refreshing slots…";
+        await replan(toast);
+        return;
+      }
       if (outcome?.kind === "committed") {
         toast.style = Toast.Style.Success;
         toast.title = `Scheduled “${props.name}”`;
@@ -625,6 +686,7 @@ function ProposalsList(props: {
         return;
       }
       if (!result.ok) failToast(toast, result);
+      else if (outcome?.kind === "failed" && outcome.error) failToast(toast, outcome.error);
       else {
         toast.style = Toast.Style.Failure;
         toast.title = "The slot was not scheduled";
@@ -640,12 +702,12 @@ function ProposalsList(props: {
       {state.options.map((option, index) => (
         <List.Item
           key={index}
-          title={option.start ? `${option.start}–${option.end ?? ""}` : `Option ${index + 1}`}
+          title={option.start && option.end ? formatRange(option) : `Option ${index + 1}`}
           subtitle={option.reason}
-          accessories={option.date ? [{ text: option.date }] : []}
+          accessories={option.start ? [{ text: datePart(option.start) }] : []}
           actions={
             <ActionPanel>
-              <Action title="Use This Slot" icon={Icon.Check} onAction={() => confirm(option, index)} />
+              <Action title="Use This Slot" icon={Icon.Check} onAction={() => confirm(index)} />
             </ActionPanel>
           }
         />
@@ -656,8 +718,8 @@ function ProposalsList(props: {
 
 /**
  * The flexible fit has no calendar fields, so a chosen calendar lands in a
- * follow-up PATCH on the new event. The block stays scheduled either way; a
- * failure only changes the toast message.
+ * follow-up `update` op on the new event. The block stays scheduled either way;
+ * a failure only changes the toast message.
  */
 async function applyCalendar(eventId: string | undefined, calendar: CalendarWriteFields, toast: Toast): Promise<void> {
   if (!hasCalendarChange(calendar)) return;
@@ -665,10 +727,18 @@ async function applyCalendar(eventId: string | undefined, calendar: CalendarWrit
     toast.message = "Pick the calendar with Edit Details.";
     return;
   }
-  const result = await updateEvent(eventId, calendar);
-  if (!result.ok || result.data.failed > 0) {
+  const result = await writeEvents([{ op: "update", id: eventId, ...calendar }]);
+  if (!result.ok || batchFailure(result.data)) {
     toast.message = "The calendar did not apply. Pick it with Edit Details.";
   }
+}
+
+/** A plan without a slot. A rejected row shows the server's reason instead. */
+function showNoSlot(toast: Toast, error?: ApiError): void {
+  if (error) return failToast(toast, error);
+  toast.style = Toast.Style.Failure;
+  toast.title = "No slot found";
+  toast.message = "Try a different day or a shorter block.";
 }
 
 /** A DST-invalid inferred end stays editable instead of crashing the form. */

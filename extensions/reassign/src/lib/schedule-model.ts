@@ -1,6 +1,9 @@
 // Raw /schedule wire types (subset the extension uses) plus the transforms that
 // turn a payload into view models for `agenda` and `now`.
-// Times arrive as both "HH:MM" strings and decimal hours. We key off "HH:MM".
+// A span is start + end, both local datetimes ("YYYY-MM-DDTHH:MM") in the
+// account timezone. The end is after the start. Durations are computed here.
+
+import { clockPart, datePart, localMinutesBetween } from "./format";
 
 export interface Area {
   id: string;
@@ -14,69 +17,44 @@ export interface ActivityType {
   pattern?: string;
 }
 
-export interface Now {
-  iso: string;
-  todayIso: string;
-  weekday: string;
-  currentHour: number;
-  currentClock: string; // "HH:MM"
-  timezone: string;
-  offset: string;
-}
+/** The account's wall clock as a local datetime ("YYYY-MM-DDTHH:MM"). */
+export type Now = string;
 
 export interface ReflectState {
-  state?: "kept" | "skipped" | "changed" | "added";
   status?: "kept" | "skipped" | "changed" | "added";
 }
 
 export interface ScheduleEvent {
   id: string;
-  date: string;
-  start: string; // "HH:MM"
-  end: string; // "HH:MM"
-  durationMinutes: number;
+  start: string; // local datetime; its date part is the event's day
+  end: string; // local datetime
   name: string;
   notes?: string;
-  kind?: "blocking" | "non-blocking" | "reference";
+  kind?: "blocking" | "non_blocking" | "reference";
   source?: string;
-  endNextDay?: boolean;
-  crossesMidnight?: boolean;
-  endsAtDayBoundary?: boolean;
-  continuesFromPrevDay?: boolean;
-  isRecurringInstance?: boolean;
   recurrence?: string;
   readOnly?: boolean;
   warning?: string;
-  calendar?: string;
-  // The home calendar and the one-way copies (ids from GET /calendars, names for display).
-  calendarId?: string;
-  mirroredTo?: string[];
+  // The home calendar and the one-way copies (ids from GET /calendars). Null = Reassign only.
+  calendarId?: string | null;
   mirrorCalendarIds?: string[];
   meeting?: { url?: string; label?: string };
   location?: { text?: string; url?: string };
-  // Full mode carries an inline area/activityType. Compact carries only ids.
-  area?: Area | null;
-  activityType?: ActivityType | null;
-  areaId?: string;
-  activityTypeId?: string;
+  areaId?: string | null;
+  activityTypeId?: string | null;
   reflect?: ReflectState;
   [key: string]: unknown;
 }
 
 export interface FreeSlot {
-  date?: string;
   start: string;
   end: string;
-  durationMinutes: number;
-  endsAtDayBoundary?: boolean;
 }
 
 export interface ScheduleDay {
   date: string;
-  weekday: string;
   events?: ScheduleEvent[];
   freeSlots?: FreeSlot[];
-  empty?: boolean;
 }
 
 /** A parked item from the paginated /schedule Inbox response. */
@@ -84,12 +62,11 @@ export interface BacklogItem {
   id: string;
   name: string;
   notes?: string;
-  durationHours?: number;
+  durationMinutes?: number;
   plannedDate?: string;
-  areaId?: string;
-  area?: Area | null;
-  activityTypeId?: string;
-  activityType?: ActivityType | null;
+  kind?: "blocking" | "non_blocking" | "reference"; // the kind the block takes when scheduled
+  areaId?: string | null;
+  activityTypeId?: string | null;
   [key: string]: unknown;
 }
 
@@ -102,7 +79,6 @@ export interface Calendar {
   account?: string;
   color?: string;
   writable?: boolean;
-  isDefault?: boolean;
 }
 
 export interface CalendarsResponse {
@@ -112,10 +88,13 @@ export interface CalendarsResponse {
 
 export interface ScheduleResponse {
   now: Now;
+  timezone: string; // IANA name; every local datetime in the response is in it
   days: ScheduleDay[];
   areas: Area[];
   activityTypes: ActivityType[];
-  userPreferences?: { timezone?: string; offset?: string; conflictPolicy?: string };
+  userPreferences?: { conflictPolicy?: string };
+  // Only with `includeSeries`: each recurring master. Its span is the anchor occurrence.
+  series?: { id: string; start: string; end: string }[];
   backlogCount?: number;
   nextBacklogOffset?: number | null;
   backlog?: BacklogItem[];
@@ -129,34 +108,44 @@ export function minutesFromClock(clock: string | undefined): number | null {
   return Number(match[1]) * 60 + Number(match[2]);
 }
 
-/** Minutes since midnight from a clock ("HH:MM") or a decimal-hour value. */
-export function minutesFromTime(value: string | number | undefined | null): number | null {
-  if (value === undefined || value === null) return null;
-  if (typeof value === "number") return Number.isFinite(value) ? Math.round(value * 60) : null;
-  const clock = minutesFromClock(value);
-  if (clock !== null) return clock;
-  const decimal = Number(value);
-  return value.trim() !== "" && Number.isFinite(decimal) ? Math.round(decimal * 60) : null;
+export interface Span {
+  start: string;
+  end: string;
 }
 
-/** Start/end minutes, extending end past midnight when the block crosses it. */
-export function eventRange(event: ScheduleEvent): { start: number; end: number } | null {
-  const start = minutesFromClock(event.start);
-  let end = minutesFromClock(event.end);
-  if (start === null || end === null) return null;
-  // Extend past midnight only for a real overnight block. Keep end === start
-  // as a zero-length marker, so a reference point does not become a 24h block.
-  if (event.endNextDay || event.crossesMidnight || end < start) {
-    end += 24 * 60;
-  }
+/**
+ * Start/end minutes from midnight of `dayDate` (default: the start's day). A tail
+ * row from the previous day gets a negative start. Null on a malformed span.
+ */
+export function eventRange(span: Span, dayDate = datePart(span.start)): { start: number; end: number } | null {
+  const midnight = `${dayDate}T00:00`;
+  const start = localMinutesBetween(midnight, span.start);
+  const end = localMinutesBetween(midnight, span.end);
+  if (start === null || end === null || end <= start) return null;
   return { start, end };
+}
+
+/** The length of a span in minutes, or null when the span is malformed. */
+export function spanMinutes(span: Span): number | null {
+  const range = eventRange(span);
+  return range ? range.end - range.start : null;
+}
+
+/** True for the tail of a block that started on an earlier day than `dayDate`. */
+export function isTailRow(event: Span, dayDate: string): boolean {
+  return datePart(event.start) < dayDate;
+}
+
+/** The date, minute of the day, and local datetime of `now` (a local datetime). */
+export function nowWallClock(now: Now): { date: string; minutes: number; local: string } {
+  return { date: datePart(now), minutes: minutesFromClock(clockPart(now)) ?? 0, local: now };
 }
 
 export type ReflectStatus = "kept" | "skipped" | "changed" | "added";
 
 /** The terminal reflect state of a block, or null when it is still open. */
 export function reflectState(event: ScheduleEvent): ReflectStatus | null {
-  const state = event.reflect?.state ?? event.reflect?.status;
+  const state = event.reflect?.status;
   return state === "kept" || state === "skipped" || state === "changed" || state === "added" ? state : null;
 }
 
@@ -167,14 +156,20 @@ export function isReflected(event: ScheduleEvent): boolean {
 
 /** True unless the block is explicitly non-blocking or a reference point. */
 export function isBlockingKind(event: ScheduleEvent): boolean {
-  return event.kind !== "non-blocking" && event.kind !== "reference";
+  return event.kind !== "non_blocking" && event.kind !== "reference";
 }
 
-/** Resolve an area from an inline value or an `areaId` join. Works for events and backlog items. */
-export function resolveArea(item: { area?: Area | null; areaId?: string }, areas: Area[]): Area | null {
-  if (item.area) return item.area;
-  if (item.areaId) return areas.find((a) => a.id === item.areaId) ?? null;
-  return null;
+/**
+ * The block's home calendar id, or null for a Reassign-only block. The server
+ * omits `calendarId` when the block follows the account default calendar.
+ */
+export function homeCalendarId(event: { calendarId?: string | null }, defaultId?: string | null): string | null {
+  return event.calendarId === undefined ? (defaultId ?? null) : event.calendarId;
+}
+
+/** Resolve an area from its `areaId`. Works for events and backlog items. */
+export function resolveArea(item: { areaId?: string | null }, areas: Area[]): Area | null {
+  return item.areaId ? (areas.find((a) => a.id === item.areaId) ?? null) : null;
 }
 
 // Known conferencing hosts, for the notes fallback when the API has no meeting.
@@ -208,28 +203,37 @@ export function eventMeeting(event: ScheduleEvent): { url: string; label?: strin
   return scraped ? { url: scraped } : null;
 }
 
-/** True when the block repeats or is one occurrence of a series. */
-export function isRecurring(event: ScheduleEvent): boolean {
-  return Boolean(event.recurrence || event.isRecurringInstance);
+/** The series id and date of an occurrence id (`seriesId@YYYY-MM-DD`), or null. */
+export function splitOccurrenceId(id: string): { seriesId: string; date: string } | null {
+  const match = /^(.+)@(\d{4}-\d{2}-\d{2})$/.exec(id);
+  return match ? { seriesId: match[1], date: match[2] } : null;
 }
 
-/** Resolve an activity type from an inline value or an `activityTypeId` join. */
-export function resolveActivity(
-  item: { activityType?: ActivityType | null; activityTypeId?: string },
-  activityTypes: ActivityType[],
-): ActivityType | null {
-  if (item.activityType) return item.activityType;
-  if (item.activityTypeId) return activityTypes.find((a) => a.id === item.activityTypeId) ?? null;
-  return null;
-}
+/** Which blocks of a series an edit covers. */
+export type SeriesReach = "this" | "future" | "all";
 
 /**
- * Drop next-day tail rows that duplicate a start-day row present in the same
- * list (shared id). For a single-day fetch this is a no-op.
+ * The write target: the `@DATE` occurrence id for this block, plus
+ * `scope: "future"` for later blocks, or the bare series id for all of them.
+ * An occurrence that was changed on its own has the same id form.
  */
-function dedupeCrossMidnight(events: ScheduleEvent[]): ScheduleEvent[] {
-  const startIds = new Set(events.filter((e) => !e.continuesFromPrevDay).map((e) => e.id));
-  return events.filter((e) => !(e.continuesFromPrevDay && startIds.has(e.id)));
+export function occurrenceTarget(id: string, reach: SeriesReach): { id: string; scope?: "future" } {
+  const occurrence = splitOccurrenceId(id);
+  if (!occurrence || reach === "this") return { id };
+  return reach === "future" ? { id, scope: "future" } : { id: occurrence.seriesId };
+}
+
+/** True when the block repeats or is one occurrence of a series. */
+export function isRecurring(event: ScheduleEvent): boolean {
+  return Boolean(event.recurrence || splitOccurrenceId(event.id));
+}
+
+/** Resolve an activity type from its `activityTypeId`. */
+export function resolveActivity(
+  item: { activityTypeId?: string | null },
+  activityTypes: ActivityType[],
+): ActivityType | null {
+  return item.activityTypeId ? (activityTypes.find((a) => a.id === item.activityTypeId) ?? null) : null;
 }
 
 export type TodaySection = "now" | "upNext" | "later" | "done";
@@ -256,9 +260,10 @@ export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): To
   const day = schedule.days.find((d) => d.date === dateISO);
   if (!day) return null;
 
-  const nowMinutes = minutesFromClock(schedule.now.currentClock) ?? 0;
-  const isToday = day.date === schedule.now.todayIso;
-  const events = dedupeCrossMidnight(day.events ?? []);
+  const clock = nowWallClock(schedule.now);
+  const nowMinutes = clock.minutes;
+  const isToday = day.date === clock.date;
+  const events = day.events ?? [];
 
   const sections: Record<TodaySection, ScheduleEvent[]> = {
     now: [],
@@ -275,7 +280,7 @@ export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): To
       sections.done.push(event);
       continue;
     }
-    const range = eventRange(event);
+    const range = eventRange(event, day.date);
     if (!range || !isToday) {
       future.push({ event, start: range?.start ?? 0 });
       continue;
@@ -306,7 +311,6 @@ export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): To
 
 export interface DayAgenda {
   date: string;
-  weekday: string;
   events: ScheduleEvent[]; // cross-midnight deduped, sorted by start
   areas: Area[];
   activityTypes: ActivityType[];
@@ -315,10 +319,8 @@ export interface DayAgenda {
 /**
  * One DayAgenda per requested date, from a single range response (days[]).
  * A date the server omits becomes an empty day, so it never borrows another
- * day's events. Because the whole range is one response, a midnight-crossing
- * block's tail row on the next day drops against its start row anywhere in the
- * range — a cross-day dedupe a per-day fetch cannot do. A tail whose start row
- * sits outside the window survives.
+ * day's events. A tail row (its start is on an earlier day) drops when its start
+ * row is in the range. A tail whose start row sits outside the window survives.
  */
 export function buildRangeAgenda(schedule: ScheduleResponse, dates: string[]): DayAgenda[] {
   const days = schedule.days ?? [];
@@ -326,32 +328,22 @@ export function buildRangeAgenda(schedule: ScheduleResponse, dates: string[]): D
   const areas = schedule.areas ?? [];
   const activityTypes = schedule.activityTypes ?? [];
   // The start-row id of every block across the range (a tail is not a start).
-  const startIds = new Set(
-    days
-      .flatMap((d) => d.events ?? [])
-      .filter((e) => !e.continuesFromPrevDay)
-      .map((e) => e.id),
-  );
+  const startIds = new Set(days.flatMap((d) => (d.events ?? []).filter((e) => !isTailRow(e, d.date)).map((e) => e.id)));
   return dates.map((date) => {
     const day = byDate.get(date);
     const events = day
       ? (day.events ?? [])
-          .filter((e) => !(e.continuesFromPrevDay && startIds.has(e.id)))
+          .filter((e) => !(isTailRow(e, date) && startIds.has(e.id)))
           .slice()
-          .sort((a, b) => (eventRange(a)?.start ?? 0) - (eventRange(b)?.start ?? 0))
+          .sort((a, b) => a.start.localeCompare(b.start))
       : [];
-    return { date, weekday: day?.weekday ?? "", events, areas, activityTypes };
+    return { date, events, areas, activityTypes };
   });
 }
 
 /** The area and activity names of an item, for a row's search keywords. */
 export function areaActivityNames(
-  item: {
-    area?: Area | null;
-    areaId?: string;
-    activityType?: ActivityType | null;
-    activityTypeId?: string;
-  },
+  item: { areaId?: string | null; activityTypeId?: string | null },
   areas: Area[],
   activityTypes: ActivityType[],
 ): string[] {
@@ -404,7 +396,7 @@ export function eventMatchesFilter(event: ScheduleEvent, model: TodayModel, filt
 
 /** False when the block's kind is currently hidden by a kind toggle. */
 export function passesKindFilter(event: ScheduleEvent, hideNonBlocking: boolean, hideReference: boolean): boolean {
-  if (hideNonBlocking && event.kind === "non-blocking") return false;
+  if (hideNonBlocking && event.kind === "non_blocking") return false;
   if (hideReference && event.kind === "reference") return false;
   return true;
 }
@@ -420,9 +412,12 @@ export interface MenuBarModel {
 
 /** Current block, the next few blocks, and the next free slot for the menu bar. */
 export function buildMenuBarModel(schedule: ScheduleResponse): MenuBarModel {
-  const today = schedule.days.find((d) => d.date === schedule.now.todayIso) ?? schedule.days[0];
-  const nowMinutes = minutesFromClock(schedule.now.currentClock) ?? 0;
-  const live = dedupeCrossMidnight(today?.events ?? []).filter((e) => !isReflected(e));
+  const clock = nowWallClock(schedule.now);
+  // Never borrow another day: its events would sit on today's clock.
+  const today = schedule.days.find((d) => d.date === clock.date);
+  const nowMinutes = clock.minutes;
+  const dayDate = today?.date ?? clock.date;
+  const live = (today?.events ?? []).filter((e) => !isReflected(e));
   // Only real (blocking) blocks drive the bar title, current, and up-next.
   const events = live.filter(isBlockingKind);
 
@@ -430,7 +425,7 @@ export function buildMenuBarModel(schedule: ScheduleResponse): MenuBarModel {
   // group in the popover. Keep the ones that have not ended, earliest first.
   const other = live
     .filter((e) => !isBlockingKind(e))
-    .map((e) => ({ event: e, range: eventRange(e) }))
+    .map((e) => ({ event: e, range: eventRange(e, dayDate) }))
     .filter((x) => x.range !== null && x.range.end > nowMinutes)
     .sort((a, b) => (a.range?.start ?? 0) - (b.range?.start ?? 0))
     .slice(0, 5)
@@ -439,7 +434,7 @@ export function buildMenuBarModel(schedule: ScheduleResponse): MenuBarModel {
   let current: ScheduleEvent | null = null;
   const upcoming: { event: ScheduleEvent; start: number }[] = [];
   for (const event of events) {
-    const range = eventRange(event);
+    const range = eventRange(event, dayDate);
     if (!range) continue;
     if (range.start <= nowMinutes && nowMinutes < range.end) {
       current = event;
@@ -451,7 +446,7 @@ export function buildMenuBarModel(schedule: ScheduleResponse): MenuBarModel {
 
   const nextFree =
     (today?.freeSlots ?? [])
-      .map((slot) => ({ slot, start: minutesFromClock(slot.start) ?? 0 }))
+      .map((slot) => ({ slot, start: eventRange(slot, dayDate)?.start ?? -1 }))
       .filter((x) => x.start >= nowMinutes)
       .sort((a, b) => a.start - b.start)[0]?.slot ?? null;
 

@@ -4,12 +4,14 @@ import { BlockDraft, blockDraft } from "../lib/ai-draft";
 import { previewBlock } from "../lib/api";
 import { failToast } from "../lib/feedback";
 import { clockHM, todayISO } from "../lib/format";
-import type { ActivityType, Area } from "../lib/schedule-model";
+import type { ActivityType, Area, Calendar } from "../lib/schedule-model";
 
 export function AiFillForm(props: {
   initialText: string;
   areas: Area[];
   activityTypes: ActivityType[];
+  // The writable calendars: a suggested home must be one of them.
+  calendars: Calendar[];
   onFill: (draft: BlockDraft) => void;
 }) {
   const { pop } = useNavigation();
@@ -59,6 +61,8 @@ export function AiFillForm(props: {
         throw new Error("The suggested area is unavailable. Refresh Add Block and try again.");
       if (next.activityTypeId && !props.activityTypes.some((a) => a.id === next.activityTypeId))
         throw new Error("The suggested activity is unavailable. Refresh Add Block and try again.");
+      if (next.calendarId && !props.calendars.some((c) => c.id === next.calendarId))
+        throw new Error("The suggested calendar is not one you can publish to. Pick the calendar in the form.");
       setDraft(next);
       toast.style = Toast.Style.Success;
       toast.title = "Suggestion ready — nothing saved";
@@ -76,6 +80,7 @@ export function AiFillForm(props: {
 
   const area = props.areas.find((a) => a.id === draft?.areaId)?.name;
   const activity = props.activityTypes.find((a) => a.id === draft?.activityTypeId)?.name;
+  const calendar = props.calendars.find((c) => c.id === draft?.calendarId)?.name;
   return (
     <Form
       navigationTitle="Fill with Reassign AI"
@@ -122,7 +127,7 @@ export function AiFillForm(props: {
           />
           <Form.Description
             title="Details"
-            text={[area, activity, draft.kind, draft.notes].filter(Boolean).join(" · ")}
+            text={[area, activity, calendar, draft.kind, draft.notes].filter(Boolean).join(" · ")}
           />
         </>
       )}

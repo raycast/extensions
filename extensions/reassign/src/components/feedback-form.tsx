@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FeedbackKind, sendFeedback } from "../lib/api";
+import { MAX_FEEDBACK_LENGTH } from "../lib/wire";
 import { failToast } from "../lib/feedback";
 
 /** A short form to send real feedback to the Reassign team (POST /feedback). */
@@ -10,6 +11,14 @@ export function FeedbackForm() {
     const message = values.message.trim();
     if (!message) {
       await showToast({ style: Toast.Style.Failure, title: "Write a message first" });
+      return;
+    }
+    if (message.length > MAX_FEEDBACK_LENGTH) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "The message is too long",
+        message: `Shorten it to ${MAX_FEEDBACK_LENGTH} characters or less.`,
+      });
       return;
     }
     const toast = await showToast({ style: Toast.Style.Animated, title: "Sending…" });

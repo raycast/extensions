@@ -1,6 +1,13 @@
-import type { ScheduleEvent } from "./schedule-model";
+import { MAX_NAME_LENGTH, MAX_NOTES_LENGTH } from "./wire";
 
 // Local-date and label helpers shared by the commands.
+
+/** The reason a name or notes text is over the server limit, or null. */
+export function textLimitError(name: string, notes = ""): string | null {
+  if (name.length > MAX_NAME_LENGTH) return `Shorten the name to ${MAX_NAME_LENGTH} characters or less.`;
+  if (notes.length > MAX_NOTES_LENGTH) return `Shorten the notes to ${MAX_NOTES_LENGTH} characters or less.`;
+  return null;
+}
 
 /** Local calendar date as YYYY-MM-DD. */
 export function todayISO(base = new Date()): string {
@@ -41,10 +48,67 @@ export function relativeDayLabel(iso: string, todayIso: string): string {
   });
 }
 
-/** "22:00 → 01:30 +1" — a +1 marks a block that ends the next day. */
-export function formatRange(event: ScheduleEvent): string {
-  const plusDay = event.endNextDay || event.crossesMidnight || event.end < event.start ? " +1" : "";
-  return `${event.start} → ${event.end}${plusDay}`;
+// A span bound is a local datetime "YYYY-MM-DDTHH:MM": wall-clock time in the
+// account timezone, with no offset. Wall arithmetic here ignores DST on purpose.
+const LOCAL_DATETIME = /^(\d{4}-\d{2}-\d{2})T([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** True when a value is a strict local datetime ("YYYY-MM-DDTHH:MM"). */
+export function isLocalDateTime(value: unknown): value is string {
+  return typeof value === "string" && LOCAL_DATETIME.test(value);
+}
+
+/** The "YYYY-MM-DD" part of a local datetime. */
+export function datePart(local: string): string {
+  return local.slice(0, 10);
+}
+
+/** The "HH:MM" part of a local datetime. */
+export function clockPart(local: string): string {
+  return local.slice(11, 16);
+}
+
+/** The local datetime of a device Date's wall clock. */
+export function toLocalDateTime(date: Date): string {
+  return `${todayISO(date)}T${clockHM(date)}`;
+}
+
+/** A device Date with the wall clock of a local datetime. */
+export function localToDate(local: string): Date {
+  return combineDateTime(datePart(local), clockPart(local));
+}
+
+/** Wall minutes since the epoch, so two local datetimes subtract without DST. */
+function wallEpochMinutes(local: string): number {
+  const [y, m, d] = datePart(local).split("-").map(Number);
+  const [h, min] = clockPart(local).split(":").map(Number);
+  return Date.UTC(y, m - 1, d, h, min) / 60000;
+}
+
+/** Wall minutes from one local datetime to another, or null on a bad value. */
+export function localMinutesBetween(from: string, to: string): number | null {
+  if (!isLocalDateTime(from) || !isLocalDateTime(to)) return null;
+  return wallEpochMinutes(to) - wallEpochMinutes(from);
+}
+
+/** A local datetime moved by wall minutes. */
+export function addMinutesLocal(local: string, minutes: number): string {
+  const moved = new Date((wallEpochMinutes(local) + minutes) * 60000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${moved.getUTCFullYear()}-${pad(moved.getUTCMonth() + 1)}-${pad(moved.getUTCDate())}T${pad(moved.getUTCHours())}:${pad(moved.getUTCMinutes())}`;
+}
+
+/**
+ * "22:00 → 01:30 +1" — "+N" is the days from the start date to the end date. An
+ * end at 00:00 on the next day is the day boundary, so it shows as 24:00.
+ */
+export function formatRange(span: { start: string; end: string }): string {
+  const start = clockPart(span.start);
+  const end = clockPart(span.end);
+  const days = Math.round(
+    (localMinutesBetween(`${datePart(span.start)}T00:00`, `${datePart(span.end)}T00:00`) ?? 0) / 1440,
+  );
+  if (days === 1 && end === "00:00") return `${start} → 24:00`;
+  return `${start} → ${end}${days > 0 ? ` +${days}` : ""}`;
 }
 
 /** "90m" / "1h" / "1h30". */
@@ -53,11 +117,6 @@ export function humanDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
   return rest === 0 ? `${hours}h` : `${hours}h${String(rest).padStart(2, "0")}`;
-}
-
-/** Human duration from a decimal-hour value (for example `durationHours`). */
-export function humanHours(hours: number): string {
-  return humanDuration(Math.round(hours * 60));
 }
 
 /**

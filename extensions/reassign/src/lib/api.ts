@@ -1,9 +1,14 @@
+import { randomUUID } from "node:crypto";
 import { getAccessToken, NotAuthorizedError, SignedOutError } from "./oauth";
 import type { CalendarsResponse, ScheduleResponse } from "./schedule-model";
+import { batchFailure, BatchReceipt, BatchResultRow, toClientCode } from "./envelope";
+import { addDaysISO, addMinutesLocal, clockPart, datePart, localMinutesBetween } from "./format";
 import { API_BASE, ErrorCode, PATHS } from "./wire";
 
+export type { BatchReceipt, BatchResultRow } from "./envelope";
+
 // Typed client over /api/v1. It normalizes both refusal shapes to one result,
-// refreshes once on 401, retries once on a 503, and never retries a 429.
+// refreshes once on 401, retries a safe call once on a 503, and never retries a 429.
 // Only the `permission` code drives the Pro-required state — branch on `code`.
 
 export type ClientCode = ErrorCode | "network" | "unauthenticated" | "signed_out";
@@ -17,97 +22,51 @@ export interface ApiError {
 
 export type ApiResult<T> = { ok: true; data: T } | ApiError;
 
-export type Scope = "this" | "future" | "all";
+// `future` covers an occurrence (`seriesId@DATE`) and every later one. A bare
+// occurrence id is that block only; a bare series id is the whole series.
+export type Scope = "future";
 export type ReflectStatus = "kept" | "skipped" | "changed" | "added";
 
-export type WriteOp =
-  | {
-      op: "create";
-      date: string;
-      start: string;
-      end: string;
-      endNextDay?: boolean;
-      name: string;
-      notes?: string;
-      areaId?: string;
-      activityTypeId?: string;
-      areaName?: string;
-      activityTypeName?: string;
-      kind?: string;
-      // Calendar publish targets (Pro). `syncTo: null` keeps it in Reassign only.
-      syncTo?: string | null;
-      mirrorTo?: string[];
-    }
-  | {
-      op: "move";
-      id: string;
-      start?: string;
-      date?: string;
-      scope?: Scope;
-      occurrenceDate?: string;
-    }
-  | { op: "shift"; id: string; byMinutes: number; scope?: Scope; occurrenceDate?: string }
-  | {
-      op: "reflect";
-      id: string;
-      status: ReflectStatus;
-      actualStart?: string;
-      actualEnd?: string;
-      actualEndNextDay?: boolean;
-    }
-  | { op: "delete"; id: string; scope?: Scope; occurrenceDate?: string };
-
-// The PATCH /events/{id} body. Every field is optional; send only what changes.
-// The server supports name/time/date/area/activity/notes edits (verified 2026-08-15).
-export interface UpdateEventPatch {
+/**
+ * The editable event fields. Input shape = output shape, so a read field copies
+ * over. `start` / `end` are local datetimes ("YYYY-MM-DDTHH:MM").
+ */
+interface EventFields {
   name?: string;
   start?: string;
   end?: string;
-  endNextDay?: boolean;
-  date?: string;
-  areaId?: string;
-  areaName?: string;
-  activityTypeId?: string;
-  activityTypeName?: string;
   notes?: string;
+  areaId?: string | null; // null clears it
+  activityTypeId?: string | null; // null clears it
   kind?: string;
-  // Re-home (`id`) or unlink (`null`) the calendar copy, and replace the mirror
-  // set. Both apply to the whole series, so they need `scope: "all"` on a repeat.
-  syncTo?: string | null;
-  mirrorTo?: string[];
-  scope?: Scope;
-  occurrenceDate?: string;
+  // Home calendar (`null` = Reassign only; omitted = the default) and one-way copies (Pro).
+  calendarId?: string | null;
+  mirrorCalendarIds?: string[];
 }
 
-export interface BatchResultRow {
-  index: number;
-  status: "ok" | "error";
-  result?: unknown;
-  error?: string;
-  errorCode?: string;
-}
+export type CreateOp = { op: "create"; start: string; end: string; name: string } & EventFields;
+// `start` / `end` move the block, also to another day; a lone `start` keeps the duration.
+export type UpdateOp = { op: "update"; id: string; scope?: Scope } & EventFields;
 
-export interface BatchReceipt {
-  applied: number;
-  failed: number;
-  skipped?: number;
-  results: BatchResultRow[];
-  undoToken?: string;
-}
+export type WriteOp =
+  | CreateOp
+  | UpdateOp
+  | { op: "shift"; id: string; byMinutes: number; scope?: Scope }
+  | { op: "reflect"; id: string; status: ReflectStatus; actualStart?: string; actualEnd?: string }
+  | { op: "delete"; id: string; scope?: Scope };
 
 export interface BacklogOp {
   op: "capture";
   name: string;
   notes?: string;
-  durationHours?: number;
+  durationMinutes?: number;
   areaId?: string;
-  areaName?: string;
   activityTypeId?: string;
-  activityTypeName?: string;
   plannedDate?: string;
+  kind?: string; // omitted = "blocking"
 }
 
-// The POST /backlog op union (verified 2026-08-15). `capture` is `BacklogOp`.
+// The POST /backlog op union. `capture` is `BacklogOp`.
 // `schedule` places a parked item into the day; `remove` deletes it (undoable).
 export type BacklogManageOp =
   | BacklogOp
@@ -115,22 +74,18 @@ export type BacklogManageOp =
       op: "update";
       id: string;
       name?: string;
-      durationHours?: number;
+      durationMinutes?: number;
       plannedDate?: string;
       notes?: string;
     }
-  | { op: "schedule"; id: string; date: string; start: string }
+  | { op: "schedule"; id: string; start: string }
   | { op: "park"; id: string }
   | { op: "remove"; id: string };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Core request with token, 401-refresh-once, 503-retry-once, 429-no-retry. */
-async function request<T>(
-  method: "GET" | "POST" | "PATCH" | "DELETE",
-  path: string,
-  body?: unknown,
-): Promise<ApiResult<T>> {
+async function request<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<ApiResult<T>> {
   let token: string;
   try {
     token = await getAccessToken();
@@ -188,8 +143,9 @@ async function request<T>(
 
     const failure = await normalizeError(response);
 
-    // 503 internal → back off briefly and retry once.
-    if (response.status === 503 && failure.code === "internal" && !retriedInternal) {
+    // 503 internal → back off briefly and retry once, but only a safe call: a
+    // 503 can come after a write landed, so a plain write must not run twice.
+    if (response.status === 503 && failure.code === "internal" && !retriedInternal && safeToRetry(method, body)) {
       retriedInternal = true;
       await sleep(300);
       continue;
@@ -199,48 +155,28 @@ async function request<T>(
   }
 }
 
-/** Read the error envelope. Handles the plain shape and the rejected batch. */
+/**
+ * Read the `{ error: { code, message } }` envelope. A rejected atomic batch also
+ * carries `results`; its first failed row names the op, so prefer that row.
+ */
 async function normalizeError(response: Response): Promise<ApiError> {
   const status = response.status;
   const payload = (await parseBody(response)) as
-    | {
-        error?: { code?: string; message?: string };
-        rejected?: boolean;
-        results?: BatchResultRow[];
-      }
-    | undefined;
-
-  // Rejected batch: derive a single code if the ops agree.
-  if (payload?.rejected && Array.isArray(payload.results)) {
-    const codes = payload.results.filter((r) => r.errorCode).map((r) => r.errorCode as string);
-    const unanimous = codes.length > 0 && codes.every((c) => c === codes[0]) ? codes[0] : undefined;
-    const message = payload.results.find((r) => r.error)?.error ?? "The change was rejected.";
-    return { ok: false, code: toClientCode(unanimous, status), message, status };
-  }
-
-  const code = payload?.error?.code;
-  const message = payload?.error?.message ?? `Request failed (${status}).`;
-  return { ok: false, code: toClientCode(code, status), message, status };
+    { error?: { code?: string; message?: string }; results?: BatchResultRow[] } | undefined;
+  const row = Array.isArray(payload?.results) ? batchFailure({ results: payload.results }) : undefined;
+  const error = row?.error ?? payload?.error;
+  const message = error?.message ?? `Request failed (${status}).`;
+  return { ok: false, code: toClientCode(error?.code, status), message, status };
 }
 
-function toClientCode(code: string | undefined, status: number): ClientCode {
-  const known: ErrorCode[] = [
-    "unauthorized",
-    "permission",
-    "scope",
-    "read_only",
-    "not_found",
-    "validation",
-    "conflict",
-    "ambiguous",
-    "rate_limited",
-    "internal",
-  ];
-  if (code && (known as string[]).includes(code)) return code as ErrorCode;
-  if (status === 429) return "rate_limited";
-  if (status === 503) return "internal";
-  if (status === 401) return "unauthorized";
-  return "internal";
+/** A read, or a write that the server deduplicates by its `requestId` / `submissionId`. */
+function safeToRetry(method: "GET" | "POST", body: unknown): boolean {
+  if (method === "GET") return true;
+  const b = body as { submissionId?: unknown; requests?: { requestId?: unknown }[] } | undefined;
+  if (typeof b?.submissionId === "string") return true;
+  return (
+    Array.isArray(b?.requests) && b.requests.length > 0 && b.requests.every((r) => typeof r.requestId === "string")
+  );
 }
 
 async function parseBody(response: Response): Promise<unknown> {
@@ -260,39 +196,38 @@ function asMessage(error: unknown): string {
 // --- Typed endpoints ---------------------------------------------------------
 
 interface ScheduleParams {
-  date?: string;
-  from?: string;
-  to?: string;
-  compact?: boolean;
+  from: string;
+  to: string;
   includeBacklog?: boolean;
   backlogOffset?: number;
+  includeSeries?: boolean;
 }
 
-/** Build the /schedule query string. A range uses from+to; backlog needs the flag. */
+/** Build the /schedule query string. `from` and `to` are required; backlog needs the flag. */
 function scheduleQuery(params: ScheduleParams): string {
-  const q = new URLSearchParams();
-  if (params.date) q.set("date", params.date);
-  if (params.from) q.set("from", params.from);
-  if (params.to) q.set("to", params.to);
-  if (params.compact) q.set("compact", "true");
-  if (params.backlogOffset !== undefined) q.set("backlogOffset", String(params.backlogOffset));
+  const q = new URLSearchParams({ from: params.from, to: params.to });
   if (params.includeBacklog) q.set("includeBacklog", "true");
-  const s = q.toString();
-  return s ? `?${s}` : "";
+  if (params.backlogOffset !== undefined) q.set("backlogOffset", String(params.backlogOffset));
+  if (params.includeSeries) q.set("includeSeries", "true");
+  return `?${q.toString()}`;
 }
 
-export function getSchedule(date: string, compact = false): Promise<ApiResult<ScheduleResponse>> {
-  return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ date, compact }));
+/** Read one day (`from` = `to`). */
+export function getSchedule(date: string): Promise<ApiResult<ScheduleResponse>> {
+  return getScheduleRange(date, date);
 }
 
 /** Read a contiguous [from, to] date range in one call. Response groups days[]. */
-export function getScheduleRange(from: string, to: string, compact = false): Promise<ApiResult<ScheduleResponse>> {
-  return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ from, to, compact }));
+export function getScheduleRange(from: string, to: string): Promise<ApiResult<ScheduleResponse>> {
+  return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ from, to }));
 }
 
 /** Read a day plus the parked-block inbox. The backlog needs includeBacklog=true. */
 export async function getScheduleWithBacklog(date: string): Promise<ApiResult<ScheduleResponse>> {
-  const first = await request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ date, includeBacklog: true }));
+  const first = await request<ScheduleResponse>(
+    "GET",
+    PATHS.schedule + scheduleQuery({ from: date, to: date, includeBacklog: true }),
+  );
   if (!first.ok) return first;
   const backlog = [...(first.data.backlog ?? [])];
   let offset = first.data.nextBacklogOffset;
@@ -303,7 +238,7 @@ export async function getScheduleWithBacklog(date: string): Promise<ApiResult<Sc
     }
     const page = await request<ScheduleResponse>(
       "GET",
-      PATHS.schedule + scheduleQuery({ date, includeBacklog: true, backlogOffset: offset }),
+      PATHS.schedule + scheduleQuery({ from: date, to: date, includeBacklog: true, backlogOffset: offset }),
     );
     if (!page.ok) return page;
     backlog.push(...(page.data.backlog ?? []));
@@ -320,25 +255,62 @@ export async function getScheduleWithBacklog(date: string): Promise<ApiResult<Sc
   };
 }
 
+/**
+ * Move a time change of one occurrence onto its series anchor. A bare series id
+ * reads `start` / `end` on the anchor day, so an occurrence datetime would
+ * re-anchor the series. A new start keeps its clock and moves the anchor by the
+ * days from the occurrence's original date; a new end keeps the anchor start and
+ * sets the new length. So a changed occurrence gives the series the chosen times.
+ */
+export async function rebaseOnSeries(
+  seriesId: string,
+  occurrence: { date: string; start: string; end: string },
+  change: { start?: string; end?: string },
+): Promise<ApiResult<{ start?: string; end?: string }>> {
+  // The original date of the occurrence (from its id), also when it was moved.
+  const day = occurrence.date;
+  const read = await request<ScheduleResponse>(
+    "GET",
+    PATHS.schedule + scheduleQuery({ from: day, to: day, includeSeries: true }),
+  );
+  if (!read.ok) return read;
+  const anchor = read.data.series?.find((s) => s.id === seriesId);
+  if (!anchor) return { ok: false, code: "not_found", message: "The series was not found. Edit it in Reassign." };
+  const out: { start?: string; end?: string } = {};
+  if (change.start) {
+    const days = Math.round((localMinutesBetween(`${day}T00:00`, `${datePart(change.start)}T00:00`) ?? 0) / 1440);
+    out.start = `${addDaysISO(datePart(anchor.start), days)}T${clockPart(change.start)}`;
+  }
+  if (change.end) out.end = addMinutesLocal(anchor.start, localMinutesBetween(occurrence.start, change.end) ?? 0);
+  return { ok: true, data: out };
+}
+
 /** The connected calendars, in picker order, plus the account default. */
 export function listCalendars(): Promise<ApiResult<CalendarsResponse>> {
   return request<CalendarsResponse>("GET", PATHS.calendars);
 }
 
-export function createEvent(op: Extract<WriteOp, { op: "create" }>): Promise<ApiResult<BatchReceipt>> {
-  return request<BatchReceipt>("POST", PATHS.events, { ops: [op] });
+/** The one event write endpoint: create, update, shift, reflect, and delete ops. */
+export function writeEvents(ops: WriteOp[]): Promise<ApiResult<BatchReceipt>> {
+  return request<BatchReceipt>("POST", PATHS.events, { ops });
 }
 
-export function eventsBatch(ops: WriteOp[]): Promise<ApiResult<BatchReceipt>> {
-  return request<BatchReceipt>("POST", PATHS.eventsBatch, { ops });
+/** One /schedule/plan request. The bounds are local datetimes; `start` excludes the window. */
+export interface PlanRequest {
+  name: string;
+  durationMinutes: number;
+  start?: string;
+  earliest?: string;
+  latest?: string;
+  areaId?: string;
+  activityTypeId?: string;
+  kind?: string;
+  notes?: string;
+  autoCommitBest?: boolean;
+  requestId?: string;
 }
 
-/** Update one event in place (PATCH /events/{id}). Send only the changed fields. */
-export function updateEvent(id: string, patch: UpdateEventPatch): Promise<ApiResult<BatchReceipt>> {
-  return request<BatchReceipt>("PATCH", `${PATHS.events}/${encodeURIComponent(id)}`, patch);
-}
-
-export function planSchedule(requests: unknown[]): Promise<ApiResult<Record<string, unknown>>> {
+export function planSchedule(requests: PlanRequest[]): Promise<ApiResult<Record<string, unknown>>> {
   return request<Record<string, unknown>>("POST", PATHS.schedulePlan, { requests });
 }
 
@@ -361,18 +333,15 @@ export function manageBacklog(ops: BacklogManageOp[]): Promise<ApiResult<BatchRe
   return request<BatchReceipt>("POST", PATHS.backlog, { ops });
 }
 
-// GET /events/search result. The row is lean: no area, activity, or duration.
+// GET /events/search row: a full event; the view reads only these fields.
 export interface SearchEvent {
   id: string;
-  date: string;
-  start: string;
-  end: string;
+  start: string; // local datetime
+  end: string; // local datetime
   name: string;
-  score?: number;
 }
 
 export interface SearchResponse {
-  count: number;
   ambiguous?: boolean;
   timezone?: string;
   events: SearchEvent[];
@@ -393,11 +362,12 @@ export function searchEvents(
 
 export type FeedbackKind = "bug" | "idea" | "other";
 
-export function sendFeedback(
-  message: string,
-  kind: FeedbackKind = "other",
-): Promise<ApiResult<Record<string, unknown>>> {
-  return request<Record<string, unknown>>("POST", PATHS.feedback, { kind, message });
+/**
+ * Send feedback. The server answers 204 with no body. The `submissionId` stays
+ * the same on the 503 retry, so the server keeps one copy.
+ */
+export function sendFeedback(message: string, kind: FeedbackKind = "other"): Promise<ApiResult<void>> {
+  return request<void>("POST", PATHS.feedback, { kind, message, submissionId: randomUUID() });
 }
 
 /** Ask Reassign AI for a preview only. Saving uses the normal reviewed form. */

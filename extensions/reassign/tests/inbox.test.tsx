@@ -5,20 +5,22 @@ const mock = vi.hoisted(() => ({
   data: {
     ok: true,
     data: {
-      backlog: [{ id: "a", name: "Read paper", durationHours: 2, plannedDate: "2026-09-23" }],
+      backlog: [{ id: "a", name: "Read paper", durationMinutes: 120, plannedDate: "2026-09-23" }],
       areas: [],
       activityTypes: [],
-      now: { todayIso: "2026-09-22" },
+      now: "2026-09-22T10:00",
+      timezone: "UTC",
     },
   } as {
     ok: boolean;
     code?: string;
     message?: string;
     data?: {
-      backlog: { id: string; name: string; durationHours?: number; plannedDate?: string }[];
+      backlog: { id: string; name: string; durationMinutes?: number; plannedDate?: string }[];
       areas: never[];
       activityTypes: never[];
-      now: { todayIso: string };
+      now: string;
+      timezone: string;
     };
   },
   revalidate: vi.fn(),
@@ -111,10 +113,11 @@ beforeEach(() => {
   mock.data = {
     ok: true,
     data: {
-      backlog: [{ id: "a", name: "Read paper", durationHours: 2, plannedDate: "2026-09-23" }],
+      backlog: [{ id: "a", name: "Read paper", durationMinutes: 120, plannedDate: "2026-09-23" }],
       areas: [],
       activityTypes: [],
-      now: { todayIso: "2026-09-22" },
+      now: "2026-09-22T10:00",
+      timezone: "UTC",
     },
   };
   mock.revalidate.mockReset();
@@ -125,7 +128,7 @@ beforeEach(() => {
 });
 
 it("Remove Idea revalidates after a successful remove", async () => {
-  mock.manage.mockResolvedValueOnce({ ok: true, data: { failed: 0 } });
+  mock.manage.mockResolvedValueOnce({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
   const tree = InboxCommand();
   await findByTitle(tree, "Remove Idea")!.props.onAction!();
   expect(mock.revalidate).toHaveBeenCalledTimes(1);
@@ -143,7 +146,10 @@ it("Remove Idea keeps the inbox list visible after a failed network remove (fix)
 });
 
 it("Remove Idea does not revalidate when the server rejects the batch", async () => {
-  mock.manage.mockResolvedValueOnce({ ok: true, data: { failed: 1 } });
+  mock.manage.mockResolvedValueOnce({
+    ok: true,
+    data: { results: [{ index: 0, status: "error", error: { code: "not_found", message: "Gone" } }] },
+  });
   const tree = InboxCommand();
   await findByTitle(tree, "Remove Idea")!.props.onAction!();
   expect(mock.revalidate).not.toHaveBeenCalled();

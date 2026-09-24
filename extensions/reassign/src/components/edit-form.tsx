@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import type { Scope, UpdateEventPatch } from "../lib/api";
-import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
-import { minutesFromClock, minutesFromTime, resolveActivity, resolveArea } from "../lib/schedule-model";
+import { rebaseOnSeries, type UpdateOp } from "../lib/api";
+import { showApiError } from "../lib/feedback";
+import type { ActivityType, Area, ScheduleEvent, SeriesReach } from "../lib/schedule-model";
+import {
+  homeCalendarId,
+  occurrenceTarget,
+  resolveActivity,
+  resolveArea,
+  splitOccurrenceId,
+} from "../lib/schedule-model";
+import { localMinutesBetween, localToDate, textLimitError, toLocalDateTime } from "../lib/format";
 import { CALENDAR_NONE, CalendarFields, CalendarFormValues, calendarEditFields, useCalendars } from "./calendar-fields";
 
 interface EditFormValues extends CalendarFormValues {
   name: string;
-  end: string;
+  end: Date | null;
   areaId: string;
   activityTypeId: string;
   notes: string;
@@ -15,28 +23,30 @@ interface EditFormValues extends CalendarFormValues {
 }
 
 /**
- * Edit a block's details with the `PATCH /events/{id}` op. It changes the name,
- * the end (so the duration), the area, the activity, the notes, and the calendar
- * home / mirrors. Date and start stay in "Move to…" (the conflict-aware `move`
- * op). It sends only the changed fields. A recurring instance adds a scope picker.
- * Limit: it cannot clear an area — pick another, or clear it on the web.
+ * Edit a block's details with an `update` op. It changes the name, the end (so
+ * the duration), the area, the activity, the notes, and the calendar home /
+ * mirrors. Date and start stay in "Move to…". It sends only the changed fields.
+ * An occurrence adds a scope picker. "Unassigned" / "None" clear the area / activity.
  */
 export function EditForm(props: {
   event: ScheduleEvent;
   areas: Area[];
   activityTypes: ActivityType[];
-  onSubmit: (patch: UpdateEventPatch) => Promise<boolean>;
+  onSubmit: (op: UpdateOp) => Promise<boolean>;
 }) {
   const { event, areas, activityTypes, onSubmit } = props;
   const { pop } = useNavigation();
-  const recurring = Boolean(event.isRecurringInstance);
+  const occurrence = splitOccurrenceId(event.id);
+  const recurring = occurrence !== null;
   const currentArea = resolveArea(event, areas);
   const currentActivity = resolveActivity(event, activityTypes);
   const currentNotes = typeof event.notes === "string" ? event.notes : "";
   const { writable, defaultId } = useCalendars();
   const writableIds = new Set(writable.map((c) => c.id));
   // A block homed in a calendar we cannot write to cannot be re-homed here.
-  const canPickCalendar = !event.calendarId || writableIds.has(event.calendarId);
+  // A missing `calendarId` follows the default calendar; null is Reassign only.
+  const home = homeCalendarId(event, defaultId);
+  const canPickCalendar = !home || writableIds.has(home);
   const mirrorIds = Array.isArray(event.mirrorCalendarIds) ? event.mirrorCalendarIds : [];
   const knownMirrors = mirrorIds.filter((id) => writableIds.has(id));
   const hiddenMirrors = mirrorIds.filter((id) => !writableIds.has(id));
@@ -54,39 +64,43 @@ export function EditForm(props: {
       ...calendarValues,
       ...submitted,
     };
-    const patch: UpdateEventPatch = {};
+    const patch: Omit<UpdateOp, "op" | "id" | "scope"> = {};
     const name = values.name.trim();
+    const tooLong = textLimitError(name, values.notes);
+    if (tooLong) {
+      await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
+      return;
+    }
     if (name && name !== event.name) patch.name = name;
-    const end = values.end.trim();
+    const end = values.end ? toLocalDateTime(values.end) : null;
     if (end && end !== event.end) {
-      // Reject a malformed end before the round-trip; the server needs HH:MM.
-      if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(end)) {
+      // The server stores a span of 5 minutes to 168 hours; check it before the round-trip.
+      const minutes = localMinutesBetween(event.start, end) ?? 0;
+      if (minutes < 5 || minutes > 168 * 60) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Check the end time",
-          message: "Write the time as HH:MM, for example 17:30.",
+          message: "The end must be 5 minutes to 7 days after the start. For an overnight block, choose the next day.",
         });
         return;
       }
       patch.end = end;
-      // An end at or before the start crosses midnight — mark it, or the server
-      // reads the wrapped range as invalid. Send the flag either way, so moving
-      // an end back to the same day also clears a previous overnight marker.
-      // The start may arrive as a clock or a decimal hour, so parse both.
-      const startMin = minutesFromTime(event.start);
-      const endMin = minutesFromClock(end);
-      if (startMin !== null && endMin !== null) patch.endNextDay = endMin < startMin;
     }
-    if (values.areaId && values.areaId !== (currentArea?.id ?? "")) patch.areaId = values.areaId;
-    if (values.activityTypeId && values.activityTypeId !== (currentActivity?.id ?? "")) {
-      patch.activityTypeId = values.activityTypeId;
+    // "" is the Unassigned / None choice; `null` clears the id on the server.
+    if (values.areaId !== (currentArea?.id ?? "")) patch.areaId = values.areaId || null;
+    if (values.activityTypeId !== (currentActivity?.id ?? "")) {
+      patch.activityTypeId = values.activityTypeId || null;
     }
     if (values.notes !== currentNotes) patch.notes = values.notes;
     if (canPickCalendar) {
-      const cal = calendarEditFields(values, { calendarId: event.calendarId, mirrorIds: knownMirrors });
-      if (cal.syncTo !== undefined) patch.syncTo = cal.syncTo;
-      // Keep the mirrors the picker could not show, so a save never drops them.
-      if (cal.mirrorTo) patch.mirrorTo = [...cal.mirrorTo, ...hiddenMirrors];
+      const cal = calendarEditFields(values, { calendarId: home, mirrorIds: knownMirrors });
+      if (cal.calendarId !== undefined) patch.calendarId = cal.calendarId;
+      // An unlink also removes the mirrors, and it takes no mirror field.
+      if (cal.calendarId !== null && cal.mirrorCalendarIds) {
+        // Keep the mirrors the picker could not show; the server accepts an id
+        // that is already on the event and checks only the added ones.
+        patch.mirrorCalendarIds = [...cal.mirrorCalendarIds, ...hiddenMirrors];
+      }
     }
 
     // Nothing changed — skip the round-trip and return to the list.
@@ -94,11 +108,10 @@ export function EditForm(props: {
       pop();
       return;
     }
+    const reach = recurring ? ((values.scope as SeriesReach) ?? "this") : "this";
     if (recurring) {
-      patch.scope = (values.scope as Scope) ?? "this";
-      patch.occurrenceDate = event.date;
       // The server applies a calendar change to the whole series only.
-      if ((patch.syncTo !== undefined || patch.mirrorTo) && patch.scope !== "all") {
+      if ((patch.calendarId !== undefined || patch.mirrorCalendarIds) && reach !== "all") {
         await showToast({
           style: Toast.Style.Failure,
           title: "A calendar change covers the whole series",
@@ -107,7 +120,15 @@ export function EditForm(props: {
         return;
       }
     }
-    if (await onSubmit(patch)) pop();
+    const target = occurrenceTarget(event.id, reach);
+    if (reach === "all" && occurrence && patch.end) {
+      // A bare series id reads the end on the anchor day, so move it by the same amount.
+      const rebased = await rebaseOnSeries(target.id, { ...event, date: occurrence.date }, { end: patch.end });
+      if (!rebased.ok) return showApiError(rebased);
+      patch.end = rebased.data.end ?? patch.end;
+    }
+    // An unlink may carry the other edits: the server applies them first.
+    if (await onSubmit({ op: "update", ...target, ...patch })) pop();
   }
 
   return (
@@ -120,12 +141,12 @@ export function EditForm(props: {
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={event.name} />
-      <Form.TextField
+      <Form.DatePicker
         id="end"
         title="End"
-        placeholder="HH:MM"
-        defaultValue={event.end}
-        info="Change the end time to make the block longer or shorter."
+        type={Form.DatePicker.Type.DateTime}
+        defaultValue={localToDate(event.end)}
+        info="Change the end to make the block longer or shorter."
       />
       <Form.Checkbox
         id="showDetails"
@@ -177,7 +198,7 @@ export function EditForm(props: {
               writable={writable}
               defaultId={defaultId}
               allowDefault={false}
-              calendarDefault={calendarValues.calendarId ?? event.calendarId ?? CALENDAR_NONE}
+              calendarDefault={calendarValues.calendarId ?? home ?? CALENDAR_NONE}
               mirrorDefault={calendarValues.mirrorIds ?? knownMirrors}
               onChange={setCalendarValues}
             />

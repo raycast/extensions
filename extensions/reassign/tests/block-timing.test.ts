@@ -49,3 +49,7 @@ it("rejects reversed ranges, date-only ends, invalid durations and overlong bloc
 it.each(["1h30", "1 hour 30 minutes", "1h 30m", "90 minutes"])("accepts readable duration %s", (duration) => {
   expect(resolveBlockTiming({ start, end: null, duration })).toMatchObject({ kind: "exact", minutes: 90 });
 });
+it("refuses a block shorter than the 5-minute server minimum", () => {
+  expect(() => resolveBlockTiming({ start, end: null, duration: "4m" })).toThrow(/at least 5 minutes/);
+  expect(resolveBlockTiming({ start, end: null, duration: "5m" })).toMatchObject({ kind: "exact", minutes: 5 });
+});

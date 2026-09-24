@@ -14,7 +14,8 @@ import { signOut } from "../lib/oauth";
 import type { MutatePromise } from "@raycast/utils";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
-import { ApiError, ApiResult, BatchReceipt, eventsBatch, updateEvent, UpdateEventPatch, WriteOp } from "../lib/api";
+import { ApiError, ApiResult, writeEvents, WriteOp } from "../lib/api";
+import { batchFailure, BatchReceipt, rowError } from "../lib/envelope";
 import { applyUndoToast, failToast } from "../lib/feedback";
 import { ActivityType, Area, eventMeeting, ScheduleEvent, ScheduleResponse } from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
@@ -86,54 +87,21 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
     }
   }
 
-  // Edit path (PATCH /events/{id}). It revalidates rather than updating
-  // optimistically — an edit is rarer than a reflect / shift, and the changed
-  // fields (area, name) do not map to a simple local transform.
-  async function applyEdit(loading: string, success: string, id: string, patch: UpdateEventPatch): Promise<boolean> {
-    const toast = await showToast({ style: Toast.Style.Animated, title: loading });
-    const result = await updateEvent(id, patch);
-    if (!result.ok) {
-      failToast(toast, result);
-      return false;
-    }
-    // A 2xx can still carry a rejected row (failed:1). Treat it as a failure.
-    if (result.data.failed > 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "The change did not apply";
-      toast.message = "The server rejected it.";
-      return false;
-    }
-    toast.style = Toast.Style.Success;
-    toast.title = success;
-    const token = result.data.undoToken ?? null;
-    if (token) {
-      attachUndo(toast, token);
-    }
-    revalidate();
-    return true;
-  }
-
   async function runUndo(): Promise<void> {
     await lastUndoAction.current?.run();
   }
 
-  return { mutate: apply, applyEdit, lastUndoToken, runUndo };
+  return { mutate: apply, lastUndoToken, runUndo };
 }
 
-/** Run a 1-op batch, throwing the refusal so `mutate` can roll back. */
+/** Run a batch, throwing the refusal so `mutate` can roll back. */
 async function callBatch(ops: WriteOp[]): Promise<BatchReceipt> {
-  const result = await eventsBatch(ops);
+  const result = await writeEvents(ops);
   if (!result.ok) throw result;
-  // A 2xx with a rejected row (failed:1) must roll back the optimistic update,
-  // so throw an ApiError the caller already handles.
-  if (result.data.failed > 0) {
-    const failure: ApiError = {
-      ok: false,
-      code: "validation",
-      message: "The server rejected the change.",
-    };
-    throw failure;
-  }
+  // A 2xx with a rejected row must roll back the optimistic update, so throw
+  // an ApiError the caller already handles.
+  const failed = batchFailure(result.data);
+  if (failed) throw rowError(failed);
   return result.data;
 }
 
@@ -187,12 +155,11 @@ export function AgendaActions(props: {
   areas: Area[];
   activityTypes: ActivityType[];
   mutate: (loading: string, success: string, ops: WriteOp[]) => Promise<boolean>;
-  onEdit: (id: string, patch: UpdateEventPatch) => Promise<boolean>;
   lastUndoToken: string | null;
   runUndo: () => Promise<void>;
   nav: ReactNode;
 }) {
-  const { event, date, areas, activityTypes, mutate, onEdit, lastUndoToken, runUndo, nav } = props;
+  const { event, date, areas, activityTypes, mutate, lastUndoToken, runUndo, nav } = props;
   const editable = !event.readOnly;
   const meeting = eventMeeting(event);
   return (
@@ -239,7 +206,7 @@ export function AgendaActions(props: {
                 event={event}
                 areas={areas}
                 activityTypes={activityTypes}
-                onSubmit={(patch) => onEdit(event.id, patch)}
+                onSubmit={(op) => mutate("Saving…", "Saved changes", [op])}
               />
             }
           />

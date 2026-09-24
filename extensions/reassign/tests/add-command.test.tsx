@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
 import { blockDraft, type AiPreview } from "../src/lib/ai-draft";
+import { addDaysISO, todayISO } from "../src/lib/format";
 
 const mock = vi.hoisted(() => ({
   slots: [] as unknown[],
@@ -56,7 +57,13 @@ vi.mock("@raycast/utils", () => ({
   useCachedPromise: () => ({ data: { ok: true, data: { areas: [], activityTypes: [] } } }),
 }));
 vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
-vi.mock("../src/lib/api", () => ({ createEvent: mock.create, backlogCapture: mock.capture, planSchedule: mock.plan }));
+// `mock.create` sees the single create op that the command sends to POST /events.
+vi.mock("../src/lib/api", () => ({
+  getSchedule: vi.fn(),
+  writeEvents: (ops: unknown[]) => mock.create(ops[0]),
+  backlogCapture: mock.capture,
+  planSchedule: mock.plan,
+}));
 vi.mock("../src/components/ai-fill-form", () => ({ AiFillForm: "AiFillForm" }));
 vi.mock("../src/components/states", () => ({ refusalView: vi.fn() }));
 vi.mock("../src/components/calendar-fields", () => ({
@@ -66,7 +73,7 @@ vi.mock("../src/components/calendar-fields", () => ({
   CalendarFields: "CalendarFields",
   CALENDAR_DEFAULT: "",
 }));
-import AddCommand from "../src/add";
+import AddCommand, { planWindow } from "../src/add";
 
 type Values = {
   name: string;
@@ -112,8 +119,8 @@ beforeEach(() => {
   mock.cursor = 0;
   mock.fullDays = new WeakSet();
   for (const fn of [mock.capture, mock.create, mock.root, mock.plan, mock.push]) fn.mockReset();
-  mock.capture.mockResolvedValue({ ok: true, data: { failed: 0 } });
-  mock.create.mockResolvedValue({ ok: true, data: { failed: 0 } });
+  mock.capture.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  mock.create.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
 });
 it("blank Add Block opens with Save to Inbox as primary", () => {
   expect(render().find((n) => n.type === "SubmitForm")?.props.title).toBe("Save to Inbox");
@@ -139,9 +146,9 @@ it("a duration without times offers Find a Time", () => {
   expect(render().find((n) => n.type === "SubmitForm")?.props.title).toBe("Find a Time");
 });
 it.each([
-  ["deep work tomorrow 9am-11am", "09:00", "11:00", undefined],
-  ["work tomorrow 11pm-1am", "23:00", "01:00", true],
-])("submits the parsed boundaries for %s with hidden duration", async (text, start, end, endNextDay) => {
+  ["deep work tomorrow 9am-11am", "09:00", "11:00", 0],
+  ["work tomorrow 11pm-1am", "23:00", "01:00", 1],
+])("submits the parsed boundaries for %s with hidden duration", async (text, start, end, endDays) => {
   const tree = render(text);
   await tree
     .find((n) => n.props.title === "Schedule Block")!
@@ -150,9 +157,15 @@ it.each([
       start: tree.find((n) => n.props.id === "start")!.props.value as Date,
       end: tree.find((n) => n.props.id === "end")!.props.value as Date,
     });
-  expect(mock.create).toHaveBeenCalledWith(
-    expect.objectContaining({ start, end, ...(endNextDay ? { endNextDay } : {}) }),
-  );
+  // Both bounds are local datetimes; an overnight end carries the next day's date.
+  const tomorrow = addDaysISO(todayISO(), 1);
+  expect(mock.create).toHaveBeenCalledWith({
+    op: "create",
+    name: expect.any(String),
+    kind: "blocking",
+    start: `${tomorrow}T${start}`,
+    end: `${addDaysISO(tomorrow, endDays)}T${end}`,
+  });
   expect(mock.root).toHaveBeenCalledWith({ clearSearchBar: true });
 });
 it("keeps a failed draft and permits a corrected retry", async () => {
@@ -172,7 +185,7 @@ it("does not submit the same saved draft twice", async () => {
 it("handles a replayed flexible commit", async () => {
   mock.plan.mockResolvedValue({
     ok: true,
-    data: { committed: 1, results: [{ status: "ok", result: { status: "committed", event: { id: "new" } } }] },
+    data: { undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "new" } } }] },
   });
   await render()
     .find((n) => n.props.title === "Schedule Block")!
@@ -193,6 +206,12 @@ it("keeps hidden details when submitting the compact form", async () => {
     .find((n) => n.props.title === "Save to Inbox")!
     .props.onSubmit({ name: "idea", start: null, end: null, duration: "" } as Values);
   expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining({ notes: "Keep this note" }));
+});
+it("saves the chosen type with an Inbox idea", async () => {
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, kind: "reference" });
+  expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining({ kind: "reference" }));
 });
 it("accepting AI only fills the draft and leaves saving explicit", () => {
   const action = render("work tomorrow 9am-11am").find((n) => n.props.title === "Fill with AI…")!;
@@ -242,14 +261,19 @@ it("does not schedule full-day input without a duration", async () => {
   expect(mock.root).not.toHaveBeenCalled();
 });
 it("duration-only scheduling requests concrete proposals without auto-commit", async () => {
-  mock.plan.mockResolvedValue({ ok: true, data: { committed: 0, results: [] } });
+  mock.plan.mockResolvedValue({ ok: true, data: { results: [] } });
   const date = new Date(2026, 8, 22);
   mock.fullDays.add(date);
   await render()
     .find((n) => n.props.title === "Schedule Block")!
     .props.onSubmit({ ...values, start: date, duration: "90m" });
   expect(mock.plan).toHaveBeenCalledWith([
-    expect.objectContaining({ duration: "90m", date: "2026-09-22", autoCommitBest: false }),
+    expect.objectContaining({
+      durationMinutes: 90,
+      earliest: "2026-09-22T08:00",
+      latest: "2026-09-22T22:00",
+      autoCommitBest: false,
+    }),
   ]);
   expect(mock.create).not.toHaveBeenCalled();
   expect(mock.root).not.toHaveBeenCalled();
@@ -259,7 +283,7 @@ it("derives a start from end plus duration", async () => {
     .find((n) => n.props.title === "Schedule Block")!
     .props.onSubmit({ ...values, end: new Date(2026, 8, 22, 11), duration: "90m" });
   expect(mock.create).toHaveBeenCalledWith(
-    expect.objectContaining({ date: "2026-09-22", start: "09:30", end: "11:00" }),
+    expect.objectContaining({ start: "2026-09-22T09:30", end: "2026-09-22T11:00" }),
   );
 });
 afterEach(() => vi.useRealTimers());
@@ -271,8 +295,7 @@ it.each([
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date(2026, 8, 22, 12));
   const preview: AiPreview = {
-    applied: false,
-    intents: [{ op: "park", name: "Lunch", durationHours: 1 }],
+    intents: [{ op: "park", name: "Lunch", durationMinutes: 60 }],
   };
   const draft = blockDraft(preview);
   expect(draft.destination).toBe("inbox");
@@ -290,10 +313,9 @@ it.each([
 
 it("AI schedule followed by Inbox retains the newly chosen date", async () => {
   const scheduled = blockDraft({
-    applied: false,
-    intents: [{ op: "create", name: "Lunch", date: "2026-10-12", start: "12:00", end: "13:00" }],
+    intents: [{ op: "create", name: "Lunch", start: "2026-10-12T12:00", end: "2026-10-12T13:00" }],
   });
-  const parked = blockDraft({ applied: false, intents: [{ op: "park", name: "Lunch" }] });
+  const parked = blockDraft({ intents: [{ op: "park", name: "Lunch" }] });
   function fill(draft: unknown) {
     const action = render("lunch tomorrow").find((n) => n.props.title === "Fill with AI…")!;
     const target = (action.props as unknown as { target: ReactElement<{ onFill: (draft: unknown) => void }> }).target;
@@ -305,4 +327,28 @@ it("AI schedule followed by Inbox retains the newly chosen date", async () => {
     .find((n) => n.props.title === "Save to Inbox")!
     .props.onSubmit(values);
   expect(mock.capture.mock.calls[0][0].plannedDate).toBe("2026-10-12");
+});
+
+it("moves a window that has passed today to the same window tomorrow", () => {
+  const evening = new Date(2026, 8, 22, 22, 30);
+  expect(planWindow("2026-09-22", undefined, undefined, evening)).toEqual({
+    earliest: "2026-09-23T08:00",
+    latest: "2026-09-23T22:00",
+    nextDay: true,
+  });
+  // A window that is still open today, and any other day, stay as they are.
+  expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 12))).toMatchObject({
+    earliest: "2026-09-22T08:00",
+    nextDay: false,
+  });
+  expect(planWindow("2026-09-25", "06:00", "12:00", evening)).toMatchObject({
+    earliest: "2026-09-25T06:00",
+    nextDay: false,
+  });
+});
+it("refuses a name over the server limit before it sends anything", async () => {
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "x".repeat(201) });
+  expect(mock.capture).not.toHaveBeenCalled();
 });

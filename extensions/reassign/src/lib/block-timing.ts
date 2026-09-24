@@ -57,9 +57,10 @@ export function resolveBlockTiming(fields: TimingFields): BlockTiming {
 }
 
 function validateMinutes(minutes: number) {
-  if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) {
+  // The server stores a span of 5 minutes or more.
+  if (!Number.isFinite(minutes) || minutes < 5 || minutes > 1440) {
     throw new Error(
-      "End must be after Start, and the block must be at most 24 hours. For an overnight block, choose the next day for End.",
+      "End must be at least 5 minutes after Start, and the block must be at most 24 hours. For an overnight block, choose the next day for End.",
     );
   }
 }

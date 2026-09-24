@@ -1,13 +1,12 @@
 import { shiftWallMinutes } from "./block-timing";
-import { combineDateTime, humanDuration, isIsoDate, todayISO } from "./format";
-import { minutesFromTime } from "./schedule-model";
+import { humanDuration, isLocalDateTime, localMinutesBetween, localToDate, toLocalDateTime } from "./format";
 
 export interface AiPreview {
-  date?: string;
-  applied: boolean;
   intents: Record<string, unknown>[];
   questions?: unknown[];
   notices?: string[];
+  // Only an applied change carries an undo. A preview never has one.
+  undoToken?: string;
 }
 
 export interface BlockDraft {
@@ -19,11 +18,13 @@ export interface BlockDraft {
   kind: string;
   areaId: string;
   activityTypeId: string;
+  // The home calendar that the AI named ("... >Work"); absent = the default.
+  calendarId?: string;
 }
 
 /** Accept only a single new block that this form can represent completely. */
 export function blockDraft(preview: AiPreview): BlockDraft {
-  if (preview.applied !== false) throw new Error("The AI response was not a preview.");
+  if (preview.undoToken) throw new Error("The AI response was not a preview.");
   if (preview.questions?.length) throw new Error("Add more detail to your description and try again.");
   if (!Array.isArray(preview.intents) || preview.intents.length !== 1) {
     throw new Error("Describe one new block at a time. Use Reassign for changes to several blocks.");
@@ -36,15 +37,14 @@ export function blockDraft(preview: AiPreview): BlockDraft {
   const supported = new Set([
     "op",
     "name",
-    "date",
     "start",
     "end",
-    "endNextDay",
-    "durationHours",
+    "durationMinutes",
     "notes",
     "kind",
     "areaId",
     "activityTypeId",
+    "calendarId",
   ]);
   if (Object.entries(intent).some(([key, value]) => !supported.has(key) && value != null)) {
     throw new Error(
@@ -62,61 +62,41 @@ export function blockDraft(preview: AiPreview): BlockDraft {
     areaId: typeof intent.areaId === "string" ? intent.areaId : "",
     activityTypeId: typeof intent.activityTypeId === "string" ? intent.activityTypeId : "",
   };
-  if (!["blocking", "non-blocking", "reference"].includes(draft.kind))
+  if (intent.calendarId != null) {
+    // An Inbox idea has no calendar; a new block takes it as its home.
+    if (intent.op === "park" || typeof intent.calendarId !== "string")
+      throw new Error(
+        "This suggestion includes details this form cannot represent. Try a simpler block or use Reassign.",
+      );
+    draft.calendarId = intent.calendarId;
+  }
+  if (!["blocking", "non_blocking", "reference"].includes(draft.kind))
     throw new Error("The suggested block type is invalid.");
   if (intent.op === "park") {
-    if (intent.date != null || intent.start != null || intent.end != null)
+    if (intent.start != null || intent.end != null)
       throw new Error("The Inbox suggestion includes a time. Ask for a scheduled block instead.");
-    if (intent.durationHours != null) {
+    if (intent.durationMinutes != null) {
       if (
-        typeof intent.durationHours !== "number" ||
-        !Number.isFinite(intent.durationHours) ||
-        intent.durationHours <= 0 ||
-        intent.durationHours > 24
+        typeof intent.durationMinutes !== "number" ||
+        !Number.isInteger(intent.durationMinutes) ||
+        intent.durationMinutes < 5 ||
+        intent.durationMinutes > 1440
       )
         throw new Error("The suggested duration is invalid.");
-      draft.duration = humanDuration(Math.round(intent.durationHours * 60));
+      draft.duration = humanDuration(intent.durationMinutes);
     }
     return draft;
   }
-  const date = intent.date ?? preview.date;
-  const start = aiMinutes(intent.start);
-  let end = aiMinutes(intent.end);
-  if (
-    typeof date !== "string" ||
-    !isIsoDate(date) ||
-    start === null ||
-    end === null ||
-    start < 0 ||
-    start >= 1440 ||
-    end < 0 ||
-    end > 2880
-  )
+  // The span is two local datetimes; the end must be after the start.
+  if (!isLocalDateTime(intent.start) || !isLocalDateTime(intent.end))
     throw new Error("The suggestion needs a valid date and time range.");
-  if (end < 1440 && (intent.endNextDay === true || end < start)) end += 1440;
-  const duration = end - start;
-  if (duration <= 0 || duration > 1440)
-    throw new Error("The suggested duration must be between one minute and one day.");
-  const clock = `${String(Math.floor(start / 60)).padStart(2, "0")}:${String(start % 60).padStart(2, "0")}`;
-  draft.start = combineDateTime(date, clock);
-  if (
-    !draft.start ||
-    Number.isNaN(draft.start.getTime()) ||
-    todayISO(draft.start) !== date ||
-    draft.start.getHours() * 60 + draft.start.getMinutes() !== start
-  )
+  const duration = localMinutesBetween(intent.start, intent.end) ?? 0;
+  // The server stores a span of 5 minutes to one day from this form.
+  if (duration < 5 || duration > 1440) throw new Error("The suggested duration must be between 5 minutes and one day.");
+  draft.start = localToDate(intent.start);
+  if (Number.isNaN(draft.start.getTime()) || toLocalDateTime(draft.start) !== intent.start)
     throw new Error("The suggested local time does not exist. Choose another time.");
   shiftWallMinutes(draft.start, duration);
   draft.duration = humanDuration(duration);
   return draft;
-}
-
-function aiMinutes(value: unknown): number | null {
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  if (typeof value === "string" && value.includes(":")) {
-    const clock = /^(\d{1,2}):(\d{2})$/.exec(value);
-    if (!clock || Number(clock[1]) > 24 || Number(clock[2]) > 59 || (Number(clock[1]) === 24 && Number(clock[2]) !== 0))
-      return null;
-  }
-  return minutesFromTime(value);
 }

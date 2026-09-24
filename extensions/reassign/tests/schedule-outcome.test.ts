@@ -1,35 +1,42 @@
 import { expect, it } from "vitest";
 import { readOutcome } from "../src/lib/schedule-outcome";
-it("reads a committed event and undo token from the nested API receipt", () => {
+it("reads a committed event and the batch undo token", () => {
   expect(
     readOutcome({
-      committed: 1,
-      failed: 0,
-      results: [{ index: 0, status: "ok", result: { status: "committed", event: { id: "event" }, undoToken: "undo" } }],
+      undoToken: "undo",
+      results: [{ index: 0, status: "ok", result: { event: { id: "event" } } }],
     }),
   ).toEqual({ kind: "committed", eventId: "event", undoToken: "undo" });
 });
-it("reads the documented confirm receipt's event id", () => {
+it("reads a confirm row the same way", () => {
   expect(
-    readOutcome({ committed: 1, results: [{ status: "ok", result: { id: "event", undoToken: "undo" } }] }),
-  ).toMatchObject({ kind: "committed", eventId: "event", undoToken: "undo" });
+    readOutcome({ undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "event" } } }] }),
+  ).toEqual({ kind: "committed", eventId: "event", undoToken: "undo" });
 });
-it("reads proposals and the expiry from the nested API receipt", () => {
-  const options = [{ choice: 0, date: "2026-09-22", start: "09:00", end: "11:00" }];
+it("reads proposals and the ISO expiry from the nested API receipt", () => {
+  const options = [{ date: "2026-09-22", start: "09:00", end: "11:00", score: 0.9, reason: "Free morning" }];
   expect(
     readOutcome({
-      committed: 0,
       results: [
-        { status: "ok", result: { status: "proposals", commitToken: "proposal", options, expiresAt: 1790000000000 } },
+        {
+          index: 0,
+          status: "ok",
+          result: { commitToken: "proposal", options, expiresAt: "2026-09-22T08:00:00.000Z" },
+        },
       ],
     }),
-  ).toEqual({ kind: "proposals", commitToken: "proposal", options, expiresAt: 1790000000000 });
+  ).toEqual({ kind: "proposals", commitToken: "proposal", options, expiresAt: Date.parse("2026-09-22T08:00:00.000Z") });
 });
 it.each([
   {},
-  { committed: 0, failed: 1, results: [{ status: "error", error: "No slot" }] },
-  { committed: 1, results: [{ status: "error" }] },
-  { results: [{ status: "ok", result: { status: "proposals", options: [] } }] },
+  { results: [{ index: 0, status: "skipped", reason: "atomic" }] },
+  { results: [{ index: 0, status: "ok", result: { commitToken: "proposal", options: [] } }] },
+  { results: [{ index: 0, status: "ok", result: { event: {} } }] },
 ])("does not report a malformed or failed response as saved: %j", (data) => {
   expect(readOutcome(data)).toEqual({ kind: "failed" });
+});
+it("carries the server reason of a rejected row", () => {
+  expect(
+    readOutcome({ results: [{ index: 0, status: "error", error: { code: "validation", message: "Bad window" } }] }),
+  ).toEqual({ kind: "failed", error: { ok: false, code: "validation", message: "Bad window" } });
 });

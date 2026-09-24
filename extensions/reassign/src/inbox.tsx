@@ -7,8 +7,16 @@ import { refusalView } from "./components/states";
 import { reassignProvider } from "./lib/oauth";
 import { getScheduleWithBacklog, manageBacklog } from "./lib/api";
 import { runMutation } from "./lib/feedback";
-import { humanHours, isIsoDate, relativeDayLabel, todayISO } from "./lib/format";
-import { Area, ActivityType, areaActivityNames, BacklogItem, resolveActivity, resolveArea } from "./lib/schedule-model";
+import { humanDuration, isIsoDate, relativeDayLabel, todayISO } from "./lib/format";
+import {
+  Area,
+  ActivityType,
+  areaActivityNames,
+  BacklogItem,
+  nowWallClock,
+  resolveActivity,
+  resolveArea,
+} from "./lib/schedule-model";
 import { WEB_BASE } from "./lib/wire";
 
 function Command() {
@@ -18,11 +26,11 @@ function Command() {
   });
 
   // Place a parked item with the `schedule` op, then refresh the list.
-  async function scheduleItem(id: string, date: string, start: string) {
+  async function scheduleItem(id: string, start: string) {
     const result = await runMutation(
       "Scheduling…",
       "Scheduled the block",
-      () => manageBacklog([{ op: "schedule", id, date, start }]),
+      () => manageBacklog([{ op: "schedule", id, start }]),
       undefined,
       { onUndone: revalidate },
     );
@@ -32,7 +40,7 @@ function Command() {
 
   if (data && !data.ok) return refusalView(data, revalidate);
 
-  const todayIso = data?.ok ? data.data.now.todayIso : todayISO();
+  const todayIso = data?.ok ? nowWallClock(data.data.now).date : todayISO();
   const areas = data?.ok ? (data.data.areas ?? []) : [];
   const activityTypes = data?.ok ? (data.data.activityTypes ?? []) : [];
   const items = data?.ok ? (data.data.backlog ?? []) : [];
@@ -56,7 +64,7 @@ function Command() {
         <Action.Push
           title="Schedule This Idea…"
           icon={Icon.Calendar}
-          target={<BacklogScheduleForm item={item} onSubmit={(date, start) => scheduleItem(item.id, date, start)} />}
+          target={<BacklogScheduleForm item={item} onSubmit={(start) => scheduleItem(item.id, start)} />}
         />
         <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
         <Action
@@ -160,6 +168,12 @@ function BacklogDetail(props: { item: BacklogItem; areas: Area[]; activityTypes:
             </List.Item.Detail.Metadata.TagList>
           ) : null}
           {activity ? <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} /> : null}
+          {item.kind === "non_blocking" || item.kind === "reference" ? (
+            <List.Item.Detail.Metadata.Label
+              title="Type"
+              text={item.kind === "reference" ? "Reference" : "Non-blocking"}
+            />
+          ) : null}
         </List.Item.Detail.Metadata>
       }
     />
@@ -177,11 +191,11 @@ function accessories(item: BacklogItem, areas: Area[], todayIso: string): List.I
   return out;
 }
 
-/** A human duration from `durationHours`, or "" when it is absent or invalid. */
+/** A human duration from `durationMinutes`, or "" when it is absent or invalid. */
 function backlogDurationLabel(item: BacklogItem): string {
-  const hours = item.durationHours;
-  if (typeof hours !== "number" || !Number.isFinite(hours) || hours <= 0) return "";
-  return humanHours(hours);
+  const minutes = item.durationMinutes;
+  if (typeof minutes !== "number" || !Number.isFinite(minutes) || minutes <= 0) return "";
+  return humanDuration(minutes);
 }
 
 /** A friendly planned-date label, or "" when the field is absent or not a date. */

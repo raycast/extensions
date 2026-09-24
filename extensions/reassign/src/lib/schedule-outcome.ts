@@ -1,32 +1,40 @@
+// `start` / `end` are local datetimes.
+import type { ApiError } from "./api";
+import { type BatchResultRow, rowError } from "./envelope";
+
 export interface Proposal {
-  choice?: number;
-  date?: string;
-  start?: string;
-  end?: string;
-  durationMinutes?: number;
+  start: string;
+  end: string;
+  score?: number;
   reason?: string;
 }
 
 type Outcome =
   | { kind: "committed"; undoToken?: string; eventId?: string }
   | { kind: "proposals"; options: Proposal[]; commitToken: string; expiresAt?: number; eventId?: undefined }
-  | { kind: "failed"; eventId?: undefined };
+  // `error` is the server's reason when the row itself was rejected.
+  | { kind: "failed"; error?: ApiError; eventId?: undefined };
 
-/** Read the documented BatchOutcome shape (the response type is loose JSON). */
+/**
+ * Read the documented batch outcome (the response type is loose JSON). The
+ * row result has no kind field: `{ event }` is a booking, and
+ * `{ commitToken, expiresAt, options }` is a proposal set.
+ */
 export function readOutcome(data: Record<string, unknown>): Outcome {
   const results = Array.isArray(data.results) ? (data.results as Record<string, unknown>[]) : [];
   const row = results[0];
+  if (row?.status === "error") return { kind: "failed", error: rowError(row as unknown as BatchResultRow) };
   if (row?.status !== "ok" || !row.result || typeof row.result !== "object") return { kind: "failed" };
   const first = row.result as Record<string, unknown>;
-  if (first.status === "committed" || (typeof data.committed === "number" && data.committed > 0)) {
+  const eventId = committedEventId(first);
+  if (eventId) {
     return {
       kind: "committed",
-      undoToken: (first.undoToken ?? data.undoToken) as string | undefined,
-      eventId: committedEventId(first),
+      undoToken: typeof data.undoToken === "string" ? data.undoToken : undefined,
+      eventId,
     };
   }
   if (
-    first.status === "proposals" &&
     typeof first.commitToken === "string" &&
     first.commitToken &&
     Array.isArray(first.options) &&
@@ -34,35 +42,26 @@ export function readOutcome(data: Record<string, unknown>): Outcome {
   ) {
     return {
       kind: "proposals",
-      options: (first.options as Proposal[]) ?? [],
-      commitToken: (first.commitToken as string) ?? "",
+      options: first.options as Proposal[],
+      commitToken: first.commitToken,
       expiresAt: proposalDeadline(first),
     };
   }
   return { kind: "failed" };
 }
 
-/** The id of the event a committed plan row made, when the row names it. */
+/** The id of the event a committed plan or confirm row made. */
 function committedEventId(row: Record<string, unknown>): string | undefined {
   const event = row.event as { id?: unknown } | undefined;
-  return typeof event?.id === "string" ? event.id : typeof row.id === "string" ? row.id : undefined;
+  return typeof event?.id === "string" ? event.id : undefined;
 }
 
 /**
- * Absolute expiry (epoch ms) for a proposal set. Prefer `expiresInMs` (a
- * relative window), else parse `expiresAt`. The server tunes the length, so
- * never assume a fixed 10 min.
+ * Absolute expiry (epoch ms) for a proposal set, from the ISO `expiresAt`. The
+ * server tunes the length, so never assume a fixed 10 min.
  */
 function proposalDeadline(first: Record<string, unknown>): number | undefined {
-  if (typeof first.expiresInMs === "number") return Date.now() + first.expiresInMs;
-  if (typeof first.expiresAt === "string") {
-    const parsed = Date.parse(first.expiresAt);
-    return Number.isNaN(parsed) ? undefined : parsed;
-  }
-  // A bare number may be epoch seconds or ms. 1e12 ms is year 2001, so any real
-  // future ms value is above it while epoch seconds stay below — scale seconds up.
-  if (typeof first.expiresAt === "number") {
-    return first.expiresAt < 1e12 ? first.expiresAt * 1000 : first.expiresAt;
-  }
-  return undefined;
+  if (typeof first.expiresAt !== "string") return undefined;
+  const parsed = Date.parse(first.expiresAt);
+  return Number.isNaN(parsed) ? undefined : parsed;
 }

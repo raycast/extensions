@@ -12,10 +12,7 @@ interface ScheduleFormValues {
  * date and a start; the server derives the end from the item's duration. The
  * default date is the item's planned date, else today.
  */
-export function BacklogScheduleForm(props: {
-  item: BacklogItem;
-  onSubmit: (date: string, start: string) => Promise<boolean>;
-}) {
+export function BacklogScheduleForm(props: { item: BacklogItem; onSubmit: (start: string) => Promise<boolean> }) {
   const { item, onSubmit } = props;
   const { pop } = useNavigation();
   const defaultDate = isIsoDate(item.plannedDate) ? item.plannedDate : todayISO();
@@ -31,7 +28,8 @@ export function BacklogScheduleForm(props: {
       });
       return;
     }
-    if (await onSubmit(date, start)) pop();
+    // The `schedule` op takes one local datetime; the server keeps the item's duration.
+    if (await onSubmit(`${date}T${start.padStart(5, "0")}`)) pop();
   }
 
   return (

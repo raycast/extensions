@@ -11,25 +11,26 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
-import { eventsBatch, getSchedule } from "./lib/api";
-import { humanDuration, todayISO } from "./lib/format";
+import { getScheduleRange, writeEvents } from "./lib/api";
+import { batchFailure } from "./lib/envelope";
+import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
 import { maybeNotifyTransitions } from "./lib/notify";
 import { signOut } from "./lib/oauth";
 import {
   buildMenuBarModel,
   eventMeeting,
-  eventRange,
   kindLabel,
-  minutesFromClock,
   Now,
+  nowWallClock,
   resolveArea,
   ScheduleEvent,
+  spanMinutes,
 } from "./lib/schedule-model";
 import { BILLING_URL, WEB_BASE, webDayUrl } from "./lib/wire";
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
-  const { data, isLoading, revalidate } = useCachedPromise((date: string) => getSchedule(date, true), [todayISO()], {
+  const { data, isLoading, revalidate } = useCachedPromise(loadAroundToday, [todayISO()], {
     keepPreviousData: true,
   });
 
@@ -66,7 +67,7 @@ export default function Command() {
 
   const model = buildMenuBarModel(data.data);
   const backlogCount = data.data.backlogCount ?? 0;
-  const todayIso = data.data.now.todayIso;
+  const todayIso = nowWallClock(data.data.now).date;
   const currentMeeting = model.current ? eventMeeting(model.current) : null;
   const { title, icon } = barTitle(model.current, model.upcoming[0], prefs.showBlockName);
 
@@ -74,16 +75,17 @@ export default function Command() {
   // only feedback a menu-bar command can show.
   async function reflectCurrent(status: "kept" | "skipped") {
     if (!model.current) return;
-    const result = await eventsBatch([{ op: "reflect", id: model.current.id, status }]);
-    // A 2xx can still carry a rejected row (failed:1); do not report a false success.
-    const applied = result.ok && result.data.failed === 0;
+    const result = await writeEvents([{ op: "reflect", id: model.current.id, status }]);
+    // A 2xx can still carry a rejected row; do not report a false success.
+    const failed = result.ok ? batchFailure(result.data)?.error : result;
     await showHUD(
-      applied
+      !failed
         ? status === "kept"
           ? "Checked off the block"
           : "Marked the block skipped"
-        : "Could not update the block",
+        : `Could not update the block: ${failed.message}`,
     );
+    const applied = !failed;
     if (applied) revalidate();
   }
 
@@ -130,7 +132,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={`${event.id}-${event.start}`}
               icon={{ source: Icon.Dot, tintColor: areaColor(event, model.areas) }}
-              title={`${event.start}  ${event.name || "(untitled)"}`}
+              title={`${clockPart(event.start)}  ${event.name || "(untitled)"}`}
               onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
             />
           ))}
@@ -142,7 +144,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={`${event.id}-${event.start}`}
               icon={{ source: Icon.Dot, tintColor: areaColor(event, model.areas) }}
-              title={`${event.start}  ${event.name || "(untitled)"}`}
+              title={`${clockPart(event.start)}  ${event.name || "(untitled)"}`}
               subtitle={kindLabel(event)}
               onAction={() => launchCommand({ name: "agenda", type: LaunchType.UserInitiated })}
             />
@@ -152,7 +154,7 @@ export default function Command() {
       {model.nextFree && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
-            title={`Free from ${model.nextFree.start} for ${humanDuration(model.nextFree.durationMinutes)}`}
+            title={`Free from ${clockPart(model.nextFree.start)} for ${humanDuration(spanMinutes(model.nextFree) ?? 0)}`}
           />
         </MenuBarExtra.Section>
       )}
@@ -197,12 +199,13 @@ function barTitle(
   showName: boolean,
 ): { title: string; icon: { source: Icon; tintColor: Color | string } } {
   if (current) {
-    const label = showName ? `${current.name || "block"} · until ${current.end}` : `until ${current.end}`;
+    const until = clockPart(current.end);
+    const label = showName ? `${current.name || "block"} · until ${until}` : `until ${until}`;
     return { title: label, icon: { source: Icon.CircleFilled, tintColor: Color.Green } };
   }
   if (next) {
     return {
-      title: `Free until ${next.start}`,
+      title: `Free until ${clockPart(next.start)}`,
       icon: { source: Icon.Circle, tintColor: Color.SecondaryText },
     };
   }
@@ -218,9 +221,15 @@ function areaColor(event: ScheduleEvent, areas: Parameters<typeof resolveArea>[1
 
 /** "until 14:30 · 23m left" for the current block. Recomputed each render. */
 function currentSubtitle(event: ScheduleEvent, now: Now): string {
-  const nowMinutes = minutesFromClock(now.currentClock);
-  const range = eventRange(event);
-  if (nowMinutes === null || !range) return `until ${event.end}`;
-  const left = range.end - nowMinutes;
-  return left > 0 ? `until ${event.end} · ${humanDuration(left)} left` : `until ${event.end}`;
+  const until = `until ${clockPart(event.end)}`;
+  const left = localMinutesBetween(nowWallClock(now).local, event.end);
+  return left !== null && left > 0 ? `${until} · ${humanDuration(left)} left` : until;
+}
+
+/**
+ * Read the device day and its neighbours. The account timezone can put "today"
+ * on another date than the device, and the model picks the day from `now`.
+ */
+function loadAroundToday(deviceDay: string) {
+  return getScheduleRange(addDaysISO(deviceDay, -1), addDaysISO(deviceDay, 1));
 }

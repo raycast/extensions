@@ -1,72 +1,66 @@
 import { expect, it } from "vitest";
-import { addMinutesHM, formatRange } from "../src/lib/format";
-import { eventRange, type ScheduleEvent } from "../src/lib/schedule-model";
+import {
+  addMinutesLocal,
+  clockPart,
+  datePart,
+  formatRange,
+  isLocalDateTime,
+  textLimitError,
+  localMinutesBetween,
+} from "../src/lib/format";
+import { eventRange, spanMinutes } from "../src/lib/schedule-model";
 
-function makeEvent(overrides: Partial<ScheduleEvent> = {}): ScheduleEvent {
-  return {
-    id: "b1",
-    date: "2026-09-22",
-    start: "22:45",
-    end: "23:55",
-    durationMinutes: 70,
-    name: "Deep work",
-    endNextDay: false,
-    crossesMidnight: false,
-    ...overrides,
-  };
-}
+const span = (start: string, end: string) => ({ start, end });
 
-// Replays the optimistic ±15-minute shift transform from src/agenda.tsx
-// (transformEvents): it rewrites only start/end via addMinutesHM and leaves the
-// endNextDay / crossesMidnight flags untouched.
-function optimisticShift(event: ScheduleEvent, byMinutes: number): ScheduleEvent {
-  return {
-    ...event,
-    start: addMinutesHM(event.start, byMinutes),
-    end: addMinutesHM(event.end, byMinutes),
-  };
-}
-
-it("flags +1 after an optimistic shift wraps end past midnight while start stays same-day", () => {
-  const shifted = optimisticShift(makeEvent({ start: "22:45", end: "23:55" }), 15);
-  expect(shifted).toMatchObject({ start: "23:00", end: "00:10", endNextDay: false, crossesMidnight: false });
-  // eventRange extends end past midnight; formatRange must agree and print +1.
-  expect(eventRange(shifted)).toEqual({ start: 23 * 60, end: 24 * 60 + 10 });
-  expect(formatRange(shifted)).toBe("23:00 → 00:10 +1");
+it("reads the parts of a local datetime", () => {
+  expect(datePart("2026-09-22T22:45")).toBe("2026-09-22");
+  expect(clockPart("2026-09-22T22:45")).toBe("22:45");
+  expect(isLocalDateTime("2026-09-22T22:45")).toBe(true);
+  for (const bad of ["2026-09-22", "22:45", "2026-09-22T24:00", "2026-09-22T22:45:00", "2026-09-22T22:45Z"]) {
+    expect(isLocalDateTime(bad)).toBe(false);
+  }
 });
 
-it("flags +1 after an optimistic shift wraps start to the previous day", () => {
-  const shifted = optimisticShift(makeEvent({ start: "00:05", end: "00:20" }), -15);
-  expect(shifted).toMatchObject({ start: "23:50", end: "00:05" });
-  expect(eventRange(shifted)).toEqual({ start: 23 * 60 + 50, end: 24 * 60 + 5 });
-  expect(formatRange(shifted)).toBe("23:50 → 00:05 +1");
+it("does wall arithmetic across days and months", () => {
+  expect(addMinutesLocal("2026-09-30T23:50", 15)).toBe("2026-10-01T00:05");
+  expect(addMinutesLocal("2026-10-01T00:05", -15)).toBe("2026-09-30T23:50");
+  expect(localMinutesBetween("2026-09-22T22:00", "2026-09-23T01:00")).toBe(180);
 });
 
-it("does not add +1 for a same-day or zero-length block", () => {
-  expect(formatRange(makeEvent({ start: "09:00", end: "10:00" }))).toBe("09:00 → 10:00");
-  expect(formatRange(makeEvent({ start: "12:00", end: "12:00" }))).toBe("12:00 → 12:00");
-  // A zero-length marker stays zero-length in eventRange (it is not extended to 24h).
-  expect(eventRange(makeEvent({ start: "12:00", end: "12:00" }))).toEqual({ start: 12 * 60, end: 12 * 60 });
+it("does not add +1 for a same-day block", () => {
+  expect(formatRange(span("2026-09-22T09:00", "2026-09-22T10:00"))).toBe("09:00 → 10:00");
 });
 
-it("keeps +1 from explicit flags, including after an optimistic shift", () => {
-  expect(formatRange(makeEvent({ start: "22:00", end: "01:30", endNextDay: true }))).toBe("22:00 → 01:30 +1");
-  expect(formatRange(makeEvent({ start: "22:00", end: "01:30", crossesMidnight: true }))).toBe("22:00 → 01:30 +1");
-  const shifted = optimisticShift(makeEvent({ start: "22:00", end: "01:30", endNextDay: true }), 15);
-  expect(formatRange(shifted)).toBe("22:15 → 01:45 +1");
+it("marks +N from the start date to the end date", () => {
+  expect(formatRange(span("2026-09-22T22:00", "2026-09-23T01:30"))).toBe("22:00 → 01:30 +1");
+  expect(formatRange(span("2026-09-22T12:00", "2026-09-23T12:00"))).toBe("12:00 → 12:00 +1");
+  expect(formatRange(span("2026-09-22T09:00", "2026-09-25T17:00"))).toBe("09:00 → 17:00 +3");
 });
 
-// The core invariant: formatRange and eventRange must never disagree on whether
-// a block is overnight. This is the silent display/model divergence that hid the
-// original bug; both functions must key off the same predicate.
-it.each([
-  { start: "22:00", end: "01:30", endNextDay: true, crossesMidnight: false },
-  { start: "22:00", end: "01:30", endNextDay: false, crossesMidnight: true },
-  { start: "23:00", end: "00:10", endNextDay: false, crossesMidnight: false },
-  { start: "09:00", end: "10:00", endNextDay: false, crossesMidnight: false },
-  { start: "12:00", end: "12:00", endNextDay: false, crossesMidnight: false },
-])("formatRange and eventRange agree on overnight: %j", (event) => {
-  const e = makeEvent(event);
-  const overnight = eventRange(e)!.end >= 24 * 60;
-  expect(formatRange(e).endsWith(" +1")).toBe(overnight);
+it("shows an end at the next midnight as the 24:00 day boundary", () => {
+  expect(formatRange(span("2026-09-22T22:00", "2026-09-23T00:00"))).toBe("22:00 → 24:00");
+  expect(formatRange(span("2026-09-22T00:00", "2026-09-23T00:00"))).toBe("00:00 → 24:00");
+  expect(eventRange(span("2026-09-22T22:00", "2026-09-23T00:00"))).toEqual({ start: 22 * 60, end: 24 * 60 });
+});
+
+it("measures a span in wall minutes, also over several days", () => {
+  expect(spanMinutes(span("2026-09-22T09:00", "2026-09-22T10:30"))).toBe(90);
+  expect(spanMinutes(span("2026-09-22T22:00", "2026-09-23T01:00"))).toBe(180);
+  expect(spanMinutes(span("2026-09-22T09:00", "2026-09-23T09:00"))).toBe(24 * 60);
+  expect(spanMinutes(span("2026-09-22T09:00", "2026-09-25T17:00"))).toBe(3 * 24 * 60 + 8 * 60);
+});
+
+it("rejects a span whose end is not after its start", () => {
+  expect(eventRange(span("2026-09-22T10:00", "2026-09-22T10:00"))).toBeNull();
+  expect(eventRange(span("2026-09-22T22:00", "2026-09-22T01:00"))).toBeNull();
+});
+
+it("measures a tail row against the day it shows on", () => {
+  expect(eventRange(span("2026-09-21T22:00", "2026-09-22T01:00"), "2026-09-22")).toEqual({ start: -120, end: 60 });
+});
+
+it("names the field that is over the server text limit", () => {
+  expect(textLimitError("x".repeat(200), "y".repeat(2000))).toBeNull();
+  expect(textLimitError("x".repeat(201))).toMatch(/name to 200/);
+  expect(textLimitError("ok", "y".repeat(2001))).toMatch(/notes to 2000/);
 });

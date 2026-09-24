@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { eventRange, isBlockingKind, minutesFromClock, ScheduleResponse } from "./schedule-model";
+import { clockPart } from "./format";
+import { eventRange, isBlockingKind, isTailRow, nowWallClock, ScheduleResponse } from "./schedule-model";
 
 // Block-transition notifications (the retention feature). The menu-bar command
 // re-renders only on its ~10-min tick, so we notify slightly ahead. Each block
@@ -25,32 +26,30 @@ function boundaryFor(lead: number): Boundary | null {
 
 /** Fire a system notification for each block that enters a lead band. */
 export async function maybeNotifyTransitions(schedule: ScheduleResponse): Promise<void> {
-  const nowMinutes = minutesFromClock(schedule.now.currentClock);
-  if (nowMinutes === null) return;
-
-  const todayIso = schedule.now.todayIso;
-  const today = schedule.days.find((d) => d.date === todayIso) ?? schedule.days[0];
+  const { date: todayIso, minutes: nowMinutes } = nowWallClock(schedule.now);
+  const today = schedule.days.find((d) => d.date === todayIso);
   const events = today?.events ?? [];
 
   // Read the dedup snapshot once; reuse it for the check and the prune.
   const stored = await LocalStorage.allItems<Record<string, string>>();
 
   for (const event of events) {
-    // A next-day tail row starts at 00:00 but is not a real start. Skip it.
-    if (event.continuesFromPrevDay) continue;
+    // A tail row from the previous day is not a real start. Skip it.
+    if (isTailRow(event, todayIso)) continue;
     // Do not ping for non-blocking or reference blocks — they are not real starts.
     if (!isBlockingKind(event)) continue;
-    const range = eventRange(event);
+    const range = eventRange(event, todayIso);
     if (!range) continue;
     const boundary = boundaryFor(range.start - nowMinutes);
     if (!boundary) continue;
 
     // Key the dedup by today's date and the band, so each band fires once and
     // the date-prefix prune below stays unambiguous.
-    const key = notifyKey(todayIso, event.id, event.start, boundary);
+    const start = clockPart(event.start);
+    const key = notifyKey(todayIso, event.id, start, boundary);
     if (stored[key]) continue;
 
-    await fireNotification(event.name || "A block", event.start, boundary);
+    await fireNotification(event.name || "A block", start, boundary);
     await LocalStorage.setItem(key, "1");
   }
 

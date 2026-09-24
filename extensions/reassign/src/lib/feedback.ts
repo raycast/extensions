@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { ApiError, ApiResult, undo } from "./api";
+import { batchFailure, BatchResultRow, rowError } from "./envelope";
 
 // Toast and error helpers shared by the mutating commands.
 
@@ -32,8 +33,8 @@ export function describeError(error: ApiError): { title: string; message?: strin
       return { title: "Check the details", message: error.message };
     case "conflict":
       return { title: "That time is already taken", message: error.message };
-    case "ambiguous":
-      return { title: "More than one block matches", message: error.message };
+    case "batch_rejected":
+      return { title: "The changes were not applied", message: error.message };
     case "rate_limited":
       return { title: "Too many requests", message: "Wait a moment, then try again." };
     case "network":
@@ -85,6 +86,8 @@ export function applyUndoToast(
         completed = undone.ok;
         t.style = undone.ok ? Toast.Style.Success : Toast.Style.Failure;
         t.title = undone.ok ? "Undid the change" : "Could not undo the change";
+        // A sync in flight refuses with `conflict`; its message says to try again.
+        if (!undone.ok) t.message = undone.message;
         if (completed) {
           try {
             await opts?.onUndone?.();
@@ -128,13 +131,10 @@ export async function runMutation<T>(
     failToast(toast, result);
     return { ok: false, undoToken: null };
   }
-  // A 2xx can still carry a rejected row (applied:0, failed:1). Treat it as a
-  // failure, not a false success.
-  const failed = (result.data as { failed?: number }).failed;
-  if (typeof failed === "number" && failed > 0) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "The change did not apply";
-    toast.message = "The server rejected it.";
+  // A 2xx can still carry a rejected row. Treat it as a failure, not a false success.
+  const failed = batchFailure(result.data as { results?: BatchResultRow[] });
+  if (failed) {
+    failToast(toast, rowError(failed));
     return { ok: false, undoToken: null };
   }
   const token = getUndoToken(result.data);

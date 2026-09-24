@@ -22,6 +22,7 @@ vi.mock("../src/components/agenda-actions", () => ({
   useAgendaMutations: () => ({}),
 }));
 vi.mock("../src/components/agenda-item", () => ({ AgendaItem: "AgendaItem" }));
+vi.mock("../src/components/calendar-fields", () => ({ useCalendars: () => ({ calendars: [] }) }));
 vi.mock("../src/components/search-view", () => ({ SearchView: "SearchView" }));
 vi.mock("../src/components/states", () => ({ refusalView: () => null }));
 vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
@@ -29,7 +30,7 @@ vi.mock("../src/lib/api", () => ({ getSchedule: vi.fn(), getScheduleRange: vi.fn
 
 import { List } from "@raycast/api";
 import Agenda from "../src/agenda";
-import { todayISO } from "../src/lib/format";
+import { toLocalDateTime } from "../src/lib/format";
 
 type Node = ReactElement<{ children?: unknown; actions?: unknown; title?: string; isLoading?: boolean }>;
 function nodes(value: unknown): Node[] {
@@ -46,7 +47,13 @@ beforeEach(() => {
   mock.loading = false;
   mock.data = {
     ok: true,
-    data: { now: { todayIso: todayISO(), currentClock: "10:00" }, days: [], areas: [], activityTypes: [] },
+    data: {
+      now: toLocalDateTime(new Date()),
+      timezone: "UTC",
+      days: [],
+      areas: [],
+      activityTypes: [],
+    },
   };
 });
 
