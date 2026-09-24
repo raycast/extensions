@@ -67,58 +67,65 @@ async function fetchLocalTabsRaw(options?: { silent?: boolean }): Promise<Tab[] 
     `
     const orion = Application("${getOrionAppIdentifier()}");
     const result = { tabs: [], needsCurrentTabResolution: false };
-    orion.windows().forEach(window => {
-      const windowId = window.id();
-      // Orion's scripting bridge fails when reading 'URL'/'name' from the tab
-      // objects returned by window.tabs(), but bulk property access on the tab
-      // collection (window.tabs.url() / .name()) works, so read them that way.
-      let urls, names;
-      try {
-        urls = window.tabs.url();
-        names = window.tabs.name();
-      } catch (e) {
-        return;
-      }
-      const count = Math.min(urls.length, names.length);
-      let currentUrl = '';
-      let currentName = '';
-      try {
-        const currentTab = window.currentTab();
-        currentUrl = currentTab.url() || '';
-        currentName = currentTab.name() || '';
-      } catch (e) {
-        // Keep every tab available even when Orion does not expose its active
-        // tab while a page is in flight.
-      }
+    // \`orion.running()\` never launches the app - unlike any property or
+    // method that actually talks to it (e.g. \`.windows()\`), which macOS
+    // launches the target application for if it isn't already running. A
+    // background poll must never bring back an application the user just
+    // quit, so this has to be checked before touching anything else on it.
+    if (orion.running()) {
+      orion.windows().forEach(window => {
+        const windowId = window.id();
+        // Orion's scripting bridge fails when reading 'URL'/'name' from the tab
+        // objects returned by window.tabs(), but bulk property access on the tab
+        // collection (window.tabs.url() / .name()) works, so read them that way.
+        let urls, names;
+        try {
+          urls = window.tabs.url();
+          names = window.tabs.name();
+        } catch (e) {
+          return;
+        }
+        const count = Math.min(urls.length, names.length);
+        let currentUrl = '';
+        let currentName = '';
+        try {
+          const currentTab = window.currentTab();
+          currentUrl = currentTab.url() || '';
+          currentName = currentTab.name() || '';
+        } catch (e) {
+          // Keep every tab available even when Orion does not expose its active
+          // tab while a page is in flight.
+        }
 
-      // A tab has no JXA-exposed persistent identifier. If the current URL and
-      // title point to exactly one tab in the frontmost window, we can safely
-      // mark it. Otherwise, ask the AppleScript bridge for the exact instance
-      // after this fast bulk snapshot is returned.
-      const currentMatches = [];
-      if (window.index() === 1) {
-        for (let i = 0; i < count; i++) {
-          if ((urls[i] || '') === currentUrl && (names[i] || '') === currentName) {
-            currentMatches.push(i);
+        // A tab has no JXA-exposed persistent identifier. If the current URL and
+        // title point to exactly one tab in the frontmost window, we can safely
+        // mark it. Otherwise, ask the AppleScript bridge for the exact instance
+        // after this fast bulk snapshot is returned.
+        const currentMatches = [];
+        if (window.index() === 1) {
+          for (let i = 0; i < count; i++) {
+            if ((urls[i] || '') === currentUrl && (names[i] || '') === currentName) {
+              currentMatches.push(i);
+            }
           }
         }
-      }
-      const currentIndex = currentMatches.length === 1 ? currentMatches[0] : -1;
-      if (window.index() === 1 && currentIndex === -1) {
-        result.needsCurrentTabResolution = true;
-      }
+        const currentIndex = currentMatches.length === 1 ? currentMatches[0] : -1;
+        if (window.index() === 1 && currentIndex === -1) {
+          result.needsCurrentTabResolution = true;
+        }
 
-      for (let i = 0; i < count; i++) {
-        const url = urls[i] || '';
-        result.tabs.push({
-          title: names[i],
-          url: url,
-          window_id: windowId,
-          tab_index: i,
-          is_current: i === currentIndex,
-        });
-      }
-    });
+        for (let i = 0; i < count; i++) {
+          const url = urls[i] || '';
+          result.tabs.push({
+            title: names[i],
+            url: url,
+            window_id: windowId,
+            tab_index: i,
+            is_current: i === currentIndex,
+          });
+        }
+      });
+    }
     result
   `,
     options,
@@ -164,7 +171,7 @@ function tabsAreEqual(current: Tab[] | undefined, next: Tab[]): boolean {
 
 const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
   const tabs = useCachedPromise(fetchLocalTabs, [], { keepPreviousData: true });
-  const refreshInFlight = useRef(false);
+  const pollInFlight = useRef(false);
   const latestTabsRef = useRef<Tab[] | undefined>(undefined);
   // Bumped by every authoritative local write (currently just markTabActive).
   // A poll captures this at the start of its JXA round trip; if it has moved
@@ -176,14 +183,18 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
     latestTabsRef.current = tabs.data;
   }, [tabs.data]);
 
-  // Avoid overlapping JXA requests when Orion takes longer than one interval
-  // to return its tab list. A poll with an identical snapshot must not call
-  // revalidate(), because that needlessly re-renders the Command Bar and can
-  // make an otherwise unchanged list visibly flicker.
-  const refresh = useCallback(async () => {
-    if (refreshInFlight.current) return;
+  // Background-poll only: silent (no failure toast) and applied only when it
+  // still reflects reality (deduped against the last snapshot, discarded if
+  // superseded by a newer local write). User-triggered refreshes - the
+  // "Refresh Open Tabs" action, the refresh after Close Tab, in both the
+  // Command Bar and the standalone Search Tabs command - must keep using
+  // `tabs.revalidate` instead, further down: they need their own loading
+  // state and failure toast, and must not be skipped just because a poll
+  // happens to be in flight at that moment.
+  const pollRefresh = useCallback(async () => {
+    if (pollInFlight.current) return;
 
-    refreshInFlight.current = true;
+    pollInFlight.current = true;
     const versionAtStart = mutationVersionRef.current;
     try {
       // Silent: a background poll failing (Orion quit, or briefly declined
@@ -201,7 +212,7 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
         shouldRevalidateAfter: false,
       });
     } finally {
-      refreshInFlight.current = false;
+      pollInFlight.current = false;
     }
   }, [tabs.mutate]);
 
@@ -242,18 +253,18 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
     if (!refreshWhileOpen) return;
 
     const timer = setInterval(() => {
-      void refresh();
+      void pollRefresh();
     }, COMMAND_BAR_REFRESH_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [refresh, refreshWhileOpen]);
+  }, [pollRefresh, refreshWhileOpen]);
 
-  return { ...tabs, refresh, markTabActive };
+  return { ...tabs, markTabActive };
 };
 
 const useTabs = (options?: UseTabsOptions) => {
   const tabs = useLocalTabs(options);
-  return { tabs: tabs.data, refresh: tabs.refresh, markTabActive: tabs.markTabActive };
+  return { tabs: tabs.data, refresh: tabs.revalidate, markTabActive: tabs.markTabActive };
 };
 
 export default useTabs;
