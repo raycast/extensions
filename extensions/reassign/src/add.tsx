@@ -199,7 +199,12 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     setHasNamedDate((current) => Boolean(draft.start) || current);
     setDetails({ areaId: draft.areaId, activityTypeId: draft.activityTypeId, kind: draft.kind, notes: draft.notes });
     if (draft.calendarId) {
-      setCalendarValues({ calendarId: draft.calendarId, mirrorIds: [] });
+      // Keep the mirrors the user chose; only the new home cannot be a mirror.
+      const home = draft.calendarId;
+      setCalendarValues((current) => ({
+        calendarId: home,
+        mirrorIds: (current.mirrorIds ?? []).filter((id) => id !== home),
+      }));
       // The picker keeps its own state, so remount it to show the suggestion.
       setCalendarRevision((n) => n + 1);
     }

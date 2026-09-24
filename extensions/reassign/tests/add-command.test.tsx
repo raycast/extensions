@@ -233,6 +233,34 @@ it("accepting AI only fills the draft and leaves saving explicit", () => {
   expect(mock.create).not.toHaveBeenCalled();
   expect(mock.capture).not.toHaveBeenCalled();
 });
+it("an AI home calendar keeps the mirrors the user chose, apart from that calendar", () => {
+  render()
+    .find((n) => n.props.id === "showDetails")!
+    .props.onChange(true);
+  const picker = render().find((n) => n.type === "CalendarFields")! as unknown as ReactElement<{
+    onChange: (values: { calendarId: string; mirrorIds: string[] }) => void;
+  }>;
+  picker.props.onChange({ calendarId: "", mirrorIds: ["home", "work"] });
+  const action = render().find((n) => n.props.title === "Fill with AI…")!;
+  const target = (action.props as unknown as { target: ReactElement<{ onFill: (draft: unknown) => void }> }).target;
+  target.props.onFill({
+    name: "Standup",
+    start: new Date(2026, 8, 22, 9),
+    duration: "30m",
+    destination: "schedule",
+    notes: "",
+    kind: "blocking",
+    areaId: "",
+    activityTypeId: "",
+    calendarId: "work",
+  });
+  const filled = render().find((n) => n.type === "CalendarFields")! as unknown as ReactElement<{
+    calendarDefault: string;
+    mirrorDefault: string[];
+  }>;
+  expect(filled.props.calendarDefault).toBe("work");
+  expect(filled.props.mirrorDefault).toEqual(["home"]);
+});
 it("native full-day picker input stays in Inbox, not an event at midnight", async () => {
   const date = new Date(2026, 8, 22);
   mock.fullDays.add(date);
