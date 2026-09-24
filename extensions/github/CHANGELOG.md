@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## Add PR Review Skill - {PR_MERGE_DATE}
+
+- Review pull request patches and correlate workflow results with the reviewed commit. Available through the bundled PR Review skill in Raycast AI.
+
 ## [My Packages] - 2026-09-22
 
 - Add **My Packages** and **My Packages Menu Bar** to browse the packages you published to GitHub Packages.

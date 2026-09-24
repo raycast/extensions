@@ -1078,6 +1078,12 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "github-pr-review",
+        "title": "PR Review"
+      }
     ]
   },
   "preferences": [
@@ -1201,7 +1207,7 @@
   ],
   "dependencies": {
     "@octokit/rest": "^21.0.1",
-    "@raycast/api": "^1.104.17",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
