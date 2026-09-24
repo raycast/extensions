@@ -88,6 +88,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   const [dateText, setDateText] = useState("");
   const [draftUrl, setDraftUrl] = useState(draftValues?.url ?? "");
   const nlpParseRef = useRef<ParsedDueDate | null>(null);
+  const recurrenceSetByNlpRef = useRef<boolean>(false);
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
@@ -256,7 +257,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     if (!value.trim()) {
       nlpParseRef.current = null;
       setValue("dueDate", null);
-      setValue("isRecurring", false);
+      if (recurrenceSetByNlpRef.current) {
+        setValue("isRecurring", false);
+        recurrenceSetByNlpRef.current = false;
+      }
       return;
     }
 
@@ -265,8 +269,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("isRecurring", true);
       setValue("frequency", recurrence.frequency);
       setValue("interval", recurrence.interval.toString());
-    } else {
+      recurrenceSetByNlpRef.current = true;
+    } else if (recurrenceSetByNlpRef.current) {
       setValue("isRecurring", false);
+      recurrenceSetByNlpRef.current = false;
     }
 
     const parsed = parseDueDate(value);
@@ -389,7 +395,15 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         }
 
         return [
-          <Form.Checkbox key="isRecurring" {...itemProps.isRecurring} label="Is Recurring" />,
+          <Form.Checkbox
+            key="isRecurring"
+            {...itemProps.isRecurring}
+            label="Is Recurring"
+            onChange={(checked) => {
+              recurrenceSetByNlpRef.current = false;
+              itemProps.isRecurring.onChange?.(checked);
+            }}
+          />,
           ...(values.isRecurring
             ? [
                 <Form.Dropdown key="frequency" {...itemProps.frequency} title="Frequency">
