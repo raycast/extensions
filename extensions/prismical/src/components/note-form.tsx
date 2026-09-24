@@ -72,6 +72,12 @@ export function NoteForm({
             (draft.id !== undefined && typeof draft.id !== "string")
           )
             throw new Error("Invalid saved recovery");
+          // A completed capture may remain when best-effort cleanup failed.
+          if (!draft.body && !draft.uncertain) {
+            setHasRecovery(false);
+            setReady(true);
+            return;
+          }
           setTitle(draft.title);
           setBody(draft.body);
           setFolder(draft.folder);
@@ -133,7 +139,8 @@ export function NoteForm({
     try {
       toast = await showToast({ style: Toast.Style.Animated, title: note ? "Appending text…" : "Saving note…" });
       id = await saveCapture(client(), { title, body, folder, id, uncertain: false }, persist);
-      await LocalStorage.removeItem(journalKey);
+      // saveCapture durably cleared the pending body; cleanup must not turn a saved write into a retry.
+      await LocalStorage.removeItem(journalKey).catch(() => undefined);
       toast.style = Toast.Style.Success;
       toast.title = note ? "Text appended" : "Note created";
       toast.primaryAction = { title: "Open Note", onAction: () => open(noteUrl(id!)) };

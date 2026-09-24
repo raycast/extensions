@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   pop: vi.fn(),
   popToRoot: vi.fn(),
   confirm: vi.fn(),
+  remove: vi.fn(),
+  toast: { style: "", title: "" },
 }));
 vi.mock("@raycast/api", () => ({
   LaunchType: { UserInitiated: "userInitiated" },
@@ -44,13 +46,11 @@ vi.mock("@raycast/api", () => ({
     setItem: async (key: string, value: string) => {
       mocks.storage.set(key, value);
     },
-    removeItem: async (key: string) => {
-      mocks.storage.delete(key);
-    },
+    removeItem: mocks.remove,
   },
   Clipboard: { readText: async () => "captured" },
   getSelectedText: async () => "captured",
-  showToast: async () => ({}),
+  showToast: async () => mocks.toast,
   open: vi.fn(),
   popToRoot: mocks.popToRoot,
   useNavigation: () => ({ pop: mocks.pop }),
@@ -69,6 +69,9 @@ const host = (name: string) => renderer.root.findByType(name as never);
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   mocks.storage.clear();
+  mocks.remove.mockImplementation(async (key: string) => {
+    mocks.storage.delete(key);
+  });
   vi.clearAllMocks();
   mocks.create.mockImplementation(async () => ({ id: `note-${mocks.create.mock.calls.length}` }));
   mocks.write.mockResolvedValue({});
@@ -129,4 +132,28 @@ test("corrupt recovery stops loading and requires confirmed discard", async () =
   mocks.confirm.mockResolvedValue(true);
   await act(async () => discard.props.onAction());
   expect(mocks.storage.has(key)).toBe(false);
+});
+
+test.each(["create", "append"])("%s succeeds even when completed recovery cleanup fails", async (mode) => {
+  const note =
+    mode === "append" ? { id: "existing", title: "Existing", updated_at: "2026-09-23T00:00:00Z" } : undefined;
+  mocks.remove.mockRejectedValue(new Error("Storage unavailable"));
+  await act(async () => {
+    renderer = create(<NoteForm root note={note} />);
+  });
+  await act(async () => host("area").props.onChange("saved text"));
+  await act(async () => host("submit").props.onSubmit());
+  expect(mocks.write).toHaveBeenCalledTimes(1);
+  expect(mocks.toast.style).toBe("success");
+  expect(host("area").props.value).toBe("");
+  expect(mocks.popToRoot).toHaveBeenCalledTimes(1);
+  await act(async () => renderer.unmount());
+  await act(async () => {
+    renderer = create(<NoteForm root note={note} />);
+  });
+  expect(host("area").props.value).toBe("");
+  await act(async () => host("area").props.onChange("new text"));
+  await act(async () => host("submit").props.onSubmit());
+  expect(mocks.write.mock.calls.map((call) => call[1])).toEqual(["saved text", "new text"]);
+  expect(mocks.create).toHaveBeenCalledTimes(mode === "create" ? 2 : 0);
 });
