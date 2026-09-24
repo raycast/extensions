@@ -818,11 +818,17 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "reminders-weekly-review",
+        "title": "Weekly Review"
+      }
     ]
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.1",
-    "@raycast/api": "^1.104.25",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.3.0",
     "chrono-node": "^2.10.1",
     "date-fns": "^4.4.0",

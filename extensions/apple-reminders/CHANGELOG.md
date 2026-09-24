@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## Add Weekly Review Skill - {PR_MERGE_DATE}
+
+- Review reminders and capture action items from supplied meeting notes. Available through the bundled Weekly Review skill in Raycast AI.
+
 ## [Default list for Quick Add] - 2026-09-23
 
 - Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.
