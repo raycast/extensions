@@ -6,16 +6,6 @@ import { fetchTrace } from "./lib/fetchTrace";
 import { flagForCountryCode } from "./lib/flag";
 import { nextState, type CardState } from "./lib/refresh";
 
-function countryNameForCode(countryCode: string | undefined): string {
-  if (!countryCode) return "Unknown country";
-
-  try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode) ?? countryCode;
-  } catch {
-    return countryCode;
-  }
-}
-
 function markdownForState(state: CardState): string {
   if (state.kind === "loading") return "";
 
@@ -52,7 +42,7 @@ function markdownForState(state: CardState): string {
   const location =
     state.kind === "success"
       ? [state.country, state.city, state.isp].filter(Boolean).join(" · ")
-      : countryNameForCode(state.countryCode);
+      : (state.countryCode ?? "Unknown country");
   const locationLine = state.kind === "geo-failed" ? location + " — location lookup failed" : location;
 
   return [headline, "", locationLine, "", "---", "", "The IP claude.ai sees you from"].join("\n");
@@ -109,7 +99,7 @@ export default function Command() {
       state.kind === "success"
         ? [state.ip, state.country, state.city, state.isp].filter(Boolean).join(" · ")
         : state.countryCode
-          ? [state.ip, countryNameForCode(state.countryCode)].join(" · ")
+          ? [state.ip, state.countryCode].join(" · ")
           : undefined;
 
     actions = (
