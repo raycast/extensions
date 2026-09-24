@@ -79,7 +79,11 @@ export default function Instances() {
       },
     };
     if (await confirmAlert(options)) {
-      const remaining = instances.filter((i) => instanceId(i) !== instanceId(instance));
+      // Reference equality, not `instanceId()` - two records that predate `id` and happen to share
+      // a `key` (nothing stops that on Add) would otherwise both match the same fallback identity
+      // and both get removed. `instance` is the exact array element this row was rendered from, so
+      // this always targets only the one actually being deleted, duplicate keys or not.
+      const remaining = instances.filter((i) => i !== instance);
       await setValue(remaining);
       // Every other screen (Projects, Docker, ...) fetches unconditionally off `useToken()`'s
       // url with no guard for it being empty, so leaving the cached token at its blank default
@@ -189,9 +193,10 @@ function InstanceForm({
 
         const record: Instance = { ...values, id: initial?.id ?? crypto.randomUUID() };
         const wasActive = !!initial && isActiveInstance(initial, token);
-        const next = initial
-          ? instances.map((i) => (instanceId(i) === instanceId(initial) ? record : i))
-          : [...instances, record];
+        // Reference equality, same reasoning as `deleteInstance` - `initial` is the exact array
+        // element being edited, so this can't be fooled by a duplicate `key` matching more than
+        // one pre-`id` record via `instanceId()`.
+        const next = initial ? instances.map((i) => (i === initial ? record : i)) : [...instances, record];
         await setInstances(next);
         if (wasActive) setToken(tokenForInstance(record));
 
