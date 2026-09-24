@@ -205,6 +205,14 @@
       "description": "Returns the current Google Calendar event and calendar color palettes"
     }
   ],
+  "ai": {
+    "skills": [
+      {
+        "name": "google-calendar-week-planning",
+        "title": "Plan My Week"
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "addSignature",

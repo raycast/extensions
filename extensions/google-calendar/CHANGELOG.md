@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Plan My Week Skill] - {PR_MERGE_DATE}
+
+- Add a skill for reviewing the week, finding meeting and focus-time slots, and booking requested events with availability checks.
+
 ## [Hide contact birthdays from List Events by default] - 2026-09-19
 
 - Exclude Google `birthday` events from List Events on the primary calendar so contact birthdays no longer flood the upcoming schedule
