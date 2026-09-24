@@ -11,37 +11,16 @@
  * would take an in-process daemon down with it; a spawned one outlives the command and serves
  * the next.
  */
-import { execFile } from 'node:child_process';
-import { join } from 'node:path';
-import { environment } from '@raycast/api';
-import { CLI_VENDOR } from '../vendor/cli-integrity';
-import { mismatchedFiles } from './integrity';
+import { execFile } from "node:child_process";
+import { join } from "node:path";
+import { environment } from "@raycast/api";
+import { CLI_VENDOR } from "../vendor/cli-integrity";
+import { mismatchedFiles } from "./integrity";
 
-/** The exit codes the CLI documents (FEATURES.md F13). */
-export const EXIT = {
-  ok: 0,
-  failed: 1,
-  badArguments: 2,
-  noBrowser: 3,
-  notPaired: 4,
-  daemonFailed: 5,
-} as const;
+export { EXIT, isSetupMissing, type CliFailure, type CliResult } from "./cli-answer";
+import type { CliResult } from "./cli-answer";
 
-/** What every `--json` answer carries on failure. */
-export interface CliFailure {
-  ok: false;
-  code: number;
-  error: string;
-  message: string;
-  hint?: string;
-}
-
-export interface CliResult<T> {
-  exitCode: number;
-  answer: (T & { ok: true }) | CliFailure;
-}
-
-export const bundlePath = () => join(environment.assetsPath, 'page-scanner.mjs');
+export const bundlePath = () => join(environment.assetsPath, "page-scanner.mjs");
 
 let verified = false;
 
@@ -51,7 +30,7 @@ function verifyVendoredCli() {
   const bad = mismatchedFiles(environment.assetsPath, CLI_VENDOR.sha256);
   if (bad.length > 0) {
     throw new Error(
-      `The bundled Page Scanner command failed its integrity check (${bad.join(', ')}). Reinstall the extension.`,
+      `The bundled Page Scanner command failed its integrity check (${bad.join(", ")}). Reinstall the extension.`,
     );
   }
   verified = true;
@@ -73,17 +52,15 @@ export function runCli<T>(
   return new Promise((resolve, reject) => {
     execFile(
       process.execPath,
-      [bundlePath(), ...args, '--json'],
+      [bundlePath(), ...args, "--json"],
       { timeout: timeoutMs, maxBuffer: 16 * 1024 * 1024 },
       (error, stdout, stderr) => {
-        const exitCode = error ? (typeof error.code === 'number' ? error.code : -1) : 0;
+        const exitCode = error ? (typeof error.code === "number" ? error.code : -1) : 0;
         try {
-          resolve({ exitCode, answer: JSON.parse(stdout) as CliResult<T>['answer'] });
+          resolve({ exitCode, answer: JSON.parse(stdout) as CliResult<T>["answer"] });
         } catch {
           const reason = error?.killed ? `timed out after ${timeoutMs / 1000}s` : stderr.trim();
-          reject(
-            new Error(`page-scanner ${args[0] ?? ''} gave no answer: ${reason || 'no output'}`),
-          );
+          reject(new Error(`page-scanner ${args[0] ?? ""} gave no answer: ${reason || "no output"}`));
         }
       },
     );

@@ -54,7 +54,7 @@
       "default": "pdf",
       "data": [
         {
-          "title": "PDF (vector, selectable text)",
+          "title": "PDF (Vector, Selectable Text)",
           "value": "pdf"
         },
         {
@@ -76,15 +76,15 @@
       "default": "a4",
       "data": [
         {
-          "title": "A4 pages",
+          "title": "A4 Pages",
           "value": "a4"
         },
         {
-          "title": "US Letter pages",
+          "title": "US Letter Pages",
           "value": "letter"
         },
         {
-          "title": "Single long page",
+          "title": "Single Long Page",
           "value": "auto"
         }
       ]
@@ -102,7 +102,7 @@
           "value": "none"
         },
         {
-          "title": "Also save a Markdown file beside it",
+          "title": "Also Save a Markdown File Beside It",
           "value": "beside"
         },
         {
@@ -120,11 +120,11 @@
       "default": "extension",
       "data": [
         {
-          "title": "As in Page Scanner's settings",
+          "title": "As in Page Scanner's Settings",
           "value": "extension"
         },
         {
-          "title": "The browser's (auto)",
+          "title": "The Browser's (Auto)",
           "value": "auto"
         },
         {
@@ -146,19 +146,19 @@
       "default": "extension",
       "data": [
         {
-          "title": "As in Page Scanner's settings",
+          "title": "As in Page Scanner's Settings",
           "value": "extension"
         },
         {
-          "title": "The window's",
+          "title": "The Window's",
           "value": "window"
         },
         {
-          "title": "A4 sheet",
+          "title": "A4 Sheet",
           "value": "a4"
         },
         {
-          "title": "US Letter sheet",
+          "title": "US Letter Sheet",
           "value": "letter"
         }
       ]
@@ -172,15 +172,15 @@
       "default": "extension",
       "data": [
         {
-          "title": "As in Page Scanner's settings",
+          "title": "As in Page Scanner's Settings",
           "value": "extension"
         },
         {
-          "title": "Hide all of them",
+          "title": "Hide All of Them",
           "value": "all"
         },
         {
-          "title": "Hide none of them",
+          "title": "Hide None of Them",
           "value": "none"
         }
       ]
@@ -194,7 +194,7 @@
       "default": "copy",
       "data": [
         {
-          "title": "Copy the file",
+          "title": "Copy the File",
           "value": "copy"
         },
         {
@@ -202,11 +202,11 @@
           "value": "reveal"
         },
         {
-          "title": "Open it",
+          "title": "Open It",
           "value": "open"
         },
         {
-          "title": "Open the capture in Page Scanner's editor",
+          "title": "Open the Capture in Page Scanner's Editor",
           "value": "editor"
         }
       ]

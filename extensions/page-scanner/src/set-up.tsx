@@ -9,30 +9,20 @@
  * Whether the Chrome extension is installed at all cannot be told apart from step 2, since
  * a browser only shows up once it connects, so the store link sits in step 2.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  Keyboard,
-  launchCommand,
-  LaunchType,
-  showToast,
-  Toast,
-} from '@raycast/api';
-import { runCli, type BrowsersAnswer, type StatusAnswer } from './lib/cli';
-import { helperState, installHelper } from './lib/helper';
-import { setUpMarkdown, STORE_URL, type Progress } from './lib/set-up-markdown';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { runCli, type BrowsersAnswer, type StatusAnswer } from "./lib/cli";
+import { helperState, installHelper } from "./lib/helper";
+import { setUpMarkdown, STORE_URL, type Progress } from "./lib/set-up-markdown";
 
 const POLL_MS = 3_000;
 
 async function readProgress(): Promise<Progress> {
-  const status = await runCli<StatusAnswer>(['status']);
+  const status = await runCli<StatusAnswer>(["status"]);
   if (!status.answer.ok) throw new Error(status.answer.message);
   const helper = helperState(status.answer);
   // `browsers` starts the daemon, which the helper waits for before it connects anything.
-  const connected = helper === 'ready' ? await runCli<BrowsersAnswer>(['browsers']) : null;
+  const connected = helper === "ready" ? await runCli<BrowsersAnswer>(["browsers"]) : null;
   return {
     helper,
     helperNode: status.answer.nativeHost.node,
@@ -72,24 +62,24 @@ export default function SetUp() {
 
   const install = async () => {
     setInstalling(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: 'Installing the helper' });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Installing the helper" });
     try {
       const result = await installHelper();
       if (!result.answer.ok) throw new Error(result.answer.message);
       toast.style = Toast.Style.Success;
-      toast.title = 'Helper installed';
+      toast.title = "Helper installed";
       toast.message = `It runs on ${result.answer.node}.`;
       await refresh();
     } catch (reason) {
       toast.style = Toast.Style.Failure;
-      toast.title = 'Could not install the helper';
+      toast.title = "Could not install the helper";
       toast.message = reason instanceof Error ? reason.message : String(reason);
     } finally {
       setInstalling(false);
     }
   };
 
-  const needsHelper = progress !== undefined && progress.helper !== 'ready';
+  const needsHelper = progress !== undefined && progress.helper !== "ready";
   return (
     <Detail
       isLoading={progress === undefined || installing}
@@ -100,14 +90,12 @@ export default function SetUp() {
             <Action
               title="Scan Current Tab"
               icon={Icon.Document}
-              onAction={() =>
-                launchCommand({ name: 'scan-current-tab', type: LaunchType.UserInitiated })
-              }
+              onAction={() => launchCommand({ name: "scan-current-tab", type: LaunchType.UserInitiated })}
             />
           ) : null}
           {needsHelper ? (
             <Action
-              title={progress.helper === 'broken' ? 'Repair Helper' : 'Install Helper'}
+              title={progress.helper === "broken" ? "Repair Helper" : "Install Helper"}
               icon={Icon.Download}
               onAction={install}
             />

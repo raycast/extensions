@@ -3,20 +3,20 @@
  * `pickTab` to tell several windows apart. Asked only when it is needed, because the first
  * AppleScript call to a browser makes macOS ask whether Raycast may control it.
  */
-import { getFrontmostApplication } from '@raycast/api';
-import { runAppleScript } from '@raycast/utils';
+import { getFrontmostApplication } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 /** Chromium browsers the helper can be set up in, which all answer Chrome's AppleScript. */
 const CHROMIUM_BUNDLES = new Set([
-  'com.google.Chrome',
-  'com.google.Chrome.beta',
-  'com.google.Chrome.dev',
-  'com.google.Chrome.canary',
-  'org.chromium.Chromium',
-  'com.microsoft.edgemac',
-  'com.brave.Browser',
-  'company.thebrowser.Browser',
-  'com.vivaldi.Vivaldi',
+  "com.google.Chrome",
+  "com.google.Chrome.beta",
+  "com.google.Chrome.dev",
+  "com.google.Chrome.canary",
+  "org.chromium.Chromium",
+  "com.microsoft.edgemac",
+  "com.brave.Browser",
+  "company.thebrowser.Browser",
+  "com.vivaldi.Vivaldi",
 ]);
 
 export async function frontTabUrl(): Promise<string | undefined> {

@@ -19,27 +19,18 @@
  * to try an unreleased CLI in `ray develop`. Its integrity file names the version `local`, which
  * `src/vendor/cli-integrity.test.ts` refuses, so it cannot be committed by accident.
  */
-import { createHash } from 'node:crypto';
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  realpathSync,
-  writeFileSync,
-} from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import * as esbuild from 'esbuild';
+import { createHash } from "node:crypto";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import * as esbuild from "esbuild";
 
 const here = dirname(dirname(fileURLToPath(import.meta.url)));
-const local = process.argv.includes('--local');
-const cli = local
-  ? join(here, '..', 'cli')
-  : realpathSync(join(here, 'node_modules', '@page-scanner', 'cli'));
-const { version } = JSON.parse(readFileSync(join(cli, 'package.json'), 'utf8'));
-const entry = join(cli, 'dist', 'bin.js');
-const hostSource = join(cli, 'dist', 'native', 'host.js');
+const local = process.argv.includes("--local");
+const cli = local ? join(here, "..", "cli") : realpathSync(join(here, "node_modules", "@page-scanner", "cli"));
+const { version } = JSON.parse(readFileSync(join(cli, "package.json"), "utf8"));
+const entry = join(cli, "dist", "bin.js");
+const hostSource = join(cli, "dist", "native", "host.js");
 
 for (const file of [entry, hostSource]) {
   if (!existsSync(file)) {
@@ -52,14 +43,14 @@ for (const file of [entry, hostSource]) {
   }
 }
 
-const bundle = join(here, 'assets', 'page-scanner.mjs');
-const host = join(here, 'assets', 'host.js');
+const bundle = join(here, "assets", "page-scanner.mjs");
+const host = join(here, "assets", "host.js");
 
 // ws asks for its optional native speedups with a guarded `require()`, which an ESM bundle has
 // no `require` for; a global one built from the bundle's own URL lets the guard catch the miss.
 // __filename and __dirname are for the CJS-shaped modules esbuild wraps. The same banner as the
 // CLI's own scripts/bundle.mjs, which builds the .mcpb.
-const banner = `// @page-scanner/cli ${local ? 'local build' : version}, Apache-2.0, bundled by scripts/vendor-cli.mjs.
+const banner = `// @page-scanner/cli ${local ? "local build" : version}, Apache-2.0, bundled by scripts/vendor-cli.mjs.
 import { createRequire as __psCreateRequire } from 'node:module';
 import { fileURLToPath as __psFileURLToPath } from 'node:url';
 import { dirname as __psDirname } from 'node:path';
@@ -72,14 +63,14 @@ const result = await esbuild.build({
   entryPoints: [entry],
   absWorkingDir: here,
   bundle: true,
-  platform: 'node',
-  format: 'esm',
+  platform: "node",
+  format: "esm",
   // Raycast's Node, which was 22 when this was written.
-  target: 'node20',
+  target: "node20",
   sourcemap: false,
-  external: ['bufferutil', 'utf-8-validate'],
+  external: ["bufferutil", "utf-8-validate"],
   banner: { js: banner },
-  logLevel: 'warning',
+  logLevel: "warning",
   write: false,
 });
 // esbuild names each module by its path, in a comment and in its wrapper, and pnpm (this
@@ -89,25 +80,23 @@ const result = await esbuild.build({
 // this repository commits. A `--local` build names ../cli's own dist, which no install shares.
 const code = result.outputFiles[0].text.replace(
   /(?:\.\.\/)*node_modules\/\.pnpm\/[^/"\s]+\/node_modules\//g,
-  'node_modules/',
+  "node_modules/",
 );
 writeFileSync(bundle, code, { mode: 0o755 });
 copyFileSync(hostSource, host);
 
-const sha256 = (file) => createHash('sha256').update(readFileSync(file)).digest('hex');
-mkdirSync(join(here, 'src', 'vendor'), { recursive: true });
+const sha256 = (file) => createHash("sha256").update(readFileSync(file)).digest("hex");
+mkdirSync(join(here, "src", "vendor"), { recursive: true });
 writeFileSync(
-  join(here, 'src', 'vendor', 'cli-integrity.ts'),
+  join(here, "src", "vendor", "cli-integrity.ts"),
   `// Written by scripts/vendor-cli.mjs: the vendored CLI's version and the SHA-256 of its two files.
 export const CLI_VENDOR = {
-  version: '${local ? 'local' : version}',
+  version: "${local ? "local" : version}",
   sha256: {
-    'page-scanner.mjs': '${sha256(bundle)}',
-    'host.js': '${sha256(host)}',
+    "page-scanner.mjs": "${sha256(bundle)}",
+    "host.js": "${sha256(host)}",
   },
 } as const;
 `,
 );
-console.log(
-  `Vendored @page-scanner/cli ${local ? `(local build, ${version})` : version} into assets/`,
-);
+console.log(`Vendored @page-scanner/cli ${local ? `(local build, ${version})` : version} into assets/`);

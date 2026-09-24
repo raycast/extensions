@@ -8,19 +8,19 @@
  * Homebrew's symlink, which follows every upgrade. Without one, Raycast's Node is named, and
  * Scan Current Tab writes the wrapper again the next time it finds that Node gone.
  */
-import { execFile } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { runCli, type CliResult, type StatusAnswer } from './cli';
+import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
+import { runCli, type CliResult, type StatusAnswer } from "./cli";
 
 /** Paths that keep naming a working Node across upgrades. Not fnm's or nvm's, which are versioned. */
-const STABLE_NODES = ['/opt/homebrew/bin/node', '/usr/local/bin/node'];
+const STABLE_NODES = ["/opt/homebrew/bin/node", "/usr/local/bin/node"];
 
 /** The oldest Node the helper is run on here: Raycast's own, which the bundle is tested with. */
 const MIN_MAJOR = 22;
 
 function nodeMajor(node: string): Promise<number | null> {
   return new Promise((resolve) => {
-    execFile(node, ['--version'], { timeout: 5_000 }, (error, stdout) => {
+    execFile(node, ["--version"], { timeout: 5_000 }, (error, stdout) => {
       const major = /^v(\d+)\./.exec(stdout.trim())?.[1];
       resolve(error || major === undefined ? null : Number(major));
     });
@@ -38,10 +38,10 @@ export async function helperNode(): Promise<string> {
 }
 
 export async function installHelper(): Promise<CliResult<{ node: string }>> {
-  return runCli(['install', '--node', await helperNode()]);
+  return runCli(["install", "--node", await helperNode()]);
 }
 
-export type HelperState = 'missing' | 'broken' | 'ready';
+export type HelperState = "missing" | "broken" | "ready";
 
 /**
  * Where the helper stands. `broken` is a wrapper whose Node is gone, which only a new wrapper
@@ -49,6 +49,6 @@ export type HelperState = 'missing' | 'broken' | 'ready';
  */
 export function helperState(status: StatusAnswer): HelperState {
   const host = status.nativeHost;
-  if (!host.hostInstalled || !host.browsers.some((browser) => browser.installed)) return 'missing';
-  return host.nodeFound ? 'ready' : 'broken';
+  if (!host.hostInstalled || !host.browsers.some((browser) => browser.installed)) return "missing";
+  return host.nodeFound ? "ready" : "broken";
 }

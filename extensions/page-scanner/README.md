@@ -27,7 +27,7 @@ Preferences (Raycast Settings, Extensions, Page Scanner):
 | After Scanning | copy the file, show it in Finder, open it, open the capture in the editor       |
 | Browser        | a connected browser's label or id, when more than one is connected              |
 
-"As in Page Scanner's settings" leaves the choice to the extension's Capture settings. The
+"As in Page Scanner's Settings" leaves the choice to the extension's Capture settings. The
 editor's own output (padding and frame, stamp, brand and watermark, PDF/A, text recognition, the
 integrity record, a crop, marks) is not applied to a scan from Raycast; open the capture in the
 editor to add any of it.
