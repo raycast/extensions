@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Bug Triage Skill] - {PR_MERGE_DATE}
+
+- Add a skill for comparing bug reports with existing issues, identifying possible duplicates, and creating or updating issues with the available tools.
+
 ## [Search input available immediately] - 2026-09-20
 
 - Fixed commands blocking keyboard input on launch: the Jira site and user details are now cached, so the view renders right away while authentication requests run in the background
