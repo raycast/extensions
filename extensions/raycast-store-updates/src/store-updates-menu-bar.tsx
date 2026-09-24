@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { StoreItem } from "./types";
 import {
   changelogUrl,
+  checkForExtensionUpdates,
   createStoreDeeplink,
   extensionIconImage,
-  getInstalledExtensionSlugs,
+  fetchInstalledExtensionSlugs,
   scanStoreUpdates,
 } from "./utils";
 import { getStoredItemsSync, storeItems, getLastSeen, setLastSeen } from "./utils/store-cache";
@@ -88,14 +89,30 @@ export default function Command() {
   // scoped that way — a "new" extension is by definition not installed yet, so including
   // new items under this scope would contradict the filter it is named after.
   const scope = getPreferenceValues<Preferences>().menuBarScope ?? "all";
+
+  // Installed extensions are read from disk asynchronously (every installed extension's
+  // package.json). Same three states as the main list: undefined is
+  // "still resolving", null is "could not tell", and only a Set is authoritative.
+  // Both non-Set states leave the menu unscoped — a badge that under-counts is worse
+  // than one that briefly over-counts, because the whole point is to surface things.
+  const [installed, setInstalled] = useState<Set<string> | null | undefined>(undefined);
+  useEffect(() => {
+    // Clear on the way out, not just on the way in. Leaving a previous resolution
+    // in place lets a scope change apply a stale set before the fresh lookup lands.
+    setInstalled(undefined);
+    if (scope !== "my-updates") return;
+    let cancelled = false;
+    fetchInstalledExtensionSlugs().then((slugs) => {
+      if (!cancelled) setInstalled(slugs);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [scope]);
+
   const scoped =
-    scope === "my-updates"
-      ? (() => {
-          const installed = getInstalledExtensionSlugs();
-          return items.filter(
-            (item) => item.type === "updated" && item.extensionSlug && installed.has(item.extensionSlug),
-          );
-        })()
+    scope === "my-updates" && installed
+      ? items.filter((item) => item.type === "updated" && item.extensionSlug && installed.has(item.extensionSlug))
       : items;
 
   const unseen = scoped.filter((item) => new Date(item.date).getTime() > lastSeen);
@@ -107,6 +124,13 @@ export default function Command() {
       ? `${count} new or updated extension${count !== 1 ? "s" : ""}`
       : "No new store updates";
 
+  // "Mark All as Seen" means ALL, deliberately — the RSS-reader model, chosen by Chris
+  // (2026-09-23): it advances the watermark past every item in the current list, including
+  // those beyond the MAX_ITEMS the menu displays. This menu is "Store Updates", not a
+  // My-Updates-only view, so when the installed lookup has settled to null (could not tell)
+  // the full list IS what the user is looking at, and marking it all seen is the intent.
+  // The one exclusion is the render below: while My Updates is still RESOLVING, the action is
+  // hidden, because that list is about to change under the user.
   const markAllSeen = () => {
     // Seed from 0, not Date.now(): Date.now() always wins the Math.max, so the watermark
     // jumped to "now" and silently marked items seen that were never in the scoped list
@@ -120,7 +144,7 @@ export default function Command() {
   const shown = (count > 0 ? unseen : scoped).slice(0, MAX_ITEMS);
 
   return (
-    <MenuBarExtra icon="store-updates-icon.png" title={title} tooltip={tooltip} isLoading={isLoading}>
+    <MenuBarExtra icon={Icon.Store} title={title} tooltip={tooltip} isLoading={isLoading}>
       {scoped.length === 0 && !isLoading && (
         <MenuBarExtra.Item
           title={scope === "my-updates" ? "No updates for your extensions" : "No store updates"}
@@ -149,22 +173,37 @@ export default function Command() {
         </MenuBarExtra.Section>
       )}
 
-      <MenuBarExtra.Separator />
-
-      {count > 0 && <MenuBarExtra.Item title="Mark All as Seen" icon={Icon.CheckCircle} onAction={markAllSeen} />}
-      <MenuBarExtra.Item
-        title="View Store Updates"
-        icon={Icon.AppWindowGrid3x3}
-        onAction={() => launchCommand({ name: "view-store-updates", type: LaunchType.UserInitiated })}
-      />
-      <MenuBarExtra.Item
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        // Common.Refresh, not a bare {cmd+r}: this extension ships to Windows, where
-        // cmd does not exist. The Common constant is platform-aware by construction.
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={scan}
-      />
+      {/* An untitled Section draws its own divider above itself, which is what the
+          deprecated MenuBarExtra.Separator did here. */}
+      <MenuBarExtra.Section>
+        {/* Not while My Updates is still resolving: until then the menu shows every item,
+            and marking those seen would advance the watermark past installed updates the
+            scoped list never showed. (Once the lookup settles to null, the full list IS
+            the scope, so the action returns.) */}
+        {count > 0 && (scope !== "my-updates" || installed !== undefined) && (
+          <MenuBarExtra.Item title="Mark All as Seen" icon={Icon.CheckCircle} onAction={markAllSeen} />
+        )}
+        <MenuBarExtra.Item
+          title="View Store Updates"
+          icon={Icon.AppWindowGrid3x3}
+          onAction={() => launchCommand({ name: "view-store-updates", type: LaunchType.UserInitiated })}
+        />
+        {/* Updating installed extensions is Raycast's own command; this one only
+            reports what changed upstream. */}
+        <MenuBarExtra.Item
+          title="Check for Extension Updates"
+          icon={Icon.Download}
+          onAction={checkForExtensionUpdates}
+        />
+        <MenuBarExtra.Item
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          // Common.Refresh, not a bare {cmd+r}: this extension ships to Windows, where
+          // cmd does not exist. The Common constant is platform-aware by construction.
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={scan}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

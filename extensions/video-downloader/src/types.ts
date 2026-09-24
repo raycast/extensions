@@ -14,6 +14,6 @@ export type Format = {
 export type Video = {
   title: string;
   duration: number;
-  live_status: string;
+  live_status: string | null;
   formats: Format[];
 };

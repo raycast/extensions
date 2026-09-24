@@ -1,16 +1,16 @@
 import { beforeEach, expect, test, vi } from "vitest";
 import findStoreUpdates from "../src/tools/find-store-updates";
-import { fetchStoreUpdates, getInstalledExtensionSlugs } from "../src/utils";
+import { fetchInstalledExtensionSlugs, fetchStoreUpdates } from "../src/utils";
 
 vi.mock("../src/utils", () => ({
   fetchStoreUpdates: vi.fn(),
-  getInstalledExtensionSlugs: vi.fn(),
+  fetchInstalledExtensionSlugs: vi.fn(),
 }));
 
 beforeEach(() => {
   vi.mocked(fetchStoreUpdates).mockReset();
-  vi.mocked(getInstalledExtensionSlugs).mockReset();
-  vi.mocked(getInstalledExtensionSlugs).mockReturnValue(new Set());
+  vi.mocked(fetchInstalledExtensionSlugs).mockReset();
+  vi.mocked(fetchInstalledExtensionSlugs).mockResolvedValue(new Set());
 });
 
 function item(title: string, date: string) {
@@ -58,4 +58,11 @@ test("invalid since dates fail before fetching", async () => {
   await expect(findStoreUpdates({ since: "2026-02-30" })).rejects.toThrow(/since must be a valid date/);
   await expect(findStoreUpdates({ since: "09/01/2026" })).rejects.toThrow(/since must be a valid date/);
   expect(fetchStoreUpdates).not.toHaveBeenCalled();
+});
+
+test("installed lookup failure is reported instead of claiming no matches", async () => {
+  vi.mocked(fetchStoreUpdates).mockResolvedValue([]);
+  vi.mocked(fetchInstalledExtensionSlugs).mockResolvedValue(null);
+
+  await expect(findStoreUpdates({ installedOnly: true })).rejects.toThrow(/Installed extensions could not be determined/);
 });

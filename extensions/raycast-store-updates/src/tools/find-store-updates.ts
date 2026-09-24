@@ -1,4 +1,4 @@
-import { fetchStoreUpdates, getInstalledExtensionSlugs } from "../utils";
+import { fetchInstalledExtensionSlugs, fetchStoreUpdates } from "../utils";
 
 type Input = {
   /** Match an extension's title or description. Omit to see the latest updates. */
@@ -30,7 +30,10 @@ export default async function findStoreUpdates(input: Input) {
   }
   const items = await fetchStoreUpdates(input.type === "new" ? "new" : "all");
   const query = input.query?.trim().toLowerCase();
-  const installed = input.installedOnly ? getInstalledExtensionSlugs() : null;
+  const installed = input.installedOnly ? await fetchInstalledExtensionSlugs() : null;
+  if (input.installedOnly && !installed) {
+    throw new Error("Installed extensions could not be determined.");
+  }
   const limit = Math.min(50, Math.max(1, Math.floor(input.limit ?? 20)));
 
   const matches = items.filter((item) => {

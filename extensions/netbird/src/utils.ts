@@ -164,8 +164,10 @@ export async function netbirdUp(): Promise<void> {
   const bin = await getNetbirdBin();
 
   // we need to return explicit Promise in order to read live output from child process
+  // `--no-browser` stops the CLI from opening the SSO page itself; we open it below from stdout,
+  // otherwise the login page is opened twice
   return new Promise((resolve, reject) => {
-    const child = exec(`${bin} up`, (error, stdout, stderr) => {
+    const child = exec(`${bin} up --no-browser`, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(formatNetbirdError(error)));
         return;
@@ -180,10 +182,8 @@ export async function netbirdUp(): Promise<void> {
     let urlOpened = false;
     child.stdout?.on("data", (data) => {
       const output = data.toString();
-      if (
-        !urlOpened &&
-        (output.includes("Please do the SSO login in your browser") || output.includes("use this URL to log in"))
-      ) {
+      // with `--no-browser` the CLI prints "Use this URL to log in:", without it "...use this URL to log in:"
+      if (!urlOpened && /use this URL to log in/i.test(output)) {
         const match = output.match(/(https:\/\/[^\s]+)/);
         if (match) {
           urlOpened = true;

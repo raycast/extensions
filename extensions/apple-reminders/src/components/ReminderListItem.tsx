@@ -4,6 +4,7 @@ import { format, formatDistanceToNow } from "date-fns";
 
 import {
   displayDueDate,
+  extractTagsFromNotes,
   formatReminderTime,
   getLocationDescription,
   getPriorityIcon,
@@ -98,6 +99,18 @@ export default function ReminderListItem({
     });
 
     keywords.push(reminder.priority);
+  }
+
+  const { tags } = extractTagsFromNotes(reminder.notes);
+
+  if (tags.length > 0) {
+    accessories.push({
+      icon: Icon.Tag,
+      text: tags.map((t) => `#${t}`).join(" "),
+      tooltip: `Tags: ${tags.map((t) => `#${t}`).join(", ")}`,
+    });
+
+    keywords.push(...tags.map((t) => `#${t}`), ...tags);
   }
 
   if (listId === "all" && reminder.list) {

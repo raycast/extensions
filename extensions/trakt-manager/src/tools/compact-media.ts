@@ -1,5 +1,7 @@
 import {
   TraktEpisodeListItem,
+  TraktList,
+  TraktListEntry,
   TraktMovieBaseItem,
   TraktMovieHistoryListItem,
   TraktMovieListItem,
@@ -117,6 +119,35 @@ export type CompactUserStats = {
   totalDaysWatched: number;
   ratingsTotal: number;
   ratingDistribution?: { [rating: string]: number };
+};
+
+export type CompactList = {
+  traktId: number;
+  slug?: string;
+  /** Pass this to the other list tools. */
+  listId: string;
+  name: string;
+  description?: string;
+  privacy?: string;
+  itemCount: number;
+  displayNumbers?: boolean;
+  sortBy?: string;
+  sortHow?: string;
+  updatedAt?: string;
+};
+
+export type CompactListEntry = {
+  listEntryId: number;
+  rank?: number;
+  type: "movie" | "show" | "season" | "episode" | string;
+  title: string;
+  /** Release year of the movie or show; the parent show's year for seasons and episodes. */
+  year?: number;
+  traktId: number;
+  showTraktId?: number;
+  seasonNumber?: number;
+  episodeNumber?: number;
+  episodeLabel?: string;
 };
 
 function truncateOverview(overview?: string, maxLength = 220): string | undefined {
@@ -264,6 +295,65 @@ export function toCompactRating(item: TraktUserRatingItem): CompactRatingItem {
     traktId,
     episode,
   };
+}
+
+export function toCompactList(list: TraktList): CompactList {
+  const slug = list.ids.slug ?? undefined;
+  return {
+    traktId: list.ids.trakt,
+    slug,
+    listId: slug ?? String(list.ids.trakt),
+    name: list.name,
+    description: truncateOverview(list.description ?? undefined),
+    privacy: list.privacy,
+    itemCount: list.item_count ?? 0,
+    displayNumbers: list.display_numbers,
+    sortBy: list.sort_by,
+    sortHow: list.sort_how,
+    updatedAt: list.updated_at,
+  };
+}
+
+export function toCompactListEntry(entry: TraktListEntry): CompactListEntry {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const base = { listEntryId: entry.id, rank: entry.rank ?? undefined, type: entry.type };
+
+  if (entry.type === "movie" && entry.movie) {
+    return { ...base, title: entry.movie.title, year: entry.movie.year ?? undefined, traktId: entry.movie.ids.trakt };
+  }
+
+  if (entry.type === "episode" && entry.episode) {
+    const label = `S${pad(entry.episode.season)}E${pad(entry.episode.number)}`;
+    return {
+      ...base,
+      title: entry.show
+        ? `${entry.show.title}: ${entry.episode.title ?? "Episode"}`
+        : (entry.episode.title ?? "Episode"),
+      year: entry.show?.year ?? undefined,
+      traktId: entry.episode.ids.trakt,
+      showTraktId: entry.show?.ids.trakt,
+      seasonNumber: entry.episode.season,
+      episodeNumber: entry.episode.number,
+      episodeLabel: label,
+    };
+  }
+
+  if (entry.type === "season" && entry.season) {
+    return {
+      ...base,
+      title: entry.show ? `${entry.show.title} (Season ${entry.season.number})` : `Season ${entry.season.number}`,
+      year: entry.show?.year ?? undefined,
+      traktId: entry.season.ids?.trakt ?? 0,
+      showTraktId: entry.show?.ids.trakt,
+      seasonNumber: entry.season.number,
+    };
+  }
+
+  if (entry.type === "show" && entry.show) {
+    return { ...base, title: entry.show.title, year: entry.show.year ?? undefined, traktId: entry.show.ids.trakt };
+  }
+
+  return { ...base, title: "Unknown", traktId: 0 };
 }
 
 export function toCompactUserStats(stats: TraktUserStats): CompactUserStats {

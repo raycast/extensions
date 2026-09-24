@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add QuillHub MCP Server] - 2026-09-23
+
+- Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
 ## [Add SocialFaktory MCP Server] - 2026-09-22
 
 - Add SocialFaktory to the official registry: write, generate, schedule and publish a brand's social content, in its own voice, on every channel. Remote Streamable HTTP server at https://www.socialfaktory.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.

@@ -118,10 +118,12 @@ struct NewReminder: Decodable {
   let notes: String?
   let dueDate: String?
   let priority: String?
+  let tags: [String]?
   let recurrence: Recurrence?
   let address: String?
   let proximity: String?
   let radius: Double?
+  let url: String?
 }
 
 struct Recurrence: Decodable {
@@ -136,7 +138,27 @@ struct Recurrence: Decodable {
 
   reminder.title = newReminder.title
 
-  if let notes = newReminder.notes {
+  if let urlString = newReminder.url, let url = URL(string: urlString) {
+    reminder.url = url
+  }
+
+  var fullNotes = newReminder.notes
+  if let tags = newReminder.tags, !tags.isEmpty {
+    let formattedTags = tags.map { tag in
+      let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+      return trimmed.hasPrefix("#") ? trimmed : "#\(trimmed)"
+    }.filter { $0.count > 1 }.joined(separator: " ")
+
+    if !formattedTags.isEmpty {
+      if let existingNotes = fullNotes, !existingNotes.isEmpty {
+        fullNotes = "\(existingNotes)\n\n\(formattedTags)"
+      } else {
+        fullNotes = formattedTags
+      }
+    }
+  }
+
+  if let notes = fullNotes {
     reminder.notes = notes
   }
 
@@ -479,8 +501,10 @@ struct UpdateReminderPayload: Decodable {
   let notes: String?
   let dueDate: String?
   let priority: String?
+  let tags: [String]?
   let isCompleted: Bool?
   let recurrence: Recurrence?
+  let url: String?
 }
 
 @raycast func updateReminder(payload: UpdateReminderPayload) throws {
@@ -498,8 +522,45 @@ struct UpdateReminderPayload: Decodable {
     item.title = title
   }
 
-  if let notes = payload.notes {
-    item.notes = notes
+  if let urlString = payload.url {
+    item.url = urlString.isEmpty ? nil : URL(string: urlString)
+  }
+
+  if payload.notes != nil || payload.tags != nil {
+    var rawNotes = payload.notes ?? item.notes ?? ""
+
+    if payload.tags != nil {
+      var lines = rawNotes.components(separatedBy: "\n")
+      while let last = lines.last, last.trimmingCharacters(in: .whitespaces).isEmpty {
+        lines.removeLast()
+      }
+      if let lastLine = lines.last?.trimmingCharacters(in: .whitespaces) {
+        let isAllHashtags = !lastLine.isEmpty && lastLine.components(separatedBy: .whitespaces).allSatisfy { $0.hasPrefix("#") && $0.count > 1 }
+        if isAllHashtags {
+          lines.removeLast()
+          while let last = lines.last, last.trimmingCharacters(in: .whitespaces).isEmpty {
+            lines.removeLast()
+          }
+          rawNotes = lines.joined(separator: "\n")
+        }
+      }
+    }
+
+    if let tags = payload.tags {
+      let formattedTags = tags.map { tag in
+        let trimmed = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.hasPrefix("#") ? trimmed : "#\(trimmed)"
+      }.filter { $0.count > 1 }.joined(separator: " ")
+
+      if !formattedTags.isEmpty {
+        if !rawNotes.isEmpty {
+          rawNotes = "\(rawNotes)\n\n\(formattedTags)"
+        } else {
+          rawNotes = formattedTags
+        }
+      }
+    }
+    item.notes = rawNotes.isEmpty ? nil : rawNotes
   }
 
   if payload.dueDate != nil {

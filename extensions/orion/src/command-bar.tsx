@@ -211,8 +211,11 @@ export default function Command() {
     data: history,
     isLoading: historyLoading,
     permissionView,
+    completedQueryKey,
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
   const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
+  const historyQueryKey = `${selectedProfileId}\u0000${hasQuery ? query : ""}`;
+  const hasCurrentHistoryResult = !hasQuery || completedQueryKey === historyQueryKey;
 
   // A result ID from the previous query can disappear while typing (for
   // example, the "Open Address" item vanishes when `sina.com.cn` becomes
@@ -239,7 +242,13 @@ export default function Command() {
     ? bookmarks.filter((b) => relevance(q, b.title, b.url) > 0 || b.folders.some((f) => textMatchesQuery(q, f)))
     : [];
   const readingHits: Bookmark[] = hasQuery ? (readingList ?? []).filter((b) => relevance(q, b.title, b.url) > 0) : [];
-  const historyHits: HistoryItem[] = hasQuery ? (history ?? []).filter((h) => relevance(q, h.title, h.url) > 0) : [];
+  const displayedHistoryHits: HistoryItem[] = hasQuery
+    ? (history ?? []).filter((h) => relevance(q, h.title, h.url) > 0)
+    : [];
+  // useSQL keeps its previous data while the new statement executes. Do not
+  // allow that previous result set to influence Top Hit, but keep it visible
+  // when it still matches the new text to avoid needless list reflow.
+  const historyHits: HistoryItem[] = hasCurrentHistoryResult ? displayedHistoryHits : [];
   const suggestionHits: string[] = hasQuery ? suggestions : [];
 
   // Pick the single best local match as Top Hit.
@@ -312,7 +321,7 @@ export default function Command() {
     LIMITS.reading,
   );
   const historySection = uniqueUrls(
-    historyHits.filter((h) => `hist-${h.id}` !== topUrlKey),
+    displayedHistoryHits.filter((h) => `hist-${h.id}` !== topUrlKey),
     seenUrls,
     LIMITS.history,
   );
