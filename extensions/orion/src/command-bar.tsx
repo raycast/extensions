@@ -204,7 +204,9 @@ export default function Command() {
   const { profiles } = useProfiles();
   const { selectedProfileId, setSelectedProfileId } = useSelectedProfileId("Defaults");
 
-  const { tabs, refresh } = useTabs();
+  // Open Tabs can change while the Command Bar is visible. Keep this command
+  // current without affecting the standalone Search Tabs command.
+  const { tabs, refresh, markTabActive } = useTabs({ refreshWhileOpen: true });
   const { bookmarks, isLoading: bookmarksLoading } = useBookmarks(selectedProfileId);
   const { readingList } = useReadingList(selectedProfileId);
   const {
@@ -414,7 +416,13 @@ export default function Command() {
       {topHit && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
-            <TabListItem id={TOP_HIT_ITEM_ID} tab={topHit.tab} refresh={refresh} closeLaunchers />
+            <TabListItem
+              id={TOP_HIT_ITEM_ID}
+              tab={topHit.tab}
+              refresh={refresh}
+              closeLaunchers
+              onActivate={markTabActive}
+            />
           ) : (
             <UrlListItem id={TOP_HIT_ITEM_ID} item={topHit.item} accessory={topHit.source} />
           )}
@@ -463,7 +471,14 @@ export default function Command() {
       {tabSection.length > 0 && (
         <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
-            <TabListItem id={tabKey(t)} key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
+            <TabListItem
+              id={tabKey(t)}
+              key={tabKey(t)}
+              tab={t}
+              refresh={refresh}
+              closeLaunchers
+              onActivate={markTabActive}
+            />
           ))}
         </List.Section>
       )}
