@@ -78,8 +78,13 @@ export default function Instances() {
       },
     };
     if (await confirmAlert(options)) {
-      await setValue(instances.filter((i) => instanceId(i) !== instanceId(instance)));
-      if (wasActive) setToken({ url: "", headers: {} });
+      const remaining = instances.filter((i) => instanceId(i) !== instanceId(instance));
+      await setValue(remaining);
+      // Every other screen (Projects, Docker, ...) fetches unconditionally off `useToken()`'s
+      // url with no guard for it being empty, so leaving the cached token at its blank default
+      // whenever another instance is still around would crash the next screen instead of
+      // degrading gracefully - auto-switch to one of the survivors instead.
+      if (wasActive) setToken(remaining.length ? tokenForInstance(remaining[0]) : { url: "", headers: {} });
       await showToast(Toast.Style.Success, "Deleted", instance.name);
     }
   }
