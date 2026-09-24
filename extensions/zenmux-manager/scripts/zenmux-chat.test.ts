@@ -366,23 +366,38 @@ describe("ZenMux stream regressions", () => {
 });
 
 describe("ZenMux tool capability", () => {
-  it("requires explicit catalog support for tools", () => {
+  it("allows tools when metadata is absent and respects explicit opt-outs", () => {
     const models = toRegisteredModels([
       { id: "missing" },
       { id: "reasoning", capabilities: { reasoning: true } },
       { id: "supported", capabilities: { tools: true } },
       { id: "legacy", capabilities: { function_calling: true } },
       { id: "disabled", capabilities: { tools: false, function_calling: true } },
+      { id: "legacy-disabled", capabilities: { tools: true, function_calling: false } },
     ]);
     const support = Object.fromEntries(models.map((model) => [model.id, model.capabilities.tools.supported]));
-    assert.deepEqual(support, { disabled: false, legacy: true, missing: false, reasoning: false, supported: true });
+    assert.deepEqual(support, {
+      disabled: false,
+      legacy: true,
+      "legacy-disabled": false,
+      missing: true,
+      reasoning: true,
+      supported: true,
+    });
     const body = buildChatCompletionRequest(models.find((model) => model.id === "missing")!, {
       messages: [{ role: "user", content: [{ type: "text", text: "Hi" }] }],
       tools: { lookup: { inputSchema: { type: "object" } } },
       toolChoice: "required",
     });
-    assert.equal(body.tools, undefined);
-    assert.equal(body.tool_choice, undefined);
+    assert.equal(body.tools?.[0]?.function.name, "lookup");
+    assert.equal(body.tool_choice, "required");
+    const disabled = buildChatCompletionRequest(models.find((model) => model.id === "disabled")!, {
+      messages: [{ role: "user", content: [{ type: "text", text: "Hi" }] }],
+      tools: { lookup: { inputSchema: { type: "object" } } },
+      toolChoice: "required",
+    });
+    assert.equal(disabled.tools, undefined);
+    assert.equal(disabled.tool_choice, undefined);
   });
 });
 

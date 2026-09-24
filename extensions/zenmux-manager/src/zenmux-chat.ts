@@ -200,10 +200,9 @@ export function toRegisteredModels(models: ZenMuxCatalogModel[]): ProvidedModel[
     }
 
     const reasoning = model.capabilities?.reasoning === true;
-    const toolsSupported =
-      (model.capabilities?.tools === true || model.capabilities?.function_calling === true) &&
-      model.capabilities?.tools !== false &&
-      model.capabilities?.function_calling !== false;
+    // ZenMux's catalog currently reports reasoning, but omits tool support even
+    // for tool-capable models. Allow tools unless the catalog explicitly opts out.
+    const toolsSupported = model.capabilities?.tools !== false && model.capabilities?.function_calling !== false;
     const contextWindow =
       typeof model.context_length === "number" && Number.isFinite(model.context_length) && model.context_length > 0
         ? model.context_length

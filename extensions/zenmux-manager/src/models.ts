@@ -15,7 +15,7 @@ import {
 } from "./zenmux-chat";
 
 const cache = new Cache();
-const MODEL_CACHE_KEY = "zenmux-provided-models-v2";
+const MODEL_CACHE_KEY = "zenmux-provided-models-v3";
 const MODEL_ICON = "extension-icon.png";
 
 export const getModels: AI.GetModels = async () => {
