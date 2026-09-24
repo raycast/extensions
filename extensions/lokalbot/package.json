@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lokalbot",
   "title": "LokalBot",
-  "description": "A local LLM workhorse that keeps a private memory of your workday — search meeting transcripts and summaries from Raycast.",
+  "description": "Find what you said or saw on your Mac. Search LokalBot meeting transcripts and summaries from Raycast.",
   "icon": "icon.png",
   "author": "stevan_bogosavljevic",
   "categories": [
