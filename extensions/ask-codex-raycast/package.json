@@ -34,7 +34,8 @@
           "placeholder": "Optional question to start with",
           "required": false
         }
-      ]
+      ],
+      "icon": "command-icon.png"
     }
   ],
   "preferences": [
