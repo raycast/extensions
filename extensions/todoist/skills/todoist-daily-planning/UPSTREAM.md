@@ -22,9 +22,9 @@ Raw sync priorities use 4 for P1; task-list results and create/update tool input
 
 The CLI's recurring-occurrence rescheduling, cursor pagination, and direct task-view commands have no equivalent registered tools here. This skill stops affected operations when those capabilities are required. The extension also cannot read calendar availability, change an existing task's duration, or accept `due: null` through the declared update input. It does not imply those abilities or claim that a suggested time block is free.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, and Raycast AI Chat tests are deferred until release. These prompts are a future manual test plan, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These prompts are a future manual test plan, not executed transcripts:
 
 1. "Plan my day from Todoist. I have four hours for focused work. Show today's tasks and overdue work separately, and suggest what fits without changing anything."
 2. "Triage my Inbox. Suggest existing projects and sections for each task, flag possible duplicates, and keep my recurring schedules unchanged. Show the proposed changes first."

@@ -2,6 +2,7 @@
 
 ## [Meeting Prep Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for preparing upcoming-meeting briefs with Zoom details, join links, and suggested questions.
 - Keep known meeting details separate from proposed agendas and flag missing context or schedule coverage.
 

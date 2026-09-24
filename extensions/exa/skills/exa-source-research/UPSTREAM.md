@@ -13,3 +13,7 @@ The adaptation uses the extension's existing `search`, `search-deep`, `get-conte
 The upstream [company-research](https://github.com/exa-labs/agent-skills/blob/975171aac8d40e713fbcc5637bf64972378a3617/skills/company-research/SKILL.md) and [lead-generation](https://github.com/exa-labs/agent-skills/blob/975171aac8d40e713fbcc5637bf64972378a3617/skills/lead-generation/SKILL.md) workflows depend on `agent_run` and additional tools that this extension does not provide. They are not bundled here.
 
 The upstream MIT copyright notice and license are retained in [LICENSE](LICENSE).
+
+## Public API validation
+
+See [validation results](VALIDATION.md) for checks after the API 2.5.0 update.

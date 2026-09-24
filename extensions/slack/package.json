@@ -252,7 +252,7 @@
     "skills": [
       {
         "name": "slack-catch-up",
-        "title": "Catch Up on Slack"
+        "title": "Catch up on Slack"
       },
       {
         "name": "slack-decision-research",
@@ -265,7 +265,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.6",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.2",
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",

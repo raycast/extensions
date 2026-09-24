@@ -34,11 +34,11 @@ The manifest and every file in `src/tools/` were read before editing. [TOOLS.md]
 - Use the built-in write confirmations once target and content are concrete. A clear user request to save already authorizes that scoped operation; a draft-only request does not. Do not add a second approval gate or treat upstream setup instructions as requirements to install anything.
 - Verify writes where reachable, account for conversion failures after successful appends, and stop uncertain retries. Preserve source and destination URLs, keeping page/database-container IDs separate from data-source IDs when constructing links.
 
-Only the skill registration, skill/research documentation, license notice, and changelog are added. Existing source, manifest instructions/evals, API dependency `^1.104.5`, and lockfiles are unchanged. No private Notion content was queried or written during this preparation.
+Only the skill registration, skill/research documentation, license notice, and changelog are added. Existing source, manifest instructions/evals, API dependency and lockfiles were unchanged during the initial preparation. No private Notion content was queried or written during this preparation.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, automated tests, and Raycast AI Chat testing are deferred until release. These are future manual prompts and expected behavior, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These are future manual prompts and expected behavior, not executed transcripts:
 
 1. **Decision capture:** "Save this decision in the Engineering Decisions database as 'Keep webhooks for billing': we chose webhooks for lower latency; polling remains the fallback. Morgan owns the rollout; no date was agreed." Expect destination disambiguation, bounded duplicate checks, supported title/body creation, source attribution, and no invented date or database owner/status property assignment.
 2. **Append an FAQ:** "Add a short FAQ to the existing Onboarding Guide explaining the staging-access process from the notes below. Preserve the rest of the page." Expect title resolution, JSON block reads and relevant nested context, only new material appended, a returned page link, and cautious readback if the page is long or the append receipt is unusable.

@@ -29,11 +29,11 @@ All 29 tool files and the manifest were read before editing. [TOOLS.md](TOOLS.md
 
 The reviewed official skill also supports Substack Notes, inert planned dates, link-preview suppression, and broader mention workflows. This extension has no corresponding Substack platform, `plan`, `hide_link_preview`, or LinkedIn person-resolution input. Its string-only scheduling inputs cannot send the null needed to unschedule a draft. These gaps are documented, and none is replaced with a similar operation that could publish content. External article retrieval and arbitrary post-body updates are also unavailable. X Articles, analytics, scheduling, and comment mutations have tools but are outside this post/thread skill's scope.
 
-Only skill registration, documentation, license notices, and the changelog are added. Tool source, AI instructions/evals, dependencies, and lockfiles remain unchanged. The extension keeps `@raycast/api` at `^1.104.24`.
+The initial preparation added skill registration, documentation, license notices, and the changelog. Tool source and AI instructions/evals remain unchanged. The public API dependency and lockfile now target 2.5.0.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, and Raycast AI Chat tests are deferred until release. These prompts are a future manual test plan, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These prompts are a future manual test plan, not executed transcripts:
 
 1. "Use my recent published X drafts to learn my voice. Turn these notes into a four-post thread: we added keyboard shortcuts, the feature is in beta, and feedback is welcome. Save an X draft in my personal account; don't schedule or share it." Expected: account/platform resolution, full writing samples, exact thread text, one unscheduled draft, and readback.
 2. "Add a LinkedIn version to the thread draft you just saved. Keep the X version untouched and put 'Review with the team before launch' in the scratchpad." Expected: re-read the draft, update only LinkedIn with a single post, preserve X, save the requested private note, and verify both versions.

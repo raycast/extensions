@@ -4,23 +4,23 @@ Reviewed against `package.json`, `ai.yaml`, and every file in `src/tools/` on Se
 
 | Tool | Inputs |
 | --- | --- |
-| [get-channels](../src/tools/get-channels.ts) | None |
-| [get-channel-history](../src/tools/get-channel-history.ts) | `text?: string`; `after?: string` |
-| [read-conversation](../src/tools/read-conversation.ts) | `conversation: string`; `limit?: number`; `after?: string` |
-| [get-users](../src/tools/get-users.ts) | None |
-| [find-users](../src/tools/find-users.ts) | `query: string` |
-| [set-status](../src/tools/set-status.ts) | `text?: string`; `emoji?: string`; `duration?: number`; `snoozeMinutes?: number` |
-| [get-emojis](../src/tools/get-emojis.ts) | None |
-| [search-messages](../src/tools/search-messages.ts) | `query: string`; `sort?: "timestamp" \| "score"` |
-| [read-thread](../src/tools/read-thread.ts) | `channel: string`; `threadTs: string`; `limit?: number`; `cursor?: string` |
-| [open-group-dm](../src/tools/open-group-dm.ts) | `userIds: string` |
-| [send-message](../src/tools/send-message.ts) | `recipient: string`; `text: string` |
-| [update-message](../src/tools/update-message.ts) | `channel: string`; `messageTs: string`; `text: string` |
-| [add-reaction](../src/tools/add-reaction.ts) | `channel: string`; `messageTs: string`; `emoji: string` |
-| [reply-thread](../src/tools/reply-thread.ts) | `channel: string`; `threadTs: string`; `text: string`; `replyBroadcast?: boolean` |
-| [get-huddle-link](../src/tools/get-huddle-link.ts) | `conversation: string` |
-| [upload-files](../src/tools/upload-files.ts) | `channel: string`; `filePaths: string`; `text?: string`; `threadTs?: string` |
-| [download-files](../src/tools/download-files.ts) | `fileIds: string`; `destinationDir?: string` |
+| [get-channels](../../src/tools/get-channels.ts) | None |
+| [get-channel-history](../../src/tools/get-channel-history.ts) | `text?: string`; `after?: string` |
+| [read-conversation](../../src/tools/read-conversation.ts) | `conversation: string`; `limit?: number`; `after?: string` |
+| [get-users](../../src/tools/get-users.ts) | None |
+| [find-users](../../src/tools/find-users.ts) | `query: string` |
+| [set-status](../../src/tools/set-status.ts) | `text?: string`; `emoji?: string`; `duration?: number`; `snoozeMinutes?: number` |
+| [get-emojis](../../src/tools/get-emojis.ts) | None |
+| [search-messages](../../src/tools/search-messages.ts) | `query: string`; `sort?: "timestamp" \| "score"` |
+| [read-thread](../../src/tools/read-thread.ts) | `channel: string`; `threadTs: string`; `limit?: number`; `cursor?: string` |
+| [open-group-dm](../../src/tools/open-group-dm.ts) | `userIds: string` |
+| [send-message](../../src/tools/send-message.ts) | `recipient: string`; `text: string` |
+| [update-message](../../src/tools/update-message.ts) | `channel: string`; `messageTs: string`; `text: string` |
+| [add-reaction](../../src/tools/add-reaction.ts) | `channel: string`; `messageTs: string`; `emoji: string` |
+| [reply-thread](../../src/tools/reply-thread.ts) | `channel: string`; `threadTs: string`; `text: string`; `replyBroadcast?: boolean` |
+| [get-huddle-link](../../src/tools/get-huddle-link.ts) | `conversation: string` |
+| [upload-files](../../src/tools/upload-files.ts) | `channel: string`; `filePaths: string`; `text?: string`; `threadTs?: string` |
+| [download-files](../../src/tools/download-files.ts) | `fileIds: string`; `destinationDir?: string` |
 
 ## Readers and search limits
 
@@ -40,7 +40,7 @@ Reviewed against `package.json`, `ai.yaml`, and every file in `src/tools/` on Se
 - `send-message.recipient` accepts a C/D/G conversation ID or U/W user ID. User IDs are resolved to DMs before sending. Nonempty `text` is required. The result contains channel, exact `ts`, text, and a permalink when available. Sending may succeed before the following permalink request fails. There is no idempotency-key input; inspect an uncertain destination before retrying.
 - `reply-thread` requires channel, exact parent `threadTs`, and nonempty text. `replyBroadcast` defaults to false. It returns channel, parent/thread timestamp, reply timestamp, text, and broadcast state, without a permalink. Broadcast is a separate audience change and is never inferred from a request to reply.
 - `update-message` replaces the authenticated user's existing message text and Block Kit blocks; it is not a partial edit. It returns channel, exact timestamp, text, and optional permalink. `add-reaction` normalizes an emoji name by stripping surrounding colons and returns the message reference. Neither action is part of the three skills' default read/draft workflows.
-- The unregistered [message-signature.ts](../src/tools/message-signature.ts) helper renders message text and the optional Raycast signature. At up to 3,000 characters it can use a Markdown block; longer content uses bounded section/mrkdwn blocks. Disabling the signature falls back to text-only messages. File uploads explicitly use section/mrkdwn rather than Markdown blocks. This helper is not callable as an AI tool, and there is no native Slack composer-draft tool.
+- The unregistered [message-signature.ts](../../src/tools/message-signature.ts) helper renders message text and the optional Raycast signature. At up to 3,000 characters it can use a Markdown block; longer content uses bounded section/mrkdwn blocks. Disabling the signature falls back to text-only messages. File uploads explicitly use section/mrkdwn rather than Markdown blocks. This helper is not callable as an AI tool, and there is no native Slack composer-draft tool.
 - `open-group-dm.userIds` is a string, parsed on commas or whitespace and deduplicated. It requires 2 to 8 other U/W user IDs and opens/resumes the group. The caller must exclude the authenticated user. It returns channel and users; it does not send a message.
 - `get-huddle-link` accepts a conversation or user ID, resolving a user to a DM and reading workspace metadata. It returns workspace ID, channel, and a join URL. It does not fetch transcripts or create a meeting record.
 - `upload-files.channel` must be C/D/G, never U/W. `filePaths` contains absolute paths separated by actual newlines. Optional text accompanies the upload; optional `threadTs` targets the parent thread. It uploads files as-is and returns file IDs/names/links and a message permalink when available. A failed operation may leave a partial side effect, so do not retry blindly or re-encode files to bypass errors.

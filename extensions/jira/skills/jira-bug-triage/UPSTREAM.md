@@ -19,13 +19,13 @@ Duplicate detection is an assessment. The extension has no registered comment, i
 
 The create tool cannot submit parent, priority, component, version, team, custom-field, or attachment fields, even though some underlying API helpers support them. It cannot fill unsupported required fields after a create error. Creation, editing, and assignment require their declared `confirmation` objects; assignee omission on assignment unassigns the issue. Optional create fields remain unset unless requested, matching the existing manifest instructions.
 
-`update-issue` wraps `withAccessToken(jira)` directly, while the other tools select OAuth or configured API-token authentication through `withJiraCredentials`. This is a pre-existing limitation. The skill requires known OAuth use for edits, stops the API-token edit path, and does not change credentials or source code. Runtime testing must check this behavior after the Extensions API release.
+`update-issue` wraps `withAccessToken(jira)` directly, while the other tools select OAuth or configured API-token authentication through `withJiraCredentials`. This is a pre-existing limitation. The skill requires known OAuth use for edits, stops the API-token edit path, and does not change credentials or source code. Runtime testing must check this behavior with the public API.
 
 Descriptions are written as Markdown converted to ADF, replacing the whole field. The skill stops edits that cannot preserve existing rich content. Read/search tools do not attach a browser URL; creation does. Links therefore use a returned URL or a site already known from the user's input or returned data, never an invented tenant hostname or an API URL presented as an issue page.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, and Raycast AI Chat tests are deferred until release. These prompts are a future manual test plan, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These prompts are a future manual test plan, not executed transcripts:
 
 1. "Triage this Mobile bug: login times out on iOS 18 when switching from Wi-Fi to cellular. Check open and resolved reports for duplicates, and show the evidence without changing anything."
 2. "File the checkout error we discussed as a Payments bug if no matching report is found. Use my supplied reproduction steps and assign it to me; leave other optional fields unset."

@@ -36,14 +36,14 @@ The manifest and all seven `src/tools/` files were read before editing. [TOOLS.m
 - Keep source types distinct. Automatic note content may be enhanced or original without a discriminator. Error placeholders and fallback dates are not meeting evidence. Transcript duration is derived from the same returned segments and cannot establish completeness independently.
 - Keep the review in chat. No task creation, follow-up delivery, generated-note writing, or automatic folder organization is added. Existing-source Notion export is a separate, explicitly requested operation with per-note outcomes and no blind write retries.
 
-Only the skill registration, bundled skill/research documents, license notices, and changelog are added. Existing source, `ai.yaml`, API dependency `^1.104.25`, and lockfiles are unchanged. No private Granola data was queried or exported during this work.
+Only the skill registration, bundled skill/research documents, license notices, and changelog are added. Existing source, `ai.yaml`, API dependency and lockfiles were unchanged during the initial preparation. No private Granola data was queried or exported during this work.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, automated tests, and Raycast AI Chat testing are deferred until release. These are future manual prompts and expected behavior, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These are future manual prompts and expected behavior, not executed transcripts:
 
 1. **Latest meeting actions:** "Turn my latest product-launch meeting into decisions, actions with owners and deadlines, and open questions. Keep it here." Expect title/latest resolution, a content read after listing, source references, unknown fields preserved, and no writes or unsolicited transcript calls.
 2. **Shared-folder weekly review:** "Review notes created September 14–20 in the shared Customer Calls folder, using Asia/Kolkata. What actions were agreed and what was explicitly completed?" Expect folder resolution and membership verification, owned/shared selection, UTC boundary handling, bounded coverage, shared-content failures surfaced, and no unrelated notes if membership is empty or unavailable.
 3. **Transcript attribution and task gap:** "Use the transcript from the latest shared Acme call to check who promised the migration plan and by when, then create the follow-ups in my Notion task database." Expect listing and note content before transcript evidence, cautious capture-label attribution, a supported action draft, and a clear stop at unsupported task creation. Exporting the original note must not replace creating tasks.
 
-After release, also check a `/tldr` request and an explicitly authorized export of existing source notes against the preserved recipe and per-note export behavior.
+Also check a `/tldr` request and an explicitly authorized export of existing source notes against the preserved recipe and per-note export behavior.

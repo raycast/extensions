@@ -2,6 +2,7 @@
 
 ## [Research with Sources Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Added a Research with Sources skill for researching questions, comparing findings, and checking sources with Exa.
 
 ## [Update] - 2026-05-15

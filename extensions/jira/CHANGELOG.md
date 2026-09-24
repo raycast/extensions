@@ -2,6 +2,7 @@
 
 ## [Bug Triage Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for comparing bug reports with existing issues, identifying possible duplicates, and creating or updating issues with the available tools.
 
 ## [Search input available immediately] - 2026-09-20

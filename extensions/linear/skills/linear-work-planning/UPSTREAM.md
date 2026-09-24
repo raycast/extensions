@@ -20,3 +20,7 @@ The public skill's MCP setup and CLI instructions are omitted. Its sprint-planni
 The extension also has `list-agent-skills` and `get-agent-skill` for authenticated Linear workspace skills. Those are separate from public reusable sources and are not fetched or bundled by this change. [Linear's own release-setup skill](https://github.com/linear/linear-release/blob/main/skills/linear-release-setup/SKILL.md) targets a CLI and CI release workflow, so it is outside this task-planning scope.
 
 All 78 files in `src/tools/` and the manifest were reviewed. [TOOLS.md](TOOLS.md) lists all 71 registered tools and their inputs. Five files are helpers; `create-project-update.ts` and `get-initiatives.ts` are not registered AI tools and are not used by this skill.
+
+## Public API validation
+
+See [validation results](VALIDATION.md) for checks after the API 2.5.0 update.

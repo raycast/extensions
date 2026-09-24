@@ -31,11 +31,11 @@ The manifest and every file in `src/tools/` were read before editing. [TOOLS.md]
 - Stop unsupported retrieval of transcripts, recordings, attendee research, calendar events, documents, or previous commitments. A user may provide relevant text, but the skill does not claim it fetched that material itself.
 - Keep the brief in chat. The preparation workflow does not create, edit, delete, or join a meeting, and suggestions to prepare do not trigger the existing `Blocked` scheduling instruction.
 
-Only the skill registration, skill/research documentation, license notice, and changelog are added. Existing source, manifest instructions/evals, API dependency `^1.104.20`, and lockfiles are unchanged. No Zoom account data was queried and no meeting was changed or opened during this preparation.
+Only the skill registration, skill/research documentation, license notice, and changelog are added. Existing source, manifest instructions/evals, API dependency and lockfiles were unchanged during the initial preparation. No Zoom account data was queried and no meeting was changed or opened during this preparation.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, automated tests, and Raycast AI Chat testing are deferred until release. These are future manual prompts and expected behavior, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These are future manual prompts and expected behavior, not executed transcripts:
 
 1. **Next meeting brief:** "Prep me for my next Zoom meeting. I'm presenting; use Asia/Kolkata and keep the brief short." Expect a no-input upcoming read, chronological future selection, timezone handling, the original join link, supported facts, and proposed questions. No automatic join or mutation.
 2. **Named meeting and agenda:** "Prepare me for tomorrow's Acme rollout meeting. We need to decide whether to expand the pilot; draft a 20-minute agenda here and don't change Zoom." Expect exact meeting disambiguation, timezone boundaries, user-supplied objective attribution, a draft fitting the requested/returned duration, and missing agenda fields handled honestly. A later-than-24-hour invited meeting may be unavailable and must not be invented.

@@ -6,9 +6,9 @@ Reviewed on September 24, 2026. All three skills adapt the official [Slack skill
 
 | Bundled skill | Public sources and retained guidance |
 | --- | --- |
-| [Catch up on Slack](slack-catch-up/SKILL.md) | [Channel digest](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/channel-digest.md) and [channel summary](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/summarize-channel.md): resolve channels, read recent messages and important replies, group noteworthy activity, and surface decisions/open follow-ups. |
-| [Find discussions and decisions](slack-decision-research/SKILL.md) | [Find discussions](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/find-discussions.md) and [Slack search](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/skills/slack-search/SKILL.md): use multiple scoped searches, read thread context, group related discussions, and distinguish conclusions from unresolved questions. |
-| [Draft a standup update](slack-standup-draft/SKILL.md) | [Standup](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/standup.md) and the search skill: collect the selected person's activity, read relevant threads, and organize completed work, next steps, and blockers into a reviewable draft. |
+| [Catch up on Slack](../../skills/slack-catch-up/SKILL.md) | [Channel digest](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/channel-digest.md) and [channel summary](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/summarize-channel.md): resolve channels, read recent messages and important replies, group noteworthy activity, and surface decisions/open follow-ups. |
+| [Find discussions and decisions](../../skills/slack-decision-research/SKILL.md) | [Find discussions](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/find-discussions.md) and [Slack search](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/skills/slack-search/SKILL.md): use multiple scoped searches, read thread context, group related discussions, and distinguish conclusions from unresolved questions. |
+| [Draft a standup update](../../skills/slack-standup-draft/SKILL.md) | [Standup](https://github.com/slackapi/slack-skills-plugin/blob/8044341769fa84f85ee952dceddb67ef165ab110/commands/standup.md) and the search skill: collect the selected person's activity, read relevant threads, and organize completed work, next steps, and blockers into a reviewable draft. |
 
 The workflows have distinct triggers: a conversation/time-window digest, a topic/decision investigation, and a person's work update. Channel summary and multi-channel digest are combined to avoid two overlapping skills. Each `SKILL.md` is self-contained and has its own license; these shared research and inventory documents are repository review material, not runtime dependencies on another skill.
 
@@ -32,11 +32,11 @@ The manifest, `ai.yaml`, and all 18 files in `src/tools/` were read before editi
 - Keep digest/research/standup results in chat by default. Optional digest or standup delivery requires an explicit user request and a resolved destination, with no automatic broadcast. Because sending can succeed before permalink retrieval fails, inspect an uncertain result before retrying.
 - File metadata and downloaded paths do not supply document contents. No attachment, linked document, unread-only audit, native draft-saving, or scheduled-delivery capability is implied.
 
-Only skill registration, skill/research documentation, license notices, and the changelog are added. Existing tool source, `ai.yaml` instructions/evals, API dependency `^1.104.6`, and lockfiles remain unchanged. No Slack account data was queried and no message was sent during this preparation.
+Only skill registration, skill/research documentation, license notices, and the changelog are added. Existing tool source, `ai.yaml` instructions/evals, API dependency and lockfiles were unchanged during the initial preparation. No Slack account data was queried and no message was sent during this preparation.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, automated tests, and Raycast AI Chat testing are deferred until release. These are future manual prompts with expected behavior, not executed transcripts.
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These are future manual prompts with expected behavior, not executed transcripts.
 
 ### Catch up on Slack
 

@@ -2,6 +2,7 @@
 
 ## [Plan My Week Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for reviewing the week, finding meeting and focus-time slots, and booking requested events with availability checks.
 
 ## [Hide contact birthdays from List Events by default] - 2026-09-19

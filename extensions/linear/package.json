@@ -642,7 +642,7 @@
   ],
   "dependencies": {
     "@linear/sdk": "^91.0.0",
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.23",

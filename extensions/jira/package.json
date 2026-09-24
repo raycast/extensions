@@ -580,7 +580,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.103.9",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "filesize": "^11.0.13",

@@ -18,9 +18,9 @@ The upstream agenda command searches all calendars by default. This adaptation s
 
 All 23 files in `src/tools/` and the manifest were reviewed. [TOOLS.md](TOOLS.md) lists all 23 registered tools and their inputs. No tools, dependencies, or existing AI instructions were changed.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, and Raycast AI Chat tests are deferred until release. These prompts are a future manual test plan, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These prompts are a future manual test plan, not executed transcripts:
 
 1. "Plan next week across my Work and Personal calendars. Fit in three 90-minute focus blocks between 9 and 5, with 15-minute buffers. Show the plan first."
 2. "Find three 45-minute slots with Maya Chen and Alex Patel next Tuesday through Thursday, between 10 and 4 in Europe/London. Don't send invitations yet."

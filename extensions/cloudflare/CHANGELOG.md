@@ -2,6 +2,7 @@
 
 ## [DNS and Deployment Health Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Added a skill for reviewing DNS configuration, certificate health, Pages build failures, and Worker deployments with supporting evidence and next steps.
 
 ## [OAuth Support] - 2026-09-05

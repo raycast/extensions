@@ -283,7 +283,7 @@
   "dependencies": {
     "@googleapis/calendar": "^15.0.0",
     "@googleapis/people": "^7.0.1",
-    "@raycast/api": "^1.104.16",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.4",
     "chrono-node": "^2.9.1",
     "date-fns": "^4.1.0",

@@ -38,11 +38,11 @@ The adaptation adds concrete handling for the extension's result shapes:
 - Current flag metadata has no update timestamp, exposure history, or experiment result. The skill uses it only to form hypotheses and separates correlation from causation.
 - Native funnel/retention queries, metric-catalog reads/runs, full insight-query reads/refreshes, and dashboard/insight/flag/experiment writes have no registered tools. Requests depending on those capabilities stop with the gap reported; the skill never substitutes an undisclosed approximation.
 
-Only skill registration, documentation, the license, and the changelog are added. Existing tool source, AI instructions/evals, dependencies, and lockfiles remain unchanged. The extension keeps `@raycast/api` version `1.104.20`.
+The initial preparation added skill registration, documentation, the license, and the changelog. Tool source and AI instructions/evals remain unchanged. The API dependency and lockfile now target the exact public version `2.5.0`, preserving this extension’s pinned-version policy.
 
-## Deferred validation
+## Validation
 
-Local preparation is blocked on Extensions API release. The API update, build, lint, and Raycast AI Chat tests are deferred until release. These prompts are a future manual test plan, not executed transcripts:
+The public API dependency and lockfile now target 2.5.0. See [validation results](VALIDATION.md) for checks completed after release. These prompts are a future manual test plan, not executed transcripts:
 
 1. "In our Production project, how many people performed our core activity each day for the last seven complete days? Use the existing active-user definition if you can read it, compare the previous week, and show the HogQL and timezone."
 2. "Signup-to-paid conversion dropped last week. Check our saved conversion insight, compare complete cohorts using its conversion window, and investigate the biggest segment changes. If you cannot read its full definition or reproduce it exactly, tell me what is missing."

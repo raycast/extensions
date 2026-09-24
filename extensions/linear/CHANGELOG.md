@@ -2,6 +2,7 @@
 
 ## [Plan and Review Work Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Added a skill for turning specs into tasks, triaging issues, and reporting cycle status with linked evidence and clear scope.
 
 ## [Favorites Crash Fix] - 2026-09-14

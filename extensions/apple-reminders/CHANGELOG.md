@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Weekly Review and Action Capture Skill] - {PR_MERGE_DATE}
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Review completed and outstanding reminders and capture supplied action items without inventing deadlines.
+
 ## [Default list for Quick Add] - 2026-09-23
 
 - Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.

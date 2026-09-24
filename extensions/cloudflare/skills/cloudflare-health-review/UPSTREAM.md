@@ -43,3 +43,7 @@ All 21 files in `src/tools/` were reviewed. Twenty are registered tools; `helper
 | `purge-zone-cache` | `zoneId`; one of `urls?`, `hosts?`, `tags?`, or `prefixes?`, each a string array; omitting all purges the entire zone |
 
 Creation accepts `A`, `AAAA`, `CAA`, `CNAME`, `MX`, `NS`, `SRV`, or `TXT`. TTL is 1 for automatic or an integer from 30 to 86400; creation defaults to 1. Proxy changes apply only to A, AAAA, and CNAME; priority applies to MX and is required when creating an MX record. Comments are limited to 100 characters. Update replaces the complete tags array; empty comments or tags remove the existing values. The five mutation tools have built-in confirmations and are excluded from this diagnostic workflow.
+
+## Public API validation
+
+See [validation results](VALIDATION.md) for checks after the API 2.5.0 update.

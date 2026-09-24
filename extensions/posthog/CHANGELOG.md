@@ -2,6 +2,7 @@
 
 ## [Product Metrics Skill] - {PR_MERGE_DATE}
 
+- Update to Raycast API 2.5.0 for public bundled-skill support.
 - Add a skill for answering product-metrics questions and investigating changes with saved insight definitions, scoped HogQL queries, and explicit data limitations.
 
 ## [Add AI Analytics Tools] - 2026-06-23

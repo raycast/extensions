@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Review Pull Requests Skill] - {PR_MERGE_DATE}
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Review pull request patches with concrete findings, workflow context, and explicit coverage limits.
+
 ## [My Packages] - 2026-09-22
 
 - Add **My Packages** and **My Packages Menu Bar** to browse the packages you published to GitHub Packages.

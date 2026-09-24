@@ -324,7 +324,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.20",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.7",
     "date-fns": "^4.4.0",
     "lodash": "^4.18.1"
