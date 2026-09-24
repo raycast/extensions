@@ -26,6 +26,8 @@ export interface CatalogTool {
   desc: string;
   category: string;
   mode: 'transform' | 'generate';
+  /** Glyph path relative to the extension's assets/ — tint it with Color.PrimaryText. */
+  icon: string;
   run: ToolRun;
 }
 
