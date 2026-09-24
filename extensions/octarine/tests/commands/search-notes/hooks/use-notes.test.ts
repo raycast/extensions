@@ -1,3 +1,4 @@
+import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { noteSearchKey, type ContentMatch } from "@commands/search-notes/lib/note-search";
 import { ALL_WORKSPACES, type IndexedNote } from "@type/notes";
@@ -22,7 +23,7 @@ function note(workspace: Workspace, title: string, options?: { pinned?: boolean 
   const notePath = `${title.toLowerCase().replace(/\s+/g, "-")}.md`;
 
   return {
-    id: `${workspace.path}::${notePath}`,
+    id: path.resolve(workspace.path, notePath),
     title,
     path: notePath,
     folder: { name: "", path: "", workspace },

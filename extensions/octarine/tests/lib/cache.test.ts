@@ -125,7 +125,7 @@ describe("notes cache", () => {
   const workspaces = [{ name: "Alpha", path: "/workspaces/alpha" }];
   const notes = [
     {
-      id: "Alpha::Pinned.md",
+      id: "/workspaces/alpha/Pinned.md",
       title: "Pinned",
       path: "Pinned.md",
       folder: {
@@ -174,7 +174,16 @@ describe("notes cache", () => {
     vi.spyOn(Cache.prototype, "get").mockReturnValue(
       JSON.stringify({
         cachedAt: Date.now(),
-        data: [{ id: "Alpha::Pinned.md", title: "Pinned", path: "Pinned.md", folder: { name: "", path: "", workspace: { name: "Alpha", path: 1 } }, pinned: true, searchText: "pinned" }],
+        data: [
+          {
+            id: "/workspaces/alpha/Pinned.md",
+            title: "Pinned",
+            path: "Pinned.md",
+            folder: { name: "", path: "", workspace: { name: "Alpha", path: 1 } },
+            pinned: true,
+            searchText: "pinned",
+          },
+        ],
       }),
     );
 
@@ -196,7 +205,7 @@ describe("notes cache", () => {
     NotesCache.write(
       [
         {
-          id: "Beta::Pinned.md",
+          id: "/workspaces/beta/Pinned.md",
           title: "Pinned",
           path: "Pinned.md",
           folder: {
@@ -215,7 +224,7 @@ describe("notes cache", () => {
     expect(NotesCache.read(workspaces, new Set())).toEqual(notes);
     expect(NotesCache.read([otherWorkspace], new Set())).toEqual([
       {
-        id: "Beta::Pinned.md",
+        id: "/workspaces/beta/Pinned.md",
         title: "Pinned",
         path: "Pinned.md",
         folder: {

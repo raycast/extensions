@@ -1,3 +1,4 @@
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createDailySearch, prioritizeExactDateMatches } from "@commands/open-daily-desk-note/lib/daily-search";
 import type { WorkspaceSection } from "@type/notes";
@@ -6,15 +7,15 @@ import type { IndexedNote } from "@type/notes";
 const workspace = { name: "Work", path: "/tmp/work" };
 
 function dailyNote(dateStem: string, title: string): IndexedNote {
-  const path = `Daily/${dateStem}.md`;
+  const notePath = `Daily/${dateStem}.md`;
 
   return {
-    id: `Work::${path}`,
+    id: path.resolve(workspace.path, notePath),
     title,
-    path,
+    path: notePath,
     folder: { name: "Daily", path: "Daily", workspace },
     pinned: false,
-    searchText: `${title} ${dateStem} ${path} Work`.toLowerCase(),
+    searchText: `${title} ${dateStem} ${notePath} Work`.toLowerCase(),
   };
 }
 

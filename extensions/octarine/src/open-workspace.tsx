@@ -5,11 +5,7 @@ import { useOpenTarget } from "@hooks/use-open-target";
 import { useWorkspaces } from "@hooks/use-workspaces";
 import { openWorkspace } from "@lib/octarine";
 
-type Arguments = {
-  workspace?: string;
-};
-
-export default function OpenWorkspaceCommand(props: LaunchProps<{ arguments: Arguments }>) {
+export default function OpenWorkspaceCommand(props: LaunchProps<{ arguments: Partial<Arguments.OpenWorkspace> }>) {
   const requestedWorkspace = props.arguments.workspace?.trim() ?? "";
   const [refresh, setRefresh] = useState(false);
   const { workspaces, status, revalidate } = useWorkspaces({ refresh });

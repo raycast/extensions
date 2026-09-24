@@ -8,7 +8,7 @@ import { useNoteMarkdown } from "@commands/search-notes/hooks/use-note-markdown"
 import { showToast } from "../../../__mocks__/@raycast/api";
 
 const note: IndexedNote = {
-  id: "Work::Note.md",
+  id: "/work/Note.md",
   title: "Note",
   path: "Note.md",
   folder: { name: "", path: "", workspace: { name: "Work", path: "/work" } },

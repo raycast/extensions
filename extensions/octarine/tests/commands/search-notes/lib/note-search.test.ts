@@ -158,7 +158,7 @@ function indexedNote(title: string): IndexedNote {
   const notePath = `${title.toLowerCase()}.md`;
 
   return {
-    id: `${workspace.path}::${notePath}`,
+    id: path.resolve(workspace.path, notePath),
     title,
     path: notePath,
     folder: { name: "", path: "", workspace },

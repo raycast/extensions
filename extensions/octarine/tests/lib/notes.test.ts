@@ -36,7 +36,7 @@ describe("notes", () => {
     expect(notesByPath).toHaveLength(2);
     expect(notesByPath).toEqual([
       expect.objectContaining({
-        id: "Work::docs/Guide.md",
+        id: path.resolve(workspace.path, "docs/Guide.md"),
         title: "Guide",
         path: "docs/Guide.md",
         pinned: true,
@@ -48,7 +48,7 @@ describe("notes", () => {
         }),
       }),
       expect.objectContaining({
-        id: "Work::root.md",
+        id: path.resolve(workspace.path, "root.md"),
         title: "root",
         path: "root.md",
         pinned: false,
@@ -60,6 +60,29 @@ describe("notes", () => {
         }),
       }),
     ]);
+  });
+
+  it("keeps notes from workspaces with the same name", async () => {
+    tempDir = await createTempDir("octarine-notes-duplicate-workspace-name");
+
+    const firstWorkspace = {
+      name: "Work",
+      path: path.join(tempDir, "first", "Work"),
+    };
+    const secondWorkspace = {
+      name: "Work",
+      path: path.join(tempDir, "second", "Work"),
+    };
+
+    await writeTextFile(path.join(firstWorkspace.path, "todo.md"), "# First workspace");
+    await writeTextFile(path.join(secondWorkspace.path, "todo.md"), "# Second workspace");
+
+    const notes = await scanNotes([firstWorkspace, secondWorkspace], new Set());
+
+    expect(notes).toHaveLength(2);
+    expect(notes.map((note) => note.id).toSorted()).toEqual(
+      [path.resolve(firstWorkspace.path, "todo.md"), path.resolve(secondWorkspace.path, "todo.md")].toSorted(),
+    );
   });
 
   it("keeps an indented block-scalar delimiter inside frontmatter while detecting pinned", async () => {
@@ -165,11 +188,14 @@ describe("notes", () => {
     await writeTextFile(path.join(work.path, "Pinned.md"), "---\npinned: true\n---\ncontent");
     await writeTextFile(path.join(personal.path, "Side.md"), "---\npinned: true\n---\ncontent");
 
-    expect((await getNotes([work], new Set())).map((note) => note.id)).toEqual(["Work::Pinned.md"]);
+    expect((await getNotes([work], new Set())).map((note) => note.id)).toEqual([path.resolve(work.path, "Pinned.md")]);
 
     const rescanned = await getNotes([work, personal], new Set());
 
-    expect(rescanned.map((note) => note.id)).toEqual(["Personal::Side.md", "Work::Pinned.md"]);
+    expect(rescanned.map((note) => note.id)).toEqual([
+      path.resolve(personal.path, "Side.md"),
+      path.resolve(work.path, "Pinned.md"),
+    ]);
   });
 
   it("fails when note scanning hits an unreadable workspace", async () => {
@@ -227,6 +253,32 @@ describe("daily notes", () => {
     await writeTextFile(path.join(workspace.path, "Regular.md"), "# Regular");
 
     expect(await scanDailyNotes([workspace], new Set())).toEqual([]);
+  });
+
+  it("keeps daily notes from workspaces with the same name", async () => {
+    tempDir = await createTempDir("octarine-daily-duplicate-workspace-name");
+
+    const firstWorkspace = {
+      name: "Work",
+      path: path.join(tempDir, "first", "Work"),
+    };
+    const secondWorkspace = {
+      name: "Work",
+      path: path.join(tempDir, "second", "Work"),
+    };
+
+    await writeTextFile(path.join(firstWorkspace.path, "Daily", "2026-09-24.md"), "# First workspace");
+    await writeTextFile(path.join(secondWorkspace.path, "Daily", "2026-09-24.md"), "# Second workspace");
+
+    const notes = await scanDailyNotes([firstWorkspace, secondWorkspace], new Set());
+
+    expect(notes).toHaveLength(2);
+    expect(notes.map((note) => note.id).toSorted()).toEqual(
+      [
+        path.resolve(firstWorkspace.path, "Daily/2026-09-24.md"),
+        path.resolve(secondWorkspace.path, "Daily/2026-09-24.md"),
+      ].toSorted(),
+    );
   });
 
   it("loads daily notes and reuses the daily notes cache", async () => {

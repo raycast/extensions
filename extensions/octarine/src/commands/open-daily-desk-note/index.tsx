@@ -5,12 +5,9 @@ import { DateFormatsDetail } from "./components/date-formats";
 import { DailyDeskOpen } from "./components/open";
 import { DailyDeskSearch } from "./components/search";
 
-type Arguments = {
-  date?: string;
-  workspace?: string;
-};
-
-export default function OpenDailyDeskNoteCommand(props: LaunchProps<{ arguments: Arguments }>) {
+export default function OpenDailyDeskNoteCommand(
+  props: LaunchProps<{ arguments: Partial<Arguments.OpenDailyDeskNote> }>,
+) {
   const [showSearch, setShowSearch] = useState(false);
   const requestedDate = resolveDateArg(props.arguments.date);
   const requestedWorkspace = props.arguments.workspace?.trim() ?? "";
@@ -19,7 +16,7 @@ export default function OpenDailyDeskNoteCommand(props: LaunchProps<{ arguments:
     return <DateFormatsDetail onSearch={() => setShowSearch(true)} />;
   }
 
-  if (requestedDate !== "" && !showSearch) {
+  if (requestedDate !== null && requestedDate !== "" && !showSearch) {
     return <DailyDeskOpen date={requestedDate} requestedWorkspace={requestedWorkspace} />;
   }
 

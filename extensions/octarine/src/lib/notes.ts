@@ -176,7 +176,7 @@ function buildDailyNote(workspace: Workspace, relative: string, parsed: Filename
   const dateStem = dailyNoteStem(relative);
 
   return {
-    id: `${workspace.name}::${notePath}`,
+    id: buildNoteId(workspace, notePath),
     title: label,
     folder,
     path: notePath,
@@ -207,13 +207,17 @@ function buildIndexedNote(input: BuildIndexedNoteInput): IndexedNote {
   const title = path.posix.basename(relative, ".md");
 
   return {
-    id: `${workspace.name}::${relative}`,
+    id: buildNoteId(workspace, relative),
     title,
     folder,
     path: relative,
     pinned,
     searchText: buildSearchText(title, relative, folder.workspace.name),
   };
+}
+
+function buildNoteId(workspace: Workspace, relative: string): string {
+  return path.resolve(workspace.path, relative);
 }
 
 function isPinnedInFrontmatter(frontmatter: string | undefined): boolean {
