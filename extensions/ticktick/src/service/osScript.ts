@@ -152,7 +152,7 @@ export const getTasksByProjectId = async (id: string) => {
   return getDateListData(`
     set result to ""
     tell application "TickTick"
-      tasks in "${id}" from "raycast"    
+      tasks in "${id}" from "raycast"
     end tell
     return result
   `);

@@ -235,7 +235,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
+    "@raycast/api": "^2.4.1",
     "@raycast/utils": "^1.19.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
@@ -246,8 +246,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.14.194",
-    "@types/node": "~16.10.0",
-    "@types/react": "^18.2.46",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
     "@types/similarity": "^1.2.1",
     "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
@@ -257,7 +257,7 @@
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "prettier": "^2.8.7",
-    "typescript": "^4.4.3"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

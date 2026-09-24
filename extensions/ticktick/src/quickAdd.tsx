@@ -45,7 +45,6 @@ export default async function QuickAddTask(props: LaunchProps) {
     toast.style = Toast.Style.Failure;
     toast.title = "Something went wrong";
   }
-  setTimeout(() => {
-    closeMainWindow();
-  }, 500);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await closeMainWindow();
 }
