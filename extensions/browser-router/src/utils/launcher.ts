@@ -5,6 +5,83 @@ import { spawn } from "child_process";
 import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { BrowserProfile } from "../types";
 
+function getCleanBrowserEnv(): NodeJS.ProcessEnv {
+  if (process.platform === "win32") {
+    const standardWindowsKeys = new Set([
+      "ALLUSERSPROFILE",
+      "APPDATA",
+      "COMMONPROGRAMFILES",
+      "COMMONPROGRAMFILES(X86)",
+      "COMMONPROGRAMW6432",
+      "COMPUTERNAME",
+      "COMSPEC",
+      "DRIVERDATA",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "LOGONSERVER",
+      "NUMBER_OF_PROCESSORS",
+      "ONEDRIVE",
+      "OS",
+      "PATH",
+      "PATHEXT",
+      "PROCESSOR_ARCHITECTURE",
+      "PROCESSOR_IDENTIFIER",
+      "PROCESSOR_LEVEL",
+      "PROCESSOR_REVISION",
+      "PROGRAMDATA",
+      "PROGRAMFILES",
+      "PROGRAMFILES(X86)",
+      "PROGRAMW6432",
+      "PSMODULEPATH",
+      "PUBLIC",
+      "SYSTEMDRIVE",
+      "SYSTEMROOT",
+      "TEMP",
+      "TMP",
+      "USERDOMAIN",
+      "USERDOMAIN_ROAMINGPROFILE",
+      "USERNAME",
+      "USERPROFILE",
+      "WINDIR",
+    ]);
+
+    const cleanEnv: NodeJS.ProcessEnv = {};
+    for (const [key, value] of Object.entries(process.env)) {
+      const upperKey = key.toUpperCase();
+      if (
+        standardWindowsKeys.has(upperKey) ||
+        upperKey === "HTTP_PROXY" ||
+        upperKey === "HTTPS_PROXY" ||
+        upperKey === "ALL_PROXY" ||
+        upperKey === "NO_PROXY"
+      ) {
+        cleanEnv[key] = value;
+      }
+    }
+    return cleanEnv;
+  }
+
+  const cleanEnv: NodeJS.ProcessEnv = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    const upperKey = key.toUpperCase();
+    if (
+      upperKey.startsWith("CHROME_") ||
+      upperKey.startsWith("ELECTRON_") ||
+      upperKey.startsWith("VSCODE_") ||
+      upperKey.startsWith("ANTIGRAVITY_") ||
+      upperKey.startsWith("EFC_") ||
+      upperKey.startsWith("FPS_") ||
+      upperKey.startsWith("NODE_") ||
+      upperKey === "ORIGINAL_XDG_CURRENT_DESKTOP"
+    ) {
+      continue;
+    }
+    cleanEnv[key] = value;
+  }
+  return cleanEnv;
+}
+
 export async function launchBrowserProfile(
   profile: BrowserProfile,
   targetUrl?: string,
@@ -104,23 +181,9 @@ export async function launchBrowserProfile(
       }
     }
 
-    // Clean environment to prevent foreign Electron / IDE crashpad variables from polluting browser processes.
-    // Specifically, CHROME_CRASHPAD_PIPE_NAME and ELECTRON_* variables cause Google Chrome
-    // to detect foreign pipe interception, triggering crash-recovery mode and evicting account logins.
-    const cleanEnv: NodeJS.ProcessEnv = {};
-    for (const [key, value] of Object.entries(process.env)) {
-      const upperKey = key.toUpperCase();
-      if (
-        upperKey.startsWith("CHROME_") ||
-        upperKey.startsWith("ELECTRON_") ||
-        upperKey.startsWith("VSCODE_") ||
-        upperKey.startsWith("ANTIGRAVITY_") ||
-        upperKey === "ORIGINAL_XDG_CURRENT_DESKTOP"
-      ) {
-        continue;
-      }
-      cleanEnv[key] = value;
-    }
+    // Clean environment to prevent foreign Electron, IDE, or crashpad variables from polluting browser processes.
+    // An allowlist ensures spawned browsers only receive standard Windows OS environment variables.
+    const cleanEnv = getCleanBrowserEnv();
 
     const child = spawn(profile.executablePath, args, {
       detached: true,

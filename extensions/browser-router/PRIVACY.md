@@ -11,7 +11,7 @@ Browser Router is engineered with an absolute **privacy-first architecture**. We
 - **Zero Telemetry**: Browser Router collects **no** telemetry, usage metrics, analytics, or behavioral data.
 - **100% Local Execution**: All profile detection, registry inspection, query routing, and browser launching occur entirely on your local Windows machine.
 - **No Access to Sensitive Data**: Browser Router **never** reads or accesses your browsing history, saved passwords, authentication cookies, form autofill, or personal downloads.
-- **Optional Opt-In Feedback**: The only time network traffic is generated is when you explicitly submit a feedback or bug report through the in-app form (<kbd>Ctrl</kbd> + <kbd>F</kbd>).
+- **Optional Opt-In Feedback**: The only time network traffic is generated is when you explicitly submit a feedback or bug report through the in-app form (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>).
 
 ---
 
@@ -85,4 +85,4 @@ Browser Router is completely open source under the permissive [MIT License](LICE
 
 If you have questions, feedback, or security inquiries:
 - **GitHub Issues**: Open an issue or discussion on the official GitHub repository.
-- **In-App Feedback**: Use the built-in feedback tool (<kbd>Ctrl</kbd> + <kbd>F</kbd>).
+- **In-App Feedback**: Use the built-in feedback tool (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>).
