@@ -38,6 +38,33 @@ func log(_ message: String) {
 let pid = ProcessInfo.processInfo.processIdentifier
 log("Starting PID=\(pid)")
 
+// The PID file only appears once the window is ready, so it can't stop a
+// second launch racing the first (a double-pressed shortcut). This lock is
+// claimed before anything is shown, and the kernel releases it when the
+// process dies, SIGKILL included, so it can't go stale. Retried briefly
+// because a layout restart can launch us between the old helper removing
+// its PID file and actually exiting.
+if let pidPath = pidPath {
+    let lockFD = open(pidPath + ".lock", O_RDWR | O_CREAT, 0o644)
+    if lockFD >= 0 {
+        var claimed = false
+        for _ in 0..<20 {
+            if flock(lockFD, LOCK_EX | LOCK_NB) == 0 {
+                claimed = true
+                break
+            }
+            usleep(50_000)
+        }
+        if !claimed {
+            log("Another instance holds the lock, exiting")
+            exit(0)
+        }
+        // lockFD is deliberately never closed: the lock lives as long as we do.
+    } else {
+        log("Could not open lock file (errno=\(errno)), continuing without it")
+    }
+}
+
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 
