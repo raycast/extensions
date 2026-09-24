@@ -397,7 +397,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Search your meeting transcripts, read who said what, pull decisions and action items, get quotes from one person across meetings, and transcribe new files or YouTube links. Hosted remote server with OAuth 2.1 sign-in, no API key to paste.",
     icon: "https://raw.githubusercontent.com/Tim-nocode/quillhub-mcp/main/logo.png",
-    homepage: "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
+    homepage:
+      "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.quillhub.ai/mcp"],
