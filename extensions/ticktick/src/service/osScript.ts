@@ -3,6 +3,17 @@ import { Project } from "./project";
 import { Section, Task } from "./task";
 import { runAppleScript } from "run-applescript";
 import { convertMacTime2JSTime, getSectionNameByDate } from "../utils/date";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
+
+const supportsNLP = async () => {
+  const appPath = await runAppleScript('POSIX path of (path to application "TickTick")');
+  const { stdout } = await execFileAsync("/usr/bin/sdef", [appPath]);
+  const addTaskCommand = stdout.match(/<command\b[^>]*\bname="add task"[^>]*>[\s\S]*?<\/command>/)?.[0];
+  return /<parameter\b[^>]*\bname="nlp"[^>]*>/.test(addTaskCommand ?? "");
+};
 
 const taskObject2Task = (object: Record<string, unknown>): Task => {
   return {
@@ -181,18 +192,27 @@ export const addTask = async (data: {
   dueDate?: string;
   isAllDay?: boolean;
   priority?: string;
+  nlp?: boolean;
 }) => {
-  const { projectId, title, description, dueDate, isAllDay, priority } = data;
+  const { projectId, title, description, dueDate, isAllDay, priority, nlp } = data;
   const installed = await checkAppInstalled();
   if (!installed) return undefined;
 
   try {
+    if (nlp !== undefined && !(await supportsNLP())) {
+      await showToast(
+        Toast.Style.Failure,
+        "Please upgrade TickTick",
+        "This version of TickTick does not support the NLP parameter. Please update the TickTick macOS app."
+      );
+      return undefined;
+    }
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
       dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
-    } ${priority ? ` priority "${priority}"` : ""} from "raycast"
+    } ${priority ? ` priority "${priority}"` : ""}${nlp !== undefined ? ` nlp ${nlp}` : ""} from "raycast"
     end tell
   `)) as string;
     if (result === "missing value") {

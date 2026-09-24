@@ -1,4 +1,4 @@
-import { closeMainWindow, LaunchProps, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, LaunchProps, Toast } from "@raycast/api";
 import { addTask } from "./service/osScript";
 import { getProjects, initGlobalProjectInfo } from "./service/project";
 import { getDefaultDate } from "./service/preference";
@@ -8,6 +8,7 @@ export default async function QuickAddTask(props: LaunchProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
   try {
+    const { nlpEnabled = true } = getPreferenceValues<{ nlpEnabled?: boolean }>();
     await initGlobalProjectInfo();
     const title = (props.arguments.text ?? props.fallbackText).replace(/"/g, `\\"`);
     const description = props.arguments.description?.replace(/"/g, `\\"`);
@@ -17,6 +18,7 @@ export default async function QuickAddTask(props: LaunchProps) {
       description,
       dueDate: formatToServerDate(getDefaultDate()),
       isAllDay: false,
+      nlp: nlpEnabled,
     });
 
     switch (result) {

@@ -121,6 +121,16 @@
       "subtitle": "TickTick",
       "description": "Quick way to add task in TickTick.",
       "mode": "no-view",
+      "preferences": [
+        {
+          "name": "nlpEnabled",
+          "description": "Recognize dates and times (tomorrow 3pm), priorities (!High, !Medium, !Low, !None), tags (#tag), and lists (~list) in the task title.",
+          "type": "checkbox",
+          "default": true,
+          "label": "Enable NLP",
+          "required": false
+        }
+      ],
       "arguments": [
         {
           "name": "text",
