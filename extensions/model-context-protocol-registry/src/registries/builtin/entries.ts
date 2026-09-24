@@ -88,6 +88,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "codex-reset",
+    title: "Codex Reset",
+    description:
+      "Ask whether OpenAI Codex usage limits are likely to reset: the reset probability for the next 24 and 48 hours, the dated record of verified resets with source links, and Codex service status to tell an outage from a usage limit. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://codex-reset.com/icon-512.png",
+    homepage: "https://codex-reset.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://codex-reset.com/mcp"],
+    },
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:
@@ -397,7 +409,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Search your meeting transcripts, read who said what, pull decisions and action items, get quotes from one person across meetings, and transcribe new files or YouTube links. Hosted remote server with OAuth 2.1 sign-in, no API key to paste.",
     icon: "https://raw.githubusercontent.com/Tim-nocode/quillhub-mcp/main/logo.png",
-    homepage: "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
+    homepage:
+      "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.quillhub.ai/mcp"],

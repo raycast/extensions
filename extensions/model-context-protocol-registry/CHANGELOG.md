@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Codex Reset MCP Server] - 2026-09-24
+
+- Add Codex Reset to the official registry: OpenAI Codex usage-limit reset forecast for the next 24 and 48 hours, the verified reset record with source links, and Codex service status. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.
+
 ## [Add QuillHub MCP Server] - 2026-09-23
 
 - Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
