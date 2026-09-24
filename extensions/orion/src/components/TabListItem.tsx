@@ -8,10 +8,15 @@ import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
 import OpenTabAction from "./OpenTabAction";
 
-const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean }) => (
+const Actions = (props: {
+  tab: Tab;
+  refresh: () => void;
+  closeLaunchers?: boolean;
+  onActivate?: (tab: Tab) => void;
+}) => (
   <ActionPanel>
     <ActionPanel.Section>
-      <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} />
+      <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} onActivate={props.onActivate} />
       <Action.OpenInBrowser title="Open in Default Browser" url={props.tab.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
@@ -37,7 +42,13 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
   </ActionPanel>
 );
 
-const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean; id?: string }) => {
+const TabListItem = (props: {
+  tab: Tab;
+  refresh: () => void;
+  closeLaunchers?: boolean;
+  id?: string;
+  onActivate?: (tab: Tab) => void;
+}) => {
   const url = props.tab.url;
   const accessories: List.Item.Accessory[] = [
     {
@@ -55,7 +66,14 @@ const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: bo
       id={props.id}
       title={getTitle(props.tab)}
       icon={getFavicon(props.tab.url)}
-      actions={<Actions tab={props.tab} refresh={props.refresh} closeLaunchers={props.closeLaunchers} />}
+      actions={
+        <Actions
+          tab={props.tab}
+          refresh={props.refresh}
+          closeLaunchers={props.closeLaunchers}
+          onActivate={props.onActivate}
+        />
+      }
       accessories={accessories}
     />
   );
