@@ -4,22 +4,18 @@ import { NoVaultFoundMessage } from "./Notifications/NoVaultFoundMessage";
 import AdvancedURIPluginNotInstalled from "./Notifications/AdvancedURIPluginNotInstalled";
 import { useObsidianVaults, useVaultPluginCheck } from "../utils/hooks";
 import { DailyNotePreferences } from "../utils/preferences";
-import { Obsidian, ObsidianTargetType, type ObsidianVault } from "@/obsidian";
+import { type ObsidianVault } from "@/obsidian";
 
 interface DailyNoteProps {
-  actionTitle?: string;
-  commandId?: string;
+  actionTitle: string;
+  getTarget: (vault: ObsidianVault) => string;
 }
 
-export function DailyNote({ actionTitle = "Daily Note", commandId }: DailyNoteProps) {
+export function DailyNote({ actionTitle, getTarget }: DailyNoteProps) {
   const { vaults, ready } = useObsidianVaults();
   const { vaultName } = getPreferenceValues<DailyNotePreferences>();
   const preselectedVault = vaults.find((vault) => vault.name === vaultName);
 
-  const getTarget = (vault: ObsidianVault) =>
-    commandId
-      ? Obsidian.getTarget({ type: ObsidianTargetType.Command, vault, commandId })
-      : Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault });
   const { vaultsWithPlugin } = useVaultPluginCheck({
     vaults: vaults,
     communityPlugins: ["obsidian-advanced-uri"],
