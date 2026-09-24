@@ -1,6 +1,6 @@
 # Claude Artifacts Changelog
 
-## [US English and a redundant action title] - {PR_MERGE_DATE}
+## [US English and a redundant action title] - 2026-09-24
 
 - Spelling is now US English throughout the extension, its scripts, and its docs — 27 words across nine files that had drifted to British forms
 - **Show Index in Finder** drops its hand-written title and icon so it picks up Raycast's own defaults
