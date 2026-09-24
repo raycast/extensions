@@ -1,12 +1,20 @@
 import { UTCDate } from "@date-fns/utc";
-import { Color, Icon } from "@raycast/api";
+import { Color, Icon, getPreferenceValues } from "@raycast/api";
 import * as chrono from "chrono-node";
 import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
 import type { Location, Priority, Reminder } from "./hooks/useData";
 
 export function isDayFirst(preference?: string): boolean {
-  return preference === "dmy";
+  if (preference) {
+    return preference === "dmy";
+  }
+  try {
+    const prefs = getPreferenceValues<{ dateFormat?: string }>();
+    return prefs?.dateFormat === "dmy";
+  } catch {
+    return false;
+  }
 }
 
 export function parseChronoDate(text: string, preference?: string) {
