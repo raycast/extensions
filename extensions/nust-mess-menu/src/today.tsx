@@ -1,17 +1,28 @@
 import { Action, ActionPanel, Detail, Icon, updateCommandMetadata } from "@raycast/api";
 import { useEffect } from "react";
-import { SITE_URL, WEEKLY_SITE_URL, useTodayMenu } from "./lib/api";
-import { copyDayMenu, formatMenuDate, rootSubtitle, todayTableMarkdown } from "./lib/meals";
+import { SITE_URL, WEEKLY_SITE_URL, useTodayMenu, useWeekMenu } from "./lib/api";
+import {
+  copyDayMenu,
+  formatMenuDate,
+  getActiveMeal,
+  rootSubtitle,
+  todayTableMarkdown,
+  tomorrowWeekday,
+} from "./lib/meals";
 
 export default function Command() {
   const { data, isLoading, error, revalidate } = useTodayMenu();
+  const closed = getActiveMeal().status === "closed";
+  const tomorrow = tomorrowWeekday();
+  const week = useWeekMenu({ execute: closed && tomorrow !== undefined });
 
   useEffect(() => {
-    if (!data) {
+    if (!data || week.isLoading) {
       return;
     }
-    updateCommandMetadata({ subtitle: rootSubtitle(data.meals) });
-  }, [data]);
+    const tomorrowMeals = tomorrow ? week.data?.menu[tomorrow] : undefined;
+    updateCommandMetadata({ subtitle: rootSubtitle(data.meals, tomorrowMeals) });
+  }, [data, week.data, week.isLoading]);
 
   const markdown = error ? `# Couldn't load today's menu\n\n${error.message}` : data ? todayTableMarkdown(data) : "";
 

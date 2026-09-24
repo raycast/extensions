@@ -65,12 +65,8 @@ export function karachiMinuteOfDay(): number {
   return hour * 60 + minute;
 }
 
-export type MealStatus = "now" | "next" | "done";
-
-export interface ActiveMeal {
-  name: MealName;
-  status: MealStatus;
-}
+// After dinner ends at 22:00 there's no meal left today.
+export type ActiveMeal = { name: MealName; status: "now" | "next" } | { status: "closed" };
 
 export function getActiveMeal(): ActiveMeal {
   const minute = karachiMinuteOfDay();
@@ -88,7 +84,12 @@ export function getActiveMeal(): ActiveMeal {
     }
   }
 
-  return { name: "dinner", status: "done" };
+  return { status: "closed" };
+}
+
+// The week API covers Monday to Sunday, so on Sunday there's no tomorrow in it.
+export function tomorrowWeekday(): Weekday | undefined {
+  return WEEKDAYS[WEEKDAYS.indexOf(karachiWeekday()) + 1];
 }
 
 function mealCell(meal: Meal | undefined): string {
@@ -100,16 +101,10 @@ function mealCell(meal: Meal | undefined): string {
 
 function mealHeader(name: MealName): string {
   const active = getActiveMeal();
-  if (active.name !== name) {
+  if (active.status === "closed" || active.name !== name) {
     return MEAL_META[name].title;
   }
-  if (active.status === "now") {
-    return `${MEAL_META[name].title} · Now`;
-  }
-  if (active.status === "next") {
-    return `${MEAL_META[name].title} · Next`;
-  }
-  return MEAL_META[name].title;
+  return `${MEAL_META[name].title} · ${active.status === "now" ? "Now" : "Next"}`;
 }
 
 export function todayTableMarkdown(menu: TodayMenu): string {
@@ -159,14 +154,14 @@ export function copyDayMenu(meals: DayMeals): string {
   return MEAL_NAMES.map((name) => `${MEAL_META[name].title}: ${formatMealItems(meals[name])}`).join("\n");
 }
 
-export function rootSubtitle(meals: DayMeals): string {
+export function rootSubtitle(meals: DayMeals, tomorrow: DayMeals | undefined): string {
   const active = getActiveMeal();
+  if (active.status === "closed") {
+    return tomorrow ? `Tomorrow's Breakfast, ${formatMealItems(tomorrow.breakfast)}` : "Dinner's over";
+  }
   const items = formatMealItems(meals[active.name]);
   if (active.status === "now") {
     return `Now · ${items}`;
   }
-  if (active.status === "next") {
-    return `Next ${MEAL_META[active.name].title}, ${items}`;
-  }
-  return `Tonight · ${items}`;
+  return `Next ${MEAL_META[active.name].title}, ${items}`;
 }

@@ -1,58 +1,64 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { SITE_URL, fetchTodayMenu } from "./lib/api";
-import { MEAL_META, formatMealItems, getActiveMeal, mealHeadline } from "./lib/meals";
-import { MEAL_NAMES, type TodayMenu } from "./lib/types";
+import { useCachedPromise } from "@raycast/utils";
+import { SITE_URL, fetchTodayMenu, fetchWeekMenu } from "./lib/api";
+import { MEAL_META, formatMealItems, getActiveMeal, mealHeadline, tomorrowWeekday } from "./lib/meals";
+import { MEAL_NAMES, type DayMeals } from "./lib/types";
+
+function openToday() {
+  return launchCommand({ name: "today", type: LaunchType.UserInitiated });
+}
+
+function menuBarTitle(meals: DayMeals | undefined, tomorrow: DayMeals | undefined): string {
+  const active = getActiveMeal();
+  if (active.status === "closed") {
+    return tomorrow ? `Breakfast: ${mealHeadline(tomorrow.breakfast)}` : "Dinner's over";
+  }
+  return meals ? `${MEAL_META[active.name].title}: ${mealHeadline(meals[active.name])}` : "Mess";
+}
+
+// Menu bar commands can't show toasts, so failures show up as a menu item instead.
+const silent = { onError: () => undefined };
 
 export default function Command() {
-  const [menu, setMenu] = useState<TodayMenu>();
-  const [isLoading, setIsLoading] = useState(true);
+  const closed = getActiveMeal().status === "closed";
+  const tomorrow = tomorrowWeekday();
+  const today = useCachedPromise(fetchTodayMenu, [], silent);
+  const week = useCachedPromise(fetchWeekMenu, [], { ...silent, execute: closed && tomorrow !== undefined });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchTodayMenu()
-      .then((data) => {
-        if (!cancelled) {
-          setMenu(data);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setMenu(undefined);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const active = getActiveMeal();
-  const activeMeal = menu?.meals[active.name];
-  const title = menu ? `${MEAL_META[active.name].title}: ${mealHeadline(activeMeal)}` : "Mess";
+  const meals = today.data?.meals;
+  const tomorrowMeals = closed && tomorrow ? week.data?.menu[tomorrow] : undefined;
 
   return (
-    <MenuBarExtra icon={{ source: "icon.png" }} title={title} tooltip="NUST mess menu" isLoading={isLoading}>
-      {MEAL_NAMES.map((name) => (
-        <MenuBarExtra.Section key={name} title={MEAL_META[name].title}>
+    <MenuBarExtra
+      icon={{ source: "icon.png" }}
+      title={menuBarTitle(meals, tomorrowMeals)}
+      tooltip="NUST mess menu"
+      isLoading={today.isLoading || week.isLoading}
+    >
+      {today.error ? (
+        <MenuBarExtra.Section>
           <MenuBarExtra.Item
-            title={formatMealItems(menu?.meals[name])}
-            onAction={() => launchCommand({ name: "today", type: LaunchType.UserInitiated })}
+            title="Couldn't load the menu"
+            subtitle={meals ? "Showing the last one" : undefined}
+            icon={Icon.Warning}
+            onAction={() => today.revalidate()}
           />
         </MenuBarExtra.Section>
-      ))}
+      ) : null}
+      {tomorrowMeals ? (
+        <MenuBarExtra.Section title="Tomorrow's Breakfast">
+          <MenuBarExtra.Item title={formatMealItems(tomorrowMeals.breakfast)} onAction={openToday} />
+        </MenuBarExtra.Section>
+      ) : null}
+      {meals
+        ? MEAL_NAMES.map((name) => (
+            <MenuBarExtra.Section key={name} title={MEAL_META[name].title}>
+              <MenuBarExtra.Item title={formatMealItems(meals[name])} onAction={openToday} />
+            </MenuBarExtra.Section>
+          ))
+        : null}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Open Today's Menu"
-          icon={Icon.AppWindow}
-          onAction={() => launchCommand({ name: "today", type: LaunchType.UserInitiated })}
-        />
+        <MenuBarExtra.Item title="Open Today's Menu" icon={Icon.AppWindow} onAction={openToday} />
         <MenuBarExtra.Item
           title="Open Weekly Menu"
           icon={Icon.Calendar}
