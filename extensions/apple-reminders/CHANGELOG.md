@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Date Format Preference] - {PR_MERGE_DATE}
+## [Date Format Preference] - 2026-09-24
 
 - Add extension-level "Date Format" preference (`Month / Day (MM/DD)` and `Day / Month (DD/MM)`).
 - Interpret ambiguous numeric dates (such as `1/11`) according to the selected format across Quick Add and Create Reminder date parsing.
