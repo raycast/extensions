@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [US English] - {PR_MERGE_DATE}
+## [US English] - 2026-09-24
 
 - Use US English spelling throughout the extension and its README
 
