@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Previous Daily Note Command] - 2026-09-24
+## [Previous Daily Note Command] - {PR_MERGE_DATE}
 
 - Add a command to open the previous daily note in Obsidian
 
