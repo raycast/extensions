@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ask-codex-raycast",
   "title": "Ask Codex CLI",
   "description": "Ask ChatGPT/OpenAI through your locally authenticated Codex CLI, with streaming answers, follow-ups, steering, and local history.",
@@ -88,7 +89,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.4.1"
+    "@raycast/api": "2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
