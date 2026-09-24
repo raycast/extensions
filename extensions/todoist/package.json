@@ -643,6 +643,12 @@
           }
         ]
       }
+    ],
+    "skills": [
+      {
+        "name": "todoist-daily-plan",
+        "title": "Daily Plan"
+      }
     ]
   },
   "preferences": [
@@ -672,7 +678,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.6",
     "axios": "^1.17.0",
     "chrono-node": "^2.9.1",

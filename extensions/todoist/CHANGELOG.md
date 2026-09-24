@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## Add Daily Plan Skill - {PR_MERGE_DATE}
+
+- Plan a realistic day and triage inbox tasks while preserving existing commitments. Available through the bundled Daily Plan skill in Raycast AI.
+
 ## [Fix Menu Bar task actions in background] - 2026-08-27
 
 - Use background-safe HUD notifications for Menu Bar task actions instead of Toast APIs that can crash the command.
