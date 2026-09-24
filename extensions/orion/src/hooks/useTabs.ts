@@ -259,12 +259,22 @@ const useLocalTabs = ({ refreshWhileOpen = false }: UseTabsOptions = {}) => {
     return () => clearInterval(timer);
   }, [pollRefresh, refreshWhileOpen]);
 
-  return { ...tabs, markTabActive };
+  // A user-triggered refresh (the "Refresh Open Tabs" action, or the refresh
+  // after Close Tab) is authoritative: any poll already in flight when it
+  // starts read Orion before whatever this refresh is about to learn, so
+  // that poll's eventual result must not be allowed to overwrite this
+  // refresh's, no matter which of the two resolves last.
+  const refresh = useCallback(async () => {
+    mutationVersionRef.current += 1;
+    await tabs.revalidate();
+  }, [tabs.revalidate]);
+
+  return { ...tabs, refresh, markTabActive };
 };
 
 const useTabs = (options?: UseTabsOptions) => {
   const tabs = useLocalTabs(options);
-  return { tabs: tabs.data, refresh: tabs.revalidate, markTabActive: tabs.markTabActive };
+  return { tabs: tabs.data, refresh: tabs.refresh, markTabActive: tabs.markTabActive };
 };
 
 export default useTabs;
