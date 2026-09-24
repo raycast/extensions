@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix Search Media crash when opened via hotkey] - {PR_MERGE_DATE}
+## [Fix Search Media crash when opened via hotkey] - 2026-09-24
 
 - Fix a crash in Search Media when the command is launched without a search argument, e.g. via a hotkey
 
