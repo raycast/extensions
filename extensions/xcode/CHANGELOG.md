@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Simulator Appearance & Device Hub Support] - {PR_MERGE_DATE}
+## [Simulator Appearance & Device Hub Support] - 2026-09-24
 
 - Added "Toggle Dark/Light Mode" action for booted simulators (⌘D).
 - Updated `launchSimulatorApplication` to open Device Hub on Xcode 27+, falling back to Simulator.app.
