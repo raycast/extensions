@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Detail, Icon, LaunchType, List, launchCommand } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { IpReport } from "./ip-report";
 import { extractIp } from "./lib/ip";
 
@@ -22,7 +22,13 @@ export default function Command() {
               <Action
                 title="Open Check IP Command"
                 icon={Icon.Shield}
-                onAction={() => launchCommand({ name: "check-ip", type: LaunchType.UserInitiated })}
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: "check-ip", type: LaunchType.UserInitiated });
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Could Not Open Check IP" });
+                  }
+                }}
               />
             </ActionPanel>
           }
