@@ -1,6 +1,6 @@
 # ZenMux Manager Changelog
 
-## [AI Models] - {PR_MERGE_DATE}
+## [AI Models] - 2026-09-24
 
 - Provide ZenMux chat models to Raycast AI Chat, Quick AI, and AI Commands.
 - Add a Model API Key preference for Subscription (`sk-ss-v1-...`) and PAYG (`sk-ai-v1-...`) keys. The Platform API key stays account-only.
