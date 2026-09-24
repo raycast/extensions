@@ -40,6 +40,8 @@ function encodeBase64Url(text: string): string {
     .replace(/=+$/, "");
 }
 
+const NO_INPUT = "No text. Select text or copy it first.";
+
 const USE_AS_INPUT: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd", "shift"], key: "i" },
   Windows: { modifiers: ["ctrl", "shift"], key: "i" },
@@ -110,16 +112,26 @@ async function runTool(tool: CatalogTool, input: string): Promise<RunResult> {
 }
 
 /** Markdown for the result view: the output verbatim in a fenced block. */
-function resultMarkdown(tool: CatalogTool, res: RunResult): string {
-  if (res.error) return `## ${tool.name}\n\n${res.error}`;
-  const out = res.output ?? "";
-  // A fence longer than any backtick run in the output, so it can't close early.
-  const longest = Math.max(
-    0,
-    ...(out.match(/`+/g) ?? []).map((run) => run.length),
-  );
+/**
+ * `text` in a fenced block longer than any backtick run inside it, so neither
+ * output nor an error message — which can echo a fragment of the input — is
+ * ever read as Markdown. A loop, not `Math.max(...runs)`: a large code-like
+ * output has more backtick runs than a call can take arguments.
+ */
+function fenced(text: string): string {
+  let longest = 0;
+  let run = 0;
+  for (const ch of text) {
+    run = ch === "`" ? run + 1 : 0;
+    if (run > longest) longest = run;
+  }
   const fence = "`".repeat(Math.max(3, longest + 1));
-  return `${fence}\n${out}\n${fence}`;
+  return `${fence}\n${text}\n${fence}`;
+}
+
+function resultMarkdown(tool: CatalogTool, res: RunResult): string {
+  if (res.error) return `## ${tool.name}\n\n${fenced(res.error)}`;
+  return fenced(res.output ?? "");
 }
 
 function groupByCategory(tools: CatalogTool[]): [string, CatalogTool[]][] {
@@ -143,6 +155,12 @@ function ResultView(props: {
   const { pop } = useNavigation();
 
   useEffect(() => {
+    // Same guard as paste/copy: a transform with nothing to transform must not
+    // open a blank result that offers to paste, copy or chain it.
+    if (tool.mode === "transform" && !input) {
+      setRes({ error: NO_INPUT });
+      return;
+    }
     runTool(tool, input).then(setRes);
   }, [tool, input]);
 
@@ -244,8 +262,7 @@ export default function Command() {
     if (tool.mode === "transform" && !input) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "No text",
-        message: "Select text or copy it first.",
+        title: NO_INPUT,
       });
       return undefined;
     }

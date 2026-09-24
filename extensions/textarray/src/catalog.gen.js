@@ -582,32 +582,8 @@ var inputTooLarge$2 = {
 * Hungarian and Turkish return `one` for every count on purpose: a noun after a
 * numeral stays singular in both ("5 sor", "5 satır").
 */
-function pluralForm(locale, n) {
-	const abs = Math.abs(n);
-	const mod10 = abs % 10;
-	const mod100 = abs % 100;
-	switch (locale) {
-		case "hu":
-		case "tr": return "one";
-		case "sk":
-		case "cs": return abs === 1 ? "one" : abs >= 2 && abs <= 4 ? "few" : "many";
-		case "pl":
-			if (abs === 1) return "one";
-			return mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "few" : "many";
-		case "ru":
-		case "uk":
-		case "hr":
-			if (mod10 === 1 && mod100 !== 11) return "one";
-			return mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "few" : "many";
-		case "sl":
-			if (mod100 === 1) return "one";
-			if (mod100 === 2) return "two";
-			return mod100 === 3 || mod100 === 4 ? "few" : "many";
-		case "ro":
-			if (abs === 1) return "one";
-			return abs === 0 || mod100 >= 1 && mod100 <= 19 ? "few" : "many";
-		default: return abs === 1 ? "one" : "many";
-	}
+function pluralForm(_locale, n) {
+	return Math.abs(n) === 1 ? "one" : "many";
 }
 function plural$4(locale, n, forms) {
 	switch (pluralForm(locale, n)) {
