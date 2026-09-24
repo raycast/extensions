@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "official-usememos",
+  "title": "Official-Memos-Extension",
+  "description": "Capture, find and manage your Memos notes without leaving Raycast.",
+  "icon": "usememos.png",
+  "author": "youscef",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "setup",
+      "title": "Setup Memos",
+      "subtitle": "Connect to Memos",
+      "description": "Connect Raycast to your Memos instance and check that your access token works",
+      "mode": "view"
+    },
+    {
+      "name": "search-memos",
+      "title": "Search Memos",
+      "subtitle": "List Memos",
+      "description": "Search your memos and preview them rendered as Markdown",
+      "mode": "view"
+    },
+    {
+      "name": "create-memo",
+      "title": "Create Memo",
+      "subtitle": "Create a new memo",
+      "description": "Write a memo in Markdown, preview it, and save it to Memos",
+      "mode": "view"
+    },
+    {
+      "name": "capture-memo",
+      "title": "Capture Memo",
+      "subtitle": "Quickly capture a memo",
+      "description": "Type a memo in Root Search and save it immediately",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Memo",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard as Memo",
+      "subtitle": "Save the text on your clipboard as a new memo",
+      "description": "Save the text on your clipboard as a new memo",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-memos",
+      "title": "Open Memos",
+      "subtitle": "Open your Memos instance in the default browser",
+      "description": "Open your Memos instance in the default browser",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "title": "Instance URL",
+      "description": "Address of your Memos instance, e.g. https://memos.example.com. Leave the default to try the public demo.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://demo.usememos.com",
+      "placeholder": "Use https://demo.usememos.com, or your server URL"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Create one in Memos under Settings → Access Tokens, e.g. https://demo.usememos.com/setting#access-token",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste your Memos access token"
+    },
+    {
+      "name": "defaultVisibility",
+      "title": "Default Visibility",
+      "description": "Visibility for new memos created from Raycast",
+      "type": "dropdown",
+      "required": true,
+      "default": "PRIVATE",
+      "data": [
+        {
+          "title": "Private",
+          "value": "PRIVATE"
+        },
+        {
+          "title": "Protected",
+          "value": "PROTECTED"
+        },
+        {
+          "title": "Public",
+          "value": "PUBLIC"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "lockfile": "tsx tools/npm-lockfile/run.ts",
+    "store-check": "tsx tools/store-check/run.ts"
+  }
+}
