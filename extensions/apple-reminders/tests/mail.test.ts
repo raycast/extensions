@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { MAIL_DELIMITER, parseSelectedEmailResult } from "../src/helpers/mail";
+import { getSenderDisplayName, MAIL_DELIMITER, parseSelectedEmailResult } from "../src/helpers/mail";
 
 describe("Mail Extraction Helpers", () => {
   it("parses valid raw result with subject, message id, and sender", () => {
@@ -45,5 +45,15 @@ describe("Mail Extraction Helpers", () => {
   it("returns null when message id is empty or delimiter missing", () => {
     assert.equal(parseSelectedEmailResult("Invalid text without delimiter"), null);
     assert.equal(parseSelectedEmailResult(`Subject only${MAIL_DELIMITER}`), null);
+  });
+
+  it("extracts clean sender display name without email address", () => {
+    assert.equal(getSenderDisplayName("Bosch Group <notification@smartrecruiters.com>"), "Bosch Group");
+    assert.equal(getSenderDisplayName('"Bosch Group" <notification@smartrecruiters.com>'), "Bosch Group");
+    assert.equal(getSenderDisplayName("Alice Smith <alice@example.com>"), "Alice Smith");
+    assert.equal(getSenderDisplayName("<support@apple.com>"), "support@apple.com");
+    assert.equal(getSenderDisplayName("support@apple.com"), "support@apple.com");
+    assert.equal(getSenderDisplayName(""), "");
+    assert.equal(getSenderDisplayName(undefined), "");
   });
 });

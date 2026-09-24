@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import { CreateReminderForm, NewReminder } from "./create-reminder";
-import { getSelectedEmail, SelectedEmail } from "./helpers/mail";
+import { getSelectedEmail, getSenderDisplayName, SelectedEmail } from "./helpers/mail";
 import { useData } from "./hooks/useData";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import { formatDueDate, parseDueDate } from "./parse-due-date";
@@ -56,10 +56,10 @@ export default function Command() {
             }
           }
 
-          const reminderTitle =
-            selectedEmail.subject || (selectedEmail.sender ? `Email from ${selectedEmail.sender}` : "Email Reminder");
-          const reminderNotes = selectedEmail.sender
-            ? `From: ${selectedEmail.sender}\n\nOpen Mail: ${selectedEmail.url}`
+          const senderName = getSenderDisplayName(selectedEmail.sender);
+          const reminderTitle = selectedEmail.subject || (senderName ? `Email from ${senderName}` : "Email Reminder");
+          const reminderNotes = senderName
+            ? `From: ${senderName}\n\nOpen Mail: ${selectedEmail.url}`
             : `Open Mail: ${selectedEmail.url}`;
 
           const payload: NewReminder = {
@@ -110,10 +110,13 @@ export default function Command() {
     ? parseDueDate(preferences.defaultDueDate.trim())?.date
     : undefined;
 
-  const initialTitle = email ? email.subject || (email.sender ? `Email from ${email.sender}` : "Email Reminder") : "";
+  const senderDisplayName = getSenderDisplayName(email?.sender);
+  const initialTitle = email
+    ? email.subject || (senderDisplayName ? `Email from ${senderDisplayName}` : "Email Reminder")
+    : "";
   const initialNotes = email
-    ? email.sender
-      ? `From: ${email.sender}\n\nOpen Mail: ${email.url}`
+    ? senderDisplayName
+      ? `From: ${senderDisplayName}\n\nOpen Mail: ${email.url}`
       : `Open Mail: ${email.url}`
     : "";
 

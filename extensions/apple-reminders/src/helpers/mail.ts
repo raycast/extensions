@@ -68,3 +68,19 @@ export function parseSelectedEmailResult(rawResult: string | undefined): Selecte
     messageId: cleanId,
   };
 }
+
+export function getSenderDisplayName(sender?: string): string {
+  if (!sender) {
+    return "";
+  }
+  const trimmed = sender.trim();
+  const match = trimmed.match(/^([^<]+?)\s*<[^>]+>$/);
+  if (match && match[1]?.trim()) {
+    return match[1].trim().replace(/^["']|["']$/g, "");
+  }
+  const emailOnlyMatch = trimmed.match(/^<([^>]+)>$/);
+  if (emailOnlyMatch && emailOnlyMatch[1]?.trim()) {
+    return emailOnlyMatch[1].trim();
+  }
+  return trimmed;
+}
