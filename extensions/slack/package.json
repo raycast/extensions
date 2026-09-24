@@ -249,7 +249,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
+    "@raycast/api": "2.6.0-alpha.15",
     "@raycast/utils": "^2.2.2",
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",
@@ -288,5 +288,13 @@
     "brace-expansion@2": "2.1.4",
     "brace-expansion@5": "5.0.9",
     "js-yaml@4": "4.3.1"
+  },
+  "ai": {
+    "skills": [
+      {
+        "name": "slack-catch-up",
+        "title": "Catch-Up Digest"
+      }
+    ]
   }
 }

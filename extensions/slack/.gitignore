@@ -20,3 +20,4 @@ raycast-env.d.ts
 
 # Test output
 .test-dist/
+.npmrc

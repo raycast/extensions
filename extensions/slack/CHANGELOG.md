@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## Add Catch-Up Digest Skill - {PR_MERGE_DATE}
+
+- Summarize channel decisions, blockers, and action items with source links. Available through the bundled Catch-Up Digest skill in Raycast AI.
+
 ## [Quiet automatic rate-limit retries] - 2026-09-23
 
 - Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
