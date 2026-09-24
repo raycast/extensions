@@ -176,6 +176,16 @@ export async function fetchServerStatus(): Promise<OmlxServerStatus> {
   return response.json() as Promise<OmlxServerStatus>;
 }
 
+export interface MemoryPressure {
+  current_bytes: number;
+  soft_bytes: number;
+  hard_bytes: number;
+  current_formatted: string;
+  soft_formatted: string;
+  hard_formatted: string;
+  pressure_level: string;
+}
+
 export interface AdminStats {
   avg_prefill_tps: number;
   avg_generation_tps: number;
@@ -186,6 +196,14 @@ export interface AdminStats {
   cache_efficiency: number;
   total_tokens_served: number;
   uptime_seconds: number;
+  active_models?: {
+    memory_pressure?: MemoryPressure;
+  };
+  runtime_cache?: {
+    total_size_bytes: number;
+    disk_max_bytes: number;
+    total_num_files: number;
+  };
 }
 
 export async function fetchAdminStats(

@@ -159,10 +159,8 @@ export default function ServingStats() {
   if (!s || !st) return <List isLoading />;
 
   const totalTokens = n(st.total_prompt_tokens) + n(st.total_completion_tokens);
-  const memoryPercent =
-    s.model_memory_max > 0
-      ? Math.round((s.model_memory_used / s.model_memory_max) * 100)
-      : 0;
+  const mp = st.active_models?.memory_pressure;
+  const rc = st.runtime_cache;
 
   return (
     <List
@@ -178,23 +176,6 @@ export default function ServingStats() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Speed">
-        <List.Item
-          icon={Icon.Bolt}
-          title="Prompt Processing"
-          accessories={[{ text: `${n(st.avg_prefill_tps).toFixed(1)} tok/s` }]}
-          actions={actions}
-        />
-        <List.Item
-          icon={Icon.Bolt}
-          title="Token Generation"
-          accessories={[
-            { text: `${n(st.avg_generation_tps).toFixed(1)} tok/s` },
-          ]}
-          actions={actions}
-        />
-      </List.Section>
-
       <List.Section title="Cache">
         <List.Item
           icon={Icon.Document}
@@ -228,29 +209,58 @@ export default function ServingStats() {
         />
       </List.Section>
 
-      <List.Section title="Memory">
+      <List.Section title="Speed">
         <List.Item
-          icon={Icon.MemoryChip}
-          title="Model Memory"
+          icon={Icon.Bolt}
+          title="Prompt Processing"
+          accessories={[{ text: `${n(st.avg_prefill_tps).toFixed(1)} tok/s` }]}
+          actions={actions}
+        />
+        <List.Item
+          icon={Icon.Bolt}
+          title="Token Generation"
           accessories={[
-            {
-              text: `${s.model_memory_used_formatted} / ${s.model_memory_max_formatted}`,
-            },
-            {
-              tag: {
-                value: `${memoryPercent}%`,
-                color:
-                  memoryPercent > 80
-                    ? Color.Red
-                    : memoryPercent > 50
-                      ? Color.Yellow
-                      : Color.Green,
-              },
-            },
+            { text: `${n(st.avg_generation_tps).toFixed(1)} tok/s` },
           ]}
           actions={actions}
         />
       </List.Section>
+
+      {mp && (
+        <List.Section title="Memory">
+          <List.Item
+            icon={Icon.MemoryChip}
+            title="In Use"
+            accessories={[
+              { text: mp.current_formatted },
+              {
+                tag: {
+                  value: `${mp.soft_bytes > 0 ? Math.round((mp.current_bytes / mp.soft_bytes) * 100) : 0}%`,
+                  color:
+                    mp.current_bytes / mp.soft_bytes > 0.8
+                      ? Color.Red
+                      : mp.current_bytes / mp.soft_bytes > 0.5
+                        ? Color.Yellow
+                        : Color.Green,
+                },
+              },
+            ]}
+            actions={actions}
+          />
+          <List.Item
+            icon={Icon.MemoryChip}
+            title="Soft Ceiling"
+            accessories={[{ text: mp.soft_formatted }]}
+            actions={actions}
+          />
+          <List.Item
+            icon={Icon.MemoryChip}
+            title="Hard Ceiling"
+            accessories={[{ text: mp.hard_formatted }]}
+            actions={actions}
+          />
+        </List.Section>
+      )}
 
       <List.Section title="Active Models">
         {s.loaded_models.length > 0 ? (
@@ -341,14 +351,37 @@ export default function ServingStats() {
         )}
       </List.Section>
 
-      <List.Section title="Requests">
-        <List.Item
-          icon={Icon.Network}
-          title="Total"
-          accessories={[{ text: n(st.total_requests).toLocaleString() }]}
-          actions={actions}
-        />
-      </List.Section>
+      {rc && rc.disk_max_bytes > 0 && (
+        <List.Section title="SSD Cache">
+          <List.Item
+            icon={Icon.HardDrive}
+            title="Disk Usage"
+            accessories={[
+              {
+                text: `${formatBytes(rc.total_size_bytes)} / ${formatBytes(rc.disk_max_bytes)}`,
+              },
+              {
+                tag: {
+                  value: `${Math.round((rc.total_size_bytes / rc.disk_max_bytes) * 100)}%`,
+                  color:
+                    rc.total_size_bytes / rc.disk_max_bytes > 0.8
+                      ? Color.Red
+                      : rc.total_size_bytes / rc.disk_max_bytes > 0.5
+                        ? Color.Yellow
+                        : Color.Green,
+                },
+              },
+            ]}
+            actions={actions}
+          />
+          <List.Item
+            icon={Icon.Document}
+            title="Cache Files"
+            accessories={[{ text: rc.total_num_files.toLocaleString() }]}
+            actions={actions}
+          />
+        </List.Section>
+      )}
 
       <List.Section title="Server">
         <List.Item
