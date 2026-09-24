@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 import { promisify } from "util";
@@ -163,7 +163,7 @@ export default function Command() {
                 <Action
                   icon={Icon.ArrowClockwise}
                   title="Refresh"
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refresh}
                 />
               </ActionPanel>
