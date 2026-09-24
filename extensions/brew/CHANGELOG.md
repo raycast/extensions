@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Fix Services menu bar background refresh] - {PR_MERGE_DATE}
+## [Fix Services menu bar background refresh] - 2026-09-24
 
 - Services Menu Bar no longer fails with "Toast API is not available when command is launched in background" when a background refresh can't fetch services; the error is shown in the menu instead (click it to retry)
 
