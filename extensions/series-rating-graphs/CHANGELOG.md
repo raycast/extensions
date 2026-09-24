@@ -1,6 +1,6 @@
 # Series Rating Graphs Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-09-24
 
 - Add new detail view using markdown table
 - Add List item detail view
