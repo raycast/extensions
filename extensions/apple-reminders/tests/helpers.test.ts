@@ -1,7 +1,7 @@
 import * as assert from "node:assert";
 import { describe, it } from "node:test";
 
-import { formatReminderTime, truncate } from "../src/helpers";
+import { formatReminderTime, isDayFirst, parseChronoDate, truncate } from "../src/helpers";
 
 describe("formatReminderTime", () => {
   it("returns empty string for all-day dates (YYYY-MM-DD)", () => {
@@ -44,5 +44,25 @@ describe("truncate", () => {
   it("does not split multi-byte Unicode characters / emoji", () => {
     const emojiStr = "🚀🔥✨🎉❤️👍";
     assert.strictEqual(truncate(emojiStr, 3), "🚀🔥✨…");
+  });
+});
+
+describe("isDayFirst and parseChronoDate", () => {
+  it("returns true only for dmy preference", () => {
+    assert.strictEqual(isDayFirst("dmy"), true);
+    assert.strictEqual(isDayFirst("mdy"), false);
+    assert.strictEqual(isDayFirst(undefined), false);
+  });
+
+  it("parses ambiguous numeric dates according to preference", () => {
+    const dmy = parseChronoDate("1/11", "dmy");
+    assert.ok(dmy && dmy.length > 0);
+    assert.strictEqual(dmy[0].start.get("month"), 11);
+    assert.strictEqual(dmy[0].start.get("day"), 1);
+
+    const mdy = parseChronoDate("1/11", "mdy");
+    assert.ok(mdy && mdy.length > 0);
+    assert.strictEqual(mdy[0].start.get("month"), 1);
+    assert.strictEqual(mdy[0].start.get("day"), 11);
   });
 });
