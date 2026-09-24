@@ -256,5 +256,13 @@
   "platforms": [
     "Windows",
     "macOS"
-  ]
+  ],
+  "ai": {
+    "skills": [
+      {
+        "name": "cloudflare-health-review",
+        "title": "DNS and Deployment Health"
+      }
+    ]
+  }
 }

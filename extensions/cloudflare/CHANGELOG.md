@@ -1,5 +1,9 @@
 # Cloudflare Changelog
 
+## [DNS and Deployment Health Skill] - {PR_MERGE_DATE}
+
+- Added a skill for reviewing DNS configuration, certificate health, Pages build failures, and Worker deployments with supporting evidence and next steps.
+
 ## [OAuth Support] - 2026-09-05
 
 - Added OAuth sign-in with secure token storage and automatic token refresh while preserving API tokens as an optional fallback.
