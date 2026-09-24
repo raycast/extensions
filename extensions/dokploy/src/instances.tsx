@@ -220,8 +220,10 @@ function InstanceForm({
         // Reference equality (not `instanceId()`) already makes Edit/Delete immune to two stored
         // instances sharing a key, but a duplicate is still meaningless (an API key identifies one
         // org's access, not two separate ones) and would make `isActiveInstance` treat both as
-        // active together - block it going forward rather than just tolerate it.
-        if (instances.some((i) => i !== initial && i.key === value)) {
+        // active together - block it going forward rather than just tolerate it. Only when the key
+        // is actually changing, though - otherwise editing just the name/URL of one half of an
+        // already-duplicate pair (from before this check existed) would be permanently stuck.
+        if (value !== initial?.key && instances.some((i) => i.key === value)) {
           return "Another instance already uses this API key";
         }
       },
