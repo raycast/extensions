@@ -1,5 +1,5 @@
 /**
- * Set Up Page Scanner: the two steps between a fresh install and a first scan, each shown as
+ * Set up Page Scanner: the two steps between a fresh install and a first scan, each shown as
  * done or not, and checked again every few seconds until both are.
  *
  * 1. The helper, which Raycast installs when asked (the one step it can take for the user).

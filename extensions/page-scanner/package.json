@@ -25,7 +25,7 @@
     },
     {
       "name": "set-up",
-      "title": "Set Up Page Scanner",
+      "title": "Set up Page Scanner",
       "subtitle": "Page Scanner",
       "description": "Connect Raycast to the Page Scanner extension in Chrome.",
       "mode": "view"

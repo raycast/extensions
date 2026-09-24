@@ -40,7 +40,7 @@ const REPAIR_WAIT_SECONDS = 35;
 const SCAN_TIMEOUT_MS = 10 * 60_000;
 
 const setUpAction = {
-  title: 'Set Up Page Scanner',
+  title: 'Set up Page Scanner',
   onAction: () => launchCommand({ name: 'set-up', type: LaunchType.UserInitiated }),
 };
 

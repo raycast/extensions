@@ -1,5 +1,5 @@
 /**
- * What Set Up Page Scanner shows (`set-up.tsx`): the two steps, each with its state, and the
+ * What Set up Page Scanner shows (`set-up.tsx`): the two steps, each with its state, and the
  * instructions only for a step that is not done yet, so a finished page says it is finished
  * and fits the window without scrolling. No @raycast/api import, so it is tested.
  */
@@ -16,8 +16,8 @@ export const STORE_URL =
 
 export function setUpMarkdown(progress: Progress | undefined, error: string | undefined): string {
   if (error)
-    return `# Set Up Page Scanner\n\nPage Scanner did not answer:\n\n\`\`\`\n${error}\n\`\`\``;
-  if (!progress) return '# Set Up Page Scanner\n\nChecking what is set up already.';
+    return `# Set up Page Scanner\n\nPage Scanner did not answer:\n\n\`\`\`\n${error}\n\`\`\``;
+  if (!progress) return '# Set up Page Scanner\n\nChecking what is set up already.';
 
   const helperDone = progress.helper === 'ready';
   const connected = progress.browsers.length > 0;
@@ -42,7 +42,7 @@ export function setUpMarkdown(progress: Progress | undefined, error: string | un
       ];
 
   return [
-    '# Set Up Page Scanner',
+    '# Set up Page Scanner',
     'Raycast scans through the Page Scanner extension in your browser, which needs a small helper on this Mac to talk to it.',
     '## 1. Install the helper',
     ...helper,

@@ -10,7 +10,7 @@ macOS only.
 | Command                 | What it does                                                                    |
 | ----------------------- | ------------------------------------------------------------------------------- |
 | **Scan Current Tab**    | Scans the front window's active tab, saves it, then copies it (or as set below) |
-| **Set Up Page Scanner** | Installs the helper and waits for Connect in the extension, checking as it goes |
+| **Set up Page Scanner** | Installs the helper and waits for Connect in the extension, checking as it goes |
 
 Preferences (Raycast Settings, Extensions, Page Scanner):
 
@@ -36,7 +36,7 @@ editor to add any of it.
 
 1. Install [Page Scanner](https://chromewebstore.google.com/detail/page-scanner/oinkohacnbkapdnnhpidmoidmidlgaoj)
    1.3.0 or newer in Chrome, Edge, Brave, Arc or Vivaldi.
-2. In Raycast, run **Set Up Page Scanner** and press **Install Helper**.
+2. In Raycast, run **Set up Page Scanner** and press **Install Helper**.
 3. In the extension's settings (the gear in its popup), **Local agents**, press **Connect** and
    allow what Chrome asks.
 
