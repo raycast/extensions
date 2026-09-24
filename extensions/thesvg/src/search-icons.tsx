@@ -27,7 +27,6 @@ import {
   toDataUri,
   type IconEntry,
   type IconDetail,
-  type Preferences,
 } from "./api";
 
 export default function SearchIcons() {

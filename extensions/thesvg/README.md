@@ -12,8 +12,8 @@ Browse and search the full theSVG library. Filter by category, preview icons, an
 
 | Name | macOS shortcut | Windows shortcut | Description |
 | ---- | -------------- | ---------------- | ----------- |
-| Copy SVG | `↵` or `⌘` `↵` | `↵` or `Ctrl` `↵` | Copy the SVG source code to clipboard |
-| Show Details | `⌘` `↵` or `↵` | `Ctrl` `↵` or `↵` | Show information about the SVG |
+| Copy SVG<sup>1</sup> | `↵` or `⌘` `↵` | `↵` or `Ctrl` `↵` | Copy the SVG source code to clipboard |
+| Show Details<sup>1</sup> | `⌘` `↵` or `↵` | `Ctrl` `↵` or `↵` | Show information about the SVG |
 | Copy Direct URL | `⌘` `⇧` `C` | `Ctrl` `Shift` `C` | Copy the theSVG direct URL |
 | Copy jsDelivr URL | `⌘` `⌥` `C` | `Ctrl` `Alt` `C` | Copy the jsDelivr CDN URL |
 | Open on theSVG | `⌘` `O` | `Ctrl` `O` | Open the icon page in your browser |
@@ -24,6 +24,8 @@ Browse and search the full theSVG library. Filter by category, preview icons, an
 | Copy as Data URI | `⌘` `⇧` `D` | `Ctrl` `Shift` `D` | Copy as inline data URI |
 | Copy Hex Color | `⌘` `⇧` `X` | `Ctrl` `Shift` `X` | Copy brand color |
 
+1. Choose the primary action using the `Primary Action` preference.
+
 ### Quick Copy
 
 Copy a brand SVG instantly without opening Raycast's UI. Type the brand name as an argument.
@@ -32,9 +34,11 @@ Example: `Copy Brand Icon` > `github` copies the GitHub SVG to your clipboard.
 
 ## Preferences
 
-| Setting         | Description                                        | Default               |
-| --------------- | -------------------------------------------------- | --------------------- |
+| Setting | Description | Default |
+| --- | --- | --- |
 | Default Variant | Which variant to copy (default, mono, light, dark) | Default (Brand Color) |
+| Layout | Choose how to display results | Grid |
+| Primary Action | The action to perform when selecting an item | Copy SVG |
 
 ## Features
 

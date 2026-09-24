@@ -6,7 +6,7 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import { searchIcons, getIcon, type Preferences } from "./api";
+import { searchIcons, getIcon } from "./api";
 
 interface Arguments {
   query: string;

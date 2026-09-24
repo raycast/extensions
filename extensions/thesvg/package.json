@@ -5,6 +5,9 @@
   "description": "Search, preview, and copy 5,600+ brand SVG icons from thesvg.org",
   "icon": "extension-icon.png",
   "author": "thegdsks",
+  "contributors": [
+    "muhammadrizo"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools"
@@ -127,8 +130,5 @@
   "overrides": {
     "brace-expansion": "5.0.9",
     "js-yaml@4": "4.3.1"
-  },
-  "allowScripts": {
-    "esbuild": true
   }
 }

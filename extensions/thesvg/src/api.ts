@@ -1,9 +1,5 @@
 const BASE_URL = "https://thesvg.org";
 
-export interface Preferences {
-  defaultVariant: string;
-}
-
 export interface IconEntry {
   slug: string;
   title: string;
