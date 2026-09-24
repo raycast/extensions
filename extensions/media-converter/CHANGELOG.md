@@ -1,6 +1,6 @@
 # Media Converter Changelog
 
-## Video Editing Controls - {PR_MERGE_DATE}
+## Video Editing Controls - 2026-09-24
 
 - Extend Edit Media playback speeds from 0.25×–4× to 0.25×–40× with synchronized audio.
 - Add Change Frame Rate with 24, 30, and 60 fps outputs, and Remove Audio for silent videos.
