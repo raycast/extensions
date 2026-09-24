@@ -12,6 +12,7 @@ import { format, addDays, addHours, nextSunday, nextFriday, nextSaturday, addYea
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
+import { isDayFirst } from "./helpers";
 import { Data } from "./hooks/useData";
 import { normalizePostCreateActions, STORAGE_KEY } from "./hooks/usePostCreateActions";
 import { runPostCreateActions } from "./post-create-shortcuts";
@@ -33,7 +34,12 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await addReminderFromText(props.arguments.text, props.arguments.notes, preferences.defaultListName);
+      await addReminderFromText(
+        props.arguments.text,
+        props.arguments.notes,
+        preferences.defaultListName,
+        preferences.dateFormat,
+      );
       return;
     }
 
@@ -74,6 +80,10 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     const oneHourFromNowToday = format(addHours(now, 1), "yyyy-MM-dd'T'HH:mm:ss");
 
     const locations = await LocalStorage.getItem("saved-locations");
+    const dayFirst = isDayFirst(preferences.dateFormat);
+    const dateFormatInstruction = dayFirst
+      ? `For ambiguous numeric dates formatted with slashes or dashes (such as "D/M", "DD/MM", "1/11", "01/11"), interpret them in Day/Month format (DD/MM, so 1/11 means November 1st).`
+      : `For ambiguous numeric dates formatted with slashes or dashes (such as "M/D", "MM/DD", "1/11", "01/11"), interpret them in Month/Day format (MM/DD, so 1/11 means January 11th).`;
 
     const prompt = `You are a helpful assistant that uses natural language processing to create a task in Apple Reminders based on the user's input. Parse the user's input into a valid, parsable JSON object, using empty strings for any fields not specified by the user.\n
 
@@ -101,6 +111,7 @@ Here are the rules you must follow:
 - The title is made up of all the words you can't parse, in order. NEVER drop words.
 - Always capitalize weekday, month, and list names in your output.
 - Don't include a time unless specifically indicated by the user.
+- ${dateFormatInstruction}
 - Today is ${today} and the current time is ${currentTime}.
 - Pay special attention to "this" vs "next" day of the week.
 - The weekend begins on Saturday and the week begins on Monday. (e.g. tasks for "next week" would be scheduled for the upcoming Monday.)
@@ -139,14 +150,21 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
     try {
       const { description: aiDescription, ...newReminder } = await askAI(prompt);
       description = aiDescription;
-      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists, now, preferences.defaultListName);
+      resolvedReminder = resolveQuickAddReminder(
+        newReminder,
+        inputText,
+        data.lists,
+        now,
+        preferences.defaultListName,
+        preferences.dateFormat,
+      );
 
       if (newReminder.dueDate && resolvedReminder.dueDate?.includes("T")) {
         resolvedReminder.dueDate = applyAiLocalTimezone(resolvedReminder.dueDate);
       }
     } catch (error) {
       console.log(error);
-      await addReminderFromText(inputText, props.arguments.notes, preferences.defaultListName);
+      await addReminderFromText(inputText, props.arguments.notes, preferences.defaultListName, preferences.dateFormat);
       return;
     }
 
@@ -191,9 +209,16 @@ async function askAI(prompt: string): Promise<ParsedQuickAddReminder> {
   throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
 }
 
-async function addReminderFromText(text: string, notes?: string, defaultListName?: string) {
+async function addReminderFromText(text: string, notes?: string, defaultListName?: string, dateFormat?: string) {
   const data: Data = await getData();
-  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists, new Date(), defaultListName);
+  const resolvedReminder = resolveQuickAddReminder(
+    { title: text },
+    text,
+    data.lists,
+    new Date(),
+    defaultListName,
+    dateFormat,
+  );
   const reminder = toNewReminder(resolvedReminder, notes);
 
   await createReminder(reminder);

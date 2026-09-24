@@ -7,6 +7,26 @@
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
+  "preferences": [
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "title": "Date Format",
+      "description": "Preferred date format for numeric dates (e.g. 1/11).",
+      "required": false,
+      "default": "mdy",
+      "data": [
+        {
+          "title": "Month / Day (MM/DD)",
+          "value": "mdy"
+        },
+        {
+          "title": "Day / Month (DD/MM)",
+          "value": "dmy"
+        }
+      ]
+    }
+  ],
   "contributors": [
     "tm.wrnr",
     "ir4n",
