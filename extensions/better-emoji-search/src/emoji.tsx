@@ -15,15 +15,11 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import type { ReactElement } from "react";
-import { loadCatalog, resolveRecents, UnicodeVersion } from "./catalog";
+import { loadCatalog, resolveRecents } from "./catalog";
 import { RecentEmojiStorage } from "./recent-storage";
 import { EmojiSearchIndex, SearchableEmoji } from "./search";
 
-const { primaryAction, unicodeVersion, shortCodes } = getPreferenceValues<{
-  primaryAction: "paste" | "copy";
-  unicodeVersion: UnicodeVersion;
-  shortCodes: boolean;
-}>();
+const { primaryAction, unicodeVersion, shortCodes } = getPreferenceValues<Preferences>();
 const allEmojis = "All Emojis";
 const recentlyUsedCategory = "Recently Used";
 type Emoji = SearchableEmoji;
