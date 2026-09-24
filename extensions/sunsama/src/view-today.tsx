@@ -401,10 +401,12 @@ export default function ViewToday() {
                 shown only when the workspace is known — it can't be built
                 without it, and Sunsama's home page isn't worth an action. */}
             {(useDeepLinks || workspace) && (
-              <Action.OpenInBrowser
+              // Action.Open, not OpenInBrowser: `sunsama://` must go to the
+              // desktop app's scheme handler, not a browser.
+              <Action.Open
                 title="Open in Sunsama"
                 icon={Icon.CloudSun}
-                url={taskUrl(task.id, workspace, useDeepLinks)!}
+                target={taskUrl(task.id, workspace, useDeepLinks)!}
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}
