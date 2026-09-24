@@ -215,7 +215,16 @@ function InstanceForm({
       key: initial?.key ?? "",
     },
     validation: {
-      key: FormValidation.Required,
+      key(value) {
+        if (!value) return "The item is required";
+        // Reference equality (not `instanceId()`) already makes Edit/Delete immune to two stored
+        // instances sharing a key, but a duplicate is still meaningless (an API key identifies one
+        // org's access, not two separate ones) and would make `isActiveInstance` treat both as
+        // active together - block it going forward rather than just tolerate it.
+        if (instances.some((i) => i !== initial && i.key === value)) {
+          return "Another instance already uses this API key";
+        }
+      },
       url(value) {
         if (!value) return "The item is required";
         try {
