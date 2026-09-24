@@ -1,6 +1,6 @@
 # Fetch Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-24
 
 - **Download** — download a single file from a URL argument or the clipboard, with live progress in a toast and Show in Finder on completion. Transfers run in a background process that outlives the command, so closing Raycast doesn't cancel them. Filenames resolve from `Content-Disposition` when the server sends it, and gain the correct extension from the content type when the URL doesn't have one.
 - **Download Batch** — download many files at once with a live progress list showing per-file status and percentage. Accepts one URL per line, URLs embedded in prose, and markdown links, removing duplicates. Import every open browser tab with ⌘⇧B. Cancel a single download or the whole batch, and retry any that failed.
