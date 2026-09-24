@@ -106,6 +106,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "zoom-meeting-prep",
+        "title": "Prepare for a Zoom Meeting"
+      }
+    ],
     "instructions": "- When referring to a meeting, always include a link to the meeting if possible.\n- When the user asks to block time, this means creating a scheduled meeting with a topic of 'Blocked'.",
     "evals": [
       {

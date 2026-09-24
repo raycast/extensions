@@ -1,5 +1,10 @@
 # Zoom Changelog
 
+## [Meeting Prep Skill] - {PR_MERGE_DATE}
+
+- Add a skill for preparing upcoming-meeting briefs with Zoom details, join links, and suggested questions.
+- Keep known meeting details separate from proposed agendas and flag missing context or schedule coverage.
+
 ## [Personal Meeting ID Support] - 2026-08-10
 
 - Added a `Personal Meeting ID` preference to the Start Meeting command so you can always start your own personal meeting room with a consistent meeting ID.
