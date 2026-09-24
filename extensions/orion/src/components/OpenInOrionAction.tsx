@@ -2,7 +2,10 @@ import { Action, closeMainWindow, Icon, PopToRootType } from "@raycast/api";
 
 import { closeLauncherTabs, openInOrion } from "../utils";
 
-const OpenInOrionAction = (props: { url: string; title?: string }) => (
+// `immediatePopToRoot` is opt-in - see OpenTabAction for why only the Command
+// Bar passes it, while the standalone Bookmarks/Reading List/History commands
+// that also render this action keep respecting the user's own preference.
+const OpenInOrionAction = (props: { url: string; title?: string; immediatePopToRoot?: boolean }) => (
   <Action
     title={props.title ?? "Open in Orion"}
     icon={Icon.Globe}
@@ -11,9 +14,10 @@ const OpenInOrionAction = (props: { url: string; title?: string }) => (
       // front); otherwise a lingering raycast:// tab re-fires the deeplink.
       await closeLauncherTabs();
       await openInOrion(props.url);
-      // See OpenTabAction for why this forces an immediate pop to root instead
-      // of following the user's Pop to Root Search preference.
-      await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+      await closeMainWindow({
+        clearRootSearch: true,
+        ...(props.immediatePopToRoot ? { popToRootType: PopToRootType.Immediate } : {}),
+      });
     }}
   />
 );

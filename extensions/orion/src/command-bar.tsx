@@ -422,6 +422,7 @@ export default function Command() {
               tab={topHit.tab}
               refresh={refresh}
               closeLaunchers
+              immediatePopToRoot
               onActivate={markTabActive}
             />
           ) : (
@@ -439,7 +440,7 @@ export default function Command() {
             subtitle={address}
             actions={
               <ActionPanel>
-                <OpenInDefaultBrowserAction url={address} />
+                <OpenInDefaultBrowserAction url={address} immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -454,7 +455,7 @@ export default function Command() {
             title={`Search ${getSearchEngineName()} for “${query}”`}
             actions={
               <ActionPanel>
-                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" />
+                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -478,6 +479,7 @@ export default function Command() {
               tab={t}
               refresh={refresh}
               closeLaunchers
+              immediatePopToRoot
               onActivate={markTabActive}
             />
           ))}
