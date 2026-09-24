@@ -4,7 +4,7 @@ import Carbon.HIToolbox
 
 /// One key transition, already resolved to a simple down/up — including for
 /// modifier keys, which the OS only ever reports via flagsChanged (see the
-/// toggle-tracking note on `modifierKeysCurrentlyDown` below).
+/// note on `modifierKeysCurrentlyDown` below).
 struct KeyActivity {
     let keycode: Int64
     let isDown: Bool
@@ -20,25 +20,43 @@ class EventTap {
     private var runLoopSource: CFRunLoopSource?
     private var onActivity: ((KeyActivity) -> Void)?
 
-    // Modifier keys (Shift/Ctrl/Option/Command/Fn/CapsLock, incl. left/right
-    // pairs) never fire keyDown/keyUp — only flagsChanged, and that event's
-    // flag bits are shared between e.g. left and right Shift, so they can't
-    // tell which physical key just changed.
-    // What's reliable is the event's own keycode field: the OS always
-    // reports the specific physical key that changed. So instead of reading
-    // direction from the flag bits, we toggle per keycode: the first
-    // flagsChanged for a given modifier keycode is "down", the next is "up".
-    // This also degrades fine for CapsLock (a hardware toggle switch) since
-    // press and release still each fire their own flagsChanged.
+    // Modifier keys never fire keyDown/keyUp, only flagsChanged, which says
+    // which key changed but not in which direction. Toggling per keycode
+    // inverts for good if a release arrives first — e.g. letting go of the
+    // shortcut that launched us after the tap is already running. So the
+    // direction is read from the flags instead, and a release with no
+    // recorded press is ignored.
     private var modifierKeysCurrentlyDown: Set<Int64> = []
 
-    private static let modifierKeycodes: Set<Int64> = [
-        Int64(kVK_Shift), Int64(kVK_RightShift),
-        Int64(kVK_Control), Int64(kVK_RightControl),
-        Int64(kVK_Option), Int64(kVK_RightOption),
-        Int64(kVK_Command), Int64(kVK_RightCommand),
-        Int64(kVK_Function), Int64(kVK_CapsLock),
-    ]
+    // Device-dependent bits (NX_DEVICE*KEYMASK in IOKit's IOLLEvent.h). The
+    // generic masks like .maskShift are shared by left and right, so they
+    // can't tell whether left Shift was released while right is still held.
+    // The generic mask is still the fallback for sources that set no device
+    // bits at all for that modifier.
+    private struct ModifierMask {
+        let device: UInt64
+        let bothSides: UInt64
+        let generic: CGEventFlags
+    }
+
+    private static let modifierMasks: [Int64: ModifierMask] = {
+        let lCtl: UInt64 = 0x0000_0001, rCtl: UInt64 = 0x0000_2000
+        let lShift: UInt64 = 0x0000_0002, rShift: UInt64 = 0x0000_0004
+        let lCmd: UInt64 = 0x0000_0008, rCmd: UInt64 = 0x0000_0010
+        let lAlt: UInt64 = 0x0000_0020, rAlt: UInt64 = 0x0000_0040
+        let fn = CGEventFlags.maskSecondaryFn
+        return [
+            Int64(kVK_Control): ModifierMask(device: lCtl, bothSides: lCtl | rCtl, generic: .maskControl),
+            Int64(kVK_RightControl): ModifierMask(device: rCtl, bothSides: lCtl | rCtl, generic: .maskControl),
+            Int64(kVK_Shift): ModifierMask(device: lShift, bothSides: lShift | rShift, generic: .maskShift),
+            Int64(kVK_RightShift): ModifierMask(device: rShift, bothSides: lShift | rShift, generic: .maskShift),
+            Int64(kVK_Command): ModifierMask(device: lCmd, bothSides: lCmd | rCmd, generic: .maskCommand),
+            Int64(kVK_RightCommand): ModifierMask(device: rCmd, bothSides: lCmd | rCmd, generic: .maskCommand),
+            Int64(kVK_Option): ModifierMask(device: lAlt, bothSides: lAlt | rAlt, generic: .maskAlternate),
+            Int64(kVK_RightOption): ModifierMask(device: rAlt, bothSides: lAlt | rAlt, generic: .maskAlternate),
+            Int64(kVK_Function): ModifierMask(device: fn.rawValue, bothSides: fn.rawValue, generic: fn),
+        ]
+    }()
 
     private init() {}
 
@@ -132,14 +150,24 @@ class EventTap {
         case .keyUp:
             emit(keyCode: keyCode, isDown: false, label: "keyUp", flags: flags)
         case .flagsChanged:
-            guard Self.modifierKeycodes.contains(keyCode) else { return }
             let isDown: Bool
-            if modifierKeysCurrentlyDown.contains(keyCode) {
-                modifierKeysCurrentlyDown.remove(keyCode)
-                isDown = false
+            if let mask = Self.modifierMasks[keyCode] {
+                if flags.rawValue & mask.bothSides != 0 {
+                    isDown = flags.rawValue & mask.device != 0
+                } else {
+                    isDown = flags.contains(mask.generic)
+                }
+            } else if keyCode == Int64(kVK_CapsLock) {
+                // Its flag is the lock state, not whether the key is held.
+                isDown = !modifierKeysCurrentlyDown.contains(keyCode)
             } else {
+                return
+            }
+            guard isDown != modifierKeysCurrentlyDown.contains(keyCode) else { return }
+            if isDown {
                 modifierKeysCurrentlyDown.insert(keyCode)
-                isDown = true
+            } else {
+                modifierKeysCurrentlyDown.remove(keyCode)
             }
             emit(keyCode: keyCode, isDown: isDown, label: isDown ? "keyDown*" : "keyUp*", flags: flags)
         default:
@@ -148,7 +176,7 @@ class EventTap {
     }
 
     private func emit(keyCode: Int64, isDown: Bool, label: String, flags: CGEventFlags) {
-        let logLine = "\(label.padding(toLength: 9, withPad: " ", startingAt: 0)) keycode=\(keyCode) name=\(KeyNames.name(for: keyCode)) flags=\(Self.describeFlags(flags))"
+        let logLine = "\(label.padding(toLength: 9, withPad: " ", startingAt: 0)) keycode=\(keyCode) name=\(KeyNames.name(for: keyCode)) flags=\(Self.describeFlags(flags)) raw=0x\(String(flags.rawValue, radix: 16))"
         onActivity?(KeyActivity(keycode: keyCode, isDown: isDown, logLine: logLine))
     }
 
