@@ -10,6 +10,10 @@ type Input = {
    */
   reminderId: string;
   /**
+   * The ID of the list to move the reminder to.
+   */
+  listId?: string;
+  /**
    * The new title of the reminder.
    */
   title?: string;

@@ -497,6 +497,7 @@ struct SetLocationPayload: Decodable {
 
 struct UpdateReminderPayload: Decodable {
   let reminderId: String
+  let listId: String?
   let title: String?
   let notes: String?
   let dueDate: String?
@@ -512,6 +513,14 @@ struct UpdateReminderPayload: Decodable {
 
   guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
     throw RemindersError.noReminderFound
+  }
+
+  if let listId = payload.listId {
+    let calendars = eventStore.calendars(for: .reminder)
+    guard let newCalendar = (calendars.first { $0.calendarIdentifier == listId }) else {
+      throw RemindersError.noReminderFound
+    }
+    item.calendar = newCalendar
   }
 
   if let isCompleted = payload.isCompleted {

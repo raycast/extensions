@@ -212,6 +212,17 @@ describe("Reminder Update Tool", () => {
     assert.deepStrictEqual(updatedReminders[0].payload.tags, ["updated", "work"]);
   });
 
+  it("updates a reminder's listId", async () => {
+    const reminder = await updateReminderTool({
+      reminderId: "rem-789",
+      listId: "list-work",
+    });
+
+    assert.strictEqual(reminder.id, "rem-789");
+    assert.strictEqual(reminder.list?.id, "list-work");
+    assert.strictEqual(updatedReminders[0].payload.listId, "list-work");
+  });
+
   it("preserves existing fields when updating without priority and tags", async () => {
     const reminder = await updateReminderTool({
       reminderId: "rem-456",
