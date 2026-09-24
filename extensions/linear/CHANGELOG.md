@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## Add Delivery Planning Skill - {PR_MERGE_DATE}
+
+- Turn specs into tasks, triage issues, and report cycle progress. Available through the bundled Delivery Planning skill in Raycast AI.
+
 ## [Favorites Crash Fix] - 2026-09-14
 
 - Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
