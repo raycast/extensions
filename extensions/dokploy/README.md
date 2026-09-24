@@ -68,6 +68,8 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - Instance URL: The URL of your Dokploy instance with port
     - API Key: `Follow` instruction from [Dokploy API | Dokploy](https://docs.dokploy.com/docs/api#authentication)
 
+    Instances can later be edited or deleted from the same list.
+
 ## 🧪 Tested On
 
 Extension tested on following versions:

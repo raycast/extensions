@@ -3,7 +3,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { Environment, ErrorResult, type ModernProject } from "./interfaces";
 import { useToken } from "./instances";
 import Services from "./services";
-import { getTotalServices } from "./utils";
+import { getTotalServices, serviceScopeForEnvironment } from "./utils";
 
 export default function Environments({
   project,
@@ -65,7 +65,9 @@ export default function Environments({
               <Action.Push
                 icon="folder-input.svg"
                 title="Services"
-                target={<Services environment={environment} revalidate={revalidate} />}
+                target={
+                  <Services environment={serviceScopeForEnvironment(project, environment)} revalidate={revalidate} />
+                }
               />
               <Action.Push
                 icon={Icon.Plus}
