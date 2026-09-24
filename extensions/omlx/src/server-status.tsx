@@ -230,12 +230,14 @@ export default function ServingStats() {
         <List.Section title="Memory">
           <List.Item
             icon={Icon.MemoryChip}
-            title="In Use"
+            title="Model Memory"
             accessories={[
-              { text: mp.current_formatted },
+              {
+                text: `${mp.current_formatted} / ${mp.soft_formatted} soft / ${mp.hard_formatted} hard`,
+              },
               {
                 tag: {
-                  value: `${mp.soft_bytes > 0 ? Math.round((mp.current_bytes / mp.soft_bytes) * 100) : 0}%`,
+                  value: `${mp.hard_bytes > 0 ? Math.round((mp.current_bytes / mp.hard_bytes) * 100) : 0}%`,
                   color:
                     mp.current_bytes / mp.soft_bytes > 0.8
                       ? Color.Red
@@ -245,18 +247,6 @@ export default function ServingStats() {
                 },
               },
             ]}
-            actions={actions}
-          />
-          <List.Item
-            icon={Icon.MemoryChip}
-            title="Soft Ceiling"
-            accessories={[{ text: mp.soft_formatted }]}
-            actions={actions}
-          />
-          <List.Item
-            icon={Icon.MemoryChip}
-            title="Hard Ceiling"
-            accessories={[{ text: mp.hard_formatted }]}
             actions={actions}
           />
         </List.Section>
