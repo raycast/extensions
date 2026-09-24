@@ -1,6 +1,6 @@
 # Quick Access Changelog
 
-## [Fix Pins Not Saving] - {PR_MERGE_DATE}
+## [Fix Pins Not Saving] - 2026-09-24
 
 - Fixed pins not being saved by the Pin command: pins are now stored before the Raycast window is closed
 - Fixed pinned folders all being given the same id
