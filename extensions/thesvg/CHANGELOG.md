@@ -1,5 +1,9 @@
 # theSVG Raycast Extension Changelog
 
+## [Update icon count] - {PR_MERGE_DATE}
+
+- Icon count in the description and search placeholder now says 7,400+
+
 ## [1.1.0] - 2026-04-12
 
 ### Fixed
