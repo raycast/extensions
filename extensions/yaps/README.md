@@ -74,7 +74,6 @@ outside `/Applications`; if it cannot find the app, it opens the download page.
 ## Development
 
 ```bash
-cd extensions/yaps-raycast
 bun install
 bun run test
 bun run lint
@@ -98,8 +97,8 @@ advertised or required by the current Store package.
 - Run every command against the current production Yaps build.
 - Run `bun run lint:store` and `bun run build` locally. Linting is local; publisher authentication
   is required when you publish.
-- Raycast's public Store guidance expects npm installation with a `package-lock.json`; this
-  extension includes that lockfile for Store tooling and keeps `bun.lock` for local development.
-  Update both lockfiles together when dependencies change.
+- Raycast's public Store guidance expects npm installation with a `package-lock.json`, which
+  is included for Store tooling. The Yaps application repository also tracks `bun.lock` for local
+  development. Keep both source lockfiles current; the Store repository omits Bun lockfiles.
 - Review the latest [Raycast extension Store guidance](https://developers.raycast.com/basics/prepare-an-extension-for-store)
   and privacy/security guidance before publishing.
