@@ -235,6 +235,54 @@ describe("buildChunkedCache sidecar hooks", () => {
       await rm(dir, { recursive: true, force: true });
     }
   }, 30_000);
+  // Each rebuild parses a whole catalog: the smallest heap cap one survives is
+  // 40 MB, both at once 64 MB — which, on top of the running command, crossed
+  // Raycast's 100 MB cap on the first Search after a cache-version bump. The
+  // second build must wait for the first.
+  it("runs one build at a time, even for different catalogs", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "brew-serial-"));
+    try {
+      let reached!: () => void;
+      const reachedA = new Promise<void>((resolve) => (reached = resolve));
+      let release!: () => void;
+      const releaseA = new Promise<void>((resolve) => (release = resolve));
+      const parsedByB: string[] = [];
+
+      const a = buildChunkedCache<RawCaskFull>(
+        FIXTURE_CASK,
+        "file:///nonexistent",
+        caskConfigIn(path.join(dir, "a")),
+        extractCask,
+        undefined,
+        undefined,
+        {
+          writeSidecar: async () => {
+            reached();
+            await releaseA;
+          },
+        },
+      );
+      const b = buildChunkedCache<RawCaskFull>(
+        FIXTURE_CASK,
+        "file:///nonexistent",
+        caskConfigIn(path.join(dir, "b")),
+        extractCask,
+        undefined,
+        undefined,
+        { onRecord: (cask) => parsedByB.push(cask.token) },
+      );
+
+      await reachedA;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(parsedByB).toEqual([]);
+
+      release();
+      await Promise.all([a, b]);
+      expect(parsedByB.sort()).toEqual(["0-ad", "1password-cli", "battle-net"]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 30_000);
 });
 
 describe("buildChunkedCache", () => {

@@ -213,6 +213,13 @@ restated as a per-package verdict.
 - **The single-package `brew info` fetchers swallow every error** and return
   `undefined` — a genuine not-found and a failed read are indistinguishable. Do
   not report `undefined` as "Homebrew no longer has this package".
+- **Chunked builds run one at a time, across catalogs.** `buildChunkedCache`
+  queues every build behind the previous one (`buildQueue` in
+  `src/utils/cache.ts`); the per-type `buildInProgress` mutexes cannot, since
+  formulae and casks each have their own. Measured under a hard heap cap: one
+  rebuild needs 40 MB, both at once 64 MB, both queued 44 MB. On top of
+  Search's ~35 MB floor, the concurrent pair crossed the 100 MB cap on the first
+  Search after a cache-version bump, which rebuilds both.
 - **`brewSearch` slices before loading chunks.** That ordering is the memory
   optimization the whole chunked cache exists for; do not load first and slice
   after.

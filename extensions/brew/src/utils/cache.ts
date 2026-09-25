@@ -456,10 +456,27 @@ export async function isChunkedCacheValid(
 export type IndexExtractor<T> = (item: T, chunkNumber: number, indexInChunk: number) => IndexEntry;
 
 /**
- * Build chunked cache from source JSON file.
- * Streams through the source, writing chunks and building an index.
+ * The tail of the build queue. Every build — formulae and casks alike — waits
+ * for the one before it. Each parses a whole catalog. Measured as the smallest
+ * heap cap a build survives: 40 MB for one, 64 MB for both at once, 44 MB for
+ * both queued. On top of the running command, the concurrent pair crossed
+ * Raycast's 100 MB cap on the first Search after a cache-version bump. The per-type `buildInProgress` mutexes in `fetch.ts`
+ * cannot prevent that; they are per type.
  */
-export async function buildChunkedCache<T>(
+let buildQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Build chunked cache from source JSON file.
+ * Streams through the source, writing chunks and building an index. Builds run
+ * one at a time — see `buildQueue`.
+ */
+export function buildChunkedCache<T>(...args: Parameters<typeof buildChunkedCacheNow<T>>): Promise<void> {
+  const run = buildQueue.then(() => buildChunkedCacheNow<T>(...args));
+  buildQueue = run.catch(() => {});
+  return run;
+}
+
+async function buildChunkedCacheNow<T>(
   sourcePath: string,
   sourceUrl: string,
   config: ChunkedCacheConfig,
