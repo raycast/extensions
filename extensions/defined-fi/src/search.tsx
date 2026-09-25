@@ -1,4 +1,4 @@
-// Search Defined.fi command: search tokens by name/symbol/address across Codex,
+// Search Tokens command: search tokens by name/symbol/address across Codex,
 // preview them in a detail pane, and open the highlighted result on defined.fi.
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -222,7 +222,6 @@ function SearchView({ apiKey, onApiKeyChange }: { apiKey: string; onApiKeyChange
       onSearchTextChange={setSearchText}
       isShowingDetail={showDetail && items.length > 0}
       searchBarPlaceholder="Token name, symbol, or address"
-      navigationTitle="Defined.fi"
       searchBarAccessory={<NetworkDropdown networks={networks ?? []} onChange={setNetworkId} />}
     >
       {isEmptySearch ? (
@@ -360,7 +359,7 @@ function TokenListItem({
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            <Action title="Codex.io API Key…" icon={Icon.Key} onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel.Section>
         </ActionPanel>
       }

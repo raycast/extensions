@@ -8,7 +8,7 @@ The extension needs a Codex.io API key. Codex.io provides Defined.fi's data.
 
 1. Create an account at [dashboard.codex.io](https://dashboard.codex.io/signup). Activation costs $1 once (card or 1 USDC). The plan then includes 10,000 free requests a month.
 2. Copy your key from the [API Keys page](https://dashboard.codex.io/dashboard/api-keys).
-3. Run **Search Defined.fi** and paste the key. The extension checks the key before it saves it.
+3. Run **Search Tokens** and paste the key. The extension checks the key before it saves it.
 
 To change the key later, set **Codex.io API Key** in the extension preferences.
 

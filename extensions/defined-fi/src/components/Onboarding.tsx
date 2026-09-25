@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   Form,
+  Icon,
   Keyboard,
   openExtensionPreferences,
   showToast,
@@ -269,15 +270,21 @@ export function Onboarding(props: { onDone: (apiKey: string) => void; reason?: "
 
   return (
     <Form
-      navigationTitle={rejected ? "Update Codex.io API Key" : "Set Up Defined.fi Search"}
       actions={
         <ActionPanel>
           {/* In a Form, the first action runs on ⌘↵ and the second on ⌘⇧↵. */}
-          <Action.SubmitForm title="Save and Start Searching" onSubmit={submit} />
+          <Action.SubmitForm title="Save and Start Searching" icon={Icon.Check} onSubmit={submit} />
           {rejected ? openApiKeys() : openSignup()}
           {rejected ? openSignup(SIGNUP_SHORTCUT) : openApiKeys(API_KEYS_SHORTCUT)}
-          <Action title="Paste Key from Clipboard" onAction={pasteFromClipboard} shortcut={PASTE_SHORTCUT} />
-          {keyInPreferences && <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />}
+          <Action
+            title="Paste Key from Clipboard"
+            icon={Icon.Clipboard}
+            onAction={pasteFromClipboard}
+            shortcut={PASTE_SHORTCUT}
+          />
+          {keyInPreferences && (
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          )}
         </ActionPanel>
       }
     >

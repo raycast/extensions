@@ -4,9 +4,9 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 
 const STORAGE_KEY = "codexApiKey";
 
-/** The key from the optional "Codex API Key" preference, if one is set. */
+/** The key from the optional "Codex.io API Key" preference, if one is set. */
 export function getPreferenceApiKey(): string | undefined {
-  const { apiKey } = getPreferenceValues<{ apiKey?: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   const trimmed = apiKey?.trim();
   return trimmed ? trimmed : undefined;
 }

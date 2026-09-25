@@ -177,6 +177,17 @@ export function classifyResponse(
   return undefined;
 }
 
+/** How long one request may take before it counts as a network failure. */
+const REQUEST_TIMEOUT_MS = 15_000;
+
+/** Map a fetch failure: caller aborts stay AbortErrors; timeouts and the rest are network errors. */
+function toFetchError(err: unknown, signal: AbortSignal | undefined, timedOut: boolean): unknown {
+  if (signal?.aborted) return isAbortError(err) ? err : makeAbortError();
+  if (timedOut) return new CodexError("network", "Codex.io did not respond in time");
+  if (isAbortError(err)) return err;
+  return new CodexError("network", err instanceof Error ? err.message : "Network request failed");
+}
+
 async function codexFetch<T>(
   apiKey: string,
   query: string,
@@ -185,28 +196,43 @@ async function codexFetch<T>(
 ): Promise<T> {
   let attempt = 0;
   for (;;) {
-    let response: Response;
-    try {
-      response = await fetch(CODEX_GRAPHQL_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: apiKey,
-        },
-        body: JSON.stringify({ query, variables }),
-        signal,
-      });
-    } catch (err) {
-      if (isAbortError(err)) throw err;
-      throw new CodexError("network", err instanceof Error ? err.message : "Network request failed");
-    }
+    // Each attempt gets its own deadline; the caller's signal still aborts it.
+    const attemptController = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      attemptController.abort();
+    }, REQUEST_TIMEOUT_MS);
+    const onCallerAbort = () => attemptController.abort();
+    if (signal?.aborted) attemptController.abort();
+    signal?.addEventListener("abort", onCallerAbort, { once: true });
 
+    let response: Response;
     let body: GraphQLResponseBody<T> | undefined;
     try {
-      body = (await response.json()) as GraphQLResponseBody<T>;
-    } catch (err) {
-      if (isAbortError(err)) throw err;
-      body = undefined;
+      try {
+        response = await fetch(CODEX_GRAPHQL_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: apiKey,
+          },
+          body: JSON.stringify({ query, variables }),
+          signal: attemptController.signal,
+        });
+      } catch (err) {
+        throw toFetchError(err, signal, timedOut);
+      }
+
+      try {
+        body = (await response.json()) as GraphQLResponseBody<T>;
+      } catch (err) {
+        if (signal?.aborted || timedOut) throw toFetchError(err, signal, timedOut);
+        body = undefined;
+      }
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onCallerAbort);
     }
 
     const classification = classifyResponse(response.status, body);

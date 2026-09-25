@@ -11,11 +11,12 @@ import type { Network } from "./types";
 
 /**
  * Defined.fi slugs checked against real https://www.defined.fi pages in a
- * browser on 2026-09-23. Where Codex's live `networkShortName` was also
- * checked (eth, sol, base, bsc, arb, opti), it matched; the table pins these
- * slugs in case Codex renames a short name. Other networks fall back to
- * `networkShortName.toLowerCase()` (see `deriveDefinedSlug`), which is
- * unverified.
+ * browser on 2026-09-23. Defined.fi runs on Codex, and its slugs are Codex's
+ * `networkShortName`: every network checked matched, including Optimism's
+ * "opti" (eth, sol, base, bsc, arb, opti, matic, avax, tron, hyperevm, linea;
+ * an unknown slug renders "Token Not Found"). The table pins the checked ones
+ * in case Codex renames a short name; other networks fall back to
+ * `networkShortName.toLowerCase()` (see `deriveDefinedSlug`).
  */
 export const DEFINED_SLUG_OVERRIDES: Record<number, string> = {
   1: "eth", // Ethereum — VERIFIED

@@ -402,6 +402,25 @@ describe("searchTokens, getNetworks, validateKey", () => {
     expect((err as InstanceType<typeof CodexError>).kind).toBe("network");
   });
 
+  it("gives up on a request that never answers and reports a network error", async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock.mockImplementation(
+        (_url: string, init: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+          }),
+      );
+      const { validateKey } = await import("./codex");
+      const pending = validateKey("key").catch((e) => e);
+      await vi.advanceTimersByTimeAsync(15_000);
+      const err = await pending;
+      expect(err).toMatchObject({ kind: "network" });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("propagates an abort as AbortError, not CodexError", async () => {
     const abortError = new DOMException("The operation was aborted.", "AbortError");
     fetchMock.mockRejectedValue(abortError);
