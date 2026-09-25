@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "number-formatter",
+  "version": "1.0.0",
+  "description": "Quickly understand and copy numbers in familiar, locale-aware formats.",
+  "type": "module",
+  "main": "src/format-number.tsx",
+  "author": "dydent",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test test/*.test.ts"
+  },
+  "keywords": [
+    "number",
+    "format",
+    "compact",
+    "locale",
+    "million",
+    "billion",
+    "readable"
+  ],
+  "icon": "icon.png",
+  "title": "Number Formatter",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "format-number",
+      "title": "Format Number",
+      "description": "Make large and small numbers easier to read.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "locale",
+          "title": "Number Locale",
+          "description": "Locale used to interpret and format numbers.",
+          "type": "dropdown",
+          "required": true,
+          "default": "system",
+          "data": [
+            {
+              "title": "System Default",
+              "value": "system"
+            },
+            {
+              "title": "English (United States)",
+              "value": "en-US"
+            },
+            {
+              "title": "English (United Kingdom)",
+              "value": "en-GB"
+            },
+            {
+              "title": "German (Germany)",
+              "value": "de-DE"
+            },
+            {
+              "title": "German (Switzerland)",
+              "value": "de-CH"
+            },
+            {
+              "title": "French (France)",
+              "value": "fr-FR"
+            },
+            {
+              "title": "Italian (Italy)",
+              "value": "it-IT"
+            },
+            {
+              "title": "Spanish (Spain)",
+              "value": "es-ES"
+            }
+          ]
+        },
+        {
+          "name": "decimalDetail",
+          "title": "Decimal Detail",
+          "description": "Maximum decimal detail to show without adding trailing zeros.",
+          "type": "dropdown",
+          "required": true,
+          "default": "2",
+          "data": [
+            {
+              "title": "0",
+              "value": "0"
+            },
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.3",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.7",
+    "typescript": "^6.0.3"
+  }
+}
