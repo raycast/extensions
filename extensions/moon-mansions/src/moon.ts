@@ -620,6 +620,10 @@ export function getVocInfo(date = new Date()): VocInfo {
 
   let prevMLon = moonLon(jd0);
   let prev = distsAt(prevMLon, jd0);
+  // One step BEFORE now, so the first step has a direction to read: a
+  // perfection inside it still turns from a lower distance, while one just
+  // behind now stays above this lookback and is not a fresh perfection.
+  const back = distsAt(moonLon(jd0 - step), jd0 - step);
   // Per planet × aspect: has the distance been shrinking since it last turned?
   // Seeded false so a separating aspect is not mistaken for a fresh perfection.
   const closing = VOC_PLANETS.map(() => VOC_ASPECTS.map(() => false));
@@ -639,7 +643,7 @@ export function getVocInfo(date = new Date()): VocInfo {
         const dCur = cur[pi][ai];
         if (dCur < dPrev) {
           closing[pi][ai] = true;
-        } else if (dCur > dPrev && closing[pi][ai]) {
+        } else if (dCur > dPrev && (closing[pi][ai] || (i === 1 && dCur <= back[pi][ai]))) {
           closing[pi][ai] = false;
           // The minimum sits between the two samples; split the step by depth.
           const frac = dPrev / (dPrev + dCur);
