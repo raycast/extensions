@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Create Calendar Event from Reminder] - {PR_MERGE_DATE}
+## [Create Calendar Event from Reminder] - 2026-09-25
 
 - Add "Create Calendar Event" action (`Cmd + Shift + E`) in "My Reminders" action panel to turn any reminder into an Apple Calendar event.
 - Support pre-filling event title, notes, location, start and end dates from reminder due date, and reminder deep-link URL.
