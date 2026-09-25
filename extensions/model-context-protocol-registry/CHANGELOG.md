@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add QuoteBill MCP Server] - 2026-09-26
+
+- Add QuoteBill to the official registry: draft quotations and invoices from 133 templates, look up the published tax rate for 195 countries with the official source, total line items and get a link that opens the finished document on quotebill.com (Excel, Word or PDF). Read-only tools. Hosted remote Streamable HTTP server at https://quotebill.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free QuoteBill account, no API key.
+
 ## [Add SpringBrand MCP Server] - 2026-09-25
 
 - Add SpringBrand to the official registry: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation, all behind one connector and billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
