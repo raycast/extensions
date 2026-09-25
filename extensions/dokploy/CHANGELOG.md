@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Menu Bar Server Health] - {PR_MERGE_DATE}
+
+- Add a `Server Health` menu bar command showing disk/memory/container status for every configured instance, without opening Raycast's main window. The icon tints red when any instance's disk usage crosses a configurable threshold.
+
 ## [Deployments Feed Command] - 2026-09-25
 
 - Add a `Deployments` command showing the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency. Opens straight into the full deployment history (rollback, cancel, delete) for whichever one you pick.

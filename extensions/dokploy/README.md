@@ -58,6 +58,8 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Logs
+- Server Health (menu bar)
+    - See disk/memory/container status for every configured instance from the menu bar, with the icon tinting red when any instance's disk usage crosses a configurable threshold.
 
 ## 🚀 Getting Started
 
