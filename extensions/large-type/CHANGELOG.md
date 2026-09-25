@@ -1,6 +1,6 @@
 # Large Type Changelog
 
-## [Fit text in the window] - {PR_MERGE_DATE}
+## [Fit text in the window] - 2026-09-25
 
 - Fixed text running off the edges of the window in non-indexed mode: it is now scaled to fit and wrapped across lines
 - Line breaks in the text are now shown
