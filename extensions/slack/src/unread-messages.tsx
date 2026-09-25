@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
@@ -26,7 +26,8 @@ function UnreadMessages() {
 
   const setConversations = async () => {
     const item = await LocalStorage.getItem(conversationsStorageKey);
-    let conversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
+    const storedConversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
+    let conversations = storedConversations;
 
     // unselect conversations that don't exist anymore
     if (users && channels && groups && !channelsError) {
@@ -37,7 +38,10 @@ function UnreadMessages() {
           !!groups.find((group) => group.id === id),
       );
 
-      await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
+      // Only write back when something was removed, so a stale read can't overwrite a newer selection
+      if (conversations.length !== storedConversations.length) {
+        await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
+      }
     }
 
     if (!selectedConversations || !isEqual(selectedConversations, conversations)) {
@@ -210,6 +214,7 @@ type ConfigurationProps = {
 };
 
 function Configuration({ data, refreshConversations }: ConfigurationProps) {
+  const { pop } = useNavigation();
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
   const [users, channels, groups] = data ?? [];
 
@@ -221,7 +226,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
     });
   }, []);
 
-  const toggleConversation = (id: string) => {
+  const toggleConversation = async (id: string) => {
     let updatedSelectedConversations: string[] | undefined;
     if (selectedConversations.includes(id)) {
       updatedSelectedConversations = selectedConversations.filter((x) => x !== id);
@@ -237,7 +242,8 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
 
     if (updatedSelectedConversations) {
       setSelectedConversations(updatedSelectedConversations);
-      LocalStorage.setItem(conversationsStorageKey, JSON.stringify(updatedSelectedConversations));
+      // Store the selection before refreshing, which reads it back from storage
+      await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(updatedSelectedConversations));
       refreshConversations();
     }
   };
@@ -266,6 +272,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                     title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                     onAction={() => toggleConversation(conversationId)}
                   />
+                  <Action icon={Icon.Check} title="Done" onAction={pop} />
                 </ActionPanel>
               }
             />
@@ -290,6 +297,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                       onAction={() => toggleConversation(id)}
                     />
+                    <Action icon={Icon.Check} title="Done" onAction={pop} />
                   </ActionPanel>
                 }
               />
