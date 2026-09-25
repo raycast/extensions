@@ -39,7 +39,7 @@ export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate
   const existingCategories = [UNCATEGORIZED, ...knownCategories];
   const visibleCategories = existingCategories.filter((c) => !query || c.toLowerCase().includes(query));
   const canCreate = typed.length > 0 && !categoryExists(existingCategories, typed);
-  const showCurrent = category !== UNCATEGORIZED && !visibleCategories.includes(category);
+  const showCurrent = !visibleCategories.includes(category);
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
