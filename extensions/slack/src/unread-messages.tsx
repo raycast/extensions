@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { isEqual } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 
 import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
@@ -210,28 +210,34 @@ function UnreadMessagesConversation({
 
 type ConfigurationProps = {
   data: ReturnType<typeof useChannels>["data"];
-  refreshConversations: () => void;
+  refreshConversations: () => Promise<void>;
 };
 
 function Configuration({ data, refreshConversations }: ConfigurationProps) {
   const { pop } = useNavigation();
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
+  // The latest selection, so toggles made before a re-render build on each other
+  const latestSelection = useRef<string[]>([]);
+  // Saves run one after another, so the newest selection is always the last one written
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const [users, channels, groups] = data ?? [];
 
   useEffect(() => {
     LocalStorage.getItem(conversationsStorageKey).then((item) => {
       if (item) {
-        setSelectedConversations(JSON.parse(item as string));
+        latestSelection.current = JSON.parse(item as string);
+        setSelectedConversations(latestSelection.current);
       }
     });
   }, []);
 
-  const toggleConversation = async (id: string) => {
+  const toggleConversation = (id: string) => {
+    const currentSelection = latestSelection.current;
     let updatedSelectedConversations: string[] | undefined;
-    if (selectedConversations.includes(id)) {
-      updatedSelectedConversations = selectedConversations.filter((x) => x !== id);
-    } else if (selectedConversations.length < 30) {
-      updatedSelectedConversations = [...selectedConversations, id];
+    if (currentSelection.includes(id)) {
+      updatedSelectedConversations = currentSelection.filter((x) => x !== id);
+    } else if (currentSelection.length < 30) {
+      updatedSelectedConversations = [...currentSelection, id];
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -241,10 +247,16 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
     }
 
     if (updatedSelectedConversations) {
+      latestSelection.current = updatedSelectedConversations;
       setSelectedConversations(updatedSelectedConversations);
       // Store the selection before refreshing, which reads it back from storage
-      await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(updatedSelectedConversations));
-      refreshConversations();
+      const selection = JSON.stringify(updatedSelectedConversations);
+      saveQueue.current = saveQueue.current
+        .then(() => LocalStorage.setItem(conversationsStorageKey, selection))
+        .then(() => refreshConversations())
+        .catch(async (error) => {
+          await handleError(error, "Could not save the selected conversations");
+        });
     }
   };
 
