@@ -55,6 +55,18 @@ describe("facetsOf", () => {
     expect(facetsOf({ title: "Profile", packageName: "@kud" })).toEqual({ environment: "kud", name: "Profile" });
   });
 
+  it("lifts a leading handle field off a scoped brand, as documented", () => {
+    expect(facetsOf({ title: "Rooms", packageName: "@acme · Matrix" })).toEqual({
+      environment: "acme",
+      name: "Rooms",
+      brand: "Matrix",
+    });
+  });
+
+  it("keeps a handle that is not a whole sigil field inside the brand", () => {
+    expect(facetsOf({ title: "Types", packageName: "@types/node" })).toEqual({ name: "Types", brand: "@types/node" });
+  });
+
   it("degrades to a bare name when the subtitle is empty", () => {
     expect(facetsOf({ title: "Netflix", packageName: "" })).toEqual({ name: "Netflix" });
     expect(facetsOf({ title: "Netflix", packageName: undefined })).toEqual({ name: "Netflix" });

@@ -6,7 +6,7 @@
 
 - A new command's environment is written on the subtitle, beside the package and category — `Sprint Board` / `Linear · @work · #dev` — rather than as a prefix on the title. Raycast renders the title bold and in full, so `@work · ` led every work command in the launcher with the same five characters and separated none of them; the subtitle is searched too, so typing `@work` still finds them. The filename is unchanged (`work.linear.sprint-board.sh`).
 - Commands written in the older form, `@work · Sprint Board` / `Linear`, are read exactly as before: the list still groups and filters them by environment, and the title-anchored sigil wins if a command somehow carries both. Nothing on disk is rewritten — a collection moves over one command at a time as commands are recreated.
-- One shape reads differently: a package that is itself a bare handle, such as `@kud`, is now taken as an environment rather than a brand. `Chat @ Mozilla` and other mid-string uses are unaffected, since only a whole field made of a sigil and a token counts.
+- One shape reads differently: any subtitle field that is wholly an `@` handle is now taken as an environment rather than as part of the brand. A package that is itself a bare handle, such as `@kud`, becomes the environment `kud`; a scoped brand written `@acme · Matrix` becomes the environment `acme` with the brand `Matrix`. If a package of yours starts with a handle, drop the `@` or fold it into the name to keep it a brand. `Chat @ Mozilla`, `@types/node` and other uses where the handle is not a whole field of letters, digits, `-` and `_` are unaffected.
 
 ## [Readable Rows] - 2026-09-12
 
