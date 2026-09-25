@@ -6,7 +6,7 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import { searchIcons, getIcon, type Preferences } from "./api";
+import { searchIcons, getIcon } from "./api";
 
 interface Arguments {
   query: string;
@@ -21,7 +21,7 @@ export default async function CopyIcon(
   try {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Searching...",
+      title: "Searching…",
     });
 
     // Search for the icon
@@ -33,7 +33,7 @@ export default async function CopyIcon(
     }
 
     const match = results.icons[0];
-    toast.title = `Fetching ${match.title} SVG...`;
+    toast.title = `Fetching ${match.title} SVG…`;
 
     // Get full icon data with inline SVG
     const detail = await getIcon(match.slug);

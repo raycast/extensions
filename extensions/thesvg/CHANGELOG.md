@@ -1,5 +1,12 @@
 # theSVG Raycast Extension Changelog
 
+## [Windows support] - 2026-09-25
+
+- Add support for Windows platform
+- Add `Grid` view, preference and action to toggle the layout
+- Improve keyboard shortcuts
+- Bump all dependencies to the latest
+
 ## [Update icon count] - 2026-09-24
 
 - Icon count in the description and search placeholder now says 7,400+
