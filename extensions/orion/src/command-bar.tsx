@@ -212,11 +212,10 @@ export default function Command() {
   const { readingList } = useReadingList(selectedProfileId);
   const {
     data: history,
-    isLoading: historyLoading,
     permissionView,
     completedQueryKey,
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
-  const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
+  const { suggestions } = useSuggestions(query);
   const historyQueryKey = `${selectedProfileId}\u0000${hasQuery ? query : ""}`;
   const hasCurrentHistoryResult = !hasQuery || completedQueryKey === historyQueryKey;
 
@@ -234,7 +233,12 @@ export default function Command() {
     setSelectedItemId(undefined);
   };
 
-  const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
+  // Loading local history and remote suggestions for each keystroke should not
+  // put the entire List into a loading state: by the time either can be true,
+  // profiles/tabs/bookmarks have already resolved, so there is no genuine
+  // "nothing to show yet" case being masked - only a loading flicker on every
+  // keystroke would be added for no benefit.
+  const isLoading = !profiles || tabs === undefined || bookmarksLoading;
 
   // Never show the launcher tabs in the list itself.
   const openTabs: Tab[] = (tabs ?? []).filter((t) => !isLauncherTab(t.url));
