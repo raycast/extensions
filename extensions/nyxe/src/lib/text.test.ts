@@ -40,6 +40,13 @@ describe("parseRecipients", () => {
   it("reports what isn't an address", () => {
     expect(parseRecipients("a@b.co, nope")).toEqual({ valid: ["a@b.co"], invalid: ["nope"] });
   });
+
+  it("keeps separators inside a quoted display name", () => {
+    expect(parseRecipients('"Doe, Jane" <jane@example.com>; "Smith; Al" <al@x.io>')).toEqual({
+      valid: ["jane@example.com", "al@x.io"],
+      invalid: [],
+    });
+  });
 });
 
 describe("plainTextToMarkdown", () => {
@@ -74,10 +81,17 @@ describe("looksLikeSecret", () => {
     expect(looksLikeSecret(text)).toBe(true);
   });
 
-  it.each(["Buy milk and eggs", "https://example.com/some/long/path", "abc", "note\nwith lines"])(
-    "treats %s as text",
-    (text) => {
-      expect(looksLikeSecret(text)).toBe(false);
-    },
-  );
+  it.each([
+    "Buy milk and eggs",
+    "https://example.com/some/long/path",
+    "abc",
+    "note\nwith lines",
+    "hello",
+    "Hello",
+    "invoice.pdf",
+    "report-2024.pdf",
+    "ada@example.com",
+  ])("treats %s as text", (text) => {
+    expect(looksLikeSecret(text)).toBe(false);
+  });
 });
