@@ -11,48 +11,73 @@ const SPECIAL: Record<string, string> = {
 };
 const SPECIAL_RE = new RegExp(`[${Object.keys(SPECIAL).join("")}]`, "g");
 
-/**
- * The guard that makes this safe on mixed text.
- *
- * Stripping every `\p{M}` is wrong, and destructively so: a combining mark is not always an accent.
- * In Devanagari the virama is a mark, so क्षत्रिय became कषतरय. In Thai the vowels are marks, so
- * สวัสดี became สวสด. Even ❤️ lost its variation selector and became ❤. The command is handed the
- * user's whole selection, so any of those could be in it.
- *
- * So a character is only touched when its decomposition starts with a LATIN letter. Everything else
- * — every other script, emoji, punctuation, a stray combining mark on its own — is returned exactly
- * as it came in.
- */
 const LATIN = /\p{Script=Latin}/u;
+const MARK = /\p{M}/u;
 
 /**
- * NFD, not NFKD: removing accents must leave everything else alone, and a compatibility
- * decomposition would also rewrite ﬁ to fi and ½ to 1⁄2.
+ * Strips one cluster: a base character plus every combining mark that follows it.
  *
- * No lookbehind anywhere in this file. Raycast runs on macOS today, but the same rules are shared
- * with the Obsidian plugin, where a lookbehind breaks on older iOS.
+ * Working a cluster at a time, rather than a code point at a time, is what makes this correct:
  *
- * The table runs AFTER the decomposition, never instead of it: ǣ decomposes to æ plus a macron,
- * and æ itself has no plain form, so it still has to become "ae".
+ *  - `ạ́` normalises to `ạ` followed by a SEPARATE acute, because no single code point
+ *    carries both marks. Handling code points individually turned `ạ` into "a" and then left the
+ *    acute stranded, giving back "á" — still accented.
+ *  - A combining mark is not always an accent. The Devanagari virama, Thai vowels, Arabic harakat
+ *    and an emoji variation selector are all marks, so only a LATIN base is ever stripped.
+ *
+ * NFD, not NFKD: a compatibility decomposition would also rewrite ﬁ to fi and ½ to 1⁄2, which is a
+ * different operation from the one the user asked for.
+ *
+ * No lookbehind anywhere. Raycast is macOS only, but these rules are shared with the Obsidian
+ * plugin, where a lookbehind fails silently on older iOS.
  */
-function stripChar(c: string): string {
-  const decomposed = c.normalize("NFD");
+function stripCluster(base: string, marks: string): string {
+  // Everything that is not Latin keeps its marks, exactly as it arrived.
+  if (!LATIN.test(base)) return base + marks;
 
-  if (!LATIN.test(decomposed[0])) {
-    return c;
+  // The table runs AFTER the decomposition, never instead of it: ǣ decomposes to æ plus a macron,
+  // and æ itself has no plain form, so it still has to become "ae".
+  return (base + marks)
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(SPECIAL_RE, (x) => SPECIAL[x]);
+}
+
+/**
+ * NFC is the working form, not NFD: NFD splits a Hangul syllable into jamo, which are letters
+ * rather than marks, so walking the decomposed string would hand 한 back as three characters.
+ */
+function clusters(text: string): Array<[string, string]> {
+  const src = text.normalize("NFC");
+  const out: Array<[string, string]> = [];
+  let i = 0;
+
+  while (i < src.length) {
+    const base = String.fromCodePoint(src.codePointAt(i) as number);
+    i += base.length;
+
+    let marks = "";
+    while (i < src.length) {
+      const c = String.fromCodePoint(src.codePointAt(i) as number);
+      if (!MARK.test(c)) break;
+      marks += c;
+      i += c.length;
+    }
+    out.push([base, marks]);
   }
-
-  return decomposed.replace(/\p{M}/gu, "").replace(SPECIAL_RE, (x) => SPECIAL[x]);
+  return out;
 }
 
 export function removeAccents(text: string): string {
-  return [...text.normalize("NFC")].map(stripChar).join("");
+  return clusters(text)
+    .map(([base, marks]) => stripCluster(base, marks))
+    .join("");
 }
 
 export function countChanged(before: string, after: string): number {
   let changed = 0;
-  for (const c of [...before.normalize("NFC")]) {
-    if (stripChar(c) !== c) changed++;
+  for (const [base, marks] of clusters(before)) {
+    if (stripCluster(base, marks) !== base + marks) changed++;
   }
   return changed;
 }
