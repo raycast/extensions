@@ -15,16 +15,16 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "open-project",
+      "title": "Browse Codex Sessions",
+      "mode": "view",
+      "description": "Browse project folders and drill into their local Codex sessions"
+    },
+    {
       "name": "search-sessions",
       "title": "Search Codex Sessions",
       "mode": "view",
       "description": "Search all local Codex threads and open them in Codex Desktop or the terminal"
-    },
-    {
-      "name": "open-project",
-      "title": "Open Codex Project",
-      "mode": "view",
-      "description": "Open a project folder in Codex Desktop, ranked by how often you use it"
     }
   ],
   "preferences": [

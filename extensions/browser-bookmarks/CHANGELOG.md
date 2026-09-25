@@ -1,5 +1,13 @@
 # Browser Bookmarks Changelog
 
+## [Copy Link Shortcut Preference] - 2026-09-25
+
+- Added a preference to choose the Copy Link shortcut: ⌘ C (Ctrl+C on Windows) or ⌘ ⌥ C (Ctrl+Alt+C on Windows)
+
+## [Bug Fix] - 2026-09-22
+
+- Fixed the new-tab keyboard shortcut and clarified the browser action icons
+
 ## [Browser Opening and Favicons] - 2026-09-21
 
 - Added macOS actions to open bookmarks in a new browser tab or window, plus an option to replace the current tab

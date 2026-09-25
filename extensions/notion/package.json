@@ -216,6 +216,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "notion-knowledge-capture",
+        "title": "Capture Knowledge in Notion"
+      }
+    ],
     "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.",
     "evals": [
       {
@@ -339,7 +345,7 @@
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
     "@notionhq/client": "^5.9.0",
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.2",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^4.1.0",

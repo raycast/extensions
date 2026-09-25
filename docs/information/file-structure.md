@@ -22,6 +22,10 @@ extension
 ├── package-lock.json
 ├── package.json
 ├── README.md
+├── skills
+│   └── triage-inbox
+│       ├── SKILL.md
+│       └── references
 ├── src
 │   ├── command.tsx
 │   └── tools
@@ -39,13 +43,55 @@ The directory contains all source files, assets, and a few support files. Let's 
 
 Put all your source files into the `src` folder. We recommend using TypeScript as a programming language. Our API is fully typed, which helps you catch errors at compile time rather than runtime. `ts`, `tsx`, `js` and `jsx` are supported as file extensions. As a rule of thumb, use `tsx` or `jsx` for commands with a UI.
 
-An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands and tools. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some [additional properties](./manifest.md), in particular, the `commands` properties which describes the entry points exposed by the extension.
+An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands, tools, and skills. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some [additional properties](./manifest.md), in particular, the `commands` properties which describes the entry points exposed by the extension.
 
 Each command has a property `name` that maps to its main entry point file in the `src` folder. For example, a command with the name `create` in the `package.json` file, maps to the file `src/create{.ts,.tsx,.js,.jsx}`.
 
 ### Tools
 
 Put tool entry points in `src/tools`. Tools expose functionality that Raycast AI can call, such as searching data or creating an item. Declare each tool in the `tools` array in `package.json`; its `name` maps to a `.ts` or `.tsx` file in this folder. For example, a tool named `search` maps to `src/tools/search.ts`. See [Create an AI Extension](../ai/create-an-ai-extension.md) for a walkthrough.
+
+## Skills
+
+Extensions can bundle [Agent Skills](https://agentskills.io/specification) in `skills`. Each skill uses the standard directory format:
+
+```bash
+skills/<skill-name>/SKILL.md
+```
+
+`SKILL.md` must start with YAML frontmatter containing a lowercase, hyphenated `name` that matches its directory and a non-empty `description`. The skill directory can also contain scripts, references, assets, and other files referenced by the skill.
+
+Every skill must also be declared in `ai.skills` in the extension’s `package.json`, or in the top-level `skills` array of an AI configuration file. The declaration's `name` identifies the matching directory, while `title` provides the human-readable label shown in Raycast. Raycast reads the skill’s description from its `SKILL.md` frontmatter. An optional `icon` overrides the extension icon for skill mentions..
+
+```json
+{
+  "ai": {
+    "skills": [
+      {
+        "name": "triage-inbox",
+        "title": "Triage Inbox"
+      }
+    ]
+  }
+}
+```
+
+For example, the same declaration can live in `ai.json` instead:
+
+```json
+{
+  "skills": [
+    {
+      "name": "triage-inbox",
+      "title": "Triage Inbox"
+    }
+  ]
+}
+```
+
+The CLI also supports `ai.json5`, `ai.yaml`, and `ai.yml`. Properties from the AI file override matching properties in `package.json`'s `ai` object; a file's `skills` array replaces the manifest's array. The merged configuration is validated and included in the built manifest, including for extensions without tools.
+
+Raycast catalogs declared skills from enabled extensions so users and AI agents can discover them. This does not load their instructions. Mentioning an extension activates its tools but does not load its skills. Mentioning a skill, or loading it through AI routing, loads only that skill and makes its owning extension's tools available for the task. This lets the user select a workflow while Raycast resolves the tools it depends on.
 
 ## Assets
 
@@ -57,7 +103,7 @@ The optional **help.md** file contains Markdown instructions for configuring req
 
 ## AI Configuration
 
-The optional **ai.yaml** file contains AI configuration, including additional `instructions` and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See [AI File](../ai/learn-core-concepts-of-ai-extensions.md#ai-file) and [Write Evals for Your AI Extension](../ai/write-evals-for-your-ai-extension.md).
+The optional **ai.yaml** file contains AI configuration, including `skills`, additional `instructions`, and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See [AI File](../ai/learn-core-concepts-of-ai-extensions.md#ai-file) and [Evals](../ai/evals.md).
 
 ## Metadata
 

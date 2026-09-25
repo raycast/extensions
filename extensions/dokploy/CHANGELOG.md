@@ -1,5 +1,48 @@
 # Dokploy Changelog
 
+## [Deployments Feed Command] - 2026-09-25
+
+- Add a `Deployments` command showing the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency. Opens straight into the full deployment history (rollback, cancel, delete) for whichever one you pick.
+
+## [Sort Projects, Services, and Docker by Frecency] - 2026-09-25
+
+- **Projects**, **Services**, and **Docker** now sort by how often you actually open each one, not raw API order - matching how **Deploy Service** already sorts. Scoped per instance, so frequently-used items in one account never affect another's ranking.
+
+## [Switch Instances Without Leaving the Screen] - 2026-09-25
+
+- Add an instance switcher to **Projects**, **Docker**, **S3 Destinations**, and **Users** - pick a different configured instance right from where you are, no need to go back to **Instances** first.
+- The **Instances** screen now shows a checkmark on whichever instance is currently active. Switching only happens when you actually choose to open a screen for a specific instance - arrowing past its row in the list no longer does it silently.
+
+## [Edit and Delete Instances] - 2026-09-24
+
+- Add `Edit Instance` and `Delete Instance` actions to the **Instances** screen. Editing re-verifies the API key the same way adding one does; deleting only removes the instance from Raycast and doesn't revoke the key or change anything on the Dokploy server.
+- Editing or deleting the currently active instance keeps the extension's cached connection in sync automatically.
+- Fix **Services** failing to load for any project managed with Dokploy's environments feature - entering it from **Projects** or **Environments** errored instead of showing the service list.
+
+## [Fix Services list not refreshing after Create/Delete] - 2026-09-24
+
+- `Create Application`, `Create Database` and `Delete` popped back to Raycast's root (or, for Delete, stopped there without navigating at all) before the refreshed list actually loaded, so the change only showed up after fully restarting Raycast. Fixed so the **Services** list updates immediately.
+
+## [Template Preview] - 2026-09-23
+
+- Add a `Preview` action to `From Template`, showing the domains, environment variables and file mounts a template will create before deploying it.
+
+## [Deploy from Template] - 2026-09-23
+
+- Add a `From Template` action to the `Create` menu on the **Services** screen, browsing Dokploy's public template registry (500+ templates) with search, `Add Bookmark`/`Remove Bookmark`, and a one-action `Deploy` that hands off to Dokploy's own template processing.
+
+## [Runtime Logs: Follow Mode and Compose Support] - 2026-09-23
+
+- `View Logs` now works for Compose stacks: pick a container from its stack to see its logs. Also adds `Start Following`/`Stop Following` to every kind, auto-refreshing the view instead of needing to hit `Refresh` manually.
+
+## [Deploy Service Command] - 2026-09-22
+
+- Add a `Deploy Service` command that searches for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and current status, and offers the full set of lifecycle actions (Deploy, Redeploy/Rebuild, Start, Stop, Reload) plus `View Logs` - the same actions the Services screen already has, sorted by frecency. Always lists matches and waits for an explicit selection - never acts automatically, even when only one service matches.
+
+## [Schedules] - 2026-09-21
+
+- Add a `View Schedules` action to Applications and Compose stacks, listing scheduled shell commands with `Add Schedule`, `Edit Schedule`, `Run Now`, `View Runs` (with logs) and `Delete Schedule` actions.
+
 ## [Compose Backups] - 2026-09-21
 
 - Extend the `View Backups` action to Compose stacks: pick a container and which database engine it runs, alongside the same schedule/destination/retention fields the database version already has.

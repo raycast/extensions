@@ -6,13 +6,17 @@
 
 This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each **instance** you can:
 
-- View Projects
-    - View Services
+- View Projects (sorted by frecency)
+    - View Services (sorted by frecency)
         - Create Application
         - Create Database
+        - Create From Template (browse Dokploy's public template registry, bookmark favorites, deploy with one action)
+            - Preview (which domains, environment variables and file mounts the template creates)
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
-        - View Service Logs
+        - View Service Logs (Compose stacks pick a container first)
+            - Start / Stop Following
+            - Select / Change Container (Compose stacks)
         - View Deployments (Applications and Compose stacks)
             - View Build Logs
             - Roll Back
@@ -30,13 +34,30 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Edit Backup
             - Run Backup Now
             - Delete Backup
+        - View Schedules (Applications and Compose stacks)
+            - Add Schedule
+            - Edit Schedule
+            - Run Now
+            - View Runs
+            - Delete Schedule
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
-    - View Docker (Containers)
+    - View Docker (Containers, sorted by frecency)
         - View Docker Config
     - View S3 Destinations
         - Delete S3 Destination
     - View Users
+- Deploy Service
+    - Search for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and status, sorted by frecency.
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
+- Deployments
+    - See the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency.
+        - View Deployments (full history: Roll Back, Cancel, Delete)
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
 
 ## 🚀 Getting Started
 
@@ -52,6 +73,10 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - Name: This can be anything you want
     - Instance URL: The URL of your Dokploy instance with port
     - API Key: `Follow` instruction from [Dokploy API | Dokploy](https://docs.dokploy.com/docs/api#authentication)
+
+    Instances can later be edited or deleted from the same list. Use the instance dropdown in the
+    search bar of Projects, Docker, S3 Destinations, or Users to switch to a different configured
+    instance without going back to Instances.
 
 ## 🧪 Tested On
 

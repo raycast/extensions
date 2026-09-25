@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2023",
+    "strict": true,
+    "noEmitOnError": true,
+    "rootDir": "..",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "types": ["node"]
+  },
+  "files": ["../src/zenmux-chat.ts", "./zenmux-chat.test.ts"]
+}

@@ -132,6 +132,7 @@ This extension support a few sub commands.
 
 - link to the reference in your zotero app (default)
 - link to the PDF of your reference in zotero app or default PDF Reader
+- open a secondary pdf of your reference, e.g. supplementary material saved under the same entry
 - show the PDF file of your reference in Finder
 - copy the PDF file path of your reference to the clipboard
 - open original link to open URL in default browser
@@ -142,7 +143,9 @@ This extension support a few sub commands.
 - paste bibtex entry for the paper to the frontmost application
 
 Please note that in case a reference has multiple PDF files associated with it, the primary (oldest)
-PDF file will be opened, matching Zotero's native behavior.
+PDF file will be opened, matching Zotero's native behavior. The remaining pdfs open through the
+"Open Secondary PDF" action (`⌘⇧↵`): with exactly two pdfs it opens the secondary one directly,
+with more it shows a list of them.
 
 ## Group libraries
 

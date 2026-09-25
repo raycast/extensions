@@ -320,9 +320,17 @@ export class AudioManager extends EventEmitter {
     console.log("Beginning audio playback from temporary file");
 
     try {
-      await this.playAudioFile();
+      const stopped = await this.playAudioFile();
       console.log("Audio playback completed successfully");
       this.streamState.playbackComplete = true;
+
+      // Playback was stopped by the user, so stop generating the rest of the audio
+      if (stopped && !this.streamState.streamComplete) {
+        console.log("Playback stopped, closing stream early");
+        this.streamState.streamComplete = true;
+        this.ws?.terminate();
+      }
+
       this.checkAndEmitComplete();
     } catch (error) {
       console.error("Playback failed:", error);
@@ -333,14 +341,15 @@ export class AudioManager extends EventEmitter {
   /**
    * Plays audio file using system audio player
    * Uses afplay for macOS compatibility
+   * Resolves true when playback was stopped (SIGTERM) rather than finished
    */
-  private async playAudioFile(): Promise<void> {
+  private async playAudioFile(): Promise<boolean> {
     const validatedSpeed = validatePlaybackSpeed(this.config.playbackSpeed);
     const audioProcess = spawn("afplay", ["-r", validatedSpeed, this.tempFile]);
     const pid = audioProcess.pid;
     let closed = false;
 
-    const completion = new Promise<void>((resolve, reject) => {
+    const completion = new Promise<boolean>((resolve, reject) => {
       audioProcess.once("error", async (error) => {
         closed = true;
         if (pid) await clearPlayback(this.config.sessionId, pid);
@@ -354,7 +363,7 @@ export class AudioManager extends EventEmitter {
 
         if (code === 0 || signal === "SIGTERM") {
           console.log("Audio player process completed successfully");
-          resolve();
+          resolve(signal === "SIGTERM");
         } else {
           console.error(`Audio player process failed with code ${code}`);
           reject(new Error(`afplay exited with code ${code}`));

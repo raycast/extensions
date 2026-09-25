@@ -26,7 +26,7 @@ export function MediaGrid(props: { vault: ObsidianVault; searchArguments: MediaS
   const extensions = getListOfMediaFileExtensions(allMedia);
   const { imageSize } = getPreferenceValues<SearchMediaPreferences>();
 
-  const [searchText, setSearchText] = useState(searchArguments.searchArgument);
+  const [searchText, setSearchText] = useState(searchArguments.searchArgument ?? "");
   let mediaType = searchArguments.typeArgument;
   if (!mediaType) mediaType = "all";
   else if (!mediaType.startsWith(".")) {

@@ -51,6 +51,14 @@ export interface Tab {
   title: string;
   url: string;
   window_id: number;
+  // `tab_index` is zero-based within its Orion window. Orion's scripting
+  // dictionary does not expose a persistent tab identifier, so this is the
+  // stable identity for the lifetime of a fetched tab snapshot.
+  tab_index: number;
+  // Set only when Orion can identify the current tab unambiguously. Multiple
+  // otherwise identical tabs cannot be distinguished by the public scripting
+  // API, and must not be labelled incorrectly.
+  is_current?: boolean;
 }
 
 // Profiles

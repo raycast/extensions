@@ -8,12 +8,14 @@ Required preferences need to be set by the user before a command opens. They are
 
 ## Help for Required Preferences
 
+![Setup instructions from help.md beside the required preferences form](../.gitbook/assets/required-preferences-help.webp)
+
 Add an optional `help.md` file to the root of your extension, next to `package.json`, to explain how to fill in required preferences. Raycast renders its Markdown beside the setup form when a command or tool needs required preferences that haven't been set. The same help file is used throughout the extension, so include any instructions needed for both shared and command-specific preferences.
 
 For example, a `help.md` file for an extension that requires an API key could contain:
 
 ```markdown
-# Set Up Your API Key
+### Set Up Your API Key
 
 1. Sign in to your account on the service's website.
 2. Open **Settings → API Keys** and create a key with read access.

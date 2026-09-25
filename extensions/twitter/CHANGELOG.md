@@ -1,5 +1,11 @@
 # X Changelog
 
+## [Fix Long Post Reading] - 2026-09-23
+
+- Read full long posts in commands and AI tools instead of shortened previews
+- Find matches beyond the preview in personal-history and bookmark searches
+- Show the full original text of reposts when X makes it available
+
 ## [Fix Authentication Lock Recovery] - 2026-09-10
 
 - Prevent interrupted commands from leaving X login and logout permanently blocked

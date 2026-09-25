@@ -12,8 +12,8 @@ import {
   open,
   useNavigation,
 } from "@raycast/api";
-import { RefData, Preferences, MAX_RENDER_RESULTS } from "./zoteroApi";
-import { resolveAttachmentPath } from "./attachments";
+import { RefData, Preferences, MAX_RENDER_RESULTS, Attachment } from "./zoteroApi";
+import { resolveAttachmentPath, secondaryAttachments, attachmentPath } from "./attachments";
 import { isAbsolute } from "path";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
@@ -74,6 +74,7 @@ const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], ke
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
 const copyPDFPathShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "," };
+const openSecondaryPdfShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "enter" };
 
 function getURL(item: RefData): string {
   return `${
@@ -298,18 +299,10 @@ export const View = ({
                       />
                     )}
                     {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
-                      <Action
-                        icon={Icon.ArrowRightCircleFilled}
+                      <OpenPdfInSystemViewerAction
+                        path={attachmentFilePath}
                         title="Open PDF in System Viewer"
-                        onAction={async () => {
-                          try {
-                            await open(attachmentFilePath);
-                            trackOpen();
-                            closeMainWindow();
-                          } catch {
-                            await showHUD("Failed to open attachment");
-                          }
-                        }}
+                        onTracked={trackOpen}
                       />
                     )}
                     {item.attachment?.key &&
@@ -322,6 +315,9 @@ export const View = ({
                           onShow={() => trackOpen()}
                         />
                       )}
+                    {secondaryAttachments(item).length > 0 && (
+                      <SecondaryPdfAction item={item} zoteroPath={preferences.zotero_path} onOpen={onOpen} />
+                    )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open in Zotero"
@@ -385,6 +381,130 @@ export const View = ({
 };
 
 const configureGroupsShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
+
+function OpenPdfInSystemViewerAction({
+  path,
+  title,
+  onTracked,
+}: {
+  path: string;
+  title: string;
+  onTracked?: () => void;
+}) {
+  return (
+    <Action
+      icon={Icon.ArrowRightCircleFilled}
+      title={title}
+      onAction={async () => {
+        try {
+          await open(path);
+          onTracked?.();
+          closeMainWindow();
+        } catch {
+          await showHUD("Failed to open attachment");
+        }
+      }}
+    />
+  );
+}
+
+// With exactly two pdfs, opens the secondary one directly; with three or more,
+// pushes a list of the secondary pdfs to pick from.
+function SecondaryPdfAction({
+  item,
+  zoteroPath,
+  onOpen,
+}: {
+  item: RefData;
+  zoteroPath: string;
+  onOpen: (url: string) => void;
+}) {
+  const { push } = useNavigation();
+  const secondaries = secondaryAttachments(item);
+  const trackOpen = () => recordInteraction(itemIdentity(item));
+  const onOpenTracked = (url: string) => {
+    onOpen(url);
+    trackOpen();
+  };
+  if (secondaries.length === 1) {
+    const s = secondaries[0];
+    const p = attachmentPath(s, zoteroPath);
+    return (
+      <>
+        <Action.OpenInBrowser
+          icon={Icon.ArrowRightCircleFilled}
+          title="Open Secondary PDF"
+          shortcut={openSecondaryPdfShortcut}
+          url={zoteroOpenPdfUri(item, s.key)}
+          onOpen={onOpenTracked}
+        />
+        {p && (
+          <OpenPdfInSystemViewerAction path={p} title="Open Secondary PDF in System Viewer" onTracked={trackOpen} />
+        )}
+        {p && isAbsolute(p) && (
+          <Action.ShowInFinder path={p} title="Show Secondary PDF in Finder" onShow={() => trackOpen()} />
+        )}
+      </>
+    );
+  }
+  return (
+    <Action
+      icon={Icon.ArrowRightCircleFilled}
+      title="Open Secondary PDF"
+      shortcut={openSecondaryPdfShortcut}
+      onAction={() =>
+        push(<SecondaryPdfList item={item} secondaries={secondaries} zoteroPath={zoteroPath} onOpen={onOpen} />)
+      }
+    />
+  );
+}
+
+function SecondaryPdfList({
+  item,
+  secondaries,
+  zoteroPath,
+  onOpen,
+}: {
+  item: RefData;
+  secondaries: Attachment[];
+  zoteroPath: string;
+  onOpen: (url: string) => void;
+}) {
+  const trackOpen = () => recordInteraction(itemIdentity(item));
+  const onOpenTracked = (url: string) => {
+    onOpen(url);
+    trackOpen();
+  };
+  return (
+    <List searchBarPlaceholder="Search PDFs...">
+      {secondaries.map((s) => {
+        const p = attachmentPath(s, zoteroPath);
+        return (
+          <List.Item
+            key={s.key}
+            id={s.key}
+            title={s.title || s.key}
+            icon={Icon.Document}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  icon={Icon.ArrowRightCircleFilled}
+                  title="Open PDF"
+                  url={zoteroOpenPdfUri(item, s.key)}
+                  onOpen={onOpenTracked}
+                />
+                {p && <OpenPdfInSystemViewerAction path={p} title="Open PDF in System Viewer" onTracked={trackOpen} />}
+                {p && isAbsolute(p) && (
+                  <Action.ShowInFinder path={p} title="Show PDF in Finder" onShow={() => trackOpen()} />
+                )}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
+  );
+}
 
 function ConfigureGroupLibrariesAction({
   groupLibraries,

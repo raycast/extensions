@@ -9,4 +9,5 @@ export interface CalendarEvent {
   validated: boolean;
   location?: string;
   timezone?: TimezoneInfo | null;
+  reminders?: number[];
 }

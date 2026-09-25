@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
 import useBookmarks from "./hooks/useBookmarks";
@@ -13,12 +13,15 @@ import TabListItem from "./components/TabListItem";
 import UrlListItem, { UrlItem } from "./components/UrlListItem";
 import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
+import OpenInDefaultBrowserAction from "./components/OpenInDefaultBrowserAction";
+import { searchTabsWithFallback } from "./tabSearch";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
 import {
   buildSearchUrl,
   extractDomainName,
   getSearchEngineName,
+  getTabKey,
   isLauncherTab,
   isWebAddress,
   normalizeWebAddress,
@@ -83,7 +86,7 @@ type Hit =
   | { kind: "tab"; tab: Tab; key: string }
   | { kind: "url"; item: UrlItem; source: string; key: string; visitCount?: number; lastVisitTime?: string };
 
-const tabKey = (t: Tab) => `tab-${t.window_id}-${t.url}`;
+const tabKey = getTabKey;
 
 function sourcePriority(hit: Hit): number {
   if (hit.kind === "tab") return 4;
@@ -202,15 +205,19 @@ export default function Command() {
   const { profiles } = useProfiles();
   const { selectedProfileId, setSelectedProfileId } = useSelectedProfileId("Defaults");
 
-  const { tabs, refresh } = useTabs();
+  // Open Tabs can change while the Command Bar is visible. Keep this command
+  // current without affecting the standalone Search Tabs command.
+  const { tabs, refresh, markTabActive } = useTabs({ refreshWhileOpen: true });
   const { bookmarks, isLoading: bookmarksLoading } = useBookmarks(selectedProfileId);
   const { readingList } = useReadingList(selectedProfileId);
   const {
     data: history,
-    isLoading: historyLoading,
     permissionView,
+    completedQueryKey,
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
-  const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
+  const { suggestions } = useSuggestions(query);
+  const historyQueryKey = `${selectedProfileId}\u0000${hasQuery ? query : ""}`;
+  const hasCurrentHistoryResult = !hasQuery || completedQueryKey === historyQueryKey;
 
   // A result ID from the previous query can disappear while typing (for
   // example, the "Open Address" item vanishes when `sina.com.cn` becomes
@@ -226,7 +233,12 @@ export default function Command() {
     setSelectedItemId(undefined);
   };
 
-  const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
+  // Loading local history and remote suggestions for each keystroke should not
+  // put the entire List into a loading state: by the time either can be true,
+  // profiles/tabs/bookmarks have already resolved, so there is no genuine
+  // "nothing to show yet" case being masked - only a loading flicker on every
+  // keystroke would be added for no benefit.
+  const isLoading = !profiles || tabs === undefined || bookmarksLoading;
 
   // Never show the launcher tabs in the list itself.
   const openTabs: Tab[] = (tabs ?? []).filter((t) => !isLauncherTab(t.url));
@@ -237,7 +249,13 @@ export default function Command() {
     ? bookmarks.filter((b) => relevance(q, b.title, b.url) > 0 || b.folders.some((f) => textMatchesQuery(q, f)))
     : [];
   const readingHits: Bookmark[] = hasQuery ? (readingList ?? []).filter((b) => relevance(q, b.title, b.url) > 0) : [];
-  const historyHits: HistoryItem[] = hasQuery ? (history ?? []).filter((h) => relevance(q, h.title, h.url) > 0) : [];
+  const displayedHistoryHits: HistoryItem[] = hasQuery
+    ? (history ?? []).filter((h) => relevance(q, h.title, h.url) > 0)
+    : [];
+  // useSQL keeps its previous data while the new statement executes. Do not
+  // allow that previous result set to influence Top Hit, but keep it visible
+  // when it still matches the new text to avoid needless list reflow.
+  const historyHits: HistoryItem[] = hasCurrentHistoryResult ? displayedHistoryHits : [];
   const suggestionHits: string[] = hasQuery ? suggestions : [];
 
   // Pick the single best local match as Top Hit.
@@ -280,13 +298,25 @@ export default function Command() {
   const topUrlKey = topHit?.kind === "url" ? topHit.key : undefined;
 
   const topUrl = topHit?.kind === "tab" ? topHit.tab.url : topHit?.item.url;
-  const seenUrls = new Set(topUrl ? [canonicalUrl(topUrl)] : []);
-  const exactTabSection = uniqueUrls(
-    tabHits.filter((t) => tabKey(t) !== topTabKey),
-    seenUrls,
-    hasQuery ? LIMITS.tabs : tabHits.length,
-  );
-  const tabSection = exactTabSection;
+  // Tabs are instances, not merely destinations. Keep duplicate URLs in Open
+  // Tabs, while retaining canonical-URL de-duplication only across sources.
+  // A Tab Top Hit removes only its own instance; the other instances remain.
+  const seenUrls = new Set(topHit?.kind === "url" && topUrl ? [canonicalUrl(topUrl)] : []);
+  const exactTabSection = tabHits
+    .filter((t) => tabKey(t) !== topTabKey && !seenUrls.has(canonicalUrl(t.url)))
+    .slice(0, hasQuery ? LIMITS.tabs : tabHits.length);
+  if (topHit?.kind === "tab") seenUrls.add(canonicalUrl(topHit.tab.url));
+  exactTabSection.forEach((tab) => seenUrls.add(canonicalUrl(tab.url)));
+  // Fuzzy/pinyin results are a fallback only when there is no exact local tab
+  // match at all; `seenUrls` already reflects Top Hit at this point (exact
+  // matches are empty whenever this runs), so this only needs to exclude Top
+  // Hit's own destination, not re-check against exactTabSection.
+  const fuzzyTabSection =
+    hasQuery && tabHits.length === 0
+      ? searchTabsWithFallback(openTabs, query, LIMITS.tabs).filter((tab) => !seenUrls.has(canonicalUrl(tab.url)))
+      : [];
+  fuzzyTabSection.forEach((tab) => seenUrls.add(canonicalUrl(tab.url)));
+  const tabSection = exactTabSection.length > 0 ? exactTabSection : fuzzyTabSection;
   const bookmarkSection = uniqueUrls(
     bookmarkHits.filter((b) => `bm-${b.uuid}` !== topUrlKey),
     seenUrls,
@@ -298,7 +328,7 @@ export default function Command() {
     LIMITS.reading,
   );
   const historySection = uniqueUrls(
-    historyHits.filter((h) => `hist-${h.id}` !== topUrlKey),
+    displayedHistoryHits.filter((h) => `hist-${h.id}` !== topUrlKey),
     seenUrls,
     LIMITS.history,
   );
@@ -391,7 +421,14 @@ export default function Command() {
       {topHit && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
-            <TabListItem id={TOP_HIT_ITEM_ID} tab={topHit.tab} refresh={refresh} closeLaunchers />
+            <TabListItem
+              id={TOP_HIT_ITEM_ID}
+              tab={topHit.tab}
+              refresh={refresh}
+              closeLaunchers
+              immediatePopToRoot
+              onActivate={markTabActive}
+            />
           ) : (
             <UrlListItem id={TOP_HIT_ITEM_ID} item={topHit.item} accessory={topHit.source} />
           )}
@@ -407,7 +444,7 @@ export default function Command() {
             subtitle={address}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Default Browser" url={address} />
+                <OpenInDefaultBrowserAction url={address} immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -422,7 +459,7 @@ export default function Command() {
             title={`Search ${getSearchEngineName()} for “${query}”`}
             actions={
               <ActionPanel>
-                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" />
+                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -438,9 +475,17 @@ export default function Command() {
       )}
 
       {tabSection.length > 0 && (
-        <List.Section title="Open Tabs">
+        <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
-            <TabListItem id={tabKey(t)} key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
+            <TabListItem
+              id={tabKey(t)}
+              key={tabKey(t)}
+              tab={t}
+              refresh={refresh}
+              closeLaunchers
+              immediatePopToRoot
+              onActivate={markTabActive}
+            />
           ))}
         </List.Section>
       )}

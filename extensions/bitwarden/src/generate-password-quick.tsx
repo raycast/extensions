@@ -12,14 +12,14 @@ const actions: Record<
   (password: string) => Promise<void>
 > = {
   copy: async (password) => {
-    await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
+    await Clipboard.copy(password, { concealed: getTransientCopyPreference("password") });
     await showCopySuccessMessage("Copied password to clipboard");
   },
   paste: async (password) => {
     await Clipboard.paste(password);
   },
   copyAndPaste: async (password) => {
-    await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
+    await Clipboard.copy(password, { concealed: getTransientCopyPreference("password") });
     await Clipboard.paste(password);
     await showHUD("Copied password to clipboard");
   },

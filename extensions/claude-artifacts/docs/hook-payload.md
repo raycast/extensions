@@ -170,10 +170,10 @@ the failure surfaced as a toast — see
 
 ## The lock is kernel-backed, and that is not a detail
 
-`scripts/record-artifact.sh` serialises writes with a **`flock(2)` advisory lock**
+`scripts/record-artifact.sh` serializes writes with a **`flock(2)` advisory lock**
 held by a `perl` process for the duration of the critical section. macOS ships no
 `flock(1)`, but it ships perl. `perl` absent ⇒ the hook logs and skips rather than
-writing unserialised, because a lost row beats a corrupt index.
+writing unserialized, because a lost row beats a corrupt index.
 
 The portable-looking alternative — `mkdir` as an atomic test-and-set plus an
 age-based reaper for locks left by killed processes — **cannot be made correct**,

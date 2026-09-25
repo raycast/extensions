@@ -12,6 +12,11 @@ are closed for legal or terms-of-service reasons rather than technical ones.
 Two commands: **Search Artifacts** (`src/search-artifacts.tsx`) and **Run Doctor**
 (`src/doctor.tsx`).
 
+Two places hold reasoning that is not in the code: `docs/solutions/` collects writeups of
+problems already solved here, filed by category with YAML frontmatter (`module`, `tags`,
+`problem_type`) — relevant when you are working in an area one of them covers. `CONCEPTS.md`
+defines the vocabulary the rest of these docs use without redefining.
+
 ## The data flow, and who writes what
 
 ```mermaid
@@ -44,7 +49,7 @@ old  https://claude.ai/code/artifact/<uuid>
 new  https://claude.ai/artifact/<22-char base62 slug>
 ```
 
-The hook matched `[0-9a-fA-F-]{36}`, stopped recognising its own payload, and — because its
+The hook matched `[0-9a-fA-F-]{36}`, stopped recognizing its own payload, and — because its
 contract is that it must **never fail a Claude Code turn**, so every failure path exits 0 —
 silently recorded nothing for nine days while remaining installed, registered, and running.
 
@@ -69,7 +74,7 @@ observed, with dates — treat it as an observation, not a contract, and re-run
 `Records Current Artifact URLs` **executes the user's installed hook** against a current-format URL
 with `HOME` pointed at a temp directory, and checks whether a row came out. Every structural
 check — installed, executable, registered — was green throughout the nine-day outage. Only
-behaviour could see it.
+behavior could see it.
 
 `HOME` is an environment variable, not a sandbox, so the self-test reads the script first and
 refuses to run anything that does not derive its index from `$HOME`.

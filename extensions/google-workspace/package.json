@@ -19,7 +19,8 @@
     "ridemountainpig",
     "ViGeng",
     "xilopaint",
-    "faridrashidi"
+    "faridrashidi",
+    "anupchavan"
   ],
   "categories": [
     "Productivity"
@@ -141,6 +142,21 @@
       "mode": "view"
     },
     {
+      "name": "download-google-drive-file",
+      "title": "Download Google Drive File",
+      "description": "Download a file or folder from your Google Drive by searching for it or pasting its link",
+      "icon": "google-drive.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "link",
+          "placeholder": "Link",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "starred-google-drive-files-menubar",
       "title": "Starred Google Drive Files",
       "description": "List your starred Google Drive files in the Menu Bar",
@@ -159,6 +175,11 @@
       "name": "create-document",
       "title": "Create Document",
       "description": "Creates a new Google document (docs, forms, spreadsheets, presentation)"
+    },
+    {
+      "name": "download-file",
+      "title": "Download File",
+      "description": "Download a file or folder from your Google Drive to the Downloads folder"
     }
   ],
   "dependencies": {

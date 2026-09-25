@@ -6,6 +6,9 @@
 - Add `Grid` view, preference and action to toggle the layout
 - Improve keyboard shortcuts
 - Bump all dependencies to the latest
+## [Update icon count] - 2026-09-24
+
+- Icon count in the description and search placeholder now says 7,400+
 
 ## [1.1.0] - 2026-04-12
 

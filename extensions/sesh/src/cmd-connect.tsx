@@ -2,15 +2,10 @@ import { useState } from "react";
 
 import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions, connectToSession, isTmuxRunning, Session } from "./sesh";
+import { getSessions, connectToSession, Session } from "./sesh";
+import { checkSetup, isSetupError, renderSetupEmptyView } from "./setup";
 import { openApp } from "./app";
-
-export class TmuxNotRunningError extends Error {
-  constructor() {
-    super("Please start tmux before using this command.");
-    this.name = "TmuxNotRunningError";
-  }
-}
+import { WindowList } from "./windows";
 
 function getIcon(session: Session) {
   switch (session.Src) {
@@ -49,22 +44,21 @@ export default function ConnectCommand() {
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
-      if (!(await isTmuxRunning())) {
-        throw new TmuxNotRunningError();
-      }
+      await checkSetup();
       return (await getSessions()) ?? [];
     },
     [],
     {
       keepPreviousData: true,
       onError: (error) => {
-        showFailureToast(error, {
-          title: error instanceof TmuxNotRunningError ? "tmux isn't running" : "Couldn't get sessions",
-        });
+        if (isSetupError(error)) {
+          return;
+        }
+        showFailureToast(error, { title: "Couldn't get sessions" });
       },
     },
   );
-  const sessions = data ?? [];
+  const sessions = isSetupError(error) ? [] : (data ?? []);
 
   async function connect(session: string) {
     try {
@@ -89,20 +83,34 @@ export default function ConnectCommand() {
     />
   );
 
-  return (
-    <List isLoading={isLoading || isConnecting}>
+  function renderEmptyView() {
+    const setupEmptyView = renderSetupEmptyView(error, refreshAction);
+    if (setupEmptyView) {
+      return setupEmptyView;
+    }
+    if (error) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load sessions"
+          description="Press ⌘R to retry."
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      );
+    }
+    return (
       <List.EmptyView
-        icon={error ? Icon.Warning : Icon.MagnifyingGlass}
-        title={error ? "Couldn't load sessions" : "No sessions found"}
-        description={
-          error
-            ? error instanceof TmuxNotRunningError
-              ? "Start tmux, then press ⌘R to retry."
-              : "Press ⌘R to retry."
-            : "Press ⌘R to refresh."
-        }
+        icon={Icon.MagnifyingGlass}
+        title="No sessions found"
+        description="Press ⌘R to refresh."
         actions={<ActionPanel>{refreshAction}</ActionPanel>}
       />
+    );
+  }
+
+  return (
+    <List isLoading={isLoading || isConnecting}>
+      {renderEmptyView()}
       {sessions.map((session, index) => {
         const accessories = [];
 
@@ -129,6 +137,13 @@ export default function ConnectCommand() {
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session.Name)} />
+                {session.Src === "tmux" && (
+                  <Action.Push
+                    title="Search Windows"
+                    icon={Icon.AppWindowList}
+                    target={<WindowList session={session.Name} />}
+                  />
+                )}
                 {refreshAction}
               </ActionPanel>
             }

@@ -120,7 +120,7 @@ function localDate(timestamp: unknown): string | undefined {
  *
  * `toolUseResult` carries the tool's own response. Its shape has changed
  * repeatedly — eight distinct key sets appear in the corpus — so the test is
- * behavioural rather than structural:
+ * behavioral rather than structural:
  *
  * 1. A `url` that is exactly an artifact URL. A *publish* response stores the
  *    URL as its own field; prose that merely mentions one does not.

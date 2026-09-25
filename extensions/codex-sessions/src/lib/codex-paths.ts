@@ -17,11 +17,7 @@ export function sessionsDir(): string {
   return join(getCodexHome(), "sessions");
 }
 
-export function worktreesDir(): string {
-  return join(getCodexHome(), "worktrees");
-}
-
-const probeColumns = [
+const requiredColumns = [
   "id",
   "rollout_path",
   "created_at",
@@ -39,7 +35,12 @@ const probeColumns = [
   "tokens_used",
 ];
 
-export async function discoverStateDb(): Promise<string | null> {
+interface StateDb {
+  path: string;
+  hasThreadName: boolean;
+}
+
+export async function discoverStateDb(): Promise<StateDb | null> {
   let entries;
   try {
     entries = await readdir(getCodexHome(), { withFileTypes: true });
@@ -55,11 +56,13 @@ export async function discoverStateDb(): Promise<string | null> {
     .filter((candidate): candidate is { path: string; version: number } => candidate !== null)
     .sort((a, b) => b.version - a.version);
 
-  const probe = `SELECT ${probeColumns.join(", ")} FROM threads LIMIT 1`;
   for (const candidate of candidates) {
     try {
-      await executeSQL(candidate.path, probe);
-      return candidate.path;
+      const columns = await executeSQL<{ name: string }>(candidate.path, "PRAGMA table_info(threads)");
+      const names = new Set(columns.map((column) => column.name));
+      if (requiredColumns.every((column) => names.has(column))) {
+        return { path: candidate.path, hasThreadName: names.has("name") };
+      }
     } catch {
       continue;
     }

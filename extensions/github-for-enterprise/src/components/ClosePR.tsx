@@ -1,6 +1,6 @@
 import { CLOSE_PR } from "@/queries/pull-requests";
 import { fetcher } from "@/utils";
-import { Color, showToast, useNavigation, Action, Toast } from "@raycast/api";
+import { Color, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useSWRConfig } from "swr";
 
 export default function CloseIssue({ id, number, shouldPop }: any) {
@@ -41,7 +41,7 @@ export default function CloseIssue({ id, number, shouldPop }: any) {
     <Action
       title="Close Pull Request"
       icon={{
-        source: "xmark-circle-16",
+        source: Icon.XMarkCircle,
         tintColor: Color.PrimaryText,
       }}
       shortcut={{

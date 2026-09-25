@@ -12,16 +12,31 @@ import {
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
 import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
+import { LocalStorage } from "@raycast/api";
+
+/**
+ * LocalStorage key prefix for the recent simulators history.
+ * Each simulator is stored under its own key to avoid read-modify-write races.
+ */
+const RECENT_SIMULATOR_KEY_PREFIX = "xcode_recent_simulator_";
 
 /**
  * XcodeSimulatorService
  */
 export class XcodeSimulatorService {
   /**
-   * Launches simulator application
+   * Launches the simulator GUI application.
+   * Xcode 27+ replaced Simulator.app with Device Hub, so try that first
+   * and fall back to Simulator.app on older Xcode versions.
    */
-  static launchSimulatorApplication(): Promise<void> {
-    return execAsync(`open -b "com.apple.iphonesimulator"`).then();
+  static async launchSimulatorApplication(): Promise<void> {
+    try {
+      // Device Hub (Xcode 27+)
+      await execAsync(`open -b "com.apple.dt.Devices"`);
+    } catch {
+      // Simulator.app (Xcode 26 and earlier)
+      await execAsync(`open -b "com.apple.iphonesimulator"`);
+    }
   }
 
   /**
@@ -31,6 +46,13 @@ export class XcodeSimulatorService {
    */
   static async xcodeSimulatorGroups(filter: XcodeSimulatorStateFilter): Promise<XcodeSimulatorGroup[]> {
     const simulators = await XcodeSimulatorService.xcodeSimulators();
+    const history = await XcodeSimulatorService.getRecentSimulatorHistory();
+
+    // Attach lastUsed timestamp to each simulator
+    for (const sim of simulators) {
+      sim.lastUsed = history[sim.udid] ?? 0;
+    }
+
     return groupBy(
       simulators.filter(
         (value) =>
@@ -41,7 +63,22 @@ export class XcodeSimulatorService {
       .map((group) => {
         return { runtime: group.key, simulators: group.values };
       })
-      .sort((lhs, rhs) => lhs.runtime.localeCompare(rhs.runtime));
+      .sort((lhs, rhs) => {
+        // Sort by numeric version parts (newest first).
+        // e.g. "iOS 17.0" > "iOS 9.0", "tvOS 2.0" > "iOS 17.0"
+        const a = lhs.runtime.split(" ");
+        const b = rhs.runtime.split(" ");
+        const osCmp = a[0].localeCompare(b[0]);
+        if (osCmp !== 0) return osCmp;
+        const aVersion = a.slice(1).join(".").split(".").map(Number);
+        const bVersion = b.slice(1).join(".").split(".").map(Number);
+        for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+          const aPart = aVersion[i] ?? 0;
+          const bPart = bVersion[i] ?? 0;
+          if (aPart !== bPart) return bPart - aPart;
+        }
+        return 0;
+      });
   }
 
   /**
@@ -83,6 +120,8 @@ export class XcodeSimulatorService {
    */
   static boot(xcodeSimulatorUDID: string): Promise<void> {
     return execAsync(`xcrun simctl boot ${xcodeSimulatorUDID}`).then(() => {
+      // Track usage for recent history
+      XcodeSimulatorService.trackSimulatorUsage(xcodeSimulatorUDID);
       // Silently launch Simulator application
       XcodeSimulatorService.launchSimulatorApplication();
     });
@@ -254,5 +293,67 @@ export class XcodeSimulatorService {
    */
   static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {
     return execAsync(`xcrun simctl icloud_sync ${xcodeSimulator.udid}`).then();
+  }
+
+  /**
+   * Retrieve the recent simulator history from LocalStorage.
+   * Each simulator is stored under its own key to avoid read-modify-write races.
+   * @returns A map of simulator UDID to last-used timestamp.
+   */
+  static async getRecentSimulatorHistory(): Promise<Record<string, number>> {
+    try {
+      // LocalStorage doesn't support listing keys by prefix,
+      // so we keep a lightweight index of known UDIDs.
+      const indexRaw = await LocalStorage.getItem<string>("xcode_recent_simulator_index");
+      const udidList: string[] = indexRaw ? JSON.parse(indexRaw) : [];
+
+      const history: Record<string, number> = {};
+      for (const udid of udidList) {
+        const raw = await LocalStorage.getItem<string>(`${RECENT_SIMULATOR_KEY_PREFIX}${udid}`);
+        if (raw) {
+          history[udid] = Number(raw);
+        }
+      }
+      return history;
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Track usage of a simulator by updating its last-used timestamp in LocalStorage.
+   * Each simulator is stored under its own key to avoid read-modify-write races
+   * when multiple operations run concurrently.
+   * @param udid The UDID of the simulator to track.
+   */
+  static async trackSimulatorUsage(udid: string): Promise<void> {
+    try {
+      const key = `${RECENT_SIMULATOR_KEY_PREFIX}${udid}`;
+      await LocalStorage.setItem(key, String(Date.now()));
+
+      // Update the index of known UDIDs
+      const indexRaw = await LocalStorage.getItem<string>("xcode_recent_simulator_index");
+      const udidList: string[] = indexRaw ? JSON.parse(indexRaw) : [];
+      if (!udidList.includes(udid)) {
+        udidList.push(udid);
+        await LocalStorage.setItem("xcode_recent_simulator_index", JSON.stringify(udidList));
+      }
+    } catch {
+      // Silently ignore tracking errors
+    }
+  }
+
+  /**
+   * Toggle the appearance (Dark/Light mode) of a booted Xcode Simulator.
+   * @param xcodeSimulator The booted Xcode Simulator
+   * @returns The new appearance ("dark" or "light")
+   */
+  static async toggleAppearance(xcodeSimulator: XcodeSimulator): Promise<"dark" | "light"> {
+    const { stdout } = await execAsync(`xcrun simctl ui ${xcodeSimulator.udid} appearance`);
+    const currentIsDark = stdout.trim().toLowerCase().includes("dark");
+    const newMode = currentIsDark ? "light" : "dark";
+    await execAsync(`xcrun simctl ui ${xcodeSimulator.udid} appearance ${newMode}`);
+    await XcodeSimulatorService.trackSimulatorUsage(xcodeSimulator.udid);
+    return newMode;
   }
 }

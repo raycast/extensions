@@ -8,7 +8,8 @@
   "contributors": [
     "pantajoe",
     "kero13",
-    "ridemountainpig"
+    "ridemountainpig",
+    "islamtayeb"
   ],
   "categories": [
     "Developer Tools",
@@ -132,15 +133,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.3",
-    "axios": "^1.12.2",
-    "cheerio": "^1.1.2",
-    "fs-extra": "^11.3.2",
+    "entities": "^6.0.1",
     "json5": "^2.2.3",
     "validator": "^13.15.15"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/fs-extra": "^11.0.4",
     "@types/node": "~24.8.0",
     "@types/react": "^19.2.2",
     "@types/validator": "^13.15.3",
