@@ -15,7 +15,7 @@ Search Z-Library and download books directly from Raycast.
 ## Requirements
 
 - **zlib CLI** installed:
-  - macOS / Linux:
+  - macOS:
     ```bash
     brew install heartleo/tap/zlib
     ```
@@ -42,7 +42,7 @@ Search Z-Library and download books directly from Raycast.
    - **Open in Browser** - Visit the book's Z-Library page
    - **Copy Book ID** - Copy the book's identifier
 
-> **Note:** These shortcuts use `⌘` on macOS and map to `Ctrl` on Windows.
+> **Note:** These shortcuts use `⌘` on macOS and `Ctrl` on Windows.
 
 ### Bulk Download (select and download now)
 

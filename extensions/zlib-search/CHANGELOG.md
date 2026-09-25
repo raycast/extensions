@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Windows support: extension is now installable from the Store on Windows
 - Auto-detect `zlib.exe` from PATH instead of the macOS Homebrew paths when running on Windows
 - Windows install instructions (`winget install heartleo.zlib`) in the README
+- Per-platform keyboard shortcuts (`⌘` on macOS, `Ctrl` on Windows) so the actions are reachable by keyboard on Windows
 
 ## [Bulk Download] - 2026-09-11
 
