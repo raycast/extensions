@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix Unread Messages configuration] - {PR_MERGE_DATE}
+## [Fix Unread Messages configuration] - 2026-09-25
 
 - Fix selected conversations in the Unread Messages configuration sometimes being lost
 - Add a "Done" action to the configuration list to go back once you've picked your conversations
