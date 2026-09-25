@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Scout7 MCP Server] - {PR_MERGE_DATE}
+## [Add Scout7 MCP Server] - 2026-09-25
 
 - Add Scout7 to the official registry: plans a week of organic marketing from your brand, writes SEO blogs, videos, LinkedIn carousels and social posts, schedules them across your channels and reports what moved, with your approval before anything goes live. Hosted remote Streamable HTTP server at https://mcp.scout7.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
 
