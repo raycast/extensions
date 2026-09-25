@@ -27,12 +27,13 @@ The default order matches the original Create Reminder form:
 - Title
 - Notes
 - Date
+- Early Reminder
 - Recurrence
 - List
 - Priority
 - Location
 
-Recurrence remains tied to the date field, so it only appears when Date is enabled and a due date is selected.
+Early Reminder and Recurrence remain tied to the date field, so they only appear when Date is enabled and a due date is selected.
 
 You can open the customization UI either from Raycast search with the "Customize Create Reminder Form" command or from the action panel inside "Create Reminder."
 
@@ -61,6 +62,7 @@ You can set:
 - Title
 - Notes
 - Due date
+- Early reminder
 - Recurrence
 - List
 - Priority

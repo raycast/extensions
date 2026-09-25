@@ -4,10 +4,10 @@ Read the complete manifest and all 8 files in `src/tools/` before writing the sk
 
 | Tool | Inputs |
 | --- | --- |
-| [create-reminder](../../src/tools/create-reminder.ts) | `title: string`; `notes?: string`; `dueDate?: string`; `priority?: "low" \| "medium" \| "high"`; `tags?: string`; `listId?: string`; `address?: string`; `proximity?: "enter" \| "leave"`; `radius?: number`; `url?: string`; `recurrence?: { frequency: Frequency; interval: number; endDate?: string; }` |
+| [create-reminder](../../src/tools/create-reminder.ts) | `title: string`; `notes?: string`; `dueDate?: string`; `earlyReminder?: number`; `priority?: "low" \| "medium" \| "high"`; `tags?: string`; `listId?: string`; `address?: string`; `proximity?: "enter" \| "leave"`; `radius?: number`; `url?: string`; `recurrence?: { frequency: Frequency; interval: number; endDate?: string; }` |
 | [get-lists](../../src/tools/get-lists.ts) | None |
 | [get-reminders](../../src/tools/get-reminders.ts) | None |
-| [update-reminder](../../src/tools/update-reminder.ts) | `reminderId: string`; `title?: string`; `notes?: string`; `dueDate?: string`; `priority?: "high" \| "medium" \| "low"`; `tags?: string`; `isCompleted?: boolean`; `url?: string`; `recurrence?: { frequency: Frequency; interval: number; endDate?: string; }` |
+| [update-reminder](../../src/tools/update-reminder.ts) | `reminderId: string`; `title?: string`; `notes?: string`; `dueDate?: string`; `earlyReminder?: number`; `priority?: "high" \| "medium" \| "low"`; `tags?: string`; `isCompleted?: boolean`; `url?: string`; `recurrence?: { frequency: Frequency; interval: number; endDate?: string; }` |
 | [delete-reminder](../../src/tools/delete-reminder.ts) | `id: string`; `confirmation: { title: string; notes?: string; list?: { id: string; title: string; color: string }; dueDate?: string; priority?: "high" \| "medium" \| "low"; isRecurring?: string; recurrenceRule?: string; }` |
 | [get-locations](../../src/tools/get-locations.ts) | None |
 | [create-location](../../src/tools/create-location.ts) | `id: string`; `name: string`; `icon: "home" \| "work" \| "gym" \| "store" \| "school" \| "other"`; `address: string`; `proximity: "enter" \| "leave"`; `radius: string` |

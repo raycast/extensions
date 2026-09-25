@@ -20,6 +20,7 @@ import { createReminder } from "swift:../swift/AppleReminders";
 import LocationForm from "./components/LocationForm";
 import CustomizeCreateReminderForm from "./customize-create-reminder-form";
 import { getIntervalValidationError, getPriorityIcon, parseTags } from "./helpers";
+import { EARLY_REMINDER_OPTIONS } from "./helpers/early-reminder";
 import useCreateReminderFormLayout from "./hooks/useCreateReminderFormLayout";
 import { Frequency, List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
@@ -48,8 +49,6 @@ export type NewReminder = {
   radius?: number;
   url?: string;
 };
-
-import { EARLY_REMINDER_OPTIONS } from "./helpers/early-reminder";
 
 type CreateReminderValues = {
   title: string;
