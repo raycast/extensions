@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add QuoteBill MCP Server] - 2026-09-26
+## [Add QuoteBill MCP Server] - {PR_MERGE_DATE}
 
 - Add QuoteBill to the official registry: draft quotations and invoices from 133 templates, look up the published tax rate for 195 countries with the official source, total line items and get a link that opens the finished document on quotebill.com (Excel, Word or PDF). Read-only tools. Hosted remote Streamable HTTP server at https://quotebill.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free QuoteBill account, no API key.
 
