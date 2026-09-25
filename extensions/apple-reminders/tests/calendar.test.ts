@@ -97,7 +97,7 @@ describe("Calendar Helpers", () => {
       assert.ok(script.includes("make new event at end of events of cal with properties {"));
     });
 
-    it("builds script targeting default calendar when calendarName is omitted", () => {
+    it("builds script targeting default writable calendar when calendarName is omitted", () => {
       const script = buildCreateCalendarEventScript({
         title: "All-Day Milestone",
         startDate,
@@ -105,11 +105,45 @@ describe("Calendar Helpers", () => {
         isAllDay: true,
       });
 
-      assert.ok(script.includes("set cal to first calendar"));
+      assert.ok(script.includes("set cal to first calendar whose writable is true"));
       assert.ok(script.includes("allday event:true"));
       assert.ok(!script.includes("description:"));
       assert.ok(!script.includes("location:"));
       assert.ok(!script.includes("url:"));
+    });
+
+    it("adjusts single-day all-day event end date to exclusive next day (+1 day)", () => {
+      const eventDate = new Date(2026, 8, 25);
+      const script = buildCreateCalendarEventScript({
+        title: "Single Day All-Day",
+        startDate: eventDate,
+        endDate: eventDate,
+        isAllDay: true,
+      });
+
+      assert.ok(script.includes("set day of startDate to 25"));
+      assert.ok(script.includes("set hours of startDate to 0"));
+      assert.ok(script.includes("set minutes of startDate to 0"));
+      assert.ok(script.includes("set seconds of startDate to 0"));
+
+      assert.ok(script.includes("set day of endDate to 26"));
+      assert.ok(script.includes("set hours of endDate to 0"));
+      assert.ok(script.includes("set minutes of endDate to 0"));
+      assert.ok(script.includes("set seconds of endDate to 0"));
+    });
+
+    it("adjusts multi-day all-day event end date to exclusive next day after last selected day", () => {
+      const start = new Date(2026, 8, 25);
+      const end = new Date(2026, 8, 27);
+      const script = buildCreateCalendarEventScript({
+        title: "Multi-Day Conference",
+        startDate: start,
+        endDate: end,
+        isAllDay: true,
+      });
+
+      assert.ok(script.includes("set day of startDate to 25"));
+      assert.ok(script.includes("set day of endDate to 28"));
     });
   });
 });

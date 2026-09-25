@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, open, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 
-import { parseReminderDueDate } from "../helpers";
+import { isFullDay, parseReminderDueDate } from "../helpers";
 import { createCalendarEvent, getCalendarNames } from "../helpers/calendar";
 import { Reminder } from "../hooks/useData";
 
@@ -24,17 +24,17 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
   const { pop } = useNavigation();
   const { data: calendars = [], isLoading: isLoadingCalendars } = useCachedPromise(getCalendarNames, []);
 
-  const isFullDay = reminder.dueDate ? reminder.dueDate.length === 10 || !reminder.dueDate.includes("T") : false;
+  const reminderIsFullDay = reminder.dueDate ? isFullDay(reminder.dueDate) : false;
   const initialStartDate = parseReminderDueDate(reminder.dueDate) ?? new Date();
-  const initialEndDate = isFullDay ? initialStartDate : new Date(initialStartDate.getTime() + 30 * 60 * 1000);
+  const initialEndDate = reminderIsFullDay ? initialStartDate : new Date(initialStartDate.getTime() + 30 * 60 * 1000);
 
   const { handleSubmit, itemProps, values, setValue } = useForm<FormValues>({
     initialValues: {
       title: reminder.title,
-      calendarName: "",
+      calendarName: calendars[0] ?? "",
       startDate: initialStartDate,
       endDate: initialEndDate,
-      isAllDay: isFullDay,
+      isAllDay: reminderIsFullDay,
       location: reminder.location?.address ?? "",
       notes: reminder.notes ?? "",
       includeReminderLink: true,
@@ -68,7 +68,7 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
         await showToast({ style: Toast.Style.Animated, title: "Creating calendar event..." });
 
         await createCalendarEvent({
-          calendarName: formValues.calendarName || undefined,
+          calendarName: formValues.calendarName || calendars[0] || undefined,
           title: formValues.title,
           startDate: formValues.startDate,
           endDate: formValues.endDate,
@@ -114,7 +114,7 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
       <Form.TextField {...itemProps.title} title="Event Title" placeholder="Meeting / Task Title" />
 
       {calendars.length > 0 && (
-        <Form.Dropdown {...itemProps.calendarName} title="Calendar">
+        <Form.Dropdown {...itemProps.calendarName} value={values.calendarName || calendars[0]} title="Calendar">
           {calendars.map((calName) => (
             <Form.Dropdown.Item key={calName} title={calName} value={calName} />
           ))}

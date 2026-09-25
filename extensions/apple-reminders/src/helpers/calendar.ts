@@ -13,7 +13,7 @@ export type CalendarEventPayload = {
 
 export const GET_CALENDARS_SCRIPT = `
 tell application "Calendar"
-  set calNames to name of every calendar
+  set calNames to name of calendars where writable is true
   set AppleScript's text item delimiters to linefeed
   return calNames as text
 end tell
@@ -60,7 +60,15 @@ set seconds of ${varName} to ${d.getSeconds()}`;
 export function buildCreateCalendarEventScript(payload: CalendarEventPayload): string {
   const calTarget = payload.calendarName
     ? `first calendar whose name is "${escapeAppleScriptString(payload.calendarName)}"`
-    : `first calendar`;
+    : `first calendar whose writable is true`;
+
+  const effectiveStartDate = payload.isAllDay
+    ? new Date(payload.startDate.getFullYear(), payload.startDate.getMonth(), payload.startDate.getDate(), 0, 0, 0)
+    : payload.startDate;
+
+  const effectiveEndDate = payload.isAllDay
+    ? new Date(payload.endDate.getFullYear(), payload.endDate.getMonth(), payload.endDate.getDate() + 1, 0, 0, 0)
+    : payload.endDate;
 
   const props: string[] = [
     `summary:"${escapeAppleScriptString(payload.title)}"`,
@@ -80,8 +88,8 @@ export function buildCreateCalendarEventScript(payload: CalendarEventPayload): s
   }
 
   return `tell application "Calendar"
-  ${buildAppleScriptDate(payload.startDate, "startDate")}
-  ${buildAppleScriptDate(payload.endDate, "endDate")}
+  ${buildAppleScriptDate(effectiveStartDate, "startDate")}
+  ${buildAppleScriptDate(effectiveEndDate, "endDate")}
   set cal to ${calTarget}
   make new event at end of events of cal with properties {${props.join(", ")}}
 end tell`;
