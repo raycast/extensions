@@ -20,7 +20,7 @@ Browser Router is engineered with an absolute **privacy-first architecture**. We
 To provide profile-aware browser routing, Browser Router inspects standard Windows registry paths and browser configuration files:
 
 1. **Windows Registry**:
-   - Queries HKCU\Software\Clients\StartMenuInternet and HKLM\Software\Clients\StartMenuInternet to locate installed browser binary paths (chrome.exe, msedge.exe, rave.exe, ivaldi.exe, etc.).
+   - Queries HKCU\Software\Clients\StartMenuInternet and HKLM\Software\Clients\StartMenuInternet to locate installed browser binary paths (chrome.exe, msedge.exe, brave.exe, vivaldi.exe, etc.).
 2. **Profile Metadata**:
    - Reads the Local State (JSON) file and profile avatar assets located in standard application data directories (%LOCALAPPDATA%).
    - Extracts only non-sensitive visual metadata:

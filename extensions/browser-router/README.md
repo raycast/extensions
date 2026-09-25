@@ -121,36 +121,36 @@ Browser Router is built with modern, lightweight, and type-safe technologies:
     <td align="center" width="50%">
       <h3>1. Root Search Fast Routing</h3>
       <p><i>Type your search query directly from Raycast Root Search with Tab-completion.</i></p>
-      <img src="assets/screenshots/showcase/01_root_search.png" alt="Root Search" width="460" />
+      <img src="media/01_root_search.png" alt="Root Search" width="460" />
     </td>
     <td align="center" width="50%">
       <h3>2. Intelligent Query & URL Lexing</h3>
       <p><i>Auto-detects localhost, dev ports, bare domains, and search queries.</i></p>
-      <img src="assets/screenshots/showcase/02_query_routing.png" alt="Query Routing" width="460" />
+      <img src="media/02_query_routing.png" alt="Query Routing" width="460" />
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <h3>3. Real-Time Profile Filtering</h3>
       <p><i>Filter profiles instantly by browser brand, account email, or nickname.</i></p>
-      <img src="assets/screenshots/showcase/03_profile_filter.png" alt="Profile Filtering" width="460" />
+      <img src="media/03_profile_filter.png" alt="Profile Filtering" width="460" />
     </td>
     <td align="center" width="50%">
       <h3>4. Power Action Panel</h3>
       <p><i>Instant access to profile renaming, custom setups, link copying, and feedback.</i></p>
-      <img src="assets/screenshots/showcase/04_action_panel.png" alt="Action Panel" width="460" />
+      <img src="media/04_action_panel.png" alt="Action Panel" width="460" />
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <h3>5. In-Place Profile Renaming</h3>
       <p><i>Assign clean labels without modifying browser preferences on disk.</i></p>
-      <img src="assets/screenshots/showcase/05_rename_profile.png" alt="Rename Profile" width="460" />
+      <img src="media/05_rename_profile.png" alt="Rename Profile" width="460" />
     </td>
     <td align="center" width="50%">
       <h3>6. Custom & Portable Setups</h3>
       <p><i>Add portable installations, custom directories, or Canary builds.</i></p>
-      <img src="assets/screenshots/showcase/06_custom_profile.png" alt="Custom Profiles" width="460" />
+      <img src="media/06_custom_profile.png" alt="Custom Profiles" width="460" />
     </td>
   </tr>
 </table>
