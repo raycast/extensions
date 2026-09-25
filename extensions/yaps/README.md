@@ -40,6 +40,9 @@ The extension resolves and validates the CLI in this order:
 3. The packaged `yaps_cli` inside the installed Yaps application returned by macOS.
 4. The verified system and per-user Applications locations.
 
+Automatic discovery continues past wrappers whose account-check version cannot be verified,
+so a wrapper on `PATH` cannot hide the supported helper inside the installed Yaps app.
+
 Every candidate must pass a bounded, read-only `status` check. An invalid configured override fails closed so Raycast never silently runs a different binary. The extension never invokes the Yaps GUI executable as a CLI.
 
 Setapp CLI automation is deferred until a future Yaps helper can report its

@@ -146,16 +146,22 @@ touch ${JSON.stringify(sentinel)}
     expect(await pathExists(sentinel)).toBe(false);
   });
 
-  test("keeps a genuine yaps PATH wrapper outside an app bundle eligible", async () => {
+  test("continues past a PATH wrapper to the verified app helper", async () => {
     const fixture = await createFixtureCli();
     const pathDirectory = join(fixture.directory, "wrapper-bin");
     await mkdir(pathDirectory);
-    const wrapper = await createStandaloneStatusCli(pathDirectory, "yaps");
+    await createStandaloneStatusCli(pathDirectory, "yaps");
+    await symlink(process.execPath, join(pathDirectory, "bun"));
     const previousPath = process.env.PATH;
     process.env.PATH = pathDirectory;
     try {
-      const cli = new YapsCli({ supportPath: join(fixture.directory, "support") });
-      expect(await cli.resolveCliPath()).toBe(wrapper);
+      const cli = new YapsCli({
+        additionalCliPaths: async () => [fixture.executable],
+        supportPath: join(fixture.directory, "support"),
+      });
+      expect(await cli.resolveCliPath()).toBe(fixture.executable);
+      expect((await cli.getVaultStatus()).root).toBe(fixture.vault);
+      expect(await pathExists(fixture.authLog)).toBe(true);
     } finally {
       if (previousPath === undefined) delete process.env.PATH;
       else process.env.PATH = previousPath;
@@ -182,20 +188,16 @@ touch ${JSON.stringify(sentinel)}
 
   test("accepts a CLI path discovered from an installed Yaps app", async () => {
     const fixture = await createFixtureCli();
-    const application = join(fixture.directory, "Detected Yaps.app");
-    const executableDirectory = join(application, "Contents", "MacOS");
-    await mkdir(executableDirectory, { recursive: true });
-    const executable = await createStandaloneStatusCli(executableDirectory, "yaps_cli");
     const previousPath = process.env.PATH;
-    process.env.PATH = "";
+    process.env.PATH = dirname(process.execPath);
 
     try {
       const cli = new YapsCli({
-        additionalCliPaths: async () => [executable],
+        additionalCliPaths: async () => [fixture.executable],
         supportPath: join(fixture.directory, "support"),
       });
 
-      expect(await cli.resolveCliPath()).toBe(executable);
+      expect(await cli.resolveCliPath()).toBe(fixture.executable);
     } finally {
       if (previousPath === undefined) delete process.env.PATH;
       else process.env.PATH = previousPath;
@@ -293,7 +295,10 @@ touch ${JSON.stringify(sentinel)}
     const previousPath = process.env.PATH;
     process.env.PATH = [pathDirectory, dirname(process.execPath), "/usr/bin", "/bin"].join(":");
     try {
-      const cli = new YapsCli({ supportPath: join(fixture.directory, "support") });
+      const cli = new YapsCli({
+        maxDiscoveryCandidates: 2,
+        supportPath: join(fixture.directory, "support"),
+      });
       await expect(cli.getVaultStatus()).rejects.toThrow(
         "could not verify that its account check is credential-free",
       );

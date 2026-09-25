@@ -129,6 +129,7 @@ export class YapsCli {
     const maxProbes = nonNegativeInteger(this.options.maxDiscoveryProbes, MAX_CLI_DISCOVERY_PROBES);
     let candidatesChecked = 0;
     let probes = 0;
+    let unverifiedFallback: string | undefined;
     for (const candidate of candidates) {
       if (Date.now() >= deadline || candidatesChecked >= maxCandidates || probes >= maxProbes)
         break;
@@ -141,11 +142,24 @@ export class YapsCli {
           Math.min(CLI_DISCOVERY_TIMEOUT_MS, Math.max(1, deadline - Date.now())),
         )
       ) {
-        this.cachedCliPath = candidate;
-        return candidate;
+        const safety = await settleBeforeDeadline(
+          credentialFreeAuthStatusSafety(candidate),
+          deadline,
+        );
+        if (safety?.kind === "safe") {
+          this.cachedCliPath = candidate;
+          return candidate;
+        }
+        // Preserve the account-check diagnostic if no supported app is found,
+        // but keep looking so a PATH wrapper cannot hide its installed helper.
+        unverifiedFallback ??= candidate;
       }
     }
 
+    if (unverifiedFallback) {
+      this.cachedCliPath = unverifiedFallback;
+      return unverifiedFallback;
+    }
     throw new YapsCliNotFoundError();
   }
 
