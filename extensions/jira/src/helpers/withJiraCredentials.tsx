@@ -1,5 +1,3 @@
-import type { ComponentType } from "react";
-
 import { getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 
@@ -7,20 +5,7 @@ import { jira, jiraWithApiToken } from "../api/jiraCredentials";
 
 export function withJiraCredentials<T, R>(fn: (input: T) => Promise<R> | R) {
   const { token, email, siteUrl } = getPreferenceValues<Preferences>();
-  const credentials = token && email && siteUrl ? jiraWithApiToken : jira;
-
-  const isReactComponent =
-    typeof fn === "function" &&
-    fn.name &&
-    fn.name[0] === fn.name[0].toUpperCase() &&
-    fn.name[0] !== fn.name[0].toLowerCase() &&
-    fn.constructor.name !== "AsyncFunction";
-
-  if (isReactComponent) {
-    return withAccessToken<T>(credentials)(fn as unknown as ComponentType<T>);
-  }
-
-  return withAccessToken<T>(credentials)(async (input: T) => {
+  return withAccessToken<T>(token && email && siteUrl ? jiraWithApiToken : jira)(async (input: T) => {
     try {
       return await fn(input);
     } catch (error) {

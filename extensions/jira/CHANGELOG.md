@@ -1,11 +1,8 @@
 # Jira Changelog
 
-## [Fix React 19 suspension, icons and My Filters] - {PR_MERGE_DATE}
+## [Load all projects] - {PR_MERGE_DATE}
 
-- Fixed the infinite render suspension loop and associated 100MB JS Heap memory crash under React 19 by refactoring the `withJiraCredentials` wrapper. This ensures synchronous React components are not wrapped in uncached async promises, while preserving the error-catching wrapper for async AI tools.
-- Fixed `My Filters` command crashing on first launch with "Unbounded JQL queries are not allowed here" by casting the `execute` condition to a strict boolean, preventing an unintended query for an empty JQL string.
-- Fixed Jira issue type icons rendering as white squares in Raycast by dynamically parsing the `content-type` response header (e.g., `image/svg+xml`, `image/png`) instead of hardcoding `"image/jpeg"`.
-- Added performance optimization for icon resolution using a Map-based `iconUriCache` cache to prevent duplicate concurrent network requests.
+- Loaded all projects instead of stopping after the first 100 results
 
 ## [Fixed team field on issue creation] - 2026-08-25
 

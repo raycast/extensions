@@ -46,7 +46,7 @@ export async function request<T>(path: string, options: RequestOptions = { metho
   return parseJiraResponse<T>(response);
 }
 
-export const getAuthenticatedUri = async (uri: string, fallbackContentType: string = "image/jpeg") => {
+export const getAuthenticatedUri = async (uri: string, contentType: string) => {
   const { authorizationHeader } = getJiraCredentials();
   const response = await fetch(uri, {
     headers: {
@@ -55,8 +55,7 @@ export const getAuthenticatedUri = async (uri: string, fallbackContentType: stri
   });
 
   if (response.ok) {
-    const responseContentType = response.headers.get("content-type") || fallbackContentType;
-    const dataUri = `data:${responseContentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+    const dataUri = `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
     return dataUri;
   } else {
     await parseJiraResponse(response);
