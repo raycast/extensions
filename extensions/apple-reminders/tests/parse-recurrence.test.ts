@@ -106,6 +106,32 @@ describe("resolveDueDateFromNlp", () => {
     assert.ok(r.dueDate);
     assert.notEqual(r.dueDate.getTime(), fixedNow.getTime());
     assert.equal(r.dueDate.getHours(), 10);
+    assert.equal(r.dueDate.getDay(), 5); // Friday
+  });
+
+  it("preserves next weekday as start date for weekday recurring phrases", () => {
+    // fixedNow is Thursday (day 4), so next Friday is day 5 (2026-09-25)
+    const r1 = resolveDueDateFromNlp("every Friday", fixedNow);
+    assert.deepEqual(r1.recurrence, { frequency: "weekly", interval: 1, matchedText: "every Friday" });
+    assert.ok(r1.dueDate);
+    assert.equal(r1.dueDate.getDay(), 5); // Friday
+    assert.ok(r1.dueDate.getTime() > fixedNow.getTime());
+
+    const r2 = resolveDueDateFromNlp("every other friday", fixedNow);
+    assert.deepEqual(r2.recurrence, { frequency: "weekly", interval: 2, matchedText: "every other friday" });
+    assert.ok(r2.dueDate);
+    assert.equal(r2.dueDate.getDay(), 5); // Friday
+    assert.ok(r2.dueDate.getTime() > fixedNow.getTime());
+
+    const r3 = resolveDueDateFromNlp("every Monday", fixedNow);
+    assert.deepEqual(r3.recurrence, { frequency: "weekly", interval: 1, matchedText: "every Monday" });
+    assert.ok(r3.dueDate);
+    assert.equal(r3.dueDate.getDay(), 1); // Monday
+
+    const r4 = resolveDueDateFromNlp("each Tuesday", fixedNow);
+    assert.deepEqual(r4.recurrence, { frequency: "weekly", interval: 1, matchedText: "each Tuesday" });
+    assert.ok(r4.dueDate);
+    assert.equal(r4.dueDate.getDay(), 2); // Tuesday
   });
 
   it("handles non-recurring relative durations correctly", () => {

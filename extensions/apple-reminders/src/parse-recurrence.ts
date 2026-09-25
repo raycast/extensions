@@ -142,6 +142,7 @@ export function resolveDueDateFromNlp(
     const isOnlyRecurrenceInterval =
       recurrence &&
       parsed.matchedText &&
+      /\d/.test(parsed.matchedText) &&
       recurrence.matchedText.toLowerCase().includes(parsed.matchedText.toLowerCase().trim());
 
     if (!isOnlyRecurrenceInterval) {
