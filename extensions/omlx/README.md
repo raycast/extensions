@@ -14,6 +14,10 @@ Use locally running [oMLX](https://omlx.com) models as AI providers in Raycast. 
 2. Install this extension.
 3. Enter your oMLX API key (found in `~/.omlx/settings.json` under `auth.api_key`).
 
+## AI Chat
+
+Type `@omlx` in Raycast AI Chat to manage models conversationally — load, eject, search, download, check stats, and control the server without leaving the chat.
+
 ## Commands
 
 ### Manage Models
