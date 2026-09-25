@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## [Stop Speaking] - {PR_MERGE_DATE}
+## [Stop Speaking] - 2026-09-25
 
 ### Added
 
