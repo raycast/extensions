@@ -576,36 +576,32 @@ export interface VocInfo {
   nextAspect: string | null;
 }
 
-// ─── Void of Course: Moon makes no applying Ptolemaic aspect (0/60/90/120/180)
-// to a classical planet (Sun, Mercury, Venus, Mars, Jupiter, Saturn) before
-// leaving its current tropical sign. Forward-scan at 10-min steps; an aspect
-// counts only when closing (distance shrinking), so separating past aspects
-// still read as VOC. 6° orb, ±1–2° ephemeris family as the rest of this file.
+// ─── Void of Course: the Moon perfects no applying Ptolemaic aspect
+// (0/60/90/120/180) to a classical planet (Sun, Mercury, Venus, Mars, Jupiter,
+// Saturn) before leaving its current tropical sign. Forward-scan at 10-min
+// steps and wait for exact contact: an aspect that only enters orb and then
+// ingresses without perfecting does not break VOC, and neither does a past
+// aspect that is merely separating. The reported time is the perfection, not
+// orb entry. ±1–2° ephemeris family as the rest of this file.
 const VOC_ASPECTS: [number, string][] = [
   [0, "conjunction"],
   [60, "sextile"],
   [90, "square"],
   [120, "trine"],
   [180, "opposition"],
-  [240, "trine"],
-  [270, "square"],
-  [300, "sextile"],
 ];
-const VOC_ORB = 6;
 const VOC_PLANETS = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
 
 function vocPlanetLon(name: string, jd: number): number {
   return name === "Sun" ? sunLon(jd) : planetLon(name, jd);
 }
 
-function vocDist(mLon: number, pLon: number): { dist: number; name: string } {
-  const sep = (((mLon - pLon) % 360) + 360) % 360;
-  let best = { dist: 360, name: "" };
-  for (const [a, n] of VOC_ASPECTS) {
-    const d = Math.abs(sep - a);
-    if (d < best.dist) best = { dist: d, name: n };
-  }
-  return best;
+// |Moon→planet separation| folded onto 0–180°. Continuous through both the
+// conjunction and the opposition, so every aspect is a zero of
+// |vocSep − angle|. The raw 0–359° separation instead puts an applying
+// conjunction near 360° rather than 0°, which hid it entirely.
+function vocSep(mLon: number, pLon: number): number {
+  return Math.abs(((((mLon - pLon) % 360) + 540) % 360) - 180);
 }
 
 export function getVocInfo(date = new Date()): VocInfo {
@@ -615,27 +611,73 @@ export function getVocInfo(date = new Date()): VocInfo {
   const signIdx = Math.floor(moonLon(jd0) / 30) % 12;
   const nextSign = SIGNS[(signIdx + 1) % 12];
 
-  for (let i = 0; i < maxSteps; i++) {
+  // Distance from exactness for every planet × aspect at one instant.
+  const distsAt = (mLon: number, jd: number): number[][] =>
+    VOC_PLANETS.map((p) => {
+      const sep = vocSep(mLon, vocPlanetLon(p, jd));
+      return VOC_ASPECTS.map(([a]) => Math.abs(sep - a));
+    });
+
+  let prevMLon = moonLon(jd0);
+  let prev = distsAt(prevMLon, jd0);
+  // Per planet × aspect: has the distance been shrinking since it last turned?
+  // Seeded false so a separating aspect is not mistaken for a fresh perfection.
+  const closing = VOC_PLANETS.map(() => VOC_ASPECTS.map(() => false));
+
+  for (let i = 1; i <= maxSteps; i++) {
     const jd = jd0 + i * step;
-    const mLon = moonLon(jd);
-    if (Math.floor(mLon / 30) % 12 !== signIdx) {
-      return { isVoc: true, ingressInHours: i * step * 24, nextSign, nextAspect: null };
-    }
-    for (const p of VOC_PLANETS) {
-      const { dist, name } = vocDist(mLon, vocPlanetLon(p, jd));
-      if (dist < VOC_ORB) {
-        const mNext = moonLon(jd + step);
-        const pNext = vocPlanetLon(p, jd + step);
-        if (vocDist(mNext, pNext).dist < dist) {
-          return {
-            isVoc: false,
-            ingressInHours: i * step * 24,
-            nextSign,
-            nextAspect: `${name} ${p} in ${(i * step * 24).toFixed(1)}h`,
-          };
+    const mLonRaw = moonLon(jd);
+    // Unwrap the 360°→0° wrap once, so the ingress fraction below stays sane.
+    const mLon = mLonRaw < prevMLon - 180 ? mLonRaw + 360 : mLonRaw;
+    const cur = distsAt(mLon, jd);
+
+    // Exact contact appears as the distance turning around while closing.
+    let hit: { hours: number; label: string } | null = null;
+    for (let pi = 0; pi < VOC_PLANETS.length; pi++) {
+      for (let ai = 0; ai < VOC_ASPECTS.length; ai++) {
+        const dPrev = prev[pi][ai];
+        const dCur = cur[pi][ai];
+        if (dCur < dPrev) {
+          closing[pi][ai] = true;
+        } else if (dCur > dPrev && closing[pi][ai]) {
+          closing[pi][ai] = false;
+          // The minimum sits between the two samples; split the step by depth.
+          const frac = dPrev / (dPrev + dCur);
+          const hours = (i - 1 + frac) * step * 24;
+          if (!hit || hours < hit.hours) {
+            hit = { hours, label: `${VOC_ASPECTS[ai][1]} ${VOC_PLANETS[pi]}` };
+          }
         }
       }
     }
+
+    if (Math.floor(mLon / 30) % 12 !== signIdx) {
+      // Ingress falls inside this step; a perfection only breaks VOC if it
+      // lands first.
+      const boundary = ((signIdx + 1) % 12) * 30 || 360;
+      const ingressHours = (i - 1 + (boundary - prevMLon) / (mLon - prevMLon)) * step * 24;
+      if (hit && hit.hours < ingressHours) {
+        return {
+          isVoc: false,
+          ingressInHours: hit.hours,
+          nextSign,
+          nextAspect: `${hit.label} in ${hit.hours.toFixed(1)}h`,
+        };
+      }
+      return { isVoc: true, ingressInHours: ingressHours, nextSign, nextAspect: null };
+    }
+
+    if (hit) {
+      return {
+        isVoc: false,
+        ingressInHours: hit.hours,
+        nextSign,
+        nextAspect: `${hit.label} in ${hit.hours.toFixed(1)}h`,
+      };
+    }
+
+    prevMLon = mLon;
+    prev = cur;
   }
   return { isVoc: true, ingressInHours: NaN, nextSign, nextAspect: null };
 }
