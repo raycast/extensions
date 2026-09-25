@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-25
 
 - Add an upcoming-flights list and detail view.
 - Add a friends' upcoming-flights view with friend, route, timing, status, airport, and aircraft details.
