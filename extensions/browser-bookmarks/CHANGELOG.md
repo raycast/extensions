@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Copy Link Shortcut Preference] - {PR_MERGE_DATE}
+## [Copy Link Shortcut Preference] - 2026-09-25
 
 - Added a preference to choose the Copy Link shortcut: ⌘ C (Ctrl+C on Windows) or ⌘ ⌥ C (Ctrl+Alt+C on Windows)
 
