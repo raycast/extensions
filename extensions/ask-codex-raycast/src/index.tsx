@@ -1,8 +1,7 @@
 import {
   Action,
   ActionPanel,
-  environment,
-  Form,
+  Detail,
   List,
   getPreferenceValues,
   Icon,
@@ -36,10 +35,7 @@ import {
 } from "./conversations";
 
 export default function AskCodex(
-  props: LaunchProps<{
-    arguments: Arguments.Index;
-    launchContext?: { page?: Page };
-  }>,
+  props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
   const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
@@ -51,9 +47,7 @@ export default function AskCodex(
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("正在连接 Codex…");
   const [error, setError] = useState("");
-  const [page, setPage] = useState<Page>(
-    props.launchContext?.page === "history" ? "history" : "chat",
-  );
+  const [page, setPage] = useState<Page>("chat");
   const [sessions, setSessions] = useState<StoredConversation[]>([]);
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [switching, setSwitching] = useState(false);
@@ -641,13 +635,13 @@ export default function AskCodex(
       />
     </>
   );
-  const historyLink = `raycast://extensions/${encodeURIComponent(environment.ownerOrAuthorName)}/${encodeURIComponent(environment.extensionName)}/${encodeURIComponent(environment.entryPointName)}?context=${encodeURIComponent(JSON.stringify({ page: "history" }))}`;
   const visibleMessages = conversation.messages.filter(
     (message) => message.content.trim() || message.status === "streaming",
   );
+  const newestMessages = [...visibleMessages].reverse();
   const accessory = (
     <List.Dropdown tooltip="聊天与会话管理" value={page} onChange={changePage}>
-      <List.Dropdown.Item title="聊天" value="chat" icon={Icon.Message} />
+      <List.Dropdown.Item title="当前会话" value="chat" icon={Icon.Message} />
       <List.Dropdown.Item title="历史会话" value="history" icon={Icon.Clock} />
       <List.Dropdown.Item title="已归档" value="archived" icon={Icon.Tray} />
       <List.Dropdown.Item
@@ -670,50 +664,76 @@ export default function AskCodex(
     onBack: () => changePage("chat"),
     onNew: newChat,
   });
+  const chatActions = (message?: ChatMessage) => (
+    <ActionPanel>
+      {!ready && error ? (
+        <Action
+          title="重新连接"
+          icon={Icon.ArrowClockwise}
+          onAction={reconnect}
+        />
+      ) : (
+        <Action
+          title={busy ? "发送补充要求" : "发送消息"}
+          icon={Icon.ArrowRight}
+          shortcut={{ modifiers: [], key: "return" }}
+          onAction={() => void sendPrompt(draft)}
+        />
+      )}
+      {message && (
+        <Action.Push
+          title="展开这条消息"
+          icon={Icon.AppWindow}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          target={
+            <Detail
+              navigationTitle={message.role === "assistant" ? "ChatGPT" : "你"}
+              markdown={transcript([message])}
+            />
+          }
+        />
+      )}
+      {message?.content && (
+        <Action.CopyToClipboard
+          title="复制这条消息"
+          content={message.content}
+        />
+      )}
+      {secondaryActions}
+    </ActionPanel>
+  );
   if (page === "chat") {
     return (
-      <Form
+      <List
         navigationTitle={conversationTitle(conversation)}
-        searchBarAccessory={
-          <Form.LinkAccessory target={historyLink} text="会话历史" />
+        searchBarAccessory={accessory}
+        searchText={draft}
+        onSearchTextChange={setDraft}
+        searchBarPlaceholder={
+          busy
+            ? "继续输入补充要求，按 Enter 发送…"
+            : "输入问题或追问，按 Enter 发送…"
         }
-        actions={
-          <ActionPanel>
-            {!ready && error ? (
-              <Action
-                title="重新连接"
-                icon={Icon.ArrowClockwise}
-                onAction={reconnect}
-              />
-            ) : (
-              <Action
-                title={busy ? "发送补充要求" : "发送消息"}
-                icon={Icon.ArrowRight}
-                shortcut={{ modifiers: [], key: "return" }}
-                onAction={() => void sendPrompt(draft)}
-              />
-            )}
-            {secondaryActions}
-          </ActionPanel>
-        }
+        filtering={false}
+        throttle={false}
+        isLoading={(!ready && !error) || switching}
       >
-        <Form.TextField
-          id="prompt"
-          title="消息"
-          value={draft}
-          onChange={setDraft}
-          placeholder={
-            busy
-              ? "继续输入补充要求，按 Enter 发送…"
-              : "输入问题或追问，按 Enter 发送…"
+        <List.EmptyView
+          icon={error ? Icon.ExclamationMark : Icon.Message}
+          title={error ? "暂时无法连接" : "开始新对话"}
+          description={
+            error || "直接输入问题并按 Enter，之后可以在这里持续追问。"
           }
-          autoFocus
+          actions={chatActions()}
         />
-        <Form.Separator />
-        {visibleMessages.length ? (
-          visibleMessages.map((message) => (
-            <Form.Description
+        <List.Section title={error || status}>
+          {newestMessages.map((message) => (
+            <List.Item
               key={message.id}
+              id={message.id}
+              icon={
+                message.role === "assistant" ? "command-icon.png" : Icon.Person
+              }
               title={
                 message.role === "assistant"
                   ? "ChatGPT"
@@ -721,24 +741,17 @@ export default function AskCodex(
                     ? "你 · 补充要求"
                     : "你"
               }
-              text={
-                message.content ||
-                (message.status === "streaming" ? "正在思考…" : "")
+              subtitle={message.content.replace(/\s+/g, " ") || "正在思考…"}
+              accessories={
+                message.status === "streaming"
+                  ? [{ text: "正在回复…", icon: Icon.CircleProgress }]
+                  : undefined
               }
+              actions={chatActions(message)}
             />
-          ))
-        ) : (
-          <Form.Description
-            title="ChatGPT"
-            text="输入问题并按 Enter 开始对话。"
-          />
-        )}
-        <Form.Separator />
-        <Form.Description
-          title={error ? "提示" : "状态"}
-          text={error || status}
-        />
-      </Form>
+          ))}
+        </List.Section>
+      </List>
     );
   }
   return (
