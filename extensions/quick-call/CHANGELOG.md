@@ -6,5 +6,6 @@
 - Fall back to the clipboard when no number is typed and no text is selected
 - Use Raycast's built-in `open` instead of the `open` npm package, fixing an uncaught `spawn open EAGAIN` error
 - Declare `platforms: ["macOS"]` and add Store keywords
+- Keep only a single leading `+` when sanitizing the number (previously `+` anywhere in the input was kept)
 
 ## [Initial Version] - 2023-08-29

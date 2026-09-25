@@ -22,8 +22,10 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
   }
 
-  // Keep digits and a leading plus sign only.
-  dialNumber = dialNumber.replace(/[^0-9+]/g, "").trim();
+  // Keep digits only, preserving at most a single leading plus sign.
+  const hasLeadingPlus = dialNumber.startsWith("+");
+  const digits = dialNumber.replace(/\D/g, "");
+  dialNumber = hasLeadingPlus && digits.length > 0 ? `+${digits}` : digits;
 
   if (dialNumber.length === 0) {
     await showHUD("You must enter or select a phone number before setting up a call");
