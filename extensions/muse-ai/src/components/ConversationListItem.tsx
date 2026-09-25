@@ -7,7 +7,7 @@ import { AskQuestionView } from "./AskQuestionView";
 interface ConversationListItemProps {
   conversation: Conversation;
   addConversation: (conversation: Conversation) => Promise<void>;
-  updateConversation: (id: string, updates: Partial<Conversation>) => Promise<void>;
+  updateConversation: (id: string, update: (saved: Conversation) => Partial<Conversation>) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
   deleteAllConversations: () => Promise<void>;
 }

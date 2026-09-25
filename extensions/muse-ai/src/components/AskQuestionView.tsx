@@ -10,7 +10,7 @@ import { STREAMING_CURSOR, NAVIGATION_DELAY } from "../constants";
 interface AskQuestionViewProps {
   initialQuestion?: string;
   addConversation: (conversation: Conversation) => Promise<void>;
-  updateConversation: (id: string, updates: Partial<Conversation>) => Promise<void>;
+  updateConversation: (id: string, update: (saved: Conversation) => Partial<Conversation>) => Promise<void>;
 }
 
 type ViewState = "form" | "streaming";

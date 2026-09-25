@@ -31,34 +31,40 @@ export function useConversations() {
 
   const writes = useRef<Promise<void>>(Promise.resolve());
 
-  // Serialize writes so an older snapshot can never land after a newer one; errors reach the caller.
-  const persist = useCallback((next: Conversation[]) => {
-    current.current = next;
-    setConversations(next);
+  // Serialize writes, and derive each one from the last *saved* list, so concurrent updates
+  // can't drop each other. Memory only changes once LocalStorage accepts the write; errors reach the caller.
+  const persist = useCallback((update: (saved: Conversation[]) => Conversation[]) => {
     const write = writes.current
       .catch(() => undefined)
-      .then(() =>
-        next.length ? LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next)) : LocalStorage.removeItem(STORAGE_KEY),
-      );
+      .then(async () => {
+        const next = update(current.current);
+        await (next.length
+          ? LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+          : LocalStorage.removeItem(STORAGE_KEY));
+        current.current = next;
+        setConversations(next);
+      });
     writes.current = write;
     return write;
   }, []);
 
   const addConversation = useCallback(
-    (conversation: Conversation) => persist([conversation, ...current.current]),
+    (conversation: Conversation) => persist((saved) => [conversation, ...saved]),
     [persist],
   );
 
   const updateConversation = useCallback(
-    (id: string, updates: Partial<Conversation>) =>
-      persist(current.current.map((conv) => (conv.id === id ? { ...conv, ...updates, timestamp: Date.now() } : conv))),
+    (id: string, update: (saved: Conversation) => Partial<Conversation>) =>
+      persist((saved) =>
+        saved.map((conv) => (conv.id === id ? { ...conv, ...update(conv), timestamp: Date.now() } : conv)),
+      ),
     [persist],
   );
 
   const deleteConversation = useCallback(
     async (id: string) => {
       try {
-        await persist(current.current.filter((c) => c.id !== id));
+        await persist((saved) => saved.filter((c) => c.id !== id));
         await showToast({ style: Toast.Style.Success, title: "Conversation deleted" });
       } catch (error) {
         await showFailureToast(error, { title: "Failed to delete conversation" });
@@ -69,7 +75,7 @@ export function useConversations() {
 
   const deleteAllConversations = useCallback(async () => {
     try {
-      await persist([]);
+      await persist(() => []);
       await showToast({ style: Toast.Style.Success, title: "All conversations deleted" });
     } catch (error) {
       await showFailureToast(error, { title: "Failed to delete conversations" });

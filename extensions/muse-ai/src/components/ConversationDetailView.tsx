@@ -8,7 +8,7 @@ import { STREAMING_CURSOR } from "../constants";
 
 interface ConversationDetailViewProps {
   conversation: Conversation;
-  updateConversation: (id: string, updates: Partial<Conversation>) => Promise<void>;
+  updateConversation: (id: string, update: (saved: Conversation) => Partial<Conversation>) => Promise<void>;
 }
 
 interface QAPair {
@@ -42,11 +42,17 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
 
         const { fullResponse } = await streamAIResponse(messages, setStreamingText, modelToUse);
 
-        const newMessages: Message[] = [...messages, { role: "assistant", content: fullResponse }];
+        const exchange: Message[] = [messages[messages.length - 1], { role: "assistant", content: fullResponse }];
+        const newMessages: Message[] = [...localMessages, ...exchange];
 
+        // Append to the saved record, not this view's snapshot, so a reply streaming in
+        // another view of the same conversation isn't overwritten.
+        await updateConversation(conversation.id, (saved) => ({
+          messages: [...saved.messages, ...exchange],
+          model: modelToUse,
+        }));
         setLocalMessages(newMessages);
         setModel(modelToUse);
-        await updateConversation(conversation.id, { messages: newMessages, model: modelToUse });
 
         setIsGenerating(false);
         setStreamingText("");
