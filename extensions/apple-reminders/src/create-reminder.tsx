@@ -389,7 +389,15 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           />,
           ...(values.isRecurring
             ? [
-                <Form.Dropdown key="frequency" {...itemProps.frequency} title="Frequency">
+                <Form.Dropdown
+                  key="frequency"
+                  {...itemProps.frequency}
+                  title="Frequency"
+                  onChange={(val) => {
+                    recurrenceSetByNlpRef.current = false;
+                    itemProps.frequency.onChange?.(val);
+                  }}
+                >
                   <Form.Dropdown.Item title="Daily" value="daily" />
                   <Form.Dropdown.Item title="Weekdays" value="weekdays" />
                   <Form.Dropdown.Item title="Weekends" value="weekends" />
@@ -397,7 +405,16 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
                   <Form.Dropdown.Item title="Monthly" value="monthly" />
                   <Form.Dropdown.Item title="Yearly" value="yearly" />
                 </Form.Dropdown>,
-                <Form.TextField key="interval" {...itemProps.interval} title="Interval" placeholder="1" />,
+                <Form.TextField
+                  key="interval"
+                  {...itemProps.interval}
+                  title="Interval"
+                  placeholder="1"
+                  onChange={(val) => {
+                    recurrenceSetByNlpRef.current = false;
+                    itemProps.interval.onChange?.(val);
+                  }}
+                />,
                 <Form.Description key="recurrenceDescription" text={recurrenceDescription} />,
               ]
             : []),
