@@ -2,7 +2,7 @@
 
 ## [Fix Quicklink search filtering] - {PR_MERGE_DATE}
 
-- Fix "Save as Quicklink" opening entity list commands without applying the entity filter, requiring an extra keystroke before the intended entity showed up
+- Fix "Save as Quicklink" opening entity list commands (including Cameras and Zones) without applying the entity filter, requiring an extra keystroke before the intended entity showed up
 
 ## [Entity Customization] - 2026-08-29
 

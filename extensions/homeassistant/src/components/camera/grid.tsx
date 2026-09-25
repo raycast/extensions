@@ -5,7 +5,7 @@ import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrid
 import { State } from "@lib/haapi";
 import { getDisplayName } from "@lib/utils";
 import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import React from "react";
+import React, { useState } from "react";
 import {
   CameraOpenStreamInBrowserAction,
   CameraOpenStreamInIINAAction,
@@ -77,10 +77,11 @@ function CameraGridItem(props: { state: State }): React.ReactElement {
   );
 }
 
-export function CameraGrid(): React.ReactElement {
+export function CameraGrid(props: { initialSearchText?: string | undefined }): React.ReactElement {
+  const [searchText, setSearchText] = useState<string | undefined>(props.initialSearchText);
   const { states: allStates, error, isLoading } = useVisibleHAStates();
   const { entityAliases, favoriteEntityIds } = useEntityOverrides();
-  const { states } = useStateSearch(undefined, "camera", "", allStates, entityAliases);
+  const { states } = useStateSearch(searchText, "camera", "", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -101,6 +102,8 @@ export function CameraGrid(): React.ReactElement {
       searchBarPlaceholder="Filter by Name"
       inset={Grid.Inset.Zero}
       isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
       columns={3}
       fit={Grid.Fit.Fill}
     >
