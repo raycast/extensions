@@ -1,6 +1,6 @@
 # Browser Router Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-25
 
 - Initial release of Browser Router for Windows.
 - Route search queries and URLs directly from Raycast to any installed browser and profile.
