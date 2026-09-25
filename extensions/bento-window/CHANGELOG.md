@@ -1,6 +1,6 @@
 # Bento Window Changelog
 
-## [Much Faster Tiling] - {PR_MERGE_DATE}
+## [Much Faster Tiling] - 2026-09-25
 
 - **Tiling is about 4× faster.** Every window read and move used to go through System Events via AppleScript, which handles one request at a time at roughly 30 ms each — ten windows took close to four seconds and visibly landed one by one. Windows are now read and moved by a small Swift helper that calls the Accessibility API directly, so the same nine-window grid goes from about 3.7 s to under 0.8 s, and restoring drops from 3.5 s to about 0.5 s. Nothing changes in how you use it or in the permissions it needs
 
