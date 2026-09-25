@@ -100,6 +100,7 @@ function AddNote(props: LaunchProps<{ arguments: Arguments.AddNote }>) {
         title="Parent Page"
         info={`Only used the first time: Notion can't create top-level pages, so "${notes_page_name}" is created inside this page if it doesn't exist yet.`}
         onSearchTextChange={setSearchText}
+        filtering={false}
         throttle
         storeValue
       >

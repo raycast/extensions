@@ -2,14 +2,14 @@
 
 Reviewed against `package.json` and all six files in `src/tools/` on September 24, 2026. The extension registers six tools with nine top-level inputs; all inputs are required. The database, page, mapping, Markdown conversion, and OAuth helpers were also inspected.
 
-| Tool | Inputs |
-| --- | --- |
-| [search-pages](../../src/tools/search-pages.ts) | `searchText: string` |
-| [get-page](../../src/tools/get-page.ts) | `pageId: string` |
-| [add-to-page](../../src/tools/add-to-page.ts) | `pageId: string`; `content: string` |
-| [create-page](../../src/tools/create-page.ts) | `databaseId: string`; `title: string`; `content: string` |
-| [get-databases](../../src/tools/get-databases.ts) | None |
-| [search-database](../../src/tools/search-database.ts) | `databaseId: string`; `query: string` |
+| Tool                                                  | Inputs                                                   |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| [search-pages](../../src/tools/search-pages.ts)       | `searchText: string`                                     |
+| [get-page](../../src/tools/get-page.ts)               | `pageId: string`                                         |
+| [add-to-page](../../src/tools/add-to-page.ts)         | `pageId: string`; `content: string`                      |
+| [create-page](../../src/tools/create-page.ts)         | `databaseId: string`; `title: string`; `content: string` |
+| [get-databases](../../src/tools/get-databases.ts)     | None                                                     |
+| [search-database](../../src/tools/search-database.ts) | `databaseId: string`; `query: string`                    |
 
 ## Discovery and identifiers
 

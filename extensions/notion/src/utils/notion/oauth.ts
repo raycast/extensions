@@ -20,12 +20,33 @@ export const notionService = new OAuthService({
   scope: "",
   authorizeUrl: "https://notion.oauth.raycast.com/authorize",
   tokenUrl: "https://notion.oauth.raycast.com/token",
-  personalAccessToken: notion_token,
+  personalAccessToken: notion_token?.trim() || undefined,
   extraParameters: { owner: "user" },
   onAuthorize({ token }) {
     notion = new Client({ auth: token });
   },
 });
+
+export async function checkNotionConnection() {
+  const token = notionService.personalAccessToken || (await client.getTokens())?.accessToken;
+  if (!token) return false;
+
+  await new Client({ auth: token }).users.me({});
+  return true;
+}
+
+export async function reconnectNotion() {
+  if (notionService.personalAccessToken) {
+    throw new Error("Clear the Internal Integration Secret in extension preferences before connecting with OAuth.");
+  }
+
+  await client.removeTokens();
+  notion = null;
+  const token = await notionService.authorize();
+  const newClient = new Client({ auth: token });
+  await newClient.users.me({});
+  notion = newClient;
+}
 
 export function getNotionClient() {
   if (!notion) {

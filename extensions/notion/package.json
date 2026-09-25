@@ -23,7 +23,8 @@
     "pernielsentikaer",
     "0xdhrv",
     "ridemountainpig",
-    "alvesrafa"
+    "alvesrafa",
+    "ray.dhruv"
   ],
   "pastContributors": [
     "thomaslombart",
@@ -39,6 +40,12 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "manage-connection",
+      "title": "Manage Notion Connection",
+      "description": "Test your Notion connection, reconnect, or manage page access.",
+      "mode": "view"
+    },
     {
       "name": "create-database-page",
       "title": "Create Database Page",
@@ -365,6 +372,7 @@
     "brace-expansion": "5.0.9"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

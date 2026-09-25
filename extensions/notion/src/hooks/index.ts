@@ -7,7 +7,7 @@ import {
   fetchUsers,
   fetchDatabases,
   queryDatabase,
-  search,
+  searchAllPages,
   fetchPage,
   fetchDatabase,
   isType,
@@ -15,6 +15,7 @@ import {
   type DatabaseProperty,
 } from "../utils/notion";
 import { DatabaseView } from "../utils/types";
+import { showNotionError } from "../utils/notion/errors";
 
 export function useUsers() {
   const value = useCachedPromise(() => fetchUsers());
@@ -282,7 +283,8 @@ export function usePinnedPages() {
 }
 
 export function useSearchPages(query: string) {
-  return useCachedPromise(search, [query], {
+  return useCachedPromise(searchAllPages, [query], {
     keepPreviousData: true,
+    onError: (error) => void showNotionError(error, "Failed to search Notion"),
   });
 }
