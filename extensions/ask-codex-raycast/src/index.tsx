@@ -34,6 +34,48 @@ import {
   type ConversationLibrary,
 } from "./conversations";
 
+function displayWidth(value: string) {
+  return Array.from(value).reduce(
+    (width, character) =>
+      width + ((character.codePointAt(0) || 0) > 0xff ? 2 : 1),
+    0,
+  );
+}
+
+function wrapDisplayLine(value: string, limit = 78) {
+  const result: string[] = [];
+  let current = "";
+  let width = 0;
+  for (const character of Array.from(value)) {
+    const characterWidth = displayWidth(character);
+    const keepWithPrevious = /[，。！？；：、,.!?;:）)\]】》]/.test(character);
+    if (current && width + characterWidth > limit && !keepWithPrevious) {
+      result.push(current.trimEnd());
+      current = "";
+      width = 0;
+    }
+    current += character;
+    width += characterWidth;
+  }
+  if (current.trim()) result.push(current.trimEnd());
+  return result;
+}
+
+function messageRows(content: string) {
+  const cleaned = content
+    .replace(/\r/g, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1");
+  const rows = cleaned
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .flatMap((line) => wrapDisplayLine(line));
+  return rows.length ? rows : ["正在思考…"];
+}
+
 export default function AskCodex(
   props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
@@ -726,31 +768,40 @@ export default function AskCodex(
           }
           actions={chatActions()}
         />
-        <List.Section title={error || status}>
-          {newestMessages.map((message) => (
-            <List.Item
-              key={message.id}
-              id={message.id}
-              icon={
-                message.role === "assistant" ? "command-icon.png" : Icon.Person
-              }
-              title={
-                message.role === "assistant"
-                  ? "ChatGPT"
-                  : message.kind === "steer"
-                    ? "你 · 补充要求"
-                    : "你"
-              }
-              subtitle={message.content.replace(/\s+/g, " ") || "正在思考…"}
-              accessories={
-                message.status === "streaming"
-                  ? [{ text: "正在回复…", icon: Icon.CircleProgress }]
-                  : undefined
-              }
-              actions={chatActions(message)}
-            />
-          ))}
-        </List.Section>
+        <List.Section title={error || status} />
+        {newestMessages.map((message) => {
+          const rows = messageRows(message.content);
+          const speaker =
+            message.role === "assistant"
+              ? "ChatGPT"
+              : message.kind === "steer"
+                ? "你 · 补充要求"
+                : "你";
+          return (
+            <List.Section key={message.id} title={speaker}>
+              {rows.map((row, index) => (
+                <List.Item
+                  key={`${message.id}-${index}`}
+                  id={`${message.id}-${index}`}
+                  icon={
+                    index === 0
+                      ? message.role === "assistant"
+                        ? "command-icon.png"
+                        : Icon.Person
+                      : Icon.Dot
+                  }
+                  title={row}
+                  accessories={
+                    index === 0 && message.status === "streaming"
+                      ? [{ text: "正在回复…", icon: Icon.CircleProgress }]
+                      : undefined
+                  }
+                  actions={chatActions(message)}
+                />
+              ))}
+            </List.Section>
+          );
+        })}
       </List>
     );
   }
