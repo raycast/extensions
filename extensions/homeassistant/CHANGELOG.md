@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Fix Quicklink search filtering] - {PR_MERGE_DATE}
+## [Fix Quicklink search filtering] - 2026-09-25
 
 - Fix "Save as Quicklink" opening entity list commands (including Cameras and Zones) without applying the entity filter, requiring an extra keystroke before the intended entity showed up
 
