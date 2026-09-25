@@ -1,0 +1,303 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nyxe",
+  "title": "Nyxe Mail",
+  "description": "Search, triage and send Nyxe mail, grab sign-in codes, and keep an eye on your inbox from the menu bar.",
+  "icon": "icon.png",
+  "author": "raymondaxyz",
+  "owner": "mzed-studio",
+  "access": "public",
+  "license": "MIT",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy-sign-in-code",
+      "title": "Copy Sign-In Code",
+      "subtitle": "Nyxe Mail",
+      "description": "Copy the newest verification code from the last 15 minutes of your inbox.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-sign-in-link",
+      "title": "Open Sign-In Link",
+      "subtitle": "Nyxe Mail",
+      "description": "Open the newest magic or verification link from the last 15 minutes of your inbox.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "subtitle": "Nyxe Mail",
+      "description": "Search your Nyxe mail and act on what you find.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "Nyxe Mail",
+      "description": "Your Nyxe inbox, with read, archive, snooze and tag actions.",
+      "mode": "view"
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "subtitle": "Nyxe Mail",
+      "description": "Write and send an email from your Nyxe address.",
+      "mode": "view"
+    },
+    {
+      "name": "email-selection-to-myself",
+      "title": "Email Selection to Myself",
+      "subtitle": "Nyxe Mail",
+      "description": "Send the selected text, or your clipboard, to your own Nyxe inbox.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-my-address",
+      "title": "Copy My Address",
+      "subtitle": "Nyxe Mail",
+      "description": "Copy your Nyxe address, an alias or a team address.",
+      "mode": "view"
+    },
+    {
+      "name": "find-contact",
+      "title": "Find Contact",
+      "subtitle": "Nyxe Mail",
+      "description": "Look up people you've had mail from.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-inbox",
+      "title": "Menu Bar Inbox",
+      "subtitle": "Nyxe Mail",
+      "description": "Your unread count and newest mail in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "description": "Search the user's Nyxe mailbox by keywords, sender or subject and return matching threads."
+    },
+    {
+      "name": "get-thread",
+      "title": "Get Thread",
+      "description": "Read a full email thread (every message, as plain text) by its thread id."
+    },
+    {
+      "name": "list-inbox",
+      "title": "List Inbox",
+      "description": "List the newest threads in the user's Nyxe inbox, optionally only unread ones."
+    },
+    {
+      "name": "create-reply-draft",
+      "title": "Create Reply Draft",
+      "description": "Create a reply draft in a thread. The draft is saved in Nyxe for the user to review and send; it is never sent."
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "description": "Send a new email from the user's Nyxe address. Asks the user to confirm first."
+    },
+    {
+      "name": "archive-thread",
+      "title": "Archive Thread",
+      "description": "Archive a thread (move it out of the inbox). Asks the user to confirm first."
+    }
+  ],
+  "ai": {
+    "instructions": "You are helping the user with their Nyxe Mail mailbox. Thread ids come from search-mail or list-inbox results; never invent one. Read a thread with get-thread before summarizing it or drafting a reply to it. Prefer create-reply-draft over send-email when the user wants to answer a thread: a draft lets them review it in Nyxe before it goes out. Only call send-email when the user clearly asked to send a new message, and include every recipient they named. Keep replies in the user's language and tone. Sign-in and verification codes are deliberately not available to you; if asked for one, tell the user to run the Copy Sign-In Code command.",
+    "evals": [
+      {
+        "input": "@nyxe what did Stripe send me this week?",
+        "mocks": {
+          "search-mail": {
+            "results": [
+              {
+                "emailId": "E1",
+                "threadId": "T1",
+                "from": { "email": "support@stripe.com", "name": "Stripe" },
+                "subject": "Your payout is on the way",
+                "preview": "A payout of $1,240.00 is on its way to your bank account ending in 4242.",
+                "receivedAt": 1790000000000,
+                "hasAttachment": false
+              }
+            ],
+            "total": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-mail",
+              "arguments": { "query": { "includes": "stripe" } }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@nyxe summarize my unread mail",
+        "mocks": {
+          "list-inbox": {
+            "threads": [
+              {
+                "threadId": "T2",
+                "subject": "Contract draft for review",
+                "messageCount": 2,
+                "lastMessage": {
+                  "id": "E2",
+                  "from": { "email": "ada@example.com", "name": "Ada" },
+                  "preview": "Could you look over section 4 before Friday?",
+                  "receivedAt": 1790000000000,
+                  "hasAttachment": true,
+                  "isUnread": true
+                }
+              }
+            ],
+            "nextCursor": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-inbox",
+              "arguments": { "unreadOnly": true }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@nyxe draft a reply to thread T3 saying I'll join the call on Thursday",
+        "mocks": {
+          "get-thread": {
+            "threadId": "T3",
+            "subject": "Planning call",
+            "messages": [
+              {
+                "id": "E3",
+                "from": [{ "email": "grace@example.com", "name": "Grace" }],
+                "subject": "Planning call",
+                "receivedAt": 1790000000000,
+                "text": "Are you free for a planning call on Thursday at 10?"
+              }
+            ]
+          },
+          "create-reply-draft": {
+            "draftId": "D3",
+            "threadId": "T3",
+            "openUrl": "https://nyxe.app/m?compose=D3"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-reply-draft",
+              "arguments": { "threadId": "T3" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@nyxe send an email to ada@example.com with the subject Lunch saying see you at noon",
+        "mocks": {
+          "send-email": {
+            "emailId": "E4",
+            "threadId": "T4"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-email",
+              "arguments": {
+                "to": { "includes": "ada@example.com" },
+                "subject": "Lunch"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@nyxe archive thread T5",
+        "mocks": {
+          "archive-thread": {
+            "moved": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "archive-thread",
+              "arguments": { "threadId": "T5" }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Create one in Nyxe at https://nyxe.app under Settings → API tokens. It starts with nyxe_pat_.",
+      "type": "password",
+      "required": true,
+      "placeholder": "nyxe_pat_…"
+    },
+    {
+      "name": "openIn",
+      "title": "Open Messages In",
+      "description": "Where \"Open in Nyxe\" goes. Automatic uses the Nyxe app when it's installed, the browser otherwise.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Automatic", "value": "auto" },
+        { "title": "Nyxe App", "value": "app" },
+        { "title": "Browser", "value": "browser" }
+      ]
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Leave as is unless you were asked to point the extension at another Nyxe deployment.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://convex-site.nyxe.app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "smoke": "node scripts/smoke.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
