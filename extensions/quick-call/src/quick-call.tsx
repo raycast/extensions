@@ -1,5 +1,4 @@
-import { Clipboard, getSelectedText, LaunchProps, showHUD } from "@raycast/api";
-import open from "open";
+import { Clipboard, getSelectedText, LaunchProps, open, showHUD } from "@raycast/api";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickCall }>) {
   // Both can be undefined: `fallbackText` is only set when launched as a
