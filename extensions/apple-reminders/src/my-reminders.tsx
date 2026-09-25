@@ -75,6 +75,7 @@ export default function Command() {
                     displayCompletionDate={displayCompletionDate}
                     viewProps={viewProps}
                     listId={listId}
+                    lists={data?.lists}
                     mutate={mutate}
                   />
                 );

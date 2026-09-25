@@ -1,6 +1,6 @@
 # theSVG for Raycast
 
-Search, preview, and copy 5,600+ brand SVG icons from [thesvg.org](https://thesvg.org) directly in Raycast.
+Search, preview, and copy 7,400+ brand SVG icons from [thesvg.org](https://thesvg.org) directly in Raycast.
 
 ## Commands
 
@@ -10,15 +10,21 @@ Browse and search the full theSVG library. Filter by category, preview icons, an
 
 **Actions:**
 
-- **Copy SVG** (`Cmd+C`) - Copy the SVG source code to clipboard
-- **Copy Direct URL** (`Cmd+Shift+C`) - Copy the theSVG direct URL
-- **Copy jsDelivr URL** (`Cmd+Option+C`) - Copy the jsDelivr CDN URL
-- **Open on theSVG** (`Cmd+O`) - Open the icon page in your browser
-- **View Details** (`Cmd+D`) - See all variants, SVG source, and metadata
-- **Copy as JSX** (`Cmd+Shift+J`) - Copy as a React JSX component
-- **Copy as HTML** (`Cmd+Shift+H`) - Copy as an `<img>` tag
-- **Copy as Data URI** (`Cmd+Shift+D`) - Copy as inline data URI
-- **Copy Hex Color** (`Cmd+Shift+X`) - Copy brand color
+| Name | macOS shortcut | Windows shortcut | Description |
+| ---- | -------------- | ---------------- | ----------- |
+| Copy SVG<sup>1</sup> | `↵` or `⌘` `↵` | `↵` or `Ctrl` `↵` | Copy the SVG source code to clipboard |
+| Show Details<sup>1</sup> | `⌘` `↵` or `↵` | `Ctrl` `↵` or `↵` | Show information about the SVG |
+| Copy Direct URL | `⌘` `⇧` `C` | `Ctrl` `Shift` `C` | Copy the theSVG direct URL |
+| Copy jsDelivr URL | `⌘` `⌥` `C` | `Ctrl` `Alt` `C` | Copy the jsDelivr CDN URL |
+| Open on theSVG | `⌘` `O` | `Ctrl` `O` | Open the icon page in your browser |
+| Open Brand Website | `⌘` `⇧` `O` | `Ctrl` `Shift` `O` | Open the brand website in your browser |
+| Toggle Layout | `⌘` `L` | `Ctrl` `L` | Toggle the layout between `List` and `Grid` |
+| Copy as JSX | `⌘` `⇧` `J` | `Ctrl` `Shift` `J` | Copy as a React JSX component |
+| Copy as HTML | `⌘` `⇧` `H` | `Ctrl` `Shift` `H` | Copy as an `<img>` tag |
+| Copy as Data URI | `⌘` `⇧` `D` | `Ctrl` `Shift` `D` | Copy as inline data URI |
+| Copy Hex Color | `⌘` `⇧` `X` | `Ctrl` `Shift` `X` | Copy brand color |
+
+1. Choose the primary action using the `Primary Action` preference.
 
 ### Quick Copy
 
@@ -28,13 +34,15 @@ Example: `Copy Brand Icon` > `github` copies the GitHub SVG to your clipboard.
 
 ## Preferences
 
-| Setting         | Description                                        | Default               |
-| --------------- | -------------------------------------------------- | --------------------- |
+| Setting | Description | Default |
+| --- | --- | --- |
 | Default Variant | Which variant to copy (default, mono, light, dark) | Default (Brand Color) |
+| Layout | Choose how to display results | List |
+| Primary Action | The action to perform when selecting an item | Copy SVG |
 
 ## Features
 
-- Search 5,600+ brand icons with alias matching
+- Search 7,400+ brand icons with alias matching
 - Filter by 100+ categories (AI, Design, DevTool, Cloud, etc.)
 - Preview icon thumbnails in the list
 - View all available variants (up to 7 per icon)

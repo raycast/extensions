@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nbnhhsh",
+  "title": "Nbnhhsh – Chinese Abbreviations",
+  "description": "Decode Chinese pinyin abbreviations and internet slang with 能不能好好说话 (nbnhhsh).",
+  "icon": "nbnhhsh-icon.png",
+  "author": "Astatine-213",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "nbnhhsh",
+    "能不能好好说话",
+    "pinyin",
+    "abbreviations",
+    "acronyms",
+    "initials",
+    "slang",
+    "Chinese",
+    "缩写",
+    "拼音",
+    "黑话"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "explain-abbreviations",
+      "title": "Explain Chinese Abbreviations",
+      "subtitle": "nbnhhsh · 能不能好好说话",
+      "description": "Find possible meanings for one or more Chinese pinyin abbreviations, then copy or paste an expansion.",
+      "icon": "nbnhhsh-icon.png",
+      "mode": "view",
+      "keywords": [
+        "nbnhhsh",
+        "能不能好好说话",
+        "缩写",
+        "拼音",
+        "黑话",
+        "网络用语",
+        "pinyin",
+        "slang",
+        "acronym",
+        "yyds",
+        "nsdd",
+        "awsl"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test:compile": "tsc -p tsconfig.test.json",
+    "test": "npm run test:compile && node node_modules/.cache/nbnhhsh-tests/tests/lookup.test.js",
+    "test:contract": "npm run test:compile && node node_modules/.cache/nbnhhsh-tests/tests/live-contract.test.js",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

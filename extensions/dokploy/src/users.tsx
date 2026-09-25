@@ -1,10 +1,10 @@
 import { Icon, List, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { User } from "./interfaces";
-import { useToken } from "./instances";
+import { type Instance, useInstanceScope } from "./instances";
 
-export default function Users() {
-  const { url, headers } = useToken();
+export default function Users({ instance: initial }: { instance: Instance }) {
+  const { url, headers, dropdown } = useInstanceScope(initial);
 
   const { isLoading, data: users } = useFetch<User[], User[]>(url + "user.all", {
     headers,
@@ -12,7 +12,7 @@ export default function Users() {
   });
 
   return (
-    <List navigationTitle="Users" isLoading={isLoading}>
+    <List navigationTitle="Users" isLoading={isLoading} searchBarAccessory={dropdown}>
       {users.map((user) => (
         <List.Item
           key={user.userId}

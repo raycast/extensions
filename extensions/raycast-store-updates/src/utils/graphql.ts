@@ -7,7 +7,7 @@ const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
  * Local copy of the array guard (mirrors `asArray` in ./index).
  *
  * Kept local ON PURPOSE: index.ts imports this module for the menu-bar scan, so importing
- * back from ./index would create a cycle and leave one module partially initialised at
+ * back from ./index would create a cycle and leave one module partially initialized at
  * eval time. Four lines of duplication is the cheaper trade. If this file grows, move
  * both copies to a dependency-free primitives module rather than adding the import back.
  */

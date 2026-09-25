@@ -97,6 +97,17 @@ const CHROMIUM_SCRIPTABLE_BROWSER_IDS = new Set<string>([
 
 const IS_MACOS = process.platform === "darwin";
 
+const COPY_LINK_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
+  "cmd-c": {
+    macOS: { modifiers: ["cmd"], key: "c" },
+    Windows: { modifiers: ["ctrl"], key: "c" },
+  },
+  "cmd-opt-c": {
+    macOS: { modifiers: ["cmd", "opt"], key: "c" },
+    Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+  },
+};
+
 type BrowserOpenMode = "current-tab" | "new-tab" | "new-window";
 
 function supportsBrowserAutomation(browserBundleId: string) {
@@ -153,7 +164,7 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser, replaceCurrentTab } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -727,7 +738,7 @@ export default function Command() {
                 <Action.CopyToClipboard
                   title="Copy Link"
                   content={item.url}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={COPY_LINK_SHORTCUTS[copyLinkShortcut] ?? COPY_LINK_SHORTCUTS["cmd-c"]}
                   onCopy={() => updateFrecency(item)}
                 />
 

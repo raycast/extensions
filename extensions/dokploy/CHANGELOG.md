@@ -1,5 +1,28 @@
 # Dokploy Changelog
 
+## [Deployments Feed Command] - 2026-09-25
+
+- Add a `Deployments` command showing the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency. Opens straight into the full deployment history (rollback, cancel, delete) for whichever one you pick.
+
+## [Sort Projects, Services, and Docker by Frecency] - 2026-09-25
+
+- **Projects**, **Services**, and **Docker** now sort by how often you actually open each one, not raw API order - matching how **Deploy Service** already sorts. Scoped per instance, so frequently-used items in one account never affect another's ranking.
+
+## [Switch Instances Without Leaving the Screen] - 2026-09-25
+
+- Add an instance switcher to **Projects**, **Docker**, **S3 Destinations**, and **Users** - pick a different configured instance right from where you are, no need to go back to **Instances** first.
+- The **Instances** screen now shows a checkmark on whichever instance is currently active. Switching only happens when you actually choose to open a screen for a specific instance - arrowing past its row in the list no longer does it silently.
+
+## [Edit and Delete Instances] - 2026-09-24
+
+- Add `Edit Instance` and `Delete Instance` actions to the **Instances** screen. Editing re-verifies the API key the same way adding one does; deleting only removes the instance from Raycast and doesn't revoke the key or change anything on the Dokploy server.
+- Editing or deleting the currently active instance keeps the extension's cached connection in sync automatically.
+- Fix **Services** failing to load for any project managed with Dokploy's environments feature - entering it from **Projects** or **Environments** errored instead of showing the service list.
+
+## [Fix Services list not refreshing after Create/Delete] - 2026-09-24
+
+- `Create Application`, `Create Database` and `Delete` popped back to Raycast's root (or, for Delete, stopped there without navigating at all) before the refreshed list actually loaded, so the change only showed up after fully restarting Raycast. Fixed so the **Services** list updates immediately.
+
 ## [Template Preview] - 2026-09-23
 
 - Add a `Preview` action to `From Template`, showing the domains, environment variables and file mounts a template will create before deploying it.

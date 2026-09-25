@@ -1,11 +1,40 @@
 import { UTCDate } from "@date-fns/utc";
-import { Color, Icon } from "@raycast/api";
+import { Color, Icon, getPreferenceValues } from "@raycast/api";
+import * as chrono from "chrono-node";
 import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
 import type { Location, Priority, Reminder } from "./hooks/useData";
 
+export function isDayFirst(preference?: string): boolean {
+  if (preference) {
+    return preference === "dmy";
+  }
+  try {
+    const prefs = getPreferenceValues<Preferences>();
+    return prefs?.dateFormat === "dmy";
+  } catch {
+    return false;
+  }
+}
+
+export function parseChronoDate(text: string, preference?: string) {
+  const dayFirst = isDayFirst(preference);
+  const parser = dayFirst ? chrono.en.GB : chrono.en;
+  return parser.parse(text);
+}
+
 export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
+export function parseReminderDueDate(dueDate?: string | null): Date | null {
+  if (!dueDate) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+    const [year, month, day] = dueDate.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  const date = new Date(dueDate);
+  return isNaN(date.getTime()) ? null : date;
 }
 
 export function formatReminderTime(reminder?: { dueDate?: string | null } | null): string {

@@ -101,12 +101,12 @@ export default function Command() {
     // in place lets a scope change apply a stale set before the fresh lookup lands.
     setInstalled(undefined);
     if (scope !== "my-updates") return;
-    let cancelled = false;
+    let canceled = false;
     fetchInstalledExtensionSlugs().then((slugs) => {
-      if (!cancelled) setInstalled(slugs);
+      if (!canceled) setInstalled(slugs);
     });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [scope]);
 
@@ -191,7 +191,7 @@ export default function Command() {
         {/* Updating installed extensions is Raycast's own command; this one only
             reports what changed upstream. */}
         <MenuBarExtra.Item
-          title="Check for Extension Updates"
+          title="Update Installed Extensions"
           icon={Icon.Download}
           onAction={checkForExtensionUpdates}
         />

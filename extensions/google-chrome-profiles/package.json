@@ -11,7 +11,8 @@
     "NirRosh",
     "josh_carty",
     "smpeotn",
-    "radek_cabaj"
+    "radek_cabaj",
+    "ray.dhruv"
   ],
   "license": "MIT",
   "commands": [
@@ -23,12 +24,22 @@
       "mode": "view"
     },
     {
+      "name": "move-current-tab",
+      "title": "Move Current Tab to Another Profile",
+      "subtitle": "Google Chrome",
+      "description": "Move the active Chrome tab to another profile. With two profiles, switch automatically; otherwise, choose a destination.",
+      "mode": "view"
+    },
+    {
       "name": "open-profile",
       "title": "Open Profile with Context",
       "subtitle": "Google Chrome",
       "description": "Background command for handling profile quicklinks and deeplinks.",
       "mode": "no-view"
     }
+  ],
+  "categories": [
+    "Web"
   ],
   "preferences": [
     {
@@ -39,8 +50,14 @@
       "default": "chrome",
       "description": "Which Chrome variant to use for profile switching.",
       "data": [
-        { "title": "Google Chrome", "value": "chrome" },
-        { "title": "Google Chrome Canary", "value": "chrome-canary" }
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Google Chrome Canary",
+          "value": "chrome-canary"
+        }
       ]
     },
     {
@@ -71,7 +88,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
 import useBookmarks from "./hooks/useBookmarks";
@@ -13,6 +13,7 @@ import TabListItem from "./components/TabListItem";
 import UrlListItem, { UrlItem } from "./components/UrlListItem";
 import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
+import OpenInDefaultBrowserAction from "./components/OpenInDefaultBrowserAction";
 import { searchTabsWithFallback } from "./tabSearch";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
@@ -204,16 +205,17 @@ export default function Command() {
   const { profiles } = useProfiles();
   const { selectedProfileId, setSelectedProfileId } = useSelectedProfileId("Defaults");
 
-  const { tabs, refresh } = useTabs();
+  // Open Tabs can change while the Command Bar is visible. Keep this command
+  // current without affecting the standalone Search Tabs command.
+  const { tabs, refresh, markTabActive } = useTabs({ refreshWhileOpen: true });
   const { bookmarks, isLoading: bookmarksLoading } = useBookmarks(selectedProfileId);
   const { readingList } = useReadingList(selectedProfileId);
   const {
     data: history,
-    isLoading: historyLoading,
     permissionView,
     completedQueryKey,
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
-  const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
+  const { suggestions } = useSuggestions(query);
   const historyQueryKey = `${selectedProfileId}\u0000${hasQuery ? query : ""}`;
   const hasCurrentHistoryResult = !hasQuery || completedQueryKey === historyQueryKey;
 
@@ -231,7 +233,12 @@ export default function Command() {
     setSelectedItemId(undefined);
   };
 
-  const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
+  // Loading local history and remote suggestions for each keystroke should not
+  // put the entire List into a loading state: by the time either can be true,
+  // profiles/tabs/bookmarks have already resolved, so there is no genuine
+  // "nothing to show yet" case being masked - only a loading flicker on every
+  // keystroke would be added for no benefit.
+  const isLoading = !profiles || tabs === undefined || bookmarksLoading;
 
   // Never show the launcher tabs in the list itself.
   const openTabs: Tab[] = (tabs ?? []).filter((t) => !isLauncherTab(t.url));
@@ -414,7 +421,14 @@ export default function Command() {
       {topHit && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
-            <TabListItem id={TOP_HIT_ITEM_ID} tab={topHit.tab} refresh={refresh} closeLaunchers />
+            <TabListItem
+              id={TOP_HIT_ITEM_ID}
+              tab={topHit.tab}
+              refresh={refresh}
+              closeLaunchers
+              immediatePopToRoot
+              onActivate={markTabActive}
+            />
           ) : (
             <UrlListItem id={TOP_HIT_ITEM_ID} item={topHit.item} accessory={topHit.source} />
           )}
@@ -430,7 +444,7 @@ export default function Command() {
             subtitle={address}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Default Browser" url={address} />
+                <OpenInDefaultBrowserAction url={address} immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -445,7 +459,7 @@ export default function Command() {
             title={`Search ${getSearchEngineName()} for “${query}”`}
             actions={
               <ActionPanel>
-                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" />
+                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -463,7 +477,15 @@ export default function Command() {
       {tabSection.length > 0 && (
         <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
-            <TabListItem id={tabKey(t)} key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
+            <TabListItem
+              id={tabKey(t)}
+              key={tabKey(t)}
+              tab={t}
+              refresh={refresh}
+              closeLaunchers
+              immediatePopToRoot
+              onActivate={markTabActive}
+            />
           ))}
         </List.Section>
       )}

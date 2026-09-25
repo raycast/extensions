@@ -19,7 +19,8 @@
     "yusifaliyevpro",
     "elibattistoni",
     "clins1994",
-    "just_me"
+    "just_me",
+    "ray.dhruv"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -242,6 +243,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --test test/*.test.mjs",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
   },

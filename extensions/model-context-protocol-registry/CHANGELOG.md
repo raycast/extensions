@@ -1,5 +1,33 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SpringBrand MCP Server] - 2026-09-25
+
+- Add SpringBrand to the official registry: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation, all behind one connector and billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
+## [Add Scout7 MCP Server] - 2026-09-25
+
+- Add Scout7 to the official registry: plans a week of organic marketing from your brand, writes SEO blogs, videos, LinkedIn carousels and social posts, schedules them across your channels and reports what moved, with your approval before anything goes live. Hosted remote Streamable HTTP server at https://mcp.scout7.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add Engine DJ, Serato DJ and Bandcamp MCP Servers] - 2026-09-24
+
+- Add Engine DJ, Serato DJ and Bandcamp to the community registry: ask an AI assistant about your Engine DJ (Denon) or Serato DJ library (harmonic BPM and Camelot key search, duplicate and missing-file audits, playlists and crates built on request) or dig Bandcamp without an account. Open-source local stdio servers started with `npx`; not affiliated with inMusic, Serato or Bandcamp.
+
+## [Add AI Applyd MCP Server] - 2026-09-24
+
+- Add AI Applyd to the official registry: search jobs matched to your resume, tailor the resume and cover letter to a posting, and submit the application on the employer's own hiring system across 15 ATS platforms; score a resume against a job and get interview prep. Hosted remote Streamable HTTP server at https://mcp.aiapplyd.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add Clera MCP Server] - 2026-09-24
+
+- Add Clera to the official registry: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles and request intros; candidates search open startup jobs, read full listings and save the good ones. Hosted remote Streamable HTTP server at https://mcp.getclera.com through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key; free during the beta.
+
+## [Add RemoveDuplicates.org MCP Server] - 2026-09-24
+
+- Add RemoveDuplicates.org to the official registry: remove duplicate lines or CSV/TSV rows and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add Codex Reset MCP Server] - 2026-09-24
+
+- Add Codex Reset to the official registry: OpenAI Codex usage-limit reset forecast for the next 24 and 48 hours, the verified reset record with source links, and Codex service status. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.
+
 ## [Add QuillHub MCP Server] - 2026-09-23
 
 - Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.

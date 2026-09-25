@@ -5,6 +5,19 @@ export function generateId(): string {
   return crypto.randomUUID();
 }
 
+export function categoryExists(categories: string[], value: string): boolean {
+  const v = value.trim().toLowerCase();
+  return v.length > 0 && categories.some((c) => c.trim().toLowerCase() === v);
+}
+
+export function resolveCategory(selected: string, picked: boolean, filter: string, existing: string[]): string {
+  const typed = filter.trim();
+  const match = existing.find((c) => c.trim().toLowerCase() === typed.toLowerCase());
+  if (typed && match) return match;
+  if (typed && !picked) return typed;
+  return selected.trim() || UNCATEGORIZED;
+}
+
 export function normalizeShortcut(value: unknown): Shortcut {
   const src = (typeof value === "object" && value !== null ? value : {}) as Record<string, unknown>;
 

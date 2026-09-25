@@ -689,6 +689,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "github-pull-request-review",
+        "title": "Review Pull Requests"
+      }
+    ],
     "instructions": "- Always format pull requests and issues as markdown links: [pull-request-title](https://github.com/:org/:repo/pull/:number) and [issue-title](https://github.com/:org/:repo/issues/:number).\\n- IMPORTANT: Use repo name from user input ONLY when it is in format `owner/repo`. Otherwise always search for repos using `search-repositories` tool as a first step and use the best match. When user ask for any action with issue, always use `search-issues` to get the actual `issueId`. When user ask for any action with pull request, always use `search-pull-requests` to get the actual `pullRequestId`",
     "evals": [
       {
@@ -1201,7 +1207,7 @@
   ],
   "dependencies": {
     "@octokit/rest": "^21.0.1",
-    "@raycast/api": "^1.104.17",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
@@ -1236,7 +1242,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts",
-    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/api/viewerStats.test.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/helpers/repository-filter.test.ts src/api/viewerStats.test.ts",
     "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [

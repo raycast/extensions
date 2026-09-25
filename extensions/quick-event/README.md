@@ -51,6 +51,14 @@ Optional Preferences:
 - The retreat is from Jan 12 - 29.
 - Bake a cake tomorrow.
 - Use Tabule today!
+- Meeting tomorrow at 10am remind me 5 min before
+- Doctor appointment on Friday at 3pm add reminder for 3 hours before
+- Sync next Monday 9am with 15m reminder
+- Catch up at 2pm remind me at start
+
+## Reminder Support
+
+Specify event reminders directly in your natural language query (e.g. `remind me 5 min before`, `add reminder for 3 hours before`, `with 15m reminder`, `alert 1 hour before`, `remind me at time of event`). Custom alarms are automatically created on the resulting event in Apple Calendar.
 
 ## Timezone Support
 

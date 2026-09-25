@@ -1,5 +1,16 @@
 # Slack Changelog
 
+## [Fix Unread Messages configuration] - 2026-09-25
+
+- Fix selected conversations in the Unread Messages configuration sometimes being lost
+- Add a "Done" action to the configuration list to go back once you've picked your conversations
+
+## [Catch-up, Decisions, and Standup Skills] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.
+- Include source references and coverage limits, with Slack delivery only when requested.
+
 ## [Quiet automatic rate-limit retries] - 2026-09-23
 
 - Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.

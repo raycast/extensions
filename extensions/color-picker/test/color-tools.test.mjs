@@ -23,3 +23,9 @@ test("oklch previews of grayscale colors have no NaN hue", () => {
     assert.ok(!result.includes("NaN"), `${color} produced ${result}`);
   }
 });
+
+test("native Display P3 colors retain their gamut in P3 output", () => {
+  const color = { red: 1, green: 0, blue: 0, alpha: 1, colorSpace: "p3" };
+  assert.equal(formatColor(color, "p3"), "color(display-p3 1 0 0)");
+  assert.equal(formatColor("color(display-p3 1 0 0 / 0.5)", "p3"), "color(display-p3 1 0 0 / 0.5)");
+});

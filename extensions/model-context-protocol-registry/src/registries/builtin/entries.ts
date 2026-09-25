@@ -19,6 +19,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "aiapplyd",
+    title: "AI Applyd",
+    description:
+      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: AI Applyd rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system across 15 ATS platforms, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://aiapplyd.com/apple-touch-icon.png",
+    homepage: "https://aiapplyd.com/mcps?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.aiapplyd.com/mcp"],
+    },
+  },
+  {
     name: "atono",
     title: "Atono",
     description:
@@ -85,6 +97,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://circleback.ai/api/mcp"],
+    },
+  },
+  {
+    name: "clera",
+    title: "Clera",
+    description:
+      "Hire from Raycast: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles, and request intros. Candidates search open startup jobs, read full listings and save the good ones. Hosted remote server with OAuth 2.1 sign-in (dynamic client registration), no API key to paste; free during the beta.",
+    icon: "https://www.getclera.com/images/icon-512x512.png",
+    homepage: "https://www.getclera.com/mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.getclera.com"],
+    },
+  },
+  {
+    name: "codex-reset",
+    title: "Codex Reset",
+    description:
+      "Ask whether OpenAI Codex usage limits are likely to reset: the reset probability for the next 24 and 48 hours, the dated record of verified resets with source links, and Codex service status to tell an outage from a usage limit. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://codex-reset.com/icon-512.png",
+    homepage: "https://codex-reset.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://codex-reset.com/mcp"],
     },
   },
   {
@@ -397,7 +433,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "Search your meeting transcripts, read who said what, pull decisions and action items, get quotes from one person across meetings, and transcribe new files or YouTube links. Hosted remote server with OAuth 2.1 sign-in, no API key to paste.",
     icon: "https://raw.githubusercontent.com/Tim-nocode/quillhub-mcp/main/logo.png",
-    homepage: "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
+    homepage:
+      "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.quillhub.ai/mcp"],
@@ -419,6 +456,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
+    },
+  },
+  {
+    name: "removeduplicates",
+    title: "RemoveDuplicates.org",
+    description:
+      "Remove duplicate lines from a text list, or duplicate rows from CSV/TSV text such as rows copied from Excel or Google Sheets, and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in and no API key, and text is never stored.",
+    icon: "https://removeduplicates.org/icon-512.png",
+    homepage: "https://removeduplicates.org/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://removeduplicates.org/mcp"],
     },
   },
   {
@@ -457,6 +506,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
+    },
+  },
+  {
+    name: "scout7",
+    title: "Scout7",
+    description:
+      "Run a week of organic marketing on loop from your AI agent. Scout7 plans your week from your brand, then writes SEO blogs, videos, LinkedIn carousels and social posts, schedules everything across your channels, and reports what moved — it even checks whether you're cited by ChatGPT and Claude. You approve before anything goes live. Hosted remote Streamable HTTP server with Scout7 OAuth 2.1 sign-in (dynamic client registration) through `mcp-remote`; no API key needed.",
+    icon: "https://scout7.ai/apple-touch-icon.png",
+    homepage:
+      "https://scout7.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=listing&utm_campaign=mcp-directories&ref=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.scout7.ai/mcp"],
     },
   },
   {
@@ -520,6 +582,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://www.socialfaktory.com/mcp"],
+    },
+  },
+  {
+    name: "springbrand",
+    title: "SpringBrand",
+    description:
+      "Go-to-market capabilities for your AI agent behind one connector: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation. The agent searches for the capability it needs, runs it and gets the result back, billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://springbrand.ai/apple-touch-icon.png",
+    homepage: "https://springbrand.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://connector.springbrand.ai/mcp"],
     },
   },
   {
@@ -1078,6 +1152,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bandcamp",
+    title: "Bandcamp",
+    description:
+      "Dig Bandcamp without an account or API key: search artists, albums, labels and tracks, browse genre tags for new and top releases, read tracklists and prices. Unofficial; read-only, local stdio server.",
+    icon: "https://raw.githubusercontent.com/Venut-Technologies/bandcamp-mcp/main/assets/icon.png",
+    homepage: "https://github.com/Venut-Technologies/bandcamp-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "bandcamp-mcp"],
+    },
+  },
+  {
     name: "basic-memory",
     title: "Basic Memory",
     description:
@@ -1143,6 +1229,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
       },
+    },
+  },
+  {
+    name: "engine-dj",
+    title: "Engine DJ",
+    description:
+      "Search, audit and build playlists in your Engine DJ (Denon) library: BPM and Camelot key search, duplicate and missing-file audits, cues and beatgrids, opt-in playlist and tag edits. Unofficial; local stdio server, macOS.",
+    icon: "https://raw.githubusercontent.com/Venut-Technologies/engine-dj-mcp/main/assets/icon.png",
+    homepage: "https://github.com/Venut-Technologies/engine-dj-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "engine-dj-mcp"],
     },
   },
   {
@@ -1316,6 +1414,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "serato-dj",
+    title: "Serato DJ",
+    description:
+      "Search and audit your Serato DJ library: harmonic BPM and Camelot key search, crates, duplicate and missing-file audits, and new crates built with a preview before anything is written. Unofficial; local stdio server, macOS.",
+    icon: "https://raw.githubusercontent.com/Venut-Technologies/serato-dj-mcp/main/assets/icon.png",
+    homepage: "https://github.com/Venut-Technologies/serato-dj-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "serato-dj-mcp"],
     },
   },
   {
