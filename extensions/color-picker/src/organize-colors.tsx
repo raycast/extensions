@@ -16,11 +16,12 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
+import MultipleColorActions from "./components/MultipleColorActions";
 import { EditTitle } from "./components/EditTitle";
 import { useColorsSelection } from "./hooks/useColorsSelection";
 import { useHistory } from "./lib/history";
 import { HistoryItem, SelectMode, UseColorsSelectionObject } from "./lib/types";
-import { COPY_FORMATS, copySelectedColors, getFormattedColor, getIcon, getPreviewColor } from "./lib/utils";
+import { getFormattedColor, getIcon, getPreviewColor } from "./lib/utils";
 
 const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
@@ -193,10 +194,6 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
     }
   }, []);
 
-  const { toggleSelection, selectAll, clearSelection } = selection.actions;
-  const { anySelected, allSelected, selectedItems, countSelected } = selection.selected;
-  const isSelected = selection.helpers.getIsItemSelected(historyItem);
-
   const color = historyItem.color;
   const formattedColor = getFormattedColor(color);
   const favoriteHistory = history?.filter((item) => item.isFavorite) ?? [];
@@ -274,52 +271,7 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
         )}
       </ActionPanel.Section>
 
-      {selectMode === "multi" && (
-        <ActionPanel.Section title="Multiple Colors">
-          {countSelected > 0 && (
-            <ActionPanel.Submenu
-              title="Copy Selected Colors"
-              icon={Icon.CopyClipboard}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            >
-              <Action.CopyToClipboard
-                title="Copy to Clipboard"
-                content={selectedItems.map((item) => getFormattedColor(item.color)).join(";")}
-              />
-              {COPY_FORMATS.map(({ format, title, icon }) => (
-                <Action.CopyToClipboard
-                  key={format}
-                  title={title}
-                  content={copySelectedColors(selectedItems, format)}
-                  icon={icon}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
-          <Action
-            icon={isSelected ? Icon.Checkmark : Icon.Circle}
-            title={isSelected ? `Deselect Color ${formattedColor}` : `Select Color ${formattedColor}`}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={() => toggleSelection(historyItem)}
-          />
-          {!allSelected && (
-            <Action
-              icon={Icon.Checkmark}
-              title="Select All Colors"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-              onAction={selectAll}
-            />
-          )}
-          {anySelected && (
-            <Action
-              icon={Icon.XMarkCircle}
-              title="Clear Selection"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
-              onAction={clearSelection}
-            />
-          )}
-        </ActionPanel.Section>
-      )}
+      {selectMode === "multi" && <MultipleColorActions item={historyItem} selection={selection} />}
 
       <ActionPanel.Section>
         <Action
