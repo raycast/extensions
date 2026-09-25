@@ -1,6 +1,6 @@
 # my-daily-log Changelog
 
-## [Local AI, Reminders and Timezone Fixes] - {PR_MERGE_DATE}
+## [Local AI, Reminders and Timezone Fixes] - 2026-09-25
 
 - The AI commands no longer use Raycast AI: they work with Ollama (default) or any OpenAI-compatible server (LM Studio, llama.cpp, OpenAI, OpenRouter…), configurable in the preferences
 - Added "AI Thinking" (e.g. disable thinking for qwen3 like `--think=false`) and "Extra Model Parameters" preferences to pass any parameter (temperature, top_p, seed…) to the model
