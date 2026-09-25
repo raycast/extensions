@@ -3,7 +3,7 @@
 ## [Category Dropdown] - {PR_MERGE_DATE}
 
 - Pick an existing category from a searchable dropdown when adding or editing a shortcut
-- Create a new category from the form
+- Type a name that doesn't exist yet to create a new category
 
 ## [Initial Release] - 2026-09-01
 
