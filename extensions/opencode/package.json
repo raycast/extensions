@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opencode",
+  "title": "OpenCode",
+  "description": "Use models from your OpenCode Console workspace in Raycast AI",
+  "icon": "extension-icon.png",
+  "author": "vimtor",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "refresh-models",
+      "title": "Refresh Models",
+      "description": "Reload the models available in your OpenCode Console workspace",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "An OpenCode Console API key. Create one under Service Accounts > API Keys.",
+      "type": "password",
+      "required": true,
+      "placeholder": "oc_sk_..."
+    }
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.63",
+    "@ai-sdk/google": "^4.0.80",
+    "@ai-sdk/openai": "^4.0.75",
+    "@ai-sdk/openai-compatible": "^3.0.55",
+    "@raycast/api": "^2.5.2",
+    "ai": "^7.0.114",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
