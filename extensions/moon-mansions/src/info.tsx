@@ -1,16 +1,27 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { getMoonInfo } from "./moon";
+import { getMoonInfo, nakshatraTheme, planetDetailLine, vocEndLabel } from "./moon";
 
 export default function Command() {
   const m = getMoonInfo();
-  const markdown = `# ${m.emoji} ${m.phaseName}\n\n${m.illumPct.toFixed(1)}% illuminated · ${Math.round(
-    m.age
-  )} days old · in ${m.zodiac}\n\n**Mansion ${m.mansion.num} — ${m.mansion.name}**\n\nNakshatra ${m.nakshatra.n} ${
+  const rows = m.planets
+    .map((p) => `| ${p.name} | ${p.deg} ${p.sign} | ${p.sidDeg} ${p.sidSign} | ${p.motion} |`)
+    .join("\n");
+  const markdown = `# ${m.emoji} ${m.phaseName}\n\n${m.illumPct.toFixed(
+    1
+  )}% illuminated (${m.trend.toLowerCase()}) · ${Math.round(m.age)} days old\n\n${
+    m.voc.isVoc ? `🚫 ${vocEndLabel(m.voc)}` : `✅ Applying ${m.voc.nextAspect}`
+  }\n\nTropical: in ${m.zodiac} · Sidereal: in ${m.siderealZodiac} (Lahiri ${m.ayanamsa.toFixed(2)}°)\n\n**Mansion ${
+    m.mansion.num
+  } — ${m.mansion.name}**\n\n${m.mansion.theme}\n\n**Nakshatra ${m.nakshatra.n} — ${
     m.nakshatra.name
-  } · Xiu ${m.xiu.n} ${m.xiu.name} ${m.xiu.zh} (approx)`;
-  const copyAll = `${m.phaseName} ${m.illumPct.toFixed(1)}% in ${m.zodiac} · Mansion ${m.mansion.num} ${
-    m.mansion.name
-  } · Nakshatra ${m.nakshatra.name} · Xiu ${m.xiu.name}`;
+  }**\n\n${nakshatraTheme(m.nakshatra)} (${m.nakshatra.planet} · ${m.nakshatra.deity})\n\n**Xiu ${m.xiu.n} — ${
+    m.xiu.name
+  } ${m.xiu.zh} (approx)**\n\n${
+    m.xiu.theme
+  }\n\n| Planet | Tropical | Sidereal (Lahiri) | Motion |\n| --- | --- | --- | --- |\n${rows}`;
+  const copyAll = `${m.phaseName} ${m.illumPct.toFixed(1)}% · Tropical ${m.zodiac} · Sidereal ${m.siderealZodiac} · ${
+    m.voc.isVoc ? vocEndLabel(m.voc) : m.voc.nextAspect
+  } · Mansion ${m.mansion.num} ${m.mansion.name} · Nakshatra ${m.nakshatra.name} · Xiu ${m.xiu.name}`;
 
   return (
     <Detail
@@ -32,10 +43,16 @@ export default function Command() {
           <Detail.Metadata.Label title="Masa" text={`🌙 ${m.cal.masa}`} />
           <Detail.Metadata.Label title="Vara" text={`⭐ ${m.cal.vara}`} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Phase" text={`${m.emoji} ${m.phaseName}`} />
-          <Detail.Metadata.Label title="Illumination" text={`✨ ${m.illumPct.toFixed(1)}%`} />
-          <Detail.Metadata.Label title="Zodiac" text={m.zodiac} />
+          <Detail.Metadata.Label title="Phase" text={`${m.emoji} ${m.phaseName} · ${m.trend}`} />
+          <Detail.Metadata.Label title="Illumination" text={`✨ ${m.illumPct.toFixed(1)}% · ${m.trend}`} />
           <Detail.Metadata.Label title="Moon age" text={`⏳ ${Math.round(m.age)} days`} />
+          <Detail.Metadata.Label title="Tropical Moon" text={`${m.zodiac}`} />
+          <Detail.Metadata.Label title="Sidereal Moon" text={`${m.siderealZodiac}`} />
+          <Detail.Metadata.Label
+            title="VOC"
+            text={m.voc.isVoc ? `🚫 ${vocEndLabel(m.voc)}` : `✅ ${m.voc.nextAspect}`}
+          />
+          <Detail.Metadata.Label title="Ayanamsa (Lahiri)" text={`${m.ayanamsa.toFixed(3)}°`} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Mansion number" text={`🔢 ${m.mansion.num}`} />
           <Detail.Metadata.Label title="Mansion name" text={`🏷️ ${m.mansion.name}`} />
@@ -53,11 +70,7 @@ export default function Command() {
           <Detail.Metadata.Label title="Theme" text={`💭 ${m.xiu.theme}`} />
           <Detail.Metadata.Separator />
           {m.planets.map((p) => (
-            <Detail.Metadata.Label
-              key={p.name}
-              title={`${p.symbol} ${p.name}`}
-              text={`${p.deg} ${p.sign} · ${p.motion}`}
-            />
+            <Detail.Metadata.Label key={p.name} title={`${p.symbol} ${p.name}`} text={planetDetailLine(p)} />
           ))}
         </Detail.Metadata>
       }

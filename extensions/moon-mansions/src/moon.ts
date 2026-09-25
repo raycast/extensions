@@ -1,6 +1,6 @@
 // Ported from 28LunarMansionGuide/index.html (Meeus Ch.47 truncation, ±1-2°).
 // Do not retune constants without cross-validating 3 dates vs Stellarium/AstroSeek.
-import { ARAB_THEMES, BRANCHES, NAKSHATRAS, NakshatraInfo, STEMS, XIU, XiuInfo } from "./systems";
+import { ARAB_THEMES, BRANCHES, NAKSHATRAS, NakshatraInfo, XIU, XiuInfo } from "./systems";
 
 export interface Mansion {
   num: number;
@@ -415,8 +415,12 @@ function planetLon(name: string, jd: number): number {
 export interface PlanetPosition {
   name: string;
   symbol: string;
-  sign: string;
-  deg: string;
+  sign: string; // tropical sign (compat)
+  deg: string; // tropical deg like 12°05' (compat)
+  lon: number; // tropical longitude 0–360
+  sidLon: number; // sidereal longitude via TradAstro Lahiri
+  sidSign: string;
+  sidDeg: string;
   motion: string;
 }
 
@@ -438,19 +442,118 @@ function degStr(lon: number): string {
   return `${deg}°${String(min).padStart(2, "0")}'`;
 }
 
-function planetRow(name: string, lon: number, jd: number): PlanetPosition {
+function planetRow(name: string, lon: number, jd: number, ayanamsa: number): PlanetPosition {
   let motion = "Direct";
   if (name !== "Sun" && name !== "Moon") {
     const dl = ((((planetLon(name, jd + 1) - lon) % 360) + 540) % 360) - 180;
     motion = dl < 0 ? "Retrograde" : "Direct";
   }
+  const sidLon = toSidereal(lon, ayanamsa);
   return {
     name,
     symbol: PLANET_SYMBOLS[name],
     sign: SIGNS[Math.floor(lon / 30) % 12],
     deg: degStr(lon),
+    lon: ((lon % 360) + 360) % 360,
+    sidLon,
+    sidSign: SIGNS[Math.floor(sidLon / 30) % 12],
+    sidDeg: degStr(sidLon),
     motion,
   };
+}
+
+// ─── Sidereal: TradAstro VotingEngine Lahiri/Chitrapaksha ───
+// J2000 anchor + IAU-2006 precession in longitude. Tracks JHora Swiss-Eph
+// Lahiri to ~arc-second across a human lifespan; JHora remains the reference.
+// Ported from TradAstroVotingEngine/engine.js Vedic.ayanamsa (parity item 3,
+// founder decision 2026-06-12). Replaces the old linear 23.85 + 0.01397/yr.
+export function tradAyanamsa(date: Date): number {
+  const jd = date.getTime() / 86400000 + 2440587.5;
+  const T = (jd - 2451545.0) / 36525;
+  return 23.85337 + (5028.796195 * T + 1.1054348 * T * T) / 3600;
+}
+
+export function toSidereal(tropLon: number, ayanamsa: number): number {
+  return (((tropLon - ayanamsa) % 360) + 360) % 360;
+}
+
+// ─── Column-aligned display: one visual column per field ───
+// Degrees pad with FIGURE SPACE (U+2007, exactly one digit wide), so numeric
+// columns align exactly even in Raycast's proportional font. Name/sign padding
+// uses regular spaces — near-exact, since letter widths vary and no spacing
+// character can compensate for that; only a monospace font would.
+const FIG = "\u2007"; // U+2007 FIGURE SPACE — exactly one digit wide
+const NAME_W = 7;
+const SLOT_W = 18; // max "29°47' Sagittarius"
+
+export function planetMenuTitle(p: PlanetPosition): string {
+  const trop = `${p.deg.padStart(6, FIG)} ${p.sign}`.padEnd(SLOT_W, " ");
+  return `${p.name.padEnd(NAME_W, " ")}   ${trop}  ·  ${p.sidDeg} ${p.sidSign}`;
+}
+
+export function planetDetailLine(p: PlanetPosition): string {
+  const trop = `${p.deg.padStart(6, FIG)} ${p.sign}`.padEnd(SLOT_W, " ");
+  const sid = `${p.sidDeg.padStart(6, FIG)} ${p.sidSign}`.padEnd(SLOT_W, " ");
+  return `Tropical   ${trop}    Sidereal   ${sid}    ${p.motion}`;
+}
+
+// Split a long description into at most two lines at the word boundary
+// nearest the midpoint, so truncated menu/metadata rows stay readable.
+// Returns one line when the text already fits.
+export function splitTwoLines(text: string): string[] {
+  if (text.length <= 100) return [text];
+  const mid = Math.floor(text.length / 2);
+  let cut = -1;
+  let bestDist = Infinity;
+  for (let i = text.indexOf(" "); i !== -1; i = text.indexOf(" ", i + 1)) {
+    const dist = Math.abs(i - mid);
+    if (dist < bestDist) {
+      bestDist = dist;
+      cut = i;
+      if (i >= mid) break;
+    }
+  }
+  if (cut < 0) return [text];
+  return [text.slice(0, cut).trimEnd(), text.slice(cut + 1).trimStart()];
+}
+
+// One-line counsel per nakshatra, distilled from upstream bestFor/avoid
+// (IbnArbi/client/src/data/nakshatras.ts). Kept here — not in systems.ts,
+// which is generated and must not be hand-edited.
+const NAKSHATRA_COUNSEL: Record<number, string> = {
+  1: "Favors new ventures, learning, trade and healing; avoid locking into long projects.",
+  2: "Favors surgery, decisive cuts and contests; avoid marriage, ceremony and diplomacy.",
+  3: "Favors fire, metalwork and engineering; avoid delicate talks and marriage.",
+  4: "Favors property, foundations, farming and lasting commitments; avoid throwaway errands and travel.",
+  5: "Favors marriage, friendship, music and study; avoid aggression and conflict.",
+  6: "Favors research and inner work through upheaval; avoid marriage, money deals and celebrations.",
+  7: "Favors travel, trade, job moves and negotiation; avoid foundations and permanent ties.",
+  8: "Favors new ventures, learning, trade and creative work; avoid long projects and marriage.",
+  9: "Favors research and deep transformative work; avoid marriage, money deals and celebrations.",
+  10: "Favors bold, competitive and military action; avoid marriage, ceremony and diplomacy.",
+  11: "Favors competitive action and fire or chemical work; avoid marriage and ceremony.",
+  12: "Favors property, foundations and lasting alliances; avoid temporary ventures and travel.",
+  13: "Favors new ventures, learning, trade and craft; avoid locking into long projects.",
+  14: "Favors marriage, friendship, music and study; avoid aggression and conflict.",
+  15: "Favors travel, transport, trade and moves; avoid foundations and permanent ties.",
+  16: "Favors fire, metalwork and engineering; avoid delicate talks and marriage.",
+  17: "Favors marriage, friendship, music and study; avoid aggression and conflict.",
+  18: "Favors research and inner work through upheaval; avoid marriage, money deals and celebrations.",
+  19: "Favors research and decisive clearing for transformation; avoid marriage, money deals and celebrations.",
+  20: "Favors bold, competitive and military action; avoid marriage, ceremony and diplomacy.",
+  21: "Favors property, foundations and lasting enterprise; avoid temporary ventures and travel.",
+  22: "Favors travel, trade, job moves and negotiation; avoid foundations and permanent ties.",
+  23: "Favors travel, transport, trade and moves; avoid foundations and permanent ties.",
+  24: "Favors travel, trade, job moves and negotiation; avoid foundations and permanent ties.",
+  25: "Favors surgery, decisive cuts and contests; avoid marriage, ceremony and diplomacy.",
+  26: "Favors property, foundations and solemn vows; avoid temporary ventures and travel.",
+  27: "Favors marriage, friendship, music and study; avoid aggression and conflict.",
+};
+
+// Full Vedic theme line: etymological meaning plus one line of counsel.
+export function nakshatraTheme(n: NakshatraInfo): string {
+  const counsel = NAKSHATRA_COUNSEL[n.n];
+  return counsel ? `${n.theme} — ${counsel}` : n.theme;
 }
 
 export interface Calendars {
@@ -466,18 +569,145 @@ export interface Calendars {
   vara: string;
 }
 
+export interface VocInfo {
+  isVoc: boolean;
+  ingressInHours: number;
+  nextSign: string;
+  nextAspect: string | null;
+}
+
+// ─── Void of Course: the Moon perfects no applying Ptolemaic aspect
+// (0/60/90/120/180) to a classical planet (Sun, Mercury, Venus, Mars, Jupiter,
+// Saturn) before leaving its current tropical sign. Forward-scan at 10-min
+// steps and wait for exact contact: an aspect that only enters orb and then
+// ingresses without perfecting does not break VOC, and neither does a past
+// aspect that is merely separating. The reported time is the perfection, not
+// orb entry. ±1–2° ephemeris family as the rest of this file.
+const VOC_ASPECTS: [number, string][] = [
+  [0, "conjunction"],
+  [60, "sextile"],
+  [90, "square"],
+  [120, "trine"],
+  [180, "opposition"],
+];
+const VOC_PLANETS = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
+
+function vocPlanetLon(name: string, jd: number): number {
+  return name === "Sun" ? sunLon(jd) : planetLon(name, jd);
+}
+
+// |Moon→planet separation| folded onto 0–180°. Continuous through both the
+// conjunction and the opposition, so every aspect is a zero of
+// |vocSep − angle|. The raw 0–359° separation instead puts an applying
+// conjunction near 360° rather than 0°, which hid it entirely.
+function vocSep(mLon: number, pLon: number): number {
+  return Math.abs(((((mLon - pLon) % 360) + 540) % 360) - 180);
+}
+
+export function getVocInfo(date = new Date()): VocInfo {
+  const jd0 = date.getTime() / 86400000 + 2440587.5;
+  const step = 10 / 1440; // 10 minutes in days
+  const maxSteps = Math.ceil(4 / step); // Moon clears a sign in <3d; 4d cap
+  const signIdx = Math.floor(moonLon(jd0) / 30) % 12;
+  const nextSign = SIGNS[(signIdx + 1) % 12];
+
+  // Distance from exactness for every planet × aspect at one instant.
+  const distsAt = (mLon: number, jd: number): number[][] =>
+    VOC_PLANETS.map((p) => {
+      const sep = vocSep(mLon, vocPlanetLon(p, jd));
+      return VOC_ASPECTS.map(([a]) => Math.abs(sep - a));
+    });
+
+  let prevMLon = moonLon(jd0);
+  let prev = distsAt(prevMLon, jd0);
+  // Per planet × aspect: has the distance been shrinking since it last turned?
+  // Seeded false so a separating aspect is not mistaken for a fresh perfection.
+  const closing = VOC_PLANETS.map(() => VOC_ASPECTS.map(() => false));
+
+  for (let i = 1; i <= maxSteps; i++) {
+    const jd = jd0 + i * step;
+    const mLonRaw = moonLon(jd);
+    // Unwrap the 360°→0° wrap once, so the ingress fraction below stays sane.
+    const mLon = mLonRaw < prevMLon - 180 ? mLonRaw + 360 : mLonRaw;
+    const cur = distsAt(mLon, jd);
+
+    // Exact contact appears as the distance turning around while closing.
+    let hit: { hours: number; label: string } | null = null;
+    for (let pi = 0; pi < VOC_PLANETS.length; pi++) {
+      for (let ai = 0; ai < VOC_ASPECTS.length; ai++) {
+        const dPrev = prev[pi][ai];
+        const dCur = cur[pi][ai];
+        if (dCur < dPrev) {
+          closing[pi][ai] = true;
+        } else if (dCur > dPrev && closing[pi][ai]) {
+          closing[pi][ai] = false;
+          // The minimum sits between the two samples; split the step by depth.
+          const frac = dPrev / (dPrev + dCur);
+          const hours = (i - 1 + frac) * step * 24;
+          if (!hit || hours < hit.hours) {
+            hit = { hours, label: `${VOC_ASPECTS[ai][1]} ${VOC_PLANETS[pi]}` };
+          }
+        }
+      }
+    }
+
+    if (Math.floor(mLon / 30) % 12 !== signIdx) {
+      // Ingress falls inside this step; a perfection only breaks VOC if it
+      // lands first.
+      const boundary = ((signIdx + 1) % 12) * 30 || 360;
+      const ingressHours = (i - 1 + (boundary - prevMLon) / (mLon - prevMLon)) * step * 24;
+      if (hit && hit.hours < ingressHours) {
+        return {
+          isVoc: false,
+          ingressInHours: hit.hours,
+          nextSign,
+          nextAspect: `${hit.label} in ${hit.hours.toFixed(1)}h`,
+        };
+      }
+      return { isVoc: true, ingressInHours: ingressHours, nextSign, nextAspect: null };
+    }
+
+    if (hit) {
+      return {
+        isVoc: false,
+        ingressInHours: hit.hours,
+        nextSign,
+        nextAspect: `${hit.label} in ${hit.hours.toFixed(1)}h`,
+      };
+    }
+
+    prevMLon = mLon;
+    prev = cur;
+  }
+  return { isVoc: true, ingressInHours: NaN, nextSign, nextAspect: null };
+}
+
+// Display label: "VOC" plus the clock time it ends, e.g. "VOC until 10:24 PM".
+export function vocEndLabel(voc: VocInfo, now = Date.now()): string {
+  if (!voc.isVoc || !isFinite(voc.ingressInHours)) return "VOC";
+  const end = new Date(now + voc.ingressInHours * 3600e3);
+  return `VOC until ${end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+}
+
+export type MoonTrend = "Waxing" | "Waning";
+
 export interface MoonInfo {
   phaseName: string;
   emoji: string;
   illumPct: number;
+  trend: MoonTrend;
   age: number;
   zodiac: string;
   longitude: number;
+  siderealLon: number;
+  siderealZodiac: string;
+  ayanamsa: number;
   mansion: Mansion;
   nakshatra: NakshatraInfo;
   xiu: XiuInfo;
   planets: PlanetPosition[];
   cal: Calendars;
+  voc: VocInfo;
 }
 
 // ─── Calendars: Hijri (Intl islamic, tabular ±1d), Chinese pillars (ported ───
@@ -583,16 +813,19 @@ function getCalendars(date: Date, angle: number, sunSid: number): Calendars {
   }
 
   const sex = (((jdn(date) + 49) % 60) + 60) % 60;
-  const dstem = STEMS[sex % 10],
-    dbranch = BRANCHES[sex % 12];
+  // Stem index pairs to elements (Jia/Yi = Wood … Ren/Gui = Water);
+  // display is Element + Animal ("Metal Rat"), no CJK characters.
+  const STEM_ELEMENTS = ["Wood", "Wood", "Fire", "Fire", "Earth", "Earth", "Metal", "Metal", "Water", "Water"];
+  const dBranch = BRANCHES[sex % 12];
+  const cnDay = `${STEM_ELEMENTS[sex % 10]} ${dBranch.animal}`;
   const month = date.getMonth() + 1,
     day = date.getDate();
   let cnYear = date.getFullYear();
   if (month < 2 || (month === 2 && day < 4)) cnYear -= 1;
   const yStem = (((cnYear - 4) % 10) + 10) % 10;
   const midx = chineseMonthIdx(month, day);
-  const mstem = STEMS[((yStem % 5) * 2 + 2 + midx) % 10],
-    mbranch = BRANCHES[(midx + 2) % 12];
+  const mBranch = BRANCHES[(midx + 2) % 12];
+  const cnMonth = `${STEM_ELEMENTS[((yStem % 5) * 2 + 2 + midx) % 10]} ${mBranch.animal}`;
 
   const ti = Math.floor(angle / 12) % 30;
   const paksha = ti < 15 ? "Shukla" : "Krishna";
@@ -604,12 +837,12 @@ function getCalendars(date: Date, angle: number, sunSid: number): Calendars {
 
   return {
     hijri,
-    cnDay: `${dstem.zh}${dbranch.zh} ${dbranch.animal}`,
-    cnDaySub: `${dstem.name}-${dbranch.name} day`,
-    cnDayEmoji: dbranch.emoji,
-    cnMonth: `${mstem.zh}${mbranch.zh} ${mbranch.animal}`,
-    cnMonthSub: `${mstem.name}-${mbranch.name} month`,
-    cnMonthEmoji: mbranch.emoji,
+    cnDay,
+    cnDaySub: "Day pillar",
+    cnDayEmoji: dBranch.emoji,
+    cnMonth,
+    cnMonthSub: "Month pillar",
+    cnMonthEmoji: mBranch.emoji,
     tithi,
     masa,
     vara,
@@ -623,6 +856,8 @@ export function getMoonInfo(date = new Date()): MoonInfo {
   const angle = (((mLon - sLon) % 360) + 360) % 360;
   const illumPct = ((1 - Math.cos(angle * (Math.PI / 180))) / 2) * 100;
   const age = (angle / 360) * 29.53058867;
+  // Sun→Moon elongation 0–180° = lighting up, 180–360° = darkening.
+  const trend: MoonTrend = angle < 180 ? "Waxing" : "Waning";
 
   let phaseName: string;
   let emoji: string;
@@ -658,39 +893,56 @@ export function getMoonInfo(date = new Date()): MoonInfo {
   const base = MANSIONS[lonToMansion(mLon) - 1];
   const mansion: Mansion = { ...base, theme: ARAB_THEMES[base.num] };
 
-  // Sidereal systems share IbnArbi's Lahiri approximation
-  // (AYANAMSHA_J2000 23.85 + 0.01397°/yr). Vedic nakshatras are exact equal
-  // 27ths from 0° sidereal Aries. Chinese xiu are APPROXIMATE equal 28ths
-  // anchored at Horn (Spica ≈ 180° sidereal) — true lodge widths are unequal.
-  const yearsSinceJ2000 = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / (365.25 * 86400000);
-  const ayanamsa = 23.85 + 0.01397 * yearsSinceJ2000;
-  const sidereal = (((mLon - ayanamsa) % 360) + 360) % 360;
-  const sunSid = (((sLon - ayanamsa) % 360) + 360) % 360;
+  // Sidereal: TradAstro Lahiri (tradAyanamsa above). Vedic nakshatras are
+  // exact equal 27ths from 0° sidereal Aries. Chinese xiu follow
+  // IbnArbi/client/src/{data,chinese-astro}: traditional unequal lodge
+  // widths, positional from Moon TROPICAL longitude, anchor 0° = Horn.
+  const XIU_WIDTHS_DEG = [
+    12, 9, 15, 5, 5, 18, 11, 26, 8, 12, 10, 17, 16, 9, 16, 12, 14, 11, 17, 2, 9, 33, 4, 13, 7, 18, 18, 17,
+  ];
+  const XIU_TOTAL_WIDTH = XIU_WIDTHS_DEG.reduce((s, w) => s + w, 0);
+  const ayanamsa = tradAyanamsa(date);
+  const sidereal = toSidereal(mLon, ayanamsa);
+  const sunSid = toSidereal(sLon, ayanamsa);
   const nakshatra = NAKSHATRAS[Math.floor(sidereal / (360 / 27)) % 27];
-  const xiuSlice = ((((sidereal - 180) % 360) + 360) % 360) / (360 / 28);
-  const xiu = XIU[Math.floor(xiuSlice) % 28];
+  const scaled = ((((mLon % 360) + 360) % 360) / 360) * XIU_TOTAL_WIDTH;
+  let cum = 0;
+  let xiuIdx = XIU_WIDTHS_DEG.length - 1;
+  for (let i = 0; i < XIU_WIDTHS_DEG.length; i++) {
+    cum += XIU_WIDTHS_DEG[i];
+    if (scaled < cum) {
+      xiuIdx = i;
+      break;
+    }
+  }
+  const xiu = XIU[xiuIdx];
 
   const planets: PlanetPosition[] = [
-    planetRow("Sun", sLon, jd),
-    planetRow("Moon", mLon, jd),
-    planetRow("Mercury", planetLon("Mercury", jd), jd),
-    planetRow("Venus", planetLon("Venus", jd), jd),
-    planetRow("Mars", planetLon("Mars", jd), jd),
-    planetRow("Jupiter", planetLon("Jupiter", jd), jd),
-    planetRow("Saturn", planetLon("Saturn", jd), jd),
+    planetRow("Sun", sLon, jd, ayanamsa),
+    planetRow("Moon", mLon, jd, ayanamsa),
+    planetRow("Mercury", planetLon("Mercury", jd), jd, ayanamsa),
+    planetRow("Venus", planetLon("Venus", jd), jd, ayanamsa),
+    planetRow("Mars", planetLon("Mars", jd), jd, ayanamsa),
+    planetRow("Jupiter", planetLon("Jupiter", jd), jd, ayanamsa),
+    planetRow("Saturn", planetLon("Saturn", jd), jd, ayanamsa),
   ];
 
   return {
     phaseName,
     emoji,
     illumPct,
+    trend,
     age,
     zodiac: SIGNS[Math.floor(mLon / 30) % 12],
     longitude: mLon,
+    siderealLon: sidereal,
+    siderealZodiac: SIGNS[Math.floor(sidereal / 30) % 12],
+    ayanamsa,
     mansion,
     nakshatra,
     xiu,
     planets,
     cal: getCalendars(date, angle, sunSid),
+    voc: getVocInfo(date),
   };
 }

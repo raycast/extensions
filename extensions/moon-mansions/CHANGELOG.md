@@ -1,5 +1,9 @@
 # Moon Mansions Changelog
 
+## [Phase trend indicator] - {PR_MERGE_DATE}
+- Show waxing/waning on the illumination and phase rows
+- Add the trend to the menu-bar tooltip and to copied summaries
+
 ## [Initial Version] - {PR_MERGE_DATE}
 - Show Moon Info command (Detail view)
 - Moon in Menu Bar command with tap-to-copy rows

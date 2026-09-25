@@ -1,5 +1,5 @@
 import { Clipboard, MenuBarExtra } from "@raycast/api";
-import { getMoonInfo } from "./moon";
+import { getMoonInfo, nakshatraTheme, planetMenuTitle, splitTwoLines, vocEndLabel } from "./moon";
 
 const SYMBOL: Record<string, string> = {
   Aries: "♈",
@@ -24,8 +24,10 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      title={`${m.emoji} ${m.illumPct.toFixed(0)}%`}
-      tooltip={`${m.phaseName} · ${m.illumPct.toFixed(1)}% in ${m.zodiac}`}
+      title={`${m.emoji} ${m.illumPct.toFixed(0)}%${m.voc.isVoc ? " VOC" : ""}`}
+      tooltip={`${m.phaseName} · ${m.trend} · ${m.illumPct.toFixed(1)}% in ${m.zodiac}${
+        m.voc.isVoc ? ` · ${vocEndLabel(m.voc)}` : ""
+      }`}
     >
       <MenuBarExtra.Section title="Calendars">
         <MenuBarExtra.Item icon="🕌" title={m.cal.hijri} subtitle="Hijri" onAction={copy(m.cal.hijri)} />
@@ -48,15 +50,15 @@ export default function Command() {
       <MenuBarExtra.Section title="Moon">
         <MenuBarExtra.Item
           icon={m.emoji}
-          title={m.phaseName}
+          title={`${m.phaseName} · ${m.trend}`}
           subtitle="Phase"
-          onAction={copy(`${m.phaseName} ${m.illumPct.toFixed(1)}% in ${m.zodiac}`)}
+          onAction={copy(`${m.phaseName} (${m.trend.toLowerCase()}) ${m.illumPct.toFixed(1)}% in ${m.zodiac}`)}
         />
         <MenuBarExtra.Item
           icon="✨"
-          title={`${m.illumPct.toFixed(1)}%`}
+          title={`${m.illumPct.toFixed(1)}% · ${m.trend}`}
           subtitle="Illumination"
-          onAction={copy(`${m.illumPct.toFixed(1)}%`)}
+          onAction={copy(`${m.illumPct.toFixed(1)}% ${m.trend.toLowerCase()}`)}
         />
         <MenuBarExtra.Item
           icon="⏳"
@@ -64,7 +66,30 @@ export default function Command() {
           subtitle="Age"
           onAction={copy(`${Math.round(m.age)} days`)}
         />
-        <MenuBarExtra.Item icon={SYMBOL[m.zodiac]} title={m.zodiac} subtitle="Zodiac" onAction={copy(m.zodiac)} />
+        <MenuBarExtra.Item
+          icon={SYMBOL[m.zodiac]}
+          title={m.zodiac}
+          subtitle="Zodiac (Tropical)"
+          onAction={copy(m.zodiac)}
+        />
+        <MenuBarExtra.Item
+          icon={SYMBOL[m.siderealZodiac]}
+          title={m.siderealZodiac}
+          subtitle="Zodiac (Sidereal Lahiri)"
+          onAction={copy(m.siderealZodiac)}
+        />
+        <MenuBarExtra.Item
+          icon="📐"
+          title={`${m.ayanamsa.toFixed(3)}°`}
+          subtitle="Ayanamsa"
+          onAction={copy(`${m.ayanamsa.toFixed(3)}°`)}
+        />
+        <MenuBarExtra.Item
+          icon={m.voc.isVoc ? "🚫" : "✅"}
+          title={m.voc.isVoc ? vocEndLabel(m.voc) : `Applying: ${m.voc.nextAspect}`}
+          subtitle="VOC"
+          onAction={copy(m.voc.isVoc ? vocEndLabel(m.voc) : `Moon applying: ${m.voc.nextAspect}`)}
+        />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Arab mansion">
         <MenuBarExtra.Item
@@ -81,7 +106,9 @@ export default function Command() {
           onAction={copy(m.mansion.divineName)}
         />
         <MenuBarExtra.Item icon="📐" title={m.mansion.deg} subtitle="Degrees" onAction={copy(m.mansion.deg)} />
-        <MenuBarExtra.Item icon="💭" title={m.mansion.theme} onAction={copy(m.mansion.theme)} />
+        {splitTwoLines(m.mansion.theme).map((line, i) => (
+          <MenuBarExtra.Item key={`mansion-theme-${i}`} icon="💭" title={line} onAction={copy(m.mansion.theme)} />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Vedic nakshatra">
         <MenuBarExtra.Item
@@ -98,7 +125,14 @@ export default function Command() {
           subtitle="Rulers"
           onAction={copy(`${m.nakshatra.planet}, ${m.nakshatra.deity}`)}
         />
-        <MenuBarExtra.Item icon="💭" title={m.nakshatra.theme} onAction={copy(m.nakshatra.theme)} />
+        {splitTwoLines(nakshatraTheme(m.nakshatra)).map((line, i) => (
+          <MenuBarExtra.Item
+            key={`nakshatra-theme-${i}`}
+            icon="💭"
+            title={line}
+            onAction={copy(nakshatraTheme(m.nakshatra))}
+          />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Chinese lodge (approx)">
         <MenuBarExtra.Item
@@ -108,16 +142,20 @@ export default function Command() {
           onAction={copy(`Xiu ${m.xiu.n} ${m.xiu.name} ${m.xiu.zh} (${m.xiu.group})`)}
         />
         <MenuBarExtra.Item icon="🏯" title={m.xiu.group} subtitle="Palace" onAction={copy(m.xiu.group)} />
-        <MenuBarExtra.Item icon="💭" title={m.xiu.theme} onAction={copy(m.xiu.theme)} />
+        {splitTwoLines(m.xiu.theme).map((line, i) => (
+          <MenuBarExtra.Item key={`xiu-theme-${i}`} icon="💭" title={line} onAction={copy(m.xiu.theme)} />
+        ))}
       </MenuBarExtra.Section>
-      <MenuBarExtra.Section title="Planets">
+      <MenuBarExtra.Section title="Planets — Tropical · Sidereal">
         {m.planets.map((p) => (
           <MenuBarExtra.Item
             key={p.name}
             icon={p.symbol}
-            title={`${p.deg} ${p.sign}`}
-            subtitle={`${p.name} · ${p.motion}`}
-            onAction={copy(`${p.name} ${p.deg} ${p.sign} ${p.motion}`)}
+            title={planetMenuTitle(p)}
+            subtitle={p.motion}
+            onAction={copy(
+              `${p.name}  Tropical ${p.deg} ${p.sign}  ·  Sidereal ${p.sidDeg} ${p.sidSign}  ·  ${p.motion}`
+            )}
           />
         ))}
       </MenuBarExtra.Section>
