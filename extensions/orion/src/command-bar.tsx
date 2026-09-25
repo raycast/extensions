@@ -206,6 +206,18 @@ export default function Command() {
   // signal that tells React to re-render because of it.
   const [, setHandoffVersion] = useState(0);
   const selectionSessionRef = useRef<SelectionSession | undefined>(undefined);
+  // Tracks whether the automatic target (Top Hit or the typed-address row)
+  // was already the visible, selected row a moment ago, independent of the
+  // per-keystroke session reset in `resetSelectionSession` below - which
+  // intentionally clears `session.target` on every keystroke, so it cannot
+  // by itself distinguish an unbroken Top Hit from a fresh one that happens
+  // to reuse the same row id. Only a row that is genuinely new (a different
+  // destination, the same id reappearing after being absent, or a profile
+  // switch) needs the single-row isolation handoff below; one that was
+  // already confirmed selected must not re-trigger it on every keystroke, or
+  // the other sections would visibly collapse each time.
+  const previousAutomaticTargetRef = useRef<string | undefined>(undefined);
+  const previousProfileIdRef = useRef<string | undefined>(undefined);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
 
@@ -351,38 +363,45 @@ export default function Command() {
   // already-rendered row set: Raycast's List can report a stale selection and
   // never send a follow-up correcting itself, leaving the wrong row focused
   // indefinitely. Render only the target row until Raycast acknowledges it
-  // (see `isHandingOffAutomaticTarget` below), then restore the rest. A
-  // `useLayoutEffect` (not `useEffect`) keeps this decision in the same commit
-  // as the data change that triggered it, so the isolated frame never paints
-  // with a stale row visible.
+  // (see `isHandingOffAutomaticTarget` below), then restore the rest - but
+  // only when the target row is genuinely new (see `previousAutomaticTargetRef`
+  // above): a keystroke that leaves Top Hit pointing at the same row it
+  // already confirmed must not re-trigger that isolation, or the other
+  // sections would visibly collapse on every keystroke. A `useLayoutEffect`
+  // (not `useEffect`) keeps this decision in the same commit as the data
+  // change that triggered it, so an isolated frame never paints with a stale
+  // row visible.
   useLayoutEffect(() => {
     const key = `${selectedProfileId}\u0000${query}`;
     const previous = selectionSessionRef.current;
-    const isNewSession = previous?.key !== key;
+    const session: SelectionSession =
+      previous?.key === key ? previous : { key, awaitingTarget: false, userNavigated: false };
+    selectionSessionRef.current = session;
 
-    const beginAutomaticSelection = (session: SelectionSession, target: string | undefined) => {
-      session.target = target;
-      if (!target) {
-        session.awaitingTarget = false;
-        setSelectedItemId(undefined);
-        return;
-      }
-      session.awaitingTarget = true;
-      setSelectedItemId(target);
-      setHandoffVersion((version) => version + 1);
-    };
-
-    if (isNewSession) {
-      const session: SelectionSession = { key, awaitingTarget: false, userNavigated: false };
-      selectionSessionRef.current = session;
-      beginAutomaticSelection(session, automaticTarget);
-      return;
-    }
+    const profileChanged = previousProfileIdRef.current !== selectedProfileId;
+    previousProfileIdRef.current = selectedProfileId;
+    const targetJustAppeared =
+      automaticTarget !== undefined && (profileChanged || automaticTarget !== previousAutomaticTargetRef.current);
+    previousAutomaticTargetRef.current = automaticTarget;
 
     // Local tabs, bookmarks, and history resolve at different times. Keep
     // following the best candidate only until the user has made a choice.
-    if (!previous.userNavigated && previous.target !== automaticTarget) {
-      beginAutomaticSelection(previous, automaticTarget);
+    if (session.userNavigated) return;
+
+    session.target = automaticTarget;
+    if (!automaticTarget) {
+      session.awaitingTarget = false;
+      setSelectedItemId(undefined);
+      return;
+    }
+
+    session.awaitingTarget = targetJustAppeared;
+    setSelectedItemId(automaticTarget);
+    if (targetJustAppeared) {
+      // The target is initially rendered by itself so Raycast cannot retain
+      // an old native row. The handoff version schedules that isolated
+      // render; it intentionally does not remount the complete List.
+      setHandoffVersion((version) => version + 1);
     }
   }, [query, selectedProfileId, automaticTarget]);
 
