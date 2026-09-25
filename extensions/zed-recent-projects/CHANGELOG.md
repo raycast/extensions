@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Open in New Window Preference] - {PR_MERGE_DATE}
+## [Open in New Window Preference] - 2026-09-25
 
 - Add an "Open in New Window" preference to the "Open with Zed" and "Search Recent Projects" commands that opens items in a new Zed window.
 - Change the "Move Up" and "Move Down" shortcuts for pinned entries to `⌘⌥↑` / `⌘⌥↓` to match Raycast 2.0.
