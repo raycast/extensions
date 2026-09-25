@@ -478,6 +478,12 @@ export default function Command() {
         // focus and scroll handling; continually controlling selectedItemId
         // causes visible scroll jumps after repeated Ctrl+N/Ctrl+P cycles.
         if (session) session.userNavigated = true;
+        // From this point on, Raycast's actual selection is wherever the user
+        // navigated to, not `previousAutomaticTargetRef`. If a later query
+        // resolves back to that same destination, it must go through the
+        // isolation handoff again rather than assuming Raycast is still
+        // showing it selected - the row set has changed in the meantime.
+        previousAutomaticTargetRef.current = undefined;
         setSelectedItemId(undefined);
       }}
       searchBarPlaceholder="Search tabs, bookmarks, history, or the web"
