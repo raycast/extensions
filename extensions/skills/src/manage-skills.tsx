@@ -53,10 +53,13 @@ export default function Command() {
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
   if (error && skills.length === 0) {
     const { errorTitle, errorDetails } = describeSkillsError(error);
+    const [summary, ...outputLines] = error.message.split("\n");
+    const output = outputLines.join("\n").trim();
+    const outputBlock = output ? `\n\n\`\`\`\n${output}\n\`\`\`` : "";
 
     return (
       <Detail
-        markdown={`# ${errorTitle}\n\n**Error:** ${error.message}\n\n---\n\n${errorDetails}`}
+        markdown={`# ${errorTitle}\n\n**Error:** ${summary}${outputBlock}\n\n---\n\n${errorDetails}`}
         actions={
           <ActionPanel>
             <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />

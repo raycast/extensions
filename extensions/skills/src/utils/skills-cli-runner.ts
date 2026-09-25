@@ -290,6 +290,10 @@ const MAX_CLI_OUTPUT_CHARS = 500;
 // Built from a char code so the escape byte stays out of the regex literal.
 const ANSI_ESCAPE_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, "g");
 
+export function stripAnsiEscapes(text: string): string {
+  return text.replace(ANSI_ESCAPE_PATTERN, "");
+}
+
 /**
  * What the failed run told us. The skills CLI renders everything — including
  * errors — on stdout, so stderr alone would usually be empty.
@@ -298,7 +302,7 @@ function extractCliOutput(error: unknown): string {
   const failure = error as ExecFailure | undefined;
 
   return [failure?.stdout, failure?.stderr]
-    .map((stream) => stream?.toString().replace(ANSI_ESCAPE_PATTERN, "").trim() ?? "")
+    .map((stream) => (stream ? stripAnsiEscapes(stream.toString()).trim() : ""))
     .filter(Boolean)
     .join("\n");
 }
