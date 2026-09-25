@@ -1,0 +1,104 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import {
+  buildAppleScriptDate,
+  buildCreateCalendarEventScript,
+  escapeAppleScriptString,
+  parseCalendarListResult,
+} from "../src/helpers/calendar";
+
+describe("Calendar Helpers", () => {
+  describe("parseCalendarListResult", () => {
+    it("parses valid JSON array of calendar names and deduplicates", () => {
+      const raw = JSON.stringify(["Work", "Personal", "Work", "Home"]);
+      const result = parseCalendarListResult(raw);
+      assert.deepEqual(result, ["Work", "Personal", "Home"]);
+    });
+
+    it("filters out empty or whitespace-only names", () => {
+      const raw = JSON.stringify(["Work", "", "   ", "Personal"]);
+      const result = parseCalendarListResult(raw);
+      assert.deepEqual(result, ["Work", "Personal"]);
+    });
+
+    it("returns empty array for invalid JSON or empty input", () => {
+      assert.deepEqual(parseCalendarListResult(undefined), []);
+      assert.deepEqual(parseCalendarListResult(""), []);
+      assert.deepEqual(parseCalendarListResult("invalid json"), []);
+      assert.deepEqual(parseCalendarListResult(JSON.stringify({ not: "an array" })), []);
+    });
+  });
+
+  describe("escapeAppleScriptString", () => {
+    it("escapes backslashes and double quotes correctly", () => {
+      const input = 'Meeting with "VIP" client \\ test';
+      const escaped = escapeAppleScriptString(input);
+      assert.equal(escaped, 'Meeting with \\"VIP\\" client \\\\ test');
+    });
+
+    it("leaves regular strings untouched", () => {
+      const input = "Normal calendar event title";
+      assert.equal(escapeAppleScriptString(input), "Normal calendar event title");
+    });
+  });
+
+  describe("buildAppleScriptDate", () => {
+    it("generates locale-independent AppleScript date setter statements", () => {
+      const date = new Date(2026, 8, 25, 14, 30, 45); // Sept 25, 2026 14:30:45
+      const script = buildAppleScriptDate(date, "testDate");
+
+      assert.ok(script.includes("set testDate to current date"));
+      assert.ok(script.includes("set year of testDate to 2026"));
+      assert.ok(script.includes("set month of testDate to 9"));
+      assert.ok(script.includes("set day of testDate to 25"));
+      assert.ok(script.includes("set hours of testDate to 14"));
+      assert.ok(script.includes("set minutes of testDate to 30"));
+      assert.ok(script.includes("set seconds of testDate to 45"));
+    });
+  });
+
+  describe("buildCreateCalendarEventScript", () => {
+    const startDate = new Date(2026, 8, 25, 10, 0, 0);
+    const endDate = new Date(2026, 8, 25, 11, 0, 0);
+
+    it("builds script targeting specific calendar with full properties", () => {
+      const script = buildCreateCalendarEventScript({
+        calendarName: "Work Calendar",
+        title: 'Review "Q3 Budget"',
+        startDate,
+        endDate,
+        isAllDay: false,
+        notes: "Discuss with team\nDetails here",
+        location: "Room 101",
+        url: "x-apple-reminderkit://remind/12345",
+      });
+
+      assert.ok(script.includes('tell application "Calendar"'));
+      assert.ok(script.includes('set cal to first calendar whose name is "Work Calendar"'));
+      assert.ok(script.includes('summary:"Review \\"Q3 Budget\\""'));
+      assert.ok(script.includes("start date:startDate"));
+      assert.ok(script.includes("end date:endDate"));
+      assert.ok(script.includes("allday event:false"));
+      assert.ok(script.includes('description:"Discuss with team\nDetails here"'));
+      assert.ok(script.includes('location:"Room 101"'));
+      assert.ok(script.includes('url:"x-apple-reminderkit://remind/12345"'));
+      assert.ok(script.includes("make new event at end of events of cal with properties {"));
+    });
+
+    it("builds script targeting default calendar when calendarName is omitted", () => {
+      const script = buildCreateCalendarEventScript({
+        title: "All-Day Milestone",
+        startDate,
+        endDate,
+        isAllDay: true,
+      });
+
+      assert.ok(script.includes("set cal to first calendar"));
+      assert.ok(script.includes("allday event:true"));
+      assert.ok(!script.includes("description:"));
+      assert.ok(!script.includes("location:"));
+      assert.ok(!script.includes("url:"));
+    });
+  });
+});
