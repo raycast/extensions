@@ -68,6 +68,21 @@ describe("YapsCli response contracts", () => {
     expect(cli.getNote("Missing.md")).rejects.toBeInstanceOf(YapsNoteNotFoundError);
   });
 
+  test.each(["Projects/../Inbox", "../Inbox", "Projects\\..\\Inbox"])(
+    "rejects ambiguous clipboard folder %s before creating a note or temporary file",
+    async (folder) => {
+      const fixture = await createFixtureCli();
+      await expect(
+        fixtureClient(fixture).createClipboardNote("New note", "Synthetic text", folder),
+      ).rejects.toThrow("without '..' parent segments");
+      expect(await pathExists(fixture.log)).toBe(false);
+      expect(await pathExists(fixture.authLog)).toBe(false);
+      expect(await pathExists(join(fixture.directory, "support", "clipboard-captures"))).toBe(
+        false,
+      );
+    },
+  );
+
   test("surfaces CLI stderr instead of hiding the actionable failure", async () => {
     const fixture = await createFixtureCli();
     const cli = fixtureClient(fixture);

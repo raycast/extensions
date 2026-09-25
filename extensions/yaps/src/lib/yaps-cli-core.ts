@@ -251,7 +251,7 @@ export class YapsCli {
 
   async createClipboardNote(title: string, markdown: string, folder: string): Promise<VaultNote> {
     const normalizedTitle = validateCliArgument(title, "Note title");
-    const normalizedFolderValue = validateCliArgument(folder, "Vault folder");
+    const normalizedFolderValue = normalizedFolder(validateCliArgument(folder, "Vault folder"));
     const temporaryDir = join(this.options.supportPath, "clipboard-captures");
     const temporaryPath = join(temporaryDir, `${randomUUID()}.md`);
     await mkdir(temporaryDir, { recursive: true, mode: 0o700 });
@@ -263,7 +263,7 @@ export class YapsCli {
           "vault",
           "create",
           "--folder",
-          normalizedFolder(normalizedFolderValue),
+          normalizedFolderValue,
           "--title",
           normalizedTitle,
           "--markdown-file",
@@ -930,11 +930,11 @@ function limitErrorMessage(message: string): string {
 }
 
 function normalizedFolder(folder: string): string {
-  const normalized = folder
-    .split(/[\\/]/)
-    .map((part) => part.trim())
-    .filter((part) => part && part !== "." && part !== "..")
-    .join("/");
+  const parts = folder.split(/[\\/]/).map((part) => part.trim());
+  if (parts.includes("..")) {
+    throw new Error("Choose a capture folder without '..' parent segments, such as Inbox.");
+  }
+  const normalized = parts.filter((part) => part && part !== ".").join("/");
   return normalized || "Inbox";
 }
 
