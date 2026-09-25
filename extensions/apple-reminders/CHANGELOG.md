@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Natural Language Recurrence in Create Reminder] - {PR_MERGE_DATE}
+## [Natural Language Recurrence in Create Reminder] - 2026-09-25
 
 - Support natural language recurrence patterns (e.g. `every day`, `every Friday 10am`, `every 2 weeks`, `weekdays`, `monthly`) in the Create Reminder free-text date field.
 - Automatically populate recurrence frequency, interval, and start date from text input.
