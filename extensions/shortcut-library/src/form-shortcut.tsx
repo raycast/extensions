@@ -16,7 +16,7 @@ export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate
 
   const [tags, setTags] = useState<string[]>(existing?.tags ?? []);
   const [knownTags, setKnownTags] = useState<string[]>(existing?.tags ?? []);
-  const [knownCategories, setKnownCategories] = useState<string[]>([]);
+  const [knownCategories, setKnownCategories] = useState<string[]>(existing?.category ? [existing.category] : []);
   const [category, setCategory] = useState<string>(existing?.category ?? UNCATEGORIZED);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categoryPicked, setCategoryPicked] = useState(false);
