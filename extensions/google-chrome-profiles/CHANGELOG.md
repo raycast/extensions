@@ -1,8 +1,16 @@
 # Google Chrome Profiles Changelog
 
+## [Profile Search, Switching, and Tab Moves] - 2026-09-25
+
+- Search profiles by profile name, Google account name, or email, including accounts without an avatar.
+- Make profile switching independent of Chrome's menu order and language, and fall back to opening the profile directly when menu automation is unavailable.
+- Show action failures instead of silently dismissing Raycast.
+- Add "Move Current Tab to Another Profile". With two profiles, move to the other profile automatically; with more, choose a destination. Keep the original tab if the destination cannot be confirmed.
+- Fix bookmark and web searches being filtered a second time by the list.
+
 ## [Fix] - 2026-08-27
 
-- Fix selecting a profile bringing a *different* profile to front (e.g. selecting "Work" opened "Work admin"). For a profile signed into a Google account, Chrome's Profiles menu bar item does not show the profile's own name — it shows `${gaia_given_name} (${name})`, e.g. a profile named "Work" signed in with a Google account whose given name is "Alex" appears in the menu as "Alex (Work)". The exact-name match against the raw profile name therefore never matched a signed-in profile, and always fell through to a substring search across every menu item — which happily clicked any other profile whose name was a substring of the search text (e.g. "Work" matched "Work admin" or "old work", depending on menu order), with no visible error. Carry the profile's `gaia_given_name` on the `Profile` object itself (read once alongside the rest of the profile, and across the Quicklink/deeplink, which previously dropped it) to construct the label Chrome actually shows, and try it — then the raw profile name — as exact candidates only; drop the substring fallback entirely, since guessing the wrong profile is worse than a clear "Profile not found in menu" failure. A Quicklink created before this fix, whose deeplink still lacks the given name, falls back to a one-time `Local State` read so it keeps working.
+- Fix selecting a profile bringing a _different_ profile to front (e.g. selecting "Work" opened "Work admin"). For a profile signed into a Google account, Chrome's Profiles menu bar item does not show the profile's own name — it shows `${gaia_given_name} (${name})`, e.g. a profile named "Work" signed in with a Google account whose given name is "Alex" appears in the menu as "Alex (Work)". The exact-name match against the raw profile name therefore never matched a signed-in profile, and always fell through to a substring search across every menu item — which happily clicked any other profile whose name was a substring of the search text (e.g. "Work" matched "Work admin" or "old work", depending on menu order), with no visible error. Carry the profile's `gaia_given_name` on the `Profile` object itself (read once alongside the rest of the profile, and across the Quicklink/deeplink, which previously dropped it) to construct the label Chrome actually shows, and try it — then the raw profile name — as exact candidates only; drop the substring fallback entirely, since guessing the wrong profile is worse than a clear "Profile not found in menu" failure. A Quicklink created before this fix, whose deeplink still lacks the given name, falls back to a one-time `Local State` read so it keeps working.
 
 ## [Feature] - 2026-08-25
 
@@ -16,7 +24,7 @@
 
 ## [Fix] - 2026-07-14
 
-- Fix profile actions still failing in the store build after the 2026-05-26 detached-spawn fix. `showHUD` was awaited *before* spawning the detached `osascript` subprocess; `showHUD` closes the main window, which starts the extension process teardown, so in the distribution build the Node process could be killed before the `spawn` call ever ran — the HUD appeared but no Chrome action happened. (Dev mode keeps the process alive, which is why this never reproduced under `npm run dev`.) Spawn the detached subprocess first, then show the HUD; skip the HUD when the spawn failed so the failure toast stays visible.
+- Fix profile actions still failing in the store build after the 2026-05-26 detached-spawn fix. `showHUD` was awaited _before_ spawning the detached `osascript` subprocess; `showHUD` closes the main window, which starts the extension process teardown, so in the distribution build the Node process could be killed before the `spawn` call ever ran — the HUD appeared but no Chrome action happened. (Dev mode keeps the process alive, which is why this never reproduced under `npm run dev`.) Spawn the detached subprocess first, then show the HUD; skip the HUD when the spawn failed so the failure toast stays visible.
 
 ## [Fix] - 2026-05-26
 
