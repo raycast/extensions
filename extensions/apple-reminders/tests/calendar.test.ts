@@ -10,23 +10,28 @@ import {
 
 describe("Calendar Helpers", () => {
   describe("parseCalendarListResult", () => {
-    it("parses valid JSON array of calendar names and deduplicates", () => {
-      const raw = JSON.stringify(["Work", "Personal", "Work", "Home"]);
+    it("parses linefeed-delimited list of calendar names and deduplicates", () => {
+      const raw = "Work\nPersonal\nWork\nHome";
       const result = parseCalendarListResult(raw);
       assert.deepEqual(result, ["Work", "Personal", "Home"]);
     });
 
     it("filters out empty or whitespace-only names", () => {
-      const raw = JSON.stringify(["Work", "", "   ", "Personal"]);
+      const raw = "Work\n\n   \nPersonal";
       const result = parseCalendarListResult(raw);
       assert.deepEqual(result, ["Work", "Personal"]);
     });
 
-    it("returns empty array for invalid JSON or empty input", () => {
+    it("handles calendar names containing quotes and special characters", () => {
+      const raw = 'Work "Primary"\nPersonal & Family\nJane\'s Calendar';
+      const result = parseCalendarListResult(raw);
+      assert.deepEqual(result, ['Work "Primary"', "Personal & Family", "Jane's Calendar"]);
+    });
+
+    it("returns empty array for empty or undefined input", () => {
       assert.deepEqual(parseCalendarListResult(undefined), []);
       assert.deepEqual(parseCalendarListResult(""), []);
-      assert.deepEqual(parseCalendarListResult("invalid json"), []);
-      assert.deepEqual(parseCalendarListResult(JSON.stringify({ not: "an array" })), []);
+      assert.deepEqual(parseCalendarListResult("   \n\n  "), []);
     });
   });
 
@@ -44,17 +49,23 @@ describe("Calendar Helpers", () => {
   });
 
   describe("buildAppleScriptDate", () => {
-    it("generates locale-independent AppleScript date setter statements", () => {
+    it("generates locale-independent AppleScript date setter statements with day reset", () => {
       const date = new Date(2026, 8, 25, 14, 30, 45); // Sept 25, 2026 14:30:45
       const script = buildAppleScriptDate(date, "testDate");
 
       assert.ok(script.includes("set testDate to current date"));
+      assert.ok(script.includes("set day of testDate to 1"));
       assert.ok(script.includes("set year of testDate to 2026"));
       assert.ok(script.includes("set month of testDate to 9"));
       assert.ok(script.includes("set day of testDate to 25"));
       assert.ok(script.includes("set hours of testDate to 14"));
       assert.ok(script.includes("set minutes of testDate to 30"));
       assert.ok(script.includes("set seconds of testDate to 45"));
+
+      // Verify day reset occurs before year/month setter to prevent month rollover
+      const dayOneIndex = script.indexOf("set day of testDate to 1");
+      const monthIndex = script.indexOf("set month of testDate to 9");
+      assert.ok(dayOneIndex < monthIndex, "Day must be set to 1 before month is set");
     });
   });
 

@@ -8,23 +8,13 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../../swift/AppleReminders";
 
-import { applyTagsToNotes, extractTagsFromNotes, formatTags, getPriorityIcon } from "../helpers";
+import { applyTagsToNotes, extractTagsFromNotes, formatTags, getPriorityIcon, parseReminderDueDate } from "../helpers";
 import { List, Priority, Reminder, useData } from "../hooks/useData";
 
 type EditReminderProps = {
   reminder: Reminder;
   mutate: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
-
-function parseReminderDueDate(dueDate?: string | null): Date | null {
-  if (!dueDate) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
-    const [year, month, day] = dueDate.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  }
-  const date = new Date(dueDate);
-  return isNaN(date.getTime()) ? null : date;
-}
 
 export default function EditReminder({ reminder, mutate }: EditReminderProps) {
   const { pop } = useNavigation();

@@ -14,13 +14,8 @@ export type CalendarEventPayload = {
 export const GET_CALENDARS_SCRIPT = `
 tell application "Calendar"
   set calNames to name of every calendar
-  set jsonList to {}
-  repeat with aName in calNames
-    set cleanName to (aName as text)
-    set end of jsonList to "\\"" & cleanName & "\\""
-  end repeat
-  set AppleScript's text item delimiters to ","
-  return "[" & (jsonList as text) & "]"
+  set AppleScript's text item delimiters to linefeed
+  return calNames as text
 end tell
 `;
 
@@ -28,15 +23,14 @@ export function parseCalendarListResult(rawResult: string | undefined): string[]
   if (!rawResult) {
     return [];
   }
-  try {
-    const parsed = JSON.parse(rawResult.trim());
-    if (Array.isArray(parsed)) {
-      return Array.from(new Set(parsed.map((item) => String(item).trim()).filter(Boolean)));
-    }
-    return [];
-  } catch {
-    return [];
-  }
+  return Array.from(
+    new Set(
+      rawResult
+        .split(/[\r\n]+/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
 }
 
 export async function getCalendarNames(): Promise<string[]> {
@@ -54,6 +48,7 @@ export function escapeAppleScriptString(str: string): string {
 
 export function buildAppleScriptDate(d: Date, varName: string): string {
   return `set ${varName} to current date
+set day of ${varName} to 1
 set year of ${varName} to ${d.getFullYear()}
 set month of ${varName} to ${d.getMonth() + 1}
 set day of ${varName} to ${d.getDate()}

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, open, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 
+import { parseReminderDueDate } from "../helpers";
 import { createCalendarEvent, getCalendarNames } from "../helpers/calendar";
 import { Reminder } from "../hooks/useData";
 
@@ -24,7 +25,7 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
   const { data: calendars = [], isLoading: isLoadingCalendars } = useCachedPromise(getCalendarNames, []);
 
   const isFullDay = reminder.dueDate ? reminder.dueDate.length === 10 || !reminder.dueDate.includes("T") : false;
-  const initialStartDate = reminder.dueDate ? new Date(reminder.dueDate) : new Date();
+  const initialStartDate = parseReminderDueDate(reminder.dueDate) ?? new Date();
   const initialEndDate = isFullDay ? initialStartDate : new Date(initialStartDate.getTime() + 30 * 60 * 1000);
 
   const { handleSubmit, itemProps, values, setValue } = useForm<FormValues>({
@@ -114,7 +115,6 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
 
       {calendars.length > 0 && (
         <Form.Dropdown {...itemProps.calendarName} title="Calendar">
-          <Form.Dropdown.Item title="Default Calendar" value="" />
           {calendars.map((calName) => (
             <Form.Dropdown.Item key={calName} title={calName} value={calName} />
           ))}
