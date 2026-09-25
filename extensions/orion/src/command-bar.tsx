@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
@@ -198,6 +198,13 @@ function uniqueUrls<T extends { url: string }>(items: T[], seen: Set<string>, li
 export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string>();
+  // Bumped whenever the selection session's ref state changes in a way that
+  // must force a re-render even though `selectedItemId` itself may end up
+  // unchanged (for example, re-confirming the same target once Raycast
+  // acknowledges it). `selectionSessionRef` is a ref precisely so reads and
+  // writes elsewhere in this render never lag a commit; this is the only
+  // signal that tells React to re-render because of it.
+  const [, setHandoffVersion] = useState(0);
   const selectionSessionRef = useRef<SelectionSession | undefined>(undefined);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
@@ -333,36 +340,78 @@ export default function Command() {
     LIMITS.history,
   );
   const address = isWebAddress(query) ? normalizeWebAddress(query) : undefined;
+  const automaticTarget = topHit ? TOP_HIT_ITEM_ID : address ? OPEN_ADDRESS_ITEM_ID : undefined;
 
   // Keep selection controlled while the local sources resolve. A session lasts
   // for one query/profile pair: it auto-selects a Top Hit until the user
   // navigates, after which slower data must not steal their selection.
-  useEffect(() => {
-    const target = topHit ? TOP_HIT_ITEM_ID : address ? OPEN_ADDRESS_ITEM_ID : undefined;
+  //
+  // `selectedItemId` alone is not sufficient when a late result (for example
+  // a History entry that needed its own SQL round trip) replaces an
+  // already-rendered row set: Raycast's List can report a stale selection and
+  // never send a follow-up correcting itself, leaving the wrong row focused
+  // indefinitely. Render only the target row until Raycast acknowledges it
+  // (see `isHandingOffAutomaticTarget` below), then restore the rest. A
+  // `useLayoutEffect` (not `useEffect`) keeps this decision in the same commit
+  // as the data change that triggered it, so the isolated frame never paints
+  // with a stale row visible.
+  useLayoutEffect(() => {
     const key = `${selectedProfileId}\u0000${query}`;
     const previous = selectionSessionRef.current;
     const isNewSession = previous?.key !== key;
 
-    if (isNewSession) {
-      selectionSessionRef.current = {
-        key,
-        target,
-        awaitingTarget: !!target,
-        userNavigated: false,
-      };
+    const beginAutomaticSelection = (session: SelectionSession, target: string | undefined) => {
+      session.target = target;
+      if (!target) {
+        session.awaitingTarget = false;
+        setSelectedItemId(undefined);
+        return;
+      }
+      session.awaitingTarget = true;
       setSelectedItemId(target);
+      setHandoffVersion((version) => version + 1);
+    };
+
+    if (isNewSession) {
+      const session: SelectionSession = { key, awaitingTarget: false, userNavigated: false };
+      selectionSessionRef.current = session;
+      beginAutomaticSelection(session, automaticTarget);
       return;
     }
 
     // Local tabs, bookmarks, and history resolve at different times. Keep
     // following the best candidate only until the user has made a choice.
-    if (!previous.userNavigated && previous.target !== target) {
-      previous.target = target;
-      previous.awaitingTarget = !!target;
-      setSelectedItemId(target);
-      return;
+    if (!previous.userNavigated && previous.target !== automaticTarget) {
+      beginAutomaticSelection(previous, automaticTarget);
     }
-  }, [query, selectedProfileId, topHit?.key, address]);
+  }, [query, selectedProfileId, automaticTarget]);
+
+  const activeSelectionSession = selectionSessionRef.current;
+  const isHandingOffAutomaticTarget =
+    !!automaticTarget && activeSelectionSession?.awaitingTarget && activeSelectionSession.target === automaticTarget;
+
+  // `onSelectionChange` has no keyboard-event information, so waiting
+  // indefinitely for Raycast's acknowledgement risks consuming the first
+  // Ctrl+N/Ctrl+P if it is ever delayed or dropped. Force the isolated frame
+  // to end on the next event-loop turn regardless, using the query-scoped
+  // `selectedItemId` already committed above.
+  useEffect(() => {
+    if (!isHandingOffAutomaticTarget) return;
+
+    const session = selectionSessionRef.current;
+    const sessionKey = session?.key;
+    const target = session?.target;
+    const timer = setTimeout(() => {
+      const current = selectionSessionRef.current;
+      if (!current || current.key !== sessionKey || current.target !== target || !current.awaitingTarget) return;
+
+      current.awaitingTarget = false;
+      setSelectedItemId(target);
+      setHandoffVersion((version) => version + 1);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [automaticTarget, isHandingOffAutomaticTarget]);
 
   return (
     <List
@@ -385,6 +434,7 @@ export default function Command() {
           if (id !== session.target) return;
           session.awaitingTarget = false;
           setSelectedItemId(id ?? undefined);
+          setHandoffVersion((version) => version + 1);
           return;
         }
 
@@ -418,7 +468,7 @@ export default function Command() {
         />
       }
     >
-      {topHit && (
+      {topHit && (!isHandingOffAutomaticTarget || automaticTarget === TOP_HIT_ITEM_ID) && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
             <TabListItem
@@ -435,7 +485,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {address && (
+      {address && (!isHandingOffAutomaticTarget || automaticTarget === OPEN_ADDRESS_ITEM_ID) && (
         <List.Section title="Open Address">
           <List.Item
             id={OPEN_ADDRESS_ITEM_ID}
@@ -451,7 +501,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {hasQuery && (
+      {!isHandingOffAutomaticTarget && hasQuery && (
         <List.Section title="Search the Web">
           <List.Item
             id="web-search"
@@ -466,7 +516,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {suggestionHits.length > 0 && (
+      {!isHandingOffAutomaticTarget && suggestionHits.length > 0 && (
         <List.Section title="Suggestions">
           {suggestionHits.map((s, i) => (
             <SuggestionListItem id={`suggestion-${i}-${s}`} key={`sugg-${i}-${s}`} suggestion={s} />
@@ -474,7 +524,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {tabSection.length > 0 && (
+      {!isHandingOffAutomaticTarget && tabSection.length > 0 && (
         <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
             <TabListItem
@@ -490,7 +540,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {bookmarkSection.length > 0 && (
+      {!isHandingOffAutomaticTarget && bookmarkSection.length > 0 && (
         <List.Section title="Bookmarks">
           {bookmarkSection.map((b) => (
             <UrlListItem id={`bm-${b.uuid}`} key={`bm-${b.uuid}`} item={b} />
@@ -498,7 +548,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {readingSection.length > 0 && (
+      {!isHandingOffAutomaticTarget && readingSection.length > 0 && (
         <List.Section title="Reading List">
           {readingSection.map((b) => (
             <UrlListItem id={`rl-${b.uuid}`} key={`rl-${b.uuid}`} item={b} />
@@ -506,7 +556,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {!permissionView && historySection.length > 0 && (
+      {!isHandingOffAutomaticTarget && !permissionView && historySection.length > 0 && (
         <List.Section title="History">
           {historySection.map((h) => (
             <UrlListItem id={`hist-${h.id}`} key={`hist-${h.id}`} item={h} />
