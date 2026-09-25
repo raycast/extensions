@@ -7,6 +7,7 @@ export type ParsedDueDate = {
   date: Date;
   isDateTime: boolean;
   matchedText: string;
+  hasExplicitDate?: boolean;
 };
 
 type DurationUnit = "minute" | "hour" | "day" | "week" | "month" | "year";
@@ -59,9 +60,14 @@ export function formatDueDate(parsed: ParsedDueDate): string {
   return parsed.isDateTime ? parsed.date.toISOString() : format(parsed.date, "yyyy-MM-dd");
 }
 
-function parseChronoDate(text: string, now: Date, dateFormatPreference?: string): ParsedDueDate | null {
+function parseChronoDate(
+  text: string,
+  now: Date,
+  dateFormatPreference?: string,
+  options?: { forwardDate?: boolean },
+): ParsedDueDate | null {
   const parser = isDayFirst(dateFormatPreference) ? chrono.en.GB : chrono.en;
-  const chronoMatch = parser.parse(text, now)[0];
+  const chronoMatch = parser.parse(text, now, { forwardDate: options?.forwardDate ?? true })[0];
   if (!chronoMatch) {
     return null;
   }
@@ -88,6 +94,7 @@ function fromChrono(match: chrono.ParsedResult, now: Date): ParsedDueDate {
     date,
     isDateTime,
     matchedText: match.text,
+    hasExplicitDate,
   };
 }
 
@@ -126,6 +133,7 @@ function parsedDuration(matchedText: string, amountText: string, unitText: strin
     date,
     isDateTime,
     matchedText: matchedText.trim(),
+    hasExplicitDate: false,
   };
 }
 
