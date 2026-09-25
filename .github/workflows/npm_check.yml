@@ -73,6 +73,7 @@ jobs:
         if: >-
           matrix.extension_dir == 'extensions/printer-status' || matrix.extension_dir == 'extensions/printer-status/' ||
           matrix.extension_dir == 'extensions/gif-search' || matrix.extension_dir == 'extensions/gif-search/' ||
-          matrix.extension_dir == 'extensions/nba-game-viewer' || matrix.extension_dir == 'extensions/nba-game-viewer/'
+          matrix.extension_dir == 'extensions/nba-game-viewer' || matrix.extension_dir == 'extensions/nba-game-viewer/' ||
+          matrix.extension_dir == 'extensions/google-chrome-profiles' || matrix.extension_dir == 'extensions/google-chrome-profiles/'
         working-directory: ${{ matrix.extension_dir }}
         run: npm test
