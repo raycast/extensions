@@ -2,7 +2,7 @@
 
 ## [Copy Link Shortcut Preference] - {PR_MERGE_DATE}
 
-- Added a preference to choose the Copy Link shortcut: ⌘ C, ⌘ ⇧ C or ⌘ ⌥ C
+- Added a preference to choose the Copy Link shortcut: ⌘ C (Ctrl+C on Windows) or ⌘ ⌥ C (Ctrl+Alt+C on Windows)
 
 ## [Bug Fix] - 2026-09-22
 

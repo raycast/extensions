@@ -98,9 +98,14 @@ const CHROMIUM_SCRIPTABLE_BROWSER_IDS = new Set<string>([
 const IS_MACOS = process.platform === "darwin";
 
 const COPY_LINK_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
-  "cmd-c": { modifiers: ["cmd"], key: "c" },
-  "cmd-shift-c": { modifiers: ["cmd", "shift"], key: "c" },
-  "cmd-opt-c": { modifiers: ["cmd", "opt"], key: "c" },
+  "cmd-c": {
+    macOS: { modifiers: ["cmd"], key: "c" },
+    Windows: { modifiers: ["ctrl"], key: "c" },
+  },
+  "cmd-opt-c": {
+    macOS: { modifiers: ["cmd", "opt"], key: "c" },
+    Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+  },
 };
 
 type BrowserOpenMode = "current-tab" | "new-tab" | "new-window";
