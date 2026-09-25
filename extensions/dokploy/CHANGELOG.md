@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Switch Instances Without Leaving the Screen] - {PR_MERGE_DATE}
+## [Switch Instances Without Leaving the Screen] - 2026-09-25
 
 - Add an instance switcher to **Projects**, **Docker**, **S3 Destinations**, and **Users** - pick a different configured instance right from where you are, no need to go back to **Instances** first.
 - The **Instances** screen now shows a checkmark on whichever instance is currently active. Switching only happens when you actually choose to open a screen for a specific instance - arrowing past its row in the list no longer does it silently.
