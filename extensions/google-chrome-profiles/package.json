@@ -38,6 +38,9 @@
       "mode": "no-view"
     }
   ],
+  "categories": [
+    "Web"
+  ],
   "preferences": [
     {
       "title": "Browser",
