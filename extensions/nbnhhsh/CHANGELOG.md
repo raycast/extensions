@@ -1,6 +1,6 @@
 # nbnhhsh Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-25
 
 - Look up Chinese abbreviations with grouped meanings and tentative suggestions.
 - Copy or paste a meaning, retry a lookup, or open the abbreviation on nbnhhsh.
