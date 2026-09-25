@@ -40,12 +40,34 @@ export async function reconnectNotion() {
     throw new Error("Clear the Internal Integration Secret in extension preferences before connecting with OAuth.");
   }
 
-  await client.removeTokens();
-  notion = null;
-  const token = await notionService.authorize();
-  const newClient = new Client({ auth: token });
-  await newClient.users.me({});
-  notion = newClient;
+  const previousTokens = await client.getTokens();
+  const previousClient = notion;
+
+  try {
+    // authorize reuses saved credentials, so clear them to force a new sign-in.
+    await client.removeTokens();
+    const token = await notionService.authorize();
+    const newClient = new Client({ auth: token });
+    await newClient.users.me({});
+    notion = newClient;
+  } catch (error) {
+    notion = previousClient;
+    if (previousTokens) {
+      await client.setTokens({
+        accessToken: previousTokens.accessToken,
+        refreshToken: previousTokens.refreshToken,
+        idToken: previousTokens.idToken,
+        scope: previousTokens.scope,
+        expiresIn:
+          previousTokens.expiresIn === undefined
+            ? undefined
+            : Math.max(0, previousTokens.expiresIn - (Date.now() - previousTokens.updatedAt.getTime()) / 1000),
+      });
+    } else {
+      await client.removeTokens();
+    }
+    throw error;
+  }
 }
 
 export function getNotionClient() {

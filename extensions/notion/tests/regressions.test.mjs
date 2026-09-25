@@ -4,7 +4,13 @@ import { Client, APIErrorCode, APIResponseError } from "@notionhq/client";
 import * as notionSDK from "@notionhq/client";
 import { createLoader } from "./load-module.mjs";
 
-function setup({ secret, storedToken, respond = () => ({ object: "user", id: "bot" }) } = {}) {
+function setup({
+  secret,
+  storedToken,
+  authorizeError,
+  initializeClient = true,
+  respond = () => ({ object: "user", id: "bot" }),
+} = {}) {
   const requests = [];
   const toasts = [];
   const events = [];
@@ -20,6 +26,10 @@ function setup({ secret, storedToken, respond = () => ({ object: "user", id: "bo
         async removeTokens() {
           events.push("remove");
           tokens = undefined;
+        }
+        async setTokens(options) {
+          events.push("restore");
+          tokens = { ...options, updatedAt: new Date() };
         }
       },
     },
@@ -47,6 +57,7 @@ function setup({ secret, storedToken, respond = () => ({ object: "user", id: "bo
         }
         async authorize() {
           events.push("authorize");
+          if (authorizeError) throw authorizeError;
           tokens = { accessToken: "fresh-token" };
           return "fresh-token";
         }
@@ -67,7 +78,7 @@ function setup({ secret, storedToken, respond = () => ({ object: "user", id: "bo
                 headers: init.headers,
               };
               requests.push(request);
-              const response = respond(request);
+              const response = await respond(request);
               return new Response(JSON.stringify(response.body ?? response), { status: response.status ?? 200 });
             },
           });
@@ -76,7 +87,7 @@ function setup({ secret, storedToken, respond = () => ({ object: "user", id: "bo
     },
   });
   const oauth = load("src/utils/notion/oauth.ts");
-  oauth.notionService.onAuthorize({ token: "test-token" });
+  if (initializeClient) oauth.notionService.onAuthorize({ token: storedToken || "test-token" });
   return { load, oauth, requests, toasts, events };
 }
 
@@ -236,10 +247,64 @@ test("reconnect does not silently ignore an internal integration secret", async 
 
 test("invalid new credentials fail verification rather than reporting successful reconnect", async () => {
   const { oauth } = setup({
+    initializeClient: false,
     respond: () => ({ status: 401, body: { object: "error", code: "unauthorized", message: "API token is invalid." } }),
   });
   await assert.rejects(oauth.reconnectNotion(), /API token is invalid/);
   assert.throws(() => oauth.getNotionClient(), /No Notion client/);
+  assert.equal(await oauth.checkNotionConnection(), false);
+});
+
+test("cancelled or failed authorization restores the saved credentials and active client", async () => {
+  for (const message of ["Sign-in cancelled", "Token exchange failed"]) {
+    const authorizeError = new Error(message);
+    const { oauth, events, requests } = setup({ storedToken: "old-token", authorizeError });
+    const previousClient = oauth.getNotionClient();
+    await oauth.notionService.client.setTokens({
+      accessToken: "old-token",
+      refreshToken: "old-refresh-token",
+      idToken: "old-id-token",
+      scope: "old-scope",
+      expiresIn: 3600,
+    });
+    events.length = 0;
+    await assert.rejects(oauth.reconnectNotion(), (error) => error === authorizeError);
+    assert.deepEqual(events, ["remove", "authorize", "restore"]);
+    const restored = await oauth.notionService.client.getTokens();
+    assert.equal(restored.accessToken, "old-token");
+    assert.equal(restored.refreshToken, "old-refresh-token");
+    assert.equal(restored.idToken, "old-id-token");
+    assert.equal(restored.scope, "old-scope");
+    assert.ok(restored.expiresIn > 0 && restored.expiresIn <= 3600);
+    assert.equal(oauth.getNotionClient(), previousClient);
+    assert.equal(await oauth.checkNotionConnection(), true);
+    await oauth.getNotionClient().users.me({});
+    assert.ok(requests.every((request) => new Headers(request.headers).get("authorization") === "Bearer old-token"));
+  }
+});
+
+test("failed verification restores the previous connection after new credentials have been saved", async () => {
+  for (const failure of ["invalid-token", "network-error"]) {
+    let oauth;
+    let previousClient;
+    const context = setup({
+      storedToken: "old-token",
+      respond: (request) => {
+        if (new Headers(request.headers).get("authorization") === "Bearer fresh-token") {
+          assert.equal(oauth.getNotionClient(), previousClient);
+          if (failure === "network-error") throw new Error("Network unavailable");
+          return { status: 401, body: { object: "error", code: "unauthorized", message: "API token is invalid." } };
+        }
+        return { object: "user", id: "bot" };
+      },
+    });
+    oauth = context.oauth;
+    previousClient = oauth.getNotionClient();
+    await assert.rejects(oauth.reconnectNotion(), /API token is invalid|Network unavailable/);
+    assert.equal(oauth.getNotionClient(), previousClient);
+    assert.equal(await oauth.checkNotionConnection(), true);
+    await oauth.getNotionClient().users.me({});
+  }
 });
 
 test("revoked access offers OAuth recovery or secret preferences, and network failures preserve credentials", async () => {
