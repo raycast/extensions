@@ -1,3 +1,3 @@
 # Rubiks cube timer Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-25
