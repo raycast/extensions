@@ -119,6 +119,9 @@ export function parseRecurrence(text: string): ParsedRecurrence | null {
   return null;
 }
 
+const WEEKDAY_ANCHOR_PATTERN =
+  /\b(?:mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/i;
+
 export type NlpDueDateResolution = {
   dueDate: Date | null;
   parsedDueDate: ParsedDueDate | null;
@@ -136,16 +139,20 @@ export function resolveDueDateFromNlp(
   }
 
   const recurrence = parseRecurrence(trimmed);
-  const parsed = parseDueDate(trimmed, now, dateFormatPreference);
 
-  if (parsed) {
-    const isOnlyRecurrenceInterval =
-      recurrence &&
-      parsed.matchedText &&
-      /\d/.test(parsed.matchedText) &&
-      recurrence.matchedText.toLowerCase().includes(parsed.matchedText.toLowerCase().trim());
+  if (!recurrence) {
+    const parsed = parseDueDate(trimmed, now, dateFormatPreference);
+    return {
+      dueDate: parsed ? parsed.date : null,
+      parsedDueDate: parsed,
+      recurrence: null,
+    };
+  }
 
-    if (!isOnlyRecurrenceInterval) {
+  // Weekday-anchored recurrences (e.g. "every Friday", "every other friday", "each tuesday", "every Monday at 9am")
+  if (WEEKDAY_ANCHOR_PATTERN.test(recurrence.matchedText)) {
+    const parsed = parseDueDate(trimmed, now, dateFormatPreference);
+    if (parsed) {
       return {
         dueDate: parsed.date,
         parsedDueDate: parsed,
@@ -154,22 +161,58 @@ export function resolveDueDateFromNlp(
     }
   }
 
-  if (recurrence) {
-    const fallbackParsed: ParsedDueDate = {
-      date: now,
-      isDateTime: false,
-      matchedText: recurrence.matchedText,
-    };
-    return {
-      dueDate: now,
-      parsedDueDate: fallbackParsed,
-      recurrence,
-    };
+  // Interval and generic recurrences (e.g. "every 2 weeks", "every 2 weeks at 10am", "every 3 days at 9am", "every half year")
+  // Strip the recurrence phrase to see if an explicit time or start date was specified
+  const remainingText = trimmed
+    .replace(recurrence.matchedText, "")
+    .replace(/^(?:at|from|on|starting)\s+/i, "")
+    .trim();
+  if (remainingText) {
+    const parsedRemainder = parseDueDate(remainingText, now, dateFormatPreference);
+    if (parsedRemainder) {
+      if (parsedRemainder.isDateTime && !parsedRemainder.hasExplicitDate) {
+        // Only time was parsed (e.g. "10am", "at 9am") -> merge time into today's date
+        const dueDate = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          parsedRemainder.date.getHours(),
+          parsedRemainder.date.getMinutes(),
+          parsedRemainder.date.getSeconds(),
+          parsedRemainder.date.getMilliseconds(),
+        );
+        return {
+          dueDate,
+          parsedDueDate: {
+            date: dueDate,
+            isDateTime: true,
+            matchedText: trimmed,
+            hasExplicitDate: false,
+          },
+          recurrence,
+        };
+      }
+
+      // Explicit start date was provided (e.g. "starting next Friday", "from tomorrow 10am")
+      return {
+        dueDate: parsedRemainder.date,
+        parsedDueDate: parsedRemainder,
+        recurrence,
+      };
+    }
   }
 
+  // Pure interval/generic recurrence without explicit start date/time defaults to today (all-day)
+  const fallbackParsed: ParsedDueDate = {
+    date: now,
+    isDateTime: false,
+    matchedText: recurrence.matchedText,
+    hasExplicitDate: false,
+  };
+
   return {
-    dueDate: null,
-    parsedDueDate: null,
-    recurrence: null,
+    dueDate: now,
+    parsedDueDate: fallbackParsed,
+    recurrence,
   };
 }
