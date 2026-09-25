@@ -1,6 +1,6 @@
 # Quick Event Changelog
 
-## [Add Reminder Support] - {PR_MERGE_DATE}
+## [Add Reminder Support] - 2026-09-25
 
 - Add support for custom event reminders/alerts using natural language (e.g., "remind me 5 min before", "add reminder for 3 hours before", "with 15m reminder", "remind me at start").
 - Display recognized reminders with a badge in the quick event results list.
