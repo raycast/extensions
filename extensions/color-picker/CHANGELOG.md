@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Fix Color Picking and Conversion] - {PR_MERGE_DATE}
+## [Fix Color Picking and Conversion] - 2026-09-25
 
 - Stop showing an error after picking a color when the optional menu bar command is disabled or unavailable
 - Allow typing or pasting colors directly into Convert Color, with inline feedback for invalid input
