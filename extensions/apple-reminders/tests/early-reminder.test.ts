@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
-  EARLY_REMINDER_OPTIONS,
   extractEarlyReminderFromText,
   formatEarlyReminder,
   formatEarlyReminderShort,

@@ -25,7 +25,7 @@ export const Form = {
   TextArea: () => null,
   Dropdown: () => null,
   DatePicker: {
-    isFullDay: (d) => false,
+    isFullDay: () => false,
   },
 };
 
