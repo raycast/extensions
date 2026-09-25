@@ -135,6 +135,9 @@ export function ChangelogActions({ items, currentIndex, changelog, slug, selecte
         />
         {copyActions(changelog, selectedVersion)}
       </ActionPanel.Section>
+      {/* Deliberately between the changelog and Store sections, not appended (Chris's call).
+          The panel reads changelog → commit → extension, each section open-then-copy; the
+          Enter default stays Next/Previous Changelog, so no existing default moves. */}
       {commitActions(selectedVersion)}
       <ActionPanel.Section>
         <Action.OpenInBrowser

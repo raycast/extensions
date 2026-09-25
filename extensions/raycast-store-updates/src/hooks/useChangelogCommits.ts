@@ -1,60 +1,73 @@
-import { Cache, LocalStorage } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { asArray, githubHeaders } from "../utils";
-import { ChangelogCommit } from "../utils/changelog";
-import { RATE_LIMIT_RESET_KEY, useGitHubRateLimit } from "./useGitHubRateLimit";
+import { ChangelogCommit, parseChangelog } from "../utils/changelog";
 
 const cache = new Cache({ namespace: "store-updates-changelog-commits" });
-const TTL_MS = 15 * 60 * 1000;
+const FEED_TTL_MS = 15 * 60 * 1000;
+const RAW = "https://raw.githubusercontent.com/raycast/extensions";
 
 /**
- * The commits that touched an extension's CHANGELOG.md, newest first.
+ * The newest 20 commits that touched the extension's CHANGELOG.md, from GitHub's Atom feed.
  *
- * One billed `api.github.com` call per extension per 15 minutes: the fetch re-runs on
- * every mount, so paging back and forth through changelogs would otherwise
- * bill each visit against the tokenless 60/hr that the list and menu bar share. It makes
- * no call during the shared rate-limit cooldown, and starts one when GitHub reports the
- * quota exhausted. Every failure returns an empty list: the commit actions disappear, the
- * changelog does not.
+ * The feed is served by github.com, not api.github.com, so it does not spend the rate-limit
+ * budget the update scan depends on. Cached for 15 minutes per extension.
+ */
+async function commitShas(slug: string): Promise<string[]> {
+  const cached = cache.get(`feed:${slug}`);
+  if (cached) {
+    const { ts, shas } = JSON.parse(cached) as { ts: number; shas: string[] };
+    if (Date.now() - ts < FEED_TTL_MS) return shas;
+  }
+  const response = await fetch(
+    `https://github.com/raycast/extensions/commits/main/extensions/${slug}/CHANGELOG.md.atom`,
+  );
+  if (!response.ok) return [];
+  const shas = [...(await response.text()).matchAll(/Grit::Commit\/([0-9a-f]{40})</g)].map((m) => m[1]);
+  cache.set(`feed:${slug}`, JSON.stringify({ ts: Date.now(), shas }));
+  return shas;
+}
+
+/**
+ * The version titles in the extension's CHANGELOG.md at a commit (`ref` may be `<sha>~1`).
+ * An empty list when the file did not exist there; null when it could not be read. A
+ * commit never changes, so a successful read is cached with no expiry (Raycast's Cache
+ * still evicts the least recently used entries past 10 MB).
+ */
+async function titlesAt(slug: string, ref: string): Promise<string[] | null> {
+  try {
+    const key = `titles:${ref}:${slug}`;
+    const cached = cache.get(key);
+    if (cached) return JSON.parse(cached) as string[];
+    const response = await fetch(`${RAW}/${ref}/extensions/${slug}/CHANGELOG.md`);
+    if (response.status === 404) return [];
+    if (!response.ok) return null;
+    const titles = parseChangelog(await response.text()).map((v) => v.title);
+    cache.set(key, JSON.stringify(titles));
+    return titles;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The CHANGELOG.md history `attributeVersions()` needs: each recent commit with the titles
+ * the file held there, plus the titles just before the oldest one. No billed requests.
+ * A failed feed read means no commit actions. A failed read of one commit also hides what
+ * the next-newer commit added, so pairing stops before both. The changelog itself is unaffected.
  */
 export function useChangelogCommits(slug: string | undefined) {
-  const { recordRateLimit } = useGitHubRateLimit();
-  // usePromise, not useCachedPromise: this hook keeps its own success-only cache, and
-  // useCachedPromise would also persist the empty result of a cooldown or a failure.
   return usePromise(
-    async (extension: string): Promise<ChangelogCommit[]> => {
+    async (extension: string): Promise<{ history: ChangelogCommit[]; before: string[] | null }> => {
       try {
-        const cached = cache.get(extension);
-        if (cached) {
-          const { ts, commits } = JSON.parse(cached) as { ts: number; commits: ChangelogCommit[] };
-          if (Date.now() - ts < TTL_MS) return commits;
-        }
-        const reset = Number(await LocalStorage.getItem<string>(RATE_LIMIT_RESET_KEY));
-        if (reset > Date.now()) return [];
-        const response = await fetch(
-          `https://api.github.com/repos/raycast/extensions/commits?path=extensions/${extension}/CHANGELOG.md&per_page=100`,
-          { headers: githubHeaders() },
-        );
-        // Same rule as fetchMergedPRs: only a 429, or a 403 with no quota left, is a rate limit.
-        if (
-          response.status === 429 ||
-          (response.status === 403 && response.headers.get("X-RateLimit-Remaining") === "0")
-        ) {
-          await recordRateLimit(Number(response.headers.get("X-RateLimit-Reset")) || undefined);
-          return [];
-        }
-        if (!response.ok) return [];
-        // A success can spend the last request; start the cooldown now rather than on the next call's 403.
-        if (response.headers.get("X-RateLimit-Remaining") === "0") {
-          await recordRateLimit(Number(response.headers.get("X-RateLimit-Reset")) || undefined);
-        }
-        const commits = asArray<{ sha: string; commit: { committer: { date: string } } }>(await response.json()).map(
-          (c) => ({ sha: c.sha, date: c.commit.committer.date }),
-        );
-        cache.set(extension, JSON.stringify({ ts: Date.now(), commits }));
-        return commits;
+        const shas = await commitShas(extension);
+        if (shas.length === 0) return { history: [], before: null };
+        const [before, ...titles] = await Promise.all([
+          titlesAt(extension, `${shas[shas.length - 1]}~1`),
+          ...shas.map((sha) => titlesAt(extension, sha)),
+        ]);
+        return { history: shas.map((sha, i) => ({ sha, titles: titles[i] })), before };
       } catch {
-        return [];
+        return { history: [], before: null };
       }
     },
     [slug!],

@@ -112,54 +112,59 @@ export function formatVersionAge(date: Date | undefined): string | undefined {
   return "just now";
 }
 
-/** A commit that touched an extension's CHANGELOG.md, newest first as GitHub lists them. */
+/** One commit in a CHANGELOG.md's history: its SHA and the version titles the file held there. */
 export interface ChangelogCommit {
   sha: string;
-  /** Committer date, ISO 8601 UTC — for a squash merge, the merge time. */
-  date: string;
+  /** Null when the file at this commit could not be read. */
+  titles: string[] | null;
 }
 
-// A stamped heading's commit merged within two days after the start of its date (UTC).
-// CI stamps in either UTC or US Pacific time, and sometimes a day behind the merge
-// (Linear's `2026-07-14` merged at 07-15 09:24Z), but never ahead of it in the samples below.
-const STAMP_WINDOW = 2 * 86_400_000;
-
 /**
- * Pairs each version row with the commit that added it, or undefined when none can be named.
+ * Pairs each version row with the commit that added it, or undefined when that cannot be shown.
  *
- * The two lists are walked together newest-first: commits newer than a heading's window
- * touched the file without adding a version (a typo fix, a bulk sweep) and are skipped. A
- * heading that finds no commit of its own reuses the previous one when that commit also
- * fits its window, because one PR can add several versions (better-json's first merge
- * added four). A file written oldest-first is walked in reverse, or every pair would swap.
+ * `history` is the file's commit history, newest first; `before` is the titles the file
+ * held just before the oldest of those commits (empty when that commit created it). Nothing
+ * touches the file between two consecutive commits in its history, so a commit added exactly
+ * the titles it holds that the next-older state lacks. Titles, not dates, are compared, so
+ * the commit that stamps `{PR_MERGE_DATE}` adds nothing. They are counted as a multiset,
+ * so a repeated title ("Update") pairs one occurrence per commit, newest commit to topmost
+ * row — which is only right in a newest-first file, so in any other file a repeated title
+ * is left unpaired. A row whose heading text was edited later pairs with that edit, where
+ * its current text first appeared; a row older than the history stays unpaired.
  *
- * Only the first 100 commits are fetched, so versions older than that go unpaired: they
- * lose the commit actions, but are never linked to the wrong commit.
- *
- * Measured 2026-09-24 against the commit diffs themselves. Over 157 headings in 30
- * extensions: 144 paired correctly, 10 unpaired (undated, or older than the file's
- * history), 3 wrong — each a heading whose author typed a date instead of
- * `{PR_MERGE_DATE}`, which no date rule can see through. A fresh 144 headings in 30 more
- * extensions: 135 correct, 9 unpaired, 0 wrong. Narrowing the window to one Pacific day
- * fixed none of the 3, and turned 29 correct pairs into 4 wrong and 25 unpaired.
+ * Nothing is paired unless the displayed rows are exactly the newest commit's titles: the
+ * feed and the displayed file are fetched separately, and a feed that lags the file would
+ * otherwise hand a new row's duplicate title to an older commit.
  */
-export function pairVersionCommits(versions: ChangelogVersion[], commits: ChangelogCommit[]): (string | undefined)[] {
-  const dated = versions.filter((v) => v.date);
-  const oldestFirst = dated.length > 1 && dated[0].date! < dated[dated.length - 1].date!;
-  if (oldestFirst) return pairVersionCommits([...versions].reverse(), commits).reverse();
-
-  const times = commits.map((c) => Date.parse(c.date));
-  let next = 0;
-  let last: number | undefined;
-  return versions.map(({ date }) => {
-    if (!date) return undefined;
-    const day = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-    const fits = (i: number) => times[i] >= day && times[i] < day + STAMP_WINDOW;
-    while (next < times.length && times[next] >= day + STAMP_WINDOW) next++;
-    if (next < times.length && fits(next)) {
-      last = next++;
-      return commits[last].sha;
+export function attributeVersions(
+  versions: ChangelogVersion[],
+  history: ChangelogCommit[],
+  before: string[] | null,
+): (string | undefined)[] {
+  const result: (string | undefined)[] = versions.map(() => undefined);
+  const shown = versions.map((v) => v.title);
+  if (shown.join("\n") !== history[0]?.titles?.join("\n")) return result;
+  const dates = versions.flatMap((v) => (v.date ? [v.date.getTime()] : []));
+  // First against last, not every pair: one hand-typed date out of order in a long history
+  // would otherwise unpair every repeated title in a file that is plainly newest-first.
+  const newestFirst = dates.length > 1 && dates[0] > dates[dates.length - 1];
+  const repeated = new Set(shown.filter((t, i) => shown.indexOf(t) !== i));
+  for (let i = 0; i < history.length; i++) {
+    const titles = history[i].titles;
+    const older = i + 1 < history.length ? history[i + 1].titles : before;
+    if (!titles || !older) break;
+    const remaining = new Map<string, number>();
+    for (const t of older) remaining.set(t, (remaining.get(t) ?? 0) + 1);
+    for (const t of titles) {
+      const left = remaining.get(t) ?? 0;
+      if (left > 0) {
+        remaining.set(t, left - 1);
+        continue;
+      }
+      if (repeated.has(t) && !newestFirst) continue;
+      const row = versions.findIndex((v, index) => v.title === t && result[index] === undefined);
+      if (row !== -1) result[row] = history[i].sha;
     }
-    return last !== undefined && fits(last) ? commits[last].sha : undefined;
-  });
+  }
+  return result;
 }
