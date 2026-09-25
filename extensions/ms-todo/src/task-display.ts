@@ -41,14 +41,48 @@ export function graphDate(
 ): string {
   if (!value) return "None";
   const utc = value.timeZone?.toUpperCase() === "UTC";
-  const date = new Date(`${value.dateTime}Z`);
-  if (!Number.isNaN(date.valueOf())) {
-    if (dateOnly) {
-      // Match ms-todo's local_due_date: Graph returns writer-zone midnight in UTC.
-      const rounded = new Date(date.getTime() + 12 * 60 * 60 * 1000);
-      return isoDay(rounded, utc ? localZone : "UTC");
+  if (utc) {
+    const date = new Date(`${value.dateTime}Z`);
+    if (!Number.isNaN(date.valueOf())) {
+      if (!dateOnly) return date.toLocaleString();
+      const localTime = new Intl.DateTimeFormat("en-GB", {
+        timeZone: localZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23",
+      }).format(date);
+      if (localTime === "00:00:00" && date.getUTCMilliseconds() === 0) {
+        return isoDay(date, localZone);
+      }
+      return isoDay(new Date(date.getTime() + 12 * 60 * 60 * 1000), "UTC");
     }
-    if (utc) return date.toLocaleString();
+  } else if (dateOnly) {
+    // A non-UTC Graph response is wall time in its named zone, not a UTC instant.
+    const parts =
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?$/.exec(
+        value.dateTime,
+      );
+    if (parts) {
+      const [, year, month, day, hour, minute, second, fraction = ""] = parts;
+      const wall = new Date(
+        Date.UTC(
+          Number(year),
+          Number(month) - 1,
+          Number(day),
+          Number(hour),
+          Number(minute),
+          Number(second),
+          Number(fraction.slice(0, 3).padEnd(3, "0")),
+        ),
+      );
+      if (
+        !Number.isNaN(wall.valueOf()) &&
+        wall.toISOString().slice(0, 19) === value.dateTime.slice(0, 19)
+      ) {
+        return isoDay(new Date(wall.getTime() + 12 * 60 * 60 * 1000), "UTC");
+      }
+    }
   }
   return `${value.dateTime.replace("T", " ")}${value.timeZone ? ` (${value.timeZone})` : ""}`;
 }
