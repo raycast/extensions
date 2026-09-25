@@ -5,8 +5,6 @@
   "description": "Search, triage and send Nyxe mail, grab sign-in codes, and keep an eye on your inbox from the menu bar.",
   "icon": "icon.png",
   "author": "raymondaxyz",
-  "owner": "mzed-studio",
-  "access": "public",
   "license": "MIT",
   "categories": [
     "Communication",
