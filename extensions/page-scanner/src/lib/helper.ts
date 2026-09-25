@@ -10,7 +10,7 @@
  */
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { runCli, type CliResult, type StatusAnswer } from "./cli";
+import { runCli, type CliResult } from "./cli";
 
 /** Paths that keep naming a working Node across upgrades. Not fnm's or nvm's, which are versioned. */
 const STABLE_NODES = ["/opt/homebrew/bin/node", "/usr/local/bin/node"];
@@ -39,16 +39,4 @@ export async function helperNode(): Promise<string> {
 
 export async function installHelper(): Promise<CliResult<{ node: string }>> {
   return runCli(["install", "--node", await helperNode()]);
-}
-
-export type HelperState = "missing" | "broken" | "ready";
-
-/**
- * Where the helper stands. `broken` is a wrapper whose Node is gone, which only a new wrapper
- * fixes; `missing` is a machine where nobody has set it up, which is the user's to agree to.
- */
-export function helperState(status: StatusAnswer): HelperState {
-  const host = status.nativeHost;
-  if (!host.hostInstalled || !host.browsers.some((browser) => browser.installed)) return "missing";
-  return host.nodeFound ? "ready" : "broken";
 }

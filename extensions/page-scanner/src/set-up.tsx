@@ -12,7 +12,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { runCli, type BrowsersAnswer, type StatusAnswer } from "./lib/cli";
-import { helperState, installHelper } from "./lib/helper";
+import { installHelper } from "./lib/helper";
+import { helperState } from "./lib/helper-state";
 import { setUpMarkdown, STORE_URL, type Progress } from "./lib/set-up-markdown";
 
 const POLL_MS = 3_000;
@@ -95,7 +96,7 @@ export default function SetUp() {
           ) : null}
           {needsHelper ? (
             <Action
-              title={progress.helper === "broken" ? "Repair Helper" : "Install Helper"}
+              title={progress.helper === "missing" ? "Install Helper" : "Repair Helper"}
               icon={Icon.Download}
               onAction={install}
             />

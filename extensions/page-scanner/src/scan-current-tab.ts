@@ -21,7 +21,8 @@ import {
 } from "@raycast/api";
 import { isSetupMissing, runCli, type CliResult, type ScanAnswer, type StatusAnswer, type TabsAnswer } from "./lib/cli";
 import { frontTabUrl } from "./lib/front-tab";
-import { helperState, installHelper } from "./lib/helper";
+import { installHelper } from "./lib/helper";
+import { helperState } from "./lib/helper-state";
 import { pickTab } from "./lib/pick-tab";
 import { scanArgs } from "./lib/scan-args";
 
@@ -117,7 +118,8 @@ async function deliver(answer: ScanAnswer, after: Preferences.ScanCurrentTab["af
 }
 
 /**
- * No browser answered. Writes the helper again when its Node is gone and says to wait; returns
+ * No browser answered. Writes the helper again when its Node is gone, or when its manifest
+ * predates Edge Add-ons, and says to wait; returns
  * false, having said what is missing, in every other case.
  */
 async function repairIfBroken(toast: Toast): Promise<boolean> {
@@ -140,7 +142,10 @@ async function repairIfBroken(toast: Toast): Promise<boolean> {
     return false;
   }
   toast.title = "Repairing the helper";
-  toast.message = `The Node it ran on is gone (${status.answer.nativeHost.node ?? "unknown"}).`;
+  toast.message =
+    state === "broken"
+      ? `The Node it ran on is gone (${status.answer.nativeHost.node ?? "unknown"}).`
+      : "It was set up before Page Scanner came to Edge Add-ons.";
   const installed = await installHelper();
   if (!installed.answer.ok) {
     await fail(toast, failure(installed));

@@ -76,7 +76,8 @@ export interface StatusAnswer {
     hostInstalled: boolean;
     node: string | null;
     nodeFound: boolean;
-    browsers: { name: string; installed: boolean }[];
+    /** `allowsStore`: its manifest lets both store builds, Chrome's and Edge's, start the helper. */
+    browsers: { name: string; installed: boolean; allowsStore: boolean }[];
   };
 }
 

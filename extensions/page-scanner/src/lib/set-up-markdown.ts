@@ -3,7 +3,7 @@
  * instructions only for a step that is not done yet, so a finished page says it is finished
  * and fits the window without scrolling. No @raycast/api import, so it is tested.
  */
-import type { HelperState } from "./helper";
+import type { HelperState } from "./helper-state";
 
 export interface Progress {
   helper: HelperState;
@@ -25,12 +25,17 @@ export function setUpMarkdown(progress: Progress | undefined, error: string | un
           `**Needs repair.** The Node it ran on is gone (\`${progress.helperNode ?? "unknown"}\`).`,
           "Press **Repair Helper** below to name the Node it runs on again.",
         ]
-      : helperDone
-        ? ["**Done.**"]
-        : [
-            "**To do.**",
-            "Press **Install Helper** below. It tells Chrome, Edge, Brave, Arc and Vivaldi where the helper is, and changes nothing else.",
-          ];
+      : progress.helper === "outdated"
+        ? [
+            "**Needs repair.** It was set up before Page Scanner came to Edge Add-ons, so Edge cannot start it yet.",
+            "Press **Repair Helper** below to set it up again for both stores.",
+          ]
+        : helperDone
+          ? ["**Done.**"]
+          : [
+              "**To do.**",
+              "Press **Install Helper** below. It tells Chrome, Edge, Brave, Arc and Vivaldi where the helper is, and changes nothing else.",
+            ];
   const connect = connected
     ? [`**Done.** Connected: ${progress.browsers.join(", ")}.`]
     : [
