@@ -48,6 +48,8 @@ test("weeks start on Monday", () => {
 test("time of day parsing", () => {
   assert.equal(parseTimeOfDay("09:30"), 570);
   assert.equal(parseTimeOfDay("18"), 1080);
+  assert.equal(parseTimeOfDay("24:00"), 1440);
+  assert.equal(parseTimeOfDay("24:30"), undefined);
   assert.equal(parseTimeOfDay("25:00"), undefined);
   assert.equal(parseTimeOfDay(""), undefined);
 });

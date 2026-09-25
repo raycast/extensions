@@ -112,7 +112,7 @@ export function formatDuration(milliseconds: number): string {
   return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
 }
 
-/** Parses `HH:MM` into minutes since midnight. */
+/** Parses `HH:MM` into minutes since midnight. `24:00` is accepted as the end of the day. */
 export function parseTimeOfDay(value: string | undefined): number | undefined {
   const match = value?.trim().match(/^(\d{1,2})(?::(\d{2}))?$/);
   if (!match) {
@@ -120,7 +120,7 @@ export function parseTimeOfDay(value: string | undefined): number | undefined {
   }
   const hours = Number(match[1]);
   const minutes = Number(match[2] ?? 0);
-  if (hours > 24 || minutes > 59) {
+  if (hours > 24 || minutes > 59 || (hours === 24 && minutes > 0)) {
     return undefined;
   }
   return hours * 60 + minutes;
