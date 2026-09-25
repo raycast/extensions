@@ -209,18 +209,22 @@ child.unref();
 
 <br />
 
-### 2. Chromium Dual-Argument Directory Targeting
-Passing `--profile-directory="Profile 1"` alone is fragile on Windows. If Chromium is launched outside native shell associations, it defaults to the generic default user data root.
+### 2. Tailored Profile Directory Targeting Architecture
+Launching browser profiles reliably on Windows requires a tailored command-line strategy:
 
-Browser Router dynamically detects and pairs the root user data directory with the profile folder:
-```typescript
-const launchArgs = [
-  `--user-data-dir=${browser.userDataDir}`,
-  `--profile-directory=${profile.directoryName}`,
-  targetUrl,
-];
-```
-This guarantees deterministic profile targeting across Chrome, Edge, Brave, Vivaldi, and Arc.
+* **Brave, Vivaldi, Arc, Opera & Custom Profiles**:
+  Browser Router dynamically detects and pairs the root user data directory with the profile folder:
+  ```typescript
+  const launchArgs = [
+    `--user-data-dir=${browser.userDataDir}`,
+    `--profile-directory=${profile.directoryName}`,
+    targetUrl,
+  ];
+  ```
+  This guarantees deterministic profile targeting and prevents MSIX container virtualization.
+
+* **Google Chrome & Microsoft Edge**:
+  Passes `--profile-directory=${profile.directoryName}` while deliberately omitting `--user-data-dir`. This respects Chrome's singleton process model (preventing profile detachment and session logout) and avoids conflicts with Edge's background Startup Boost locks.
 
 <br />
 
@@ -293,8 +297,8 @@ Search for **Browser Router** in the Raycast Store and click **Install Extension
 ### Local Development Setup
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/raghavg02/browser-router.git
-   cd browser-router
+   git clone https://github.com/raycast/extensions.git
+   cd extensions/extensions/browser-router
    ```
 
 2. **Install dependencies:**

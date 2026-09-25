@@ -15,8 +15,8 @@ First off, thank you for considering contributing to Browser Router! Open source
 ### Local Setup
 1. Fork and clone the repository:
    ```bash
-   git clone https://github.com/raghavg02/browser-router.git
-   cd browser-router
+   git clone https://github.com/raycast/extensions.git
+   cd extensions/extensions/browser-router
    ```
 2. Install dependencies:
    ```bash

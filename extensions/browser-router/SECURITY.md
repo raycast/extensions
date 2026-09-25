@@ -1,4 +1,4 @@
-﻿# Security Policy
+# Security Policy
 
 ## Supported Versions
 
@@ -15,7 +15,7 @@ The Browser Router team takes the security and integrity of our software serious
 
 ### How to Report
 1. **GitHub Security Advisory**: Submit a private advisory via GitHub's "Security" tab if available on the repository.
-2. **In-App Feedback**: Use the built-in feedback tool (<kbd>Ctrl</kbd> + <kbd>F</kbd>) with category "Bug Report" and mark "[SECURITY]" in the subject line.
+2. **In-App Feedback**: Use the built-in feedback tool (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>) with category "Bug Report" and mark "[SECURITY]" in the subject line.
 
 Please include:
 - A clear description of the vulnerability.
