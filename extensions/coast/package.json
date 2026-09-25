@@ -1,0 +1,201 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "coast",
+  "title": "Coast",
+  "description": "An independently maintained Raycast integration to search, inspect, and revisit Coast screen history",
+  "version": "0.2.0",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "author": "jerichosequitin",
+  "categories": [
+    "Productivity"
+  ],
+  "icon": "extension_icon.png",
+  "tools": [
+    {
+      "name": "get-adjacent-moment",
+      "title": "Get Adjacent Moment",
+      "description": "Navigate to a previous or next representative capture with app/domain filters."
+    },
+    {
+      "name": "find-related-moments",
+      "title": "Find Related Moments",
+      "description": "Find related captures by URL, title, or application with explicit matching reasons."
+    },
+    {
+      "name": "use-saved-search",
+      "title": "Use Saved Search",
+      "description": "List or run locally saved search filters. Does not modify saved searches."
+    },
+    {
+      "name": "explore-around-moment",
+      "title": "Explore Around Moment",
+      "description": "Explore grouped captures before and after a known frame, preserving context for drill-down."
+    },
+    {
+      "name": "search-captures",
+      "title": "Search Captures",
+      "description": "Full-text search across OCR text and frame titles in the user's Coast screen history. Use for 'where did I see X' questions.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-capture",
+      "title": "Get Capture",
+      "description": "Get the full OCR text and metadata for a single Coast frame by its frame ID. Use after search-captures to read a specific capture in full.",
+      "mode": "no-view"
+    },
+    {
+      "name": "app-breakdown",
+      "title": "App Breakdown",
+      "description": "Get time spent per application, or total time for one application, over a date range. Use for 'how much time did I spend on X' questions.",
+      "mode": "no-view"
+    },
+    {
+      "name": "recent-activity",
+      "title": "Recent Activity",
+      "description": "Get a chronological summary of usage sessions over a date range, with optional app or domain filter. Use for 'what was I doing' questions.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-capture-image",
+      "title": "Get Capture Image",
+      "description": "Export the screenshot for a Coast frame to a temporary local PNG, optionally cropped to the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-ocr-boxes",
+      "title": "Get OCR Boxes",
+      "description": "Get positioned OCR text boxes for a Coast frame when text location and reading order matter.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-accessibility-tree",
+      "title": "Get Accessibility Tree",
+      "description": "Get the recorded macOS accessibility tree for a Coast frame to inspect UI controls and structured visible content.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-accessibility-coverage",
+      "title": "Get Accessibility Coverage",
+      "description": "Audit stored accessibility attributes for a Coast frame to diagnose capture coverage.",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-coast-filters",
+      "title": "List Coast Filters",
+      "description": "List recorded application bundle IDs and web domains for use with other Coast tools.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sample-activity",
+      "title": "Sample Activity",
+      "description": "Get one representative Coast frame per activity segment for a compact overview of an hour or day.",
+      "mode": "no-view"
+    },
+    {
+      "name": "browse-timeline",
+      "title": "Browse Timeline",
+      "description": "Get a chronological, textually deduplicated Coast timeline for a short period of about 30 minutes.",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-coast-link",
+      "title": "Create Coast Link",
+      "description": "Create a read-only coast:// deep link to a moment in the local Coast timeline.",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-current-screen",
+      "title": "Capture Current Screen",
+      "description": "Capture the current display through Coast, with confirmation and optional OCR. Recording exclusions still apply.",
+      "mode": "no-view"
+    }
+  ],
+  "commands": [
+    {
+      "name": "gallery",
+      "title": "Browse Screenshots",
+      "subtitle": "Coast",
+      "description": "Visually browse recorded Coast moments with application and domain filters",
+      "mode": "view"
+    },
+    {
+      "name": "saved-searches",
+      "title": "Saved Searches",
+      "subtitle": "Coast",
+      "description": "Save and rerun local queries and filters without copying recordings",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Coast",
+      "description": "Search your Coast screen history",
+      "mode": "view"
+    },
+    {
+      "name": "activity",
+      "title": "Coast Activity",
+      "description": "See app and domain usage over time",
+      "mode": "view"
+    },
+    {
+      "name": "timeline",
+      "title": "Browse Coast Timeline",
+      "description": "Browse recent Coast screenshots and activity highlights",
+      "mode": "view"
+    },
+    {
+      "name": "grab-screen",
+      "title": "Capture Current Screen",
+      "description": "Capture the current display through Coast and copy the image",
+      "mode": "no-view"
+    },
+    {
+      "name": "today",
+      "title": "Coast Screen Time",
+      "description": "Show today's Coast screen time in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "coastPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Coast Binary Path",
+      "description": "Path to the coast CLI if not on PATH",
+      "placeholder": "/usr/local/bin/coast"
+    },
+    {
+      "name": "defaultLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Search Page Size",
+      "description": "Results loaded per page, from 1 to 200. More matches remain available as you scroll. Defaults to 20.",
+      "placeholder": "20"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "bun test tests"
+  }
+}

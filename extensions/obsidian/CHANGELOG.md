@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix Search Media crash when opened via hotkey] - 2026-09-24
+
+- Fix a crash in Search Media when the command is launched without a search argument, e.g. via a hotkey
+
 ## [Added contributor] - 2026-09-07
 
 ## [Fix Misleading Required Plugin Message] - 2026-09-06

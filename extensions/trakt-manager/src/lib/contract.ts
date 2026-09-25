@@ -26,7 +26,17 @@ import {
   TraktUserStatsSchema,
   TraktIdLookupQuerySchema,
   TraktIdLookupSchema,
+  TraktListEntriesSchema,
+  TraktListItemsBodySchema,
+  TraktListSchema,
+  TraktListsSchema,
+  TraktListWriteBodySchema,
 } from "./schema";
+
+const TraktListPathSchema = z.object({
+  id: z.string().default("me"),
+  listId: z.string(),
+});
 
 const c = initContract();
 
@@ -444,6 +454,92 @@ const TraktUserContract = c.router({
       id: z.string().default("me"),
     }),
     summary: "Get user stats",
+  },
+  getLists: {
+    method: "GET",
+    path: "/users/:id/lists",
+    responses: {
+      200: TraktListsSchema,
+    },
+    pathParams: z.object({
+      id: z.string().default("me"),
+    }),
+    query: TraktPaginationSchema,
+    summary: "Get personal lists (paginated, limit clamped per endpoint)",
+  },
+  getList: {
+    method: "GET",
+    path: "/users/:id/lists/:listId",
+    responses: {
+      200: TraktListSchema,
+      404: z.unknown(),
+    },
+    pathParams: TraktListPathSchema,
+    summary: "Get one personal list",
+  },
+  createList: {
+    method: "POST",
+    path: "/users/:id/lists",
+    responses: {
+      201: z.unknown(),
+    },
+    pathParams: z.object({
+      id: z.string().default("me"),
+    }),
+    body: TraktListWriteBodySchema.extend({ name: z.string() }),
+    summary: "Create a personal list",
+  },
+  updateList: {
+    method: "PUT",
+    path: "/users/:id/lists/:listId",
+    responses: {
+      200: z.unknown(),
+    },
+    pathParams: TraktListPathSchema,
+    body: TraktListWriteBodySchema,
+    summary: "Update a personal list (the slug is kept when the name changes)",
+  },
+  deleteList: {
+    method: "DELETE",
+    path: "/users/:id/lists/:listId",
+    responses: {
+      204: z.unknown(),
+    },
+    pathParams: TraktListPathSchema,
+    body: c.noBody(),
+    summary: "Delete a personal list and every item on it",
+  },
+  getListItems: {
+    method: "GET",
+    path: "/users/:id/lists/:listId/items/:type",
+    responses: {
+      200: TraktListEntriesSchema,
+    },
+    pathParams: TraktListPathSchema.extend({
+      type: z.literal("movie,show,season,episode"),
+    }),
+    query: TraktPaginationSchema,
+    summary: "Get movie, show, season and episode items on a personal list",
+  },
+  addListItems: {
+    method: "POST",
+    path: "/users/:id/lists/:listId/items",
+    responses: {
+      201: z.unknown(),
+    },
+    pathParams: TraktListPathSchema,
+    body: TraktListItemsBodySchema,
+    summary: "Add items to a personal list",
+  },
+  removeListItems: {
+    method: "POST",
+    path: "/users/:id/lists/:listId/items/remove",
+    responses: {
+      200: z.unknown(),
+    },
+    pathParams: TraktListPathSchema,
+    body: TraktListItemsBodySchema,
+    summary: "Remove items from a personal list",
   },
 });
 

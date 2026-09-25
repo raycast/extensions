@@ -3,6 +3,7 @@ import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
   deleteReminder,
+  moveToList,
   setPriorityStatus,
   toggleCompletionStatus,
   setDueDate as setReminderDueDate,
@@ -22,12 +23,68 @@ type ReminderActionsProps = {
   reminder: Reminder;
   mutate: MutatePromise<{ reminders: Reminder[]; lists: TList[] } | undefined>;
   listId?: string;
+  lists?: TList[];
   viewProps: ViewProps;
 };
 
-export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
+export default function ReminderActions({ reminder, listId, lists = [], viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
   const attachedUrls = getAttachedUrls(reminder);
+
+  async function moveReminderToList(targetList: TList) {
+    if (targetList.id === reminder.list?.id) return;
+
+    try {
+      if (reminder.isCompleted && viewProps.completed.mutate) {
+        await viewProps.completed.mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return data.map((r) => {
+              if (reminder.id === r.id) {
+                return {
+                  ...r,
+                  list: targetList,
+                };
+              }
+              return r;
+            });
+          },
+        });
+      } else {
+        await mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return {
+              ...data,
+              reminders: data.reminders.map((r) => {
+                if (reminder.id === r.id) {
+                  return {
+                    ...r,
+                    list: targetList,
+                  };
+                }
+
+                return r;
+              }),
+            };
+          },
+        });
+      }
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Moved Reminder",
+        message: `Moved to ${targetList.title}`,
+      });
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to move reminder",
+      });
+    }
+  }
 
   async function toggleReminder() {
     async function toggle() {
@@ -284,6 +341,24 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
             target={<LocationForm onSubmit={setReminderLocation} isCustomLocation />}
           />
         </ActionPanel.Submenu>
+
+        {lists.length > 0 ? (
+          <ActionPanel.Submenu
+            title="Move to List"
+            icon={Icon.Folder}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          >
+            {lists.map((list) => (
+              <Action
+                key={list.id}
+                title={list.title}
+                icon={{ source: Icon.Circle, tintColor: list.color }}
+                autoFocus={list.id === reminder.list?.id}
+                onAction={() => moveReminderToList(list)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        ) : null}
 
         <Action
           title="Delete Reminder"

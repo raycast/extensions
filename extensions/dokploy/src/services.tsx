@@ -3,25 +3,27 @@ import {
   confirmAlert,
   showToast,
   Toast,
-  popToRoot,
   Icon,
   List,
   ActionPanel,
   Action,
-  Color,
   Form,
+  useNavigation,
 } from "@raycast/api";
-import { useFetch, useForm, FormValidation } from "@raycast/utils";
-import { useToken } from "./instances";
-import { Server, Service, ErrorResult, DatabaseKind } from "./interfaces";
+import { useFetch, useForm, FormValidation, useFrecencySorting } from "@raycast/utils";
+import { type Instance, useToken, tokenForInstance, instanceId } from "./instances";
+import { Server, Service, ErrorResult, DatabaseKind, Project } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
 import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
+import ServiceSchedules from "./service-schedules";
+import Templates from "./templates";
 import { DatabaseActions } from "./database-actions";
+import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
 import type { ServiceScope } from "./utils";
-import { getTotalServices } from "./utils";
+import { getTotalServices, isModernProject } from "./utils";
 
 const DATABASE_KINDS: DatabaseKind[] = ["mariadb", "mongo", "mysql", "postgres", "redis"];
 // Redis has no `databaseType` value in Dokploy's backup API - only these four take one.
@@ -30,12 +32,45 @@ const BACKUPABLE_KINDS: BackupableKind[] = ["mariadb", "mongo", "mysql", "postgr
 export default function Services({
   environment,
   revalidate,
+  instance,
 }: {
   environment: ServiceScope;
-  /** Refetches the project tree this screen's data came from, so a lifecycle action's effect on status is reflected without leaving the screen. */
+  /**
+   * Refetches the parent's own project list (Projects/Environments), so their subtitles
+   * ("N services"/"N environments") stay in sync too. Services no longer depends on this for its
+   * own rows - see the `project.one` fetch below - so it's optional and only wired for that.
+   */
   revalidate?: () => void;
+  /** The instance this screen was opened for, when a caller (e.g. Projects' own instance dropdown) knows it explicitly - falls back to the shared active token otherwise, same as `useToken()` alone did before. */
+  instance?: Instance;
 }) {
-  const { url, headers } = useToken();
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
+
+  // `environment` is a snapshot from whenever this screen was pushed - the parent's own
+  // `revalidate` refetches its own list, but that refetch never reaches an already-pushed Services
+  // screen since props don't change on their own. So Services fetches its own copy of the project
+  // here and renders from that instead, which makes its own `refresh()` (below) actually update
+  // what's on screen after Create/Delete.
+  const {
+    data: project,
+    revalidate: revalidateProject,
+    isLoading: isProjectLoading,
+  } = useFetch<Project, Project | undefined>(`${url}project.one?projectId=${environment.projectId}`, {
+    headers,
+  });
+
+  const scope: ServiceScope =
+    (project
+      ? isModernProject(project)
+        ? project.environments.find((e) => e.environmentId === environment.environmentId)
+        : project
+      : undefined) ?? environment;
+
+  function refresh() {
+    revalidateProject();
+    revalidate?.();
+  }
 
   interface GroupedService extends Service {
     type: string;
@@ -43,116 +78,25 @@ export default function Services({
     status: "idle" | "done";
   }
 
-  type LifecycleAction = "deploy" | "redeploy" | "rebuild" | "start" | "stop" | "reload";
-
-  // Route suffix is always the action name itself, e.g. `application.deploy`, `postgres.rebuild`.
-  const SERVICE_ACTIONS: Record<GroupedService["type"], LifecycleAction[]> = {
-    application: ["deploy", "redeploy", "start", "stop", "reload"],
-    compose: ["deploy", "redeploy", "start", "stop"],
-    mariadb: ["deploy", "rebuild", "start", "stop", "reload"],
-    mongo: ["deploy", "rebuild", "start", "stop", "reload"],
-    mysql: ["deploy", "rebuild", "start", "stop", "reload"],
-    postgres: ["deploy", "rebuild", "start", "stop", "reload"],
-    redis: ["deploy", "rebuild", "start", "stop", "reload"],
-  };
-
-  const ID_FIELDS: Record<GroupedService["type"], string> = {
-    application: "applicationId",
-    mariadb: "mariadbId",
-    mongo: "mongoId",
-    mysql: "mysqlId",
-    postgres: "postgresId",
-    redis: "redisId",
-    compose: "composeId",
-  };
-
-  const ACTION_ICONS: Record<LifecycleAction, Icon> = {
-    deploy: Icon.Rocket,
-    redeploy: Icon.RotateClockwise,
-    rebuild: Icon.Hammer,
-    start: Icon.Play,
-    stop: Icon.Stop,
-    reload: Icon.ArrowClockwise,
-  };
-
-  const ACTION_LABELS: Record<LifecycleAction, string> = {
-    deploy: "Deploy",
-    redeploy: "Redeploy",
-    rebuild: "Rebuild",
-    start: "Start",
-    stop: "Stop",
-    reload: "Reload",
-  };
-
-  const ACTION_PROGRESS: Record<LifecycleAction, string> = {
-    deploy: "Deploying",
-    redeploy: "Redeploying",
-    rebuild: "Rebuilding",
-    start: "Starting",
-    stop: "Stopping",
-    reload: "Reloading",
-  };
-
-  const ACTION_PAST: Record<LifecycleAction, string> = {
-    deploy: "Deployed",
-    redeploy: "Redeployed",
-    rebuild: "Rebuilt",
-    start: "Started",
-    stop: "Stopped",
-    reload: "Reloaded",
-  };
-
-  async function runServiceAction(service: GroupedService, action: LifecycleAction) {
-    if (action === "stop") {
-      const options: Alert.Options = {
-        title: `Stop ${service.name}?`,
-        message: "The service will become unreachable until it is started again.",
-        primaryAction: {
-          style: Alert.ActionStyle.Destructive,
-          title: "Stop",
-        },
-      };
-      if (!(await confirmAlert(options))) return;
-    }
-
-    const toast = await showToast(Toast.Style.Animated, ACTION_PROGRESS[action], service.name);
-    try {
-      const body: Record<string, string> = { [ID_FIELDS[service.type]]: service.id };
-      if (action === "reload") body.appName = service.appName;
-
-      const response = await fetch(url + `${service.type}.${action}`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
-      toast.style = Toast.Style.Success;
-      toast.title = ACTION_PAST[action];
-      revalidate?.();
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Could not ${action} service`;
-      toast.message = `${error}`;
-    }
-  }
-
   const services: GroupedService[] = [
-    ...environment.applications.map((a) => ({
+    ...scope.applications.map((a) => ({
       ...a,
       type: "application",
       id: a.applicationId,
       status: a.applicationStatus,
     })),
-    ...environment.mariadb.map((m) => ({ ...m, type: "mariadb", id: m.mariadbId, status: m.applicationStatus })),
-    ...environment.mongo.map((m) => ({ ...m, type: "mongo", id: m.mongoId, status: m.applicationStatus })),
-    ...environment.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
-    ...environment.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
-    ...environment.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
-    ...environment.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
+    ...scope.mariadb.map((m) => ({ ...m, type: "mariadb", id: m.mariadbId, status: m.applicationStatus })),
+    ...scope.mongo.map((m) => ({ ...m, type: "mongo", id: m.mongoId, status: m.applicationStatus })),
+    ...scope.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
+    ...scope.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
+    ...scope.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
+    ...scope.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
   ];
+
+  const { data: sortedServices, visitItem } = useFrecencySorting(services, {
+    namespace: instance ? instanceId(instance) : "shared",
+    key: (service) => `${service.type}-${service.id}`,
+  });
 
   async function deleteService({ id, name, type }: GroupedService) {
     const options: Alert.Options = {
@@ -205,7 +149,11 @@ export default function Services({
         }
         toast.style = Toast.Style.Success;
         toast.title = "Deleted service";
-        await popToRoot();
+        // Same live-status-update mechanism the lifecycle actions above already use - unlike
+        // Create, delete never navigates anywhere, so there's no unmount race to work around; it
+        // just needed to actually call refresh() instead of popToRoot(), which exited the whole
+        // screen and made the list look stale until Raycast was fully restarted.
+        refresh();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not delete service";
@@ -224,10 +172,10 @@ export default function Services({
     redis: "redis.svg",
   };
 
-  const totalServices = getTotalServices(environment);
+  const totalServices = getTotalServices(scope);
 
   return (
-    <List navigationTitle="Services" isShowingDetail={totalServices > 0}>
+    <List navigationTitle="Services" isLoading={isProjectLoading} isShowingDetail={totalServices > 0}>
       {!totalServices ? (
         <List.EmptyView
           icon="folder-input.svg"
@@ -238,29 +186,34 @@ export default function Services({
                 <Action.Push
                   icon="folder-input.svg"
                   title="Application"
-                  target={<CreateApplication environment={environment} />}
+                  target={<CreateApplication environment={scope} instance={instance} />}
+                  onPop={() => refresh()}
                 />
                 <Action.Push
                   icon="database.svg"
                   title="Database"
-                  target={<CreateDatabase environment={environment} />}
+                  target={<CreateDatabase environment={scope} instance={instance} />}
+                  onPop={() => refresh()}
                 />
+                {scope.environmentId && (
+                  <Action.Push
+                    icon={Icon.Box}
+                    title="From Template"
+                    target={<Templates environmentId={scope.environmentId} />}
+                    onPop={() => refresh()}
+                  />
+                )}
               </ActionPanel.Submenu>
             </ActionPanel>
           }
         />
       ) : (
-        services.map((service) => (
+        sortedServices.map((service) => (
           <List.Item
             key={service.id}
             icon={SERVICE_ICONS[service.type]}
             title={service.name}
-            accessories={[
-              {
-                icon: { source: Icon.CircleFilled, tintColor: service.status === "done" ? Color.Green : "#18181B" },
-                tooltip: service.status,
-              },
-            ]}
+            accessories={[statusAccessory(service.status)]}
             detail={
               <List.Item.Detail
                 markdown={service.description}
@@ -284,13 +237,23 @@ export default function Services({
                   <Action.Push
                     icon="folder-input.svg"
                     title="Application"
-                    target={<CreateApplication environment={environment} />}
+                    target={<CreateApplication environment={scope} instance={instance} />}
+                    onPop={() => refresh()}
                   />
                   <Action.Push
                     icon="database.svg"
                     title="Database"
-                    target={<CreateDatabase environment={environment} />}
+                    target={<CreateDatabase environment={scope} instance={instance} />}
+                    onPop={() => refresh()}
                   />
+                  {scope.environmentId && (
+                    <Action.Push
+                      icon={Icon.Box}
+                      title="From Template"
+                      target={<Templates environmentId={scope.environmentId} />}
+                      onPop={() => refresh()}
+                    />
+                  )}
                 </ActionPanel.Submenu>
                 <ActionPanel.Section title="Actions">
                   {SERVICE_ACTIONS[service.type].map((action) => (
@@ -299,13 +262,18 @@ export default function Services({
                       icon={ACTION_ICONS[action]}
                       title={ACTION_LABELS[action]}
                       style={action === "stop" ? Action.Style.Destructive : undefined}
-                      onAction={() => runServiceAction(service, action)}
+                      onAction={() => {
+                        void visitItem(service);
+                        void runServiceAction(url, headers, service, action, refresh);
+                      }}
                     />
                   ))}
-                  {/* compose.readLogs requires a containerId, which this screen doesn't have; leave compose out until that's picked. */}
-                  {service.type !== "compose" && (
-                    <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
-                  )}
+                  <Action.Push
+                    icon={Icon.Terminal}
+                    title="View Logs"
+                    target={<ServiceLogs service={service} />}
+                    onPush={() => visitItem(service)}
+                  />
                   {(service.type === "application" || service.type === "compose") && (
                     <Action.Push
                       icon={Icon.List}
@@ -332,6 +300,13 @@ export default function Services({
                       target={<ServiceBackups service={{ ...service, type: service.type as BackupableKind }} />}
                     />
                   )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.Clock}
+                      title="View Schedules"
+                      target={<ServiceSchedules service={{ ...service, type: service.type }} />}
+                    />
+                  )}
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
@@ -351,8 +326,10 @@ export default function Services({
   );
 }
 
-function CreateApplication({ environment }: { environment: ServiceScope }) {
-  const { url, headers } = useToken();
+function CreateApplication({ environment, instance }: { environment: ServiceScope; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
+  const { pop } = useNavigation();
 
   interface FormValues {
     name: string;
@@ -382,7 +359,11 @@ function CreateApplication({ environment }: { environment: ServiceScope }) {
         }
         toast.style = Toast.Style.Success;
         toast.title = "Created Application";
-        await popToRoot();
+        // Pops back to Services instead of popToRoot() - the Action.Push that opened this form
+        // has its own onPop calling revalidate, which only actually refreshes what's on screen if
+        // Services stays mounted (popToRoot() tore it down before the fire-and-forget revalidate
+        // could land, confirmed live for the same popToRoot()-based pattern on Deploy Template).
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create Application";
@@ -424,8 +405,10 @@ function CreateApplication({ environment }: { environment: ServiceScope }) {
   );
 }
 
-function CreateDatabase({ environment }: { environment: ServiceScope }) {
-  const { url, headers } = useToken();
+function CreateDatabase({ environment, instance }: { environment: ServiceScope; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
+  const { pop } = useNavigation();
   interface FormValues {
     dbType: string;
 
@@ -480,7 +463,9 @@ function CreateDatabase({ environment }: { environment: ServiceScope }) {
         }
         toast.style = Toast.Style.Success;
         toast.title = "Created Database";
-        await popToRoot();
+        // See the matching comment in CreateApplication - pops back to Services instead of
+        // popToRoot() so the Action.Push's onPop-triggered revalidate actually lands.
+        pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create Database";

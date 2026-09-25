@@ -9,6 +9,7 @@ const ZLIB_PATH_CANDIDATES = ["/opt/homebrew/bin/zlib", "/usr/local/bin/zlib"];
 
 export function resolveZlibPath(configuredPath: string): string {
   if (configuredPath) return configuredPath;
+  if (process.platform === "win32") return "zlib.exe";
   return ZLIB_PATH_CANDIDATES.find((path) => existsSync(path)) ?? "zlib";
 }
 

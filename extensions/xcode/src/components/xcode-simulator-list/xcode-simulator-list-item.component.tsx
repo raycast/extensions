@@ -100,6 +100,23 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                   )
                 }
               />
+              <Action
+                icon={Icon.Moon}
+                title="Toggle Dark/Light Mode"
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() =>
+                  operationWithUserFeedback(
+                    "Please wait",
+                    `Appearance switched on ${props.simulator.name}`,
+                    `Failed to switch appearance on ${props.simulator.name}`,
+                    () => XcodeSimulatorService.toggleAppearance(props.simulator)
+                  ).then(({ isSuccess, result, toast }) => {
+                    if (isSuccess && result) {
+                      toast.title = `Switched to ${result} mode on ${props.simulator.name}`;
+                    }
+                  })
+                }
+              />
             </>
           )}
           <Action.Push

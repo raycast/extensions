@@ -1,11 +1,13 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
+  categoryExists,
   generateId,
   isDuplicate,
   mergeShortcuts,
   normalizeShortcut,
   parseJsonImport,
+  resolveCategory,
   validateShortcut,
 } from "../src/schema";
 
@@ -51,6 +53,23 @@ test("parseJsonImport assigns fresh ids to every row", () => {
   const items = parseJsonImport(json);
   assert.notEqual(items[0].id, items[1].id);
   assert.notEqual(items[0].id, "same");
+});
+
+const CATEGORIES = ["Uncategorized", "Work"];
+
+test("categoryExists matches case-insensitively and ignores blanks", () => {
+  assert.equal(categoryExists(["Work", "Home"], "work"), true);
+  assert.equal(categoryExists(["Work"], "  Home "), false);
+  assert.equal(categoryExists(["Work"], "   "), false);
+  assert.equal(categoryExists(["Work"], "  wOrK "), true);
+});
+
+test("resolveCategory prefers an exact existing match, then a newly typed name", () => {
+  assert.equal(resolveCategory("Home", false, "work", CATEGORIES), "Work");
+  assert.equal(resolveCategory("Home", false, "New Cat", CATEGORIES), "New Cat");
+  assert.equal(resolveCategory("Home", true, "Wor", CATEGORIES), "Home");
+  assert.equal(resolveCategory("Home", false, "", CATEGORIES), "Home");
+  assert.equal(resolveCategory("", false, "   ", CATEGORIES), "Uncategorized");
 });
 
 test("isDuplicate matches on normalized title+keys", () => {

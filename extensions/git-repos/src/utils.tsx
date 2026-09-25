@@ -4,7 +4,7 @@ import { homedir, platform } from "os";
 import path from "path";
 import fs from "fs";
 import parseGitConfig from "parse-git-config";
-import parseGithubURL from "parse-github-url";
+import parseGitUrl from "git-url-parse";
 import getDefaultBrowser from "default-browser";
 
 export enum Platform {
@@ -128,13 +128,19 @@ function gitRemotes(path: string): RemoteRepo[] {
   if (gitConfig.remote != null) {
     for (const remoteName in gitConfig.remote) {
       const config = gitConfig.remote[remoteName] as GitRemote;
-      const parsed = parseGithubURL(config.url);
-      if (parsed?.host && parsed?.repo) {
-        repos = repos.concat({
-          name: remoteName,
-          host: parsed?.host,
-          url: `https://${parsed?.host}/${parsed?.repo}`,
-        });
+      try {
+        const parsed = parseGitUrl(config.url);
+        if (parsed.resource && parsed.full_name && !parsed.protocols.includes("file")) {
+          const port = parsed.port ? `:${parsed.port}` : "";
+          const host = parsed.resource.toLowerCase();
+          repos = repos.concat({
+            name: remoteName,
+            host,
+            url: `https://${host}${port}/${parsed.full_name}`,
+          });
+        }
+      } catch {
+        continue;
       }
     }
   }

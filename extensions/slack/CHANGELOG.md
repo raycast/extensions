@@ -1,5 +1,15 @@
 # Slack Changelog
 
+## [Catch-up, Decisions, and Standup Skills] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.
+- Include source references and coverage limits, with Slack delivery only when requested.
+
+## [Quiet automatic rate-limit retries] - 2026-09-23
+
+- Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
+
 ## [Fix recipient search, AI file uploads, and attachment downloads] - 2026-09-10
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.

@@ -47,6 +47,36 @@
       "mode": "view"
     },
     {
+      "name": "purge",
+      "title": "Purge Cache",
+      "description": "Purge a URL, surrogate keys, or everything on a service, with optional soft purge",
+      "mode": "view"
+    },
+    {
+      "name": "realtime",
+      "title": "Watch Real-Time Stats",
+      "description": "Watch live requests, hit ratio, errors, and bandwidth for a service",
+      "mode": "view"
+    },
+    {
+      "name": "service-addons",
+      "title": "Manage Service Add-Ons",
+      "description": "Enable or disable products like Image Optimizer, Fanout, and WebSockets per service",
+      "mode": "view"
+    },
+    {
+      "name": "tls",
+      "title": "Manage TLS Certificates",
+      "description": "View TLS certificates and subscriptions with expiry warnings",
+      "mode": "view"
+    },
+    {
+      "name": "alerts",
+      "title": "View Alerts",
+      "description": "View Fastly alert definitions and firing history",
+      "mode": "view"
+    },
+    {
       "name": "kv-stores",
       "title": "Manage KV Stores",
       "description": "Browse and manage Fastly KV Store key-value pairs",
@@ -74,6 +104,42 @@
       "name": "audit-log",
       "title": "View Audit Log",
       "description": "View and filter Fastly audit log events for security monitoring and compliance",
+      "mode": "view"
+    },
+    {
+      "name": "bot-management",
+      "title": "Manage Bot Management",
+      "description": "Enable Bot Management on services and view detected bot traffic",
+      "mode": "view"
+    },
+    {
+      "name": "ddos-protection",
+      "title": "Manage DDoS Protection",
+      "description": "Enable DDoS Protection, switch between log and block modes, and manage attack mitigation rules",
+      "mode": "view"
+    },
+    {
+      "name": "ai-virtual-keys",
+      "title": "Manage AI Runtime Control Virtual Keys",
+      "description": "Create, rotate, and manage AI Runtime Control virtual keys",
+      "mode": "view"
+    },
+    {
+      "name": "ai-providers",
+      "title": "Manage AI Runtime Control Providers",
+      "description": "Configure AI Runtime Control provider connections",
+      "mode": "view"
+    },
+    {
+      "name": "ai-usage",
+      "title": "View AI Runtime Control Usage",
+      "description": "View AI Runtime Control usage metrics by provider and model",
+      "mode": "view"
+    },
+    {
+      "name": "ai-sessions",
+      "title": "View AI Runtime Control Sessions",
+      "description": "Browse AI Runtime Control session logs with request and response data",
       "mode": "view"
     },
     {

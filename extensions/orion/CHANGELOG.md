@@ -1,5 +1,40 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-25
+
+- Stop the Command Bar's loading indicator from flickering on every keystroke. History and search-suggestion lookups re-run as you type and briefly report loading, but by the time either can be true, tabs/bookmarks/profiles have already resolved, so there was no genuine "nothing to show yet" state being reflected - just a distracting flash.
+
+## [Command Bar] - 2026-09-24
+
+- Always return to Raycast's root search immediately after opening a Tab, Bookmark, Reading List item, History entry, or address from the Command Bar, regardless of the "Pop to Root Search" preference. Previously, a delayed preference could leave the Command Bar's background process lingering instead of resetting, so reopening it soon after could show a tab list that had not picked up a change made directly in Orion in the meantime.
+
+## [Command Bar] - 2026-09-24
+
+- Keep Open Tabs current while the Command Bar stays open: poll for tab changes at a modest cadence so opening or closing a tab directly in Orion is reflected without a manual refresh, and update the cached "Current Tab" immediately after switching to a tab from the Command Bar instead of waiting for the next poll. The standalone Search Tabs command is unaffected.
+
+## [Command Bar] - 2026-09-23
+
+- Fix typed web address detection recognizing a bare public suffix (e.g. `goog`, `abc`, `app`, `dev`, `github.io`, `co.uk`) as an address. Several brand-owned gTLDs are themselves ordinary words or common file extensions, so a one-word search query could land exactly on a real ICANN or private suffix with no domain label in front of it. Require an actual domain (a label plus the suffix, e.g. `goog.com`) before accepting a bare host as an address; an explicit `http://`/`https://` scheme is unaffected.
+
+## [Command Bar] - 2026-09-23
+
+- Fix a Top Hit race with fast typing: `useSQL` intentionally keeps its previous history result set visible while a new query runs, but that stale result set could still be scored for Top Hit against the query text currently in the search bar. Track the history query that actually completed and exclude stale history results from Top Hit ranking until the matching result arrives, while still keeping them visible in the History section to avoid unnecessary list reflow.
+
+## [Command Bar] - 2026-09-23
+
+- Fix typed web address detection: a bare number like `1` was misrecognized as an address (Node's URL parser coerces it to an IPv4-looking hostname), a non-canonical IPv4 octet like `192.168.001.1` was accepted as valid, and bracketed IPv6 literals were not recognized at all. Also trust an explicit `http://`/`https://` scheme for single-label hosts (e.g. an internal hostname with no public TLD) instead of requiring it to pass Public Suffix List validation.
+
+## [Tabs] - 2026-09-22
+
+- Track each open tab's window-local index and whether it is Orion's current tab. Open Tabs (Search Tabs and Command Bar) now shows a "Current Tab" label, keeps duplicate URLs as separate entries instead of silently collapsing them, and switching to a tab addresses it by that stable index rather than a title/URL scan.
+- Add a "Refresh Open Tabs" action (⌘R) to Open Tabs results.
+- Escape tab title/URL correctly when building the AppleScript that switches to a tab, instead of an unescaped template literal.
+
+## [Command Bar] - 2026-09-22
+
+- Add a configurable limit for live search suggestions; setting it to zero hides suggestions and prevents suggestion requests.
+- Add fuzzy and pinyin matching as a labeled fallback for open tabs when there is no exact local tab match. Fallback matches are not eligible for Top Hit.
+
 ## [Command Bar] - 2026-09-21
 
 - Improve Top Hit ranking with deterministic match tiers and source precedence: open tabs, bookmarks, reading list, then history. Deduplicate matching destinations and use history frecency only to resolve ties within history.

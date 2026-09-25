@@ -107,8 +107,11 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.21",
-    "ajv": "^8.20.0"
+    "@ai-sdk/openai-compatible": "^3.0.48",
+    "@raycast/api": "2.5.0",
+    "ai": "^7.0.0",
+    "ajv": "^8.20.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -119,5 +122,8 @@
     "tsx": "^4.20.6",
     "typescript": "^5.8.3",
     "vitest": "^4.1.9"
+  },
+  "ai": {
+    "modelProvider": "models"
   }
 }

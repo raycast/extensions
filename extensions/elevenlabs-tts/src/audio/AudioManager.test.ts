@@ -14,6 +14,9 @@ interface AudioManagerInternals {
   streamState: { isPlaying: boolean; chunksReceived: number; streamComplete: boolean; playbackComplete: boolean };
   handleWebSocketMessage(data: Buffer): Promise<void>;
   handleWebSocketClose(code: number): void;
+  beginPlayback(): Promise<void>;
+  playAudioFile(): Promise<boolean>;
+  ws: { terminate(): void } | null;
 }
 
 function createManager(): { manager: AudioManager; internals: AudioManagerInternals } {
@@ -111,6 +114,37 @@ describe("AudioManager stream completion", () => {
     await internals.handleWebSocketMessage(Buffer.from(JSON.stringify({ isFinal: true })));
 
     expect(internals.streamState.streamComplete).toBe(true);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("stops streaming when playback is stopped before the stream finishes", async () => {
+    const { manager, internals } = createManager();
+    const terminate = jest.fn();
+    internals.ws = { terminate };
+    internals.streamState.chunksReceived = 3;
+    internals.playAudioFile = jest.fn().mockResolvedValue(true);
+
+    const complete = completion(manager);
+    await internals.beginPlayback();
+
+    await complete;
+    expect(terminate).toHaveBeenCalled();
+    expect(internals.streamState.streamComplete).toBe(true);
+  });
+
+  it("keeps streaming when playback finishes on its own before the stream finishes", async () => {
+    const { manager, internals } = createManager();
+    const terminate = jest.fn();
+    internals.ws = { terminate };
+    internals.streamState.chunksReceived = 3;
+    internals.playAudioFile = jest.fn().mockResolvedValue(false);
+
+    const listener = jest.fn();
+    manager.once("complete", listener);
+    await internals.beginPlayback();
+
+    expect(terminate).not.toHaveBeenCalled();
+    expect(internals.streamState.streamComplete).toBe(false);
     expect(listener).not.toHaveBeenCalled();
   });
 });
