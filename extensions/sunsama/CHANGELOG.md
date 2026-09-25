@@ -1,6 +1,6 @@
 # Sunsama Changelog
 
-## [Deep Links] - {PR_MERGE_DATE}
+## [Deep Links] - 2026-09-25
 
 - Turn on "Use Deep Links" in the extension preferences to open tasks in the
   Sunsama desktop app instead of the website. No workspace URL needed.
