@@ -64,4 +64,11 @@ describe("execBrewWithProgress", () => {
     expect(spawned.calls[0].env).toMatchObject({ PATH: "/usr/bin", BREW_ASKPASS_MARKER: "/tmp/marker" });
     expect(spawned.calls[0].args).toEqual(["install", "--adopt", "--cask", "foo"]);
   });
+
+  it("spawns an argument array as given, never splitting a path on its spaces", async () => {
+    const run = execBrewWithProgress(["install", "--appdir=/Users/me/My Apps", "foo"]);
+    envReady.gate?.();
+    await run;
+    expect(spawned.calls[0].args).toEqual(["install", "--appdir=/Users/me/My Apps", "foo"]);
+  });
 });

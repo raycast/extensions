@@ -351,7 +351,7 @@ function AdoptRow(props: {
 
   const adoptWith = async (askpassMarker: string) => {
     actionsLogger.log("Adopting app", evidence);
-    const ok = await confirmAndRun([brewAdoptCaskCommand(candidate.token)], {
+    const ok = await confirmAndRun([brewAdoptCaskCommand(candidate.token, path.dirname(app.path))], {
       title: `Adopt ${app.name}`,
       // The list may be painted from cache, and the dialog stays open as long
       // as the user leaves it. If the app is gone by the time they confirm,
@@ -394,7 +394,7 @@ function AdoptRow(props: {
         const tick = setInterval(show, 1000);
         try {
           await execBrewWithProgress(
-            brewAdoptCaskArgs(candidate.token),
+            brewAdoptCaskArgs(candidate.token, path.dirname(app.path)),
             (progress) => {
               if (!isAdoptPhase(progress.message)) return;
               phase = progress.message;
@@ -517,7 +517,7 @@ function AdoptRow(props: {
             <Action.ShowInFinder path={app.path} shortcut={Keyboard.Shortcut.Common.Open} />
             <Action.CopyToClipboard
               title="Copy Adopt Command"
-              content={brewAdoptCaskCommand(candidate.token)}
+              content={brewAdoptCaskCommand(candidate.token, path.dirname(app.path))}
               shortcut={Keyboard.Shortcut.Common.Copy}
             />
             {app.candidates.length > 1 && (

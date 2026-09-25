@@ -15,6 +15,7 @@ import os from "os";
 import path from "path";
 import { mkdtempSync, rmSync } from "fs";
 import { describe, expect, it } from "vitest";
+import { brewAdoptCaskArgs, brewAdoptCaskCommand } from "./helpers";
 import {
   adoptIndexEntry,
   adoptOperation,
@@ -494,5 +495,29 @@ describe("isOwnedByCurrentUser", () => {
 
   it("is undefined when the path cannot be read, rather than guessing", () => {
     expect(isOwnedByCurrentUser("/nonexistent/Nothing.app")).toBeUndefined();
+  });
+});
+
+describe("the adopt command names the folder that was scanned", () => {
+  // `HOMEBREW_CASK_OPTS` can also come from brew's own `brew.env` files, which
+  // the extension never sees. An explicit `--appdir` beats every source of it
+  // (`cask/config.rb`: explicit, then env, then default), so brew adopts in the
+  // folder the scan and preview checked rather than one configured elsewhere.
+  it("passes --appdir as one argument, even with a space in it", () => {
+    expect(brewAdoptCaskArgs("iterm2", "/Users/me/My Apps")).toEqual([
+      "install",
+      "--adopt",
+      "--cask",
+      "--appdir=/Users/me/My Apps",
+      "iterm2",
+    ]);
+  });
+
+  it("quotes the folder in the command it shows and copies", () => {
+    expect(brewAdoptCaskCommand("iterm2", "/Applications")).toMatch(
+      / install --adopt --cask --appdir=\/Applications iterm2$/,
+    );
+    expect(brewAdoptCaskCommand("iterm2", "/Users/me/My Apps")).toMatch(/ '--appdir=\/Users\/me\/My Apps' iterm2$/);
+    expect(brewAdoptCaskCommand("x", "/Users/me/Bob's")).toMatch(/ '--appdir=\/Users\/me\/Bob'\\''s' x$/);
   });
 });

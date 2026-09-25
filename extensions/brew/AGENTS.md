@@ -331,6 +331,12 @@ target: "Thorium Browser.app"` publishes both names; Homebrew installs — and
   ships `Recents.app` inside `Finder.app`, it name-matches a cask, and `recents`
   is not `auto_updates` — so without it the list offered an SIP-protected Apple
   binary labeled verified.
+  Raycast's environment is not the whole story, though: brew also loads
+  `HOMEBREW_CASK_OPTS` from its own `brew.env` files, which the extension never
+  sees. So the adopt command passes the scanned folder as an explicit
+  `--appdir` (`brewAdoptCaskArgs`), which beats every env source
+  (`cask/config.rb`: explicit, then env, then default). It is an argument
+  ARRAY because the streaming runner otherwise splits on whitespace.
 - **Check the app still exists AFTER the confirmation, immediately before
   brew runs** (`confirmAndRun`'s `beforeRun`). The list paints from cache and
   the dialog stays open as long as the user leaves it; `--adopt` with nothing
