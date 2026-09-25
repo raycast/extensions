@@ -38,6 +38,14 @@ When entering a profile, you can choose whether:
 
 ![show profile bookmarks](https://user-images.githubusercontent.com/2499356/182669098-0adfd17f-b586-4820-bebf-85e5ec49cd39.jpg)
 
+## Move the current tab
+
+Run **Move Current Tab to Another Profile** while a regular Chrome window is open. With two profiles, it moves the current tab to the other profile automatically. With more profiles, choose a destination from the list. You can assign this command its own hotkey in Raycast.
+
+The command opens the URL in the destination profile, reusing an existing matching tab when possible, then closes the original tab. It keeps the original tab if the destination cannot be confirmed or the source URL has changed. Page state, such as unsaved form input, is not transferred. Incognito tabs are not supported.
+
+Profile switching and tab moves use Raycast's Accessibility and Automation permissions for Chrome and System Events. If ordinary profile switching cannot use the menu, it falls back to opening the profile directly. Tab moves require menu access to identify and verify the destination profile.
+
 ## Hotkey (recommended)
 
 I highly recommend that you map the default Google Chrome profile shortcut (`⌘ ⇧ M`) to open this extension. Like so:
