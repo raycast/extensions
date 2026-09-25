@@ -52,6 +52,12 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Logs
+- Deployments
+    - See the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency.
+        - View Deployments (full history: Roll Back, Cancel, Delete)
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
 
 ## 🚀 Getting Started
 
