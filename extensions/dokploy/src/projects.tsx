@@ -1,8 +1,8 @@
 import Services from "./services";
-import { type Instance, useInstanceScope, tokenForInstance } from "./instances";
+import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
 import Environments from "./environments";
 import { ErrorResult, Project, type ModernProject } from "./interfaces";
-import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useFetch, useForm, useFrecencySorting } from "@raycast/utils";
 import { getServiceScopeForProject, getTotalServices, isModernProject } from "./utils";
 import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Alert, confirmAlert, popToRoot } from "@raycast/api";
 
@@ -16,6 +16,11 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
   } = useFetch<Project[], Project[]>(url + "project.all", {
     headers,
     initialData: [],
+  });
+
+  const { data: sortedProjects, visitItem } = useFrecencySorting(projects, {
+    namespace: instanceId(instance),
+    key: (project) => project.projectId,
   });
 
   async function deleteProject(project: Project) {
@@ -71,7 +76,7 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
           }
         />
       ) : (
-        projects.map((project) => {
+        sortedProjects.map((project) => {
           const serviceScope = getServiceScopeForProject(project);
           const subtitle = isModernProject(project)
             ? `${project.environments.length} environments`
@@ -93,6 +98,7 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
                       icon="folder-input.svg"
                       title="Services"
                       target={<Services environment={serviceScope} revalidate={revalidate} instance={instance} />}
+                      onPush={() => visitItem(project)}
                     />
                   ) : (
                     environmentsProject && (
@@ -102,6 +108,7 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
                         target={
                           <Environments project={environmentsProject} revalidate={revalidate} instance={instance} />
                         }
+                        onPush={() => visitItem(project)}
                       />
                     )
                   )}

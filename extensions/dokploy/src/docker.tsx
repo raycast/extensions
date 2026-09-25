@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { DockerContainer } from "./interfaces";
-import { type Instance, useInstanceScope, tokenForInstance } from "./instances";
+import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
 
 export default function Docker({ instance: initial }: { instance: Instance }) {
   const { url, headers, instance, dropdown } = useInstanceScope(initial);
@@ -11,9 +11,14 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
     initialData: [],
   });
 
+  const { data: sortedContainers, visitItem } = useFrecencySorting(containers, {
+    namespace: instanceId(instance),
+    key: (container) => container.containerId,
+  });
+
   return (
     <List navigationTitle="Docker" isLoading={isLoading} searchBarAccessory={dropdown}>
-      {containers.map((container) => (
+      {sortedContainers.map((container) => (
         <List.Item
           key={container.containerId}
           icon={Icon.Box}
@@ -25,6 +30,7 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
                 icon={Icon.WrenchScrewdriver}
                 title="View Config"
                 target={<DockerConfig container={container} instance={instance} />}
+                onPush={() => visitItem(container)}
               />
             </ActionPanel>
           }

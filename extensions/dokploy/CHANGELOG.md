@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Sort Projects, Services, and Docker by Frecency] - {PR_MERGE_DATE}
+
+- **Projects**, **Services**, and **Docker** now sort by how often you actually open each one, not raw API order - matching how **Deploy Service** already sorts. Scoped per instance, so frequently-used items in one account never affect another's ranking.
+
 ## [Switch Instances Without Leaving the Screen] - 2026-09-25
 
 - Add an instance switcher to **Projects**, **Docker**, **S3 Destinations**, and **Users** - pick a different configured instance right from where you are, no need to go back to **Instances** first.

@@ -6,8 +6,8 @@
 
 This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each **instance** you can:
 
-- View Projects
-    - View Services
+- View Projects (sorted by frecency)
+    - View Services (sorted by frecency)
         - Create Application
         - Create Database
         - Create From Template (browse Dokploy's public template registry, bookmark favorites, deploy with one action)
@@ -42,7 +42,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Delete Schedule
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
-    - View Docker (Containers)
+    - View Docker (Containers, sorted by frecency)
         - View Docker Config
     - View S3 Destinations
         - Delete S3 Destination
