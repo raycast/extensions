@@ -256,9 +256,30 @@ extension EKReminder {
       earlyReminder: self.extractedEarlyReminder)
   }
 
+  func isEarlyReminderAlarm(_ alarm: EKAlarm) -> Bool {
+    guard !alarm.isLocationAlarm else { return false }
+    if alarm.relativeOffset < 0 {
+      return true
+    }
+    if let alarmDate = alarm.absoluteDate,
+       let dueDateComponents = self.dueDateComponents,
+       let dueDate = Calendar.current.date(from: dueDateComponents),
+       alarmDate < dueDate {
+      return true
+    }
+    return false
+  }
+
+  func removeEarlyReminderAlarms() {
+    guard let alarms = self.alarms else { return }
+    for alarm in alarms where isEarlyReminderAlarm(alarm) {
+      self.removeAlarm(alarm)
+    }
+  }
+
   var extractedEarlyReminder: Double? {
     guard let alarms = self.alarms else { return nil }
-    for alarm in alarms where !alarm.isLocationAlarm {
+    for alarm in alarms where isEarlyReminderAlarm(alarm) {
       if alarm.relativeOffset < 0 {
         return abs(alarm.relativeOffset)
       } else if let alarmDate = alarm.absoluteDate,

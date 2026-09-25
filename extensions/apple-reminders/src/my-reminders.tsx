@@ -18,11 +18,10 @@ export default function Command() {
   useEffect(() => {
     const timer = setInterval(() => {
       setTick((t) => t + 1);
-      mutate();
     }, 10000);
 
     return () => clearInterval(timer);
-  }, [mutate]);
+  }, []);
 
   const { sections, viewProps } = useViewReminders(listId, { data });
 

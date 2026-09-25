@@ -443,11 +443,7 @@ struct SetEarlyReminderPayload: Decodable {
     throw RemindersError.noReminderFound
   }
 
-  if let alarms = item.alarms {
-    for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
-      item.removeAlarm(alarm)
-    }
-  }
+  item.removeEarlyReminderAlarms()
 
   if let earlyReminder = payload.earlyReminder, earlyReminder > 0, item.dueDateComponents != nil {
     item.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
@@ -664,11 +660,7 @@ struct UpdateReminderPayload: Decodable {
       item.startDateComponents = nil
     }
   } else if let earlyReminder = payload.earlyReminder {
-    if let alarms = item.alarms {
-      for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
-        item.removeAlarm(alarm)
-      }
-    }
+    item.removeEarlyReminderAlarms()
     if earlyReminder > 0 && item.dueDateComponents != nil {
       item.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
     }
