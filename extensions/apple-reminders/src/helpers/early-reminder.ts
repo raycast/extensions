@@ -27,6 +27,28 @@ export function formatEarlyReminder(seconds?: number | null): string {
   return `${days} day${days === 1 ? "" : "s"} before`;
 }
 
+export function formatEarlyReminderShort(seconds?: number | null): string {
+  if (!seconds || seconds <= 0) return "";
+  if (seconds < 3600) {
+    const mins = Math.round(seconds / 60);
+    return `${mins}m before`;
+  }
+  if (seconds < 86400) {
+    const hours = Math.round(seconds / 3600);
+    return `${hours}h before`;
+  }
+  if (seconds < 604800) {
+    const days = Math.round(seconds / 86400);
+    return `${days}d before`;
+  }
+  if (seconds < 2592000) {
+    const weeks = Math.round(seconds / 604800);
+    return `${weeks}w before`;
+  }
+  const months = Math.round(seconds / 2592000);
+  return `${months}mo before`;
+}
+
 export function extractEarlyReminderFromText(text: string): { title: string; earlyReminderSeconds: number | null } {
   const patterns = [
     /(?:(?:remind|alert)\s+me\s+(?:at\s+)?|with\s+|early\s+reminder\s+|early\s+alert\s+)?(\d+)\s*(mins?|minutes?|m|hours?|hrs?|h|days?|d|weeks?|wks?|w|months?|mos?)\s*(?:before|early|ahead|in\s+advance|prior)(?:\s*(?:reminder|alert))?/i,

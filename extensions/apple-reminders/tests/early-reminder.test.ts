@@ -5,6 +5,7 @@ import {
   EARLY_REMINDER_OPTIONS,
   extractEarlyReminderFromText,
   formatEarlyReminder,
+  formatEarlyReminderShort,
 } from "../src/helpers/early-reminder";
 import { resolveQuickAddReminder } from "../src/quick-add-reminder-parser";
 
@@ -33,6 +34,26 @@ describe("Early Reminder Helpers", () => {
       assert.equal(formatEarlyReminder(600), "10 minutes before");
       assert.equal(formatEarlyReminder(10800), "3 hours before");
       assert.equal(formatEarlyReminder(259200), "3 days before");
+    });
+  });
+
+  describe("formatEarlyReminderShort", () => {
+    it("returns empty string for missing, zero, or negative seconds", () => {
+      assert.equal(formatEarlyReminderShort(undefined), "");
+      assert.equal(formatEarlyReminderShort(null), "");
+      assert.equal(formatEarlyReminderShort(0), "");
+      assert.equal(formatEarlyReminderShort(-300), "");
+    });
+
+    it("formats concise short intervals", () => {
+      assert.equal(formatEarlyReminderShort(300), "5m before");
+      assert.equal(formatEarlyReminderShort(900), "15m before");
+      assert.equal(formatEarlyReminderShort(1800), "30m before");
+      assert.equal(formatEarlyReminderShort(3600), "1h before");
+      assert.equal(formatEarlyReminderShort(7200), "2h before");
+      assert.equal(formatEarlyReminderShort(86400), "1d before");
+      assert.equal(formatEarlyReminderShort(604800), "1w before");
+      assert.equal(formatEarlyReminderShort(2592000), "1mo before");
     });
   });
 
