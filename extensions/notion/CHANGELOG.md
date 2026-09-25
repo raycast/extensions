@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Fix Links, Search Results, and Connection Recovery] - {PR_MERGE_DATE}
+## [Fix Links, Search Results, and Connection Recovery] - 2026-09-25
 
 - Fix Copy Formatted URL pasting only the title into plain-text apps. It now includes a Markdown link while preserving the rich-text link.
 - Show complete page and database titles, including titles with mixed formatting, and prevent matching search results from being hidden by a second filter.
