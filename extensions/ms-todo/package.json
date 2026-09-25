@@ -1,0 +1,75 @@
+{
+  "name": "ms-todo",
+  "title": "Microsoft To Do via ms-todo",
+  "description": "Browse, search, and manage Microsoft To Do tasks through your local ms-todo cache",
+  "icon": "icon.png",
+  "author": "bhekanik",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Microsoft To Do",
+    "tasks",
+    "offline"
+  ],
+  "commands": [
+    {
+      "name": "quick-add",
+      "title": "Quick Add Task",
+      "description": "Capture a task with ms-todo quick add",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Fuzzy search all cached tasks and reopen or complete them",
+      "mode": "view"
+    },
+    {
+      "name": "browse-tasks",
+      "title": "Browse Tasks",
+      "description": "Browse smart views and lists, inspect and edit tasks",
+      "mode": "view"
+    },
+    {
+      "name": "my-day",
+      "title": "My Day",
+      "description": "View and manage today\u2019s My Day tasks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "ms-todo CLI Path",
+      "description": "Optional absolute path to the installed ms-todo binary. Leave blank to search Homebrew and PATH.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/ms-todo"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "publish": "ray publish",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "2.5.2",
+    "html-to-text": "10.0.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/html-to-text": "9.0.4",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
