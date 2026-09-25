@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Create Reminder from Selected Email] - {PR_MERGE_DATE}
+## [Create Reminder from Selected Email] - 2026-09-25
 
 - Add "Create Reminder from Selected Email" command to create reminders directly from the active email in Apple Mail.
 - Attach native `message://` URL link to created reminders for 1-click opening of the email thread in Apple Mail.
