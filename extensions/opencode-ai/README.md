@@ -6,7 +6,7 @@ Use [OpenCode Zen](https://opencode.ai/zen) and [OpenCode Go](https://opencode.a
 
 1. Get an API key from [opencode.ai/auth](https://opencode.ai/auth).
 2. Open the extension's preferences in Raycast and paste it into **OpenCode API Key**.
-3. Under **Model Sources**, check **Show OpenCode Zen models** and/or **Show OpenCode Go models** (Go uses the same key; uncheck it if you don't subscribe).
+3. Check **Zen Models** and/or **Go Models** (Go uses the same key; uncheck it if you don't subscribe).
 4. Optionally set **Default Model** (defaults to `go/gpt-6-luna`; Go models use the `go/` prefix).
 
 ## Features
