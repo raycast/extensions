@@ -14,7 +14,7 @@
     <a href="https://raycast.com"><img src="https://img.shields.io/badge/Raycast-Extension-red.svg?style=flat-square&logo=raycast&logoColor=white" alt="Raycast Extension" /></a>
     <a href="https://microsoft.com/windows"><img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D4.svg?style=flat-square&logo=windows&logoColor=white" alt="Platform: Windows" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License: MIT" /></a>
-    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-6.x-blue.svg?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
     <a href="PRIVACY.md"><img src="https://img.shields.io/badge/Privacy-100%25%20Local-brightgreen.svg?style=flat-square" alt="100% Local" /></a>
   </p>
 
@@ -78,7 +78,7 @@ On macOS, Raycast power users easily route links to specific browser profiles. O
 Browser Router is built with modern, lightweight, and type-safe technologies:
 
 * [![Raycast API](https://img.shields.io/badge/Raycast%20API-v1.104+-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://developers.raycast.com/) — Native Windows desktop UI and action system
-* [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) — Type safety and robust data structures
+* [![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) — Type safety and robust data structures
 * [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/) — Declarative component architecture
 * [![Node.js](https://img.shields.io/badge/Node.js-Process%20Engine-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/) — Libuv detached process spawning
 * [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Worker%20Relay-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/) — Encrypted serverless edge relay for feedback
@@ -96,7 +96,7 @@ Browser Router is built with modern, lightweight, and type-safe technologies:
   Seamlessly accepts queries from **Raycast Root Search** (press <kbd>Tab</kbd>) or acts as an automatic **Fallback Command**.
 
 * 🔍 **Deep Profile & Avatar Auto-Discovery**  
-  Scans the Windows Registry and parses browser metadata (`Local State`, `Preferences`) to discover profiles, display names, and profile pictures.
+  Scans the Windows Registry and parses browser metadata (`Local State` plus profile avatars) to discover profiles, display names, and profile pictures.
 
 * 🌐 **Smart URL vs. Query Classification**  
   Differentiates between plain text searches, bare domains (`github.com`), and local dev servers (`localhost:3000`, `127.0.0.1:8080`).
@@ -178,7 +178,7 @@ flowchart TD
     subgraph Discovery ["3. Registry & Profile Resolver"]
         D --> F[Locate Target Browser & User Data Dir]
         E --> F
-        F --> G[Extract Profile Directory & Preferences]
+        F --> G[Extract Profile Directory & Local State]
     end
 
     subgraph Launcher ["4. Native Detachment Engine"]
@@ -230,14 +230,14 @@ Rather than hardcoding filesystem paths, Browser Router inspects both Windows Re
 * `HKLM\Software\Clients\StartMenuInternet` (System-wide installations)
 
 It reads the registered shell command, extracts the executable binary, and parses:
-* **`Local State`**: Extracts profile avatars, high-resolution badge icons, and Google/Microsoft account emails.
-* **`Preferences`**: Inspects profile-level settings for custom user nicknames.
+* **`Local State`**: Extracts profile display names, high-resolution badge icons, and Google/Microsoft account emails.
+* **Profile Avatars**: Resolves cached profile pictures and custom avatar assets from the profile directory.
 
 <br />
 
 ### 4. Zero-Overhead URL & Query Classification
 An instantaneous regex-free tokenizer classifies user input in real time:
-* **Full URLs**: Matches valid schemas (`https://`, `http://`, `raycast://`, `file://`).
+* **Full URLs**: Matches valid schemas (`https://`, `http://`, `file://`, and browser-internal protocols like `chrome://`, `edge://`, `brave://`).
 * **Localhost & Ports**: Matches `localhost`, `127.0.0.1`, `::1`, and custom port bindings (`:3000`, `:8080`).
 * **Bare Domains**: Identifies valid top-level domains (`.com`, `.dev`, `.ai`, `.org`, etc.) and automatically prepends `https://`.
 * **Search Queries**: Cleanly URL-encodes multi-word queries into your chosen engine template.

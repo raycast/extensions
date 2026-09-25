@@ -22,7 +22,7 @@ To provide profile-aware browser routing, Browser Router inspects standard Windo
 1. **Windows Registry**:
    - Queries HKCU\Software\Clients\StartMenuInternet and HKLM\Software\Clients\StartMenuInternet to locate installed browser binary paths (chrome.exe, msedge.exe, rave.exe, ivaldi.exe, etc.).
 2. **Profile Metadata**:
-   - Reads the Local State (JSON) and individual profile Preferences files located in standard application data directories (%LOCALAPPDATA%).
+   - Reads the Local State (JSON) file and profile avatar assets located in standard application data directories (%LOCALAPPDATA%).
    - Extracts only non-sensitive visual metadata:
      - Profile folder directory names (e.g., Default, Profile 1)
      - Profile display names (e.g., "Work", "Personal")
