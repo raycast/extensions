@@ -1,6 +1,6 @@
 # Changelog
 
-## [Category Dropdown] - {PR_MERGE_DATE}
+## [Category Dropdown] - 2026-09-25
 
 - Pick an existing category from a searchable dropdown when adding or editing a shortcut
 - Type a name that doesn't exist yet to create a new category
