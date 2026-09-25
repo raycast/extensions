@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import { CalendarEvent } from './types';
 import { getEndDate, getStartDate, preprocessQuery } from './dates';
 import { adjustDateForTimezone, extractTimezone } from './timezones';
+import { extractReminders } from './reminders';
 import osascript from 'osascript-tag';
 import Sherlock from 'sherlockjs';
 
@@ -47,8 +48,9 @@ export function useCalendar() {
         query = query.replace(/@(?:\(([^)]+)\)|([^@\s]+))/, '');
 
         const { query: queryWithoutTz, timezone } = extractTimezone(query);
+        const { query: queryWithoutReminders, reminders } = extractReminders(queryWithoutTz);
 
-        const preprocessedQuery = preprocessQuery(queryWithoutTz);
+        const preprocessedQuery = preprocessQuery(queryWithoutReminders);
 
         const parsedEvent = Sherlock.parse(preprocessedQuery);
 
@@ -57,6 +59,7 @@ export function useCalendar() {
           location: location,
           id: nanoid(),
           timezone: timezone,
+          reminders: reminders.length > 0 ? reminders : undefined,
         };
 
         if (!event.startDate) {
