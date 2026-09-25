@@ -25,7 +25,7 @@ export interface EventType {
   description_plain?: string | null;
   duration: number;
   kind: string;
-  locations: EventTypeLocation[];
+  locations: EventTypeLocation[] | null;
   pooling_type?: string | null;
   scheduling_url: string;
   slug: string;

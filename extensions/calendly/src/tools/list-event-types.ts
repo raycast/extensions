@@ -11,7 +11,8 @@ async function tool() {
     durationMinutes: eventType.duration,
     kind: eventType.kind,
     schedulingUrl: eventType.scheduling_url,
-    locations: eventType.locations,
+    locations: eventType.locations ?? [],
+    poolingType: eventType.pooling_type,
   }));
 }
 

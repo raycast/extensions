@@ -55,6 +55,8 @@ Books an invitee into an open slot. Choose an event type, enter name and email, 
 
 The form uses your local timezone. Booking asks for confirmation before it creates the invitee.
 
+For outbound calls, provide the invitee's phone number. For invitee-selected locations, enter where to meet. The form and AI tool require these details before booking. Round-robin events use Calendly's location assignment and do not ask you to choose a location.
+
 ## Raycast AI
 
 Mention `@calendly` in Raycast AI to work with your calendar in conversation. Write tools show a confirmation before they change anything; canceling a meeting uses a destructive confirmation.
@@ -100,7 +102,7 @@ npm install
 npm run dev
 ```
 
-`npm run dev` starts the extension in Raycast with hot reload. Run `npm run lint` and `npm run build` before publishing.
+`npm run dev` starts the extension in Raycast with hot reload. Run `npm test`, `npm run lint`, and `npm run build` before publishing.
 
 ## License
 
