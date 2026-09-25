@@ -243,25 +243,6 @@ extension EKReminder {
       }
     }
 
-    var earlyReminderSeconds: Double? = nil
-    if let alarms = self.alarms {
-      for alarm in alarms where !alarm.isLocationAlarm {
-        if alarm.relativeOffset < 0 {
-          earlyReminderSeconds = abs(alarm.relativeOffset)
-          break
-        } else if let alarmDate = alarm.absoluteDate,
-                  let dueDateComponents,
-                  let dueDate = Calendar.current.date(from: dueDateComponents),
-                  alarmDate < dueDate {
-          let diff = dueDate.timeIntervalSince(alarmDate)
-          if diff > 0 {
-            earlyReminderSeconds = diff
-            break
-          }
-        }
-      }
-    }
-
     return Reminder(
       id: self.calendarItemIdentifier,
       openUrl: "x-apple-reminderkit://REMCDReminder/\(self.calendarItemIdentifier)",
@@ -272,7 +253,25 @@ extension EKReminder {
       recurrenceRule: recurrenceRuleDescription ?? "",
       list: calendar.toStruct(defaultCalendarId: nil), location: location,
       creationDate: self.creationDate,
-      earlyReminder: earlyReminderSeconds)
+      earlyReminder: self.extractedEarlyReminder)
+  }
+
+  var extractedEarlyReminder: Double? {
+    guard let alarms = self.alarms else { return nil }
+    for alarm in alarms where !alarm.isLocationAlarm {
+      if alarm.relativeOffset < 0 {
+        return abs(alarm.relativeOffset)
+      } else if let alarmDate = alarm.absoluteDate,
+                let dueDateComponents = self.dueDateComponents,
+                let dueDate = Calendar.current.date(from: dueDateComponents),
+                alarmDate < dueDate {
+        let diff = dueDate.timeIntervalSince(alarmDate)
+        if diff > 0 {
+          return diff
+        }
+      }
+    }
+    return nil
   }
 }
 

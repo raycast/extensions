@@ -391,14 +391,7 @@ struct SetDueDatePayload: Decodable {
     throw RemindersError.noReminderFound
   }
 
-  var existingEarlyReminder: Double? = nil
-  if let alarms = item.alarms {
-    for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
-      existingEarlyReminder = abs(alarm.relativeOffset)
-      break
-    }
-  }
-  let earlyOffset = payload.earlyReminder ?? existingEarlyReminder
+  let earlyOffset = payload.earlyReminder ?? item.extractedEarlyReminder
 
   // Preserve location-based alarms when changing the due date.
   removeTimeBasedAlarms(from: item)
@@ -637,14 +630,7 @@ struct UpdateReminderPayload: Decodable {
   }
 
   if payload.dueDate != nil {
-    var existingEarlyReminder: Double? = nil
-    if let alarms = item.alarms {
-      for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
-        existingEarlyReminder = abs(alarm.relativeOffset)
-        break
-      }
-    }
-    let earlyOffset = payload.earlyReminder ?? existingEarlyReminder
+    let earlyOffset = payload.earlyReminder ?? item.extractedEarlyReminder
 
     // Preserve location-based alarms when changing the due date.
     removeTimeBasedAlarms(from: item)

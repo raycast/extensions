@@ -96,17 +96,27 @@ export function resolveQuickAddReminder(
   }
 
   if (!dueDate) {
-    const extracted = extractDueDateFromText(title, now, dateFormatPreference);
+    const extracted = extractDueDateFromText(inputText, now, dateFormatPreference);
     if (extracted.dueDate) {
       dueDate = formatDueDate(extracted.dueDate);
-      title = stripListMentions(extracted.title || title, mentionedList);
+      const isAiCleanedTitle = reminder.title.trim() !== inputText.trim();
+      title = isAiCleanedTitle ? title : stripListMentions(extracted.title || title, mentionedList);
     }
   }
 
-  const extractedEarly = extractEarlyReminderFromText(title);
-  if (extractedEarly.earlyReminderSeconds) {
-    earlyReminder = extractedEarly.earlyReminderSeconds;
-    title = extractedEarly.title;
+  if (dueDate) {
+    const extractedEarly = extractEarlyReminderFromText(title);
+    if (extractedEarly.earlyReminderSeconds) {
+      earlyReminder = extractedEarly.earlyReminderSeconds;
+      title = extractedEarly.title;
+    } else if (!earlyReminder) {
+      const extractedFromInput = extractEarlyReminderFromText(inputText);
+      if (extractedFromInput.earlyReminderSeconds) {
+        earlyReminder = extractedFromInput.earlyReminderSeconds;
+      }
+    }
+  } else {
+    earlyReminder = undefined;
   }
 
   const extractedTags = extractTagsFromText(title);

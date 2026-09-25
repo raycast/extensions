@@ -106,13 +106,35 @@ describe("Early Reminder Helpers", () => {
       assert.ok(resolved.dueDate);
     });
 
-    it("resolves early reminder in non-AI fallback", () => {
-      const input = "Submit presentation with 1 hour early alert #Work";
+    it("resolves early reminder in non-AI fallback with due date", () => {
+      const input = "Submit presentation tomorrow 2pm with 1 hour early alert #Work";
       const resolved = resolveQuickAddReminder({ title: input }, input, lists, baseNow);
 
       assert.equal(resolved.title, "Submit presentation");
       assert.equal(resolved.listId, "work-id");
       assert.equal(resolved.earlyReminder, 3600);
+      assert.ok(resolved.dueDate);
+    });
+
+    it("does not set early reminder when no due date exists", () => {
+      const input = "Submit presentation with 1 hour early alert #Work";
+      const resolved = resolveQuickAddReminder({ title: input }, input, lists, baseNow);
+
+      assert.equal(resolved.title, "Submit presentation with 1 hour early alert");
+      assert.equal(resolved.listId, "work-id");
+      assert.equal(resolved.earlyReminder, undefined);
+      assert.equal(resolved.dueDate, undefined);
+    });
+
+    it("extracts missing due date from original input when AI returns cleaned title", () => {
+      const input = "Call mom tomorrow at 9 with 15 min early reminder #Personal";
+      const aiResponse = { title: "Call mom" };
+      const resolved = resolveQuickAddReminder(aiResponse, input, lists, baseNow);
+
+      assert.equal(resolved.title, "Call mom");
+      assert.equal(resolved.listId, "personal-id");
+      assert.equal(resolved.earlyReminder, 900);
+      assert.ok(resolved.dueDate);
     });
   });
 });
