@@ -1,6 +1,6 @@
 # theSVG Raycast Extension Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-09-25
 
 - Add support for Windows platform
 - Add `Grid` view, preference and action to toggle the layout
