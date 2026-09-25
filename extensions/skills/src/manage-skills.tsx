@@ -55,7 +55,9 @@ export default function Command() {
     const { errorTitle, errorDetails } = describeSkillsError(error);
     const [summary, ...outputLines] = error.message.split("\n");
     const output = outputLines.join("\n").trim();
-    const outputBlock = output ? `\n\n\`\`\`\n${output}\n\`\`\`` : "";
+    const longestBacktickRun = Math.max(0, ...(output.match(/`+/g) ?? []).map((run) => run.length));
+    const fence = "`".repeat(Math.max(3, longestBacktickRun + 1));
+    const outputBlock = output ? `\n\n${fence}\n${output}\n${fence}` : "";
 
     return (
       <Detail
