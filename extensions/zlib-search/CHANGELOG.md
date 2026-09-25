@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-25
 
 ### Added
 
