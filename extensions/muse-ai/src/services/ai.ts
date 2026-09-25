@@ -1,7 +1,6 @@
 import { streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import { getPreferenceValues } from "@raycast/api";
-import { META_BASE_URL } from "../model-provider";
+import { createMetaClient } from "../model-provider";
 import type { Message } from "../types";
 
 export interface StreamResponse {
@@ -15,7 +14,7 @@ export async function streamAIResponse(
   selectedModel?: string,
 ): Promise<StreamResponse> {
   const preferences = getPreferenceValues<Preferences>();
-  const client = createOpenAI({ apiKey: preferences.MODEL_API_KEY, baseURL: META_BASE_URL });
+  const client = createMetaClient(preferences.MODEL_API_KEY);
   const modelToUse = selectedModel || preferences.MUSE_MODEL || "muse-spark-1.3";
 
   const result = streamText({
@@ -24,9 +23,13 @@ export async function streamAIResponse(
   });
 
   let fullResponse = "";
-  for await (const textPart of result.textStream) {
-    fullResponse += textPart;
-    onUpdate(fullResponse);
+  // textStream drops error parts, so read fullStream to surface API failures.
+  for await (const part of result.fullStream) {
+    if (part.type === "error") throw part.error instanceof Error ? part.error : new Error(String(part.error));
+    if (part.type === "text-delta") {
+      fullResponse += part.text;
+      onUpdate(fullResponse);
+    }
   }
 
   return { fullResponse, model: modelToUse };

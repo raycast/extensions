@@ -90,7 +90,7 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
         navigationTitle="New Conversation"
         questionTitle="Question"
         questionPlaceholder="Ask Muse Spark anything…"
-        defaultQuestion={initialQuestion}
+        defaultQuestion={userQuestion || initialQuestion}
         onSubmit={handleSubmit}
       />
     );

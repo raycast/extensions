@@ -26,6 +26,7 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedMessageIndex, setSelectedMessageIndex] = useState<number>(0);
   const [localMessages, setLocalMessages] = useState<Message[]>(conversation.messages);
+  const [model, setModel] = useState(conversation.model);
 
   useEffect(() => {
     setLocalMessages(conversation.messages);
@@ -37,14 +38,15 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
 
       try {
         const messages: Message[] = [...localMessages, { role: "user", content: question }];
-        const modelToUse = selectedModel || conversation.model;
+        const modelToUse = selectedModel || model;
 
         const { fullResponse } = await streamAIResponse(messages, setStreamingText, modelToUse);
 
         const newMessages: Message[] = [...messages, { role: "assistant", content: fullResponse }];
 
         setLocalMessages(newMessages);
-        await updateConversation(conversation.id, { messages: newMessages });
+        setModel(modelToUse);
+        await updateConversation(conversation.id, { messages: newMessages, model: modelToUse });
 
         setIsGenerating(false);
         setStreamingText("");
@@ -59,9 +61,10 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to get response";
         toast.message = error instanceof Error ? error.message : "Unknown error";
+        setViewMode("asking");
       }
     },
-    [localMessages, conversation.model, conversation.id, updateConversation],
+    [localMessages, model, conversation.id, updateConversation],
   );
 
   const handleAskQuestion = useCallback(
@@ -78,9 +81,9 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
       setIsGenerating(true);
       setViewMode("list");
 
-      await generateResponse(question, values.model || conversation.model);
+      await generateResponse(question, values.model);
     },
-    [generateResponse, conversation.model],
+    [generateResponse],
   );
 
   const qaPairs = useMemo(() => {
@@ -120,7 +123,8 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
         navigationTitle={`Continue: ${conversation.title}`}
         questionTitle="Continue asking..."
         questionPlaceholder="Ask Muse Spark anything…"
-        defaultModel={conversation.model}
+        defaultQuestion={userQuestion}
+        defaultModel={model}
         onSubmit={handleAskQuestion}
         onCancel={handleCancel}
         additionalDescription={{

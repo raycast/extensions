@@ -34,9 +34,13 @@ const modelsResponseSchema = z.object({
   ),
 });
 
+export function createMetaClient(apiKey: string, fetcher: typeof fetch = fetch) {
+  return createOpenAI({ apiKey, baseURL: META_BASE_URL, fetch: fetcher });
+}
+
 export function createModelProvider(options: { apiKey: string; fetch?: typeof fetch }) {
   const fetcher = options.fetch ?? fetch;
-  const client = createOpenAI({ apiKey: options.apiKey, baseURL: META_BASE_URL, fetch: fetcher });
+  const client = createMetaClient(options.apiKey, fetcher);
 
   const getModels: AI.GetModels = async () => {
     const response = await fetcher(`${META_BASE_URL}/models`, {
@@ -74,13 +78,7 @@ export function createModelProvider(options: { apiKey: string; fetch?: typeof fe
     return {
       fullStream: (async function* () {
         for await (const part of result.fullStream) {
-          if (typeof (part as { toolName?: unknown }).toolName === "string") {
-            const p = part as { toolName: string };
-            const original = restoreName.get(p.toolName);
-            yield { ...p, toolName: original ?? p.toolName } as AI.ModelStreamPart;
-          } else {
-            yield part as AI.ModelStreamPart;
-          }
+          yield restorePartToolName(part, restoreName) as AI.ModelStreamPart;
         }
       })(),
     };
@@ -90,6 +88,19 @@ export function createModelProvider(options: { apiKey: string; fetch?: typeof fe
 }
 
 const MAX_TOOL_NAME_LENGTH = 64;
+
+function restoreToolName<T>(value: T, restoreName: Map<string, string>): T {
+  const name = (value as { toolName?: unknown } | null)?.toolName;
+  if (typeof name !== "string" || !restoreName.has(name)) return value;
+  return { ...value, toolName: restoreName.get(name) };
+}
+
+// tool-approval-request parts nest the call under `toolCall`.
+function restorePartToolName(part: unknown, restoreName: Map<string, string>): unknown {
+  const restored = restoreToolName(part, restoreName) as { toolCall?: unknown };
+  if (typeof restored !== "object" || restored === null || !("toolCall" in restored)) return restored;
+  return { ...restored, toolCall: restoreToolName(restored.toolCall, restoreName) };
+}
 
 function toAiTools(tools: AI.ModelToolSet | undefined): {
   toolSet: ToolSet | undefined;

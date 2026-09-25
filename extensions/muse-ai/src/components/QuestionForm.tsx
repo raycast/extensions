@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { createModelProvider } from "../model-provider";
 import type { FormValues } from "../types";
 
@@ -30,12 +30,15 @@ export function QuestionForm({
   const preferences = getPreferenceValues<Preferences>();
   const fallbackModel = defaultModel || preferences.MUSE_MODEL || "muse-spark-1.3";
 
-  const { data: models, isLoading } = usePromise(async () => {
-    const provider = createModelProvider({ apiKey: preferences.MODEL_API_KEY });
-    return provider.getModels();
-  });
+  const { data: modelIds, isLoading } = useCachedPromise(
+    async (apiKey: string) => {
+      const models = await createModelProvider({ apiKey }).getModels();
+      return models.map((model) => model.id);
+    },
+    [preferences.MODEL_API_KEY],
+  );
 
-  const availableModels = models?.map((model) => model.id) ?? [fallbackModel];
+  const availableModels = modelIds?.length ? modelIds : [fallbackModel];
   const modelToDisplay = availableModels.includes(fallbackModel) ? fallbackModel : availableModels[0];
 
   return (
@@ -56,7 +59,7 @@ export function QuestionForm({
         defaultValue={defaultQuestion}
         autoFocus
       />
-      <Form.Dropdown id="model" title="Model" defaultValue={modelToDisplay} storeValue>
+      <Form.Dropdown id="model" title="Model" defaultValue={modelToDisplay}>
         {availableModels.map((model) => (
           <Form.Dropdown.Item key={model} value={model} title={model} />
         ))}

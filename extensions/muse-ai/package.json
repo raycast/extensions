@@ -43,7 +43,6 @@
   "ai": {
     "modelProvider": "models"
   },
-  "tools": [],
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",
     "@raycast/api": "^2.5.1",

@@ -53,7 +53,17 @@ export function ConversationListItem({
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             shortcut={{ macOS: { modifiers: ["ctrl"], key: "x" }, Windows: { modifiers: ["ctrl"], key: "x" } }}
-            onAction={() => deleteConversation(conversation.id)}
+            onAction={async () => {
+              if (
+                await confirmAlert({
+                  title: "Delete Conversation",
+                  message: `Delete "${conversation.title}"? This action cannot be undone.`,
+                  primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                })
+              ) {
+                await deleteConversation(conversation.id);
+              }
+            }}
           />
           <Action
             title="Delete All Conversations"
