@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SpringBrand MCP Server] - {PR_MERGE_DATE}
+
+- Add SpringBrand to the official registry: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation, all behind one connector and billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
 ## [Add Scout7 MCP Server] - 2026-09-25
 
 - Add Scout7 to the official registry: plans a week of organic marketing from your brand, writes SEO blogs, videos, LinkedIn carousels and social posts, schedules them across your channels and reports what moved, with your approval before anything goes live. Hosted remote Streamable HTTP server at https://mcp.scout7.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
