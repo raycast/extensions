@@ -1,6 +1,6 @@
 # Number Formatter Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-25
 
 - Format numbers in grouped, compact short, compact long, and scientific notation.
 - Switch between system, English, German, French, Italian, and Spanish locales.
