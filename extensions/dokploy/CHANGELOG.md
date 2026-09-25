@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Deployments Feed Command] - {PR_MERGE_DATE}
+## [Deployments Feed Command] - 2026-09-25
 
 - Add a `Deployments` command showing the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency. Opens straight into the full deployment history (rollback, cancel, delete) for whichever one you pick.
 
