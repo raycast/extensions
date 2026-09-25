@@ -18,23 +18,30 @@ export function subjectFromText(text: string): string {
     : line;
 }
 
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const FILE_NAME = /^[\w-]+\.[A-Za-z0-9]{1,5}$/;
+
 /**
- * One short token with no spaces that isn't a URL: a code or a password, not a
- * note. The clipboard is where Copy Sign-In Code and password managers leave
- * those, so nothing auto-fills or auto-sends one.
+ * One short token that reads as a code or a password, not a word, file name,
+ * address or URL. The clipboard is where Copy Sign-In Code and password
+ * managers leave those, so nothing auto-fills or auto-sends one.
  */
 export function looksLikeSecret(text: string): boolean {
-  return /^\s*\S{4,64}\s*$/.test(text) && !/^\s*https?:\/\//i.test(text);
+  const token = text.trim();
+  if (!/^\S{4,64}$/.test(token)) return false;
+  if (/^https?:\/\//i.test(token) || EMAIL.test(token) || FILE_NAME.test(token)) return false;
+  if (/^\d+$/.test(token)) return true;
+  const letter = /\p{L}/u.test(token);
+  return letter && (/\d/.test(token) || /[^\p{L}\d._@-]/u.test(token));
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** "a@b.c, Ada <ada@x.io>; c@d.e" → addresses. Returns the invalid parts too,
- *  so a form can say which one is wrong. */
+/** "a@b.c, Ada <ada@x.io>; c@d.e" → addresses. Separators inside a quoted
+ *  name or angle brackets don't split ("Doe, Jane" <jane@x.io> is one).
+ *  Returns the invalid parts too, so a form can say which one is wrong. */
 export function parseRecipients(raw: string): { valid: string[]; invalid: string[] } {
   const valid: string[] = [];
   const invalid: string[] = [];
-  for (const part of raw.split(/[,;\n]/)) {
+  for (const part of splitMailboxes(raw)) {
     const trimmed = part.trim();
     if (!trimmed) continue;
     const angle = /<([^>]+)>\s*$/.exec(trimmed);
@@ -43,6 +50,27 @@ export function parseRecipients(raw: string): { valid: string[]; invalid: string
     else invalid.push(trimmed);
   }
   return { valid, invalid };
+}
+
+// fallow-ignore-next-line complexity
+function splitMailboxes(raw: string): string[] {
+  const parts: string[] = [];
+  let current = "";
+  let quoted = false;
+  let angled = false;
+  for (const ch of raw) {
+    if (ch === '"' && !angled) quoted = !quoted;
+    else if (ch === "<" && !quoted) angled = true;
+    else if (ch === ">" && !quoted) angled = false;
+    else if (/[,;\n]/.test(ch) && !quoted && !angled) {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  parts.push(current);
+  return parts;
 }
 
 /**
