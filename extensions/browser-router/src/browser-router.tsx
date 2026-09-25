@@ -23,7 +23,7 @@ import { RenameProfileForm } from "./components/RenameProfileForm";
 import { FeedbackForm } from "./components/FeedbackForm";
 import { UserManualView } from "./components/UserManualView";
 
-export default function Command(props: LaunchProps<{ arguments: { query?: string }; fallbackText?: string }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.BrowserRouter; fallbackText?: string }>) {
   const preferences = getPreferenceValues<Preferences>();
 
   // Determine if query came from Raycast argument or fallback text
