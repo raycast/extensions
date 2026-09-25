@@ -4,7 +4,7 @@ import { useToken } from "./instances";
 import DeploymentLogs from "./deployment-logs";
 import { parseTrpcJsonResponse, trpcMutate, trpcQueryUrl } from "./trpc";
 
-interface Deployment {
+export interface Deployment {
   deploymentId: string;
   title: string;
   description: string | null;
@@ -14,7 +14,7 @@ interface Deployment {
   rollbackId: string | null;
 }
 
-const STATUS_COLORS: Record<Deployment["status"], Color> = {
+export const STATUS_COLORS: Record<Deployment["status"], Color> = {
   running: Color.Yellow,
   done: Color.Green,
   error: Color.Red,
@@ -22,22 +22,28 @@ const STATUS_COLORS: Record<Deployment["status"], Color> = {
 };
 
 // Only applications and compose stacks keep a deployment history; the six database kinds don't.
-type DeployableKind = "application" | "compose";
-const ID_FIELDS: Record<DeployableKind, string> = {
+export type DeployableKind = "application" | "compose";
+export const ID_FIELDS: Record<DeployableKind, string> = {
   application: "applicationId",
   compose: "composeId",
 };
-const ENDPOINTS: Record<DeployableKind, string> = {
+export const ENDPOINTS: Record<DeployableKind, string> = {
   application: "deployment.all",
   compose: "deployment.allByCompose",
 };
 
 export default function DeploymentHistory({
   service,
+  token,
 }: {
   service: { id: string; type: DeployableKind; name: string };
+  /** Overrides the cached active-instance token - needed by callers (like Deployments) that list
+   * services from more than one instance, where the service being viewed might not belong to
+   * whichever instance happens to be currently active. */
+  token?: { url: string; headers: Record<string, string> };
 }) {
-  const { url, headers } = useToken();
+  const activeToken = useToken();
+  const { url, headers } = token ?? activeToken;
 
   const {
     isLoading,
@@ -144,7 +150,7 @@ export default function DeploymentHistory({
                 <Action.Push
                   icon={Icon.Terminal}
                   title="View Build Logs"
-                  target={<DeploymentLogs deployment={deployment} />}
+                  target={<DeploymentLogs deployment={deployment} token={{ url, headers }} />}
                 />
                 {deployment.rollbackId && (
                   <Action

@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Deployments Feed Command] - 2026-09-25
+
+- Add a `Deployments` command showing the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency. Opens straight into the full deployment history (rollback, cancel, delete) for whichever one you pick.
+
 ## [Sort Projects, Services, and Docker by Frecency] - 2026-09-25
 
 - **Projects**, **Services**, and **Docker** now sort by how often you actually open each one, not raw API order - matching how **Deploy Service** already sorts. Scoped per instance, so frequently-used items in one account never affect another's ranking.
