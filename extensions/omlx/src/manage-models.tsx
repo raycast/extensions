@@ -117,10 +117,14 @@ export default function ManageModels() {
     );
   }
 
-  const loaded = models.filter((m) => m.loaded && !m.is_helper);
-  const available = models.filter(
-    (m) => !m.loaded && !m.is_loading && !m.is_helper,
-  );
+  const favoritesFirst = (a: OmlxModelStatus, b: OmlxModelStatus) =>
+    a.is_favorite === b.is_favorite ? 0 : a.is_favorite ? -1 : 1;
+  const loaded = models
+    .filter((m) => m.loaded && !m.is_helper)
+    .sort(favoritesFirst);
+  const available = models
+    .filter((m) => !m.loaded && !m.is_loading && !m.is_helper)
+    .sort(favoritesFirst);
   const loading = models.filter((m) => m.is_loading);
   const helpers = models.filter((m) => m.is_helper);
 

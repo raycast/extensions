@@ -23,6 +23,88 @@
   "ai": {
     "modelProvider": "models"
   },
+  "tools": [
+    {
+      "name": "list-models",
+      "title": "List Models",
+      "description": "List oMLX models with their load status, size, type, and capabilities. Optionally filter to only loaded or only available models."
+    },
+    {
+      "name": "load-model",
+      "title": "Load Model",
+      "description": "Load an oMLX model into memory so it can serve requests. Use list-models first to find the model ID."
+    },
+    {
+      "name": "eject-model",
+      "title": "Eject Model",
+      "description": "Eject an oMLX model from memory. Use list-models first to find loaded model IDs."
+    },
+    {
+      "name": "pin-model",
+      "title": "Pin or Unpin Model",
+      "description": "Pin a model to keep it in memory (prevents automatic eviction), or unpin it."
+    },
+    {
+      "name": "get-server-status",
+      "title": "Get Server Status",
+      "description": "Check if the oMLX server is running and get stats: version, uptime, loaded models, speed, memory usage, cache efficiency."
+    },
+    {
+      "name": "get-model-stats",
+      "title": "Get Model Stats",
+      "description": "Get historical usage stats for a specific model from past requests: average speed (tok/s), total tokens served, cache hit rate. This is not a benchmark — it reflects real usage, not a controlled test. Use list-models first to find model IDs."
+    },
+    {
+      "name": "search-models",
+      "title": "Search Models",
+      "description": "Search for models on HuggingFace. Returns model name, size, parameters, and download count. Results are MLX-compatible models only."
+    },
+    {
+      "name": "download-model",
+      "title": "Download Model",
+      "description": "Download a model from HuggingFace. Use search-models first to find the repo ID."
+    },
+    {
+      "name": "get-download-progress",
+      "title": "Get Download Progress",
+      "description": "Check the progress of active and recent model downloads."
+    },
+    {
+      "name": "cancel-download",
+      "title": "Cancel Download",
+      "description": "Cancel an active model download. Use get-download-progress first to find the task ID."
+    },
+    {
+      "name": "get-recommended-models",
+      "title": "Get Recommended Models",
+      "description": "Get trending and popular MLX models from HuggingFace."
+    },
+    {
+      "name": "reload-models",
+      "title": "Reload Models",
+      "description": "Rescan the model directory to discover newly added or removed models."
+    },
+    {
+      "name": "start-server",
+      "title": "Start Server",
+      "description": "Start the oMLX server if it is not already running."
+    },
+    {
+      "name": "stop-server",
+      "title": "Stop Server",
+      "description": "Stop the oMLX server. All loaded models will be unloaded."
+    },
+    {
+      "name": "restart-server",
+      "title": "Restart Server",
+      "description": "Restart the oMLX server. Active requests will be interrupted."
+    },
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "description": "Check if a new version of oMLX is available."
+    }
+  ],
   "commands": [
     {
       "name": "manage-models",
