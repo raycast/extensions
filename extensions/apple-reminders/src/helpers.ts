@@ -27,6 +27,16 @@ export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
 }
 
+export function parseReminderDueDate(dueDate?: string | null): Date | null {
+  if (!dueDate) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+    const [year, month, day] = dueDate.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  const date = new Date(dueDate);
+  return isNaN(date.getTime()) ? null : date;
+}
+
 export function formatReminderTime(reminder?: { dueDate?: string | null } | null): string {
   if (!reminder?.dueDate || isFullDay(reminder.dueDate)) {
     return "";
