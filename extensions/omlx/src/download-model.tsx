@@ -150,7 +150,7 @@ export default function DownloadModel() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Download Omlx"
+                title="Download oMLX"
                 url="https://omlx.com"
               />
             </ActionPanel>

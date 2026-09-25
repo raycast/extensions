@@ -118,7 +118,7 @@ export default function ServingStats() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Download Omlx"
+                title="Download oMLX"
                 url="https://omlx.com"
               />
             </ActionPanel>

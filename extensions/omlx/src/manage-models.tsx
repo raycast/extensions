@@ -86,7 +86,7 @@ export default function ManageModels() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Download Omlx"
+                title="Download oMLX"
                 url="https://omlx.com"
               />
             </ActionPanel>
