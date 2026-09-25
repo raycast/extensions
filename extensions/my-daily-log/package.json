@@ -2,20 +2,26 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "my-daily-log",
   "title": "My Daily Log",
-  "description": "Log what you do every day.",
+  "description": "Log what you do every day, get reminded to log, and summarize your days with a local LLM.",
   "icon": "command-icon.png",
   "author": "frugoman",
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "dailyLogList",
       "title": "My Daily Log",
-      "description": "List of all logs for the current day",
+      "description": "List, edit and delete the logs of a day",
       "mode": "view",
       "arguments": [
         {
           "name": "date",
-          "placeholder": "When (y, 2022-12-31)",
+          "placeholder": "When (t, y, 3, 2022-12-31)",
           "type": "text",
           "required": false
         }
@@ -24,7 +30,7 @@
     {
       "name": "loggedDaysInMonthList",
       "title": "Logged Days of Month",
-      "description": "List of all logged days in a given month",
+      "description": "List of all logged days, grouped by month",
       "mode": "view"
     },
     {
@@ -42,56 +48,210 @@
       ]
     },
     {
-      "name": "summaryOfAMonth",
-      "title": "Summary Of A Month",
-      "description": "Summary of what you did in a given month",
+      "name": "searchLogs",
+      "title": "Search Logs",
+      "description": "Search through everything you have ever logged",
       "mode": "view"
+    },
+    {
+      "name": "logReminderMenuBar",
+      "title": "Log Reminder",
+      "subtitle": "My Daily Log",
+      "description": "Menu bar item that reminds you to log what you are doing when you have not logged for a while",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "reminderIntervalMinutes",
+          "title": "Remind Me Every",
+          "description": "How long without a new log before you are reminded",
+          "type": "dropdown",
+          "required": false,
+          "default": "60",
+          "data": [
+            {
+              "title": "30 minutes",
+              "value": "30"
+            },
+            {
+              "title": "1 hour",
+              "value": "60"
+            },
+            {
+              "title": "90 minutes",
+              "value": "90"
+            },
+            {
+              "title": "2 hours",
+              "value": "120"
+            },
+            {
+              "title": "3 hours",
+              "value": "180"
+            },
+            {
+              "title": "4 hours",
+              "value": "240"
+            }
+          ]
+        },
+        {
+          "name": "reminderStartTime",
+          "title": "Working Hours Start",
+          "description": "Do not remind before this time (24h format, e.g. 09:00)",
+          "type": "textfield",
+          "required": false,
+          "default": "09:00"
+        },
+        {
+          "name": "reminderEndTime",
+          "title": "Working Hours End",
+          "description": "Do not remind after this time (24h format, e.g. 18:00)",
+          "type": "textfield",
+          "required": false,
+          "default": "18:00"
+        },
+        {
+          "name": "reminderWeekdaysOnly",
+          "title": "Days",
+          "label": "Only remind me on weekdays",
+          "description": "Skip reminders on Saturdays and Sundays",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "reminderNotification",
+          "title": "Notification",
+          "label": "Show a system notification when a log is due",
+          "description": "Besides highlighting the menu bar item, show a macOS notification",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "daySummaryView",
       "title": "Day Summary",
-      "description": "Summary of a given day",
+      "description": "AI summary of a given day, generated with your own LLM (Ollama by default)",
+      "mode": "view"
+    },
+    {
+      "name": "weekSummaryView",
+      "title": "Summary of a Week",
+      "description": "AI weekly report of what you did, generated with your own LLM (Ollama by default)",
+      "mode": "view"
+    },
+    {
+      "name": "summaryOfAMonth",
+      "title": "Summary of a Month",
+      "description": "AI summary of what you did in a given month, generated with your own LLM (Ollama by default)",
       "mode": "view"
     },
     {
       "name": "dailyStandupSpeechView",
       "title": "Day Standup Speech",
-      "description": "Creates a speech that you can use for your daily standup meeting",
+      "description": "Creates a speech for your daily standup meeting, generated with your own LLM (Ollama by default)",
       "mode": "view"
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.51.1",
-    "@raycast/utils": "^1.4.10",
-    "fs": "0.0.1-security",
-    "uuid": "^9.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@types/uuid": "^9.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
-  },
   "preferences": [
     {
       "name": "logPath",
       "title": "Daily Log Path",
-      "description": "Path to your daily log",
+      "description": "Folder where your logs are stored. Put it in iCloud Drive or Dropbox to sync between machines.",
       "default": "~/Documents/DailyLog",
       "type": "textfield",
       "required": true
+    },
+    {
+      "name": "aiBaseUrl",
+      "title": "AI Server URL",
+      "description": "Base URL of any OpenAI-compatible API. Ollama: http://localhost:11434/v1, LM Studio: http://localhost:1234/v1, OpenAI: https://api.openai.com/v1",
+      "default": "http://localhost:11434/v1",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "aiModel",
+      "title": "AI Model",
+      "description": "Name of the model to use, e.g. llama3.2, qwen2.5, mistral (for Ollama run `ollama list` to see yours)",
+      "default": "llama3.2",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "aiApiKey",
+      "title": "AI API Key",
+      "description": "Only needed for hosted providers. Leave empty for Ollama or other local servers.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "aiInstructions",
+      "title": "Extra AI Instructions",
+      "description": "Optional instructions added to every prompt, e.g. 'Answer in Spanish' or 'Keep it under 5 bullet points'",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "aiThinking",
+      "title": "AI Thinking",
+      "description": "For reasoning models (qwen3, deepseek-r1, gpt-oss\u2026). Disabling thinking makes answers much faster. Sent as `reasoning_effort`.",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "Model Default",
+          "value": "default"
+        },
+        {
+          "title": "Disabled (like --think=false)",
+          "value": "none"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "aiExtraParams",
+      "title": "Extra Model Parameters",
+      "description": "Extra parameters sent with every request, as flags (--think=false --temperature=0.2) or JSON ({\"temperature\": 0.2, \"top_p\": 0.9}).",
+      "type": "textfield",
+      "required": false
     }
   ],
+  "dependencies": {
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.2.18",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "esbuild tests/*.test.ts --bundle --platform=node --format=cjs --outdir=.test-build --alias:@raycast/api=./tests/stubs/raycast-api.ts --log-level=warning && node --test .test-build/*.test.js"
   }
 }
