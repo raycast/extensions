@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-25
 
 - Stop the Command Bar's loading indicator from flickering on every keystroke. History and search-suggestion lookups re-run as you type and briefly report loading, but by the time either can be true, tabs/bookmarks/profiles have already resolved, so there was no genuine "nothing to show yet" state being reflected - just a distracting flash.
 
