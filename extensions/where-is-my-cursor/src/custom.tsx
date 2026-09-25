@@ -49,8 +49,10 @@ async function handleSubmit(values: FormValues) {
     ? parseFloat(values.borderWidth)
     : undefined;
 
-  if (isNaN(duration) || duration <= 0) {
-    showFailureToast("Duration must be a positive number.");
+  if (isNaN(duration) || duration < 0) {
+    showFailureToast(
+      "Duration must be zero (persistent) or a positive number.",
+    );
     return;
   }
   if (isNaN(screenOpacity) || screenOpacity < 0 || screenOpacity > 1) {

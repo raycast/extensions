@@ -6,7 +6,9 @@
   "icon": "extension-icon.png",
   "author": "luciodaou",
   "license": "MIT",
-  "permissions": ["execute"],
+  "permissions": [
+    "execute"
+  ],
   "commands": [
     {
       "name": "where-is-my-cursor",
@@ -44,7 +46,6 @@
       "mode": "view"
     }
   ],
-
   "dependencies": {
     "@raycast/api": "^1.102.3",
     "@raycast/utils": "^1.17.0"
