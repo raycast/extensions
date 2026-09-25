@@ -26,7 +26,6 @@ import {
   type GenerationProvider,
   type ProviderModel,
   type ProviderAnswer,
-  type ProviderSettings,
 } from "./lib/providers";
 import { appendHistory } from "./lib/history-storage";
 import {
@@ -397,7 +396,7 @@ const CREATIVITY_LEVELS = [
 ] as const;
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences & ProviderSettings>();
+  const preferences = getPreferenceValues<Preferences>();
   const defaultValues = getDefaultFormValues(preferences);
 
   const [values, setValues] = useState<FormValues>(defaultValues);
@@ -893,17 +892,6 @@ export default function Command() {
               title="Copy Result Again"
               content={session.result}
             />
-            <Action.Push
-              title="Compare with Original"
-              icon={Icon.Text}
-              target={
-                <CompareDetail
-                  original={session.values.draft}
-                  result={session.result}
-                  incompleteReason={session.incompleteReason}
-                />
-              }
-            />
             <Action
               title="Regenerate"
               icon={Icon.RotateClockwise}
@@ -926,6 +914,17 @@ export default function Command() {
                 setSession(null);
                 setIsCorrectionMode(false);
               }}
+            />
+            <Action.Push
+              title="Compare with Original"
+              icon={Icon.Text}
+              target={
+                <CompareDetail
+                  original={session.values.draft}
+                  result={session.result}
+                  incompleteReason={session.incompleteReason}
+                />
+              }
             />
           </ActionPanel>
         }

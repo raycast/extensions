@@ -5,15 +5,6 @@ export type GenerationProvider =
   | "anthropic"
   | "google";
 
-export type ProviderSettings = {
-  generationProvider?: GenerationProvider;
-  providerModel?: string;
-  openRouterApiKey?: string;
-  openAIApiKey?: string;
-  anthropicApiKey?: string;
-  googleApiKey?: string;
-};
-
 export type ProviderModel = { id: string; name: string };
 export type ProviderAnswer = { text: string; incompleteReason?: string };
 
@@ -111,7 +102,7 @@ type ProviderResponse = {
   error?: { message?: string };
 };
 
-export function getProviderSummary(settings: ProviderSettings): string {
+export function getProviderSummary(settings: Preferences): string {
   const provider = settings.generationProvider ?? "openrouter";
   if (provider === "raycast") return "Raycast AI uses your Raycast account.";
   const config = PROVIDERS[provider];
@@ -124,7 +115,7 @@ export function getProviderSummary(settings: ProviderSettings): string {
 
 export async function askProvider(
   prompt: string,
-  settings: ProviderSettings,
+  settings: Preferences,
   signal?: AbortSignal,
 ): Promise<ProviderAnswer> {
   const provider = settings.generationProvider ?? "openrouter";

@@ -137,6 +137,12 @@ function normalizeProvider(
   value: unknown,
   fallback: GenerationProvider,
 ): GenerationProvider {
+  // Settings saved before providers existed have no generationProvider.
+  // Keep those on Raycast AI instead of the newer preference default.
+  if (value == null) {
+    return "raycast";
+  }
+
   return PROVIDER_OPTIONS.some((provider) => provider.id === value)
     ? (value as GenerationProvider)
     : fallback;

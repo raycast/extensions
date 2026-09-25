@@ -176,16 +176,6 @@ function HistoryDetail(props: { entry: HistoryEntry }) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Result" content={entry.result} />
-          <Action.Push
-            title="Compare with Original"
-            icon={Icon.Text}
-            target={
-              <CompareDetail
-                original={entry.values.draft}
-                result={entry.result}
-              />
-            }
-          />
           <Action
             title="Copy Original Draft"
             icon={Icon.Clipboard}
@@ -196,6 +186,16 @@ function HistoryDetail(props: { entry: HistoryEntry }) {
                 title: "Draft copied",
               });
             }}
+          />
+          <Action.Push
+            title="Compare with Original"
+            icon={Icon.Text}
+            target={
+              <CompareDetail
+                original={entry.values.draft}
+                result={entry.result}
+              />
+            }
           />
         </ActionPanel>
       }

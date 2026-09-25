@@ -33,19 +33,19 @@
       "default": "openrouter",
       "data": [
         {
-          "title": "OpenRouter API key",
+          "title": "OpenRouter API Key",
           "value": "openrouter"
         },
         {
-          "title": "OpenAI API key",
+          "title": "OpenAI API Key",
           "value": "openai"
         },
         {
-          "title": "Anthropic API key",
+          "title": "Anthropic API Key",
           "value": "anthropic"
         },
         {
-          "title": "Google Gemini API key",
+          "title": "Google Gemini API Key",
           "value": "google"
         },
         {
@@ -474,6 +474,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "ray publish"
   },
   "dependencies": {
