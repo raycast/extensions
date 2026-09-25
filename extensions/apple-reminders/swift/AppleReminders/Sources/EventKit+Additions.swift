@@ -270,6 +270,25 @@ extension EKReminder {
     return false
   }
 
+  func isBaseDueDateAlarm(_ alarm: EKAlarm) -> Bool {
+    guard !alarm.isLocationAlarm else { return false }
+    if alarm.relativeOffset == 0 && alarm.absoluteDate == nil {
+      return true
+    }
+    if let alarmDate = alarm.absoluteDate,
+       let dueDateComponents = self.dueDateComponents,
+       let dueDate = Calendar.current.date(from: dueDateComponents),
+       abs(alarmDate.timeIntervalSince(dueDate)) < 1 {
+      return true
+    }
+    return false
+  }
+
+  var hasBaseDueDateAlarm: Bool {
+    guard let alarms = self.alarms else { return false }
+    return alarms.contains(where: { isBaseDueDateAlarm($0) })
+  }
+
   func removeEarlyReminderAlarms() {
     guard let alarms = self.alarms else { return }
     for alarm in alarms where isEarlyReminderAlarm(alarm) {

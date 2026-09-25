@@ -447,8 +447,7 @@ struct SetEarlyReminderPayload: Decodable {
 
   item.removeEarlyReminderAlarms()
 
-  let hasBaseAlarm = item.alarms?.contains(where: { !$0.isLocationAlarm && $0.relativeOffset == 0 }) ?? false
-  if !hasBaseAlarm, item.dueDateComponents != nil {
+  if !item.hasBaseDueDateAlarm, item.dueDateComponents != nil {
     item.addAlarm(EKAlarm(relativeOffset: 0))
   }
 
@@ -669,8 +668,7 @@ struct UpdateReminderPayload: Decodable {
     }
   } else if let earlyReminder = payload.earlyReminder {
     item.removeEarlyReminderAlarms()
-    let hasBaseAlarm = item.alarms?.contains(where: { !$0.isLocationAlarm && $0.relativeOffset == 0 }) ?? false
-    if !hasBaseAlarm, item.dueDateComponents != nil {
+    if !item.hasBaseDueDateAlarm, item.dueDateComponents != nil {
       item.addAlarm(EKAlarm(relativeOffset: 0))
     }
     if earlyReminder > 0 && item.dueDateComponents != nil {
