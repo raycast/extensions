@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ask-codex-raycast",
-  "title": "Ask Codex CLI",
+  "title": "Ask ChatGPT",
   "description": "Ask ChatGPT/OpenAI through your locally authenticated Codex CLI, with streaming answers, follow-ups, steering, and local history.",
   "icon": "command-icon.png",
   "author": "bbfss",
@@ -17,8 +17,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Ask Codex",
-      "subtitle": "Local Codex CLI",
+      "title": "Ask ChatGPT",
+      "subtitle": "Continuous Local Chat",
       "description": "Ask ChatGPT/OpenAI through your local Codex CLI and continue the conversation.",
       "mode": "view",
       "keywords": [

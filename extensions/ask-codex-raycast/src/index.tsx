@@ -335,7 +335,7 @@ export default function AskCodex(
     if (!mountedRef.current) return;
     const client = clientRef.current;
     if (!client || !readyRef.current)
-      throw new Error("Codex 尚未连接，请重新打开命令。");
+      throw new Error("服务尚未连接，请重新打开命令。");
     setError("");
     if (client.currentTurnId) {
       try {
@@ -430,7 +430,7 @@ export default function AskCodex(
     if (!readyRef.current) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Codex 尚未连接",
+        title: "服务尚未连接",
         message: "文字已保留，请等待连接或点击“重新连接”。",
       });
       return false;
@@ -461,7 +461,7 @@ export default function AskCodex(
     try {
       await initRef.current;
       const client = clientRef.current;
-      if (!client || !readyRef.current) throw new Error("Codex 尚未连接");
+      if (!client || !readyRef.current) throw new Error("服务尚未连接");
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.startThread();
       const next = {
@@ -506,7 +506,7 @@ export default function AskCodex(
       await initRef.current;
       const client = clientRef.current;
       if (!client || !readyRef.current || !session.threadId)
-        throw new Error("Codex 尚未连接，请返回聊天重新连接。");
+        throw new Error("服务尚未连接，请返回聊天重新连接。");
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.resumeThread(session.threadId);
       const existing = libraryRef.current.sessions.find(
@@ -641,23 +641,16 @@ export default function AskCodex(
     </>
   );
   const historyLink = `raycast://extensions/bbfss/ask-codex-raycast/index?context=${encodeURIComponent(JSON.stringify({ page: "history" }))}`;
-  const chatTranscript = [
-    ...(error ? [`提示：${error}`] : []),
-    ...conversation.messages
-      .filter((message) => message.content.trim())
-      .map(
-        (message) =>
-          `${message.role === "user" ? "你" : "Codex"}${message.kind === "steer" ? " · 补充要求" : ""}\n${message.content}`,
-      ),
-    `状态：${status}`,
-  ].join("\n\n");
+  const visibleMessages = conversation.messages.filter(
+    (message) => message.content.trim() || message.status === "streaming",
+  );
   const accessory = (
     <List.Dropdown tooltip="聊天与会话管理" value={page} onChange={changePage}>
       <List.Dropdown.Item title="聊天" value="chat" icon={Icon.Message} />
       <List.Dropdown.Item title="历史会话" value="history" icon={Icon.Clock} />
       <List.Dropdown.Item title="已归档" value="archived" icon={Icon.Tray} />
       <List.Dropdown.Item
-        title="本机 Codex 会话"
+        title="本机 CLI 会话"
         value="cli"
         icon={Icon.Terminal}
       />
@@ -692,12 +685,11 @@ export default function AskCodex(
                 onAction={reconnect}
               />
             ) : (
-              <Action.SubmitForm
+              <Action
                 title={busy ? "发送补充要求" : "发送消息"}
                 icon={Icon.ArrowRight}
-                onSubmit={(values) => {
-                  void sendPrompt(asString(values.prompt) || draft);
-                }}
+                shortcut={{ modifiers: [], key: "return" }}
+                onAction={() => void sendPrompt(draft)}
               />
             )}
             {secondaryActions}
@@ -716,19 +708,47 @@ export default function AskCodex(
           }
           autoFocus
         />
-        <Form.Description text={chatTranscript} />
+        <Form.Separator />
+        {visibleMessages.length ? (
+          visibleMessages.map((message) => (
+            <Form.Description
+              key={message.id}
+              title={
+                message.role === "assistant"
+                  ? "ChatGPT"
+                  : message.kind === "steer"
+                    ? "你 · 补充要求"
+                    : "你"
+              }
+              text={
+                message.content ||
+                (message.status === "streaming" ? "正在思考…" : "")
+              }
+            />
+          ))
+        ) : (
+          <Form.Description
+            title="ChatGPT"
+            text="输入问题并按 Enter 开始对话。"
+          />
+        )}
+        <Form.Separator />
+        <Form.Description
+          title={error ? "提示" : "状态"}
+          text={error || status}
+        />
       </Form>
     );
   }
   return (
     <List
-      navigationTitle="Ask ChatGPT (Codex)"
+      navigationTitle="Ask ChatGPT"
       searchBarAccessory={accessory}
       searchText={draft}
       onSearchTextChange={setDraft}
       searchBarPlaceholder={
         busy
-          ? "继续输入补充要求，Enter 发送给正在回答的 Codex…"
+          ? "继续输入补充要求，Enter 发送给正在回答的 ChatGPT…"
           : "输入问题或追问，Enter 发送…"
       }
       filtering={false}

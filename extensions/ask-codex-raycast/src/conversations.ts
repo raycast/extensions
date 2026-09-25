@@ -190,12 +190,12 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
 
 export function transcript(messages: ChatMessage[]): string {
   if (!messages.length)
-    return "# 新对话\n\n在顶部输入问题并按 Enter 发送。对话记录会一直保留在这里。\n\nCodex 回答过程中也可以继续输入，按 Enter 发送补充要求。";
+    return "# 新对话\n\n在顶部输入问题并按 Enter 发送。对话记录会一直保留在这里。\n\nChatGPT 回答过程中也可以继续输入，按 Enter 发送补充要求。";
   return messages
     .map((message) => {
       const heading =
         message.role === "assistant"
-          ? "Codex"
+          ? "ChatGPT"
           : message.kind === "steer"
             ? "补充要求"
             : "你";

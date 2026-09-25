@@ -2,7 +2,7 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Ask a locally authenticated Codex CLI directly from Raycast Root Search.
+- Ask ChatGPT directly from Raycast Root Search through a locally authenticated Codex CLI.
 - Stream Markdown answers in a full-width view without a permanent sidebar.
 - Continue conversations and steer an in-progress response.
 - Search, rename, archive, restore, and resume extension sessions.

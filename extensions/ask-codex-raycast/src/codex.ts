@@ -124,7 +124,7 @@ export class CodexAppServer {
     await this.request("initialize", {
       clientInfo: {
         name: "ask_codex_raycast",
-        title: "Ask Codex Raycast Extension",
+        title: "Ask ChatGPT Raycast Extension",
         version: "1.0.0",
       },
     });

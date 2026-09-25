@@ -106,9 +106,7 @@ export function useSessionHistory({
         .map((thread) => ({
           threadId: asString(thread.id),
           title:
-            asString(thread.name) ||
-            asString(thread.preview) ||
-            "未命名 Codex 会话",
+            asString(thread.name) || asString(thread.preview) || "未命名会话",
           cwd: asString(thread.cwd),
           updatedAt:
             typeof thread.updatedAt === "number" ? thread.updatedAt * 1000 : 0,
@@ -190,7 +188,7 @@ export function useSessionHistory({
   return {
     navigationTitle:
       page === "cli"
-        ? "本机 Codex 会话"
+        ? "本机 CLI 会话"
         : page === "archived"
           ? "已归档会话"
           : "历史会话",
@@ -224,7 +222,7 @@ export function useSessionHistory({
               : loading
                 ? "正在读取会话…"
                 : page === "cli" && !ready
-                  ? "Codex 尚未连接"
+                  ? "CLI 尚未连接"
                   : "没有匹配的会话"
           }
           description={
