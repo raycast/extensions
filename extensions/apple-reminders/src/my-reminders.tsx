@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, clearSearchBar, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ReminderListItem from "./components/ReminderListItem";
 import { CreateReminderForm } from "./create-reminder";
@@ -11,8 +11,18 @@ export default function Command() {
   const { displayCompletionDate } = getPreferenceValues<Preferences.MyReminders>();
   const [listId, setListId] = useCachedState<string>("view", "today");
   const [newReminderTitle, setNewReminderTitle] = useState("");
+  const [, setTick] = useState(0);
 
   const { data, isLoading, mutate } = useData();
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
+      mutate();
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, [mutate]);
 
   const { sections, viewProps } = useViewReminders(listId, { data });
 
