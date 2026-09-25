@@ -11,8 +11,8 @@ type Input = {
   keys: string;
   /**
    * Soft purge marks the content as stale instead of removing it, so Fastly can
-   * keep serving it while revalidating. Prefer soft purge unless the user asks
-   * for a hard purge or the content must disappear immediately.
+   * keep serving it while revalidating. Defaults to true; only pass false when
+   * the user asks for a hard purge or the content must disappear immediately.
    */
   soft?: boolean;
 };
@@ -26,13 +26,14 @@ function splitKeys(keys: string): string[] {
 
 export const confirmation: Tool.Confirmation<Input> = async ({ serviceId, keys, soft }) => {
   const details = await getServiceDetails(serviceId);
+  const isSoft = soft !== false;
   return {
-    style: soft ? undefined : Action.Style.Destructive,
+    style: isSoft ? undefined : Action.Style.Destructive,
     message: "Purge these surrogate keys from the Fastly cache?",
     info: [
       { name: "Service", value: details.name },
       { name: "Keys", value: splitKeys(keys).join(", ") },
-      { name: "Purge type", value: soft ? "Soft (mark stale)" : "Hard (remove immediately)" },
+      { name: "Purge type", value: isSoft ? "Soft (mark stale)" : "Hard (remove immediately)" },
     ],
   };
 };
@@ -41,7 +42,7 @@ export const confirmation: Tool.Confirmation<Input> = async ({ serviceId, keys, 
  * Purge cached content by surrogate key (cache tag) on a Fastly service.
  * This is the preferred way to purge groups of related content.
  */
-export default async function ({ serviceId, keys, soft = false }: Input) {
+export default async function ({ serviceId, keys, soft = true }: Input) {
   const keyList = splitKeys(keys);
   if (keyList.length === 0) {
     throw new Error("No surrogate keys provided");

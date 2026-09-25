@@ -1,4 +1,8 @@
 import { getArcVirtualKeys, isArcNotEntitledError } from "../api";
+import { ArcVirtualKey } from "../types";
+
+// Follow next_cursor so the listing is complete, with a page cap as a safety guard
+const MAX_PAGES = 10;
 
 /**
  * List AI Runtime Control virtual keys: name, provider, model, rate limits
@@ -7,8 +11,15 @@ import { getArcVirtualKeys, isArcNotEntitledError } from "../api";
  */
 export default async function () {
   try {
-    const response = await getArcVirtualKeys();
-    return (response.data || []).map((key) => ({
+    const keys: ArcVirtualKey[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const response = await getArcVirtualKeys({ cursor });
+      keys.push(...(response.data || []));
+      cursor = response.meta?.next_cursor ?? undefined;
+      if (!cursor) break;
+    }
+    return keys.map((key) => ({
       id: key.id,
       name: key.name,
       provider: key.provider,

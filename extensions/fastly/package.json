@@ -525,25 +525,30 @@
       {
         "input": "@fastly what changed on my account in the last day?",
         "mocks": {
-          "get-audit-events": [
-            {
-              "id": "evt-100",
-              "event_type": "version.activate",
-              "description": "Activated version 42 of service www.example.com",
-              "created_at": "2026-09-24T14:30:00Z",
-              "service_id": "SU1Z0isxPaozGVKXdv0eY",
-              "user_id": "user-1",
-              "ip": "203.0.113.10"
-            },
-            {
-              "id": "evt-101",
-              "event_type": "token.create",
-              "description": "Created API token",
-              "created_at": "2026-09-24T09:05:00Z",
-              "user_id": "user-2",
-              "ip": "203.0.113.11"
-            }
-          ]
+          "get-audit-events": {
+            "total_matching": 2,
+            "returned": 2,
+            "truncated": false,
+            "events": [
+              {
+                "id": "evt-100",
+                "event_type": "version.activate",
+                "description": "Activated version 42 of service www.example.com",
+                "created_at": "2026-09-24T14:30:00Z",
+                "service_id": "SU1Z0isxPaozGVKXdv0eY",
+                "user_id": "user-1",
+                "ip": "203.0.113.10"
+              },
+              {
+                "id": "evt-101",
+                "event_type": "token.create",
+                "description": "Created API token",
+                "created_at": "2026-09-24T09:05:00Z",
+                "user_id": "user-2",
+                "ip": "203.0.113.11"
+              }
+            ]
+          }
         },
         "expected": [
           {

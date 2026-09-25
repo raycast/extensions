@@ -1,4 +1,5 @@
 import { getArcUsageMetrics, isArcNotEntitledError } from "../api";
+import { ArcUsageMetric } from "../types";
 
 type Input = {
   /** Start of the time range as an ISO 8601 timestamp. Defaults to 7 days ago. */
@@ -11,6 +12,9 @@ type Input = {
   model?: string;
 };
 
+// Follow next_cursor so totals cover the whole range, with a page cap as a safety guard
+const MAX_PAGES = 10;
+
 /**
  * Get AI Runtime Control usage metrics: requests, sessions, input/output
  * tokens, and AI Firewall violations, broken down by day, virtual key,
@@ -19,8 +23,15 @@ type Input = {
 export default async function ({ from, to, provider, model }: Input) {
   const defaultFrom = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   try {
-    const response = await getArcUsageMetrics({ from: from || defaultFrom, to, provider, model });
-    return response.data || [];
+    const data: ArcUsageMetric[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const response = await getArcUsageMetrics({ from: from || defaultFrom, to, provider, model, cursor });
+      data.push(...(response.data || []));
+      cursor = response.meta?.next_cursor ?? undefined;
+      if (!cursor) break;
+    }
+    return data;
   } catch (error) {
     if (isArcNotEntitledError(error)) {
       throw new Error(

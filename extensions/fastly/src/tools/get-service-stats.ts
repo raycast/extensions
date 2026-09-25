@@ -13,7 +13,7 @@ type Input = {
  */
 export default async function ({ serviceId }: Input) {
   const details = await getServiceDetails(serviceId);
-  const stats = await getServiceStats(serviceId, details.type);
+  const stats = await getServiceStats(serviceId, details.type, { throwOnError: true });
 
   const hits = stats.hits || 0;
   const miss = stats.miss || 0;
