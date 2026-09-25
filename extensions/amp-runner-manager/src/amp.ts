@@ -17,6 +17,29 @@ export type Runner = {
   directories: RunnerDirectory[];
 };
 
+export function getServedDirectories(
+  runner: Runner,
+): (RunnerDirectory & { removable: boolean })[] {
+  const directories = runner.directories.map((directory) => ({
+    ...directory,
+    removable: !(runner.serveCwd && directory.path === runner.workingDirectory),
+  }));
+
+  if (
+    runner.serveCwd &&
+    !directories.some((directory) => directory.path === runner.workingDirectory)
+  ) {
+    directories.unshift({
+      path: runner.workingDirectory,
+      repositoryURL: null,
+      canCreateWorktree: false,
+      removable: false,
+    });
+  }
+
+  return directories;
+}
+
 export function expandHome(path: string): string {
   return path === "~" ? homedir() : path.replace(/^~\//, `${homedir()}/`);
 }

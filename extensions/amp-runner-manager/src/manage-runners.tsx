@@ -21,11 +21,10 @@ import {
   RunnerDirectory,
   addDirectory,
   displayPath,
+  getServedDirectories,
   listRunners,
   removeDirectory,
 } from "./amp";
-
-type Preferences = { ampPath?: string };
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unexpected error";
@@ -127,12 +126,14 @@ function RunnerActions({
   runners,
   ampPath,
   refresh,
+  canRemove = true,
 }: {
   runner: Runner;
   directory?: RunnerDirectory;
   runners: Runner[];
   ampPath: string;
   refresh: () => Promise<void>;
+  canRemove?: boolean;
 }) {
   async function remove() {
     if (!directory) return;
@@ -192,7 +193,7 @@ function RunnerActions({
             />
           }
         />
-        {directory ? (
+        {directory && canRemove ? (
           <Action
             title="Remove Served Folder"
             icon={Icon.Trash}
@@ -237,6 +238,8 @@ export default function Command() {
       setRunners(await listRunners(ampPath));
       setError("");
     } catch (failure) {
+      setRunners([]);
+      setSelectedRunnerId("");
       setError(errorMessage(failure));
     } finally {
       setLoading(false);
@@ -259,6 +262,9 @@ export default function Command() {
   const selectedRunner =
     runners.find((runner) => runner.runnerId === selectedRunnerId) ??
     runners[0];
+  const servedDirectories = selectedRunner
+    ? getServedDirectories(selectedRunner)
+    : [];
 
   return (
     <List
@@ -311,9 +317,9 @@ export default function Command() {
         <List.Section
           key={selectedRunner.runnerId}
           title={selectedRunner.runnerId}
-          subtitle={`${selectedRunner.directories.length} ${selectedRunner.directories.length === 1 ? "folder" : "folders"}`}
+          subtitle={`${servedDirectories.length} ${servedDirectories.length === 1 ? "folder" : "folders"}`}
         >
-          {selectedRunner.directories.length === 0 ? (
+          {servedDirectories.length === 0 ? (
             <List.Item
               title="No served folders"
               subtitle="Add a folder to make it available for new threads"
@@ -328,7 +334,7 @@ export default function Command() {
               }
             />
           ) : (
-            selectedRunner.directories.map((directory) => (
+            servedDirectories.map((directory) => (
               <List.Item
                 key={directory.path}
                 title={basename(directory.path) || directory.path}
@@ -351,6 +357,7 @@ export default function Command() {
                     runners={runners}
                     ampPath={ampPath}
                     refresh={refresh}
+                    canRemove={directory.removable}
                   />
                 }
               />
