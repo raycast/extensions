@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-25
 
 - Search more than 350,000 SVG icons across upstream icon sets.
 - Browse all 355,702 icons through 229 deduplicated upstream icon sets.
