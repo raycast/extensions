@@ -33,6 +33,17 @@ export default async function Command(): Promise<void> {
   }
 
   const changed = countChanged(selection, stripped);
-  await Clipboard.paste(stripped);
+
+  // The frontmost app can refuse a paste — a read-only field, a terminal in some modes. Without
+  // this the command dies with a generic extension failure and the user cannot tell whether their
+  // text was replaced or not.
+  try {
+    await Clipboard.paste(stripped);
+  } catch {
+    await Clipboard.copy(stripped);
+    await showHUD("Could not paste there — copied to the clipboard instead");
+    return;
+  }
+
   await showHUD(`Removed accents from ${changed} letter${changed === 1 ? "" : "s"}`);
 }

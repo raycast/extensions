@@ -38,6 +38,10 @@ function keywordsFor(letter: Letter, langs: Record<string, string>): string[] {
   // The shared search string carries the plain-English wordings ("two dots", "accent going up")
   // that the rest of Accent Letters is searchable by; keep them working here too.
   if (letter.t) for (const w of letter.t.split(/\s+/)) if (w.length > 1) words.add(w.toLowerCase());
+  // The dataset's search string carries the FRIENDLY description ("small a with acute accent"), not
+  // the Unicode name, so "latin" matched nothing even though the listing advertises full-name
+  // search. Index the real name too.
+  for (const w of letter.n.split(/[^A-Za-z0-9]+/)) if (w.length > 1) words.add(w.toLowerCase());
   return [...words];
 }
 
