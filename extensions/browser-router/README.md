@@ -42,7 +42,7 @@
     <li><a href="#how-it-works-architecture">How It Works (Architecture)</a>
       <ul>
         <li><a href="#1-escaping-the-windows-job-object-sandbox">Windows Job Object Detachment</a></li>
-        <li><a href="#2-chromium-dual-argument-directory-targeting">Dual-Argument Directory Targeting</a></li>
+        <li><a href="#2-tailored-profile-directory-targeting-architecture">Tailored Profile Directory Targeting</a></li>
         <li><a href="#3-registry--local-state-metadata-discovery">Registry & Local State Discovery</a></li>
         <li><a href="#4-zero-overhead-url--query-classification">Zero-Overhead Input Classification</a></li>
       </ul>
@@ -298,7 +298,7 @@ Search for **Browser Router** in the Raycast Store and click **Install Extension
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/raycast/extensions.git
-   cd extensions/extensions/browser-router
+   cd extensions/browser-router
    ```
 
 2. **Install dependencies:**
