@@ -118,8 +118,16 @@ test("add and complete use one argv value and local ID", async () => {
     "local-id",
   ]);
 });
-test("missing CLI gives installation guidance", () => {
-  assert.throws(() => findCli("/missing/ms-todo"), CliError);
+test("CLI discovery accepts an executable path and reports setup problems", () => {
+  const cli = fakeCli(JSON.stringify(ready));
+  assert.equal(findCli(cli.path), cli.path);
+  assert.throws(
+    () => findCli("/missing/ms-todo"),
+    { name: "CliError", message: /configured ms-todo CLI path/ },
+  );
+  assert.throws(() => findCli("relative/ms-todo"), CliError);
+  chmodSync(cli.path, 0o644);
+  assert.throws(() => findCli(cli.path), CliError);
 });
 test("nonzero JSON stderr exposes CLI message", async () => {
   const cli = fakeCli(

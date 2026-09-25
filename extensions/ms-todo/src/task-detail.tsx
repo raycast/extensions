@@ -24,7 +24,6 @@ import {
 import { EditTask } from "./edit-task";
 import { graphDate, literalMarkdown, notesMarkdown } from "./task-display";
 
-type Preferences = { cliPath?: string };
 type Props = { id: string; listName?: string; onChanged: () => void };
 
 export function TaskDetail({ id, listName, onChanged }: Props) {
@@ -41,29 +40,34 @@ export function TaskDetail({ id, listName, onChanged }: Props) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    void Promise.allSettled([showTask(id, cliPath), myDay(cliPath)])
-      .then(([detail, day]) => {
+    setInMyDay(undefined);
+    void showTask(id, cliPath)
+      .then((detail) => {
         if (cancelled) return;
-        if (detail.status === "rejected") {
-          setTask(undefined);
-          setError(
-            detail.reason instanceof Error
-              ? detail.reason.message
-              : String(detail.reason),
-          );
-          return;
-        }
-        setTask(detail.value);
-        setInMyDay(
-          day.status === "fulfilled" && day.value.sync.state !== "initial"
-            ? day.value.items.some((item) => item.id === id)
-            : undefined,
-        );
+        setTask(detail);
         setError(undefined);
+      })
+      .catch((cause: unknown) => {
+        if (cancelled) return;
+        setTask(undefined);
+        setError(cause instanceof Error ? cause.message : String(cause));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    void myDay(cliPath).then(
+      (day) => {
+        if (!cancelled)
+          setInMyDay(
+            day.sync.state === "initial"
+              ? undefined
+              : day.items.some((item) => item.id === id),
+          );
+      },
+      () => {
+        if (!cancelled) setInMyDay(undefined);
+      },
+    );
     return () => {
       cancelled = true;
     };

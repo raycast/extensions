@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ms-todo",
   "title": "Microsoft To Do via ms-todo",
   "description": "Browse, search, and manage Microsoft To Do tasks through your local ms-todo cache",
@@ -57,7 +58,7 @@
     "build": "ray build",
     "publish": "ray publish",
     "lint": "ray lint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "ray build && tsc --noEmit",
     "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {

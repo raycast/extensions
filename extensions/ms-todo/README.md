@@ -24,6 +24,8 @@ Capture and manage Microsoft To Do tasks from Raycast using the local [ms-todo](
 
 4. The extension looks for `ms-todo` in the standard Homebrew paths, `~/.local/bin`, and Raycast's `PATH`. If it cannot find the binary, set the absolute **ms-todo CLI Path** in extension preferences.
 
+If the CLI is missing or not executable, opening any command shows these setup steps and a **Retry CLI Detection** action.
+
 ## Commands
 
 - **Quick Add Task** uses [ms-todo quick add syntax](https://github.com/planetaryescape/ms-todo/blob/main/docs/usage.md#quick-add), such as `Buy milk tomorrow #Groceries`. With no list, the task goes to Tasks. An unknown explicit `#List` is rejected.

@@ -22,11 +22,11 @@ import {
   reopenTask,
 } from "./cli";
 import QuickAdd from "./quick-add";
+import { CliSetup } from "./cli-setup";
 import { TaskDetail } from "./task-detail";
 import { graphDate, plainNotes } from "./task-display";
 
 type Mode = "search" | "my-day" | "browse";
-type Preferences = { cliPath?: string };
 
 function browseQuery(selection: string): TaskListQuery {
   if (selection.startsWith("list:"))
@@ -58,7 +58,7 @@ function listTitle(list: TodoList, lists: TodoList[]): string {
   return duplicate ? `${name} · ${list.id.slice(0, 8)}` : name;
 }
 
-export function TaskList({ mode }: { mode: Mode }) {
+function LoadedTaskList({ mode }: { mode: Mode }) {
   const { cliPath } = getPreferenceValues<Preferences>();
   const [selection, setSelection] = useState("open");
   const [searchStatus, setSearchStatus] = useState("open");
@@ -91,7 +91,6 @@ export function TaskList({ mode }: { mode: Mode }) {
       })
       .catch((cause: unknown) => {
         if (!cancelled) {
-          setLists([]);
           setListError(cause instanceof Error ? cause.message : String(cause));
         }
       });
@@ -436,5 +435,13 @@ export function TaskList({ mode }: { mode: Mode }) {
           />
         )}
     </List>
+  );
+}
+
+export function TaskList({ mode }: { mode: Mode }) {
+  return (
+    <CliSetup>
+      <LoadedTaskList mode={mode} />
+    </CliSetup>
   );
 }

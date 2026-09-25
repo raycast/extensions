@@ -9,12 +9,11 @@ import {
 } from "@raycast/api";
 import { useRef, useState } from "react";
 import { addTask } from "./cli";
-
-type Preferences = { cliPath?: string };
+import { CliSetup } from "./cli-setup";
 
 type Props = { listId?: string; listName?: string; onAdded?: () => void };
 
-export default function QuickAdd({ listId, listName, onAdded }: Props = {}) {
+function QuickAddForm({ listId, listName, onAdded }: Props = {}) {
   const { cliPath } = getPreferenceValues<Preferences>();
   const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState("");
@@ -74,5 +73,13 @@ export default function QuickAdd({ listId, listName, onAdded }: Props = {}) {
         }
       />
     </Form>
+  );
+}
+
+export default function QuickAdd(props: Props = {}) {
+  return (
+    <CliSetup>
+      <QuickAddForm {...props} />
+    </CliSetup>
   );
 }
