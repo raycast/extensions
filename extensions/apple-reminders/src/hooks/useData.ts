@@ -26,6 +26,7 @@ export type Reminder = {
   list: { id: string; title: string; color: string } | null;
   location?: Location;
   creationDate?: Date;
+  earlyReminder?: number | null;
 };
 
 export type List = { id: string; title: string; color: string; isDefault: boolean };

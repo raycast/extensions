@@ -1,5 +1,13 @@
 # Apple Reminders Changelog
 
+## [Early Reminder Support] - {PR_MERGE_DATE}
+
+- Add "Early Reminder" support to trigger notifications ahead of scheduled due dates (e.g. 5m, 15m, 30m, 1h, 2h, 1d, 2d, 1w, 1mo before).
+- Add "Early Reminder" dropdown to the "Create Reminder" and "Edit Reminder" forms.
+- Support natural language early reminders in "Quick Add Reminder" (e.g. `haircut tomorrow 4pm remind me 30m before #Personal`).
+- Support early reminder parameters in AI tools.
+- Resolves: https://github.com/raycast/extensions/issues/15190
+
 ## [Create Calendar Event from Reminder] - 2026-09-25
 
 - Add "Create Calendar Event" action (`Cmd + Shift + E`) in "My Reminders" action panel to turn any reminder into an Apple Calendar event.

@@ -3,7 +3,7 @@ import { Icon } from "@raycast/api";
 import { useLocalStorage } from "./useLocalStorage";
 
 export type CreateReminderFieldId =
-  "title" | "notes" | "dueDate" | "recurrence" | "list" | "priority" | "tags" | "location";
+  "title" | "notes" | "dueDate" | "earlyReminder" | "recurrence" | "list" | "priority" | "tags" | "location";
 
 export type CreateReminderFieldDefinition = {
   id: CreateReminderFieldId;
@@ -48,6 +48,13 @@ export const createReminderFieldDefinitions: CreateReminderFieldDefinition[] = [
     title: "Date",
     description: "Set a due date with natural language (1h, in 10 minutes, tomorrow 3:45pm) or the calendar.",
     icon: Icon.Calendar,
+  },
+  {
+    id: "earlyReminder",
+    title: "Early Reminder",
+    description: "Trigger an alert ahead of the due date (e.g. 5 min, 15 min, 30 min, 1 hour, 1 day before).",
+    icon: Icon.Clock,
+    dependsOn: "dueDate",
   },
   {
     id: "recurrence",

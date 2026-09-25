@@ -18,6 +18,10 @@ type Input = {
    */
   dueDate?: string;
   /**
+   * Optional early reminder in seconds ahead of the due date (e.g. 300 for 5 min, 900 for 15 min, 1800 for 30 min, 3600 for 1 hour, 86400 for 1 day before).
+   */
+  earlyReminder?: number;
+  /**
    * Optional priority level. Only include this when the user explicitly asks for a priority or uses wording such as "urgent", "important", or an exclamation mark. Never default unspecified reminders to "low". Only pick the value from this list: "low", "medium", "high".
    */
   priority?: "low" | "medium" | "high";

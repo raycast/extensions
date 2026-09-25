@@ -24,6 +24,7 @@ struct Reminder: Codable {
   let list: ReminderList?
   let location: Location?
   let creationDate: Date?
+  let earlyReminder: Double?
 }
 
 struct ReminderList: Codable {
@@ -118,6 +119,7 @@ struct NewReminder: Decodable {
   let listId: String?
   let notes: String?
   let dueDate: String?
+  let earlyReminder: Double?
   let priority: String?
   let tags: [String]?
   let recurrence: Recurrence?
@@ -180,11 +182,17 @@ struct Recurrence: Decodable {
         from: dueDate
       )
       reminder.addAlarm(EKAlarm(absoluteDate: dueDate))
+      if let earlyReminder = newReminder.earlyReminder, earlyReminder > 0 {
+        reminder.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
+      }
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
       reminder.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day],
         from: dueDate
       )
+      if let earlyReminder = newReminder.earlyReminder, earlyReminder > 0 {
+        reminder.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
+      }
     }
   }
 
@@ -369,6 +377,7 @@ struct SetPriorityStatusPayload: Decodable {
 struct SetDueDatePayload: Decodable {
   let reminderId: String
   let dueDate: String?
+  let earlyReminder: Double?
 }
 
 @raycast func setDueDate(payload: SetDueDatePayload) throws {
@@ -377,6 +386,15 @@ struct SetDueDatePayload: Decodable {
   guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
     throw RemindersError.noReminderFound
   }
+
+  var existingEarlyReminder: Double? = nil
+  if let alarms = item.alarms {
+    for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
+      existingEarlyReminder = abs(alarm.relativeOffset)
+      break
+    }
+  }
+  let earlyOffset = payload.earlyReminder ?? existingEarlyReminder
 
   // Preserve location-based alarms when changing the due date.
   removeTimeBasedAlarms(from: item)
@@ -388,14 +406,49 @@ struct SetDueDatePayload: Decodable {
         from: dueDate
       )
       item.addAlarm(EKAlarm(absoluteDate: dueDate))
+      if let earlyOffset = earlyOffset, earlyOffset > 0 {
+        item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
+      }
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
       item.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day],
         from: dueDate
       )
+      if let earlyOffset = earlyOffset, earlyOffset > 0 {
+        item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
+      }
     }
   } else {
     item.dueDateComponents = nil
+  }
+
+  do {
+    try eventStore.save(item, commit: true)
+  } catch {
+    throw RemindersError.unableToSaveReminder
+  }
+}
+
+struct SetEarlyReminderPayload: Decodable {
+  let reminderId: String
+  let earlyReminder: Double?
+}
+
+@raycast func setEarlyReminder(payload: SetEarlyReminderPayload) throws {
+  let eventStore = EKEventStore()
+
+  guard let item = eventStore.calendarItem(withIdentifier: payload.reminderId) as? EKReminder else {
+    throw RemindersError.noReminderFound
+  }
+
+  if let alarms = item.alarms {
+    for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
+      item.removeAlarm(alarm)
+    }
+  }
+
+  if let earlyReminder = payload.earlyReminder, earlyReminder > 0, item.dueDateComponents != nil {
+    item.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
   }
 
   do {
@@ -502,6 +555,7 @@ struct UpdateReminderPayload: Decodable {
   let title: String?
   let notes: String?
   let dueDate: String?
+  let earlyReminder: Double?
   let priority: String?
   let tags: [String]?
   let isCompleted: Bool?
@@ -574,6 +628,15 @@ struct UpdateReminderPayload: Decodable {
   }
 
   if payload.dueDate != nil {
+    var existingEarlyReminder: Double? = nil
+    if let alarms = item.alarms {
+      for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
+        existingEarlyReminder = abs(alarm.relativeOffset)
+        break
+      }
+    }
+    let earlyOffset = payload.earlyReminder ?? existingEarlyReminder
+
     // Preserve location-based alarms when changing the due date.
     removeTimeBasedAlarms(from: item)
 
@@ -584,15 +647,30 @@ struct UpdateReminderPayload: Decodable {
           from: dueDate
         )
         item.addAlarm(EKAlarm(absoluteDate: dueDate))
+        if let earlyOffset = earlyOffset, earlyOffset > 0 {
+          item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
+        }
       } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
         item.dueDateComponents = Calendar.current.dateComponents(
           [.year, .month, .day],
           from: dueDate
         )
+        if let earlyOffset = earlyOffset, earlyOffset > 0 {
+          item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
+        }
       }
     } else {
       // If dueDate is an empty string, remove the due date
       item.dueDateComponents = nil
+    }
+  } else if let earlyReminder = payload.earlyReminder {
+    if let alarms = item.alarms {
+      for alarm in alarms where !alarm.isLocationAlarm && alarm.relativeOffset < 0 {
+        item.removeAlarm(alarm)
+      }
+    }
+    if earlyReminder > 0 && item.dueDateComponents != nil {
+      item.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
     }
   }
 

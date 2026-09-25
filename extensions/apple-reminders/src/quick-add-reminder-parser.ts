@@ -1,3 +1,4 @@
+import { extractEarlyReminderFromText } from "./helpers/early-reminder";
 import { extractTagsFromText, parseTags } from "./helpers";
 import type { Frequency } from "./hooks/useData";
 import { extractDueDateFromText, formatDueDate } from "./parse-due-date";
@@ -7,6 +8,7 @@ export type ParsedQuickAddReminder = {
   description?: string;
   listId?: string;
   dueDate?: string;
+  earlyReminder?: number;
   notes?: string;
   priority?: string;
   tags?: string[];
@@ -69,6 +71,7 @@ export function resolveQuickAddReminder(
   let { title } = reminder;
   let listId = reminder.listId || undefined;
   let dueDate = reminder.dueDate || undefined;
+  let earlyReminder = reminder.earlyReminder || undefined;
   const notes = reminder.notes || undefined;
   const priority = reminder.priority || undefined;
   const address = reminder.address || undefined;
@@ -93,11 +96,17 @@ export function resolveQuickAddReminder(
   }
 
   if (!dueDate) {
-    const extracted = extractDueDateFromText(inputText, now, dateFormatPreference);
+    const extracted = extractDueDateFromText(title, now, dateFormatPreference);
     if (extracted.dueDate) {
       dueDate = formatDueDate(extracted.dueDate);
       title = stripListMentions(extracted.title || title, mentionedList);
     }
+  }
+
+  const extractedEarly = extractEarlyReminderFromText(title);
+  if (extractedEarly.earlyReminderSeconds) {
+    earlyReminder = extractedEarly.earlyReminderSeconds;
+    title = extractedEarly.title;
   }
 
   const extractedTags = extractTagsFromText(title);
@@ -110,6 +119,7 @@ export function resolveQuickAddReminder(
     title: title.replace(/\s+/g, " ").trim() || reminder.title.trim(),
     listId,
     dueDate,
+    earlyReminder,
     notes,
     priority,
     address,

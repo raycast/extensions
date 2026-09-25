@@ -26,6 +26,10 @@ type Input = {
    */
   dueDate?: string;
   /**
+   * The new early reminder in seconds ahead of the due date (e.g. 300 for 5 min, 900 for 15 min, 1800 for 30 min, 3600 for 1 hour, 86400 for 1 day before). Pass 0 or null to remove early reminder.
+   */
+  earlyReminder?: number;
+  /**
    * The new priority of the reminder.
    */
   priority?: "high" | "medium" | "low";

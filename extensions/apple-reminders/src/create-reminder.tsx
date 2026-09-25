@@ -35,6 +35,7 @@ export type NewReminder = {
   listId?: string;
   notes?: string;
   dueDate?: string;
+  earlyReminder?: number;
   priority?: string;
   tags?: string[];
   recurrence?: {
@@ -48,10 +49,13 @@ export type NewReminder = {
   url?: string;
 };
 
+import { EARLY_REMINDER_OPTIONS } from "./helpers/early-reminder";
+
 type CreateReminderValues = {
   title: string;
   notes: string;
   dueDate: Date | null;
+  earlyReminder: string;
   priority: string;
   tags: string;
   listId: string;
@@ -130,6 +134,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         const parsedNlp = nlpParseRef.current;
         const isDateTime = parsedNlp ? parsedNlp.isDateTime : !Form.DatePicker.isFullDay(values.dueDate);
         payload.dueDate = isDateTime ? values.dueDate.toISOString() : format(values.dueDate, "yyyy-MM-dd");
+
+        if (values.earlyReminder) {
+          payload.earlyReminder = Number(values.earlyReminder);
+        }
       }
 
       if (values.isRecurring) {
@@ -198,6 +206,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("title", "");
       setValue("notes", "");
       setValue("tags", "");
+      setValue("earlyReminder", "");
       setValue("location", "");
       setValue("address", "");
       setValue("radius", "");
@@ -224,6 +233,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       title: draftValues?.title ?? "",
       notes: draftValues?.notes ?? "",
       dueDate: initialDueDate,
+      earlyReminder: draftValues?.earlyReminder ?? "",
       priority: draftValues?.priority,
       tags: draftValues?.tags ?? "",
       listId: initialListId,
@@ -371,6 +381,18 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
               itemProps.dueDate.onChange?.(value);
             }}
           />,
+        ];
+      case "earlyReminder":
+        if (!isFieldEnabled("dueDate") || !values.dueDate) {
+          return [];
+        }
+
+        return [
+          <Form.Dropdown key="earlyReminder" {...itemProps.earlyReminder} title="Early Reminder">
+            {EARLY_REMINDER_OPTIONS.map((option) => (
+              <Form.Dropdown.Item key={option.value} title={option.label} value={option.value} />
+            ))}
+          </Form.Dropdown>,
         ];
       case "recurrence":
         if (!isFieldEnabled("dueDate") || !values.dueDate) {

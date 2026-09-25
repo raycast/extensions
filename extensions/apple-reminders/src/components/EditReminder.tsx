@@ -6,9 +6,11 @@ import {
   moveToList,
   setPriorityStatus,
   setDueDate as setReminderDueDate,
+  setEarlyReminder as setReminderEarlyReminder,
 } from "swift:../../swift/AppleReminders";
 
 import { applyTagsToNotes, extractTagsFromNotes, formatTags, getPriorityIcon, parseReminderDueDate } from "../helpers";
+import { EARLY_REMINDER_OPTIONS, formatEarlyReminder } from "../helpers/early-reminder";
 import { List, Priority, Reminder, useData } from "../hooks/useData";
 
 type EditReminderProps = {
@@ -23,32 +25,49 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
 
   const initialNotesData = extractTagsFromNotes(reminder.notes);
   const initialDueDate = parseReminderDueDate(reminder.dueDate);
+  const initialEarlyReminder = reminder.earlyReminder ? String(Math.round(reminder.earlyReminder)) : "";
 
-  const { itemProps, handleSubmit } = useForm<{
+  const earlyReminderOptions: { label: string; value: string }[] = [...EARLY_REMINDER_OPTIONS];
+  if (
+    reminder.earlyReminder &&
+    !EARLY_REMINDER_OPTIONS.some((opt) => opt.value === String(Math.round(reminder.earlyReminder!)))
+  ) {
+    earlyReminderOptions.push({
+      label: formatEarlyReminder(reminder.earlyReminder),
+      value: String(Math.round(reminder.earlyReminder)),
+    });
+  }
+
+  const { itemProps, handleSubmit, values } = useForm<{
     title: string;
     dueDate: Date | null;
+    earlyReminder: string;
     notes: string;
     priority: string;
     tags: string;
     listId: string;
   }>({
-    async onSubmit(values) {
+    async onSubmit(formValues) {
       try {
-        const newNotes = applyTagsToNotes(values.notes, values.tags) ?? "";
-        const titleOrNotesChanged = values.title !== reminder.title || newNotes !== (reminder.notes ?? "");
-        const priorityChanged = values.priority !== (reminder.priority || "");
-        const listChanged = values.listId !== (reminder.list?.id || "");
+        const newNotes = applyTagsToNotes(formValues.notes, formValues.tags) ?? "";
+        const titleOrNotesChanged = formValues.title !== reminder.title || newNotes !== (reminder.notes ?? "");
+        const priorityChanged = formValues.priority !== (reminder.priority || "");
+        const listChanged = formValues.listId !== (reminder.list?.id || "");
 
         let newDueDate: string | null = null;
-        if (values.dueDate) {
-          newDueDate = Form.DatePicker.isFullDay(values.dueDate)
-            ? format(values.dueDate, "yyyy-MM-dd")
-            : values.dueDate.toISOString();
+        if (formValues.dueDate) {
+          newDueDate = Form.DatePicker.isFullDay(formValues.dueDate)
+            ? format(formValues.dueDate, "yyyy-MM-dd")
+            : formValues.dueDate.toISOString();
         }
         const dueDateChanged = newDueDate !== (reminder.dueDate ?? null);
 
+        const newEarlySeconds = formValues.earlyReminder ? Number(formValues.earlyReminder) : null;
+        const earlyReminderChanged =
+          newEarlySeconds !== (reminder.earlyReminder ? Math.round(reminder.earlyReminder) : null);
+
         if (titleOrNotesChanged) {
-          await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: newNotes }), {
+          await mutate(setTitleAndNotes({ reminderId: reminder.id, title: formValues.title, notes: newNotes }), {
             optimisticUpdate(data) {
               if (!data) return;
 
@@ -56,7 +75,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                 ...data,
                 reminders: data.reminders.map((r) => {
                   if (reminder.id === r.id) {
-                    return { ...r, title: values.title, notes: newNotes };
+                    return { ...r, title: formValues.title, notes: newNotes };
                   }
                   return r;
                 }),
@@ -65,25 +84,12 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
           });
         }
         if (dueDateChanged) {
-          await mutate(setReminderDueDate({ reminderId: reminder.id, dueDate: newDueDate }), {
-            optimisticUpdate(data) {
-              if (!data) return;
-
-              return {
-                ...data,
-                reminders: data.reminders.map((r) => {
-                  if (reminder.id === r.id) {
-                    return { ...r, dueDate: newDueDate };
-                  }
-                  return r;
-                }),
-              };
-            },
-          });
-        }
-        if (priorityChanged) {
           await mutate(
-            setPriorityStatus({ reminderId: reminder.id, priority: (values.priority || null) as Priority }),
+            setReminderDueDate({
+              reminderId: reminder.id,
+              dueDate: newDueDate,
+              earlyReminder: newEarlySeconds ?? 0,
+            }),
             {
               optimisticUpdate(data) {
                 if (!data) return;
@@ -92,7 +98,49 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                   ...data,
                   reminders: data.reminders.map((r) => {
                     if (reminder.id === r.id) {
-                      return { ...r, priority: (values.priority || null) as Priority };
+                      return { ...r, dueDate: newDueDate, earlyReminder: newEarlySeconds };
+                    }
+                    return r;
+                  }),
+                };
+              },
+            },
+          );
+        } else if (earlyReminderChanged) {
+          await mutate(
+            setReminderEarlyReminder({
+              reminderId: reminder.id,
+              earlyReminder: newEarlySeconds ?? 0,
+            }),
+            {
+              optimisticUpdate(data) {
+                if (!data) return;
+
+                return {
+                  ...data,
+                  reminders: data.reminders.map((r) => {
+                    if (reminder.id === r.id) {
+                      return { ...r, earlyReminder: newEarlySeconds };
+                    }
+                    return r;
+                  }),
+                };
+              },
+            },
+          );
+        }
+        if (priorityChanged) {
+          await mutate(
+            setPriorityStatus({ reminderId: reminder.id, priority: (formValues.priority || null) as Priority }),
+            {
+              optimisticUpdate(data) {
+                if (!data) return;
+
+                return {
+                  ...data,
+                  reminders: data.reminders.map((r) => {
+                    if (reminder.id === r.id) {
+                      return { ...r, priority: (formValues.priority || null) as Priority };
                     }
                     return r;
                   }),
@@ -102,7 +150,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
           );
         }
         if (listChanged) {
-          await mutate(moveToList({ reminderId: reminder.id, listId: values.listId }), {
+          await mutate(moveToList({ reminderId: reminder.id, listId: formValues.listId }), {
             optimisticUpdate(data) {
               if (!data) return;
 
@@ -112,7 +160,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                   if (reminder.id === r.id) {
                     return {
                       ...r,
-                      list: data.lists.find((l) => l.id === values.listId) || null,
+                      list: data.lists.find((l) => l.id === formValues.listId) || null,
                     };
                   }
                   return r;
@@ -134,6 +182,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
     initialValues: {
       title: reminder.title,
       dueDate: initialDueDate,
+      earlyReminder: initialEarlyReminder,
       notes: initialNotesData.notes,
       priority: reminder.priority || "",
       tags: formatTags(initialNotesData.tags),
@@ -154,6 +203,13 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="New Reminder" />
       <Form.DatePicker {...itemProps.dueDate} title="Due Date" type={Form.DatePicker.Type.DateTime} />
+      {values.dueDate && (
+        <Form.Dropdown {...itemProps.earlyReminder} title="Early Reminder">
+          {earlyReminderOptions.map((opt) => (
+            <Form.Dropdown.Item key={opt.value} title={opt.label} value={opt.value} />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
       <Form.Dropdown {...itemProps.priority} title="Priority">
         <Form.Dropdown.Item title="None" value="" />

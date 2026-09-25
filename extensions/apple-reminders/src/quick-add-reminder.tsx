@@ -241,6 +241,7 @@ function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewRemin
     title: parsed.title,
     listId: parsed.listId || undefined,
     dueDate: parsed.dueDate || undefined,
+    earlyReminder: parsed.earlyReminder || undefined,
     notes: notes || parsed.notes || undefined,
     priority: parsed.priority || undefined,
     tags: parsed.tags && parsed.tags.length > 0 ? parsed.tags : undefined,
