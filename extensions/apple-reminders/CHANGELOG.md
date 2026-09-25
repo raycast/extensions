@@ -1,5 +1,12 @@
 # Apple Reminders Changelog
 
+## [Create Calendar Event from Reminder] - 2026-09-25
+
+- Add "Create Calendar Event" action (`Cmd + Shift + E`) in "My Reminders" action panel to turn any reminder into an Apple Calendar event.
+- Support pre-filling event title, notes, location, start and end dates from reminder due date, and reminder deep-link URL.
+- Allow selecting target Apple Calendar and toggling all-day events.
+- Support viewing and editing reminder due date and time directly in the "Edit Reminder" form (`Cmd + E`).
+
 ## [Natural Language Recurrence in Create Reminder] - 2026-09-25
 
 - Support natural language recurrence patterns (e.g. `every day`, `every Friday 10am`, `every 2 weeks`, `weekdays`, `monthly`) in the Create Reminder free-text date field.
