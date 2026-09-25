@@ -19,7 +19,7 @@
 
 - Remove direct Homebrew, mas, and Terminal execution from the extension.
 - Revalidate identities, paths, versions, source evidence, and data freshness before handing off actions.
-- Keep missing, stale, unsupported, and inconsistent exports reviewable without authorizing updates.
+- Prevent update actions when export data is missing, stale, unsupported, or inconsistent.
 - Preserve current update visibility when only an older target version was skipped.
 
 ## [Show Vesslo Review Warnings] - 2026-07-14
