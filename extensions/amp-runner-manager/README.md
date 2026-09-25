@@ -1,6 +1,6 @@
 # Local Amp Runners
 
-Manage the folders served by local Amp runners without duplicating Amp's state.
+Manage the folders served by local Amp runners.
 
 ## Features
 
