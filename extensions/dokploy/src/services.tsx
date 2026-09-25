@@ -10,8 +10,8 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { useFetch, useForm, FormValidation } from "@raycast/utils";
-import { type Instance, useToken, tokenForInstance } from "./instances";
+import { useFetch, useForm, FormValidation, useFrecencySorting } from "@raycast/utils";
+import { type Instance, useToken, tokenForInstance, instanceId } from "./instances";
 import { Server, Service, ErrorResult, DatabaseKind, Project } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
@@ -92,6 +92,11 @@ export default function Services({
     ...scope.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
     ...scope.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
   ];
+
+  const { data: sortedServices, visitItem } = useFrecencySorting(services, {
+    namespace: instance ? instanceId(instance) : "shared",
+    key: (service) => `${service.type}-${service.id}`,
+  });
 
   async function deleteService({ id, name, type }: GroupedService) {
     const options: Alert.Options = {
@@ -203,7 +208,7 @@ export default function Services({
           }
         />
       ) : (
-        services.map((service) => (
+        sortedServices.map((service) => (
           <List.Item
             key={service.id}
             icon={SERVICE_ICONS[service.type]}
@@ -257,10 +262,18 @@ export default function Services({
                       icon={ACTION_ICONS[action]}
                       title={ACTION_LABELS[action]}
                       style={action === "stop" ? Action.Style.Destructive : undefined}
-                      onAction={() => runServiceAction(url, headers, service, action, refresh)}
+                      onAction={() => {
+                        void visitItem(service);
+                        void runServiceAction(url, headers, service, action, refresh);
+                      }}
                     />
                   ))}
-                  <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
+                  <Action.Push
+                    icon={Icon.Terminal}
+                    title="View Logs"
+                    target={<ServiceLogs service={service} />}
+                    onPush={() => visitItem(service)}
+                  />
                   {(service.type === "application" || service.type === "compose") && (
                     <Action.Push
                       icon={Icon.List}
