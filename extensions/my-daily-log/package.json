@@ -70,27 +70,27 @@
           "default": "60",
           "data": [
             {
-              "title": "30 minutes",
+              "title": "30 Minutes",
               "value": "30"
             },
             {
-              "title": "1 hour",
+              "title": "1 Hour",
               "value": "60"
             },
             {
-              "title": "90 minutes",
+              "title": "90 Minutes",
               "value": "90"
             },
             {
-              "title": "2 hours",
+              "title": "2 Hours",
               "value": "120"
             },
             {
-              "title": "3 hours",
+              "title": "3 Hours",
               "value": "180"
             },
             {
-              "title": "4 hours",
+              "title": "4 Hours",
               "value": "240"
             }
           ]
