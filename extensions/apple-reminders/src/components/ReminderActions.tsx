@@ -308,13 +308,6 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
           shortcut={Keyboard.Shortcut.Common.Edit}
         />
 
-        <Action.Push
-          icon={Icon.Calendar}
-          title="Create Calendar Event"
-          target={<CreateCalendarEvent reminder={reminder} />}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-        />
-
         <ActionPanel.Submenu
           title="Set Priority"
           icon={Icon.Exclamationmark}
@@ -468,6 +461,15 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
           title="Copy Reminder URL"
           content={reminder.openUrl}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.Push
+          icon={Icon.Calendar}
+          title="Create Calendar Event"
+          target={<CreateCalendarEvent reminder={reminder} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
         />
       </ActionPanel.Section>
 

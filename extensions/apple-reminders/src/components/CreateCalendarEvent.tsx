@@ -45,8 +45,16 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
         if (!val) {
           return "End date is required";
         }
-        if (values.startDate && val < values.startDate) {
-          return "End date must be after start date";
+        if (values.startDate) {
+          if (values.isAllDay) {
+            if (val < values.startDate) {
+              return "End date cannot be earlier than start date";
+            }
+          } else {
+            if (val <= values.startDate) {
+              return "End date must be after start date";
+            }
+          }
         }
       },
     },
@@ -118,8 +126,14 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
         label="All-Day Event"
         onChange={(checked) => {
           setValue("isAllDay", checked);
-          if (checked && values.startDate) {
-            setValue("endDate", values.startDate);
+          if (checked) {
+            if (values.startDate) {
+              setValue("endDate", values.startDate);
+            }
+          } else {
+            if (values.startDate) {
+              setValue("endDate", new Date(values.startDate.getTime() + 30 * 60 * 1000));
+            }
           }
         }}
       />
@@ -128,6 +142,16 @@ export default function CreateCalendarEvent({ reminder }: CreateCalendarEventPro
         {...itemProps.startDate}
         title="Start Date"
         type={values.isAllDay ? Form.DatePicker.Type.Date : Form.DatePicker.Type.DateTime}
+        onChange={(newDate) => {
+          setValue("startDate", newDate);
+          if (newDate) {
+            if (values.isAllDay) {
+              setValue("endDate", newDate);
+            } else if (values.endDate && values.endDate <= newDate) {
+              setValue("endDate", new Date(newDate.getTime() + 30 * 60 * 1000));
+            }
+          }
+        }}
       />
 
       <Form.DatePicker
