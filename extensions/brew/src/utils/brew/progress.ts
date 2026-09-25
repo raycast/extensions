@@ -146,6 +146,8 @@ export interface ExecBrewWithProgressOptions {
   packageName?: string;
   /** Enable detailed phase logging */
   verboseLogging?: boolean;
+  /** Extra environment for this invocation only, layered over `execBrewEnv()`. */
+  env?: NodeJS.ProcessEnv;
 }
 
 /**
@@ -163,7 +165,16 @@ export async function execBrewWithProgress(
   cancel?: AbortSignal,
   options?: Omit<ExecBrewWithProgressOptions, "onProgress" | "cancel">,
 ): Promise<ExecResult> {
-  const env = await execBrewEnv();
+  const env = { ...(await execBrewEnv()), ...options?.env };
+  // A cancel that lands during the await above has ALREADY fired by the time
+  // the listener below is attached, so it would never run and brew would start
+  // anyway — the user pressed Cancel and the change happened regardless. Check
+  // before spawning, not only after.
+  if (cancel?.aborted) {
+    const error = new Error("Canceled");
+    error.name = "AbortError";
+    throw error;
+  }
   const args = cmd.split(/\s+/).filter(Boolean);
   const staleTimeoutMs = options?.staleTimeoutMs ?? DEFAULT_STALE_TIMEOUT_MS;
   const packageName = options?.packageName;
@@ -241,7 +252,7 @@ export async function execBrewWithProgress(
         isRejected = true;
         cleanup();
         proc.kill("SIGTERM");
-        const error = new Error("Cancelled");
+        const error = new Error("Canceled");
         error.name = "AbortError";
         reject(error);
       });

@@ -3,7 +3,7 @@
  *
  * Fixtures are copied verbatim from the real `cask.json` / `formula.json` the
  * extension downloads (captured 2026-09-14), because the shapes are the whole
- * problem: `depends_on.macos` is `{}` for half the catalogue, `maximum_macos`
+ * problem: `depends_on.macos` is `{}` for half the catalog, `maximum_macos`
  * is a sibling key rather than an operator, a cask's Linux requirement is a
  * Ruby inspect string, and a formula's requirement carries a `contexts` array
  * whose `"test"` and `"build"` entries both mean the requirement does not
@@ -88,7 +88,7 @@ describe("installabilityOf — casks", () => {
     expect(installabilityOf(capped, { macos: "13.6", arch: "arm64" }).installable).toBe(true);
   });
 
-  it("honours an explicit == list", () => {
+  it("honors an explicit == list", () => {
     // Real: calhash, macos {"==":["11","12","13","14","15","26"]}.
     const listed = cask({
       token: "calhash",

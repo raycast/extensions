@@ -171,8 +171,8 @@ restated as a per-package verdict.
   `src/components/packageMetadata.tsx`, rendered by one parameterised renderer
   for both Raycast namespaces. Adding a row means editing one place; the two
   views were once written out separately and drifted three times.
-- **The semantic colour and icon vocabulary lives in `src/components/palette.ts`**
-  with the colour meanings documented (green up to date, blue in progress or
+- **The semantic color and icon vocabulary lives in `src/components/palette.ts`**
+  with the color meanings documented (green up to date, blue in progress or
   informational, red failed, orange needs attention including update available,
   yellow LOW severity only, secondary skipped or not installed). It owns
   the whole table, not just install state: `STATUS_COLOR` names those meanings,
@@ -206,18 +206,22 @@ restated as a per-package verdict.
   helpers carry no toast id, so hiding "ours" can dismiss someone else's. Settle
   an animated toast by _replacing_ it with `showToast`, not by mutating it. See
   the comment above `settle` in `src/utils/toast.ts`.
+- **`execBrewWithProgress` checks `cancel.aborted` before it spawns.** Its
+  abort listener is attached after an `await`, and an abort that fired during
+  that await is already spent — so brew started although the user had pressed
+  Cancel. Any runner that awaits before wiring its listener has the same hole.
 - **The single-package `brew info` fetchers swallow every error** and return
   `undefined` — a genuine not-found and a failed read are indistinguishable. Do
   not report `undefined` as "Homebrew no longer has this package".
 - **`brewSearch` slices before loading chunks.** That ordering is the memory
-  optimisation the whole chunked cache exists for; do not load first and slice
+  optimization the whole chunked cache exists for; do not load first and slice
   after.
 
 ## Homebrew 7 features
 
 Three surfaces need Homebrew 7, gated two different ways. **Show
-Vulnerabilities** and **Run Doctor** (entry points `src/show-vulnerabilities`
-and `src/run-doctor`) render a `RequiresHomebrew` view instead of the command.
+Vulnerabilities** and **Run Doctor** (entry points `src/show-vulnerabilities.tsx`
+and `src/run-doctor.tsx`) render a `RequiresHomebrew` view instead of the command.
 Cask link/unlink (`src/components/actionPanels.tsx`) is simply omitted from the
 action panel below Homebrew 7 — there is no explanatory view, because a missing
 action in a panel full of working ones is not worth one. Nothing else is
@@ -236,7 +240,14 @@ askpass, and prepends the configured brew `bin` to `PATH` so a bare `brew` in a
 remediation resolves off `customBrewPath` rather than whatever was inherited. It
 appends the command list to the alert body itself, so **callers pass prose
 only** — never re-list the commands in `message`. `toastTitle` exists because
-the alert title can be a full sentence and a toast cannot.
+the alert title can be a full sentence and a toast cannot; `labels` replaces the
+raw command in the toasts for a routine action, where the command is noise.
+
+It **logs every run** — confirmed or declined, each command, and the outcome,
+with stderr on failure — because it is the one place arbitrary shell strings
+run, `sudo` included, and for a long time nothing recorded that one had. The
+test logger mock records calls (`__logs`) so that stays asserted rather than
+assumed.
 
 Exit status 1 with a populated stdout is the **normal** case for both
 `brew doctor --json` and `brew vulns`: any finding sets `Homebrew.failed`
@@ -246,7 +257,7 @@ before the JSON is written. `brewDoctor`/`brewVulns` in
 The install preview (`brewInstallDryRun`) sets `HOMEBREW_NO_AUTO_UPDATE=1` so a
 read-only preview never triggers the first `brew update` of the day, and
 `HOMEBREW_NO_ENV_HINTS=1` because brew otherwise prints a two-line hint on
-STDOUT *inside* the dependents block, which the line parser reads as fourteen
+STDOUT _inside_ the dependents block, which the line parser reads as fourteen
 extra packages.
 
 Installability (`src/utils/brew/installability.ts`) is **never marked on a
@@ -255,9 +266,112 @@ as installable, since a false ⊘ hides a package the user could have had. Only
 the `test` context is ignored. `disabled`, OS-family, macOS-version and arch
 constraints all mark "Can't Install".
 
-The chunked cache has **one** version rule: changing `valid_keys` in
+## Adopt Apps
+
+Matching an installed app to a cask by its bundle NAME alone is unreliable:
+plenty of unrelated apps share a name with a cask (Iris, Crunch, Atlas and
+Pencil each name-match a cask for entirely different software). So
+`src/utils/brew/adopt.ts` never lists a candidate on a name match
+alone, and the list is sectioned by **who vouches for the match**, not by a
+confidence score:
+
+- **Ready to Adopt** — the cask publishes a `quit:` bundle id that matches, OR
+  the cask is not `auto_updates`, so Homebrew runs its own comparison during
+  adoption (`cask/artifact/moved.rb:95-125`) and refuses a mismatch.
+- **Likely Adoptable** — an `auto_updates` cask with no matching id, at the
+  SAME version as the installed app. Nothing checks, so adoption goes through
+  the preview.
+- **Unlikely Adoptions** — everything else, preview only.
+
+The order in `adoptClassification` is load-bearing, and three real cases fix it:
+
+- **A bundle id drops a candidate only alongside a version that also
+  disagrees.** Kaleidoscope 7.0.1 still identifies as `app.kaleidoscope.v4`
+  while its cask says `v7`; a hard id gate rejects a correct match. 78% of
+  app-bearing casks publish no id at all.
+- **For an `auto_updates` cask, a confirmed id beats a version gap.** The app
+  running ahead of the cask is the normal state there (it updated itself), and
+  Homebrew skips its comparison anyway. Checking the gap first would file
+  Fantastical 4.2.1, against a 4.2 cask with a matching id, under Unlikely.
+- **An unorderable version never promotes a candidate that nothing checks.**
+  It is missing evidence, not agreement. Otherwise Atlas, an unrelated app,
+  moves from Unlikely to Likely the moment its version is the unparseable
+  `1.6.13b`. The
+  cost is that Antinote and Keka, genuine matches that publish no readable
+  version, sit in Unlikely with it — nothing distinguishes them from Atlas.
+
+Two things that are easy to get wrong and are covered by tests:
+
+- **Index the rename destination, never the source.** `app "Thorium.app",
+target: "Thorium Browser.app"` publishes both names; Homebrew installs — and
+  therefore adopts — at the target. 60 casks rename this way.
+- **Skip an app whose bundle name ANY installed cask places**, not merely one
+  whose token is installed. Otherwise a managed app returns as a candidate for
+  its own `@beta` sibling.
+- **Only the app directly inside brew's effective `appdir` is adoptable.**
+  `brew install --adopt` targets `<appdir>/<Name>.app` and nothing else, and the
+  extension runs brew with Raycast's environment, so that is `--appdir` from
+  Raycast's `HOMEBREW_CASK_OPTS`, or `/Applications` when unset
+  (`caskAppdir`). Accepting `~/Applications` as well would let a row show one
+  file while brew installs beside it or adopts a different one. `caskAppdir`
+  reproduces Homebrew's parse exactly — Ruby `Shellwords.shellsplit`, only
+  `=`-form words, the LAST `appdir` wins — because every divergence is a way
+  to scan one directory while brew uses another. `shellSplit` is checked
+  against Ruby's own output; note that JavaScript rejects an optional group
+  that only matches the empty string, so Ruby's trailing `(\s|\z)?` cannot be
+  ported literally (a literal port drops every final word). The same check
+  keeps out system apps: `getApplications()` is LaunchServices-backed, macOS
+  ships `Recents.app` inside `Finder.app`, it name-matches a cask, and `recents`
+  is not `auto_updates` — so without it the list offered an SIP-protected Apple
+  binary labeled verified.
+- **Check the app still exists AFTER the confirmation, immediately before
+  brew runs** (`confirmAndRun`'s `beforeRun`). The list paints from cache and
+  the dialog stays open as long as the user leaves it; `--adopt` with nothing
+  at the target silently becomes a fresh install.
+- **Ignore state lives in the cached scan, written with `mutate`.** A
+  component-local overlay was gone on the next launch, which painted the cache
+  before rescanning — so a just-ignored app came back with its direct Adopt
+  action. The scan reads the ignore list LAST and applies it to its result,
+  because a scan in flight lands on top of the optimistic write; read at the
+  start, it restored the old state. A window the width of the ignore's own
+  LocalStorage write remains and is accepted. Every route to adoption is also checked against ignored state: the
+  row panel AND the pushed preview, which is pushed from ignored rows too.
+- **Whether sudo prompted is known from a per-run marker.** `assets/askpass.sh`
+  touches `$BREW_ASKPASS_MARKER` when it runs; each adoption passes a fresh
+  random path to its own brew process only (`execBrewWithProgress`'s `env`
+  option) and removes it after. A single global path, exported to every brew
+  call, let another command's password prompt fake a success HUD.
+- **An ignored app is marked, never dropped.** Ignoring is one keystroke, so the
+  scan keeps it and the Ignored filter offers it back.
+
+`brew install --cask --adopt --dry-run` is **not** a preview: it prints
+`Would install 1 cask` and nothing else, because it never downloads and so never
+reaches the comparison. The preview is assembled from the scan's own evidence.
+
+Not gated on Homebrew 7 — `--adopt` landed 2023-04-19 (`b2156dc125`).
+
+The chunked cache has **two** version rules. Changing `valid_keys` in
 `src/utils/cache.ts` means bumping `CHUNKED_CACHE_VERSION` in the same edit,
 because a stripped field that a reader expects is indistinguishable from a
 missing one. A bump forces every user to re-download the full index, and an
 offline user retries it on every launch until they are back online — so bump
-deliberately, not defensively.
+deliberately, not defensively. Changing what the build WRITES is the same
+hazard: the cask build also emits `adopt-index.json` beside the chunks, and a
+directory from before that existed is indistinguishable from a catalog with
+nothing adoptable in it.
+
+**Recovery must never delete the cache it is recovering.** `rebuildCaskIndex`
+forces a rebuild through the same `buildInProgress` mutex as every other cask
+build and removes nothing: the build writes into `cask.partial` and only swaps
+on success, so a failed rebuild (offline, say) leaves Search its stale fallback.
+Deleting the live directory first would make a failed recovery of an
+Adopt-only file take Search's casks down with it, and skipping the mutex would
+race a background refresh over the shared `.partial`.
+
+**A sidecar must never be able to fail the build.** `writeSidecar` runs inside a
+try/catch and its failure is logged, not thrown. It serves one command while the
+chunks serve every command, and after a version bump there is no valid stale
+cache to fall back on — so letting it reject would leave Search unable to load
+casks at all over a file only Adopt reads. Equally, `loadAdoptIndex` throws
+rather than returning an empty index: an empty list is the claim "nothing on
+this Mac is adoptable", which is false when the file is merely missing.

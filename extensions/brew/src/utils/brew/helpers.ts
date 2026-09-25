@@ -142,7 +142,7 @@ export function brewAvailableVersion(item: Cask | Formula): string | undefined {
  * The version line: what is INSTALLED, plus what is available when they differ.
  *
  * Never leads with `versions.stable` on an installed package — that is the
- * version on offer, not the one present, and labelling it "installed" claimed a
+ * version on offer, not the one present, and labeling it "installed" claimed a
  * version the user did not have.
  *
  * Lives here rather than in the component that renders it: it is pure string
@@ -455,6 +455,28 @@ export function brewCompare(lhs: string, rhs: string, target: string): number {
 export function brewInstallCommand(installable: Cask | Formula | Nameable): string {
   const identifier = brewIdentifier(installable);
   return `${brewExecutable()} install ${brewCaskOption(installable)} ${identifier}`.replace(/ +/g, " ");
+}
+
+/**
+ * `brew install --adopt --cask <token>` for a cask known only by its token.
+ *
+ * The Adopt scan carries tokens, not whole `Cask` records — it loads a record
+ * to compare versions and lets it go — and casting a bare `{ token }` to `Cask`
+ * to reach `brewAdoptCommand` would be a lie the type system happens to allow.
+ * Adoption is cask-only (`--adopt` does nothing for a formula), so the `--cask`
+ * flag is unconditional here.
+ */
+export function brewAdoptCaskCommand(token: string): string {
+  return `${brewExecutable()} ${brewAdoptCaskArgs(token)}`;
+}
+
+/**
+ * The same command as arguments to `brew`, for the streaming runner, which
+ * spawns the executable itself. One source for both, so the confirmation lists
+ * exactly what runs.
+ */
+export function brewAdoptCaskArgs(token: string): string {
+  return `install --adopt --cask ${token}`;
 }
 
 /**

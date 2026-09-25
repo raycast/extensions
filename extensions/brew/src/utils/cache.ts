@@ -22,7 +22,14 @@ import { parser } from "stream-json";
 import { filter } from "stream-json/filters/filter.js";
 import { streamArray } from "stream-json/streamers/stream-array.js";
 import { pipeline as streamPipeline } from "stream/promises";
-import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
+import {
+  DownloadProgressCallback,
+  ChunkedCacheConfig,
+  ChunkedCacheMeta,
+  CacheIndex,
+  IndexEntry,
+  ChunkedBuildHooks,
+} from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
 import { analyticsCacheFiles } from "./brew/analyticsParse";
 import { NetworkError, ParseError, ensureError } from "./errors";
@@ -370,7 +377,10 @@ const CHUNK_SIZE = 500;
 // 4: `artifacts` reduced to the derived `has_symlink_artifacts` instead of
 // being dropped outright, so the Symlinks section is gated precisely again. A
 // v3 cask chunk has neither field and would leave every cask reading "unknown".
-export const CHUNKED_CACHE_VERSION = 4;
+// 5: the cask build writes `adopt-index.json` beside the chunks. A v4 directory
+// does not have it, and Adopt cannot tell that from a catalog with nothing
+// adoptable in it.
+export const CHUNKED_CACHE_VERSION = 5;
 
 /**
  * Get configuration for chunked cache paths.
@@ -456,13 +466,9 @@ export async function buildChunkedCache<T>(
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
-  /**
-   * Shrink each record before it is written to a chunk. Runs on the freshly
-   * parsed object, which nothing else holds, so it may mutate in place; see
-   * `compactCaskArtifacts`. Omitted for formulae, which store what they parse.
-   */
-  compact?: (item: T) => T,
+  hooks: ChunkedBuildHooks<T> = {},
 ): Promise<void> {
+  const { onRecord, compact, writeSidecar } = hooks;
   // Check for abort before starting
   if (signal?.aborted) {
     const error = new Error("Aborted");
@@ -530,9 +536,13 @@ export async function buildChunkedCache<T>(
 
     pipeline.on("data", (data) => {
       if (data && typeof data === "object" && "value" in data) {
+        const raw = data.value as T;
+        // BEFORE compact, which deletes fields — this is the only point in the
+        // build where the record is still whole.
+        onRecord?.(raw);
         // Compact BEFORE indexing, so the index is extracted from the record
         // that will actually be on disk rather than from a fuller one.
-        const item = compact ? compact(data.value as T) : (data.value as T);
+        const item = compact ? compact(raw) : raw;
         const indexInChunk = currentChunk.length;
 
         // Build index entry
@@ -596,7 +606,23 @@ export async function buildChunkedCache<T>(
         };
         await writeFile(path.join(partialDir, "meta.json"), JSON.stringify(meta));
 
-        // Atomically swap partial -> baseDir. Doing this last means a failed
+        // A sidecar serves ONE feature; the chunks and index serve every
+        // command. So its failure is logged and swallowed: letting it reject
+        // here would fail the whole build, and after a cache-version bump
+        // there is no valid stale cache to fall back to — which would leave
+        // Search unable to load anything over a file only Adopt reads.
+        if (writeSidecar) {
+          try {
+            await writeSidecar(partialDir);
+          } catch (err) {
+            cacheLogger.warn("Failed to write cache sidecar", {
+              type: config.type,
+              error: ensureError(err).message,
+            });
+          }
+        }
+
+        // Swap partial -> baseDir. Doing this last means a failed
         // build leaves any prior cache intact for the fall-back path to use.
         await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
         await rename(partialDir, config.baseDir);

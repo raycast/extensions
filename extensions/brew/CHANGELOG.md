@@ -1,5 +1,14 @@
 # Brew Changelog
 
+## [Adopt Apps] - {PR_MERGE_DATE}
+
+- New **Adopt Apps** command: finds apps already on your Mac that Homebrew has a cask for, and hands them to Homebrew so they upgrade with everything else
+- Matches are grouped by what vouches for them — **Ready to Adopt**, **Likely Adoptable**, **Unlikely Adoptions** — and anything not ready goes through **Preview Adoption** (⌘⇧I) first
+- Adoption shows Homebrew's progress as it runs, and warns before it will ask for your administrator password
+- Ignore a wrong match with ⌘⇧H; the filter above the list shows ignored apps and puts them back
+- Never offers Mac App Store or macOS system apps, and refuses an adoption that could delete your only copy of an app
+- Fixed: packages from third-party taps no longer show three "Unavailable" install-count rows
+
 ## [Fix Services menu bar background refresh] - 2026-09-24
 
 - Services Menu Bar no longer fails with "Toast API is not available when command is launched in background" when a background refresh can't fetch services; the error is shown in the menu instead (click it to retry)
@@ -43,9 +52,9 @@
 
 - **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
 - A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
-- A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
+- A pin is a lock, matching brew's own behavior: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
 - Refreshing mid-review (⌘R) keeps the selections you have already made; a formula pinned outside the extension is deselected on refresh — the lock always wins
-- Casks are selectable exactly like formulae. Cask *pinning* (the lock semantics) ships in a follow-up
+- Casks are selectable exactly like formulae. Cask _pinning_ (the lock semantics) ships in a follow-up
 - Running the upgrade cancels the review's in-flight background `brew update` (and waits for it to release Homebrew's update lock) instead of asking the user to try again in a moment
 - Reopening either upgrade command after a run no longer flashes the pre-run list: a snapshot the run made stale is withheld until fresh data lands
 - A failed check-for-upgrades now shows a failure screen with a Retry action instead of a blank list (Show Upgrades) or a stuck checking placeholder (Upgrade); with cached packages still on screen the failure arrives as a toast instead, and with nothing outdated the empty screen offers a route to Show Installed
@@ -67,7 +76,7 @@
 - Upgrading a pinned formula now says so instead of failing. `brew upgrade` refuses a pinned package outright, so the action surfaced its error; it now skips with an explanation, matching Upgrade All which already skipped them.
 - An available update is now marked the same way everywhere — a yellow up-arrow, replacing a red check in Search that clashed with the red used for a failed upgrade, and a grey check in Show Outdated that was the "upgraded" glyph greyed out.
 - The Details view and the search sidebar now show the same metadata, built from one definition. They had drifted: statistics, the deprecation warning and the corrected version line each landed in one and not the other.
-- The version row leads with the version you actually have, showing `installed → available` when they differ. It previously showed the available version labelled "installed", so an outdated package read as current.
+- The version row leads with the version you actually have, showing `installed → available` when they differ. It previously showed the available version labeled "installed", so an outdated package read as current.
 - Cached downloads are now written atomically, so an interrupted one can no longer leave a partial file that later fails to load. This covers the package index every command depends on, not just the new statistics. Clear Cache removes leftover temporary files too.
 - Updated to `@raycast/api` 2.x, and to a `brace-expansion` release without the denial-of-service advisory (GHSA-rgw5-rvv9-x895).
 
@@ -86,14 +95,14 @@
 
 ## [Pin visibility, outdated tags, detail pane] - 2026-08-04
 
-- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae
+- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabeled among the other formulae
 - Installed packages with an available update now carry an `Outdated` tag — formulae and casks both. The list component is shared, so the tag also appears for installed-and-outdated packages in Search results
 - Show Installed: ⌘⇧D toggles a metadata detail pane for the selected package
 - A list of nothing but pinned formulae no longer reports itself as empty
 
 ## [Bug fix] - 2026-08-03
 
-- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialise to `{}`, so the cached value was emptied on write and then re-served empty forever. The serialisable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
+- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialize to `{}`, so the cached value was emptied on write and then re-served empty forever. The serializable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
 - Fixed Search intermittently failing to mark packages as installed, which had the same cause.
 
 ## [Bug fix] - 2026-07-10

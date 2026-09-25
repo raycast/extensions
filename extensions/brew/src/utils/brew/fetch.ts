@@ -38,6 +38,8 @@ import { execBrew, execBrewJson } from "./commands";
 import { parseBrewVulns, VulnResults } from "./vulns";
 import { invalidateBrewMajorVersion } from "./brew-version";
 import { compactCaskArtifacts } from "./link";
+import { ADOPT_INDEX_FILE, adoptIndexEntry, type AdoptIndex } from "./adopt";
+import { AdoptIndexUnavailableError } from "../errors";
 import { brewLogger, cacheLogger } from "../logger";
 
 /// Cache Paths
@@ -61,7 +63,20 @@ const caskRemote: ChunkedRemote<Cask> = {
   url: caskURL,
   cachePath: caskCachePath,
   chunkedConfig: getChunkedCacheConfig("cask"),
-  compact: compactCaskArtifacts,
+  buildHooks: () => {
+    // Accumulated per build, never shared: a module-level map would keep a
+    // previous catalog's tokens after one is removed upstream.
+    const adopt: AdoptIndex = {};
+    return {
+      // Runs on the whole record, before `compact` deletes `artifacts`.
+      onRecord: (cask) => {
+        const entry = adoptIndexEntry(cask);
+        if (entry) adopt[cask.token] = entry;
+      },
+      compact: compactCaskArtifacts,
+      writeSidecar: (partialDir) => fs.writeFile(path.join(partialDir, ADOPT_INDEX_FILE), JSON.stringify(adopt)),
+    };
+  },
 };
 
 /** Extract index entry from a Formula */
@@ -125,7 +140,7 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortSignal
 }
 
 /**
- * Fetch all installed packages with full metadata, in their serialisable form.
+ * Fetch all installed packages with full metadata, in their serializable form.
  *
  * Prefer this over {@link brewFetchInstalled} when the result is persisted:
  * `InstalledMap` holds `Map`s, and `JSON.stringify(new Map())` is `{}`, so a
@@ -258,7 +273,7 @@ export async function brewFetchInstallableResults(
  *
  * Values read back out of a cache are not guaranteed to be what was written:
  * an entry persisted by an earlier version of the extension holds the mapped
- * form, whose `Map`s serialised to `{}`. Such an entry must be rejected rather
+ * form, whose `Map`s serialized to `{}`. Such an entry must be rejected rather
  * than rendered as an empty package list.
  */
 export function asInstallableResults(value: unknown): InstallableResults | undefined {
@@ -391,7 +406,7 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
  * unparseable JSON — a caller that names deletion would be guessing.
  *
  * Cancellation IS separated out and re-thrown, because that one is knowable:
- * without it, a user who cancelled mid-`brew info` got the same undefined and
+ * without it, a user who canceled mid-`brew info` got the same undefined and
  * an error toast for an operation they themselves stopped.
  */
 export async function brewCheckForUpdate(
@@ -482,6 +497,102 @@ export function invalidateChunkedCacheMemory(): void {
   formulaRemote.indexFetch = undefined;
   caskRemote.index = undefined;
   caskRemote.indexFetch = undefined;
+}
+
+/**
+ * Force the cask chunked cache to be rebuilt, sidecar included.
+ *
+ * The recovery path for a missing or damaged `adopt-index.json`. A plain
+ * revalidate cannot fix it: the chunk cache is still valid and current by its
+ * own test, so nothing would rebuild, and the sidecar would stay missing until
+ * the catalog next changed upstream.
+ *
+ * It deliberately deletes NOTHING. The build writes into `cask.partial` and only
+ * swaps on success, so leaving the live directory in place keeps it as the
+ * stale fallback if this rebuild fails — offline, say. Removing it first
+ * would mean a failed recovery for an Adopt-only file left Search with no
+ * casks at all.
+ *
+ * It also goes through `buildInProgress`, the same mutex every other cask
+ * build takes, so it cannot race a background refresh over the shared
+ * `cask.partial` directory. If a build is already running, that build writes
+ * the sidecar too, so waiting for it is the whole job.
+ */
+export async function rebuildCaskIndex(onProgress?: DownloadProgressCallback, signal?: AbortSignal): Promise<void> {
+  const state = caskIndexState;
+  if (state.buildInProgress) {
+    await state.buildInProgress;
+    return;
+  }
+  state.buildInProgress = ensureChunkedCache(state.remote, state.extractIndex, onProgress, signal, { force: true });
+  try {
+    await state.buildInProgress;
+  } finally {
+    state.buildInProgress = null;
+  }
+  // Only after success: Search re-reads the fresh index on its next query.
+  state.remote.index = undefined;
+  state.remote.indexFetch = undefined;
+}
+
+/**
+ * Full cask records for a handful of tokens, out of the chunked cache.
+ *
+ * Only ever called with the tokens that already matched an installed app's
+ * bundle name — 16 or so — so this loads a couple of chunk files, not the
+ * catalog. A token with no entry is simply absent from the result: the caller
+ * treats that as "the index and the chunks are out of step" and skips it.
+ */
+export async function loadCasksByToken(tokens: readonly string[]): Promise<Cask[]> {
+  if (tokens.length === 0) return [];
+  const wanted = new Set(tokens);
+  const index = await loadIndex(caskRemote.chunkedConfig);
+  const entries = index.entries.filter((entry) => wanted.has(entry.id));
+  return loadItemsFromChunks<Cask>(caskRemote.chunkedConfig, entries);
+}
+
+/**
+ * The derived index the Adopt scan matches against, or a reason it cannot.
+ *
+ * Every failure here reads the same way to a user — an empty list — and an
+ * empty list is a *claim*: "nothing on this Mac is adoptable". That claim is
+ * false whenever the file is merely missing or damaged, so this never returns
+ * an empty index. It throws, and the command renders "the cask index needs
+ * rebuilding" with a Rebuild action.
+ *
+ * A damaged file is deleted on the way out so the next build replaces it,
+ * rather than failing identically forever.
+ */
+export async function loadAdoptIndex(): Promise<AdoptIndex> {
+  const indexPath = path.join(caskRemote.chunkedConfig.baseDir, ADOPT_INDEX_FILE);
+  let raw: string;
+  try {
+    raw = await fs.readFile(indexPath, "utf-8");
+  } catch {
+    throw new AdoptIndexUnavailableError("The cask index has not been built yet.");
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    await fs.unlink(indexPath).catch(() => {});
+    throw new AdoptIndexUnavailableError("The cask index is damaged.");
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    await fs.unlink(indexPath).catch(() => {});
+    throw new AdoptIndexUnavailableError("The cask index is damaged.");
+  }
+
+  const index = parsed as AdoptIndex;
+  // No catalog has zero app-bearing casks — there are ~4,100 — so an empty
+  // object is damage rather than a result, and must not read as one.
+  if (Object.keys(index).length === 0) {
+    await fs.unlink(indexPath).catch(() => {});
+    throw new AdoptIndexUnavailableError("The cask index is empty.");
+  }
+  return index;
 }
 
 /**
@@ -645,9 +756,10 @@ async function ensureChunkedCache<T>(
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
+  /** Rebuild even when the cache is current — the sidecar recovery path. */
+  options: { force?: boolean } = {},
 ): Promise<void> {
-  const isValid = await isChunkedCacheValid(remote.chunkedConfig, remote.url, signal);
-  if (isValid) {
+  if (!options.force && (await isChunkedCacheValid(remote.chunkedConfig, remote.url, signal))) {
     return;
   }
 
@@ -672,7 +784,7 @@ async function ensureChunkedCache<T>(
       extractIndex,
       onProgress,
       signal,
-      remote.compact,
+      remote.buildHooks?.(),
     );
     return;
   } catch (err) {
