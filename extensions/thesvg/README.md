@@ -37,7 +37,7 @@ Example: `Copy Brand Icon` > `github` copies the GitHub SVG to your clipboard.
 | Setting | Description | Default |
 | --- | --- | --- |
 | Default Variant | Which variant to copy (default, mono, light, dark) | Default (Brand Color) |
-| Layout | Choose how to display results | Grid |
+| Layout | Choose how to display results | List |
 | Primary Action | The action to perform when selecting an item | Copy SVG |
 
 ## Features

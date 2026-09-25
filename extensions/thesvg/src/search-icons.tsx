@@ -72,7 +72,7 @@ export default function SearchIcons() {
         isLoading={isLoading}
         searchText={searchText}
         onSearchTextChange={setSearchText}
-        searchBarPlaceholder="Search 5,600+ brand icons…"
+        searchBarPlaceholder="Search 7,400+ brand icons…"
         filtering={false}
         searchBarAccessory={
           <Grid.Dropdown
@@ -83,7 +83,7 @@ export default function SearchIcons() {
             <Grid.Dropdown.Item title="All Categories" value="all" />
             <Grid.Dropdown.Section title="Categories">
               {(categories ?? []).map((cat) => (
-                <List.Dropdown.Item
+                <Grid.Dropdown.Item
                   key={cat.name}
                   title={`${cat.name} (${cat.count})`}
                   value={cat.name}
