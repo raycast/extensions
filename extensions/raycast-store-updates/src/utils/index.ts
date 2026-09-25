@@ -313,7 +313,7 @@ export async function checkForExtensionUpdates(): Promise<void> {
       type: LaunchType.UserInitiated,
     });
   } catch (error) {
-    await showError(error, { title: "Couldn't Open Check for Extension Updates" });
+    await showError(error, { title: "Couldn't Update Installed Extensions" });
   }
 }
 
