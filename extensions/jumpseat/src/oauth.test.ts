@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   clearCache: vi.fn(),
   migrateCache: vi.fn(),
+  authorizationRequest: vi.fn(),
+  authorize: vi.fn(),
   getTokens: vi.fn(),
   removeTokens: vi.fn(),
   getItem: vi.fn(),
@@ -21,6 +23,8 @@ vi.mock("@raycast/api", () => ({
   OAuth: {
     RedirectMethod: { Web: "web" },
     PKCEClient: class {
+      authorizationRequest = mocks.authorizationRequest;
+      authorize = mocks.authorize;
       getTokens = mocks.getTokens;
       removeTokens = mocks.removeTokens;
       setTokens = mocks.setTokens;
@@ -39,8 +43,126 @@ vi.mock("./config", () => ({
 
 import {
   clearJumpseatAuthorization,
+  getJumpseatAccessToken,
   refreshJumpseatAccessToken,
 } from "./oauth";
+
+describe("fresh authorization", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mocks.getTokens.mockResolvedValue(undefined);
+    mocks.setTokens.mockResolvedValue(undefined);
+    mocks.setItem.mockResolvedValue(undefined);
+    mocks.removeItem.mockResolvedValue(undefined);
+    mocks.authorizationRequest.mockResolvedValue({
+      redirectURI: "https://raycast.com/callback",
+      codeVerifier: "verifier",
+    });
+    mocks.authorize.mockResolvedValue({ authorizationCode: "code" });
+    mocks.getConfiguration.mockReturnValue({
+      apiBaseUrl: "https://api.withjumpseat.com",
+      webBaseUrl: "https://app.withjumpseat.com",
+      authBaseUrl: "https://auth.withjumpseat.com",
+    });
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("uses the released login flow after discovery returns 404", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 404 }))
+      .mockResolvedValueOnce(
+        Response.json({
+          access_token: "access",
+          refresh_token: "refresh",
+          token_type: "Bearer",
+          expires_in: 3600,
+          scope: "flights:upcoming:read",
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getJumpseatAccessToken()).resolves.toBe("access");
+    expect(mocks.authorizationRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "https://app.withjumpseat.com/connect/raycast",
+      }),
+    );
+    expect(String(fetchMock.mock.calls[1][0])).toBe(
+      "https://api.withjumpseat.com/api/v1/auth/oauth/token",
+    );
+    expect(mocks.setItem).toHaveBeenCalledWith(
+      "jumpseat-auth-protocol",
+      "legacy",
+    );
+  });
+
+  it.each([
+    [
+      "server error",
+      () => Promise.resolve(new Response(null, { status: 503 })),
+    ],
+    ["malformed document", () => Promise.resolve(new Response("not JSON"))],
+    [
+      "incorrect issuer",
+      () => Promise.resolve(Response.json({ issuer: "https://other.example" })),
+    ],
+    ["network error", () => Promise.reject(new TypeError("offline"))],
+  ])(
+    "asks the user to retry after a discovery %s",
+    async (_reason, discovery) => {
+      const fetchMock = vi.fn().mockImplementation(discovery);
+      vi.stubGlobal("fetch", fetchMock);
+
+      await expect(getJumpseatAccessToken()).rejects.toThrow(
+        "Please try again shortly.",
+      );
+      expect(fetchMock).toHaveBeenCalledOnce();
+      expect(mocks.authorizationRequest).not.toHaveBeenCalled();
+      expect(mocks.setTokens).not.toHaveBeenCalled();
+    },
+  );
+
+  it("accepts a central token response without scope", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          issuer: "https://auth.withjumpseat.com",
+          authorization_endpoint:
+            "https://auth.withjumpseat.com/oauth/authorize",
+          token_endpoint: "https://auth.withjumpseat.com/oauth/token",
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          access_token: "central-access",
+          refresh_token: "central-refresh",
+          token_type: "Bearer",
+          expires_in: 3600,
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getJumpseatAccessToken()).resolves.toBe("central-access");
+    expect(mocks.authorizationRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "https://auth.withjumpseat.com/oauth/authorize",
+      }),
+    );
+    expect(mocks.setTokens).toHaveBeenCalledWith({
+      access_token: "central-access",
+      refresh_token: "central-refresh",
+      expires_in: 3600,
+      scope: "flights:upcoming:read",
+    });
+    expect(mocks.setItem).toHaveBeenCalledWith(
+      "jumpseat-auth-protocol",
+      "central",
+    );
+  });
+});
 
 describe("clearJumpseatAuthorization", () => {
   beforeEach(() => {

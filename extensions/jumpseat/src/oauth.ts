@@ -32,6 +32,8 @@ const AUTH_CONFIGURATION_KEY = "jumpseat-auth-configuration";
 const AUTH_PROTOCOL_KEY = "jumpseat-auth-protocol";
 const AUTH_ISSUER_KEY = "jumpseat-auth-issuer";
 const AUTH_DISCOVERY_TIMEOUT_MS = 5_000;
+const AUTH_DISCOVERY_ERROR_MESSAGE =
+  "Jumpseat could not start sign-in. Please try again shortly.";
 
 export const jumpseatOAuthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -81,8 +83,11 @@ async function exchangeAuthorizationCode(
     );
   }
 
-  const tokens = parseOAuthTokenResponse(await response.json());
-  if (!tokens || tokens.scope !== JUMPSEAT_OAUTH_SCOPE) {
+  const tokens = parseOAuthTokenResponse(
+    await response.json(),
+    JUMPSEAT_OAUTH_SCOPE,
+  );
+  if (!tokens) {
     throw new JumpseatAuthenticationError(
       "Jumpseat returned an unexpected sign-in response.",
     );
@@ -98,8 +103,9 @@ interface FreshAuthorizationProtocol {
 async function discoverFreshAuthorizationProtocol(
   configuration: JumpseatConfiguration,
 ): Promise<FreshAuthorizationProtocol> {
+  let response: Response;
   try {
-    const response = await fetch(
+    response = await fetch(
       oauthEndpoint(
         configuration.authBaseUrl,
         "/.well-known/oauth-authorization-server",
@@ -109,17 +115,18 @@ async function discoverFreshAuthorizationProtocol(
         signal: AbortSignal.timeout(AUTH_DISCOVERY_TIMEOUT_MS),
       },
     );
-    if (!response.ok) return { protocol: "legacy" };
-    const document = await response.json().catch(() => null);
-    return isCentralOAuthAuthorizationServer(
-      document,
-      configuration.authBaseUrl,
-    )
-      ? { protocol: "central", issuer: configuration.authBaseUrl }
-      : { protocol: "legacy" };
   } catch {
-    return { protocol: "legacy" };
+    throw new JumpseatAuthenticationError(AUTH_DISCOVERY_ERROR_MESSAGE);
   }
+  if (response.status === 404) return { protocol: "legacy" };
+  if (!response.ok) {
+    throw new JumpseatAuthenticationError(AUTH_DISCOVERY_ERROR_MESSAGE);
+  }
+  const document = await response.json().catch(() => null);
+  if (!isCentralOAuthAuthorizationServer(document, configuration.authBaseUrl)) {
+    throw new JumpseatAuthenticationError(AUTH_DISCOVERY_ERROR_MESSAGE);
+  }
+  return { protocol: "central", issuer: configuration.authBaseUrl };
 }
 
 async function authorize(
