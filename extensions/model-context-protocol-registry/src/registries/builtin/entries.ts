@@ -585,6 +585,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "springbrand",
+    title: "SpringBrand",
+    description:
+      "Go-to-market capabilities for your AI agent behind one connector: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation. The agent searches for the capability it needs, runs it and gets the result back, billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://springbrand.ai/apple-touch-icon.png",
+    homepage: "https://springbrand.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://connector.springbrand.ai/mcp"],
+    },
+  },
+  {
     name: "square",
     title: "Square",
     description:
