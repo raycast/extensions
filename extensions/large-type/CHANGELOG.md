@@ -1,5 +1,10 @@
 # Large Type Changelog
 
+## [Fit text in the window] - {PR_MERGE_DATE}
+
+- Fixed text running off the edges of the window in non-indexed mode: it is now scaled to fit and wrapped across lines
+- Line breaks in the text are now shown
+
 ## [Fix special characters in non-indexed mode] - 2026-09-24
 
 - Fixed text after `&`, `<` or `>` disappearing when not using the indexed display
