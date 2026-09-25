@@ -6,6 +6,7 @@ import {
   mergeShortcuts,
   normalizeShortcut,
   parseJsonImport,
+  resolveCategory,
   validateShortcut,
 } from "../src/schema";
 
@@ -51,6 +52,13 @@ test("parseJsonImport assigns fresh ids to every row", () => {
   const items = parseJsonImport(json);
   assert.notEqual(items[0].id, items[1].id);
   assert.notEqual(items[0].id, "same");
+});
+
+test("resolveCategory picks the dropdown value or a typed new name", () => {
+  assert.equal(resolveCategory(false, "Work", "ignored"), "Work");
+  assert.equal(resolveCategory(false, "", ""), "Uncategorized");
+  assert.equal(resolveCategory(true, "ignored", "  Play  "), "Play");
+  assert.equal(resolveCategory(true, "ignored", "   "), "Uncategorized");
 });
 
 test("isDuplicate matches on normalized title+keys", () => {

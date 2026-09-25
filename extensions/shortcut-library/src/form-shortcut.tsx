@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { generateId, loadShortcuts, saveShortcuts } from "./data";
+import { distinctCategories, generateId, loadShortcuts, saveShortcuts } from "./data";
+import { resolveCategory } from "./schema";
 import { UNCATEGORIZED } from "./types";
 import type { NewShortcut, Shortcut } from "./types";
 
@@ -9,6 +10,8 @@ interface FormValues {
   keys: string;
   title: string;
   category: string;
+  createNew: boolean;
+  newCategory: string;
 }
 
 export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate: () => void }) {
@@ -16,7 +19,8 @@ export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate
   const { pop } = useNavigation();
 
   const [tags, setTags] = useState<string[]>(existing?.tags ?? []);
-  const [knownTags, setKnownTags] = useState<string[]>([]);
+  const [knownTags, setKnownTags] = useState<string[]>(existing?.tags ?? []);
+  const [knownCategories, setKnownCategories] = useState<string[]>([]);
 
   useEffect(() => {
     loadShortcuts().then((items) => {
@@ -26,25 +30,31 @@ export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate
           for (const t of s.tags ?? []) tagSet.add(t);
         }
       }
-      setKnownTags([...tagSet].sort());
+      setKnownTags([...new Set([...(existing?.tags ?? []), ...tagSet])].sort());
+      setKnownCategories(distinctCategories(items));
     });
   }, [existing?.id]);
 
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
     initialValues: {
       keys: existing?.keys ?? "",
-      category: existing?.category ?? "",
+      category: existing?.category ?? UNCATEGORIZED,
       title: existing?.title ?? "",
+      createNew: false,
+      newCategory: "",
     },
     validation: {
       title: FormValidation.Required,
       keys: FormValidation.Required,
+      newCategory: (value) => {
+        if (values.createNew && !value?.trim()) return "Category name is required";
+      },
     },
     async onSubmit(values) {
       const cleaned = tags.map((t) => t.trim()).filter((t) => t.length > 0);
 
       const shortcut: NewShortcut = {
-        category: values.category.trim() || UNCATEGORIZED,
+        category: resolveCategory(values.createNew, values.category, values.newCategory),
         title: values.title.trim(),
         keys: values.keys.trim(),
         tags: cleaned.length > 0 ? cleaned : undefined,
@@ -76,7 +86,20 @@ export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate
     >
       <Form.TextField title="Keys" placeholder="Hyper + O + G" {...itemProps.keys} />
       <Form.TextField title="Title" placeholder="Title" {...itemProps.title} />
-      <Form.TextField title="Category" placeholder="Category" {...itemProps.category} />
+      {values.createNew ? (
+        <Form.TextField title="Category" placeholder="Category name" {...itemProps.newCategory} />
+      ) : (
+        <Form.Dropdown title="Category" {...itemProps.category}>
+          <Form.Dropdown.Item value={UNCATEGORIZED} title="Uncategorized" />
+          {knownCategories.map((c) => (
+            <Form.Dropdown.Item key={c} value={c} title={c} />
+          ))}
+          {values.category !== UNCATEGORIZED && !knownCategories.includes(values.category) && (
+            <Form.Dropdown.Item key={values.category} value={values.category} title={values.category} />
+          )}
+        </Form.Dropdown>
+      )}
+      <Form.Checkbox title="New Category" label="Create a new category" {...itemProps.createNew} />
       <Form.TagPicker id="tags" title="Tags" value={tags} onChange={setTags} placeholder="Tags">
         {knownTags.map((t) => (
           <Form.TagPicker.Item key={t} value={t} title={t} />

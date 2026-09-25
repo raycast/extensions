@@ -5,6 +5,11 @@ export function generateId(): string {
   return crypto.randomUUID();
 }
 
+export function resolveCategory(createNew: boolean, selection: string, newName: string): string {
+  const value = createNew ? newName : selection;
+  return value.trim() || UNCATEGORIZED;
+}
+
 export function normalizeShortcut(value: unknown): Shortcut {
   const src = (typeof value === "object" && value !== null ? value : {}) as Record<string, unknown>;
 
