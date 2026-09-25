@@ -111,3 +111,55 @@ export function formatVersionAge(date: Date | undefined): string | undefined {
   }
   return "just now";
 }
+
+/** A commit that touched an extension's CHANGELOG.md, newest first as GitHub lists them. */
+export interface ChangelogCommit {
+  sha: string;
+  /** Committer date, ISO 8601 UTC — for a squash merge, the merge time. */
+  date: string;
+}
+
+// A stamped heading's commit merged within two days after the start of its date (UTC).
+// CI stamps in either UTC or US Pacific time, and sometimes a day behind the merge
+// (Linear's `2026-07-14` merged at 07-15 09:24Z), but never ahead of it in the samples below.
+const STAMP_WINDOW = 2 * 86_400_000;
+
+/**
+ * Pairs each version row with the commit that added it, or undefined when none can be named.
+ *
+ * The two lists are walked together newest-first: commits newer than a heading's window
+ * touched the file without adding a version (a typo fix, a bulk sweep) and are skipped. A
+ * heading that finds no commit of its own reuses the previous one when that commit also
+ * fits its window, because one PR can add several versions (better-json's first merge
+ * added four). A file written oldest-first is walked in reverse, or every pair would swap.
+ *
+ * Only the first 100 commits are fetched, so versions older than that go unpaired: they
+ * lose the commit actions, but are never linked to the wrong commit.
+ *
+ * Measured 2026-09-24 against the commit diffs themselves. Over 157 headings in 30
+ * extensions: 144 paired correctly, 10 unpaired (undated, or older than the file's
+ * history), 3 wrong — each a heading whose author typed a date instead of
+ * `{PR_MERGE_DATE}`, which no date rule can see through. A fresh 144 headings in 30 more
+ * extensions: 135 correct, 9 unpaired, 0 wrong. Narrowing the window to one Pacific day
+ * fixed none of the 3, and turned 29 correct pairs into 4 wrong and 25 unpaired.
+ */
+export function pairVersionCommits(versions: ChangelogVersion[], commits: ChangelogCommit[]): (string | undefined)[] {
+  const dated = versions.filter((v) => v.date);
+  const oldestFirst = dated.length > 1 && dated[0].date! < dated[dated.length - 1].date!;
+  if (oldestFirst) return pairVersionCommits([...versions].reverse(), commits).reverse();
+
+  const times = commits.map((c) => Date.parse(c.date));
+  let next = 0;
+  let last: number | undefined;
+  return versions.map(({ date }) => {
+    if (!date) return undefined;
+    const day = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const fits = (i: number) => times[i] >= day && times[i] < day + STAMP_WINDOW;
+    while (next < times.length && times[next] >= day + STAMP_WINDOW) next++;
+    if (next < times.length && fits(next)) {
+      last = next++;
+      return commits[last].sha;
+    }
+    return last !== undefined && fits(last) ? commits[last].sha : undefined;
+  });
+}

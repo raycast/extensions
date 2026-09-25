@@ -2,7 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { useCallback } from "react";
 
 const LAST_FETCH_KEY = "github-last-fetch-time";
-const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
+export const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
 const MIN_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 /** GitHub's rate-limit window is 1h, so no honest cooldown exceeds it. */
 const MAX_COOLDOWN_MS = 60 * 60 * 1000;

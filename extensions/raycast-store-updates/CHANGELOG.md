@@ -1,5 +1,11 @@
 # Raycast Store Updates Changelog
 
+## [Commit Links in Version History] - {PR_MERGE_DATE}
+
+- Version History rows can open or copy the `raycast/extensions` commit that added that version.
+- "Open in Raycast Store" is now "View Extension in Store", and Version History's "Open in Browser" is now "Open Changelog in Browser" (it opens the changelog rather than the Store page).
+- "Check for Extension Updates" is now "Update Installed Extensions", to set it apart from Refresh: it runs Raycast's updater on your installed extensions.
+
 ## [US English] - 2026-09-24
 
 - Use US English spelling throughout the extension and its README
