@@ -1,3 +1,5 @@
+import BackupActions from "./backup_actions";
+import { shortcut } from "./shortcuts";
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -123,7 +125,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 setSearchMode(false);
                 editTodo();
               }}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={shortcut("e", ["cmd"])}
               title="Edit Todo"
             />
             <Action
@@ -132,7 +134,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 editTodoTag();
                 push(<TodoTagForm />);
               }}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={shortcut("t", ["cmd"])}
               title="Edit Tag"
             />
             <Action
@@ -141,13 +143,13 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 editTodoDueDate();
                 push(<TodoDueDateForm />);
               }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              shortcut={shortcut("e", ["cmd", "shift"])}
               title="Edit Due Date"
             />
             <Action
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
               onAction={() => deleteTodo()}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={shortcut("d", ["cmd"])}
               style={Action.Style.Destructive}
               title="Delete Todo"
             />
@@ -155,20 +157,20 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               <Action
                 icon={{ source: Icon.Pin, tintColor: Color.Blue }}
                 onAction={() => unPin()}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+                shortcut={shortcut("p", ["cmd", "opt"])}
                 title="Unpin Todo"
               />
             ) : (
               <Action
                 icon={{ source: Icon.Pin, tintColor: Color.Blue }}
                 onAction={() => pin()}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+                shortcut={shortcut("p", ["cmd", "opt"])}
                 title="Pin Todo"
               />
             )}
             <ActionPanel.Submenu
               icon={Icon.Exclamationmark}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              shortcut={shortcut("p", ["cmd", "shift"])}
               title="Set Priority"
             >
               <Action onAction={() => setPriority(undefined)} title="None" />
@@ -194,23 +196,9 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
             {urls &&
               urls.length > 0 &&
               (urls.length === 1 ? (
-                <OpenUrlAction
-                  shortcut={{
-                    modifiers: ["cmd"],
-                    key: "o",
-                  }}
-                  title={`Open ${urls[0]}`}
-                  url={urls[0]}
-                />
+                <OpenUrlAction shortcut={shortcut("o", ["cmd"])} title={`Open ${urls[0]}`} url={urls[0]} />
               ) : (
-                <ActionPanel.Submenu
-                  icon={Icon.Globe}
-                  shortcut={{
-                    modifiers: ["cmd"],
-                    key: "o",
-                  }}
-                  title="Open URL"
-                >
+                <ActionPanel.Submenu icon={Icon.Globe} shortcut={shortcut("o", ["cmd"])} title="Open URL">
                   {urls.map((url, idx) => (
                     <OpenUrlAction key={idx} url={url} />
                   ))}
@@ -218,6 +206,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               ))}
             <ClearCompletedAction />
             <DeleteAllAction />
+            <BackupActions />
             <MarkAllIncompleteAction />
             <SearchModeAction />
           </ActionPanel>

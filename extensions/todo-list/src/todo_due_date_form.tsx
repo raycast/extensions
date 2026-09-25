@@ -6,19 +6,20 @@ import { useState } from "react";
 
 const TodoDueDateForm = () => {
   const { pop } = useNavigation();
-  const [todoSections, setTodoSections] = useAtom(todoAtom);
+  const [savedSections, setTodoSections] = useAtom(todoAtom);
   const [editingDueDate] = useAtom(editingDueDateAtom);
   const [editingDueDateValue] = useAtom(editingDueDateValueAtom);
   const [dueDate, setDueDate] = useState<Date | null>(editingDueDateValue > 0 ? new Date(editingDueDateValue) : null);
 
-  const editTodoDueDate = async () => {
+  const editTodoDueDate = () => {
     if (!editingDueDate) return;
 
+    const todoSections = _.cloneDeep(savedSections);
     todoSections[editingDueDate.sectionKey].splice(editingDueDate.index, 1, {
       ...todoSections[editingDueDate.sectionKey][editingDueDate.index],
       dueDate: dueDate ? dueDate.getTime() : undefined,
     });
-    setTodoSections(_.cloneDeep(todoSections));
+    setTodoSections(todoSections);
   };
 
   return (

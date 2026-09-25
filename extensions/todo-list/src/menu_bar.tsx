@@ -53,15 +53,16 @@ const TodoList = ({
 }) => {
   if (todos.length === 0 || limit === 0) return null;
 
-  if (limit) {
-    todos = todos.slice(0, limit);
-  }
+  const visibleTodos = todos
+    .map((item, idx) => ({ item, idx }))
+    .sort((a, b) => sortTodoItem(a.item, b.item))
+    .slice(0, limit);
 
   return (
     <>
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title={SECTIONS_DATA[sectionKey].name} />
-      {todos.sort(sortTodoItem).map((todo, idx) => (
+      {visibleTodos.map(({ item: todo, idx }) => (
         <MenuBarTodoItem idx={idx} item={todo} key={idx} sectionKey={sectionKey} />
       ))}
     </>
