@@ -509,6 +509,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "scout7",
+    title: "Scout7",
+    description:
+      "Run a week of organic marketing on loop from your AI agent. Scout7 plans your week from your brand, then writes SEO blogs, videos, LinkedIn carousels and social posts, schedules everything across your channels, and reports what moved — it even checks whether you're cited by ChatGPT and Claude. You approve before anything goes live. Hosted remote Streamable HTTP server with Scout7 OAuth 2.1 sign-in (dynamic client registration) through `mcp-remote`; no API key needed.",
+    icon: "https://scout7.ai/apple-touch-icon.png",
+    homepage:
+      "https://scout7.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=listing&utm_campaign=mcp-directories&ref=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.scout7.ai/mcp"],
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
