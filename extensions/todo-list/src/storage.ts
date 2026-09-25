@@ -87,6 +87,35 @@ export function readTodos(file: string): { sections: TodoSections; revision: str
   }
 }
 
+const lockWait = new Int32Array(new SharedArrayBuffer(4));
+
+function withFileLock<T>(file: string, action: () => T): T {
+  fs.mkdirSync(dirname(file), { recursive: true });
+  const lockFile = `${file}.lock`;
+  const deadline = Date.now() + 2000;
+  let fd: number | undefined;
+  while (fd === undefined) {
+    try {
+      fd = fs.openSync(lockFile, "wx");
+    } catch (error) {
+      if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
+      try {
+        if (Date.now() - fs.statSync(lockFile).mtimeMs > 10_000) fs.rmSync(lockFile, { force: true });
+      } catch {
+        // The lock was released between the failed create and this check.
+      }
+      if (Date.now() > deadline) throw new Error("The list is being saved by another command. Try again.");
+      Atomics.wait(lockWait, 0, 0, 20);
+    }
+  }
+  try {
+    return action();
+  } finally {
+    fs.closeSync(fd);
+    fs.rmSync(lockFile, { force: true });
+  }
+}
+
 function atomicWrite(file: string, contents: string) {
   fs.mkdirSync(dirname(file), { recursive: true });
   const temporary = `${file}.${randomUUID()}.tmp`;
@@ -100,24 +129,28 @@ function atomicWrite(file: string, contents: string) {
 
 export function writeTodos(file: string, sections: TodoSections, expectedRevision: string | null): string {
   const contents = JSON.stringify(parseTodos(JSON.stringify(sections)));
-  const current = readFile(file);
-  if (current !== expectedRevision)
-    throw new Error("The list changed in another command. Reopen this command and try again.");
-  if (current !== null) {
-    parseTodos(current);
-    atomicWrite(`${file}.backup`, current);
-  }
-  atomicWrite(file, contents);
-  return contents;
+  return withFileLock(file, () => {
+    const current = readFile(file);
+    if (current !== expectedRevision)
+      throw new Error("The list changed in another command. Reopen this command and try again.");
+    if (current !== null) {
+      parseTodos(current);
+      atomicWrite(`${file}.backup`, current);
+    }
+    atomicWrite(file, contents);
+    return contents;
+  });
 }
 
 /** Import is explicit recovery: preserve even an unreadable current file before replacing it. */
 export function importTodos(file: string, contents: string): TodoSections {
   const sections = parseTodos(contents);
-  const current = readFile(file);
-  if (current !== null) atomicWrite(`${file}.${Date.now()}.${randomUUID()}.backup`, current);
-  atomicWrite(file, JSON.stringify(sections));
-  return sections;
+  return withFileLock(file, () => {
+    const current = readFile(file);
+    if (current !== null) atomicWrite(`${file}.${Date.now()}.${randomUUID()}.backup`, current);
+    atomicWrite(file, JSON.stringify(sections));
+    return sections;
+  });
 }
 
 export function exportTodos(file: string, destination: string): void {

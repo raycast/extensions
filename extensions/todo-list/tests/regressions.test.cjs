@@ -108,8 +108,8 @@ test("export and import round-trip without overwriting existing export files", (
 });
 
 test("custom shortcuts provide explicit macOS and Windows bindings", () => {
-  assert.deepEqual(shortcut("p", ["cmd", "opt"]), { macOS: { key: "p", modifiers: ["cmd", "opt"] }, windows: { key: "p", modifiers: ["ctrl", "alt"] } });
-  assert.deepEqual(shortcut("e", ["cmd", "shift"]).windows, { key: "e", modifiers: ["ctrl", "shift"] });
+  assert.deepEqual(shortcut("p", ["cmd", "opt"]), { macOS: { key: "p", modifiers: ["cmd", "opt"] }, Windows: { key: "p", modifiers: ["ctrl", "alt"] } });
+  assert.deepEqual(shortcut("e", ["cmd", "shift"]).Windows, { key: "e", modifiers: ["ctrl", "shift"] });
 });
 
 test("tag discovery includes literal All and deduplicates across sections", () => {

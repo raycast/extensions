@@ -206,9 +206,9 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               ))}
             <ClearCompletedAction />
             <DeleteAllAction />
-            <BackupActions />
             <MarkAllIncompleteAction />
             <SearchModeAction />
+            <BackupActions />
           </ActionPanel>
         ) : (
           <ListActions />
