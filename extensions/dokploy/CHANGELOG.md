@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Sort Projects, Services, and Docker by Frecency] - {PR_MERGE_DATE}
+## [Sort Projects, Services, and Docker by Frecency] - 2026-09-25
 
 - **Projects**, **Services**, and **Docker** now sort by how often you actually open each one, not raw API order - matching how **Deploy Service** already sorts. Scoped per instance, so frequently-used items in one account never affect another's ranking.
 
