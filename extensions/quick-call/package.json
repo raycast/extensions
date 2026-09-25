@@ -11,7 +11,19 @@
   "categories": [
     "Communication"
   ],
+  "keywords": [
+    "phone",
+    "call",
+    "dial",
+    "tel",
+    "telephone",
+    "facetime",
+    "continuity"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "quick-call",
