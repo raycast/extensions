@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
-import { isDeepStrictEqual } from "util";
 import {
   EntryLike,
   EntryType,
@@ -107,7 +106,7 @@ export function filterEntriesByType(filter: EntryType | null) {
 }
 
 export function filterUnpinnedEntries(pinnedEntries: EntryLike[]) {
-  return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isDeepStrictEqual(pinnedEntry, entry)) === undefined;
+  return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isSameEntry(pinnedEntry, entry)) === undefined;
 }
 
 export function getErrorMessage(error: unknown): string {

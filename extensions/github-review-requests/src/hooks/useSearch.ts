@@ -1,17 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
-import { GraphQLClient } from "graphql-request";
+import graphQLClient from "../integration/graphQLClient";
 import { useEffect, useState } from "react";
 import { StatusState } from "../schema.generated";
 import { formatDate } from "../util";
 import { getSdk } from "./SearchReviewRequest.generated";
 
-const api = getSdk(
-  new GraphQLClient("https://api.github.com/graphql", {
-    headers: {
-      Authorization: `token ${getPreferenceValues().token}`,
-    },
-  }),
-);
+const api = getSdk(graphQLClient);
 
 type CommitStatus = "pending" | "success" | "failure";
 

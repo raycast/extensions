@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { DiscussionFieldsFragment } from "../generated/graphql";
+import { uniqueById } from "../helpers";
 import { DISCUSSION_DEFAULT_SORT_QUERY, formatDateForQuery } from "../helpers/discussion";
 
 import { DiscussionListItem } from "./DiscussionListItem";
@@ -48,6 +49,7 @@ export function RepositoryDiscussionList(props: { repository: string }) {
     },
     [searchText, filterText, sortQuery],
   );
+  const discussions = uniqueById(data ?? []);
 
   return (
     <List
@@ -58,8 +60,10 @@ export function RepositoryDiscussionList(props: { repository: string }) {
       pagination={pagination}
       searchBarAccessory={<DiscussionFilterDropdown value={filter} onChange={setFilter} />}
     >
-      <List.Section title="Discussions" subtitle={`${data?.length ?? 0}`}>
-        {data?.map((d) => <DiscussionListItem key={d.id} discussion={d} {...{ sortQuery, setSortQuery }} />)}
+      <List.Section title="Discussions" subtitle={`${discussions.length}`}>
+        {discussions.map((d) => (
+          <DiscussionListItem key={d.id} discussion={d} {...{ sortQuery, setSortQuery }} />
+        ))}
       </List.Section>
     </List>
   );

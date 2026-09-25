@@ -1,5 +1,16 @@
 # 1Bookmark Changelog
 
+## [Subscribed Tag Check Icon] - 2026-08-30
+
+- 0.14.0
+- 👥 Team spaces now have a **Copy Invitation Link** action (`⌘I`). Share the link and teammates can join the space directly from the web after signing in.
+- 🌐 Space owners are directed to the web to change space settings or delete a space.
+- 💅🏼 Subscribed tags now show a check icon in the space tags list.
+- 🐛 Cached bookmarks now carry a schema version. Caches from incompatible versions are refetched instead of causing unexpected behavior, and the cache from earlier versions is kept usable while offline.
+- 🐛 When bookmarks cannot be loaded and nothing is cached, the search command now shows a retry state instead of loading indefinitely.
+- 🐛 Network failures now show a clear cached-data notice.
+- 🐛 Search results now always select the top item as you type, instead of sticking to a previously selected item that moved down.
+
 ## [Bookmark Detail View and UX Improvements] - 2026-07-06
 
 - 0.13.0

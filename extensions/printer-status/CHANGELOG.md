@@ -1,5 +1,14 @@
 # Changelog
 
+## [Add Xerox Status OIDs] - 2026-09-08
+
+- Added support for waste toner bottle level monitoring
+- Added printer uptime tracking
+- Added general printer status monitoring (idle, printing, warmup, etc.)
+- Added display message lines 1-4 support for console text reading
+- Enhanced OID configuration with 7 new customizable OID preferences
+- Improved printer status display with dedicated Status section
+
 ## [Xerox C325 Support] - 2026-04-28
 
 - Adapted the printer status command for Xerox C325 printers.

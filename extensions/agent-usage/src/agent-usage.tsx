@@ -15,15 +15,22 @@ import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
+import type { AccountsProvider } from "./accounts/types.ts";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
-import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId, getRequestedSelectedRowId } from "./agents/order.ts";
+import { formatClock, latestTimestamp, withCredentialStatus } from "./agents/format.ts";
+import {
+  AGENT_ORDER_KEY,
+  DEFAULT_AGENT_ORDER,
+  getInitialSelectedRowId,
+  getRequestedSelectedRowId,
+  parseStoredAgentOrder,
+} from "./agents/order.ts";
 import {
   useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
-  useClaudeUsage,
+  useClaudeAccounts,
   useClinePassAccounts,
   useCodexAccounts,
   useCopilotAccounts,
@@ -36,6 +43,7 @@ import {
   useMiniMaxUsage,
   useMinimaxCNUsage,
   useOpencodegoUsage,
+  useOpenRouterUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
@@ -78,12 +86,12 @@ import { formatMinimaxCNUsageText, getMinimaxCNAccessory, renderMinimaxCNDetail 
 import type { MinimaxCNError, MinimaxCNUsage } from "./minimaxcn/types.ts";
 import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
+import { formatOpenRouterUsageText, getOpenRouterAccessory, renderOpenRouterDetail } from "./openrouter/renderer.tsx";
+import type { OpenRouterError, OpenRouterUsage } from "./openrouter/types.ts";
 import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
 import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
 import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
 import type { ZaiError, ZaiUsage } from "./zai/types.ts";
-
-const AGENT_ORDER_KEY = "agent-order";
 
 type ErrorLike = { type: string; message: string };
 type CommandLaunchContext = { selectedAgentId?: string };
@@ -96,7 +104,7 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 }
 
 /** Providers rendered from account rows — they have no single-usage hook. */
-type MultiAccountAgentId = "clinepass" | "codex" | "copilot" | "kimi" | "synthetic" | "zai";
+type MultiAccountAgentId = "claude" | "clinepass" | "codex" | "copilot" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
   aihubmix: AihubmixUsage;
@@ -117,6 +125,7 @@ interface AgentUsageById {
   minimax: MiniMaxUsage;
   minimaxcn: MinimaxCNUsage;
   "opencode-go": OpencodegoUsage;
+  openrouter: OpenRouterUsage;
 }
 
 interface AgentErrorById {
@@ -138,6 +147,7 @@ interface AgentErrorById {
   minimax: MiniMaxError;
   minimaxcn: MinimaxCNError;
   "opencode-go": OpencodegoError;
+  openrouter: OpenRouterError;
 }
 
 type AgentRegistry = {
@@ -177,12 +187,12 @@ interface AccountedAgentView {
   formatUsageText: () => string;
   /** The account id, for use in the manage-accounts form */
   accountId: string;
-  /** The provider key, for use in the manage-accounts form */
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
+  /** The provider key for the manage-accounts form; absent for providers with no manual accounts */
+  provider?: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
   /** Whether this provider is supported (always true for accounted views) */
   isSupported: boolean;
-  /** The API token for this account (for copying) */
-  token: string;
+  /** The API token for this account (for copying); absent for providers with no manual key flow */
+  token?: string;
   /** Whether this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
   lastFetchedAt?: number;
@@ -220,7 +230,6 @@ const AGENT_REGISTRY: AgentRegistry = {
     description: "Anthropic Claude Code",
     isSupported: true,
     settingsUrl: "https://claude.ai/settings/billing",
-    useUsage: useClaudeUsage,
     renderDetail: renderClaudeDetail,
     getAccessory: getClaudeAccessory,
     formatUsageText: formatClaudeUsageText,
@@ -397,6 +406,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getOpencodegoAccessory,
     formatUsageText: formatOpencodegoUsageText,
   },
+  openrouter: {
+    id: "openrouter",
+    name: "OpenRouter",
+    icon: "openrouter-icon.svg",
+    description: "OpenRouter Credit Balance",
+    isSupported: true,
+    settingsUrl: "https://openrouter.ai/credits",
+    useUsage: useOpenRouterUsage,
+    renderDetail: renderOpenRouterDetail,
+    getAccessory: getOpenRouterAccessory,
+    formatUsageText: formatOpenRouterUsageText,
+  },
 };
 
 const AGENT_IDS: AgentId[] = [...DEFAULT_AGENT_ORDER];
@@ -422,7 +443,8 @@ function createAgentView<TUsage, TError extends ErrorLike>(
     isLoading: state.isLoading,
     lastFetchedAt: state.lastFetchedAt,
     revalidate: state.revalidate,
-    getAccessory: () => config.getAccessory(state.usage, state.error, state.isLoading),
+    getAccessory: () =>
+      withCredentialStatus(config.getAccessory(state.usage, state.error, state.isLoading), state.credentialStatus),
     renderDetail: () => config.renderDetail(state.usage, state.error),
     formatUsageText: () => config.formatUsageText(state.usage, state.error),
   };
@@ -433,7 +455,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   providerName: string,
   icon: string,
   settingsUrl: string | undefined,
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic",
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic" | undefined,
   isVisible: boolean,
   accountStates: AccountUsageState<TUsage, TError>[],
   renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode,
@@ -458,7 +480,10 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
     accountId: state.accountId,
     provider,
     isSupported: true,
-    token: state.token,
+    // Only a provider with a manual key flow has a copyable key. Claude's token is a
+    // short-lived OAuth access token, so offering it as an "API Key" hands out a secret
+    // that expires and fails wherever an Anthropic key is expected.
+    token: provider ? state.token : undefined,
     isOpenCodeActive: state.isOpenCodeActive,
   }));
 }
@@ -469,6 +494,7 @@ function getAccountedTitle(providerName: string, label: string): string {
 }
 
 function getProviderName(agentId: MultiAccountAgentId): string {
+  if (agentId === "claude") return "Claude";
   if (agentId === "clinepass") return "ClinePass";
   if (agentId === "codex") return "Codex";
   if (agentId === "copilot") return "Copilot";
@@ -484,7 +510,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   // Hooks must be called unconditionally at top level (React rules)
   const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
-  const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
@@ -494,8 +519,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
   const minimaxcnState = AGENT_REGISTRY.minimaxcn.useUsage(Boolean(prefs.showMinimaxCN));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
+  const openrouterState = AGENT_REGISTRY.openrouter.useUsage(Boolean(prefs.showOpenRouter));
 
   // Multi-account providers
+  const claudeState = useClaudeAccounts(Boolean(prefs.showClaude));
   const clinePassState = useClinePassAccounts(Boolean(prefs.showClinePass));
   const codexState = useCodexAccounts(Boolean(prefs.showCodex));
   const copilotState = useCopilotAccounts(Boolean(prefs.showCopilot));
@@ -506,7 +533,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
     aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
-    claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
@@ -516,6 +542,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
     minimaxcn: createAgentView(AGENT_REGISTRY.minimaxcn, minimaxcnState, Boolean(prefs.showMinimaxCN)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
+    openrouter: createAgentView(AGENT_REGISTRY.openrouter, openrouterState, Boolean(prefs.showOpenRouter)),
   };
 
   const clinePassAccountedViews = createAccountedViews(
@@ -570,6 +597,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     formatZaiUsageText,
   );
 
+  const claudeAccountedViews = createAccountedViews(
+    "claude",
+    "Claude",
+    AGENT_REGISTRY.claude.icon,
+    AGENT_REGISTRY.claude.settingsUrl,
+    undefined,
+    Boolean(prefs.showClaude),
+    claudeState.accounts,
+    renderClaudeDetail,
+    getClaudeAccessory,
+    formatClaudeUsageText,
+  );
+
   const codexAccountedViews = createAccountedViews(
     "codex",
     "Codex",
@@ -604,20 +644,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   useEffect(() => {
     LocalStorage.getItem<string>(AGENT_ORDER_KEY).then((stored) => {
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
-            if (validOrder.length > 0) {
-              const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
-              setAgentOrder([...validOrder, ...missingIds]);
-              setHasStoredAgentOrder(true);
-            }
-          }
-        } catch {
-          // keep default order
-        }
+      const parsed = parseStoredAgentOrder(stored, isAgentId, AGENT_IDS);
+      if (parsed) {
+        setAgentOrder(parsed);
+        setHasStoredAgentOrder(true);
       }
       setOrderLoaded(true);
     });
@@ -646,6 +676,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const allRows = useMemo<ListRow[]>(
     () =>
       agentOrder.flatMap((agentId): ListRow[] => {
+        if (agentId === "claude") {
+          return claudeAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
         if (agentId === "clinepass") {
           return clinePassAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
@@ -673,6 +706,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
       }),
     [
       agentOrder,
+      claudeAccountedViews,
       clinePassAccountedViews,
       codexAccountedViews,
       copilotAccountedViews,
@@ -710,7 +744,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const isLoading =
     allRows.some((row) => row.view.isLoading) ||
-    [clinePassState, codexState, copilotState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
+    [claudeState, clinePassState, codexState, copilotState, kimiState, syntheticState, zaiState].some(
+      (state) => state.isLoading,
+    );
 
   const hasPromptedGeminiReauth = useRef(false);
 
@@ -760,7 +796,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   }, [prefs.showGemini, geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
-    await Promise.all(allRows.map((row) => row.view.revalidate()));
+    await Promise.all([...new Set(allRows.map((row) => row.view.revalidate))].map((refresh) => refresh()));
     await showToast({
       title: "Refreshed",
       style: Toast.Style.Success,
@@ -819,7 +855,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                   <ActionPanel>
                     {agent.isSupported && (
                       <>
-                        <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                        <Action
+                          title={refreshTitle}
+                          icon={Icon.ArrowClockwise}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          onAction={handleRefresh}
+                        />
                         <Action.CopyToClipboard
                           title="Copy Usage Details"
                           content={agent.formatUsageText()}
@@ -890,7 +931,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                 detail={<List.Item.Detail markdown={errorMarkdown} metadata={detail} />}
                 actions={
                   <ActionPanel>
-                    <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                    <Action
+                      title={refreshTitle}
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={handleRefresh}
+                    />
                     <Action.CopyToClipboard
                       title="Copy Usage Details"
                       content={view.formatUsageText()}
@@ -903,20 +949,22 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         shortcut={Keyboard.Shortcut.Common.Copy}
                       />
                     )}
-                    <Action
-                      title="Manage Accounts"
-                      icon={Icon.Person}
-                      shortcut={Keyboard.Shortcut.Common.Edit}
-                      onAction={() =>
-                        push(
-                          <ManageAccountsForm
-                            provider={view.provider}
-                            providerName={getProviderName(view.agentId as MultiAccountAgentId)}
-                            onSave={handleRefresh}
-                          />,
-                        )
-                      }
-                    />
+                    {view.provider && (
+                      <Action
+                        title="Manage Accounts"
+                        icon={Icon.Person}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
+                        onAction={() =>
+                          push(
+                            <ManageAccountsForm
+                              provider={view.provider as AccountsProvider}
+                              providerName={getProviderName(view.agentId as MultiAccountAgentId)}
+                              onSave={handleRefresh}
+                            />,
+                          )
+                        }
+                      />
+                    )}
                     {view.settingsUrl && (
                       <Action.OpenInBrowser
                         title={`Open ${getProviderName(view.agentId as MultiAccountAgentId)} Settings`}

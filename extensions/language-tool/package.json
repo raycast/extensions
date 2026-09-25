@@ -30,6 +30,13 @@
       "description": "Check a text with LanguageTool using the clipboard content and paste the result instantly. The language is detected automatically.",
       "mode": "no-view",
       "icon": "extension-icon.png"
+    },
+    {
+      "name": "check-selected-text",
+      "title": "Check Selected Text",
+      "description": "Check the selected text, review each correction with the result in view, then replace the selection.",
+      "mode": "view",
+      "icon": "extension-icon.png"
     }
   ],
   "preferences": [

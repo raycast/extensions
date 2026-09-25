@@ -6,12 +6,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DetectedLangModel } from "@/core/detect/types";
 import { chineseLanguageItem, englishLanguageItem } from "@/core/language/consts";
+import { clearQueryCache, getCachedQueryResult } from "@/core/query/cache";
 import type { DictionaryServiceConfig } from "@/providers/dictionary";
 import { BaseDictionaryProvider } from "@/providers/dictionary/base";
 import { LingueeListItemType } from "@/providers/dictionary/linguee/types";
-import { DictionaryType, LanguageDetectType } from "@/types/api";
+import type { TranslationServiceConfig } from "@/providers/translation";
+import { BaseNonStreamingTranslateProvider } from "@/providers/translation/base";
+import { DictionaryType, LanguageDetectType, TranslationType } from "@/types/api";
 import type { ListDisplayItem } from "@/types/display";
-import type { DictionaryResult, QueryInput, RequestOptions } from "@/types/query";
+import { buildFavoriteWord } from "@/types/favorite";
+import type { DictionaryResult, QueryInput, RequestOptions, TranslationResult } from "@/types/query";
 
 import { useQueryEngine } from "./useQueryEngine";
 
@@ -27,16 +31,56 @@ interface DictionaryRequest {
   deferred: Deferred<DictionaryResult>;
 }
 
+interface TranslationRequest {
+  queryWordInfo: QueryInput;
+  signal?: AbortSignal;
+  deferred: Deferred<TranslationResult>;
+}
+
 const testDoubles = vi.hoisted(() => ({
+  raycastCaches: new Map<string, Map<string, string>>(),
   detectLanguage: vi.fn(),
   dictionaryServices: [] as DictionaryServiceConfig[],
   playQueryWordAudio: vi.fn(),
   showErrorToast: vi.fn(),
+  queryCacheMode: "off",
+  aiQueryCacheMode: "off",
 }));
 
 vi.mock("@raycast/api", () => ({
   environment: { isDevelopment: false },
+  Cache: class {
+    private storage: Map<string, string>;
+
+    constructor(options?: { namespace?: string }) {
+      const namespace = options?.namespace ?? "default";
+      let storage = testDoubles.raycastCaches.get(namespace);
+      if (!storage) {
+        storage = new Map();
+        testDoubles.raycastCaches.set(namespace, storage);
+      }
+      this.storage = storage;
+    }
+
+    get(key: string) {
+      return this.storage.get(key);
+    }
+
+    set(key: string, value: string) {
+      this.storage.set(key, value);
+    }
+
+    remove(key: string) {
+      return this.storage.delete(key);
+    }
+
+    clear() {
+      this.storage.clear();
+    }
+  },
 }));
+
+vi.mock("@/utils/appearance", () => ({ isDarkAppearance: () => false }));
 
 vi.mock("@/consts", () => ({
   myPreferences: {
@@ -46,6 +90,24 @@ vi.mock("@/consts", () => ({
     enableLingueeDictionary: true,
     enableAutomaticPlayWordAudio: true,
     flagsAreNotLanguages: false,
+    language1: "zh-CHS",
+    language2: "en",
+    enableDetectLanguageSpeedFirst: true,
+    enableBaiduLanguageDetect: true,
+    enableTencentLanguageDetect: false,
+    enableVolcanoLanguageDetect: false,
+    baiduAppId: undefined,
+    baiduAppSecret: undefined,
+    tencentSecretId: "",
+    tencentSecretKey: undefined,
+    volcanoAccessKeyId: "",
+    volcanoAccessKeySecret: undefined,
+    get queryCacheMode() {
+      return testDoubles.queryCacheMode;
+    },
+    get aiQueryCacheMode() {
+      return testDoubles.aiQueryCacheMode;
+    },
   },
 }));
 
@@ -72,6 +134,11 @@ vi.mock("@/providers/translation", () => ({
   translationServices: [],
 }));
 
+vi.mock("@/providers/registry", () => ({
+  builtinDictionaryProviderServices: testDoubles.dictionaryServices,
+  builtinTranslationServices: [],
+}));
+
 vi.mock("@/utils/errors", () => ({
   handleRequestError: (_type: string, error: unknown) => (error instanceof Error ? error : new Error(String(error))),
   showErrorToast: testDoubles.showErrorToast,
@@ -86,6 +153,8 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 const dictionaryRequests: DictionaryRequest[] = [];
+const translationRequests: QueryInput[] = [];
+const deferredTranslationRequests: TranslationRequest[] = [];
 
 class DeferredDictionaryProvider extends BaseDictionaryProvider {
   type = DictionaryType.Linguee;
@@ -97,16 +166,61 @@ class DeferredDictionaryProvider extends BaseDictionaryProvider {
   }
 }
 
+class RecordingTranslationProvider extends BaseNonStreamingTranslateProvider {
+  type = TranslationType.OpenAI;
+
+  protected async doTranslate(queryWordInfo: QueryInput): Promise<TranslationResult> {
+    translationRequests.push(queryWordInfo);
+    return {
+      type: this.type,
+      queryWordInfo,
+      translations: ["translated"],
+    };
+  }
+}
+
+class DeferredTranslationProvider extends BaseNonStreamingTranslateProvider {
+  type = TranslationType.OpenAI;
+
+  protected doTranslate(queryWordInfo: QueryInput, options?: RequestOptions): Promise<TranslationResult> {
+    const deferred = createDeferred<TranslationResult>();
+    deferredTranslationRequests.push({ queryWordInfo, signal: options?.signal, deferred });
+    return deferred.promise;
+  }
+}
+
+class WhitespaceTranslationProvider extends BaseNonStreamingTranslateProvider {
+  type = TranslationType.OpenAI;
+
+  protected async doTranslate(queryWordInfo: QueryInput): Promise<TranslationResult> {
+    return {
+      type: this.type,
+      queryWordInfo,
+      translations: [" \t\n"],
+    };
+  }
+}
+
 beforeEach(() => {
   dictionaryRequests.length = 0;
+  translationRequests.length = 0;
+  deferredTranslationRequests.length = 0;
   testDoubles.detectLanguage.mockReset();
   testDoubles.playQueryWordAudio.mockReset().mockResolvedValue(undefined);
   testDoubles.showErrorToast.mockReset();
+  testDoubles.queryCacheMode = "off";
+  testDoubles.aiQueryCacheMode = "off";
+  clearQueryCache();
   testDoubles.dictionaryServices.splice(0, testDoubles.dictionaryServices.length, {
+    id: `static:${DictionaryType.Linguee}`,
+    label: DictionaryType.Linguee,
+    providerKey: `builtin:dictionary:${DictionaryType.Linguee}`,
+    enabledInPreferences: true,
+    order: 0,
     type: DictionaryType.Linguee,
-    preference: "enableLingueeDictionary",
-    provider: DeferredDictionaryProvider,
-    isEnabled: () => true,
+    enabled: () => true,
+    createProvider: () => new DeferredDictionaryProvider(),
+    canTriggerAutomaticAudio: true,
   });
 });
 
@@ -115,6 +229,224 @@ afterEach(() => {
 });
 
 describe("useQueryEngine query generations", () => {
+  it("reuses a completed cached dictionary result without calling its provider again", async () => {
+    testDoubles.queryCacheMode = "words";
+    const { result } = renderHook(() => useQueryEngine(englishLanguageItem, chineseLanguageItem));
+    const query = createQueryInput("cached");
+
+    act(() => result.current.queryTextWithTextInfo(query));
+    await resolveDictionaryRequest(0);
+
+    act(() => result.current.queryTextWithTextInfo(query));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(dictionaryRequests).toHaveLength(1);
+    expect(result.current.displaySections[0].items[0].fromCache).toBe(true);
+  });
+
+  it("regenerates only the selected AI service even when its completed result is cached", async () => {
+    testDoubles.aiQueryCacheMode = "words";
+    const aiService: TranslationServiceConfig = {
+      id: "profile:test",
+      label: "Test AI",
+      providerKey: "ai:test",
+      order: 0,
+      type: TranslationType.OpenAI,
+      enabled: () => true,
+      createProvider: () => new RecordingTranslationProvider(),
+    };
+    const { result } = renderHook(() =>
+      useQueryEngine(englishLanguageItem, chineseLanguageItem, {
+        translationServices: [aiService],
+        dictionaryServices: [],
+      }),
+    );
+    const query = createQueryInput("generate");
+
+    act(() => result.current.queryTextWithTextInfo(query));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(translationRequests).toHaveLength(1);
+
+    act(() => result.current.queryTextWithTextInfo(query));
+    await waitFor(() => expect(result.current.displaySections[0].items[0].fromCache).toBe(true));
+    expect(translationRequests).toHaveLength(1);
+
+    act(() => result.current.regenerateService(aiService.id));
+    await waitFor(() => expect(translationRequests).toHaveLength(2));
+  });
+
+  it("keeps only the latest regeneration when same-service requests finish out of order", async () => {
+    testDoubles.aiQueryCacheMode = "words";
+    const aiService: TranslationServiceConfig = {
+      id: "profile:deferred",
+      label: "Deferred AI",
+      providerKey: "ai:deferred",
+      order: 0,
+      type: TranslationType.OpenAI,
+      enabled: () => true,
+      createProvider: () => new DeferredTranslationProvider(),
+    };
+    const { result } = renderHook(() =>
+      useQueryEngine(englishLanguageItem, chineseLanguageItem, {
+        translationServices: [aiService],
+        dictionaryServices: [],
+      }),
+    );
+    const query = createQueryInput("generate");
+
+    act(() => result.current.queryTextWithTextInfo(query));
+    await waitFor(() => expect(deferredTranslationRequests).toHaveLength(1));
+    act(() => result.current.regenerateService(aiService.id));
+    await waitFor(() => expect(deferredTranslationRequests).toHaveLength(2));
+    act(() => result.current.regenerateService(aiService.id));
+    await waitFor(() => expect(deferredTranslationRequests).toHaveLength(3));
+
+    expect(deferredTranslationRequests[0].signal?.aborted).toBe(true);
+    expect(deferredTranslationRequests[1].signal?.aborted).toBe(true);
+    expect(deferredTranslationRequests[2].signal?.aborted).toBe(false);
+
+    await resolveTranslationRequest(2, "latest");
+    await waitFor(() => expect(result.current.displaySections[0].items[0].title).toBe("latest"));
+    expect(result.current.isLoading).toBe(false);
+
+    await resolveTranslationRequest(1, "middle");
+    await resolveTranslationRequest(0, "oldest");
+    expect(result.current.displaySections[0].items[0].title).toBe("latest");
+    expect(getCachedQueryResult(aiService, query)).toMatchObject({ translations: ["latest"] });
+  });
+
+  it("does not cache a provider result that completes after the cache was cleared", async () => {
+    testDoubles.queryCacheMode = "words";
+    const { result } = renderHook(() => useQueryEngine(englishLanguageItem, chineseLanguageItem));
+    const query = createQueryInput("pending");
+
+    act(() => result.current.queryTextWithTextInfo(query));
+    clearQueryCache();
+    await resolveDictionaryRequest(0);
+
+    expect(result.current.displaySections).not.toEqual([]);
+    expect(getCachedQueryResult(testDoubles.dictionaryServices[0], query)).toBeUndefined();
+  });
+
+  it("saves completed results without an unused standalone detail snapshot", async () => {
+    const { result } = renderHook(() => useQueryEngine(englishLanguageItem, chineseLanguageItem));
+    const query = createQueryInput("word");
+    act(() => result.current.queryTextWithTextInfo(query));
+    await resolveDictionaryRequest(0);
+
+    const favorite = buildFavoriteWord(query, result.current.displaySections);
+    expect(favorite.displaySections[0].items[0].detailsMarkdown).toBe("**word**");
+    expect(JSON.stringify(favorite)).not.toContain("showMoreDetailsMarkdown");
+    expect(JSON.stringify(favorite)).not.toContain("data:image/svg+xml");
+  });
+
+  it("changes the list epoch only when each query first produces visible results", async () => {
+    const { result } = renderHook(() =>
+      useQueryEngine(englishLanguageItem, chineseLanguageItem, {
+        translationServices: [],
+        dictionaryServices: testDoubles.dictionaryServices,
+      }),
+    );
+
+    expect(result.current.listEpoch).toBe(0);
+
+    act(() => result.current.queryTextWithTextInfo(createQueryInput("first")));
+    expect(dictionaryRequests).toHaveLength(1);
+    expect(result.current.listEpoch).toBe(0);
+
+    await resolveDictionaryRequest(0);
+    expect(result.current.listEpoch).toBe(1);
+
+    act(() => {
+      result.current.clearQueryResult();
+      result.current.clearQueryResult();
+    });
+    expect(result.current.listEpoch).toBe(1);
+
+    act(() => result.current.queryTextWithTextInfo(createQueryInput("second")));
+    expect(dictionaryRequests).toHaveLength(2);
+    expect(result.current.listEpoch).toBe(1);
+
+    await resolveDictionaryRequest(1);
+    expect(result.current.listEpoch).toBe(4);
+  });
+
+  it("adds providers that load later without restarting dictionary requests", async () => {
+    const dynamicService: TranslationServiceConfig = {
+      id: "profile:test",
+      label: "Test AI",
+      providerKey: "ai:test",
+      order: 0,
+      type: TranslationType.OpenAI,
+      icon: { kind: "preset", name: "gemini" },
+      enabled: () => true,
+      createProvider: () => new RecordingTranslationProvider(),
+    };
+    const { result, rerender } = renderHook(
+      ({ services }: { services: TranslationServiceConfig[] }) =>
+        useQueryEngine(englishLanguageItem, chineseLanguageItem, {
+          translationServices: services,
+          dictionaryServices: testDoubles.dictionaryServices,
+        }),
+      { initialProps: { services: [] as TranslationServiceConfig[] } },
+    );
+
+    act(() => {
+      result.current.queryTextWithTextInfo(createQueryInput("incremental"));
+    });
+    expect(dictionaryRequests).toHaveLength(1);
+    expect(translationRequests).toHaveLength(0);
+
+    rerender({ services: [dynamicService] });
+    await waitFor(() => expect(translationRequests).toHaveLength(1));
+    expect(translationRequests[0].word).toBe("incremental");
+    await waitFor(() =>
+      expect(
+        result.current.displaySections
+          .flatMap((section) => section.items)
+          .find((item) => item.serviceId === dynamicService.id)?.serviceIcon,
+      ).toEqual({ kind: "preset", name: "gemini" }),
+    );
+    expect(dictionaryRequests).toHaveLength(1);
+    await resolveDictionaryRequest(0);
+  });
+
+  it("adds a late dictionary service once without letting it claim automatic audio", async () => {
+    const dynamicDictionaryService: DictionaryServiceConfig = {
+      id: "profile:test:dictionary",
+      label: "Test AI Dictionary",
+      providerKey: "ai:test",
+      order: 0,
+      type: DictionaryType.AI,
+      enabled: () => true,
+      createProvider: () => new DeferredDictionaryProvider(),
+      canTriggerAutomaticAudio: false,
+    };
+    const { result, rerender } = renderHook(
+      ({ dictionaryServices }: { dictionaryServices: DictionaryServiceConfig[] }) =>
+        useQueryEngine(englishLanguageItem, chineseLanguageItem, {
+          translationServices: [],
+          dictionaryServices,
+        }),
+      { initialProps: { dictionaryServices: testDoubles.dictionaryServices } },
+    );
+
+    act(() => {
+      result.current.queryTextWithTextInfo(createQueryInput("incremental"));
+    });
+    expect(dictionaryRequests).toHaveLength(1);
+
+    rerender({ dictionaryServices: [...testDoubles.dictionaryServices, dynamicDictionaryService] });
+    await waitFor(() => expect(dictionaryRequests).toHaveLength(2));
+
+    await resolveDictionaryRequest(1);
+    expect(testDoubles.playQueryWordAudio).not.toHaveBeenCalled();
+
+    await resolveDictionaryRequest(0);
+    await waitFor(() => expect(testDoubles.playQueryWordAudio).toHaveBeenCalledTimes(1));
+    expect(dictionaryRequests).toHaveLength(2);
+  });
+
   it("keeps the initial query active through the development Strict Mode effect replay", async () => {
     const detection = createDeferred<DetectedLangModel>();
     testDoubles.detectLanguage.mockReturnValueOnce(detection.promise);
@@ -233,6 +565,32 @@ describe("useQueryEngine query generations", () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it("does not create a result when a translation output contains only whitespace", async () => {
+    const whitespaceService: TranslationServiceConfig = {
+      id: "profile:whitespace",
+      label: "Whitespace AI",
+      providerKey: "ai:whitespace",
+      order: 0,
+      type: TranslationType.OpenAI,
+      icon: { kind: "preset", name: "gemini" },
+      enabled: () => true,
+      createProvider: () => new WhitespaceTranslationProvider(),
+    };
+    const { result } = renderHook(() =>
+      useQueryEngine(englishLanguageItem, chineseLanguageItem, {
+        translationServices: [whitespaceService],
+        dictionaryServices: [],
+      }),
+    );
+
+    act(() => {
+      result.current.queryTextWithTextInfo(createQueryInput("whitespace"));
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.displaySections).toEqual([]);
+  });
+
   it("automatically plays each new word when consecutive lookups have the same provider count", async () => {
     const { result } = renderHook(() => useQueryEngine(englishLanguageItem, chineseLanguageItem));
 
@@ -301,6 +659,18 @@ async function resolveDictionaryRequest(index: number) {
   const request = dictionaryRequests[index];
   await act(async () => {
     request.deferred.resolve(createDictionaryResult(request.queryWordInfo));
+    await request.deferred.promise;
+  });
+}
+
+async function resolveTranslationRequest(index: number, translation: string) {
+  const request = deferredTranslationRequests[index];
+  await act(async () => {
+    request.deferred.resolve({
+      type: TranslationType.OpenAI,
+      queryWordInfo: request.queryWordInfo,
+      translations: [translation],
+    });
     await request.deferred.promise;
   });
 }

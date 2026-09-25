@@ -96,6 +96,10 @@ export function ChatView(): React.JSX.Element {
   function ActionMessage(props: { message?: RaycastChatMessage }): React.JSX.Element {
     const question = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.USER);
     const answer = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+    const answerText = props.message?.messages
+      .filter((message) => message.role === OllamaApiChatMessageRole.ASSISTANT)
+      .map((message) => message.content)
+      .join("");
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -104,7 +108,11 @@ export function ChatView(): React.JSX.Element {
             icon={Icon.SpeechBubbleActive}
             onAction={() => {
               Run(Query, Image, UseToolsOllamaApi, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
-                await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Error:",
+                  message: e.message,
+                });
                 SetIsLoading(false);
               });
             }}
@@ -159,6 +167,7 @@ export function ChatView(): React.JSX.Element {
               <Action title="No" icon={Icon.XMarkCircle} />
             </ActionPanel.Submenu>
           )}
+          {answerText && <Action.Paste title="Paste Answer" content={answerText} />}
         </ActionPanel.Section>
         {Chat && !IsLoading && (
           <ActionPanel.Section title="Attach">
@@ -181,10 +190,17 @@ export function ChatView(): React.JSX.Element {
                 GetImage()
                   .then((i) => {
                     SetImage(i);
-                    showToast({ style: Toast.Style.Success, title: "Image Added" });
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Image Added",
+                    });
                   })
                   .catch((e) => {
-                    showToast({ style: Toast.Style.Failure, title: "Error: ", message: String(e) });
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Error: ",
+                      message: String(e),
+                    });
                   })
               }
               shortcut={Shortcut.AttachImage}
@@ -238,7 +254,10 @@ export function ChatView(): React.JSX.Element {
 
     const toolUsed = message.messages.filter((v) => v.role === OllamaApiChatMessageRole.TOOL);
     if (toolUsed.length)
-      accessory.push({ icon: Icon.Hammer, tooltip: toolUsed.map((v) => `${v.tool_name}`).join(", ") });
+      accessory.push({
+        icon: Icon.Hammer,
+        tooltip: toolUsed.map((v) => `${v.tool_name}`).join(", "),
+      });
 
     return accessory;
   }

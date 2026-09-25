@@ -38,8 +38,8 @@ const SOCIAL_REFERRERS = [
   "https://www.reddit.com/",
 ];
 
-/** Timeout for Googlebot fetch attempts (shorter than normal) */
-export const GOOGLEBOT_TIMEOUT_MS = 15000;
+/** Timeout for crawler-UA fetch attempts (shorter than a normal fetch) */
+export const CRAWLER_TIMEOUT_MS = 15000;
 
 /** Timeout for WallHopper re-fetch attempts */
 export const WALLHOPPER_TIMEOUT_MS = 15000;
@@ -161,28 +161,35 @@ function categorizeError(err: unknown): FetchError {
 }
 
 /**
- * Fetches HTML content using Googlebot User-Agent for paywall bypass.
- * Many paywalled sites serve full content to search engine crawlers for SEO indexing.
+ * Fetches HTML with a crawler User-Agent, for paywall bypass.
+ *
+ * Publishers serve full article text to bots they want indexed (or have licensing
+ * deals with) while gating the same page for a browser. The three callers below
+ * differ only in which bot they claim to be.
  *
  * Based on the 13ft technique: https://github.com/wasi-master/13ft
  *
  * @param url - The URL to fetch
+ * @param userAgent - User-Agent to send
+ * @param name - Log label for this bypass method (e.g. "googlebot")
  * @returns FetchResult on success, FetchError on failure
  */
-export async function fetchHtmlAsGooglebot(
+async function fetchHtmlAsCrawler(
   url: string,
+  userAgent: string,
+  name: string,
 ): Promise<{ success: true; data: FetchResult } | { success: false; error: FetchError }> {
-  paywallLog.log("bypass:googlebot:start", { url });
+  paywallLog.log(`bypass:${name}:start`, { url });
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), GOOGLEBOT_TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), CRAWLER_TIMEOUT_MS);
 
     const response = await fetch(url, {
       signal: controller.signal,
       redirect: "follow",
       headers: {
-        "User-Agent": GOOGLEBOT_USER_AGENT,
+        "User-Agent": userAgent,
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
         "Accept-Encoding": "gzip, deflate",
@@ -194,7 +201,7 @@ export async function fetchHtmlAsGooglebot(
 
     if (!response.ok) {
       const error = getHttpError(response.status);
-      paywallLog.log("bypass:googlebot:failed", {
+      paywallLog.log(`bypass:${name}:failed`, {
         url,
         statusCode: response.status,
         reason: error.message,
@@ -205,7 +212,7 @@ export async function fetchHtmlAsGooglebot(
     const html = await response.text();
     const contentType = response.headers.get("content-type");
 
-    paywallLog.log("bypass:googlebot:success", {
+    paywallLog.log(`bypass:${name}:success`, {
       url,
       statusCode: response.status,
       contentLength: html.length,
@@ -222,9 +229,14 @@ export async function fetchHtmlAsGooglebot(
     };
   } catch (err) {
     const error = categorizeError(err);
-    paywallLog.log("bypass:googlebot:failed", { url, reason: error.message });
+    paywallLog.log(`bypass:${name}:failed`, { url, reason: error.message });
     return { success: false, error };
   }
+}
+
+/** Fetches HTML as Googlebot — many sites serve full content to search crawlers for SEO. */
+export function fetchHtmlAsGooglebot(url: string) {
+  return fetchHtmlAsCrawler(url, GOOGLEBOT_USER_AGENT, "googlebot");
 }
 
 /**
@@ -308,7 +320,7 @@ async function fetchWithReferrer(
 ): Promise<{ success: true; data: FetchResult } | { success: false; error: FetchError }> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), GOOGLEBOT_TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), CRAWLER_TIMEOUT_MS);
 
     const response = await fetch(url, {
       signal: controller.signal,
@@ -346,69 +358,9 @@ async function fetchWithReferrer(
   }
 }
 
-/**
- * Fetch with Bingbot User-Agent (alternative to Googlebot).
- * Some sites may serve content to Bingbot but not Googlebot.
- *
- * @param url - The URL to fetch
- * @returns FetchResult on success, FetchError on failure
- */
-export async function fetchHtmlAsBingbot(
-  url: string,
-): Promise<{ success: true; data: FetchResult } | { success: false; error: FetchError }> {
-  paywallLog.log("bypass:bingbot:start", { url });
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), GOOGLEBOT_TIMEOUT_MS);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow",
-      headers: {
-        "User-Agent": BINGBOT_USER_AGENT,
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate",
-        Connection: "keep-alive",
-      },
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const error = getHttpError(response.status);
-      paywallLog.log("bypass:bingbot:failed", {
-        url,
-        statusCode: response.status,
-        reason: error.message,
-      });
-      return { success: false, error };
-    }
-
-    const html = await response.text();
-    const contentType = response.headers.get("content-type");
-
-    paywallLog.log("bypass:bingbot:success", {
-      url,
-      statusCode: response.status,
-      contentLength: html.length,
-    });
-
-    return {
-      success: true,
-      data: {
-        html,
-        url: response.url,
-        contentLength: html.length,
-        contentType,
-      },
-    };
-  } catch (err) {
-    const error = categorizeError(err);
-    paywallLog.log("bypass:bingbot:failed", { url, reason: error.message });
-    return { success: false, error };
-  }
+/** Fetches HTML as Bingbot — some sites serve content to Bingbot but not Googlebot. */
+export function fetchHtmlAsBingbot(url: string) {
+  return fetchHtmlAsCrawler(url, BINGBOT_USER_AGENT, "bingbot");
 }
 
 /**

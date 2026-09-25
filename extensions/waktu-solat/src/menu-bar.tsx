@@ -1,94 +1,113 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import {
   getPreferenceValues,
   Icon,
   launchCommand,
   LaunchType,
-  LocalStorage,
   MenuBarExtra,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { loadTodaySolat, PrayerTime } from "./lib/prayer-times";
-import { now } from "moment/moment";
+import { usePromise } from "@raycast/utils";
+import { differenceInMilliseconds, isAfter, isBefore } from "date-fns";
+import { loadStoredPrayerTime, PrayerTime, PrayerTimeItem } from "./lib/prayer-times";
 
-// noinspection JSUnusedGlobalSymbols
-export default function Command() {
-  const { menuTemplate, afterOffset, beforeOffset, showIcon }: Preferences = getPreferenceValues();
-  const [isLoading, setLoading] = useState(true);
-  const [prayerTime, setPrayerTime] = useState<PrayerTime>();
-  const [zoneId, setZoneId] = useState<string>();
+function applyMenuTemplate(template: string, label: string, value: string) {
+  return template.split("$name").join(label).split("$time").join(value);
+}
 
-  async function onLoad() {
-    const _zid = (await LocalStorage.getItem("zone")) || "WLY01";
-    setZoneId(_zid);
-    setPrayerTime(await loadTodaySolat(_zid));
-    setLoading(false);
+function getPrayerState(prayerTime: PrayerTime | undefined, beforeOffset: string, afterOffset: string) {
+  const items = prayerTime?.items ?? [];
+  const current = items.find((item) => item.isCurrent);
+  const nextPrayer = items.find((item) => item.isNext);
+
+  const now = new Date();
+  const nextDiff = nextPrayer ? Math.abs(differenceInMilliseconds(nextPrayer.time, now) / 60_000) : 0;
+  const currentDiff = current ? Math.abs(differenceInMilliseconds(current.time, now) / 60_000) : 0;
+
+  const beforeMinutes = Math.abs(Number(beforeOffset)) || 30;
+  const afterMinutes = Math.abs(Number(afterOffset)) || 30;
+
+  let menuPrayer: PrayerTimeItem | undefined;
+  if (nextDiff < beforeMinutes) {
+    menuPrayer = nextPrayer;
+  } else if (currentDiff < afterMinutes) {
+    menuPrayer = current;
   }
 
-  useEffect(() => {
-    onLoad();
-  }, []);
+  return {
+    current,
+    nextPrayer,
+    menuPrayer,
+    upcomingPrayers: items.filter((item) => isAfter(item.time, now)),
+    pastPrayers: current ? items.filter((item) => isBefore(item.time, current.time)) : [],
+    hasPrayerTimes: items.length > 0,
+  };
+}
 
-  const current = prayerTime?.items?.find((p) => p.isCurrent);
-  const nextPrayer = prayerTime?.items?.find((p) => p.isNext);
-  const nextDiff = Math.abs(nextPrayer?.time.diff(now(), "minutes", true) || 0);
-  const currentDiff = Math.abs(current?.time.diff(now(), "minutes", true) || 0);
-  const menuPrayer =
-    nextDiff < (Math.abs(beforeOffset) || 30)
-      ? nextPrayer
-      : currentDiff < (Math.abs(afterOffset) || 30)
-        ? current
-        : null;
-  const title = menuTemplate?.replace("$name", menuPrayer?.label).replace("$time", menuPrayer?.value);
-  // const icon = showIcon ? "🕌 " : "";
-  const _title = (!isLoading || undefined) && menuPrayer && `${title}`;
-  const shouldHide = !_title && !showIcon;
-  const upcomingPrayers = prayerTime?.items?.filter((p) => p.time.isAfter(now()));
-  const pastPrayers = prayerTime?.items?.filter((p) => p.time.isBefore(current.time));
+function PrayerMenuItem({ item, icon }: { item: PrayerTimeItem; icon: Icon }) {
+  return (
+    <MenuBarExtra.Item
+      icon={icon}
+      key={item.label}
+      title={`${item.label}: `}
+      subtitle={item.value}
+      onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
+    />
+  );
+}
+
+export default function Command() {
+  const { data, isLoading } = usePromise(loadStoredPrayerTime);
+
+  const preferences = getPreferenceValues<Preferences>();
+  const prayerState = getPrayerState(data?.prayerTime, preferences.beforeOffset, preferences.afterOffset);
+
+  const menuTitle = prayerState.menuPrayer
+    ? applyMenuTemplate(preferences.menuTemplate, prayerState.menuPrayer.label, prayerState.menuPrayer.value)
+    : undefined;
+
+  const title = !isLoading && prayerState.menuPrayer ? menuTitle : undefined;
+  const icon = preferences.iconColor === "black" ? "mosque01-black.svg" : "mosque01.svg";
+
   return (
     <MenuBarExtra
-      icon={(showIcon && "mosque01.svg") || undefined}
-      title={_title}
-      tooltip={`${current?.label} since ${current?.value}, Next: ${nextPrayer?.label} at ${nextPrayer?.value}`}
-      isLoading={isLoading || shouldHide}
+      icon={preferences.showIcon ? icon : undefined}
+      title={title}
+      tooltip={`${prayerState.current?.label} since ${prayerState.current?.value}, Next: ${prayerState.nextPrayer?.label} at ${prayerState.nextPrayer?.value}`}
+      isLoading={isLoading || (!title && !preferences.showIcon)}
     >
-      <MenuBarExtra.Section title={`Current [${zoneId}]`}>
+      {prayerState.hasPrayerTimes ? (
+        <>
+          <MenuBarExtra.Section title={`Current [${data?.zoneId}]`}>
+            <MenuBarExtra.Item
+              icon={Icon.CircleProgress50}
+              key={prayerState.current?.label}
+              title={`${prayerState.current?.label}: `}
+              subtitle={`${prayerState.current?.value}`}
+              onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
+            />
+          </MenuBarExtra.Section>
+          {prayerState.upcomingPrayers.length > 0 && (
+            <MenuBarExtra.Section title="Upcoming">
+              {prayerState.upcomingPrayers.map((item) => (
+                <PrayerMenuItem item={item} icon={Icon.Circle} />
+              ))}
+            </MenuBarExtra.Section>
+          )}
+          {prayerState.pastPrayers.length > 0 && (
+            <MenuBarExtra.Section title="Past">
+              {prayerState.pastPrayers.map((item) => (
+                <PrayerMenuItem item={item} icon={Icon.CircleProgress100} />
+              ))}
+            </MenuBarExtra.Section>
+          )}
+        </>
+      ) : (
         <MenuBarExtra.Item
-          // icon={"mosque-color.svg"}
-          icon={Icon.CircleProgress50}
-          key={current?.label}
-          title={`${current?.label}: `}
-          subtitle={`${current?.value}`}
+          icon={Icon.ExclamationMark}
+          title={isLoading ? "Loading prayer times…" : "No prayer times available"}
+          subtitle={isLoading ? undefined : "Open Waktu Solat to try again"}
           onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
         />
-      </MenuBarExtra.Section>
-      {upcomingPrayers?.length > 0 && (
-        <MenuBarExtra.Section title="Upcoming">
-          {upcomingPrayers?.map((item) => (
-            <MenuBarExtra.Item
-              icon={Icon.Circle}
-              key={item.label}
-              title={`${item.label}: `}
-              subtitle={`${item.value}`}
-              onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
-            />
-          ))}
-        </MenuBarExtra.Section>
-      )}
-      {pastPrayers?.length > 0 && (
-        <MenuBarExtra.Section title="Past">
-          {pastPrayers?.map((item) => (
-            <MenuBarExtra.Item
-              icon={Icon.CircleProgress100}
-              key={item.label}
-              title={`${item.label}: `}
-              subtitle={`${item.value}`}
-              onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
-            />
-          ))}
-        </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item icon={Icon.Cog} title="Settings" onAction={() => openExtensionPreferences()} />

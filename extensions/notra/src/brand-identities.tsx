@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { BrandIdentityDetail } from "./components/brand-identity-detail";
 import { CreateBrandIdentityForm } from "./components/create-brand-identity-form";
 import { useBrandIdentities } from "./hooks/use-brand-identities";
@@ -38,13 +38,13 @@ export default function Command() {
               />
               <Action.Push
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<CreateBrandIdentityForm onCreated={revalidate} />}
                 title="Create Brand Identity"
               />
               <Action.OpenInBrowser
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
                 title="View on Notra"
                 url={notraUrl("/settings/brand")}
               />

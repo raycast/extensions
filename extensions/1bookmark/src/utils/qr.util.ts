@@ -1,12 +1,12 @@
 import qrcode from "qrcode-generator";
 
-// URL → SVG data URI. qrcode-generator는 sync라 render 중에 호출해도 안전.
-// errorCorrectionLevel 'M'(기본)이 디자인/복원력 균형상 적당.
+// URL → SVG data URI. qrcode-generator is sync, so it is safe to call during render.
+// errorCorrectionLevel 'M' (default) is a reasonable balance between design and resilience.
 //
-// SVG의 natural width/height는 module 수에 따라 달라지므로 (URL 길이가 길수록
-// modules↑), 동일한 size 속성으로 override하여 어떤 URL이든 화면 표시 크기가
-// 같아지도록 한다. viewBox는 원본 그대로 유지되어 SVG 내부가 해당 크기에 맞춰
-// 스케일링된다.
+// The SVG's natural width/height depend on the module count (longer URL → more
+// modules), so we override them with the same size attribute so every URL renders
+// at the same on-screen size. The viewBox is kept as-is, so the SVG contents scale
+// to fit that size.
 export function qrSvgDataUri(url: string, size = 200): string | null {
   if (!url) return null;
   try {

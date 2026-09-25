@@ -1,5 +1,18 @@
 # Linear Changelog
 
+## [Plan and Review Work Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Added a skill for turning specs into tasks, triaging issues, and reporting cycle status with linked evidence and clear scope.
+
+## [Favorites Crash Fix] - 2026-09-14
+
+- Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
+
+## [AI Comment Reliability] - 2026-09-02
+
+- Prevent AI comment tools from retrying successful writes and creating duplicate comments.
+
 ## [Expanded AI Tools] - 2026-08-26
 
 - Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.

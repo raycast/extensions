@@ -89,7 +89,7 @@ export default function Command(props: LaunchProps) {
             const workspaceUrl = await LocalStorage.getItem<string>("URL");
             if (!workspaceUrl) throw new Error("The awork workspace URL is unavailable");
 
-            await open(`${workspaceUrl.replace(/\/$/, "")}/tasks/${result.task.id}`);
+            await open(`${workspaceUrl.replace(/\/$/, "")}/tasks/${result.task.taskIdentifier ?? result.task.id}`);
           } catch (error) {
             await showFailureToast(error, { title: "Task created, but couldn't open it" });
           }

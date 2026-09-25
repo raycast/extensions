@@ -1,115 +1,88 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCachedState } from "@raycast/utils";
-import { getDevices, getCategories } from "./utils/tuyaConnector";
+import { showToast, Toast } from "@raycast/api";
+import { getCategories, getDevicesFunctions } from "./utils/tuyaConnector";
+import { loadDevicesWithFallback } from "./utils/deviceSource";
 import { DeviceCategory, Device } from "./utils/interfaces";
 import { DeviceList } from "./components/list";
 import { getCategory, getDeviceFunctions, isPinned, ShowToastError } from "./utils/functions";
-import { DeviceOnlineFilterDropdown, DeviceOnlineFilterType, placeholder } from "./components/filter";
+import { cleanName } from "./utils/deviceSemantics";
+import { DeviceOnlineFilterDropdown, placeholder } from "./components/filter";
+import { DeviceOnlineFilterType, filterDevices } from "./utils/filters";
 
 export default function Command() {
-  // States
   const [filter, setFilter] = useState(DeviceOnlineFilterType.all);
   const [isLoading, setIsLoading] = useState(true);
+  // Off by default: the side panel squeezes the list column and truncates the
+  // state, battery and offline accessories, which are the useful part at a glance.
+  const [isShowingDetail, setIsShowingDetail] = useCachedState<boolean>("showDetail", false);
   const [devices, setDevices] = useCachedState<Device[]>("devices", []);
   const [categories, setCategories] = useCachedState<DeviceCategory[]>("categories", []);
-  const [pinnedSwitches, setPinnedSwitches] = useCachedState<string[]>("pinnedSwitches", []);
+
+  // Keeps the effect below from reading a stale device list through its closure.
+  const devicesRef = useRef(devices);
+  devicesRef.current = devices;
+
+  // Categories only translate a code into a display name, so a failure here must not
+  // stop the device list from loading.
+  useEffect(() => {
+    getCategories()
+      .then((result) => setCategories(result ?? []))
+      .catch(() => setCategories((previous) => previous ?? []));
+  }, []);
 
   useEffect(() => {
-    const getDeviceCategories = async () => {
-      const categories = await getCategories();
+    const load = async () => {
+      const { devices: fetched, source } = await loadDevicesWithFallback();
+      const previousDevices = devicesRef.current ?? [];
 
-      setCategories(() => {
-        return categories.result;
-      });
+      // One request for the whole account instead of one per device.
+      const functionsByDevice = await getDevicesFunctions(fetched.map((device) => device.id));
+
+      const populated = fetched.map((device) => ({
+        ...device,
+        name: cleanName(device.name),
+        status: getDeviceFunctions(
+          device,
+          previousDevices.find((deviceInfo) => deviceInfo.id === device.id),
+          functionsByDevice.get(device.id) ?? [],
+        ),
+      }));
+
+      setDevices((prev) => populated.map((device) => ({ ...device, pinned: isPinned(device, prev ?? []) })));
+      setIsLoading(false);
+
+      if (source === "cache") {
+        showToast(
+          Toast.Style.Failure,
+          "Showing Cached Devices",
+          "The Tuya cloud is unavailable, so commands will be sent over the local network where possible.",
+        );
+      }
     };
 
-    getDeviceCategories().catch((error) => {
+    load().catch((error) => {
       setIsLoading(false);
-      setCategories(() => {
-        return [];
-      });
-      setDevices(() => {
-        return [];
-      });
       ShowToastError(error);
     });
   }, []);
 
-  useEffect(() => {
-    const getAllDevices = async () => {
-      const newDevicesinfo = await getDevices();
-
-      const populateDevicesPromises = newDevicesinfo.map(async (device) => {
-        const oldDeviceInfo = devices.find((deviceInfo) => deviceInfo.id === device.id);
-        const functions = await getDeviceFunctions(device, oldDeviceInfo);
-
-        return {
-          ...device,
-          status: functions,
-        };
-      });
-
-      const devicesPopulated = await Promise.all(populateDevicesPromises);
-
-      setDevices((prev) => {
-        const formatedDevices = devicesPopulated.map((device) => {
-          return {
-            ...device,
-            pinned: isPinned(device, prev),
-            category: getCategory(categories, device.category),
-          };
-        });
-
-        return formatedDevices;
-      });
-      setIsLoading(false);
-    };
-
-    if (categories && categories.length > 0) {
-      getAllDevices().catch((error) => {
-        ShowToastError(error);
-      });
-    }
-  }, [categories]);
-
-  const finalDevices =
-    filter === DeviceOnlineFilterType.Online
-      ? devices.filter((device) => device.online)
-      : filter === DeviceOnlineFilterType.Offline
-      ? devices.filter((device) => !device.online)
-      : devices;
+  const visible = filterDevices(devices ?? [], filter).map((device) => ({
+    ...device,
+    category: getCategory(categories ?? [], device.category),
+  }));
 
   return (
     <DeviceList
-      devices={finalDevices}
+      devices={visible}
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<DeviceOnlineFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
+      onToggleDetail={() => setIsShowingDetail((previous) => !previous)}
       filter={filter}
-      pinnedSwitches={pinnedSwitches}
-      onTogglePinSwitch={(deviceId, commandCode) => {
-        const key = `${deviceId}:${commandCode}`;
-        setPinnedSwitches((prev) => {
-          if (prev.includes(key)) {
-            return prev.filter((k) => k !== key);
-          }
-          return [...prev, key];
-        });
-      }}
       onAction={(device) => {
-        setDevices((prev) => {
-          const formatedDevices = prev.map((oldDevice) => {
-            if (device.id === oldDevice.id) {
-              return device;
-            }
-
-            return {
-              ...oldDevice,
-            };
-          });
-
-          return formatedDevices;
-        });
+        setDevices((prev) => (prev ?? []).map((oldDevice) => (device.id === oldDevice.id ? device : { ...oldDevice })));
       }}
     />
   );

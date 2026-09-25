@@ -31,31 +31,31 @@ const HueRecordListItem = memo(function HueRecordListItem({
         {
           tooltip: record.hue.colors[0],
           icon: {
-            source: `https://hue-palette.zeabur.app/hue-color-image/${record.hue.tailwind_colors["50"].replace("#", "")}`,
+            source: `https://hue-palette.yencheng.dev/hue-color-image/${record.hue.tailwind_colors["50"].replace("#", "")}`,
           },
         },
         {
           tooltip: record.hue.colors[3],
           icon: {
-            source: `https://hue-palette.zeabur.app/hue-color-image/${record.hue.tailwind_colors["300"].replace("#", "")}`,
+            source: `https://hue-palette.yencheng.dev/hue-color-image/${record.hue.tailwind_colors["300"].replace("#", "")}`,
           },
         },
         {
           tooltip: record.hue.colors[5],
           icon: {
-            source: `https://hue-palette.zeabur.app/hue-color-image/${record.hue.tailwind_colors["500"].replace("#", "")}`,
+            source: `https://hue-palette.yencheng.dev/hue-color-image/${record.hue.tailwind_colors["500"].replace("#", "")}`,
           },
         },
         {
           tooltip: record.hue.colors[7],
           icon: {
-            source: `https://hue-palette.zeabur.app/hue-color-image/${record.hue.tailwind_colors["700"].replace("#", "")}`,
+            source: `https://hue-palette.yencheng.dev/hue-color-image/${record.hue.tailwind_colors["700"].replace("#", "")}`,
           },
         },
         {
           tooltip: record.hue.colors[9],
           icon: {
-            source: `https://hue-palette.zeabur.app/hue-color-image/${record.hue.tailwind_colors["900"].replace("#", "")}`,
+            source: `https://hue-palette.yencheng.dev/hue-color-image/${record.hue.tailwind_colors["900"].replace("#", "")}`,
           },
         },
       ]}

@@ -1,25 +1,29 @@
 # Mint for Raycast
 
-Inspect Mint’s on-device storage intelligence without leaving Raycast.
+Use Mint's native Mac-care tools as a fast Raycast interface. Raycast handles selection and review; the signed Mint app performs every scan and action with the same engines, plan allowance, Boundaries, history, and Undo used by Mint's window and menu bar.
 
 ## Commands
 
-- **View Mint Status** — disk usage, reclaimable space, seven-day activity, and managed folders.
-- **Scan Reclaimable Space** — a focused, read-only scan of developer caches, app caches, logs, and junk. Mint's full Disk review engine remains in the app.
+- **Review AI Agent Storage** — see what Codex, Claude Code, Claude Desktop, Cursor, and other AI tools keep on this Mac, including conversation age and reclaimable archived media.
+- **Free Disk** — run a standard scan or add exact duplicates, similar photos, and reversible AI archive optimization; review every result before cleaning.
+- **Free Memory** — release ordinary apps quickly, with a separate explicit step for advanced processes.
+- **Uninstall App** — find an installed app and its leftovers, review protected or administrator-required items, then move the selection to Trash.
+- **Quick Redact** — detect sensitive content locally and export a new redacted PDF or image from Raycast.
+- **Full Redact in Mint** — open the selected file in Mint's visual editor for manual redaction and page-by-page review.
+- **Undo Mint Action** — restore recoverable cleanup, uninstall, organization, and AI archive optimization actions.
+- **View Mint Status** — see disk usage, reclaimable space, seven-day activity, and managed folders.
 - **Explain Disk Growth or File Activity** — explain storage changes or investigate Mint operations involving a path.
 
-## How Mint Differs From Disk Analyzers
+## One Product, Another Interface
 
-Mint is a companion for the Mint app, not a general-purpose disk browser. It reads Mint's signed local CLI to show storage trends, Mint-managed folders, recent Mint activity, and focused reclaimable categories. It does not crawl arbitrary folders from Raycast, request Full Disk Access for Raycast, or expose deletion; cleanup remains in Mint's review-first workflow.
+This extension is not a separate cleaner and does not have a separate subscription. It requires the direct edition of Mint and uses the plan already active in Mint. Actions started in Raycast appear in Mint's normal history and count against the same cleanup allowance.
 
-The extension intentionally does not expose destructive actions. Cleanup remains in Mint’s review-first workflow, where actions default to Trash and enter the 90-day operation journal.
+The extension never implements deletion itself. It sends a short-lived, local request to Mint's signed command surface; Mint then revalidates live files or processes before acting. Protected Boundaries stay protected, Needs Review items require an explicit selection, cleanup defaults to Trash where supported, and existing redaction outputs are never overwritten.
 
-All command output stays on this Mac. The extension does not send paths, filenames, scan results, or activity history to Raycast or DZG Studio.
-
-Before running a command, the extension verifies that Mint's CLI is signed by DZG Studio LLC and checks its machine-readable schema and read-only capabilities. An unsigned, altered, or incompatible CLI is never executed.
+Paths, filenames, scan results, and redaction detections stay on this Mac. Sensitive matched text is not returned to Raycast.
 
 ## Requirements
 
-Install the direct edition of Mint from https://mint.dzgapp.com and launch it once from Finder. The extension locates `mint-cli` in Homebrew’s standard binary paths or inside `/Applications/Mint.app`.
+Install Mint 1.0.25 or later from https://mint.dzgapp.com and launch it once from Finder. The extension verifies DZG Studio's signature and the `surface.v1` capability before exposing native actions.
 
 Mint requires macOS 14 Sonoma or later.

@@ -1,5 +1,12 @@
 # Changelog
 
+## [AI Tools] - 2026-09-07
+
+- Add AI Tools for Raycast AI integration:
+  - `ask-hermes`: Send questions to Hermes and get answers
+  - `process-text`: Transform text (summarize, explain, fix grammar, etc.)
+  - `check-status`: Diagnose connection issues with the Hermes API server
+
 ## [0.1.1] - 2026-08-21
 
 - Status uses `GET /v1/models` as the primary liveness check (OpenAI-compatible). `/health` is optional metadata.

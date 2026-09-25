@@ -1,18 +1,16 @@
-export interface OpencodegoQuota {
-  label: string;
-  used: number;
-  limit: number;
-  unit: string;
-}
-
-export interface OpencodegoUsage {
-  planName: string;
-  primary: OpencodegoQuota;
-  quotas: OpencodegoQuota[];
+export interface OpencodegoWindowUsage {
+  status: string;
+  percent: number;
   resetsAt: string | null;
 }
 
+export interface OpencodegoUsage {
+  rolling: OpencodegoWindowUsage;
+  weekly: OpencodegoWindowUsage;
+  monthly: OpencodegoWindowUsage;
+}
+
 export interface OpencodegoError {
-  type: "not_configured" | "unauthorized" | "network_error" | "parse_error" | "unknown";
+  type: "not_configured" | "unauthorized" | "forbidden" | "network_error" | "parse_error" | "unknown";
   message: string;
 }

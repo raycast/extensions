@@ -14,7 +14,8 @@
     "AntonNiklasson",
     "xmok",
     "merchako",
-    "alexi.build"
+    "alexi.build",
+    "sansaxena789"
   ],
   "repository": {
     "type": "git",
@@ -31,7 +32,7 @@
     "svg:optimize": "find assets -type f -name '*.svg' -print0 | xargs -0 -n 1 -P 6 svgo"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^2.0.5",
     "fuzzball": "^2.1.2",
     "run-applescript": "^6.1.0"
   },
@@ -431,19 +432,11 @@
       "placeholder": "Raycast Headphones"
     },
     {
-      "name": "closeOnSuccessfulConnection",
-      "type": "checkbox",
-      "required": true,
-      "title": "Options",
-      "label": "Close window after successful connection.",
-      "description": "If checked, Raycast will close after successfully connecting to a device."
-    },
-    {
       "name": "bluetoothBackend",
       "type": "dropdown",
       "required": false,
-      "title": "Bluetooth Backend",
-      "description": "What tool Toothpick will use for Bluetooth related actions.",
+      "title": "Bluetooth Backend (macOS only)",
+      "description": "What tool Toothpick will use for Bluetooth related actions on macOS.",
       "default": "applescript",
       "data": [
         {
@@ -460,8 +453,8 @@
       "name": "blueutilDirectory",
       "type": "textfield",
       "required": false,
-      "title": "Override Blueutil Directory",
-      "description": "Set a custom 'blueutil' location for Toothpick to use.",
+      "title": "Override Blueutil Directory (macOS only)",
+      "description": "Set a custom 'blueutil' location for Toothpick to use on macOS.",
       "placeholder": "/opt/homebrew/bin/blueutil"
     }
   ],
@@ -472,6 +465,7 @@
   "license": "MIT",
   "icon": "icon.png",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

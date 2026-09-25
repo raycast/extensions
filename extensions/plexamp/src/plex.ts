@@ -27,15 +27,18 @@ export {
   getTracksForPlaylist,
   getTracksPage,
   resolveSelectedLibrary,
+  resolveTrackAlbum,
+  resolveTrackArtist,
   searchLibrary,
 } from "./plex-library";
-export type { PageResult } from "./plex-library";
+export type { PageResult, TrackAlbumTarget, TrackArtistTarget } from "./plex-library";
 export {
   clearPlayQueue,
   getPlayQueue,
   getPlayQueueForTimeline,
   getTimeline,
   movePlayQueueItem,
+  playAlbumFromTrack,
   playItem,
   playNextItem,
   playPause,

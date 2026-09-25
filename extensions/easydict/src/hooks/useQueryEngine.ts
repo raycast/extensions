@@ -9,19 +9,32 @@ import type { DetectedLangModel } from "@/core/detect/types";
 import { englishLanguageItem } from "@/core/language/consts";
 import type { LanguageItem } from "@/core/language/types";
 import { getLanguageItem } from "@/core/language/utils";
+import {
+  cacheLanguageDetection,
+  cacheQueryResult,
+  getCachedLanguageDetection,
+  getCachedQueryResult,
+  getQueryCacheGeneration,
+} from "@/core/query/cache";
 import { computeDisplaySections } from "@/core/query/displaySections";
 import { computeHideDisplay } from "@/core/query/hideRules";
 import type { QueryAction, QueryState } from "@/core/query/queryReducer";
 import { queryReducer } from "@/core/query/queryReducer";
 import { getAutoSelectedTargetLanguageItem } from "@/core/query/utils";
 import type { DictionaryServiceConfig } from "@/providers/dictionary";
-import { dictionaryProviderServices } from "@/providers/dictionary";
+import { builtinDictionaryProviderServices, builtinTranslationServices } from "@/providers/registry";
 import type { TranslationServiceConfig } from "@/providers/translation";
-import { translationServices } from "@/providers/translation";
 import { TranslationType } from "@/types/api";
 import type { DisplaySection, ListDisplayItem } from "@/types/display";
-import type { DictionaryQueryResult, QueryInput, TranslationQueryResult, TranslationResult } from "@/types/query";
-import { showErrorToast } from "@/utils/errors";
+import type {
+  DictionaryQueryResult,
+  QueryInput,
+  RuntimeServiceConfig,
+  RuntimeServiceMetadata,
+  TranslationQueryResult,
+  TranslationResult,
+} from "@/types/query";
+import { RequestError, showErrorToast } from "@/utils/errors";
 import { logTrace, logWarn } from "@/utils/logger";
 
 logTrace("UseQueryEngine", "module loaded");
@@ -29,7 +42,38 @@ logTrace("UseQueryEngine", "module loaded");
 interface QuerySession {
   generation: number;
   signal: AbortSignal;
+  bypassCache: boolean;
+  cacheGeneration: number;
 }
+
+interface ServiceRequestSession {
+  requestId: number;
+  signal: AbortSignal;
+  cacheGeneration: number;
+}
+
+interface QueryOptions {
+  bypassCache?: boolean;
+}
+
+function createRuntimeServiceMetadata(service: RuntimeServiceConfig): RuntimeServiceMetadata {
+  return {
+    serviceId: service.id,
+    serviceLabel: service.label,
+    serviceOrder: service.order,
+    serviceIcon: service.icon,
+  };
+}
+
+export interface QueryServiceSnapshot {
+  translationServices: TranslationServiceConfig[];
+  dictionaryServices: DictionaryServiceConfig[];
+}
+
+const defaultQueryServiceSnapshot: QueryServiceSnapshot = {
+  translationServices: builtinTranslationServices,
+  dictionaryServices: builtinDictionaryProviderServices,
+};
 
 // Initial State
 
@@ -42,6 +86,7 @@ function createInitialState({
 }): QueryState {
   return {
     activeGeneration: 0,
+    listEpoch: 0,
     queryResults: [],
     queryRecordList: [],
     isLoading: false,
@@ -54,25 +99,29 @@ function createInitialState({
 // Hook
 
 function createStreamDebouncer(
-  configType: TranslationType,
+  service: TranslationServiceConfig,
   queryWordInfo: QueryInput,
   dispatch: React.Dispatch<QueryAction>,
-  buildTranslationDisplay: (rawResult: TranslationResult) => TranslationQueryResult | null,
+  buildTranslationDisplay: (
+    rawResult: TranslationResult,
+    service: TranslationServiceConfig,
+  ) => TranslationQueryResult | null,
   generation: number,
+  shouldApply: () => boolean,
   delay = 80,
 ) {
   let updateTimer: ReturnType<typeof setTimeout> | undefined;
   let accumulatedText = "";
 
   const flushUpdate = () => {
-    if (accumulatedText) {
+    if (accumulatedText && shouldApply()) {
       const result: TranslationResult = {
-        type: configType,
+        type: service.type,
         queryWordInfo,
         translations: [accumulatedText],
         result: { translatedText: accumulatedText },
       };
-      const displayResult = buildTranslationDisplay(result);
+      const displayResult = buildTranslationDisplay(result, service);
       if (displayResult) {
         dispatch({ type: "SET_RESULT", queryResult: displayResult, generation });
       }
@@ -101,7 +150,11 @@ function createStreamDebouncer(
   };
 }
 
-export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetLanguage: LanguageItem) {
+export function useQueryEngine(
+  initialFromLanguage: LanguageItem,
+  initialTargetLanguage: LanguageItem,
+  serviceSnapshot: QueryServiceSnapshot = defaultQueryServiceSnapshot,
+) {
   const [state, dispatch] = useReducer(
     queryReducer,
     { initialFromLanguage, initialTargetLanguage },
@@ -112,21 +165,52 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
   const isCurrentQueryRef = useRef(true);
   const hasPlayedAudioRef = useRef(false);
   const generationRef = useRef(0);
+  const serviceRequestIdRef = useRef(0);
+  const serviceRequestsRef = useRef(new Map<string, { requestId: number; controller: AbortController }>());
   const isEffectMountedRef = useRef(false);
+  const currentQueryWordInfoRef = useRef<QueryInput | undefined>(undefined);
+  const currentQueryCacheGenerationRef = useRef(getQueryCacheGeneration());
+  const serviceSnapshotRef = useRef(serviceSnapshot);
+  serviceSnapshotRef.current = serviceSnapshot;
+  const previousServiceSnapshotRef = useRef(serviceSnapshot);
 
-  const beginQuerySession = useCallback((): QuerySession => {
+  const beginQuerySession = useCallback((options?: QueryOptions): QuerySession => {
     generationRef.current += 1;
     abortControllerRef.current?.abort();
+    for (const request of serviceRequestsRef.current.values()) request.controller.abort();
+    serviceRequestsRef.current.clear();
     abortControllerRef.current = new AbortController();
     isCurrentQueryRef.current = true;
     hasPlayedAudioRef.current = false;
+    currentQueryWordInfoRef.current = undefined;
     const session = {
       generation: generationRef.current,
       signal: abortControllerRef.current.signal,
+      bypassCache: options?.bypassCache === true,
+      cacheGeneration: getQueryCacheGeneration(),
     };
+    currentQueryCacheGenerationRef.current = session.cacheGeneration;
     dispatch({ type: "RESET_FOR_NEW_QUERY", generation: session.generation });
     return session;
   }, []);
+
+  const beginServiceRequest = useCallback((serviceId: string, session: QuerySession): ServiceRequestSession => {
+    serviceRequestsRef.current.get(serviceId)?.controller.abort();
+    const controller = new AbortController();
+    serviceRequestIdRef.current += 1;
+    const requestId = serviceRequestIdRef.current;
+    serviceRequestsRef.current.set(serviceId, { requestId, controller });
+    return {
+      requestId,
+      signal: AbortSignal.any([session.signal, controller.signal]),
+      cacheGeneration: session.cacheGeneration,
+    };
+  }, []);
+
+  const isCurrentServiceRequest = useCallback(
+    (serviceId: string, requestId: number) => serviceRequestsRef.current.get(serviceId)?.requestId === requestId,
+    [],
+  );
 
   const displaySections = useMemo(() => computeDisplaySections(state), [state]);
 
@@ -142,52 +226,72 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
     };
   }, []);
 
-  const buildTranslationDisplay = useCallback((queryResult: TranslationResult): TranslationQueryResult | null => {
-    const { type, translations, queryWordInfo } = queryResult;
+  const buildTranslationDisplay = useCallback(
+    (queryResult: TranslationResult, service: TranslationServiceConfig): TranslationQueryResult | null => {
+      const { type, translations, queryWordInfo } = queryResult;
 
-    if (translations.length === 0) {
-      logWarn("UseQueryEngine", `${type} result is empty.`);
-      return null;
-    }
+      const oneLineTranslation = translations.join(", ");
+      if (!oneLineTranslation.trim()) {
+        logWarn("UseQueryEngine", `${service.label} result is empty.`);
+        return null;
+      }
 
-    const oneLineTranslation = translations.join(", ");
-    const copyText = translations.join("\n");
-    const isStreamingProvider = type === TranslationType.OpenAI || type === TranslationType.Gemini;
+      const copyText = translations.join("\n");
+      const isStreamingProvider = type === TranslationType.OpenAI || type === TranslationType.Gemini;
 
-    const displayItem: ListDisplayItem = {
-      queryType: type,
-      key: isStreamingProvider ? type : `${oneLineTranslation}-${type}`,
-      title: oneLineTranslation,
-      copyText,
-      queryWordInfo,
-    };
-    const displaySections: DisplaySection[] = [{ type, sectionTitle: type, items: [displayItem] }];
+      const displayItem: ListDisplayItem = {
+        queryType: type,
+        key: isStreamingProvider ? service.id : `${service.id}:${oneLineTranslation}`,
+        title: oneLineTranslation,
+        copyText,
+        queryWordInfo,
+      };
+      const displaySections: DisplaySection[] = [{ type, sectionTitle: service.label, items: [displayItem] }];
 
-    return {
-      ...queryResult,
-      displaySections,
-      hideDisplay: computeHideDisplay(type),
-    };
-  }, []);
+      return {
+        ...queryResult,
+        ...createRuntimeServiceMetadata(service),
+        displaySections,
+        hideDisplay: computeHideDisplay(type),
+      };
+    },
+    [],
+  );
 
   const runTranslationQuery = useCallback(
     async (config: TranslationServiceConfig, queryWordInfo: QueryInput, session: QuerySession) => {
-      const enabled = config.isEnabled?.(queryWordInfo) ?? myPreferences[config.preference];
-      if (!enabled) return;
+      if (!config.enabled(queryWordInfo)) return;
 
-      dispatch({ type: "START_QUERY", queryType: config.type, generation: session.generation });
+      const request = beginServiceRequest(config.id, session);
+      dispatch({ type: "START_QUERY", serviceId: config.id, generation: session.generation });
 
-      const instance = new config.provider();
       let debouncer: ReturnType<typeof createStreamDebouncer> | undefined;
 
       try {
-        const iterator = instance.request(queryWordInfo, { signal: session.signal });
+        if (!session.bypassCache) {
+          const cached = getCachedQueryResult(config, queryWordInfo);
+          if (cached && "translations" in cached) {
+            const displayResult = buildTranslationDisplay(cached, config);
+            if (displayResult && isCurrentServiceRequest(config.id, request.requestId)) {
+              dispatch({
+                type: "SET_RESULT",
+                queryResult: { ...displayResult, fromCache: true },
+                generation: session.generation,
+              });
+            }
+            return;
+          }
+        }
+
+        const instance = config.createProvider();
+        const iterator = instance.request(queryWordInfo, { signal: request.signal });
         debouncer = createStreamDebouncer(
-          config.type,
+          config,
           queryWordInfo,
           dispatch,
           buildTranslationDisplay,
           session.generation,
+          () => isCurrentServiceRequest(config.id, request.requestId),
         );
         let finalResult: TranslationResult | undefined;
 
@@ -200,9 +304,12 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
           debouncer.push(value.content);
         }
 
-        if (finalResult) {
-          const displayResult = buildTranslationDisplay(finalResult);
+        if (finalResult && isCurrentServiceRequest(config.id, request.requestId)) {
+          const displayResult = buildTranslationDisplay(finalResult, config);
           if (displayResult) {
+            if (!request.signal.aborted && session.generation === generationRef.current) {
+              cacheQueryResult(config, queryWordInfo, finalResult, request.cacheGeneration);
+            }
             dispatch({ type: "SET_RESULT", queryResult: displayResult, generation: session.generation });
           }
         }
@@ -210,27 +317,45 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
         debouncer.clear();
       } catch (error) {
         debouncer?.clear(false);
-        showErrorToast(error);
+        if (isCurrentServiceRequest(config.id, request.requestId)) {
+          showErrorToast(
+            error instanceof RequestError ? new RequestError(config.label, error.message, error.code) : error,
+          );
+        }
       } finally {
-        dispatch({ type: "FINISH_QUERY", queryType: config.type, generation: session.generation });
+        if (isCurrentServiceRequest(config.id, request.requestId)) {
+          dispatch({ type: "FINISH_QUERY", serviceId: config.id, generation: session.generation });
+          serviceRequestsRef.current.delete(config.id);
+        }
       }
     },
-    [buildTranslationDisplay],
+    [beginServiceRequest, buildTranslationDisplay, isCurrentServiceRequest],
   );
 
   const runDictionaryQuery = useCallback(
     async (config: DictionaryServiceConfig, queryWordInfo: QueryInput, session: QuerySession) => {
-      const enabled = config.isEnabled?.(queryWordInfo) ?? myPreferences[config.preference];
-      if (!enabled) return;
+      if (!config.enabled(queryWordInfo)) return;
 
-      dispatch({ type: "START_QUERY", queryType: config.type, generation: session.generation });
-      const instance = new config.provider();
+      const request = beginServiceRequest(config.id, session);
+      dispatch({ type: "START_QUERY", serviceId: config.id, generation: session.generation });
 
       try {
-        const result = await instance.request(queryWordInfo, { signal: session.signal });
+        const cached = session.bypassCache ? undefined : getCachedQueryResult(config, queryWordInfo);
+        const fromCache = cached !== undefined && !("translations" in cached);
+        const result = fromCache
+          ? cached
+          : await config.createProvider().request(queryWordInfo, { signal: request.signal });
         const displaySections = result.displaySections;
-        if (displaySections?.length) {
-          const queryResult: DictionaryQueryResult = { ...result, displaySections };
+        if (displaySections?.length && isCurrentServiceRequest(config.id, request.requestId)) {
+          if (!fromCache && !request.signal.aborted && session.generation === generationRef.current) {
+            cacheQueryResult(config, queryWordInfo, result, request.cacheGeneration);
+          }
+          const queryResult: DictionaryQueryResult = {
+            ...result,
+            ...createRuntimeServiceMetadata(config),
+            displaySections,
+            fromCache,
+          };
           dispatch({ type: "SET_RESULT", queryResult, generation: session.generation });
 
           const wordInfo = queryResult.queryWordInfo;
@@ -239,36 +364,44 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
             wordInfo.isWord &&
             wordInfo.fromLanguage === englishLanguageItem.youdaoLangCode &&
             session.generation === generationRef.current &&
-            !session.signal.aborted &&
+            !request.signal.aborted &&
             isCurrentQueryRef.current &&
-            !hasPlayedAudioRef.current;
+            !hasPlayedAudioRef.current &&
+            config.canTriggerAutomaticAudio;
 
           if (shouldAutoPlay) {
             hasPlayedAudioRef.current = true;
             logTrace("UseQueryEngine", `playing audio for: ${wordInfo.word}`);
-            playQueryWordAudio(wordInfo, { signal: session.signal }).catch((error) => {
-              if (!session.signal.aborted) {
+            playQueryWordAudio(wordInfo, { signal: request.signal }).catch((error) => {
+              if (!request.signal.aborted) {
                 logWarn("UseQueryEngine", `failed to play audio for ${wordInfo.word}: ${error}`);
               }
             });
           }
         }
       } catch (error) {
-        showErrorToast(error);
+        if (isCurrentServiceRequest(config.id, request.requestId)) {
+          showErrorToast(
+            error instanceof RequestError ? new RequestError(config.label, error.message, error.code) : error,
+          );
+        }
       } finally {
-        dispatch({ type: "FINISH_QUERY", queryType: config.type, generation: session.generation });
+        if (isCurrentServiceRequest(config.id, request.requestId)) {
+          dispatch({ type: "FINISH_QUERY", serviceId: config.id, generation: session.generation });
+          serviceRequestsRef.current.delete(config.id);
+        }
       }
     },
-    [],
+    [beginServiceRequest, isCurrentServiceRequest],
   );
 
   const runAllProviders = useCallback(
     (queryWordInfo: QueryInput, session: QuerySession) => {
-      for (const config of dictionaryProviderServices) {
+      for (const config of serviceSnapshotRef.current.dictionaryServices) {
         runDictionaryQuery(config, queryWordInfo, session);
       }
 
-      for (const config of translationServices) {
+      for (const config of serviceSnapshotRef.current.translationServices) {
         runTranslationQuery(config, queryWordInfo, session);
       }
 
@@ -280,8 +413,9 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
   );
 
   const queryTextWithTextInfo = useCallback(
-    (queryWordInfo: QueryInput) => {
-      const session = beginQuerySession();
+    (queryWordInfo: QueryInput, options?: QueryOptions) => {
+      const session = beginQuerySession(options);
+      currentQueryWordInfoRef.current = queryWordInfo;
 
       const { word, fromLanguage, toLanguage } = queryWordInfo;
       logTrace("UseQueryEngine", `query text: ${word}`);
@@ -323,18 +457,21 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
         fromLanguage: fromYoudaoLangCode,
         toLanguage: targetLangCode,
       };
+      currentQueryWordInfoRef.current = queryTextInfo;
       runAllProviders(queryTextInfo, session);
     },
     [runAllProviders],
   );
 
   const queryText = useCallback(
-    (text: string, toLanguage: string) => {
+    (text: string, toLanguage: string, options?: QueryOptions) => {
       logTrace("UseQueryEngine", `query: ${text}`);
 
-      const session = beginQuerySession();
+      const session = beginQuerySession(options);
+      const cachedDetection = session.bypassCache ? undefined : getCachedLanguageDetection(text);
+      const detection = cachedDetection ? Promise.resolve(cachedDetection) : detectLanguage(text, session.signal);
 
-      detectLanguage(text, session.signal)
+      detection
         .then((detectedLanguage: DetectedLangModel) => {
           logTrace(
             "UseQueryEngine",
@@ -346,6 +483,7 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
             return;
           }
 
+          if (!cachedDetection) cacheLanguageDetection(text, detectedLanguage, session.cacheGeneration);
           queryTextWithDetectedLanguage(text, toLanguage, detectedLanguage, session);
         })
         .catch((error) => {
@@ -359,12 +497,49 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
     [beginQuerySession, queryTextWithDetectedLanguage],
   );
 
+  useEffect(() => {
+    // Only newly added service IDs join an active query. Existing IDs keep
+    // their in-flight request; profile edits apply on the next query.
+    const previousSnapshot = previousServiceSnapshotRef.current;
+    previousServiceSnapshotRef.current = serviceSnapshot;
+    if (previousSnapshot === serviceSnapshot) return;
+    const queryWordInfo = currentQueryWordInfoRef.current;
+    const signal = abortControllerRef.current?.signal;
+    if (!queryWordInfo || !signal || signal.aborted) return;
+
+    const previousTranslationServiceIds = new Set(previousSnapshot.translationServices.map((service) => service.id));
+    const addedTranslationServices = serviceSnapshot.translationServices.filter(
+      (service) => !previousTranslationServiceIds.has(service.id),
+    );
+    const previousDictionaryServiceIds = new Set(previousSnapshot.dictionaryServices.map((service) => service.id));
+    const addedDictionaryServices = serviceSnapshot.dictionaryServices.filter(
+      (service) => !previousDictionaryServiceIds.has(service.id),
+    );
+    if (addedTranslationServices.length === 0 && addedDictionaryServices.length === 0) return;
+
+    const session = {
+      generation: generationRef.current,
+      signal,
+      bypassCache: false,
+      cacheGeneration: currentQueryCacheGenerationRef.current,
+    };
+    for (const service of addedDictionaryServices) {
+      runDictionaryQuery(service, queryWordInfo, session);
+    }
+    for (const service of addedTranslationServices) {
+      runTranslationQuery(service, queryWordInfo, session);
+    }
+  }, [runDictionaryQuery, runTranslationQuery, serviceSnapshot]);
+
   const clearQueryResult = useCallback(() => {
+    currentQueryWordInfoRef.current = undefined;
     const activeController = abortControllerRef.current;
     if (activeController) {
       logTrace("UseQueryEngine", "clearQueryResult");
       activeController.abort();
     }
+    for (const request of serviceRequestsRef.current.values()) request.controller.abort();
+    serviceRequestsRef.current.clear();
 
     generationRef.current += 1;
     isCurrentQueryRef.current = false;
@@ -378,8 +553,38 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
     dispatch({ type: "SET_TARGET_LANGUAGE", targetLanguageItem: item });
   }, []);
 
+  const regenerateService = useCallback(
+    (serviceId: string) => {
+      const queryWordInfo = currentQueryWordInfoRef.current;
+      const signal = abortControllerRef.current?.signal;
+      if (!queryWordInfo || !signal || signal.aborted) return;
+
+      const session: QuerySession = {
+        generation: generationRef.current,
+        signal,
+        bypassCache: true,
+        cacheGeneration: getQueryCacheGeneration(),
+      };
+      const dictionaryService = serviceSnapshotRef.current.dictionaryServices.find(
+        (service) => service.id === serviceId,
+      );
+      if (dictionaryService) {
+        runDictionaryQuery(dictionaryService, queryWordInfo, session);
+        return;
+      }
+
+      const translationService = serviceSnapshotRef.current.translationServices.find(
+        (service) => service.id === serviceId,
+      );
+      if (translationService) runTranslationQuery(translationService, queryWordInfo, session);
+    },
+    [runDictionaryQuery, runTranslationQuery],
+  );
+
   return {
     displaySections,
+    queryGeneration: state.activeGeneration,
+    listEpoch: state.listEpoch,
     isLoading: state.isLoading,
     isShowDetail: state.isShowDetail,
     currentFromLanguageItem: state.currentFromLanguageItem,
@@ -387,6 +592,7 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
 
     queryText,
     queryTextWithTextInfo,
+    regenerateService,
     clearQueryResult,
     setAutoSelectedTargetLanguageItem,
   } as const;

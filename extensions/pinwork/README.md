@@ -1,11 +1,12 @@
 # Pinwork
 
-Manage your tasks directly from Raycast with [Pinwork](https://pinwork.app), a GTD-inspired task management app for macOS.
+Capture a complete task in one sentence with [Pinwork](https://pinwork.app), then manage Today, Inbox, upcoming tasks, and projects directly from Raycast. Pinwork is a private, native task planner for Mac.
+
+Works with the installed Pinwork Mac app. No separate Pinwork account is required.
 
 ## Prerequisites
 
-- [Pinwork](https://pinwork.app) must be installed and running on your Mac
-- Join the [TestFlight beta](https://testflight.apple.com/join/aWxfGbtt)
+- [Download Pinwork from the App Store](https://apps.apple.com/app/apple-store/id6760645497), then install and open it on your Mac
 
 ## Commands
 
@@ -23,11 +24,10 @@ Manage your tasks directly from Raycast with [Pinwork](https://pinwork.app), a G
 The Quick Add command supports Pinwork's natural language parsing. You can include project, tags, dates, and more in a single line:
 
 ```
-Buy groceries #errands !tomorrow
-Review PR :ProjectName !fri
+Buy groceries tomorrow at 2pm #errands ~30min
+Plan repairs Friday at 2pm ~45min #home >Apartment
 ```
 
 ## Preferences
 
 - **Show Completed Tasks** - Include recently completed tasks in list views
-- **Default List** - Choose which list to show when opening the extension (Today, Inbox, or Next)

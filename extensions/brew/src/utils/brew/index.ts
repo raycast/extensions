@@ -11,6 +11,7 @@ export type {
   Nameable,
   Cask,
   CaskDependency,
+  CaskArtifact,
   Formula,
   InstalledVersion,
   Versions,
@@ -22,7 +23,7 @@ export type {
 } from "../types";
 
 // Paths
-export { brewPrefix, brewPath, brewExecutable } from "./paths";
+export { brewPrefix, brewPath, brewCachePrefix, brewExecutable } from "./paths";
 
 // Commands
 export { execBrew, execBrewEnv } from "./commands";
@@ -35,17 +36,38 @@ export type { BrewPhase, BrewProgress, ProgressCallback } from "./progress";
 export {
   brewFetchInstalled,
   brewFetchInstallableResults,
-  brewFetchInstalledFast,
   brewMapInstalled,
   asInstallableResults,
   brewFetchOutdated,
+  brewFetchVulns,
   brewUpdate,
+  brewCheckForUpdate,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
   hasSearchCache,
   invalidateChunkedCacheMemory,
   onIndexRefreshed,
 } from "./fetch";
+
+// Analytics
+export {
+  packageAnalyticsURL,
+  analyticsRows,
+  totalForPeriod,
+  packageStatus,
+  fetchPopularityRanks,
+  invalidatePopularityRanks,
+  analyticsCacheFiles,
+  POPULARITY_PERIOD,
+} from "./analytics";
+export type {
+  AnalyticsPeriod,
+  AnalyticsRow,
+  AnalyticsCounts,
+  PackageAnalytics,
+  PackageDetailResponse,
+  PopularityRanks,
+} from "./analytics";
 
 // Search
 export { brewSearch } from "./search";
@@ -54,16 +76,29 @@ export type { SearchProgressCallback, SearchDownloadProgress } from "./search";
 // Actions
 export {
   brewInstall,
+  brewInstallDryRun,
   brewInstallWithProgress,
   brewUninstall,
   brewUpgrade,
   brewUpgradeSingleWithProgress,
   brewUpgradeAll,
   brewCleanup,
-  brewPinFormula,
-  brewUnpinFormula,
+  brewPin,
+  brewUnpin,
   brewDoctor,
 } from "./actions";
+
+// Link / unlink casks (`brew {link,unlink} --cask`, Homebrew 7)
+export { brewCaskLinkPreview, caskHasSymlinkArtifacts } from "./link";
+export type { CaskLinkVerb } from "./link";
+
+// Install preview (`brew install --dry-run`)
+export { parseDryRun } from "./dry-run";
+export type { DryRunSection } from "./dry-run";
+
+// Doctor (`brew doctor --json`)
+export { tierLabel, worstTier, doctorReportMarkdown } from "./doctor";
+export type { DoctorReport, DoctorTier } from "./doctor";
 
 // Upgrade with progress
 export { brewUpgradeOutdated, upgradeKey } from "./upgrade";
@@ -89,14 +124,37 @@ export {
 } from "./services";
 export type { Service, ServiceStatus, ServiceAction } from "./services";
 
+// Installability (Homebrew 7's ⊘ marker, derived from the API JSON)
+export { installabilityOf } from "./installability";
+export { brewHost } from "./host";
+
+// Version comparison
+export { isOutdatedVersion, HOMEBREW_7 } from "./version";
+export { getBrewMajorVersion, invalidateBrewMajorVersion } from "./brew-version";
+export { confirmAndRun } from "./confirmAndRun";
+
+// Vulnerabilities (`brew vulns`)
+export { osvUrl, osvLink, escapeMarkdown } from "./vulns";
+export type { VulnSeverity, Vulnerability, VulnFinding, VulnResults } from "./vulns";
+
 // Helpers
 export {
   brewName,
   brewIsInstalled,
   brewInstallPath,
   brewFormatVersion,
+  brewInstalledVersion,
+  brewAvailableVersion,
+  formatPackageVersion,
+  brewIsOutdated,
+  brewInstalledDate,
   brewIdentifier,
   brewCaskOption,
+  caskLanguagesText,
+  normalizeOutdatedResults,
+  brewPinnedIdentifiers,
+  pinLookupKey,
+  isPinnedPackage,
   isCask,
   brewCompare,
   brewInstallCommand,

@@ -34,6 +34,7 @@ export function ModelView(): React.JSX.Element {
   const { data: ServersSettings, revalidate: RevalidateServersSettings } = usePromise(GetOllamaServers);
   const {
     data: Models,
+    error: ModelsError,
     isLoading: IsLoadingModels,
     revalidate: RevalidateModels,
   } = usePromise(GetModels, [SelectedServer], { abortable: abort });
@@ -50,7 +51,7 @@ export function ModelView(): React.JSX.Element {
         onChange={setSelectedServer}
         defaultValue={SelectedServer ? SelectedServer : "Local"}
       >
-        {Servers && Servers.map((s) => <List.Dropdown.Item title={s} value={s} />)}
+        {Servers && Servers.map((s) => <List.Dropdown.Item key={s} title={s} value={s} />)}
       </List.Dropdown>
     );
   }
@@ -70,14 +71,19 @@ export function ModelView(): React.JSX.Element {
             {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Capabilities">
                 {prop.model.show.capabilities.map((c) => (
-                  <List.Item.Detail.Metadata.TagList.Item icon={IconsCapabilities[c]} text={c} color={Color.Purple} />
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={c}
+                    icon={IconsCapabilities[c]}
+                    text={c}
+                    color={Color.Purple}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
             {prop.model.detail.details.families && prop.model.detail.details.families.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Families">
                 {prop.model.detail.details.families.map((f) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={f} />
+                  <List.Item.Detail.Metadata.TagList.Item key={f} text={f} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
@@ -98,10 +104,12 @@ export function ModelView(): React.JSX.Element {
             />
             {prop.model.ps && (
               <React.Fragment>
-                <List.Item.Detail.Metadata.Label
-                  title="Context Length"
-                  text={`${prop.model.ps.context_length.toLocaleString(locale)}`}
-                />
+                {typeof prop.model.ps.context_length === "number" && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Context Length"
+                    text={prop.model.ps.context_length.toLocaleString(locale)}
+                  />
+                )}
                 <List.Item.Detail.Metadata.Label
                   title="Memory freed at"
                   text={new Date(prop.model.ps.expires_at).toLocaleString(locale)}
@@ -116,6 +124,7 @@ export function ModelView(): React.JSX.Element {
               <List.Item.Detail.Metadata.TagList title="Parameters">
                 {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
                   <List.Item.Detail.Metadata.TagList.Item
+                    key={p}
                     text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
                   />
                 ))}
@@ -226,11 +235,17 @@ export function ModelView(): React.JSX.Element {
       /* Skip other accessories if details are showed */
       if (showDetail) return accessories;
       accessories.push({
-        tag: { color: Color.PrimaryText, value: `${(Model.ps.size_vram / 1e9).toPrecision(2).toString()} GB` },
+        tag: {
+          color: Color.PrimaryText,
+          value: `${(Model.ps.size_vram / 1e9).toPrecision(2).toString()} GB`,
+        },
         icon: Icon.MemoryChip,
       });
       accessories.push({
-        tag: { color: Color.PrimaryText, value: FormatOllamaPsModelExpireAtFormat(Model.ps.expires_at) },
+        tag: {
+          color: Color.PrimaryText,
+          value: FormatOllamaPsModelExpireAtFormat(Model.ps.expires_at),
+        },
         icon: Icon.Hourglass,
       });
     }
@@ -315,6 +330,18 @@ export function ModelView(): React.JSX.Element {
         </ActionPanel>
       }
     >
+      {ModelsError && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Unable to Load Models"
+          description={ModelsError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={RevalidateModels} />
+            </ActionPanel>
+          }
+        />
+      )}
       {Models &&
         Models.length > 0 &&
         Models.map((item) => {
@@ -342,13 +369,15 @@ export function ModelView(): React.JSX.Element {
             />
           );
       })}
-      {(Models === undefined || Models.length === 0) && (Download === undefined || Download.length === 0) && (
-        <List.EmptyView
-          icon={Icon.Download}
-          title="No Models Installed."
-          description="No model is currently installed on this server. You can download a new model using the ⌘+N (macOS) or ctrl+N (Windows) shortcut."
-        />
-      )}
+      {!ModelsError &&
+        (Models === undefined || Models.length === 0) &&
+        (Download === undefined || Download.length === 0) && (
+          <List.EmptyView
+            icon={Icon.Download}
+            title="No Models Installed."
+            description="No model is currently installed on this server. You can download a new model using the ⌘+N (macOS) or ctrl+N (Windows) shortcut."
+          />
+        )}
     </List>
   );
 }

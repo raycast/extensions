@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, confirmAlert, getPreferenceValues } from "@raycast/api";
 import Alerts from "../feedback/Alerts";
 import Process from "../models/Process";
-import { KillSignal, killProcess, resolveKillSignal } from "../utilities/killProcess";
+import { KillSignal, Survivor, killProcess, resolveKillSignal } from "../utilities/killProcess";
 import { isWindows, platformShortcut } from "../utilities/platform";
 
 export type ProcessWithKillableParent = Process & {
@@ -23,6 +23,7 @@ export default function KillParentActions(props: {
   process: Process;
   onError?: (err: unknown) => Promise<void> | void;
   onKilled?: () => Promise<void> | void;
+  onSurvived?: (survivor: Survivor) => Promise<void> | void;
 }) {
   if (!isProcessWithKillableParent(props.process)) {
     return null;
@@ -40,6 +41,7 @@ export default function KillParentActions(props: {
               killSignal: resolveKillSignal(preferences.killSignal),
               killParent: true,
               onKilled: props.onKilled,
+              onSurvived: props.onSurvived,
               onError: props.onError,
             });
           } else {
@@ -61,6 +63,7 @@ export default function KillParentActions(props: {
 
               killParent: true,
               onKilled: props.onKilled,
+              onSurvived: props.onSurvived,
               onError: props.onError,
             });
           } else {
@@ -76,6 +79,7 @@ export default function KillParentActions(props: {
               killSignal: KillSignal.KILL,
               killParent: true,
               onKilled: props.onKilled,
+              onSurvived: props.onSurvived,
               onError: props.onError,
             });
           } else {

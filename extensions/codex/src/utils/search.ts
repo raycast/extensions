@@ -25,25 +25,34 @@ type ScoredMatch = {
   snippetSource?: string;
 };
 
-export function mapNativeThreadSearchResults(
-  threads: CodexThread[],
+type ThreadSearchIndex = {
+  title: string;
+  pathKeywords: string;
+  preview: string;
+  previewSearch: string;
+};
+
+// Normalizing a thread's searchable text depends on the thread alone, not on
+// the query, so derive it once instead of on every keystroke. Weak keys let an
+// entry fall away with the thread it describes.
+const threadSearchIndexes = new WeakMap<CodexThread, ThreadSearchIndex>();
+
+export function mapTranscriptSearchResults(
   hits: CodexThreadSearchHit[],
 ): CodexThreadSearchResult[] {
-  const threadsById = new Map(threads.map((thread) => [thread.id, thread]));
   const seenThreadIds = new Set<string>();
   const results: CodexThreadSearchResult[] = [];
 
   for (const hit of hits) {
-    const thread = threadsById.get(hit.threadId);
-    if (!thread || seenThreadIds.has(thread.id)) {
+    if (seenThreadIds.has(hit.thread.id)) {
       continue;
     }
 
-    seenThreadIds.add(thread.id);
+    seenThreadIds.add(hit.thread.id);
     results.push({
-      thread,
+      thread: hit.thread,
       match: { snippet: normalizeSnippet(hit.snippet) },
-      score: thread.updatedAt,
+      score: hit.thread.updatedAt,
     });
   }
 
@@ -104,25 +113,41 @@ export function searchThreadMetadata(
   );
 }
 
+function getThreadSearchIndex(thread: CodexThread): ThreadSearchIndex {
+  const cached = threadSearchIndexes.get(thread);
+  if (cached) {
+    return cached;
+  }
+
+  const title = getThreadDisplayTitle(thread);
+  const preview = normalizeSnippetText(thread.preview) ?? "";
+  const index: ThreadSearchIndex = {
+    title: normalizeSearchText(title === thread.id ? "" : title),
+    pathKeywords: normalizeSearchText(getPathKeywords(thread.cwd).join(" ")),
+    preview,
+    previewSearch: normalizeSearchText(preview),
+  };
+  threadSearchIndexes.set(thread, index);
+
+  return index;
+}
+
 function findBestMetadataMatch(
   thread: CodexThread,
   query: string,
   queryTokens: string[],
 ): ScoredMatch | null {
-  const title = getThreadDisplayTitle(thread);
-  const searchableTitle = title === thread.id ? "" : title;
-  const pathKeywords = getPathKeywords(thread.cwd).join(" ");
-  const preview = normalizeSnippetText(thread.preview) ?? "";
+  const index = getThreadSearchIndex(thread);
   const matches: ScoredMatch[] = [
     {
-      score: scoreSearchField(searchableTitle, query, queryTokens, 1_000),
+      score: scoreSearchField(index.title, query, queryTokens, 1_000),
     },
     {
-      score: scoreSearchField(pathKeywords, query, queryTokens, 850),
+      score: scoreSearchField(index.pathKeywords, query, queryTokens, 850),
     },
     {
-      score: scoreSearchField(preview, query, queryTokens, 650),
-      snippetSource: preview,
+      score: scoreSearchField(index.previewSearch, query, queryTokens, 650),
+      snippetSource: index.preview,
     },
   ];
 
@@ -134,12 +159,11 @@ function findBestMetadataMatch(
 }
 
 function scoreSearchField(
-  text: string,
+  normalizedText: string,
   query: string,
   queryTokens: string[],
   score: number,
 ): number {
-  const normalizedText = normalizeSearchText(text);
   if (!normalizedText) {
     return 0;
   }
@@ -187,8 +211,8 @@ function buildSnippet(
     sourceText.length,
     matchIndex + matchedToken.length + snippetContextCharacters,
   );
-  const prefix = start > 0 ? "..." : "";
-  const suffix = end < sourceText.length ? "..." : "";
+  const prefix = start > 0 ? "…" : "";
+  const suffix = end < sourceText.length ? "…" : "";
 
   return truncate(
     `${prefix}${sourceText.slice(start, end).trim()}${suffix}`,

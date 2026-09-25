@@ -4,14 +4,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
+import { usePopularityRanks } from "./hooks/usePopularityRanks";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
-
-interface SearchPreferences {
-  showMetadataPanel?: boolean;
-}
+import { PAGE_SIZE, clampPage, pageCount, visibleTotal } from "./utils/paging";
 
 /**
  * Format a number with commas (e.g., 8081 -> "8,081")
@@ -22,8 +21,27 @@ function formatNumber(num: number): string {
 
 export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const [searchText, setSearchText] = useState(props.arguments.search ?? "");
+  const [page, setPage] = useState(0);
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
+  const [sortByPopularity, setSortByPopularity] = useCachedState("sort-by-popularity", false);
+  const [showDescription, setShowDescription] = useCachedState("show-description", true);
+  const { showMetadataPanel } = getPreferenceValues<Preferences.Search>();
+  // The preference is the default; the action toggles it for this session.
+  const [showDetails, setShowDetails] = useState(showMetadataPanel);
+
+  // Install rankings for the whole index, loaded only when the sort is on.
+  const {
+    isLoading: isLoadingRanks,
+    data: ranks,
+    revalidate: revalidateRanks,
+    version: ranksVersion,
+  } = usePopularityRanks(sortByPopularity);
+
+  // The toggle is on well before the ~3MB download lands. Until it does, the
+  // list is still relevance-ordered, so only the *applied* state may describe
+  // the ordering — the action title still reflects the toggle, since that is
+  // what pressing it does next.
+  const sortApplied = sortByPopularity && ranks != undefined;
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
 
@@ -38,11 +56,60 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
     downloadProgressRef,
   } = useBrewSearch({
     searchText,
+    limit: PAGE_SIZE,
+    // The RAW page, deliberately: `currentPage` below is clamped against totals
+    // that only exist once this fetch returns, so it cannot feed the fetch that
+    // produces them. The clamp is reconciled back into state by the effect
+    // below instead.
+    offset: page * PAGE_SIZE,
     installed,
+    ranks: sortByPopularity ? ranks : undefined,
+    ranksVersion,
+    onCacheCleared: revalidateRanks,
   });
 
   const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
   const casks = filter != InstallableFilterType.formulae ? (results?.casks ?? []) : [];
+
+  const pagedTotal = visibleTotal(results?.totals, {
+    formulae: filter != InstallableFilterType.casks,
+    casks: filter != InstallableFilterType.formulae,
+  });
+  const totalPages = pageCount(pagedTotal);
+  // Clamped on read as well as on write: narrowing the filter can strand the
+  // current page past the end while the previous totals are still on screen.
+  const currentPage = clampPage(page, pagedTotal);
+
+  // Reconcile a page index that the arriving totals say is out of range. The
+  // fetch above used the raw `page`, so without this the window sits past the
+  // end of the results — an empty list, with both sections absent and therefore
+  // no footer and no row whose panel carries Previous Page. That is a dead end
+  // the user cannot leave except by retyping the query.
+  //
+  // Guarded on `totals` being present: absent totals mean "not known yet", and
+  // clamping against them would reset the page on every transient.
+  useEffect(() => {
+    if (results?.totals && currentPage !== page) {
+      setPage(currentPage);
+    }
+  }, [results?.totals, currentPage, page]);
+
+  const goToPage = useCallback(
+    (next: number) => {
+      setPage(clampPage(next, pagedTotal));
+    },
+    [pagedTotal],
+  );
+
+  const paging =
+    totalPages > 1
+      ? {
+          page: currentPage,
+          totalPages,
+          pageSize: PAGE_SIZE,
+          goToPage,
+        }
+      : undefined;
 
   // Memoize isInstalled callback to avoid creating a new function every render
   const isInstalledCallback = useCallback((name: string) => isInstalled(name, installed), [installed]);
@@ -127,15 +194,45 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
       formulae={formulae}
       casks={casks}
       searchText={searchText}
-      searchBarPlaceholder={placeholder(filter)}
-      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
-      isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}
-      onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
+      searchBarPlaceholder={placeholder(filter, sortApplied)}
+      searchBarAccessory={
+        <InstallableFilterDropdown
+          onSelect={(next) => {
+            // Page 86 of Formulae is not page 86 of Casks. Narrowing the filter
+            // changes which totals apply, so the page index stops meaning
+            // anything — start the new selection at its first page.
+            setFilter(next);
+            setPage(0);
+          }}
+        />
+      }
+      isLoading={(isLoadingInstalled && !installed) || isLoadingSearch || isLoadingRanks}
+      onSearchTextChange={(next) => {
+        const trimmed = next.trim();
+        if (trimmed === searchText) {
+          return;
+        }
+        // Page 12 of the old query means nothing for the new one, and both
+        // updates must land in the same commit or the hook fetches a window
+        // into results that no longer exist.
+        setSearchText(trimmed);
+        setPage(0);
+      }}
       filtering={false}
       isInstalled={isInstalledCallback}
       onAction={() => revalidateInstalled()}
       dataFetched={loadingState.phase === "complete"}
-      showMetadataPanel={showMetadataPanel}
+      showMetadataPanel={showDetails}
+      onToggleSidebar={() => setShowDetails((current) => !current)}
+      showDescription={showDescription}
+      onToggleDescription={() => setShowDescription((current) => !current)}
+      sortByPopularity={sortByPopularity}
+      onToggleSort={() => {
+        setSortByPopularity((current) => !current);
+        setPage(0);
+      }}
+      totals={results?.totals}
+      paging={paging}
     />
   );
 }

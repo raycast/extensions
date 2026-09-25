@@ -47,7 +47,9 @@
     "wonbywondev",
     "SandeepBaskaran",
     "0xdhrv",
-    "ernest0n"
+    "ernest0n",
+    "raycast_0ukl",
+    "olafvanmidden"
   ],
   "pastContributors": [
     "Lemon",
@@ -253,6 +255,21 @@
       "title": "My Starred Repositories",
       "description": "List repositories you have starred",
       "mode": "view"
+    },
+    {
+      "name": "my-packages",
+      "title": "My Packages",
+      "description": "List packages you published to GitHub Packages",
+      "mode": "view",
+      "keywords": [
+        "container",
+        "npm",
+        "maven",
+        "docker",
+        "nuget",
+        "rubygems",
+        "registry"
+      ]
     },
     {
       "name": "workflow-runs",
@@ -548,6 +565,40 @@
       ]
     },
     {
+      "name": "my-packages-menu",
+      "title": "My Packages Menu Bar",
+      "description": "Display My Packages in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "titlePackage",
+          "description": "Show this package's name and total download count in the menu bar title. Leave empty to show the number of packages instead. GitHub publishes download counts only on public package pages, so a private package shows just its name.",
+          "type": "textfield",
+          "required": false,
+          "title": "Menu Bar Title",
+          "placeholder": "package-name"
+        },
+        {
+          "name": "showtext",
+          "description": "Show packages count with menu bar icon. Ignored when a package name is set above.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum packages shown per package type.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Packages per Package Type",
+          "placeholder": "10"
+        }
+      ]
+    },
+    {
       "name": "download-repository",
       "title": "Download Repository as ZIP",
       "subtitle": "GitHub",
@@ -638,6 +689,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "github-pull-request-review",
+        "title": "Review Pull Requests"
+      }
+    ],
     "instructions": "- Always format pull requests and issues as markdown links: [pull-request-title](https://github.com/:org/:repo/pull/:number) and [issue-title](https://github.com/:org/:repo/issues/:number).\\n- IMPORTANT: Use repo name from user input ONLY when it is in format `owner/repo`. Otherwise always search for repos using `search-repositories` tool as a first step and use the best match. When user ask for any action with issue, always use `search-issues` to get the actual `issueId`. When user ask for any action with pull request, always use `search-pull-requests` to get the actual `pullRequestId`",
     "evals": [
       {
@@ -1035,7 +1092,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user. Add read:packages to use the My Packages commands.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
     },
@@ -1051,8 +1108,8 @@
       "name": "numberOfResults",
       "type": "textfield",
       "required": false,
-      "title": "Number of search results",
-      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "title": "Search Results per Page",
+      "description": "For repository, issue, discussion, or pull request searches, this is the number of results requested per page. Fewer results per page will load faster.",
       "placeholder": "25"
     },
     {
@@ -1150,7 +1207,7 @@
   ],
   "dependencies": {
     "@octokit/rest": "^21.0.1",
-    "@raycast/api": "^1.104.17",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
@@ -1185,7 +1242,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts",
-    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/api/viewerStats.test.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/helpers/repository-filter.test.ts src/api/viewerStats.test.ts",
     "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [

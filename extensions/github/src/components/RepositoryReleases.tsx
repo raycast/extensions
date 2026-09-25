@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment, ReleaseFieldsFragment } from "../generated/graphql";
+import { uniqueById } from "../helpers";
 
 const RELEASES_PAGE_SIZE = 25;
 
@@ -27,10 +28,11 @@ export default function RepositoryReleases(props: { repository: ExtendedReposito
     },
     [owner, name],
   );
+  const releases = uniqueById(data ?? []);
 
   return (
     <List isLoading={isLoading} navigationTitle={props.repository.nameWithOwner} pagination={pagination}>
-      {data?.map((release) => (
+      {releases.map((release) => (
         <List.Item
           key={release.id}
           title={release.name || release.tagName}

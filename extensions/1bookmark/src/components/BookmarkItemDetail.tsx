@@ -12,15 +12,16 @@ function formatDate(d: Date | string | null | undefined): string {
   return date.toLocaleString();
 }
 
-// 북마크 우측 상세 패널. QR 코드는 URL을 sync로 SVG 생성해 markdown에 임베드.
-// Note: "updated by" 는 현재 DB에 저장되지 않아 시간만 표시한다.
+// Detail panel on the right side of a bookmark. The QR code is generated synchronously as SVG from the URL
+// and embedded in the markdown.
+// Note: "updated by" is not currently stored in the DB, so only the time is shown.
 export function BookmarkItemDetail({ bookmark, me }: { bookmark: Bookmark; me?: Me }) {
   const qrUri = useMemo(() => qrSvgDataUri(bookmark.url), [bookmark.url]);
   const space = me?.associatedSpaces.find((s) => s.id === bookmark.spaceId);
 
-  // 제목은 List.Item의 title로 이미 좌측에 노출되므로 마크다운에는 중복 표기하지 않는다.
-  // Description은 긴 텍스트일 수 있어 Metadata.Label(단일 라인, ... 축약)이 아닌
-  // 마크다운 하단(QR 아래)에 두어 자연스럽게 줄바꿈되도록 한다.
+  // The title is already shown on the left as the List.Item title, so it isn't duplicated in the markdown.
+  // Description can be long, so instead of Metadata.Label (single line, truncated with ...)
+  // it is placed at the bottom of the markdown (below the QR) so it wraps naturally.
   const markdown = [qrUri ? `![QR Code](${qrUri})` : "", bookmark.description ? `\n${bookmark.description}` : ""]
     .filter(Boolean)
     .join("\n");

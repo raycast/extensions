@@ -44,7 +44,9 @@ What it covers:
 - Video conversion emits at least one progress callback
 - Media inspection parses video/audio streams and dimensions
 - Target-size conversion works across MP4, MKV, WebM, AVI, and MPG outputs
-- Resize, speed change, audio extraction, and loudness normalization
+- Resize, speed changes from 0.25× to 40×, audio extraction, and loudness normalization
+- 24/30/60 fps output and audio removal, separately and combined with speed changes
+- Silent video, multiple audio tracks, audio-only speed changes, and speed-adjusted progress
 - Burn external subtitles and remove subtitle streams
 - Paths containing quotes, shell metacharacters, command substitutions, and Unicode are handled literally
 
@@ -131,7 +133,13 @@ is the surest way to catch regressions the automated layers can't see
 
 - [ ] Resize a video with one dimension omitted and preserve its aspect ratio
 - [ ] Crop with width, height, X, and Y values
-- [ ] Change video speed to 0.25× and 4× with synchronized audio
+- [ ] Change video speed to 0.25×, 4×, 10×, and 40× with synchronized audio
+- [ ] Change output frame rate to 24, 30, and 60 fps without changing duration
+- [ ] Combine a speed change with a frame rate and Remove Audio
+- [ ] Remove Audio produces a silent video, including inputs with multiple audio tracks
+- [ ] Editing an already silent video succeeds
+- [ ] Change Speed hides video-only controls when switching the selected input to audio
+- [ ] Speeds outside 0.25×–40× display an error without creating an output
 - [ ] Extract audio as MP3, M4A, WAV, and FLAC
 - [ ] Normalize an audio file to -16 LUFS
 - [ ] Burn an SRT file into a video

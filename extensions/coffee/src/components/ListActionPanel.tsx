@@ -19,6 +19,19 @@ export function ListActionPanel({
   return (
     <ActionPanel>
       <Action title="Set Caffeination Schedule" icon={Icon.Calendar} onAction={onSetScheduleAction} />
+      {schedule.IsManuallyDecafed ? (
+        <Action
+          title="Resume Caffeination Schedule"
+          icon={Icon.Play}
+          onAction={() => onResumeScheduleAction(schedule)}
+        />
+      ) : (
+        <Action
+          title="Pause Caffeination Schedule"
+          icon={Icon.Pause}
+          onAction={() => onPauseScheduleAction(schedule)}
+        />
+      )}
       <Action
         title="Delete Caffeination Schedule"
         style={Action.Style.Destructive}
@@ -26,22 +39,6 @@ export function ListActionPanel({
         shortcut={Keyboard.Shortcut.Common.Remove}
         onAction={() => onDeleteScheduleAction(schedule)}
       />
-
-      {schedule.IsManuallyDecafed ? (
-        <Action
-          title="Resume Caffeination Schedule"
-          icon={Icon.Play}
-          onAction={() => onResumeScheduleAction(schedule)}
-          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        />
-      ) : (
-        <Action
-          title="Pause Caffeination Schedule"
-          icon={Icon.Pause}
-          onAction={() => onPauseScheduleAction(schedule)}
-          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        />
-      )}
     </ActionPanel>
   );
 }

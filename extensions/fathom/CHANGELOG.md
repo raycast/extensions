@@ -1,5 +1,22 @@
 # Fathom for Raycast Changelog
 
+## [Download Recordings] - 2026-09-20
+
+### Added
+
+- **Download Recording**: Save a meeting's recording to your export directory (⌘⇧D). Recordings are typically 250–650 MB, so the transfer runs in a background process that **keeps going after you dismiss Raycast** — reopen the command to see where it got to.
+- **Copy Download Link** (⌘⇧L): Copy a direct link to the recording. The link is signed and expires within 24 hours.
+- **Resumable transfers**: An interrupted download resumes from where it stopped instead of starting over, and a cancelled one leaves no partial file behind.
+- **Live progress**: Percentage, transferred size, speed, and time remaining, with a Cancel action throughout.
+- **Transcript search reaches the whole transcript.** Transcripts moved to disk with a compact index in storage, and a word appearing later in a long meeting fell outside it. Search now consults the transcript on disk whenever that index cannot answer.
+- **Search Older Meetings** (⌘L): search covers the meetings loaded so far, so a match further back can be missing. This fetches another batch of older meetings on demand, and the empty state now says when there is more to look through rather than reporting no results.
+
+### Changed
+
+- Failure notifications now carry a **Copy Error** action, so a problem can be reported with its details attached.
+- Keyboard shortcuts are now platform-explicit (macOS and Windows) rather than ambiguous.
+- Export Summary as Markdown moved to ⌘⇧M (⌘⇧S conflicted with a system shortcut).
+
 ## [Instant Display, Stop Fetching & Cache Performance] - 2026-02-25
 
 ### Added

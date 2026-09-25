@@ -1,5 +1,30 @@
 # Coffee Changelog
 
+## [Fix] - 2026-09-21
+
+- Close the `Caffeinate for ...` / `Caffeinate Until` window as soon as `caffeinate` is spawned, instead of holding an empty view open while the menu bar and status commands refresh.
+
+## [Fix] - 2026-09-17
+
+- Fix `Caffeinate for ...` and `Caffeinate Until` showing the HUD without actually starting `caffeinate` — the work now runs before the HUD closes the view command.
+
+## [Fix] - 2026-09-15
+
+- Restore inline hours, minutes, and seconds arguments for `Caffeinate for ...` and use an invisible view to reset command state after submission.
+## [Fix] - 2026-09-14
+
+- Converted the `Caffeinate for ...` command from inline arguments back to a Form so its state isn't persisted between invocations.
+
+## [Enhancement] - 2026-08-30
+
+- Add reason to `Caffeinate Status`, showing 4 types, examples: 
+  - `Caffeinate Until`: until 2:00 PM
+  - `Caffeinate For ...`: 42m left
+  - `Caffeinate While`: while Slack is running
+  - `Schedule Caffeination`: schedule: Mondays from 11:00 to 15:00
+- Add `Decaffeinate pauses running schedules` preference
+- Add app icons to `Caffeinate While` command
+
 ## [Windows support] - 2026-08-25
 
 - Add support for Windows platform

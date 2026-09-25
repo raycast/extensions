@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { Fixture } from "../types";
-import { convertISOToLocalTime, getMatchStatusIcon } from "../utils";
+import { convertISOToLocalTime, getMatchStatusIcon, isLive } from "../utils";
 import MatchCommentary from "./commentary";
 import MatchLineups from "./lineup";
 import MatchReports from "./report";
@@ -35,7 +35,7 @@ export default function Matchday(props: PropsType) {
           },
         ];
 
-        if (match.period === "L") {
+        if (isLive(match)) {
           accessories.unshift({
             tag: {
               value: match.clock,

@@ -1,4 +1,4 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, Image, List } from "@raycast/api";
 import { getFavicon, getProgressIcon } from "@raycast/utils";
 import { Actions } from "../actions";
 import { DiggerResult } from "../types";
@@ -12,10 +12,38 @@ interface OverviewProps {
 }
 
 export function Overview({ data, onRefresh, overallProgress }: OverviewProps) {
-  // Show favicon once data is available, otherwise show progress
   const isStillLoading = !data;
-  const favicon = data?.url ? getFavicon(data.url) : null;
-  const progressIcon = isStillLoading ? getProgressIcon(overallProgress, Color.Blue) : (favicon ?? Icon.Globe);
+
+  // Never block the icon slot on a favicon.
+  //
+  // `getFavicon` asks a third-party service, and its default fallback is
+  // Icon.Link — so the row sat on a chain glyph for as long as that lookup took,
+  // which on a slow or icon-less host is until it gives up. Three changes:
+  //
+  //  1. Prefer the icon the PAGE declared. We already parsed it into
+  //     resources.images and resolved it to an absolute URL, so there is no
+  //     discovery step at all — Raycast just loads the image and swaps it in.
+  //  2. Fall back to Icon.Globe rather than Icon.Link. A globe reads as "a
+  //     website whose icon we don't have"; a chain reads as "a link", which is
+  //     what every other row in this list already is.
+  //  3. Only reach for a REMOTE icon when the host actually served us a page.
+  //     `fallback` covers an image that fails to load; it does nothing for one
+  //     that never resolves, and the slot renders EMPTY the whole time. On a
+  //     host that answered 436 — or did not answer at all — its favicon is not
+  //     going to load either, so pointing at it trades a globe for a blank.
+  //
+  // The fallback renders immediately and is replaced when the real icon
+  // decodes, which is the lazy behaviour asked for.
+  const servedAPage = !!data?.networking?.statusCode && data.networking.statusCode < 400;
+  const declaredFavicon = data?.overview?.favicon;
+  const siteIcon: Image.ImageLike | undefined = !data
+    ? undefined
+    : !servedAPage
+      ? Icon.Globe
+      : declaredFavicon
+        ? { source: declaredFavicon, fallback: Icon.Globe }
+        : getFavicon(data.url, { fallback: Icon.Globe });
+  const progressIcon = isStillLoading ? getProgressIcon(overallProgress, Color.Blue) : (siteIcon ?? Icon.Globe);
 
   if (!data) {
     return (
@@ -106,6 +134,17 @@ function OverviewDetail({ data, statusText, contentType, contentLength, finalUrl
     resources?.images?.find((img) => img.type === "twitter") ??
     resources?.images?.find((img) => img.type === "json-ld");
 
+  // Only 200 was marked before, so every other status — a 404, a redirect, or
+  // digg.xyz answering 436 behind Cloudflare — rendered with no affordance at all
+  // and read like a normal result sitting next to an empty page.
+  const code = networking?.statusCode;
+  const statusIcon =
+    code === undefined
+      ? undefined
+      : code >= 200 && code < 300
+        ? { source: Icon.Check, tintColor: Color.Green }
+        : { source: Icon.ExclamationMark, tintColor: Color.Orange };
+
   // Build markdown with image if available
   const markdown = representativeImage
     ? `![${representativeImage.alt || "Preview"}](${representativeImage.src})`
@@ -120,11 +159,7 @@ function OverviewDetail({ data, statusText, contentType, contentLength, finalUrl
           {showDescription && <List.Item.Detail.Metadata.Label title="" text={cleanDescription} />}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Response Details" />
-          <List.Item.Detail.Metadata.Label
-            title="Status"
-            text={statusText}
-            icon={networking?.statusCode === 200 ? { source: Icon.Check, tintColor: Color.Green } : undefined}
-          />
+          <List.Item.Detail.Metadata.Label title="Status" text={statusText} icon={statusIcon} />
           <List.Item.Detail.Metadata.Link title="Final URL" target={finalUrl} text={finalUrl} />
           <List.Item.Detail.Metadata.Label
             title="Response Time"

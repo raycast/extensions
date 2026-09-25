@@ -76,21 +76,22 @@ export async function getAsideTabSnapshot(): Promise<AsideTabSnapshotResult> {
         try
           set activeId to id of active tab of w as text
         end try
-        set tabPosition to 0
-        repeat with t in tabs of w
-          set tabPosition to tabPosition + 1
+        set tabIds to id of every tab of w
+        set tabTitles to title of every tab of w
+        set tabUrls to URL of every tab of w
+        repeat with tabPosition from 1 to count of tabIds
           set tId to ""
           try
-            set tId to id of t as text
+            set tId to item tabPosition of tabIds as text
           end try
           if tId is not "" then
             set tTitle to ""
             set tUrl to ""
             try
-              set tTitle to title of t as text
+              set tTitle to item tabPosition of tabTitles as text
             end try
             try
-              set tUrl to URL of t as text
+              set tUrl to item tabPosition of tabUrls as text
             end try
             set tActive to (tId is activeId) as text
             set end of output to tId & fieldSep & tTitle & fieldSep & tUrl & fieldSep & tActive & fieldSep & wId & fieldSep & windowPosition & fieldSep & tabPosition & fieldSep & wMode

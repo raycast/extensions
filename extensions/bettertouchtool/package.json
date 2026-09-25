@@ -5,6 +5,9 @@
   "description": "Run BTT actions from Raycast",
   "icon": "command-icon.png",
   "author": "dnnsmnstrr",
+  "contributors": [
+    "kmusick"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -13,17 +16,79 @@
   "commands": [
     {
       "name": "trigger",
-      "title": "Run BTT Named Trigger",
-      "subtitle": "Search for and run named trigger in BTT",
-      "description": "Find a named trigger in BetterTouchTool",
+      "title": "Run Named Trigger",
+      "subtitle": "BetterTouchTool",
+      "description": "Find and run named triggers in BetterTouchTool",
+      "mode": "view"
+    },
+    {
+      "name": "browse-triggers",
+      "title": "Browse Triggers",
+      "subtitle": "BetterTouchTool",
+      "description": "Find and manage configured triggers across BetterTouchTool",
       "mode": "view"
     },
     {
       "name": "action",
-      "title": "Run BTT Action",
-      "subtitle": "Search for and run an action in BTT",
-      "description": "Find an action in BetterTouchTool",
+      "title": "Run Action",
+      "subtitle": "BetterTouchTool",
+      "description": "Find and run actions in BetterTouchTool",
       "mode": "view"
+    },
+    {
+      "name": "variables",
+      "title": "Browse Variables",
+      "subtitle": "BetterTouchTool",
+      "description": "Browse BetterTouchTool variables",
+      "mode": "view"
+    },
+    {
+      "name": "clipboard-manager",
+      "title": "Search Clipboard",
+      "subtitle": "BetterTouchTool",
+      "description": "Search and paste items from BetterTouchTool's Clipboard Manager",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "clipboardCommandWhitelist",
+          "description": "Comma-separated executable names to recognize as terminal commands in addition to the built-in list",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Terminal Commands"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-named-triggers",
+      "title": "Search Named Triggers",
+      "description": "Find BetterTouchTool named triggers by name, group, assigned action, or enabled state"
+    },
+    {
+      "name": "run-named-trigger",
+      "title": "Run Named Trigger",
+      "description": "Run an enabled BetterTouchTool named trigger selected by its exact UUID"
+    },
+    {
+      "name": "search-actions",
+      "title": "Search Actions",
+      "description": "Search BetterTouchTool's built-in action catalog and discover supported parameters"
+    },
+    {
+      "name": "run-action",
+      "title": "Run Action",
+      "description": "Run a BetterTouchTool built-in action selected from the action catalog"
+    },
+    {
+      "name": "get-variable",
+      "title": "Get Variable",
+      "description": "Read the value and type of an exact BetterTouchTool variable"
+    },
+    {
+      "name": "set-variable",
+      "title": "Set Variable",
+      "description": "Set a temporary or persistent BetterTouchTool string or number variable"
     }
   ],
   "preferences": [
@@ -33,27 +98,61 @@
       "type": "password",
       "required": false,
       "title": "Shared Secret (only required if set in BTT)"
+    },
+    {
+      "name": "bttWebserverPort",
+      "description": "Used as a fallback when the local BTT socket server is unavailable",
+      "type": "textfield",
+      "required": true,
+      "default": "64472",
+      "title": "Webserver Port"
+    },
+    {
+      "name": "triggerResultHandling",
+      "description": "What to do with non-empty results returned by named triggers",
+      "type": "dropdown",
+      "required": true,
+      "default": "ignore",
+      "title": "Named Trigger Results",
+      "data": [
+        {
+          "title": "Ignore",
+          "value": "ignore"
+        },
+        {
+          "title": "Show in Toast",
+          "value": "toast"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.0",
-    "@raycast/utils": "^1.14.1"
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0",
+    "bettertouchtool": "1.0.0-alpha.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.0.0",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "tsx --test src/*.test.ts",
+    "evals": "ray evals"
   },
   "platforms": [
     "macOS"

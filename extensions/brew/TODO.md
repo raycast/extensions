@@ -1,268 +1,50 @@
-# TODO
+# Backlog
 
----
+This is the small set of work that remains both useful to Brew users and realistic to ship. Released features belong in [CHANGELOG.md](CHANGELOG.md), not here.
 
-## BRANCH 1: `refactor/code-organization-and-logging`
+## Next
 
-Focus: Refactor codebase structure, integrate logging, fix critical bugs, and improve code quality before implementing new features.
+### Adopt applications already on the Mac
 
----
+Add an **Adopt Apps** command that finds applications in `/Applications` which are not already managed by Homebrew and suggests casks that can take ownership of them. This makes the existing adoption capability discoverable instead of requiring users to know a cask token in advance.
 
-## 🔧 Logging & Debugging
+Homebrew supports `brew install --adopt --cask <token>`: it adopts an artifact already at the cask destination rather than replacing it, and rejects `--adopt` together with `--force`. The extension already has `brewAdoptCommand`, plus copy and terminal actions for a known package; the missing part is finding and safely presenting candidates.
 
-- [x] Integrate `@chrismessina/raycast-logger` for verbose logging
-  - [x] Add `verboseLogging` preference to `package.json`
-  - [x] Create `src/logger.ts` to initialize and export logger instance
-  - [x] Replace all `console.log` calls with `logger.log()` (in `utils.ts`, `brew.ts`)
-  - [x] Replace all `console.error` calls with `logger.error()`
-  - [x] Create child loggers for different modules (e.g., `[Brew]`, `[Cache]`, `[Actions]`)
-  - [x] Add logging for key operations: fetch, install, uninstall, upgrade, cleanup
-- [x] Improve error handling with better user feedback
-  - [x] Add more descriptive error messages in `showFailureToast`
-  - [x] Add error context (command, parameters) to error logs
-  - [x] Consider adding retry logic for transient network errors in `fetchRemote`
-  - [x] Create granular error types (network, parsing, brew command, etc.)
-  - [x] Show retry options in UI for network failures
-  - [x] Add React error boundaries for component-level error handling
+- During cask-cache construction, derive a compact app-bundle-name-to-cask map from `artifacts`. The cached records deliberately omit the full `artifacts` arrays — the `compact` hook on `caskRemote` is where a second derived field would go, beside `has_symlink_artifacts` — so detection must not restore them just to scan `/Applications`. Exclude casks already installed; when several casks claim one name, show the alternatives instead of selecting one silently.
+- Keep Homebrew's adoption rule honest. For ordinary casks it compares the installed bundle with the downloaded artifact's `Info.plist` short and bundle versions, falling back to a recursive diff; `auto_updates` casks skip that comparison. Candidate discovery alone therefore cannot promise that an ordinary app is adoptable or infer an "update first" version from the cask metadata. Show that Homebrew will verify the match during adoption, and only make the auto-updating exception explicit.
+- Make each row an installed app, with its version, proposed cask, and a clear status: candidate requiring Homebrew verification or auto-updating cask. Confirm the exact command before running it, and keep manual cask entry as an escape hatch.
+- Keep the scan responsive: show progress, cache a short-lived result, and make the empty state useful by offering manual entry.
 
-## 🧪 Code Quality & Testing
+### Support third-party taps
 
-- [x] Enable stricter TypeScript settings
-  - [x] Remove `any` types where possible
-  - [x] Add explicit return types to functions
+The search index is `formulae.brew.sh/api/formula.json` and `cask.json`, which publish **homebrew/core and homebrew/cask only**. A package from a third-party tap is therefore invisible to Search even when it is installed and listed correctly in Show Installed, where its `tap` field reads e.g. `cameroncooke/axe`. Closing that gap is most of the work.
 
-## 🐛 Bug Fixes
+- **Manage Taps** command, alongside Manage Services: list installed taps (`brew tap`) with what each provides, add and remove them (`brew tap <user/repo>`, `brew untap`), and surface each tap's status — pinned, official or third-party. Confirm before untapping, which can orphan installed packages.
+- **Adding a tap is a trust decision, not an install.** It means running code from an arbitrary third party, which is a different kind of choice from installing a reviewed core package. Study whatever consent flow Raycast already uses for adding an MCP server and follow that pattern rather than inventing one: name the tap's GitHub owner and repo, and make accepting deliberate rather than the default.
+- **Make tapped packages searchable.** Neither source is sufficient alone: `brew search` covers taps but shells out, is slow, and returns bare names, while the JSON index is fast and complete but core/cask only. Likely both — index results first, tap results merged in behind them. Local tap formulae under `$(brew --repo)/Library/Taps/**/Formula/*.rb` can serve offline name matching, with descriptions needing `brew info`.
+- **Attribute packages to their tap in the UI.** Show the tap on any row outside core/cask so a third-party package is identifiable at a glance, and allow filtering or grouping by tap in Search and Show Installed. The detail panel needs an honest empty state for Statistics: Homebrew publishes analytics for core and cask only, so a tapped package has no install counts rather than zero.
+- **Install from a tap.** Support the fully-qualified form (`brew install user/repo/name`), including when the tap is not yet added — brew adds it implicitly, which the confirmation must say. Handle a name present in both core and a tap: brew resolves core first, so an unqualified install can silently fetch the wrong package.
 
-- [x] Handle "another brew process is already running" lock errors gracefully
-  - [x] Create `BrewLockError` error type for concurrent process detection
-  - [x] Detect lock errors from brew stderr output (`lockf: already locked`, etc.)
-  - [x] Show user-friendly "Brew is Busy" message instead of raw error
-  - [x] Add retry action for lock errors (they are recoverable)
-  - [x] Log lock errors with context for debugging
-- [x] Fix issue with the `--[no-]quarantine` switch being deprecated in Homebrew 4.7.0+
-  - [x] Remove `quarantine` preference from `package.json`
-  - [x] Remove `brewQuarantineOption()` function from `brew.ts`
-  - [x] Remove quarantine option from install/upgrade commands
-  - [x] See: https://github.com/Homebrew/brew/pull/20929
-- [x] Fix typo: `pinned_vesion` should be `pinned_version` in `OutdatedFormula` interface
+### Keep cached search results trustworthy
 
-## 🏗️ Code Organization
+The chunked index can promise a record that its chunk no longer supplies; `brewSearch` currently omits that record but still reports the index total. Treat an index/chunk disagreement as cache corruption: rebuild or surface a retryable cache error, never show a shortened page as complete.
 
-- [x] Restructure codebase for better organization using the following directory structure:
-  - `src/components/` - React components (action panels, info panels, list items)
-  - `src/docs/` - Documentation and guides
-  - `src/hooks/` - Custom React hooks for data fetching and state management
-  - `src/tools/` - AI tools for Raycast
-  - `src/utils/` - Utility functions and helpers
-  - `src/views/` - Top-level view components (search, installed, outdated, etc.)
+Also replace the current recursive key filter in `src/utils/cache.ts` with exact top-level field selection. Its key-name matcher matches paths, not top-level keys, so a record keeps any subtree containing a whitelisted name. Casks no longer pay for this — `compactCaskArtifacts` deletes the two leaked keys along with the array it derives from — but that is a patch over the filter, not a fix, and the formula side still carries the same leak: on the 2026-09-18 snapshot, `variations` for 2,129 formulae plus `head_dependencies`, `service` and `post_install_steps`, together 560 KB that nothing reads. Preserve the fields the UI reads and add fixture coverage for both retained top-level fields and rejected nested fields.
 
-- [x] Create `src/utils/types.ts`
-  - [x] Move all type definitions from `brew.ts` (Cask, Formula, OutdatedFormula, etc.)
-  - [x] Move `Remote` interface from `utils.ts`
+### Give progress toasts an owner
 
-- [x] Create `src/utils/brew/` module structure:
-  - [x] `src/utils/brew/commands.ts` - brew command execution (`execBrew`, `execBrewEnv`)
-  - [x] `src/utils/brew/paths.ts` - path utilities (`brewPrefix`, `brewPath`, `brewExecutable`)
-  - [x] `src/utils/brew/fetch.ts` - data fetching logic (`brewFetchInstalled`, `brewFetchOutdated`)
-  - [x] `src/utils/brew/search.ts` - search functionality (`brewSearch`, `brewFetchFormulae`, `brewFetchCasks`)
-  - [x] `src/utils/brew/actions.ts` - install/uninstall/upgrade actions
-  - [x] `src/utils/brew/helpers.ts` - utility functions (`brewName`, `brewIdentifier`, `brewIsInstalled`, etc.)
-  - [x] `src/utils/brew/index.ts` - re-export all brew utilities
+Raycast's toast hide carries no toast id: it dismisses whichever toast is on screen. Anything holding an animated toast across an await can therefore dismiss a toast that now belongs to something else — most damagingly a failure toast, which silently swallows the error. `useDryRunPreview` and `useBrewDoctor` guard this with a per-run token, but the same shape is unguarded in `usePopularityRanks`, the Show Details lookup in `src/components/installPreview.tsx`, the lazy detail fetches in `caskInfo.tsx` and `formulaInfo.tsx`, and every holder of a `showActionToast` handle. Give the rule one implementation those call sites share, rather than repeating the token by hand.
 
-- [x] Refactor `src/utils/` utilities:
-  - [x] Move `utils.ts` → `src/utils/cache.ts` (cache-related functions)
-  - [x] Create `src/utils/toast.ts` - toast utilities (`showActionToast`, `showFailureToast`)
-  - [x] Create `src/utils/array.ts` - array utilities (replace global prototype extensions with functions)
-  - [x] Move `errors.ts` → `src/utils/errors.ts`
-  - [x] Move `logger.ts` → `src/utils/logger.ts`
-  - [x] Move `preferences.ts` → `src/utils/preferences.ts`
-  - [x] Create `src/utils/index.ts` - re-export all utilities
+### Avoid unnecessary global Homebrew updates
 
-- [x] Create `src/hooks/` for React hooks:
-  - [x] `src/hooks/useBrewSearch.ts` - search hook with debouncing
-  - [x] `src/hooks/useBrewInstalled.ts` - installed packages hook
-  - [x] `src/hooks/useBrewOutdated.ts` - outdated packages hook
-  - [ ] Consider using React Query or SWR for better data fetching patterns
+Replace the unconditional `brew update` used by the outdated refresh and Check for Updates with `brew update-if-needed`, while preserving cancellation, error reporting, and Homebrew-major-version invalidation when an update actually runs. Homebrew documents this command specifically as the fast no-op replacement for scripts. It reduces waiting and needless tap work without weakening freshness when an update is due.
 
-- [x] Move view components to `src/views/`:
-  - [x] `search.tsx` → `src/views/SearchView.tsx`
-  - [x] `installed.tsx` → `src/views/InstalledView.tsx`
-  - [x] `outdated.tsx` → `src/views/OutdatedView.tsx`
-  - [x] `upgrade.tsx` → `src/views/UpgradeView.tsx`
-  - [x] `clean-up.tsx` → `src/views/CleanUpView.tsx`
+### Do not report a no-op as a completed package change
 
-- [x] Organize `src/components/`:
-  - [x] Keep existing components in place
-  - [x] Move `runInTerminal.ts` → `src/utils/terminal.ts`
+Homebrew can exit successfully after declining work. Close the remaining gaps around install and uninstall: an already-installed cask can be a silent install no-op, and a package pinned after the extension's preflight can make uninstall exit 0. Confirm the resulting installed/pin state before showing a success HUD, and describe a refusal as skipped with the next action rather than as installed or uninstalled.
 
-- [x] Additional refactoring:
-  - [x] Break down long functions (e.g., `_fetchRemote`) into smaller, focused units
-  - [x] Add React error boundaries for component-level error handling
-    - [x] Created `ErrorBoundary` component with logger integration
-    - [x] Wrapped all view components (SearchView, InstalledView, OutdatedView, UpgradeView)
-    - [x] Integrated with centralized logging system for error tracking
+## Not planned
 
-## Add Support for Homebrew 5.0
-
-- [x] See https://brew.sh/2025/11/12/homebrew-5.0.0/ and https://github.com/Homebrew/brew/pull/20951
-- [x] Update brew command execution to handle new Homebrew 5.0 changes, including concurrency
-  - [x] Added `HOMEBREW_DOWNLOAD_CONCURRENCY` environment variable support
-  - [x] Added `HOMEBREW_USE_INTERNAL_API` environment variable support
-  - [x] Added preferences to control these features
-- [ ] Test compatibility with Homebrew 5.0 features
-- [x] Update documentation for Homebrew 5.0
-  - [x] Updated README.md with Homebrew 5.0 compatibility section
-  - [x] Added code comments documenting Homebrew 5.0 changes
-- [ ] Verify all existing functionality works with Homebrew 5.0
-
----
-
-## BRANCH 2: `feat/ai-tools-and-ux`
-
-Focus: Implement AI-powered features, improve user experience, and add advanced performance optimizations on top of the refactored codebase.
-
----
-
-## 🤖 AI Tools
-
-### Package Queries
-- [ ] Add tool to ask about packages and casks
-  - [ ] Allow getting current package version
-  - [ ] Allow listing outdated packages
-  - [ ] Allow updating outdated packages
-  - [ ] Allow getting package homepage
-  - [ ] Allow getting package dependencies
-  - [ ] Allow getting package description
-- [ ] Allow upgrading all packages at once
-
-### Package Intelligence & Recommendations
-- [ ] AI-powered package recommendations based on use case
-  - [ ] Suggest packages similar to installed ones
-  - [ ] Recommend packages for common workflows (web dev, data science, etc.)
-  - [ ] Analyze dependencies to suggest complementary packages
-
-### System Health & Optimization
-- [ ] Generate `brew doctor` reports with AI explanations
-  - [ ] Explain common brew issues in plain language
-  - [ ] Suggest fixes for detected problems
-  - [ ] Provide context about why issues matter
-- [ ] AI-powered cleanup suggestions
-  - [ ] Identify unused/orphaned packages
-  - [ ] Suggest safe cleanup actions based on dependencies
-  - [ ] Estimate disk space savings
-
-### Documentation & Help
-- [ ] Generate package documentation summaries
-  - [ ] Fetch and summarize package READMEs
-  - [ ] Extract key features and usage examples
-  - [ ] Provide quick reference for common commands
-- [ ] Create shell command suggestions
-  - [ ] Generate brew commands based on natural language queries
-  - [ ] Explain what a brew command does
-
-### Maintenance & Monitoring
-- [ ] Analyze security vulnerabilities (based on AI knowledge, not live CVE data)
-  - [ ] Check for known CVEs in installed packages
-  - [ ] Suggest security updates
-  - [ ] Provide vulnerability severity context
-- [ ] Generate upgrade impact analysis
-  - [ ] Warn about breaking changes before upgrading
-  - [ ] Suggest safe upgrade order for dependent packages
-  - [ ] Estimate upgrade time/complexity
-
-### Workflow Automation
-- [ ] Generate setup scripts for new machines
-  - [ ] Export current brew config as installable script
-  - [ ] Create Brewfile with AI-optimized organization
-- [ ] Suggest tap additions based on installed packages
-  - [ ] Recommend useful taps for your workflow
-  - [ ] Explain what each tap provides
-
-## 🗂️ Caching & Performance
-
-- [ ] Implement proper caching for brew data
-  - [ ] Add cache TTL configuration option
-  - [ ] Add manual cache invalidation action
-  - [ ] Consider using SQLite for faster queries (noted in `utils.ts` comments)
-  - [ ] Add cache size monitoring/cleanup
-  - [ ] Simplify cache invalidation logic
-- [ ] Optimize search performance
-  - [ ] Pre-compute lowercase names for faster filtering
-  - [ ] Consider indexing for large formula/cask lists
-  - [ ] Increase search results limit (currently capped at 200)
-  - [ ] Add search debouncing to reduce unnecessary filtering
-
-## 🎨 UI/UX Improvements
-
-- [ ] Refactor `formulaInfo.tsx` and `caskInfo.tsx` to reduce duplication
-  - [ ] Create `usePackageInfo<T>()` hook for shared lazy-loading logic
-  - [ ] Extract common patterns: `hasMinimalData()`, loading state, toast handling
-  - [ ] Keep type-specific metadata rendering in separate components
-  - [ ] Consider a shared `PackageInfoDetail` wrapper component
-- [ ] Add more detailed cask information panels
-  - [ ] Show download URL and size (from `url` field)
-  - [ ] Show installation date/time (from `installed_time` field)
-  - [ ] Show SHA256 checksum (from `sha256` field)
-  - [ ] Show bundle version info (`bundle_version`, `bundle_short_version`)
-  - [ ] Show app artifacts (what gets installed: `.app`, binaries, etc.)
-  - [ ] Show zap paths (files removed on full uninstall)
-  - [ ] Show deprecation/disabled status with reason and replacement
-  - [ ] Show old tokens/aliases (from `old_tokens` field)
-  - [ ] Show supported languages (from `languages` field)
-  - [ ] Add app icon from installed `.app` bundle
-- [ ] Add more detailed formula information panels
-  - [ ] Show installation date/time (from `installed[].time` - Unix timestamp)
-  - [ ] Show bottle info (pre-built binary availability per architecture)
-  - [ ] Show if poured from bottle vs built from source
-  - [ ] Show runtime dependencies with versions (richer than just names)
-  - [ ] Show test dependencies
-  - [ ] Show `uses_from_macos` system dependencies
-  - [ ] Show deprecation/disabled status with reason and replacement
-  - [ ] Show if formula has post-install script (`post_install_defined`)
-  - [ ] Show service info if formula provides a service
-  - [ ] Show link overwrite paths
-  - [ ] Show conflicts with reasons (not just names)
-- [ ] Improve icons for outdated packages
-  - [ ] Use distinct icons for outdated vs up-to-date (currently both use `CheckCircle`)
-  - [ ] Add visual indicator for pinned packages in list view
-  - [ ] Consider using `Icon.ArrowUp` or `Icon.ExclamationMark` for outdated items
-- [ ] Implement search filtering by category/type
-  - [ ] Add filter for taps
-  - [ ] Add filter by license type
-  - [ ] Add filter for keg-only formulae
-- [ ] Add filter for New and Updated packages
-  - [ ] Track package update dates
-  - [ ] Add "Recently Added" section
-  - [ ] Add "Recently Updated" section
-- [ ] To Show Installed, show available updates
-  - [ ] Add action to update individual package
-  - [ ] Add action to update all packages at once
-- [ ] Add download progress HUD to show download % complete
-- [ ] Improve keyboard shortcuts for Actions
-- [ ] Improve loading states with more informative messages
-- [ ] Add helpful empty states with actionable suggestions
-  - [ ] Look into why EmptyView doesn't appear on first cold start of SearchViewContent
-
-## 📚 Documentation
-
-- [ ] Improve README documentation
-  - [ ] Add screenshots of all commands
-  - [ ] Document all preferences
-  - [ ] Add troubleshooting section
-  - [ ] Add contribution guidelines
-  - [ ] Document keyboard shortcuts
-
-## 🔮 Future Enhancements
-
-- [ ] Add "brew doctor" command integration
-  - [ ] Show health check results in a dedicated view
-  - [ ] Add quick-fix actions for common issues
-- [ ] Add tap management
-  - [ ] List installed taps
-  - [ ] Add/remove taps
-- [ ] Add formula/cask analytics
-  - [ ] Show install counts from Homebrew analytics
-  - [ ] Show popularity ranking
-- [ ] Add batch operations
-  - [ ] Select multiple packages for install/uninstall
-  - [ ] Bulk upgrade selected packages
+- Replace sliding-window search with Raycast `List` pagination. Native pagination retains every previous page and exceeds the command memory limit; the window deliberately drops the prior page.
+- Add an AI assistant, recommendation engine, or generated package documentation. These are not needed to manage Homebrew reliably and have not justified their ongoing maintenance cost.
+- Rewrite the data-fetching layer around a framework such as React Query or SWR. A large change with no concrete, user-facing problem behind it.

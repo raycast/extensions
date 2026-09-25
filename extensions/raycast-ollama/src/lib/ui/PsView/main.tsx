@@ -81,10 +81,12 @@ export function PsView(): React.JSX.Element {
               icon={Icon.HardDrive}
               text={`${(prop.model.detail.size / 1e9).toPrecision(2).toString()} GB`}
             />
-            <List.Item.Detail.Metadata.Label
-              title="Context Length"
-              text={`${prop.model.detail.context_length.toLocaleString(locale)}`}
-            />
+            {typeof prop.model.detail.context_length === "number" && (
+              <List.Item.Detail.Metadata.Label
+                title="Context Length"
+                text={prop.model.detail.context_length.toLocaleString(locale)}
+              />
+            )}
             <List.Item.Detail.Metadata.Label
               title="Expires at"
               icon={Icon.Hourglass}
@@ -107,14 +109,20 @@ export function PsView(): React.JSX.Element {
     /* Model Ps Data */
     if (Model.detail.size_vram)
       accessories.push({
-        tag: { color: Color.PrimaryText, value: `${(Model.detail.size_vram / 1e9).toPrecision(2).toString()} GB` },
+        tag: {
+          color: Color.PrimaryText,
+          value: `${(Model.detail.size_vram / 1e9).toPrecision(2).toString()} GB`,
+        },
         icon: Icon.MemoryChip,
       });
     /* Skip other accessories if details are showed */
     if (showDetail) return accessories;
     if (Model.detail.expires_at)
       accessories.push({
-        tag: { color: Color.PrimaryText, value: FormatOllamaPsModelExpireAtFormat(Model.detail.expires_at) },
+        tag: {
+          color: Color.PrimaryText,
+          value: FormatOllamaPsModelExpireAtFormat(Model.detail.expires_at),
+        },
         icon: Icon.Hourglass,
       });
 

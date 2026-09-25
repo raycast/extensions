@@ -2,8 +2,9 @@ import sha256 from "sha256-file";
 import { ResultViewIconsListKeys, icons, speedTestResultPrettyNames } from "./speedtest-pretty-names";
 import { SpeedtestResultKeys, SpeedtestResultValueType } from "./speedtest.types";
 
-export function pingToString(ping: number): string {
-  return ping === 0 ? "?" : ping.toFixed(1) + " ms";
+export function pingToString(ping: number | undefined): string {
+  // Live CLI events only carry a subset of the fields (e.g. no low/high while pinging).
+  return !ping ? "?" : ping.toFixed(1) + " ms";
 }
 
 export function speedToString(speed: number | undefined): string {

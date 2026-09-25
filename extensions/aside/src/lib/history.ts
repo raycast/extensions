@@ -29,7 +29,7 @@ function historyDbPath(profile: string): string {
 
 // Chromium stores `last_visit_time` as microseconds since 1601. Convert to ISO-8601 UTC.
 const TIME_EXPR =
-  "strftime('%Y-%m-%dT%H:%M:%SZ', last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')";
+  "strftime('%Y-%m-%dT%H:%M:%SZ', visible_history.last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch')";
 
 function buildHistoryQuery(searchText: string, limit: number, options: HistoryQueryOptions = {}): string {
   const terms = searchText
@@ -38,17 +38,56 @@ function buildHistoryQuery(searchText: string, limit: number, options: HistoryQu
     .filter(Boolean)
     .map((term) => term.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/'/g, "''"));
 
-  const where = terms.length
-    ? `WHERE last_visit_time > 0 AND ${terms.map((term) => `(url LIKE '%${term}%' ESCAPE '\\' OR title LIKE '%${term}%' ESCAPE '\\')`).join(" AND ")}`
-    : "WHERE last_visit_time > 0";
+  const searchPredicate = terms.length
+    ? terms
+        .map(
+          (term) =>
+            `(visible_history.url LIKE '%${term}%' ESCAPE '\\' OR visible_history.title LIKE '%${term}%' ESCAPE '\\')`,
+        )
+        .join(" AND ")
+    : "1";
 
   const totalMatchesColumn = options.includeTotalMatches ? ", COUNT(*) OVER() AS totalMatches" : "";
 
+  // Redirect hops share a timestamp. Keep only final destinations, while preserving URLs
+  // without a matching local visit and unrelated navigations that share a title or time.
   return `
+    WITH canonical_visits AS MATERIALIZED (
+      SELECT urls.id,
+            urls.url,
+            urls.title,
+            urls.last_visit_time,
+            current_visit.id AS visit_id,
+            current_visit.from_visit,
+            current_visit.transition
+      FROM urls
+      LEFT JOIN visits AS current_visit
+        ON current_visit.id = (
+          SELECT MAX(candidate.id)
+          FROM visits AS candidate
+          WHERE candidate.url = urls.id
+            AND candidate.visit_time = urls.last_visit_time
+        )
+      WHERE urls.last_visit_time > 0
+    ),
+    visible_history AS (
+      SELECT current.id, current.url, current.title, current.last_visit_time, current.visit_id
+      FROM canonical_visits AS current
+      WHERE current.visit_id IS NULL
+        OR NOT EXISTS (
+          SELECT 1
+          FROM canonical_visits AS child
+          WHERE child.from_visit = current.visit_id
+            AND child.last_visit_time = current.last_visit_time
+            AND (child.transition & 0xC0000000) != 0
+        )
+    )
     SELECT id, url, title, ${TIME_EXPR} AS lastVisitedAt${totalMatchesColumn}
-    FROM urls
-    ${where}
-    ORDER BY last_visit_time DESC
+    FROM visible_history
+    WHERE ${searchPredicate}
+    ORDER BY visible_history.last_visit_time DESC,
+            visible_history.visit_id DESC,
+            visible_history.id DESC
     LIMIT ${Math.max(1, Math.floor(limit))};
   `;
 }
@@ -94,10 +133,18 @@ export async function searchHistory(searchText = "", limit = 20): Promise<Histor
 }
 
 /** Search one Aside profile without an extension-managed history cache. */
-export function useHistorySearch(searchText: string, limit = 25, profile = configuredProfile()) {
+export function useHistorySearch(
+  searchText: string,
+  limit = 25,
+  profile = configuredProfile(),
+  options: HistoryQueryOptions = {},
+) {
   const dbPath = historyDbPath(resolveAsideProfile(profile));
   const dbExists = existsSync(dbPath);
-  const query = useMemo(() => (dbExists ? buildHistoryQuery(searchText, limit) : ""), [searchText, limit, dbExists]);
+  const query = useMemo(
+    () => (dbExists ? buildHistoryQuery(searchText, limit, options) : ""),
+    [searchText, limit, dbExists, options.includeTotalMatches],
+  );
   const { data, error, isLoading, permissionView, revalidate } = useSQL<HistoryRow>(
     dbExists ? dbPath : __filename,
     query,
@@ -109,6 +156,7 @@ export function useHistorySearch(searchText: string, limit = 25, profile = confi
   );
 
   const entries = useMemo<HistoryEntry[]>(() => (data ?? []).map(mapHistoryRow), [data]);
+  const totalMatches = data?.[0]?.totalMatches ?? entries.length;
 
-  return { data: entries, error, isAvailable: dbExists, isLoading, permissionView, revalidate };
+  return { data: entries, totalMatches, error, isAvailable: dbExists, isLoading, permissionView, revalidate };
 }

@@ -1,3 +1,4 @@
+import { fetchAntigravityOauthUsage } from "./oauth.ts";
 import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser.ts";
 import {
   AntigravityProbeError,
@@ -8,8 +9,12 @@ import {
 import type { AntigravityError, AntigravityUsage } from "./types.ts";
 
 type ProbeFetcher = (preferredSource?: AntigravityProbeSource) => Promise<AntigravityProbeResult>;
+type OauthUsageFetcher = () => Promise<{ usage: AntigravityUsage | null; error: AntigravityError | null } | null>;
 
-export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetchAntigravityRawStatus): Promise<{
+export async function fetchAntigravityUsage(
+  fetchRawStatus: ProbeFetcher = fetchAntigravityRawStatus,
+  fetchOauthUsage: OauthUsageFetcher = fetchAntigravityOauthUsage,
+): Promise<{
   usage: AntigravityUsage | null;
   error: AntigravityError | null;
 }> {
@@ -40,11 +45,26 @@ export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetch
 
     return parseAntigravityCommandModelConfigsResponse(probeResult.payload);
   } catch (error) {
+    if (shouldFallbackToOauth(error)) {
+      try {
+        const oauthResult = await fetchOauthUsage();
+        if (oauthResult) {
+          return oauthResult;
+        }
+      } catch {
+        // Keep the original probe error when OAuth itself throws.
+      }
+    }
+
     return {
       usage: null,
       error: mapAntigravityError(error),
     };
   }
+}
+
+function shouldFallbackToOauth(error: unknown): boolean {
+  return error instanceof AntigravityProbeError && (error.code === "not_running" || error.code === "missing_csrf");
 }
 
 export function mapAntigravityError(error: unknown): AntigravityError {

@@ -1,19 +1,24 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { DockerContainer } from "./interfaces";
-import { useToken } from "./instances";
+import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
 
-export default function Docker() {
-  const { url, headers } = useToken();
+export default function Docker({ instance: initial }: { instance: Instance }) {
+  const { url, headers, instance, dropdown } = useInstanceScope(initial);
 
   const { isLoading, data: containers } = useFetch<DockerContainer[], DockerContainer[]>(url + "docker.getContainers", {
     headers,
     initialData: [],
   });
 
+  const { data: sortedContainers, visitItem } = useFrecencySorting(containers, {
+    namespace: instanceId(instance),
+    key: (container) => container.containerId,
+  });
+
   return (
-    <List navigationTitle="Docker" isLoading={isLoading}>
-      {containers.map((container) => (
+    <List navigationTitle="Docker" isLoading={isLoading} searchBarAccessory={dropdown}>
+      {sortedContainers.map((container) => (
         <List.Item
           key={container.containerId}
           icon={Icon.Box}
@@ -24,7 +29,8 @@ export default function Docker() {
               <Action.Push
                 icon={Icon.WrenchScrewdriver}
                 title="View Config"
-                target={<DockerConfig container={container} />}
+                target={<DockerConfig container={container} instance={instance} />}
+                onPush={() => visitItem(container)}
               />
             </ActionPanel>
           }
@@ -34,8 +40,8 @@ export default function Docker() {
   );
 }
 
-function DockerConfig({ container }: { container: DockerContainer }) {
-  const { url, headers } = useToken();
+function DockerConfig({ container, instance }: { container: DockerContainer; instance: Instance }) {
+  const { url, headers } = tokenForInstance(instance);
   const { isLoading, data } = useFetch(url + `docker.getConfig?containerId=${container.containerId}`, {
     headers,
   });

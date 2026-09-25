@@ -1,6 +1,6 @@
 // Cleans noise Codex wraps around user messages.
 // "compact" inlines markers for AI input; "preserve" relocates skill blocks for export.
-export type CodexCleanMode = "compact" | "preserve";
+type CodexCleanMode = "compact" | "preserve";
 
 export function cleanCodexUserMessage(
   raw: string,

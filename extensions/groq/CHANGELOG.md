@@ -1,5 +1,13 @@
 # Groq Changelog
 
+## [Raycast Model Provider] - 2026-09-24
+
+- Use available models directly in Raycast AI with streaming, conversation history, and supported model capabilities.
+
+## [Updated Models] - 2026-09-01
+
+- Added `Qwen 3.8 27B 131k`
+
 ## [Updated Models] - 2026-07-12
 
 - Added `Qwen 3.6 27B 131k`

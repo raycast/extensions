@@ -44,17 +44,26 @@ export function CopyActions({ data, url }: CopyActionsProps) {
 interface CopyIndividualActionsProps {
   title?: string;
   description?: string;
+  /** og:description, which is frequently NOT the same string as the meta one. */
+  ogDescription?: string;
   ogImage?: string;
   favicon?: string;
   canonical?: string;
 }
 
-export function CopyIndividualActions({ title, description, ogImage, favicon, canonical }: CopyIndividualActionsProps) {
+export function CopyIndividualActions({
+  title,
+  description,
+  ogDescription,
+  ogImage,
+  favicon,
+  canonical,
+}: CopyIndividualActionsProps) {
   return (
     <>
       {title && (
         <Action.CopyToClipboard
-          title="Copy Title"
+          title="Copy Page Title"
           content={title}
           icon={Icon.Text}
           shortcut={{
@@ -74,9 +83,20 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
           }}
         />
       )}
+      {ogDescription && (
+        <Action.CopyToClipboard
+          title="Copy Open Graph Description"
+          content={ogDescription}
+          icon={Icon.Text}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "g" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "g" },
+          }}
+        />
+      )}
       {ogImage && (
         <Action.CopyToClipboard
-          title="Copy OG Image URL"
+          title="Copy Open Graph Image URL"
           content={ogImage}
           icon={Icon.Image}
           shortcut={{
@@ -112,7 +132,7 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
 }
 
 function generateMarkdownReport(data: DiggerResult): string {
-  const { overview, metadata, discoverability, resources, networking, performance } = data;
+  const { overview, metadata, discoverability, resources, networking, performance, wellKnown } = data;
 
   let markdown = `# Website Analysis: ${overview?.title || data.url}\n\n`;
 
@@ -186,14 +206,22 @@ function generateMarkdownReport(data: DiggerResult): string {
     if (discoverability.robots) {
       markdown += `- **Robots**: ${discoverability.robots}\n`;
     }
+    // Same distinction as the UI: "Not found" is only claimed when the server
+    // answered. A 5xx or a timeout reports as unchecked, not absent.
+    const resourceText = (status?: string) =>
+      status === "found" ? "Found" : status === "unavailable" ? "Couldn't check" : "Not found";
     if (discoverability.sitemap) {
       markdown += `- **Sitemap**: ${discoverability.sitemap}\n`;
+    } else if (discoverability.sitemapStatus !== undefined) {
+      // Printing the URL only on success meant a timed-out sitemap vanished from
+      // the report entirely — the reader could not tell it had been checked.
+      markdown += `- **Sitemap**: ${resourceText(discoverability.sitemapStatus)}\n`;
     }
     if (discoverability.robotsTxt !== undefined) {
-      markdown += `- **robots.txt**: ${discoverability.robotsTxt ? "Found" : "Not found"}\n`;
+      markdown += `- **robots.txt**: ${resourceText(discoverability.robotsTxt)}\n`;
     }
     if (discoverability.llmsTxt !== undefined) {
-      markdown += `- **llms.txt**: ${discoverability.llmsTxt ? "Found" : "Not found"}\n`;
+      markdown += `- **llms.txt**: ${resourceText(discoverability.llmsTxt)}\n`;
     }
     if (discoverability.contentSignals) {
       const cs = discoverability.contentSignals;
@@ -247,14 +275,31 @@ function generateMarkdownReport(data: DiggerResult): string {
     if (performance.loadTime) {
       markdown += `- **Load Time**: ${Math.round(performance.loadTime)}ms\n`;
     }
-    if (performance.ttfb) {
-      markdown += `- **TTFB**: ${Math.round(performance.ttfb)}ms\n`;
-    }
     if (performance.pageSize) {
       markdown += `- **Page Size**: ${formatBytes(performance.pageSize)}\n`;
     }
-    if (performance.requestCount) {
-      markdown += `- **Requests**: ${performance.requestCount}\n`;
+    markdown += `\n`;
+  }
+
+  if (wellKnown) {
+    markdown += `## Well-Known\n\n`;
+    if (wellKnown.catchAll) {
+      markdown += `- This host answers every path under /.well-known/, so no result could be established.\n`;
+    } else if (wellKnown.hits.length > 0) {
+      for (const hit of wellKnown.hits) {
+        markdown += `- **${hit.path}**: ${hit.url} (${hit.contentType.split(";")[0]})\n`;
+      }
+    } else if (wellKnown.unchecked?.length) {
+      // Zero hits AND unanswered paths is not "none published" — a qualifying
+      // sentence afterwards does not make the preceding claim true.
+      const answered = wellKnown.probed - wellKnown.unchecked.length;
+      markdown += `- No files found in the ${answered} of ${wellKnown.probed} paths that answered\n`;
+    } else {
+      markdown += `- None published (${wellKnown.probed} paths probed)\n`;
+    }
+    // A path that got no answer is not a path the host declined to publish.
+    if (wellKnown.unchecked?.length) {
+      markdown += `- **Couldn't check** ${wellKnown.unchecked.length} paths: ${wellKnown.unchecked.join(", ")}\n`;
     }
     markdown += `\n`;
   }

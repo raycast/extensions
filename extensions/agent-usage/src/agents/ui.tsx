@@ -1,9 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { environment, Image, List } from "@raycast/api";
+import { environment, getPreferenceValues, Image, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 
+import type { PercentageDisplayMode } from "./percentage-display.ts";
 import {
   getDarkListIconAssetName,
   invertMonochromeSvg,
@@ -24,9 +25,21 @@ function getProgressColor(percent: number): string {
   return "#FF453A";
 }
 
-export function generatePieIcon(percent: number): Image.ImageLike {
-  const p = Math.max(0, Math.min(100, percent));
-  return getProgressIcon(p / 100, getProgressColor(p));
+/** The user's global "Percentage Display" preference (remaining by default). */
+export function getPercentageDisplayMode(): PercentageDisplayMode {
+  return getPreferenceValues<Preferences>().percentageDisplayMode;
+}
+
+/**
+ * Pie icon for a quota. Always takes the REMAINING percentage: the warning
+ * color is keyed to how much quota remains regardless of display mode, while
+ * the filled fraction follows the "Percentage Display" preference (remaining
+ * fills down, used fills up).
+ */
+export function generatePieIcon(percentRemaining: number): Image.ImageLike {
+  const p = Math.max(0, Math.min(100, percentRemaining));
+  const fraction = getPercentageDisplayMode() === "used" ? (100 - p) / 100 : p / 100;
+  return getProgressIcon(fraction, getProgressColor(p));
 }
 
 /**

@@ -4,7 +4,7 @@ import { getPreferenceValues, LaunchProps } from "@raycast/api";
 import { Creativity } from "./lib/enum";
 import { OllamaApiModelCapability } from "./lib/ollama/enum";
 
-const pref = getPreferenceValues<Preferences>();
+const pref = getPreferenceValues<Preferences.OllamaTranslate>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.OllamaTranslate }>): React.JSX.Element {
@@ -20,6 +20,7 @@ Produce only the ${props.arguments.target} translation, without any additional e
       prompt={p}
       creativity={Creativity.Low}
       capabilities={[OllamaApiModelCapability.COMPLETION]}
+      autoReplace={pref.ollamaAutoReplace}
     />
   );
 }

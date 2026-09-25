@@ -1,5 +1,17 @@
 # Changelog
 
+## [Fix Reword Message Handling] - 2026-09-14
+
+### Fixed
+- **Rebase**: Keep reword messages literal in interactive rebase, so `$(...)` and backticks are no longer run by the shell, and multi-line messages no longer break the rebase
+
+## [Fix Pager and Editor Environment Variables] - 2026-09-14
+
+### Fixed
+- **Git**: Fix "Use of PAGER is not permitted without enabling allowUnsafePager" (and the same error for `EDITOR`) when the shell exports a pager or editor
+- **Rebase**: Fix "Continue Rebase" failing with "Use of GIT_EDITOR is not permitted" and breaking every later Git command until the extension reloads
+- **Rebase**: Fix interactive rebase (reword, squash, fixup, drop, edit) failing with "Configuring sequence.editor is not permitted"
+
 ## [Update] - 2026-08-13
 
 ### Added

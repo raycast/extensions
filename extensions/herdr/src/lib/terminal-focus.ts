@@ -10,32 +10,123 @@ function appleScriptString(value: string): string {
   return `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replaceAll("\n", "\\n")}"`;
 }
 
-function sessionMatches(args: string, sessionName?: string): boolean {
-  const namedSession = args.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1];
-  const attachedSession = args.match(/(?:^|\s)session\s+attach\s+([^\s]+)/)?.[1];
-  // A bare client reads as default. Argv cannot reveal a client that joined a
-  // named session through an inherited HERDR_SESSION.
-  const clientSession = namedSession || attachedSession || "default";
-  return clientSession === (sessionName?.trim() || "default");
+export interface HerdrClient {
+  pid: string;
+  tty: string;
 }
 
-export function parseHerdrClientTtys(output: string, binary: string, sessionName?: string): string[] {
+/**
+ * The one column set both lookups ask `ps` for. `comm` is omitted because macOS
+ * truncates it to 16 characters, which splits a binary path containing a space.
+ */
+export const PS_COLUMNS = "pid=,tty=,args=";
+
+interface HerdrProcess extends HerdrClient {
+  /** The argv after the executable, so a path containing spaces cannot shift the arguments. */
+  arguments: string;
+}
+
+/** Parses `ps -o pid=,tty=,args=` into the Herdr processes that own a tty. */
+function parseHerdrProcesses(output: string, binary: string): HerdrProcess[] {
   const binaryName = basename(binary);
-  const ttys: string[] = [];
+  const processes: HerdrProcess[] = [];
   for (const line of output.split("\n")) {
-    const match = line.trim().match(/^(\S+)\s+(\S+)\s+(.+)$/);
+    const match = line.trim().match(/^(\d+)\s+(\S+)\s+(.+)$/);
     if (!match) continue;
-    const [, tty, , args] = match;
+    const [, pid, tty, args] = match;
     if (tty === "??" || tty === "?") continue;
-    const executable = args
-      .trim()
-      .split(/\s+/, 1)[0]
-      .replace(/^['"]|['"]$/g, "");
-    if (basename(executable) !== binaryName && basename(executable) !== "herdr") continue;
-    if (!sessionMatches(args, sessionName)) continue;
-    ttys.push(tty.startsWith("/dev/") ? tty : `/dev/${tty}`);
+    const argv = args.trim().replace(/^['"]|['"]$/g, "");
+    // The resolved binary path is matched whole, so a path containing spaces
+    // still yields the right argument list; a differently located `herdr`
+    // falls back to the first token.
+    const first = argv.split(/\s+/)[0];
+    let rest: string;
+    if (argv === binary || argv.startsWith(`${binary} `)) rest = argv.slice(binary.length);
+    else if (basename(first) === binaryName || basename(first) === "herdr") rest = argv.slice(first.length);
+    else continue;
+    processes.push({ pid, tty: tty.startsWith("/dev/") ? tty : `/dev/${tty}`, arguments: rest.trim() });
   }
+  return processes;
+}
+
+type ArgvSession =
+  /** `herdr --session x` or `herdr session attach x`. */
+  | { kind: "named"; session: string }
+  /** A plain `herdr`, which joins the Default Session. */
+  | { kind: "bare" }
+  /** Not a local Client: a server, a CLI call, the remote bridge, or a remote attach. */
+  | { kind: "other" };
+
+/** Herdr's global options, which a Client may carry before any subcommand. */
+const GLOBAL_FLAGS_WITH_VALUE = ["--session", "--remote", "--remote-keybindings"];
+const GLOBAL_FLAGS = ["--no-session", "--handoff", "--default-config", "--version", "-V", "--help", "-h"];
+
+/**
+ * What a Herdr process's arguments say about the Session it belongs to.
+ *
+ * A Client is `herdr` with global options only, or `herdr session attach <name>`.
+ * Anything else is a subcommand, so a CLI call such as `herdr --session work
+ * pane read` is not a Client even though it names a Session: revealing its pane
+ * or signaling it would hit the user's own running command. The remote bridge
+ * (`herdr client`) and a `--remote` attach drive another host's server, so
+ * neither is a Client of a local Session either.
+ */
+function argvSession(argv: string): ArgvSession {
+  const words = argv.split(/\s+/).filter(Boolean);
+  let session: string | undefined;
+  let index = 0;
+  while (index < words.length) {
+    const word = words[index];
+    const [flag, inlineValue] = word.startsWith("--") && word.includes("=") ? word.split(/=(.*)/s) : [word, undefined];
+    if (flag === "--remote") return { kind: "other" };
+    if (GLOBAL_FLAGS_WITH_VALUE.includes(flag)) {
+      const value = inlineValue ?? words[index + 1];
+      if (flag === "--session") session = value;
+      index += inlineValue === undefined ? 2 : 1;
+      continue;
+    }
+    if (GLOBAL_FLAGS.includes(flag)) {
+      index += 1;
+      continue;
+    }
+    // The only subcommand a Client runs.
+    const attached = words
+      .slice(index)
+      .join(" ")
+      .match(/^session\s+attach\s+(\S+)$/)?.[1];
+    return attached === undefined ? { kind: "other" } : { kind: "named", session: attached };
+  }
+  return session === undefined ? { kind: "bare" } : { kind: "named", session };
+}
+
+/**
+ * Ttys of Clients that may be Revealed. A plain `herdr` reads as the Default
+ * Session, because argv cannot reveal a client that joined a named session
+ * through an inherited HERDR_SESSION.
+ */
+export function parseHerdrClientTtys(output: string, binary: string, sessionName?: string): string[] {
+  const wanted = sessionName?.trim() || "default";
+  const ttys = parseHerdrProcesses(output, binary)
+    .filter((process) => {
+      const argv = argvSession(process.arguments);
+      return argv.kind === "named" ? argv.session === wanted : argv.kind === "bare" && wanted === "default";
+    })
+    .map((process) => process.tty);
   return [...new Set(ttys)];
+}
+
+/**
+ * Clients whose arguments name `sessionName` outright, as pid and tty pairs.
+ * Argv alone never qualifies one for a detach; the caller must also find its
+ * tty in the Terminal Application's pane listing.
+ */
+export function parseHerdrClients(output: string, binary: string, sessionName: string): HerdrClient[] {
+  return parseHerdrProcesses(output, binary)
+    .filter((process) => {
+      const argv = argvSession(process.arguments);
+      return argv.kind === "named" && argv.session === sessionName;
+    })
+    .map(({ pid, tty }) => ({ pid, tty }));
 }
 
 export function buildTerminalFocusScript(ttys: string[]): string {
@@ -98,24 +189,63 @@ export function buildGhosttyFocusScript(title: string): string {
 end tell`;
 }
 
-export function selectWezTermPane(output: string, ttys: string[]): string | undefined {
-  let panes: WezTermPane[];
+export function buildTerminalTtyListScript(): string {
+  return `tell application "Terminal" to get tty of every tab of every window`;
+}
+
+export function buildITermTtyListScript(): string {
+  return `tell application "iTerm" to get tty of every session of every tab of every window`;
+}
+
+/** osascript prints nested lists flattened as "/dev/ttys001, /dev/ttys002". */
+export function parseTtyList(output: string): string[] {
+  return [...new Set(output.split(/[,\s]+/).filter((item) => item.startsWith("/dev/")))];
+}
+
+/** The given ttys that are WezTerm panes, with the window of the first match. */
+export function parseWezTermPanes(output: string): WezTermPane[] | undefined {
+  let panes: unknown;
   try {
-    panes = JSON.parse(output) as WezTermPane[];
+    panes = JSON.parse(output);
   } catch {
     return undefined;
   }
-  const match = panes.find((pane) => pane.tty_name && ttys.includes(pane.tty_name));
+  return Array.isArray(panes) ? (panes as WezTermPane[]) : undefined;
+}
+
+export interface WezTermMatch {
+  tty: string;
+  windowId?: string;
+  paneId?: string;
+}
+
+/**
+ * The given ttys that are WezTerm panes, each with its Terminal Window, plus the
+ * window of the first match. The per-match window lets a caller act on one
+ * window rather than on every pane it found.
+ */
+export function selectWezTermPanes(
+  output: string,
+  ttys: string[],
+): { matches: WezTermMatch[]; windowId?: string } | undefined {
+  const panes = parseWezTermPanes(output);
+  if (!panes) return undefined;
+  const matches = panes
+    .filter((pane) => pane.tty_name && ttys.includes(pane.tty_name))
+    .map((pane) => ({
+      tty: pane.tty_name as string,
+      windowId: Number.isInteger(pane.window_id) ? String(pane.window_id) : undefined,
+      paneId: Number.isInteger(pane.pane_id) ? String(pane.pane_id) : undefined,
+    }));
+  return { matches, windowId: matches.find((match) => match.windowId !== undefined)?.windowId };
+}
+
+export function selectWezTermPane(output: string, ttys: string[]): string | undefined {
+  const match = parseWezTermPanes(output)?.find((pane) => pane.tty_name && ttys.includes(pane.tty_name));
   return match ? String(match.pane_id) : undefined;
 }
 
 export function selectWezTermWindow(output: string): string | undefined {
-  let panes: WezTermPane[];
-  try {
-    panes = JSON.parse(output) as WezTermPane[];
-  } catch {
-    return undefined;
-  }
-  const windowId = panes.find((pane) => Number.isInteger(pane.window_id))?.window_id;
+  const windowId = parseWezTermPanes(output)?.find((pane) => Number.isInteger(pane.window_id))?.window_id;
   return windowId === undefined ? undefined : String(windowId);
 }

@@ -59,15 +59,12 @@ export default function EditTeamMember({ userChanged, user }: Props) {
             setIsLoading(false);
             showToast({
               style: Toast.Style.Success,
-              title: "Success!",
-              message: "User updated",
+              title: "Team Member Updated",
             });
-            if (response && response.ok) {
-              const json = await response.json();
-              const invited = userSchema.safeParse(json.data);
-              if (invited.success) {
-                userChanged(invited.data);
-              }
+            const json = await response.json();
+            const invited = userSchema.safeParse(json.data);
+            if (invited.success) {
+              userChanged(invited.data);
             }
           } catch (error) {
             setIsLoading(false);

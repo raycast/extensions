@@ -1,5 +1,9 @@
 # Raycast Browsers Profiles
 
+## [Add Brave Origin browser support] - 2026-09-07
+
+- Adding Brave Origin browser to supported browser list
+
 ## [Copy Deeplink] - 2026-08-11
 
 - Copy a profile as deeplink (ref: [Issue #23606](https://github.com/raycast/extensions/issues/23606))

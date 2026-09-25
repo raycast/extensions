@@ -1,17 +1,17 @@
-# Research Sync — Raycast Extension
+# Clipfile — Raycast Extension
 
-Browse your **Research Sync** list, read saved articles, and save the current
-browser tab — without leaving Raycast. Your list stays in sync with the Research
-Sync apps on iOS, macOS, and the browser via a hosted sync service.
+Browse your **Clipfile** list, read saved articles, and save the current
+browser tab — without leaving Raycast. Your list stays in sync with the Clipfile
+apps on iOS, macOS, and the browser via a hosted sync service.
 
 ## Commands
 
 - **Show Unread Links** — browse your saved articles, grouped into the folders
-  your Research Sync account assigns. Filter by Unread, Read, or All from the
+  your Clipfile account assigns. Filter by Unread, Read, or All from the
   dropdown. `↵` opens the article in your browser and marks it read; `⌘↵` reads
   it inside Raycast (or shows its note and details); `⌘R` toggles read; `⌘C`
   copies the URL; `⌘L` reloads; `⌃X` deletes.
-- **Save Current Tab** — saves the frontmost browser tab to your Research Sync
+- **Save Current Tab** — saves the frontmost browser tab to your Clipfile
   list. Works in Safari, Chrome, Dia, Arc, Brave, Edge, Vivaldi, and Opera.
   With the Raycast browser extension connected, it also captures the article
   text for offline reading.
@@ -30,8 +30,8 @@ subscriber prompt. Links showing a green book icon have a saved copy; press
 
 ## Setup
 
-1. **Get your sync token.** This extension authenticates to your Research Sync
-   sync service with a bearer token — the same token your Research Sync iOS/macOS
+1. **Get your sync token.** This extension authenticates to your Clipfile
+   sync service with a bearer token — the same token your Clipfile iOS/macOS
    app uses. Copy that value.
 2. **Add the token in Raycast.** Open this extension's settings (`⌘,` with the
    command selected) and paste the value into **Sync Token**. It's stored
@@ -83,6 +83,6 @@ everywhere) and assert the encryption against the shared interop vector.
 
 ## Companion apps
 
-Research Sync runs on iOS (App Store), macOS, and any Chromium browser via the
+Clipfile runs on iOS (App Store), macOS, and any Chromium browser via the
 browser extension. See the [project site](https://shearmds.github.io/ReadThisLater/)
 for downloads.

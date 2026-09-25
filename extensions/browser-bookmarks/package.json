@@ -22,7 +22,9 @@
     "msms",
     "0xdhrv",
     "pernielsentikaer",
-    "haneul486"
+    "haneul486",
+    "just_me",
+    "mguellsegarra"
   ],
   "pastContributors": [
     "danulqua"
@@ -46,6 +48,14 @@
       "name": "openBookmarkBrowser",
       "description": "When enabled, the extension will open the browser from which the bookmark originated, instead of your default browser.",
       "default": true,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Replace Current Browser Tab (macOS Only)",
+      "name": "replaceCurrentTab",
+      "description": "When enabled with Open Bookmark's Browser, pressing Enter replaces the active tab in supported macOS browsers. If no browser window exists, a new one is created.",
+      "default": false,
       "required": false
     }
   ],
@@ -82,7 +92,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-strip-types tests/*.test.mts"
   },
   "platforms": [
     "macOS",

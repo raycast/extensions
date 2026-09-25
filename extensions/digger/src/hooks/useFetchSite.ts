@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import { useCallback, useRef, useState } from "react";
-import { Clipboard, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import {
   BotProtectionData,
@@ -15,12 +15,14 @@ import {
   MetadataData,
   OverviewData,
   PaymentSignalsData,
+  ResourceStatus,
 } from "../types";
 import { detectBotProtection } from "../utils/botDetection";
 import { LIMITS } from "../utils/config";
 import { CertificateInfo, getTLSCertificateInfo, performDNSLookup } from "../utils/dnsUtils";
 import { buildErrorReport, getErrorTitle } from "../utils/errorReport";
-import { fetchHeadOnlyWithFallback, fetchTextResource, fetchWithTimeout } from "../utils/fetcher";
+import { fetchHeadOnlyWithFallback, fetchTextResource, preferredLanguage, probeResource } from "../utils/fetcher";
+import type { ResourceShape } from "../utils/fetcher";
 import {
   deduplicateFonts,
   extractInlineStyles,
@@ -30,8 +32,10 @@ import {
 } from "../utils/fontUtils";
 import { fetchHostMetadata } from "../utils/hostMetaUtils";
 import { getLogger } from "../utils/logger";
+import { extractThemeData, fetchStylesheetTokens, withStylesheetTokens } from "../utils/themeUtils";
 import { getRootResourceUrl, normalizeUrl, redactUrlForLog } from "../utils/urlUtils";
 import { fetchWaybackMachineData } from "../utils/waybackUtils";
+import { fetchWellKnown } from "../utils/wellKnownUtils";
 import { useCache } from "./useCache";
 
 const log = getLogger("fetch");
@@ -149,6 +153,62 @@ function classifyError(
   };
 }
 
+/**
+ * Classify a settled well-known-resource fetch into found / absent / unavailable.
+ *
+ * The distinction this exists to make: 404 and 410 are ANSWERS — the site
+ * publishes no robots.txt — while a 5xx, a timeout, or a refused connection tell
+ * us nothing about what the site publishes. Reporting the second as "Not found"
+ * states a fact that was never established, which is what this replaces.
+ *
+ * A soft 404 (a 200 serving an HTML error page) counts as absent: the server
+ * answered, and the answer is "there is nothing here".
+ *
+robots.txt and llms.txt come from `fetchTextResource`, which downloads them
+ * because their contents are parsed anyway. sitemap.xml is only SNIFFED — see
+ * `probeResource` — because it can be megabytes and nothing here reads it. Both
+ * routes answer the same question: are these bytes the format that was asked
+ * for, or an HTML error page wearing a 200?
+ */
+function classifyResourceResult(
+  settled: PromiseSettledResult<{
+    exists?: boolean;
+    status: number;
+    isSoft404?: boolean;
+    shape?: ResourceShape;
+  } | null>,
+): ResourceStatus {
+  // Rejected = timeout or transport error. Both fetchTextResource and
+  // probeResource rethrow those.
+  if (settled.status === "rejected" || settled.value === null) return "unavailable";
+  const { exists, status, isSoft404, shape } = settled.value;
+
+  // A sniffed probe reports `shape`: what the opening bytes actually are. An
+  // HTML document where XML was requested is the site's catch-all page, and the
+  // server has effectively answered "there is nothing here" — which is absence,
+  // not a malformed sitemap. muse.ai served its 86KB app shell for
+  // /sitemap.xml and the section rendered "Could not parse sitemap structure",
+  // blaming the file for a sitemap that was never published.
+  if (shape !== undefined) {
+    // Status first, and in this order. A 406 with an empty body is the server
+    // refusing to answer, not the site declining to publish a sitemap — reading
+    // the shape before the status turned github.com's 406 into "absent".
+    if (status === 404 || status === 410) return "absent";
+    if (status < 200 || status >= 300) return "unavailable";
+    // A challenge page or a truncated all-whitespace prefix are checks that
+    // never completed — they establish nothing, so they must not read as
+    // absence. Only a genuine catch-all HTML page or a genuinely empty body is
+    // the server answering "nothing is published here".
+    if (shape === "challenge" || shape === "unknown") return "unavailable";
+    if (shape === "html" || shape === "empty") return "absent";
+    return "found";
+  }
+
+  if (exists ?? (status >= 200 && status < 300)) return "found";
+  if (status === 404 || status === 410 || isSoft404) return "absent";
+  return "unavailable";
+}
+
 /** Get user-friendly description for a fetch category */
 function getCategoryDescription(category: FetchCategory): string {
   const descriptions: Record<FetchCategory, string> = {
@@ -157,6 +217,8 @@ function getCategoryDescription(category: FetchCategory): string {
     certificate: "SSL certificate",
     wayback: "Wayback Machine history",
     hostMeta: "Host metadata",
+    wellKnown: "Well-known files",
+    stylesheets: "Stylesheet colour tokens",
     robots: "robots.txt",
     sitemap: "Sitemap",
     llmsTxt: "llms.txt",
@@ -232,6 +294,8 @@ export interface LoadingProgress {
   dns: number;
   history: number;
   dataFeeds: number;
+  wellKnown: number;
+  theme: number;
 }
 
 const initialProgress: LoadingProgress = {
@@ -243,6 +307,8 @@ const initialProgress: LoadingProgress = {
   dns: 0,
   history: 0,
   dataFeeds: 0,
+  wellKnown: 0,
+  theme: 0,
 };
 
 export function useFetchSite(url?: string) {
@@ -277,8 +343,8 @@ export function useFetchSite(url?: string) {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchSite = useCallback(
-    async (targetUrl: string) => {
-      log.log("fetch:start", { targetUrl });
+    async (targetUrl: string, { skipCache = false }: { skipCache?: boolean } = {}) => {
+      log.log("fetch:start", { targetUrl, skipCache });
 
       // Cancel any previous fetch in progress
       if (abortControllerRef.current) {
@@ -348,6 +414,8 @@ export function useFetchSite(url?: string) {
         dns: 0.1,
         history: 0.1,
         dataFeeds: 0.1,
+        wellKnown: 0.1,
+        theme: 0.1,
       });
 
       // Helper to update data progressively
@@ -360,7 +428,15 @@ export function useFetchSite(url?: string) {
         const normalizedUrl = normalizeUrl(targetUrl);
         log.log("fetch:normalized", { normalizedUrl });
 
-        const cached = await getFromCache(normalizedUrl);
+        // Skip the READ, deliberately without deleting the entry: a success
+        // overwrites it via saveToCache anyway, while delete-then-fetch discards
+        // a usable copy the moment the network is down and adds a second
+        // read-modify-write on the cache index racing saveToCache's.
+        //
+        // Scope: this preserves the cached ENTRY, not the on-screen result.
+        // `data` is reset before the fetch, so a failed refresh still lands on
+        // the error screen; the cached copy comes back by re-running the command.
+        const cached = skipCache ? null : await getFromCache(normalizedUrl);
         // A newer fetch can start during the cache read, and a cache hit is the
         // FASTEST path here — dig a cached site, immediately dig another, and
         // without this the first one's cached payload lands on top of the second,
@@ -381,6 +457,8 @@ export function useFetchSite(url?: string) {
             dns: 1,
             history: 1,
             dataFeeds: 1,
+            wellKnown: 1,
+            theme: 1,
           });
           setIsLoading(false);
           return;
@@ -420,8 +498,14 @@ export function useFetchSite(url?: string) {
         // so a long synchronous parse holding the main thread inflates the
         // number. Read these as "which of the four was the straggler", which is
         // the question they exist to answer — not as a network benchmark.
-        function withAbort<T>(label: string, promise: Promise<T>, fallback: T): Promise<T> {
-          const done = log.time(label);
+        //
+        // The label is the FetchCategory, so a failure here can be reported
+        // without a lookup table. This is the ONE place all four auxiliary
+        // fetches route through, which is why the reporting belongs here rather
+        // than at each call site.
+        function withAbort<T>(category: FetchCategory, promise: Promise<T>, fallback: T): Promise<T> {
+          const done = log.time(category);
+          lookups[category] = "unavailable"; // pessimistic until it settles
           // `log.time()` hands back an unguarded closure, and abort can race the
           // promise settling — without this gate a slow fetch logs two durations.
           let stopped = false;
@@ -454,20 +538,59 @@ export function useFetchSite(url?: string) {
               .then((value) => {
                 release();
                 stop();
+                lookups[category] = "found";
                 resolve(value);
               })
               .catch((error) => {
                 release();
                 stop({ failed: error instanceof Error ? error.message : String(error) });
+                // Surface it. These were swallowed into a fallback, so a site
+                // whose DNS or TLS lookup failed rendered an empty section with
+                // nothing saying why.
+                //
+                // `ownsView()`, NOT `isSuperseded()`. The two disagree in exactly
+                // one case, and it is this one: a newer dig makes isSuperseded
+                // true and ownsView FALSE, but this dig also aborts its OWN
+                // controller after a main-fetch failure — leaving isSuperseded
+                // true while ownsView is still true, because the ref still points
+                // here. `isSuperseded()` would therefore drop a late auxiliary
+                // error belonging to the dig still on screen. Ownership is the
+                // question being asked.
+                lookupErrors[category] = errorDetail(error);
+                if (ownsView()) addFetchError(category, error);
                 resolve(fallback);
               });
           });
         }
 
-        const dnsPromise = withAbort("dns", performDNSLookup(hostname), undefined);
-        const certPromise = withAbort("cert", getTLSCertificateInfo(hostname), null);
-        const waybackPromise = withAbort("wayback", fetchWaybackMachineData(normalizedUrl), undefined);
-        const hostMetaPromise = withAbort("hostmeta", fetchHostMetadata(normalizedUrl), undefined);
+        // Fallbacks restate each helper's OLD sentinel, so a failure yields the
+        // value the UI and the JSON export always received — `{}` here, not a
+        // missing `dns` key. The reason now reaches the banner instead of the data.
+        // Per-category outcome, carried into the result so each section can report
+        // itself. Seeded pessimistically in withAbort and flipped on success.
+        const lookups: Partial<Record<FetchCategory, ResourceStatus>> = {};
+        // The toast needs each reason synchronously; `fetchErrors` is React state
+        // and will not have flushed by the time we build the message.
+        const lookupErrors: Partial<Record<FetchCategory, string>> = {};
+
+        const dnsPromise = withAbort("dns", performDNSLookup(hostname), {});
+        const certPromise =
+          urlObj.protocol === "https:"
+            ? withAbort("certificate", getTLSCertificateInfo(hostname), null)
+            : Promise.resolve(null);
+        const waybackPromise = withAbort(
+          "wayback",
+          fetchWaybackMachineData(normalizedUrl, abortController.signal),
+          undefined,
+        );
+        const hostMetaPromise = withAbort("hostMeta", fetchHostMetadata(normalizedUrl), { available: false });
+        // ~110 probes, but they are header-only and capped in flight, so this
+        // settles alongside the other auxiliary lookups rather than after them.
+        const wellKnownPromise = withAbort(
+          "wellKnown",
+          fetchWellKnown(normalizedUrl, abortController.signal),
+          undefined,
+        );
 
         // Use streaming fetch for main HTML to avoid memory issues on large pages
         // Use getRootResourceUrl to ensure robots.txt, llms.txt and sitemap.xml are fetched from the domain root
@@ -476,9 +599,13 @@ export function useFetchSite(url?: string) {
         const sitemapUrl = getRootResourceUrl("sitemap.xml", normalizedUrl);
         const [htmlResult, robotsTxtResult, llmsTxtResult, sitemapResult] = await Promise.allSettled([
           fetchHeadOnlyWithFallback(normalizedUrl, undefined, abortController.signal),
-          robotsUrl ? fetchTextResource(robotsUrl).catch(() => null) : Promise.resolve(null),
-          llmsTxtUrl ? fetchTextResource(llmsTxtUrl).catch(() => null) : Promise.resolve(null),
-          sitemapUrl ? fetchWithTimeout(sitemapUrl).catch(() => null) : Promise.resolve(null),
+          // No `.catch(() => null)`: allSettled already contains a rejection, and
+          // swallowing it here is what made a timeout indistinguishable from a 404.
+          robotsUrl ? fetchTextResource(robotsUrl) : Promise.resolve(null),
+          llmsTxtUrl ? fetchTextResource(llmsTxtUrl) : Promise.resolve(null),
+          // Sniffed, not downloaded: a sitemap can be megabytes, and the only
+          // question the dig asks is whether one is really there.
+          sitemapUrl ? probeResource(sitemapUrl, { signal: abortController.signal }) : Promise.resolve(null),
         ]);
 
         if (htmlResult.status === "rejected") {
@@ -526,6 +653,14 @@ export function useFetchSite(url?: string) {
         // Parse the streamed HTML (already limited to head content)
         const $ = cheerio.load(streamedHtml);
 
+        // Counted here rather than reused from discoverability.alternates, which
+        // is assembled further down and also carries non-language alternates.
+        const alternateLanguages = new Set(
+          [...streamedHtml.matchAll(/<link\b[^>]*\bhreflang\s*=\s*["']([^"']+)["'][^>]*>/gi)].map((m) =>
+            m[1].toLowerCase(),
+          ),
+        ).size;
+
         // Get language from html tag (it's at the start of the streamed content)
         const langMatch = streamedHtml.match(/<html[^>]*\slang=["']([^"']+)["']/i);
 
@@ -557,10 +692,24 @@ export function useFetchSite(url?: string) {
         // If it's a challenge page, don't use the fake title
         const effectiveTitle = botProtectionResult.isChallengePage ? undefined : rawTitle;
 
+        // A challenge page has no theme because we never saw the real page.
+        // Claiming "no theme declared" from it is an absence we never established.
+        const theme = botProtectionResult.isChallengePage ? undefined : extractThemeData(streamedHtml);
+
         const overview: OverviewData = {
           title: effectiveTitle,
           description: botProtectionResult.isChallengePage ? undefined : $('meta[name="description"]').attr("content"),
           language: langMatch?.[1],
+          // `<html lang>` describes the variant this request received, not the
+          // site. Saying so needs three more facts, all already in hand: what the
+          // header claims, whether the server negotiates, and how many other
+          // languages exist. Without them the row reports one of apple.com's 138
+          // variants as though it were the language of apple.com.
+          contentLanguage: headers["content-language"],
+          languageNegotiated:
+            /(^|[,\s])accept-language([,\s]|$)/i.test(headers["vary"] ?? "") || alternateLanguages > 0,
+          languageAlternates: alternateLanguages > 0 ? alternateLanguages : undefined,
+          languageRequested: preferredLanguage(),
           charset: $("meta[charset]").attr("charset") || undefined,
         };
         log.log("parse:overview", {
@@ -653,19 +802,30 @@ export function useFetchSite(url?: string) {
           paymentResponse: paymentSignals?.paymentResponse ?? false,
         });
 
+        const sitemapStatus = classifyResourceResult(sitemapResult);
+        const robotsStatus = classifyResourceResult(robotsTxtResult);
+        const llmsStatus = classifyResourceResult(llmsTxtResult);
+
+        // These three are NOT added to the error banner, deliberately.
+        //
+        // Each already reports itself in its own Discoverability row, and
+        // "Couldn't check" sitting next to robots.txt says more, in context, than
+        // a line in a banner at the top of the list. Adding both meant one slow
+        // site produced a loud "4 failed" header for three optional files whose
+        // rows had already said so — the banner is for lookups with nowhere else
+        // to speak (DNS, certificate, Wayback, host-meta), not a second copy of
+        // something already on screen.
+        //
+        // These statuses are still computed above and still drive their rows;
+        // only the duplicate banner entry is dropped.
+
         const discoverability: DiscoverabilityData = {
           robots: $('meta[name="robots"]').attr("content"),
-          robotsTxt:
-            robotsTxtResult.status === "fulfilled" && !!robotsTxtResult.value && robotsTxtResult.value.exists === true,
+          robotsTxt: robotsStatus,
           canonical: $('link[rel="canonical"]').attr("href"),
-          sitemap:
-            sitemapResult.status === "fulfilled" &&
-            sitemapResult.value &&
-            sitemapResult.value.status >= 200 &&
-            sitemapResult.value.status < 300
-              ? sitemapUrl
-              : undefined,
-          llmsTxt: llmsTxtResult.status === "fulfilled" && !!llmsTxtResult.value && llmsTxtResult.value.exists === true,
+          sitemap: sitemapStatus === "found" ? sitemapUrl : undefined,
+          sitemapStatus,
+          llmsTxt: llmsStatus,
           contentSignals,
           paymentSignals,
         };
@@ -908,8 +1068,8 @@ export function useFetchSite(url?: string) {
             // result. That degradation is invisible in the UI, which makes it
             // exactly the thing a bug report needs to carry.
             //
-            // Query string stripped because warn is not verbose-gated — see
-            // redactUrlForLog.
+            // Query string stripped because warn is not verbose-gated, so it
+            // emits for a user who enabled nothing — see redactUrlForLog.
             log.warn("parse:manifest-error", {
               url: redactUrlForLog(manifestUrl),
               error: e instanceof Error ? e.message : "unknown",
@@ -1018,6 +1178,14 @@ export function useFetchSite(url?: string) {
         });
 
         // Build resources and dataFeeds objects once for reuse
+        // The page's own declared icon. `OverviewData.favicon` has always been in
+        // the type and read by the Markdown export, but nothing ever set it — so
+        // the export silently omitted the line and the UI had to fall back to a
+        // third-party favicon service. The URL is right here, already absolute.
+        // Prefer the plain icon; an apple-touch-icon is a fine second.
+        overview.favicon =
+          images.find((i) => i.type === "favicon")?.src ?? images.find((i) => i.type === "apple-touch-icon")?.src;
+
         const resources = {
           stylesheets: stylesheets.length > 0 ? stylesheets : undefined,
           scripts: scripts.length > 0 ? scripts : undefined,
@@ -1039,7 +1207,33 @@ export function useFetchSite(url?: string) {
         // Resources and data feeds parsing complete - update immediately
         updateProgress("resources", 1);
         updateProgress("dataFeeds", 1);
-        updateData({ resources, dataFeeds });
+        updateData({ resources, dataFeeds, theme });
+
+        // The markup half of Theme is already on screen. This reads the linked
+        // stylesheets for the rest, which is where most sites actually keep their
+        // palette — primer.style declares none in markup and 842 in CSS.
+        const themePromise = withAbort(
+          "stylesheets",
+          fetchStylesheetTokens(
+            // `stylesheets` stores the href AS AUTHORED — the UI resolves it at
+            // render time — so a relative one must be resolved here too. Without
+            // this, every Next.js site fails all three fetches with
+            // "Failed to parse URL from /_next/static/chunks/….css" and the
+            // section reports 0 of 29 read.
+            // Only `data:` sheets are dropped — they carry no fetchable URL. An
+            // href that fails to resolve is KEPT so it fails into `unchecked`
+            // rather than vanishing from the denominator.
+            stylesheets.map((sheet) => resolveUrl(sheet.href)).filter((href) => !href.startsWith("data:")),
+            normalizedUrl,
+            abortController.signal,
+          ).then((result) => withStylesheetTokens(theme, result)),
+          theme,
+        );
+        themePromise.then((withTokens) => {
+          if (isSuperseded()) return;
+          updateProgress("theme", 1);
+          updateData({ theme: withTokens, lookups: { ...lookups } });
+        });
 
         log.log("fetch:awaiting-async-fetches", { hostname });
 
@@ -1091,12 +1285,25 @@ export function useFetchSite(url?: string) {
           updateData({ hostMetadata });
         });
 
+        wellKnownPromise.then((wellKnown) => {
+          if (isSuperseded()) return;
+          log.log("fetch:wellknown-complete", { hits: wellKnown?.hits.length });
+          updateProgress("wellKnown", 1);
+          // `lookups` travels WITH the data. Without it the section is complete
+          // but statusless in the window before the final result, and its
+          // "Couldn't check" / "None" branch resolves to "None" — a failed sweep
+          // rendered as a host that publishes nothing.
+          updateData({ wellKnown, lookups: { ...lookups } });
+        });
+
         // Wait for all async fetches to complete before caching
-        const [dnsData, certInfo, waybackData, hostMetadata] = await Promise.all([
+        const [dnsData, certInfo, waybackData, hostMetadata, wellKnown, themeWithTokens] = await Promise.all([
           dnsPromise,
           certPromise,
           waybackPromise,
           hostMetaPromise,
+          wellKnownPromise,
+          themePromise,
         ]);
 
         log.log("fetch:all-async-complete", {
@@ -1104,6 +1311,7 @@ export function useFetchSite(url?: string) {
           hasCert: !!certInfo,
           hasWayback: !!waybackData,
           hasHostMeta: !!hostMetadata?.available,
+          wellKnownHits: wellKnown?.hits.length,
           waybackRateLimited: waybackData?.rateLimited,
         });
 
@@ -1146,6 +1354,9 @@ export function useFetchSite(url?: string) {
           history: finalHistoryData,
           dataFeeds,
           hostMetadata,
+          wellKnown,
+          theme: themeWithTokens,
+          lookups,
           fetchedAt: Date.now(),
         };
 
@@ -1163,9 +1374,66 @@ export function useFetchSite(url?: string) {
           return;
         }
         setData(result);
-        // The predicate is re-checked inside, after eviction — passing the guard
-        // above only proves we were current when the write STARTED.
-        await saveToCache(normalizedUrl, result, isSuperseded);
+
+        // Only cache a result worth serving again.
+        //
+        // `fetchHeadOnlyWithFallback` throws on transport failure but NOT on an
+        // unhappy HTTP status, so a bot-block or edge error — digg.xyz answering
+        // 436 with an empty body behind Cloudflare — parses into a result with no
+        // title, no resources and no metadata. Caching that pinned the broken
+        // view for the full 48h TTL: every later dig was a cache hit, so the site
+        // looked permanently empty and re-running changed nothing.
+        //
+        // Skipping the write costs one refetch and lets the next dig actually
+        // retry. `fetchErrors` is not part of DiggerResult either, so a cached
+        // failure would also lose its banner and its Retry All — the statuses
+        // would persist with nothing left to explain or repair them.
+        // One heads-up, then get out of the way. The durable record is each
+        // section's own row, which survives a cache hit; this is only so a
+        // failure is not silent on the run that produced it.
+        //
+        // Only WHOLE-SUBSYSTEM failures escalate to a toast, which is why this
+        // reads `lookups` and not the discoverability statuses. DNS, the
+        // certificate, Wayback and host metadata each stand for a subsystem, and
+        // losing one is worth interrupting for. A robots.txt or sitemap.xml that
+        // could not be fetched is a detail INSIDE a section the reader is already
+        // going to review row by row, and its row says "Couldn't check" on its
+        // own. Wiring those into this toast reads like a fix for an asymmetry;
+        // it is not one — it just makes the interruption cheaper and therefore
+        // easier to ignore. Deliberate, decided 2026-09-02.
+        const failed = (Object.keys(lookups) as FetchCategory[]).filter((c) => lookups[c] === "unavailable");
+        if (failed.length > 0 && ownsView()) {
+          const names = failed.map(getCategoryDescription);
+          const detail = failed
+            .map((c) => `${getCategoryDescription(c)}: ${lookupErrors[c] ?? "lookup failed"}`)
+            .join("\n");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Some data couldn't be loaded",
+            message: names.join(", "),
+            primaryAction: {
+              title: "Copy Error",
+              shortcut: { macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } },
+              onAction: (toast: Toast) => {
+                Clipboard.copy(detail);
+                toast.hide();
+              },
+            },
+          });
+        }
+
+        const usable = status >= 200 && status < 300 && streamedHtml.length > 0;
+        if (usable) {
+          // The predicate is re-checked inside, after eviction — passing the
+          // guard above only proves we were current when the write STARTED.
+          await saveToCache(normalizedUrl, result, isSuperseded);
+        } else {
+          log.warn("cache:skipped-unusable", {
+            url: redactUrlForLog(normalizedUrl),
+            status,
+            htmlLength: streamedHtml.length,
+          });
+        }
         log.log("fetch:complete", { url: normalizedUrl });
       } catch (err) {
         // Say nothing if a newer dig owns the view — whether it cancelled us or we
@@ -1228,7 +1496,7 @@ export function useFetchSite(url?: string) {
 
   const refetch = useCallback(() => {
     if (url) {
-      fetchSite(url);
+      fetchSite(url, { skipCache: true });
     }
   }, [url, fetchSite]);
 

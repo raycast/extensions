@@ -13,7 +13,7 @@ export const userAgent =
 
 export const networkTimeout = 15000;
 
-export const EASYDICT_VERSION = "3.1.0";
+export const EASYDICT_VERSION = "3.3.0";
 
 const GITHUB_REPO = "https://github.com/tisfeng/Raycast-Easydict";
 
@@ -28,37 +28,47 @@ export const RELEASE_MARKDOWN = `
 
 ### ✨ New Features
 
-- Added favorite words: save translation results and browse/manage them in the favorites list.
-  - Thanks for @[TTsWorld](https://github.com/TTsWorld)
+#### Optional Query Caching
 
-### 🔧 Maintenance
+- Added local caching for completed dictionary lookups and translations, with separate **Query Cache** and **AI Query Cache** settings. Both default to **Off** and offer **Words Only** and **All Text** modes.
+- Language detection can reuse confirmed results for inputs covered by either cache setting.
+- Cached results show a clock indicator. Use **Requery All Services** to fetch fresh results, **Regenerate AI Result** to refresh one AI provider, or **Clear Query Cache** to remove cached results.
 
-- Updated dependencies.
+### 💎 Improvements
+
+- Improved result previews, detailed views, and saved favorites with clearer headings, pronunciation and language direction, and compact tables for short word translations, word forms, and phrases.
+- Google Translate now supports full translations of text longer than 1,830 characters, with paragraph breaks preserved.
+
+### 🐞 Bug Fixes
+
+- Fixed Google Translate failures caused by the previous web translation endpoint.
+- Favorites now show language codes when **Flags are not languages** is enabled, keeping the source and target languages distinguishable.
 
 ---
 
 <details>
-<summary>Recent Updates [v3.0.0]</summary>
+<summary>Recent Updates [v3.2.0]</summary>
 
 ### ⚠️ Behavioral Changes
 
-- Removed built-in proxy detection; enable Raycast system proxy if needed.
-- **Play Text** renamed to **Read Text** with updated shortcuts (\`Cmd+R\` / \`Cmd+Shift+R\`).
+#### Custom AI Providers
+
+- Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
+- **Existing settings migrate automatically.** Open Search Word or Manage Providers to convert configured OpenAI and Gemini settings into ordinary AI providers, preserving connection settings, enablement, and ordering. Previously imported providers keep their edits; previously retired providers stay removed.
+- **Manage AI providers in Manage Providers.** Old Extension Settings remain available as import sources, but no longer run separate providers. Editing, disabling, or deleting an AI provider does not restore an old service. Use **Add from Legacy OpenAI/Gemini Settings…** to create another copy, initially disabled.
+- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions or Cmd+Shift+Up/Down on macOS and Ctrl+Shift+Up/Down on Windows. The **Legacy Service List Order** preference only initializes this order until it is saved.
 
 ### ✨ New Features
 
-- Windows platform support with native TTS and cross-platform audio.
-- DeepL Traditional Chinese, hide language emoji option, independent Tencent/Volcano detection toggles.
+#### AI-Generated Dictionary Entries
 
-### 💎 Improvements
+- For each provider, choose Plain Translation or AI-Generated Dictionary Entry in Word & Term Results.
+- Dictionary mode applies to words and terms; other input remains plain translation. New or connection-related provider changes offer Test & Save by default, with Save Without Testing still available. JSON output defaults follow provider presets. Some models may fail to return valid structured dictionary output and require a retry, and dictionary generation may take longer.
 
-- Full architecture and audio system refactor; streamlined project structure and dependencies.
-- Optimized OpenAI translation prompts, Youdao dictionary formatting, and Linguee HTML parsing.
-- Improved documentation, auto-generated docs, and build tooling.
+#### Chinese Stroke Order
 
-### 🐞 Bug Fixes
-
-- Fixed background resume text flash, Bing recursion/race conditions, audio playback conflicts, DeepLX failures, Georgian language support, and Apple Translate single-quote escaping.
+- Use **Show Stroke Order** from live or saved translation results to view stroke-order diagrams for Chinese characters.
+  - Thanks to [@MagEk1511](https://github.com/MagEk1511)
 
 </details>
 
@@ -68,37 +78,47 @@ export const RELEASE_MARKDOWN = `
 
 ### ✨ 新特性
 
-- 新增收藏单词功能，支持保存翻译结果并在收藏列表中查看和管理。
-  - 感谢 @[TTsWorld](https://github.com/TTsWorld)
+#### 可选查询缓存
 
-### 🔧 维护
+- 新增已完成的词典查询和翻译结果的本地缓存，可分别通过 **Query Cache** 和 **AI Query Cache** 设置。两项默认均为 **Off**，可选择 **Words Only** 或 **All Text** 模式。
+- 当任一缓存设置允许缓存当前输入时，语言检测也可复用已确认的检测结果。
+- 缓存结果会显示时钟标识。可使用 **Requery All Services** 重新查询所有服务、**Regenerate AI Result** 重新生成单个 AI Provider 的结果，或使用 **Clear Query Cache** 清除查询缓存。
 
-- 更新项目依赖项。
+### 💎 改进
+
+- 优化结果预览、详情页和收藏内容的排版，让标题、音标和翻译方向更清晰，并用紧凑表格展示简短的单词译文、词形和短语。
+- Google 翻译现在支持完整翻译超过 1,830 字符的长文本，并保留段落换行。
+
+### 🐞 修复
+
+- 修复旧网页翻译接口导致的 Google 翻译失败。
+- 启用 **Flags are not languages** 后，收藏列表会显示语言代码，便于区分源语言和目标语言。
 
 ---
 
 <details>
-<summary>最近更新 [v3.0.0]</summary>
+<summary>最近更新 [v3.2.0]</summary>
 
 ### ⚠️ 行为变更
 
-- 移除内置系统代理检测，如需代理请开启 Raycast 的系统代理设置。
-- **Play Text** 重命名为 **Read Text**，快捷键调整为 \`Cmd+R\` / \`Cmd+Shift+R\`。
+#### 🆕 自定义 AI Provider
+
+- 现在可通过 Raycast AI 或任意 OpenAI 兼容端点接入 LLM，用于翻译和查词。
+- **旧设置自动迁移。** 打开 Search Word 或 Manage Providers 时，已配置的 OpenAI/Gemini 设置会转换为普通 AI Provider，保留连接配置、启用状态和排序。已导入 Provider 的修改会保留；此前已退出的 Provider 不会重新创建。
+- **AI Provider 统一在 Manage Providers 管理。** 旧 Extension Settings 仅保留为导入来源，不再运行独立服务。编辑、禁用或删除 AI Provider 不会恢复旧服务；如需重新复制旧配置，可使用 **Add from Legacy OpenAI/Gemini Settings…**，新副本初始为禁用状态。
+- **Provider 排序现在统一由 Manage Providers 管理。** 内置和 AI Provider 共用同一顺序，可通过 **Move Up**/**Move Down** 或 macOS 的 Cmd+Shift+Up/Down、Windows 的 Ctrl+Shift+Up/Down 调整。**Legacy Service List Order** 仅在新顺序保存前负责初始化。
 
 ### ✨ 新特性
 
-- Windows 平台支持（含原生 TTS 与跨平台音频）。
-- DeepL 繁体中文目标语言、隐藏语言 emoji 选项、腾讯/火山检测独立开关。
+#### AI 词典结果
 
-### 💎 改进
+- 每个配置都可在 Word & Term Results 中选择 Plain Translation 或 AI-Generated Dictionary Entry。
+- 词典模式仅用于单词和术语，其他输入仍使用普通翻译。新建 Provider 或修改连接相关配置后会默认提供 Test & Save，同时仍可选择 Save Without Testing。JSON 输出模式会根据预设选择默认值。部分模型可能无法返回有效的结构化词典结果而需要重试，生成词典结果也可能耗时更长。
 
-- 底层架构与音频系统全面重构，项目结构优化，移除冗余依赖。
-- 优化 OpenAI 翻译提示词、有道词典格式、Linguee HTML 解析。
-- 改进文档、自动文档生成与构建工具链。
+#### 汉字笔顺
 
-### 🐞 修复
-
-- 修复后台恢复时搜索文本闪现、必应翻译递归/竞态、音频播放冲突、DeepLX 翻译失败、格鲁吉亚语支持、Apple Translate 单引号转义等问题。
+- 可在实时查询或已收藏的翻译结果中选择 **Show Stroke Order**，查看汉字笔顺图。
+  - 感谢 [@MagEk1511](https://github.com/MagEk1511)
 
 </details>
 

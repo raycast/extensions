@@ -214,7 +214,7 @@
   ],
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "2.5.0",
     "@raycast/utils": "^1.18.1",
     "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.1.0",
@@ -227,16 +227,20 @@
     "run-applescript": "^7.0.0",
     "say": "^0.16.0",
     "uuid": "^9.0.0",
-    "youtube-transcript": "^1.2.1"
+    "youtube-transcript": "^1.2.1",
+    "@ai-sdk/cerebras": "^3.0.48",
+    "ai": "^7.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
+    "@types/node": "22.19.17",
     "@types/plist": "^3.0.5",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -244,6 +248,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "tsc --project tsconfig.test.json && vitest run"
+  },
+  "ai": {
+    "modelProvider": "models"
   }
 }

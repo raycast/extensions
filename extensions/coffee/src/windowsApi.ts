@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ProcessInfo, is_caffeinate_running, list_processes, start_caffeinate, stop_caffeinate } from "rust:../rust";
+import { is_caffeinate_running, list_processes, start_caffeinate, stop_caffeinate } from "rust:../rust";
 
 interface ParsedCaffeinateArgs {
   durationSeconds: number | null;
@@ -39,8 +39,8 @@ export async function windowsStartCaffeinate(additionalArgs?: string): Promise<v
   });
 }
 
-export async function windowsStopCaffeinate(): Promise<void> {
-  await stop_caffeinate();
+export async function windowsStopCaffeinate(): Promise<boolean> {
+  return await stop_caffeinate();
 }
 
 export async function windowsIsCaffeinateRunning(): Promise<boolean> {
@@ -48,6 +48,13 @@ export async function windowsIsCaffeinateRunning(): Promise<boolean> {
   return info.running;
 }
 
-export async function windowsListProcesses(): Promise<ProcessInfo[]> {
+export async function windowsListProcesses(): Promise<WindowsProcessInfo[]> {
   return await list_processes();
+}
+
+interface WindowsProcessInfo {
+  name: string;
+  pid: number;
+  windowHandle: number;
+  path: string | null;
 }

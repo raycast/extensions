@@ -31,7 +31,10 @@ export default async function (input: Input) {
   }
 
   const windowArg = target.windowHandle ? ` -wh ${target.windowHandle}` : "";
-  await startCaffeinate({ menubar: true, status: true }, undefined, `-w ${target.id}${windowArg}`);
+  await startCaffeinate({ menubar: true, status: true }, undefined, `-w ${target.id}${windowArg}`, {
+    kind: "while",
+    appName: application,
+  });
 
   return `${deviceName()} will stay awake while ${application} is running`;
 }

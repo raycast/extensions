@@ -150,4 +150,33 @@ export const menubarTweaks: TweakDefinition[] = [
     risk: "safe",
     tags: ["user switcher", "icon"],
   },
+  {
+    id: "menubar-visible-in-fullscreen",
+    title: "Show the Menu Bar in Full Screen",
+    description: "Keep the menu bar on screen while an app is full screen, instead of revealing it on hover",
+    category: "menubar",
+    domain: "NSGlobalDomain",
+    key: "AppleMenuBarVisibleInFullscreen",
+    type: "boolean",
+    defaultValue: false,
+    risk: "safe",
+    tags: ["menu bar", "full screen"],
+  },
+  {
+    id: "menubar-accent-graphite",
+    title: "Graphite Appearance",
+    description:
+      "Use the graphite accent and highlight colour instead of the blue one. Apps pick up the new colour as you relaunch them",
+    category: "menubar",
+    domain: "NSGlobalDomain",
+    key: "AppleAquaColorVariant",
+    type: "enum",
+    defaultValue: 1,
+    options: [
+      { title: "Blue", value: 1 },
+      { title: "Graphite", value: 6 },
+    ],
+    risk: "safe",
+    tags: ["appearance", "accent", "colour", "graphite"],
+  },
 ];

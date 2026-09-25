@@ -1,3 +1,5 @@
+import { WellKnownStatus } from "../utils/wellKnownCatalog";
+
 export interface DiggerResult {
   url: string;
   overview?: OverviewData;
@@ -10,7 +12,18 @@ export interface DiggerResult {
   history?: HistoryData;
   dataFeeds?: DataFeedsData;
   hostMetadata?: HostMetadataData;
+  wellKnown?: WellKnownData;
+  theme?: ThemeData;
   botProtection?: BotProtectionData;
+  /**
+   * Outcome of each auxiliary lookup, so a section can say "Couldn't check"
+   * itself rather than relying on a banner.
+   *
+   * This lives on the RESULT, not in component state, precisely so it survives
+   * caching: `fetchErrors` does not, which is why a cached partial failure used
+   * to show failed rows with nothing left on screen to explain them.
+   */
+  lookups?: Partial<Record<FetchCategory, ResourceStatus>>;
   fetchedAt: number;
 }
 
@@ -36,8 +49,23 @@ export interface OverviewData {
   title?: string;
   description?: string;
   favicon?: string;
-  screenshot?: string;
   language?: string;
+  /**
+   * `Content-Language` response header. Independent of the `<html lang>`
+   * attribute and free to disagree with it — github.com sends `en-US` here while
+   * its markup says `en`.
+   */
+  contentLanguage?: string;
+  /**
+   * The page is served in more than one language, so `language` describes the
+   * variant WE received rather than the site. Set when the response varies on
+   * Accept-Language or the markup declares `hreflang` alternates.
+   */
+  languageNegotiated?: boolean;
+  /** Number of `hreflang` alternates declared. apple.com publishes 137. */
+  languageAlternates?: number;
+  /** The Accept-Language Digger sent, so the received variant can be read in context. */
+  languageRequested?: string;
   charset?: string;
 }
 
@@ -80,14 +108,26 @@ export interface PaymentSignalsData {
   paymentResponseRaw?: string;
 }
 
+/**
+ * Outcome of fetching a well-known resource (robots.txt, llms.txt, sitemap.xml).
+ *
+ * `absent` and `unavailable` are deliberately distinct. A 404 is a real answer —
+ * the site publishes no robots.txt. A 500, a timeout, or a refused connection is
+ * NOT an answer: we do not know what the site publishes. Collapsing both into
+ * "Not found" states something we never established.
+ */
+export type ResourceStatus = "found" | "absent" | "unavailable";
+
 export interface DiscoverabilityData {
   robots?: string;
-  robotsTxt?: boolean;
+  robotsTxt?: ResourceStatus;
   canonical?: string;
   /** Language/region alternate links (hreflang). Feed alternates are in DataFeedsData. */
   alternates?: Array<{ href: string; hreflang?: string; type?: string }>;
   sitemap?: string;
-  llmsTxt?: boolean;
+  /** Outcome of fetching sitemap.xml, independent of whether the HTML declared one. */
+  sitemapStatus?: ResourceStatus;
+  llmsTxt?: ResourceStatus;
   /** Parsed Content-Signal directives from robots.txt (IETF aipref / Cloudflare Content Signals) */
   contentSignals?: ContentSignalsData;
   /** x402 payment-required signals detected from HTTP response */
@@ -160,13 +200,14 @@ export interface ResourcesData {
 }
 
 export interface NetworkingData {
-  ipAddress?: string;
   server?: string;
   headers?: Record<string, string>;
   statusCode?: number;
-  redirects?: Array<{ from: string; to: string; status: number }>;
   finalUrl?: string;
 }
+
+/** The record types a DNS lookup queries, used to report which ones failed. */
+export type DNSRecordKind = "a" | "aaaa" | "cname" | "mx" | "ns" | "txt";
 
 export interface DNSData {
   aRecords?: string[];
@@ -175,14 +216,19 @@ export interface DNSData {
   txtRecords?: string[];
   nsRecords?: string[];
   cnameRecord?: string;
+  /**
+   * Record types whose query failed for a non-benign reason. An empty result for
+   * a type listed here means "we could not check", NOT "the host publishes none"
+   * — the two render differently and only one of them is a fact about the host.
+   * Absent on entries cached before this field existed, which reads as "nothing
+   * known to have failed" and matches the old behaviour.
+   */
+  unchecked?: DNSRecordKind[];
 }
 
 export interface PerformanceData {
   loadTime?: number;
-  ttfb?: number;
-  domContentLoaded?: number;
   pageSize?: number;
-  requestCount?: number;
 }
 
 export interface HistoryData {
@@ -215,8 +261,119 @@ export interface HostMetadataData {
   format?: "xrd" | "jrd";
 }
 
+/**
+ * One file actually published under `/.well-known/`.
+ *
+ * Only files that passed the content-type judgement in `wellKnownUtils` become
+ * hits, so the absence of a path here means the host answered for it — not that
+ * the probe was skipped. Paths whose probe never got an answer are listed
+ * separately in `WellKnownData.unchecked`.
+ */
+export interface WellKnownHit {
+  /** Path segment under `/.well-known/`, e.g. `security.txt`. */
+  path: string;
+  /** Absolute URL, post-redirect. */
+  url: string;
+  /** IANA registration status, or "unregistered" for the deployed-but-unlisted tail. */
+  registration: WellKnownStatus;
+  /** Spec or documentation URL for the file's format. */
+  reference?: string;
+  contentType: string;
+  /** From `Content-Length`; absent when the response was chunked. */
+  size?: number;
+}
+
+export interface WellKnownData {
+  hits: WellKnownHit[];
+  /** How many catalog paths were probed, so the UI can say what "none" was drawn from. */
+  probed: number;
+  /**
+   * Paths whose probe failed outright. NOT the same as "not published" — these
+   * were never answered, and folding them into absence is the mistake this
+   * codebase documents in AGENTS.md. Optional so entries cached under the older
+   * shape still render.
+   */
+  unchecked?: string[];
+  /**
+   * The host returned a plausible file for a control path nothing publishes, so
+   * every per-path answer is that same catch-all. `hits` is emptied when this is
+   * set: the sweep ran, and established nothing.
+   */
+  catchAll?: boolean;
+  /**
+   * The control probe itself failed, so whether this host is a catch-all was
+   * never established — and `hits` therefore carries less confidence than usual.
+   */
+  controlUnchecked?: boolean;
+}
+
+/** One colour a page declares: a token with a name, or a theme-color with a media query. */
+export interface ThemeColor {
+  /** Custom-property or meta name. Absent for a bare `theme-color`. */
+  name?: string;
+  value: string;
+  /** The media query a `theme-color` is scoped to, e.g. `(prefers-color-scheme: dark)`. */
+  media?: string;
+  /** Where it was declared. Stylesheet tokens cost a request; markup ones do not. */
+  source?: "markup" | "stylesheet";
+  /**
+   * `value` converted to `#rrggbb`, which is the only form a swatch can render.
+   * Absent when the value is a system keyword (`Canvas`) or an unresolvable
+   * reference — an empty swatch there is correct, not a bug.
+   */
+  hex?: string;
+}
+
+/**
+ * Theme signals declared in the page's own markup.
+ *
+ * Parsed from the HTML already fetched for the dig, so this never costs a
+ * request — and equally, it cannot see custom properties a page sets from
+ * JavaScript after load. This is what the SERVER declares, not what the browser
+ * ends up rendering.
+ */
+export interface ThemeData {
+  /** `<meta name="theme-color">`, one per media query. */
+  themeColors: ThemeColor[];
+  /** `<meta name="color-scheme">`, e.g. "light dark". */
+  colorScheme?: string;
+  /** A `light` / `dark` class on <html>. */
+  schemeClass?: string;
+  /** `<meta name="apple-mobile-web-app-status-bar-style">`. */
+  statusBarStyle?: string;
+  /** Theme-bearing `data-*` attributes on <html>, e.g. `data-accent-color`. */
+  attributes: Record<string, string>;
+  /** Vendor chrome colours: msapplication tile and nav-button. */
+  vendorColors: ThemeColor[];
+  /** CSS custom properties whose value is a colour. */
+  tokens: ThemeColor[];
+  /**
+   * Outcome of reading the linked stylesheets. Absent when none were scanned —
+   * which is not the same as scanning them and finding nothing.
+   */
+  stylesheets?: {
+    /** How many were read, out of how many the page links. */
+    scanned: number;
+    linked: number;
+    /** Sheets that could not be fetched. Their tokens are unknown, not absent. */
+    unchecked: number;
+    /** True when the token cap was hit, so the list is a sample not a census. */
+    truncated?: boolean;
+  };
+}
+
 /** Categories that can fail independently during fetch */
-export type FetchCategory = "main" | "dns" | "certificate" | "wayback" | "hostMeta" | "robots" | "sitemap" | "llmsTxt";
+export type FetchCategory =
+  | "main"
+  | "dns"
+  | "certificate"
+  | "wayback"
+  | "hostMeta"
+  | "wellKnown"
+  | "stylesheets"
+  | "robots"
+  | "sitemap"
+  | "llmsTxt";
 
 /** Represents an error that occurred during fetching */
 export interface FetchError {

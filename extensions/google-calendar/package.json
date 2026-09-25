@@ -14,7 +14,8 @@
     "dangkhoipro",
     "0xdhrv",
     "peduarte",
-    "oguma0923"
+    "oguma0923",
+    "alerix"
   ],
   "categories": [
     "Productivity",
@@ -56,6 +57,15 @@
           "title": "Display",
           "label": "Show location",
           "description": "Show the event's location as an accessory in the list",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showBirthdays",
+          "type": "checkbox",
+          "title": "Display",
+          "label": "Show birthdays",
+          "description": "Include Google Contacts birthday events when listing the primary calendar. Off by default because birthdays often flood upcoming events.",
           "default": false,
           "required": false
         },
@@ -195,6 +205,14 @@
       "description": "Returns the current Google Calendar event and calendar color palettes"
     }
   ],
+  "ai": {
+    "skills": [
+      {
+        "name": "google-calendar-week-planning",
+        "title": "Plan My Week"
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "addSignature",
@@ -265,7 +283,7 @@
   "dependencies": {
     "@googleapis/calendar": "^15.0.0",
     "@googleapis/people": "^7.0.1",
-    "@raycast/api": "^1.104.16",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.4",
     "chrono-node": "^2.9.1",
     "date-fns": "^4.1.0",
@@ -293,5 +311,10 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true
+  }
 }

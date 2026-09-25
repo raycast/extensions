@@ -1,5 +1,38 @@
 # macOS Tweaks Changelog
 
+## [Windows & Stage Manager] - 2026-09-01
+
+### New Category
+
+- **Windows & Stage Manager** — 9 tweaks for `com.apple.WindowManager`, which was not covered at all
+  - **Click Wallpaper to Show Desktop** — turn off Sonoma's behaviour of sweeping every window aside when you click the wallpaper
+  - Stage Manager itself, auto-hiding its recent-apps strip, and whether clicking an app shows all its windows at once or one at a time
+  - Hide desktop icons and desktop widgets, and hide widgets in Stage Manager separately
+  - Margins between tiled windows (macOS 15+)
+  - What a double-click on a window's title bar does — fill, zoom, minimise, or nothing
+
+### AI Extension
+
+- The extension is now usable from Raycast AI: ask for a setting in your own words and it will find it, tell you its current value, and change it for you
+  - **Search Tweaks** and **Get Modified Tweaks** read your settings
+  - **Apply Tweak** and **Reset Tweak** change them, and always show a confirmation first with the domain, key, current and new value, the `defaults` command, and which process will restart
+  - Resetting a tweak that is already at its default asks for nothing, since there is nothing to undo
+
+### Improved
+
+- The detail pane is now native metadata instead of rendered markdown: status and risk read as coloured tags, and the domain, key and command line up as proper labels
+- Tweaks can be searched by their `defaults` domain and key, not just by title — so a key copied from a guide finds the setting straight away
+- The list appears immediately with the values from last time and refreshes in the background, instead of waiting on a read of all 129 settings
+- The menu bar switches to one submenu per category once more than 12 tweaks are modified, instead of a flat list that ran off the bottom of the screen
+- Added a **Risk** filter, and each tweak now shows whether it is safe or moderate risk
+
+### New Tweaks
+
+- **Desktop & Spaces** — a modifier key for each of the four hot corners, so they no longer trigger by accident; reduce wallpaper tinting in windows; switch to an app's space when activating it
+- **Menu Bar & UI** — keep the menu bar visible in full screen; graphite appearance
+- **Keyboard & Input** — smart quote styles for double and single quotes, with presets for English, French/Italian, German and Japanese
+- **Screenshots** — show mouse clicks in screen recordings; screenshot destination (file, clipboard, Preview, Mail, Messages)
+
 ## [Raycast 2 Compatibility] - 2026-08-27
 
 - Updated to `@raycast/api` 2.x

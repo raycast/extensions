@@ -37,7 +37,7 @@ export const Shortcut = {
   CopyTertiary: platformShortcut(",", ["cmd", "shift"]),
   CreateQuickLink: platformShortcut("s", ["cmd", "shift"]),
   OpenInBrowser: platformShortcut("b", ["cmd"]),
-  OpenInTerminal: platformShortcut("o", ["cmd", "shift"]),
+  OpenInTerminal: platformShortcut("t", ["cmd", "shift"]),
   RevealInFileManager: platformShortcut("f", ["cmd", "shift"]),
   Pin: platformShortcut("p", ["cmd", "shift"]),
   UnpinAll: sharedShortcut("x", ["ctrl", "shift"]),

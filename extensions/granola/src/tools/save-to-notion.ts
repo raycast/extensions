@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { saveToNotionWithRetry } from "../utils/granolaApi";
 import { findDocumentsByIds } from "../utils/toolHelpers";
 import { getNotionBatchSize } from "../utils/notionBatching";
@@ -30,6 +31,7 @@ type Output = {
  * Use this when the user wants to export or share their notes to Notion.
  */
 export default async function tool(input: Input): Promise<Output> {
+  await getAccessToken();
   try {
     // Validate input
     if (!input.noteIds || input.noteIds.length === 0) {

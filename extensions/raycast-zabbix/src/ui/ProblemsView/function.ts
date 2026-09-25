@@ -27,7 +27,7 @@ export async function LoadData(
   if (SelectedZabbixServer.toLowerCase() !== "all")
     config = config.filter((v) => v.uuid === SelectedZabbixServer);
 
-  const data: Types.DataProblemsView[] = [];
+  let data: Types.DataProblemsView[] = [];
 
   /* Promises */
   const promisesTriggerGet: Promise<ZabbixResponseTriggerGet>[] = [];
@@ -121,11 +121,11 @@ export async function LoadData(
     /* Replace Cached Data with Fesh Data */
     const startIndex = data.findIndex((v) => v.server_uuid === uuid);
     if (startIndex === -1) {
-      data.splice(lastIndex, 0, ...d);
+      data = data.toSpliced(lastIndex, 0, ...d);
     } else {
-      const number =
-        data.findLastIndex((v) => v.server_uuid === uuid) - startIndex + 1;
-      data.splice(startIndex, number, ...d);
+      const endIndex = data.findLastIndex((v) => v.server_uuid === uuid);
+      const number = endIndex - startIndex + 1;
+      data = data.toSpliced(startIndex, number, ...d);
     }
     lastIndex = data.findLastIndex((v) => v.server_uuid === uuid);
   }

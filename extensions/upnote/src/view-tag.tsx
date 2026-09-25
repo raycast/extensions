@@ -1,15 +1,15 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, open } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { exec } from "child_process";
+import { buildUpnoteUrl } from "./upnote-url";
+
 type Values = {
   tag: string;
 };
 
 export default function Command() {
   const { handleSubmit, itemProps } = useForm<Values>({
-    onSubmit: (values) => {
-      const cmd = `open 'upnote://x-callback-url/tag/view?tag=${values.tag}'`;
-      exec(cmd);
+    onSubmit: async (values) => {
+      await open(buildUpnoteUrl("tag/view", { tag: values.tag }));
     },
     validation: {
       tag: FormValidation.Required,

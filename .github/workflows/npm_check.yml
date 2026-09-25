@@ -33,8 +33,10 @@ jobs:
           pull_request_number: "${{ steps.get_pr_number.outputs.pr_number }}"      
       - name: to JSON
         id: get_changed_extensions_json
+        env:
+          CHANGED_EXTENSIONS: ${{ steps.get_changed_extensions.outputs.paths }}
         run: |
-          changed_extensions="${{ steps.get_changed_extensions.outputs.paths }}"
+          changed_extensions="$CHANGED_EXTENSIONS"
           repo_path="${GITHUB_WORKSPACE}/"
           # Remove the repository path from each path and convert to JSON array
           relative_paths=$(echo "$changed_extensions" | sed "s|$repo_path||g" | tr ',' '\n')
@@ -67,3 +69,10 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             echo "::warning::npm-check found issues in dependencies."
           fi
+      - name: Test extension
+        if: >-
+          matrix.extension_dir == 'extensions/printer-status' || matrix.extension_dir == 'extensions/printer-status/' ||
+          matrix.extension_dir == 'extensions/gif-search' || matrix.extension_dir == 'extensions/gif-search/' ||
+          matrix.extension_dir == 'extensions/nba-game-viewer' || matrix.extension_dir == 'extensions/nba-game-viewer/'
+        working-directory: ${{ matrix.extension_dir }}
+        run: npm test

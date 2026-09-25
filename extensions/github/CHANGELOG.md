@@ -1,5 +1,23 @@
 # GitHub Changelog
 
+## [Review Pull Requests Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Review pull request patches with concrete findings, workflow context, and explicit coverage limits.
+
+## [Restore My Repositories Filter] - 2026-09-24
+
+- Search Repositories, Issues, Pull Requests and Discussions: Restore the **My Repositories** filter, which searches repositories owned by your personal account and your organizations. **My Organizations** is still available for organization-only results.
+- Search Repositories: Fix recently visited repositories matching the wrong owners when an owner filter is selected.
+
+## [My Packages] - 2026-09-22
+
+- Add **My Packages** and **My Packages Menu Bar** to browse the packages you published to GitHub Packages.
+
+## [Fix Star Action Icon] - 2026-09-09
+
+- Search Repositories: Fix the broken Star action icon
+
 ## [Fix Stats for Large Accounts] - 2026-08-29
 
 - Split aggregate and list GraphQL requests so My GitHub Stats loads for accounts with large histories
@@ -32,6 +50,11 @@
 - **Download as ZIP** forms explain that archives do not create a Git repository and do not use the Default Clone Path.
 - README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
 - Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
+
+## [Load GitHub lists incrementally] - 2026-08-10
+
+- Added native pagination to repository, issue, pull request, discussion, release, notification, workflow run, and commit lists so initial results render sooner and later pages load on demand.
+- Limited GraphQL page sizes to 25 items while honoring smaller configured limits to reduce large-request failures.
 
 ## [Show CI status in pull request details] - 2026-08-10
 

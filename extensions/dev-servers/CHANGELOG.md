@@ -1,5 +1,9 @@
 # Dev Servers Changelog
 
+## [Detect Next.js dev servers] - 2026-09-20
+
+- Next.js dev servers now appear. Next renames its server process to `next-server`, which has neither `next dev` nor a `node_modules` path in its command line, so it was being filtered out.
+
 ## [Menu bar restart fixed, plus icon and row polish] - 2026-08-03
 
 - **Restarting from the menu bar brings the server back.** Restart used to kill the server and stop there: Raycast unloads a menu bar command shortly after its menu closes, and the respawn was still in flight when that happened. Restart now hands the whole job to the dashboard, the same way menu bar starts already work, so you also get what starts get: a live "Restarting…" row, and a diagnosed failure row if the server never comes back, instead of silence.

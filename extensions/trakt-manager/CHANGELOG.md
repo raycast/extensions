@@ -1,5 +1,39 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-09-23
+
+### Added
+
+- **AI tools for personal lists** — Raycast AI can now read your Trakt lists, check whether a title is on one, create, rename or delete a list, and add or remove movies, shows, seasons and episodes. Building a themed list takes a single batched call, and every change asks for confirmation naming the list and the items as Trakt holds them.
+- List names keep their emoji and non-Latin characters when matched, so "🎬 Oscars 2026" and "Oscars 2026" stay distinct lists.
+
+## [Update] - 2026-09-19
+
+### Added
+
+- **AI tools that update your account** — Raycast AI can now add to and remove from the watchlist, mark movies, shows and episodes as watched, remove history entries, and rate or unrate a title. Every action asks for confirmation first, and the dialog names the item by looking its Trakt ID up on Trakt, so a wrong identifier surfaces there instead of silently modifying the wrong title.
+- A tool to read your own ratings, including a targeted lookup for the score you gave a specific title.
+
+## [Update] - 2026-09-17
+
+### Added
+
+- **AI tools for browsing your account** — Raycast AI can now read your Trakt account directly, reusing the existing OAuth session. Ask it in plain language to search a title, check whether you have already watched something, or see what to watch next.
+- Nine read-only tools: search movies and shows, watchlist, watch history, up next, show progress, season episodes, personalised recommendations, and account statistics. None of them modify your account.
+
+### Fixed
+
+- Searching by year no longer misses titles. Trakt ranks search results by relevance and serves them as a single capped page, so a lesser-known release sharing a popular title stayed out of reach and could be reported as missing. Searches now combine Trakt's exact-title and relevance results, which surfaces releases such as Dune (1989) that ranking alone hides.
+- Resolving a title now prefers an exact title match over the most popular one, so "Butterfly" no longer resolves to "Sniper Butterfly".
+- When a requested year matches nothing, tools now say the title exists for other years instead of reporting it as unknown, and flag when a fallback was used rather than presenting it as an exact match.
+
+## [Fix] - 2026-09-14
+
+- Fixed sign-in failing with `invalid_grant` ("invalid code") when a command issued several requests at once. Each request triggered its own authorization, so the same single-use code was exchanged more than once; concurrent callers now share one in-flight authorization
+- Moved authorization, token exchange and refresh to the `auth.trakt.tv` host, which Trakt now requires for all OAuth requests
+- Fixed the `redirect_uri` sent when refreshing, which used a package name that never matched the static redirect URL Raycast uses during authorization
+- Token errors now report Trakt's `error` and `error_description` instead of the raw response body
+
 ## [Fix] - 2026-07-03
 
 - Fixed token refresh failing because the `redirect_uri` sent to Trakt's token endpoint didn't match the one used during authorization

@@ -82,6 +82,7 @@ function Body() {
               enabled={enabledSpaceIds.includes(s.id)}
               authenticated={authenticatedSpaceIds.includes(s.id)}
               toggleSpace={confirmAndToggleEnableDisableSpace}
+              myRole={s.myRole}
             />
           }
         />

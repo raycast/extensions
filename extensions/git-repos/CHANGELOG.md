@@ -1,5 +1,9 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2026-09-21
+
+- Use `git-url-parse` so nested GitLab group paths, custom Git host subdomains, and explicit ports are preserved when opening repository remotes.
+
 ## [Bug Fix] - 2026-05-24
 
 - Reduce memory usage while scanning large directory trees for repositories.

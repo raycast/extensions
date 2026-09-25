@@ -55,9 +55,8 @@ const TITLE_TO_SLUG_CHARS_REGEX = new RegExp(`[${Object.keys(TITLE_TO_SLUG_REPLA
 const LEGACY_TITLE_TO_SLUG_RANGE_REGEX = /[^a-z\d-]/g;
 const TITLE_TO_SLUG_RANGE_REGEX = /[^a-z\d]/g;
 
-const titleToSlug = (title: string) => {
-  const cachedVersion = loadCachedVersion();
-  const [packageName, version] = cachedVersion.split(/@(?!.*@)/);
+const titleToSlug = (title: string, packVersion: string) => {
+  const [packageName, version] = packVersion.split(/@(?!.*@)/);
   const major = semverMajor(version);
 
   const isV3Pattern = packageName === "simple-icons" && major < 4;
@@ -93,4 +92,9 @@ const titleToSlug = (title: string) => {
     .replace(isV4Pattern ? LEGACY_TITLE_TO_SLUG_RANGE_REGEX : TITLE_TO_SLUG_RANGE_REGEX, "");
 };
 
-export const getIconSlug = (icon: IconData) => icon.slug || titleToSlug(icon.title);
+// `packVersion` selects the slug pattern of the pack the icon comes from. It
+// defaults to the cached version for callers that operate on the loaded pack;
+// pass it explicitly when the cached version may not be set yet (e.g. while
+// validating a freshly downloaded pack).
+export const getIconSlug = (icon: IconData, packVersion = loadCachedVersion()) =>
+  icon.slug || titleToSlug(icon.title, packVersion);

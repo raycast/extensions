@@ -105,5 +105,25 @@
   },
   "platforms": [
     "macOS"
+  ],
+  "tools": [
+    {
+      "name": "ask-hermes",
+      "title": "Ask Hermes",
+      "description": "Ask the local Hermes Agent a question and get its answer. Use for general Q&A, explanations, brainstorming, and advice.",
+      "icon": "icon.png"
+    },
+    {
+      "name": "process-text",
+      "title": "Process Text with Hermes",
+      "description": "Run a text transformation via your own Hermes server: summarize, explain, fix grammar, improve writing, simplify, expand, translate, or review code. Text is sent to the configured Hermes endpoint (local by default).",
+      "icon": "icon.png"
+    },
+    {
+      "name": "check-status",
+      "title": "Check Hermes Status",
+      "description": "Check whether the Hermes API server is reachable and return the resolved model name. Use to diagnose connection or configuration problems.",
+      "icon": "icon.png"
+    }
   ]
 }

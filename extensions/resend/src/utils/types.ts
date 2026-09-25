@@ -25,10 +25,8 @@ export type SendEmailRequestForm = Omit<CreateEmailOptions, "to" | "bcc" | "cc" 
   attachments?: string[];
 };
 
-// Audiences
+// Segments
 
 // Contacts
 export type CreateContactRequestForm = CreateContactOptions;
-export type UpdateContactRequestForm = UpdateContactOptions & {
-  email: string;
-};
+export type UpdateContactRequestForm = Omit<UpdateContactOptions, "id" | "email" | "audienceId">;

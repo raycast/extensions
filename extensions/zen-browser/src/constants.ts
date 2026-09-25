@@ -1,4 +1,5 @@
 export const SEARCH_ENGINE: { [key: string]: string } = {
+  // Empty prefix: the bare query is handed to Zen, which resolves it with its own default search engine.
   default: ``,
   google: `https://google.com/search?q=`,
   bing: `https://www.bing.com/search?q=`,

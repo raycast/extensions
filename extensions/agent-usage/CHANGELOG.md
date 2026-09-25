@@ -1,5 +1,81 @@
 # Agent Usage Changelog
 
+## [Multiple Claude accounts] - 2026-09-19
+
+### New Features
+
+- Show every Claude account side by side instead of only the first one found. Claude now uses the same multi-account rendering as Codex and Copilot, in the list, the menu bar, and background refresh
+- Add an **Additional Claude Homes** preference for extra `CLAUDE_CONFIG_DIR` directories (e.g. `~/.claude-personal, ~/.claude-work`), mirroring **Additional Codex Homes**. Accounts are labelled from their directory (`~/.claude-work` → "Claude • work")
+- Name each row after the account it belongs to. A directory name carries the user's own meaning, so `~/.claude-work` stays "Claude • work"; the stock `~/.claude` names nothing, so it falls back to the signed-in account ("Claude • yourname") instead of an unattributable bare "Claude" row. The account email and organization are shown in the detail pane, the tooltip and the copied usage text
+
+### Fixes
+
+- Read each account's credentials from the macOS Keychain before its `.credentials.json`. Claude Code writes to the Keychain, so a credentials file left next to it can be days stale — Claude could report "Token Expired" while a valid token was already stored. Keychain services are resolved per config dir (the bare service for `~/.claude`, and a `sha256(<config dir>)` prefix for others), with the credentials file as fallback
+- Refreshing a Keychain-backed token now writes back to the service it came from instead of the default one, so refreshing a secondary profile no longer overwrites the primary profile's entry
+- Collapse accounts whose config directories resolve to the same place. `~/.claude` symlinked to a profile directory produced two Keychain entries with different tokens for one account, which token de-duplication alone could not catch
+
+### Improvements
+
+- An account whose token is missing the `user:profile` scope now shows that error on its own row instead of hiding the account
+- Share the additional-home parsing between Claude and Codex, with test coverage it did not have before
+
+## [Add Percentage Display preference] - 2026-09-14
+
+### New Features
+
+- Add a global **Percentage Display** preference (Remaining by default, or Used). In **Used** mode, quota percentages are shown as `100 − remaining` consistently across the main list, menu bar, tooltips, detail views, and copied usage text (e.g. 58% remaining → 42% used)
+- Pie and progress bars flip direction in Used mode while warning colors stay based on quota remaining, so the visual meaning stays consistent
+
+## [Fixed exhausted quota display] - 2026-09-10
+
+- Keep MiniMax CN 5h and weekly usage visible with 0% remaining and reset countdowns when quotas are exhausted.
+- Apply the same display to copied usage text.
+
+## [Cached usage and background refresh] - 2026-09-09
+
+### Improvements
+
+- Add configurable background refresh every 1, 5, 15, 30, or 60 minutes, including when the menu bar is disabled
+- Show cached provider and account rows immediately while checking credentials, then update the list when accounts or availability change
+- Add the standard Refresh keyboard shortcut and avoid duplicate refresh requests for multi-account providers
+- Keep cached usage for unchanged Amp and Grok credentials, and invalidate it on confirmed login changes
+- Retain cached usage with an Account unverified label when credential checks fail or Antigravity's active account cannot be determined
+- Keep manual and scheduled refresh independent of foreground credential checks
+
+## [Fix Antigravity Closed-App Quota] - 2026-09-09
+
+### Bug Fixes
+
+- Fetch Antigravity quota via stored Google OAuth credentials when the Antigravity app/`agy` language server is not running, so Agent Usage still shows Gemini/Claude weekly and 5-hour limits
+- Fill Antigravity email and plan on that OAuth path from Google userinfo and Cloud Code `loadCodeAssist`
+
+## [Apply Saved Provider Order] - 2026-09-09
+
+### Bug Fixes
+
+- Apply the provider order from Move Up/Down in the list to the menu bar (use Refresh All after reordering)
+
+## [Add OpenRouter credit balance] - 2026-09-08
+
+### New Features
+
+- Show the OpenRouter credit balance in the list and menu bar, auto-detected from an OpenCode `openrouter` login, `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or a pasted API key
+- Read account credits from `/api/v1/credits` with a provisioning key, and fall back to the key's own spending cap from `/api/v1/key` for a regular inference key
+
+## [OpenCode Go Zen usage API] - 2026-09-07
+
+### Improvements
+
+- Fetch OpenCode Go usage from the Zen JSON API (`https://opencode.ai/zen/go/v1/usage`) instead of scraping the workspace web page
+- Replace the workspace ID and session cookie setup with an optional Zen API key, auto-detected from OpenCode (`~/.local/share/opencode/auth.json`)
+- Show rolling, weekly, and monthly limits with per-window reset times in the detail view
+
+## [Show Grok limit reset credits] - 2026-09-04
+
+### New Features
+
+- Show Grok manual usage-limit reset tokens in the detail view: remaining count and each expiration time, matching Codex
+
 ## [Copilot multi-account and AI credits] - 2026-08-29
 
 ### New Features

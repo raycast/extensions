@@ -1,4 +1,4 @@
-import { db, Prisma } from '@repo/db';
+import { db } from '@repo/db';
 export declare class BookmarkService {
     list(params: {
         spaceIds: string[];
@@ -26,8 +26,10 @@ export declare class BookmarkService {
         id: string;
         createdAt: Date;
         name: string;
-        url: string;
+        updatedAt: Date;
         tags: string[];
+        deletedAt: Date | null;
+        url: string;
         faviconUrl: string | null;
         faviconAttemptedAt: Date | null;
         faviconAttemptCount: number;
@@ -36,8 +38,6 @@ export declare class BookmarkService {
         previewImageAttemptCount: number;
         author: string;
         authorEmail: string;
-        deletedAt: Date | null;
-        updatedAt: Date;
     } | null>;
     getDetail(params: {
         bookmarkId: string;
@@ -103,8 +103,10 @@ export declare class BookmarkService {
         id: string;
         createdAt: Date;
         name: string;
-        url: string;
+        updatedAt: Date;
         tags: string[];
+        deletedAt: Date | null;
+        url: string;
         faviconUrl: string | null;
         faviconAttemptedAt: Date | null;
         faviconAttemptCount: number;
@@ -113,8 +115,6 @@ export declare class BookmarkService {
         previewImageAttemptCount: number;
         author: string;
         authorEmail: string;
-        deletedAt: Date | null;
-        updatedAt: Date;
     }>;
     update(params: {
         id: string;
@@ -129,8 +129,10 @@ export declare class BookmarkService {
         id: string;
         createdAt: Date;
         name: string;
-        url: string;
+        updatedAt: Date;
         tags: string[];
+        deletedAt: Date | null;
+        url: string;
         faviconUrl: string | null;
         faviconAttemptedAt: Date | null;
         faviconAttemptCount: number;
@@ -139,8 +141,6 @@ export declare class BookmarkService {
         previewImageAttemptCount: number;
         author: string;
         authorEmail: string;
-        deletedAt: Date | null;
-        updatedAt: Date;
     }>;
     reportFaviconAttempts(params: {
         attempts: {
@@ -160,8 +160,10 @@ export declare class BookmarkService {
         id: string;
         createdAt: Date;
         name: string;
-        url: string;
+        updatedAt: Date;
         tags: string[];
+        deletedAt: Date | null;
+        url: string;
         faviconUrl: string | null;
         faviconAttemptedAt: Date | null;
         faviconAttemptCount: number;
@@ -170,8 +172,6 @@ export declare class BookmarkService {
         previewImageAttemptCount: number;
         author: string;
         authorEmail: string;
-        deletedAt: Date | null;
-        updatedAt: Date;
     } | null>;
     usageRanked(params: {
         email: string;
@@ -254,10 +254,15 @@ export declare class BookmarkService {
         tags: string[];
         spaceId: string;
         browserName: string;
+        duplicateStrategy?: 'skip' | 'overwrite';
         bookmarks: {
             name: string;
             url: string;
             description?: string;
         }[];
-    }): Promise<Prisma.BatchPayload>;
+    }): Promise<{
+        imported: number;
+        overwritten: number;
+        skipped: number;
+    }>;
 }

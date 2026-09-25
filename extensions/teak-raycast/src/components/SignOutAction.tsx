@@ -1,5 +1,5 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
-import { teakOAuth } from "../lib/oauth";
+import { signOutTeak } from "../lib/oauth";
 import { getPreferences } from "../lib/preferences";
 
 interface SignOutActionProps {
@@ -17,7 +17,16 @@ export function SignOutAction({ onSignedOut }: SignOutActionProps) {
     <Action
       icon={Icon.Logout}
       onAction={async () => {
-        await teakOAuth.client.removeTokens();
+        try {
+          await signOutTeak();
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could not sign out of Teak",
+            message: error instanceof Error ? error.message : "Try again.",
+          });
+          return;
+        }
         await showToast({
           style: Toast.Style.Success,
           title: "Signed out of Teak",

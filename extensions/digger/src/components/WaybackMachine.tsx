@@ -4,7 +4,7 @@ import { BrowserActions } from "../actions/BrowserActions";
 import { CacheActions } from "../actions/CacheActions";
 import { CopyActions } from "../actions/CopyActions";
 import { WaybackMachineActions } from "../actions/WaybackMachineActions";
-import { DiggerResult } from "../types";
+import { DiggerResult, ResourceStatus } from "../types";
 import { formatCompactNumber, formatDate } from "../utils/formatters";
 
 interface WaybackMachineProps {
@@ -49,6 +49,7 @@ export function WaybackMachine({ data, onRefresh, progress }: WaybackMachineProp
           hasSnapshots={hasSnapshots}
           isRateLimited={isRateLimited}
           isStillLoading={isStillLoading}
+          status={data.lookups?.wayback}
         />
       }
       actions={
@@ -76,9 +77,16 @@ interface WaybackMachineDetailProps {
   hasSnapshots: boolean;
   isRateLimited: boolean;
   isStillLoading: boolean;
+  status?: ResourceStatus;
 }
 
-function WaybackMachineDetail({ history, hasSnapshots, isRateLimited, isStillLoading }: WaybackMachineDetailProps) {
+function WaybackMachineDetail({
+  history,
+  hasSnapshots,
+  isRateLimited,
+  isStillLoading,
+  status,
+}: WaybackMachineDetailProps) {
   const getArchiveAge = (): string => {
     if (!history?.firstSeen || !history?.lastSeen) return "";
     try {
@@ -140,6 +148,18 @@ function WaybackMachineDetail({ history, hasSnapshots, isRateLimited, isStillLoa
                 icon={{ source: Icon.Clock, tintColor: Color.Blue }}
               />
               <List.Item.Detail.Metadata.Label title="" text="Querying the Internet Archive for historical snapshots" />
+            </>
+          ) : status === "unavailable" ? (
+            <>
+              <List.Item.Detail.Metadata.Label
+                title="Status"
+                text="Couldn't check"
+                icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
+              />
+              <List.Item.Detail.Metadata.Label
+                title=""
+                text="The archive lookup failed, so we don't know whether snapshots exist"
+              />
             </>
           ) : isRateLimited ? (
             <>

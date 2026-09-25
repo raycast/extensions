@@ -1,0 +1,13 @@
+instructions: |
+  Adjacent is a prediction-market data product. Markets and events use prefixed
+  ids (`kalshi:KXPRESPARTY-2028-R`). Indices use slugs (`red`, `blue`, `pres`).
+  Rates use slugs (`adj_blup`). News uses opaque article ids.
+
+  Call `find` first when the user names a topic but not an id. Then `get` or
+  `price` with that id. Prefer mid quotes over last trade when both exist.
+  Prices are 0–100 for markets and rates (65 = 65%), and base-100 for indices
+  (100 is neutral). News needs an API key. Without a key, data is the public
+  15-minute-delayed snapshot.
+
+  Do not invent prices, settlement rules, or ids. Quote what the tools return.
+  Index correlation is not live — do not claim a live correlation matrix.

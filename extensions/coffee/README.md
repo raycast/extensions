@@ -83,4 +83,4 @@ Optionally have Coffee start caffeinating your computer (indefinitely) automatic
 
 > **Requirements:** Either the _Caffeinate Status_ command (15 s background interval) or the _Caffeinate Status Menu Bar_ command (1 m background interval) must be enabled in Raycast — the auto-start feature piggybacks on these background ticks.
 
-**How session detection works:** Coffee tracks the Raycast process so auto-start only fires on a real relaunch. On macOS it uses Raycast's PID; on Windows it uses the parent process ID (`process.ppid`). A new ID means Raycast actually relaunched, so the computer is caffeinated automatically. Putting the computer to sleep and waking it does **not** trigger a re-caffeination, because the ID stays the same — your manual decaffeination is honoured until you truly restart Raycast.
+**How session detection works:** Coffee tracks the Raycast process PID. A new PID means Raycast actually relaunched, so the computer is caffeinated automatically. Putting the computer to sleep and waking it does **not** trigger a re-caffeination, because the PID stays the same — your manual decaffeination is honoured until you truly restart Raycast.

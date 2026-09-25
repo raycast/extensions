@@ -3,7 +3,7 @@
 **Like `dig`, but for the web.** Comprehensive website intelligence and metadata extraction for Raycast.
 
 <div align="center">
-  <img src="assets/digger.png" width="128" height="128" alt="Digger icon">
+  <img src="media/digger.png" width="128" height="128" alt="Digger icon">
 </div>
 
 <div align="center">
@@ -123,6 +123,19 @@ Digger fetches websites directly from your machine. No data is sent to third-par
 
 - **Wayback Machine API** — To retrieve archive history
 - **DNS lookups** — Standard system DNS resolution
+
+**Debug Logging** (off by default, in preferences) writes detailed diagnostics to the
+Raycast console. Those logs stay on your machine — nothing is uploaded — and credentials
+are masked automatically: values under names like `token`, `key`, or `api_key`, and
+`Bearer` tokens, are replaced with `***` wherever they appear, including inside logged
+objects. Masking is pattern-based, so a sensitive value under an unremarkable parameter
+name — `?sid=`, `?u=`, a document id — can still appear in full.
+
+**Strict Redaction** (also in preferences, off by default) closes that gap: every URL query
+string and fragment is masked to `?***` / `#***`, including values no pattern can recognize.
+It applies to lines written *after* you enable it — it cannot clean up console output that
+already exists — so turn it on first, reproduce the problem, then share the new lines. It is off by default because the query string
+is frequently the thing you are trying to diagnose.
 
 ## Troubleshooting
 

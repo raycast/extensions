@@ -34,6 +34,7 @@ test("formatCursorAccessory shows Auto and API remaining together", () => {
       auto: window(10),
       api: window(50),
     }),
+    "remaining",
   );
 
   assert.equal(badge.text, "Auto 90%  API 50%");
@@ -42,12 +43,12 @@ test("formatCursorAccessory shows Auto and API remaining together", () => {
 });
 
 test("formatCursorAccessory falls back to a single Auto or API window", () => {
-  assert.deepEqual(formatCursorAccessory(usage({ auto: window(10) })), {
+  assert.deepEqual(formatCursorAccessory(usage({ auto: window(10) }), "remaining"), {
     remainingForIcon: 90,
     text: "Auto 90%",
     tooltip: "Auto: 90% remaining",
   });
-  assert.deepEqual(formatCursorAccessory(usage({ api: window(25) })), {
+  assert.deepEqual(formatCursorAccessory(usage({ api: window(25) }), "remaining"), {
     remainingForIcon: 75,
     text: "API 75%",
     tooltip: "API: 75% remaining",
@@ -55,7 +56,7 @@ test("formatCursorAccessory falls back to a single Auto or API window", () => {
 });
 
 test("formatCursorAccessory keeps a single Total or Requests badge otherwise", () => {
-  assert.deepEqual(formatCursorAccessory(usage()), {
+  assert.deepEqual(formatCursorAccessory(usage(), "remaining"), {
     remainingForIcon: 82,
     text: "82%",
     tooltip: "Total: 82% remaining",
@@ -66,6 +67,7 @@ test("formatCursorAccessory keeps a single Total or Requests badge otherwise", (
         total: window(48),
         legacyRequests: { used: 240, limit: 500, usedPercent: 48 },
       }),
+      "remaining",
     ),
     {
       remainingForIcon: 52,
@@ -73,4 +75,24 @@ test("formatCursorAccessory keeps a single Total or Requests badge otherwise", (
       tooltip: "Requests: 52% remaining",
     },
   );
+});
+
+test("formatCursorAccessory flips percentages in used mode but keeps the icon on remaining", () => {
+  const badge = formatCursorAccessory(
+    usage({
+      auto: window(10),
+      api: window(50),
+    }),
+    "used",
+  );
+
+  assert.equal(badge.text, "Auto 10%  API 50%");
+  assert.equal(badge.tooltip, "Auto: 10% used | API: 50% used");
+  assert.equal(badge.remainingForIcon, 50);
+
+  assert.deepEqual(formatCursorAccessory(usage(), "used"), {
+    remainingForIcon: 82,
+    text: "18%",
+    tooltip: "Total: 18% used",
+  });
 });

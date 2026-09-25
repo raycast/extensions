@@ -1,7 +1,8 @@
 import { auth, calendar_v3 } from "@googleapis/calendar";
 import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
-import { Tool } from "@raycast/api";
+import { getPreferenceValues, Tool } from "@raycast/api";
+import { resolveCalendarIdForEventsList, resolveEventTypesForList } from "./event-types";
 import { getClientId } from "./utils";
 
 let calendar: calendar_v3.Calendar | null = null;
@@ -125,26 +126,35 @@ export function useCalendars() {
 }
 
 export function useEvents(calendarId?: string | null) {
+  const { showBirthdays } = getPreferenceValues<Preferences.ListEvents>();
+
   return useCachedPromise(
-    (calendarId?: string | null) =>
+    (calendarId?: string | null, showBirthdays?: boolean) =>
       async ({ cursor }) => {
         const calendar = getCalendarClient();
+        const resolvedCalendarId = resolveCalendarIdForEventsList(calendarId);
+        const eventTypes = resolveEventTypesForList({
+          calendarId,
+          showBirthdays: !!showBirthdays,
+        });
 
         // Get recurring events and expanded instances in parallel
         const [recurringResponse, instancesResponse] = await Promise.all([
           calendar.events.list({
-            calendarId: calendarId ?? "primary",
+            calendarId: resolvedCalendarId,
             timeMin: new Date().toISOString(),
             maxResults: 50,
             singleEvents: false,
+            eventTypes,
             pageToken: cursor?.recurringResponse,
           }),
           calendar.events.list({
-            calendarId: calendarId ?? "primary",
+            calendarId: resolvedCalendarId,
             timeMin: new Date().toISOString(),
             maxResults: 50,
             singleEvents: true,
             orderBy: "startTime",
+            eventTypes,
             pageToken: cursor?.instanceResponse,
           }),
         ]);
@@ -183,7 +193,7 @@ export function useEvents(calendarId?: string | null) {
           cursor: nextCursor,
         };
       },
-    [calendarId],
+    [calendarId, showBirthdays],
     {
       keepPreviousData: true,
     },

@@ -19,15 +19,19 @@ import { createTimer } from "@/utils/logger";
 export abstract class BaseDictionaryProvider<T = unknown> {
   abstract type: DictionaryType;
 
+  protected get logLabel(): string {
+    return this.type;
+  }
+
   public request = async (queryWordInfo: QueryInput, options?: RequestOptions): Promise<DictionaryResult<T>> => {
-    const timer = createTimer(this.type);
+    const timer = createTimer(this.logLabel);
     try {
       const result = await this.doQuery(queryWordInfo, options);
       const sectionCount = result.displaySections?.length ?? 0;
       timer.done(sectionCount > 0 ? `${sectionCount} sections` : "no entries");
       return result;
     } catch (error) {
-      const requestError = handleRequestError(this.type, error, options?.signal);
+      const requestError = handleRequestError(this.type, error, options?.signal, this.logLabel);
       if (!(requestError instanceof CancelledError)) {
         timer.fail();
       }

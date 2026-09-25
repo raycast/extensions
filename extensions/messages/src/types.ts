@@ -18,7 +18,9 @@ export type ChatParticipant = {
 export type MessagesTarget = Pick<
   ChatParticipant,
   "chat_identifier" | "group_participants" | "is_group" | "latest_message_guid"
->;
+> & {
+  chat_guid?: string | null;
+};
 
 export type ChatOrMessageInfo = {
   chat_identifier: string;
@@ -41,10 +43,15 @@ export type Contact = {
 };
 
 export type SQLMessage = ChatParticipant & {
+  row_id: number;
+  chat_row_id: number;
+  chat_guid: string;
   guid: string;
+  date_nanoseconds: string;
   date: string;
   date_read: string | null;
   body: string;
+  plain_text: string | null;
   service: "iMessage" | "SMS";
   is_audio_message: boolean;
   is_from_me: boolean;
@@ -53,12 +60,23 @@ export type SQLMessage = ChatParticipant & {
   attachment_filename: string | null;
   attachment_name: string | null;
   attachment_mime_type: string | null;
+  attachments_json: string;
   reply_body: string | null;
+  reply_plain_text: string | null;
+};
+
+export type MessageAttachment = {
+  id: string;
+  filename: string | null;
+  name: string | null;
+  mimeType: string | null;
+  sizeBytes: number | null;
 };
 
 export type Message = SQLMessage & {
   avatar?: Image.ImageLike;
   sender: string;
   senderName: string;
+  attachments: MessageAttachment[];
   replyingTo?: string | null;
 };

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-firefox",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "title": "Mozilla Firefox",
   "description": "Search and open tabs from bookmarks and history in Mozilla Firefox.",
   "icon": "firefox-logo.png",
@@ -9,7 +9,9 @@
   "contributors": [
     "serhii_kravchenko",
     "Laptop765",
-    "kud"
+    "kud",
+    "BryanG02",
+    "rockschtar"
   ],
   "categories": [
     "Applications",
@@ -132,6 +134,7 @@
     "test:run": "vitest run"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

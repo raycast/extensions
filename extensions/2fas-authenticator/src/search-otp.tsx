@@ -165,13 +165,19 @@ export default function SearchOTP() {
                 <Action
                   title="Copy Account"
                   icon={Icon.AtSymbol}
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "u" },
+                    Windows: { modifiers: ["ctrl"], key: "u" },
+                  }}
                   onAction={() => handleCopyAccount(item)}
                 />
                 <Action
                   title="Toggle Pin"
                   icon={Icon.Pin}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+                  }}
                   onAction={() => handleTogglePin(item)}
                 />
               </ActionPanel>

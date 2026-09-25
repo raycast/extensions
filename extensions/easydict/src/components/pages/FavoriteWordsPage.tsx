@@ -14,32 +14,17 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+import StrokeOrderPage from "@/components/pages/StrokeOrderPage";
 import { myPreferences } from "@/consts";
 import { playQueryWordAudio, playTTS } from "@/core/audio";
 import { getLanguageItem } from "@/core/language/utils";
+import { savedResultMarkdown } from "@/core/query/resultMarkdown";
+import { getStrokeOrderCharacters } from "@/core/stroke-order";
 import { useFavoriteWords } from "@/hooks";
-import { favoriteKeyOf, type FavoriteWord } from "@/types/favorite";
+import { favoriteKeyOf, type FavoriteWord, resolveFavoriteTranslations } from "@/types/favorite";
 import type { QueryWordInfo } from "@/types/query";
 import { copyAllText } from "@/utils/copyFavorites";
 import { logError } from "@/utils/logger";
-
-/**
- * Render a favorite's saved display snapshot as offline markdown: each section
- * title followed by its items' details, preserving the original layout without
- * any network re-query.
- */
-function aggregateMarkdown(favorite: FavoriteWord): string {
-  return (
-    favorite.displaySections
-      .flatMap((section) =>
-        section.items.map(
-          (item) => item.showMoreDetailsMarkdown ?? item.detailsMarkdown ?? item.copyText ?? item.title,
-        ),
-      )
-      .join("\n")
-      .trim() || favorite.word
-  );
-}
 
 /**
  * Reconstruct a minimal QueryWordInfo from saved fields so audio helpers work
@@ -115,9 +100,15 @@ function FavoriteItem({
 }) {
   const fromLanguageItem = getLanguageItem(favorite.fromLanguage);
   const toLanguageItem = getLanguageItem(favorite.toLanguage);
-  const translation = favorite.translations?.[0];
-  // Respect the same "flags are not languages" preference as TargetLanguageSection.
-  const langIcon = (emoji: string) => (myPreferences.flagsAreNotLanguages ? Icon.Globe : { source: emoji });
+  const translations = resolveFavoriteTranslations(favorite);
+  const translation = translations?.[0];
+  const strokeOrderCharacters = getStrokeOrderCharacters({
+    fromLanguage: favorite.fromLanguage,
+    toLanguage: favorite.toLanguage,
+    sourceText: favorite.word,
+    translatedText: translations?.join("\n") ?? "",
+  });
+  const languageDirection = `${fromLanguageItem.googleLangCode.toUpperCase()} → ${toLanguageItem.googleLangCode.toUpperCase()}`;
 
   const openInEasydict = async () => {
     try {
@@ -138,18 +129,29 @@ function FavoriteItem({
       id={favoriteKeyOf(favorite)}
       title={favorite.word}
       subtitle={translation}
-      accessories={[
-        { icon: langIcon(fromLanguageItem.emoji) },
-        { icon: Icon.ArrowRight },
-        { icon: langIcon(toLanguageItem.emoji) },
-      ]}
-      detail={<List.Item.Detail markdown={aggregateMarkdown(favorite)} />}
+      accessories={
+        myPreferences.flagsAreNotLanguages
+          ? [{ text: languageDirection }]
+          : [
+              { icon: { source: fromLanguageItem.emoji } },
+              { icon: Icon.ArrowRight },
+              { icon: { source: toLanguageItem.emoji } },
+            ]
+      }
+      detail={<List.Item.Detail markdown={savedResultMarkdown(favorite, favorite.displaySections)} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action icon={Icon.MagnifyingGlass} title="Open in Easydict" onAction={openInEasydict} />
             <Action.CopyToClipboard title="Copy Translation" content={translation ?? favorite.word} />
             <Action.CopyToClipboard title="Copy All to Clipboard" icon={Icon.Clipboard} content={copyAllContent} />
+            {strokeOrderCharacters.length > 0 && (
+              <Action.Push
+                title="Show Stroke Order"
+                icon={Icon.Brush}
+                target={<StrokeOrderPage characters={strokeOrderCharacters} />}
+              />
+            )}
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Read Text Audio">
@@ -162,7 +164,7 @@ function FavoriteItem({
             <Action
               title="Read Translation"
               icon={Icon.Play}
-              onAction={() => translation && playTTS(translation, favorite.toLanguage, { truncate: true })}
+              onAction={() => translation && playTTS(translation, favorite.toLanguage)}
             />
           </ActionPanel.Section>
 
