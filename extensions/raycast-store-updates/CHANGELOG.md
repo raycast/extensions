@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Commit Links in Version History] - {PR_MERGE_DATE}
+## [Commit Links in Version History] - 2026-09-25
 
 - Version History rows can open or copy the `raycast/extensions` commit that added that version.
 - "Open in Raycast Store" is now "View Extension in Store", and Version History's "Open in Browser" is now "Open Changelog in Browser" (it opens the changelog rather than the Store page).
