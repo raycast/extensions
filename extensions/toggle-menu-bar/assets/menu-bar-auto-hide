@@ -2,16 +2,9 @@
 
 set -euo pipefail
 
-readonly CONTROL_CENTER_DOMAIN="com.apple.controlcenter"
-readonly CONTROL_CENTER_KEY="AutoHideMenuBarOption"
-readonly FULL_SCREEN_KEY="AppleMenuBarVisibleInFullscreen"
-readonly DESKTOP_KEY="_HIHideMenuBar"
-
-# Mutations are serialized inside the native helper: it holds an flock(2)
-# across the whole read, target choice, and pulse, so overlapping invocations
-# can never observe a transient pulse value. The wrapper only normalizes
-# arguments and forwards each mutation as a single native call; `status`
-# stays a lock-free read.
+# The native helper serializes mutations with an exclusive flock(2) across
+# read, target choice, and pulse. Status reads take a shared lock so they
+# cannot observe an intermediate pulse mode.
 
 normalize_mode() {
   case "${1:-}" in
@@ -53,64 +46,6 @@ mode_from_option() {
     3) printf 'never\n' ;;
     *) return 2 ;;
   esac
-}
-
-read_preference_bool() {
-  local key="$1"
-  local value
-
-  if ! value=$(/usr/bin/defaults read -g "$key" 2>/dev/null); then
-    return 1
-  fi
-
-  case "$value" in
-    1 | true | TRUE | yes | YES) printf '1\n' ;;
-    0 | false | FALSE | no | NO) printf '0\n' ;;
-    *)
-      printf 'Unexpected value for %s: %s\n' "$key" "$value" >&2
-      return 1
-      ;;
-  esac
-}
-
-current_mode_from_global_preferences() {
-  local full_screen_visible
-  local desktop_hidden
-
-  full_screen_visible=$(read_preference_bool "$FULL_SCREEN_KEY")
-  desktop_hidden=$(read_preference_bool "$DESKTOP_KEY")
-
-  case "${full_screen_visible}${desktop_hidden}" in
-    01) printf 'always\n' ;;
-    11) printf 'desktop-only\n' ;;
-    00) printf 'fullscreen-only\n' ;;
-    10) printf 'never\n' ;;
-    *) return 1 ;;
-  esac
-}
-
-current_mode() {
-  local global_mode
-  local option
-
-  # These are the preferences macOS actually enforces. The Control Center key
-  # below is only the popup's cached selection and can briefly lag behind.
-  if global_mode=$(current_mode_from_global_preferences); then
-    printf '%s\n' "$global_mode"
-    return
-  fi
-
-  if option=$(/usr/bin/defaults read "$CONTROL_CENTER_DOMAIN" "$CONTROL_CENTER_KEY" 2>/dev/null); then
-    case "$option" in
-      0 | 1 | 2 | 3)
-        mode_from_option "$option"
-        return
-        ;;
-    esac
-  fi
-
-  printf 'Could not determine the current menu bar mode.\n' >&2
-  return 1
 }
 
 apply_preferences() {
@@ -208,8 +143,8 @@ case "$command_name" in
       usage >&2
       exit 2
     fi
-    mode=$(current_mode)
-    printf 'Menu bar auto-hide: %s\n' "$(mode_label "$mode")"
+    result=$(apply_preferences status)
+    print_applied_mode "$result"
     ;;
   set)
     if [[ $# -ne 2 ]]; then

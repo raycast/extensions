@@ -224,7 +224,7 @@ static void mutationLockPath(char *buffer, size_t capacity) {
   snprintf(buffer, capacity, "%s/toggle-menu-bar-mutation.lock", tmpdir);
 }
 
-static int acquireMutationLock(void) {
+static int acquireModeLock(bool shared) {
   char path[PATH_MAX];
   mutationLockPath(path, sizeof(path));
 
@@ -233,11 +233,11 @@ static int acquireMutationLock(void) {
     fprintf(stderr, "Could not open the menu bar mutation lock (%s)\n", path);
     return -1;
   }
-  // Blocking: concurrent invocations serialize in the kernel for the whole
-  // read, target choice, and pulse. The lock is released automatically if
-  // this process dies, so no polling or stale-lock recovery is needed.
-  if (flock(fd, LOCK_EX) != 0) {
-    fprintf(stderr, "Could not acquire the menu bar mutation lock\n");
+  // Shared reads wait for an exclusive pulse to finish. Mutations retain the
+  // exclusive lock across their read, target choice, and pulse. The kernel
+  // releases either lock automatically if the process dies.
+  if (flock(fd, shared ? LOCK_SH : LOCK_EX) != 0) {
+    fprintf(stderr, "Could not acquire the menu bar mode lock\n");
     close(fd);
     return -1;
   }
@@ -250,8 +250,11 @@ int main(int argc, const char *argv[]) {
     int secondOption = -1;
     int targetOption = -1;
     bool resolveToggle = false;
+    bool readStatus = false;
 
-    if (argc == 3 && strcmp(argv[1], "set") == 0) {
+    if (argc == 2 && strcmp(argv[1], "status") == 0) {
+      readStatus = true;
+    } else if (argc == 3 && strcmp(argv[1], "set") == 0) {
       if (!parseOption(argv[2], &targetOption)) {
         fprintf(stderr, "Invalid menu bar option: %s\n", argv[2]);
         return 2;
@@ -265,16 +268,28 @@ int main(int argc, const char *argv[]) {
       resolveToggle = true;
     } else {
       fprintf(stderr,
-              "Usage: %s set OPTION | toggle FIRST SECOND\n"
+              "Usage: %s status | set OPTION | toggle FIRST SECOND\n"
               "Options: 0 (Always), 1 (On Desktop Only), 2 (In Full Screen "
               "Only), 3 (Never)\n",
               argv[0]);
       return 2;
     }
 
-    const int lockFd = acquireMutationLock();
+    const int lockFd = acquireModeLock(readStatus);
     if (lockFd < 0) {
       return 1;
+    }
+
+    if (readStatus) {
+      const int currentOption = readCurrentOptionWithFallback();
+      if (currentOption < 0) {
+        fprintf(stderr, "Could not determine the current menu bar mode\n");
+        close(lockFd);
+        return 1;
+      }
+      printf("option=%d\n", currentOption);
+      close(lockFd);
+      return 0;
     }
 
     SkyLightFunctions skyLight = {0};

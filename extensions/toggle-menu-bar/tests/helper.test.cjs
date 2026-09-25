@@ -5,35 +5,22 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 
-// Only a temporary COPY is rewritten: all defaults reads and native writes are
-// replaced by fixtures. Never execute the shipped helper against the host here.
+// Only a temporary COPY is executed with a native-helper fixture. Never run
+// the shipped helper against the host from this test suite.
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), "toggle-menu-bar-test-"));
 const helper = path.join(directory, "menu-bar-auto-hide");
-fs.writeFileSync(
-  helper,
-  fs
-    .readFileSync(path.resolve(__dirname, "../assets/menu-bar-auto-hide"), "utf8")
-    .replaceAll("/usr/bin/defaults", '"$FIXTURE_DEFAULTS"'),
-);
-fs.writeFileSync(
-  path.join(directory, "defaults"),
-  `#!/bin/bash
-[[ "$READ_FAIL" == "1" ]] && exit 1
-case "$*" in
-  'read -g AppleMenuBarVisibleInFullscreen') echo "$FULLSCREEN" ;;
-  'read -g _HIHideMenuBar') echo "$DESKTOP" ;;
-  'read com.apple.controlcenter AutoHideMenuBarOption') echo "$OPTION" ;;
-  *) exit 90 ;;
-esac
-`,
-  { mode: 0o755 },
-);
+fs.copyFileSync(path.resolve(__dirname, "../assets/menu-bar-auto-hide"), helper);
 fs.writeFileSync(
   path.join(directory, "menu-bar-auto-hide-native"),
   `#!/bin/bash
-# Fixture for the native helper: emulates read, target choice, and result
-# reporting for the set/toggle subcommands without touching the host.
-if [[ "$1" == "toggle" ]]; then
+# Fixture for the native helper: emulates status, target choice, and result
+# reporting without touching the host.
+if [[ "$1" == "status" ]]; then
+  [[ "$NATIVE_READ_FAIL" == "1" ]] && { echo 'fixture status failure' >&2; exit 1; }
+  printf '%s' "$*" > "$CALL_ARGS"
+  printf 'option=%s\\n' "$FIXTURE_CURRENT"
+  exit 0
+elif [[ "$1" == "toggle" ]]; then
   [[ "$NATIVE_READ_FAIL" == "1" ]] && { echo 'fixture status failure' >&2; exit 1; }
   if [[ "$FIXTURE_CURRENT" == "$2" ]]; then chosen="$3"; else chosen="$2"; fi
 elif [[ "$1" == "set" ]]; then
@@ -57,12 +44,8 @@ function baseEnv(current = 0, extra = {}) {
   const id = invocation++;
   return {
     PATH: process.env.PATH,
-    FIXTURE_DEFAULTS: path.join(directory, "defaults"),
     CALL_FILE: path.join(directory, `call-${id}`),
     CALL_ARGS: path.join(directory, `call-${id}.args`),
-    FULLSCREEN: String(current % 2),
-    DESKTOP: current <= 1 ? "1" : "0",
-    OPTION: String(current),
     FIXTURE_CURRENT: String(current),
     ...extra,
   };
@@ -108,10 +91,11 @@ for (let first = 0; first < 4; first++)
       });
     }
 for (let current = 0; current < 4; current++) {
-  test(`status ${modes[current]} never launches the native helper`, () => {
+  test(`status ${modes[current]} reads through the native helper without mutation`, () => {
     const result = run(["status"], current);
     assert.equal(result.status, 0);
     assert.equal(result.applied, "");
+    assert.equal(result.nativeArgs, "status");
     assert.equal(result.stdout.trim(), `Menu bar auto-hide: ${labels[current]}`);
   });
 }
@@ -122,7 +106,7 @@ test("bare invocation without a command shows usage", () => {
   assert.equal(result.applied, "");
 });
 test("unreadable status exits unsuccessfully without success output or native mutation", () => {
-  const result = run(["status"], 0, { READ_FAIL: "1" });
+  const result = run(["status"], 0, { NATIVE_READ_FAIL: "1" });
   assert.notEqual(result.status, 0);
   assert.equal(result.stdout, "");
   assert.equal(result.applied, "");

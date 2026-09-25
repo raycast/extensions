@@ -63,7 +63,7 @@ async function runHelper(args: string[], timeout: number) {
 }
 
 export function readMenuBarStatus() {
-  return runHelper(["status"], 5_000);
+  return runHelper(["status"], 30_000);
 }
 
 export function setMenuBarMode(mode: MenuBarMode) {
