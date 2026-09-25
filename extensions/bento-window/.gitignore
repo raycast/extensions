@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Swift helper build output
+.raycast-swift-build
+.swiftpm
+.build/
+compiled_raycast_swift
+Package.resolved
