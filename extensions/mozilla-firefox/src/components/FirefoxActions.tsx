@@ -4,7 +4,17 @@ import { HistoryEntry } from "../interfaces";
 
 function OpenInNewWindowAction({ url }: { url?: string }) {
   if (process.platform !== "win32") return null;
-  return <Action title="Open in New Window" icon={{ source: Icon.Window }} onAction={() => openInNewWindow(url)} />;
+  return (
+    <Action
+      title="Open in New Window"
+      icon={{ source: Icon.Window }}
+      shortcut={{
+        macOS: { modifiers: ["ctrl"], key: "enter" },
+        Windows: { modifiers: ["ctrl"], key: "enter" },
+      }}
+      onAction={() => openInNewWindow(url)}
+    />
+  );
 }
 
 function EditUrlAction({ url, onEditUrl }: { url?: string; onEditUrl?: (url: string) => void }) {

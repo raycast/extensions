@@ -107,7 +107,10 @@ export function buildNewTabUrl(queryText: string | null | undefined): string {
   const trimmed = queryText?.trim();
   if (!trimmed) return "about:newtab";
   if (/^(https?:\/\/|about:)/i.test(trimmed)) return trimmed;
-  if (looksLikeUrl(trimmed)) return `https://${trimmed}`;
+  if (looksLikeUrl(trimmed)) {
+    const scheme = /^(localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?([/:?#]|$)/i.test(trimmed) ? "http" : "https";
+    return `${scheme}://${trimmed}`;
+  }
   const searchEngine = getPreferenceValues<Preferences.NewTab>().searchEngine?.toLowerCase() || "google";
   return `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(trimmed)}`;
 }

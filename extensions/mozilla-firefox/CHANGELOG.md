@@ -4,6 +4,8 @@
 
 - Shift+Enter copies a result URL into the search bar (New Tab, Search History, and Search Bookmarks) so it can be edited before opening
 - Pasting or typing a URL in the search bar labels the first item Open URL instead of a search query (Enter still opens it)
+- Fixed Ctrl+Enter (Open in New Window) on Windows
+- Bare localhost and IPv4 targets open over HTTP
 
 ## [Windows Launch Fixes] - 2026-09-21
 

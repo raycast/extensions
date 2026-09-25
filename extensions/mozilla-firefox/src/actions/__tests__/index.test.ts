@@ -344,11 +344,13 @@ describe("buildNewTabUrl", () => {
     expect(buildNewTabUrl(" about:config ")).toBe("about:config");
   });
 
-  it("prefixes https:// for host-like input", () => {
+  it("prefixes https:// for public hosts and http:// for local hosts", () => {
     expect(buildNewTabUrl("github.com/foo/2")).toBe("https://github.com/foo/2");
     expect(buildNewTabUrl("www.google.com")).toBe("https://www.google.com");
-    expect(buildNewTabUrl("localhost:3000")).toBe("https://localhost:3000");
-    expect(buildNewTabUrl("127.0.0.1")).toBe("https://127.0.0.1");
+    expect(buildNewTabUrl("localhost:3000")).toBe("http://localhost:3000");
+    expect(buildNewTabUrl("localhost")).toBe("http://localhost");
+    expect(buildNewTabUrl("127.0.0.1")).toBe("http://127.0.0.1");
+    expect(buildNewTabUrl("10.0.0.1:8080/path")).toBe("http://10.0.0.1:8080/path");
   });
 
   it("sends remaining text to the search engine", () => {
