@@ -7,7 +7,7 @@ The extension uses `codex app-server` over local standard input/output as the br
 ## Highlights
 
 - Works from Raycast Root Search as a fallback command—no need to type the prompt twice.
-- Full-width Markdown response view without a permanent conversation sidebar.
+- Persistent chat view that keeps the full conversation visible while composing and sending messages.
 - Multi-turn follow-ups and in-flight steering in the same Codex thread.
 - Separate searchable session management for active, archived, and local Codex sessions.
 - Automatic Codex CLI path discovery on Windows and macOS, with a user-editable manual path override.
@@ -28,13 +28,11 @@ For the fastest workflow, open Raycast Settings → Launcher → Fallback Comman
 
 ### Continue or Steer
 
-On the answer page, press Enter to open the message composer. Type the next message and press Enter again to send it. If Codex is currently responding, the message is sent as steering; otherwise it starts the next turn in the same conversation. Failed messages remain available for retry.
-
-Raycast's public extension API does not provide a permanently editable text field inside a full-width Detail view. The extension therefore uses a dedicated native composer page so both opening the composer and sending a message can use Enter while the reading page remains uncluttered.
+The search field stays available above the transcript. Type a message and press Enter to send it; if Codex is still responding, it is sent as steering. The transcript remains visible while you type and after each reply. Each launch reconnects to the last active conversation by default.
 
 ### Manage Sessions
 
-Open **History** from the action menu to search and continue previous conversations, rename them, archive them, or restore archived entries. The local Codex session view reads compatible CLI, editor, and app-server sessions only when requested. Renaming and archiving are extension metadata operations and do not delete Codex's original local records.
+Use the conversation menu at the top right or the action menu to open history or start a new chat. History can search and continue previous conversations, rename them, archive them, or restore archived entries. The local Codex session view reads compatible CLI, editor, and app-server sessions only when requested. Renaming and archiving are extension metadata operations and do not delete Codex's original local records.
 
 ## Windows and macOS
 
@@ -93,7 +91,7 @@ Run `npm run dev` to load the development extension in Raycast.
 
 Ask Codex CLI 通过本机已经登录的 Codex CLI 连接 ChatGPT/OpenAI 服务，并把 Raycast 根搜索里的文字直接交给它。它不是另一套要求你填写 API Key 的客户端，而是使用 `codex app-server` 作为本地连接桥梁。把 **Ask Codex** 设置为第一项 Fallback Command 后，平时只需打开 Raycast、输入问题、向下选择一次并回车；插件会自动使用刚才的搜索文字，无需进入页面后重新输入。
 
-回答页面采用全宽布局，不显示常驻的“当前对话”左侧栏。需要追问时按 Enter 打开输入页，输入后再按 Enter 发送；如果 Codex 仍在生成答案，该消息会作为 steer 补充要求发送。历史会话被放在独立管理页面中，不会干扰日常对话。历史页可以搜索、继续、重命名、归档和恢复，也可以按需读取本机 Codex 会话。
+聊天页面会一直保留顶部输入框和完整对话记录。直接输入后按 Enter 发送；如果 Codex 正在生成，也可以继续输入并按 Enter 发送补充要求。每次打开 Ask Codex 默认自动连接上次活动会话。右上角会话菜单和操作菜单都能打开历史或新建对话；历史支持搜索、继续、重命名、归档和恢复，也可以按需读取本机 Codex 会话。
 
 Windows 会自动寻找 `codex.exe`、`codex.cmd` 和常见 npm 安装位置；macOS 会检查登录 shell、Apple Silicon/Intel Homebrew 路径及常见用户目录。两边都支持用户在设置中修改 Codex 路径和工作目录。如果没有检测到 CLI，界面会明确提示安装官方 Codex CLI，并提供安装入口；已经安装在特殊目录时则可以直接填写绝对路径。插件不内置 API Key，也不会把你的登录文件、聊天记录或本地路径打包发布。
 

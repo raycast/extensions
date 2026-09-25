@@ -190,7 +190,7 @@ export function messagesFromThread(thread: unknown): ChatMessage[] {
 
 export function transcript(messages: ChatMessage[]): string {
   if (!messages.length)
-    return "# 问 Codex\n\n按 Enter 打开输入页，写完后再按 Enter 发送。\n\n回答过程中也能发送补充要求（Steer）。聊天页保持全宽，不显示历史列表。";
+    return "# 新对话\n\n在顶部输入问题并按 Enter 发送。对话记录会一直保留在这里。\n\nCodex 回答过程中也可以继续输入，按 Enter 发送补充要求。";
   return messages
     .map((message) => {
       const heading =
