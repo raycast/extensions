@@ -1,6 +1,6 @@
 # Changelog
 
-## [Provider and Writing Improvements] - {PR_MERGE_DATE}
+## [Provider and Writing Improvements] - 2026-09-25
 
 - Added provider and model selection to the command and saved presets.
 - Added a searchable OpenRouter model catalog with manual model ID fallback.
