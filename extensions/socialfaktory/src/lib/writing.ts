@@ -14,9 +14,6 @@ export const MAX_PENDING_WRITES = 10;
 export const PENDING_WRITE_PREFIX = "pending-write-";
 export const WRITE_RESERVE_CREDITS = 3;
 
-const SETTLE_MIN_MS = 150;
-const SETTLE_SPREAD_MS = 250;
-const SETTLE_CHECKS = 2;
 const IN_PROGRESS_RETRIES = 5;
 const IN_PROGRESS_WAIT_MS = 1_000;
 const LATE_POLLS = 2;
@@ -77,7 +74,7 @@ export type WriteDependencies = {
   call<T>(name: string, args: Record<string, unknown>, options?: CallOptions): Promise<T>;
   now(): number;
   sleep(ms: number, signal?: AbortSignal): Promise<void>;
-  random(): number;
+  lock<T>(name: string, work: () => Promise<T>): Promise<T>;
   storage: WriteStorage;
   signIn(): Promise<void>;
   account(): Promise<string>;
@@ -174,30 +171,16 @@ export async function startWrite(
 ): Promise<WriteRecord & { textGenerationId: string }> {
   const account = await signedInAccount(dependencies);
   const slot = slotFor(account, request);
-  const existing = await readEntry(dependencies, slot);
+  const { existing, pending } = await dependencies.lock(slot, () => claimSlot(dependencies, slot, request, account));
   if (existing?.textGenerationId) return { ...existing, textGenerationId: existing.textGenerationId };
-  const candidate = existing?.key ?? request.idempotencyKey;
-  const sentUnder = candidate ? dependencies.sent.get(candidate) : undefined;
-  if (sentUnder && sentUnder !== account) throw new ConnectionRenewedError();
-  const pending: WriteRecord = {
-    key: candidate ?? randomUUID(),
-    brandId: request.brandId,
-    platform: request.platform,
-    brief: request.brief.trim(),
-    startedAt: dependencies.now(),
-    account,
-  };
-  await saveEntry(dependencies, slot, pending);
-  const settled = await settledKey(dependencies, slot, pending.key);
-  const fresh = !existing && !request.reused && settled === pending.key && !dependencies.sent.has(settled);
-  pending.key = settled;
-  dependencies.sent.set(settled, account);
+  const fresh = !existing && !request.reused && !dependencies.sent.has(pending.key);
+  dependencies.sent.set(pending.key, account);
 
   let answer: { text_generation_id: string };
   try {
     answer = await generate(dependencies, pending, signal, fresh);
   } catch (error) {
-    if (!mayStillBeRunning(error)) await clearEntry(dependencies, slot, pending.key);
+    if (!mayStillBeRunning(error)) await dependencies.lock(slot, () => clearEntry(dependencies, slot, pending.key));
     throw error;
   }
 
@@ -364,13 +347,27 @@ async function generate(
   }
 }
 
-async function settledKey(dependencies: WriteDependencies, slot: string, key: string): Promise<string> {
-  for (let check = 0; check < SETTLE_CHECKS; check += 1) {
-    await dependencies.sleep(SETTLE_MIN_MS + dependencies.random() * SETTLE_SPREAD_MS);
-    const current = parse(await dependencies.storage.getItem(slot));
-    if (current && current.key !== key && !current.textGenerationId) return current.key;
-  }
-  return key;
+async function claimSlot(
+  dependencies: WriteDependencies,
+  slot: string,
+  request: WriteRequest,
+  account: string,
+): Promise<{ existing?: WriteRecord; pending: WriteRecord }> {
+  const existing = await readEntry(dependencies, slot);
+  if (existing?.textGenerationId) return { existing, pending: existing };
+  const candidate = existing?.key ?? request.idempotencyKey;
+  const sentUnder = candidate ? dependencies.sent.get(candidate) : undefined;
+  if (sentUnder && sentUnder !== account) throw new ConnectionRenewedError();
+  const pending: WriteRecord = {
+    key: candidate ?? randomUUID(),
+    brandId: request.brandId,
+    platform: request.platform,
+    brief: request.brief.trim(),
+    startedAt: dependencies.now(),
+    account,
+  };
+  await saveEntry(dependencies, slot, pending);
+  return { existing, pending };
 }
 
 async function markFinished(dependencies: WriteDependencies, textGenerationId: string): Promise<void> {

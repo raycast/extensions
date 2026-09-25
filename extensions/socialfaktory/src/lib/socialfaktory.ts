@@ -1,3 +1,5 @@
+import { environment } from "@raycast/api";
+import { join } from "node:path";
 import {
   MCP_URL,
   accountKey,
@@ -8,6 +10,7 @@ import {
   renewAccessToken,
   signInAgain as startOver,
 } from "./auth";
+import { fileLock } from "./lock";
 import { McpClient } from "./mcp";
 import { createSession } from "./session";
 import type { Brand, PostPage, PostStatus, Wallet } from "./types";
@@ -47,7 +50,7 @@ const writing: WriteDependencies = {
   call,
   now: () => Date.now(),
   sleep: abortableSleep,
-  random: Math.random,
+  lock: fileLock(join(environment.supportPath, "locks"), { now: () => Date.now(), sleep: abortableSleep }),
   storage: localStore,
   signIn: async () => {
     await credentials();

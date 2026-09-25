@@ -117,6 +117,25 @@ class FakeServer {
   };
 }
 
+function memoryLocks(): WriteDependencies["lock"] {
+  const tails = new Map<string, Promise<void>>();
+  return async (name, work) => {
+    const previous = tails.get(name) ?? Promise.resolve();
+    let release = () => {};
+    const tail = new Promise<void>((resolve) => (release = resolve));
+    tails.set(
+      name,
+      previous.then(() => tail),
+    );
+    await previous;
+    try {
+      return await work();
+    } finally {
+      release();
+    }
+  };
+}
+
 function memory() {
   const values = new Map<string, string>();
   return {
@@ -155,7 +174,7 @@ function dependencies(call: WriteDependencies["call"], setup: Setup = {}) {
       clock.now += ms;
       setup.onSleep?.();
     },
-    random: () => 0.5,
+    lock: memoryLocks(),
     storage: store.storage,
     signIn: setup.signIn ?? (async () => {}),
     account: async () => (setup.account ? setup.account() : "oauth:account-1"),
@@ -365,20 +384,14 @@ describe("startWrite", () => {
   it("adopts the key another process saved for the same brief before asking", async () => {
     const server = new FakeServer(10);
     const store = memory();
-    let sleeps = 0;
-    const { deps } = dependencies(server.call, {
-      store,
-      onSleep: () => {
-        sleeps += 1;
-        if (sleeps !== 1) return;
-        const [slot, value] = [...store.values.entries()].find(([key]) => key.startsWith(PENDING_WRITE_PREFIX)) ?? [];
-        if (slot && value) store.values.set(slot, JSON.stringify({ ...JSON.parse(value), key: "other-process-key" }));
-      },
-    });
+    server.loseNextAnswer = true;
+    const other = dependencies(server.call, { store });
+    await startWrite(other.deps, { ...brief, idempotencyKey: "other-process-key" }).catch(() => undefined);
+    const { deps } = dependencies(server.call, { store });
 
     await startWrite(deps, { ...brief, idempotencyKey: "my-key" });
 
-    assert.deepEqual(server.keysSeen, ["other-process-key"]);
+    assert.deepEqual([...new Set(server.keysSeen)], ["other-process-key"]);
   });
 
   it("waits while the server is still running the same request, then takes its answer", async () => {
@@ -399,6 +412,14 @@ describe("startWrite", () => {
     let doubles = 0;
     for (let seed = 1; seed <= 200; seed += 1) {
       if ((await sameBriefRace(seed)) > 1) doubles += 1;
+    }
+    assert.equal(doubles, 0);
+  });
+
+  it("reserves once when one process stalls between reading the empty slot and claiming it", async () => {
+    let doubles = 0;
+    for (let seed = 1; seed <= 50; seed += 1) {
+      if ((await sameBriefRace(seed, 5_000)) > 1) doubles += 1;
     }
     assert.equal(doubles, 0);
   });
@@ -589,7 +610,7 @@ class VirtualClock {
   }
 }
 
-async function sameBriefRace(seed: number): Promise<number> {
+async function sameBriefRace(seed: number, stallMs = 0): Promise<number> {
   const random = seeded(seed);
   const clock = new VirtualClock();
   const latency = () => clock.sleep(random() * 60);
@@ -613,11 +634,12 @@ async function sameBriefRace(seed: number): Promise<number> {
     return { text_generation_id: answered.get(key), status: "pending" } as T;
   };
 
-  const process = (): WriteDependencies => ({
+  const locks = memoryLocks();
+  const process = (stall = 0): WriteDependencies => ({
     call,
+    lock: locks,
     now: () => clock.now,
     sleep: (ms) => clock.sleep(ms),
-    random,
     sent: new Map(),
     storage: {
       getItem: async (key) => {
@@ -626,6 +648,10 @@ async function sameBriefRace(seed: number): Promise<number> {
       },
       setItem: async (key, value) => {
         await latency();
+        if (stall > 0 && key.startsWith(PENDING_WRITE_PREFIX)) {
+          await clock.sleep(stall);
+          stall = 0;
+        }
         values.set(key, value);
       },
       removeItem: async (key) => {
@@ -643,7 +669,7 @@ async function sameBriefRace(seed: number): Promise<number> {
 
   await clock.run(
     Promise.all([
-      startWrite(process(), { ...brief, brief: "Race brief", idempotencyKey: "tool-key" }),
+      startWrite(process(stallMs), { ...brief, brief: "Race brief", idempotencyKey: "tool-key" }),
       (async () => {
         await clock.sleep(random() * 20);
         return startWrite(process(), { ...brief, brief: "Race brief", idempotencyKey: "view-key" });
