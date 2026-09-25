@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Keyboard,
-  List,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import { NoteActions } from "./components/note-detail";
@@ -30,10 +22,7 @@ async function loadResults(query: string, signal?: AbortSignal): Promise<SearchI
 export default function SearchMemoryCommand() {
   const [searchText, setSearchText] = useState("");
   const abortable = useRef<AbortController | null>(null);
-  const loadResultsWithAbort = useCallback(
-    (query: string) => loadResults(query, abortable.current?.signal),
-    [],
-  );
+  const loadResultsWithAbort = useCallback((query: string) => loadResults(query, abortable.current?.signal), []);
   const { data, error, isLoading, revalidate } = usePromise(loadResultsWithAbort, [searchText], {
     abortable,
     failureToastOptions: {
@@ -55,14 +44,12 @@ export default function SearchMemoryCommand() {
       ? {
           icon: Icon.MagnifyingGlass,
           title: "No matching notes",
-          description:
-            "Try a different word or phrase. Search runs only against your local Yaps vault.",
+          description: "Try a different word or phrase. Search runs only against your local Yaps vault.",
         }
       : {
           icon: Icon.Document,
           title: "No notes yet",
-          description:
-            "Capture a thought in Yaps, then return here. Your private memory stays on this Mac.",
+          description: "Capture a thought in Yaps, then return here. Your private memory stays on this Mac.",
         };
 
   return (
@@ -95,11 +82,7 @@ export default function SearchMemoryCommand() {
                 shortcut={Keyboard.Shortcut.Common.Open}
                 onAction={() => runAction("Could not open Yaps", openYapsWithFallback)}
               />
-              <Action
-                title="Configure CLI Path"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Configure CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -145,11 +128,7 @@ function RecentNoteItem({ note }: { note: VaultNote }) {
           markdown={previewMarkdown(note.markdown)}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Location"
-                text={note.path}
-                icon={Icon.Folder}
-              />
+              <List.Item.Detail.Metadata.Label title="Location" text={note.path} icon={Icon.Folder} />
               <List.Item.Detail.Metadata.Label
                 title="Source"
                 text={displaySource(note.source)}
@@ -160,11 +139,7 @@ function RecentNoteItem({ note }: { note: VaultNote }) {
                 text={formatTimestamp(note.updated_at)}
                 icon={Icon.Clock}
               />
-              <List.Item.Detail.Metadata.Label
-                title="Privacy"
-                text="Stored locally on this Mac"
-                icon={Icon.Lock}
-              />
+              <List.Item.Detail.Metadata.Label title="Privacy" text="Stored locally on this Mac" icon={Icon.Lock} />
               {note.tags.length > 0 ? (
                 <List.Item.Detail.Metadata.TagList title="Tags">
                   {note.tags.map((tag) => (
@@ -176,14 +151,7 @@ function RecentNoteItem({ note }: { note: VaultNote }) {
           }
         />
       }
-      actions={
-        <NoteActions
-          path={note.path}
-          title={note.title}
-          markdown={note.markdown}
-          includeViewAction
-        />
-      }
+      actions={<NoteActions path={note.path} title={note.title} markdown={note.markdown} includeViewAction />}
     />
   );
 }
@@ -201,21 +169,13 @@ function SearchHitItem({ hit }: { hit: VaultSearchHit }) {
           markdown={`# ${hit.title}\n\n${previewMarkdown(hit.snippet)}`}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Location"
-                text={hit.path}
-                icon={Icon.Folder}
-              />
+              <List.Item.Detail.Metadata.Label title="Location" text={hit.path} icon={Icon.Folder} />
               <List.Item.Detail.Metadata.Label
                 title="Match"
                 text="Found in your local vault"
                 icon={Icon.MagnifyingGlass}
               />
-              <List.Item.Detail.Metadata.Label
-                title="Privacy"
-                text="Stored locally on this Mac"
-                icon={Icon.Lock}
-              />
+              <List.Item.Detail.Metadata.Label title="Privacy" text="Stored locally on this Mac" icon={Icon.Lock} />
             </List.Item.Detail.Metadata>
           }
         />

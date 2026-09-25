@@ -29,11 +29,7 @@ const MAX_METADATA_BYTES = 64 * 1024;
 const MIN_SAFE_AUTH_STATUS_VERSION = [2, 3, 124] as const;
 const AUTH_RECOVERY_TIMEOUT_MS = 6_000;
 const AUTH_RETRY_DELAYS_MS = [250, 500, 1_000, 2_000] as const;
-const REFRESHABLE_AUTH_STATES = new Set([
-  "cached_offline",
-  "credential_missing",
-  "verification_unavailable",
-]);
+const REFRESHABLE_AUTH_STATES = new Set(["cached_offline", "credential_missing", "verification_unavailable"]);
 const REFRESHABLE_AUTH_DIAGNOSTICS = new Set([
   "account_cache_incomplete",
   "credential_missing",
@@ -57,9 +53,7 @@ export interface YapsCliOptions {
 
 export class YapsCliNotFoundError extends Error {
   constructor() {
-    super(
-      "Yaps CLI was not found. Install Yaps, or set the CLI path in this extension's preferences.",
-    );
+    super("Yaps CLI was not found. Install Yaps, or set the CLI path in this extension's preferences.");
     this.name = "YapsCliNotFoundError";
   }
 }
@@ -90,20 +84,12 @@ export class YapsCli {
     }
     this.cachedCliPath = undefined;
 
-    const discoveryTimeoutMs = positiveInteger(
-      this.options.discoveryTimeoutMs,
-      CLI_DISCOVERY_TOTAL_TIMEOUT_MS,
-    );
+    const discoveryTimeoutMs = positiveInteger(this.options.discoveryTimeoutMs, CLI_DISCOVERY_TOTAL_TIMEOUT_MS);
     const deadline = Date.now() + discoveryTimeoutMs;
     const configured = this.options.configuredPath?.trim();
     if (configured) {
       const override = expandHome(configured);
-      if (
-        await isValidatedYapsCli(
-          override,
-          Math.min(CLI_DISCOVERY_TIMEOUT_MS, Math.max(1, deadline - Date.now())),
-        )
-      ) {
+      if (await isValidatedYapsCli(override, Math.min(CLI_DISCOVERY_TIMEOUT_MS, Math.max(1, deadline - Date.now())))) {
         this.cachedCliPath = override;
         return override;
       }
@@ -122,30 +108,18 @@ export class YapsCli {
       ),
     ];
 
-    const maxCandidates = nonNegativeInteger(
-      this.options.maxDiscoveryCandidates,
-      MAX_CLI_DISCOVERY_CANDIDATES,
-    );
+    const maxCandidates = nonNegativeInteger(this.options.maxDiscoveryCandidates, MAX_CLI_DISCOVERY_CANDIDATES);
     const maxProbes = nonNegativeInteger(this.options.maxDiscoveryProbes, MAX_CLI_DISCOVERY_PROBES);
     let candidatesChecked = 0;
     let probes = 0;
     let unverifiedFallback: string | undefined;
     for (const candidate of candidates) {
-      if (Date.now() >= deadline || candidatesChecked >= maxCandidates || probes >= maxProbes)
-        break;
+      if (Date.now() >= deadline || candidatesChecked >= maxCandidates || probes >= maxProbes) break;
       candidatesChecked += 1;
       if (!(await isExecutable(candidate))) continue;
       probes += 1;
-      if (
-        await isValidatedYapsCli(
-          candidate,
-          Math.min(CLI_DISCOVERY_TIMEOUT_MS, Math.max(1, deadline - Date.now())),
-        )
-      ) {
-        const safety = await settleBeforeDeadline(
-          credentialFreeAuthStatusSafety(candidate),
-          deadline,
-        );
+      if (await isValidatedYapsCli(candidate, Math.min(CLI_DISCOVERY_TIMEOUT_MS, Math.max(1, deadline - Date.now())))) {
+        const safety = await settleBeforeDeadline(credentialFreeAuthStatusSafety(candidate), deadline);
         if (safety?.kind === "safe") {
           this.cachedCliPath = candidate;
           return candidate;
@@ -170,9 +144,7 @@ export class YapsCli {
       const candidates = await settleBeforeDeadline(additionalCliPaths(), deadline);
       if (!Array.isArray(candidates)) return [];
       return candidates
-        .filter(
-          (candidate): candidate is string => typeof candidate === "string" && candidate.length > 0,
-        )
+        .filter((candidate): candidate is string => typeof candidate === "string" && candidate.length > 0)
         .slice(0, MAX_ADDITIONAL_CLI_CANDIDATES);
     } catch {
       return [];
@@ -197,20 +169,14 @@ export class YapsCli {
     const normalizedQuery = validateCliArgument(query, "Search query");
     const normalizedLimit = normalizeLimit(limit);
     return expectResponse(
-      await this.run(
-        ["vault", "search", normalizedQuery, "--limit", String(normalizedLimit)],
-        signal,
-      ),
+      await this.run(["vault", "search", normalizedQuery, "--limit", String(normalizedLimit)], signal),
       isVaultSearchResult,
     );
   }
 
   async getNote(path: string): Promise<VaultNote> {
     const normalizedPath = validateCliArgument(path, "Note path");
-    const result = expectResponse(
-      await this.run(["vault", "get", normalizedPath]),
-      isVaultNoteResult,
-    );
+    const result = expectResponse(await this.run(["vault", "get", normalizedPath]), isVaultNoteResult);
     if (!result.note) {
       throw new YapsNoteNotFoundError(path);
     }
@@ -286,11 +252,7 @@ export class YapsCli {
     try {
       const { stdout } = await execFileBounded(
         cliPath,
-        [
-          ...(session.settingsPath ? ["--settings-path", session.settingsPath] : []),
-          ...args,
-          "--pretty",
-        ],
+        [...(session.settingsPath ? ["--settings-path", session.settingsPath] : []), ...args, "--pretty"],
         {
           maxBuffer: MAX_CLI_OUTPUT_BYTES,
           timeout: this.options.timeoutMs ?? DEFAULT_CLI_TIMEOUT_MS,
@@ -330,11 +292,7 @@ export class YapsCli {
     const explicitSettings = Boolean(process.env.YAPS_SETTINGS_PATH?.trim());
     let settingsPath: string | undefined;
     let auth = await readAuthStatus(cliPath);
-    if (
-      !explicitSettings &&
-      auth?.status === "settings_path_mismatch" &&
-      auth.recommendedSettingsPath
-    ) {
+    if (!explicitSettings && auth?.status === "settings_path_mismatch" && auth.recommendedSettingsPath) {
       const retry = await readAuthStatus(cliPath, auth.recommendedSettingsPath);
       if (retry) {
         settingsPath = auth.recommendedSettingsPath;
@@ -343,13 +301,9 @@ export class YapsCli {
     }
 
     if (refreshableAuth(auth)) {
-      const recoveryTimeoutMs = positiveInteger(
-        this.options.authRecoveryTimeoutMs,
-        AUTH_RECOVERY_TIMEOUT_MS,
-      );
+      const recoveryTimeoutMs = positiveInteger(this.options.authRecoveryTimeoutMs, AUTH_RECOVERY_TIMEOUT_MS);
       const deadline = Date.now() + recoveryTimeoutMs;
-      const resolveApplication =
-        this.options.recoveryApplicationPath ?? recoveryApplicationPathForCli;
+      const resolveApplication = this.options.recoveryApplicationPath ?? recoveryApplicationPathForCli;
       const applicationPath = await settleBeforeDeadline(resolveApplication(cliPath), deadline);
       if (applicationPath) {
         const launch = this.options.launchYapsApp ?? launchInstalledYaps;
@@ -400,9 +354,7 @@ function versionAtLeast(value: string | undefined): boolean {
 }
 
 type AuthStatusSafety =
-  | { kind: "safe"; version: string }
-  | { kind: "unsafe"; version: string }
-  | { kind: "unknown"; version?: undefined };
+  { kind: "safe"; version: string } | { kind: "unsafe"; version: string } | { kind: "unknown"; version?: undefined };
 
 function authStatusSafetyForVersion(value: string | undefined): AuthStatusSafety {
   const version = value?.trim();
@@ -464,18 +416,9 @@ async function credentialFreeAuthStatusSafety(cliPath: string): Promise<AuthStat
   // Binary plists are read by the fixed, bounded system utility below.
   const [bundleIdentifier, version] = await Promise.all([
     readBoundedText("/usr/bin/plutil", ["-extract", "CFBundleIdentifier", "raw", "-o", "-", plist]),
-    readBoundedText("/usr/bin/plutil", [
-      "-extract",
-      "CFBundleShortVersionString",
-      "raw",
-      "-o",
-      "-",
-      plist,
-    ]),
+    readBoundedText("/usr/bin/plutil", ["-extract", "CFBundleShortVersionString", "raw", "-o", "-", plist]),
   ]);
-  return bundleIdentifier === "com.yaps.app"
-    ? authStatusSafetyForVersion(version)
-    : { kind: "unknown" };
+  return bundleIdentifier === "com.yaps.app" ? authStatusSafetyForVersion(version) : { kind: "unknown" };
 }
 
 function documentedYapsApplicationPaths(): string[] {
@@ -496,10 +439,7 @@ async function recoveryApplicationPathForCli(cliPath: string): Promise<string | 
 }
 
 async function launchInstalledYaps(applicationPath: string): Promise<boolean> {
-  if (
-    process.platform !== "darwin" ||
-    !documentedYapsApplicationPaths().includes(applicationPath)
-  ) {
+  if (process.platform !== "darwin" || !documentedYapsApplicationPaths().includes(applicationPath)) {
     return false;
   }
   try {
@@ -600,10 +540,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isPathInside(root: string, candidate: string): boolean {
   const relativePath = relative(root, candidate);
   return (
-    relativePath !== "" &&
-    relativePath !== ".." &&
-    !relativePath.startsWith(`..${sep}`) &&
-    !isAbsolute(relativePath)
+    relativePath !== "" && relativePath !== ".." && !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath)
   );
 }
 
@@ -627,10 +564,7 @@ async function isExecutable(path: string): Promise<boolean> {
   }
 }
 
-async function isValidatedYapsCli(
-  path: string,
-  timeoutMs = CLI_DISCOVERY_TIMEOUT_MS,
-): Promise<boolean> {
+async function isValidatedYapsCli(path: string, timeoutMs = CLI_DISCOVERY_TIMEOUT_MS): Promise<boolean> {
   if (!(await isExecutable(path))) return false;
   if (await isPackagedYapsGuiExecutable(path)) return false;
   try {
@@ -700,21 +634,11 @@ async function readAuthStatus(
 function refreshableAuth(auth: AuthStatus | undefined): boolean {
   if (
     !auth ||
-    [
-      "active",
-      "expired",
-      "mobile_only",
-      "platform_mismatch",
-      "signed_out",
-      "unauthenticated",
-    ].includes(auth.status)
+    ["active", "expired", "mobile_only", "platform_mismatch", "signed_out", "unauthenticated"].includes(auth.status)
   ) {
     return false;
   }
-  return (
-    REFRESHABLE_AUTH_STATES.has(auth.status) ||
-    REFRESHABLE_AUTH_DIAGNOSTICS.has(auth.diagnosticCode ?? "")
-  );
+  return REFRESHABLE_AUTH_STATES.has(auth.status) || REFRESHABLE_AUTH_DIAGNOSTICS.has(auth.diagnosticCode ?? "");
 }
 
 function requireActiveAccount(auth: AuthStatus | undefined): asserts auth is AuthStatus {
@@ -868,10 +792,7 @@ function nonNegativeInteger(value: number | undefined, fallback: number): number
   return Number.isSafeInteger(value) && (value ?? -1) >= 0 ? (value as number) : fallback;
 }
 
-async function settleBeforeDeadline<T>(
-  operation: Promise<T>,
-  deadline: number,
-): Promise<T | undefined> {
+async function settleBeforeDeadline<T>(operation: Promise<T>, deadline: number): Promise<T | undefined> {
   const remaining = deadline - Date.now();
   if (remaining <= 0) return undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -924,9 +845,7 @@ function compareStrings(left: string, right: string): number {
 }
 
 function limitErrorMessage(message: string): string {
-  return message.length <= MAX_CLI_ERROR_LENGTH
-    ? message
-    : `${message.slice(0, MAX_CLI_ERROR_LENGTH - 1)}…`;
+  return message.length <= MAX_CLI_ERROR_LENGTH ? message : `${message.slice(0, MAX_CLI_ERROR_LENGTH - 1)}…`;
 }
 
 function normalizedFolder(folder: string): string {

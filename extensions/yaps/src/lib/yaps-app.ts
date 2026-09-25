@@ -17,7 +17,7 @@ export async function openYapsWithFallback(): Promise<void> {
     return;
   }
 
-  await showHUD("Yaps is not installed — opening the download page");
+  await showHUD("Yaps is not installed. Opening the download page.");
   await open(YAPS_DOWNLOAD_URL);
 }
 

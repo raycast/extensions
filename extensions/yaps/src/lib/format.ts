@@ -45,8 +45,7 @@ function firstNonEmptyLine(content: string): string | undefined {
     if (breakIndex === -1) {
       break;
     }
-    lineStart =
-      breakIndex + (content[breakIndex] === "\r" && content[breakIndex + 1] === "\n" ? 2 : 1);
+    lineStart = breakIndex + (content[breakIndex] === "\r" && content[breakIndex + 1] === "\n" ? 2 : 1);
   }
 
   return undefined;

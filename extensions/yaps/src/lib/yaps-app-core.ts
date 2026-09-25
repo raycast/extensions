@@ -9,20 +9,13 @@ export interface InstalledApplication {
   path: string;
 }
 
-export function selectYapsApplication(
-  applications: InstalledApplication[],
-): InstalledApplication | undefined {
+export function selectYapsApplication(applications: InstalledApplication[]): InstalledApplication | undefined {
   const usableApplications = applications.filter(isUsableApplication);
   return (
     selectDeterministically(
       usableApplications,
-      (application) =>
-        application.bundleId === YAPS_BUNDLE_ID || application.bundleId === YAPS_SETAPP_BUNDLE_ID,
-    ) ??
-    selectDeterministically(
-      usableApplications,
-      (application) => application.name.trim().toLowerCase() === "yaps",
-    )
+      (application) => application.bundleId === YAPS_BUNDLE_ID || application.bundleId === YAPS_SETAPP_BUNDLE_ID,
+    ) ?? selectDeterministically(usableApplications, (application) => application.name.trim().toLowerCase() === "yaps")
   );
 }
 

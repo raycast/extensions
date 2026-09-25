@@ -1,16 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import {
-  access,
-  chmod,
-  mkdir,
-  mkdtemp,
-  readFile,
-  realpath,
-  rm,
-  stat,
-  symlink,
-  writeFile,
-} from "node:fs/promises";
+import { access, chmod, mkdir, mkdtemp, readFile, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { YapsCli, YapsNoteNotFoundError } from "../src/lib/yaps-cli-core";
@@ -18,11 +7,7 @@ import { YapsCli, YapsNoteNotFoundError } from "../src/lib/yaps-cli-core";
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
-  await Promise.all(
-    temporaryDirectories
-      .splice(0)
-      .map((directory) => rm(directory, { recursive: true, force: true })),
-  );
+  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
 });
 
 describe("YapsCli response contracts", () => {
@@ -42,11 +27,7 @@ describe("YapsCli response contracts", () => {
     const cli = fixtureClient(fixture);
 
     const fetched = await cli.getNote("Inbox/Fetched.md");
-    const created = await cli.createClipboardNote(
-      "Captured thought",
-      "Private clipboard text\n",
-      " Projects / Notes ",
-    );
+    const created = await cli.createClipboardNote("Captured thought", "Private clipboard text\n", " Projects / Notes ");
 
     expect(fetched.path).toBe("Inbox/Fetched.md");
     expect(created.path).toBe("Projects/Notes/Captured thought.md");
@@ -72,14 +53,12 @@ describe("YapsCli response contracts", () => {
     "rejects ambiguous clipboard folder %s before creating a note or temporary file",
     async (folder) => {
       const fixture = await createFixtureCli();
-      await expect(
-        fixtureClient(fixture).createClipboardNote("New note", "Synthetic text", folder),
-      ).rejects.toThrow("without '..' parent segments");
+      await expect(fixtureClient(fixture).createClipboardNote("New note", "Synthetic text", folder)).rejects.toThrow(
+        "without '..' parent segments",
+      );
       expect(await pathExists(fixture.log)).toBe(false);
       expect(await pathExists(fixture.authLog)).toBe(false);
-      expect(await pathExists(join(fixture.directory, "support", "clipboard-captures"))).toBe(
-        false,
-      );
+      expect(await pathExists(join(fixture.directory, "support", "clipboard-captures"))).toBe(false);
     },
   );
 
@@ -269,14 +248,9 @@ touch ${JSON.stringify(sentinel)}
 
   test("never runs the legacy credential-based auth check on older Yaps builds", async () => {
     const fixture = await createFixtureCli();
-    await writeFile(
-      join(fixture.directory, "Yaps.app", "Contents", "Info.plist"),
-      plist("2.3.123"),
-    );
+    await writeFile(join(fixture.directory, "Yaps.app", "Contents", "Info.plist"), plist("2.3.123"));
 
-    await expect(fixtureClient(fixture).getVaultStatus()).rejects.toThrow(
-      "older credential-based account check",
-    );
+    await expect(fixtureClient(fixture).getVaultStatus()).rejects.toThrow("older credential-based account check");
 
     expect(await pathExists(fixture.authLog)).toBe(false);
     expect(await pathExists(fixture.sessionLog)).toBe(false);
@@ -291,9 +265,7 @@ touch ${JSON.stringify(sentinel)}
       supportPath: join(fixture.directory, "support"),
     });
 
-    await expect(cli.getVaultStatus()).rejects.toThrow(
-      "could not verify that its account check is credential-free",
-    );
+    await expect(cli.getVaultStatus()).rejects.toThrow("could not verify that its account check is credential-free");
     expect(await pathExists(fixture.authLog)).toBe(false);
     expect(await pathExists(fixture.sessionLog)).toBe(false);
   });
@@ -314,9 +286,7 @@ touch ${JSON.stringify(sentinel)}
         maxDiscoveryCandidates: 2,
         supportPath: join(fixture.directory, "support"),
       });
-      await expect(cli.getVaultStatus()).rejects.toThrow(
-        "could not verify that its account check is credential-free",
-      );
+      await expect(cli.getVaultStatus()).rejects.toThrow("could not verify that its account check is credential-free");
       expect(await pathExists(fixture.authLog)).toBe(false);
     } finally {
       if (previousPath === undefined) delete process.env.PATH;
@@ -446,9 +416,7 @@ touch ${JSON.stringify(sentinel)}
     const cli = fixtureClient(fixture);
     await writeFile(join(fixture.directory, "invalid-list"), "");
 
-    expect(cli.listNotes()).rejects.toThrow(
-      "Yaps CLI returned an unsupported response. Update Yaps and try again.",
-    );
+    expect(cli.listNotes()).rejects.toThrow("Yaps CLI returned an unsupported response. Update Yaps and try again.");
   });
 
   test("rejects malformed nested search fields instead of accepting partial results", async () => {
@@ -494,9 +462,7 @@ touch ${JSON.stringify(sentinel)}
     await symlink(fixture.vault, linkedVault, "dir");
     await writeFile(join(fixture.directory, "symlinked-status"), "");
 
-    expect(await fixtureClient(fixture).resolveVaultFile("Inbox/Linked-root.md")).toBe(
-      await realpath(note),
-    );
+    expect(await fixtureClient(fixture).resolveVaultFile("Inbox/Linked-root.md")).toBe(await realpath(note));
   });
 });
 

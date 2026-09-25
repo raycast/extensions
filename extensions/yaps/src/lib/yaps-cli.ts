@@ -4,12 +4,7 @@ import type { VaultNote, VaultSearchResult, VaultStatus } from "./types";
 import { selectYapsApplication, YAPS_BUNDLE_ID } from "./yaps-app-core";
 import { YapsCli } from "./yaps-cli-core";
 
-export {
-  fileLabel,
-  YapsCliNotFoundError,
-  YapsCliResponseError,
-  YapsNoteNotFoundError,
-} from "./yaps-cli-core";
+export { fileLabel, YapsCliNotFoundError, YapsCliResponseError, YapsNoteNotFoundError } from "./yaps-cli-core";
 
 let cachedClient: YapsCli | undefined;
 let cachedConfiguredPath: string | undefined;
@@ -30,9 +25,7 @@ function client(): YapsCli {
 
 async function installedYapsCliPaths(): Promise<string[]> {
   try {
-    const applications = (await getApplications()).filter(
-      (application) => application.bundleId === YAPS_BUNDLE_ID,
-    );
+    const applications = (await getApplications()).filter((application) => application.bundleId === YAPS_BUNDLE_ID);
     const application = selectYapsApplication(applications);
     if (!application) {
       return [];
@@ -51,11 +44,7 @@ export async function listNotes(limit = 40, signal?: AbortSignal): Promise<Vault
   return client().listNotes(limit, signal);
 }
 
-export async function searchNotes(
-  query: string,
-  limit = 30,
-  signal?: AbortSignal,
-): Promise<VaultSearchResult> {
+export async function searchNotes(query: string, limit = 30, signal?: AbortSignal): Promise<VaultSearchResult> {
   return client().searchNotes(query, limit, signal);
 }
 
@@ -71,10 +60,6 @@ export async function resolveVaultFile(notePath: string): Promise<string> {
   return client().resolveVaultFile(notePath);
 }
 
-export async function createClipboardNote(
-  title: string,
-  markdown: string,
-  folder: string,
-): Promise<VaultNote> {
+export async function createClipboardNote(title: string, markdown: string, folder: string): Promise<VaultNote> {
   return client().createClipboardNote(title, markdown, folder);
 }

@@ -78,11 +78,7 @@ export function NoteDetail({ path }: NoteDetailProps) {
               shortcut={Keyboard.Shortcut.Common.Open}
               onAction={() => runAction("Could not open Yaps", openYapsWithFallback)}
             />
-            <Action
-              title="Open Extension Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-            />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         ) : undefined
       }
@@ -97,38 +93,21 @@ interface NoteActionsProps {
   includeViewAction?: boolean;
 }
 
-export function NoteActions({
-  path,
-  title,
-  markdown,
-  includeViewAction = false,
-}: NoteActionsProps) {
+export function NoteActions({ path, title, markdown, includeViewAction = false }: NoteActionsProps) {
   return (
     <ActionPanel>
-      {includeViewAction ? (
-        <Action.Push title="View Note" icon={Icon.Eye} target={<NoteDetail path={path} />} />
-      ) : null}
+      {includeViewAction ? <Action.Push title="View Note" icon={Icon.Eye} target={<NoteDetail path={path} />} /> : null}
       <Action
         title="Open Markdown File"
         icon={Icon.Document}
-        onAction={() =>
-          runAction("Could not open the note", async () => open(await resolveVaultFile(path)))
-        }
+        onAction={() => runAction("Could not open the note", async () => open(await resolveVaultFile(path)))}
       />
       <Action
         title="Show in Finder"
         icon={Icon.Finder}
-        onAction={() =>
-          runAction("Could not reveal the note", async () =>
-            showInFinder(await resolveVaultFile(path)),
-          )
-        }
+        onAction={() => runAction("Could not reveal the note", async () => showInFinder(await resolveVaultFile(path)))}
       />
-      <Action.CopyToClipboard
-        title="Copy Wikilink"
-        content={`[[${title}]]`}
-        shortcut={Keyboard.Shortcut.Common.Copy}
-      />
+      <Action.CopyToClipboard title="Copy Wikilink" content={`[[${title}]]`} shortcut={Keyboard.Shortcut.Common.Copy} />
       <Action
         title="Copy Markdown"
         icon={Icon.Clipboard}
@@ -145,11 +124,7 @@ export function NoteActions({
         icon={Icon.AppWindow}
         onAction={() => runAction("Could not open Yaps", openYapsWithFallback)}
       />
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Gear}
-        onAction={openExtensionPreferences}
-      />
+      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel>
   );
 }

@@ -1,10 +1,4 @@
-import {
-  Clipboard,
-  getPreferenceValues,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Clipboard, getPreferenceValues, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { runAction } from "./lib/action";
 import { clipboardMarkdown, titleFromClipboard } from "./lib/format";
 import { openYapsWithFallback } from "./lib/yaps-app";

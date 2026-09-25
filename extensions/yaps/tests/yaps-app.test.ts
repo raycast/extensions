@@ -13,9 +13,7 @@ describe("selectYapsApplication", () => {
     ];
 
     expect(selectYapsApplication(applications)?.path).toBe("/Users/test/Applications/Yaps.app");
-    expect(selectYapsApplication([...applications].reverse())?.path).toBe(
-      "/Users/test/Applications/Yaps.app",
-    );
+    expect(selectYapsApplication([...applications].reverse())?.path).toBe("/Users/test/Applications/Yaps.app");
   });
 
   test("falls back to an exact application name for older builds", () => {

@@ -1,10 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  clipboardMarkdown,
-  displaySource,
-  previewMarkdown,
-  titleFromClipboard,
-} from "../src/lib/format";
+import { clipboardMarkdown, displaySource, previewMarkdown, titleFromClipboard } from "../src/lib/format";
 
 describe("titleFromClipboard", () => {
   test("uses the first non-empty line and removes lightweight Markdown", () => {
@@ -12,9 +7,7 @@ describe("titleFromClipboard", () => {
   });
 
   test("turns a lone URL into a useful local capture title", () => {
-    expect(titleFromClipboard("https://www.example.com/article?q=1")).toBe(
-      "Saved link · example.com",
-    );
+    expect(titleFromClipboard("https://www.example.com/article?q=1")).toBe("Saved link · example.com");
   });
 
   test("caps titles without cutting into an extra character", () => {
