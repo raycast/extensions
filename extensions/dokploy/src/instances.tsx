@@ -13,13 +13,14 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import Projects from "./projects";
 import Docker from "./docker";
 import Users from "./users";
 import Destinations from "./destinations";
 
 export interface Instance {
-  /** Absent on instances stored before Edit/Delete existed - never backfilled in bulk, see `instanceId`. */
+  /** Absent only until `Instances()`'s own one-time backfill runs - see `instanceId`. */
   id?: string;
   key: string;
   url: string;
@@ -43,8 +44,14 @@ export function tokenForInstance(instance: Instance): CachedToken {
     },
   };
 }
-/** `key` (the API secret) is the only identifier instances stored before this had - fall back to it. */
-function instanceId(instance: Instance): string {
+/**
+ * `key` (the API secret) is the only identifier instances stored before `id` existed had - fall
+ * back to it. Not guaranteed unique (nothing stopped two instances sharing a key before `id`
+ * existed), unlike `id` itself - `Instances()`'s own one-time backfill (below) is what makes this
+ * safe to treat as unique in practice for anything that needs a real key, like `List.Dropdown`
+ * values.
+ */
+export function instanceId(instance: Instance): string {
   return instance.id ?? instance.key;
 }
 /** Whether `token` (the cached active connection) is currently pointed at `instance`. */
@@ -61,12 +68,16 @@ export default function Instances() {
 
   const { isLoading, value: instances = [], setValue } = useLocalStorage<Instance[]>("instances");
 
-  function onSelectionChange(key: string | null) {
-    if (!key) return;
-    const instance = instances.find((i) => instanceId(i) === key);
-    if (!instance) return;
-    setToken(tokenForInstance(instance));
-  }
+  // One-time backfill for instances saved before `id` existed. `instanceId()`'s `?? key` fallback
+  // was safe enough for Edit/Delete (reference equality there doesn't care whether two records
+  // resolve to the same fallback id), but the instance-switcher dropdown's `value` must actually be
+  // unique - two legacy records sharing a key would otherwise be indistinguishable to it, making
+  // the second one unreachable. Runs once per record that needs it, then never again.
+  useEffect(() => {
+    if (!isLoading && instances.some((i) => !i.id)) {
+      setValue(instances.map((i) => (i.id ? i : { ...i, id: crypto.randomUUID() })));
+    }
+  }, [isLoading, instances, setValue]);
 
   async function deleteInstance(instance: Instance) {
     const wasActive = isActiveInstance(instance, token);
@@ -95,7 +106,7 @@ export default function Instances() {
   }
 
   return (
-    <List onSelectionChange={onSelectionChange}>
+    <List>
       {!isLoading && !instances.length ? (
         <List.EmptyView
           icon="extension-icon.png"
@@ -118,13 +129,36 @@ export default function Instances() {
             icon={Icon.Key}
             title={instance.name}
             subtitle={instance.url}
+            accessories={[
+              isActiveInstance(instance, token) ? { icon: Icon.CheckCircle, tooltip: "Active instance" } : {},
+            ]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Folder} title="Projects" target={<Projects />} />
-                <Action.Push icon="blocks.svg" title="Docker" target={<Docker />} />
+                <Action.Push
+                  icon={Icon.Folder}
+                  title="Projects"
+                  target={<Projects key={instanceId(instance)} instance={instance} />}
+                  onPush={() => setToken(tokenForInstance(instance))}
+                />
+                <Action.Push
+                  icon="blocks.svg"
+                  title="Docker"
+                  target={<Docker key={instanceId(instance)} instance={instance} />}
+                  onPush={() => setToken(tokenForInstance(instance))}
+                />
                 <ActionPanel.Section title="Settings">
-                  <Action.Push icon={Icon.Coin} title="S3 Destinations" target={<Destinations />} />
-                  <Action.Push icon={Icon.TwoPeople} title="Users" target={<Users />} />
+                  <Action.Push
+                    icon={Icon.Coin}
+                    title="S3 Destinations"
+                    target={<Destinations key={instanceId(instance)} instance={instance} />}
+                    onPush={() => setToken(tokenForInstance(instance))}
+                  />
+                  <Action.Push
+                    icon={Icon.TwoPeople}
+                    title="Users"
+                    target={<Users key={instanceId(instance)} instance={instance} />}
+                    onPush={() => setToken(tokenForInstance(instance))}
+                  />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.Push
@@ -271,4 +305,49 @@ function InstanceForm({
 export function AddInstance() {
   const { value = [], setValue } = useLocalStorage<Instance[]>("instances");
   return <InstanceForm instances={value} setInstances={setValue} onSaved={popToRoot} />;
+}
+
+/**
+ * Scopes a screen to `initial` (the instance it was pushed for) while still letting the user
+ * switch to a different configured instance without leaving the screen, via the returned
+ * `dropdown`. `instance` is always derived fresh from `initial` unless overridden via the
+ * dropdown - never seeded into local state, so there's nothing to fall out of sync with the prop.
+ * The cached token is updated on a switch too (best-effort), for anything pushed *further* from
+ * this screen that isn't part of this PR's scope and still relies on ambient `useToken()`.
+ */
+export function useInstanceScope(initial: Instance) {
+  const [, setToken] = useCachedState<CachedToken>("token", { url: "", headers: {} });
+  const { value: instances = [] } = useLocalStorage<Instance[]>("instances");
+  const [override, setOverride] = useState<Instance | null>(null);
+  const instance = override ?? initial;
+
+  // `List.Dropdown` fires its own `onChange` once, unprompted, on mount - with the first
+  // configured instance's id, not whatever `value` it was given. Confirmed live with a logging
+  // probe; nothing here ever calls it and `storeValue` is never set. Counting instead of gating
+  // on mount timing (a `useEffect`-flipped ref didn't reliably beat it) sidesteps the race: this
+  // dropdown's first-ever `onChange` is always that synthetic call, so only later ones are real.
+  const onChangeCount = useRef(0);
+
+  const dropdown =
+    instances.length < 2 ? null : (
+      <List.Dropdown
+        tooltip="Instance"
+        value={instanceId(instance)}
+        onChange={(id) => {
+          onChangeCount.current += 1;
+          if (onChangeCount.current === 1) return;
+          const next = instances.find((i) => instanceId(i) === id);
+          if (next) {
+            setOverride(next);
+            setToken(tokenForInstance(next));
+          }
+        }}
+      >
+        {instances.map((i) => (
+          <List.Dropdown.Item key={instanceId(i)} value={instanceId(i)} title={i.name} icon={Icon.Key} />
+        ))}
+      </List.Dropdown>
+    );
+
+  return { ...tokenForInstance(instance), instance, dropdown };
 }

@@ -1,13 +1,13 @@
 import Services from "./services";
-import { useToken } from "./instances";
+import { type Instance, useInstanceScope, tokenForInstance } from "./instances";
 import Environments from "./environments";
 import { ErrorResult, Project, type ModernProject } from "./interfaces";
 import { FormValidation, showFailureToast, useFetch, useForm } from "@raycast/utils";
 import { getServiceScopeForProject, getTotalServices, isModernProject } from "./utils";
 import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Alert, confirmAlert, popToRoot } from "@raycast/api";
 
-export default function Projects() {
-  const { url, headers } = useToken();
+export default function Projects({ instance: initial }: { instance: Instance }) {
+  const { url, headers, instance, dropdown } = useInstanceScope(initial);
 
   const {
     isLoading,
@@ -59,14 +59,14 @@ export default function Projects() {
   }
 
   return (
-    <List navigationTitle="Projects" isLoading={isLoading}>
+    <List navigationTitle="Projects" isLoading={isLoading} searchBarAccessory={dropdown}>
       {!isLoading && !projects.length ? (
         <List.EmptyView
           icon="folder-input.svg"
           title="No projects found"
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Plus} title="Create Project" target={<CreateService />} />
+              <Action.Push icon={Icon.Plus} title="Create Project" target={<CreateService instance={instance} />} />
             </ActionPanel>
           }
         />
@@ -92,18 +92,20 @@ export default function Projects() {
                     <Action.Push
                       icon="folder-input.svg"
                       title="Services"
-                      target={<Services environment={serviceScope} revalidate={revalidate} />}
+                      target={<Services environment={serviceScope} revalidate={revalidate} instance={instance} />}
                     />
                   ) : (
                     environmentsProject && (
                       <Action.Push
                         icon="folder-input.svg"
                         title="Environments"
-                        target={<Environments project={environmentsProject} revalidate={revalidate} />}
+                        target={
+                          <Environments project={environmentsProject} revalidate={revalidate} instance={instance} />
+                        }
                       />
                     )
                   )}
-                  <Action.Push icon={Icon.Plus} title="Create Project" target={<CreateService />} />
+                  <Action.Push icon={Icon.Plus} title="Create Project" target={<CreateService instance={instance} />} />
                   <Action
                     icon={Icon.Trash}
                     title="Delete"
@@ -120,8 +122,8 @@ export default function Projects() {
   );
 }
 
-function CreateService() {
-  const { url, headers } = useToken();
+function CreateService({ instance }: { instance: Instance }) {
+  const { url, headers } = tokenForInstance(instance);
 
   interface FormValues {
     name: string;
