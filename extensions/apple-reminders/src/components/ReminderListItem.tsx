@@ -11,6 +11,7 @@ import {
   isFullDay,
   isOverdue,
 } from "../helpers";
+import { formatEarlyReminder } from "../helpers/early-reminder";
 import { Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
@@ -53,6 +54,13 @@ export default function ReminderListItem({
     accessories.push({
       icon: Icon.Repeat,
       tooltip: reminder.recurrenceRule,
+    });
+  }
+
+  if (reminder.earlyReminder && reminder.earlyReminder > 0) {
+    accessories.push({
+      icon: Icon.Bell,
+      tooltip: `Early Reminder: ${formatEarlyReminder(reminder.earlyReminder)}`,
     });
   }
 
