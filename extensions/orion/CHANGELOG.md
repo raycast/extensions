@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-25
+
+- Stop the Command Bar's loading indicator from flickering on every keystroke. History and search-suggestion lookups re-run as you type and briefly report loading, but by the time either can be true, tabs/bookmarks/profiles have already resolved, so there was no genuine "nothing to show yet" state being reflected - just a distracting flash.
+
 ## [Command Bar] - 2026-09-24
 
 - Always return to Raycast's root search immediately after opening a Tab, Bookmark, Reading List item, History entry, or address from the Command Bar, regardless of the "Pop to Root Search" preference. Previously, a delayed preference could leave the Command Bar's background process lingering instead of resetting, so reopening it soon after could show a tab list that had not picked up a change made directly in Orion in the meantime.
