@@ -1,6 +1,6 @@
 # TextArray Changelog
 
-## [More Tools, Icons and Actions] - {PR_MERGE_DATE}
+## [More Tools, Icons and Actions] - 2026-09-25
 
 - The catalog grows from 540+ to 650+ tools: every tool published on textarray.com up to 2026-09-24.
 - Every tool shows its own icon, the same glyph it has on textarray.com.
