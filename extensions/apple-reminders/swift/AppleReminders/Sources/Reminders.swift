@@ -177,19 +177,23 @@ struct Recurrence: Decodable {
 
   if let dueDateString = newReminder.dueDate {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
-      reminder.dueDateComponents = Calendar.current.dateComponents(
+      let components = Calendar.current.dateComponents(
         [.year, .month, .day, .hour, .minute, .second],
         from: dueDate
       )
+      reminder.dueDateComponents = components
+      reminder.startDateComponents = components
       reminder.addAlarm(EKAlarm(absoluteDate: dueDate))
       if let earlyReminder = newReminder.earlyReminder, earlyReminder > 0 {
         reminder.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
       }
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
-      reminder.dueDateComponents = Calendar.current.dateComponents(
+      let components = Calendar.current.dateComponents(
         [.year, .month, .day],
         from: dueDate
       )
+      reminder.dueDateComponents = components
+      reminder.startDateComponents = components
       if let earlyReminder = newReminder.earlyReminder, earlyReminder > 0 {
         reminder.addAlarm(EKAlarm(relativeOffset: -earlyReminder))
       }
@@ -401,25 +405,30 @@ struct SetDueDatePayload: Decodable {
 
   if let dueDateString = payload.dueDate {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
-      item.dueDateComponents = Calendar.current.dateComponents(
+      let components = Calendar.current.dateComponents(
         [.year, .month, .day, .hour, .minute, .second],
         from: dueDate
       )
+      item.dueDateComponents = components
+      item.startDateComponents = components
       item.addAlarm(EKAlarm(absoluteDate: dueDate))
       if let earlyOffset = earlyOffset, earlyOffset > 0 {
         item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
       }
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
-      item.dueDateComponents = Calendar.current.dateComponents(
+      let components = Calendar.current.dateComponents(
         [.year, .month, .day],
         from: dueDate
       )
+      item.dueDateComponents = components
+      item.startDateComponents = components
       if let earlyOffset = earlyOffset, earlyOffset > 0 {
         item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
       }
     }
   } else {
     item.dueDateComponents = nil
+    item.startDateComponents = nil
   }
 
   do {
@@ -642,19 +651,23 @@ struct UpdateReminderPayload: Decodable {
 
     if let dueDateString = payload.dueDate, !dueDateString.isEmpty {
       if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
-        item.dueDateComponents = Calendar.current.dateComponents(
+        let components = Calendar.current.dateComponents(
           [.year, .month, .day, .hour, .minute, .second],
           from: dueDate
         )
+        item.dueDateComponents = components
+        item.startDateComponents = components
         item.addAlarm(EKAlarm(absoluteDate: dueDate))
         if let earlyOffset = earlyOffset, earlyOffset > 0 {
           item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
         }
       } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
-        item.dueDateComponents = Calendar.current.dateComponents(
+        let components = Calendar.current.dateComponents(
           [.year, .month, .day],
           from: dueDate
         )
+        item.dueDateComponents = components
+        item.startDateComponents = components
         if let earlyOffset = earlyOffset, earlyOffset > 0 {
           item.addAlarm(EKAlarm(relativeOffset: -earlyOffset))
         }
@@ -662,6 +675,7 @@ struct UpdateReminderPayload: Decodable {
     } else {
       // If dueDate is an empty string, remove the due date
       item.dueDateComponents = nil
+      item.startDateComponents = nil
     }
   } else if let earlyReminder = payload.earlyReminder {
     if let alarms = item.alarms {
