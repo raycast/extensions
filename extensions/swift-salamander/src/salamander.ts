@@ -27,17 +27,11 @@ export async function runCommand(task: () => Promise<void>): Promise<void> {
   }
 }
 
-export async function send(
-  verb: string,
-  fields: ReadonlyArray<readonly [string, string]> = [],
-): Promise<void> {
+export async function send(verb: string, fields: ReadonlyArray<readonly [string, string]> = []): Promise<void> {
   await open(link(verb, fields), "ch.raciborski.swiftsalamander");
   await showHUD("Sent to Swift Salamander");
 }
 
 export function openFields(paths: string[], target: Target = preferredPathTarget()) {
-  return [
-    ...paths.map((path) => ["path", normalizeLocalPath(path)] as const),
-    ["target", target] as const,
-  ];
+  return [...paths.map((path) => ["path", normalizeLocalPath(path)] as const), ["target", target] as const];
 }

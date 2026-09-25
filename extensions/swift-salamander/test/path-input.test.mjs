@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { finderPathInput, normalizeLocalPath } from "../src/path-input.ts";
+import { clipboardPathInput, finderPathInput, normalizeLocalPath } from "../src/path-input.ts";
 
 test("a tilde opens the home directory", () => {
   assert.equal(normalizeLocalPath("~"), homedir());
@@ -16,6 +16,13 @@ test("a Finder path round-trips without trimming whitespace", () => {
   const path = "/tmp/ report ";
   assert.equal(normalizeLocalPath(finderPathInput(path)), path);
 });
+
+for (const suffix of ["\n", "\r\n"]) {
+  test(`clipboard path drops one trailing line ending: ${JSON.stringify(suffix)}`, () => {
+    assert.equal(normalizeLocalPath(clipboardPathInput(`/tmp/report ${suffix}`)), "/tmp/report ");
+    assert.equal(clipboardPathInput(`/tmp/report${suffix}${suffix}`), `/tmp/report${suffix}`);
+  });
+}
 
 for (const path of ["/tmp/report ", "/tmp/ report", "/tmp/ report ", "~/Downloads/report "]) {
   test(`raw path preserves filename spaces: ${JSON.stringify(path)}`, () => {

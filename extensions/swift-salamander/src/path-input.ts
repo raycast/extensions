@@ -6,6 +6,10 @@ export function finderPathInput(path: string): string {
   return pathToFileURL(path).href;
 }
 
+export function clipboardPathInput(text: string): string {
+  return text.replace(/\r?\n$/, "");
+}
+
 export function normalizeLocalPath(input: string): string {
   const value = input;
   if (!value.trim() || value.includes("\n") || value.includes("\0")) {

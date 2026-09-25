@@ -14,8 +14,8 @@ macOS.
 - **Open Path** accepts one path, including `~`, `~/Downloads`, an absolute
   path, or a local `file:` URL.
 - **Open Clipboard Path** opens the local path currently on the clipboard.
-- **Open Finder Selection** opens up to ten selected items from one folder.
-  Run it while Finder is the frontmost app.
+- **Open Finder Selection** opens every selected item in Finder. Run it while
+  Finder is the frontmost app.
 - **Open Swift Salamander** brings the app to the front.
 - **Open Saved Workspace** applies an existing workspace by its exact name.
 
