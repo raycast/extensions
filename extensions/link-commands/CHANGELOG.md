@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Scope on the Subtitle] - {PR_MERGE_DATE}
+## [Scope on the Subtitle] - 2026-09-25
 
 ### Changed
 
