@@ -20,10 +20,44 @@ export function getPlatformTitle(value: string): string {
   return isAdapter(value) ? platformTitles[value] : value;
 }
 
+const MUSIC_HOSTS = [
+  "spotify.com",
+  "spotify.link",
+  "youtube.com",
+  "youtu.be",
+  "music.apple.com",
+  "itunes.apple.com",
+  "deezer.com",
+  "dzr.page.link",
+  "soundcloud.com",
+  "tidal.com",
+  "qobuz.com",
+  "bandcamp.com",
+  "pandora.com",
+];
+
 export function isLinkValid(value: string): boolean {
   try {
     const url = new URL(value.trim());
     return ["https:", "http:"].includes(url.protocol) && !!url.hostname && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function matchesHost(hostname: string, host: string): boolean {
+  const normalized = hostname.toLowerCase().replace(/\.$/, "");
+  return normalized === host || normalized.endsWith(`.${host}`);
+}
+
+/** Clipboard auto-conversion only. User-typed links and service responses use isLinkValid. */
+export function isKnownMusicLink(value: string, instanceUrl?: string): boolean {
+  if (!isLinkValid(value)) return false;
+  const { hostname } = new URL(value.trim());
+  if (MUSIC_HOSTS.some((host) => matchesHost(hostname, host))) return true;
+  if (!instanceUrl) return false;
+  try {
+    return matchesHost(hostname, new URL(instanceUrl).hostname);
   } catch {
     return false;
   }

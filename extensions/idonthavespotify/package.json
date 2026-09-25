@@ -108,7 +108,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.5.1",
-    "@raycast/utils": "^2.3.1",
     "play-sound": "^1.1.6"
   },
   "devDependencies": {
@@ -118,11 +117,11 @@
     "@types/react": "19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.70.1",
     "@typescript-eslint/parser": "^8.70.1",
+    "esbuild": "^0.28.2",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.9",
-    "typescript": "^6.0.3",
-    "esbuild": "^0.28.2"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -20,7 +20,7 @@ import { getSiteUrl } from "./constants";
 import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 import { apiCall, errorMessage as getErrorMessage, isAbortError } from "./shared/conversion";
-import { getPlatformTitle, getUniversalUrl, isLinkValid } from "./shared/links";
+import { getPlatformTitle, getUniversalUrl, isKnownMusicLink, isLinkValid } from "./shared/links";
 
 const searchResultTypesTitles: Record<MetadataType, string> = {
   [MetadataType.Song]: "Song",
@@ -84,7 +84,13 @@ export default function Command() {
           return;
         }
 
-        if (clipboardText && isLinkValid(clipboardText)) {
+        let instanceUrl: string | undefined;
+        try {
+          instanceUrl = getSiteUrl();
+        } catch {
+          // An invalid instance is reported when the user submits a link.
+        }
+        if (clipboardText && isKnownMusicLink(clipboardText, instanceUrl)) {
           setState({ searchText: clipboardText, searchResult: null });
           await searchLinks(clipboardText);
         }

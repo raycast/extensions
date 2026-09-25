@@ -8,7 +8,8 @@
 - Handle complete universal URLs, missing artwork, and unavailable matches returned by the service.
 - Show conversion progress, request timeouts, match verification, and actionable authentication errors.
 - Expire cached results after one hour and keep them separate between instances.
-- Fix the YouTube Music command filename to match its command ID.
+- Convert clipboard links automatically only when they come from a supported music service or the configured instance.
+- Fix the YouTube Music command filename to match its command ID (`toYouTube.ts`).
 - Document the self-hosted instance requirement for direct conversion from Raycast.
 
 ## [Self-Hosted Instances & Error Handling] - 2026-08-03

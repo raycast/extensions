@@ -88,6 +88,19 @@ test("accepts trimmed HTTP links and rejects unsafe or invalid URLs", () => {
   }
 });
 
+test("automatic conversion is limited to known music hosts and the configured instance", () => {
+  assert.equal(api.isKnownMusicLink(source, "https://idhs.example.com"), true);
+  assert.equal(api.isKnownMusicLink("https://artist.bandcamp.com/track/example"), true);
+  assert.equal(api.isKnownMusicLink("https://idhs.example.com/?id=example", "https://idhs.example.com"), true);
+  for (const value of [
+    "http://localhost/callback?code=secret",
+    "https://example.com/song",
+    "https://evil.spotify.com.attacker.test/track",
+  ]) {
+    assert.equal(api.isKnownMusicLink(value, "https://idhs.example.com"), false);
+  }
+});
+
 test("supports complete universal URLs and encoded legacy IDs", () => {
   assert.equal(api.getUniversalUrl(fixture().universalLink, "https://idhs.example.com"), fixture().universalLink);
   const url = new URL(api.getUniversalUrl("a+b/c=&d", "https://idhs.example.com/base"));
@@ -221,6 +234,15 @@ test("clipboard conversion copies an available destination and updates progress"
   await api.searchToClipboard("appleMusic");
   assert.equal(globalThis.testCopied, destination);
   assert.equal(globalThis.testToast.style, "success");
+});
+
+test("clipboard conversion does not send links from unknown hosts", async () => {
+  const request = respond();
+  globalThis.testClipboard = "http://localhost/callback?code=secret";
+  await api.searchToClipboard("appleMusic");
+  assert.equal(request.mock.callCount(), 0);
+  assert.equal(globalThis.testCopied, undefined);
+  assert.match(globalThis.testToast.message, /supported music service/);
 });
 
 test("clipboard failures preserve the clipboard", async () => {
