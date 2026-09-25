@@ -1,6 +1,6 @@
 # Sunsama Changelog
 
-## [Fix Store Publish] - {PR_MERGE_DATE}
+## [Fix Store Publish] - 2026-09-25
 
 - Fixed the store build failing on the AI tools' subtask lists. The AI now
   sends subtasks one per line instead of as a list. Nothing changes for you.
