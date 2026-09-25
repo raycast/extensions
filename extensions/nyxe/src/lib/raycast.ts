@@ -14,16 +14,10 @@ import {
 } from "@raycast/api";
 import { createClient, DEFAULT_API_BASE_URL, normalizeBaseUrl, type NyxeClient } from "./api";
 import { describeError } from "./errors";
-import { chooseOpenTarget, DEFAULT_WEB_URL, NYXE_DESKTOP_BUNDLE_ID, type OpenInPreference } from "./open";
+import { chooseOpenTarget, DEFAULT_WEB_URL, NYXE_DESKTOP_BUNDLE_ID } from "./open";
 
-interface ExtensionPreferences {
-  apiToken: string;
-  openIn?: OpenInPreference;
-  apiBaseUrl?: string;
-}
-
-function preferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
+function preferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function nyxe(): NyxeClient {
