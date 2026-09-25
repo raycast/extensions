@@ -35,7 +35,7 @@ Search Z-Library and download books directly from Raycast.
 
 ## Usage
 
-1. Open Raycast (Ctrl+Space; ⌘+Space on macOS)
+1. Open Raycast (Alt+Space on Windows; ⌘+Space on macOS)
 2. Type "Search Books"
 3. Enter a search query (title, author, ISBN, etc.)
 4. Press ⏎ to download, or use other actions:
