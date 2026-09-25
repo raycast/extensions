@@ -14,7 +14,22 @@
       "name": "toggle",
       "title": "Toggle Menu Bar",
       "description": "Toggle auto hide/show menu bar between two options of your choice.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "select-menu-bar-mode",
+      "title": "Set Menu Bar Mode",
+      "description": "Choose one of the four macOS menu bar visibility modes.",
+      "mode": "view",
+      "keywords": [
+        "menu",
+        "bar",
+        "fullscreen",
+        "auto-hide",
+        "select",
+        "choose"
+      ]
     }
   ],
   "preferences": [
@@ -36,11 +51,11 @@
         },
         {
           "title": "On Desktop Only",
-          "value": "ondesk"
+          "value": "desktop-only"
         },
         {
           "title": "In Full Screen Only",
-          "value": "infull"
+          "value": "fullscreen-only"
         },
         {
           "title": "Never",
@@ -62,11 +77,11 @@
         },
         {
           "title": "On Desktop Only",
-          "value": "ondesk"
+          "value": "desktop-only"
         },
         {
           "title": "In Full Screen Only",
-          "value": "infull"
+          "value": "fullscreen-only"
         },
         {
           "title": "Never",
@@ -76,29 +91,35 @@
       "type": "dropdown",
       "description": "Select \"Automatically hide and show the menu bar\" option.",
       "required": true,
-      "default": "infull"
+      "default": "fullscreen-only"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.1",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.104.24"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "19.2.18",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
+    "build:native": "xcrun clang -fobjc-arc -std=c11 -Wall -Wextra -Werror -O2 -arch arm64 -arch x86_64 -mmacosx-version-min=13.0 -framework Foundation native/menu-bar-auto-hide-native.m -o assets/menu-bar-auto-hide-native && codesign --force --sign - assets/menu-bar-auto-hide-native",
+    "build": "npm run build:native && ray build -e dist",
+    "dev": "npm run build:native && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "prepublishOnly": "echo 'Use npm run publish for the Raycast Store' && exit 1",
+    "publish": "npm run build:native && npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs",
+    "typecheck": "tsc --noEmit"
   },
   "platforms": [
     "macOS"
+  ],
+  "contributors": [
+    "0xAdriaTorralba"
   ]
 }

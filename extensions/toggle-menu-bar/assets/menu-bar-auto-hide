@@ -1,0 +1,235 @@
+#!/bin/bash
+
+set -euo pipefail
+
+readonly CONTROL_CENTER_DOMAIN="com.apple.controlcenter"
+readonly CONTROL_CENTER_KEY="AutoHideMenuBarOption"
+readonly FULL_SCREEN_KEY="AppleMenuBarVisibleInFullscreen"
+readonly DESKTOP_KEY="_HIHideMenuBar"
+
+# Mutations are serialized inside the native helper: it holds an flock(2)
+# across the whole read, target choice, and pulse, so overlapping invocations
+# can never observe a transient pulse value. The wrapper only normalizes
+# arguments and forwards each mutation as a single native call; `status`
+# stays a lock-free read.
+
+normalize_mode() {
+  case "${1:-}" in
+    always | desktop-only | fullscreen-only | never)
+      printf '%s\n' "$1"
+      ;;
+    *)
+      printf 'Unknown mode: %s\n' "${1:-<empty>}" >&2
+      return 2
+      ;;
+  esac
+}
+
+mode_label() {
+  case "$1" in
+    always) printf 'Always\n' ;;
+    desktop-only) printf 'On Desktop Only\n' ;;
+    fullscreen-only) printf 'In Full Screen Only\n' ;;
+    never) printf 'Never\n' ;;
+    *) return 2 ;;
+  esac
+}
+
+mode_option() {
+  case "$1" in
+    always) printf '0\n' ;;
+    desktop-only) printf '1\n' ;;
+    fullscreen-only) printf '2\n' ;;
+    never) printf '3\n' ;;
+    *) return 2 ;;
+  esac
+}
+
+mode_from_option() {
+  case "$1" in
+    0) printf 'always\n' ;;
+    1) printf 'desktop-only\n' ;;
+    2) printf 'fullscreen-only\n' ;;
+    3) printf 'never\n' ;;
+    *) return 2 ;;
+  esac
+}
+
+read_preference_bool() {
+  local key="$1"
+  local value
+
+  if ! value=$(/usr/bin/defaults read -g "$key" 2>/dev/null); then
+    return 1
+  fi
+
+  case "$value" in
+    1 | true | TRUE | yes | YES) printf '1\n' ;;
+    0 | false | FALSE | no | NO) printf '0\n' ;;
+    *)
+      printf 'Unexpected value for %s: %s\n' "$key" "$value" >&2
+      return 1
+      ;;
+  esac
+}
+
+current_mode_from_global_preferences() {
+  local full_screen_visible
+  local desktop_hidden
+
+  full_screen_visible=$(read_preference_bool "$FULL_SCREEN_KEY")
+  desktop_hidden=$(read_preference_bool "$DESKTOP_KEY")
+
+  case "${full_screen_visible}${desktop_hidden}" in
+    01) printf 'always\n' ;;
+    11) printf 'desktop-only\n' ;;
+    00) printf 'fullscreen-only\n' ;;
+    10) printf 'never\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+current_mode() {
+  local global_mode
+  local option
+
+  # These are the preferences macOS actually enforces. The Control Center key
+  # below is only the popup's cached selection and can briefly lag behind.
+  if global_mode=$(current_mode_from_global_preferences); then
+    printf '%s\n' "$global_mode"
+    return
+  fi
+
+  if option=$(/usr/bin/defaults read "$CONTROL_CENTER_DOMAIN" "$CONTROL_CENTER_KEY" 2>/dev/null); then
+    case "$option" in
+      0 | 1 | 2 | 3)
+        mode_from_option "$option"
+        return
+        ;;
+    esac
+  fi
+
+  printf 'Could not determine the current menu bar mode.\n' >&2
+  return 1
+}
+
+apply_preferences() {
+  local helper_dir
+  local native_helper
+
+  helper_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  native_helper="$helper_dir/menu-bar-auto-hide-native"
+
+  if [[ ! -x "$native_helper" ]]; then
+    printf 'Native menu bar helper is missing or not executable.\n' >&2
+    return 1
+  fi
+
+  "$native_helper" "$@"
+}
+
+print_applied_mode() {
+  local result="$1"
+  local applied_option
+  local applied_mode
+
+  case "$result" in
+    option=0 | option=1 | option=2 | option=3)
+      applied_option=${result#option=}
+      ;;
+    *)
+      printf 'Native menu bar helper returned an invalid result.\n' >&2
+      return 1
+      ;;
+  esac
+
+  applied_mode=$(mode_from_option "$applied_option")
+
+  printf 'Menu bar auto-hide: %s\n' "$(mode_label "$applied_mode")"
+}
+
+set_mode() {
+  local mode
+  local option
+  local result
+
+  mode=$(normalize_mode "$1")
+  option=$(mode_option "$mode")
+
+  if ! result=$(apply_preferences set "$option"); then
+    return 1
+  fi
+
+  if [[ "${result#option=}" != "$option" ]]; then
+    printf 'macOS did not retain the requested menu bar mode.\n' >&2
+    return 1
+  fi
+
+  print_applied_mode "$result"
+}
+
+toggle_modes() {
+  local first_mode
+  local second_mode
+  local first_option
+  local second_option
+  local result
+
+  first_mode=$(normalize_mode "$1")
+  second_mode=$(normalize_mode "$2")
+  first_option=$(mode_option "$first_mode")
+  second_option=$(mode_option "$second_mode")
+
+  # A single native call: the helper reads the current mode, chooses the
+  # target, and pulses while holding its lock, so no transient value can
+  # leak into another invocation's choice.
+  if ! result=$(apply_preferences toggle "$first_option" "$second_option"); then
+    return 1
+  fi
+
+  print_applied_mode "$result"
+}
+
+usage() {
+  printf '%s\n' \
+    'Usage:' \
+    '  menu-bar-auto-hide status' \
+    '  menu-bar-auto-hide set MODE' \
+    '  menu-bar-auto-hide toggle MODE_A MODE_B' \
+    '' \
+    'Modes: always, desktop-only, fullscreen-only, never'
+}
+
+command_name="${1:-}"
+
+case "$command_name" in
+  status)
+    if [[ $# -ne 1 ]]; then
+      usage >&2
+      exit 2
+    fi
+    mode=$(current_mode)
+    printf 'Menu bar auto-hide: %s\n' "$(mode_label "$mode")"
+    ;;
+  set)
+    if [[ $# -ne 2 ]]; then
+      usage >&2
+      exit 2
+    fi
+    set_mode "$2"
+    ;;
+  toggle)
+    if [[ $# -ne 3 ]]; then
+      usage >&2
+      exit 2
+    fi
+    toggle_modes "$2" "$3"
+    ;;
+  help | -h | --help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
