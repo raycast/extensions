@@ -352,7 +352,14 @@ export default function Command() {
     LIMITS.history,
   );
   const address = isWebAddress(query) ? normalizeWebAddress(query) : undefined;
-  const automaticTarget = topHit ? TOP_HIT_ITEM_ID : address ? OPEN_ADDRESS_ITEM_ID : undefined;
+  // Identify each row by its destination, not just its section, so a Top Hit
+  // or address that changes to a genuinely different destination is treated
+  // as a new target - even though it stays in the same section - and gets
+  // the isolation handoff below instead of silently reusing Raycast's
+  // existing selection for what it now looks like might be a stale row.
+  const topHitItemId = topHit ? `${TOP_HIT_ITEM_ID}\u0000${topHit.key}` : undefined;
+  const openAddressItemId = address ? `${OPEN_ADDRESS_ITEM_ID}\u0000${address}` : undefined;
+  const automaticTarget = topHitItemId ?? openAddressItemId;
 
   // Keep selection controlled while the local sources resolve. A session lasts
   // for one query/profile pair: it auto-selects a Top Hit until the user
@@ -487,11 +494,11 @@ export default function Command() {
         />
       }
     >
-      {topHit && (!isHandingOffAutomaticTarget || automaticTarget === TOP_HIT_ITEM_ID) && (
+      {topHit && (!isHandingOffAutomaticTarget || automaticTarget === topHitItemId) && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
             <TabListItem
-              id={TOP_HIT_ITEM_ID}
+              id={topHitItemId}
               tab={topHit.tab}
               refresh={refresh}
               closeLaunchers
@@ -499,15 +506,15 @@ export default function Command() {
               onActivate={markTabActive}
             />
           ) : (
-            <UrlListItem id={TOP_HIT_ITEM_ID} item={topHit.item} accessory={topHit.source} />
+            <UrlListItem id={topHitItemId} item={topHit.item} accessory={topHit.source} />
           )}
         </List.Section>
       )}
 
-      {address && (!isHandingOffAutomaticTarget || automaticTarget === OPEN_ADDRESS_ITEM_ID) && (
+      {address && (!isHandingOffAutomaticTarget || automaticTarget === openAddressItemId) && (
         <List.Section title="Open Address">
           <List.Item
-            id={OPEN_ADDRESS_ITEM_ID}
+            id={openAddressItemId}
             icon={Icon.Globe}
             title={`Open “${query.trim()}” in Default Browser`}
             subtitle={address}
