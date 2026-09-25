@@ -1,5 +1,5 @@
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
-import { useToken } from "./instances";
+import { type Instance, useToken, useInstanceScope, tokenForInstance } from "./instances";
 import { Destination, ErrorResult } from "./interfaces";
 import {
   Action,
@@ -15,8 +15,8 @@ import {
 } from "@raycast/api";
 import { DESTINATION_PROVIDERS } from "./config";
 
-export default function Destinations() {
-  const { url, headers } = useToken();
+export default function Destinations({ instance: initial }: { instance: Instance }) {
+  const { url, headers, instance, dropdown } = useInstanceScope(initial);
 
   const {
     isLoading,
@@ -69,7 +69,7 @@ export default function Destinations() {
   }
 
   return (
-    <List navigationTitle="Destinations" isLoading={isLoading}>
+    <List navigationTitle="Destinations" isLoading={isLoading} searchBarAccessory={dropdown}>
       {!isLoading && !destinations.length ? (
         <List.EmptyView
           icon={Icon.Upload}
@@ -80,7 +80,7 @@ export default function Destinations() {
               <Action.Push
                 icon={Icon.Plus}
                 title="Add Destination"
-                target={<CreateDestination onCreate={revalidate} />}
+                target={<CreateDestination instance={instance} onCreate={revalidate} />}
               />
             </ActionPanel>
           }
@@ -97,7 +97,7 @@ export default function Destinations() {
                 <Action.Push
                   icon={Icon.Plus}
                   title="Add Destination"
-                  target={<CreateDestination onCreate={revalidate} />}
+                  target={<CreateDestination instance={instance} onCreate={revalidate} />}
                 />
                 <Action
                   icon={Icon.Trash}
@@ -114,8 +114,9 @@ export default function Destinations() {
   );
 }
 
-export function CreateDestination({ onCreate }: { onCreate: () => void }) {
-  const { url, headers } = useToken();
+export function CreateDestination({ onCreate, instance }: { onCreate: () => void; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
   const { pop } = useNavigation();
   interface FormValues {
     name: string;

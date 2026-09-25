@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { DockerContainer } from "./interfaces";
-import { useToken } from "./instances";
+import { type Instance, useInstanceScope, tokenForInstance } from "./instances";
 
-export default function Docker() {
-  const { url, headers } = useToken();
+export default function Docker({ instance: initial }: { instance: Instance }) {
+  const { url, headers, instance, dropdown } = useInstanceScope(initial);
 
   const { isLoading, data: containers } = useFetch<DockerContainer[], DockerContainer[]>(url + "docker.getContainers", {
     headers,
@@ -12,7 +12,7 @@ export default function Docker() {
   });
 
   return (
-    <List navigationTitle="Docker" isLoading={isLoading}>
+    <List navigationTitle="Docker" isLoading={isLoading} searchBarAccessory={dropdown}>
       {containers.map((container) => (
         <List.Item
           key={container.containerId}
@@ -24,7 +24,7 @@ export default function Docker() {
               <Action.Push
                 icon={Icon.WrenchScrewdriver}
                 title="View Config"
-                target={<DockerConfig container={container} />}
+                target={<DockerConfig container={container} instance={instance} />}
               />
             </ActionPanel>
           }
@@ -34,8 +34,8 @@ export default function Docker() {
   );
 }
 
-function DockerConfig({ container }: { container: DockerContainer }) {
-  const { url, headers } = useToken();
+function DockerConfig({ container, instance }: { container: DockerContainer; instance: Instance }) {
+  const { url, headers } = tokenForInstance(instance);
   const { isLoading, data } = useFetch(url + `docker.getConfig?containerId=${container.containerId}`, {
     headers,
   });

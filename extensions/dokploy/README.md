@@ -68,7 +68,9 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - Instance URL: The URL of your Dokploy instance with port
     - API Key: `Follow` instruction from [Dokploy API | Dokploy](https://docs.dokploy.com/docs/api#authentication)
 
-    Instances can later be edited or deleted from the same list.
+    Instances can later be edited or deleted from the same list. Use the instance dropdown in the
+    search bar of Projects, Docker, S3 Destinations, or Users to switch to a different configured
+    instance without going back to Instances.
 
 ## 🧪 Tested On
 
