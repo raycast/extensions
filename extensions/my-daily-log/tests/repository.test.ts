@@ -53,3 +53,18 @@ test("a failed move keeps the original log", () => {
     [log.id],
   );
 });
+
+test("a move that cannot clean up the old day is rolled back", () => {
+  const storage = new MemoryStorage();
+  const repository = new JsonDailyLogRepository(storage);
+  const log = repository.create({ title: "Wrote tests", date: monday });
+  repository.create({ title: "Planned the week", date: tuesday });
+  storage.save("{ not json", monday);
+
+  assert.throws(() => repository.update(log, new DailyLog(log.id, tuesday, "Wrote tests")));
+  assert.deepEqual(
+    repository.getAllForDate(tuesday).map((item) => item.title),
+    ["Planned the week"],
+  );
+  assert.equal(storage.readForDate(monday), "{ not json");
+});

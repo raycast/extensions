@@ -21,9 +21,16 @@ export class JsonDailyLogRepository implements DailyLogRepository {
   update(original: DailyLog, updated: DailyLog): void {
     const logsWithoutUpdated = this.getAllForDate(updated.date).filter((log) => log.id !== updated.id);
     this.saveLogs([...logsWithoutUpdated, updated], updated.date);
-    // Remove the original only once the log is safely saved on its new day, so a failure never loses it.
-    if (!isSameDay(original.date, updated.date)) {
+    if (isSameDay(original.date, updated.date)) {
+      return;
+    }
+    // Remove the original only once the log is saved on its new day, so a failure never loses it,
+    // and undo that save if the removal fails, so a failure never duplicates it either.
+    try {
       this.deleteLog(original);
+    } catch (error) {
+      this.saveLogs(logsWithoutUpdated, updated.date);
+      throw error;
     }
   }
 
