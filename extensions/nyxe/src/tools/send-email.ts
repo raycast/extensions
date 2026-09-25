@@ -34,19 +34,15 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
     { name: "To", value: recipients(input.to).join(", ") },
     { name: "Cc", value: input.cc ? recipients(input.cc).join(", ") || undefined : undefined },
     { name: "Subject", value: input.subject },
-    // The body is what a prompt injection would smuggle out, so the user sees it.
-    { name: "Message", value: preview(input.text) },
+    // The body is what a prompt injection would smuggle out, so the user sees
+    // all of it: a cut-off preview would hide whatever follows the cut.
+    { name: "Message", value: input.text || "(empty)" },
   ],
 });
 
-function preview(text: string): string {
-  const chars = Array.from(text.trim());
-  return chars.length > 600 ? `${chars.slice(0, 599).join("")}…` : chars.join("") || "(empty)";
-}
-
 /**
  * Send a new email from the user's primary Nyxe address. The user confirms
- * the recipients and subject first. To answer an existing thread, use
+ * the recipients, subject and full message first. To answer an existing thread, use
  * create-reply-draft instead.
  */
 export default async function tool(input: Input) {
