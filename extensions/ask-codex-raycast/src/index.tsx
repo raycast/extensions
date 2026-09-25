@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Form,
   List,
   getPreferenceValues,
   Icon,
@@ -34,7 +35,10 @@ import {
 } from "./conversations";
 
 export default function AskCodex(
-  props: LaunchProps<{ arguments: Arguments.Index }>,
+  props: LaunchProps<{
+    arguments: Arguments.Index;
+    launchContext?: { page?: Page };
+  }>,
 ) {
   const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
@@ -46,7 +50,9 @@ export default function AskCodex(
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("正在连接 Codex…");
   const [error, setError] = useState("");
-  const [page, setPage] = useState<Page>("chat");
+  const [page, setPage] = useState<Page>(
+    props.launchContext?.page === "history" ? "history" : "chat",
+  );
   const [sessions, setSessions] = useState<StoredConversation[]>([]);
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [switching, setSwitching] = useState(false);
@@ -584,21 +590,8 @@ export default function AskCodex(
 
   const codexNotFound =
     error.includes("未找到 Codex CLI") || error.includes("找不到指定的 Codex");
-  const actions = (
-    <ActionPanel>
-      {!ready && error ? (
-        <Action
-          title="重新连接"
-          icon={Icon.ArrowClockwise}
-          onAction={reconnect}
-        />
-      ) : (
-        <Action
-          title={busy ? "发送补充要求" : "发送消息"}
-          icon={Icon.ArrowRight}
-          onAction={() => void sendPrompt(draft)}
-        />
-      )}
+  const secondaryActions = (
+    <>
       {codexNotFound && (
         <Action.OpenInBrowser
           title="安装 Codex CLI"
@@ -645,12 +638,19 @@ export default function AskCodex(
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />
-    </ActionPanel>
+    </>
   );
-  const currentMarkdown =
-    (error ? `**提示：** ${error}\n\n---\n\n` : "") +
-    transcript(conversation.messages) +
-    `\n\n---\n\n_${status}_`;
+  const historyLink = `raycast://extensions/bbfss/ask-codex-raycast/index?context=${encodeURIComponent(JSON.stringify({ page: "history" }))}`;
+  const chatTranscript = [
+    ...(error ? [`提示：${error}`] : []),
+    ...conversation.messages
+      .filter((message) => message.content.trim())
+      .map(
+        (message) =>
+          `${message.role === "user" ? "你" : "Codex"}${message.kind === "steer" ? " · 补充要求" : ""}\n${message.content}`,
+      ),
+    `状态：${status}`,
+  ].join("\n\n");
   const accessory = (
     <List.Dropdown tooltip="聊天与会话管理" value={page} onChange={changePage}>
       <List.Dropdown.Item title="聊天" value="chat" icon={Icon.Message} />
@@ -678,29 +678,46 @@ export default function AskCodex(
   });
   if (page === "chat") {
     return (
-      <List
+      <Form
         navigationTitle={conversationTitle(conversation)}
-        searchBarAccessory={accessory}
-        searchText={draft}
-        onSearchTextChange={setDraft}
-        searchBarPlaceholder={
-          busy ? "继续输入补充要求，Enter 发送…" : "输入问题或追问，Enter 发送…"
+        searchBarAccessory={
+          <Form.LinkAccessory target={historyLink} text="会话历史" />
         }
-        filtering={false}
-        throttle={false}
-        selectedItemId="current"
-        isShowingDetail
-        isLoading={(!ready && !error) || switching}
+        actions={
+          <ActionPanel>
+            {!ready && error ? (
+              <Action
+                title="重新连接"
+                icon={Icon.ArrowClockwise}
+                onAction={reconnect}
+              />
+            ) : (
+              <Action.SubmitForm
+                title={busy ? "发送补充要求" : "发送消息"}
+                icon={Icon.ArrowRight}
+                onSubmit={(values) => {
+                  void sendPrompt(asString(values.prompt) || draft);
+                }}
+              />
+            )}
+            {secondaryActions}
+          </ActionPanel>
+        }
       >
-        <List.Item
-          id="current"
-          title={conversationTitle(conversation)}
-          subtitle={status}
-          icon={Icon.Message}
-          detail={<List.Item.Detail markdown={currentMarkdown} />}
-          actions={actions}
+        <Form.TextField
+          id="prompt"
+          title="消息"
+          value={draft}
+          onChange={setDraft}
+          placeholder={
+            busy
+              ? "继续输入补充要求，按 Enter 发送…"
+              : "输入问题或追问，按 Enter 发送…"
+          }
+          autoFocus
         />
-      </List>
+        <Form.Description text={chatTranscript} />
+      </Form>
     );
   }
   return (
@@ -719,7 +736,6 @@ export default function AskCodex(
       isShowingDetail
       isLoading={(!ready && !error) || busy || switching}
       selectedItemId="current"
-      actions={actions}
       {...historyProps}
     >
       {historyProps.children}
