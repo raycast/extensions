@@ -92,14 +92,16 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
                     <Action.Push
                       icon="folder-input.svg"
                       title="Services"
-                      target={<Services environment={serviceScope} revalidate={revalidate} />}
+                      target={<Services environment={serviceScope} revalidate={revalidate} instance={instance} />}
                     />
                   ) : (
                     environmentsProject && (
                       <Action.Push
                         icon="folder-input.svg"
                         title="Environments"
-                        target={<Environments project={environmentsProject} revalidate={revalidate} />}
+                        target={
+                          <Environments project={environmentsProject} revalidate={revalidate} instance={instance} />
+                        }
                       />
                     )
                   )}

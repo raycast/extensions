@@ -13,14 +13,14 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, useCachedState, useForm, useLocalStorage } from "@raycast/utils";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Projects from "./projects";
 import Docker from "./docker";
 import Users from "./users";
 import Destinations from "./destinations";
 
 export interface Instance {
-  /** Absent on instances stored before Edit/Delete existed - never backfilled in bulk, see `instanceId`. */
+  /** Absent only until `Instances()`'s own one-time backfill runs - see `instanceId`. */
   id?: string;
   key: string;
   url: string;
@@ -44,7 +44,13 @@ export function tokenForInstance(instance: Instance): CachedToken {
     },
   };
 }
-/** `key` (the API secret) is the only identifier instances stored before this had - fall back to it. */
+/**
+ * `key` (the API secret) is the only identifier instances stored before `id` existed had - fall
+ * back to it. Not guaranteed unique (nothing stopped two instances sharing a key before `id`
+ * existed), unlike `id` itself - `Instances()`'s own one-time backfill (below) is what makes this
+ * safe to treat as unique in practice for anything that needs a real key, like `List.Dropdown`
+ * values.
+ */
 export function instanceId(instance: Instance): string {
   return instance.id ?? instance.key;
 }
@@ -61,6 +67,17 @@ export default function Instances() {
   const { pop } = useNavigation();
 
   const { isLoading, value: instances = [], setValue } = useLocalStorage<Instance[]>("instances");
+
+  // One-time backfill for instances saved before `id` existed. `instanceId()`'s `?? key` fallback
+  // was safe enough for Edit/Delete (reference equality there doesn't care whether two records
+  // resolve to the same fallback id), but the instance-switcher dropdown's `value` must actually be
+  // unique - two legacy records sharing a key would otherwise be indistinguishable to it, making
+  // the second one unreachable. Runs once per record that needs it, then never again.
+  useEffect(() => {
+    if (!isLoading && instances.some((i) => !i.id)) {
+      setValue(instances.map((i) => (i.id ? i : { ...i, id: crypto.randomUUID() })));
+    }
+  }, [isLoading, instances, setValue]);
 
   async function deleteInstance(instance: Instance) {
     const wasActive = isActiveInstance(instance, token);

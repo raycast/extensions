@@ -11,7 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
-import { useToken } from "./instances";
+import { type Instance, useToken, tokenForInstance } from "./instances";
 import { Server, Service, ErrorResult, DatabaseKind, Project } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
@@ -32,6 +32,7 @@ const BACKUPABLE_KINDS: BackupableKind[] = ["mariadb", "mongo", "mysql", "postgr
 export default function Services({
   environment,
   revalidate,
+  instance,
 }: {
   environment: ServiceScope;
   /**
@@ -40,8 +41,11 @@ export default function Services({
    * own rows - see the `project.one` fetch below - so it's optional and only wired for that.
    */
   revalidate?: () => void;
+  /** The instance this screen was opened for, when a caller (e.g. Projects' own instance dropdown) knows it explicitly - falls back to the shared active token otherwise, same as `useToken()` alone did before. */
+  instance?: Instance;
 }) {
-  const { url, headers } = useToken();
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
 
   // `environment` is a snapshot from whenever this screen was pushed - the parent's own
   // `revalidate` refetches its own list, but that refetch never reaches an already-pushed Services
@@ -177,13 +181,13 @@ export default function Services({
                 <Action.Push
                   icon="folder-input.svg"
                   title="Application"
-                  target={<CreateApplication environment={scope} />}
+                  target={<CreateApplication environment={scope} instance={instance} />}
                   onPop={() => refresh()}
                 />
                 <Action.Push
                   icon="database.svg"
                   title="Database"
-                  target={<CreateDatabase environment={scope} />}
+                  target={<CreateDatabase environment={scope} instance={instance} />}
                   onPop={() => refresh()}
                 />
                 {scope.environmentId && (
@@ -228,13 +232,13 @@ export default function Services({
                   <Action.Push
                     icon="folder-input.svg"
                     title="Application"
-                    target={<CreateApplication environment={scope} />}
+                    target={<CreateApplication environment={scope} instance={instance} />}
                     onPop={() => refresh()}
                   />
                   <Action.Push
                     icon="database.svg"
                     title="Database"
-                    target={<CreateDatabase environment={scope} />}
+                    target={<CreateDatabase environment={scope} instance={instance} />}
                     onPop={() => refresh()}
                   />
                   {scope.environmentId && (
@@ -309,8 +313,9 @@ export default function Services({
   );
 }
 
-function CreateApplication({ environment }: { environment: ServiceScope }) {
-  const { url, headers } = useToken();
+function CreateApplication({ environment, instance }: { environment: ServiceScope; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
   const { pop } = useNavigation();
 
   interface FormValues {
@@ -387,8 +392,9 @@ function CreateApplication({ environment }: { environment: ServiceScope }) {
   );
 }
 
-function CreateDatabase({ environment }: { environment: ServiceScope }) {
-  const { url, headers } = useToken();
+function CreateDatabase({ environment, instance }: { environment: ServiceScope; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
   const { pop } = useNavigation();
   interface FormValues {
     dbType: string;
