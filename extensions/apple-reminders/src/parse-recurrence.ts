@@ -1,3 +1,5 @@
+import { addDays } from "date-fns";
+
 import { type ParsedDueDate, parseDueDate } from "./parse-due-date";
 
 export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
@@ -149,8 +151,8 @@ export function resolveDueDateFromNlp(
     };
   }
 
-  // Weekday-anchored recurrences (e.g. "every Friday", "every other friday", "each tuesday", "every Monday at 9am")
-  if (WEEKDAY_ANCHOR_PATTERN.test(recurrence.matchedText)) {
+  // Single weekday-anchored weekly recurrences (e.g. "every Friday", "every other friday", "each tuesday", "every Monday at 9am")
+  if (recurrence.frequency === "weekly" && WEEKDAY_ANCHOR_PATTERN.test(recurrence.matchedText)) {
     const parsed = parseDueDate(trimmed, now, dateFormatPreference);
     if (parsed) {
       return {
@@ -161,7 +163,7 @@ export function resolveDueDateFromNlp(
     }
   }
 
-  // Interval and generic recurrences (e.g. "every 2 weeks", "every 2 weeks at 10am", "every 3 days at 9am", "every half year")
+  // Interval, generic, weekdays, and weekends recurrences (e.g. "every 2 weeks", "every 2 weeks at 10am", "every day at 9am", "mon-fri 8am")
   // Strip the recurrence phrase to see if an explicit time or start date was specified
   const remainingText = trimmed
     .replace(recurrence.matchedText, "")
@@ -171,8 +173,8 @@ export function resolveDueDateFromNlp(
     const parsedRemainder = parseDueDate(remainingText, now, dateFormatPreference);
     if (parsedRemainder) {
       if (parsedRemainder.isDateTime && !parsedRemainder.hasExplicitDate) {
-        // Only time was parsed (e.g. "10am", "at 9am") -> merge time into today's date
-        const dueDate = new Date(
+        // Only time was parsed (e.g. "10am", "at 9am", "8am")
+        const candidateDate = new Date(
           now.getFullYear(),
           now.getMonth(),
           now.getDate(),
@@ -181,6 +183,22 @@ export function resolveDueDateFromNlp(
           parsedRemainder.date.getSeconds(),
           parsedRemainder.date.getMilliseconds(),
         );
+
+        // Only merge into today if the resulting time is still in the future; otherwise keep parsedRemainder.date (forward-dated)
+        let dueDate = candidateDate.getTime() > now.getTime() ? candidateDate : parsedRemainder.date;
+
+        if (recurrence.frequency === "weekdays") {
+          if (dueDate.getDay() === 6) {
+            dueDate = addDays(dueDate, 2);
+          } else if (dueDate.getDay() === 0) {
+            dueDate = addDays(dueDate, 1);
+          }
+        } else if (recurrence.frequency === "weekends") {
+          if (dueDate.getDay() >= 1 && dueDate.getDay() <= 5) {
+            dueDate = addDays(dueDate, 6 - dueDate.getDay());
+          }
+        }
+
         return {
           dueDate,
           parsedDueDate: {
@@ -202,16 +220,29 @@ export function resolveDueDateFromNlp(
     }
   }
 
-  // Pure interval/generic recurrence without explicit start date/time defaults to today (all-day)
+  // Pure interval/generic/weekdays/weekends recurrence without explicit start date/time
+  let fallbackDate = now;
+  if (recurrence.frequency === "weekdays") {
+    if (now.getDay() === 6) {
+      fallbackDate = addDays(now, 2);
+    } else if (now.getDay() === 0) {
+      fallbackDate = addDays(now, 1);
+    }
+  } else if (recurrence.frequency === "weekends") {
+    if (now.getDay() >= 1 && now.getDay() <= 5) {
+      fallbackDate = addDays(now, 6 - now.getDay());
+    }
+  }
+
   const fallbackParsed: ParsedDueDate = {
-    date: now,
+    date: fallbackDate,
     isDateTime: false,
     matchedText: recurrence.matchedText,
     hasExplicitDate: false,
   };
 
   return {
-    dueDate: now,
+    dueDate: fallbackDate,
     parsedDueDate: fallbackParsed,
     recurrence,
   };

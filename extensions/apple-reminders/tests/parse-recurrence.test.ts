@@ -72,7 +72,7 @@ describe("parseRecurrence", () => {
 });
 
 describe("resolveDueDateFromNlp", () => {
-  const fixedNow = new Date("2026-09-24T10:00:00.000Z");
+  const fixedNow = new Date(2026, 8, 24, 10, 0, 0); // Thursday, Sep 24, 2026 10:00 AM
 
   it("sets start date to now (today) for interval recurrence phrases without future offset", () => {
     const r1 = resolveDueDateFromNlp("every 2 weeks", fixedNow);
@@ -108,33 +108,71 @@ describe("resolveDueDateFromNlp", () => {
     assert.equal(r8.dueDate?.getTime(), fixedNow.getTime());
   });
 
-  it("applies parsed time to today for interval recurrence with time", () => {
-    const r1 = resolveDueDateFromNlp("every 2 weeks at 10am", fixedNow);
+  it("applies parsed time to today for interval recurrence with time when time is in the future", () => {
+    const fixedMorning = new Date(2026, 8, 24, 6, 0, 0); // 6am Thursday
+
+    const r1 = resolveDueDateFromNlp("every 2 weeks at 10am", fixedMorning);
     assert.deepEqual(r1.recurrence, { frequency: "weekly", interval: 2, matchedText: "every 2 weeks" });
     assert.ok(r1.dueDate);
-    assert.equal(r1.dueDate.getFullYear(), fixedNow.getFullYear());
-    assert.equal(r1.dueDate.getMonth(), fixedNow.getMonth());
-    assert.equal(r1.dueDate.getDate(), fixedNow.getDate());
+    assert.equal(r1.dueDate.getFullYear(), fixedMorning.getFullYear());
+    assert.equal(r1.dueDate.getMonth(), fixedMorning.getMonth());
+    assert.equal(r1.dueDate.getDate(), fixedMorning.getDate());
     assert.equal(r1.dueDate.getHours(), 10);
     assert.equal(r1.parsedDueDate?.isDateTime, true);
 
-    const r2 = resolveDueDateFromNlp("every 3 days at 9am", fixedNow);
+    const r2 = resolveDueDateFromNlp("every 3 days at 9am", fixedMorning);
     assert.deepEqual(r2.recurrence, { frequency: "daily", interval: 3, matchedText: "every 3 days" });
     assert.ok(r2.dueDate);
-    assert.equal(r2.dueDate.getFullYear(), fixedNow.getFullYear());
-    assert.equal(r2.dueDate.getMonth(), fixedNow.getMonth());
-    assert.equal(r2.dueDate.getDate(), fixedNow.getDate());
+    assert.equal(r2.dueDate.getFullYear(), fixedMorning.getFullYear());
+    assert.equal(r2.dueDate.getMonth(), fixedMorning.getMonth());
+    assert.equal(r2.dueDate.getDate(), fixedMorning.getDate());
     assert.equal(r2.dueDate.getHours(), 9);
     assert.equal(r2.parsedDueDate?.isDateTime, true);
 
-    const r3 = resolveDueDateFromNlp("every 1 week at 8am", fixedNow);
+    const r3 = resolveDueDateFromNlp("every 1 week at 8am", fixedMorning);
     assert.deepEqual(r3.recurrence, { frequency: "weekly", interval: 1, matchedText: "every 1 week" });
     assert.ok(r3.dueDate);
-    assert.equal(r3.dueDate.getFullYear(), fixedNow.getFullYear());
-    assert.equal(r3.dueDate.getMonth(), fixedNow.getMonth());
-    assert.equal(r3.dueDate.getDate(), fixedNow.getDate());
+    assert.equal(r3.dueDate.getFullYear(), fixedMorning.getFullYear());
+    assert.equal(r3.dueDate.getMonth(), fixedMorning.getMonth());
+    assert.equal(r3.dueDate.getDate(), fixedMorning.getDate());
     assert.equal(r3.dueDate.getHours(), 8);
     assert.equal(r3.parsedDueDate?.isDateTime, true);
+
+    const r4 = resolveDueDateFromNlp("mon-fri 8am", fixedMorning);
+    assert.deepEqual(r4.recurrence, { frequency: "weekdays", interval: 1, matchedText: "mon-fri" });
+    assert.ok(r4.dueDate);
+    assert.equal(r4.dueDate.getDate(), fixedMorning.getDate());
+    assert.equal(r4.dueDate.getHours(), 8);
+    assert.equal(r4.parsedDueDate?.isDateTime, true);
+  });
+
+  it("rolls start date forward when phrase time has already passed today", () => {
+    const fixedAfternoon = new Date(2026, 8, 24, 14, 0, 0); // 2pm Thursday
+
+    const r1 = resolveDueDateFromNlp("every day at 9am", fixedAfternoon);
+    assert.deepEqual(r1.recurrence, { frequency: "daily", interval: 1, matchedText: "every day" });
+    assert.ok(r1.dueDate);
+    assert.equal(r1.dueDate.getDate(), 25); // Friday (tomorrow)
+    assert.equal(r1.dueDate.getHours(), 9);
+    assert.equal(r1.parsedDueDate?.isDateTime, true);
+
+    const r2 = resolveDueDateFromNlp("daily 9am", fixedAfternoon);
+    assert.deepEqual(r2.recurrence, { frequency: "daily", interval: 1, matchedText: "daily" });
+    assert.ok(r2.dueDate);
+    assert.equal(r2.dueDate.getDate(), 25); // Friday (tomorrow)
+    assert.equal(r2.dueDate.getHours(), 9);
+
+    const r3 = resolveDueDateFromNlp("weekdays at 9am", fixedAfternoon);
+    assert.deepEqual(r3.recurrence, { frequency: "weekdays", interval: 1, matchedText: "weekdays" });
+    assert.ok(r3.dueDate);
+    assert.equal(r3.dueDate.getDate(), 25); // Friday (tomorrow)
+    assert.equal(r3.dueDate.getHours(), 9);
+
+    const r4 = resolveDueDateFromNlp("mon-fri 8am", fixedAfternoon);
+    assert.deepEqual(r4.recurrence, { frequency: "weekdays", interval: 1, matchedText: "mon-fri" });
+    assert.ok(r4.dueDate);
+    assert.equal(r4.dueDate.getDate(), 25); // Friday (tomorrow)
+    assert.equal(r4.dueDate.getHours(), 8);
   });
 
   it("preserves explicit start date/time when specified with recurrence", () => {
