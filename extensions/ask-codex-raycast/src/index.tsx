@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  environment,
   Form,
   List,
   getPreferenceValues,
@@ -640,7 +641,7 @@ export default function AskCodex(
       />
     </>
   );
-  const historyLink = `raycast://extensions/bbfss/ask-codex-raycast/index?context=${encodeURIComponent(JSON.stringify({ page: "history" }))}`;
+  const historyLink = `raycast://extensions/${encodeURIComponent(environment.ownerOrAuthorName)}/${encodeURIComponent(environment.extensionName)}/${encodeURIComponent(environment.entryPointName)}?context=${encodeURIComponent(JSON.stringify({ page: "history" }))}`;
   const visibleMessages = conversation.messages.filter(
     (message) => message.content.trim() || message.status === "streaming",
   );
