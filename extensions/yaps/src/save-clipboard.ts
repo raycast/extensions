@@ -7,7 +7,6 @@ import {
 } from "@raycast/api";
 import { runAction } from "./lib/action";
 import { clipboardMarkdown, titleFromClipboard } from "./lib/format";
-import type { ExtensionPreferences } from "./lib/types";
 import { openYapsWithFallback } from "./lib/yaps-app";
 import { createClipboardNote, YapsCliNotFoundError } from "./lib/yaps-cli";
 
@@ -49,9 +48,9 @@ export default async function SaveClipboardCommand() {
 
   toast.title = "Saving clipboard to Yaps…";
 
-  let preferences: ExtensionPreferences;
+  let preferences: Preferences.SaveClipboard;
   try {
-    preferences = getPreferenceValues<ExtensionPreferences>();
+    preferences = getPreferenceValues<Preferences.SaveClipboard>();
     if (typeof preferences.captureFolder !== "string" || !preferences.captureFolder.trim()) {
       throw new Error("Clipboard capture folder is empty.");
     }

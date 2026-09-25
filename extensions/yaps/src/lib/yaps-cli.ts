@@ -1,6 +1,6 @@
 import { environment, getApplications, getPreferenceValues } from "@raycast/api";
 import { join } from "node:path";
-import type { ExtensionPreferences, VaultNote, VaultSearchResult, VaultStatus } from "./types";
+import type { VaultNote, VaultSearchResult, VaultStatus } from "./types";
 import { selectYapsApplication, YAPS_BUNDLE_ID } from "./yaps-app-core";
 import { YapsCli } from "./yaps-cli-core";
 
@@ -15,7 +15,7 @@ let cachedClient: YapsCli | undefined;
 let cachedConfiguredPath: string | undefined;
 
 function client(): YapsCli {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const configuredPath = preferences.cliPath?.trim() || undefined;
   if (!cachedClient || cachedConfiguredPath !== configuredPath) {
     cachedClient = new YapsCli({

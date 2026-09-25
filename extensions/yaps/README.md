@@ -80,8 +80,8 @@ outside `/Applications`; if it cannot find the app, it opens the download page.
 ```bash
 bun install
 bun run test
-bun run lint
 bun run build
+bun run lint
 bun run dev
 ```
 

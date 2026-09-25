@@ -46,8 +46,3 @@ export interface VaultStatus {
   note_count: number;
   root: string;
 }
-
-export interface ExtensionPreferences {
-  cliPath?: string;
-  captureFolder: string;
-}
