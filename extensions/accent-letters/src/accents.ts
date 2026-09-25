@@ -44,21 +44,28 @@ function stripCluster(base: string, marks: string): string {
 }
 
 /**
- * NFC is the working form, not NFD: NFD splits a Hangul syllable into jamo, which are letters
- * rather than marks, so walking the decomposed string would hand 한 back as three characters.
+ * The ORIGINAL text is walked, with no normalisation first, because anything this function does
+ * not strip has to come back byte for byte. Normalising to NFC up front rewrote text it then left
+ * alone: decomposed Cyrillic и + breve came back as й, and decomposed Hangul jamo were composed
+ * into 한 — the text was changed while the caller was told nothing had changed.
+ *
+ * Normalising to NFD up front is worse: it splits a Hangul syllable into jamo, which are letters
+ * rather than marks, so the walk handed 한 back as three separate characters.
+ *
+ * Normalisation belongs in stripCluster instead, applied to the one cluster being stripped — which
+ * is what makes decomposed and precomposed Latin give the same answer.
  */
 function clusters(text: string): Array<[string, string]> {
-  const src = text.normalize("NFC");
   const out: Array<[string, string]> = [];
   let i = 0;
 
-  while (i < src.length) {
-    const base = String.fromCodePoint(src.codePointAt(i) as number);
+  while (i < text.length) {
+    const base = String.fromCodePoint(text.codePointAt(i) as number);
     i += base.length;
 
     let marks = "";
-    while (i < src.length) {
-      const c = String.fromCodePoint(src.codePointAt(i) as number);
+    while (i < text.length) {
+      const c = String.fromCodePoint(text.codePointAt(i) as number);
       if (!MARK.test(c)) break;
       marks += c;
       i += c.length;
