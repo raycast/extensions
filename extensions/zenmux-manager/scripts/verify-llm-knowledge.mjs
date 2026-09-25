@@ -299,7 +299,30 @@ checks.push({
   ),
 });
 
+const modelsSource = fs.readFileSync(path.join(root, "src/models.ts"), "utf8");
+const chatSource = fs.readFileSync(path.join(root, "src/zenmux-chat.ts"), "utf8");
+
 checks.push(
+  {
+    name: "Extension declares a ZenMux model provider",
+    passed:
+      packageJson.ai.modelProvider === "models" &&
+      modelsSource.includes("export const getModels") &&
+      modelsSource.includes("export const streamCompletion"),
+  },
+  {
+    name: "Model provider uses the model API key, not the Platform API key",
+    passed:
+      packageJson.preferences.some(
+        (preference) =>
+          preference.name === "modelApiKey" && preference.type === "password" && preference.required === false,
+      ) &&
+      modelsSource.includes("modelApiKey") &&
+      !modelsSource.includes("managementApiKey") &&
+      chatSource.includes("https://zenmux.ai/api/v1/models") &&
+      chatSource.includes("https://zenmux.ai/api/v1/chat/completions") &&
+      ai.includes("Never tell users to put the Platform API key in the Model API Key field."),
+  },
   {
     name: "Platform API key preference keeps stable stored key",
     passed:

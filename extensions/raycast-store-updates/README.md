@@ -3,7 +3,7 @@
 # Raycast Store Updates
 
 [![Raycast Store](https://img.shields.io/badge/Raycast-Store-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/chrismessina/raycast-store-updates)
-[![Licence MIT](https://img.shields.io/badge/Licence-MIT-22C55E?style=flat-square)](LICENSE)
+[![License MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 [![Follow @chrismessina](https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social)](https://github.com/chrismessina)
 [![Stars](https://img.shields.io/github/stars/chrismessina/raycast-store-updates?style=social)](https://github.com/chrismessina/raycast-store-updates/stargazers)
 
@@ -63,13 +63,13 @@ To keep an eye on things passively, enable **Store Updates Menu Bar** — it ref
 | Action | Shortcut | Description |
 | --- | --- | --- |
 | View Changelog | <kbd>⏎</kbd> | Read the extension's changelog inside Raycast |
-| Open in Raycast Store | <kbd>⌥</kbd><kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> | Deep-link straight to the Store page in Raycast |
+| View Extension in Store | <kbd>⌥</kbd><kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> | Deep-link straight to the Store page in Raycast |
 | Open in Browser | `Common.Open` | Open the Store listing on the web |
 | Copy Latest Changes | `Common.Copy` | Copy only the latest release's changelog entry |
 | Copy Extension URL | `Common.CopyName` | Copy the Store URL |
 | Open Changelog in Browser | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>L</kbd> | Open `CHANGELOG.md` on GitHub |
 | Refresh | `Common.Refresh` | Re-fetch the list |
-| Check for Extension Updates | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>U</kbd> | Run Raycast's own updater on your installed extensions |
+| Update Installed Extensions | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>U</kbd> | Run Raycast's own updater on your installed extensions |
 | Show/Hide macOS-only | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>M</kbd> | Toggle platform-exclusive macOS extensions |
 | Show/Hide Windows-only | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>W</kbd> | Toggle platform-exclusive Windows extensions |
 | Filter by Category | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>F</kbd> | Pick a single category |

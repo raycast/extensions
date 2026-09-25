@@ -1,4 +1,4 @@
-import { closeMainWindow, Icon, Action } from "@raycast/api";
+import { closeMainWindow, Icon, Action, PopToRootType } from "@raycast/api";
 
 import { Tab } from "../types";
 import { closeLauncherTabs, executeJxa, getOrionAppIdentifier } from "../utils";
@@ -31,10 +31,18 @@ const activateTab = async (tab: Tab) =>
     }
   `);
 
-// `closeLaunchers` is opt-in (the Command Bar passes it) so the standalone
-// "Search Tabs" command doesn't make an extra AppleScript call on every open.
-const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean; onActivate?: (tab: Tab) => void }) => {
-  const { tab, closeLaunchers, onActivate } = props;
+// `closeLaunchers` and `immediatePopToRoot` are both opt-in (the Command Bar
+// passes them) so the standalone "Search Tabs" command neither makes an extra
+// AppleScript call on every open, nor stops respecting the user's Pop to Root
+// Search preference - only the Command Bar's background poll depends on
+// always tearing down immediately after a result opens.
+const OpenTabAction = (props: {
+  tab: Tab;
+  closeLaunchers?: boolean;
+  immediatePopToRoot?: boolean;
+  onActivate?: (tab: Tab) => void;
+}) => {
+  const { tab, closeLaunchers, immediatePopToRoot, onActivate } = props;
   return (
     <Action
       title="Open in Browser"
@@ -51,7 +59,15 @@ const OpenTabAction = (props: { tab: Tab; closeLaunchers?: boolean; onActivate?:
         // refresh. Update it locally right away so a Command Bar reopened
         // before that refresh completes already shows `tab` as current.
         onActivate?.(tab);
-        await closeMainWindow({ clearRootSearch: true });
+        // Opening a result completes this Command Bar interaction. Return to
+        // root immediately so the next hotkey starts a fresh command session,
+        // independent of the user's delayed Pop to Root Search preference -
+        // otherwise a lingering session can resume without noticing a tab
+        // opened or closed directly in Orion in the meantime.
+        await closeMainWindow({
+          clearRootSearch: true,
+          ...(immediatePopToRoot ? { popToRootType: PopToRootType.Immediate } : {}),
+        });
       }}
     />
   );

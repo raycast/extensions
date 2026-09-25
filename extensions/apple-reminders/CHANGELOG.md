@@ -5,6 +5,13 @@
 - Support natural language recurrence patterns (e.g. `every day`, `every Friday 10am`, `every 2 weeks`, `weekdays`, `monthly`) in the Create Reminder free-text date field.
 - Automatically populate recurrence frequency, interval, and start date from text input.
 
+## [Create Reminder from Selected Email] - 2026-09-25
+
+- Add "Create Reminder from Selected Email" command to create reminders directly from the active email in Apple Mail.
+- Attach native `message://` URL link to created reminders for 1-click opening of the email thread in Apple Mail.
+- Support interactive form mode with pre-filled title and email URL as well as instant background reminder creation.
+- Add "Default Due Date & Time" and "Default List" preferences for email reminders.
+
 ## [Weekly Review and Action Capture Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

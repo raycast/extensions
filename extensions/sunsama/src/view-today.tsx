@@ -30,7 +30,7 @@ import { signOut } from "./lib/mcp";
 import { addDays, nextMonday, todayString, toDayString } from "./lib/date";
 import { reportError, runWithToast } from "./lib/errors";
 import { elapsedSeconds, formatDuration, formatElapsed } from "./lib/time";
-import { taskWebUrl, workspaceSlug } from "./lib/urls";
+import { taskUrl, workspaceSlug } from "./lib/urls";
 import { Task } from "./lib/types";
 import { EditTaskForm } from "./components/edit-task-form";
 import { AddSubtasksForm } from "./components/add-subtasks-form";
@@ -122,7 +122,7 @@ export default function ViewToday() {
     { onError: () => undefined },
   );
 
-  const { showCompleted, showDetails, workspaceUrl } =
+  const { showCompleted, showDetails, workspaceUrl, useDeepLinks } =
     getPreferenceValues<Preferences.ViewToday>();
   const workspace = workspaceSlug(workspaceUrl);
   // getTasksForDay already returns Sunsama's day order; just optionally hide
@@ -345,7 +345,7 @@ export default function ViewToday() {
             task={task}
             // Only a ticking row gets the clock, so the others stay memoized.
             now={task.timerStart ? now : 0}
-            sunsamaUrl={workspace ? taskWebUrl(workspace, task.id) : undefined}
+            sunsamaUrl={taskUrl(task.id, workspace, useDeepLinks)}
           />
         )
       }
@@ -397,14 +397,16 @@ export default function ViewToday() {
                 <EditTaskForm task={task} day={day} onSaved={revalidate} />
               }
             />
-            {/* Only shown when the workspace is known — the link can't be
-                built without it, and a Sunsama extension pointing at Sunsama's
-                home page isn't worth an action. */}
-            {workspace && (
-              <Action.OpenInBrowser
+            {/* Deep link when that setting is on; otherwise the web link,
+                shown only when the workspace is known — it can't be built
+                without it, and Sunsama's home page isn't worth an action. */}
+            {(useDeepLinks || workspace) && (
+              // Action.Open, not OpenInBrowser: `sunsama://` must go to the
+              // desktop app's scheme handler, not a browser.
+              <Action.Open
                 title="Open in Sunsama"
                 icon={Icon.CloudSun}
-                url={taskWebUrl(workspace, task.id)}
+                target={taskUrl(task.id, workspace, useDeepLinks)!}
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
 import useBookmarks from "./hooks/useBookmarks";
@@ -13,6 +13,7 @@ import TabListItem from "./components/TabListItem";
 import UrlListItem, { UrlItem } from "./components/UrlListItem";
 import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
+import OpenInDefaultBrowserAction from "./components/OpenInDefaultBrowserAction";
 import { searchTabsWithFallback } from "./tabSearch";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
@@ -211,11 +212,10 @@ export default function Command() {
   const { readingList } = useReadingList(selectedProfileId);
   const {
     data: history,
-    isLoading: historyLoading,
     permissionView,
     completedQueryKey,
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
-  const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
+  const { suggestions } = useSuggestions(query);
   const historyQueryKey = `${selectedProfileId}\u0000${hasQuery ? query : ""}`;
   const hasCurrentHistoryResult = !hasQuery || completedQueryKey === historyQueryKey;
 
@@ -233,7 +233,12 @@ export default function Command() {
     setSelectedItemId(undefined);
   };
 
-  const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
+  // Loading local history and remote suggestions for each keystroke should not
+  // put the entire List into a loading state: by the time either can be true,
+  // profiles/tabs/bookmarks have already resolved, so there is no genuine
+  // "nothing to show yet" case being masked - only a loading flicker on every
+  // keystroke would be added for no benefit.
+  const isLoading = !profiles || tabs === undefined || bookmarksLoading;
 
   // Never show the launcher tabs in the list itself.
   const openTabs: Tab[] = (tabs ?? []).filter((t) => !isLauncherTab(t.url));
@@ -421,6 +426,7 @@ export default function Command() {
               tab={topHit.tab}
               refresh={refresh}
               closeLaunchers
+              immediatePopToRoot
               onActivate={markTabActive}
             />
           ) : (
@@ -438,7 +444,7 @@ export default function Command() {
             subtitle={address}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Default Browser" url={address} />
+                <OpenInDefaultBrowserAction url={address} immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -453,7 +459,7 @@ export default function Command() {
             title={`Search ${getSearchEngineName()} for “${query}”`}
             actions={
               <ActionPanel>
-                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" />
+                <OpenInOrionAction url={buildSearchUrl(query)} title="Search in Orion" immediatePopToRoot />
               </ActionPanel>
             }
           />
@@ -477,6 +483,7 @@ export default function Command() {
               tab={t}
               refresh={refresh}
               closeLaunchers
+              immediatePopToRoot
               onActivate={markTabActive}
             />
           ))}

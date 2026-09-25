@@ -1,5 +1,10 @@
 # Sunsama Changelog
 
+## [Deep Links] - 2026-09-25
+
+- Turn on "Use Deep Links" in the extension preferences to open tasks in the
+  Sunsama desktop app instead of the website. No workspace URL needed.
+
 ## [Task Details Pane] - 2026-09-21
 
 - Turn on "Show task details" in View Today's Tasks preferences to open a side

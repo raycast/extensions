@@ -313,7 +313,7 @@ export async function checkForExtensionUpdates(): Promise<void> {
       type: LaunchType.UserInitiated,
     });
   } catch (error) {
-    await showError(error, { title: "Couldn't Open Check for Extension Updates" });
+    await showError(error, { title: "Couldn't Update Installed Extensions" });
   }
 }
 
@@ -696,7 +696,7 @@ export async function convertPRsToStoreItems(
   const removalConfirmations = new Map<string, Promise<RemovalCheck>>();
   const removalResults = await mapWithConcurrency(removalCandidatePRs, 8, async (pr) => {
     // Which slugs to check. An `extension:` label names them for free, and the definitive
-    // 404 from isExtensionGone() below is the actual proof of removal — so a labelled PR
+    // 404 from isExtensionGone() below is the actual proof of removal — so a labeled PR
     // needs no billed request at all. That matters more than it looks: most PRs this
     // classifies as removals are not (a survey of merged "Remove…" PRs, 2026-09-22, was
     // dominated by "Remove outdated screenshots from … README", "Remove contributor …"),
@@ -704,10 +704,10 @@ export async function convertPRsToStoreItems(
     //
     // A label set is complete, not a sample: Raycast's PR bot (scripts/bots/pr-bot.ts in
     // raycast/extensions) returns before adding any `extension:` label when a PR touches more
-    // than one extension. So a labelled PR touches exactly one, and a multi-extension removal
-    // arrives unlabelled and takes the /files path below, which finds every slug.
+    // than one extension. So a labeled PR touches exactly one, and a multi-extension removal
+    // arrives unlabeled and takes the /files path below, which finds every slug.
     //
-    // Only an unlabelled PR — e.g. a staff bulk removal like "Removed two extensions" —
+    // Only an unlabeled PR — e.g. a staff bulk removal like "Removed two extensions" —
     // falls back to /files, which requires every file under extensions/<slug>/ on the
     // first page of the PR's file list (100; it does not paginate) to be deleted. That
     // call is budgeted like every other.
@@ -823,7 +823,7 @@ export async function convertPRsToStoreItems(
     // while the per-scan budget lasts. Without this cap a scan where many lookups miss
     // costs one billed request per PR (measured: 29), so two scans exhaust the 60/hour
     // unauthenticated quota and the extension locks itself out. A PR that misses the
-    // budget simply keeps its title-derived slug, which is the pre-existing behaviour.
+    // budget simply keeps its title-derived slug, which is the pre-existing behavior.
     if (!pkgInfo && filesBudget.spend()) {
       const fileSlug = await fetchExtensionSlugFromPRFiles(pr.number);
       if (fileSlug && fileSlug !== resolvedSlug) {
@@ -963,7 +963,7 @@ function installedExtensionsDir(): string | null {
  *
  * Null, never an empty or partial Set, whenever the read cannot be trusted — a filter
  * that fails closed looks exactly like "you have no updates":
- * - the bundle id is unrecognised, or the directory is missing or unreadable;
+ * - the bundle id is unrecognized, or the directory is missing or unreadable;
  * - the result does not contain THIS extension. It is necessarily installed while it
  *   runs, so its absence means we are reading the wrong directory. That check is what
  *   makes an empty Set impossible, and it catches a relayout or an unanticipated
