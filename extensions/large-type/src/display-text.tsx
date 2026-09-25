@@ -87,7 +87,11 @@ function estimateLineWidth(line: string, monospace: boolean): number {
   const splitter = new Graphemer();
   return splitter.splitGraphemes(line).reduce((width, char) => {
     // CJK, emoji and other wide characters
-    if (/[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]/.test(char)) {
+    if (
+      /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6\u{20000}-\u{2FA1F}\u{30000}-\u{3FFFD}]/u.test(
+        char,
+      )
+    ) {
       return width + 1.1;
     }
     if (/\p{Extended_Pictographic}/u.test(char)) {
@@ -226,7 +230,7 @@ export default function DisplayText({ inputText }: DisplayTextProps) {
     const lineHeight = fontSize * 1.2;
     const padding = fontSize / 4;
     const monospace = preferences.fontStyle === "monospace";
-    const textWidth = Math.max(...lines.map((line) => estimateLineWidth(line, monospace))) * fontSize;
+    const textWidth = lines.reduce((max, line) => Math.max(max, estimateLineWidth(line, monospace)), 0) * fontSize;
 
     // Grow the viewBox to fit the text, so it is scaled down to fit the window instead of being cut off
     const svgWidth = Math.ceil(Math.max(700, textWidth + padding * 2));
