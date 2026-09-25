@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Profile Search, Switching, and Tab Moves] - {PR_MERGE_DATE}
+## [Profile Search, Switching, and Tab Moves] - 2026-09-25
 
 - Search profiles by profile name, Google account name, or email, including accounts without an avatar.
 - Make profile switching independent of Chrome's menu order and language, and fall back to opening the profile directly when menu automation is unavailable.
