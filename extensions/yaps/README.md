@@ -7,18 +7,19 @@ executable; it does not replace Yaps or create a vault for you.
 
 ## Commands
 
-- **Search Yaps Memory** — shows recently updated notes before you type, then searches note titles
+- **Search Yaps Memory:** shows recently updated notes before you type, then searches note titles
   and contents through the Yaps local index. View Markdown, copy a wikilink or the full note, open
   the Markdown file, or reveal it in Finder.
-- **Save Clipboard to Yaps** — creates a Markdown note from the current clipboard text in `Inbox`
+- **Save Clipboard to Yaps:** creates a Markdown note from the current clipboard text in `Inbox`
   (or the vault-relative folder selected in extension preferences). The note title is derived from
   the first non-empty clipboard line, or from the current date and time when no non-empty line is
   available.
-- **Open Yaps** — launches the desktop app, with a download-page fallback when it is not installed.
+- **Open Yaps:** launches the desktop app, with a download-page fallback when it is not installed.
 
 ## First-day setup
 
-1. Install Yaps for macOS from [yaps.ai/download](https://yaps.ai/download) and configure a vault.
+1. Install Yaps for macOS from [yaps.ai/download](https://yaps.ai/download), sign in, and choose a
+   vault. An active free trial or Yaps Pro is required.
 2. Install **Yaps Memory for Raycast** from the Raycast Store.
 3. Run **Search Yaps Memory**. With an empty search field it shows recently updated notes; type to
    search note titles and contents.
