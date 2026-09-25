@@ -1,5 +1,10 @@
 # Sunsama Changelog
 
+## [Fix Store Publish] - {PR_MERGE_DATE}
+
+- Fixed the store build failing on the AI tools' subtask lists. The AI now
+  sends subtasks one per line instead of as a list. Nothing changes for you.
+
 ## [Deep Links] - 2026-09-25
 
 - Turn on "Use Deep Links" in the extension preferences to open tasks in the
