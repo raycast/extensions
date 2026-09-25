@@ -138,6 +138,7 @@ export const defaultCreateReminderFormLayout: CreateReminderFormLayoutItem[] = [
   { type: "field", id: "notes", enabled: true },
   createSeparatorItem(),
   { type: "field", id: "dueDate", enabled: true },
+  { type: "field", id: "earlyReminder", enabled: true },
   { type: "field", id: "recurrence", enabled: true },
   { type: "field", id: "list", enabled: true },
   { type: "field", id: "priority", enabled: true },
