@@ -34,14 +34,14 @@ Bento Window is inspired by [Window Layouts](https://www.raycast.com/teemu_suvin
 
 Bento Window is intentionally **narrower and more opinionated**. It's built for one workflow: bind a hotkey, press it, and your app's windows snap into a grid. No menus, no views, no choices at runtime.
 
-| | Window Layouts | Bento Window |
-|---|---|---|
-| **Scope** | All windows on the desktop | Single app's windows (or all, your choice) |
-| **Auto-detect target app** | — | ✅ uses the focused window's app |
-| **Layout philosophy** | Multiple commands for different layouts | Grid adapts to window count |
-| **Own layout grids** | Shared grid definitions | Opinionated grids (e.g. 3 windows → 2 small + 1 big, not 3 equal columns) |
-| **Interface** | Multiple commands | Two no-view commands (app / all windows), hotkey-optimized |
-| **Reversible** | — | ✅ press the hotkey again to restore original positions |
+|                            | Window Layouts                          | Bento Window                                                              |
+| -------------------------- | --------------------------------------- | ------------------------------------------------------------------------- |
+| **Scope**                  | All windows on the desktop              | Single app's windows (or all, your choice)                                |
+| **Auto-detect target app** | —                                       | ✅ uses the focused window's app                                          |
+| **Layout philosophy**      | Multiple commands for different layouts | Grid adapts to window count                                               |
+| **Own layout grids**       | Shared grid definitions                 | Opinionated grids (e.g. 3 windows → 2 small + 1 big, not 3 equal columns) |
+| **Interface**              | Multiple commands                       | Two no-view commands (app / all windows), hotkey-optimized                |
+| **Reversible**             | —                                       | ✅ press the hotkey again to restore original positions                   |
 
 ## Layouts
 
@@ -118,7 +118,7 @@ npm install
 npm run dev
 ```
 
-`npm run dev` registers the extension with Raycast and watches for code changes. You can `Ctrl+C` it once the extension shows up — the registration persists.
+`npm run dev` registers the extension with Raycast and watches for code changes. It also compiles the Swift helper in `swift/` (macOS 13+, Xcode or Command Line Tools required). The first build can take a minute; later builds are incremental. You can `Ctrl+C` it once the extension shows up — the registration persists.
 
 </details>
 

@@ -8,7 +8,7 @@ let package = Package(
     .macOS(.v13)
   ],
   dependencies: [
-    .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.1.0")
+    .package(url: "https://github.com/raycast/extensions-swift-tools.git", from: "1.1.0")
   ],
   targets: [
     .executableTarget(

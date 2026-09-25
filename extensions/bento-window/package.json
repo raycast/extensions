@@ -5,9 +5,14 @@
   "description": "Tile multiple windows of the same app into a bento-box grid. The grid auto-adapts to the window count (2×2, 3×3, 5×2, etc.).",
   "icon": "extension-icon.png",
   "author": "Popo",
-  "categories": ["Productivity", "System"],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "tile",

@@ -1,10 +1,10 @@
-// 免 Pro 的窗口后端，实现在 swift/：枚举走 CGWindowList（无需权限），读写走
-// AXUIElement 直调（需要给 Raycast 授「辅助功能」权限）。
-// 刻意不读 CG 窗口标题——那需要屏幕录制权限；窗口匹配只用 pid + 当前坐标。
+// Pro-free window backend, implemented in swift/: enumeration via CGWindowList (no permission),
+// read/write via direct AXUIElement calls (Raycast needs Accessibility permission).
+// Deliberately does not read CG window titles — that requires Screen Recording; matching uses pid + current bounds only.
 import { listState, moveWindows, probeTileable } from "swift:../swift";
 
 export interface WMWindow {
-  id: string; // kCGWindowNumber，窗口存活期间稳定，创建顺序单调递增
+  id: string; // kCGWindowNumber; stable while the window lives; creation order is monotonic
   pid: number;
   appName: string;
   x: number;
@@ -22,25 +22,25 @@ export interface WMRect {
 
 export interface WMScreen {
   id: string;
-  frame: WMRect; // 整屏，CG 左上角原点坐标系
-  visible: WMRect; // 去掉菜单栏和 Dock 的可用区域
+  frame: WMRect; // full screen, CG top-left origin
+  visible: WMRect; // usable area excluding menu bar and Dock
 }
 
 export interface WMState {
-  windows: WMWindow[]; // CG 返回序。多屏下按 Space 分组，不是全局 z-order
+  windows: WMWindow[]; // CG return order; on multi-display setups grouped by Space, not global z-order
   screens: WMScreen[];
-  cursor: { x: number; y: number }; // CG 左上角原点坐标系
+  cursor: { x: number; y: number }; // CG top-left origin
 }
 
 export interface WMMove {
   id: string;
   pid: number;
-  // 当前坐标，用于在 AX 窗口列表里定位目标窗口
+  // current bounds, used to locate the window in the AX window list
   cx: number;
   cy: number;
   cw: number;
   ch: number;
-  // 目标坐标
+  // target bounds
   x: number;
   y: number;
   width: number;
@@ -53,13 +53,13 @@ export async function getState(): Promise<WMState> {
   return (await listState()) as WMState;
 }
 
-// 返回候选里真正能被平铺的窗口 id。AX 里对不上号或不可 resize / 移动的一律剔除，
-// 它们进网格只会占一个空槽。
+// Returns ids of candidates that can actually be tiled. Unmatched or non-resizable / non-movable
+// AX windows are dropped — they would only occupy an empty grid slot.
 export async function getTileable(windows: WMWindow[]): Promise<Set<string>> {
   if (windows.length === 0) return new Set();
   const items = windows.map((w) => ({ id: w.id, pid: w.pid, cx: w.x, cy: w.y, cw: w.width, ch: w.height }));
   const { tileable, trusted } = (await probeTileable(items)) as { tileable: string[]; trusted: boolean };
-  // 未授「辅助功能」就别再往下走到布局阶段，直接把授权引导抛出去
+  // Without Accessibility permission, surface the grant prompt instead of continuing to layout
   if (!trusted) throw new AccessibilityError("Accessibility permission not granted");
   return new Set(tileable);
 }
