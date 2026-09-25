@@ -49,11 +49,27 @@ export function formatEarlyReminderShort(seconds?: number | null): string {
   return `${months}mo before`;
 }
 
+const UNITS = "(?:minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|wks?|w|months?|mos?)";
+
 export function extractEarlyReminderFromText(text: string): { title: string; earlyReminderSeconds: number | null } {
   const patterns = [
-    /(?:(?:remind|alert)\s+me\s+(?:at\s+)?|with\s+|early\s+reminder\s+|early\s+alert\s+)?(\d+)\s*(mins?|minutes?|m|hours?|hrs?|h|days?|d|weeks?|wks?|w|months?|mos?)\s*(?:before|early|ahead|in\s+advance|prior)(?:\s*(?:reminder|alert))?/i,
-    /(?:with\s+|and\s+)?(\d+)\s*(mins?|minutes?|m|hours?|hrs?|h|days?|d|weeks?|wks?|w|months?|mos?)\s*(?:early\s+reminder|early\s+alert)/i,
-    /(?:remind|alert)\s+me\s+(\d+)\s*(mins?|minutes?|m|hours?|hrs?|h|days?|d|weeks?|wks?|w|months?|mos?)(?:\s*(?:before|early|ahead|in\s+advance))?/i,
+    new RegExp(
+      `(?:remind|alert)\\s+me\\s+(?:at\\s+)?(\\d+)\\s*(${UNITS})\\b(?:\\s*(?:before|early|ahead|in\\s+advance))?(?:\\s*(?:reminder|alert))?`,
+      "i",
+    ),
+    new RegExp(
+      `(?:with|and)\\s+(\\d+)\\s*(${UNITS})\\b\\s*(?:before|early|ahead|in\\s+advance)(?:\\s*(?:reminder|alert))?`,
+      "i",
+    ),
+    new RegExp(
+      `(?:with|and)\\s+(?:an?\\s+)?early\\s+(?:reminder|alert)(?:\\s+(?:of|at|by|:))?\\s*(\\d+)\\s*(${UNITS})\\b`,
+      "i",
+    ),
+    new RegExp(
+      `early\\s+(?:reminder|alert)(?:\\s*:|\\s+of|\\s+at|\\s+by)?\\s+(\\d+)\\s*(${UNITS})\\b(?:\\s*(?:before|early|ahead|in\\s+advance))?`,
+      "i",
+    ),
+    new RegExp(`(\\d+)\\s*(${UNITS})\\b\\s*early(?:\\s+(?:reminder|alert))?`, "i"),
   ];
 
   for (const pattern of patterns) {

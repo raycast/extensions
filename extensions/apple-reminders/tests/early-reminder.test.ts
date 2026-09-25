@@ -64,6 +64,18 @@ describe("Early Reminder Helpers", () => {
       assert.equal(result.title, "Haircut tomorrow 4pm");
     });
 
+    it("extracts 'remind me 30 minutes' without 'before' and consumes whole unit word", () => {
+      const result = extractEarlyReminderFromText("Dentist tomorrow 3pm remind me 30 minutes #Personal");
+      assert.equal(result.earlyReminderSeconds, 1800);
+      assert.equal(result.title, "Dentist tomorrow 3pm #Personal");
+    });
+
+    it("extracts 'remind me 15 minutes' without leaving remind me or partial words in title", () => {
+      const result = extractEarlyReminderFromText("Meeting tomorrow 3pm remind me 15 minutes");
+      assert.equal(result.earlyReminderSeconds, 900);
+      assert.equal(result.title, "Meeting tomorrow 3pm");
+    });
+
     it("extracts 'with 15 min early reminder'", () => {
       const result = extractEarlyReminderFromText("Team standup Friday 10am with 15 min early reminder");
       assert.equal(result.earlyReminderSeconds, 900);
@@ -76,10 +88,16 @@ describe("Early Reminder Helpers", () => {
       assert.equal(result.title, "Doctor appointment");
     });
 
-    it("extracts '1 day before'", () => {
-      const result = extractEarlyReminderFromText("Submit tax documents 1 day before");
-      assert.equal(result.earlyReminderSeconds, 86400);
-      assert.equal(result.title, "Submit tax documents");
+    it("extracts 'early reminder: 2 hours'", () => {
+      const result = extractEarlyReminderFromText("Submit report early reminder: 2 hours");
+      assert.equal(result.earlyReminderSeconds, 7200);
+      assert.equal(result.title, "Submit report");
+    });
+
+    it("does not extract early reminder when there is no explicit cue (e.g. 2 days before the demo)", () => {
+      const result = extractEarlyReminderFromText("Review PR 2 days before the demo tomorrow");
+      assert.equal(result.earlyReminderSeconds, null);
+      assert.equal(result.title, "Review PR 2 days before the demo tomorrow");
     });
 
     it("returns null when no early reminder phrase exists", () => {
