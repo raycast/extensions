@@ -1,0 +1,79 @@
+{
+  "scenarios": [
+    {
+      "expected": "unavailableExport; noHandoff; doNotInventEmptyReadyInventory",
+      "id": "missing-export",
+      "injectedErrno": "ENOENT",
+      "operation": "readExport",
+      "path": "raycast_data.json"
+    },
+    {
+      "expected": "permissionDenied; noHandoff; doNotReportFreshOrReady",
+      "id": "permission-denied-export",
+      "injectedErrno": "EACCES",
+      "operation": "readExport",
+      "path": "raycast_data.json"
+    },
+    {
+      "expected": "noReceiptObservedYet; URLopenSuccessIsNotAcceptance",
+      "id": "missing-receipts",
+      "injectedErrno": "ENOENT",
+      "operation": "readReceiptEnvelope",
+      "path": "raycast_receipts.json"
+    },
+    {
+      "expected": "receiptReadFailure; neverInferCompletion",
+      "id": "permission-denied-receipts",
+      "injectedErrno": "EACCES",
+      "operation": "readReceiptEnvelope",
+      "path": "raycast_receipts.json"
+    },
+    {
+      "expected": "storageUnavailable; confirmationBlocked; preserveExistingFile",
+      "fixture": "malformed-truncated.input",
+      "id": "corrupt-receipts",
+      "operation": "appBootstrapReceiptStore",
+      "path": "raycast_receipts.json"
+    },
+    {
+      "expected": "returnCurrentReceipt; executorInvocationCountUnchanged",
+      "fixture": "request-valid.json",
+      "id": "same-id-identical-payload",
+      "operation": "receiveTwice"
+    },
+    {
+      "expected": "requestConflict; originalReceiptUnchanged; noSecondExecution",
+      "fixture": "request-valid.json",
+      "id": "same-id-conflicting-payload",
+      "mutate": {
+        "targets[0].expectedTargetVersion": "3.0"
+      },
+      "operation": "receiveTwiceWithMutation"
+    },
+    {
+      "expected": "sourceChanged; noFallback; noOutOfRequestTargets",
+      "fixture": "request-valid.json",
+      "id": "preflight-await-source-change",
+      "mutateDuringAwait": {
+        "targets[0].liveSource": "sparkle"
+      },
+      "operation": "injectedExecutorPreflight"
+    },
+    {
+      "expected": "observeExportRevision100Then101; sameInventoryAndCheckRevision",
+      "fixtures": [
+        "same-mtime-different-revision-a.json",
+        "same-mtime-different-revision-b.json"
+      ],
+      "id": "same-mtime-new-revision",
+      "operation": "readExportTwice",
+      "setBothMtime": "2026-09-10T12:00:00Z"
+    },
+    {
+      "expected": "readOnlyFixedPaths; neverWriteReceiptOrCallVerificationRetryDeleteMutationURL",
+      "id": "receipt-not-mutation-api",
+      "operation": "consumerPolicy"
+    }
+  ],
+  "schemaVersion": 1
+}
