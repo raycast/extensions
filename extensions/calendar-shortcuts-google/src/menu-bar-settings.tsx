@@ -33,10 +33,6 @@ import {
 } from "./lib/menu-bar-display-settings";
 import { GoogleCalendarEntry } from "./lib/types";
 
-interface Preferences {
-  calendarSelectionMode: CalendarSelectionMode;
-}
-
 type Values = {
   scheduleCalendars: string[];
   menuBarCalendars: string[];
@@ -156,7 +152,7 @@ function sameIds(a: string[], b: string[]): boolean {
 }
 
 function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

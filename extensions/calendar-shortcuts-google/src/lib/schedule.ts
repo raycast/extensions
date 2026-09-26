@@ -7,6 +7,7 @@ export type ScheduleOptions = {
   hideDeclined: boolean;
   selectionMode: CalendarSelectionMode;
   enabledCalendarIds?: string[] | null;
+  includeBirthdays?: boolean;
 };
 
 function connectedGoogleAccountId(
@@ -141,12 +142,30 @@ export async function loadSchedule(options: ScheduleOptions): Promise<{
     }),
   );
 
+  const failedCalendars = results.flatMap((result, index) =>
+    result.status === "rejected"
+      ? [calendarEntryDisplayName(included[index])]
+      : [],
+  );
+
+  if (failedCalendars.length > 0) {
+    throw new Error(
+      `Could not load events from ${failedCalendars.join(", ")}. DayCal stopped rather than showing an incomplete schedule.`,
+    );
+  }
+
   const events: ScheduleEvent[] = [];
   for (const result of results) {
     if (result.status === "fulfilled") events.push(...result.value);
   }
 
   events.sort((a, b) => eventStartMillis(a) - eventStartMillis(b));
+
+  // The persistent Menu Bar does not expose the synthetic Birthdays filter.
+  // Avoid its much wider discovery query on every menu-bar refresh.
+  if (options.includeBirthdays === false) {
+    return { calendars: included, events, birthdays: [] };
+  }
 
   // Birthdays are a synthetic layer in DayCal. Google can surface
   // contact birthdays through the primary calendar, so a normal calendar-ID
@@ -158,8 +177,11 @@ export async function loadSchedule(options: ScheduleOptions): Promise<{
   const birthdayEnd = new Date(birthdayStart);
   birthdayEnd.setDate(birthdayEnd.getDate() + 367);
 
+  // Google exposes contact-linked birthday events through the connected
+  // account's primary calendar. Restrict the rolling-year discovery query to
+  // that calendar instead of querying every readable calendar.
   const birthdayCalendars = calendars.filter(
-    (calendar) => calendar.accessRole !== "none",
+    (calendar) => calendar.primary && calendar.accessRole !== "none",
   );
 
   const birthdayResults = await Promise.allSettled(
@@ -181,6 +203,18 @@ export async function loadSchedule(options: ScheduleOptions): Promise<{
         }));
     }),
   );
+
+  const failedBirthdayCalendars = birthdayResults.flatMap((result, index) =>
+    result.status === "rejected"
+      ? [calendarEntryDisplayName(birthdayCalendars[index])]
+      : [],
+  );
+
+  if (failedBirthdayCalendars.length > 0) {
+    throw new Error(
+      `Could not load birthday events from ${failedBirthdayCalendars.join(", ")}. DayCal stopped rather than showing incomplete birthday data.`,
+    );
+  }
 
   const birthdayCandidates: ScheduleEvent[] = [];
   for (const result of birthdayResults) {
@@ -420,7 +454,8 @@ export function scheduleOverview(
 
   const todaysEvents = items.filter((item) => {
     const start = eventStartMillis(item);
-    return start >= dayStart.getTime() && start < dayEnd.getTime();
+    const end = eventEndMillis(item);
+    return start < dayEnd.getTime() && end > dayStart.getTime();
   });
 
   const todaySummary =

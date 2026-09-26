@@ -52,10 +52,10 @@ Raycast will load the local extension.
 Open **Schedule** or explicitly launch **Calendar Menu Bar**. On first use:
 
 1. sign in to Google through Raycast;
-2. DayCal opens **Set Up Calendars** for the connected account if setup is incomplete;
+2. DayCal opens **Set up Calendars** for the connected account if setup is incomplete;
 3. complete the three-step setup, including choosing independent calendar sets for Schedule and the Menu Bar.
 
-Automatic/background Menu Bar launches stay quiet when setup is incomplete. The dropdown keeps a **Set Up Calendars** action so you can finish when ready; background refreshes do not open the setup wizard.
+Automatic/background Menu Bar launches stay quiet when setup is incomplete. The dropdown keeps a **Set up Calendars** action so you can finish when ready; background refreshes do not open the setup wizard.
 
 If Google sign-in fails during the beta, please report it through GitHub Issues. DayCal’s Google OAuth verification is approved for the requested sensitive Calendar scope, so new users should not see Google’s unverified-app warning.
 

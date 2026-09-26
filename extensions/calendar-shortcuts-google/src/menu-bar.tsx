@@ -21,7 +21,6 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CalendarSelectionMode,
   getMenuBarEnabledCalendarIds,
   isCalendarSetupComplete,
 } from "./lib/calendar-settings";
@@ -51,13 +50,6 @@ type MenuBarMode =
   "never" | "2" | "5" | "10" | "15" | "30" | "60" | "upcoming" | "always";
 
 type MenuBarHeadlineStyle = "smart" | "event-only";
-
-interface Preferences {
-  hideDeclined: boolean;
-  calendarSelectionMode: CalendarSelectionMode;
-  menuBarMode: MenuBarMode;
-  menuBarHeadlineStyle: MenuBarHeadlineStyle;
-}
 
 const MENU_BAR_CACHE_KEY_PREFIX = "schedule-snapshot-v3";
 const MENU_BAR_CACHE_STALE_MS = 3 * 60_000;
@@ -586,7 +578,7 @@ function Command(props: LaunchProps<{ launchContext?: MenuBarLaunchContext }>) {
     () => menuBarSessionRevision() === sessionRevision,
     [sessionRevision],
   );
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const displayOnlyRefresh =
     environment.launchType === LaunchType.Background &&
     props.launchContext?.refreshMode === "display";
@@ -642,7 +634,7 @@ function Command(props: LaunchProps<{ launchContext?: MenuBarLaunchContext }>) {
 
   const reload = useCallback(async () => {
     if (!sessionIsCurrent()) return;
-    const latestPreferences = getPreferenceValues<Preferences>();
+    const latestPreferences = getPreferenceValues();
     setMenuBarHeadlineStyle(latestPreferences.menuBarHeadlineStyle ?? "smart");
 
     // Calendar Settings lives in a separate Raycast command. Its LocalStorage
@@ -687,6 +679,7 @@ function Command(props: LaunchProps<{ launchContext?: MenuBarLaunchContext }>) {
         hideDeclined: Boolean(latestPreferences.hideDeclined),
         selectionMode: latestPreferences.calendarSelectionMode,
         enabledCalendarIds,
+        includeBirthdays: false,
       });
 
       if (!sessionIsCurrent()) return;

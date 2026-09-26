@@ -67,10 +67,6 @@ type SetupDraft = {
   keywordText: KeywordValues;
 };
 
-interface Preferences {
-  calendarSelectionMode: CalendarSelectionMode;
-}
-
 type Props = {
   onComplete?: () => void | Promise<void>;
 };
@@ -196,7 +192,7 @@ async function refreshMenuBar(): Promise<void> {
 }
 
 export function CalendarSetupView({ onComplete }: Props) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [step, setStep] = useState<SetupStep>(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

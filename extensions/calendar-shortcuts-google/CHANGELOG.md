@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Removed **Check Google Calendar Connection** from Raycast Root Search. Connection diagnostics remain available contextually from DayCal error states without exposing a standalone support command.
 - Removed development-only **Refresh Diagnostics**, **Test Quick Add Parsing**, and **Replay Calendar Setup** commands from the public Raycast manifest ahead of Store submission. Their source and regression tooling remain available for development.

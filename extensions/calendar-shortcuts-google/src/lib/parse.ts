@@ -213,7 +213,26 @@ export function parseDetails(
     };
   }
 
-  return { durationMinutes: parseDuration(raw), location: "", description: "" };
+  const durationLike =
+    /^\d+$/.test(raw) ||
+    /^\d+(?:\.\d+)?\s*(?:(?:mins?|minutes?|hrs?|hours?|days?)\b|[mhd](?=\s|\d|$))/i.test(
+      raw,
+    );
+
+  if (durationLike) {
+    return {
+      durationMinutes: parseDuration(raw),
+      location: "",
+      description: "",
+    };
+  }
+
+  const place = classifyPlace(raw);
+  return {
+    durationMinutes: defaultDurationMinutes,
+    location: place.location,
+    description: place.description,
+  };
 }
 
 type Clock = { hour: number; minute: number };

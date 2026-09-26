@@ -157,6 +157,35 @@ const checks = [
       count(scheduleLib, "withAccountAwareGoogleCalendarLink(event, authUser)") >= 2,
     detail: "Normal events and birthdays both carry account-aware Google Calendar URLs into Schedule and Menu Bar.",
   },
+  {
+    label: "Calendar request failures are surfaced",
+    pass:
+      scheduleLib.includes("const failedCalendars = results.flatMap") &&
+      scheduleLib.includes(
+        "DayCal stopped rather than showing an incomplete schedule",
+      ),
+    detail:
+      "A failed calendar request stops the load instead of silently presenting partial data as complete.",
+  },
+  {
+    label: "Birthday discovery is limited and skipped by Menu Bar",
+    pass:
+      scheduleLib.includes("options.includeBirthdays === false") &&
+      scheduleLib.includes(
+        'calendar.primary && calendar.accessRole !== "none"',
+      ) &&
+      menuBar.includes("includeBirthdays: false"),
+    detail:
+      "Menu Bar refreshes skip rolling-year birthday discovery, and Schedule limits it to the primary calendar.",
+  },
+  {
+    label: "Today overview counts events spanning the current day",
+    pass: scheduleLib.includes(
+      "start < dayEnd.getTime() && end > dayStart.getTime()",
+    ),
+    detail:
+      "Multi-day all-day events are counted while they overlap today, even if they started earlier.",
+  },
 ];
 
 console.log("\nDayCal refresh contract\n");

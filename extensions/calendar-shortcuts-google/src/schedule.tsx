@@ -31,7 +31,6 @@ import {
   transferModeFor,
 } from "./event-actions";
 import {
-  CalendarSelectionMode,
   getScheduleEnabledCalendarIds,
   isCalendarSetupComplete,
 } from "./lib/calendar-settings";
@@ -51,12 +50,6 @@ import {
   scheduleOverview,
 } from "./lib/schedule";
 import { GoogleCalendarEntry, ScheduleEvent } from "./lib/types";
-
-interface Preferences {
-  daysAhead: string;
-  hideDeclined: boolean;
-  calendarSelectionMode: CalendarSelectionMode;
-}
 
 function mapsUrl(location: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
@@ -203,7 +196,7 @@ function Command(props: ScheduleLaunchProps) {
 }
 
 function ScheduleView() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [isLoading, setIsLoading] = useState(true);
   const [setupComplete, setSetupComplete] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -262,7 +255,7 @@ function ScheduleView() {
 
   // A newly connected Google account should not leave the user wondering why
   // Schedule is showing setup fields inside a different command. Route first-run
-  // users straight to the dedicated Set Up Calendars command instead.
+  // users straight to the dedicated Set up Calendars command instead.
   useEffect(() => {
     if (setupComplete !== false || setupRedirectStartedRef.current) return;
 
@@ -406,8 +399,8 @@ function ScheduleView() {
           icon={setupRedirectError ? Icon.Warning : Icon.Gear}
           title={
             setupRedirectError
-              ? "Could not open Set Up Calendars"
-              : "Opening Set Up Calendars…"
+              ? "Could not open Set up Calendars"
+              : "Opening Set up Calendars…"
           }
           description={
             setupRedirectError

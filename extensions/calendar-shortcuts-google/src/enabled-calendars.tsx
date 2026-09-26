@@ -15,7 +15,6 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  CalendarSelectionMode,
   allReadableCalendarIds,
   calendarEntryDisplayName,
   getMenuBarEnabledCalendarIds,
@@ -26,10 +25,6 @@ import {
 } from "./lib/calendar-settings";
 import { listCalendars } from "./lib/google";
 import { GoogleCalendarEntry } from "./lib/types";
-
-interface Preferences {
-  calendarSelectionMode: CalendarSelectionMode;
-}
 
 type CalendarTarget = "schedule" | "menu-bar";
 
@@ -50,7 +45,7 @@ async function refreshMenuBar(): Promise<void> {
 }
 
 function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [calendars, setCalendars] = useState<GoogleCalendarEntry[]>([]);

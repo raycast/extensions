@@ -28,6 +28,26 @@ assert.deepEqual(parseDetails("45m @ https://meet.google.com/abc-defg-hij"), {
   location: "",
   description: "Meeting link: https://meet.google.com/abc-defg-hij",
 });
+assert.deepEqual(parseDetails("Zoom"), {
+  durationMinutes: 60,
+  location: "",
+  description: "Meeting via Zoom",
+});
+assert.deepEqual(parseDetails("https://meet.google.com/abc-defg-hij"), {
+  durationMinutes: 60,
+  location: "",
+  description: "Meeting link: https://meet.google.com/abc-defg-hij",
+});
+assert.deepEqual(parseDetails("Miller and Carter"), {
+  durationMinutes: 60,
+  location: "Miller and Carter",
+  description: "",
+});
+assert.deepEqual(parseDetails("123 Main Street"), {
+  durationMinutes: 60,
+  location: "123 Main Street",
+  description: "",
+});
 assert.deepEqual(parseDetails(undefined, 1440), {
   durationMinutes: 1440,
   location: "",
