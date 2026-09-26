@@ -2,6 +2,10 @@
 
 ## [Command Bar] - 2026-09-26
 
+- Focus the tab currently visible in Orion when the Command Bar opens with an empty query, and keep following it if you switch tabs directly in Orion while the Command Bar stays open, instead of leaving selection to Raycast's own default. When Top Hit ranks two open tabs with the same URL as an equal match, prefer the one currently visible in Orion over an arbitrary duplicate.
+
+## [Command Bar] - 2026-09-26
+
 - Fix Top Hit (and the typed-address row) occasionally not receiving focus when it resolves after Raycast has already rendered the rest of the results, most noticeably when the winning candidate needs a History lookup. Raycast's List can retain a stale native selection instead of applying the updated `selectedItemId` when the full result set changes at the same time, so pressing Enter could trigger the wrong action (e.g. "Search the Web" instead of the intended result) without any visible sign something was off. Render only the Top Hit/address row until Raycast acknowledges the selection, then restore the rest of the sections.
 
 ## [Command Bar] - 2026-09-25
