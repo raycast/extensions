@@ -31,6 +31,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "airport-lounge-list",
+    title: "Airport Lounge List",
+    description:
+      "Search 8,500+ airport lounges and check access by card, membership or status. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Airport-Lounge-List/mcp-server/HEAD/plugins/airport-lounge-list/assets/logo.png",
+    homepage: "https://airportloungelist.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.airportloungelist.com/mcp"],
+    },
+  },
+  {
     name: "atono",
     title: "Atono",
     description:
@@ -48,6 +60,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         X_API_KEY: "<YOUR_API_KEY_HERE>",
       },
+    },
+  },
+  {
+    name: "award-travel-finder",
+    title: "Award Travel Finder",
+    description:
+      "Search award flight availability across 28 airlines and award-chart pricing for 23 loyalty programs. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/AwardTravelFinder/mcp/HEAD/logo.png",
+    homepage: "https://awardtravelfinder.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.awardtravelfinder.com/mcp"],
     },
   },
   {
@@ -359,6 +383,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-filesystem", "YOUR_ALLOWED_PATH_HERE"],
+    },
+  },
+  {
+    name: "flightqueue",
+    title: "FlightQueue",
+    description:
+      "Airport security wait times, FAA delays, EES border queues and baggage stats. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Flight-Queue/mcp/HEAD/assets/logo.png",
+    homepage: "https://flightqueue.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.flightqueue.com/mcp"],
+    },
+  },
+  {
+    name: "flightseatmap",
+    title: "FlightSeatMap",
+    description:
+      "Seat maps, seat ratings, traveller reviews and seat alerts for 117 airlines. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://avatars.githubusercontent.com/u/277431901?s=512",
+    homepage: "https://flightseatmap.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.flightseatmap.com/mcp"],
     },
   },
   {
