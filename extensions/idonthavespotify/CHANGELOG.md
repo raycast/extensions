@@ -9,6 +9,7 @@
 - Show conversion progress, request timeouts, match verification, and actionable authentication errors.
 - Expire cached results after one hour and keep them separate between instances.
 - Convert clipboard links automatically only when they come from a supported music service or the configured instance.
+- Accept Google Music Share links from the clipboard and keep audio preview as the default result action when available.
 - Fix the YouTube Music command filename to match its command ID (`toYouTube.ts`).
 - Document the self-hosted instance requirement for direct conversion from Raycast.
 

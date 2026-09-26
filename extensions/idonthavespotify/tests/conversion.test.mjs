@@ -108,6 +108,33 @@ test("supports complete universal URLs and encoded legacy IDs", () => {
   assert.equal(url.searchParams.get("id"), "a+b/c=&d");
 });
 
+test("automatic conversion accepts Google music shares without allowing unrelated Google pages", () => {
+  for (const link of ["https://share.google/abc123", "https://www.google.com/gasearch?q=example&source=sh/x/gs/m2/5"]) {
+    assert.equal(api.isKnownMusicLink(link), true, link);
+  }
+  for (const link of [
+    "https://www.google.com/search?q=private",
+    "https://www.google.com/gasearch/other",
+    "https://docs.google.com/document/private",
+    "https://www.google.com.attacker.test/gasearch",
+    "https://share.google.attacker.test/abc123",
+    "https://dzr.page.link/abc123",
+  ]) {
+    assert.equal(api.isKnownMusicLink(link), false, link);
+  }
+});
+
+test("no-view commands convert Google music shares from the clipboard", async () => {
+  for (const link of ["https://share.google/abc123", "https://www.google.com/gasearch?q=example"]) {
+    const request = respond();
+    globalThis.testClipboard = link;
+    await api.searchToClipboard("appleMusic");
+    assert.equal(JSON.parse(request.mock.calls[0].arguments[1].body).link, link);
+    assert.equal(globalThis.testCopied, destination);
+    mock.restoreAll();
+  }
+});
+
 test("accepts absent artwork and removes unavailable results and extra service fields", () => {
   const result = api.parseSearchResult(
     fixture({

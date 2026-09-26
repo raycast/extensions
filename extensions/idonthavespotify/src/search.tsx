@@ -188,16 +188,6 @@ export default function Command() {
                 subtitle={state.searchResult.description}
                 actions={
                   <ActionPanel>
-                    {universalUrl && <Action.OpenInBrowser title="Open Universal Link" url={universalUrl} />}
-                    {universalUrl && <Action.CopyToClipboard title="Copy Universal Link" content={universalUrl} />}
-                    {state.searchResult.links.length > 0 && (
-                      <Action.CopyToClipboard
-                        title="Copy All Platform Links"
-                        content={state.searchResult.links
-                          .map(({ type, url }) => `${getPlatformTitle(type)}: ${url}`)
-                          .join("\n")}
-                      />
-                    )}
                     {state.searchResult.audio && (
                       <>
                         <Action
@@ -212,6 +202,16 @@ export default function Command() {
                           shortcut={Keyboard.Shortcut.Common.Pin}
                         />
                       </>
+                    )}
+                    {universalUrl && <Action.OpenInBrowser title="Open Universal Link" url={universalUrl} />}
+                    {universalUrl && <Action.CopyToClipboard title="Copy Universal Link" content={universalUrl} />}
+                    {state.searchResult.links.length > 0 && (
+                      <Action.CopyToClipboard
+                        title="Copy All Platform Links"
+                        content={state.searchResult.links
+                          .map(({ type, url }) => `${getPlatformTitle(type)}: ${url}`)
+                          .join("\n")}
+                      />
                     )}
                   </ActionPanel>
                 }
