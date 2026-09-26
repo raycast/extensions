@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Menu Bar Server Health] - {PR_MERGE_DATE}
+## [Menu Bar Server Health] - 2026-09-26
 
 - Add a `Server Health` menu bar command showing disk/memory/container status for every configured instance, without opening Raycast's main window. The icon tints red when any instance's disk usage crosses a configurable threshold.
 
