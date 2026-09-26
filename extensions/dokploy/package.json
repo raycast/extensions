@@ -96,7 +96,7 @@
   "ai": {
     "evals": [
       {
-        "input": "What Dokploy instances do I have connected?",
+        "input": "@dokploy What instances do I have connected?",
         "mocks": {
           "list-instances": {
             "instances": [
@@ -118,7 +118,7 @@
         ]
       },
       {
-        "input": "What's running on staging?",
+        "input": "@dokploy What's running on staging?",
         "mocks": {
           "list-services": {
             "count": 1,
@@ -148,7 +148,7 @@
         ]
       },
       {
-        "input": "Give me the details for the api service",
+        "input": "@dokploy Give me the details for the api service",
         "mocks": {
           "get-service": {
             "name": "api",
@@ -180,7 +180,7 @@
         ]
       },
       {
-        "input": "Show me the logs for the api service",
+        "input": "@dokploy Show me the logs for the api service",
         "mocks": {
           "get-service-logs": {
             "service": "api",
@@ -202,7 +202,7 @@
         ]
       },
       {
-        "input": "Why did the api deploy fail?",
+        "input": "@dokploy Why did the api deploy fail?",
         "mocks": {
           "get-deployment-logs": {
             "service": "api",
