@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [AI Tools] - {PR_MERGE_DATE}
+
+- Add 7 read-only AI tools: List Instances, List Projects, List Services, Get Service, Get Service Logs, List Deployments, and Get Deployment Logs. Search across every configured instance by name, project, or kind.
+
 ## [Docker Cleanup] - 2026-09-26
 
 - Add a `Docker Cleanup` action to the `Docker` command: shows disk usage per category (containers, images, volumes, build cache) and lets you clean stopped containers, unused images, unused volumes, the build cache, or run a full prune, each behind a confirmation dialog. Requires an org-admin API key.

@@ -7,6 +7,9 @@ type Kind = keyof Pick<
   ServiceCollections,
   "applications" | "mariadb" | "mongo" | "mysql" | "postgres" | "redis" | "compose"
 >;
+/** `Candidate.deployType`'s own value space - the singular route-name form, not `Kind`'s plural
+ * collection-key form. Shared with the AI tools, which filter/report on this. */
+export type DeployType = "application" | "mariadb" | "mongo" | "mysql" | "postgres" | "redis" | "compose";
 // The deploy route is named after the singular kind ("application.deploy"), while the collection
 // on an environment/project is keyed by the plural ("applications") - both map from the same Kind.
 const KIND_ID_FIELDS: Record<Kind, string> = {
@@ -18,7 +21,7 @@ const KIND_ID_FIELDS: Record<Kind, string> = {
   redis: "redisId",
   compose: "composeId",
 };
-const DEPLOY_TYPES: Record<Kind, string> = {
+const DEPLOY_TYPES: Record<Kind, DeployType> = {
   applications: "application",
   mariadb: "mariadb",
   mongo: "mongo",
@@ -50,7 +53,7 @@ const STATUS_FIELDS: Record<Kind, string> = {
 export interface Candidate {
   id: string;
   idField: string;
-  deployType: string;
+  deployType: DeployType;
   icon: string;
   name: string;
   appName: string;
@@ -148,4 +151,61 @@ export async function loadCandidates(): Promise<LoadCandidatesResult> {
     ),
     hasInstances: true,
   };
+}
+
+export interface CandidateFilter {
+  /** Matched case-insensitively against an instance's name. */
+  instance?: string;
+  /** Matched case-insensitively against a project's name. */
+  project?: string;
+  kind?: DeployType;
+}
+
+export function matchesFilter(candidate: Candidate, filter: CandidateFilter): boolean {
+  if (filter.instance && !candidate.instanceName.toLowerCase().includes(filter.instance.toLowerCase())) return false;
+  if (filter.project && !candidate.projectName.toLowerCase().includes(filter.project.toLowerCase())) return false;
+  if (filter.kind && candidate.deployType !== filter.kind) return false;
+  return true;
+}
+
+/**
+ * Finds the one candidate a name/id refers to - for AI tools that act on "the service named X".
+ * Throws a clear, model-readable error (rather than silently guessing) when nothing matches, when
+ * the name is ambiguous across projects/instances, or when an unreachable instance might be hiding
+ * the real match.
+ */
+export async function resolveCandidate(nameOrId: string, filter: CandidateFilter = {}): Promise<Candidate> {
+  const { candidates, failedInstances, hasInstances } = await loadCandidates();
+  if (!hasInstances) throw new Error("No Dokploy instances are configured in this extension yet - add one first.");
+
+  const scoped = candidates.filter((candidate) => matchesFilter(candidate, filter));
+  const needle = nameOrId.toLowerCase();
+  const exact = scoped.filter(
+    (candidate) =>
+      candidate.id === nameOrId ||
+      candidate.name.toLowerCase() === needle ||
+      candidate.appName.toLowerCase() === needle,
+  );
+  const matches =
+    exact.length > 0 ? exact : scoped.filter((candidate) => candidate.name.toLowerCase().includes(needle));
+
+  if (matches.length === 0) {
+    const unreachable =
+      failedInstances.length > 0
+        ? ` (${failedInstances.map((failed) => `"${failed.name}" could not be reached: ${failed.error}`).join("; ")})`
+        : "";
+    throw new Error(`No service matching "${nameOrId}" was found${unreachable}.`);
+  }
+  if (matches.length > 1) {
+    const list = matches
+      .map(
+        (candidate) =>
+          `${candidate.name} (${candidate.deployType} in ${candidate.projectName}/${candidate.environmentName} on ${candidate.instanceName})`,
+      )
+      .join("; ");
+    throw new Error(
+      `Multiple services match "${nameOrId}": ${list}. Narrow the search with "project", "kind", or "instance".`,
+    );
+  }
+  return matches[0];
 }

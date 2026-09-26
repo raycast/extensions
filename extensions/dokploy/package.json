@@ -56,6 +56,43 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "list-instances",
+      "title": "List Instances",
+      "description": "List the Dokploy instances configured in this extension."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List every project across the configured Dokploy instance(s), with each project's environments and how many services each holds."
+    },
+    {
+      "name": "list-services",
+      "title": "List Services",
+      "description": "List every application, database, and Compose stack across the configured Dokploy instance(s), optionally filtered by instance, project, or kind."
+    },
+    {
+      "name": "get-service",
+      "title": "Get Service",
+      "description": "Get the details of one Dokploy service: what it builds from, its domains, and its current status."
+    },
+    {
+      "name": "get-service-logs",
+      "title": "Get Service Logs",
+      "description": "Read the runtime log of a Dokploy service - what the container is currently printing."
+    },
+    {
+      "name": "list-deployments",
+      "title": "List Deployments",
+      "description": "List the build history of a Dokploy application or Compose stack: what was deployed, when, and whether it failed."
+    },
+    {
+      "name": "get-deployment-logs",
+      "title": "Get Deployment Logs",
+      "description": "Read the build log of a Dokploy deployment - the log to check when a deploy failed."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^2.2.0"
