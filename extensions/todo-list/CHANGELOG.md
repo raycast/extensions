@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Windows Shortcuts, Backups, and AI Tools] - {PR_MERGE_DATE}
+## [Windows Shortcuts, Backups, and AI Tools] - 2026-09-26
 
 - Reload newer task data after conflicting saves and close stale tag/date forms so editing can continue from the refreshed list.
 - Show an error when opening the todo list or backup commands fails.
