@@ -1,3 +1,10 @@
+instructions: |
+  An @raycast-store-updates mention selects this extension. Do not treat the mention as the subject or search query unless the user explicitly asks about the Raycast Store Updates extension.
+  If totalMatches exceeds the number of items returned, state how many additional matches there are.
+  If updatesUnavailable is present, say that GitHub updates could not be loaded; any new extensions in items still came from the Store feed.
+  If updatesWindowIncomplete is true, say that update coverage is only guaranteed after updatesCoverageSince and that older updates may be missing.
+  For an updated item, updatedBy is the PR submitter, not necessarily the extension author. Use changeSummary for what changed when available.
+
 evals:
   - input: "@raycast-store-updates Show me the 2 newest extensions."
     mocks:
@@ -114,3 +121,61 @@ evals:
       - includes: "no new"
       - not:
           matches: "https?://"
+
+  - input: "@raycast-store-updates what's new this week?"
+    mocks:
+      find-store-updates:
+        totalMatches: 46
+        items:
+          - { title: Google Chrome Profiles, description: Switch between Chrome profiles, type: updated, date: "2026-09-25T21:26:16Z", updatedBy: 0xdhrv, changeSummary: Fix profile switching, url: https://www.raycast.com/frouo/google-chrome-profiles }
+          - { title: Swift Salamander, description: Open paths in Swift Salamander, type: new, date: "2026-09-25T21:06:15Z", author: c0desurfer, url: https://www.raycast.com/c0desurfer/swift-salamander }
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            days: 7
+      - includes: Google Chrome Profiles
+      - includes: Swift Salamander
+      - not:
+          matches: "no (updated|update)"
+
+  - input: "@raycast-store-updates What was updated this week?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        updatesCoverageSince: "2026-09-24T00:00:00Z"
+        updatesWindowIncomplete: true
+        items:
+          - { title: Calendar, description: Manage events, type: updated, date: "2026-09-25T12:00:00Z", updatedBy: contributor, url: https://www.raycast.com/example/calendar }
+    expected:
+      - callsTool: find-store-updates
+      - includes: Calendar
+      - includes: coverage
+      - matches: "(missing|incomplete|partial|only|limited)"
+
+  - input: "@raycast-store-updates What new and updated extensions appeared this week?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        updatesUnavailable: GitHub rate limit reached.
+        items:
+          - { title: Swift Salamander, description: Open paths in Swift Salamander, type: new, date: "2026-09-25T21:06:15Z", author: c0desurfer, url: https://www.raycast.com/c0desurfer/swift-salamander }
+    expected:
+      - callsTool: find-store-updates
+      - includes: Swift Salamander
+      - matches: "(unavailable|could not|unable|rate limit)"
+
+  - input: "@raycast-store-updates What changed in the Slack extension this week?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        items:
+          - { title: Slack, description: Work with Slack, type: updated, date: "2026-09-25T12:00:00Z", updatedBy: contributor, changeSummary: Fix message search, url: https://www.raycast.com/slack/slack }
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            query:
+              includes: slack
+      - includes: Slack
+      - includes: message search

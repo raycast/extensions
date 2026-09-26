@@ -20,6 +20,9 @@ export default async function findStoreUpdates(input: Input) {
   if (input.days !== undefined && (!Number.isFinite(input.days) || input.days <= 0)) {
     throw new Error("days must be a positive number.");
   }
+  if (input.limit !== undefined && !Number.isFinite(input.limit)) {
+    throw new Error("limit must be a finite number.");
+  }
   let cutoff = input.days === undefined ? null : Date.now() - input.days * 24 * 60 * 60 * 1000;
   if (input.since !== undefined) {
     const date = /^\d{4}-\d{2}-\d{2}$/.test(input.since) ? Date.parse(`${input.since}T00:00:00Z`) : NaN;

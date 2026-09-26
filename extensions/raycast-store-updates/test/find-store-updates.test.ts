@@ -117,3 +117,8 @@ test("identifies the PR submitter as the updater and includes the PR title", asy
   expect(result.items[0]).not.toHaveProperty("author");
 });
 
+test("non-finite limits fail before fetching", async () => {
+  await expect(findStoreUpdates({ limit: NaN })).rejects.toThrow(/limit must be a finite number/);
+  await expect(findStoreUpdates({ limit: Infinity })).rejects.toThrow(/limit must be a finite number/);
+  expect(fetchStoreUpdates).not.toHaveBeenCalled();
+});

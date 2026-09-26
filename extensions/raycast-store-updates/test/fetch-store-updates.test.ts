@@ -130,4 +130,3 @@ test("reports the activity cutoff of a full PR page", async () => {
 
   expect(result.updatesCoverageSince).toBe("2026-09-24T00:00:00Z");
 });
-
