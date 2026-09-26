@@ -114,6 +114,7 @@ test("a failed Store feed remains an error", async () => {
 
   await expect(fetchStoreUpdates()).rejects.toThrow(/invalid response/);
 });
+
 test("reports the activity cutoff of a full PR page", async () => {
   const prs = Array.from({ length: 50 }, (_, index) => ({
     number: index + 1,

@@ -1,5 +1,6 @@
 instructions: |
   An @raycast-store-updates mention selects this extension. Do not treat the mention as the subject or search query unless the user explicitly asks about the Raycast Store Updates extension.
+  For a broad question such as "what's new this week?", include both new and updated extensions by calling find-store-updates with type: all.
   If totalMatches exceeds the number of items returned, state how many additional matches there are.
   If updatesUnavailable is present, say that GitHub updates could not be loaded; any new extensions in items still came from the Store feed.
   If updatesWindowIncomplete is true, say that update coverage is only guaranteed after updatesCoverageSince and that older updates may be missing.
@@ -41,7 +42,7 @@ evals:
             description: Improved event search
             type: updated
             date: "2026-09-21T12:00:00Z"
-            author: example
+            updatedBy: example
             url: https://www.raycast.com/example/calendar
     expected:
       - callsTool:
@@ -118,7 +119,7 @@ evals:
           arguments:
             type: new
             since: "2026-09-21"
-      - includes: "no new"
+      - matches: "(no|none|haven't been any|not been any).*new"
       - not:
           matches: "https?://"
 
@@ -134,8 +135,10 @@ evals:
           name: find-store-updates
           arguments:
             days: 7
+            type: all
       - includes: Google Chrome Profiles
       - includes: Swift Salamander
+      - matches: "(44|forty-four)"
       - not:
           matches: "no (updated|update)"
 
