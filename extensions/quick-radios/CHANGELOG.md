@@ -1,6 +1,6 @@
 # Quick Radios Changelog
 
-## [Location Access Guidance] - {PR_MERGE_DATE}
+## [Location Access Guidance] - 2026-09-26
 
 - Added a *Location Access Required* screen to Manage Wi-Fi when Windows Location access is off, with a shortcut to the Location settings page; the list reloads automatically once access is granted
 - Documented the Windows 11 Location requirement for Wi-Fi scanning in the README
