@@ -11,7 +11,13 @@ const STATUS_COLOR: Record<string, Color> = {
 };
 export default function Objectives() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const { isLoading, data: objectives, pagination } = useProductboardPaginated<Objective>("objectives");
+  const {
+    isLoading,
+    data: objectives,
+    pagination,
+  } = useProductboardPaginated<Objective>("entities", {
+    "type[]": "objective",
+  });
 
   return (
     <List
@@ -23,10 +29,15 @@ export default function Objectives() {
       {objectives.map((objective) => (
         <List.Item
           key={objective.id}
-          title={objective.name || "Unnamed objective"}
-          icon={{ source: Icon.BullsEye, tintColor: STATUS_COLOR[objective.status.name] }}
+          title={objective.fields.name || "Unnamed objective"}
+          icon={{
+            source: Icon.BullsEye,
+            tintColor: objective.fields.status
+              ? (STATUS_COLOR[objective.fields.status.name] ?? Color.SecondaryText)
+              : Color.SecondaryText,
+          }}
           accessories={[{ date: new Date(objective.updatedAt) }]}
-          detail={<List.Item.Detail markdown={objective.description} />}
+          detail={<List.Item.Detail markdown={objective.fields.description || "No description"} />}
           actions={
             <ActionPanel>
               <Action
