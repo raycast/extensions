@@ -1,5 +1,5 @@
 import { DeployType, resolveCandidate } from "../candidates";
-import { Deployment, ENDPOINTS, ID_FIELDS, DeployableKind } from "../deployment-history";
+import { Deployment, ENDPOINTS, ID_FIELDS, DeployableKind, sortDeploymentsByRecency } from "../deployment-history";
 import { parseTrpcJsonResponse, parseTrpcTextResponse, trpcQueryUrl } from "../trpc";
 
 const MAX_LINES = 500;
@@ -49,7 +49,7 @@ export default async function tool(input: Input) {
       trpcQueryUrl(candidate.url, ENDPOINTS[candidate.deployType], { [ID_FIELDS[candidate.deployType]]: candidate.id }),
       { headers: candidate.headers },
     );
-    const deployments = await parseTrpcJsonResponse<Deployment[]>(listResponse);
+    const deployments = sortDeploymentsByRecency(await parseTrpcJsonResponse<Deployment[]>(listResponse));
     deployment = deployments[0];
     if (!deployment) throw new Error(`${candidate.name} has never been deployed, so there is no build log.`);
     deploymentId = deployment.deploymentId;

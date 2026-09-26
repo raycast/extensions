@@ -178,6 +178,14 @@ export async function resolveCandidate(nameOrId: string, filter: CandidateFilter
   const { candidates, failedInstances, hasInstances } = await loadCandidates();
   if (!hasInstances) throw new Error("No Dokploy instances are configured in this extension yet - add one first.");
 
+  // Failures unrelated to this lookup shouldn't block it - narrow to instances the current
+  // `instance` filter doesn't already rule out. A `project`/`kind` filter can't rule one out this
+  // way: an unreached instance's projects/kinds are unknown, so it could still hold a same-named
+  // service under either.
+  const relevantFailures = filter.instance
+    ? failedInstances.filter((failed) => failed.name.toLowerCase().includes(filter.instance!.toLowerCase()))
+    : failedInstances;
+
   const scoped = candidates.filter((candidate) => matchesFilter(candidate, filter));
   const needle = nameOrId.toLowerCase();
   const exact = scoped.filter(
@@ -189,12 +197,13 @@ export async function resolveCandidate(nameOrId: string, filter: CandidateFilter
   const matches =
     exact.length > 0 ? exact : scoped.filter((candidate) => candidate.name.toLowerCase().includes(needle));
 
+  const unreachableNote =
+    relevantFailures.length > 0
+      ? ` (${relevantFailures.map((failed) => `"${failed.name}" could not be reached: ${failed.error}`).join("; ")})`
+      : "";
+
   if (matches.length === 0) {
-    const unreachable =
-      failedInstances.length > 0
-        ? ` (${failedInstances.map((failed) => `"${failed.name}" could not be reached: ${failed.error}`).join("; ")})`
-        : "";
-    throw new Error(`No service matching "${nameOrId}" was found${unreachable}.`);
+    throw new Error(`No service matching "${nameOrId}" was found${unreachableNote}.`);
   }
   if (matches.length > 1) {
     const list = matches
@@ -205,6 +214,15 @@ export async function resolveCandidate(nameOrId: string, filter: CandidateFilter
       .join("; ");
     throw new Error(
       `Multiple services match "${nameOrId}": ${list}. Narrow the search with "project", "kind", or "instance".`,
+    );
+  }
+  // Exactly one reachable match - but an instance this search couldn't rule out is still
+  // unreachable, and it might hold another service with the same name. Fail rather than silently
+  // act on the wrong one; narrowing with "instance" (once the other instance is confirmed
+  // irrelevant) bypasses this.
+  if (relevantFailures.length > 0) {
+    throw new Error(
+      `Found "${matches[0].name}", but this name couldn't be checked on every instance${unreachableNote} - narrow with "instance" once you've confirmed it isn't the one you mean.`,
     );
   }
   return matches[0];

@@ -1,5 +1,5 @@
 import { DeployType, resolveCandidate } from "../candidates";
-import { Deployment, ENDPOINTS, ID_FIELDS, DeployableKind } from "../deployment-history";
+import { Deployment, ENDPOINTS, ID_FIELDS, DeployableKind, sortDeploymentsByRecency } from "../deployment-history";
 import { parseTrpcJsonResponse, trpcQueryUrl } from "../trpc";
 
 type Input = {
@@ -40,8 +40,8 @@ export default async function tool(input: Input) {
     trpcQueryUrl(candidate.url, ENDPOINTS[candidate.deployType], { [ID_FIELDS[candidate.deployType]]: candidate.id }),
     { headers: candidate.headers },
   );
-  const deployments = await parseTrpcJsonResponse<Deployment[]>(response);
-  const limit = input.limit ?? 10;
+  const deployments = sortDeploymentsByRecency(await parseTrpcJsonResponse<Deployment[]>(response));
+  const limit = Number.isInteger(input.limit) && input.limit! > 0 ? input.limit! : 10;
 
   return {
     service: candidate.name,

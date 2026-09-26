@@ -93,13 +93,23 @@ export default async function tool(input: Input) {
     );
   }
 
-  const target = input.container
-    ? containers.find((container) => container.name.includes(input.container!))
-    : containers[0];
-  if (!target) {
-    throw new Error(
-      `No container matching "${input.container}". Available: ${containers.map((container) => container.name).join(", ")}.`,
-    );
+  let target = containers[0];
+  if (input.container) {
+    const exact = containers.find((container) => container.name === input.container);
+    const partial = containers.filter((container) => container.name.includes(input.container!));
+    if (exact) {
+      target = exact;
+    } else if (partial.length === 1) {
+      target = partial[0];
+    } else if (partial.length > 1) {
+      throw new Error(
+        `"${input.container}" matches more than one container: ${partial.map((container) => container.name).join(", ")}. Use the exact name.`,
+      );
+    } else {
+      throw new Error(
+        `No container matching "${input.container}". Available: ${containers.map((container) => container.name).join(", ")}.`,
+      );
+    }
   }
 
   const response = await fetch(
