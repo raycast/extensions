@@ -1,0 +1,10 @@
+{
+  "kind": "app-owned hand-authored anonymous contract examples",
+  "sourceDirectory": "Vesslo app source tree: Docs/fixtures/raycast-readiness-v2",
+  "sourceHead": "cad24187733387f545dd1b9793deacc02cfe8c8a",
+  "sourceManifestSHA256": "0028fcefb14cd69b59d9cc12299abf90e09be4c9f59e1d80aab896869ca45d03",
+  "copiedFixtureCount": 27,
+  "sourceBytesPreserved": true,
+  "swiftGenerated": false,
+  "validationBoundary": "App-side static validation reported 158 checks; current Swift decoder/receiver tests were still running at import. TypeScript fixture consumption is separate from native UI, installed app, or real update evidence."
+}

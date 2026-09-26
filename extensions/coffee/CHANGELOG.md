@@ -1,5 +1,12 @@
 # Coffee Changelog
 
+## [Fix, Enhancement] - 2026-09-26
+
+- Keep the empty pot icon visible in the menu bar for 5 seconds after decaffeinating before hiding, preserving the decaffeinated state across Raycast restarts.
+- Fix 1-frame blanking flicker when transitioning to decaffeinated state in the menu bar.
+- Fix menu bar command not displaying the item when launched from Raycast root search while decaffeinated.
+- Prevent a transient empty pot icon glitch in the menu bar when calling `decaffeinate` while already decaffeinated.
+
 ## [Fix] - 2026-09-21
 
 - Close the `Caffeinate for ...` / `Caffeinate Until` window as soon as `caffeinate` is spawned, instead of holding an empty view open while the menu bar and status commands refresh.

@@ -4,6 +4,7 @@ import {
   LaunchProps,
   LaunchType,
   MenuBarExtra,
+  environment,
   getPreferenceValues,
   launchCommand,
   showHUD,
@@ -11,7 +12,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDuration, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
 import { maybeAutoCaffeinate } from "./status";
 import { get_caffeinate_state } from "rust:../rust";
@@ -54,6 +55,8 @@ const DURATION_PRESETS: { label: string; seconds: number }[] = [
   { label: "8 Hours", seconds: 8 * 3600 },
   { label: "12 Hours", seconds: 12 * 3600 },
 ];
+
+const HIDE_DECAFFEINATED_DELAY_MS = 5 * 1000;
 
 function useCaffeinateInfo(execute: boolean) {
   if (process.platform === "win32") {
@@ -158,13 +161,39 @@ export default function Command(props: LaunchProps) {
   const { isLoading, data, mutate } = useCaffeinateInfo(true);
 
   const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data.isRunning;
-  const caffeinateLoader = hasLaunchContext ? false : isLoading;
+  const isEffectiveLoading = hasLaunchContext ? false : isLoading;
   const preferences = getPreferenceValues<Preferences.Index>();
+  const isHideEnabled = Boolean(preferences.hidenWhenDecaffeinated);
 
   const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
 
   const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
+
+  const [visibleUntil, setVisibleUntil] = useState(() =>
+    environment.launchType === LaunchType.UserInitiated ? Date.now() + HIDE_DECAFFEINATED_DELAY_MS : 0,
+  );
+
+  const prevStatusRef = useRef(displayCaffeinateStatus);
+  const justDecaffeinated = prevStatusRef.current && !displayCaffeinateStatus;
+  prevStatusRef.current = displayCaffeinateStatus;
+
+  const isGracePeriod = isHideEnabled && (justDecaffeinated || Date.now() < visibleUntil);
+
+  useEffect(() => {
+    if (displayCaffeinateStatus) {
+      setVisibleUntil(0);
+    } else if (justDecaffeinated && isHideEnabled) {
+      setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
+    }
+  }, [displayCaffeinateStatus, justDecaffeinated, isHideEnabled]);
+
+  useEffect(() => {
+    if (!isGracePeriod || !isHideEnabled) return;
+    const remaining = Math.max(0, (visibleUntil || Date.now() + HIDE_DECAFFEINATED_DELAY_MS) - Date.now());
+    const timer = setTimeout(() => setTick((t) => t + 1), remaining);
+    return () => clearTimeout(timer);
+  }, [isGracePeriod, isHideEnabled, visibleUntil]);
 
   useEffect(() => {
     setLocalCaffeinateStatus(null);
@@ -226,7 +255,6 @@ export default function Command(props: LaunchProps) {
 
   const handleDeactivate = async () => {
     const schedule = await getSchedule();
-    const preferences = getPreferenceValues<Preferences.Index>();
     if (schedule != undefined && schedule.IsRunning == true && !preferences.decaffeinatePausesSchedules) {
       await showToast({
         style: Toast.Style.Failure,
@@ -256,18 +284,19 @@ export default function Command(props: LaunchProps) {
       return;
     }
     setLocalCaffeinateStatus(false);
-    if (preferences.hidenWhenDecaffeinated) {
+    if (isHideEnabled) {
+      setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
       showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
   };
 
-  if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
+  if (isHideEnabled && !displayCaffeinateStatus && !isEffectiveLoading && !isGracePeriod) {
     return null;
   }
 
   return (
     <MenuBarExtra
-      isLoading={caffeinateLoader}
+      isLoading={false}
       icon={
         displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }

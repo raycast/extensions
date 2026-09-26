@@ -19,6 +19,19 @@ Once you've got your account setup, head to [Account > Personal profile > API to
 **Input your API token**
 You'll be prompted by Raycast to input your API token when attempting to use the Fastly Raycast extension without one. Additionally, with Raycast open, you can type `⌘ + ,` to open Raycast preferences. Within preferences, head to the Extensions tab, select Fastly by clicking on the row, then input the API token in the field to the right.
 
+## AI Extension
+
+Mention `@fastly` in Raycast AI chat or Quick AI to work with your account conversationally. Ask things like:
+
+- "What services do I have?" / "What's the cache hit ratio on www.example.com today?"
+- "Purge https://www.example.com/pricing" / "Soft purge the `product-123` surrogate key on my main service"
+- "Are we under a DDoS attack?" / "Switch DDoS protection to block mode on api-edge"
+- "Do any TLS certs expire this month?" / "Are any alerts firing?"
+- "What changed on my account yesterday?"
+- "How many AI tokens did we use this week, by model?"
+
+Anything that changes state — purges and DDoS mode switches — always asks for confirmation before running. AI Runtime Control questions require an account with the product enabled.
+
 ## Commands
 
 ### Manage Services

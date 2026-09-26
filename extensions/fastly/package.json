@@ -155,6 +155,441 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-services",
+      "title": "Get Services",
+      "description": "List all Fastly services with their IDs, names, and types (CDN or Compute)"
+    },
+    {
+      "name": "get-service-details",
+      "title": "Get Service Details",
+      "description": "Get details for a Fastly service: domains, active version, and version history"
+    },
+    {
+      "name": "get-service-stats",
+      "title": "Get Service Stats",
+      "description": "Get 24-hour traffic stats for a service: requests, cache hit ratio, errors, and bandwidth"
+    },
+    {
+      "name": "purge-url",
+      "title": "Purge URL",
+      "description": "Purge a single URL from the Fastly cache, with optional soft purge"
+    },
+    {
+      "name": "purge-surrogate-keys",
+      "title": "Purge Surrogate Keys",
+      "description": "Purge cached content by surrogate key (cache tag) on a service"
+    },
+    {
+      "name": "purge-all",
+      "title": "Purge All",
+      "description": "Purge the entire cache for a service"
+    },
+    {
+      "name": "get-security-status",
+      "title": "Get Security Status",
+      "description": "Get Bot Management and DDoS Protection status and 24-hour activity for a service"
+    },
+    {
+      "name": "get-ddos-events",
+      "title": "Get DDoS Events",
+      "description": "List recent DDoS attack events detected by Fastly DDoS Protection"
+    },
+    {
+      "name": "set-ddos-protection-mode",
+      "title": "Set DDoS Protection Mode",
+      "description": "Switch DDoS Protection between log-only and block mode for a service"
+    },
+    {
+      "name": "get-tls-certificates",
+      "title": "Get TLS Certificates",
+      "description": "List TLS certificates and subscriptions with expiry information"
+    },
+    {
+      "name": "get-alerts",
+      "title": "Get Alerts",
+      "description": "List Fastly alert definitions and recent firing history"
+    },
+    {
+      "name": "get-audit-events",
+      "title": "Get Audit Events",
+      "description": "Query the Fastly audit log for account and service changes"
+    },
+    {
+      "name": "get-ai-usage",
+      "title": "Get AI Usage",
+      "description": "Get AI Runtime Control usage metrics by virtual key, provider, and model"
+    },
+    {
+      "name": "get-ai-virtual-keys",
+      "title": "Get AI Virtual Keys",
+      "description": "List AI Runtime Control virtual keys with rate limits and security settings"
+    }
+  ],
+  "ai": {
+    "instructions": "- Users usually refer to services by name. Always call get-services first to resolve a service name to its service ID before calling tools that take a serviceId.\n- Prefer targeted purges (purge-url or purge-surrogate-keys) over purge-all. Only use purge-all when the user explicitly asks to purge everything on a service.\n- Prefer soft purges unless the user asks for a hard purge or needs content gone immediately (e.g. removing sensitive content).\n- When showing TLS certificates, call out any certificate expiring within 30 days.\n- AI Runtime Control tools return an entitlement error on accounts without the product; relay that message rather than retrying.\n- Never display API tokens, access tokens, or secret values in responses.\n- Format bandwidth in human-readable units (MB, GB) and timestamps as readable dates.",
+    "evals": [
+      {
+        "input": "@fastly what services do I have?",
+        "mocks": {
+          "get-services": [
+            {
+              "id": "SU1Z0isxPaozGVKXdv0eY",
+              "name": "www.example.com",
+              "type": "cdn",
+              "created_at": "2024-01-15T09:00:00Z",
+              "updated_at": "2026-06-01T12:00:00Z"
+            },
+            {
+              "id": "7i6HN3TK9wS159v2gPZ8",
+              "name": "api-edge",
+              "type": "compute",
+              "created_at": "2025-03-10T09:00:00Z",
+              "updated_at": "2026-08-20T12:00:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-services"
+          },
+          {
+            "meetsCriteria": "Lists both services with their types"
+          }
+        ]
+      },
+      {
+        "input": "@fastly how's the cache hit ratio on www.example.com?",
+        "mocks": {
+          "get-services": [
+            {
+              "id": "SU1Z0isxPaozGVKXdv0eY",
+              "name": "www.example.com",
+              "type": "cdn",
+              "created_at": "2024-01-15T09:00:00Z",
+              "updated_at": "2026-06-01T12:00:00Z"
+            }
+          ],
+          "get-service-stats": {
+            "service": "www.example.com",
+            "period": "last 24 hours",
+            "requests": 1250000,
+            "errors": 320,
+            "status_2xx": 1230000,
+            "status_4xx": 18000,
+            "status_5xx": 320,
+            "hits": 1150000,
+            "misses": 85000,
+            "hit_ratio_percent": 93.1,
+            "bandwidth_bytes": 48200000000
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-services"
+          },
+          {
+            "callsTool": {
+              "name": "get-service-stats",
+              "arguments": {
+                "serviceId": "SU1Z0isxPaozGVKXdv0eY"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Reports the cache hit ratio of about 93%"
+          }
+        ]
+      },
+      {
+        "input": "@fastly purge https://www.example.com/blog/post-1 from the cache",
+        "mocks": {
+          "purge-url": {
+            "purged": "https://www.example.com/blog/post-1",
+            "soft": true,
+            "status": "ok",
+            "purge_id": "1234-abcd"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "purge-url",
+              "arguments": {
+                "url": {
+                  "includes": "www.example.com/blog/post-1"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms the URL was purged"
+          }
+        ]
+      },
+      {
+        "input": "@fastly are we under a DDoS attack right now?",
+        "mocks": {
+          "get-ddos-events": [
+            {
+              "id": "evt-1",
+              "name": "Volumetric attack",
+              "service_id": "SU1Z0isxPaozGVKXdv0eY",
+              "requests_detected": 4820000,
+              "requests_allowed": 120000,
+              "started_at": "2026-09-24T08:15:00Z",
+              "ended_at": null,
+              "ongoing": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-ddos-events"
+          },
+          {
+            "meetsCriteria": "Says there is an ongoing attack and mentions when it started"
+          }
+        ]
+      },
+      {
+        "input": "@fastly do any of my TLS certs expire soon?",
+        "mocks": {
+          "get-tls-certificates": {
+            "certificates": [
+              {
+                "id": "cert-1",
+                "name": "www.example.com",
+                "issued_to": "www.example.com",
+                "issuer": "Let's Encrypt",
+                "not_after": "2026-10-05T00:00:00Z",
+                "days_until_expiry": 11,
+                "domains": [
+                  "www.example.com"
+                ]
+              },
+              {
+                "id": "cert-2",
+                "name": "api.example.com",
+                "issued_to": "api.example.com",
+                "issuer": "Let's Encrypt",
+                "not_after": "2027-02-15T00:00:00Z",
+                "days_until_expiry": 144,
+                "domains": [
+                  "api.example.com"
+                ]
+              }
+            ],
+            "subscriptions": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-tls-certificates"
+          },
+          {
+            "meetsCriteria": "Warns that the www.example.com certificate expires in 11 days"
+          }
+        ]
+      },
+      {
+        "input": "@fastly is bot management enabled on www.example.com?",
+        "mocks": {
+          "get-services": [
+            {
+              "id": "SU1Z0isxPaozGVKXdv0eY",
+              "name": "www.example.com",
+              "type": "cdn",
+              "created_at": "2024-01-15T09:00:00Z",
+              "updated_at": "2026-06-01T12:00:00Z"
+            }
+          ],
+          "get-security-status": {
+            "service": "www.example.com",
+            "bot_management": {
+              "enabled": true,
+              "last_24h": {
+                "requests_analyzed": 980000,
+                "bots_detected": 42000,
+                "challenges_issued": 3100,
+                "challenges_succeeded": 2400,
+                "challenges_failed": 700,
+                "by_bot_type": {
+                  "AI Crawlers": 21000,
+                  "Search Engine Crawlers": 15000,
+                  "Headless Browsers": 6000
+                }
+              }
+            },
+            "ddos_protection": {
+              "enabled": true,
+              "mode": "block",
+              "last_24h": {
+                "total_requests": 1250000,
+                "allowed": 1249000,
+                "detected": 1000,
+                "mitigated": 1000
+              }
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-services"
+          },
+          {
+            "callsTool": {
+              "name": "get-security-status",
+              "arguments": {
+                "serviceId": "SU1Z0isxPaozGVKXdv0eY"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Says Bot Management is enabled and summarizes detected bot traffic"
+          }
+        ]
+      },
+      {
+        "input": "@fastly purge everything on www.example.com",
+        "mocks": {
+          "get-services": [
+            {
+              "id": "SU1Z0isxPaozGVKXdv0eY",
+              "name": "www.example.com",
+              "type": "cdn",
+              "created_at": "2024-01-15T09:00:00Z",
+              "updated_at": "2026-06-01T12:00:00Z"
+            }
+          ],
+          "purge-all": {
+            "purged": "all",
+            "serviceId": "SU1Z0isxPaozGVKXdv0eY"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-services"
+          },
+          {
+            "callsTool": {
+              "name": "purge-all",
+              "arguments": {
+                "serviceId": "SU1Z0isxPaozGVKXdv0eY"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms the whole cache was purged"
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@fastly are any alerts firing right now?",
+        "mocks": {
+          "get-alerts": {
+            "definitions": [
+              {
+                "id": "def-1",
+                "name": "High origin errors",
+                "service_id": "SU1Z0isxPaozGVKXdv0eY",
+                "metric": "status_5xx",
+                "source": "stats",
+                "threshold": 1000,
+                "period": "5m"
+              }
+            ],
+            "history": [
+              {
+                "alert": "High origin errors",
+                "metric": "status_5xx",
+                "service_id": "SU1Z0isxPaozGVKXdv0eY",
+                "status": "firing",
+                "start": "2026-09-24T10:00:00Z",
+                "end": null
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-alerts"
+          },
+          {
+            "meetsCriteria": "Says the High origin errors alert is currently firing"
+          }
+        ]
+      },
+      {
+        "input": "@fastly what changed on my account in the last day?",
+        "mocks": {
+          "get-audit-events": {
+            "total_matching": 2,
+            "returned": 2,
+            "truncated": false,
+            "events": [
+              {
+                "id": "evt-100",
+                "event_type": "version.activate",
+                "description": "Activated version 42 of service www.example.com",
+                "created_at": "2026-09-24T14:30:00Z",
+                "service_id": "SU1Z0isxPaozGVKXdv0eY",
+                "user_id": "user-1",
+                "ip": "203.0.113.10"
+              },
+              {
+                "id": "evt-101",
+                "event_type": "token.create",
+                "description": "Created API token",
+                "created_at": "2026-09-24T09:05:00Z",
+                "user_id": "user-2",
+                "ip": "203.0.113.11"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-audit-events"
+          },
+          {
+            "meetsCriteria": "Summarizes the version activation and token creation events"
+          }
+        ]
+      },
+      {
+        "input": "@fastly how many AI tokens did we use this week?",
+        "mocks": {
+          "get-ai-usage": [
+            {
+              "date": "2026-09-22",
+              "usage_type": "input_tokens",
+              "quantity": 1200000,
+              "provider": "anthropic",
+              "model": "claude-sonnet-5"
+            },
+            {
+              "date": "2026-09-22",
+              "usage_type": "output_tokens",
+              "quantity": 340000,
+              "provider": "anthropic",
+              "model": "claude-sonnet-5"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-ai-usage"
+          },
+          {
+            "meetsCriteria": "Summarizes input and output token usage"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2"
