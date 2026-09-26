@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { ReactElement } from "react";
+import { looksLikeUrl } from "./actions";
 import { HistoryListEntry, NewTabEntry } from "./components";
 import { useEditUrlInSearch } from "./hooks/useEditUrlInSearch";
 import { GroupedEntries, HistoryEntry } from "./interfaces";
@@ -40,9 +41,11 @@ export default function Command(): ReactElement {
       isLoading={isLoading}
       throttle={true}
     >
-      <List.Section title="Open URL" key="open-url">
-        <NewTabEntry searchText={searchText} />
-      </List.Section>
+      {looksLikeUrl(searchText ?? "") ? (
+        <List.Section title="Open URL" key="open-url">
+          <NewTabEntry searchText={searchText} />
+        </List.Section>
+      ) : null}
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
