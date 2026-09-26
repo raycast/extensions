@@ -43,8 +43,9 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={t.toString()}
                 title={t.toString()}
                 onAction={async () => {
-                  await apex.setClimateTemperature(entityID, t);
-                  setCurrentTemp(t);
+                  if (await apex.setClimateTemperature(entityID, t)) {
+                    setCurrentTemp(t);
+                  }
                 }}
               />
             ))}
@@ -61,8 +62,9 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await apex.setClimateOperation(entityID, o);
-                  popToRoot();
+                  if (await apex.setClimateOperation(entityID, o)) {
+                    popToRoot();
+                  }
                 }}
               />
             ))}
@@ -80,8 +82,9 @@ export function ClimateActionPanel(props: { state: State }) {
                 key={o}
                 title={o}
                 onAction={async () => {
-                  await apex.setClimatePreset(entityID, o);
-                  popToRoot();
+                  if (await apex.setClimatePreset(entityID, o)) {
+                    popToRoot();
+                  }
                 }}
               />
             ))}
@@ -93,8 +96,9 @@ export function ClimateActionPanel(props: { state: State }) {
             title={`Increase Temp. ${tempStep}`}
             shortcut={{ modifiers: ["cmd"], key: "+" }}
             onAction={async () => {
-              await apex.setClimateTemperature(entityID, upperTemp);
-              setCurrentTemp(upperTemp);
+              if (await apex.setClimateTemperature(entityID, upperTemp)) {
+                setCurrentTemp(upperTemp);
+              }
             }}
             icon={{ source: "plus.png", tintColor: Color.PrimaryText }}
           />
@@ -104,8 +108,9 @@ export function ClimateActionPanel(props: { state: State }) {
             title={`Decrease Temp. ${tempStep}`}
             shortcut={{ modifiers: ["cmd"], key: "-" }}
             onAction={async () => {
-              await apex.setClimateTemperature(entityID, lowerTemp);
-              setCurrentTemp(lowerTemp);
+              if (await apex.setClimateTemperature(entityID, lowerTemp)) {
+                setCurrentTemp(lowerTemp);
+              }
             }}
             icon={{ source: "minus.png", tintColor: Color.PrimaryText }}
           />

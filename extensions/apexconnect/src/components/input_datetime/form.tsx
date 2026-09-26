@@ -27,8 +27,13 @@ export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTi
         }
       }
       const unixTimestamp = dateToUnixTimestamp(input.datetime);
-      await apex.callService("input_datetime", "set_datetime", { entity_id: s.entity_id, timestamp: unixTimestamp });
-      pop();
+      const ok = await apex.callService("input_datetime", "set_datetime", {
+        entity_id: s.entity_id,
+        timestamp: unixTimestamp,
+      });
+      if (ok) {
+        pop();
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,

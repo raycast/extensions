@@ -21,8 +21,10 @@ export function InputTextForm(props: { state: State }): JSX.Element {
           throw Error(`Maximum text length is ${max}`);
         }
       }
-      await apex.callService("input_text", "set_value", { entity_id: s.entity_id, value: text });
-      pop();
+      const ok = await apex.callService("input_text", "set_value", { entity_id: s.entity_id, value: text });
+      if (ok) {
+        pop();
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
