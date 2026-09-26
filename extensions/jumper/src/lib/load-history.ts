@@ -1,18 +1,9 @@
-import { LocalStorage } from "@raycast/api";
 import { applyRemovals, excludeApps, removeApp, type Removals } from "./history";
 import { getRecentApps, type RunningApp } from "./macos";
+import { readJson, writeJson } from "./storage";
 
 const REMOVALS_KEY = "removed-apps";
 const EXCLUDED_KEY = "excluded-apps";
-
-async function read<T>(key: string, fallback: T): Promise<T> {
-  const raw = await LocalStorage.getItem<string>(key);
-  return raw ? (JSON.parse(raw) as T) : fallback;
-}
-
-async function write(key: string, value: unknown): Promise<void> {
-  await LocalStorage.setItem(key, JSON.stringify(value));
-}
 
 /**
  * Running apps, most recent first, without apps removed from or excluded from history. The frontmost app is always
@@ -25,11 +16,11 @@ export async function loadHistoryState(): Promise<{
 }> {
   const [recent, removals, excluded] = await Promise.all([
     getRecentApps(),
-    read<Removals>(REMOVALS_KEY, {}),
+    readJson<Removals>(REMOVALS_KEY, {}),
     loadExcludedApps(),
   ]);
   const result = applyRemovals(recent, removals);
-  if (JSON.stringify(result.removals) !== JSON.stringify(removals)) await write(REMOVALS_KEY, result.removals);
+  if (JSON.stringify(result.removals) !== JSON.stringify(removals)) await writeJson(REMOVALS_KEY, result.removals);
   const excludedIds = new Set(excluded.map((a) => a.bundleId));
   const current = recent[0]?.bundleId;
   return {
@@ -46,23 +37,23 @@ export async function loadHistory(): Promise<RunningApp[]> {
 
 /** Hides `app` from history until it's used again. `history` is the list as shown, most recent first. */
 export async function removeFromHistory(history: RunningApp[], app: RunningApp): Promise<void> {
-  await write(REMOVALS_KEY, removeApp(history, app.bundleId, await read<Removals>(REMOVALS_KEY, {})));
+  await writeJson(REMOVALS_KEY, removeApp(history, app.bundleId, await readJson<Removals>(REMOVALS_KEY, {})));
 }
 
 /** Apps always skipped in history, in the order they were excluded. Kept with name and path to list them when not running. */
-export async function loadExcludedApps(): Promise<RunningApp[]> {
-  return read<RunningApp[]>(EXCLUDED_KEY, []);
+async function loadExcludedApps(): Promise<RunningApp[]> {
+  return readJson<RunningApp[]>(EXCLUDED_KEY, []);
+}
+
+/** Excluded apps other than `app`. */
+async function excludedExcept(app: RunningApp): Promise<RunningApp[]> {
+  return (await loadExcludedApps()).filter((a) => a.bundleId !== app.bundleId);
 }
 
 export async function excludeFromHistory(app: RunningApp): Promise<void> {
-  const excluded = await loadExcludedApps();
-  await write(EXCLUDED_KEY, [...excluded.filter((a) => a.bundleId !== app.bundleId), app]);
+  await writeJson(EXCLUDED_KEY, [...(await excludedExcept(app)), app]);
 }
 
 export async function includeInHistory(app: RunningApp): Promise<void> {
-  const excluded = await loadExcludedApps();
-  await write(
-    EXCLUDED_KEY,
-    excluded.filter((a) => a.bundleId !== app.bundleId),
-  );
+  await writeJson(EXCLUDED_KEY, await excludedExcept(app));
 }

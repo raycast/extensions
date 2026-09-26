@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { excludeFromHistory, includeInHistory, loadHistoryState, removeFromHistory } from "./lib/load-history";
 import { activateApp, type RunningApp } from "./lib/macos";
 
@@ -25,7 +25,12 @@ export default function Command() {
   const { apps = [], recent = [], excluded = [] } = data ?? {};
 
   async function update(change: Promise<void>, title: string) {
-    await change;
+    try {
+      await change;
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not update history" });
+      return;
+    }
     revalidate();
     await showToast({ style: Toast.Style.Success, title });
   }
@@ -99,7 +104,12 @@ function SwitchAction({ app }: { app: RunningApp }) {
       onAction={async () => {
         // Activate first: closing the window with Immediate unmounts this view and kills the
         // command before open() runs (ADR-009, https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md).
-        await activateApp(app);
+        try {
+          await activateApp(app);
+        } catch (error) {
+          await showFailureToast(error, { title: `Could not switch to ${app.name}` });
+          return;
+        }
         await closeMainWindow({ popToRootType: PopToRootType.Immediate });
       }}
     />
