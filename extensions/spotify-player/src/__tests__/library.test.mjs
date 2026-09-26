@@ -244,7 +244,10 @@ test("picker checks a new track instead of reusing the previous track's membersh
     assert.equal(renderer.root.findByType("Action").props.title, "Add to Playlist");
     await act(async () => renderer.root.findByType("Action").props.onAction());
     assert.deepEqual(stats.writes.filter((write) => write[0] === "add")[0][2].uris, ["spotify:track:new"]);
-    assert.equal(stats.writes.some((write) => write[0] === "remove"), false);
+    assert.equal(
+      stats.writes.some((write) => write[0] === "remove"),
+      false,
+    );
   } finally {
     await unmount(renderer);
   }
@@ -470,4 +473,126 @@ test("cancelling a failed in-flight membership check stops the catalog walk", as
     errors.mock.calls.some(({ arguments: args }) => String(args[0]).startsWith("Could not check playlist")),
     false,
   );
+});
+
+for (const initiallyPresent of [false, true]) {
+  test(`picker refreshes instead of reversing the intended action after an external ${initiallyPresent ? "removal" : "addition"}`, async () => {
+    resetStats();
+    let present = initiallyPresent;
+    let version = "first";
+    fixture({ playlists: 1, tracks: 1, contains: () => present, snapshot: () => version });
+    const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+    try {
+      await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+      await settle();
+      present = !initiallyPresent;
+      version = "external-change";
+      await act(async () => renderer.root.findByType("Action").props.onAction());
+      assert.equal(stats.writes.length, 0);
+      assert.ok(toasts.some((toast) => toast.title === "Playlist Changed"));
+      assert.equal(
+        renderer.root.findByType("Action").props.title,
+        present ? "Remove from Playlist" : "Add to Playlist",
+      );
+      await act(async () => renderer.root.findByType("Action").props.onAction());
+      assert.equal(stats.writes[0][0], present ? "remove" : "add");
+    } finally {
+      await unmount(renderer);
+    }
+  });
+}
+
+test("picker checks again when the playlist changes during its background scan", async () => {
+  resetStats();
+  let present = false;
+  let version = "first";
+  const client = fixture({ playlists: 1, tracks: 1, contains: () => present, snapshot: () => version });
+  const original = client.getPlaylistsByPlaylistIdTracks;
+  let first = true;
+  client.getPlaylistsByPlaylistIdTracks = async (...args) => {
+    const result = await original(...args);
+    if (first) {
+      first = false;
+      version = "changed-during-scan";
+      present = true;
+    }
+    return result;
+  };
+  const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+  try {
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+    await settle();
+    await act(async () => renderer.root.findByType("Action").props.onAction());
+    assert.equal(stats.writes.length, 0);
+    assert.equal(renderer.root.findByType("Action").props.title, "Remove from Playlist");
+  } finally {
+    await unmount(renderer);
+  }
+});
+
+test("picker blocks writes when the snapshot request fails", async () => {
+  resetStats();
+  const client = fixture({ playlists: 1, tracks: 1 });
+  const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+  try {
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+    await settle();
+    client.getPlaylistsByPlaylistId = async () => {
+      throw new Error("snapshot unavailable");
+    };
+    await act(async () => renderer.root.findByType("Action").props.onAction());
+    assert.equal(stats.writes.length, 0);
+    assert.ok(
+      toasts.some(
+        (toast) => toast.title === "Could not update playlist" && toast.message.includes("snapshot unavailable"),
+      ),
+    );
+  } finally {
+    await unmount(renderer);
+  }
+});
+
+test("picker scans before writing when the service omits snapshot IDs", async () => {
+  resetStats();
+  fixture({ playlists: 1, tracks: 1, snapshot: () => undefined });
+  const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+  try {
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+    await settle();
+    assert.equal(stats.calls.tracks, 1);
+    await act(async () => renderer.root.findByType("Action").props.onAction());
+    assert.equal(stats.writes[0][0], "add");
+    assert.equal(stats.calls.tracks, 3); // background, pre-write, post-write refresh
+  } finally {
+    await unmount(renderer);
+  }
+});
+
+test("a cancelled snapshot request never starts a stale playlist scan", async () => {
+  resetStats();
+  const client = fixture({ playlists: 2, tracks: 1 });
+  let resolveOld;
+  client.getPlaylistsByPlaylistId = async (id) =>
+    id === "p0"
+      ? new Promise((resolve) => {
+          resolveOld = resolve;
+        })
+      : { snapshot_id: "second" };
+  const scanned = [];
+  const original = client.getPlaylistsByPlaylistIdTracks;
+  client.getPlaylistsByPlaylistIdTracks = (...args) => {
+    scanned.push(args[0]);
+    return original(...args);
+  };
+  const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+  try {
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p1"));
+    await settle();
+    await act(async () => resolveOld({ snapshot_id: "first" }));
+    await settle();
+    assert.deepEqual(scanned, ["p1"]);
+  } finally {
+    await unmount(renderer);
+  }
 });

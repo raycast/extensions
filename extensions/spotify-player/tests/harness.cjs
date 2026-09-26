@@ -179,7 +179,14 @@ function track(id) {
     available_markets: Array.from({ length: 60 }, (_, i) => `M${i}`),
   };
 }
-function fixture({ playlists = 250, tracks = 1500, delay = 0, contains = () => false, fail = () => false } = {}) {
+function fixture({
+  playlists = 250,
+  tracks = 1500,
+  delay = 0,
+  contains = () => false,
+  snapshot = () => "initial",
+  fail = () => false,
+} = {}) {
   const request = async (name, payload, fn) => {
     stats.calls[name] = (stats.calls[name] ?? 0) + 1;
     stats.active++;
@@ -209,6 +216,7 @@ function fixture({ playlists = 250, tracks = 1500, delay = 0, contains = () => f
     getMe: () => request("me", {}, () => ({ id: "me" })),
     getMePlaylists: () => request("catalog", {}, () => page()),
     getNext: (url) => request("catalog", {}, () => page(Number(new URL(url).searchParams.get("offset")))),
+    getPlaylistsByPlaylistId: (id) => request("snapshot", { id }, () => ({ snapshot_id: snapshot(id) })),
     getPlaylistsByPlaylistIdTracks: (id, { offset = 0, limit = 50, fields } = {}) =>
       request("tracks", { id, offset }, () => {
         if (fail(id, offset)) throw new Error("Fixture request failure");

@@ -13,7 +13,7 @@ import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { useMyPlaylists } from "../hooks/useMyPlaylists";
 import { useMe } from "../hooks/useMe";
-import { playlistContainsTrack } from "../api/playlistContainsTrack";
+import { getPlaylistSnapshot, playlistContainsTrack } from "../api/playlistContainsTrack";
 import { addToPlaylist } from "../api/addToPlaylist";
 import { removeFromPlaylist } from "../api/removeFromPlaylist";
 import { CreateQuicklink } from "./CreateQuicklink";
@@ -30,11 +30,12 @@ export function PlaylistPicker({ uri, quicklinks = false }: { uri: string; quick
     error,
     revalidate,
   } = usePromise(
-    async (id: string, trackUri: string) => ({
-      id,
-      uri: trackUri,
-      contains: await playlistContainsTrack(id, trackUri, abortable.current?.signal),
-    }),
+    async (id: string, trackUri: string) => {
+      const signal = abortable.current?.signal;
+      const snapshot = await getPlaylistSnapshot(id, signal);
+      const contains = await playlistContainsTrack(id, trackUri, signal);
+      return { id, uri: trackUri, snapshot, contains };
+    },
     [selectedId ?? "", uri],
     { execute: !!selectedId, abortable },
   );
@@ -70,11 +71,19 @@ export function PlaylistPicker({ uri, quicklinks = false }: { uri: string; quick
                       if (busy.current) return;
                       busy.current = true;
                       try {
-                        // Reuse the completed check only for this playlist and track.
-                        if (!checked) {
-                          await showToast({ title: "Checking Playlist", style: Toast.Style.Animated });
+                        await showToast({ title: "Checking Playlist", style: Toast.Style.Animated });
+                        const unchanged =
+                          checked && !!membership.snapshot && membership.snapshot === (await getPlaylistSnapshot(id));
+                        const exists = unchanged ? membership.contains : await playlistContainsTrack(id, uri);
+                        if (checked && exists !== membership.contains) {
+                          await revalidate();
+                          await showToast({
+                            title: "Playlist Changed",
+                            message: "The playlist was updated elsewhere. Choose the updated action to continue.",
+                            style: Toast.Style.Failure,
+                          });
+                          return;
                         }
-                        const exists = checked ? membership.contains : await playlistContainsTrack(id, uri);
                         if (exists) {
                           await removeFromPlaylist({ playlistId: id, trackUris: [{ uri }] });
                         } else {

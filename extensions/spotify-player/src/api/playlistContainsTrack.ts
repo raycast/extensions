@@ -63,3 +63,14 @@ export async function playlistContainsTrack(playlistId: string, uri: string, sig
   }
   return false;
 }
+
+/** A small version check lets the picker reuse a scan only while the playlist is unchanged. */
+export async function getPlaylistSnapshot(playlistId: string, signal?: AbortSignal): Promise<string | undefined> {
+  const { spotifyClient } = getSpotifyClient();
+  const playlist = await request(
+    () => spotifyClient.getPlaylistsByPlaylistId(playlistId, { fields: "snapshot_id" }, { signal }),
+    signal,
+  );
+  signal?.throwIfAborted();
+  return typeof playlist.snapshot_id === "string" && playlist.snapshot_id ? playlist.snapshot_id : undefined;
+}
