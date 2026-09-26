@@ -28,6 +28,32 @@
       "title": "Deployments",
       "description": "See the most recent deployment for every application and Compose stack across every configured instance, and act on it",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Server Health",
+      "description": "Menu bar server health/disk status across every configured instance",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "diskThreshold",
+          "title": "Disk Warning Threshold",
+          "description": "Tint the menu bar icon when any instance's disk usage is at or above this percentage.",
+          "type": "textfield",
+          "default": "90",
+          "required": false
+        },
+        {
+          "name": "showIcon",
+          "title": "Show Menu Bar Icon",
+          "description": "Uncheck to hide the Server Health icon from the menu bar.",
+          "label": "Show icon",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
