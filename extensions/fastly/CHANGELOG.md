@@ -1,6 +1,6 @@
 # Fastly Changelog
 
-## [AI Extension] - {PR_MERGE_DATE}
+## [AI Extension] - 2026-09-26
 
 The extension can now be used with Raycast AI: mention `@fastly` in AI chat or Quick AI to work with your account conversationally. Fourteen tools cover the main capability areas:
 
