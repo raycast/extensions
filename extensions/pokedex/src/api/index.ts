@@ -56,10 +56,10 @@ async function fetchDataWithCaching<T>(
             return parsed.value;
           }
         } else {
-          console.warn(`Invalid cached data for key: ${key}`);
+          // console.warn(`Invalid cached data for key: ${key}`);
         }
       } catch (error) {
-        console.error(`Error parsing cached data for key: ${key}`, error);
+        // console.error(`Error parsing cached data for key: ${key}`, error);
       }
     }
   }
