@@ -218,10 +218,14 @@ export default function Command() {
   // the other sections would visibly collapse each time.
   const previousAutomaticTargetRef = useRef<string | undefined>(undefined);
   const previousProfileIdRef = useRef<string | undefined>(undefined);
-  // Holds the last Top Hit confirmed while History was current, so it can be
-  // reused below across the brief window where the History query hasn't
-  // caught up with the latest keystroke yet.
-  const lastConfirmedHistoryTopHitRef = useRef<Hit | undefined>(undefined);
+  // Holds the last Top Hit confirmed while History was current, plus the
+  // profile it was confirmed under, so it can be reused below across the
+  // brief window where the History query hasn't caught up with the latest
+  // keystroke yet - but only while it still plausibly belongs to what is
+  // currently typed (see the relevance check at the reuse site below), not
+  // whenever the user has since typed something unrelated or switched
+  // profiles.
+  const lastConfirmedHistoryTopHitRef = useRef<{ profileId: string; hit: Hit } | undefined>(undefined);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
 
@@ -322,12 +326,25 @@ export default function Command() {
   // Tab or Bookmark match - or to nothing - only for History to reclaim it a
   // few milliseconds later once the fresh result lands. Reuse the previous
   // History-backed Top Hit across that gap instead of letting it flicker to
-  // a different candidate and back; a genuinely different result once
-  // History is current still replaces it normally.
+  // a different candidate and back - but only while it is still plausibly
+  // what the user is typing towards: the same profile, and still relevant to
+  // the text typed so far. Otherwise (a profile switch, or text unrelated to
+  // it) it must not be shown, or Enter could open a stale destination the
+  // user never intended. A genuinely different result, once History is
+  // current again, still replaces it normally.
   if (hasCurrentHistoryResult) {
-    lastConfirmedHistoryTopHitRef.current = topHit?.kind === "url" && topHit.source === "History" ? topHit : undefined;
-  } else if (lastConfirmedHistoryTopHitRef.current) {
-    topHit = lastConfirmedHistoryTopHitRef.current;
+    lastConfirmedHistoryTopHitRef.current =
+      topHit?.kind === "url" && topHit.source === "History" ? { profileId: selectedProfileId, hit: topHit } : undefined;
+  } else {
+    const frozen = lastConfirmedHistoryTopHitRef.current;
+    const stillRelevant =
+      frozen &&
+      frozen.profileId === selectedProfileId &&
+      frozen.hit.kind === "url" &&
+      relevance(q, frozen.hit.item.title, frozen.hit.item.url) > 0;
+    if (stillRelevant) {
+      topHit = frozen.hit;
+    }
   }
 
   // Drop the top hit from its own section to avoid showing it twice.
