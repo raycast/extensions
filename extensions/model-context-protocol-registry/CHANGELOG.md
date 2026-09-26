@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Award Travel Finder, Airport Lounge List, FlightQueue and FlightSeatMap MCP Servers] - 2026-09-26
+## [Add Award Travel Finder, Airport Lounge List, FlightQueue and FlightSeatMap MCP Servers] - {PR_MERGE_DATE}
 
 - Add Award Travel Finder to the official registry: search award flight availability across 28 airlines and award-chart pricing for 23 loyalty programs. Hosted remote Streamable HTTP server at https://mcp.awardtravelfinder.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
 - Add Airport Lounge List to the official registry: search 8,500+ airport lounges and check access by card, membership or status. Hosted remote Streamable HTTP server at https://mcp.airportloungelist.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
