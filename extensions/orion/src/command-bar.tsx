@@ -218,6 +218,10 @@ export default function Command() {
   // the other sections would visibly collapse each time.
   const previousAutomaticTargetRef = useRef<string | undefined>(undefined);
   const previousProfileIdRef = useRef<string | undefined>(undefined);
+  // Holds the last Top Hit confirmed while History was current, so it can be
+  // reused below across the brief window where the History query hasn't
+  // caught up with the latest keystroke yet.
+  const lastConfirmedHistoryTopHitRef = useRef<Hit | undefined>(undefined);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
 
@@ -310,6 +314,20 @@ export default function Command() {
       }),
     );
     topHit = deduplicateRankedHits(candidates).sort(compareRankedHits)[0]?.hit;
+  }
+
+  // `historyHits` is excluded above while the History query hasn't caught up
+  // with the latest keystroke yet (see useHistorySearch's staleness guard),
+  // so recomputing Top Hit during that gap can hand it to a lower-priority
+  // Tab or Bookmark match - or to nothing - only for History to reclaim it a
+  // few milliseconds later once the fresh result lands. Reuse the previous
+  // History-backed Top Hit across that gap instead of letting it flicker to
+  // a different candidate and back; a genuinely different result once
+  // History is current still replaces it normally.
+  if (hasCurrentHistoryResult) {
+    lastConfirmedHistoryTopHitRef.current = topHit?.kind === "url" && topHit.source === "History" ? topHit : undefined;
+  } else if (lastConfirmedHistoryTopHitRef.current) {
+    topHit = lastConfirmedHistoryTopHitRef.current;
   }
 
   // Drop the top hit from its own section to avoid showing it twice.
