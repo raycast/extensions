@@ -22,7 +22,7 @@ SMC keys are undocumented and differ between models, so each reading is checked:
 ## What the numbers mean
 
 - **Watts** are the whole system's power draw, measured live: every 5 seconds in Diagnose Battery Drain, and every two minutes and on each menu open in the menu bar. The footer shows when the latest reading was taken. Without SMC, macOS refreshes this reading only about once a minute. On the adapter, the adapter's own input is shown next to it; the difference is roughly what goes into the battery.
-- **Charts** redraw every 15 seconds, with the process list; the readings in between are not lost, they appear on the next redraw. A ring on the line marks the peak and its value. Where nothing was measured for more than 10 minutes (sleep, or the menu bar not running), a faint dashed line without fill bridges the gap. App and process charts show 0 where a process was not among the ten using the most energy, which is all the history keeps per sample. The chart combines the menu bar's history with the live readings taken while Diagnose Battery Drain is open.
+- **Charts** redraw every 15 seconds, with the process list; the readings in between are not lost, they appear on the next redraw. A ring on the line marks the peak and its value. Where nothing was measured for more than 10 minutes (sleep, or the menu bar not running), a faint dashed line without fill bridges the gap. App and process charts show 0 where a process was not among the ten using the most energy or at the runaway CPU share, which is what the history keeps per sample. A sample taken while `top` failed is left out rather than drawn as 0. The chart combines the menu bar's history with the live readings taken while Diagnose Battery Drain is open.
 - **Rows** show CPU as a share of one core, colored green, yellow or orange by level; red is kept for runaway processes. "+GPU/wakeups" marks a row whose energy impact clearly exceeds its CPU: it costs battery in other ways too.
 - **Energy impact** is Activity Monitor's relative score for a process. It has no unit and is not watts; higher means the process costs more battery. CPU is shown next to it as a percentage of one core. Apps add up their helper processes; system processes (such as WindowServer) and command-line tools are listed under Processes only.
 - **Battery drain** is how many percent of charge the battery loses per hour, measured over the time the Mac was awake on battery.
@@ -39,12 +39,18 @@ These come from how macOS and the hardware report power, not from the extension:
 - **Charging stops at 80%.** With a charge limit or Optimized Charging on, macOS pauses charging on purpose; the Now row shows a pause icon, and hovering it explains why.
 - **Temperature is not shown** on macOS versions that do not expose it.
 
+## A case it caught
+
+On a MacBook Pro that had been awake for four days, the process list showed `dasd`, a macOS scheduling daemon, at 100% of a core. Nothing else pointed at it: the Mac felt normal, the fans were quiet, and Activity Monitor only gets opened once battery life is already a complaint. The unified log showed the cause: another Apple service, `appstoreagent`, was resubmitting a background task about 88 times a second, and `dasd` was only running what it was given. Restarting `appstoreagent` ended it within a minute.
+
+Two things worth knowing from it. A system process that shows up as a runaway (`dasd`, `mds_stores`, `kernel_task`) is usually the victim; the process feeding it is the one to look at, and the unified log names it: `log show --last 2m --info --predicate 'subsystem == "com.apple.duetactivityscheduler"'` for `dasd`. And system processes cannot be terminated from Battery Drain; restart the process that feeds them, or reboot.
+
 ## When the Now icon changes color
 
 This applies to the chip icon on the Now row in Diagnose Battery Drain; it is green when all is well. The menu bar icon keeps the menu bar's own color: there, a runaway process shows as a warning inside the menu and as a notification.
 
 - **Orange:** three consecutive readings at or above the high-draw threshold (25 W by default), or the same process at an energy impact of 50 or more for three samples in a row. A single spike does not count.
-- **Red:** a process has held at least 80% of a CPU core for 15 minutes or more, either observed by the menu bar or inferred from its total CPU time since it started.
+- **Red:** a process has held at least 80% of a CPU core for 15 minutes or more, either observed over the history (the menu bar's, or Diagnose Battery Drain's own samples while it is open) or inferred from its total CPU time since it started.
 
 ## Preferences
 
