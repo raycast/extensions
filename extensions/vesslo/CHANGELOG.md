@@ -1,6 +1,6 @@
 # Vesslo Changelog
 
-## [App Review and Verified Homebrew Requests] - {PR_MERGE_DATE}
+## [App Review and Verified Homebrew Requests] - 2026-09-26
 
 ### Added
 
