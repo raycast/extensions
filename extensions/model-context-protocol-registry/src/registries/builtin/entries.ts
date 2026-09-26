@@ -428,6 +428,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "quibbly",
+    title: "Quibbly",
+    description:
+      "Your LinkedIn inbox in your AI assistant: search synced LinkedIn conversations and connections, see who watched your videos, manage follow-ups, notes and tags, and draft replies that you send yourself. Works alongside any CRM connector. Requires a Quibbly account and the Quibbly Chrome extension with Inbox on. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://server.quibbly.co/icon-512.png",
+    homepage: "https://quibbly.co/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://server.quibbly.co/mcp"],
+    },
+  },
+  {
     name: "quillhub",
     title: "QuillHub",
     description:

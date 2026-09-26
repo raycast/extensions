@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Quibbly MCP Server] - 2026-09-26
+
+- Add Quibbly to the official registry: search synced LinkedIn conversations and connections, see who watched your videos, manage follow-ups, notes and tags, and draft replies that you send yourself. Hosted remote Streamable HTTP server at https://server.quibbly.co/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
 ## [Add QuoteBill MCP Server] - 2026-09-26
 
 - Add QuoteBill to the official registry: draft quotations and invoices from 133 templates, look up the published tax rate for 195 countries with the official source, total line items and get a link that opens the finished document on quotebill.com (Excel, Word or PDF). Read-only tools. Hosted remote Streamable HTTP server at https://quotebill.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free QuoteBill account, no API key.
