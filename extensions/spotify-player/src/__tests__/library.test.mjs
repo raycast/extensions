@@ -171,30 +171,53 @@ test("picker loads metadata only until selection; stale selection cannot replace
   assert.ok(renderer.root.findAllByType("List.Item").some((item) => item.props.title === "Playlist 274"));
   await unmount(renderer);
 });
-test("picker adds once, removes known membership and blocks duplicates discovered at action time", async () => {
-  resetStats();
-  fixture({ playlists: 1, tracks: 1 });
-  const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
-  await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
-  await settle();
-  let action = renderer.root.findByType("Action").props.onAction;
-  await act(async () => Promise.all([action(), action()]));
-  await settle();
-  assert.equal(stats.writes.filter((x) => x[0] === "add").length, 1);
-  fixture({ playlists: 1, tracks: 1, contains: () => true });
-  await act(async () => renderer.root.findByType("Action").props.onAction());
-  await settle();
-  assert.equal(stats.writes.length, 1);
-  assert.equal(toasts.at(-1).title, "Duplicate found");
-  await act(async () => toasts.at(-1).primaryAction.onAction());
-  await settle();
-  assert.equal(stats.writes.filter((x) => x[0] === "add").length, 2);
-  assert.equal(renderer.root.findByType("Action").props.title, "Remove from Playlist");
-  await act(async () => renderer.root.findByType("Action").props.onAction());
-  await settle();
-  assert.equal(stats.writes.filter((x) => x[0] === "remove").length, 1);
-  await unmount(renderer);
-});
+for (const duplicateSongCheck of [false, true]) {
+  test(`picker reuses completed checks for add/remove with Quicklink duplicate checking ${duplicateSongCheck}`, async () => {
+    resetStats();
+    const previous = harness.preferences.duplicateSongCheck;
+    harness.preferences.duplicateSongCheck = duplicateSongCheck;
+    let present = false;
+    const client = fixture({ playlists: 1, tracks: 1, contains: () => present });
+    const scansBeforeMutation = [];
+    for (const [method, nextPresent] of [
+      ["postPlaylistsByPlaylistIdTracks", true],
+      ["deletePlaylistsByPlaylistIdTracks", false],
+    ]) {
+      const original = client[method];
+      client[method] = async (...args) => {
+        scansBeforeMutation.push(stats.calls.tracks);
+        const result = await original(...args);
+        present = nextPresent;
+        return result;
+      };
+    }
+    const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+    try {
+      await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+      await settle();
+      assert.equal(stats.calls.tracks, 1);
+      const action = renderer.root.findByType("Action").props.onAction;
+      await act(async () => Promise.all([action(), action()]));
+      await settle();
+      assert.equal(stats.writes.filter((x) => x[0] === "add").length, 1);
+      assert.equal(renderer.root.findByType("Action").props.title, "Remove from Playlist");
+      const scansAfterAdd = stats.calls.tracks;
+      await act(async () => renderer.root.findByType("Action").props.onAction());
+      await settle();
+      assert.equal(stats.writes.filter((x) => x[0] === "remove").length, 1);
+      assert.deepEqual(scansBeforeMutation, [1, scansAfterAdd]);
+      assert.equal(
+        toasts.some((toast) => toast.title === "Duplicate found"),
+        false,
+      );
+      assert.equal(renderer.root.findByType("Action").props.title, "Add to Playlist");
+    } finally {
+      harness.preferences.duplicateSongCheck = previous;
+      await unmount(renderer);
+    }
+  });
+}
+
 test("favorites action writes a saved track without playlist loading", async () => {
   resetStats();
   fixture();
@@ -205,6 +228,26 @@ test("favorites action writes a saved track without playlist loading", async () 
   assert.equal(stats.calls.catalog, undefined);
   assert.equal(stats.calls.tracks, undefined);
   await unmount(renderer);
+});
+
+test("picker checks a new track instead of reusing the previous track's membership", async () => {
+  resetStats();
+  fixture({ playlists: 1, tracks: 1, contains: () => true });
+  const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+  try {
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+    await settle();
+    assert.equal(renderer.root.findByType("Action").props.title, "Remove from Playlist");
+    await act(async () => renderer.update(React.createElement(PlaylistPicker, { uri: "spotify:track:new" })));
+    await settle();
+    assert.equal(stats.calls.tracks, 2);
+    assert.equal(renderer.root.findByType("Action").props.title, "Add to Playlist");
+    await act(async () => renderer.root.findByType("Action").props.onAction());
+    assert.deepEqual(stats.writes.filter((write) => write[0] === "add")[0][2].uris, ["spotify:track:new"]);
+    assert.equal(stats.writes.some((write) => write[0] === "remove"), false);
+  } finally {
+    await unmount(renderer);
+  }
 });
 test("new search response wins when older search finishes last", async () => {
   resetStats();
@@ -272,6 +315,23 @@ test("playing-song command renders the lazy picker; quicklinks check beyond 1000
   await unmount(quicklink);
 });
 
+test("Quicklinks skip membership scans when duplicate checking is disabled", async () => {
+  resetStats();
+  fixture({ playlists: 1, tracks: 1500, contains: () => true });
+  const previous = harness.preferences.duplicateSongCheck;
+  harness.preferences.duplicateSongCheck = false;
+  const Command = loadSource("../addPlayingSongToPlaylist.tsx").default;
+  let renderer;
+  try {
+    renderer = await mount(React.createElement(Command, { launchContext: { playlistId: "p0" } }));
+    assert.equal(stats.calls.tracks, undefined);
+    assert.equal(stats.writes.filter((write) => write[0] === "add").length, 1);
+  } finally {
+    harness.preferences.duplicateSongCheck = previous;
+    if (renderer) await unmount(renderer);
+  }
+});
+
 for (const state of ["loading", "failed"]) {
   test(`picker can remove when background membership is ${state}`, async () => {
     resetStats();
@@ -294,6 +354,7 @@ for (const state of ["loading", "failed"]) {
     await act(async () => renderer.root.findByType("Action").props.onAction());
     assert.equal(stats.writes.filter((x) => x[0] === "remove").length, 1);
     assert.equal(stats.writes.filter((x) => x[0] === "add").length, 0);
+    assert.ok(toasts.some((toast) => toast.title === "Checking Playlist" && toast.style === "animated"));
     if (finishBackground) await act(async () => finishBackground({ items: [], next: null }));
     await unmount(renderer);
   });

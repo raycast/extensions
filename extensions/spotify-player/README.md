@@ -58,6 +58,8 @@ Use this to dislike the current song.
 
 Use this to add the current song to a playlist of your choice.
 
+The picker checks the selected playlist to offer Add or Remove and reuses the completed check when you run the action. Raycast selects the first playlist when the picker opens, so that first check starts automatically. The **Check for duplicate songs in Quicklinks** preference applies only when adding directly through a Quicklink. Full playlist contents are no longer cached, so there is no cache refresh setting.
+
 ### Remove Playing Song from Playlist
 
 Use this to remove the current song from the playlist it's in.

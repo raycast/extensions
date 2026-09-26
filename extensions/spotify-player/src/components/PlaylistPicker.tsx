@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Icon,
   List,
-  LocalStorage,
   Toast,
   getPreferenceValues,
   popToRoot,
@@ -71,56 +70,23 @@ export function PlaylistPicker({ uri, quicklinks = false }: { uri: string; quick
                       if (busy.current) return;
                       busy.current = true;
                       try {
-                        // Recheck at mutation time: stale membership and failed requests must never add duplicates.
-                        const exists = await playlistContainsTrack(id, uri);
-                        const invalidateItems = () =>
-                          Promise.allSettled([
-                            LocalStorage.removeItem(`playlistItems_${id}`),
-                            LocalStorage.removeItem(`playlistItems_${id}_cachedAt`),
-                          ]);
-                        const add = async () => {
-                          await addToPlaylist({ playlistId: id, trackUris: [uri] });
-                          await invalidateItems();
-                          await showToast({ title: `Added to ${playlist.name}` });
-                          await revalidate().catch(() => undefined);
-                          if (getPreferenceValues().closeWindowOnAction) {
-                            await showHUD(`Added to ${playlist.name}`);
-                            await popToRoot();
-                          }
-                        };
-                        if (exists && checked && !contains) {
-                          await showToast({
-                            title: "Duplicate found",
-                            style: Toast.Style.Failure,
-                            primaryAction: {
-                              title: "Add to playlist anyways",
-                              onAction: async () => {
-                                if (busy.current) return;
-                                busy.current = true;
-                                try {
-                                  await add();
-                                } catch (error) {
-                                  await showToast({
-                                    title: "Could not add to playlist",
-                                    message: String(error),
-                                    style: Toast.Style.Failure,
-                                  });
-                                } finally {
-                                  busy.current = false;
-                                }
-                              },
-                            },
-                          });
-                        } else if (exists) {
+                        // Reuse the completed check only for this playlist and track.
+                        if (!checked) {
+                          await showToast({ title: "Checking Playlist", style: Toast.Style.Animated });
+                        }
+                        const exists = checked ? membership.contains : await playlistContainsTrack(id, uri);
+                        if (exists) {
                           await removeFromPlaylist({ playlistId: id, trackUris: [{ uri }] });
-                          await invalidateItems();
-                          await showToast({ title: `Removed from ${playlist.name}` });
-                          await revalidate().catch(() => undefined);
-                          if (getPreferenceValues().closeWindowOnAction) {
-                            await showHUD(`Removed from ${playlist.name}`);
-                            await popToRoot();
-                          }
-                        } else await add();
+                        } else {
+                          await addToPlaylist({ playlistId: id, trackUris: [uri] });
+                        }
+                        const title = exists ? `Removed from ${playlist.name}` : `Added to ${playlist.name}`;
+                        await showToast({ title });
+                        await revalidate().catch(() => undefined);
+                        if (getPreferenceValues().closeWindowOnAction) {
+                          await showHUD(title);
+                          await popToRoot();
+                        }
                       } catch (error) {
                         await showToast({
                           title: "Could not update playlist",

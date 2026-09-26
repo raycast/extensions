@@ -260,33 +260,11 @@
       "preferences": [
         {
           "name": "duplicateSongCheck",
-          "description": "Prevents duplicate song addition. Significantly slows performance of non cached playlists.",
+          "description": "Check for duplicates when adding through a Quicklink. The playlist picker always checks membership to offer Add or Remove.",
           "type": "checkbox",
-          "label": "Check for duplicate songs",
+          "label": "Check for duplicate songs in Quicklinks",
           "default": false,
           "required": false
-        },
-        {
-          "name": "cacheRefreshTime",
-          "title": "Cache Refresh Rate",
-          "description": "How often to refresh cached playlists",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "7 Days",
-              "value": "7"
-            },
-            {
-              "title": "14 Days",
-              "value": "14"
-            },
-            {
-              "title": "1 Month",
-              "value": "30"
-            }
-          ],
-          "required": false,
-          "default": "30"
         }
       ]
     },

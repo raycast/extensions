@@ -56,7 +56,7 @@ for (const type of [List, Grid]) {
     type[name] = component(`${type === List ? "List" : "Grid"}.${name}`);
   type.Dropdown.Item = component("Dropdown.Item");
 }
-const preferences = { "Default-View": "all", cacheRefreshTime: "30", duplicateSongCheck: true };
+const preferences = { "Default-View": "all", duplicateSongCheck: true };
 const toasts = [];
 const api = {
   Action,

@@ -2,6 +2,8 @@
 
 ## [Reduce Library and Playlist Memory Usage] - {PR_MERGE_DATE}
 
+- Reuse completed playlist checks before adding or removing songs, and show progress when a check is still needed.
+- Remove the unused playlist cache setting and clarify that the duplicate-check preference controls Quicklinks.
 - Load playlist actions when opened instead of scanning playlists while browsing songs, search results, or albums.
 - Check playlist membership one page at a time, including songs beyond the first 1,000, and cancel checks when the selection changes.
 - Keep playlist actions usable during failed or pending checks and allow retrying failed quicklinks.
