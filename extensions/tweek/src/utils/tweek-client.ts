@@ -475,8 +475,9 @@ export async function update_task(
     sanitizedPatch.listId = patchFields.listId;
   if (patchFields.note !== undefined) sanitizedPatch.note = patchFields.note;
   if (patchFields.color !== undefined) sanitizedPatch.color = patchFields.color;
-  if (patchFields.notifyAt) sanitizedPatch.notifyAt = patchFields.notifyAt;
-  if (patchFields.checklist && patchFields.checklist.length > 0) {
+  if (patchFields.notifyAt !== undefined)
+    sanitizedPatch.notifyAt = patchFields.notifyAt;
+  if (patchFields.checklist !== undefined) {
     sanitizedPatch.checklist = patchFields.checklist;
   }
   if (typeof patchFields.freq === "number" && patchFields.freq > 0) {

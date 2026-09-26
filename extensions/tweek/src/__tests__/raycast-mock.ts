@@ -17,7 +17,47 @@ export const Icon = {
   Repeat: "Repeat",
   CheckList: "CheckList",
   Trash: "Trash",
+  Filter: "Filter",
+  RotateAntiClockwise: "RotateAntiClockwise",
+  Eye: "Eye",
+  EyeDisabled: "EyeDisabled",
 };
+
+export const Action = Object.assign(() => null, {
+  Style: {
+    Regular: "regular",
+    Destructive: "destructive",
+  },
+  Push: () => null,
+  CopyToClipboard: () => null,
+  OpenInBrowser: () => null,
+  SubmitForm: () => null,
+});
+
+export const ActionPanel = Object.assign(() => null, {
+  Section: () => null,
+  Submenu: () => null,
+});
+
+export const List = Object.assign(() => null, {
+  Section: () => null,
+  Item: Object.assign(() => null, {
+    Detail: Object.assign(() => null, {
+      Metadata: Object.assign(() => null, {
+        TagList: Object.assign(() => null, {
+          Item: () => null,
+        }),
+        Label: () => null,
+        Separator: () => null,
+      }),
+    }),
+  }),
+  Dropdown: Object.assign(() => null, {
+    Section: () => null,
+    Item: () => null,
+  }),
+  EmptyView: () => null,
+});
 
 export const Toast = {
   Style: {

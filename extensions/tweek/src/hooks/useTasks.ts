@@ -243,11 +243,13 @@ export function useTasks({
 
       try {
         await complete_task(task.id, nextDone, updateType);
-        setCachedTasks(
-          calendarId,
-          tasks.map((t) => (t.id === task.id ? { ...t, done: nextDone } : t)),
-          cacheScope,
-        );
+        setTasks((prev) => {
+          const nextList = prev.map((t) =>
+            t.id === task.id ? { ...t, done: nextDone } : t,
+          );
+          setCachedTasks(calendarId, nextList, cacheScope);
+          return nextList;
+        });
         await showToast({
           style: Toast.Style.Success,
           title: nextDone ? "Marked Completed" : "Marked Pending",
@@ -262,7 +264,7 @@ export function useTasks({
         });
       }
     },
-    [calendarId, cacheScope, fetchTasks, tasks],
+    [calendarId, cacheScope, fetchTasks],
   );
 
   const handleDeleteTask = useCallback(

@@ -106,12 +106,7 @@ export function setCachedTasks(
 }
 
 export function invalidateTaskCache(calendarId?: string): void {
-  if (!calendarId) {
-    memoryStore.clear();
-    getCacheInstance()?.clear();
-    return;
-  }
-  const prefix = `tasks_${calendarId}_`;
+  const prefix = calendarId ? `tasks_${calendarId}_` : "tasks_";
   for (const k of Array.from(memoryStore.keys())) {
     if (k.startsWith(prefix)) {
       memoryStore.delete(k);

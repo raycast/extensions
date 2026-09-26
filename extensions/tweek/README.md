@@ -35,7 +35,7 @@ A full-featured Raycast extension for [Tweek Calendar & Task Management](https:/
 1. Open **Tweek** (`https://tweek.so`) → **Profile** → **API Settings** → **Personal API Keys** and generate a Personal API Key.
 2. Install dependencies and start the Raycast development server:
    ```bash
-   cd /Users/erdemozbaykus/Documents/Erdem/Projects/tweek-extension
+   cd extensions/tweek
    npm install
    npm run dev
    ```
