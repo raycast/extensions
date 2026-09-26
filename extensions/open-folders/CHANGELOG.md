@@ -1,6 +1,6 @@
 # Open Changelog
 
-## [Finder Window & Tab Options] - {PR_MERGE_DATE}
+## [Finder Window & Tab Options] - 2026-09-26
 
 ### New Features
 - **Open Folders In** preference — open folders in a new Finder window (default), in a new tab of the front Finder window, or in the current Finder tab. New Tab requires Accessibility permission for Raycast
