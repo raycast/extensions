@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Docker Cleanup] - {PR_MERGE_DATE}
+## [Docker Cleanup] - 2026-09-26
 
 - Add a `Docker Cleanup` action to the `Docker` command: shows disk usage per category (containers, images, volumes, build cache) and lets you clean stopped containers, unused images, unused volumes, the build cache, or run a full prune, each behind a confirmation dialog. Requires an org-admin API key.
 
