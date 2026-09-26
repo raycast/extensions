@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues, type AI } from "@raycast/api";
+import { getPreferenceValues, type AI } from "@raycast/api";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -12,9 +12,7 @@ export const getModels: AI.GetModels = async () => {
     id: model.id,
     title: model.title,
     description: model.price && `$${model.price.input} in · $${model.price.output} out per 1M tokens`,
-    icon: model.lab
-      ? { source: `https://models.dev/logos/${model.lab}.svg`, tintColor: Color.PrimaryText }
-      : "extension-icon.png",
+    icon: "extension-icon.png",
     contextWindow: model.contextWindow,
     capabilities: {
       systemMessage: { supported: true },

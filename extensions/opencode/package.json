@@ -36,12 +36,12 @@
     "modelProvider": "models"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.63",
-    "@ai-sdk/google": "^4.0.80",
-    "@ai-sdk/openai": "^4.0.75",
-    "@ai-sdk/openai-compatible": "^3.0.55",
+    "@ai-sdk/anthropic": "^4.0.65",
+    "@ai-sdk/google": "^4.0.82",
+    "@ai-sdk/openai": "^4.0.78",
+    "@ai-sdk/openai-compatible": "^3.0.57",
     "@raycast/api": "^2.5.2",
-    "ai": "^7.0.114",
+    "ai": "^7.0.116",
     "zod": "^4.6.5"
   },
   "devDependencies": {

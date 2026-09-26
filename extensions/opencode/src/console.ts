@@ -4,26 +4,9 @@ const CONFIG_URL = "https://opencode.ai/console/api/config";
 const MANAGED_URL = "https://opencode.ai/inference/openai/v1";
 const TOKEN_PLACEHOLDER = "{env:OPENCODE_CONSOLE_TOKEN}";
 
-// Model families map to their lab's logo on models.dev; anything unmatched keeps the OpenCode logo.
-const LABS = [
-  ["claude", "anthropic"],
-  ["gpt", "openai"],
-  ["gemini", "google"],
-  ["grok", "xai"],
-  ["deepseek", "deepseek"],
-  ["kimi", "moonshotai"],
-  ["glm", "zai"],
-  ["qwen", "alibaba"],
-  ["minimax", "minimax"],
-  ["mimo", "xiaomi"],
-  ["nemotron", "nvidia"],
-  ["muse", "meta"],
-] as const;
-
 const Model = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
-  family: z.string().optional(),
   temperature: z.boolean().optional(),
   tool_call: z.boolean().optional(),
   modalities: z.object({ input: z.array(z.string()) }).optional(),
@@ -63,7 +46,6 @@ export async function loadModels(apiKey: string) {
           id: modelKey,
           apiModelID: model.id ?? modelKey,
           title: model.name ?? modelKey,
-          lab: LABS.find(([prefix]) => model.family?.startsWith(prefix))?.[1],
           price: model.cost,
           package: model.provider?.npm ?? provider.npm,
           baseURL: model.provider?.api ?? provider.api,
