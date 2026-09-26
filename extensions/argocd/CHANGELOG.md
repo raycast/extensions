@@ -1,4 +1,4 @@
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-26
 
 - Search applications across several ArgoCD instances at once, or one of them, with a scope
   selector that survives a relaunch. Results paint from a local cache first and refresh behind
