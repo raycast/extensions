@@ -1504,6 +1504,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "recordist",
+    title: "Recordist",
+    description:
+      "Search and read the meetings recorded by Recordist on your own computer: transcripts, action items and notes. Talks only to the app's loopback API or its local database; nothing leaves the machine.",
+    icon: "https://recordist.app/brand/mark.svg",
+    homepage: "https://github.com/recordist-app/gateway",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@recordist/gateway"],
+    },
+  },
+  {
     name: "serato-dj",
     title: "Serato DJ",
     description:
