@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "goose-monitor",
+  "title": "Goose Monitor",
+  "description": "Find and quit apps by name, PID, or port, with helper processes grouped under their apps.",
+  "icon": "icon.png",
+  "author": "eachann_",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "manage-processes",
+      "title": "Manage Processes",
+      "subtitle": "Goose Monitor",
+      "description": "Find and quit apps by name, PID, or port",
+      "mode": "view",
+      "keywords": [
+        "process",
+        "kill",
+        "cpu",
+        "memory",
+        "port",
+        "activity",
+        "task"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Interface Language",
+      "description": "Choose the language used inside the extension. Store metadata remains in English.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        }
+      ]
+    },
+    {
+      "name": "sharedSettingsFilePath",
+      "title": "Shared Settings JSON File",
+      "description": "Select an existing shared JSON file. Switch between this preference and an override in Settings; neither path is overwritten automatically.",
+      "type": "file",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "refreshDuration",
+      "title": "Refresh Interval",
+      "description": "How often to refresh the process list",
+      "type": "dropdown",
+      "required": false,
+      "default": "3000",
+      "data": [
+        {
+          "title": "Off",
+          "value": "0"
+        },
+        {
+          "title": "Every second",
+          "value": "1000"
+        },
+        {
+          "title": "Every 2 seconds",
+          "value": "2000"
+        },
+        {
+          "title": "Every 3 seconds",
+          "value": "3000"
+        },
+        {
+          "title": "Every 5 seconds",
+          "value": "5000"
+        }
+      ]
+    },
+    {
+      "name": "showPID",
+      "title": "Show PID",
+      "label": "Show PID",
+      "description": "Show the process PID in the list",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showPath",
+      "title": "Show Path",
+      "label": "Show Path",
+      "description": "Show the executable path in the list",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "closeWindowAfterQuit",
+      "title": "After Quitting",
+      "label": "Close Window",
+      "description": "Close the Raycast window after quitting a process",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "bun test",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "private": false
+}
