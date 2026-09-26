@@ -1,7 +1,7 @@
 # DayCal
 
 <p align="center">
-  <img src="assets/branding/daycal-store-icon-3d-1024.png" width="160" alt="DayCal icon">
+  <img src="media/daycal-store-icon-3d-1024.png" width="160" alt="DayCal icon">
 </p>
 
 **DayCal** is a Google Calendar extension for [Raycast](https://www.raycast.com/) with a fast Schedule view, a persistent menu-bar calendar, natural-language Quick Add, event editing, calendar routing, and account-aware setup.
