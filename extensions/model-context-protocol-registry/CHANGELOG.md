@@ -1,5 +1,12 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Award Travel Finder, Airport Lounge List, FlightQueue and FlightSeatMap MCP Servers] - 2026-09-26
+
+- Add Award Travel Finder to the official registry: search award flight availability across 28 airlines and award-chart pricing for 23 loyalty programs. Hosted remote Streamable HTTP server at https://mcp.awardtravelfinder.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+- Add Airport Lounge List to the official registry: search 8,500+ airport lounges and check access by card, membership or status. Hosted remote Streamable HTTP server at https://mcp.airportloungelist.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+- Add FlightQueue to the official registry: airport security wait times, FAA delays, EES border queues and baggage stats. Hosted remote Streamable HTTP server at https://mcp.flightqueue.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+- Add FlightSeatMap to the official registry: seat maps, seat ratings, traveller reviews and seat alerts for 117 airlines. Hosted remote Streamable HTTP server at https://mcp.flightseatmap.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
 ## [Add Quibbly MCP Server] - 2026-09-26
 
 - Add Quibbly to the official registry: search synced LinkedIn conversations and connections, see who watched your videos, manage follow-ups, notes and tags, and draft replies that you send yourself. Hosted remote Streamable HTTP server at https://server.quibbly.co/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
