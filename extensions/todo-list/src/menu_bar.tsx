@@ -4,6 +4,7 @@ import MenuBarTodoItem from "./menu_bar_todo_item";
 import { SECTIONS_DATA, preferences } from "./config";
 import { useAtom } from "jotai";
 import { sortTodoItem } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 const CompletedLimit: { [key: string]: number | undefined } = {
   latest: 3,
@@ -27,7 +28,13 @@ export default function MenuBar() {
       <MenuBarExtra.Item
         title="Add Todo"
         shortcut={Keyboard.Shortcut.Common.New}
-        onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
+        onAction={async () => {
+          try {
+            await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+          } catch (error) {
+            await showFailureToast(error, { title: "Could Not Open Todo List" });
+          }
+        }}
       />
       {todoLength > 0 ? (
         <>
@@ -53,15 +60,16 @@ const TodoList = ({
 }) => {
   if (todos.length === 0 || limit === 0) return null;
 
-  if (limit) {
-    todos = todos.slice(0, limit);
-  }
+  const visibleTodos = todos
+    .map((item, idx) => ({ item, idx }))
+    .sort((a, b) => sortTodoItem(a.item, b.item))
+    .slice(0, limit);
 
   return (
     <>
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title={SECTIONS_DATA[sectionKey].name} />
-      {todos.sort(sortTodoItem).map((todo, idx) => (
+      {visibleTodos.map(({ item: todo, idx }) => (
         <MenuBarTodoItem idx={idx} item={todo} key={idx} sectionKey={sectionKey} />
       ))}
     </>
