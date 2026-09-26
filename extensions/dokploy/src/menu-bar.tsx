@@ -47,10 +47,14 @@ export default function MenuBar() {
   // A free-form textfield, not a validated number input - `Number.parseFloat(...) || 90` would
   // silently turn a deliberate `0` into `90` (falsy) and accept out-of-range garbage like `150` or
   // `80abc` (parseFloat stops at the first non-numeric character instead of rejecting it). Parse the
-  // whole string and only accept a real percentage.
-  const parsedThreshold = Number(diskThreshold.trim());
+  // whole string and only accept a real percentage. An empty/whitespace-only value parses to `0`,
+  // which is in range and would otherwise turn the icon permanently red - treat it as unset instead.
+  const trimmedThreshold = diskThreshold.trim();
+  const parsedThreshold = Number(trimmedThreshold);
   const threshold =
-    Number.isFinite(parsedThreshold) && parsedThreshold >= 0 && parsedThreshold <= 100 ? parsedThreshold : 90;
+    trimmedThreshold !== "" && Number.isFinite(parsedThreshold) && parsedThreshold >= 0 && parsedThreshold <= 100
+      ? parsedThreshold
+      : 90;
 
   const { isLoading: instancesLoading, value: instances = [] } = useLocalStorage<Instance[]>("instances");
   const [isLoading, setIsLoading] = useState(true);

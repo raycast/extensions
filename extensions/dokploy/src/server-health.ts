@@ -9,6 +9,7 @@ export interface ServerHealth {
 }
 
 interface RawServerHealth {
+  error?: string | null;
   containers: { containerCount: number };
   resources: { memUsedBytes: number; memTotalBytes: number };
   disk: { usedBytes: number; totalBytes: number };
@@ -31,6 +32,11 @@ export async function fetchServerHealth(instance: Instance): Promise<ServerHealt
   const response = await fetch(url + "docker.getServerHealth", { headers });
   if (!response.ok) throw new Error(`${response.status}`);
   const raw = (await response.json()) as RawServerHealth;
+  // Dokploy still answers `200` when the diagnostic script itself failed (or its output couldn't be
+  // parsed) - `emptyResult()` on the server side fills every metric with `0` and sets `error` instead
+  // of rejecting the request. Left unchecked, those zeros read as real data (an instance that
+  // couldn't be checked would render as "Disk: 0.0 GB / 0.0 GB" and never trip the threshold).
+  if (raw.error) throw new Error(raw.error);
   return {
     diskUsedBytes: raw.disk.usedBytes,
     diskTotalBytes: raw.disk.totalBytes,
