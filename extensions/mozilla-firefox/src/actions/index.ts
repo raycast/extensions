@@ -4,7 +4,6 @@ import { existsSync } from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
-import { Tab } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
 
 const execAsync = promisify(exec);
@@ -84,11 +83,36 @@ async function showLaunchError(err: unknown) {
   });
 }
 
+const FILE_SUFFIX =
+  /\.(html|js|json|txt|ts|tsx|css|jsx|mjs|cjs|csv|go|rb|php|yml|yaml|toml|xml|vue|kt|java|pdf|png|jpe?g|svg|zip|sql|log|env|ini)$/i;
+
+export function looksLikeUrl(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (/^(https?:\/\/|about:)/i.test(trimmed)) return true;
+  if (/^localhost(:\d+)?([/:?#]|$)/i.test(trimmed)) return true;
+  if (/^\d{1,3}(\.\d{1,3}){3}(:\d+)?([/:?#]|$)/.test(trimmed)) return true;
+  const host = trimmed.split(/[/:?#]/)[0];
+  if (FILE_SUFFIX.test(host)) return false;
+  return /^[\w.-]+\.[a-z]{2,}([/:?#]|$)/i.test(trimmed);
+}
+
+export function newTabTitle(query?: string): string {
+  const trimmed = query?.trim();
+  if (!trimmed) return "Open Empty Tab";
+  return looksLikeUrl(trimmed) ? "Open URL" : `Search "${trimmed}"`;
+}
+
 export function buildNewTabUrl(queryText: string | null | undefined): string {
+  const trimmed = queryText?.trim();
+  if (!trimmed) return "about:newtab";
+  if (/^(https?:\/\/|about:)/i.test(trimmed)) return trimmed;
+  if (looksLikeUrl(trimmed)) {
+    const scheme = /^(localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?([/:?#]|$)/i.test(trimmed) ? "http" : "https";
+    return `${scheme}://${trimmed}`;
+  }
   const searchEngine = getPreferenceValues<Preferences.NewTab>().searchEngine?.toLowerCase() || "google";
-  return queryText
-    ? `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(queryText)}`
-    : "about:newtab";
+  return `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(trimmed)}`;
 }
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
@@ -131,15 +155,5 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
   } catch (err) {
     await showLaunchError(err);
     return "error";
-  }
-}
-
-export async function setActiveTab(tab: Tab): Promise<void> {
-  try {
-    // Instead of trying to find and activate the existing tab,
-    // just open the URL which is more reliable and simpler
-    await launchFirefox(tab.url, getBrowserApp());
-  } catch (err) {
-    await showLaunchError(err);
   }
 }

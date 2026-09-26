@@ -1,5 +1,11 @@
 # Mozilla Firefox Changelog
 
+## [Edit URL in Search Bar] - {PR_MERGE_DATE}
+
+- Shift+Enter copies a result URL into the search bar (New Tab, Search History, and Search Bookmarks) so it can be edited before opening
+- Pasting or typing a URL labels the first item Open URL (Enter opens it). In Search History and Search Bookmarks that row only appears when the text looks like a URL, so a normal query still opens the top match
+- Bare localhost and IPv4 targets open over HTTP
+
 ## [Windows Launch Fixes] - 2026-09-21
 
 - Added an Open in New Window action on Windows (New Tab, Search History, and Search Bookmarks) with Ctrl+Enter

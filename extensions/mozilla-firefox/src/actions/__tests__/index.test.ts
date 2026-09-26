@@ -23,7 +23,7 @@ import { existsSync } from "fs";
 import { spawn } from "child_process";
 
 // Import after the mocks are in place so the module under test picks them up.
-import { openNewTab, openInNewWindow } from "../index";
+import { buildNewTabUrl, looksLikeUrl, newTabTitle, openNewTab, openInNewWindow } from "../index";
 
 const setBrowserApp = (browserApp: string) =>
   vi.mocked(getPreferenceValues).mockReturnValue({ browserApp, searchEngine: "Google" });
@@ -294,5 +294,72 @@ describe("openInNewWindow on Windows", () => {
       ["-new-window", "about:newtab"],
       expect.anything(),
     );
+  });
+});
+
+describe("newTabTitle", () => {
+  it("treats blank input as Open Empty Tab", () => {
+    expect(newTabTitle(undefined)).toBe("Open Empty Tab");
+    expect(newTabTitle("")).toBe("Open Empty Tab");
+    expect(newTabTitle("   ")).toBe("Open Empty Tab");
+  });
+
+  it("labels host-like input Open URL and the rest as Search", () => {
+    expect(newTabTitle("github.com")).toBe("Open URL");
+    expect(newTabTitle("whatsapp")).toBe('Search "whatsapp"');
+  });
+});
+
+describe("looksLikeUrl", () => {
+  it("accepts schemes, about:, hosts, localhost, and IPv4", () => {
+    expect(looksLikeUrl("https://github.com/foo/1")).toBe(true);
+    expect(looksLikeUrl("http://example.com")).toBe(true);
+    expect(looksLikeUrl(" about:config ")).toBe(true);
+    expect(looksLikeUrl("github.com/foo/2")).toBe(true);
+    expect(looksLikeUrl("www.google.com")).toBe(true);
+    expect(looksLikeUrl("localhost:3000")).toBe(true);
+    expect(looksLikeUrl("127.0.0.1")).toBe(true);
+    expect(looksLikeUrl("docs.rs")).toBe(true);
+    expect(looksLikeUrl("example.sh")).toBe(true);
+    expect(looksLikeUrl("notes.md")).toBe(true);
+    expect(looksLikeUrl("docs.py.org")).toBe(true);
+  });
+
+  it("rejects searches and file-like names", () => {
+    expect(looksLikeUrl("whatsapp")).toBe(false);
+    expect(looksLikeUrl("index.html")).toBe(false);
+    expect(looksLikeUrl("node.js")).toBe(false);
+    expect(looksLikeUrl("package.json")).toBe(false);
+    expect(looksLikeUrl("data.csv")).toBe(false);
+  });
+});
+
+describe("buildNewTabUrl", () => {
+  it("opens about:newtab when the query is empty", () => {
+    expect(buildNewTabUrl(null)).toBe("about:newtab");
+    expect(buildNewTabUrl("   ")).toBe("about:newtab");
+  });
+
+  it("keeps absolute URLs and about: pages", () => {
+    expect(buildNewTabUrl("https://github.com/foo/1")).toBe("https://github.com/foo/1");
+    expect(buildNewTabUrl("http://example.com")).toBe("http://example.com");
+    expect(buildNewTabUrl(" about:config ")).toBe("about:config");
+  });
+
+  it("prefixes https:// for public hosts and http:// for local hosts", () => {
+    expect(buildNewTabUrl("github.com/foo/2")).toBe("https://github.com/foo/2");
+    expect(buildNewTabUrl("www.google.com")).toBe("https://www.google.com");
+    expect(buildNewTabUrl("docs.rs")).toBe("https://docs.rs");
+    expect(buildNewTabUrl("localhost:3000")).toBe("http://localhost:3000");
+    expect(buildNewTabUrl("localhost")).toBe("http://localhost");
+    expect(buildNewTabUrl("127.0.0.1")).toBe("http://127.0.0.1");
+    expect(buildNewTabUrl("10.0.0.1:8080/path")).toBe("http://10.0.0.1:8080/path");
+  });
+
+  it("sends remaining text to the search engine", () => {
+    expect(buildNewTabUrl("whatsapp")).toBe("https://google.com/search?q=whatsapp");
+    expect(buildNewTabUrl("index.html")).toBe("https://google.com/search?q=index.html");
+    expect(buildNewTabUrl("node.js")).toBe("https://google.com/search?q=node.js");
+    expect(buildNewTabUrl("package.json")).toBe("https://google.com/search?q=package.json");
   });
 });
