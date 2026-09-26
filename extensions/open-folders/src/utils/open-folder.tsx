@@ -20,7 +20,10 @@ on run argv
 end run`;
 
 // Finder has no scripting command for tabs, so a new tab is ⌘T sent through System Events
-// (hence the Accessibility requirement), then retargeted once it exists.
+// (hence the Accessibility requirement), then retargeted once it exists. Each tab counts as
+// a Finder window, which is how the new one is detected. If Finder never takes focus or the
+// tab never appears, the script errors out rather than sending ⌘T elsewhere or retargeting
+// the current tab, and openFolder falls back to a new window.
 const NEW_TAB_SCRIPT = `
 on run argv
   set targetFolder to POSIX file (item 1 of argv) as alias
@@ -34,17 +37,19 @@ on run argv
     set windowCount to count of Finder windows
   end tell
   tell application "System Events"
-    repeat 20 times
+    repeat 40 times
       if frontmost of process "Finder" then exit repeat
       delay 0.05
     end repeat
+    if not (frontmost of process "Finder") then error "Finder did not come to the front"
     keystroke "t" using command down
   end tell
   tell application "Finder"
-    repeat 20 times
+    repeat 40 times
       if (count of Finder windows) > windowCount then exit repeat
       delay 0.05
     end repeat
+    if (count of Finder windows) is not greater than windowCount then error "Finder did not open a new tab"
     set target of Finder window 1 to targetFolder
   end tell
 end run`;
