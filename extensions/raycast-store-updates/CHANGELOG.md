@@ -4,6 +4,10 @@
 
 - Add a Raycast AI tool for finding recent new and updated Store extensions by keyword, update type, number of days, or start date, with descriptions, dates, and links
 - Allow AI queries to show updates for extensions installed locally
+- Cache successful AI scans for 10 minutes to reduce GitHub API use
+- Show new extensions from the Store feed when GitHub updates are unavailable
+- Warn when the GitHub results do not cover the requested date range
+- Identify the pull request submitter for updates and use the pull request title to summarize changes
 
 ## [Commit Links in Version History] - 2026-09-25
 

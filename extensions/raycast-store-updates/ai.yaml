@@ -1,7 +1,9 @@
 instructions: |
   An @raycast-store-updates mention selects this extension. Do not treat the mention as the subject or search query unless the user explicitly asks about the Raycast Store Updates extension.
   For a broad question such as "what's new this week?", include both new and updated extensions by calling find-store-updates with type: all.
-  If totalMatches exceeds the number of items returned, state how many additional matches there are.
+  For "this week" or "past week", use days: 7 rather than calculating a calendar date.
+  If the user asks only for updates, call find-store-updates with type: updated.
+  If totalMatches exceeds the number of items returned, always state the exact number of additional matches. For example, totalMatches: 46 with two items means 44 more matches.
   If updatesUnavailable is present, say that GitHub updates could not be loaded; any new extensions in items still came from the Store feed.
   If updatesWindowIncomplete is true, say that update coverage is only guaranteed after updatesCoverageSince and that older updates may be missing.
   For an updated item, updatedBy is the PR submitter, not necessarily the extension author. Use changeSummary for what changed when available.
@@ -32,6 +34,7 @@ evals:
             limit: 2
       - includes: Focus Timer
       - includes: Quick Notes
+      - matches: "(2|two).*(more|additional|other)"
 
   - input: "@raycast-store-updates What updates are available for my installed extensions?"
     mocks:
@@ -59,7 +62,7 @@ evals:
           - title: Focus Timer
             description: Start a focus session
             type: new
-            date: "2026-09-20T12:00:00Z"
+            date: "2026-09-25T12:00:00Z"
             author: example
             url: https://www.raycast.com/example/focus-timer
     expected:
@@ -78,7 +81,7 @@ evals:
           - title: Focus Timer
             description: Start a focus session
             type: new
-            date: "2026-09-20T12:00:00Z"
+            date: "2026-09-25T12:00:00Z"
             author: example
             url: https://www.raycast.com/example/focus-timer
     expected:
@@ -90,6 +93,7 @@ evals:
       - includes: Focus Timer
 
   - input: "@raycast-store-updates What new extensions were published since September 1, 2026?"
+    usedAsExample: false
     mocks:
       find-store-updates:
         totalMatches: 1
@@ -108,7 +112,8 @@ evals:
             since: "2026-09-01"
       - includes: Focus Timer
 
-  - input: "@raycast-store-updates What new extensions were published since September 21, 2026?"
+  - input: "@raycast-store-updates What new extensions were published since September 26, 2026?"
+    usedAsExample: false
     mocks:
       find-store-updates:
         totalMatches: 0
@@ -118,7 +123,7 @@ evals:
           name: find-store-updates
           arguments:
             type: new
-            since: "2026-09-21"
+            since: "2026-09-26"
       - matches: "(no|none|haven't been any|not been any).*new"
       - not:
           matches: "https?://"
@@ -151,7 +156,11 @@ evals:
         items:
           - { title: Calendar, description: Manage events, type: updated, date: "2026-09-25T12:00:00Z", updatedBy: contributor, url: https://www.raycast.com/example/calendar }
     expected:
-      - callsTool: find-store-updates
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: updated
+            days: 7
       - includes: Calendar
       - includes: coverage
       - matches: "(missing|incomplete|partial|only|limited)"
@@ -164,7 +173,11 @@ evals:
         items:
           - { title: Swift Salamander, description: Open paths in Swift Salamander, type: new, date: "2026-09-25T21:06:15Z", author: c0desurfer, url: https://www.raycast.com/c0desurfer/swift-salamander }
     expected:
-      - callsTool: find-store-updates
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: all
+            days: 7
       - includes: Swift Salamander
       - matches: "(unavailable|could not|unable|rate limit)"
 
@@ -180,5 +193,7 @@ evals:
           arguments:
             query:
               includes: slack
+            type: updated
+            days: 7
       - includes: Slack
       - includes: message search

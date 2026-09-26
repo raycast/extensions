@@ -59,7 +59,9 @@ To keep an eye on things passively, enable **Store Updates Menu Bar** — it ref
 | View Store Updates | `view` | The full chronological list of new, updated, and removed extensions |
 | Store Updates Menu Bar | `menu-bar` | A badge of unseen Store activity, refreshed every hour in the background |
 
-The **Find Store Updates** Ask AI tool can search the same feed by keyword, type, date range, or installed extensions.
+The **Find Store Updates** tool works in Raycast's Ask AI chat. Mention `@raycast-store-updates` to ask about new or updated extensions. You can search by keyword, date range, or installed extension.
+
+If GitHub cannot load updates, Ask AI still shows new extensions from the Store feed and explains why updates are missing. Update searches use the latest 50 GitHub pull requests. Ask AI warns when those requests do not cover the full date range you asked about.
 
 ### Actions
 
@@ -129,8 +131,8 @@ raycast-store-updates/
 | `npm run fix-lint` | Auto-fix lint issues |
 | `npm run publish` | Publish to the Raycast Store |
 
-Verification is `npm run build`, `npm run lint`, `npm test`, and exercising the
-commands in `npm run dev`.
+Verification is `npm run build`, `npm run lint`, `npm test`, and
+`npx ray evals --non-interactive --exit-on-error`. Test the commands and Ask AI tool in Raycast.
 
 ### Clone & Run
 
