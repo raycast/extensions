@@ -84,7 +84,7 @@ async function showLaunchError(err: unknown) {
 }
 
 const FILE_SUFFIX =
-  /\.(html|js|json|md|txt|ts|tsx|css|jsx|mjs|cjs|py|rs|csv|go|rb|php|yml|yaml|toml|xml|vue|kt|java|pdf|png|jpe?g|svg|zip|sql|log|env|ini|sh)$/i;
+  /\.(html|js|json|txt|ts|tsx|css|jsx|mjs|cjs|csv|go|rb|php|yml|yaml|toml|xml|vue|kt|java|pdf|png|jpe?g|svg|zip|sql|log|env|ini)$/i;
 
 export function looksLikeUrl(text: string): boolean {
   const trimmed = text.trim();

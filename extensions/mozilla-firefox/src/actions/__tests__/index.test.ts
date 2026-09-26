@@ -319,6 +319,10 @@ describe("looksLikeUrl", () => {
     expect(looksLikeUrl("www.google.com")).toBe(true);
     expect(looksLikeUrl("localhost:3000")).toBe(true);
     expect(looksLikeUrl("127.0.0.1")).toBe(true);
+    expect(looksLikeUrl("docs.rs")).toBe(true);
+    expect(looksLikeUrl("example.sh")).toBe(true);
+    expect(looksLikeUrl("notes.md")).toBe(true);
+    expect(looksLikeUrl("docs.py.org")).toBe(true);
   });
 
   it("rejects searches and file-like names", () => {
@@ -326,8 +330,6 @@ describe("looksLikeUrl", () => {
     expect(looksLikeUrl("index.html")).toBe(false);
     expect(looksLikeUrl("node.js")).toBe(false);
     expect(looksLikeUrl("package.json")).toBe(false);
-    expect(looksLikeUrl("foo.py")).toBe(false);
-    expect(looksLikeUrl("app.rs")).toBe(false);
     expect(looksLikeUrl("data.csv")).toBe(false);
   });
 });
@@ -347,6 +349,7 @@ describe("buildNewTabUrl", () => {
   it("prefixes https:// for public hosts and http:// for local hosts", () => {
     expect(buildNewTabUrl("github.com/foo/2")).toBe("https://github.com/foo/2");
     expect(buildNewTabUrl("www.google.com")).toBe("https://www.google.com");
+    expect(buildNewTabUrl("docs.rs")).toBe("https://docs.rs");
     expect(buildNewTabUrl("localhost:3000")).toBe("http://localhost:3000");
     expect(buildNewTabUrl("localhost")).toBe("http://localhost");
     expect(buildNewTabUrl("127.0.0.1")).toBe("http://127.0.0.1");
