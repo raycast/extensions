@@ -6,7 +6,7 @@ import * as TE from "fp-ts/TaskEither";
 import { match } from "ts-pattern";
 
 import { getLibraryName } from "./general";
-import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
+import { createQueryString, escapeAppleScriptString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../constants";
 import { getMacosVersion } from "../get-macos-version";
 import { MenuBarSnapshot, PlayerState, ScriptError, Track } from "../models";
@@ -27,7 +27,6 @@ const getSetFavoriteCommand = (versionMajor: number, targetState: boolean) =>
     ? `set favorited of current track to ${targetState.toString()}`
     : `set loved of current track to ${targetState.toString()}`;
 const getFavoriteByVersion = (versionMajor: number) => tell("Music", getFavoriteCommand(versionMajor));
-const escapeAppleScriptString = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 const getFavoriteForCurrentTrackIdByVersion = (versionMajor: number, trackId: string) =>
   runScript(`
     tell application "Music"
@@ -192,7 +191,9 @@ export const addToLibrary = pipe(
 
     return pipe(
       getLibraryName,
-      TE.chain((name) => tell("Music", `duplicate current track to library playlist "${name}"`)),
+      TE.chain((name) =>
+        tell("Music", `duplicate current track to library playlist "${escapeAppleScriptString(name)}"`),
+      ),
     );
   }),
 );
@@ -208,75 +209,45 @@ export const getCurrentTrackRating = pipe(
   TE.map((rating) => Math.round(rating / STAR_VALUE)),
 );
 
-const getScriptForAddTo = (playlist: string, library = "source 1") =>
-  match(library)
-    .with(
-      "source 1",
-      () =>
-        `
-tell application "Music"
-	set theName to name of current track
-	set theArtist to artist of current track
-	set theAlbum to album of the current track
-	set existingTracks to get tracks of source 1 whose name is theName and artist is theArtist and album is theAlbum
-
-	if (count of existingTracks) = 0 then
-		set theCount to count of tracks of source 1
-		duplicate current track to source 1
-
-		repeat while theCount = (count of tracks of source 1)
-			delay 1
-		end repeat
-	end if
-
-	set theTrack to first track of source 1 whose name is theName and artist is theArtist and album is theAlbum
-	duplicate theTrack to playlist "${playlist}"
-end tell
-`,
-    )
-    .otherwise(
-      () =>
-        `
-tell application "Music"
-	set theName to name of current track
-	set theArtist to artist of current track
-	set theAlbum to album of the current track
-	set existingTracks to get tracks of source "${library}" whose name is theName and artist is theArtist and album is theAlbum
-
-	if (count of existingTracks) = 0 then
-		set theCount to count of tracks of "${library}"
-		duplicate current track to library playlist "${library}"
-
-		repeat while theCount = (count of tracks of "${library}")
-			delay 1
-		end repeat
-	end if
-
-	set theTrack to first track of library playlist "${library}" whose name is theName and artist is theArtist and album is theAlbum
-	duplicate theTrack to playlist "${playlist}"
-end tell
-`,
-    );
-
-/**
- *
- * Add a track to a playlist
- * @param playlist - The name of the target playlist
- */
+/** Add once, then wait for the specific track rather than the library's total count. */
 export const addToPlaylist = (playlist: string) =>
-  pipe(
-    getLibraryName,
-    TE.chain((library) =>
-      pipe(
-        getScriptForAddTo(playlist, library),
-        runScript,
-        TE.orElse((err) => {
-          console.error(err);
-          return pipe(getScriptForAddTo(playlist, "source 1"), runScript);
-        }),
-      ),
-    ),
-  );
+  runScript(`
+    tell application "Music"
+      set targetPlaylist to playlist "${escapeAppleScriptString(playlist)}"
+      if smart of targetPlaylist then
+        error "Music manages this playlist automatically. Use Favorite Track for Favorite Songs."
+      end if
+
+      try
+        set playingTrack to current track
+        set theName to name of playingTrack
+        set theArtist to artist of playingTrack
+        set theAlbum to album of playingTrack
+      on error number -1728
+        error "Music cannot access the current track. For station tracks, add the song in Music first."
+      end try
+
+      set existingTracks to (get tracks of library playlist 1 whose name is theName and artist is theArtist and album is theAlbum)
+      if (count of existingTracks) = 0 then
+        duplicate playingTrack to library playlist 1
+        repeat 20 times
+          set existingTracks to (get tracks of library playlist 1 whose name is theName and artist is theArtist and album is theAlbum)
+          if (count of existingTracks) > 0 then exit repeat
+          delay 0.25
+        end repeat
+      end if
+
+      if (count of existingTracks) = 0 then
+        error "The track has not appeared in your library yet. Wait for Music to sync, then try again."
+      end if
+
+      try
+        duplicate (item 1 of existingTracks) to targetPlaylist
+      on error number -54
+        error "Music does not allow adding to this playlist. For Favorite Songs, use Favorite Track."
+      end try
+    end tell
+  `);
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   return pipe(

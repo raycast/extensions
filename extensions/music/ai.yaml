@@ -3,7 +3,7 @@ instructions: |
   This tool allows control of Apple Music via natural language requests, including playback control, track actions, and playlist management.
 
   ---
-  
+
   # 1. Playback Control
 
   1. Identifying Content to Play
@@ -25,26 +25,26 @@ instructions: |
      - For a shuffled playback request (e.g., “Play [playlist] on shuffle”), set the shuffle flag to true in start-playlist.
      - To get the current shuffle status, use get-current-shuffle.
      - To toggle shuffle mode, use toggle-shuffle.
-     - To set the shuffle mode, use set-toggle-shuffle with the desired shuffle state (true/false). 
-     - set-toggle-shuffle is a tool that if the shuffle state is true, it will turn it off, and vice versa.
-     - So if the user wants to turn shuffle on, we first get the current shuffle status, then if it's off, we turn it on, and if it's on, we should not do anything.
+     - To set a specific shuffle state, call get-current-shuffle first. Call toggle-shuffle only if the current state differs from the requested state.
 
   ---
-  
+
   # 2. Track Actions
 
   1. Check Current Track
      - Always call get-currently-playing before performing any track-specific actions (e.g., adding to library, adding to a playlist, disliking).
+     - Wait for that call to finish, then use its returned track name in every dependent tool call. Do not run status checks in parallel with it or pass placeholder names such as "unknown".
 
   2. Adding Tracks to Library
      - If the user wants to add a track to their library (e.g., “Save this song to my library”), use add-to-library with the current track name obtained from get-currently-playing.
      - Before calling add-to-library, call get-library-tracks with the track name to check if the track is already in the library.
+     - Set search to the exact returned track name without appending the artist. Compare the returned tracks' names and artists to identify an existing copy; unrelated search matches do not count.
      - If the track is not in the library (if get-library-tracks returns an empty array), call add-to-library to add the track to the library.
-     - If the track is already in the library (if get-library-tracks returns a non-empty array), do nothing and acknowledge the user that the track is already in the library and ask if they want to add it again.
+     - If a matching track is already in the library, do nothing and acknowledge the user that the track is already in the library and ask if they want to add it again.
      - If the user wants to add the track to the library again, call add-to-library again.
      - Empty array example from get-library-tracks:
        get-library-tracks
-       {"_tag": "Right", "right": [{}]}
+       {"_tag": "Right", "right": []}
 
      - Non-empty array example from get-library-tracks:
        get-library-tracks
@@ -55,34 +55,35 @@ instructions: |
      - When disliking a track (e.g., “I don't like this song”), use the track name from get-currently-playing.
      - Then call get-dislike-status to check if the track is disliked.
      - If it is, do nothing and acknowledge the user that the track is already disliked.
-     - If it is not, call dislike and acknowledge the user that the track is now disliked.
+     - If it is not, call toggle-dislike with dislike: true and acknowledge the user that the track is now disliked.
      
   4. Favoriting
      - When favoriting a track (e.g., “Add this song to my favorites”), use the track name from get-currently-playing.
      - Then call get-favorite-status to check if the track is favorited.
      - If it is, do nothing and acknowledge the user that the track is already favorited.
-     - If it is not, call favorite and acknowledge the user that the track is now favorited.
+     - If it is not, call toggle-favorite with favorite: true and acknowledge the user that the track is now favorited.
 
   5. Undisliking
      - When undisliking a track (e.g., “Undislike this song”), use the track name from get-currently-playing.
      - Then call get-dislike-status to check if the track is disliked.
-     - If it is, call undislike and acknowledge the user that the track is now undisliked.
+     - If it is, call toggle-dislike with dislike: false and acknowledge the user that the track is now undisliked.
      - If it is not, do nothing and acknowledge the user that the track is not disliked.
 
   6. Unfavoriting
      - When unfavoriting a track (e.g., “Remove this song from my favorites”), use the track name from get-currently-playing.
      - Then call get-favorite-status to check if the track is favorited.
-     - If it is, call unfavorite and acknowledge the user that the track is now unfavorited.
+     - If it is, call toggle-favorite with favorite: false and acknowledge the user that the track is now unfavorited.
      - If it is not, do nothing and acknowledge the user that the track is not favorited.
 
   ---
-  
+
   # 3. Playlist Management
 
   1. Verifying Playlist Existence
      - Before any playlist operation, call get-playlists to confirm the playlist name and ID exist.
 
   2. Adding the Current Track to a Playlist
+     - For Music's automatically managed Favorite Songs playlist, follow the Favoriting steps above instead of calling add-to-playlist.
      - Use get-currently-playing to identify the track name.
      - Then call get-playlists to confirm the target playlist exists.
      - Finally, call add-to-playlist, passing in the target playlist name and the track name.
@@ -97,7 +98,7 @@ instructions: |
      - Then call play-library-album with the album name.
 
   ---
-  
+
   # 4. Tool-Specific Guidance
 
   - get-playlists  
@@ -123,7 +124,7 @@ instructions: |
     • Use volume-up or volume-down to increase or decrease by predefined steps.
 
   ---
-  
+
   # 5. Error Handling
 
   - Return tool error messages verbatim to the user.
@@ -131,7 +132,7 @@ instructions: |
   - Always check that a track is playable (i.e., retrieved via the correct tool) before performing a library operation.
 
   ---
-  
+
   # 6. Example Workflows
 
   1. Play a Shuffled Playlist

@@ -1,5 +1,15 @@
 # Apple Music Changelog
 
+## [Playback and Search Reliability] - {PR_MERGE_DATE}
+
+- Added timeouts for Music scripts and fixed subprocess completion handling.
+- Wait for Music to confirm shuffle and repeat changes before showing success, and recognize Repeat All as enabled.
+- Prioritize song titles over artists and albums in library searches, including Just Play and AI searches.
+- Fixed searches and playlist names containing quotes or backslashes, metadata containing equals signs, and empty library results.
+- Fixed loading indicators that stayed active when no track was playing or playlist loading failed.
+- Updated AI instructions for shuffle, favorites, and empty library results.
+- Bound playlist sync waits and explain errors for automatically managed playlists and inaccessible station tracks.
+
 ## [Search Apple Music Command] - 2026-08-22
 
 - Added a new "Search Apple Music" command that searches the Apple Music catalog for songs and albums — with album tracklists, Open in Music, and Add to Library (checking first whether the item is already in your library).
