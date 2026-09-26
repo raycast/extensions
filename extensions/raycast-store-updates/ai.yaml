@@ -129,41 +129,43 @@ evals:
           matches: "https?://"
 
   - input: "@raycast-store-updates what's new this week?"
+    usedAsExample: false
     mocks:
       find-store-updates:
-        totalMatches: 46
+        totalMatches: 49
+        updatesCoverageSince: "2026-09-25T12:49:01Z"
+        updatesWindowIncomplete: true
         items:
-          - { title: Google Chrome Profiles, description: Switch between Chrome profiles, type: updated, date: "2026-09-25T21:26:16Z", updatedBy: 0xdhrv, changeSummary: Fix profile switching, url: https://www.raycast.com/frouo/google-chrome-profiles }
-          - { title: Swift Salamander, description: Open paths in Swift Salamander, type: new, date: "2026-09-25T21:06:15Z", author: c0desurfer, url: https://www.raycast.com/c0desurfer/swift-salamander }
+          - { title: Gaffiot Latin-French Dictionary, description: Latin-French dictionary, type: new, date: "2026-09-26T21:28:28Z", author: David Tavan, url: https://www.raycast.com/davidyannick/gaffiot }
+          - { title: Orion, description: Manage Orion bookmarks, type: updated, date: "2026-09-26T19:51:21Z", updatedBy: szpony, changeSummary: "Orion: focus and follow the current tab in the Command Bar", url: https://www.raycast.com/plonq/orion }
+          - { title: Slides2PDF, description: Convert slides to PDF, type: new, date: "2026-09-22T07:46:33Z", author: Bertro, url: https://www.raycast.com/bertro/slides2pdf }
     expected:
       - callsTool:
           name: find-store-updates
           arguments:
             days: 7
-            type: all
-      - includes: Google Chrome Profiles
-      - includes: Swift Salamander
-      - matches: "(44|forty-four)"
-      - not:
-          matches: "no (updated|update)"
+      - includes: Orion
+      - matches: "([Ss]ep(tember)?\\.? ?25|9/25|2026-09-25)"
+      - matches: "(missing|incomplete|partial|may not|might not|older|[Oo]nly)"
+      - matches: "(46|forty-six)"
 
-  - input: "@raycast-store-updates What was updated this week?"
+  - input: "@raycast-store-updates what was updated this week?"
+    usedAsExample: false
     mocks:
       find-store-updates:
-        totalMatches: 1
-        updatesCoverageSince: "2026-09-24T00:00:00Z"
+        totalMatches: 49
+        updatesCoverageSince: "2026-09-25T12:49:01Z"
         updatesWindowIncomplete: true
         items:
-          - { title: Calendar, description: Manage events, type: updated, date: "2026-09-25T12:00:00Z", updatedBy: contributor, url: https://www.raycast.com/example/calendar }
+          - { title: Orion, description: Manage Orion bookmarks, type: updated, date: "2026-09-26T19:51:21Z", updatedBy: szpony, changeSummary: "Orion: focus and follow the current tab in the Command Bar", url: https://www.raycast.com/plonq/orion }
+          - { title: Dokploy, description: Deploy anywhere, type: updated, date: "2026-09-26T09:04:38Z", updatedBy: merttopuz, changeSummary: "[Dokploy] Add Docker Cleanup action", url: https://www.raycast.com/xmok/dokploy }
     expected:
       - callsTool:
           name: find-store-updates
           arguments:
             type: updated
-            days: 7
-      - includes: Calendar
-      - includes: coverage
-      - matches: "(missing|incomplete|partial|only|limited)"
+      - matches: "([Ss]ep(tember)?\\.? ?25|9/25|2026-09-25)"
+      - matches: "(missing|incomplete|partial|may not|might not|older|[Oo]nly)"
 
   - input: "@raycast-store-updates What new and updated extensions appeared this week?"
     mocks:
