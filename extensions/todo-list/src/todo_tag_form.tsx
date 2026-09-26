@@ -4,6 +4,7 @@ import { todoAtom, editingTagAtom, editingTagNameAtom } from "./atoms";
 import { ActionPanel, Form, Action, useNavigation, Icon, Color } from "@raycast/api";
 import { getTags } from "./tags";
 import { useState } from "react";
+import { TodoRevisionConflictError } from "./storage";
 
 const TodoTagForm = () => {
   const { pop } = useNavigation();
@@ -31,8 +32,14 @@ const TodoTagForm = () => {
           <Action.SubmitForm
             icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
             onSubmit={() => {
-              editTodoTag();
-              pop();
+              try {
+                editTodoTag();
+                pop();
+              } catch (error) {
+                // The store refreshed the list and cleared this form's stale target.
+                if (error instanceof TodoRevisionConflictError) pop();
+                else throw error;
+              }
             }}
           />
           <Action icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={() => pop()} title="Cancel" />

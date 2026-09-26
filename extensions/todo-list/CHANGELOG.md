@@ -2,7 +2,7 @@
 
 ## [Windows Shortcuts, Backups, and AI Tools] - {PR_MERGE_DATE}
 
-- Reload newer task data after conflicting saves so editing can continue without reopening the command.
+- Reload newer task data after conflicting saves and close stale tag/date forms so editing can continue from the refreshed list.
 - Show an error when opening the todo list or backup commands fails.
 - Fixed action shortcuts and search-mode switching on Windows. The menu-bar command is now explicitly macOS-only.
 - Fixed filtering by a tag named "All" and added an existing-tag picker when editing tags.

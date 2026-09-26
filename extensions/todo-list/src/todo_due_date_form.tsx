@@ -3,6 +3,7 @@ import _ from "lodash";
 import { todoAtom, editingDueDateAtom, editingDueDateValueAtom } from "./atoms";
 import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
 import { useState } from "react";
+import { TodoRevisionConflictError } from "./storage";
 
 const TodoDueDateForm = () => {
   const { pop } = useNavigation();
@@ -28,8 +29,14 @@ const TodoDueDateForm = () => {
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={() => {
-              editTodoDueDate();
-              pop();
+              try {
+                editTodoDueDate();
+                pop();
+              } catch (error) {
+                // The store refreshed the list and cleared this form's stale target.
+                if (error instanceof TodoRevisionConflictError) pop();
+                else throw error;
+              }
             }}
           />
           <Action onAction={() => pop()} title="Cancel" />

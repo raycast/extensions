@@ -316,3 +316,59 @@ test("backup and menu-bar launch failures show a toast without rejecting the act
   assert.equal(failures.length, 3);
   assert.ok(failures.every(([message]) => message === "Launch failed"));
 });
+
+for (const kind of ["tag", "due_date"]) {
+  for (const outcome of ["success", "conflict", "storage failure"]) {
+    test(`${kind} form closes after ${outcome} only when its edit target is safe to leave`, (t) => {
+      const { file } = fixture(t);
+      const revision = storage.writeTodos(file, sections([item("Original")]), null);
+      let popped = 0;
+      const toasts = [];
+      const host = {
+        Toast: { Style: { Failure: "failure" } },
+        showToast: async (toast) => toasts.push(toast),
+        useNavigation: () => ({ pop: () => popped++ }),
+        ActionPanel: "panel",
+        Action: Object.assign(() => null, { SubmitForm: "submit" }),
+        Form: Object.assign(() => null, {
+          Dropdown: Object.assign(() => null, { Item: "option" }),
+          TextField: "text", DatePicker: "date",
+        }),
+        Icon: {}, Color: {},
+      };
+      const atoms = load("src/atoms.ts", {
+        "./config": { TODO_FILE: file }, "./storage": storage, "@raycast/api": host,
+      });
+      const store = require("jotai/vanilla").createStore();
+      const target = kind === "tag" ? atoms.editingTagAtom : atoms.editingDueDateAtom;
+      store.set(target, { sectionKey: "todo", index: 0 });
+      const Form = load(`src/todo_${kind}_form.tsx`, {
+        "./atoms": atoms, "./storage": storage, "@raycast/api": host,
+        jotai: { useAtom: (atom) => [store.get(atom), (value) => store.set(atom, value)] },
+        react: { useState: () => [kind === "tag" ? "Work" : new Date(2000), () => {}] },
+      }).default;
+      const submit = descendants(Form().props.actions).find((node) => node.type === "submit").props.onSubmit;
+      if (outcome === "conflict") storage.writeTodos(file, sections([item("External")]), revision);
+      if (outcome === "storage failure") fs.writeFileSync(file, "broken");
+      if (outcome === "storage failure") {
+        assert.throws(submit);
+        assert.equal(popped, 0);
+        assert.notEqual(store.get(target), false);
+      } else {
+        assert.doesNotThrow(submit);
+        assert.equal(popped, 1);
+        const saved = storage.readTodos(file).sections.todo[0];
+        if (outcome === "conflict") {
+          assert.equal(saved.title, "External");
+          assert.equal(saved.tag, undefined);
+          assert.equal(saved.dueDate, undefined);
+          assert.equal(store.get(target), false);
+          assert.equal(toasts.length, 1);
+        } else {
+          assert.equal(saved.title, "Original");
+          assert.equal(kind === "tag" ? saved.tag : saved.dueDate, kind === "tag" ? "Work" : 2000);
+        }
+      }
+    });
+  }
+}
