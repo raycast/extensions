@@ -32,7 +32,8 @@ export function removeApp(apps: HistoryApp[], bundleId: string, removals: Remova
 /**
  * Hides removed apps and forgets removals that no longer apply. A removed app comes back once you use it again.
  * With no background process, that's read from the MRU order: the app is frontmost, or it moved ahead of an app
- * that was ahead of it when removed. Removals of apps that quit are forgotten too.
+ * that was ahead of it when removed. Removals of apps that quit are forgotten too, and so are removals whose
+ * ahead-apps have all quit (reuse can no longer be detected, so the app is shown rather than hidden for good).
  *
  * An app removed while frontmost stays pending (and visible, as the current app) until it's first seen behind
  * another app; the apps ahead of it at that point are recorded and the rule above applies from then on.
@@ -48,8 +49,10 @@ export function applyRemovals<T extends HistoryApp>(apps: T[], removals: Removal
       kept[bundleId] = i === 0 ? null : apps.slice(0, i).map((a) => a.bundleId);
       continue;
     }
-    if (i === 0 || ahead.some((a) => (index.get(a) ?? -1) > i)) continue;
-    kept[bundleId] = ahead;
+    // Markers for apps that quit can't show reuse any more; with none left, reuse is undetectable, so show it again.
+    const live = ahead.filter((a) => index.has(a));
+    if (i === 0 || live.length === 0 || live.some((a) => index.get(a)! > i)) continue;
+    kept[bundleId] = live;
   }
   return { apps: apps.filter((a, i) => i === 0 || !(a.bundleId in kept)), removals: kept };
 }

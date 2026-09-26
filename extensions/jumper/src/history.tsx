@@ -10,17 +10,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import {
-  excludeFromHistory,
-  includeInHistory,
-  loadExcludedApps,
-  loadHistoryState,
-  removeFromHistory,
-} from "./lib/load-history";
+import { excludeFromHistory, includeInHistory, loadHistoryState, removeFromHistory } from "./lib/load-history";
 import { activateApp, type RunningApp } from "./lib/macos";
 
 async function load() {
-  const [{ apps, currentHidden }, excluded] = await Promise.all([loadHistoryState(), loadExcludedApps()]);
+  const { apps, currentHidden, excluded } = await loadHistoryState();
   // Keep each app's real position for the "n back" label, then hide the current app if it's removed or excluded.
   const recent = apps.map((app, index) => ({ app, index })).filter(({ index }) => !(index === 0 && currentHidden));
   return { apps, recent, excluded };
@@ -104,7 +98,7 @@ function SwitchAction({ app }: { app: RunningApp }) {
       icon={Icon.ArrowRight}
       onAction={async () => {
         // Activate first: closing the window with Immediate unmounts this view and kills the
-        // command before open() runs (ADR-009).
+        // command before open() runs (ADR-009, https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md).
         await activateApp(app);
         await closeMainWindow({ popToRootType: PopToRootType.Immediate });
       }}

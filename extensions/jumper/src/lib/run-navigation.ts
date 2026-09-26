@@ -12,7 +12,7 @@ const MESSAGES = {
   "no-forward": "No later app in history",
 } as const;
 
-/** Step timings, logged only in development (`npm run dev`). Grep the dev log for "PERF". See docs/PERFORMANCE.md. */
+/** Step timings, logged only in development (`npm run dev`). Grep the dev log for "PERF". See https://github.com/mattherwig/jumper/blob/main/docs/PERFORMANCE.md. */
 function timer() {
   const t0 = performance.now();
   if (environment.isDevelopment) console.log(`PERF start ${Date.now()}`);

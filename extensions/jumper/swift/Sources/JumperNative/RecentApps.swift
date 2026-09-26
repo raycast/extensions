@@ -11,7 +11,8 @@ struct RunningApp: Codable {
 ///
 /// Primary source: LaunchServices' private `_LSCopyApplicationArrayInFrontToBackOrder`, the same
 /// front-to-back order Cmd+Tab uses (no permissions needed). Fallback if the private symbol ever
-/// disappears: on-screen window z-order, which only sees the current Space. See ADR-001.
+/// disappears: on-screen window z-order, which only sees the current Space. See ADR-001 in
+/// https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md.
 ///
 /// Kept free of Raycast macros so it compiles with plain `swiftc` for quick checks.
 func readRecentApps() -> [RunningApp] {
@@ -48,18 +49,24 @@ private func fromLaunchServices() -> [RunningApp]? {
   }
 }
 
+/// The frontmost app comes first even with no on-screen window: callers treat the first entry as current.
 private func fromWindowOrder() -> [RunningApp] {
+  let front = NSWorkspace.shared.frontmostApplication.flatMap(runningApp)
   let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
-  guard let windows = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else { return [] }
-  return windows.compactMap { window in
+  let windows = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] ?? []
+  let ordered = windows.compactMap { window -> RunningApp? in
     guard
       window[kCGWindowLayer as String] as? Int == 0,
       let pid = window[kCGWindowOwnerPID as String] as? pid_t,
-      let app = NSRunningApplication(processIdentifier: pid),
-      app.activationPolicy == .regular,
-      let bundleId = app.bundleIdentifier,
-      let path = app.bundleURL?.path
+      let app = NSRunningApplication(processIdentifier: pid)
     else { return nil }
-    return RunningApp(bundleId: bundleId, name: app.localizedName ?? bundleId, path: path)
+    return runningApp(app)
   }
+  return (front.map { [$0] } ?? []) + ordered
+}
+
+private func runningApp(_ app: NSRunningApplication) -> RunningApp? {
+  guard app.activationPolicy == .regular, let bundleId = app.bundleIdentifier, let path = app.bundleURL?.path
+  else { return nil }
+  return RunningApp(bundleId: bundleId, name: app.localizedName ?? bundleId, path: path)
 }

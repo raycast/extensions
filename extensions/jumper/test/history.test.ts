@@ -37,6 +37,21 @@ test("removal is forgotten when the app quits", () => {
   assert.deepEqual(applyRemovals([notes], removals), { apps: [notes], removals: {} });
 });
 
+test("removal is forgotten when every app that was ahead of it quits, since reuse can't be seen any more", () => {
+  const removals = removeApp([notes, safari, finder], "com.apple.Safari", {});
+  // Notes quit; Safari was used and then left for Finder. Nothing left to compare against, so Safari shows.
+  assert.deepEqual(applyRemovals([finder, safari], removals), { apps: [finder, safari], removals: {} });
+});
+
+test("markers for apps that quit are dropped, the rest still detect reuse", () => {
+  const removals = removeApp([notes, finder, safari], "com.apple.Safari", {});
+  // Notes quit, Finder still ahead: still hidden, marker list pruned.
+  assert.deepEqual(applyRemovals([finder, safari], removals), {
+    apps: [finder],
+    removals: { "com.apple.Safari": ["com.apple.finder"] },
+  });
+});
+
 test("removing an app not in history is a no-op", () => {
   assert.deepEqual(removeApp([notes], "com.apple.Safari", {}), {});
 });

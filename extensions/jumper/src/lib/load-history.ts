@@ -18,7 +18,11 @@ async function write(key: string, value: unknown): Promise<void> {
  * Running apps, most recent first, without apps removed from or excluded from history. The frontmost app is always
  * first; `currentHidden` says whether it's itself removed or excluded (navigation keeps it, the list hides it).
  */
-export async function loadHistoryState(): Promise<{ apps: RunningApp[]; currentHidden: boolean }> {
+export async function loadHistoryState(): Promise<{
+  apps: RunningApp[];
+  currentHidden: boolean;
+  excluded: RunningApp[];
+}> {
   const [recent, removals, excluded] = await Promise.all([
     getRecentApps(),
     read<Removals>(REMOVALS_KEY, {}),
@@ -31,6 +35,8 @@ export async function loadHistoryState(): Promise<{ apps: RunningApp[]; currentH
   return {
     apps: excludeApps(result.apps, excludedIds),
     currentHidden: current !== undefined && (current in result.removals || excludedIds.has(current)),
+    // Saved paths go stale if an app is moved or reinstalled; prefer the running copy's path.
+    excluded: excluded.map((app) => recent.find((r) => r.bundleId === app.bundleId) ?? app),
   };
 }
 

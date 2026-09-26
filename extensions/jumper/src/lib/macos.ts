@@ -12,7 +12,7 @@ const IGNORED = new Set(["com.raycast.macos"]);
 
 /**
  * Regular (Dock) apps, most recently used first, across all Spaces.
- * Implemented natively in `swift/Sources/JumperNative/RecentApps.swift` (~7ms per call; ADR-001, ADR-008).
+ * Implemented natively in `swift/Sources/JumperNative/RecentApps.swift` (~7ms per call; ADR-001, ADR-008 in https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md).
  */
 export async function getRecentApps(): Promise<RunningApp[]> {
   const apps: RunningApp[] = await recentApps();
@@ -22,7 +22,7 @@ export async function getRecentApps(): Promise<RunningApp[]> {
 /**
  * Bring an app to the front by asking Raycast (already running, allowed to activate apps) to open its bundle.
  * Avoids spawning `open -b` (~60ms). `NSRunningApplication.activate` from a background process is ignored on
- * macOS 14+, see ADR-002. Like a Dock click, it also unhides the app.
+ * macOS 14+, see ADR-002 in https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md. Like a Dock click, it also unhides the app.
  */
 export async function activateApp(app: RunningApp): Promise<void> {
   await open(app.path);
