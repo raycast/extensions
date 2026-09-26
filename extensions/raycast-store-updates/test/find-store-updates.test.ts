@@ -42,6 +42,16 @@ test("since includes midnight UTC and excludes earlier updates", async () => {
   expect(result.items.map((item) => item.title)).toEqual(["At cutoff", "Later"]);
 });
 
+test("empty since is treated as omitted", async () => {
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({
+    items: [item("Earlier", "2026-09-01T12:00:00Z")],
+    updatesCoverageSince: "2026-09-24T00:00:00Z",
+  });
+
+  expect(await findStoreUpdates({ since: "" })).toEqual(await findStoreUpdates({}));
+  expect(await findStoreUpdates({ since: "  " })).toEqual(await findStoreUpdates({}));
+});
+
 test("limit returns two items while counting all four matches", async () => {
   vi.mocked(fetchStoreUpdates).mockResolvedValue({
     items: [

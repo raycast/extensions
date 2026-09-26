@@ -24,9 +24,10 @@ export default async function findStoreUpdates(input: Input) {
     throw new Error("limit must be a finite number.");
   }
   let cutoff = input.days === undefined ? null : Date.now() - input.days * 24 * 60 * 60 * 1000;
-  if (input.since !== undefined) {
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(input.since) ? Date.parse(`${input.since}T00:00:00Z`) : NaN;
-    if (!Number.isFinite(date) || new Date(date).toISOString().slice(0, 10) !== input.since) {
+  const since = input.since?.trim();
+  if (since) {
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(since) ? Date.parse(`${since}T00:00:00Z`) : NaN;
+    if (!Number.isFinite(date) || new Date(date).toISOString().slice(0, 10) !== since) {
       throw new Error("since must be a valid date in YYYY-MM-DD format.");
     }
     cutoff = cutoff === null ? date : Math.max(cutoff, date);
