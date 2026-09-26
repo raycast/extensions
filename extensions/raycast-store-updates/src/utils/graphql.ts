@@ -42,6 +42,7 @@ query StoreUpdatePRs($first: Int!) {
         title
         url
         mergedAt
+        updatedAt
         headRefName
         author { login url avatarUrl }
         labels(first: 20) { nodes { name } }
@@ -55,6 +56,7 @@ interface GraphQLPRNode {
   title: string;
   url: string;
   mergedAt: string | null;
+  updatedAt: string;
   headRefName: string | null;
   author: { login: string; url: string; avatarUrl: string } | null;
   labels: { nodes: { name: string }[] | null } | null;
@@ -84,6 +86,7 @@ function toGitHubPR(node: GraphQLPRNode): GitHubPR {
     title: node.title ?? "",
     html_url: node.url,
     merged_at: node.mergedAt,
+    updated_at: node.updatedAt,
     user: {
       login: node.author?.login ?? "ghost",
       html_url: node.author?.url ?? "",
