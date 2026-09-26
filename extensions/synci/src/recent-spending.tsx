@@ -25,7 +25,7 @@ function Outflows({ transactions, title }: { transactions: Transaction[]; title:
 }
 
 function RecentSpending() {
-  const preference = getPreferenceValues<{ spendingPeriod: string }>().spendingPeriod;
+  const preference = getPreferenceValues<Preferences>().spendingPeriod;
   const [period, setPeriod] = useState<Period>(
     ["7", "30", "month"].includes(preference) ? (preference as Period) : "month",
   );

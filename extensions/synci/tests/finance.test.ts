@@ -141,4 +141,26 @@ describe("presentation", () => {
     ).toContain("/brokerages/accounts/1");
     expect(accountUrl(account())).toContain("/banks/accounts/1");
   });
+  it.each([
+    { account_category: "INVESTMENT" },
+    { integrator: "SNAPTRADE" },
+    { account_category: "INVESTMENT", financial_connection: connection({ institution: null }) },
+    {
+      integrator: "SNAPTRADE",
+      financial_connection: connection({ institution: { id: 3, category: "UNKNOWN" } }),
+    },
+  ])("routes accounts with incomplete institution metadata using account/provider signals: %j", (fields) => {
+    expect(accountUrl(account(fields))).toContain("/brokerages/accounts/1");
+  });
+  it("keeps crypto accounts in the crypto section even with investment/provider signals", () => {
+    expect(
+      accountUrl(
+        account({
+          account_category: "INVESTMENT",
+          integrator: "SNAPTRADE",
+          financial_connection: connection({ institution: { id: 3, category: "crypto" } }),
+        }),
+      ),
+    ).toContain("/crypto/accounts/1");
+  });
 });

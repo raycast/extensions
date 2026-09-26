@@ -23,7 +23,7 @@ export function TransactionList({
   const [accountId, setAccountId] = useState(initialAccountId);
   const [period, setPeriod] = useState<Period>("all");
   const [status, setStatus] = useState("all");
-  const [showDetails, setShowDetails] = useState(getPreferenceValues<{ showDetails: boolean }>().showDetails);
+  const [showDetails, setShowDetails] = useState(getPreferenceValues<Preferences>().showDetails);
   const accounts = useAccounts();
   const abortable = useRef<AbortController | null>(null);
   const queryKey = JSON.stringify([search, accountId, period, status]);

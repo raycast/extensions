@@ -74,10 +74,16 @@ export function markdown(value: string): string {
   return value.replace(/[\\`*_{}[\]()#+.!|<>~-]/g, "\\$&");
 }
 
-export function accountUrl(account: FinancialAccount): string {
+export function accountSection(account: FinancialAccount): "banks" | "brokerages" | "crypto" {
   const category = account.financial_connection?.institution?.category?.toUpperCase();
-  const section = category === "CRYPTO" ? "crypto" : category === "BROKERAGE" ? "brokerages" : "banks";
-  return `${APP_URL}/${section}/accounts/${account.id}`;
+  if (category === "CRYPTO") return "crypto";
+  if (category === "BROKERAGE" || account.account_category === "INVESTMENT" || account.integrator === "SNAPTRADE")
+    return "brokerages";
+  return "banks";
+}
+
+export function accountUrl(account: FinancialAccount): string {
+  return `${APP_URL}/${accountSection(account)}/accounts/${account.id}`;
 }
 
 export function accountBalance(account: FinancialAccount) {

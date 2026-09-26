@@ -1,13 +1,9 @@
 import Decimal from "decimal.js";
-import { accountName, dateLabel, decimal, money } from "./format";
+import { accountName, accountSection, dateLabel, decimal, money } from "./format";
 import type { AccountHolding, Amount, FinancialAccount } from "./types";
 
 export function supportsHoldings(account: FinancialAccount): boolean {
-  return (
-    account.account_category === "INVESTMENT" ||
-    account.integrator === "SNAPTRADE" ||
-    ["BROKERAGE", "CRYPTO"].includes(account.financial_connection?.institution?.category?.toUpperCase() || "")
-  );
+  return accountSection(account) !== "banks";
 }
 
 export function holdingName(holding: AccountHolding): string {

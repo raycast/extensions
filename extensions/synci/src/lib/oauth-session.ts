@@ -27,6 +27,7 @@ export class OAuthSession {
   private pending?: Promise<string>;
   private reconnecting?: Promise<string>;
   private generation = 0;
+  private tokenWrites: Promise<void> = Promise.resolve();
   constructor(
     private adapter: OAuthAdapter,
     private clientId: string,
@@ -63,12 +64,26 @@ export class OAuthSession {
 
   async disconnect() {
     this.generation++;
-    await this.adapter.removeTokens();
+    await this.updateTokens(() => this.adapter.removeTokens());
+  }
+
+  private assertCurrent(generation: number) {
+    if (generation !== this.generation) throw new SignInRequiredError();
+  }
+
+  private updateTokens(update: () => Promise<void>): Promise<void> {
+    // Sign-out must remove credentials after any token write already in progress.
+    const write = this.tokenWrites.then(update);
+    this.tokenWrites = write.catch(() => {});
+    return write;
   }
 
   private async acquire(interactive: boolean): Promise<string> {
     const generation = this.generation;
+    await this.tokenWrites;
+    this.assertCurrent(generation);
     const stored = await this.adapter.getTokens();
+    this.assertCurrent(generation);
     if (stored?.accessToken && !stored.isExpired()) return stored.accessToken;
     if (stored?.refreshToken) {
       try {
@@ -79,7 +94,11 @@ export class OAuthSession {
         );
       } catch (error) {
         if (!(error instanceof SignInRequiredError)) throw error;
-        await this.adapter.removeTokens();
+        this.assertCurrent(generation);
+        await this.updateTokens(async () => {
+          this.assertCurrent(generation);
+          await this.adapter.removeTokens();
+        });
         if (!interactive) throw error;
       }
     }
@@ -88,8 +107,9 @@ export class OAuthSession {
   }
 
   private async authorize(generation: number, forceConsent = false): Promise<string> {
+    this.assertCurrent(generation);
     const { code, verifier, redirect } = await this.adapter.authorize(forceConsent);
-    if (generation !== this.generation) throw new SignInRequiredError();
+    this.assertCurrent(generation);
     return this.exchange(
       { grant_type: "authorization_code", code, code_verifier: verifier, redirect_uri: redirect },
       generation,
@@ -136,8 +156,11 @@ export class OAuthSession {
       (tokens.refresh_token !== undefined && typeof tokens.refresh_token !== "string")
     )
       throw new Error("Synci returned an invalid token response. Try signing in again.");
-    if (generation !== this.generation) throw new SignInRequiredError();
-    await this.adapter.setTokens({ ...tokens, refresh_token: tokens.refresh_token ?? previousRefresh });
+    await this.updateTokens(async () => {
+      this.assertCurrent(generation);
+      await this.adapter.setTokens({ ...tokens, refresh_token: tokens.refresh_token ?? previousRefresh });
+    });
+    this.assertCurrent(generation);
     return tokens.access_token;
   }
 }

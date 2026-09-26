@@ -23,6 +23,16 @@ function setup(stored?: StoredTokens) {
 }
 const expired = { accessToken: "old-access", refreshToken: "old-refresh", isExpired: () => true };
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: Error) => void;
+  const promise = new Promise<T>((done, fail) => {
+    resolve = done;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
+}
+
 describe("OAuth PKCE", () => {
   it("exchanges the authorization code with form encoding and no client secret", async () => {
     const { session, adapter, transport } = setup();
@@ -163,6 +173,90 @@ describe("OAuth PKCE", () => {
     resolve(Response.json({ access_token: "late", refresh_token: "late", expires_in: 3600 }));
     await expect(request).rejects.toBeInstanceOf(SignInRequiredError);
     expect(adapter.setTokens).not.toHaveBeenCalled();
+  });
+  it.each(["refresh", "sign-in", "reconnect"])(
+    "keeps credentials removed when sign-out overlaps a pending %s token write",
+    async (flow) => {
+      const { session, adapter } = setup();
+      let persisted: StoredTokens | undefined = flow === "sign-in" ? undefined : expired;
+      const writeStarted = deferred<void>();
+      const finishWrite = deferred<void>();
+      adapter.getTokens.mockImplementation(async () => persisted);
+      adapter.setTokens.mockImplementation(async (tokens) => {
+        writeStarted.resolve();
+        await finishWrite.promise;
+        persisted = { accessToken: tokens.access_token, isExpired: () => false };
+      });
+      adapter.removeTokens.mockImplementation(async () => {
+        persisted = undefined;
+      });
+
+      const request = flow === "reconnect" ? session.reconnect() : session.accessToken(flow === "sign-in");
+      const rejected = expect(request).rejects.toBeInstanceOf(SignInRequiredError);
+      await writeStarted.promise;
+      const disconnect = session.disconnect();
+      finishWrite.resolve();
+      await Promise.all([rejected, disconnect]);
+
+      expect(persisted).toBeUndefined();
+      await expect(session.accessToken()).rejects.toBeInstanceOf(SignInRequiredError);
+    },
+  );
+  it("still removes credentials if a pending token write fails during sign-out", async () => {
+    const { session, adapter } = setup(expired);
+    const writeStarted = deferred<void>();
+    const finishWrite = deferred<void>();
+    adapter.setTokens.mockImplementation(() => {
+      writeStarted.resolve();
+      return finishWrite.promise;
+    });
+    const request = session.accessToken();
+    const rejected = expect(request).rejects.toThrow("Could not save tokens");
+    await writeStarted.promise;
+    const disconnect = session.disconnect();
+    finishWrite.reject(new Error("Could not save tokens"));
+    await Promise.all([rejected, disconnect]);
+    expect(adapter.removeTokens).toHaveBeenCalledOnce();
+  });
+  it("does not return credentials from a token read that finishes after sign-out", async () => {
+    const { session, adapter, transport } = setup();
+    const readStarted = deferred<void>();
+    const finishRead = deferred<StoredTokens>();
+    adapter.getTokens.mockImplementation(() => {
+      readStarted.resolve();
+      return finishRead.promise;
+    });
+    const request = session.accessToken();
+    const rejected = expect(request).rejects.toBeInstanceOf(SignInRequiredError);
+    await readStarted.promise;
+    await session.disconnect();
+    finishRead.resolve({ ...expired, isExpired: () => false });
+    await rejected;
+    expect(transport).not.toHaveBeenCalled();
+  });
+  it("preserves a fresh sign-in started while the previous sign-out is finishing", async () => {
+    const { session, adapter, transport } = setup();
+    let persisted: StoredTokens | undefined = { ...expired, isExpired: () => false };
+    const removalStarted = deferred<void>();
+    const finishRemoval = deferred<void>();
+    adapter.getTokens.mockImplementation(async () => persisted);
+    adapter.setTokens.mockImplementation(async (tokens) => {
+      persisted = { accessToken: tokens.access_token, isExpired: () => false };
+    });
+    adapter.removeTokens.mockImplementation(async () => {
+      removalStarted.resolve();
+      await finishRemoval.promise;
+      persisted = undefined;
+    });
+
+    const disconnect = session.disconnect();
+    await removalStarted.promise;
+    const reconnect = session.reconnect();
+    await vi.waitFor(() => expect(transport).toHaveBeenCalled());
+    finishRemoval.resolve();
+    await disconnect;
+    expect(await reconnect).toBe("new-access");
+    expect(await session.accessToken()).toBe("new-access");
   });
   it("rejects malformed tokens instead of persisting them", async () => {
     const { session, adapter, transport } = setup();
