@@ -18,12 +18,13 @@ The Ask AI tool has a Vitest suite (`npm test`). Verification is `npm run build`
 
 ## Architecture
 
-Two commands over one shared data pipeline:
+Three callers share the Store feed and merged-PR pipeline:
 
 - **`view-store-updates`** (`mode: view`) — the main list, merging the Store feed and the merged-PR list into one chronological view of new, updated, and removed extensions.
 - **`store-updates-menu-bar`** (`mode: menu-bar`, `interval: 1h`) — a badge of unseen items, refreshing in the background.
+- **`find-store-updates`** (Ask AI tool) — searches new extensions and updates by text, date, and installed status. `type: "new"` uses the feed alone. Other queries cache a successful scan for 10 minutes, return feed items if GitHub fails, and report when the 50-PR page does not cover the requested date range.
 
-Both route their PR fetch through `fetchMergedPRs()` and both call `convertPRsToStoreItems()`. The menu bar wraps these in `scanStoreUpdates()`, which differs in two ways: **new** items are built from feed fields directly (no per-item `package.json` fetch, because it runs hourly and unattended), while **updated** items still enrich through `convertPRsToStoreItems()`; and removed items are omitted entirely — the badge surfaces things to discover, not removals.
+When they need PRs, all three route their fetch through `fetchMergedPRs()` and their update conversion through `convertPRsToStoreItems()`. The menu bar wraps these in `scanStoreUpdates()`, which differs in two ways: **new** items are built from feed fields directly (no per-item `package.json` fetch, because it runs hourly and unattended), while **updated** items still enrich through `convertPRsToStoreItems()`; and removed items are omitted entirely — the badge surfaces things to discover, not removals.
 
 ### Data sources → item types
 
@@ -92,7 +93,7 @@ Each row carries its own `ChangelogActions` with that version passed as `selecte
 
 **Only `api.github.com` is billed.** `raw.githubusercontent.com` is separate infrastructure and free — that asymmetry is the lever the whole design pulls on, so keep enrichment on `raw.*`.
 
-Without the optional `githubToken` preference the budget is 60 req/hr per IP, shared across both commands. `fetchMergedPRs()` in `src/utils/index.ts` is the single entry point and picks exactly **one** transport: GraphQL when the user opted in _and_ supplied a token, REST otherwise and on any GraphQL failure.
+Without the optional `githubToken` preference the budget is 60 req/hr per IP, shared across the view, menu bar, and Ask AI tool. `fetchMergedPRs()` in `src/utils/index.ts` is the single entry point and picks exactly **one** transport: GraphQL when the user opted in _and_ supplied a token, REST otherwise and on any GraphQL failure. An Ask AI call that needs updates costs one PR-list request plus up to five `/pulls/{n}/files` requests without a token. It reuses a successful scan for 10 minutes and skips GitHub while `github-rate-limit-reset` is in the future. The Store feed remains available during that cooldown.
 
 > The view command uses `useCachedPromise`, **not** `useFetch`. `useFetch` issues the request itself and only then calls `parseResponse`, so a GraphQL branch there would run _after_ a REST call had already been spent — paying for both. Whatever owns the transport choice must also own the request.
 
@@ -109,10 +110,12 @@ State in `LocalStorage`: `read-items`, `filter-toggles`, `github-last-fetch-time
 
 Separately, `src/utils/store-cache.ts` uses Raycast's synchronous `Cache` (namespace `store-updates-menu-bar`, keys `items` / `last-seen`) so the menu bar's first render can show the previous scan instead of flickering empty. A cold or unreadable cache still yields `[]`, and the menu bar shows its loading state.
 
+The Ask AI tool keeps its scan in a separate `Cache` namespace (`store-updates-ai`). The entry includes `fetchedAt` for the 10-minute expiry; the menu bar cache has no timestamp and cannot serve this purpose.
+
 ## Conventions
 
 - `.prettierrc` is the Raycast scaffold standard (`printWidth: 120`, `singleQuote: false`). An import-sort plugin was once configured here but is **not** in `devDependencies` — re-adding the config without the dependency breaks `ray lint`.
 - Keyboard shortcuts prefer `Keyboard.Shortcut.Common.*` (`Open`, `Copy`, `Refresh`, `MoveUp`, `MoveDown`) over hand-rolled modifier objects. Choose them by meaning, and leave secondary actions unbound rather than handing out nearby constants (`CopyName`, `CopyPath`, `CopyDeeplink`) to fill a panel: in the changelog panel the only copy action with a shortcut is "Copy Changes" (`Common.Copy`); the others are bound only to the navigation (`MoveUp` / `MoveDown`) and open (`Open`) constants their meaning calls for. `ray lint` does not check for two actions in one panel sharing a shortcut, so check that by reading the panel.
 - Platform icons are `assets/platform-macos.svg` / `platform-windows.svg`, tinted via `MACOS_TINT_COLOR` / `WINDOWS_TINT_COLOR` from `src/utils`. macOS uses the theme-aware `Color.PrimaryText` — a hex tint (it was `#000000CC`) renders the glyph nearly invisible in dark mode, and `fill="currentColor"` in the asset does **not** fix that. Extension icons go through `extensionIconImage()` so the list and menu bar cannot drift apart.
-- Enrichment helpers in `src/utils` swallow errors and return `null` / `[]`. This is intentional: a failed enrichment fetch degrades one list item rather than blanking the whole list. `fetchMergedPRs()` is deliberately different — it throws, so the caller can tell a rate limit from an empty result and keep the previous list on screen. **The exception is anything used as a filter** — `fetchInstalledExtensionSlugs()` must return `null` on failure, never an empty or partial set, because a filter that fails closed looks exactly like "no updates".
+- Enrichment helpers in `src/utils` swallow errors and return `null` / `[]`. This is intentional: a failed enrichment fetch degrades one list item rather than blanking the whole list. `fetchMergedPRs()` is deliberately different — it throws, so the caller can tell a rate limit from an empty result. The view keeps its previous list; the Ask AI tool returns feed items with `updatesUnavailable`. **The exception is anything used as a filter** — `fetchInstalledExtensionSlugs()` must return `null` on failure, never an empty or partial set, because a filter that fails closed looks exactly like "no updates".
 - `// eslint-disable-next-line @raycast/prefer-title-case` is required on the "macOS-only" / "Windows-only" action titles — the linter wants title case, but the platform names are correct as written.
