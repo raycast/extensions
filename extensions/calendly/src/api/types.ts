@@ -1,6 +1,7 @@
 export type CalendlyUri = string;
 
 export interface CalendlyUser {
+  avatar_url?: string | null;
   uri: CalendlyUri;
   name: string;
   slug: string;

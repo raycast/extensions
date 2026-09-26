@@ -10,7 +10,7 @@
 
 Calendly is a Raycast extension that lets you review upcoming meetings, share event types and availability, and book invitees from Raycast or Raycast AI.
 
-Sign in with Calendly when Raycast prompts you. The extension uses OAuth 2.1 with PKCE, so you never paste an API token.
+Sign in with Calendly when Raycast prompts you. Share Meeting Link, meeting management, and AI tools all use the same connection. Users of the older link-sharing command may need to reconnect once to grant meeting access. The extension uses OAuth 2.1 with PKCE, so you never paste an API token.
 
 ## Features
 

@@ -1,26 +1,8 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import test from "node:test";
-import ts from "typescript";
+import { load } from "./load-source.mjs";
 import * as bookingLocation from "../src/lib/booking-location.ts";
 import * as dates from "../src/lib/dates.ts";
-
-function load(path, mocks) {
-  const filename = new URL(path, import.meta.url);
-  const require = createRequire(filename);
-  const module = { exports: {} };
-  const { outputText } = ts.transpileModule(readFileSync(filename, "utf8"), {
-    fileName: filename.pathname,
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
-  });
-  new Function("require", "module", "exports", outputText)(
-    (name) => (Object.hasOwn(mocks, name) ? mocks[name] : require(name)),
-    module,
-    module.exports,
-  );
-  return module.exports;
-}
 
 function setup(eventOverrides, inputOverrides = {}) {
   const eventType = {

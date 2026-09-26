@@ -1,8 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calendly",
-  "title": "Calendly Share Meeting Links",
-  "description": "Quickly share your Calendly meeting links",
+  "title": "Calendly",
+  "description": "Share scheduling links, manage meetings, and book invitees with Calendly.",
+  "categories": [
+    "Productivity"
+  ],
   "icon": "logo.png",
   "author": "eluce2",
   "contributors": [
@@ -79,9 +82,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.1.2",
-    "@raycast/utils": "^2.3.0",
-    "axios": "^1.20.0",
-    "moment": "^2.30.1"
+    "@raycast/utils": "^2.3.0"
   },
   "preferences": [
     {
@@ -106,7 +107,6 @@
   ],
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/lodash": "^4.17.25",
     "@types/node": "^22.19.17",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",

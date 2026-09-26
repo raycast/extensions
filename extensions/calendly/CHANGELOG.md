@@ -2,6 +2,7 @@
 
 ## [Meeting Management and Raycast AI] - {PR_MERGE_DATE}
 
+- Use one Calendly connection for Share Meeting Link, meeting management, and AI tools.
 - Browse upcoming meetings and event types, check availability, create single-use links, and book or cancel meetings directly from Raycast.
 - Manage Calendly through Raycast AI with tools for meetings, event types, availability, booking, and cancellation.
 - Handle event types without locations and round-robin bookings, and collect required invitee phone numbers or meeting locations.
