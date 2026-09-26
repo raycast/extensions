@@ -31,7 +31,7 @@ Search your Vesslo app library, review updates and findings, and follow Homebrew
 
 Tags and memos are edited in Vesslo. The extension presents the data Vesslo has exported.
 
-![Search Apps with compact app rows](media/vesslo-search-apps.jpg)
+![Search Apps with compact app rows](media/vesslo-search-apps.png)
 
 *Actual local candidate UI. Library contents and check status depend on your Vesslo export.*
 
