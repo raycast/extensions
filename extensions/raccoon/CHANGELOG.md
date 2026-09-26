@@ -1,6 +1,6 @@
 # Raccoon Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-26
 
 - Emptying the trash empties every mounted volume's, because Finder is what
   does it. The screen lists the other volumes and the confirmation counts them,
