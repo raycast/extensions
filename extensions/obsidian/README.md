@@ -17,6 +17,7 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Open Vault](https://github.com/KevinBatdorf/obsidian-raycast#open-vault)
 - [Create Note](https://github.com/KevinBatdorf/obsidian-raycast#create-note)
 - [Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#daily-note)
+- [Previous Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#previous-daily-note)
 - [Append to Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#append-to-daily-note)
 - [Custom Append Actions](https://github.com/KevinBatdorf/obsidian-raycast#custom-append-actions)
 - [Bookmarked Note](https://github.com/KevinBatdorf/obsidian-raycast#bookmarked-notes)
@@ -140,6 +141,11 @@ But also the table of tokens defined in the [luxon documentation](https://moment
 This command will open the daily note from the selected vault. If a daily note doesn't exist it will create one and open it.
 It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
 
+
+## Previous Daily Note
+
+This command opens the previous existing daily note from the selected vault.
+It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
 ## Append to Daily Note
 
 This command will append text to the daily note from the selected vault. If a daily note doesn't exist it will create one and open it. To append as efficiently as possible, the text is provided as a parameter to the command, so there's no form to fill out.
