@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Grid, Icon, List, showToast, Toast, useNavi
 import { useEffect, useState } from "react";
 import type { FileEntry } from "./read-directory";
 import { readFolders } from "./read-directory";
+import { OpenFolderAction } from "./open-folder";
 import { addRecentFolder, getPinnedFolders, togglePin } from "./storage";
 
 type FileListProps = {
@@ -64,19 +65,21 @@ function FileActions({
 
   return (
     <ActionPanel>
-      <Action.Open
-        title={`Open ${entry.name}`}
-        target={entry.fullPath}
-        onOpen={async () => {
-          if (entry.isDirectory) {
+      {entry.isDirectory ? (
+        <OpenFolderAction
+          title={`Open ${entry.name}`}
+          path={entry.fullPath}
+          onOpen={async () => {
             try {
               await addRecentFolder(entry.fullPath);
             } catch {
               /* ignore storage errors */
             }
-          }
-        }}
-      />
+          }}
+        />
+      ) : (
+        <Action.Open title={`Open ${entry.name}`} target={entry.fullPath} />
+      )}
       {navigable && entry.isDirectory && (
         <Action
           title="Browse Subfolder"
