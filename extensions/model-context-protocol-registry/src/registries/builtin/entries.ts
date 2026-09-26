@@ -410,6 +410,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "mnemoverse",
+    title: "Mnemoverse",
+    description:
+      "Hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next. Shared rooms for multi-agent work. One key or OAuth across Claude Code, Cursor, VS Code and ChatGPT. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com, set as `MNEMOVERSE_API_KEY`.",
+    icon: "https://mnemoverse.com/apple-touch-icon.png",
+    homepage: "https://mnemoverse.com/docs/api/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@mnemoverse/mcp-memory-server@latest"],
+      env: {
+        MNEMOVERSE_API_KEY: "mk_live_YOUR_KEY",
+      },
+    },
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:
