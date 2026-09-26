@@ -1,4 +1,0 @@
-export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
-
-npx lint-staged
-./scripts/ai-review.sh

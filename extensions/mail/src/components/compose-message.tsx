@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Action, ActionPanel, showHUD, popToRoot, getPreferenceValues } from "@raycast/api";
+import { Form, Action, ActionPanel, Icon, showHUD, popToRoot, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 
 import { Account, OutgoingMessageAction, OutgoingMessage, OutgoingMessageForm, Message, Mailbox } from "../types";
@@ -8,6 +8,7 @@ import { getAccounts } from "../scripts/accounts";
 import { Validation } from "../utils/validation";
 import { OutgoingMessageIcon } from "../utils/presets";
 import { Cache } from "../utils/cache";
+import { ContactPicker } from "./contact-picker";
 
 const { autoFillReplySubject } = getPreferenceValues<Preferences>();
 
@@ -82,7 +83,7 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
     },
   });
 
-  const { data: recipients, isLoading: isLoadingRecipients } = useCachedPromise(
+  const { isLoading: isLoadingRecipients } = useCachedPromise(
     async () => {
       if (message && mailbox) {
         if (action === OutgoingMessageAction.Reply) {
@@ -102,6 +103,21 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
     },
   );
 
+  const appendRecipient = (field: "to" | "cc" | "bcc", email: string) => {
+    const currentValue = (values[field] || "").trim();
+    if (!currentValue) {
+      setValue(field, email);
+    } else {
+      const parts = currentValue
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (!parts.includes(email)) {
+        setValue(field, `${currentValue}, ${email}`);
+      }
+    }
+  };
+
   const shouldEnableDrafts = !!values.subject || !!values.content || !!values.attachments;
 
   return isLoadingAccounts || isLoadingRecipients ? (
@@ -117,6 +133,26 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
             icon={action ? OutgoingMessageIcon[action] : OutgoingMessageIcon[OutgoingMessageAction.New]}
             onSubmit={handleSubmit}
           />
+          <ActionPanel.Section title="Add Recipient from Contacts">
+            <Action.Push
+              title="Add Recipient to To"
+              icon={Icon.Person}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              target={<ContactPicker fieldTitle="To" onSelect={(email) => appendRecipient("to", email)} />}
+            />
+            <Action.Push
+              title="Add Recipient to Cc"
+              icon={Icon.Person}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              target={<ContactPicker fieldTitle="Cc" onSelect={(email) => appendRecipient("cc", email)} />}
+            />
+            <Action.Push
+              title="Add Recipient to Bcc"
+              icon={Icon.Person}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+              target={<ContactPicker fieldTitle="Bcc" onSelect={(email) => appendRecipient("bcc", email)} />}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -129,23 +165,22 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
       <Form.TextField
         title="To"
         autoFocus
-        value={Array.isArray(recipients) ? recipients?.join(", ") : recipients}
         placeholder="Enter email address"
-        info="Enter email addresses separated by commas"
+        info="Enter email addresses separated by commas, or press ⌘⇧T to select from Contacts"
         {...itemProps.to}
       />
 
       <Form.TextField
         title="Cc"
         placeholder="Enter email address"
-        info="Enter email addresses separated by commas"
+        info="Enter email addresses separated by commas, or press ⌘⇧C to select from Contacts"
         {...itemProps.cc}
       />
 
       <Form.TextField
         title="Bcc"
         placeholder="Enter email address"
-        info="Enter email addresses separated by commas"
+        info="Enter email addresses separated by commas, or press ⌘⇧B to select from Contacts"
         {...itemProps.bcc}
       />
 

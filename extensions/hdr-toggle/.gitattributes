@@ -1,5 +1,0 @@
-# Normalize line endings to LF in the repository for all text files.
-* text=auto eol=lf
-
-# Treat images as binary so they are never line-ending converted.
-*.png binary

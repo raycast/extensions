@@ -91,3 +91,13 @@ export type Attachment = {
   size: string;
   type?: string;
 };
+
+export type ContactEmail = {
+  email: string;
+  label?: string;
+};
+
+export type Contact = {
+  name: string;
+  emails: ContactEmail[];
+};

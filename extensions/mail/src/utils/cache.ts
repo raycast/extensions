@@ -1,6 +1,6 @@
 import { Cache as RaycastCache } from "@raycast/api";
 
-import { Account, Message } from "../types";
+import { Account, Contact, Message } from "../types";
 import { messageLimit } from "./common";
 
 export enum ExpirationTime {
@@ -120,6 +120,30 @@ const setDefaultAccount = (id: string) => {
   defaultAccount.set("default-account-id", id);
 };
 
+const contacts = new RaycastCache();
+
+const invalidateContacts = () => {
+  contacts.clear();
+};
+
+const getContacts = (): Contact[] | undefined => {
+  if (contacts.has("contacts")) {
+    const response = contacts.get("contacts");
+    if (response) {
+      const { time, data, version } = JSON.parse(response);
+      if (!isCacheExpired(time, ExpirationTime.Hour) && version === CACHE_VERSION) {
+        return data;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+const setContacts = (data: Contact[]) => {
+  contacts.set("contacts", JSON.stringify({ time: Date.now(), data: data, version: CACHE_VERSION }));
+};
+
 export const Cache = Object.freeze({
   getAccounts,
   setAccounts,
@@ -133,4 +157,7 @@ export const Cache = Object.freeze({
   updateMessage,
   deleteMessage,
   invalidateMessages,
+  getContacts,
+  setContacts,
+  invalidateContacts,
 });

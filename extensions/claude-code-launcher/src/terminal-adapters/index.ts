@@ -1,1 +1,0 @@
-export { getTerminalAdapter } from "./registry";

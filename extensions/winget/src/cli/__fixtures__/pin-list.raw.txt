@@ -1,3 +1,0 @@
-   -    \    |    /    -    \    |    /                                                                                                                            -    \    |    /    -    \                                                                                                                         Name Id        Version Source Pin type
---------------------------------------
-jq   jqlang.jq 1.8.1   winget Blocking

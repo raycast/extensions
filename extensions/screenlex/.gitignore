@@ -1,6 +1,0 @@
-node_modules/
-dist/
-raycast-env.d.ts
-
-# Command icons are exported as PNG; keep editable SVG sources local.
-assets/*.svg

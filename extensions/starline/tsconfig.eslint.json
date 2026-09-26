@@ -1,8 +1,0 @@
-{
-    "extends": "./tsconfig.json",
-    "include": ["src/**/*", "test/**/*", "jest.config.js", "raycast-env.d.ts"],
-    "exclude": [],
-    "compilerOptions": {
-        "types": ["jest", "node", "react"]
-    }
-}

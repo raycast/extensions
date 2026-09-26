@@ -1,6 +1,0 @@
-# Raycast
-.DS_Store
-node_modules
-dist
-raycast-env.d.ts
-*.log

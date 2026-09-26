@@ -1,1 +1,0 @@
-# semantic-scholar-raycast-ext

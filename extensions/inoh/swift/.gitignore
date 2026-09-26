@@ -1,8 +1,0 @@
-# Swift Package Manager
-.build/
-.swiftpm/
-Package.resolved
-
-# Raycast
-.raycast-swift-build
-compiled_raycast_swift

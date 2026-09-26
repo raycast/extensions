@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add contact recipient picker (`Cmd+Shift+T`, `Cmd+Shift+C`, `Cmd+Shift+B`) to search and select email addresses from macOS Contacts directly in the Compose Message form.
+
 ## [Fix] - 2026-06-15
 
 - Fix sending composed messages when the subject or other message fields contain double quotes.

@@ -9,6 +9,7 @@ export default async function ClearCache() {
 
   Cache.invalidateMessages();
   Cache.invalidateAccounts();
+  Cache.invalidateContacts();
 
-  await showToast(Toast.Style.Success, "All mails and accounts cleared from cache");
+  await showToast(Toast.Style.Success, "All mails, accounts and contacts cleared from cache");
 }

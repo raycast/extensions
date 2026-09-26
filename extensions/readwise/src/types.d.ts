@@ -1,3 +1,0 @@
-interface HTTPError {
-  status: number;
-}

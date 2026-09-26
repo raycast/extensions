@@ -1,31 +1,100 @@
-<p align="center">
-  <img src="images/store-logo.webp" height="128">
-  <h1 align="center">Raycast Extensions</h1>
-</p>
+# Quick Event Extension for Raycast
 
-<p align="center">
-  <a aria-label="Follow Raycast on X" href="https://x.com/raycast">
-    <img alt="" src="https://img.shields.io/badge/Follow%20@raycast-black.svg?style=for-the-badge&logo=X">
-  </a>
-  <a aria-label="Join the community on Slack" href="https://raycast.com/community">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Raycast&logoColor=fff">
-  </a>
-</p>
+Quick Event is an extension for [Raycast](https://www.raycast.com/) that provides a natural language way to add a new event to your calendars. Built using [Sherlock](https://github.com/neilgupta/Sherlock).
 
-[Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
+## Install Locally
 
-![Header](images/header.webp)
+Clone the project
 
-## Getting Started
+```bash
+  git clone https://github.com/mblode/raycast-quick-event.git
+```
 
-Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
+Go to the project directory
 
-Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines and [Acceptable Use Policy](https://www.raycast.com/aup) when submitting your extension and interacting with other folks in this repository.
+```bash
+  cd raycast-quick-event
+```
 
-## Feedback
+Install dependencies
 
-Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use [GitHub issues](https://github.com/raycast/extensions/issues/new/choose) for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://developers.raycast.com/examples) that should help you get started.
+```bash
+  npm install
+```
 
-## Community
+Build locally
 
-Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
+```bash
+  npm run dev
+```
+
+Finally open Raycast and use the command `Import Extension` then choose the cloned directory
+
+## Extension Preferences
+
+The `Your calendars` text field is _required_
+
+- Specify your calendar or multiple calendars (comma separated)
+- The calendar names can be found in the sidebar of Calendar.app
+- E.g., "Personal,Work Calendar"
+
+Optional Preferences:
+- Checkbox - Focus on completion (i.e. open Calendar app on completion)
+
+## Create Event Examples
+
+- February 24 at 3pm - 2pm March 3
+- Vacation is in 4 weeks...
+- Christmas is on December 25th.
+- Homework 5 due next monday at 3pm
+- Let's have lunch on the 3rd.
+- The retreat is from Jan 12 - 29.
+- Bake a cake tomorrow.
+- Use Tabule today!
+- Meeting tomorrow at 10am remind me 5 min before
+- Doctor appointment on Friday at 3pm add reminder for 3 hours before
+- Sync next Monday 9am with 15m reminder
+- Catch up at 2pm remind me at start
+
+## Reminder Support
+
+Specify event reminders directly in your natural language query (e.g. `remind me 5 min before`, `add reminder for 3 hours before`, `with 15m reminder`, `alert 1 hour before`, `remind me at time of event`). Custom alarms are automatically created on the resulting event in Apple Calendar.
+
+## Timezone Support
+
+Specify a timezone in your query and the event time will be converted to your local timezone automatically. The original timezone time is shown in the subtitle for reference.
+
+### Supported Timezone Abbreviations
+
+**US:** ET, EST, EDT, CT, CST, CDT, MT, MST, MDT, PT, PST, PDT, AKST, AKDT, HST, HDT
+
+**Europe:** GMT, UTC, BST, CET, CEST, EET, EEST, WET, WEST, MSK, TRT
+
+**Asia/Pacific:** IST, JST, KST, SGT, HKT, PHT, ICT, WIB, GST, PKT, AEST, AEDT, ACST, ACDT, AWST, NZST, NZDT
+
+**Explicit Offsets:** GMT-1, GMT+5, UTC-3, UTC+5:30, etc.
+
+### Timezone Examples
+
+- Meeting at 3pm ET
+- Call at 10am CT tomorrow
+- Sync at 9am PT on Friday
+- Lunch at noon GMT-1
+- Standup at 8am GMT+5:30
+- Review at 2pm JST next Monday
+- Demo at 4pm CET
+
+## Author
+
+**Matthew Blode** (mblode)
+
+- [GitHub](https://www.github.com/mblode)
+- [Portfolio](https://matthewblode.com)
+
+## Related Projects
+
+- [Sherlock](https://github.com/neilgupta/Sherlock)
+- [Chrono](https://github.com/wanasit/chrono)
+- [Calfred](https://github.com/ruggi/calfred)
+- [Fantastically Good Event Parser](https://polymaths.blog/2018/06/fantastically-good-event-parser-for-drafts-5)
+- [Fantastical](https://flexibits.com/fantastical)

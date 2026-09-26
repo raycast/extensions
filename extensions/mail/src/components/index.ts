@@ -4,3 +4,4 @@ export * from "./message-list";
 export * from "./message-detail";
 export * from "./message-actions";
 export * from "./compose-message";
+export * from "./contact-picker";
