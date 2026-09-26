@@ -63,22 +63,32 @@ export async function readWorkspaceSummaries(): Promise<WorkspaceSummary[]> {
     return summaries.sort((left, right) => left.name.localeCompare(right.name));
   } catch (error) {
     if (!isMissingSummaryIndex(error)) {
-      throw new Error("The SnapState workspace index is unreadable.", { cause: error });
+      throw new Error("The SnapState workspace index is unreadable.", {
+        cause: error,
+      });
     }
 
     return [];
   }
 }
 
-export function createSnapStateURL(command: string, parameters: Record<string, string> = {}): string {
+export function createSnapStateURL(
+  command: string,
+  parameters: Record<string, string> = {},
+): string {
   // URLSearchParams form-encodes spaces as `+`, which custom URL schemes may
   // treat as a literal plus. Emit `%20` so SnapState decodes every name back
   // to the exact string the user typed.
-  const query = new URLSearchParams(parameters).toString().replace(/\+/g, "%20");
+  const query = new URLSearchParams(parameters)
+    .toString()
+    .replace(/\+/g, "%20");
   return query ? `snapstate://${command}?${query}` : `snapstate://${command}`;
 }
 
-export async function openSnapState(command: string, parameters: Record<string, string> = {}): Promise<void> {
+export async function openSnapState(
+  command: string,
+  parameters: Record<string, string> = {},
+): Promise<void> {
   await open(createSnapStateURL(command, parameters));
 }
 

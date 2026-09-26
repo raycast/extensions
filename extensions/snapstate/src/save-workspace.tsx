@@ -1,11 +1,21 @@
-import { Action, ActionPanel, Form, closeMainWindow, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  closeMainWindow,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { openSnapState } from "./lib";
 
 export default function SaveWorkspace() {
   async function submit(values: { name: string }) {
     const name = values.name.trim();
     if (!name) {
-      await showToast({ style: Toast.Style.Failure, title: "Give the workspace a name" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Give the workspace a name",
+      });
       return;
     }
 

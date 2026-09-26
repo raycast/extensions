@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   openSnapState,
@@ -17,17 +24,21 @@ export default function RestoreWorkspace() {
   useEffect(() => {
     let isCurrent = true;
 
-    readWorkspaceSummaries().then((summaries) => {
-      if (isCurrent) {
-        setWorkspaces(summaries);
-        setIsLoading(false);
-      }
-    }).catch(() => {
-      if (isCurrent) {
-        setLoadError("Open SnapState to repair the local workspace index, then try again.");
-        setIsLoading(false);
-      }
-    });
+    readWorkspaceSummaries()
+      .then((summaries) => {
+        if (isCurrent) {
+          setWorkspaces(summaries);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setLoadError(
+            "Open SnapState to repair the local workspace index, then try again.",
+          );
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       isCurrent = false;
@@ -52,7 +63,10 @@ export default function RestoreWorkspace() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Restore a SnapState workspace">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Restore a SnapState workspace"
+    >
       {!isLoading && loadError ? (
         <List.EmptyView
           icon="icon.png"
@@ -60,7 +74,10 @@ export default function RestoreWorkspace() {
           description={loadError}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Get SnapState" url={SNAPSTATE_DOWNLOAD_URL} />
+              <Action.OpenInBrowser
+                title="Get SnapState"
+                url={SNAPSTATE_DOWNLOAD_URL}
+              />
             </ActionPanel>
           }
         />
@@ -71,7 +88,10 @@ export default function RestoreWorkspace() {
           description="Open SnapState once, save a workspace, and it will appear here."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Get SnapState" url={SNAPSTATE_DOWNLOAD_URL} />
+              <Action.OpenInBrowser
+                title="Get SnapState"
+                url={SNAPSTATE_DOWNLOAD_URL}
+              />
             </ActionPanel>
           }
         />
@@ -85,8 +105,15 @@ export default function RestoreWorkspace() {
             accessories={[{ text: pluralize(workspace.windowCount, "window") }]}
             actions={
               <ActionPanel>
-                <Action title="Restore Workspace" icon={Icon.Play} onAction={() => restore(workspace)} />
-                <Action.OpenInBrowser title="Get SnapState" url={SNAPSTATE_DOWNLOAD_URL} />
+                <Action
+                  title="Restore Workspace"
+                  icon={Icon.Play}
+                  onAction={() => restore(workspace)}
+                />
+                <Action.OpenInBrowser
+                  title="Get SnapState"
+                  url={SNAPSTATE_DOWNLOAD_URL}
+                />
               </ActionPanel>
             }
           />
