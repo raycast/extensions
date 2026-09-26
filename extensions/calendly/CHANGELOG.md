@@ -1,6 +1,6 @@
 # Calendly Changelog
 
-## [Meeting Management and Raycast AI] - {PR_MERGE_DATE}
+## [Meeting Management and Raycast AI] - 2026-09-26
 
 - Use one Calendly connection for Share Meeting Link, meeting management, and AI tools.
 - Browse upcoming meetings and event types, check availability, create single-use links, and book or cancel meetings directly from Raycast.
