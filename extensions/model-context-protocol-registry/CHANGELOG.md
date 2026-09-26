@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Mnemoverse MCP Server] - {PR_MERGE_DATE}
+## [Add Mnemoverse MCP Server] - 2026-09-26
 
 - Add Mnemoverse to the official registry: hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next; shared rooms for multi-agent work. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com.
 
