@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Show Unexpected CLI Output When Listing Fails] - {PR_MERGE_DATE}
+## [Show Unexpected CLI Output When Listing Fails] - 2026-09-26
 
 - Include what the `skills` CLI actually printed when "Manage Skills" cannot parse its installed-skills list, instead of only reporting that the output was unexpected
 
