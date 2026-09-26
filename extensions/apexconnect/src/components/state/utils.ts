@@ -3,7 +3,7 @@ import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "@comp
 import { weatherConditionToIcon } from "@components/weather/utils";
 import { RGBtoString, changeRGBBrightness } from "@lib/color";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { sleep } from "@lib/utils";
 import { Color, Image, getPreferenceValues } from "@raycast/api";
 

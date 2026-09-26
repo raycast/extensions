@@ -1,5 +1,5 @@
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 
 export function isAutomationEditable(state: State) {
   return state.entity_id.startsWith("automation.");

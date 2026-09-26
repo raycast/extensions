@@ -2,7 +2,7 @@ import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { CopyToClipboardMenubarItem } from "@components/menu";
 
 function volumeRange() {

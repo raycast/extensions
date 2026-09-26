@@ -1,5 +1,5 @@
 import { getIcon } from "@components/state/utils";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getFriendlyName } from "@lib/utils";
 import { capitalize } from "lodash-es";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";

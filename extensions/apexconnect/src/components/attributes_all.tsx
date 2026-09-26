@@ -1,4 +1,4 @@
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useHAStates } from "./hooks";

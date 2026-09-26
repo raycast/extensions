@@ -1,5 +1,5 @@
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getErrorMessage } from "@lib/utils";
 import { Toast, confirmAlert, showToast } from "@raycast/api";
 

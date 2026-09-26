@@ -1,6 +1,6 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { UpdateInstallAction, UpdateSkipVersionAction } from "@components/update/actions";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { ActionPanel } from "@raycast/api";
 import { ShowWeatherAction } from "./list";
 

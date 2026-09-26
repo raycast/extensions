@@ -1,6 +1,6 @@
 import { RGB, miredToK } from "@lib/color";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { ensureMinMax } from "@lib/utils";
 
 export function getLightRGBFromState(state: State): RGB | undefined {

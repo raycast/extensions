@@ -1,6 +1,6 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
 import { getIcon } from "@components/state/utils";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
 import { getVideoStreamUrlFromCamera } from "./utils";
 

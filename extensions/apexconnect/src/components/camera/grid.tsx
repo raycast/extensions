@@ -1,7 +1,7 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getFriendlyName } from "@lib/utils";
 import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import {

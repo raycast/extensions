@@ -1,6 +1,6 @@
 import { MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
 import { Icon, Image, MenuBarExtra } from "@raycast/api";
 import { getIcon, getStateValue } from "../state/utils";

@@ -1,5 +1,5 @@
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 
 export async function callInputBooleanToggleService(state: State) {
   await apex.callService("input_boolean", "toggle", { entity_id: state.entity_id });

@@ -1,4 +1,4 @@
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { ActionPanel, Detail } from "@raycast/api";
 import { UpdateOpenInBrowserAction } from "./actions";
 

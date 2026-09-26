@@ -1,7 +1,7 @@
 import { KtoColorLike, RGB, RGBtoColorLike, miredToK } from "@lib/color";
 import { apex } from "@lib/common";
 import { lightRGBColors } from "@lib/constants";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { Action, ActionPanel, Color, Icon, Keyboard } from "@raycast/api";
 import { EntityStandardActionSections } from "../entity";
 import { ceilRound50, getLightBrightnessValues, getLightMinMaxK, hasLightBrightnessSupport } from "./utils";

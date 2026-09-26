@@ -25,7 +25,7 @@ import { VacuumActionPanel } from "@components/vacuum/actions";
 import { WeatherActionPanel } from "@components/weather/actions";
 import { ZoneActionPanel } from "@components/zone/actions";
 import { apex, shouldDisplayEntityID } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getStateTooltip } from "@lib/utils";
 import { ActionPanel, Image, List, Toast, showToast } from "@raycast/api";
 import { useState } from "react";

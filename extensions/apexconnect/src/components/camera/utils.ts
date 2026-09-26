@@ -1,5 +1,5 @@
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import afs from "fs/promises";
 
 export function getVideoStreamUrlFromCamera(state: State): string | undefined {

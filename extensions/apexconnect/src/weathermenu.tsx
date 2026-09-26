@@ -3,7 +3,7 @@ import { MenuBarItemConfigureCommand } from "@components/menu";
 import { PrimaryIconColor } from "@components/state/utils";
 import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "@components/weather/menu";
 import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 

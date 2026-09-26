@@ -2,7 +2,7 @@ import { MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon, getStateValue } from "@components/state/utils";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getFriendlyName } from "@lib/utils";
 import { Icon, MenuBarExtra } from "@raycast/api";
 import { HACSRepo, callUpdateInstallService, callUpdateSkipService, getHACSRepositories } from "./utils";

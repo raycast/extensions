@@ -1,6 +1,6 @@
 import { getIcon } from "@components/state/utils";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { capitalize } from "lodash-es";

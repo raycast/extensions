@@ -1,6 +1,6 @@
 import { CopyEntityIDToClipboard, CopyEntityStateToClipboardMenubarItem } from "@components/state/menu";
 import { getIcon } from "@components/state/utils";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getFriendlyName } from "@lib/utils";
 import { MenuBarExtra } from "@raycast/api";
 import { MenuBarSubmenu } from "../menu";

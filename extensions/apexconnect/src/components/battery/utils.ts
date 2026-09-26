@@ -1,5 +1,5 @@
 import { PrimaryIconColor } from "@components/state/utils";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { Color, Image } from "@raycast/api";
 
 export function sortBatteries(states: State[] | undefined) {

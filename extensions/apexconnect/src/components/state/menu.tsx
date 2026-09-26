@@ -16,7 +16,7 @@ import { SwitchMenubarItem } from "@components/switch/menu";
 import { TimerMenubarItem } from "@components/timer/menu";
 import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { WeatherMenubarItem } from "@components/weather/menu";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { getIcon, getStateValue } from "./utils";

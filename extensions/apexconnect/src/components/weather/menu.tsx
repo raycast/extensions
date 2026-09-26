@@ -1,4 +1,4 @@
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 
 import { MenuBarSubmenu } from "@components/menu";

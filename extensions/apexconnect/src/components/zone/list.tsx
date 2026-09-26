@@ -1,7 +1,7 @@
 import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 

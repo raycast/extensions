@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { Connection, createConnection, createLongLivedTokenAuth } from "@apexinfosysindia/js-websocket";
-import { ApexConnectClient } from "./haapi";
+import { ApexConnectClient } from "./apexapi";
 import { createSocket } from "./socket";
 
 function ensureNoTrailingSlash(url: string | undefined): string | undefined {

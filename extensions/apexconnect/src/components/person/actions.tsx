@@ -1,5 +1,5 @@
 import { EntityStandardActionSections } from "@components/entity";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { Action, ActionPanel } from "@raycast/api";
 
 export function PersonOpenInGoogleMapsAction(props: { state: State }): JSX.Element | null {

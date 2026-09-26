@@ -1,7 +1,7 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 

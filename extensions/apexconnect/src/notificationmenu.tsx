@@ -5,7 +5,7 @@ import { PersistentNotificationsMenubarSection } from "@components/persistentnot
 import { HAPersistentNotification } from "@components/persistentnotification/utils";
 import { UpdatesMenubarSection } from "@components/update/menu";
 import { getHACSRepositories } from "@components/update/utils";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { getErrorMessage } from "@lib/utils";
 import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
 

@@ -1,4 +1,4 @@
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { useCachedState } from "@raycast/utils";
 import { Connection, entitiesColl, subscribeEntities } from "@apexinfosysindia/js-websocket";
 import { useEffect, useRef, useState } from "react";

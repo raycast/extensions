@@ -1,6 +1,6 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { apex } from "@lib/common";
-import { State } from "@lib/haapi";
+import { State } from "@lib/apexapi";
 import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 
