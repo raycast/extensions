@@ -892,38 +892,47 @@ const aiScanCache = new Cache({ namespace: "store-updates-ai" });
 const AI_SCAN_TTL_MS = 10 * 60 * 1000;
 const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
 
-/** Fetches updates for AI queries, reusing successful scans for ten minutes. */
-export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<StoreItem[]> {
-  if (type === "new") return buildStoreUpdateItems(await fetchStoreFeed(), null);
+type StoreUpdatesResult = { items: StoreItem[]; updatesUnavailable?: string };
+
+/** Fetches updates for AI queries. A failed GitHub request still leaves the Store feed available. */
+export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<StoreUpdatesResult> {
+  if (type === "new") return { items: await buildStoreUpdateItems(await fetchStoreFeed(), null) };
+
   const cached = aiScanCache.get("scan");
   if (cached) {
     try {
-      const scan: { fetchedAt: number; items: StoreItem[] } = JSON.parse(cached);
-      if (Date.now() - scan.fetchedAt < AI_SCAN_TTL_MS && Array.isArray(scan.items)) return scan.items;
+      const scan: { fetchedAt: number; result: StoreUpdatesResult } = JSON.parse(cached);
+      if (Date.now() - scan.fetchedAt < AI_SCAN_TTL_MS && Array.isArray(scan.result.items)) return scan.result;
     } catch {
       // A bad cache entry is a miss.
     }
   }
 
   const reset = Number(await LocalStorage.getItem<string>(RATE_LIMIT_RESET_KEY));
-  if (reset > Date.now()) return buildStoreUpdateItems(await fetchStoreFeed(), null);
-  let feed: Feed;
-  let prs: GitHubPR[];
-  try {
-    [feed, prs] = await Promise.all([fetchStoreFeed(), fetchMergedPRs()]);
-  } catch (reason) {
-    const error = reason as Error & { rateLimitReset?: number };
-    if (/rate limit/i.test(error.message)) {
+  const prsRequest = reset > Date.now() ? Promise.reject(new Error("GitHub rate limit reached.")) : fetchMergedPRs();
+  const [feedResult, prsResult] = await Promise.allSettled([fetchStoreFeed(), prsRequest]);
+  if (feedResult.status === "rejected") throw feedResult.reason;
+
+  if (prsResult.status === "rejected") {
+    const error = prsResult.reason as Error & { rateLimitReset?: number };
+    if (/rate limit/i.test(error.message) && !(reset > Date.now())) {
       const reported = error.rateLimitReset ? error.rateLimitReset * 1000 : 0;
       const cooldown =
         reported > Date.now() && reported <= Date.now() + 60 * 60 * 1000 ? reported : Date.now() + 5 * 60 * 1000;
       await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(cooldown));
     }
-    throw reason;
+    return {
+      items: await buildStoreUpdateItems(feedResult.value, null),
+      updatesUnavailable: error.message,
+    };
   }
-  const items = await buildStoreUpdateItems(feed, prs);
-  aiScanCache.set("scan", JSON.stringify({ fetchedAt: Date.now(), items }));
-  return items;
+
+  const prs = prsResult.value;
+  const result: StoreUpdatesResult = {
+    items: await buildStoreUpdateItems(feedResult.value, prs),
+  };
+  aiScanCache.set("scan", JSON.stringify({ fetchedAt: Date.now(), result }));
+  return result;
 }
 
 /**

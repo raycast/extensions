@@ -28,11 +28,13 @@ function item(title: string, date: string) {
 }
 
 test("since includes midnight UTC and excludes earlier updates", async () => {
-  vi.mocked(fetchStoreUpdates).mockResolvedValue([
-    item("Earlier", "2026-08-31T23:59:59Z"),
-    item("At cutoff", "2026-09-01T00:00:00Z"),
-    item("Later", "2026-09-02T12:00:00Z"),
-  ]);
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({
+    items: [
+      item("Earlier", "2026-08-31T23:59:59Z"),
+      item("At cutoff", "2026-09-01T00:00:00Z"),
+      item("Later", "2026-09-02T12:00:00Z"),
+    ],
+  });
 
   const result = await findStoreUpdates({ type: "new", since: "2026-09-01" });
 
@@ -41,12 +43,14 @@ test("since includes midnight UTC and excludes earlier updates", async () => {
 });
 
 test("limit returns two items while counting all four matches", async () => {
-  vi.mocked(fetchStoreUpdates).mockResolvedValue([
-    item("First", "2026-09-22T12:00:00Z"),
-    item("Second", "2026-09-21T12:00:00Z"),
-    item("Third", "2026-09-20T12:00:00Z"),
-    item("Fourth", "2026-09-19T12:00:00Z"),
-  ]);
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({
+    items: [
+      item("First", "2026-09-22T12:00:00Z"),
+      item("Second", "2026-09-21T12:00:00Z"),
+      item("Third", "2026-09-20T12:00:00Z"),
+      item("Fourth", "2026-09-19T12:00:00Z"),
+    ],
+  });
 
   const result = await findStoreUpdates({ type: "new", limit: 2 });
 
@@ -61,8 +65,21 @@ test("invalid since dates fail before fetching", async () => {
 });
 
 test("installed lookup failure is reported instead of claiming no matches", async () => {
-  vi.mocked(fetchStoreUpdates).mockResolvedValue([]);
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({ items: [] });
   vi.mocked(fetchInstalledExtensionSlugs).mockResolvedValue(null);
 
   await expect(findStoreUpdates({ installedOnly: true })).rejects.toThrow(/Installed extensions could not be determined/);
 });
+
+test("keeps feed items and reports a GitHub failure", async () => {
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({
+    items: [item("New extension", "2026-09-25T12:00:00Z")],
+    updatesUnavailable: "GitHub rate limit reached.",
+  });
+
+  const result = await findStoreUpdates({});
+
+  expect(result.totalMatches).toBe(1);
+  expect(result.updatesUnavailable).toBe("GitHub rate limit reached.");
+});
+

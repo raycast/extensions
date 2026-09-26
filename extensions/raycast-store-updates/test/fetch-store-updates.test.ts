@@ -63,9 +63,9 @@ test("reuses a successful AI scan and skips GitHub for new-only requests", async
   const second = await fetchStoreUpdates();
   const newOnly = await fetchStoreUpdates("new");
 
-  expect(first[0].title).toBe("New Extension");
+  expect(first.items[0].title).toBe("New Extension");
   expect(second).toEqual(first);
-  expect(newOnly[0].title).toBe("New Extension");
+  expect(newOnly.items[0].title).toBe("New Extension");
   expect(fetchMock.mock.calls.map(([url]) => url).sort()).toEqual([FEED_URL, FEED_URL, GITHUB_PRS_URL].sort());
 });
 
@@ -83,3 +83,34 @@ test("refreshes an AI scan after ten minutes", async () => {
   expect(fetchMock.mock.calls.filter(([url]) => url === GITHUB_PRS_URL)).toHaveLength(2);
 });
 
+test("keeps feed items and observes the stored cooldown after a GitHub rate limit", async () => {
+  const fetchMock = vi.fn(async (url: string) =>
+    url === FEED_URL
+      ? new Response(JSON.stringify(feed), { status: 200 })
+      : new Response(JSON.stringify({ message: "rate limited" }), {
+          status: 429,
+          headers: { "X-RateLimit-Reset": String(Math.floor(Date.now() / 1000) + 1800) },
+        }),
+  );
+  vi.stubGlobal("fetch", fetchMock);
+
+  const first = await fetchStoreUpdates();
+  const reset = storage.get("github-rate-limit-reset");
+  const second = await fetchStoreUpdates();
+
+  expect(first.items.map((item) => item.title)).toEqual(["New Extension"]);
+  expect(first.updatesUnavailable).toMatch(/rate limit/i);
+  expect(reset).toBeDefined();
+  expect(second.updatesUnavailable).toMatch(/rate limit/i);
+  expect(storage.get("github-rate-limit-reset")).toBe(reset);
+  expect(fetchMock.mock.calls.map(([url]) => url).sort()).toEqual([FEED_URL, FEED_URL, GITHUB_PRS_URL].sort());
+});
+
+test("a failed Store feed remains an error", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) => new Response(JSON.stringify(url === FEED_URL ? {} : []), { status: 200 })),
+  );
+
+  await expect(fetchStoreUpdates()).rejects.toThrow(/invalid response/);
+});
