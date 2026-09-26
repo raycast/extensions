@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { showToast, Toast } from "@raycast/api";
 import { TODO_FILE } from "./config";
-import { readTodos, writeTodos } from "./storage";
+import { readTodos, TodoRevisionConflictError, writeTodos } from "./storage";
 import type { TodoSections } from "./types";
 export type { TodoItem, TodoSections } from "./types";
 
@@ -15,6 +15,13 @@ export const todoAtom = atom(
       revision = writeTodos(TODO_FILE, newTodo, revision);
       set(todo, newTodo);
     } catch (error) {
+      if (error instanceof TodoRevisionConflictError) {
+        revision = error.revision;
+        set(todo, error.sections);
+        set(editingAtom, false);
+        set(editingTagAtom, false);
+        set(editingDueDateAtom, false);
+      }
       void showToast({ style: Toast.Style.Failure, title: "Could Not Save Todos", message: String(error) });
       throw error;
     }

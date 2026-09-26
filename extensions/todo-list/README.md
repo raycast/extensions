@@ -46,7 +46,7 @@ Run **Import Todo Backup** to restore an exported backup or an original `todo.js
 
 Normal saves also keep the previous saved version in `todo.json.backup`. The import command's **Open Todo Storage Folder** action opens the current storage directory. Choose `todo.json.backup` in the import form to restore that version. This backup lives alongside your data, so it does not replace an exported backup stored elsewhere.
 
-Unreadable or invalid data produces an error instead of silently becoming an empty list. If another command has saved a newer list, reopen the command before editing again.
+Unreadable or invalid data produces an error instead of silently becoming an empty list. If another command has saved a newer list, the command reloads it without overwriting those changes. Select the task in the refreshed list and retry your edit.
 
 ### Missing tasks after migrating to Raycast v2
 
@@ -65,6 +65,6 @@ These tools do not modify tasks. Deadline and priority summary counts cover inco
 
 ## Development
 
-Run `npm test`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`. `npx ray evals` checks AI tool selection using mocked task data.
+Run `npm test`, `npm run build`, `npx tsc --noEmit`, and `npm run lint`. Build first to generate `raycast-env.d.ts` on a fresh clone. `npx ray evals` checks AI tool selection using mocked task data.
 
 Before release, smoke-test shortcuts and search-mode switching in Raycast on both platforms. On macOS, also verify that toggling a task from a sorted, limited menu-bar list changes the task you selected. Check tag selection, backup export/import, and recovery from an invalid file using disposable test data.

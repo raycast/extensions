@@ -3,6 +3,15 @@ import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { TodoItem, TodoSections } from "./types";
 
+export class TodoRevisionConflictError extends Error {
+  constructor(
+    readonly sections: TodoSections,
+    readonly revision: string | null,
+  ) {
+    super("The list changed in another command. Select the task in the refreshed list and try again.");
+  }
+}
+
 function parseItem(value: unknown): TodoItem {
   if (
     typeof value !== "object" ||
@@ -131,8 +140,12 @@ export function writeTodos(file: string, sections: TodoSections, expectedRevisio
   const contents = JSON.stringify(parseTodos(JSON.stringify(sections)));
   return withFileLock(file, () => {
     const current = readFile(file);
-    if (current !== expectedRevision)
-      throw new Error("The list changed in another command. Reopen this command and try again.");
+    if (current !== expectedRevision) {
+      throw new TodoRevisionConflictError(
+        current === null ? { pinned: [], todo: [], completed: [] } : parseTodos(current),
+        current,
+      );
+    }
     if (current !== null) {
       parseTodos(current);
       atomicWrite(`${file}.backup`, current);

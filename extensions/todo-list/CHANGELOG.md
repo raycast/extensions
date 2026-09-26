@@ -2,6 +2,8 @@
 
 ## [Windows Shortcuts, Backups, and AI Tools] - {PR_MERGE_DATE}
 
+- Reload newer task data after conflicting saves so editing can continue without reopening the command.
+- Show an error when opening the todo list or backup commands fails.
 - Fixed action shortcuts and search-mode switching on Windows. The menu-bar command is now explicitly macOS-only.
 - Fixed filtering by a tag named "All" and added an existing-tag picker when editing tags.
 - Fixed sorted and limited menu-bar lists changing the wrong task.

@@ -174,6 +174,7 @@ function uiMocks(saved, setSaved = () => {}) {
       "./config": config, "../config": config,
       jotai: { useAtom: (atom) => atom === atoms.todoAtom ? [saved, setSaved] : ["All", () => {}] },
       react: { ...React, useEffect: () => {}, useMemo: (fn) => fn() },
+      "@raycast/utils": { showFailureToast: async () => {} },
       "@raycast/api": {
         MenuBarExtra, Keyboard: { Shortcut: { Common: { New: {} } } },
         List: { Section: "list-section", Dropdown: Object.assign(() => null, { Item: "dropdown-item" }) },
@@ -252,4 +253,66 @@ test("AI entry points read fresh storage and return cloneable results without wr
   assert.deepEqual(structuredClone(results), results);
   assert.equal(fs.readFileSync(file, "utf8"), updated);
   assert.equal(fs.existsSync(`${file}.backup`), false);
+});
+
+for (const change of ["menu-bar save", "import", "deleted file"]) {
+  test(`an open list recovers after a ${change} without overwriting the newer data`, (t) => {
+    const { file } = fixture(t);
+    const original = storage.writeTodos(file, sections([item("Original")]), null);
+    const toasts = [];
+    const atoms = load("src/atoms.ts", {
+      "./config": { TODO_FILE: file },
+      "@raycast/api": { Toast: { Style: { Failure: "failure" } }, showToast: async (toast) => toasts.push(toast) },
+    });
+    const store = require("jotai/vanilla").createStore();
+    const newer = change === "deleted file" ? sections() : sections([item("Newer")]);
+    store.set(atoms.editingAtom, { sectionKey: "todo", index: 0 });
+    store.set(atoms.editingTagAtom, { sectionKey: "todo", index: 0 });
+    store.set(atoms.editingDueDateAtom, { sectionKey: "todo", index: 0 });
+    if (change === "import") storage.importTodos(file, JSON.stringify(newer));
+    else if (change === "deleted file") fs.unlinkSync(file);
+    else storage.writeTodos(file, newer, original);
+    assert.throws(() => store.set(atoms.todoAtom, sections([item("Stale edit")])), /changed in another command/);
+    assert.deepEqual(store.get(atoms.todoAtom), storage.parseTodos(JSON.stringify(newer)));
+    for (const atom of [atoms.editingAtom, atoms.editingTagAtom, atoms.editingDueDateAtom]) assert.equal(store.get(atom), false);
+    assert.equal(toasts.length, 1);
+    const next = structuredClone(store.get(atoms.todoAtom));
+    next.todo.push(item("Retry"));
+    store.set(atoms.todoAtom, next);
+    assert.deepEqual(storage.readTodos(file).sections, storage.parseTodos(JSON.stringify(next)));
+    if (change !== "deleted file") assert.equal(storage.readTodos(file).sections.todo[0].title, "Newer");
+  });
+}
+
+test("refreshing a conflict never replaces visible tasks with corrupt storage", (t) => {
+  const { file } = fixture(t);
+  const original = sections([item("Keep")]);
+  storage.writeTodos(file, original, null);
+  const { todoAtom } = load("src/atoms.ts", {
+    "./config": { TODO_FILE: file },
+    "@raycast/api": { Toast: { Style: { Failure: "failure" } }, showToast: async () => {} },
+  });
+  const store = require("jotai/vanilla").createStore();
+  fs.writeFileSync(file, "broken");
+  assert.throws(() => store.set(todoAtom, sections()));
+  assert.deepEqual(store.get(todoAtom), storage.parseTodos(JSON.stringify(original)));
+  assert.equal(fs.readFileSync(file, "utf8"), "broken");
+});
+
+test("backup and menu-bar launch failures show a toast without rejecting the action", async () => {
+  const { mocks } = uiMocks(sections());
+  const launches = [];
+  const failures = [];
+  mocks["@raycast/api"] = {
+    ...mocks["@raycast/api"], Action: "action", Icon: {}, LaunchType: { UserInitiated: "user" },
+    launchCommand: async (options) => { launches.push(options.name); throw new Error("Launch failed"); },
+  };
+  mocks["@raycast/utils"] = { showFailureToast: async (error, options) => failures.push([error.message, options.title]) };
+  const Backup = load("src/backup_actions.tsx", mocks).default;
+  for (const action of descendants(Backup()).filter((node) => node.type === "action")) await action.props.onAction();
+  const Menu = load("src/menu_bar.tsx", mocks).default;
+  await descendants(Menu()).find((node) => node.props?.title === "Add Todo").props.onAction();
+  assert.deepEqual(launches, ["export-todos", "import-todos", "index"]);
+  assert.equal(failures.length, 3);
+  assert.ok(failures.every(([message]) => message === "Launch failed"));
 });
