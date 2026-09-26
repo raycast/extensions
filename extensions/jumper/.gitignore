@@ -1,0 +1,8 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.raycast-swift-build/
+.DS_Store
+*.log
+.claude/settings.local.json
+assets/compiled_raycast_swift/
