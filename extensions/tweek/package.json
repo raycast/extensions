@@ -1,0 +1,248 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tweek",
+  "title": "Tweek Task Manager",
+  "description": "Manage your Tweek calendars, tasks, someday lists, and recurring todos directly from Raycast and Raycast AI (@tweek).",
+  "icon": "extension-icon.png",
+  "author": "Bykush",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "ai": {
+    "instructions": "You are the Tweek Task Manager AI assistant (@tweek). Use `get-calendars` to discover the user's calendars and Someday lists, and `get-tasks` to inspect Today's, This Week's, Overdue, or Someday tasks before modifying tasks. When creating tasks with `create-task`, support relative dates ('today', 'tomorrow', 'someday') or YYYY-MM-DD and Tweek color badges ('blank', 'pink', 'yellowish', 'cornflower', 'mango', 'greenish', 'lilac', 'grey', 'black'). For recurring occurrences (`<taskId>_yyyyMMdd`), ask or default to `only_this` unless the user specifies `this_and_future` or `all_linked`.",
+    "evals": [
+      {
+        "input": "@tweek What tasks do I have scheduled for today and this week?",
+        "mocks": {
+          "get-tasks": {
+            "todayISO": "2026-09-26",
+            "calendar": { "id": "cal_1", "name": "Personal" },
+            "totalCount": 1,
+            "tasks": [
+              {
+                "id": "t1",
+                "text": "Review Q4 roadmap",
+                "done": false,
+                "date": "2026-09-26",
+                "color": "pink"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-tasks"
+          }
+        ]
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "get-calendars",
+      "title": "Get Tweek Calendars & Colors",
+      "description": "Lists all Tweek calendars, Someday lists, and custom colors available in the user's account."
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tweek Tasks",
+      "description": "Fetches Tweek tasks by calendar, date preset (today, this_week, overdue, someday, all), date range, or keyword search."
+    },
+    {
+      "name": "create-task",
+      "title": "Create Tweek Task",
+      "description": "Creates a new task in Tweek with optional date (today, tomorrow, someday, or YYYY-MM-DD), color badge, note, and subtasks."
+    },
+    {
+      "name": "update-task",
+      "title": "Update Tweek Task",
+      "description": "Updates an existing Tweek task's title, date, color badge, note, or recurring series scope."
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Tweek Task",
+      "description": "Marks a Tweek task or recurring occurrence as completed or pending."
+    },
+    {
+      "name": "delete-task",
+      "title": "Delete Tweek Task",
+      "description": "Deletes a Tweek task or recurring series occurrence after user confirmation."
+    }
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Tweek Dashboard",
+      "subtitle": "Tweek",
+      "description": "Main dashboard to view today's tasks, weekly schedule, calendars, and manage tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "ask-tweek",
+      "title": "Ask Tweek",
+      "subtitle": "Tweek AI (@tweek)",
+      "description": "Ask Raycast AI about your Tweek schedule, overdue tasks, or daily priorities.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Bugün ve bu hafta hangi görevlerim var?",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add Task",
+      "subtitle": "Tweek",
+      "description": "Quickly add a task to your default Tweek calendar with inline date and color syntax.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Buy milk @today #pink",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "date",
+          "placeholder": "today, tomorrow, or YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "note",
+          "placeholder": "Optional note or details",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Tweek",
+      "description": "Search and filter Tweek tasks across dates, calendars, and color badges.",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Tweek",
+      "description": "Create a new Tweek task with a detailed modal form (calendar, date/someday list, color, recurrence, checklist, and note).",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Tweek Personal API Key / Access Token",
+      "description": "Generate your Personal API Key in Tweek → Profile → API Settings.",
+      "placeholder": "twk_live_..."
+    },
+    {
+      "name": "mcpEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Tweek MCP Endpoint (Optional)",
+      "description": "Optional MCP Server URL (defaults to https://tweek.so/mcp when using MCP transport, or https://tweek.so/api/v1 for REST).",
+      "default": "https://tweek.so/mcp"
+    },
+    {
+      "name": "defaultCalendar",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Calendar Name or ID",
+      "description": "Optional name or ID of your preferred default calendar. Leave empty to use your primary Tweek calendar.",
+      "default": ""
+    },
+    {
+      "name": "hideCompleted",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Completed Tasks",
+      "description": "Whether to hide completed tasks by default in the Dashboard and Search views.",
+      "label": "Hide completed tasks by default in Dashboard and Search views",
+      "default": false
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Date Format",
+      "description": "Preferred date display format across lists and details.",
+      "default": "dd/MM/yyyy",
+      "data": [
+        {
+          "title": "dd/MM/yyyy (26/09/2026)",
+          "value": "dd/MM/yyyy"
+        },
+        {
+          "title": "MM/dd/yyyy (09/26/2026)",
+          "value": "MM/dd/yyyy"
+        }
+      ]
+    },
+    {
+      "name": "weekStartsOn",
+      "type": "dropdown",
+      "required": false,
+      "title": "Week Starts On",
+      "description": "First day of the week for weekly views and filters.",
+      "default": "Monday",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "Monday"
+        },
+        {
+          "title": "Sunday",
+          "value": "Sunday"
+        }
+      ]
+    },
+    {
+      "name": "defaultTaskColor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Task Color",
+      "description": "Default color badge assigned to newly created tasks.",
+      "default": "blank",
+      "data": [
+        { "title": "Blank (No Highlight)", "value": "blank" },
+        { "title": "Pink (#CD2C54)", "value": "pink" },
+        { "title": "Yellowish (#FDEF5D)", "value": "yellowish" },
+        { "title": "Cornflower (#5167F4)", "value": "cornflower" },
+        { "title": "Mango (#FFAF23)", "value": "mango" },
+        { "title": "Greenish (#21FFA1)", "value": "greenish" },
+        { "title": "Lilac (#D95CFE)", "value": "lilac" },
+        { "title": "Grey (#C2C2C2)", "value": "grey" },
+        { "title": "Black (#000000)", "value": "black" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.x",
+    "@types/react": "18.2.55",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}
