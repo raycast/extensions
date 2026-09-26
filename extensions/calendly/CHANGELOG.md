@@ -1,5 +1,13 @@
 # Calendly Changelog
 
+## [Meeting Management and Raycast AI] - 2026-09-26
+
+- Use one Calendly connection for Share Meeting Link, meeting management, and AI tools.
+- Browse upcoming meetings and event types, check availability, create single-use links, and book or cancel meetings directly from Raycast.
+- Manage Calendly through Raycast AI with tools for meetings, event types, availability, booking, and cancellation.
+- Handle event types without locations and round-robin bookings, and collect required invitee phone numbers or meeting locations.
+- Add support for Windows.
+
 ## [Added event duration] - 2026-04-12
 
 - Display event duration as a right-aligned accessory on each event type
@@ -15,4 +23,4 @@
 
 ## [Update] - 2022-09-12
 
- - OAuth Support 🎉
+- OAuth Support 🎉
