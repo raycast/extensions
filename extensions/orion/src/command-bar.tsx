@@ -387,13 +387,20 @@ export default function Command() {
 
     const profileChanged = previousProfileIdRef.current !== selectedProfileId;
     previousProfileIdRef.current = selectedProfileId;
-    const targetJustAppeared =
-      automaticTarget !== undefined && (profileChanged || automaticTarget !== previousAutomaticTargetRef.current);
-    previousAutomaticTargetRef.current = automaticTarget;
 
     // Local tabs, bookmarks, and history resolve at different times. Keep
     // following the best candidate only until the user has made a choice.
+    // Do not touch the remembered target while the user is navigating: it
+    // must stay cleared (see onSelectionChange) regardless of how many times
+    // automaticTarget recomputes in the background (for example a tab
+    // closing) until automatic tracking resumes for a later session -
+    // otherwise a row that was only ever visible, never actually selected,
+    // could later be mistaken for an already-confirmed target.
     if (session.userNavigated) return;
+
+    const targetJustAppeared =
+      automaticTarget !== undefined && (profileChanged || automaticTarget !== previousAutomaticTargetRef.current);
+    previousAutomaticTargetRef.current = automaticTarget;
 
     session.target = automaticTarget;
     if (!automaticTarget) {
