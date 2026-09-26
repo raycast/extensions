@@ -863,6 +863,7 @@ export async function convertPRsToStoreItems(
       type: "updated" as const,
       extensionSlug: resolvedSlug,
       prUrl: pr.html_url,
+      changeSummary: pr.title,
       platforms: pkgInfo?.platforms ?? ["macOS"],
       version: pkgInfo?.version,
       categories: pkgInfo?.categories,

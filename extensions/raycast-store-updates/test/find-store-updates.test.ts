@@ -99,3 +99,21 @@ test("reports incomplete update coverage", async () => {
   expect(result.items[0].title).toBe("New extension");
 });
 
+test("identifies the PR submitter as the updater and includes the PR title", async () => {
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({
+    items: [
+      {
+        ...item("Calendar", "2026-09-25T12:00:00Z"),
+        type: "updated",
+        authorName: "reviewer",
+        changeSummary: "Fix event search",
+      },
+    ],
+  });
+
+  const result = await findStoreUpdates({ type: "updated" });
+
+  expect(result.items[0]).toMatchObject({ updatedBy: "reviewer", changeSummary: "Fix event search" });
+  expect(result.items[0]).not.toHaveProperty("author");
+});
+
