@@ -58,8 +58,8 @@ async function fetchDataWithCaching<T>(
         } else {
           // console.warn(`Invalid cached data for key: ${key}`);
         }
-      } catch (error) {
-        // console.error(`Error parsing cached data for key: ${key}`, error);
+      } catch {
+        // console.error(`Error parsing cached data for key: ${key}`);
       }
     }
   }
