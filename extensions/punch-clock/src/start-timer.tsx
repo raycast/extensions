@@ -1,8 +1,19 @@
-import { useEffect, useState } from "react";
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  openExtensionPreferences,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { parseWholeNumber, validateBreakMinutes, validateHours, validateMinutes } from "./duration";
-import { formatClock, getState, startTimer, TimerState } from "./timer";
+import { formatClock, getState, hasMenuBarBeenSeen, startTimer, TimerState } from "./timer";
 
 interface FormValues {
   hours: string;
@@ -65,11 +76,24 @@ export default function StartTimer() {
       setIsSubmitting(true);
       try {
         const state = await startTimer(totalMinutes, breakMinutes);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Timer Started",
-          message: `Ends around ${formatClock(state.endTime)}`,
-        });
+
+        if (await hasMenuBarBeenSeen()) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Timer Started",
+            message: `Ends around ${formatClock(state.endTime)}`,
+          });
+        } else {
+          await confirmAlert({
+            title: "Enable the Menu Bar to See Your Timer",
+            message: `Timer started, ends around ${formatClock(state.endTime)}. Enable "Work Timer" in your menu bar to see the countdown.`,
+            primaryAction: {
+              title: "Open Extension Preferences",
+              onAction: () => openExtensionPreferences(),
+            },
+            dismissAction: { title: "OK" },
+          });
+        }
         await popToRoot();
       } catch {
         await showToast({
@@ -88,6 +112,7 @@ export default function StartTimer() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Start Timer" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action title="Enable Menu Bar…" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
         </ActionPanel>
       }
     >

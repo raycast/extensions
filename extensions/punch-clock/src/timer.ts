@@ -1,7 +1,9 @@
 import { LocalStorage } from "@raycast/api";
 import { isValidTimestamp, resolveTimerEndTime } from "./duration";
+import { isMenuBarHeartbeatFresh } from "./menu-bar-presence";
 
 export const STORAGE_KEY = "punch-clock-state";
+const MENU_BAR_SEEN_KEY = "punch-clock-menu-bar-seen";
 
 export interface TimerState {
   /** Total working time in minutes, as entered by the user (excludes break). */
@@ -135,4 +137,13 @@ export function formatDuration(ms: number): string {
   const seconds = abs % 60;
   const text = `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   return negative ? `-${text}` : text;
+}
+
+export async function markMenuBarSeen(): Promise<void> {
+  await LocalStorage.setItem(MENU_BAR_SEEN_KEY, String(Date.now()));
+}
+
+export async function hasMenuBarBeenSeen(): Promise<boolean> {
+  const stored = await LocalStorage.getItem<string>(MENU_BAR_SEEN_KEY);
+  return isMenuBarHeartbeatFresh(stored, Date.now());
 }
