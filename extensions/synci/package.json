@@ -5,7 +5,6 @@
   "description": "Search transactions, check balances and holdings, monitor connections, and ask Raycast AI about your finances with Synci.",
   "icon": "synci-mark.png",
   "author": "tonning",
-  "owner": "synci",
   "access": "public",
   "platforms": [
     "macOS",
