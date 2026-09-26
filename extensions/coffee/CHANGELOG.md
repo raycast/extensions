@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix, Enhancement] - {PR_MERGE_DATE}
+## [Fix, Enhancement] - 2026-09-26
 
 - Keep the empty pot icon visible in the menu bar for 5 seconds after decaffeinating before hiding, preserving the decaffeinated state across Raycast restarts.
 - Fix 1-frame blanking flicker when transitioning to decaffeinated state in the menu bar.
