@@ -33,13 +33,7 @@ const TOP_HIT_ITEM_ID = "top-hit";
 const OPEN_ADDRESS_ITEM_ID = "open-address";
 const CURRENT_TAB_HANDOFF_SETTLE_MS = 50;
 const CURRENT_TAB_HANDOFF_FALLBACK_MS = 150;
-// Unlike CURRENT_TAB_HANDOFF_SETTLE_MS above, this one is not a wall-clock
-// safety margin: the acknowledgement it fences is a same-tick side effect of
-// the `setSelectedItemId` call just above it, so the very next event-loop
-// turn is already past it. A larger, fixed delay here would instead risk
-// swallowing a genuine fast Ctrl+N/Ctrl+P landing in the window right after
-// the list expands to its full content.
-const CURRENT_TAB_FINAL_ACK_TIMEOUT_MS = 0;
+const CURRENT_TAB_FINAL_ACK_TIMEOUT_MS = 100;
 
 type SelectionSession = {
   key: string;
