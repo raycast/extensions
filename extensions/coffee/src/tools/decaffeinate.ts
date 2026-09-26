@@ -28,10 +28,9 @@ export default async function () {
     }
   } else {
     const isRunning = await isCaffeinateRunning();
-    if (!isRunning) {
-      return `${deviceName()} sleep prevention is already disabled`;
-    }
     await stopCaffeinate({ menubar: true, status: true });
-    return `${deviceName()} sleep prevention has been disabled`;
+    return isRunning
+      ? `${deviceName()} sleep prevention has been disabled`
+      : `${deviceName()} sleep prevention is already disabled`;
   }
 }

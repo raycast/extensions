@@ -1,5 +1,5 @@
 import { isCaffeinateRunning, stopCaffeinate, getSchedule, deviceName } from "./utils";
-import { getPreferenceValues, showToast, Toast, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 
 export default async () => {
   const schedule = await getSchedule();
@@ -26,10 +26,9 @@ export default async () => {
   }
 
   const isRunning = await isCaffeinateRunning();
-  if (!isRunning) {
-    await showHUD(`Your ${deviceName()} is already decaffeinated`);
-    return;
-  }
+  const hudMessage = isRunning
+    ? `Your ${deviceName()} is now decaffeinated`
+    : `Your ${deviceName()} is already decaffeinated`;
 
-  await stopCaffeinate({ menubar: true, status: true }, `Your ${deviceName()} is now decaffeinated`);
+  await stopCaffeinate({ menubar: true, status: true }, hudMessage);
 };
