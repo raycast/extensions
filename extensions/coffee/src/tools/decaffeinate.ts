@@ -1,4 +1,4 @@
-import { stopCaffeinate, deviceName, getSchedule } from "../utils";
+import { isCaffeinateRunning, stopCaffeinate, deviceName, getSchedule } from "../utils";
 import { getPreferenceValues, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 
 /**
@@ -27,6 +27,10 @@ export default async function () {
       throw new Error("Caffeination schedule running");
     }
   } else {
+    const isRunning = await isCaffeinateRunning();
+    if (!isRunning) {
+      return `${deviceName()} sleep prevention is already disabled`;
+    }
     await stopCaffeinate({ menubar: true, status: true });
     return `${deviceName()} sleep prevention has been disabled`;
   }
