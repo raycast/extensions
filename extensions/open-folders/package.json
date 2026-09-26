@@ -349,6 +349,30 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "openFoldersIn",
+      "title": "Open Folders In",
+      "type": "dropdown",
+      "description": "Where Finder shows a folder you open. New Tab requires Accessibility permission for Raycast.",
+      "default": "newWindow",
+      "data": [
+        {
+          "title": "New Finder Window",
+          "value": "newWindow"
+        },
+        {
+          "title": "New Tab in Front Finder Window",
+          "value": "newTab"
+        },
+        {
+          "title": "Current Finder Tab",
+          "value": "currentTab"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.72.1"
   },
