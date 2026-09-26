@@ -41,7 +41,7 @@ These come from how macOS and the hardware report power, not from the extension:
 
 ## A case it caught
 
-On a MacBook Pro that had been awake for four days, a runaway notification named `dasd`, a macOS scheduling daemon, at 100% of a core. Nothing else pointed at it: the Mac felt normal, the fans were quiet, and Activity Monitor only gets opened once battery life is already a complaint. The unified log showed the cause: another Apple service, `appstoreagent`, was resubmitting a background task about 88 times a second, and `dasd` was only running what it was given. Restarting `appstoreagent` ended it within a minute.
+On a MacBook Pro that had been awake for four days, a notification said "dasd has used 104% CPU for 16m". `dasd` is a macOS scheduling daemon. Nothing else pointed at it: the Mac felt normal, the fans were quiet, and Activity Monitor only gets opened once battery life is already a complaint. The unified log showed the cause: another Apple service, `appstoreagent`, was resubmitting a background task about 88 times a second, and `dasd` was only running what it was given. Restarting `appstoreagent` ended it within a minute.
 
 Two things worth knowing from it. A system process that shows up as a runaway (`dasd`, `mds_stores`, `kernel_task`) is usually the victim; the process feeding it is the one to look at, and the unified log names it: `log show --last 2m --info --predicate 'subsystem == "com.apple.duetactivityscheduler"'` for `dasd`. And system processes cannot be terminated from Battery Drain; restart the process that feeds them, or reboot.
 
