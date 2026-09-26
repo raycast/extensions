@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
@@ -198,7 +198,34 @@ function uniqueUrls<T extends { url: string }>(items: T[], seen: Set<string>, li
 export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string>();
+  // Bumped whenever the selection session's ref state changes in a way that
+  // must force a re-render even though `selectedItemId` itself may end up
+  // unchanged (for example, re-confirming the same target once Raycast
+  // acknowledges it). `selectionSessionRef` is a ref precisely so reads and
+  // writes elsewhere in this render never lag a commit; this is the only
+  // signal that tells React to re-render because of it.
+  const [, setHandoffVersion] = useState(0);
   const selectionSessionRef = useRef<SelectionSession | undefined>(undefined);
+  // Tracks whether the automatic target (Top Hit or the typed-address row)
+  // was already the visible, selected row a moment ago, independent of the
+  // per-keystroke session reset in `resetSelectionSession` below - which
+  // intentionally clears `session.target` on every keystroke, so it cannot
+  // by itself distinguish an unbroken Top Hit from a fresh one that happens
+  // to reuse the same row id. Only a row that is genuinely new (a different
+  // destination, the same id reappearing after being absent, or a profile
+  // switch) needs the single-row isolation handoff below; one that was
+  // already confirmed selected must not re-trigger it on every keystroke, or
+  // the other sections would visibly collapse each time.
+  const previousAutomaticTargetRef = useRef<string | undefined>(undefined);
+  const previousProfileIdRef = useRef<string | undefined>(undefined);
+  // Holds the last Top Hit confirmed while History was current, plus the
+  // profile it was confirmed under, so it can be reused below across the
+  // brief window where the History query hasn't caught up with the latest
+  // keystroke yet - but only while it still plausibly belongs to what is
+  // currently typed (see the relevance check at the reuse site below), not
+  // whenever the user has since typed something unrelated or switched
+  // profiles.
+  const lastConfirmedHistoryTopHitRef = useRef<{ profileId: string; hit: Hit } | undefined>(undefined);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
 
@@ -293,6 +320,33 @@ export default function Command() {
     topHit = deduplicateRankedHits(candidates).sort(compareRankedHits)[0]?.hit;
   }
 
+  // `historyHits` is excluded above while the History query hasn't caught up
+  // with the latest keystroke yet (see useHistorySearch's staleness guard),
+  // so recomputing Top Hit during that gap can hand it to a lower-priority
+  // Tab or Bookmark match - or to nothing - only for History to reclaim it a
+  // few milliseconds later once the fresh result lands. Reuse the previous
+  // History-backed Top Hit across that gap instead of letting it flicker to
+  // a different candidate and back - but only while it is still plausibly
+  // what the user is typing towards: the same profile, and still relevant to
+  // the text typed so far. Otherwise (a profile switch, or text unrelated to
+  // it) it must not be shown, or Enter could open a stale destination the
+  // user never intended. A genuinely different result, once History is
+  // current again, still replaces it normally.
+  if (hasCurrentHistoryResult) {
+    lastConfirmedHistoryTopHitRef.current =
+      topHit?.kind === "url" && topHit.source === "History" ? { profileId: selectedProfileId, hit: topHit } : undefined;
+  } else {
+    const frozen = lastConfirmedHistoryTopHitRef.current;
+    const stillRelevant =
+      frozen &&
+      frozen.profileId === selectedProfileId &&
+      frozen.hit.kind === "url" &&
+      relevance(q, frozen.hit.item.title, frozen.hit.item.url) > 0;
+    if (stillRelevant) {
+      topHit = frozen.hit;
+    }
+  }
+
   // Drop the top hit from its own section to avoid showing it twice.
   const topTabKey = topHit?.kind === "tab" ? topHit.key : undefined;
   const topUrlKey = topHit?.kind === "url" ? topHit.key : undefined;
@@ -333,36 +387,99 @@ export default function Command() {
     LIMITS.history,
   );
   const address = isWebAddress(query) ? normalizeWebAddress(query) : undefined;
+  // Identify each row by its destination, not just its section, so a Top Hit
+  // or address that changes to a genuinely different destination is treated
+  // as a new target - even though it stays in the same section - and gets
+  // the isolation handoff below instead of silently reusing Raycast's
+  // existing selection for what it now looks like might be a stale row.
+  const topHitItemId = topHit ? `${TOP_HIT_ITEM_ID}\u0000${topHit.key}` : undefined;
+  const openAddressItemId = address ? `${OPEN_ADDRESS_ITEM_ID}\u0000${address}` : undefined;
+  const automaticTarget = topHitItemId ?? openAddressItemId;
 
   // Keep selection controlled while the local sources resolve. A session lasts
   // for one query/profile pair: it auto-selects a Top Hit until the user
   // navigates, after which slower data must not steal their selection.
-  useEffect(() => {
-    const target = topHit ? TOP_HIT_ITEM_ID : address ? OPEN_ADDRESS_ITEM_ID : undefined;
+  //
+  // `selectedItemId` alone is not sufficient when a late result (for example
+  // a History entry that needed its own SQL round trip) replaces an
+  // already-rendered row set: Raycast's List can report a stale selection and
+  // never send a follow-up correcting itself, leaving the wrong row focused
+  // indefinitely. Render only the target row until Raycast acknowledges it
+  // (see `isHandingOffAutomaticTarget` below), then restore the rest - but
+  // only when the target row is genuinely new (see `previousAutomaticTargetRef`
+  // above): a keystroke that leaves Top Hit pointing at the same row it
+  // already confirmed must not re-trigger that isolation, or the other
+  // sections would visibly collapse on every keystroke. A `useLayoutEffect`
+  // (not `useEffect`) keeps this decision in the same commit as the data
+  // change that triggered it, so an isolated frame never paints with a stale
+  // row visible.
+  useLayoutEffect(() => {
     const key = `${selectedProfileId}\u0000${query}`;
     const previous = selectionSessionRef.current;
-    const isNewSession = previous?.key !== key;
+    const session: SelectionSession =
+      previous?.key === key ? previous : { key, awaitingTarget: false, userNavigated: false };
+    selectionSessionRef.current = session;
 
-    if (isNewSession) {
-      selectionSessionRef.current = {
-        key,
-        target,
-        awaitingTarget: !!target,
-        userNavigated: false,
-      };
-      setSelectedItemId(target);
-      return;
-    }
+    const profileChanged = previousProfileIdRef.current !== selectedProfileId;
+    previousProfileIdRef.current = selectedProfileId;
 
     // Local tabs, bookmarks, and history resolve at different times. Keep
     // following the best candidate only until the user has made a choice.
-    if (!previous.userNavigated && previous.target !== target) {
-      previous.target = target;
-      previous.awaitingTarget = !!target;
-      setSelectedItemId(target);
+    // Do not touch the remembered target while the user is navigating: it
+    // must stay cleared (see onSelectionChange) regardless of how many times
+    // automaticTarget recomputes in the background (for example a tab
+    // closing) until automatic tracking resumes for a later session -
+    // otherwise a row that was only ever visible, never actually selected,
+    // could later be mistaken for an already-confirmed target.
+    if (session.userNavigated) return;
+
+    const targetJustAppeared =
+      automaticTarget !== undefined && (profileChanged || automaticTarget !== previousAutomaticTargetRef.current);
+    previousAutomaticTargetRef.current = automaticTarget;
+
+    session.target = automaticTarget;
+    if (!automaticTarget) {
+      session.awaitingTarget = false;
+      setSelectedItemId(undefined);
       return;
     }
-  }, [query, selectedProfileId, topHit?.key, address]);
+
+    session.awaitingTarget = targetJustAppeared;
+    setSelectedItemId(automaticTarget);
+    if (targetJustAppeared) {
+      // The target is initially rendered by itself so Raycast cannot retain
+      // an old native row. The handoff version schedules that isolated
+      // render; it intentionally does not remount the complete List.
+      setHandoffVersion((version) => version + 1);
+    }
+  }, [query, selectedProfileId, automaticTarget]);
+
+  const activeSelectionSession = selectionSessionRef.current;
+  const isHandingOffAutomaticTarget =
+    !!automaticTarget && activeSelectionSession?.awaitingTarget && activeSelectionSession.target === automaticTarget;
+
+  // `onSelectionChange` has no keyboard-event information, so waiting
+  // indefinitely for Raycast's acknowledgement risks consuming the first
+  // Ctrl+N/Ctrl+P if it is ever delayed or dropped. Force the isolated frame
+  // to end on the next event-loop turn regardless, using the query-scoped
+  // `selectedItemId` already committed above.
+  useEffect(() => {
+    if (!isHandingOffAutomaticTarget) return;
+
+    const session = selectionSessionRef.current;
+    const sessionKey = session?.key;
+    const target = session?.target;
+    const timer = setTimeout(() => {
+      const current = selectionSessionRef.current;
+      if (!current || current.key !== sessionKey || current.target !== target || !current.awaitingTarget) return;
+
+      current.awaitingTarget = false;
+      setSelectedItemId(target);
+      setHandoffVersion((version) => version + 1);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [automaticTarget, isHandingOffAutomaticTarget]);
 
   return (
     <List
@@ -385,6 +502,7 @@ export default function Command() {
           if (id !== session.target) return;
           session.awaitingTarget = false;
           setSelectedItemId(id ?? undefined);
+          setHandoffVersion((version) => version + 1);
           return;
         }
 
@@ -402,6 +520,12 @@ export default function Command() {
         // focus and scroll handling; continually controlling selectedItemId
         // causes visible scroll jumps after repeated Ctrl+N/Ctrl+P cycles.
         if (session) session.userNavigated = true;
+        // From this point on, Raycast's actual selection is wherever the user
+        // navigated to, not `previousAutomaticTargetRef`. If a later query
+        // resolves back to that same destination, it must go through the
+        // isolation handoff again rather than assuming Raycast is still
+        // showing it selected - the row set has changed in the meantime.
+        previousAutomaticTargetRef.current = undefined;
         setSelectedItemId(undefined);
       }}
       searchBarPlaceholder="Search tabs, bookmarks, history, or the web"
@@ -418,11 +542,11 @@ export default function Command() {
         />
       }
     >
-      {topHit && (
+      {topHit && (!isHandingOffAutomaticTarget || automaticTarget === topHitItemId) && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
             <TabListItem
-              id={TOP_HIT_ITEM_ID}
+              id={topHitItemId}
               tab={topHit.tab}
               refresh={refresh}
               closeLaunchers
@@ -430,15 +554,15 @@ export default function Command() {
               onActivate={markTabActive}
             />
           ) : (
-            <UrlListItem id={TOP_HIT_ITEM_ID} item={topHit.item} accessory={topHit.source} />
+            <UrlListItem id={topHitItemId} item={topHit.item} accessory={topHit.source} />
           )}
         </List.Section>
       )}
 
-      {address && (
+      {address && (!isHandingOffAutomaticTarget || automaticTarget === openAddressItemId) && (
         <List.Section title="Open Address">
           <List.Item
-            id={OPEN_ADDRESS_ITEM_ID}
+            id={openAddressItemId}
             icon={Icon.Globe}
             title={`Open “${query.trim()}” in Default Browser`}
             subtitle={address}
@@ -451,7 +575,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {hasQuery && (
+      {!isHandingOffAutomaticTarget && hasQuery && (
         <List.Section title="Search the Web">
           <List.Item
             id="web-search"
@@ -466,7 +590,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {suggestionHits.length > 0 && (
+      {!isHandingOffAutomaticTarget && suggestionHits.length > 0 && (
         <List.Section title="Suggestions">
           {suggestionHits.map((s, i) => (
             <SuggestionListItem id={`suggestion-${i}-${s}`} key={`sugg-${i}-${s}`} suggestion={s} />
@@ -474,7 +598,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {tabSection.length > 0 && (
+      {!isHandingOffAutomaticTarget && tabSection.length > 0 && (
         <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
             <TabListItem
@@ -490,7 +614,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {bookmarkSection.length > 0 && (
+      {!isHandingOffAutomaticTarget && bookmarkSection.length > 0 && (
         <List.Section title="Bookmarks">
           {bookmarkSection.map((b) => (
             <UrlListItem id={`bm-${b.uuid}`} key={`bm-${b.uuid}`} item={b} />
@@ -498,7 +622,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {readingSection.length > 0 && (
+      {!isHandingOffAutomaticTarget && readingSection.length > 0 && (
         <List.Section title="Reading List">
           {readingSection.map((b) => (
             <UrlListItem id={`rl-${b.uuid}`} key={`rl-${b.uuid}`} item={b} />
@@ -506,7 +630,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      {!permissionView && historySection.length > 0 && (
+      {!isHandingOffAutomaticTarget && !permissionView && historySection.length > 0 && (
         <List.Section title="History">
           {historySection.map((h) => (
             <UrlListItem id={`hist-${h.id}`} key={`hist-${h.id}`} item={h} />

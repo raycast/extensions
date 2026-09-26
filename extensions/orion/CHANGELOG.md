@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-26
+
+- Fix Top Hit (and the typed-address row) occasionally not receiving focus when it resolves after Raycast has already rendered the rest of the results, most noticeably when the winning candidate needs a History lookup. Raycast's List can retain a stale native selection instead of applying the updated `selectedItemId` when the full result set changes at the same time, so pressing Enter could trigger the wrong action (e.g. "Search the Web" instead of the intended result) without any visible sign something was off. Render only the Top Hit/address row until Raycast acknowledges the selection, then restore the rest of the sections.
+
 ## [Command Bar] - 2026-09-25
 
 - Stop the Command Bar's loading indicator from flickering on every keystroke. History and search-suggestion lookups re-run as you type and briefly report loading, but by the time either can be true, tabs/bookmarks/profiles have already resolved, so there was no genuine "nothing to show yet" state being reflected - just a distracting flash.
