@@ -3,11 +3,11 @@ import React, { useCallback, useMemo, useState } from "react";
 import { TaskList } from "../components/TaskList";
 import { useCalendars } from "../hooks/useCalendars";
 import { useTasks } from "../hooks/useTasks";
-import { ExtensionPreferences, TaskFilterState } from "../types";
+import { TaskFilterState } from "../types";
 import { addDaysISO, getTodayISO } from "../utils/date-utils";
 
 export default function SearchTasksCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   // 90-day window (within Tweek's 92-day occurrence expansion limit)
   const searchWindow = useMemo(() => {

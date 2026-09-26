@@ -1,5 +1,5 @@
 import { Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BulkUpdateItem,
   CreateTaskInput,
@@ -57,10 +57,12 @@ export function useTasks({
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(
     new Set(),
   );
+  const latestFetchIdRef = useRef<number>(0);
 
   const fetchTasks = useCallback(
     async (forceRefresh = false) => {
       if (!calendarId) return;
+      const fetchId = ++latestFetchIdRef.current;
 
       if (!forceRefresh) {
         const cached = getCachedTasks(calendarId, cacheScope, false);
@@ -105,6 +107,11 @@ export function useTasks({
           ...somedayPromises,
         ]);
 
+        // Ignore response if another calendar fetch was started after this one
+        if (fetchId !== latestFetchIdRef.current) {
+          return;
+        }
+
         const mergedMap = new Map<string, TweekTask>();
         for (const t of datedResult.data) {
           mergedMap.set(t.id, t);
@@ -120,6 +127,9 @@ export function useTasks({
         setCachedTasks(calendarId, mergedTasks, cacheScope);
         setIsOffline(false);
       } catch (err) {
+        if (fetchId !== latestFetchIdRef.current) {
+          return;
+        }
         const stale = getCachedTasks(calendarId, cacheScope, true);
         const msg =
           err instanceof Error ? err.message : "Failed to load tasks.";
@@ -140,7 +150,9 @@ export function useTasks({
           });
         }
       } finally {
-        setIsLoading(false);
+        if (fetchId === latestFetchIdRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     [

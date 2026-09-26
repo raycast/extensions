@@ -2,7 +2,7 @@ import { invalidateTaskCache } from "../hooks/useTaskCache";
 import { UpdateType } from "../types";
 import { complete_task } from "../utils/tweek-client";
 
-export type CompleteTaskToolInput = {
+type Input = {
   /**
    * The ID of the task (or virtual occurrence ID `<taskId>_yyyyMMdd`) to mark completed or pending.
    */
@@ -14,17 +14,24 @@ export type CompleteTaskToolInput = {
   /**
    * Optional recurring scope: "only_this", "this_and_future", or "all_linked".
    */
-  updateType?: UpdateType;
+  updateType?: string;
 };
 
 /**
  * Marks a Tweek task (or recurring occurrence) as completed or pending.
  */
-export default async function completeTaskTool(input: CompleteTaskToolInput) {
+export default async function completeTaskTool(input: Input) {
+  const validUpdateType =
+    input.updateType === "only_this" ||
+    input.updateType === "this_and_future" ||
+    input.updateType === "all_linked"
+      ? (input.updateType as UpdateType)
+      : undefined;
+
   const res = await complete_task(
     input.taskId,
     input.done ?? true,
-    input.updateType,
+    validUpdateType,
   );
   invalidateTaskCache();
   return {

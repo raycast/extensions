@@ -3,7 +3,6 @@ import {
   BulkOperationResult,
   BulkUpdateItem,
   CreateTaskInput,
-  ExtensionPreferences,
   ListTasksParams,
   PaginatedTasksResponse,
   TweekCalendar,
@@ -18,6 +17,7 @@ const REST_BASE_URL = "https://tweek.so/api/v1";
 const MAX_BATCH_SIZE = 50;
 const DEFAULT_TIMEOUT_MS = 12_000;
 const MAX_RETRIES = 2;
+const MAX_PAGINATION_PAGES = 10;
 
 export class TweekApiError extends Error {
   public readonly status: number;
@@ -54,7 +54,7 @@ function getAuthHeaders(customApiKey?: string): Record<string, string> {
   let apiKey = customApiKey;
   if (!apiKey) {
     try {
-      const prefs = getPreferenceValues<ExtensionPreferences>();
+      const prefs = getPreferenceValues<Preferences>();
       apiKey = prefs.apiKey?.trim();
     } catch {
       apiKey = process.env.TWEEK_API_KEY?.trim() || "";
@@ -98,9 +98,12 @@ async function fetchWithRetry<T>(
     ...(init.headers as Record<string, string> | undefined),
   };
 
+  const method = (init.method || "GET").toUpperCase();
+  const maxAttempts = method === "GET" ? MAX_RETRIES : 0;
+
   let lastError: unknown;
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+  for (let attempt = 0; attempt <= maxAttempts; attempt++) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
@@ -174,7 +177,7 @@ async function fetchWithRetry<T>(
             );
     }
 
-    if (attempt < MAX_RETRIES) {
+    if (attempt < maxAttempts) {
       const backoffMs = 350 * Math.pow(2, attempt);
       await new Promise((resolve) => setTimeout(resolve, backoffMs));
     }
@@ -241,7 +244,8 @@ export async function list_colors(
 
 /**
  * 3. list_tasks(calendarId, options?) — Lists tasks in a calendar.
- * Automatically adds `expand=occurrences` and user's IANA timezone when dateFrom & dateTo are given.
+ * Automatically adds `expand=occurrences` and user's IANA timezone when dateFrom & dateTo are given,
+ * and follows `nextDocId` pagination for non-expanded listings.
  */
 export async function list_tasks(
   calendarIdOrParams: string | ListTasksParams,
@@ -253,41 +257,56 @@ export async function list_tasks(
       ? { calendarId: calendarIdOrParams, ...options }
       : calendarIdOrParams;
 
-  const query = new URLSearchParams();
-  query.set("calendarId", params.calendarId);
-
-  if (params.listId) {
-    query.set("listId", params.listId);
-  }
-
   const hasDateWindow = Boolean(params.dateFrom && params.dateTo);
-  if (params.dateFrom) query.set("dateFrom", params.dateFrom);
-  if (params.dateTo) query.set("dateTo", params.dateTo);
+  const allTasks: TweekTask[] = [];
+  let currentCursor: string | null | undefined = params.startAt;
+  let lastPageSize: number | undefined;
+  let pageCount = 0;
 
-  if (hasDateWindow && params.expand !== false) {
-    query.set("expand", "occurrences");
-    query.set("timezone", params.timezone || getUserTimezone());
-  } else if (params.startAt) {
-    query.set("startAt", params.startAt);
-  }
+  do {
+    const query = new URLSearchParams();
+    query.set("calendarId", params.calendarId);
 
-  const res = await fetchWithRetry<PaginatedTasksResponse | TweekTask[]>(
-    `/tasks?${query.toString()}`,
-    { method: "GET" },
-    apiKey,
-  );
+    if (params.listId) {
+      query.set("listId", params.listId);
+    }
+    if (params.dateFrom) query.set("dateFrom", params.dateFrom);
+    if (params.dateTo) query.set("dateTo", params.dateTo);
 
-  if (Array.isArray(res)) {
-    return {
-      data: res.filter((t) => !t.deleted),
-      nextDocId: null,
-    };
-  }
+    if (hasDateWindow && params.expand !== false) {
+      query.set("expand", "occurrences");
+      query.set("timezone", params.timezone || getUserTimezone());
+    } else if (currentCursor) {
+      query.set("startAt", currentCursor);
+    }
+
+    const res = await fetchWithRetry<PaginatedTasksResponse | TweekTask[]>(
+      `/tasks?${query.toString()}`,
+      { method: "GET" },
+      apiKey,
+    );
+
+    if (Array.isArray(res)) {
+      allTasks.push(...res.filter((t) => !t.deleted));
+      currentCursor = null;
+      break;
+    }
+
+    allTasks.push(...(res.data || []).filter((t) => !t.deleted));
+    lastPageSize = res.pageSize;
+    currentCursor = res.nextDocId ?? null;
+    pageCount += 1;
+
+    // If caller explicitly passed a single startAt page or occurrences are expanded, stop after 1 page
+    if (params.startAt || (hasDateWindow && params.expand !== false)) {
+      break;
+    }
+  } while (currentCursor && pageCount < MAX_PAGINATION_PAGES);
 
   return {
-    data: (res.data || []).filter((t) => !t.deleted),
-    pageSize: res.pageSize,
-    nextDocId: res.nextDocId ?? null,
+    data: allTasks,
+    pageSize: lastPageSize,
+    nextDocId: currentCursor ?? null,
   };
 }
 
@@ -480,9 +499,11 @@ export async function update_task(
   if (patchFields.checklist !== undefined) {
     sanitizedPatch.checklist = patchFields.checklist;
   }
-  if (typeof patchFields.freq === "number" && patchFields.freq > 0) {
+  if (typeof patchFields.freq === "number") {
     sanitizedPatch.freq = patchFields.freq;
-    if (patchFields.dtStart) sanitizedPatch.dtStart = patchFields.dtStart;
+    if (patchFields.dtStart !== undefined) {
+      sanitizedPatch.dtStart = patchFields.dtStart;
+    }
     if (patchFields.freq === 7 && patchFields.recurrence) {
       sanitizedPatch.recurrence = patchFields.recurrence;
     }

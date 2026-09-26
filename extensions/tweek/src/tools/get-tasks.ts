@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { resolveDefaultCalendar } from "../hooks/useCalendars";
 import { getCachedCalendars, setCachedCalendars } from "../hooks/useTaskCache";
-import { ExtensionPreferences, TweekTask } from "../types";
+import { TweekTask } from "../types";
 import {
   addDaysISO,
   getDashboardFetchWindowISO,
@@ -11,7 +11,7 @@ import {
 } from "../utils/date-utils";
 import { list_calendars, list_tasks } from "../utils/tweek-client";
 
-export type GetTasksInput = {
+type Input = {
   /**
    * Optional calendarId or calendar name. If omitted, uses the user's default calendar.
    */
@@ -19,7 +19,7 @@ export type GetTasksInput = {
   /**
    * Optional preset filter: "today", "this_week", "overdue", "someday", or "all".
    */
-  preset?: "today" | "this_week" | "overdue" | "someday" | "all";
+  preset?: string;
   /**
    * Optional start date in YYYY-MM-DD format.
    */
@@ -41,8 +41,8 @@ export type GetTasksInput = {
 /**
  * Fetches Tweek tasks for a calendar, date preset (today, this_week, overdue, someday), or search query.
  */
-export default async function getTasksTool(input: GetTasksInput = {}) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+export default async function getTasksTool(input: Input = {}) {
+  const prefs = getPreferenceValues<Preferences>();
 
   let calendars = getCachedCalendars(true);
   if (!calendars || calendars.length === 0) {

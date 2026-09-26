@@ -11,7 +11,6 @@ import React, { useMemo, useState } from "react";
 import {
   CreateTaskInput,
   DateFormatPreference,
-  ExtensionPreferences,
   TaskFilterState,
   TweekCalendar,
   TweekCustomColor,
@@ -106,7 +105,7 @@ export function TaskList({
   onBulkDelete,
 }: TaskListProps) {
   const { push } = useNavigation();
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const dateFormat: DateFormatPreference = prefs.dateFormat || "dd/MM/yyyy";
   const weekStartsOn: WeekStartPreference = prefs.weekStartsOn || "Monday";
 
@@ -204,10 +203,15 @@ export function TaskList({
     const raw = filter.searchText.trim();
     if (!raw || !activeCalendarId) return;
     const parsed = parseQuickAddInput(raw);
+    const resolvedListId =
+      parsed.date === null && activeCalendar?.lists?.[0]
+        ? activeCalendar.lists[0].id
+        : null;
     await onCreateTask({
       calendarId: activeCalendarId,
       text: parsed.cleanText,
-      date: parsed.date,
+      date: resolvedListId ? null : parsed.date,
+      listId: resolvedListId,
       color: parsed.color || prefs.defaultTaskColor || "blank",
     });
     onUpdateFilter({ searchText: "" });

@@ -3,7 +3,7 @@ import { invalidateTaskCache } from "../hooks/useTaskCache";
 import { UpdateType } from "../types";
 import { delete_task } from "../utils/tweek-client";
 
-export type DeleteTaskToolInput = {
+type Input = {
   /**
    * The ID of the task (or virtual occurrence ID `<taskId>_yyyyMMdd`) to delete.
    */
@@ -15,15 +15,13 @@ export type DeleteTaskToolInput = {
   /**
    * Optional recurring scope: "only_this", "this_and_future", or "all_linked".
    */
-  updateType?: UpdateType;
+  updateType?: string;
 };
 
 /**
  * Asks the user for confirmation before Raycast AI deletes a Tweek task.
  */
-export const confirmation: Tool.Confirmation<DeleteTaskToolInput> = async (
-  input,
-) => {
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
     style: Action.Style.Destructive,
     message: `Are you sure you want to delete "${input.taskTitle || input.taskId}" from Tweek?`,
@@ -38,8 +36,15 @@ export const confirmation: Tool.Confirmation<DeleteTaskToolInput> = async (
 /**
  * Permanently deletes a task or recurring occurrence from Tweek.
  */
-export default async function deleteTaskTool(input: DeleteTaskToolInput) {
-  const res = await delete_task(input.taskId, input.updateType);
+export default async function deleteTaskTool(input: Input) {
+  const validUpdateType =
+    input.updateType === "only_this" ||
+    input.updateType === "this_and_future" ||
+    input.updateType === "all_linked"
+      ? (input.updateType as UpdateType)
+      : undefined;
+
+  const res = await delete_task(input.taskId, validUpdateType);
   invalidateTaskCache();
   return {
     success: true,

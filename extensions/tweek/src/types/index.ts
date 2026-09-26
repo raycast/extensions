@@ -14,16 +14,6 @@ export type BuiltInColorId =
 export type DateFormatPreference = "MM/dd/yyyy" | "dd/MM/yyyy";
 export type WeekStartPreference = "Monday" | "Sunday";
 
-export interface ExtensionPreferences {
-  apiKey: string;
-  mcpEndpoint?: string;
-  defaultCalendar?: string;
-  hideCompleted?: boolean;
-  dateFormat?: DateFormatPreference;
-  weekStartsOn?: WeekStartPreference;
-  defaultTaskColor?: BuiltInColorId | string;
-}
-
 export interface TweekSomedayList {
   id: string;
   name: string;

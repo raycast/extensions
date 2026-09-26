@@ -3,10 +3,10 @@ import React, { useCallback, useState } from "react";
 import { TaskList } from "../components/TaskList";
 import { useCalendars } from "../hooks/useCalendars";
 import { useTasks } from "../hooks/useTasks";
-import { ExtensionPreferences, TaskFilterState } from "../types";
+import { TaskFilterState } from "../types";
 
 export default function DashboardCommand() {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const {
     calendars,

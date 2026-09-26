@@ -11,7 +11,6 @@ import {
   invalidateTaskCache,
   setCachedCalendars,
 } from "../hooks/useTaskCache";
-import { ExtensionPreferences } from "../types";
 import {
   formatRelativeTaskDate,
   parseQuickAddInput,
@@ -27,7 +26,7 @@ interface QuickAddArguments {
 export default async function QuickAddCommand(
   props: LaunchProps<{ arguments: QuickAddArguments }>,
 ) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const { text, date, note } = props.arguments;
 
   if (!text || !text.trim()) {

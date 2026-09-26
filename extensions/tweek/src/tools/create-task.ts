@@ -5,18 +5,16 @@ import {
   invalidateTaskCache,
   setCachedCalendars,
 } from "../hooks/useTaskCache";
-import { ExtensionPreferences } from "../types";
 import { addDaysISO, getTodayISO } from "../utils/date-utils";
 import { create_task, list_calendars } from "../utils/tweek-client";
 
-export type CreateTaskToolInput = {
+type Input = {
   /**
    * Title of the task to create.
    */
   text: string;
   /**
-   * Optional date in YYYY-MM-DD format, or relative string ("today", "tomorrow", "someday").
-   * Defaults to today.
+   * Optional date in YYYY-MM-DD format, or relative string ("today", "tomorrow", "someday"). Defaults to today.
    */
   date?: string;
   /**
@@ -32,16 +30,16 @@ export type CreateTaskToolInput = {
    */
   note?: string;
   /**
-   * Optional array of subtask titles to add as a checklist.
+   * Optional comma-separated or newline-separated subtask titles to add as a checklist.
    */
-  subtasks?: string[];
+  subtasks?: string;
 };
 
 /**
  * Creates a new task in Tweek.
  */
-export default async function createTaskTool(input: CreateTaskToolInput) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+export default async function createTaskTool(input: Input) {
+  const prefs = getPreferenceValues<Preferences>();
 
   let calendars = getCachedCalendars(true);
   if (!calendars || calendars.length === 0) {
@@ -77,6 +75,18 @@ export default async function createTaskTool(input: CreateTaskToolInput) {
     }
   }
 
+  const subtaskItems = input.subtasks
+    ? input.subtasks
+        .split(/[\n,]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s, idx) => ({
+          id: `ai_sub_${Date.now()}_${idx}`,
+          text: s,
+          done: false,
+        }))
+    : undefined;
+
   const created = await create_task({
     calendarId: targetCal.id,
     text: input.text,
@@ -84,11 +94,7 @@ export default async function createTaskTool(input: CreateTaskToolInput) {
     listId: resolvedListId,
     color: input.color || prefs.defaultTaskColor || "blank",
     note: input.note,
-    checklist: input.subtasks?.map((s, idx) => ({
-      id: `ai_sub_${Date.now()}_${idx}`,
-      text: s,
-      done: false,
-    })),
+    checklist: subtaskItems,
   });
 
   invalidateTaskCache(targetCal.id);

@@ -3,7 +3,7 @@ import { UpdateType } from "../types";
 import { addDaysISO, getTodayISO } from "../utils/date-utils";
 import { update_task } from "../utils/tweek-client";
 
-export type UpdateTaskToolInput = {
+type Input = {
   /**
    * The ID of the task (or virtual occurrence ID `<taskId>_yyyyMMdd`) to update.
    */
@@ -31,13 +31,13 @@ export type UpdateTaskToolInput = {
   /**
    * Optional recurring update scope: "only_this", "this_and_future", or "all_linked".
    */
-  updateType?: UpdateType;
+  updateType?: string;
 };
 
 /**
  * Updates an existing Tweek task's title, date, color, note, or completion status.
  */
-export default async function updateTaskTool(input: UpdateTaskToolInput) {
+export default async function updateTaskTool(input: Input) {
   const todayISO = getTodayISO();
   let resolvedDate: string | undefined;
 
@@ -52,6 +52,13 @@ export default async function updateTaskTool(input: UpdateTaskToolInput) {
     }
   }
 
+  const validUpdateType =
+    input.updateType === "only_this" ||
+    input.updateType === "this_and_future" ||
+    input.updateType === "all_linked"
+      ? (input.updateType as UpdateType)
+      : undefined;
+
   const res = await update_task(
     input.taskId,
     {
@@ -61,7 +68,7 @@ export default async function updateTaskTool(input: UpdateTaskToolInput) {
       note: input.note,
       done: input.done,
     },
-    input.updateType,
+    validUpdateType,
   );
 
   invalidateTaskCache();

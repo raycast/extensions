@@ -1,10 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import {
-  ExtensionPreferences,
-  TweekCalendar,
-  TweekCustomColor,
-} from "../types";
+import { TweekCalendar, TweekCustomColor } from "../types";
 import { list_calendars, list_colors } from "../utils/tweek-client";
 import {
   getCachedCalendars,
@@ -32,7 +28,7 @@ export function resolveDefaultCalendar(
 }
 
 export function useCalendars(initialCalendarId?: string) {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const [calendars, setCalendars] = useState<TweekCalendar[]>(() => {
     return getCachedCalendars(true) || [];

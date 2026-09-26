@@ -6,10 +6,9 @@ import {
   Icon,
   useNavigation,
 } from "@raycast/api";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   CreateTaskInput,
-  ExtensionPreferences,
   TweekCalendar,
   TweekCustomColor,
   TweekTask,
@@ -51,7 +50,7 @@ export function TaskForm({
   onSubmitEdit,
 }: TaskFormProps) {
   const { pop } = useNavigation();
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const [title, setTitle] = useState<string>(initialTask?.text || initialTitle);
   const [titleError, setTitleError] = useState<string | undefined>();
@@ -59,6 +58,17 @@ export function TaskForm({
   const [selectedCalendarId, setSelectedCalendarId] = useState<string>(
     initialTask?.calendarId || defaultCalendarId || calendars[0]?.id || "",
   );
+
+  useEffect(() => {
+    if (!selectedCalendarId && (defaultCalendarId || calendars[0]?.id)) {
+      const nextCalId = defaultCalendarId || calendars[0]?.id || "";
+      setSelectedCalendarId(nextCalId);
+      const nextCal = calendars.find((c) => c.id === nextCalId) || calendars[0];
+      if (!selectedListId && nextCal?.lists?.[0]?.id) {
+        setSelectedListId(nextCal.lists[0].id);
+      }
+    }
+  }, [calendars, defaultCalendarId, selectedCalendarId]);
 
   const [placementType, setPlacementType] = useState<"dated" | "someday">(
     initialTask && !initialTask.date && initialTask.listId
@@ -179,6 +189,11 @@ export function TaskForm({
           });
         }
       } else if (mode === "edit" && initialTask && onSubmitEdit) {
+        const hadChecklist = Boolean(
+          initialTask.checklist && initialTask.checklist.length > 0,
+        );
+        const hadRecurrence = Boolean(initialTask.freq && initialTask.freq > 0);
+
         await onSubmitEdit(
           initialTask.id,
           {
@@ -189,9 +204,14 @@ export function TaskForm({
             listId,
             color,
             note: note.trim() || null,
-            checklist: parsedChecklist,
-            freq: numericFreq > 0 ? numericFreq : undefined,
-            dtStart: numericFreq > 0 && isoDate ? isoDate : undefined,
+            checklist: parsedChecklist ?? (hadChecklist ? [] : undefined),
+            freq: numericFreq > 0 ? numericFreq : hadRecurrence ? 0 : undefined,
+            dtStart:
+              numericFreq > 0 && isoDate
+                ? isoDate
+                : hadRecurrence
+                  ? null
+                  : undefined,
           },
           recurring ? updateType : undefined,
         );
