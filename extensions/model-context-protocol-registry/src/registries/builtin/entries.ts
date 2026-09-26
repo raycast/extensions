@@ -441,6 +441,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "quotebill",
+    title: "QuoteBill",
+    description:
+      "Draft quotations and invoices: search 133 templates, look up the published tax rate for 195 countries with the official source, total line items with the same arithmetic as the QuoteBill editor, and get a link that opens the finished document on quotebill.com to export as Excel, Word or PDF. All tools are read-only. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free QuoteBill account, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/auto1225/quotebill-mcp/main/logo.png",
+    homepage: "https://quotebill.com/en/guides/connect-ai-assistants/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://quotebill.com/mcp"],
+    },
+  },
+  {
     name: "razuna",
     title: "Razuna",
     description:
