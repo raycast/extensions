@@ -39,7 +39,7 @@ export default async function tool(input: Input) {
       `${candidate.name} is a ${candidate.deployType} service - only applications and compose stacks have build logs in Dokploy.`,
     );
   }
-  const tail = Math.min(input.lines ?? DEFAULT_LINES, MAX_LINES);
+  const tail = Math.max(1, Math.min(input.lines ?? DEFAULT_LINES, MAX_LINES));
 
   let deploymentId = input.deploymentId;
   let deployment: Deployment | undefined;

@@ -93,6 +93,140 @@
       "description": "Read the build log of a Dokploy deployment - the log to check when a deploy failed."
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "What Dokploy instances do I have connected?",
+        "mocks": {
+          "list-instances": {
+            "instances": [
+              {
+                "name": "Staging",
+                "url": "https://staging.example.com"
+              },
+              {
+                "name": "Production",
+                "url": "https://prod.example.com"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-instances"
+          }
+        ]
+      },
+      {
+        "input": "What's running on staging?",
+        "mocks": {
+          "list-services": {
+            "count": 1,
+            "services": [
+              {
+                "name": "api",
+                "kind": "application",
+                "status": "idle",
+                "instance": "Staging",
+                "project": "Main",
+                "environment": "production"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-services",
+              "arguments": {
+                "instance": {
+                  "includes": "staging"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "Give me the details for the api service",
+        "mocks": {
+          "get-service": {
+            "name": "api",
+            "kind": "application",
+            "status": "idle",
+            "instance": "Staging",
+            "project": "Main",
+            "environment": "production",
+            "domains": [
+              {
+                "host": "api.example.com",
+                "url": "https://api.example.com",
+                "enabled": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-service",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "Show me the logs for the api service",
+        "mocks": {
+          "get-service-logs": {
+            "service": "api",
+            "status": "idle",
+            "logs": "Server listening on port 3000"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-service-logs",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "Why did the api deploy fail?",
+        "mocks": {
+          "get-deployment-logs": {
+            "service": "api",
+            "deploymentId": "dep_123",
+            "status": "error",
+            "errorMessage": "Build failed: missing DATABASE_URL",
+            "logs": "Error: missing DATABASE_URL"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-deployment-logs",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^2.2.0"

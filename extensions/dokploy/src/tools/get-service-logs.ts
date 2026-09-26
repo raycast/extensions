@@ -36,7 +36,7 @@ export default async function tool(input: Input) {
     project: input.project,
     kind: input.kind,
   });
-  const tail = Math.min(input.lines ?? DEFAULT_LINES, MAX_LINES);
+  const tail = Math.max(1, Math.min(input.lines ?? DEFAULT_LINES, MAX_LINES));
 
   if (candidate.deployType !== "compose") {
     const response = await fetch(
