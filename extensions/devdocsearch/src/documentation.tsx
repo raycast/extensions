@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Form, Icon, List, Toast, confirmAlert, showToast, trash, environment } from "@raycast/api";
+import { Action, ActionPanel, Alert, Detail, Form, Icon, List, Toast, confirmAlert, showToast, trash, environment, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import type { CrawlProgress } from "./docs";
 import { importDocumentation, listCollections, type Collection } from "./store";
@@ -6,7 +6,8 @@ import { collectionPaths, renameCollection } from "./library";
 import { canAutoIndex, isSemanticIndexPaused, isSemanticIndexRunning, LOCAL_MODEL_ID, pauseSemanticBackfill, resetSemanticWorker, resumeSemanticBackfill, semanticIndexStatus, startSemanticBackfill, startSemanticIndex } from "./semantic";
 import { defaultEmbeddingConfig, readEmbeddingConfig, saveEmbeddingConfig, type EmbeddingConfig } from "./embedding-config";
 import { discoverDownloadedModels, discoverServerModels, type AvailableModel, type DownloadedModel } from "./model-discovery";
-import { access } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const LOCAL_FIRECRAWL = "http://127.0.0.1:30001";
 type ImportValues = { url: string; engine: "built-in" | "firecrawl"; firecrawlUrl: string };
@@ -168,6 +169,15 @@ function EmbeddingSettings({ onDone }: { onDone: () => void }) {
 }
 
 export default function Documentation() {
+  const { push } = useNavigation();
+  async function showSemanticSetup() {
+    try {
+      const markdown = await readFile(join(environment.assetsPath, "semantic-setup.md"), "utf8");
+      push(<Detail navigationTitle="Semantic Search Setup" markdown={markdown} />);
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Could not open setup instructions", message: String(error) });
+    }
+  }
   const [screen, setScreen] = useState<{ kind: "import"; url: string } | { kind: "rename"; collection: Collection } | { kind: "embedding" } | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [vectorStatuses, setVectorStatuses] = useState<Record<string, string>>({});
@@ -216,7 +226,8 @@ export default function Documentation() {
       const started = startSemanticBackfill(environment.assetsPath);
       await showToast({ style: started ? Toast.Style.Success : Toast.Style.Failure,
         title: started ? "Vector indexing running" : "Set up local semantic search first",
-        message: started ? "Progress appears in Download Docs" : "Run scripts/setup-semantic.sh for the Python and FAISS runtime." });
+        message: started ? "Progress appears in Download Docs" : "Open setup instructions to install the Python and FAISS runtime.",
+        ...(started ? {} : { primaryAction: { title: "Open Setup Instructions", onAction: showSemanticSetup } }) });
     } catch (error) { await showToast({ style: Toast.Style.Failure, title: "Could not build semantic indexes", message: String(error) }); }
   }
   async function toggleIndexing() {
@@ -269,6 +280,7 @@ export default function Documentation() {
       icon={indexPaused ? Icon.Play : indexRunning ? Icon.Pause : Icon.ArrowClockwise} actions={<ActionPanel>
       <Action title={indexPaused ? "Resume Vector Indexing" : indexRunning ? "Pause Vector Indexing" : "Build Vector Indexes"}
         onAction={() => { void (indexPaused || indexRunning ? toggleIndexing() : buildSemanticIndexes()); }} />
+      <Action title="Open Semantic Setup Instructions" onAction={showSemanticSetup} />
     </ActionPanel>} />
     {outstanding.length > 0 && <List.Section title="Indexing Progress">
       {outstanding.map(({ collection, status }) => <List.Item key={`progress-${collection.id}`} title={collection.title}
