@@ -40,6 +40,12 @@ export async function openWifiSettings(): Promise<void> {
   return windows.openWindowsWifiSettings();
 }
 
+export async function openLocationSettings(): Promise<void> {
+  return windows.openWindowsLocationSettings();
+}
+
+export const isLocationPermissionError = windows.isLocationPermissionError;
+
 export {
   getInternetSpeed,
   getCachedInternetSpeed,
