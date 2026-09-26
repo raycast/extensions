@@ -167,6 +167,43 @@ evals:
       - matches: "([Ss]ep(tember)?\\.? ?25|9/25|2026-09-25)"
       - matches: "(missing|incomplete|partial|may not|might not|older|[Oo]nly)"
 
+  - input: "@raycast-store-updates what's new this week?"
+    mocks:
+      find-store-updates:
+        totalMatches: 46
+        items:
+          - { title: Google Chrome Profiles, description: Switch between Chrome profiles, type: updated, date: "2026-09-25T21:26:16Z", updatedBy: 0xdhrv, changeSummary: Fix profile switching, url: https://www.raycast.com/frouo/google-chrome-profiles }
+          - { title: Swift Salamander, description: Open paths in Swift Salamander, type: new, date: "2026-09-25T21:06:15Z", author: c0desurfer, url: https://www.raycast.com/c0desurfer/swift-salamander }
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            days: 7
+            type: all
+      - includes: Google Chrome Profiles
+      - includes: Swift Salamander
+      - matches: "(44|forty-four)"
+      - not:
+          matches: "no (updated|update)"
+
+  - input: "@raycast-store-updates What was updated this week?"
+    mocks:
+      find-store-updates:
+        totalMatches: 1
+        updatesCoverageSince: "2026-09-24T00:00:00Z"
+        updatesWindowIncomplete: true
+        items:
+          - { title: Calendar, description: Manage events, type: updated, date: "2026-09-25T12:00:00Z", updatedBy: contributor, url: https://www.raycast.com/example/calendar }
+    expected:
+      - callsTool:
+          name: find-store-updates
+          arguments:
+            type: updated
+            days: 7
+      - includes: Calendar
+      - includes: coverage
+      - matches: "(missing|incomplete|partial|only|limited)"
+
   - input: "@raycast-store-updates What new and updated extensions appeared this week?"
     mocks:
       find-store-updates:
