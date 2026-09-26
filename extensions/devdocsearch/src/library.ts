@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -38,6 +38,7 @@ export async function beginSnapshot(rootUrl: string, baseDir = docsDirectory()) 
     END;
   `);
   const insert = db.prepare("INSERT OR REPLACE INTO pages (url, title, markdown, fetchedAt) VALUES (?, ?, ?, ?)");
+  let published = false;
   let count = 0;
   let firstTitle = "";
   return {
@@ -64,11 +65,17 @@ export async function beginSnapshot(rootUrl: string, baseDir = docsDirectory()) 
       const pending = join(collectionDir, `current-${snapshot}.tmp`);
       await writeFile(pending, JSON.stringify(collection), "utf8");
       await rename(pending, join(collectionDir, "current.json"));
+      published = true;
+      // Cleanup cannot turn a completed handoff into a failed import.
+      if (previous?.snapshot && previous.snapshot !== snapshot) {
+        await rm(join(collectionDir, "snapshots", previous.snapshot), { recursive: true, force: true })
+          .catch((error: unknown) => console.error("Could not remove superseded documentation snapshot", error));
+      }
       return collection;
     },
-    async abandon(reason: string) {
+    async abandon(_reason: string) {
       if (db.isOpen) db.close();
-      await writeFile(join(snapshotDir, "failure.txt"), reason, "utf8");
+      if (!published) await rm(snapshotDir, { recursive: true, force: true });
     },
   };
 }

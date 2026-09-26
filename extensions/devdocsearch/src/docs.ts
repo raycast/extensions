@@ -197,13 +197,39 @@ export function coveredSavedAliases(skipped: string[], savedUrls: Set<string>): 
   });
 }
 
-async function fetchPage(url: string | URL): Promise<Response> {
+class RedirectScopeError extends Error {
+  constructor() { super("Redirected outside the documentation URL's scope."); }
+}
+
+async function fetchScoped(url: string | URL, root: URL, allowSameOriginMigration: boolean, accept: string): Promise<Response> {
+  let current = new URL(url);
+  const seen = new Set<string>();
+  const signal = AbortSignal.timeout(15000);
+  for (let redirects = 0; redirects <= 10; redirects++) {
+    if (current.origin !== root.origin || current.username || current.password ||
+      (!allowSameOriginMigration && !normalizeUrl(current.toString(), root, root))) {
+      throw new RedirectScopeError();
+    }
+    if (seen.has(current.toString())) throw new Error("Documentation redirect loop.");
+    seen.add(current.toString());
+    const response = await fetch(current, { headers: { Accept: accept }, signal, redirect: "manual" });
+    if (![301, 302, 303, 307, 308].includes(response.status)) return response;
+    const location = response.headers.get("location");
+    await response.body?.cancel();
+    if (!location) throw new Error("Documentation redirect has no Location header.");
+    current = new URL(location, current);
+  }
+  throw new Error("Too many documentation redirects.");
+}
+
+async function fetchPage(url: string | URL, root: URL, allowSameOriginMigration: boolean): Promise<Response> {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const response = await fetch(url, { headers: { Accept: "text/html" }, signal: AbortSignal.timeout(15000) });
+      const response = await fetchScoped(url, root, allowSameOriginMigration, "text/html");
       if ((response.status !== 429 && response.status < 500) || attempt === 2) return response;
+      await response.body?.cancel();
     } catch (error) {
-      if (attempt === 2) throw error;
+      if (error instanceof RedirectScopeError || attempt === 2) throw error;
     }
     await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
   }
@@ -220,12 +246,12 @@ export async function crawlDocs(input: string, onProgress?: (progress: CrawlProg
   const indexUrls = [...new Set([new URL("llms.txt", root).toString(), new URL("/llms.txt", root).toString()])];
   for (const indexUrl of indexUrls) {
     try {
-      const response = await fetch(indexUrl, { signal: AbortSignal.timeout(15000) });
+      const response = await fetchScoped(indexUrl, root, true, "text/plain");
       if (!response.ok) continue;
       const index = await response.text();
       const candidates = [...index.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((match) => match[1]);
       for (const candidate of candidates) {
-        const normalized = normalizeUrl(candidate, new URL(indexUrl), root);
+        const normalized = normalizeUrl(candidate, new URL(response.url || indexUrl), root);
         if (normalized && !queue.includes(normalized)) queue.push(normalized);
       }
       break;
@@ -243,11 +269,11 @@ export async function crawlDocs(input: string, onProgress?: (progress: CrawlProg
     visited.add(current);
     onProgress?.({ done: pageCount, queued: queue.length, current });
     try {
-      let response = await fetchPage(current);
+      let response = await fetchPage(current, root, current !== root.toString());
       if (current === root.toString() && response.status === 404 && root.pathname.endsWith("/") && root.pathname !== "/") {
         const withoutSlash = new URL(root);
         withoutSlash.pathname = withoutSlash.pathname.slice(0, -1);
-        response = await fetchPage(withoutSlash);
+        response = await fetchPage(withoutSlash, root, false);
       }
       if (current !== root.toString() && (response.status === 404 || response.status === 410)) {
         skipped.push(`${current}: HTTP ${response.status}`);
@@ -291,7 +317,9 @@ export async function crawlDocs(input: string, onProgress?: (progress: CrawlProg
       }
       for (const link of links) if (!visited.has(link) && !queue.includes(link)) queue.push(link);
     } catch (error) {
-      errors.push(`${current}: ${error instanceof Error ? error.message : String(error)}`);
+      if (error instanceof RedirectScopeError && current !== root.toString()) {
+        skipped.push(`${current}: redirected outside the documentation URL's scope`);
+      } else errors.push(`${current}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   return { pages, pageCount, errors, skipped: coveredSavedAliases(skipped, savedUrls), truncated: queue.length > 0 };

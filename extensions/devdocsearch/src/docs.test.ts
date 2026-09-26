@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test, { mock } from "node:test";
+import { createServer } from "node:http";
+import { once } from "node:events";
 import { buildIndex, coveredDrizzleAliases, coveredSavedAliases, crawlDocs, extractPage, normalizeUrl, searchPages, type SavedPage } from "./docs";
 
 test("normalizes in-scope URLs and rejects other hosts or paths", () => {
@@ -238,4 +240,49 @@ test("a temporary page timeout is retried before publishing the crawl", async ()
     assert.equal(result.pageCount, 2);
     assert.deepEqual(result.errors, []);
   } finally { fetchMock.mock.restore(); }
+});
+
+
+test("checks every page and index redirect before contacting another origin", async () => {
+  const forbidden: string[] = [];
+  const outside = createServer((request, response) => {
+    forbidden.push(request.url || "");
+    response.writeHead(200, { "content-type": "text/html" });
+    response.end("<main><h1>Outside</h1></main>");
+  }).listen(0, "127.0.0.1");
+  await once(outside, "listening");
+  const address = outside.address();
+  assert.ok(address && typeof address !== "string");
+  const external = `http://127.0.0.1:${address.port}`;
+  const visited: string[] = [];
+  const server = createServer((request, response) => {
+    const path = request.url || "/";
+    visited.push(path);
+    if (path.endsWith("llms.txt")) response.writeHead(302, { location: "/index-hop" }).end();
+    else if (path === "/index-hop") response.writeHead(307, { location: `${external}/index` }).end();
+    else if (path === "/docs/escape") response.writeHead(301, { location: "/docs/hop" }).end();
+    else if (path === "/docs/hop") response.writeHead(308, { location: `${external}/page` }).end();
+    else if (path === "/docs/old") response.writeHead(302, { location: "/reference/new" }).end();
+    else {
+      response.writeHead(200, { "content-type": "text/html" });
+      response.end(path === "/docs/"
+        ? '<main><h1>Docs</h1><p>Useful docs.</p><a href="/docs/escape">Escape</a><a href="/docs/old">Old</a></main>'
+        : '<main><h1>Reference</h1><p>Migrated docs.</p><a href="/reference/other">Other</a></main>');
+    }
+  }).listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const local = server.address();
+  assert.ok(local && typeof local !== "string");
+  try {
+    const result = await crawlDocs(`http://127.0.0.1:${local.port}/docs/`);
+    assert.deepEqual(forbidden, [], "out-of-origin redirects must never receive a request");
+    assert.equal(result.pageCount, 2);
+    assert.deepEqual(result.errors, []);
+    assert.equal(result.skipped.length, 1);
+    assert.ok(visited.includes("/reference/new"), "preserve same-origin child migrations");
+    assert.ok(!visited.includes("/reference/other"), "keep link discovery in the selected path");
+  } finally {
+    server.closeAllConnections(); outside.closeAllConnections();
+    await Promise.all([new Promise<void>((resolve) => server.close(() => resolve())), new Promise<void>((resolve) => outside.close(() => resolve()))]);
+  }
 });

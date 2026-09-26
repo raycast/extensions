@@ -25,9 +25,35 @@ test("saves each page to disk, searches it, and keeps the published snapshot aft
     assert.equal((await listCollections(base))[0]?.snapshot, published.snapshot);
     assert.equal((await searchLibrary("vite", base))[0]?.page.title, "Install");
     assert.deepEqual(await searchLibrary("incomplete", base), []);
+    await assert.rejects(readdir(failed.snapshotDir), { code: "ENOENT" });
 
     await renameCollection(published, "Tailwind Guide", base);
     assert.equal((await listCollections(base))[0]?.title, "Tailwind Guide");
     assert.equal((await searchLibrary("vite", base))[0]?.page.title, "Install");
+  } finally { await rm(base, { recursive: true, force: true }); }
+});
+
+
+test("removes superseded snapshots only after publishing and leaves concurrent imports intact", async () => {
+  const base = await mkdtemp(join(tmpdir(), "docsearch-retention-"));
+  const root = "https://example.com/docs";
+  try {
+    const first = await beginSnapshot(root, base);
+    await first.addPage({ url: root, title: "Old", markdown: "Original", fetchedAt: "2026-01-01" });
+    const old = await first.publish([], false);
+    await renameCollection(old, "My docs", base);
+    const pending = await beginSnapshot(root, base);
+    const replacement = await beginSnapshot(root, base);
+    await replacement.addPage({ url: root, title: "New", markdown: "Replacement", fetchedAt: "2026-01-02" });
+    assert.equal((await searchLibrary("original", base)).length, 1);
+    const current = await replacement.publish([], false);
+    await assert.rejects(readdir(first.snapshotDir), { code: "ENOENT" });
+    await readdir(pending.snapshotDir);
+    assert.equal(current.title, "My docs");
+    assert.equal((await searchLibrary("replacement", base)).length, 1);
+    // A caller's later failure must not delete an already published snapshot.
+    await replacement.abandon("post-publication failure");
+    assert.equal((await searchLibrary("replacement", base)).length, 1);
+    await pending.abandon("cancelled");
   } finally { await rm(base, { recursive: true, force: true }); }
 });
