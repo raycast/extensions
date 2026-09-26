@@ -1,6 +1,6 @@
 # ClickUp Active Task Bar
 
-Keep one ClickUp task visible in your macOS menu bar. Choose a task from a ClickUp custom view, then open or copy its link from the menu. Your active selection persists across Raycast restarts.
+Stay focused on what you're working on. Keep your current ClickUp task in the macOS menu bar, where it's always in sight. Choose a task from your view, open it, or copy its link without breaking your flow.
 
 ## Setup
 

@@ -1,7 +1,7 @@
 {
   "name": "clickup-active-task-bar",
   "title": "ClickUp Active Task Bar",
-  "description": "Show a sticky active ClickUp task in the Raycast menu bar.",
+  "description": "Stay focused with your current ClickUp task in the menu bar.",
   "icon": "extension-icon.png",
   "author": "lemonbottle",
   "platforms": [
@@ -81,7 +81,7 @@
       "name": "menu-bar",
       "title": "Show Active Task",
       "subtitle": "ClickUp",
-      "description": "Show and switch your current ClickUp task from the menu bar.",
+      "description": "Keep your current ClickUp task in sight and switch tasks from the menu bar.",
       "mode": "menu-bar",
       "interval": "2m"
     }
