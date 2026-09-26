@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-26
 
 - Focus the tab currently visible in Orion when the Command Bar opens with an empty query, and keep following it if you switch tabs directly in Orion while the Command Bar stays open, instead of leaving selection to Raycast's own default. When Top Hit ranks two open tabs with the same URL as an equal match, prefer the one currently visible in Orion over an arbitrary duplicate.
 
