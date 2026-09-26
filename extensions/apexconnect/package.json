@@ -349,10 +349,10 @@
         },
         {
           "name": "excludeHigher",
-          "description": "Exclude Battery with a Level higher then the given value. Keep empty to disable the filter",
+          "description": "Exclude Battery with a Level higher than the given value. Keep empty to disable the filter",
           "type": "textfield",
           "required": false,
-          "title": "Exclude Higher then",
+          "title": "Exclude Higher Than",
           "placeholder": "50"
         }
       ]
@@ -449,7 +449,7 @@
       "name": "instanceInternal",
       "type": "textfield",
       "required": false,
-      "title": "Internal Apex Connect URL (optional)",
+      "title": "Internal Apex Connect URL (Optional)",
       "description": "URL of your Apex Connect instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
       "placeholder": "http://apexconnect.local:1702"
     },
@@ -501,7 +501,7 @@
       "type": "textfield",
       "required": false,
       "default": "3000",
-      "title": "Camera Refresh Interval (ms)",
+      "title": "Camera Refresh Interval (Ms)",
       "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
       "placeholder": "3000"
     },
