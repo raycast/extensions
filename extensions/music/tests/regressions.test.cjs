@@ -5,7 +5,7 @@ const { test } = require("node:test");
 const ts = require("typescript");
 
 // Load the real TypeScript modules while replacing only the Raycast host APIs.
-function loadSource(entry, runAppleScript = async () => "") {
+function loadSource(entry, runAppleScript = async () => "", moduleMocks = {}) {
   const cache = new Map();
   function load(filename) {
     const resolved = [filename, `${filename}.ts`, `${filename}.tsx`, path.join(filename, "index.ts")].find(
@@ -20,6 +20,7 @@ function loadSource(entry, runAppleScript = async () => "") {
       fileName: resolved,
     }).outputText;
     const localRequire = (id) => {
+      if (id in moduleMocks) return moduleMocks[id];
       if (id === "@raycast/utils") return { runAppleScript };
       if (id === "@raycast/api") {
         return { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) };
@@ -120,6 +121,24 @@ test("toggle feedback uses the state returned by one bounded script", async () =
   assert.deepEqual(await player.repeat.get(), { _tag: "Right", right: true });
 });
 
+test("volume hotkeys read and set volume in one time-limited Music call", async () => {
+  const calls = [];
+  const player = loadSource("src/util/scripts/player-controls.ts", async (...args) => {
+    calls.push(args);
+    return "75";
+  });
+
+  assert.deepEqual(await player.volume.increase(10)(), { _tag: "Right", right: 75 });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][2].timeout, 5_000);
+  assert.match(calls[0][0], /set nextVolume to \(sound volume\) \+ \(10\)/);
+  assert.match(calls[0][0], /set sound volume to nextVolume/);
+
+  await player.volume.decrease(5)();
+  assert.equal(calls.length, 2);
+  assert.match(calls[1][0], /set nextVolume to \(sound volume\) \+ \(-5\)/);
+});
+
 test("playlist insertion is bounded, escaped, and is not retried after a failure", async () => {
   const scripts = [];
   const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {
@@ -133,6 +152,37 @@ test("playlist insertion is bounded, escaped, and is not retried after a failure
   assert.doesNotMatch(scripts[0], /repeat while/);
   assert.ok(scripts[0].includes('playlist "My \\"Playlist\\""'));
   assert.match(scripts[0], /smart of targetPlaylist/);
+});
+
+test("adding to a smart Favorite Songs playlist favorites the track instead of duplicating it", async () => {
+  const scripts = [];
+  const currentTrack = loadSource(
+    "src/util/scripts/current-track.ts",
+    async (script) => {
+      scripts.push(script);
+      if (script.includes("get smart of playlist")) return "true";
+      if (script.includes("get favorited of current track")) return "true";
+      return "";
+    },
+    { "../get-macos-version": { getMacosVersion: async () => ({ major: 27, minor: 0, patch: 0 }) } },
+  );
+
+  assert.equal((await currentTrack.addToPlaylist("Favourite Songs")())._tag, "Right");
+  assert.equal(scripts.length, 3);
+  assert.ok(scripts.some((script) => script.includes("set favorited of current track to true")));
+  assert.ok(scripts.every((script) => !script.includes("duplicate playingTrack")));
+});
+
+test("a regular playlist named Favorite Songs still receives a duplicate", async () => {
+  const scripts = [];
+  const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {
+    scripts.push(script);
+    return script.includes("get smart of playlist") ? "false" : "";
+  });
+
+  assert.equal((await currentTrack.addToPlaylist("Favorite Songs")())._tag, "Right");
+  assert.equal(scripts.length, 2);
+  assert.ok(scripts[1].includes("duplicate (item 1 of existingTracks) to targetPlaylist"));
 });
 
 test("subprocess execution drains stdout and stderr concurrently", async () => {

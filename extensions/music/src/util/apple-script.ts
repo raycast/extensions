@@ -9,9 +9,9 @@ function toScriptError(error: unknown, command: string): ScriptError {
   return Object.assign(cause, { shortMessage: cause.message, command, failed: true });
 }
 
-export const runScript = (command: string) =>
+export const runScript = (command: string, timeout = 10_000) =>
   TE.tryCatch(
-    () => runAppleScript(logScript(command), [], { timeout: 10_000 }),
+    () => runAppleScript(logScript(command), [], { timeout }),
     (error) => toScriptError(error, command),
   );
 

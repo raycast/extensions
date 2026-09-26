@@ -9,6 +9,8 @@
 - Fixed loading indicators that stayed active when no track was playing or playlist loading failed.
 - Updated AI instructions for shuffle, favorites, and empty library results.
 - Bound playlist sync waits and explain errors for automatically managed playlists and inaccessible station tracks.
+- Adjust Music volume in one call with a shorter timeout, so volume shortcuts return promptly when Music stops responding.
+- Adding to a smart Favorite Songs or Favourite Songs playlist now favorites the current track.
 
 ## [Search Apple Music Command] - 2026-08-22
 

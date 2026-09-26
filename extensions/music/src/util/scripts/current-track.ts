@@ -209,11 +209,14 @@ export const getCurrentTrackRating = pipe(
   TE.map((rating) => Math.round(rating / STAR_VALUE)),
 );
 
+const isFavoriteSongsName = (name: string) => /^(favorite|favourite) songs$/i.test(name.trim());
+
 /** Add once, then wait for the specific track rather than the library's total count. */
-export const addToPlaylist = (playlist: string) =>
-  runScript(`
+export const addToPlaylist = (playlist: string): TE.TaskEither<Error, string> => {
+  const escapedPlaylist = escapeAppleScriptString(playlist);
+  const addTrack = runScript(`
     tell application "Music"
-      set targetPlaylist to playlist "${escapeAppleScriptString(playlist)}"
+      set targetPlaylist to playlist "${escapedPlaylist}"
       if smart of targetPlaylist then
         error "Music manages this playlist automatically. Use Favorite Track for Favorite Songs."
       end if
@@ -248,6 +251,14 @@ export const addToPlaylist = (playlist: string) =>
       end try
     end tell
   `);
+
+  if (!isFavoriteSongsName(playlist)) return addTrack;
+
+  return pipe(
+    tell("Music", `get smart of playlist "${escapedPlaylist}"`),
+    TE.chainW((isSmart) => (isSmart.trim() === "true" ? favorite : addTrack)),
+  );
+};
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   return pipe(

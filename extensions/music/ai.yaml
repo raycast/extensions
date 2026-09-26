@@ -116,12 +116,12 @@ instructions: |
   - add-to-playlist  
     Requires a playlist name (from get-playlists) and a track name (from get-currently-playing).
 
-  - dislike / favorite  
-    Requires the current track name, obtained from get-currently-playing.
+  - toggle-dislike / toggle-favorite
+    Require the current track name from get-currently-playing. Pass dislike or favorite as true to set the status, or false to remove it.
 
   - Volume controls
     • Use set-volume with exact percentage levels (0-100).
-    • Use volume-up or volume-down to increase or decrease by predefined steps.
+    • For a relative change, call get-volume, add or subtract the requested amount, then call set-volume with a value between 0 and 100.
 
   ---
 
@@ -151,5 +151,7 @@ instructions: |
   3. Dislike Current Track and Skip
      - User says: "I don't like this song. Skip it."
      - Calls:
-       1. dislike → uses current track name from get-currently-playing
-       2. next-track
+       1. get-currently-playing → get track name
+       2. get-dislike-status with that track name
+       3. toggle-dislike with that track name and dislike: true, if the track is not already disliked
+       4. next-track with that track name

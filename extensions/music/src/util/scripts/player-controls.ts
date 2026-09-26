@@ -20,6 +20,21 @@ const setVolume = pipe(
 );
 
 const getVolume: TE.TaskEither<ScriptError, number> = pipe(tell("Music", "get sound volume"), TE.map(parseInt));
+
+const adjustVolume = (delta: number): TE.TaskEither<ScriptError, number> =>
+  pipe(
+    runScript(
+      `tell application "Music"
+        set nextVolume to (sound volume) + (${delta})
+        if nextVolume < 0 then set nextVolume to 0
+        if nextVolume > 100 then set nextVolume to 100
+        set sound volume to nextVolume
+        return sound volume
+      end tell`,
+      5_000,
+    ),
+    TE.map(Number),
+  );
 const getShuffleStatus = pipe(
   tell("Music", "get shuffle enabled"),
   TE.map((s) => s === "true"),
@@ -56,18 +71,8 @@ export const shuffle = {
 export const volume = {
   set: setVolume,
   get: getVolume,
-  decrease: (step = 10) =>
-    pipe(
-      getVolume,
-      TE.map((value) => value - step),
-      TE.chain(setVolume),
-    ),
-  increase: (step = 10) =>
-    pipe(
-      getVolume,
-      TE.map((value) => value + step),
-      TE.chain(setVolume),
-    ),
+  decrease: (step = 10) => adjustVolume(-step),
+  increase: (step = 10) => adjustVolume(step),
 };
 
 export const getPlayerState = pipe(
