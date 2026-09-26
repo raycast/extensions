@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DayCal — Google Calendar for Raycast</title>
+    <meta
+      name="description"
+      content="Your Google Calendar in Raycast: Schedule, a persistent menu bar, Quick Add and account-aware event actions. Free, open-source and built for macOS."
+    />
+    <meta name="theme-color" content="#111216" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://daycal.co.uk/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DayCal" />
+    <meta property="og:title" content="DayCal — Google Calendar for Raycast" />
+    <meta
+      property="og:description"
+      content="Your Google Calendar in Raycast: Schedule, a persistent menu bar, Quick Add and account-aware event actions. Free, open-source and built for macOS."
+    />
+    <meta property="og:url" content="https://daycal.co.uk/" />
+    <link rel="icon" type="image/png" href="./assets/daycal-icon.png" />
+    <link rel="apple-touch-icon" href="./assets/daycal-icon.png" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header wrap">
+      <a class="brand" href="./" aria-label="DayCal home"
+        ><img
+          src="./assets/daycal-icon.png"
+          alt=""
+          width="32"
+          height="32"
+        />DayCal</a
+      >
+      <nav aria-label="Main navigation">
+        <a href="./privacy/">Privacy</a><a href="./security/">Security</a
+        ><a href="https://github.com/JonahTweed/CalFlow"
+          >GitHub <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+    </header>
+    <main id="main" class="wrap">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">FOR MACOS · PUBLIC BETA</p>
+          <img
+            class="hero-icon"
+            src="./assets/daycal-icon.png"
+            alt="DayCal calendar icon"
+            width="76"
+            height="76"
+          />
+          <h1 id="hero-title">
+            Google Calendar.<br /><span>For Raycast.</span>
+          </h1>
+          <p class="intro">
+            Your schedule, a glance away. DayCal brings Google Calendar into
+            Raycast with a persistent menu bar, quick event creation and
+            account-aware event actions.
+          </p>
+          <div class="hero-actions">
+            <a
+              class="button primary"
+              href="https://github.com/JonahTweed/CalFlow#beta-installation"
+              >Get the beta <span aria-hidden="true">↗</span></a
+            ><a
+              class="button secondary"
+              href="https://github.com/JonahTweed/CalFlow"
+              >View on GitHub</a
+            >
+          </div>
+          <p class="small muted">
+            Free &amp; open source. Requires Raycast and a Google account.
+          </p>
+        </div>
+        <figure class="product-preview">
+          <div
+            class="preview-menubar"
+            aria-label="Illustrative DayCal menu-bar status: Next event at 11:30am"
+          >
+            <svg
+              class="menubar-calendar"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <rect x="3" y="5" width="18" height="16" rx="3" />
+              <path d="M7 3v4m10-4v4M3 10h18" />
+            </svg>
+            <span>Next event at 11:30am</span>
+          </div>
+          <a
+            class="schedule-screenshot-link"
+            href="./assets/daycal-schedule-demo.png"
+            aria-label="View full-size DayCal Schedule screenshot with demo events"
+          >
+            <img
+              class="schedule-screenshot"
+              src="./assets/daycal-schedule-demo.png"
+              alt="DayCal Schedule in Raycast with demo events: a morning summary, Next Up for Sunday Brunch at 11:30, This Week and Next Week sections, coloured calendar icons, recurring-event indicators, and the Open in Google Calendar action."
+              width="1512"
+              height="968"
+              fetchpriority="high"
+            />
+          </a>
+          <figcaption>
+            Actual Raycast Schedule · demo events<br />Menu-bar status
+            illustrated · select Schedule to enlarge
+          </figcaption>
+        </figure>
+      </section>
+      <section class="menubar-showcase" aria-labelledby="menubar-title">
+        <div>
+          <p class="eyebrow">ALWAYS WITHIN REACH</p>
+          <h2 id="menubar-title">Your calendar, without opening Raycast.</h2>
+          <p>
+            See upcoming events and open, edit or join a meeting straight from
+            your menu bar.
+          </p>
+        </div>
+        <figure>
+          <a
+            class="schedule-screenshot-link"
+            href="./assets/daycal-menubar-demo.png"
+            aria-label="View full-size Calendar Menu Bar screenshot"
+          >
+            <img
+              class="schedule-screenshot"
+              src="./assets/daycal-menubar-demo.png"
+              width="1120"
+              height="1058"
+              loading="lazy"
+              alt="Calendar Menu Bar showing upcoming events with calendar colours and an event submenu with Open Event, Edit Event, Join Meeting, More Actions and Delete Event."
+            />
+          </a>
+          <figcaption>
+            Actual DayCal Calendar Menu Bar · select to enlarge
+          </figcaption>
+        </figure>
+      </section>
+      <section class="features" aria-labelledby="features-title">
+        <div class="section-heading">
+          <p class="eyebrow">LESS SWITCHING. MORE DOING.</p>
+          <h2 id="features-title">
+            The day’s essentials.<br />Right where you work.
+          </h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span class="feature-number">01 / SEE YOUR DAY</span>
+            <h3>Schedule &amp; menu bar</h3>
+            <p>
+              Browse what’s coming up, see your next meeting and keep a
+              persistent calendar in the menu bar. Smart Status reflects the
+              events you choose to show.
+            </p>
+          </article>
+          <article>
+            <span class="feature-number">02 / MAKE TIME</span>
+            <h3>Quick Add &amp; actions</h3>
+            <p>
+              Create events with natural language. Edit, move, copy or delete
+              where supported, and join Google Meet without hunting for a link.
+            </p>
+            <code class="example">Friday 3pm · 45m @ Office</code>
+          </article>
+          <article>
+            <span class="feature-number">03 / KEEP IT YOURS</span>
+            <h3>Your calendars, your way</h3>
+            <p>
+              Choose separate calendar sets for Schedule and the Menu Bar. Map
+              Personal, Work, Shared and Family roles. Switching Google accounts
+              keeps each account’s settings separate.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section class="privacy-note" aria-labelledby="privacy-title">
+        <div>
+          <p class="eyebrow">A DIRECT CONNECTION</p>
+          <h2 id="privacy-title">Your calendar stays yours.</h2>
+          <p>
+            DayCal connects directly to Google Calendar through Raycast’s native
+            Google sign-in. Settings and the menu-bar cache stay locally in
+            Raycast. There’s no DayCal backend receiving your calendar data, and
+            no calendar analytics, advertising or tracking.
+          </p>
+        </div>
+        <a class="text-link" href="./privacy/"
+          >Read the privacy policy <span aria-hidden="true">↗</span></a
+        >
+      </section>
+      <section class="beta-note" aria-labelledby="beta-title">
+        <div>
+          <p class="eyebrow">READY TO TRY IT?</p>
+          <h2 id="beta-title">A little more flow in your day.</h2>
+          <p>
+            Install from source using the GitHub instructions, then open
+            Schedule or Calendar Menu Bar to sign in and set up your calendars.
+          </p>
+          <p class="small muted">
+            Currently in public beta, outside the Raycast Store. Google OAuth
+            verification is complete for DayCal’s requested sensitive Calendar
+            scope. DayCal is the public name; the repository retains its original
+            CalFlow name.
+          </p>
+        </div>
+        <div class="beta-links">
+          <a
+            class="button primary"
+            href="https://github.com/JonahTweed/CalFlow#beta-installation"
+            >Installation instructions <span aria-hidden="true">↗</span></a
+          ><a
+            class="text-link"
+            href="https://github.com/JonahTweed/CalFlow/issues"
+            >Feedback &amp; issues</a
+          ><a class="support-email" href="mailto:support@daycal.co.uk"
+            >support@daycal.co.uk</a
+          >
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer wrap">
+      <div>
+        <a class="brand" href="./">DayCal</a>
+        <p>A small utility for a full day.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="./privacy/">Privacy</a><a href="./security/">Security</a
+        ><a href="https://github.com/JonahTweed/CalFlow/issues"
+          >Report an issue</a
+        ><a href="mailto:support@daycal.co.uk">Contact</a>
+      </nav>
+      <p class="footer-note">
+        An independent, open-source extension for Raycast on macOS.
+      </p>
+    </footer>
+    <dialog
+      class="schedule-lightbox"
+      aria-label="DayCal Schedule demo screenshot"
+    >
+      <button
+        class="lightbox-close"
+        type="button"
+        aria-label="Close enlarged screenshot"
+        autofocus
+      >
+        ×
+      </button>
+      <img
+        src="./assets/daycal-schedule-demo.png"
+        width="1512"
+        height="968"
+        alt="DayCal Schedule in Raycast with demo events"
+      />
+    </dialog>
+    <script>
+      const screenshotLinks = document.querySelectorAll(
+        ".schedule-screenshot-link",
+      );
+      const lightbox = document.querySelector(".schedule-lightbox");
+      let activeScreenshotLink;
+      screenshotLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          activeScreenshotLink = link;
+          const source = link.querySelector("img");
+          const enlarged = lightbox.querySelector("img");
+          enlarged.src = source.src;
+          enlarged.alt = source.alt;
+          enlarged.width = source.naturalWidth;
+          enlarged.height = source.naturalHeight;
+          lightbox.setAttribute("aria-label", source.alt);
+          lightbox.showModal();
+        });
+      });
+      lightbox
+        .querySelector("button")
+        .addEventListener("click", () => lightbox.close());
+      lightbox.addEventListener("click", (event) => {
+        if (event.target === lightbox) lightbox.close();
+      });
+      lightbox.addEventListener("close", () => activeScreenshotLink?.focus());
+    </script>
+  </body>
+</html>
