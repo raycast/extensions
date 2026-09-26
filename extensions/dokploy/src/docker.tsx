@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { DockerContainer } from "./interfaces";
 import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
+import DockerCleanup from "./docker-cleanup";
 
 export default function Docker({ instance: initial }: { instance: Instance }) {
   const { url, headers, instance, dropdown } = useInstanceScope(initial);
@@ -18,6 +19,18 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
 
   return (
     <List navigationTitle="Docker" isLoading={isLoading} searchBarAccessory={dropdown}>
+      {/* Its own row, not attached to any container's own actions - disk usage/prune here targets
+       * this instance's whole Dokploy host, not whichever container happens to be selected. */}
+      <List.Item
+        icon={Icon.Trash}
+        title="Docker Cleanup"
+        subtitle="Disk usage & prune for this server - not a single container"
+        actions={
+          <ActionPanel>
+            <Action.Push icon={Icon.Trash} title="Docker Cleanup" target={<DockerCleanup instance={instance} />} />
+          </ActionPanel>
+        }
+      />
       {sortedContainers.map((container) => (
         <List.Item
           key={container.containerId}

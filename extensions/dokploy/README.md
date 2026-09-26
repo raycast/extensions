@@ -44,6 +44,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Delete Service
     - View Docker (Containers, sorted by frecency)
         - View Docker Config
+        - Docker Cleanup (disk usage, clean stopped containers/unused images/unused volumes/build cache, full prune)
     - View S3 Destinations
         - Delete S3 Destination
     - View Users
