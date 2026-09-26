@@ -4,7 +4,7 @@ Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One 
 
 ### Default mode
 
-![where is my cursor default mode](metadata/default_mode.gif)
+![where is my cursor default mode](media/default_mode.gif)
 
 ## ✨ Features
 
@@ -53,11 +53,11 @@ This extension works completely offline and does not collect, store, or transmit
 
 ### Presentation mode
 
-![where is my cursor presentation mode](metadata/presentation_mode.gif)
+![where is my cursor presentation mode](media/presentation_mode.gif)
 
 ### Custom mode
 
-![where is my cursor custom mode](metadata/custom_mode.gif)
+![where is my cursor custom mode](media/custom_mode.gif)
 
 ---
 

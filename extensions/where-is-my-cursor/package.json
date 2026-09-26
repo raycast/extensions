@@ -6,6 +6,9 @@
   "icon": "extension-icon.png",
   "author": "luciodaou",
   "license": "MIT",
+  "categories": [
+    "System"
+  ],
   "permissions": [
     "execute"
   ],
