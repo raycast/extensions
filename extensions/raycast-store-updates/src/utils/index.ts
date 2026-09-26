@@ -1,5 +1,15 @@
 import { Feed, FeedItem, GitHubPR, GitHubPRFile, StoreItem } from "../types";
-import { Cache, Color, environment, getPreferenceValues, Icon, Image, launchCommand, LaunchType } from "@raycast/api";
+import {
+  Cache,
+  Color,
+  environment,
+  getPreferenceValues,
+  Icon,
+  Image,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+} from "@raycast/api";
 import { showError } from "@chrismessina/raycast-kit";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
@@ -878,11 +888,42 @@ async function fetchStoreFeed(): Promise<Feed> {
   return payload as Feed;
 }
 
-/** Fetches updates for AI queries, surfacing source failures to the caller. */
+const aiScanCache = new Cache({ namespace: "store-updates-ai" });
+const AI_SCAN_TTL_MS = 10 * 60 * 1000;
+const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
+
+/** Fetches updates for AI queries, reusing successful scans for ten minutes. */
 export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<StoreItem[]> {
   if (type === "new") return buildStoreUpdateItems(await fetchStoreFeed(), null);
-  const [feed, prs] = await Promise.all([fetchStoreFeed(), fetchMergedPRs()]);
-  return buildStoreUpdateItems(feed, prs);
+  const cached = aiScanCache.get("scan");
+  if (cached) {
+    try {
+      const scan: { fetchedAt: number; items: StoreItem[] } = JSON.parse(cached);
+      if (Date.now() - scan.fetchedAt < AI_SCAN_TTL_MS && Array.isArray(scan.items)) return scan.items;
+    } catch {
+      // A bad cache entry is a miss.
+    }
+  }
+
+  const reset = Number(await LocalStorage.getItem<string>(RATE_LIMIT_RESET_KEY));
+  if (reset > Date.now()) return buildStoreUpdateItems(await fetchStoreFeed(), null);
+  let feed: Feed;
+  let prs: GitHubPR[];
+  try {
+    [feed, prs] = await Promise.all([fetchStoreFeed(), fetchMergedPRs()]);
+  } catch (reason) {
+    const error = reason as Error & { rateLimitReset?: number };
+    if (/rate limit/i.test(error.message)) {
+      const reported = error.rateLimitReset ? error.rateLimitReset * 1000 : 0;
+      const cooldown =
+        reported > Date.now() && reported <= Date.now() + 60 * 60 * 1000 ? reported : Date.now() + 5 * 60 * 1000;
+      await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(cooldown));
+    }
+    throw reason;
+  }
+  const items = await buildStoreUpdateItems(feed, prs);
+  aiScanCache.set("scan", JSON.stringify({ fetchedAt: Date.now(), items }));
+  return items;
 }
 
 /**
