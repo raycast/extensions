@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { DatabaseSync } from "node:sqlite";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beginSnapshot, listCollections, renameCollection, searchLibrary } from "./library";
@@ -34,7 +35,7 @@ test("saves each page to disk, searches it, and keeps the published snapshot aft
 });
 
 
-test("removes superseded snapshots only after publishing and leaves concurrent imports intact", async () => {
+test("retains the previous snapshot for readers and removes older history without touching pending imports", async () => {
   const base = await mkdtemp(join(tmpdir(), "docsearch-retention-"));
   const root = "https://example.com/docs";
   try {
@@ -47,13 +48,20 @@ test("removes superseded snapshots only after publishing and leaves concurrent i
     await replacement.addPage({ url: root, title: "New", markdown: "Replacement", fetchedAt: "2026-01-02" });
     assert.equal((await searchLibrary("original", base)).length, 1);
     const current = await replacement.publish([], false);
+    const reader = new DatabaseSync(join(first.snapshotDir, "index.sqlite"), { readOnly: true });
+    try { assert.equal(reader.prepare("SELECT title FROM pages").get()?.title, "Old"); }
+    finally { reader.close(); }
+    const next = await beginSnapshot(root, base);
+    await next.addPage({ url: root, title: "Latest", markdown: "Latest docs", fetchedAt: "2026-01-03" });
+    await next.publish([], false);
     await assert.rejects(readdir(first.snapshotDir), { code: "ENOENT" });
+    await readdir(replacement.snapshotDir);
     await readdir(pending.snapshotDir);
     assert.equal(current.title, "My docs");
-    assert.equal((await searchLibrary("replacement", base)).length, 1);
+    assert.equal((await searchLibrary("latest", base)).length, 1);
     // A caller's later failure must not delete an already published snapshot.
     await replacement.abandon("post-publication failure");
-    assert.equal((await searchLibrary("replacement", base)).length, 1);
+    assert.equal((await searchLibrary("latest", base)).length, 1);
     await pending.abandon("cancelled");
   } finally { await rm(base, { recursive: true, force: true }); }
 });

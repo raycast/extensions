@@ -15,6 +15,7 @@ export interface Collection {
   skipped?: string[];
   truncated: boolean;
   snapshot?: string;
+  previousSnapshot?: string;
   customTitle?: string;
 }
 
@@ -59,6 +60,7 @@ export async function beginSnapshot(rootUrl: string, baseDir = docsDirectory()) 
       const collection: Collection = {
         id, rootUrl, title: previous?.customTitle || firstTitle || new URL(rootUrl).hostname,
         pageCount: count, importedAt: new Date().toISOString(), errors, skipped, truncated, snapshot,
+        ...(previous?.snapshot ? { previousSnapshot: previous.snapshot } : {}),
         ...(previous?.customTitle ? { customTitle: previous.customTitle } : {}),
       };
       await writeFile(join(snapshotDir, "manifest.json"), JSON.stringify(collection), "utf8");
@@ -66,9 +68,10 @@ export async function beginSnapshot(rootUrl: string, baseDir = docsDirectory()) 
       await writeFile(pending, JSON.stringify(collection), "utf8");
       await rename(pending, join(collectionDir, "current.json"));
       published = true;
+      // Keep one previous generation for readers that observed current.json before the handoff.
       // Cleanup cannot turn a completed handoff into a failed import.
-      if (previous?.snapshot && previous.snapshot !== snapshot) {
-        await rm(join(collectionDir, "snapshots", previous.snapshot), { recursive: true, force: true })
+      if (previous?.previousSnapshot && previous.previousSnapshot !== snapshot) {
+        await rm(join(collectionDir, "snapshots", previous.previousSnapshot), { recursive: true, force: true })
           .catch((error: unknown) => console.error("Could not remove superseded documentation snapshot", error));
       }
       return collection;
