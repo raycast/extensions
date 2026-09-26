@@ -1,7 +1,17 @@
-import { chmodSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeAll, describe, expect, test } from 'vitest'
-import { cliRunner, DEFAULT_JEFI_PATH, jefiClient, JefiError, links, resolveJefiPath } from '../src/lib/jefi'
+import {
+  bundleVersion,
+  cliRunner,
+  DEFAULT_JEFI_PATH,
+  jefiClient,
+  JefiError,
+  links,
+  resolveJefiPath,
+  versionBefore,
+} from '../src/lib/jefi'
 
 const fake = join(__dirname, '..', 'fixtures', 'fake-jefi.mjs')
 const c = jefiClient(cliRunner(fake))
@@ -17,7 +27,11 @@ describe('client against the fake CLI', () => {
   test('inbox returns contract-shaped threads', async () => {
     const threads = await c.inbox({ limit: 2 })
     expect(threads).toHaveLength(2)
-    expect(threads[0]).toMatchObject({ id: 't1', from: { email: 'nora@example.com' }, url: 'jefi://thread/t1' })
+    expect(threads[0]).toMatchObject({
+      id: 't1',
+      from: { email: 'nora@example.com' },
+      url: 'jefi://thread/t1',
+    })
   })
 
   test('search passes the query and account filter through', async () => {
@@ -48,7 +62,9 @@ describe('client against the fake CLI', () => {
   })
 
   test('a missing executable is "not installed"', async () => {
-    const err = await jefiClient(cliRunner('/nonexistent/Jefi')).version().catch((e) => e)
+    const err = await jefiClient(cliRunner('/nonexistent/Jefi'))
+      .version()
+      .catch((e) => e)
     expect(err).toMatchObject({ kind: 'not-installed' })
   })
 })
@@ -72,4 +88,41 @@ test('jefi:// links encode values and drop empty ones', () => {
   expect(links.inbox('a/1')).toBe('jefi://inbox/a%2F1')
   expect(links.newNote({ title: 'T', body: 'line\nnext' })).toBe('jefi://new-note?title=T&body=line%0Anext')
   expect(links.search('from:nora')).toBe('jefi://search?q=from%3Anora')
+})
+
+// An older Jefi ignores `cli` and opens a whole new copy of the app on every call, so the extension
+// must not run it at all.
+function fakeApp(version: string) {
+  const root = mkdtempSync(join(tmpdir(), 'jefi-app-'))
+  const macos = join(root, 'Jefi.app', 'Contents', 'MacOS')
+  mkdirSync(macos, { recursive: true })
+  writeFileSync(
+    join(root, 'Jefi.app', 'Contents', 'Info.plist'),
+    `<plist><dict><key>CFBundleShortVersionString</key>\n<string>${version}</string></dict></plist>`,
+  )
+  const marker = join(root, 'ran')
+  const exe = join(macos, 'Jefi')
+  writeFileSync(exe, `#!/bin/sh\ntouch '${marker}'\necho '{"version":"${version}"}'\n`)
+  chmodSync(exe, 0o755)
+  return { exe, marker }
+}
+
+test('an outdated Jefi is never run', async () => {
+  const { exe, marker } = fakeApp('0.7.0')
+  expect(bundleVersion(exe)).toBe('0.7.0')
+  await expect(cliRunner(exe)(['version'])).rejects.toMatchObject({ kind: 'outdated' })
+  expect(existsSync(marker)).toBe(false)
+})
+
+test('a current Jefi runs', async () => {
+  const { exe, marker } = fakeApp('0.7.1')
+  await expect(cliRunner(exe)(['version'])).resolves.toEqual({ version: '0.7.1' })
+  expect(existsSync(marker)).toBe(true)
+})
+
+test('versionBefore compares numerically', () => {
+  expect(versionBefore('0.7.0', '0.7.1')).toBe(true)
+  expect(versionBefore('0.7.1', '0.7.1')).toBe(false)
+  expect(versionBefore('0.10.0', '0.7.1')).toBe(false)
+  expect(versionBefore('1.0', '0.7.1')).toBe(false)
 })

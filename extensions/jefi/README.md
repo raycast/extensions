@@ -15,21 +15,21 @@ to check and save. Nothing is sent from the extension and nothing leaves your Ma
 
 ## Commands
 
-| Command | What it does | Keys |
-| --- | --- | --- |
-| Search Mail | Searches mail with Jefi's search syntax | ↵ open in Jefi · ⌘C copy subject · ⌘⇧C copy sender · ⌘⇧R reply |
-| Inbox | The inbox, unread first | ↵ open · ⌘C copy subject · ⌘R reload |
-| Today | Today's events and invitations awaiting a reply | ↵ open · ⌘J join meeting · ⌘C copy title · ⌘⇧C copy meeting link |
-| Compose Email | A form that opens a prefilled draft in Jefi | ⌘↵ open in Jefi |
-| Quick Add Event | "Lunch with Nora Friday 1pm" → Jefi's event editor, prefilled | |
-| Create Note | A form that opens a prefilled note in Jefi | ⌘↵ open in Jefi |
-| Search Notes | Recent notes, or notes matching the query | ↵ open · ⌘C copy title · ⌘N create note |
-| Unread Mail | Menu bar: unread count and your next event, refreshed every 2 minutes | |
+| Command         | What it does                                                          | Keys                                                             |
+| --------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Search Mail     | Searches mail with Jefi's search syntax                               | ↵ open in Jefi · ⌘C copy subject · ⌘⇧C copy sender · ⌘⇧R reply   |
+| Inbox           | The inbox, unread first                                               | ↵ open · ⌘C copy subject · ⌘R reload                             |
+| Today           | Today's events and invitations awaiting a reply                       | ↵ open · ⌘J join meeting · ⌘C copy title · ⌘⇧C copy meeting link |
+| Compose Email   | A form that opens a prefilled draft in Jefi                           | ⌘↵ open in Jefi                                                  |
+| Quick Add Event | "Lunch with Nora Friday 1pm" → Jefi's event editor, prefilled         |                                                                  |
+| Create Note     | A form that opens a prefilled note in Jefi                            | ⌘↵ open in Jefi                                                  |
+| Search Notes    | Recent notes, or notes matching the query                             | ↵ open · ⌘C copy title · ⌘N create note                          |
+| Unread Mail     | Menu bar: unread count and your next event, refreshed every 2 minutes |                                                                  |
 
 ## Preferences
 
-| Preference | Default | What it's for |
-| --- | --- | --- |
+| Preference      | Default                                      | What it's for                                                                                               |
+| --------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Jefi Executable | `/Applications/Jefi.app/Contents/MacOS/Jefi` | Where Jefi lives. Change it if you keep Jefi elsewhere, e.g. `~/Applications/Jefi.app/Contents/MacOS/Jefi`. |
 
 ## Tinycast

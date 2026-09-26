@@ -1,5 +1,14 @@
 import { expect, test } from 'vitest'
-import { eventTime, mailDate, menuBarTitle, nextEvent, senderName, truncate, unreadFirst, untilLabel } from '../src/lib/format'
+import {
+  eventTime,
+  mailDate,
+  menuBarTitle,
+  nextEvent,
+  senderName,
+  truncate,
+  unreadFirst,
+  untilLabel,
+} from '../src/lib/format'
 import type { JefiEvent, Thread } from '../src/lib/jefi'
 
 const now = new Date(2026, 8, 26, 12, 0) // Sat 26 Sep 2026, noon local

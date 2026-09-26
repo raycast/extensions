@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, openExtensionPreferences } from '@raycast/api'
+import { Icon, MenuBarExtra, open, openExtensionPreferences } from '@raycast/api'
 import { useCachedPromise } from '@raycast/utils'
 import { eventTime, menuBarTitle, nextEvent, truncate, untilLabel } from './lib/format'
 import { JefiError, links } from './lib/jefi'
@@ -31,6 +31,13 @@ export default function UnreadMail() {
               title="Set Jefi’s Location…"
               icon={Icon.Gear}
               onAction={openExtensionPreferences}
+            />
+          ) : null}
+          {error instanceof JefiError && error.kind === 'outdated' ? (
+            <MenuBarExtra.Item
+              title="Download Latest Jefi…"
+              icon={Icon.Download}
+              onAction={() => open('https://jefi.app')}
             />
           ) : null}
         </MenuBarExtra.Section>

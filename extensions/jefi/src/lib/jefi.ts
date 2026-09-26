@@ -1,6 +1,7 @@
 // Typed client for the `Jefi cli <cmd> --json` contract (docs/integrations.md §2) and the jefi://
 // routes (§1). No @raycast/api import here so it runs under plain Node in tests.
 import { execFile } from 'node:child_process'
+import { existsSync, readFileSync } from 'node:fs'
 
 export const DEFAULT_JEFI_PATH = '/Applications/Jefi.app/Contents/MacOS/Jefi'
 
@@ -50,7 +51,7 @@ export type Unread = { total: number; accounts: { id: string; email: string; unr
 // Why a call failed, so views can show the right empty state rather than a raw error.
 export class JefiError extends Error {
   constructor(
-    readonly kind: 'not-installed' | 'cli',
+    readonly kind: 'not-installed' | 'outdated' | 'cli',
     message: string,
   ) {
     super(message)
@@ -66,9 +67,60 @@ export function resolveJefiPath(pref?: string): string {
   return process.env.JEFI_CLI?.trim() || pref?.trim() || DEFAULT_JEFI_PATH
 }
 
+/** The first Jefi with the `cli` mode. Older builds ignore `cli` and start the whole app instead. */
+export const MIN_JEFI_VERSION = '0.7.1'
+
+/** a < b for dotted numeric versions ("0.7.0" < "0.7.1" < "0.10.0"). */
+export function versionBefore(a: string, b: string): boolean {
+  const pa = a.split('.').map((n) => parseInt(n, 10) || 0)
+  const pb = b.split('.').map((n) => parseInt(n, 10) || 0)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) < (pb[i] ?? 0)
+  }
+  return false
+}
+
+/**
+ * The version of the Jefi.app an executable path sits in, from its Info.plist; null when the path
+ * isn't inside an app bundle (a script from the preferences, the fake CLI in tests) or it can't be read.
+ */
+export function bundleVersion(path: string): string | null {
+  const bundle = /^(.*\.app)\/Contents\/MacOS\/[^/]+$/.exec(path)?.[1]
+  if (!bundle) return null
+  try {
+    const plist = readFileSync(`${bundle}/Contents/Info.plist`, 'utf8')
+    return (
+      /<key>CFBundleShortVersionString<\/key>\s*<string>([^<]+)<\/string>/.exec(plist)?.[1]?.trim() ?? null
+    )
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Why Jefi at `path` can't answer, checked before running it: running an older Jefi with `cli` opens
+ * a new copy of the app on every call instead of printing JSON.
+ */
+export function preflight(path: string): JefiError | null {
+  if (!existsSync(path)) return new JefiError('not-installed', `Jefi wasn't found at ${path}`)
+  const version = bundleVersion(path)
+  if (version && versionBefore(version, MIN_JEFI_VERSION)) {
+    return new JefiError(
+      'outdated',
+      `Jefi ${version} is installed; this extension needs Jefi ${MIN_JEFI_VERSION} or later`,
+    )
+  }
+  return null
+}
+
 export function cliRunner(path: string, timeout = 15000): RunCli {
   return (args) =>
     new Promise((resolve, reject) => {
+      const blocked = preflight(path)
+      if (blocked) {
+        reject(blocked)
+        return
+      }
       execFile(path, ['cli', ...args, '--json'], { timeout, maxBuffer: 32 * 1024 * 1024 }, (err, stdout) => {
         const code = (err as NodeJS.ErrnoException | null)?.code
         if (code === 'ENOENT' || code === 'EACCES') {

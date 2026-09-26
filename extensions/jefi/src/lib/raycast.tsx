@@ -31,15 +31,31 @@ export async function openInJefi(url: string) {
 }
 
 export function errorTitle(error: unknown): string {
-  return error instanceof JefiError && error.kind === 'not-installed'
-    ? 'Jefi isn’t installed'
-    : 'Jefi couldn’t answer'
+  if (error instanceof JefiError && error.kind === 'not-installed') return 'Jefi isn’t installed'
+  if (error instanceof JefiError && error.kind === 'outdated') return 'Update Jefi'
+  return 'Jefi couldn’t answer'
 }
 
 // Replaces a list's body when a call failed: not-installed points at the preference, a CLI error shows
 // Jefi's own message.
 export function ErrorEmptyView({ error, retry }: { error: unknown; retry?: () => void }) {
   const missing = error instanceof JefiError && error.kind === 'not-installed'
+  const outdated = error instanceof JefiError && error.kind === 'outdated'
+  if (outdated) {
+    return (
+      <List.EmptyView
+        icon={Icon.Download}
+        title={errorTitle(error)}
+        description={`${error.message}. Open Jefi and choose Check for Updates, or download the latest version.`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Download Latest Jefi" url="https://jefi.app" />
+            {retry ? <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={retry} /> : null}
+          </ActionPanel>
+        }
+      />
+    )
+  }
   return (
     <List.EmptyView
       icon={missing ? Icon.QuestionMarkCircle : Icon.Warning}
