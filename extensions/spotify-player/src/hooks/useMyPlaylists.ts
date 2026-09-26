@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { getMyPlaylists } from "../api/getMyPlaylists";
 
 type UseMyPlaylistsProps = {
@@ -8,7 +8,7 @@ type UseMyPlaylistsProps = {
 };
 
 export function useMyPlaylists({ options }: UseMyPlaylistsProps = {}) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(() => getMyPlaylists(), [], {
+  const { data, error, isLoading, revalidate } = usePromise(() => getMyPlaylists(), [], {
     execute: options?.execute !== false,
   });
 

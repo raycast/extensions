@@ -46,7 +46,8 @@
     "alexi.build",
     "shivraj-roy",
     "ridemountainpig",
-    "clemenzi"
+    "clemenzi",
+    "ray.dhruv"
   ],
   "pastContributors": [
     "bkeys818",
@@ -259,33 +260,11 @@
       "preferences": [
         {
           "name": "duplicateSongCheck",
-          "description": "Prevents duplicate song addition. Significantly slows performance of non cached playlists.",
+          "description": "Check for duplicates when adding through a Quicklink. The playlist picker always checks membership to offer Add or Remove.",
           "type": "checkbox",
-          "label": "Check for duplicate songs",
+          "label": "Check for duplicate songs in Quicklinks",
           "default": false,
           "required": false
-        },
-        {
-          "name": "cacheRefreshTime",
-          "title": "Cache Refresh Rate",
-          "description": "How often to refresh cached playlists",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "7 Days",
-              "value": "7"
-            },
-            {
-              "title": "14 Days",
-              "value": "14"
-            },
-            {
-              "title": "1 Month",
-              "value": "30"
-            }
-          ],
-          "required": false,
-          "default": "30"
         }
       ]
     },
@@ -593,10 +572,13 @@
     "@types/react": "^19.1.10",
     "eslint": "^9.33.0",
     "prettier": "^3.6.2",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",
+    "test": "node --test src/__tests__/library.test.mjs",
+    "test:memory": "node --expose-gc --max-old-space-size=100 src/__tests__/memory.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
