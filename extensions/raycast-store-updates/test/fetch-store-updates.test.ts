@@ -114,3 +114,20 @@ test("a failed Store feed remains an error", async () => {
 
   await expect(fetchStoreUpdates()).rejects.toThrow(/invalid response/);
 });
+test("reports the activity cutoff of a full PR page", async () => {
+  const prs = Array.from({ length: 50 }, (_, index) => ({
+    number: index + 1,
+    title: `PR ${index + 1}`,
+    merged_at: null,
+    updated_at: index === 49 ? "2026-09-24T00:00:00Z" : "2026-09-25T00:00:00Z",
+  }));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) => new Response(JSON.stringify(url === FEED_URL ? feed : prs), { status: 200 })),
+  );
+
+  const result = await fetchStoreUpdates();
+
+  expect(result.updatesCoverageSince).toBe("2026-09-24T00:00:00Z");
+});
+

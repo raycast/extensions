@@ -28,7 +28,9 @@ export default async function findStoreUpdates(input: Input) {
     }
     cutoff = cutoff === null ? date : Math.max(cutoff, date);
   }
-  const { items, updatesUnavailable } = await fetchStoreUpdates(input.type === "new" ? "new" : "all");
+  const { items, updatesCoverageSince, updatesUnavailable } = await fetchStoreUpdates(
+    input.type === "new" ? "new" : "all",
+  );
   const query = input.query?.trim().toLowerCase();
   const installed = input.installedOnly ? await fetchInstalledExtensionSlugs() : null;
   if (input.installedOnly && !installed) {
@@ -47,6 +49,10 @@ export default async function findStoreUpdates(input: Input) {
   return {
     totalMatches: matches.length,
     ...(updatesUnavailable ? { updatesUnavailable } : {}),
+    ...(updatesCoverageSince ? { updatesCoverageSince } : {}),
+    ...(cutoff !== null && updatesCoverageSince && cutoff < Date.parse(updatesCoverageSince)
+      ? { updatesWindowIncomplete: true }
+      : {}),
     items: matches.slice(0, limit).map((item) => ({
       title: item.title,
       description: item.summary,

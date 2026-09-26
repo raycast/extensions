@@ -892,7 +892,7 @@ const aiScanCache = new Cache({ namespace: "store-updates-ai" });
 const AI_SCAN_TTL_MS = 10 * 60 * 1000;
 const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
 
-type StoreUpdatesResult = { items: StoreItem[]; updatesUnavailable?: string };
+type StoreUpdatesResult = { items: StoreItem[]; updatesCoverageSince?: string; updatesUnavailable?: string };
 
 /** Fetches updates for AI queries. A failed GitHub request still leaves the Store feed available. */
 export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<StoreUpdatesResult> {
@@ -930,6 +930,9 @@ export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<St
   const prs = prsResult.value;
   const result: StoreUpdatesResult = {
     items: await buildStoreUpdateItems(feedResult.value, prs),
+    // Both transports return their first 50 PRs by last activity. A newer merge must
+    // be in this page, but an older merge may be outside it.
+    ...(prs.length === 50 && prs[49].updated_at ? { updatesCoverageSince: prs[49].updated_at } : {}),
   };
   aiScanCache.set("scan", JSON.stringify({ fetchedAt: Date.now(), result }));
   return result;

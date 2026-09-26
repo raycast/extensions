@@ -83,3 +83,19 @@ test("keeps feed items and reports a GitHub failure", async () => {
   expect(result.updatesUnavailable).toBe("GitHub rate limit reached.");
 });
 
+test("reports incomplete update coverage", async () => {
+  vi.mocked(fetchStoreUpdates).mockResolvedValue({
+    items: [item("New extension", "2026-09-25T12:00:00Z")],
+    updatesCoverageSince: "2026-09-24T00:00:00Z",
+  });
+
+  const result = await findStoreUpdates({ since: "2026-09-20" });
+
+  expect(result).toMatchObject({
+    totalMatches: 1,
+    updatesCoverageSince: "2026-09-24T00:00:00Z",
+    updatesWindowIncomplete: true,
+  });
+  expect(result.items[0].title).toBe("New extension");
+});
+

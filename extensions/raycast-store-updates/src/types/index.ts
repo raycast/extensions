@@ -27,6 +27,7 @@ interface GitHubPR {
   title: string;
   html_url: string;
   merged_at: string | null;
+  updated_at?: string;
   user: {
     login: string;
     html_url: string;
