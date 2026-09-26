@@ -1,5 +1,4 @@
 import { getApexWSConnection, apex } from "@lib/common";
-import { getTranslation } from "@lib/translation";
 import { getErrorMessage } from "@lib/utils";
 import { Action, ActionPanel, Color, Icon, Image, List, Toast, clearSearchBar, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
@@ -102,13 +101,8 @@ async function getHAWSCurrentUser(): Promise<HAUser | undefined> {
   return r;
 }
 
-function getInitialConversations(language: string): ConversationContent[] {
-  const ts = getTranslation({
-    language: language,
-    id: "ui.dialogs.voice_command.how_can_i_help",
-    fallback: "How can I assist",
-  });
-  return [{ text: ts, author: Author.Assist, date: new Date() }];
+function getInitialConversations(): ConversationContent[] {
+  return [{ text: "How can I assist", author: Author.Assist, date: new Date() }];
 }
 
 function PipelinesDropdownList(props: {
@@ -200,7 +194,7 @@ export default function AssistCommand(): JSX.Element {
           pipelines={pipelines}
           onChange={(newLanguage: HAAssistPipeline | undefined) => {
             setSelectedPipeline(newLanguage);
-            setConversations(newLanguage ? getInitialConversations(newLanguage.conversation_language) : []);
+            setConversations(newLanguage ? getInitialConversations() : []);
           }}
         />
       }
@@ -227,7 +221,7 @@ export default function AssistCommand(): JSX.Element {
                       title="Clear Conversation"
                       icon={Icon.DeleteDocument}
                       shortcut={{ modifiers: ["opt"], key: "x" }}
-                      onAction={() => setConversations(getInitialConversations(selectedPipeline.conversation_language))}
+                      onAction={() => setConversations(getInitialConversations())}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
