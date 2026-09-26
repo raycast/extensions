@@ -6,6 +6,7 @@ import debounce from "lodash.debounce";
 import { useCallback, useMemo, useState } from "react";
 import { fetchItems, fetchItem } from "./api";
 import Descriptions from "./components/description";
+import ItemPrices from "./components/item_price";
 import { fixItemEffectText, getLocalizedName } from "./utils";
 
 export default function PokeItems(props: { arguments: { search?: string } }) {
@@ -133,12 +134,6 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
                             title="Category"
                             text={categoryName}
                           />
-                          {itemData.cost ? (
-                            <List.Item.Detail.Metadata.Label
-                              title="Price"
-                              text={`${itemData.cost} Poké Dollars`}
-                            />
-                          ) : null}
                         </List.Item.Detail.Metadata>
                       }
                     />
@@ -149,6 +144,16 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
                     item.itemflavortexts.length > 0 && (
                       <ActionPanel>
                         <ActionPanel.Section title="Information">
+                          <Action.Push
+                            title="Price"
+                            icon={Icon.List}
+                            target={
+                              <ItemPrices
+                                name={itemName}
+                                prices={item.itemprices}
+                              />
+                            }
+                          />
                           <Action.Push
                             title="Descriptions"
                             icon={Icon.List}

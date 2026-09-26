@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { fetchTypes } from "./api";
-import { TypeDetail } from "./components/type_detail";
 import { getLocalizedName } from "./utils";
+import WeaknessMetadata from "./components/metadata/weakness";
+import StrengthMetadata from "./components/metadata/strength";
 
 export default function TypeChart(props: { arguments: { search?: string } }) {
   const { search } = props.arguments;
@@ -18,33 +19,43 @@ export default function TypeChart(props: { arguments: { search?: string } }) {
   }, [search, types]);
 
   return (
-    <Grid
+    <List
       isLoading={isLoading}
-      columns={8}
+      isShowingDetail={true}
       searchBarPlaceholder="Search Pokémon type..."
     >
       {filteredTypes.map((type) => {
         const typeName = getLocalizedName(type.typenames, type.name);
 
         return (
-          <Grid.Item
+          <List.Item
             key={type.id}
             title={typeName}
-            content={{
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label
+                      title="Type"
+                      text="Attacking"
+                    />
+                    <StrengthMetadata type="detail" types={[{ type }]} />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Type"
+                      text="Defending"
+                    />
+                    <WeaknessMetadata type="detail" types={[{ type }]} />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            icon={{
               source: `types/${type.name}.svg`,
             }}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="View Type Details"
-                  icon={Icon.Eye}
-                  target={<TypeDetail type={type} allTypes={types || []} />}
-                />
-              </ActionPanel>
-            }
           />
         );
       })}
-    </Grid>
+    </List>
   );
 }

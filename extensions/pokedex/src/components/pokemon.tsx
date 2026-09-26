@@ -27,12 +27,12 @@ import PokemonLearnset from "./pokemon_learnset";
 const { language } = getPreferenceValues();
 
 enum GrowthRate {
-  "Slow" = 1,
-  "Medium" = 2,
-  "Fast" = 3,
+  Slow = 1,
+  Medium = 2,
+  Fast = 3,
   "Medium Slow" = 4,
-  "Erratic" = 5,
-  "Fluctuating" = 6,
+  Erratic = 5,
+  Fluctuating = 6,
 }
 
 export default function PokemonDetail(props: { id: number }) {
