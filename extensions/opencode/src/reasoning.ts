@@ -9,7 +9,7 @@ import type { Format } from "./console";
 const MODELS_DEV_URL = "https://models.dev/api.json";
 const CACHE_KEY = "reasoning-variants";
 const SUPPORT_CACHE_KEY = "reasoning-support";
-const SUPPORT_TTL = 5 * 60 * 1000;
+const SUPPORT_TTL = 30 * 60 * 1000;
 const EFFORTS = ["low", "medium", "high"];
 const ADAPTIVE_THINKING = { type: "adaptive", display: "summarized" };
 const ANTHROPIC_OUTPUT_TOKEN_MAX = 32_000;
