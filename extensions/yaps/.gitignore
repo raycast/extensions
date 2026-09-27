@@ -1,0 +1,10 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.raycast-swift-build/
+.DS_Store
+
+# Store preview screenshots are release metadata, not generated build output.
+!assets/
+!assets/screenshots/
+!assets/screenshots/*.png
