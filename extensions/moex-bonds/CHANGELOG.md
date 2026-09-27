@@ -1,6 +1,6 @@
 # MOEX Bonds Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-27
 
 - Live search for Russian bonds by name, ticker, issuer or ISIN, showing only traded issues
 - Bond card: price with its source, yield to maturity and to offer, duration, accrued interest,
