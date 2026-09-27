@@ -49,6 +49,7 @@ Raycast extension to search YouTube videos, channels, and more.
 - Search Channels
 - Search Live Streams
 - Popular Videos
+- Ask YouTube in Raycast AI to find videos, channels, live streams, and popular videos
 
 and more
 
