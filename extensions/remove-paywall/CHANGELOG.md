@@ -4,6 +4,7 @@
 
 - Added an Ask AI tool that returns a paywall removal link for an article URL
 - Added YAML evals for standard and Medium article requests
+- Fixed service selection for non-Medium URLs that mention medium.com outside the hostname
 
 ## [12ft.io removal] - 2026-02-04
 
