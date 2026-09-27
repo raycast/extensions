@@ -1,6 +1,6 @@
 # TrustMRR Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Add Raycast AI tools for listing startups and retrieving startup details.
 - Add YAML evals for startup discovery and revenue questions.
