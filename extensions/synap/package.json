@@ -1,0 +1,396 @@
+{
+  "name": "synap",
+  "version": "1.0.2",
+  "title": "Synap",
+  "description": "Your personal knowledge graph in Raycast — search entities, capture anything, AI-powered with your own data pod.",
+  "icon": "extension-icon.png",
+  "author": "AntoineSrvt",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-synap",
+      "title": "Ask Synap",
+      "subtitle": "Synap",
+      "description": "Ask your Synap pod and get a provenance-tagged answer from your knowledge, runbooks, and memories",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "ask",
+        "search",
+        "recall",
+        "knowledge"
+      ]
+    },
+    {
+      "name": "search-synap",
+      "title": "Search Synap",
+      "subtitle": "Synap",
+      "description": "Search entities in your knowledge graph",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "search",
+        "entity",
+        "note",
+        "task",
+        "knowledge"
+      ]
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture to Synap",
+      "subtitle": "Synap",
+      "description": "Keep selected text or clipboard content pod-wide first, then review any AI-proposed structure",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "capture",
+        "save",
+        "note",
+        "clip"
+      ]
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task in Synap",
+      "subtitle": "Synap",
+      "description": "Create a new task with title, due date, and priority",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "task",
+        "todo",
+        "create"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Synap Status",
+      "subtitle": "Synap",
+      "description": "Show pending tasks and proposals in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "connect",
+      "title": "Connect to Synap Pod",
+      "subtitle": "Synap",
+      "description": "Set up your connection to a Synap data pod (Synap Cloud or self-hosted)",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "connect",
+        "setup",
+        "api",
+        "key"
+      ]
+    },
+    {
+      "name": "browser-capture",
+      "title": "Capture Browser Tab to Synap",
+      "subtitle": "Synap",
+      "description": "Keep the active browser tab pod-wide first, then review any AI-proposed structure",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "capture",
+        "browser",
+        "bookmark",
+        "save",
+        "page"
+      ]
+    },
+    {
+      "name": "review-proposals",
+      "title": "Review Pending Proposals",
+      "subtitle": "Synap",
+      "description": "List pending AI-proposed changes and open them for review in Synap Studio",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "proposal",
+        "review",
+        "approve",
+        "ai"
+      ]
+    },
+    {
+      "name": "switch-pod",
+      "title": "Switch Synap Pod",
+      "subtitle": "Synap",
+      "description": "Switch the active Synap data pod used by Raycast",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "pod",
+        "switch",
+        "connect"
+      ]
+    },
+    {
+      "name": "daily-briefing",
+      "title": "Daily Briefing",
+      "subtitle": "Synap",
+      "description": "See today's overdue and upcoming tasks and events from your knowledge graph",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "daily",
+        "briefing",
+        "tasks",
+        "today",
+        "overdue",
+        "events"
+      ]
+    },
+    {
+      "name": "create-entity",
+      "title": "Create Entity in Synap",
+      "subtitle": "Synap",
+      "description": "Create any entity type — note, task, project, event, person, company, bookmark, decision, and more",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "create",
+        "new",
+        "entity",
+        "note",
+        "project",
+        "person"
+      ]
+    },
+    {
+      "name": "set-focus",
+      "title": "Set Synap Focus",
+      "subtitle": "Synap",
+      "description": "Pin Raycast to one workspace lens (sticky until cleared) — new captures and creates default there, and the focus is always shown. Clear it to go pod-wide.",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "focus",
+        "workspace",
+        "lens",
+        "scope",
+        "crm"
+      ]
+    },
+    {
+      "name": "diagnose",
+      "title": "Diagnose Synap",
+      "subtitle": "Synap",
+      "description": "Understand what's happening or what's wrong — whole-pod health, the review queue, a run's timeline, or one object's state and why",
+      "mode": "view",
+      "keywords": [
+        "synap",
+        "diagnose",
+        "health",
+        "status",
+        "run",
+        "proposal",
+        "debug"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask",
+      "title": "Ask Synap",
+      "description": "THE recall door. Ask the user's Synap pod anything in natural language — it routes across all knowledge substrates (entities/notes/tasks, how-to runbooks, and remembered facts/preferences) and returns ONE provenance-tagged answer saying which substrate answered. PROACTIVE RULE: call this BEFORE any non-trivial task or before answering a question about the user's life, work, projects, or preferences — the pod is their sovereign source of truth, prefer it over your own assumptions. Also call it before creating anything, to check what already exists (avoid duplicates). This single tool replaces the old search/search_entities/recall_facts/get_knowledge tools."
+    },
+    {
+      "name": "orient",
+      "title": "Orient to Synap",
+      "description": "Returns a lightweight LENS MAP — your identity, projects (companies/initiatives), workspaces (operational domains), and a profile sample. Call first in every session. This also lists your projects (it supersedes the old synap_list_projects tool) — pass scope:['projects'] and/or workspaceId to narrow. Pass detail:'full' for workspace descriptions, full onboarding specs, and per-workspace profiles. Drill into a workspace's full property schemas via list-profiles."
+    },
+    {
+      "name": "discover",
+      "title": "Discover Synap Schema",
+      "description": "Progressively discover live profiles and commands. With no workspace, returns the pod/base schema; an explicitly selected workspace adds only its own overlays. Use orient first when context is unclear and never infer a workspace from local configuration."
+    },
+    {
+      "name": "find-skills",
+      "title": "Find Synap Skills",
+      "description": "Search the skills the caller is allowed to use in the current Synap lens. Load one selected skill only when needed."
+    },
+    {
+      "name": "load-skill",
+      "title": "Load Synap Skill",
+      "description": "Load the full body of a seeded teaching skill (the L2 tier behind the one-line summaries you see on other tools' descriptions and in the catalog). Pass a `system/<package>/<stem>` slug, a bare stem (e.g. 'document-embeds'), or 'catalog' to list every available skill grouped by topic."
+    },
+    {
+      "name": "list-capabilities",
+      "title": "List Synap Capabilities",
+      "description": "Pack catalog for a workspace: status, connection, verbs, and nextAction (add|connect|enable|run|none). Dual with list-actions — this is install/connect/enable; list-actions is only verbs runnable NOW. Pass workspaceId from orient. Optional query filters packs client-side; optional extraKey resolves a pack excluded from default-sync. nextAction add|connect|enable → get-capability-brief then bounce Browser. nextAction run → list-actions then run-action."
+    },
+    {
+      "name": "get-capability-brief",
+      "title": "Get Synap Capability Brief",
+      "description": "Pack brief for one capability key from list-capabilities: status, connection, verbs, nextAction, and a Browser /open bounce when add|connect|enable is needed. Raycast cannot complete OAuth or apply a pack. Do not use get-action-brief for packs — those keys are runnable synap_* tool names, not pack keys. When nextAction is run, use list-actions then run-action."
+    },
+    {
+      "name": "list-actions",
+      "title": "List Synap Actions",
+      "description": "Get only actions Synap can execute now in one selected workspace, with real parameter schemas, execution mode, and last-known connection state. Draft, disconnected, teaching-only, and catalog-only entries are omitted. If none are runnable, the result explains why via blockedPacks and catalogReadyNotExecutable — catalog nextAction.run ≠ execute row; do not invent verbs or call run-action from those arrays."
+    },
+    {
+      "name": "get-action-brief",
+      "title": "Get Synap Action Brief",
+      "description": "Get just-in-time usage and governance guidance for one runnable action selected from list-actions."
+    },
+    {
+      "name": "list-views",
+      "title": "List Synap Views",
+      "description": "List saved views in one workspace. Call before create-view so you do not duplicate a board. Returns id, name, type, and an /open link. Requires workspaceId from orient."
+    },
+    {
+      "name": "list-widgets",
+      "title": "List Synap Widgets",
+      "description": "Compose widget allowlist for a view: curated builtins, aliases, and generated widgets. Never guess a widget key. view/view-table need a saved viewId; counts use stat-card + profileSlug. Raycast cannot render or arrange a dashboard — place widgets in Synap Browser."
+    },
+    {
+      "name": "create-view",
+      "title": "Create Synap View",
+      "description": "Create a saved view (table, kanban, list, gallery, calendar, bento, …) through Hub governance. Call list-views first. proposed is success — bounce the /open or reviewUrl. Raycast cannot draw or arrange a dashboard; a bento is a shell until the user places widgets in the Browser."
+    },
+    {
+      "name": "run-action",
+      "title": "Run Synap Action",
+      "description": "Run a registered capability verb (discover via list-actions) with dynamic inputs — e.g. send an email, search Gmail, create a calendar event. Pass verbId + parameters. A DRAFT (un-enabled) capability is refused — ask the user to enable it first. Governed like any write: an ungranted verb comes back as `{ kind: \"proposed\", proposalId, reviewUrl }` instead of running — that is SUCCESS, not an error. You MUST surface the `reviewUrl` as a clickable link in your reply (never just say 'proposed' with no link) — e.g. \"Queued that email send for your review: [Review proposal](<reviewUrl>)\" — and continue the conversation without waiting for approval.\n\nRaycast adapter: discover runnable verbs with list-actions, then run-action. list-capabilities is the pack catalog (install/connect/enable), not the execute list. JSON `parameters` string."
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Get tasks filtered by status (todo, in-progress, done, cancelled) or due date. Returns title, status, priority, and dueDate."
+    },
+    {
+      "name": "create-entity",
+      "title": "Create Entity",
+      "description": "Create a typed entity when you already know the exact profileSlug + fields — the structured, deterministic sibling of capture (which parses free text). Discover slugs with list-profiles; ask first to avoid duplicates. Same-profile same-name creates are REJECTED with candidates (reuse the existing id, enrich, or attach a facet) unless forceCreate=true. Placeholder person/company titles (e.g. 'Not publicly disclosed', 'unknown') are rejected.\n\nRaycast adapter: no forceCreate (reuse or capture). Creation-time facets must go through capture. Roles use attach-role."
+    },
+    {
+      "name": "capture",
+      "title": "Capture",
+      "description": "THE write door. Send `text` and/or JSON-string `entities`/`relations` — do not classify first. ask first to avoid duplicates. Strong identity keys (exact spellings): email, phone, website, linkedinUrl, twitterHandle, githubUsername. `proposed` is SUCCESS — surface reviewUrl as a markdown link; never retry. `rejected` with already-known or no-durable-content is correct (do not retry). Raycast adapter: no `global` (use `synap capture --global`); no forceCreate; no capture-commit. If structuring is degraded, NOTHING is written; retry shortly. Placement uses existing lenses only; never invent a workspace."
+    },
+    {
+      "name": "send-to-channel",
+      "title": "Send to Channel",
+      "description": "Post a message to a Synap channel or thread with optional AI triggering. Handles thread creation from a channelId and can trigger an AI response. triggerAI only starts an agent turn when role is 'user' — pass role:'user' with triggerAI:true to start one."
+    },
+    {
+      "name": "get-recent",
+      "title": "Get Recent Entities",
+      "description": "Get recently created or modified entities. Useful for 'what did I save recently?' or to find entities created in the last session."
+    },
+    {
+      "name": "update-entity",
+      "title": "Update Entity",
+      "description": "Update an entity's title, description, or properties (JSONB). Requires entityId from search or get-entity. May return 'proposed' if the write requires review. Use for status changes (task todo→done), property updates, corrections."
+    },
+    {
+      "name": "get-entity",
+      "title": "Get Entity",
+      "description": "Get a single entity by ID with full details: all properties and metadata. Use after ask to get complete data on a result. The id comes from ask results or create-entity responses."
+    },
+    {
+      "name": "get-connections",
+      "title": "Get Entity Connections",
+      "description": "Expand an entity into its immediate neighbourhood: direct relations, structural property links, and related channels or focus sessions. Use after get-entity for questions like 'what does this decision affect?' or 'what supports this North Star?'."
+    },
+    {
+      "name": "list-workspaces",
+      "title": "List Workspaces",
+      "description": "List optional workspace lenses accessible on this pod. Use only when the user names a workspace or an action requires workspace-specific context."
+    },
+    {
+      "name": "list-profiles",
+      "title": "List Entity Profiles",
+      "description": "List all available entity types (profiles) — system profiles plus custom types. ALWAYS call at session start before creating entities. Never assume 'deal' or custom types exist — workspaces differ. Returns a lightweight digest per profile: id, slug, displayName, entityScope (pod-wide vs workspace-scoped), description, icon. For full property schemas use orient or GET /discover."
+    },
+    {
+      "name": "create-relation",
+      "title": "Create Relation",
+      "description": "Create a typed relation between two entities. Type is a free string — use conventions: 'related_to', 'parent_of', 'child_of', 'belongs_to', 'authored_by', 'depends_on', 'references', 'mentions'. Check get-connections first to avoid duplicates. May return 'proposed'. Builds the knowledge graph.\n\nRaycast adapter: check get-connections before linking to avoid duplicates."
+    },
+    {
+      "name": "attach-role",
+      "title": "Attach Role",
+      "description": "Attach a ROLE to an existing entity (Kind + Facets). A role — client, partner, prospect, investor, sponsor — is a FACET, never its own entity: an entity IS one kind (person, company) and HAS many roles. Resolve identity FIRST (ask / ask on strong signals like email / phone / website) so you attach the role to the REAL entity instead of creating a duplicate. Governed like any write: may return 'proposed' (a proposalId to review) — NEVER treat that as an error. Use list-profiles to find role slugs (profileKind='role') and which kinds they apply to (applicableKinds).\n\nRaycast adapter: find the entity with ask (or get-entity), then attach-role. Roles are facets, never new entities."
+    },
+    {
+      "name": "diagnose",
+      "title": "Diagnose Synap",
+      "description": "Understand what's happening / what's wrong — the pod's health door (the third door, alongside ask + capture). The MODE is derived from what you pass (never a tool name you choose): NO ARGS → whole-pod health (stuck runs, failed flows, review backlog + age, duplicate-proposal clusters, capability posture, agents hitting the daily cap) with a plain-language summary; `type` → a class as a surface (type:\"proposal\" = the review queue: pending count, oldest, duplicate clusters; type:\"session\" = stuck sessions; type:\"agent\" = agent roster + quality; type:\"capability\" = approved vs awaiting; type:\"run\" = per-flow failure counts); `id` → auto-detects what the id is (proposal / session / capability / automation-run / playbook-run / agent / entity) and explains its state + WHY; `agentId` → an agent's behavioural scorecard (approve/reject/revise rates, top rejection reasons, duplicate rate, daily-cap posture). Backward-compatible: `runId`+`flowType` → that run's activity timeline (a capture's decision + trace events, each with a machine-readable reason + fixHint); `flowType`/`flowId` → the run feed. USER-scoped automatically."
+    },
+    {
+      "name": "set-focus",
+      "title": "Set Synap Focus",
+      "description": "Pin the session to one workspace lens by name (sticky until cleared) — the explicit, visible alternative to silently scoping each call. Once set, treat that workspace as the default lens for creates/captures unless the user names another, and tell the user it is active. Pass an empty or 'clear' value to return pod-wide. The current focus is also echoed by orient."
+    },
+    {
+      "name": "start-session",
+      "title": "Start Focus Session",
+      "description": "Create a focus session — a goal-bound work session — to declare 'I'm starting work on X'. Scope it to a project (projectId) OR a workspace (workspaceId), at least one; project-scoped needs no workspace membership.\n\nRaycast adapter: declare only. Does not run the desk. Lead with the /open link. Need workspaceId or projectId (or an explicit Set Synap Focus). REST has no subjectEntityId — do not send one."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "podUrl",
+      "title": "Pod URL",
+      "description": "Your Synap data pod URL (optional — set automatically via 'Connect to Synap Pod')",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://your-pod.synap.live"
+    },
+    {
+      "name": "apiKey",
+      "title": "Hub Protocol API Key",
+      "description": "Your Synap Hub Protocol API key (optional — set automatically via 'Connect to Synap Pod')",
+      "type": "password",
+      "required": false,
+      "placeholder": "synap_hub_live_..."
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "description": "Optional local workspace preference for navigation. It never silently scopes AI or command requests.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty for pod-wide requests"
+    }
+  ],
+  "permissions": [
+    "browser-extension"
+  ],
+  "ai": {
+    "instructions": "Treat the connected Synap pod as the source of truth. Do not introduce yourself as a generic assistant.\n\nCLASSIFY before creating. Name the primary layer in one word, then act:\n- data — a thing to remember (company, note, decision, relation). Messy input → capture. Known kind+fields → create-entity. Do not fake a view or a session as a note.\n- view — how to SEE existing things (saved list, grouping, dashboard). list-views first so you do not duplicate. create-view is allowed (governed; bounce /open). You cannot draw or arrange widgets in Raycast — after a bento shell, point at Synap Browser. Do not invent a new database or a vendor mini-app. Never duplicate entities into a new app.\n- capability — access beyond the graph (connect Gmail, send mail, live search). list-capabilities is the pack catalog (status + nextAction). list-actions is only verbs runnable NOW. nextAction add|connect|enable → get-capability-brief and bounce the /open link; Raycast cannot complete OAuth or apply a pack. nextAction run → list-actions then run-action. get-action-brief is for a runnable action name, not a pack key. Never implement a capability by creating a view.\n- session — \"I'm starting work on X\". Use start-session with a ONE-LINE goal. Bounce with the /open link. Do not turn a session into a task.\n- rule — when/then behaviour. Do not author automations here. If a ready verb exists, run-action; otherwise point to Synap.\n\nIf the user asked for TWO layers (connect Gmail AND a mail view), name both and do two steps. Never merge a capability install into a view create.\n\nVocabulary: thing (entity), card/view, capability (pack, e.g. Gmail), session, rule. Not mini-app. Not \"Google contact\" as a kind.\n\nStart pod-wide. Send workspaceId only when the user names a workspace, a returned plan requires it, or they have Set Synap Focus (orient echoes it). ask before answering about the user's world and before creating (dedup). Writes need the Raycast agent key. proposed = success — lead with the reviewUrl /open link, never retry. applied = landed. degraded or needsClarification wrote nothing.\n\nNever invent a workspace, kind, or card renderer. Never approve."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "@synap-core/external-connect-client": "file:../synap-app/packages/core/external-connect-client",
+    "@synap/hub-rest-client": "file:../synap-backend/packages/hub-rest-client",
+    "ray": "^0.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.12.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "gen:ai-tools": "node scripts/gen-ai-tools.mjs",
+    "check:mcp-drift": "node scripts/check-mcp-raycast-drift.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
