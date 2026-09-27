@@ -29,6 +29,7 @@ export function fakePlatform(overrides: Partial<Platform> = {}): Platform & { sc
     homeDir: overrides.homeDir ?? (() => "/Users/me"),
     readFiles: overrides.readFiles ?? (async () => []),
     openUrl: overrides.openUrl ?? unexpected("openUrl"),
+    pressWebElement: overrides.pressWebElement ?? unexpected("pressWebElement"),
     webPages: overrides.webPages ?? (async () => []),
     querySqlite: overrides.querySqlite ?? (async () => []),
     listDir: overrides.listDir ?? (async () => []),

@@ -143,3 +143,43 @@ private func firstStaticText(_ element: AXUIElement) -> String? {
   }
   return text
 }
+
+/// Presses the `occurrence`-th (0-based) element of a web UI whose DOM classes include `className` and whose
+/// description or title is `label`, inside an element with DOM class `within` (any, if empty) and not inside one
+/// with DOM class `outside` (if not empty), in the windows whose title contains `window` (all, if empty), front
+/// to back. For web tab bars whose tabs are plain
+/// elements identified only by their classes (Obsidian's "workspace-tab-header"). False if not found.
+func pressWebElementMatching(
+  bundleId: String, window: String, within: String, outside: String, className: String, label: String,
+  occurrence: Int
+) -> Bool {
+  guard let pid = pid(of: bundleId) else { return false }
+  let app = appElement(pid)
+  AXUIElementSetAttributeValue(app, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+  func classes(_ element: AXUIElement) -> [String] { attribute(element, "AXDOMClassList") as? [String] ?? [] }
+  var matches: [AXUIElement] = []
+  func visit(_ element: AXUIElement, _ inside: Bool, _ depth: Int) {
+    let own = classes(element)
+    if !outside.isEmpty, own.contains(outside) { return }
+    let inside = inside || own.contains(within)
+    if inside, own.contains(className),
+      string(element, kAXDescriptionAttribute) == label || string(element, kAXTitleAttribute) == label
+    {
+      matches.append(element)
+      return
+    }
+    guard depth > 0 else { return }
+    for child in children(element) { visit(child, inside, depth - 1) }
+  }
+  for attempt in 0..<2 {
+    // The first time accessibility is switched on, Chromium needs a moment to build the tree.
+    if attempt > 0 { Thread.sleep(forTimeInterval: 0.4) }
+    for win in children(app, kAXWindowsAttribute)
+    where window.isEmpty || (string(win, kAXTitleAttribute) ?? "").contains(window) {
+      visit(win, within.isEmpty, 24)
+    }
+    if !matches.isEmpty { break }
+  }
+  guard occurrence < matches.count else { return false }
+  return AXUIElementPerformAction(matches[occurrence], kAXPressAction as CFString) == .success
+}

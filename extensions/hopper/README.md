@@ -2,7 +2,7 @@
 
 ![Hopper demo: Back, Forward, Toggle, History, and Search](media/demo.gif)
 
-Jump to any app, tab, or agent on your Mac.
+Jump to any app, tab, or agent on your Mac. [addhopper.com](https://addhopper.com)
 
 Cmd+Tab only knows "most recent" and reshuffles every time you switch, so getting back to the app you were in three switches ago is guesswork. Hopper lets you step back through your recently used apps, and forward again, exactly like history in Safari or VS Code. And when what you want is a browser tab, a terminal tab, or a Claude session, search them all in one list and jump straight there. And when you have AI agents going in several places (Claude Code in a terminal and in the Claude app, Cursor, Codex, herdr), see which ones need you and jump to the one waiting longest.
 
@@ -12,7 +12,7 @@ Cmd+Tab only knows "most recent" and reshuffles every time you switch, so gettin
 - **Forward**: retrace a Back step.
 - **Toggle**: flip between your two most recent apps. Run it again to switch back.
 - **History**: list running apps from most to least recently used and jump to any of them.
-- **Search**: search everything open on your Mac and jump straight to it: browser tabs, terminal tabs, herdr workspaces, Claude and Muse chat sessions, Notion tabs, any app's windows, and AI agents (with their status). A **Recently Closed** section reopens browser tabs, Notion pages, and documents you've closed.
+- **Search**: search everything open on your Mac and jump straight to it: browser tabs, terminal tabs, herdr workspaces, Claude and Muse chat sessions, Notion and Obsidian tabs, any app's windows, and AI agents (with their status). A **Recently Closed** section reopens browser tabs, Notion pages, Obsidian notes, and documents you've closed.
 - **Search Current App**: the same, for the app you're in.
 - **Agents**: the AI agents running on your Mac (Claude Code, Codex, Cursor, herdr, agent CLIs), grouped by status: **Needs You**, **Done**, **Working**, **Idle**. Jump to where one runs: its terminal pane, its herdr pane, or its session in the Claude app or Cursor.
 - **Next Agent**: jump to the agent that has waited longest for you: one that needs your input or approval first, then one that finished a turn you haven't seen. Run it again for the next one.
@@ -37,7 +37,7 @@ Back, Forward, Toggle, and History need no permissions and no background process
 Search and Search Current App ask for permissions the first time:
 
 - **Automation**: macOS asks once per app ("Raycast wants to control Google Chrome"). Needed for browsers and terminals.
-- **Accessibility**: for other apps' windows, for Claude and Muse sessions and Notion tabs, and to recognize Safari's private windows (without it, Safari tabs aren't listed). Grant it to Raycast in System Settings → Privacy & Security → Accessibility.
+- **Accessibility**: for other apps' windows, for Claude and Muse sessions and Notion and Obsidian tabs, and to recognize Safari's private windows (without it, Safari tabs aren't listed). Grant it to Raycast in System Settings → Privacy & Security → Accessibility.
 
 An app Hopper can't read shows under **Unavailable**, with a shortcut to the right settings pane.
 
@@ -65,11 +65,12 @@ Agents and Next Agent read the agents' own status files and local APIs, and need
 | Claude                                         | Code sessions (all projects, most recent first, even with the sidebar hidden); Chat and Cowork conversations from the sidebar, plus ones you've opened recently when the sidebar is hidden (opened by link) |
 | Muse                                           | Main chat and side chats while the side chats panel is open; otherwise Muse's window                                                                                                                        |
 | Notion                                         | Tabs of the front window with each page's parent pages (opened by Notion's link), then its other windows                                                                                                    |
+| Obsidian                                       | Tabs of every open vault, in all its windows, with each note's folder                                                                                                                                       |
 | Any other app                                  | Windows, and tabs if the window has a native tab bar                                                                                                                                                        |
 
-Apps are ordered by recent use; within an app, active tabs come first. herdr isn't an app: its workspaces and tabs are listed under the terminal running herdr, and picking one switches herdr there and brings that terminal forward (in iTerm, cmux, and Terminal, the very tab and split running herdr). Search forgives typos ("caude" finds Claude) and matches app names first: typing an app's name lists that app's own tabs before other tabs that mention it. Picking an entry selects it in its app and brings the app to the front. **Copy URL** and **Copy Title** are in the action panel. Claude's Code sessions come from Claude's own session list and open with its deep link. Muse chats and Claude Chat conversations are read from the on-screen sidebar (Claude conversations you've opened open by link even with the sidebar hidden); Notion tabs are read from its tab bar, and their parent pages from Notion's local cache (full path on hover; searching a parent's name finds its pages). An app update can change what Hopper finds; if nothing is found, the app's windows are listed instead. Incognito and private browser windows are never listed, cached, or jumped to.
+Apps are ordered by recent use; within an app, active tabs come first. herdr isn't an app: its workspaces and tabs are listed under the terminal running herdr, and picking one switches herdr there and brings that terminal forward (in iTerm, cmux, and Terminal, the very tab and split running herdr). Search forgives typos ("caude" finds Claude) and matches app names first: typing an app's name lists that app's own tabs before other tabs that mention it. Picking an entry selects it in its app and brings the app to the front. **Copy URL** and **Copy Title** are in the action panel. Claude's Code sessions come from Claude's own session list and open with its deep link. Muse chats and Claude Chat conversations are read from the on-screen sidebar (Claude conversations you've opened open by link even with the sidebar hidden); Notion tabs are read from its tab bar, and their parent pages from Notion's local cache (full path on hover; searching a parent's name finds its pages). Obsidian tabs are read from each open vault's saved layout (`.obsidian/workspace.json`) and selected in its tab bar. An app update can change what Hopper finds; if nothing is found, the app's windows are listed instead. Incognito and private browser windows are never listed, cached, or jumped to.
 
-**Recently Closed** lists browser tabs, Notion pages, and documents (TextEdit, Preview, Pages...) that were open the last time Search looked and are gone now, newest first, for a week (up to 100). **Reopen** opens the page in the same browser (Notion: a new tab) or the file in the same app; **Remove from Recently Closed** and **Clear Recently Closed** tidy it. Hopper only notices what it saw: a tab opened and closed between two uses of Search isn't there. Terminals, chats, and private windows are never recorded.
+**Recently Closed** lists browser tabs, Notion pages, Obsidian notes, and documents (TextEdit, Preview, Pages...) that were open the last time Search looked and are gone now, newest first, for a week (up to 100). **Reopen** opens the page in the same browser (Notion and Obsidian: a new tab) or the file in the same app; **Remove from Recently Closed** and **Clear Recently Closed** tidy it. Hopper only notices what it saw: a tab opened and closed between two uses of Search isn't there. Terminals, chats, and private windows are never recorded.
 
 ### Agents
 

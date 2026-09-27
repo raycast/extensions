@@ -25,6 +25,8 @@ export interface Platform {
   openSidebarRow(bundleId: string, query: SidebarQuery, name: string): Promise<boolean>;
   /** Description or title of the first element whose description or title ends with `suffix`, minus the suffix. */
   labelWithSuffix(bundleId: string, suffix: string): Promise<string | undefined>;
+  /** Press the `occurrence`-th (0-based) element matching `query` labeled `label`. False if not found. */
+  pressWebElement(bundleId: string, query: WebElementQuery, label: string, occurrence: number): Promise<boolean>;
   /** Title and URL of each web page open in the app, through Accessibility (Notion: one per tab). */
   webPages(bundleId: string): Promise<WebPage[]>;
   /** JSON value saved under `key` (namespaced by the caller), or `fallback`. */
@@ -105,6 +107,18 @@ export interface SidebarQuery {
   namePattern?: string;
   /** Open rows by focusing them and sending Return, for apps that ignore AXPress (Muse). */
   keyboard?: boolean;
+}
+
+/** Locates elements of a web UI (Electron) through Accessibility, by DOM class and label. */
+export interface WebElementQuery {
+  /** Only windows whose title contains this, front to back; all windows if omitted. */
+  window?: string;
+  /** DOM class of an element the matches must be inside, e.g. Obsidian's "mod-root" editor area. */
+  within?: string;
+  /** DOM class of an element the matches must not be inside, e.g. Obsidian's popout windows' "workspace-window". */
+  outside?: string;
+  /** DOM class of the elements, e.g. "workspace-tab-header". Their description or title is their label. */
+  className: string;
 }
 
 export interface WebPage {

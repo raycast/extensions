@@ -9,11 +9,23 @@ import { herdr } from "./sources/herdr";
 import { iterm } from "./sources/iterm";
 import { muse } from "./sources/muse";
 import { notion } from "./sources/notion";
+import { obsidian } from "./sources/obsidian";
 import { safari } from "./sources/safari";
 import { terminal } from "./sources/terminal";
 import { windows } from "./sources/windows";
 
-export const SOURCES: readonly TabSource[] = [chromium, safari, cmux, ghostty, iterm, terminal, claude, muse, notion];
+export const SOURCES: readonly TabSource[] = [
+  chromium,
+  safari,
+  cmux,
+  ghostty,
+  iterm,
+  terminal,
+  claude,
+  muse,
+  notion,
+  obsidian,
+];
 
 /** Sources of places inside other apps (TabSource.discover), read alongside every list. */
 export const DISCOVERED: readonly TabSource[] = [herdr];

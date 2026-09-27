@@ -12,6 +12,7 @@ import {
   focusWindow,
   labelWithSuffix,
   openSidebar,
+  pressWebElement,
   processes,
   sidebarRows,
   webPages,
@@ -39,6 +40,16 @@ export const macosPlatform: Platform = {
   openSidebarRow: (bundleId, query, name) =>
     openSidebar(bundleId, query.container, query.rowRole, name, query.namePattern ?? "", query.keyboard ?? false),
   labelWithSuffix: async (bundleId, suffix) => (await labelWithSuffix(bundleId, suffix)) ?? undefined,
+  pressWebElement: (bundleId, query, label, occurrence) =>
+    pressWebElement(
+      bundleId,
+      query.window ?? "",
+      query.within ?? "",
+      query.outside ?? "",
+      query.className,
+      label,
+      occurrence,
+    ),
   webPages: (bundleId) => webPages(bundleId),
   loadJson: (key, fallback) => readJson(key, fallback),
   saveJson: (key, value) => writeJson(key, value),

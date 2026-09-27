@@ -9,7 +9,16 @@
 import type { App, Platform } from "../platform/model";
 
 // Sources use these with their own types; they live with the Platform they describe.
-export type { App, AppWindows, AXWindow, Platform, SidebarQuery, SidebarRow, WebPage } from "../platform/model";
+export type {
+  App,
+  AppWindows,
+  AXWindow,
+  Platform,
+  SidebarQuery,
+  SidebarRow,
+  WebElementQuery,
+  WebPage,
+} from "../platform/model";
 
 /** Drives the list icon and search keywords. */
 export type TabKind = "tab" | "window" | "workspace" | "session" | "conversation";

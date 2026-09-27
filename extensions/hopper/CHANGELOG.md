@@ -13,6 +13,7 @@
 - README: recommended hotkeys for every command, clear of browser, terminal, and editor tab keys.
 - Claude Code sessions that haven't started yet (e.g. waiting to trust a folder) are listed as running.
 - Copy Resume Command for Claude Code and Codex sessions.
+- Obsidian tabs in Search: every open vault's tabs, in all its windows (popouts too), with each note's folder; closed notes reopen from Recently Closed.
 
 ## [Tabs] - {PR_MERGE_DATE}
 

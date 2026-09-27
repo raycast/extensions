@@ -50,6 +50,16 @@ import RaycastSwiftMacros
   readLabel(bundleId: bundleId, suffix: suffix)
 }
 
+/// Press an element of a web UI found by DOM class and label (Obsidian's tabs).
+@raycast func pressWebElement(
+  bundleId: String, window: String, within: String, outside: String, className: String, label: String,
+  occurrence: Int
+) -> Bool {
+  pressWebElementMatching(
+    bundleId: bundleId, window: window, within: within, outside: outside, className: className, label: label,
+    occurrence: occurrence)
+}
+
 /// Title and URL of each web page open in the app (Notion: one per tab).
 @raycast func webPages(bundleId: String) -> [WebPage] {
   readWebPages(bundleId: bundleId)
