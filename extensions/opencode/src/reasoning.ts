@@ -8,6 +8,8 @@ import type { Format } from "./console";
 
 const MODELS_DEV_URL = "https://models.dev/api.json";
 const CACHE_KEY = "reasoning-variants";
+const SUPPORT_CACHE_KEY = "reasoning-support";
+const SUPPORT_TTL = 5 * 60 * 1000;
 const EFFORTS = ["low", "medium", "high"];
 const ADAPTIVE_THINKING = { type: "adaptive", display: "summarized" };
 const ANTHROPIC_OUTPUT_TOKEN_MAX = 32_000;
@@ -32,12 +34,21 @@ type Variant = [id: string, options: Options];
 type Model = { id: string; format: Format; outputLimit?: number };
 type Protocol = (model: Model, support: Support) => Variant[];
 
+type SupportCache = { fetchedAt: number; etag: string | null; supports: Record<string, Support[]> };
+
 export async function loadReasoningSupport(): Promise<Record<string, Support[]>> {
+  const cached = readSupportCache();
+  if (cached && Date.now() - cached.fetchedAt < SUPPORT_TTL) return cached.supports;
   try {
-    const response = await fetch(MODELS_DEV_URL, { signal: AbortSignal.timeout(10_000) });
-    if (!response.ok) return {};
+    // models.dev has no per-provider endpoint, so revalidate with the ETag to skip re-downloading the whole catalog.
+    const response = await fetch(MODELS_DEV_URL, {
+      headers: cached?.etag ? { "If-None-Match": cached.etag } : {},
+      signal: AbortSignal.timeout(3_000),
+    });
+    if (response.status === 304 && cached) return writeSupportCache({ ...cached, fetchedAt: Date.now() });
+    if (!response.ok) return cached?.supports ?? {};
     const { opencode } = ModelsDev.parse(await response.json());
-    return Object.fromEntries(
+    const supports = Object.fromEntries(
       Object.entries(opencode.models).map(([id, model]) => [
         id,
         (model.reasoning_options ?? []).flatMap((option) => {
@@ -46,10 +57,21 @@ export async function loadReasoningSupport(): Promise<Record<string, Support[]>>
         }),
       ]),
     );
+    return writeSupportCache({ fetchedAt: Date.now(), etag: response.headers.get("etag"), supports });
   } catch {
     // Reasoning controls are optional; models still load without them.
-    return {};
+    return cached?.supports ?? {};
   }
+}
+
+function readSupportCache(): SupportCache | undefined {
+  const value = cache.get(SUPPORT_CACHE_KEY);
+  return value ? (JSON.parse(value) as SupportCache) : undefined;
+}
+
+function writeSupportCache(value: SupportCache) {
+  cache.set(SUPPORT_CACHE_KEY, JSON.stringify(value));
+  return value.supports;
 }
 
 export function resolveVariants(model: Model, supports: Support[]): Variant[] {
