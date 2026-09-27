@@ -1,5 +1,8 @@
 # Popcorn Raycast Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+- Add Windows platform support
+
 ## [Bug Fix] - 2025-06-18
 - Fixed major bug for streams not loading correctly
 - Added more addon support
