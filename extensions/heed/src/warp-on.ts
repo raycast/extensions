@@ -1,5 +1,5 @@
 import { tell } from "./heed";
 
 export default async function command() {
-  await tell("set/warpPointer/true", "Turning mouse follows focus on");
+  await tell("set/warpPointer/true", "Turning mouse follows focus on", "0.13.0");
 }
