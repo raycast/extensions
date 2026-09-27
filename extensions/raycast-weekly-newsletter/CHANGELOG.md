@@ -1,6 +1,6 @@
 # Raycast Weekly Newsletter Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Added AI tools to list recent Raycast Weekly posts and read full posts.
 - Added YAML evals for finding and summarizing posts.
