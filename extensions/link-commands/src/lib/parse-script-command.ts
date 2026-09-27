@@ -9,7 +9,7 @@ import type { ScriptArgument, ScriptCommand } from "./types";
  */
 const METADATA_PATTERN = /@raycast\.([A-Za-z][A-Za-z0-9]*)\s*(.*)$/;
 
-const HEADER_SCAN_LINES = 100;
+export const HEADER_SCAN_LINES = 100;
 
 const ARGUMENT_KEYS = ["argument1", "argument2", "argument3"] as const;
 
