@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MfaRequiredError, type Target } from "./lib/meross";
 import { MfaForm } from "./lib/mfa-form";
 import { getSession } from "./lib/session";
-import { applyPower, stateIcon, stateLabel } from "./lib/ui";
+import { applyPower, canSwitch, canToggle, stateIcon, stateLabel } from "./lib/ui";
 
 export default function Command() {
   const [mfaCode, setMfaCode] = useState<string>();
@@ -65,13 +65,20 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              {target.online && target.mode !== "unsupported" && (
+              {canSwitch(target) && (
                 <ActionPanel.Section>
-                  <Action
-                    title={target.on ? "Turn off" : "Turn on"}
-                    icon={target.on ? Icon.CircleDisabled : Icon.Power}
-                    onAction={() => setPower(target, !target.on)}
-                  />
+                  {canToggle(target) ? (
+                    <Action
+                      title={target.on ? "Turn off" : "Turn on"}
+                      icon={target.on ? Icon.CircleDisabled : Icon.Power}
+                      onAction={() => setPower(target, !target.on)}
+                    />
+                  ) : (
+                    <>
+                      <Action title="Turn on" icon={Icon.Power} onAction={() => setPower(target, true)} />
+                      <Action title="Turn off" icon={Icon.CircleDisabled} onAction={() => setPower(target, false)} />
+                    </>
+                  )}
                   <Action.CreateQuicklink
                     title="Create Toggle Quicklink"
                     quicklink={{

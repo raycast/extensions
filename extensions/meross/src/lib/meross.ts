@@ -239,12 +239,12 @@ export async function forgetStoredLogin() {
   await LocalStorage.removeItem(TOKEN_KEY);
 }
 
+/** Exact (case-insensitive) match only: a partial name could switch the wrong plug. */
 export function findTarget(targets: Target[], query: string): Target | undefined {
   const q = query.trim().toLowerCase();
   return (
     targets.find((t) => t.title.toLowerCase() === q) ??
-    targets.find((t) => t.deviceName.toLowerCase() === q && t.channel === 0) ??
-    targets.find((t) => t.title.toLowerCase().includes(q))
+    targets.find((t) => t.deviceName.toLowerCase() === q && t.channel === 0)
   );
 }
 

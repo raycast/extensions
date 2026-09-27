@@ -1,6 +1,16 @@
 import { Color, Icon, type Image } from "@raycast/api";
 import type { Target } from "./meross";
 
+/** The device accepts on/off commands. */
+export function canSwitch(target: Target) {
+  return target.online && target.mode !== "unsupported";
+}
+
+/** Toggling needs the current state; if reading it failed, only explicit on/off is safe. */
+export function canToggle(target: Target) {
+  return canSwitch(target) && target.on !== undefined;
+}
+
 export function stateLabel(target: Target) {
   if (!target.online) return "Offline";
   if (target.mode === "unsupported") return "Unsupported";

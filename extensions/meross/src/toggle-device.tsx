@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MfaRequiredError, type Target } from "./lib/meross";
 import { MfaForm } from "./lib/mfa-form";
 import { getSession } from "./lib/session";
-import { applyPower, stateIcon, stateLabel } from "./lib/ui";
+import { applyPower, canSwitch, canToggle, stateIcon, stateLabel } from "./lib/ui";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.ToggleDevice }>) {
   const [mfaCode, setMfaCode] = useState<string>();
@@ -25,7 +25,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Toggle
     return <MfaForm message={error.message} onSubmit={setMfaCode} />;
   }
 
-  const devices = (data ?? []).filter((t) => t.online && t.mode !== "unsupported");
+  const devices = (data ?? []).filter(canSwitch);
 
   async function setPower(target: Target, on: boolean) {
     try {
@@ -60,7 +60,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Toggle
           accessories={[{ tag: { value: stateLabel(target), color: target.on ? Color.Green : Color.SecondaryText } }]}
           actions={
             <ActionPanel>
-              <Action title="Toggle" icon={Icon.Switch} onAction={() => setPower(target, !target.on)} />
+              {canToggle(target) && (
+                <Action title="Toggle" icon={Icon.Switch} onAction={() => setPower(target, !target.on)} />
+              )}
               <Action title="Turn on" icon={Icon.Power} onAction={() => setPower(target, true)} />
               <Action title="Turn off" icon={Icon.CircleDisabled} onAction={() => setPower(target, false)} />
             </ActionPanel>
