@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.raycast/
+raycast-env.d.ts
+*.tsbuildinfo
