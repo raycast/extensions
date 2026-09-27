@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hl7-preview",
+  "title": "HL7 Preview",
+  "description": "Read HL7 v2 messages as one document: patient, orders with material, flagged results and notes, and every segment with named fields.",
+  "icon": "extension-icon.png",
+  "author": "daanmlab",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "preview-hl7",
+      "title": "Preview HL7",
+      "description": "Paste an HL7 file or message, or reopen a past view searchable by patient name.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "keywords": [
+    "hl7",
+    "health",
+    "medical",
+    "lab",
+    "ORU",
+    "ORM"
+  ]
+}
