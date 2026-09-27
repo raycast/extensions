@@ -84,11 +84,24 @@ export function EpisodeList({
     else onWatchedFilterChange("all");
   };
 
+  const watchedFilterAction = (
+    <Action
+      title={getFilterToggleTitle()}
+      onAction={handleFilterToggle}
+      icon={getFilterIcon()}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "f" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+      }}
+    />
+  );
+
   return (
     <List
       isLoading={isLoading}
       navigationTitle={`Episodes for "${media.name}"`}
       searchBarPlaceholder="Filter episodes..."
+      actions={<ActionPanel>{watchedFilterAction}</ActionPanel>}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter Season" value={selectedSeason} onChange={onSeasonChange}>
           <List.Dropdown.Item title="All Seasons" value="all" />
@@ -103,6 +116,10 @@ export function EpisodeList({
       }
       isShowingDetail
     >
+      <List.EmptyView
+        title="No Episodes"
+        description="Use the watched filter in the Actions menu to show episodes again."
+      />
       {seasonsToShow.map((season) => {
         const seasonEpisodes = filterEpisodes(episodesBySeason[Number(season)]);
         const watchedInSeason = getWatchedCount(media.id, Number(season));
@@ -176,7 +193,10 @@ export function EpisodeList({
                             markSeasonAsWatched(episode.season, episodesBySeason[episode.season], media.id);
                             if (nextSeason) onSeasonChange(nextSeason);
                           }}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                            Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                          }}
                           icon={Icon.Checkmark}
                         />
                         {selectedSeason !== "all" && (
@@ -185,7 +205,10 @@ export function EpisodeList({
                               <Action
                                 title="Previous Season"
                                 onAction={() => onSeasonChange(prevSeason)}
-                                shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+                                shortcut={{
+                                  macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+                                  Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+                                }}
                                 icon={Icon.Rewind}
                               />
                             )}
@@ -193,18 +216,16 @@ export function EpisodeList({
                               <Action
                                 title="Next Season"
                                 onAction={() => onSeasonChange(nextSeason)}
-                                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                                shortcut={{
+                                  macOS: { modifiers: ["cmd"], key: "arrowRight" },
+                                  Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+                                }}
                                 icon={Icon.Forward}
                               />
                             )}
                           </>
                         )}
-                        <Action
-                          title={getFilterToggleTitle()}
-                          onAction={handleFilterToggle}
-                          icon={getFilterIcon()}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                        />
+                        {watchedFilterAction}
                       </ActionPanel>
                     }
                   />

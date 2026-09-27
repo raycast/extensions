@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Application, open, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Application, Keyboard, open, Toast, showToast } from "@raycast/api";
 import { Stream, Media, Episode } from "../types";
 import { extractQualityFromTitle, extractSizeFromTitle, extractSourceFromTitle } from "../utils/streamUtils";
 
@@ -7,7 +7,7 @@ interface StreamListProps {
   media: Media | null;
   episode?: Episode | null;
   isLoading: boolean;
-  defaultStreamingApp: Application;
+  defaultStreamingApp: Application | undefined;
   streamingAppsArray: Application[];
   isEpisodeWatched?: (episodeId: string) => boolean;
   markEpisodeAsWatched?: (episode: Episode, seriesId: string) => void;
@@ -32,6 +32,12 @@ export function StreamList({
     : "Unknown";
 
   const watched = episode && isEpisodeWatched ? isEpisodeWatched(episode.id) : false;
+
+  // On a fresh install, the appPicker preference may resolve to undefined
+  // (e.g. the macOS default "IINA" doesn't exist on Windows). Fall back to
+  // the first available alternative app instead of crashing on `.name`.
+  const resolvedDefaultApp = defaultStreamingApp ?? streamingAppsArray[0];
+  const remainingStreamingApps = streamingAppsArray.filter((app) => app.path !== resolvedDefaultApp?.path);
 
   const openInApplication = async (stream: Stream, app: Application) => {
     console.log(
@@ -109,12 +115,14 @@ export function StreamList({
               }
               actions={
                 <ActionPanel>
-                  <Action
-                    title={`Open in ${defaultStreamingApp.name}`}
-                    onAction={() => openInApplication(stream, defaultStreamingApp)}
-                    icon={Icon.Play}
-                  />
-                  {streamingAppsArray.map((app: Application) => (
+                  {resolvedDefaultApp && (
+                    <Action
+                      title="Open in Player"
+                      onAction={() => openInApplication(stream, resolvedDefaultApp)}
+                      icon={Icon.Play}
+                    />
+                  )}
+                  {remainingStreamingApps.map((app: Application) => (
                     <Action
                       key={`${app.bundleId}`}
                       title={`Open in ${app.name}`}
@@ -125,12 +133,12 @@ export function StreamList({
                   <Action.OpenInBrowser
                     url={stream.url}
                     title="Open in Browser"
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                   <Action.CopyToClipboard
                     title="Copy Stream URL"
                     content={stream.url}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   {episode && media && isEpisodeWatched && markEpisodeAsWatched && markEpisodeAsUnwatched && (
                     <Action
