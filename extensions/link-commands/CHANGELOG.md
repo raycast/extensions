@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Move Environment to Subtitle] - {PR_MERGE_DATE}
+## [Move Environment to Subtitle] - 2026-09-27
 
 ### Added
 
