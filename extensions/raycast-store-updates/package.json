@@ -79,6 +79,13 @@
       "interval": "1h"
     }
   ],
+  "tools": [
+    {
+      "name": "find-store-updates",
+      "title": "Find Store Updates",
+      "description": "Find recent new and updated Raycast Store extensions, with descriptions, dates, and links. Can narrow results by keyword, update type, date range, or installed extensions."
+    }
+  ],
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.1.4",
     "@raycast/api": "^2.1.0",
@@ -90,11 +97,13 @@
     "@types/react": "19.2.14",
     "eslint": "^10.3.0",
     "prettier": "^3.8.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
+    "test": "vitest run",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
