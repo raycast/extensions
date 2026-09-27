@@ -5,13 +5,13 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   PokeAPI,
   Pokemon,
-  TypeChartType,
   Nature,
   Move,
   Ability,
   Item,
   Pokedex,
   PokemonDex,
+  Type,
 } from "../types";
 
 const cache = new Cache();
@@ -56,10 +56,10 @@ async function fetchDataWithCaching<T>(
             return parsed.value;
           }
         } else {
-          console.warn(`Invalid cached data for key: ${key}`);
+          // console.warn(`Invalid cached data for key: ${key}`);
         }
-      } catch (error) {
-        console.error(`Error parsing cached data for key: ${key}`, error);
+      } catch {
+        // console.error(`Error parsing cached data for key: ${key}`);
       }
     }
   }
@@ -329,6 +329,16 @@ export const fetchPokemon = async (
               }
             }
           }
+          pokemonstats {
+            base_stat
+            effort
+            stat {
+              name
+              statnames(where: {language_id: {_eq: $language_id}}) {
+                name
+              }
+            }
+          }
           pokemontypes {
             type {
               id
@@ -538,7 +548,7 @@ export const fetchMove = async (move_id: number): Promise<Move | undefined> => {
   return fetchDataWithCaching(query, variables, "move");
 };
 
-export const fetchTypes = async (): Promise<TypeChartType[] | undefined> => {
+export const fetchTypes = async (): Promise<Type[] | undefined> => {
   const query = `query types($language_id: Int) {
     type(where: {id: {_lte: 18}}) {
       name
@@ -561,7 +571,7 @@ export const fetchTypes = async (): Promise<TypeChartType[] | undefined> => {
 
   const variables = { language_id };
 
-  return fetchDataWithCaching<TypeChartType[]>(
+  return fetchDataWithCaching<Type[]>(
     query,
     variables,
     "type",
@@ -632,7 +642,6 @@ export const fetchItems = async (): Promise<Item[] | undefined> => {
     item {
       id
       name
-      cost
       itemnames(where: {language_id: {_eq: $language_id}}) {
         name
       }
@@ -666,7 +675,6 @@ export const fetchItem = async (item_id: number): Promise<Item | undefined> => {
     item(where: {id: {_eq: $item_id}}) {
       id
       name
-      cost
       itemnames(where: {language_id: {_eq: $language_id}}) {
         name
       }
@@ -689,6 +697,32 @@ export const fetchItem = async (item_id: number): Promise<Item | undefined> => {
       }
       itemflavortexts(where: {language_id: {_eq: $language_id}}) {
         flavor_text
+        versiongroup {
+          name
+          generation {
+            name
+            generationnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          versions {
+            name
+            versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
+      }
+      itemprices {
+        purchase_price
+        sell_price
+        currency_id
+        currency {
+          name
+          currencynames {
+            name
+          }
+        }
         versiongroup {
           name
           generation {

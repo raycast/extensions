@@ -1,7 +1,7 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { Name, PokemonType, TypeChartType } from "../types";
+import { Name, PokemonType, Type } from "../types";
 
-type SpriteMode = "bw" | "sv" | "official";
+type SpriteMode = "bw" | "sv" | "go" | "official";
 
 type PokemonFormRef = {
   form_name?: string;
@@ -16,22 +16,34 @@ export const nationalDexNumber = (id: number) => {
   return `#${id.toString().padStart(4, "0")}`;
 };
 
-const getImageId = (id: number, form?: PokemonFormRef) => {
-  const pokemonId = form?.pokemon_id || id;
+const getImageId = (id: number, form?: PokemonFormRef): string => {
+  // Use the form's specific pokemon_id if available, otherwise fallback to the dex id
+  const targetId = form?.pokemon_id ?? id;
 
-  let name = form?.variety ? `${id}-${form.form_name}` : pokemonId.toString();
+  switch (artwork) {
+    case "official": {
+      if (!shiny) {
+        const paddedId = id.toString().padStart(3, "0");
+        // If it's a specific form index > 0, append the suffix (e.g., 003_f2)
+        return form?.idx ? `${paddedId}_f${form.idx + 1}` : paddedId;
+      }
+      break;
+    }
 
-  if (artwork === "official" && !shiny) {
-    name = form?.idx
-      ? `${id.toString().padStart(3, "0")}_f${form.idx + 1}`
-      : id.toString().padStart(3, "0");
+    case "sv":
+    case "go": {
+      // If it's the base form (idx === 0) or has no form name, just use the dex id
+      if (!form?.form_name || form.idx === 0) {
+        return id.toString();
+      }
+      return `${id}-${form.form_name}`;
+    }
   }
 
-  if (artwork === "sv" && form?.form_name) {
-    name = form.idx === 0 ? id.toString() : `${id}-${form.form_name}`;
-  }
-
-  return name;
+  // Default fallback (e.g., standard sprites, or official-shiny)
+  return form?.variety && form.form_name
+    ? `${targetId}-${form.form_name}`
+    : targetId.toString();
 };
 
 const getBlackWhiteSprite = (id: number, form?: PokemonFormRef) => {
@@ -43,10 +55,20 @@ const getBlackWhiteSprite = (id: number, form?: PokemonFormRef) => {
     : `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/${name}.png`;
 };
 
-const getScarletVioletSprite = (id: number, form?: PokemonFormRef) => {
+const getPokedexAssets = (id: number, form?: PokemonFormRef) => {
   const name = getImageId(id, form);
 
-  return `https://raw.githubusercontent.com/anhthang/sv-sprites/refs/heads/main/sprites/${name}.png`;
+  const folder = artwork === "sv" ? "scarlet_violet" : "go";
+
+  // The pokedex-assets repo doesn't have a scarlet_violet/shiny folder yet,
+  // so fall back to the regular SV sprite instead of a broken image.
+  if (shiny && folder === "scarlet_violet") {
+    return `https://raw.githubusercontent.com/anhthang/pokedex-assets/refs/heads/main/assets/${folder}/${name}.png`;
+  }
+
+  return shiny
+    ? `https://raw.githubusercontent.com/anhthang/pokedex-assets/refs/heads/main/assets/${folder}/shiny/${name}.png`
+    : `https://raw.githubusercontent.com/anhthang/pokedex-assets/refs/heads/main/assets/${folder}/${name}.png`;
 };
 
 const getOfficialArtwork = (id: number, form?: PokemonFormRef) => {
@@ -63,7 +85,8 @@ export const getPokemonImage = (id: number, form?: PokemonFormRef) => {
     case "bw":
       return getBlackWhiteSprite(id, form);
     case "sv":
-      return getScarletVioletSprite(id, form);
+    case "go":
+      return getPokedexAssets(id, form);
     case "official":
     default:
       return getOfficialArtwork(id, form);
@@ -73,6 +96,7 @@ export const getPokemonImage = (id: number, form?: PokemonFormRef) => {
 const spriteSize: Record<SpriteMode, number> = {
   bw: 96,
   sv: 128,
+  go: 144,
   official: 144,
 };
 
@@ -115,7 +139,7 @@ export const getLocalizedName = (
 
 export const calculateEffectiveness = (
   types: PokemonType[],
-  allTypes: TypeChartType[],
+  allTypes: Type[],
 ): Record<string, Detail.Metadata.TagList.Item.Props[]> => {
   const effectivenessMap = new Map<string, number>();
   const typeNameMap = new Map<string, string>();
@@ -151,21 +175,100 @@ export const calculateEffectiveness = (
       weak.push({
         text: `${factor}x ${typeNameMap.get(type)}`,
         color: typeColor[type],
+        icon: `types/${type}.svg`,
       });
     } else if (factor < 1 && factor > 0) {
       resistant.push({
         text: `${factor}x ${typeNameMap.get(type)}`,
         color: typeColor[type],
+        icon: `types/${type}.svg`,
       });
     } else if (factor === 0) {
       immune.push({
         text: `${typeNameMap.get(type)}`,
         color: typeColor[type],
+        icon: `types/${type}.svg`,
       });
     }
   });
 
   return { normal, weak, immune, resistant };
+};
+
+export const calculateStrengths = (
+  types: PokemonType[],
+  allTypes: Type[],
+): Record<string, Detail.Metadata.TagList.Item.Props[]> => {
+  const effectivenessMap = new Map<string, number>();
+  const typeNameMap = new Map<string, string>();
+
+  // Iterate over all possible types, treating them as the "defender"
+  allTypes.forEach((defender) => {
+    let maxDamageFactor = 0; // Track the best multiplier we can achieve
+
+    types.forEach((pType) => {
+      // Find the full Type object for our Pokémon's attacking type
+      const attacker = allTypes.find(
+        (t) => t.name === pType.type.name || t.id === pType.type.id,
+      );
+
+      let damageFactor = 1; // Default to neutral damage (1x)
+
+      if (attacker) {
+        // Find how this attacking type affects the current defender
+        const efficacy = attacker.typeefficacies.find(
+          (eff) => eff.target_type_id === defender.id,
+        );
+
+        if (efficacy) {
+          damageFactor = efficacy.damage_factor / 100;
+        }
+      }
+
+      // Offensive coverage takes the best possible multiplier among its STAB types
+      if (damageFactor > maxDamageFactor) {
+        maxDamageFactor = damageFactor;
+      }
+    });
+
+    // Only track non-neutral matchups for the final output
+    if (maxDamageFactor !== 1 && types.length > 0) {
+      effectivenessMap.set(defender.name, maxDamageFactor);
+      typeNameMap.set(
+        defender.name,
+        getLocalizedName(defender.typenames, defender.name),
+      );
+    }
+  });
+
+  const normal: Detail.Metadata.TagList.Item.Props[] = [];
+  const superEffective: Detail.Metadata.TagList.Item.Props[] = [];
+  const notVeryEffective: Detail.Metadata.TagList.Item.Props[] = [];
+  const noEffect: Detail.Metadata.TagList.Item.Props[] = [];
+
+  effectivenessMap.forEach((factor, type) => {
+    if (factor > 1) {
+      superEffective.push({
+        text: `${factor}x ${typeNameMap.get(type)}`,
+        color: typeColor[type],
+        icon: `types/${type}.svg`,
+      });
+    } else if (factor < 1 && factor > 0) {
+      notVeryEffective.push({
+        text: `${factor}x ${typeNameMap.get(type)}`,
+        color: typeColor[type],
+        icon: `types/${type}.svg`,
+      });
+    } else if (factor === 0) {
+      noEffect.push({
+        text: `${typeNameMap.get(type)}`,
+        color: typeColor[type],
+        icon: `types/${type}.svg`,
+      });
+    }
+  });
+
+  return { normal, superEffective, notVeryEffective, noEffect };
 };
 
 export const localeName = (
@@ -186,4 +289,13 @@ export const fixItemEffectText = (raw: string) => {
     .replaceAll("\n:", ":\n")
     .replaceAll("\n\n", "\n")
     .replaceAll("    ", "");
+};
+
+export const buildEvolutionHeader = (specy: {
+  id: number;
+  name: string;
+  pokemonspeciesnames: { name: string; language_id: number }[];
+}) => {
+  const displayName = getLocalizedName(specy.pokemonspeciesnames, specy.name);
+  return `${displayName} ${nationalDexNumber(specy.id)}`;
 };

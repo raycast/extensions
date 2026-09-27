@@ -2,10 +2,12 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
+import uniqBy from "lodash.uniqby";
 import debounce from "lodash.debounce";
 import { useCallback, useMemo, useState } from "react";
 import { fetchItems, fetchItem } from "./api";
 import Descriptions from "./components/description";
+import ItemPrices from "./components/item_price";
 import { fixItemEffectText, getLocalizedName } from "./utils";
 
 export default function PokeItems(props: { arguments: { search?: string } }) {
@@ -34,14 +36,16 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
     }
   };
 
+  const uniqueItems = useMemo(() => uniqBy(items, "id"), [items]);
+
   const pockets = useMemo(() => {
-    return groupBy(items, (i) =>
+    return groupBy(uniqueItems, (i) =>
       getLocalizedName(
         i.itemcategory?.itempocket?.itempocketnames,
         i.itemcategory?.itempocket?.name,
       ),
     );
-  }, [items]);
+  }, [uniqueItems]);
 
   const uniquePockets = useMemo(() => {
     return Object.keys(pockets || {}).sort();
@@ -109,7 +113,7 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
 
               return (
                 <List.Item
-                  key={itemData.name}
+                  key={itemData.id}
                   id={String(itemData.id)}
                   title={itemName}
                   icon={itemIcon}
@@ -133,12 +137,6 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
                             title="Category"
                             text={categoryName}
                           />
-                          {itemData.cost ? (
-                            <List.Item.Detail.Metadata.Label
-                              title="Price"
-                              text={`${itemData.cost} Poké Dollars`}
-                            />
-                          ) : null}
                         </List.Item.Detail.Metadata>
                       }
                     />
@@ -159,6 +157,18 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
                               />
                             }
                           />
+                          {item.itemprices && item.itemprices.length > 0 && (
+                            <Action.Push
+                              title="Price"
+                              icon={Icon.List}
+                              target={
+                                <ItemPrices
+                                  name={itemName}
+                                  prices={item.itemprices}
+                                />
+                              }
+                            />
+                          )}
                         </ActionPanel.Section>
                       </ActionPanel>
                     )

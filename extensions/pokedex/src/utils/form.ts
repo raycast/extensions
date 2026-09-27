@@ -3,7 +3,7 @@ import { PokemonFormType } from "../types";
 
 const { artwork } = getPreferenceValues();
 
-export type SpriteMode = "bw" | "sv" | "official";
+export type SpriteMode = "bw" | "sv" | "go" | "official";
 
 export type FormRule = {
   /**
@@ -52,6 +52,14 @@ export const FORM_RULES: Record<number, FormRule> = {
 
   658: {
     varieties: { official: ["greninja", "greninja-ash", "greninja-mega"] },
+  },
+
+  664: {
+    forms: { official: [], bw: [], sv: [], go: [] },
+  },
+
+  665: {
+    forms: { official: [], bw: [], sv: [], go: [] },
   },
 
   666: {
