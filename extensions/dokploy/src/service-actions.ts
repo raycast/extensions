@@ -75,6 +75,27 @@ export interface ActionableService {
   appName: string;
 }
 
+/** The bare request behind every lifecycle action, with no confirmation or toast - throws on failure. */
+export async function callServiceAction(
+  url: string,
+  headers: Record<string, string>,
+  service: ActionableService,
+  action: LifecycleAction,
+) {
+  const body: Record<string, string> = { [LIFECYCLE_ID_FIELDS[service.type]]: service.id };
+  if (action === "reload") body.appName = service.appName;
+
+  const response = await fetch(url + `${service.type}.${action}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const err = (await response.json()) as ErrorResult;
+    throw new Error(err.message);
+  }
+}
+
 export async function runServiceAction(
   url: string,
   headers: Record<string, string>,
@@ -96,18 +117,7 @@ export async function runServiceAction(
 
   const toast = await showToast(Toast.Style.Animated, ACTION_PROGRESS[action], service.name);
   try {
-    const body: Record<string, string> = { [LIFECYCLE_ID_FIELDS[service.type]]: service.id };
-    if (action === "reload") body.appName = service.appName;
-
-    const response = await fetch(url + `${service.type}.${action}`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      const err = (await response.json()) as ErrorResult;
-      throw new Error(err.message);
-    }
+    await callServiceAction(url, headers, service, action);
     toast.style = Toast.Style.Success;
     toast.title = ACTION_PAST[action];
     onSuccess?.();

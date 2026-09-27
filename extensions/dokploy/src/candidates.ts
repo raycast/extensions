@@ -158,12 +158,17 @@ export interface CandidateFilter {
   instance?: string;
   /** Matched case-insensitively against a project's name. */
   project?: string;
+  /** Matched case-insensitively against an environment's name (a legacy project's own name). */
+  environment?: string;
   kind?: DeployType;
 }
 
 export function matchesFilter(candidate: Candidate, filter: CandidateFilter): boolean {
   if (filter.instance && !candidate.instanceName.toLowerCase().includes(filter.instance.toLowerCase())) return false;
   if (filter.project && !candidate.projectName.toLowerCase().includes(filter.project.toLowerCase())) return false;
+  if (filter.environment && !candidate.environmentName.toLowerCase().includes(filter.environment.toLowerCase())) {
+    return false;
+  }
   if (filter.kind && candidate.deployType !== filter.kind) return false;
   return true;
 }
@@ -179,9 +184,9 @@ export async function resolveCandidate(nameOrId: string, filter: CandidateFilter
   if (!hasInstances) throw new Error("No Dokploy instances are configured in this extension yet - add one first.");
 
   // Failures unrelated to this lookup shouldn't block it - narrow to instances the current
-  // `instance` filter doesn't already rule out. A `project`/`kind` filter can't rule one out this
-  // way: an unreached instance's projects/kinds are unknown, so it could still hold a same-named
-  // service under either.
+  // `instance` filter doesn't already rule out. A `project`/`environment`/`kind` filter can't rule
+  // one out this way: an unreached instance's contents are unknown, so it could still hold a
+  // same-named service under any of them.
   const relevantFailures = filter.instance
     ? failedInstances.filter((failed) => failed.name.toLowerCase().includes(filter.instance!.toLowerCase()))
     : failedInstances;
@@ -213,7 +218,7 @@ export async function resolveCandidate(nameOrId: string, filter: CandidateFilter
       )
       .join("; ");
     throw new Error(
-      `Multiple services match "${nameOrId}": ${list}. Narrow the search with "project", "kind", or "instance".`,
+      `Multiple services match "${nameOrId}": ${list}. Narrow the search with "project", "environment", "kind", or "instance".`,
     );
   }
   // Exactly one reachable match - but an instance this search couldn't rule out is still

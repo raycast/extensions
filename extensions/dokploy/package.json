@@ -91,6 +91,16 @@
       "name": "get-deployment-logs",
       "title": "Get Deployment Logs",
       "description": "Read the build log of a Dokploy deployment - the log to check when a deploy failed."
+    },
+    {
+      "name": "deploy-service",
+      "title": "Deploy Service",
+      "description": "Deploy a Dokploy service after you confirm: rebuild an application or Compose stack from its latest source, or restart a database from its image with its data kept."
+    },
+    {
+      "name": "control-service",
+      "title": "Control Service",
+      "description": "Start, stop, or reload (restart) a Dokploy service after you confirm."
     }
   ],
   "ai": {
@@ -220,6 +230,60 @@
                 "service": {
                   "includes": "api"
                 }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Deploy the api service in staging",
+        "mocks": {
+          "deploy-service": {
+            "service": "api",
+            "kind": "application",
+            "instance": "Staging",
+            "project": "Main",
+            "environment": "staging",
+            "message": "Deployment queued for api. The build runs on the server - use list-deployments or get-deployment-logs to see how it went."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "deploy-service",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                },
+                "environment": {
+                  "includes": "staging"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Stop the worker service",
+        "mocks": {
+          "control-service": {
+            "service": "worker",
+            "kind": "application",
+            "action": "stop",
+            "instance": "Production",
+            "project": "Main",
+            "environment": "production"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "control-service",
+              "arguments": {
+                "service": {
+                  "includes": "worker"
+                },
+                "action": "stop"
               }
             }
           }

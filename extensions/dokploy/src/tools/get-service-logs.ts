@@ -15,6 +15,8 @@ type Input = {
   container?: string;
   /** Narrows the lookup when more than one project has a service with this name. */
   project?: string;
+  /** Narrows the lookup when one project has a service with this name in more than one environment, e.g. "staging". */
+  environment?: string;
   /** Narrows the lookup to one kind of service. */
   kind?: DeployType;
   /** Narrows the lookup to one configured instance, by name. */
@@ -34,6 +36,7 @@ export default async function tool(input: Input) {
   const candidate = await resolveCandidate(input.service, {
     instance: input.instance,
     project: input.project,
+    environment: input.environment,
     kind: input.kind,
   });
   const tail = Math.max(1, Math.min(input.lines ?? DEFAULT_LINES, MAX_LINES));

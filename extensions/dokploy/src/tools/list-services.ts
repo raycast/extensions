@@ -5,6 +5,8 @@ type Input = {
   instance?: string;
   /** Only return services in projects whose name contains this, case-insensitively. */
   project?: string;
+  /** Only return services in environments whose name contains this, case-insensitively, e.g. "staging". */
+  environment?: string;
   /** Only return services of this kind. */
   kind?: DeployType;
 };
