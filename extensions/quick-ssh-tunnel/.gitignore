@@ -1,0 +1,4 @@
+node_modules
+dist
+bin
+cli/bin
