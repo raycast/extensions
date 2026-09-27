@@ -67,6 +67,7 @@
   "scripts": {
     "build": "npm run build:web && ray build -e dist",
     "build:web": "tsc -p web/tsconfig.json && vite build --config web/vite.config.mts",
+    "predev": "npm run build:web",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

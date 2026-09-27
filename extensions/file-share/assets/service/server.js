@@ -49,6 +49,9 @@ const startedAt = new Date().toISOString();
 
 let dataServer = null;
 let controlServer = null;
+/** Host and port the data plane is actually listening on (frozen at startup). */
+let boundHost = null;
+let boundPort = null;
 let lastGoodConfig = null;
 let writeQueue = Promise.resolve();
 const subscribers = new Set();
@@ -990,14 +993,19 @@ function subscribe(response) {
 async function statusPayload() {
   const config = await currentConfig();
   const entries = await describeList();
+  // Report the address we are actually bound to, not the latest config file values.
+  // Config can change (receive directory, preferred host/port) without a restart; until the
+  // service is restarted, visitors still reach the original host:port.
+  const host = boundHost ?? config.host;
+  const port = boundPort ?? config.port;
   return {
     extension: EXTENSION_ID,
     configVersion: config.version,
     pid: process.pid,
     startedAt,
-    address: `http://${config.host}:${config.port}/`,
-    host: config.host,
-    port: config.port,
+    address: `http://${host}:${port}/`,
+    host,
+    port,
     receiveDirectory: receiveDirectoryOf(config),
     entryCount: entries.length,
     textCount: entries.filter((entry) => entry.type === "text").length,
@@ -1126,6 +1134,9 @@ async function main() {
     controlServer.close();
     process.exit(3);
   }
+
+  boundHost = config.host;
+  boundPort = config.port;
 
   cleanStaleUploads(config).catch((error) => console.error(`stale upload cleanup: ${describeError(error)}`));
   watchHostProcess();
