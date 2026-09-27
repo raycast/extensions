@@ -9,9 +9,13 @@ export interface Locale {
   t: Strings;
 }
 
-/** Язык берём из настроек расширения; по умолчанию английский — этого требует Store. */
+/**
+ * Язык берём из настроек расширения; по умолчанию английский — этого требует Store.
+ * Тип `Preferences` Raycast генерирует из package.json, поэтому руками его не описываем:
+ * иначе он разъедется с манифестом.
+ */
 export function useLocale(): Locale {
-  const { language } = getPreferenceValues<{ language?: string }>();
+  const { language } = getPreferenceValues<Preferences>();
   const resolved: Language = language === "ru" ? "ru" : "en";
   return { language: resolved, fmt: createFormatter(resolved), t: strings(resolved) };
 }
