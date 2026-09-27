@@ -1,8 +1,8 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { createHash } from "node:crypto";
-import { parseHL7 } from "./hl7";
-import { messageSummary, patientOf } from "./render";
-import { Source, readSource } from "./sources";
+import { parseHL7 } from "./hl7.ts";
+import { messageSummary, patientOf } from "./render.ts";
+import { type Source, readSource } from "./sources.ts";
 
 /**
  * A previous view. It keeps a copy of the message text, so it reopens as it was seen even when

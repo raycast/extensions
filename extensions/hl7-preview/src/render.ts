@@ -1,5 +1,5 @@
-import { COMPONENTS, SEGMENT_NAMES, TABLES, fieldDef } from "./definitions";
-import { Field, Message, Segment, component, field, formatTimestamp, isEmpty } from "./hl7";
+import { COMPONENTS, SEGMENT_NAMES, TABLES, fieldDef } from "./definitions.ts";
+import { type Field, type Message, type Segment, component, field, formatTimestamp, isEmpty } from "./hl7.ts";
 
 const TIME_TYPES = new Set(["TS", "DTM", "DT"]);
 

@@ -32,8 +32,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.5.2",
-    "@raycast/utils": "^2.3.2"
+    "@raycast/api": "^2.5.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -41,15 +40,14 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.2",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "vitest": "^5.0.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "vitest run",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "allowScripts": {

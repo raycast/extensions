@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decodeBuffer, looksLikeHL7 } from "./hl7";
+import { decodeBuffer, looksLikeHL7 } from "./hl7.ts";
 
 export interface Source {
   name: string;

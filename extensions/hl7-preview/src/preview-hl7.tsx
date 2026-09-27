@@ -13,12 +13,12 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fieldDef } from "./definitions";
-import { Message, isEmpty, parseHL7 } from "./hl7";
+import { fieldDef } from "./definitions.ts";
+import { useCachedState, usePromise } from "./hooks.ts";
+import { type Message, isEmpty, parseHL7 } from "./hl7.ts";
 import {
-  HistoryEntry,
+  type HistoryEntry,
   clearHistory,
   entryTitle,
   isKeepingPastViews,
@@ -27,9 +27,9 @@ import {
   openEntry,
   remember,
   toEntry,
-} from "./history";
-import { messageMarkdown, messageType, segmentName } from "./render";
-import { Source, readClipboard, readFinderSelection, readSource } from "./sources";
+} from "./history.ts";
+import { messageMarkdown, messageType, segmentName } from "./render.ts";
+import { type Source, readClipboard, readFinderSelection, readSource } from "./sources.ts";
 
 interface Document {
   source: Source;

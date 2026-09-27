@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
-import { component, decodeBuffer, field, formatTimestamp, parseHL7, unescape } from "../src/hl7";
-import { material, messageMarkdown, messageSummary, patientOf, segmentMarkdown } from "../src/render";
+import { describe, it } from "node:test";
+import { expect } from "./expect.ts";
+import { component, decodeBuffer, field, formatTimestamp, parseHL7, unescape } from "../src/hl7.ts";
+import { material, messageMarkdown, messageSummary, patientOf, segmentMarkdown } from "../src/render.ts";
 
-const fixture = (name: string) => decodeBuffer(readFileSync(join(__dirname, "fixtures", name)));
+const fixture = (name: string) => decodeBuffer(readFileSync(join(import.meta.dirname, "fixtures", name)));
 
 describe("parseHL7", () => {
   it("numbers MSH fields from the field separator", () => {
