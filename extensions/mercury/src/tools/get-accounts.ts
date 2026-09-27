@@ -1,47 +1,21 @@
-import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-
-interface Account {
-  id: string;
-  name: string;
-  nickname: string | null;
-  currentBalance: number;
-  availableBalance: number;
-  kind: string;
-  status: string;
-  accountNumber: string;
-  routingNumber: string;
-  type: string;
-  createdAt: string;
-  legalBusinessName: string;
-}
-
-const API_BASE_URL = "https://api.mercury.com/api/v1/";
+import { requireLogins } from "../logins";
+import { getAccounts, getCreditAccounts } from "../mercury";
 
 /**
- * Retrieves all Mercury accounts and their balances.
- * Returns detailed information about each account including balances, status, and account numbers.
+ * Retrieves every connected Mercury account (personal and business) with its bank accounts,
+ * balances, status, and account numbers, plus any credit balances owed.
  */
 export default async function () {
-  const { apiKey } = getPreferenceValues<Preferences>();
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/accounts`, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch accounts: ${response.statusText}`);
-    }
-
-    const data = (await response.json()) as { accounts: Account[] };
-    return data.accounts;
-  } catch (error) {
-    console.error("Error fetching accounts:", error);
-    throw new Error(`Error fetching accounts: ${error instanceof Error ? error.message : String(error)}`);
-  }
+  const logins = await requireLogins();
+  return Promise.all(
+    logins.map(async (login) => {
+      const [accounts, credit] = await Promise.all([getAccounts(login.token), getCreditAccounts(login.token)]);
+      return {
+        organization: login.name,
+        kind: login.kind,
+        accounts,
+        credit: credit.map((account) => ({ ...account, owed: Math.abs(account.currentBalance) })),
+      };
+    }),
+  );
 }

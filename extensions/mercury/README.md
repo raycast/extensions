@@ -14,12 +14,11 @@ This extension uses the Mercury API to fetch your account and transaction data. 
 
 ### Generating an API Token
 
-1. Log into your Mercury account at [app.mercury.com](https://app.mercury.com)
-2. Go to the Settings page
-3. Select the user avatar in the top right of the screen
-4. Select "Security"
-5. Select the "API Tokens" option
-6. Generate a new API token
+1. Open [app.mercury.com/settings/tokens](https://app.mercury.com/settings/tokens), or click your organization in the top left, then **All Settings → Tokens**.
+2. Click **Create an API Token** and choose **Read Only**.
+3. In Raycast, open **Manage Accounts**, choose **Add Account**, and paste the token.
+
+Mercury issues a token per account, so add one token for each personal or business account you want to see.
 
 ### Securing Your API Token
 
@@ -43,12 +42,14 @@ For this Raycast extension, a **Read Only** token is sufficient and recommended.
 
 ## Features
 
-- View all your Mercury accounts
-- Check account balances
-- View recent transactions
-- Filter transactions by type
-- Copy account and routing numbers
-- AI-driven financial analyses, summaries, and insights
+- Connect personal and business Mercury accounts side by side
+- See balances for checking, savings, Treasury, and credit
+- Search every transaction across all accounts, and export them
+- Download monthly statements
+- Keep your balance in the menu bar
+- Copy account numbers, routing numbers, and wire details
+- View your debit and credit cards and their transactions
+- Ask `@mercury` in Raycast AI about balances, transactions, cards, Treasury, and cash flow
 
 ## Feedback
 
