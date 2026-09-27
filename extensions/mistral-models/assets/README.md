@@ -1,0 +1,1 @@
+`extension-icon.png` is the Mistral logo from the MIT-licensed [Raycast Mistral extension](https://github.com/raycast/extensions/tree/main/extensions/mistral), by Colin Lienard and contributors. Mistral's logo and brand remain their respective owner's property.
