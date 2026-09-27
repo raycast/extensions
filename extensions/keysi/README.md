@@ -7,7 +7,7 @@ reaching for its hotkey.
 
 | Command | What it does |
 | --- | --- |
-| **Search Cheat Sheets** | Searches Vim, tmux, Figma, Slack and anything you wrote yourself. Takes an optional query as an argument. Works with Keysi closed. |
+| **Search Cheat Sheets** | Searches every sheet Keysi ships (Vim, tmux, Figma, Slack, Notion, Obsidian, Ghostty and more) and anything you wrote yourself. Takes an optional query as an argument. Works with Keysi closed. |
 | **Show Shortcuts** | Opens Keysi's panel for the app you were in before Raycast. An optional argument opens it with the search already typed. |
 | **Practice Shortcuts** | Opens Practice Mode. |
 | **Show Progress** | Opens Keysi's recap of the shortcuts you've learned. |
@@ -66,10 +66,16 @@ that exists.
 
 ## Requirements
 
-[Keysi](https://keysi.io) installed, for everything except Search Cheat
-Sheets. Built-in sheets are read from the app bundle in `/Applications` or
-`~/Applications`; your own sheets come from
-`~/Library/Application Support/Keysi/Sheets`.
+[Keysi](https://keysi.io) installed, for every command. Search Cheat Sheets
+reads the built-in sheets out of the app bundle in `/Applications` or
+`~/Applications`, and your own from
+`~/Library/Application Support/Keysi/Sheets` — it reads those files
+directly, so Keysi does not have to be running. The other three commands
+hand off to Keysi over `keysi://`, which launches it if it is not.
+
+A sheet file that is not valid JSON, or is missing a field Keysi requires (an
+`id`, a `name`, a `title` on every group and item), is skipped; the rest
+still load.
 
 If Keysi lives somewhere else — it is a direct download, so plenty of people
 put it anywhere — point the **Keysi Application** preference at the bundle.
@@ -94,7 +100,7 @@ open source and anything it checks is visible and removable:
   Keysi — that is what makes it work with the app closed — so Keysi has no
   opportunity to refuse it. It reads
   `~/Library/Application Support/Keysi/integration-tier.json`, which Keysi
-  writes at launch and on every tier change. Editing that file buys you
+  writes at launch and on every entitlement change. Editing that file buys you
   offline search over JSON already on your own disk.
 - **The file carries a deadline.** Keysi is a menu-bar agent that can be left
   quit for weeks, and it only rewrites that file while it runs. `proUntil` is

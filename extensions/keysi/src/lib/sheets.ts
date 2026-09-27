@@ -92,12 +92,55 @@ export const BUILTIN_SHEET_DIRS = [
  */
 export function resolve(text: LocalizedText): string {
   if (typeof text === "string") return text;
-  const keys = Object.keys(text);
+  // The type says string-or-map, but the value came out of a JSON file
+  // someone may have written by hand. Anything else — a missing field, a
+  // number, an array — resolves to "" rather than throwing, and the callers
+  // treat "" as "not usable".
+  if (text === null || typeof text !== "object" || Array.isArray(text)) return "";
+  const variants: Record<string, string> = {};
+  for (const [tag, value] of Object.entries(text)) {
+    if (typeof value === "string" && value.length > 0) variants[tag] = value;
+  }
+  const keys = Object.keys(variants).sort();
   if (keys.length === 0) return "";
-  if (text["en"]) return text["en"];
-  const englishVariant = keys.sort().find((k) => k.split("-")[0] === "en");
-  if (englishVariant) return text[englishVariant];
-  return text[keys.sort()[0]] ?? "";
+  if (variants["en"]) return variants["en"];
+  const englishVariant = keys.find((k) => k.split("-")[0] === "en");
+  if (englishVariant) return variants[englishVariant];
+  return variants[keys[0]];
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Whether a parsed file has the shape `flatten` and `matching` rely on.
+ *
+ * The same fields Keysi's `CustomSheet` decoder requires — an id, a name,
+ * groups with titles, items with titles — so a sheet Keysi would refuse to
+ * load is refused here too, and dropped the same way unparseable JSON is,
+ * instead of reaching `flatten` and taking the whole list down with it.
+ * `match` is the exception: it is required in Swift, but here a sheet
+ * without one simply never floats to the top, which costs nothing.
+ */
+export function isSheet(value: unknown): value is Sheet {
+  if (!isObject(value)) return false;
+  if (typeof value.id !== "string" || value.id.length === 0) return false;
+  if (!resolve(value.name as LocalizedText)) return false;
+  if (value.match !== undefined && !isObject(value.match)) return false;
+  if (!Array.isArray(value.groups)) return false;
+  return value.groups.every(
+    (group) =>
+      isObject(group) &&
+      resolve(group.title as LocalizedText) !== "" &&
+      Array.isArray(group.items) &&
+      group.items.every(
+        (item) =>
+          isObject(item) &&
+          resolve(item.title as LocalizedText) !== "" &&
+          (item.keys === undefined || typeof item.keys === "string"),
+      ),
+  );
 }
 
 export function readSheetsIn(dir: string): Sheet[] {
@@ -115,12 +158,11 @@ export function readSheetsIn(dir: string): Sheet[] {
     if (!name.toLowerCase().endsWith(".json")) continue;
     try {
       const path = join(dir, name);
-      const parsed = JSON.parse(readFileSync(path, "utf8")) as Sheet;
-      if (parsed && typeof parsed.id === "string" && Array.isArray(parsed.groups)) {
-        sheets.push({ ...parsed, sourcePath: path });
-      }
+      const parsed: unknown = JSON.parse(readFileSync(path, "utf8"));
+      if (isSheet(parsed)) sheets.push({ ...parsed, sourcePath: path });
     } catch {
-      // One malformed file must not take the whole list down. Keysi itself
+      // One malformed file must not take the whole list down — whether it is
+      // unparseable JSON or valid JSON in the wrong shape. Keysi itself
       // surfaces load errors in Settings; this is a reader, not the editor.
       continue;
     }
@@ -143,15 +185,24 @@ export function loadSheets(builtinDirs: string[] = BUILTIN_SHEET_DIRS, userDir: 
   return [...byId.values()];
 }
 
-/** Flattens sheets into the rows the list renders. */
+/**
+ * Flattens sheets into the rows the list renders.
+ *
+ * `readSheetsIn` already refuses a badly shaped sheet, but this is exported
+ * and runs unguarded in the command, so it does not throw on one either: a
+ * group or item that is not an object is skipped, and so is a row with no
+ * title, since a blank row is unselectable and unfindable.
+ */
 export function flatten(sheets: Sheet[]): Shortcut[] {
   const rows: Shortcut[] = [];
   const seen = new Set<string>();
   for (const sheet of sheets) {
     const sheetName = resolve(sheet.name);
-    for (const group of sheet.groups ?? []) {
+    for (const group of Array.isArray(sheet.groups) ? sheet.groups : []) {
+      if (!isObject(group)) continue;
       const groupTitle = resolve(group.title);
-      for (const item of group.items ?? []) {
+      for (const item of Array.isArray(group.items) ? group.items : []) {
+        if (!isObject(item)) continue;
         const title = resolve(item.title);
         if (!title) continue;
         const id = `${sheet.id}›${groupTitle}›${title}`;
@@ -160,7 +211,7 @@ export function flatten(sheets: Sheet[]): Shortcut[] {
         rows.push({
           id,
           title,
-          keys: item.keys ?? "",
+          keys: typeof item.keys === "string" ? item.keys : "",
           sheetId: sheet.id,
           sheetName,
           group: groupTitle,
@@ -230,8 +281,10 @@ export function matching(sheets: Sheet[], app: TargetApp | undefined): Sheet[] {
     .filter((sheet) => {
       const match = sheet.match;
       if (!match) return false;
-      if (app.bundleId && (match.bundleIDs ?? []).includes(app.bundleId)) return true;
-      return (match.processNames ?? []).some((process) => names.has(process.toLowerCase()));
+      const bundleIDs = Array.isArray(match.bundleIDs) ? match.bundleIDs : [];
+      const processNames = Array.isArray(match.processNames) ? match.processNames : [];
+      if (app.bundleId && bundleIDs.includes(app.bundleId)) return true;
+      return processNames.some((process) => typeof process === "string" && names.has(process.toLowerCase()));
     })
     .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 }

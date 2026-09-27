@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { flatten, loadSheets, readSheetsIn, resolve } from "../src/lib/sheets.ts";
 
 /**
@@ -26,6 +26,17 @@ const skip = existsSync(REPO_SHEETS)
   ? false
   : "only meaningful in the Keysi repo — the app's shipped sheets are not vendored with the extension";
 
+/**
+ * Every shipped sheet, by file name. Keysi adds sheets as content, so the
+ * expected list comes from the directory rather than being written down —
+ * a hard-coded four went stale the first time a sheet was added.
+ */
+const shippedIds = () =>
+  readdirSync(REPO_SHEETS)
+    .filter((n) => n.endsWith(".json"))
+    .map((n) => n.replace(/\.json$/, ""))
+    .sort();
+
 test("reads the fixture sheets", () => {
   assert.deepEqual(
     readSheetsIn(FIXTURES).map((s) => s.id).sort(),
@@ -37,6 +48,31 @@ test("reads the fixture sheets", () => {
 test("a malformed sheet is skipped rather than fatal", () => {
   // fixtures/builtin holds broken.json alongside the two valid sheets.
   assert.equal(readSheetsIn(FIXTURES).length, 2);
+});
+
+/**
+ * Valid JSON in the wrong shape used to pass `readSheetsIn`'s guard and then
+ * throw inside `flatten`, which took the whole command down for one bad
+ * hand-written sheet. Each of these is missing a field Keysi's own decoder
+ * requires; only `fine.json` is complete.
+ */
+test("a sheet missing a required field is skipped like malformed JSON", () => {
+  const dir = join(import.meta.dirname, "fixtures", "incomplete");
+  assert.deepEqual(
+    readSheetsIn(dir).map((s) => s.id),
+    ["fine"],
+  );
+  assert.equal(flatten(readSheetsIn(dir)).length, 1);
+});
+
+test("flatten survives sheets that bypassed the reader", () => {
+  const bad = [
+    { id: "a", groups: [{ title: "G", items: [{ title: "Do thing", keys: "x" }] }] },
+    { id: "b", name: "B", groups: [{ items: [{ title: "Do thing" }] }, null, { title: "H", items: "nope" }] },
+    { id: "c", name: "C", groups: [{ title: "G", items: [{ keys: "x" }, null, { title: 42 }] }] },
+  ] as unknown as Parameters<typeof flatten>[0];
+  const rows = flatten(bad);
+  assert.ok(rows.every((r) => r.title.length > 0));
 });
 
 test("flattens fixtures into rows that all have a title", () => {
@@ -72,7 +108,8 @@ test("keys survive flattening for a raw sheet", () => {
 test("Keysi's shipped sheets still match the format this reader expects", { skip }, () => {
   const sheets = readSheetsIn(REPO_SHEETS);
   const ids = sheets.map((s) => s.id).sort();
-  assert.deepEqual(ids, ["figma", "slack", "tmux", "vim"]);
+  // Every file parses and passes the shape check; none is silently dropped.
+  assert.deepEqual(ids, shippedIds());
 });
 
 test("a missing directory is empty, not an error", () => {
@@ -87,7 +124,7 @@ test("Keysi's shipped sheets flatten into titled rows", { skip }, () => {
   assert.ok(rows.length > 20, `expected a substantial list, got ${rows.length}`);
   assert.ok(rows.every((r) => r.title.length > 0));
   assert.ok(rows.every((r) => r.sheetName.length > 0));
-  assert.deepEqual([...new Set(rows.map((r) => r.sheetId))].sort(), ["figma", "slack", "tmux", "vim"]);
+  assert.deepEqual([...new Set(rows.map((r) => r.sheetId))].sort(), shippedIds());
 });
 
 test("the tmux sheet still carries real key notation", { skip }, () => {
@@ -108,7 +145,7 @@ test("user sheets shadow a built-in of the same id", { skip }, () => {
   // Both dirs are the repo's, so every id collides with itself; the point is
   // that the count stays the same rather than doubling.
   const both = loadSheets([REPO_SHEETS], REPO_SHEETS);
-  assert.equal(both.length, 4);
+  assert.equal(both.length, shippedIds().length);
 });
 
 test("resolve returns English when present", () => {
@@ -148,6 +185,16 @@ test("resolve never returns empty when any variant exists", () => {
 /** Deterministic rather than dependent on JSON key order. */
 test("resolve picks the first tag in sorted order when there is no English", () => {
   assert.equal(resolve({ ja: "ペイン", de: "Bereiche" }), "Bereiche");
+});
+
+test("resolve on anything that is not text is empty rather than a throw", () => {
+  for (const value of [undefined, null, 42, true, ["Panes"]]) {
+    assert.equal(resolve(value as never), "");
+  }
+});
+
+test("resolve skips variants that are not strings", () => {
+  assert.equal(resolve({ en: 42, de: "Bereiche" } as never), "Bereiche");
 });
 
 test("resolve on an empty map is empty rather than undefined", () => {

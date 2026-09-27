@@ -5,7 +5,9 @@ import { readFileSync } from "fs";
 /**
  * Whether Keysi's integrations are unlocked.
  *
- * Keysi writes this file at launch and on every tier change; see
+ * Keysi writes this file at launch and whenever the entitlement it
+ * describes changes — including a change to `proUntil` alone, which is what
+ * activating or deactivating a license does without moving the tier. See
  * `IntegrationTierFile` on the Swift side, which documents why a file is the
  * only channel available for the one command that never talks to the app.
  *

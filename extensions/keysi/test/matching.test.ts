@@ -90,5 +90,8 @@ test("Figma's bundled sheet still matches Figma", { skip }, () => {
  */
 test("a terminal does not match the tmux sheet", { skip }, () => {
   const sheets = readSheetsIn(REPO_SHEETS);
-  assert.deepEqual(matching(sheets, { bundleId: "com.mitchellh.ghostty", name: "Ghostty" }), []);
+  // Ghostty has its own sheet now, matched by bundle id — that one is right.
+  // What must not happen is tmux or Vim coming along because it's a terminal.
+  const ids = matching(sheets, { bundleId: "com.mitchellh.ghostty", name: "Ghostty" }).map((s) => s.id);
+  assert.deepEqual(ids, ["ghostty"]);
 });
