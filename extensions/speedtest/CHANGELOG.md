@@ -1,6 +1,6 @@
 # Speedtest Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Added Ask Speedtest in Raycast AI to run a speed test and answer questions about the current connection.
 - Added YAML evals for speed and latency questions.
