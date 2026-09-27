@@ -67,7 +67,7 @@ interface GitLabUserJson {
   can_merge?: boolean;
 }
 
-interface GitLabProjectJson {
+export interface GitLabProjectJson {
   id: number;
   name: string;
   name_with_namespace: string;
@@ -833,6 +833,13 @@ export class GitLab {
       let json = await toJsonOrError(response);
       if (!all) {
         return json;
+      }
+
+      const totalPages = parseInt(response.headers.get("x-total-pages") ?? "");
+      if (totalPages > 1) {
+        const pageNumbers = Array.from({ length: totalPages - 1 }, (_, index) => index + 2);
+        const pages = await Promise.all(pageNumbers.map(async (page) => toJsonOrError(await fetchPage(page))));
+        return json.concat(...pages);
       }
 
       let next_page = getNextPageNumber(response);
