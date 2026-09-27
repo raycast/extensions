@@ -1,0 +1,89 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
+  "files": {
+    "includes": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "tests/**/*.ts",
+      "*.mts"
+    ]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "recommended": true,
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 12
+          }
+        },
+        "noVoid": "error",
+        "useSimplifiedLogicExpression": "error"
+      },
+      "correctness": {
+        "recommended": true,
+        "noUndeclaredVariables": "error",
+        "noUnusedFunctionParameters": "error",
+        "noUnusedImports": "error",
+        "noUnusedPrivateClassMembers": "error",
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "error"
+      },
+      "performance": {
+        "recommended": true,
+        "noBarrelFile": "error",
+        "noReExportAll": "error"
+      },
+      "style": {
+        "recommended": true,
+        "noNegationElse": "error",
+        "noParameterProperties": "error",
+        "useCollapsedElseIf": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        },
+        "useConst": "error",
+        "useForOf": "error",
+        "useShorthandAssign": "error",
+        "useThrowNewError": "error",
+        "useThrowOnlyError": "error"
+      },
+      "suspicious": {
+        "recommended": true,
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": [
+              "error"
+            ]
+          }
+        },
+        "noEmptyBlockStatements": "error",
+        "noExplicitAny": "error",
+        "noMisplacedAssertion": "error",
+        "useAwait": "error",
+        "useErrorMessage": "error"
+      },
+      "nursery": {
+        "recommended": true
+      }
+    }
+  },
+  "javascript": {
+    "globals": [
+      "fetch",
+      "RequestInfo",
+      "AbortSignal",
+      "AbortController"
+    ]
+  }
+}
