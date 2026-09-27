@@ -1,6 +1,6 @@
 # Osaurus Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-27
 
 - **Ask Osaurus**: type a question in the search bar and a local model answers it, streaming into the detail pane. Ask follow-ups in the same chat, stop an answer mid-stream, show or hide the model's thinking, and switch models from the dropdown
 - **Manage Models**: see every model Osaurus has installed, with its size, quantization, context length, capabilities, and default parameters. Set the default model for Ask Osaurus, hide models you don't use, and open or quit Osaurus
