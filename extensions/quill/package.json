@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quill",
+  "title": "Quill",
+  "description": "Fix grammar, rephrase text and copy text from screenshots with Apple Intelligence, fully on-device.",
+  "icon": "command-icon.png",
+  "author": "giuseppe_lapenta",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fix-grammar",
+      "title": "Fix Grammar",
+      "subtitle": "Apple Intelligence",
+      "description": "Corrects spelling and grammar of the currently selected text, in place.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rephrase",
+      "title": "Rephrase",
+      "subtitle": "Apple Intelligence",
+      "description": "Rephrases the currently selected text; press Enter to replace it.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultTone",
+          "type": "dropdown",
+          "title": "Default Tone",
+          "description": "Tone used until you pick one from the action panel; after that, the last tone you picked is used.",
+          "required": false,
+          "default": "default",
+          "data": [
+            { "title": "Default", "value": "default" },
+            { "title": "Professional", "value": "professional" },
+            { "title": "Casual", "value": "casual" },
+            { "title": "Friendly", "value": "friendly" },
+            { "title": "Formal", "value": "formal" },
+            { "title": "Concise", "value": "concise" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ocr-screenshot",
+      "title": "OCR Screenshot",
+      "subtitle": "Apple Intelligence",
+      "description": "Select a screen region and copy the text in it to the clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
