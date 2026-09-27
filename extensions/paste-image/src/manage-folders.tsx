@@ -14,7 +14,12 @@ import { showFailureToast } from "@raycast/utils"
 import path from "node:path"
 import { useEffect, useState } from "react"
 import { ALL_FOLDERS_VIEW } from "./constants"
-import { clearImageMetadataCache, rebuildImageMetadataCache, saveImageMetadataCache } from "./image-cache"
+import {
+  clearImageMetadataCache,
+  loadImageMetadataCache,
+  saveImageMetadataCache,
+  syncFoldersInCache,
+} from "./image-cache"
 import {
   clearImportedFolders,
   getImportedFolders,
@@ -61,7 +66,7 @@ export default function ManageFoldersCommand() {
       if (updatedFolders.length === 0) {
         await clearImageMetadataCache()
       } else {
-        await saveImageMetadataCache(await rebuildImageMetadataCache(updatedFolders))
+        await saveImageMetadataCache(await syncFoldersInCache(await loadImageMetadataCache(), updatedFolders))
       }
 
       setFolders(updatedFolders)

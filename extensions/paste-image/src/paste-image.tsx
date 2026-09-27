@@ -12,7 +12,6 @@ import {
   useNavigation,
 } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
-import { copyFile, rename } from "node:fs/promises"
 import { homedir } from "node:os"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
@@ -29,14 +28,15 @@ import {
   getVisibleImages,
   isImageFile,
   loadImageMetadataCache,
-  pathExists,
   rebuildImageMetadataCache,
   refreshFolderInCache,
   removeCachedImage,
   replaceCachedImage,
   saveImageMetadataCache,
+  syncFoldersInCache,
 } from "./image-cache"
 import { createImagePreview } from "./image-preview"
+import { copyToAvailablePath, isFileCollision, renameWithoutOverwrite } from "./file-operations"
 import {
   clearImportedFolders,
   getImportedFolders,
@@ -103,7 +103,7 @@ export default function Command() {
 
       let nextCache = await loadImageMetadataCache()
       if (!nextCache || !foldersMatchCache(nextCache, importedFolders)) {
-        nextCache = await rebuildImageMetadataCache(importedFolders)
+        nextCache = await syncFoldersInCache(nextCache, importedFolders)
         await saveImageMetadataCache(nextCache)
       }
 
@@ -132,7 +132,7 @@ export default function Command() {
     try {
       const updatedFolders = await setImportedFolders([...folders, ...selectedFolders])
       const nextViewFolder = selectedFolders.length === 1 ? path.resolve(selectedFolders[0]) : ALL_FOLDERS_VIEW
-      const nextCache = await rebuildImageMetadataCache(updatedFolders)
+      const nextCache = await syncFoldersInCache(cache, updatedFolders)
       await Promise.all([saveImageMetadataCache(nextCache), setRecentViewFolder(nextViewFolder)])
       syncState(nextCache, updatedFolders, nextViewFolder)
       await showToast({
@@ -212,13 +212,8 @@ export default function Command() {
 
           const nextPath = path.join(image.folderPath, nextName)
           if (nextPath === image.path) return true
-          if (await pathExists(nextPath)) {
-            await showToast({ style: Toast.Style.Failure, title: "A file with that name already exists" })
-            return false
-          }
-
           try {
-            await rename(image.path, nextPath)
+            await renameWithoutOverwrite(image.path, nextPath)
             const nextImage = await createCachedImage(nextPath, image.folderPath)
             const latestCache = (await loadImageMetadataCache()) ?? refreshedCache
             const nextCache = replaceCachedImage(latestCache, image.path, nextImage)
@@ -227,6 +222,10 @@ export default function Command() {
             await showToast({ style: Toast.Style.Success, title: "Image renamed" })
             return true
           } catch (error) {
+            if (isFileCollision(error)) {
+              await showToast({ style: Toast.Style.Failure, title: "A file with that name already exists" })
+              return false
+            }
             await showFailureToast(error, { title: "Could not rename image" })
             return false
           }
@@ -237,8 +236,7 @@ export default function Command() {
 
   async function handleSaveToDesktop(image: CachedImage): Promise<void> {
     try {
-      const destination = await nextAvailablePath(path.join(homedir(), "Desktop", image.name))
-      await copyFile(image.path, destination)
+      const destination = await copyToAvailablePath(image.path, path.join(homedir(), "Desktop", image.name))
       await showToast({
         style: Toast.Style.Success,
         title: "Saved to Desktop",
@@ -259,7 +257,7 @@ export default function Command() {
     if (!confirmed) return
 
     const updatedFolders = await setImportedFolders(folders.filter((folder) => folder !== viewFolder))
-    const nextCache = await rebuildImageMetadataCache(updatedFolders)
+    const nextCache = await syncFoldersInCache(cache, updatedFolders)
     await Promise.all([saveImageMetadataCache(nextCache), setRecentViewFolder(ALL_FOLDERS_VIEW)])
     syncState(nextCache, updatedFolders, ALL_FOLDERS_VIEW, null)
     await showToast({ style: Toast.Style.Success, title: "Folder removed" })
@@ -506,21 +504,6 @@ function RenameImageForm({ image, onRename }: { image: CachedImage; onRename: (n
       <Form.TextField id="name" title="File Name" value={value} onChange={setValue} error={error} autoFocus />
     </Form>
   )
-}
-
-async function nextAvailablePath(desiredPath: string): Promise<string> {
-  if (!(await pathExists(desiredPath))) return desiredPath
-
-  const extension = path.extname(desiredPath)
-  const baseName = path.basename(desiredPath, extension)
-  const directory = path.dirname(desiredPath)
-  let copyNumber = 2
-
-  while (true) {
-    const candidate = path.join(directory, `${baseName} ${copyNumber}${extension}`)
-    if (!(await pathExists(candidate))) return candidate
-    copyNumber += 1
-  }
 }
 
 function formatBytes(bytes: number): string {

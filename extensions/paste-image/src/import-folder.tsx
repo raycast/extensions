@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
 import { useState } from "react"
-import { rebuildImageMetadataCache, saveImageMetadataCache } from "./image-cache"
+import { loadImageMetadataCache, saveImageMetadataCache, syncFoldersInCache } from "./image-cache"
 import { getImportedFolders, setImportedFolders } from "./storage"
 
 export default function Command() {
@@ -14,7 +14,7 @@ export default function Command() {
     try {
       const currentFolders = await getImportedFolders()
       const folders = await setImportedFolders([...currentFolders, ...values.folders])
-      const cache = await rebuildImageMetadataCache(folders)
+      const cache = await syncFoldersInCache(await loadImageMetadataCache(), folders)
       await saveImageMetadataCache(cache)
 
       await showToast({

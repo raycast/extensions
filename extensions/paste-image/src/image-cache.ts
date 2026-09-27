@@ -5,6 +5,8 @@ import { ALL_FOLDERS_VIEW, IMAGE_METADATA_CACHE_KEY } from "./constants"
 import { normalizeFolders } from "./storage"
 
 const CACHE_VERSION = 2
+const FOLDER_SCAN_CONCURRENCY = 4
+const FILE_STAT_CONCURRENCY = 16
 const IMAGE_EXTENSIONS = new Set([
   ".avif",
   ".bmp",
@@ -77,8 +79,10 @@ export function createEmptyCache(folders: string[] = []): ImageMetadataCache {
 async function scanFolder(folderPath: string): Promise<CachedImage[]> {
   const entries = await readdir(folderPath, { withFileTypes: true })
   const imageEntries = entries.filter((entry) => entry.isFile() && isImageFile(entry.name))
-  const images = await Promise.all(
-    imageEntries.map(async (entry): Promise<CachedImage | null> => {
+  const images = await mapWithConcurrency(
+    imageEntries,
+    FILE_STAT_CONCURRENCY,
+    async (entry): Promise<CachedImage | null> => {
       const imagePath = path.join(folderPath, entry.name)
       try {
         const metadata = await stat(imagePath)
@@ -92,7 +96,7 @@ async function scanFolder(folderPath: string): Promise<CachedImage[]> {
       } catch {
         return null
       }
-    }),
+    },
   )
 
   return images.filter((image): image is CachedImage => image !== null)
@@ -102,16 +106,20 @@ async function scanFolders(folders: string[]): Promise<{
   imagesByFolder: Record<string, CachedImage[]>
   folderErrors: Record<string, string>
 }> {
-  const results = await Promise.allSettled(
-    folders.map(async (folderPath) => ({ folderPath, images: await scanFolder(folderPath) })),
-  )
+  const results = await mapWithConcurrency(folders, FOLDER_SCAN_CONCURRENCY, async (folderPath) => {
+    try {
+      return { status: "fulfilled" as const, folderPath, images: await scanFolder(folderPath) }
+    } catch (reason) {
+      return { status: "rejected" as const, folderPath, reason }
+    }
+  })
   const imagesByFolder: Record<string, CachedImage[]> = {}
   const folderErrors: Record<string, string> = {}
 
-  results.forEach((result, index) => {
-    const folderPath = folders[index]
+  results.forEach((result) => {
+    const { folderPath } = result
     if (result.status === "fulfilled") {
-      imagesByFolder[folderPath] = result.value.images
+      imagesByFolder[folderPath] = result.images
     } else {
       imagesByFolder[folderPath] = []
       folderErrors[folderPath] = result.reason instanceof Error ? result.reason.message : "Folder is unavailable"
@@ -186,6 +194,31 @@ export function foldersMatchCache(cache: ImageMetadataCache | null, folders: str
 export async function rebuildImageMetadataCache(folders: string[]): Promise<ImageMetadataCache> {
   const normalizedFolders = normalizeFolders(folders)
   const { imagesByFolder, folderErrors } = await scanFolders(normalizedFolders)
+  return buildCache(normalizedFolders, imagesByFolder, folderErrors)
+}
+
+export async function syncFoldersInCache(
+  cache: ImageMetadataCache | null,
+  folders: string[],
+): Promise<ImageMetadataCache> {
+  const normalizedFolders = normalizeFolders(folders)
+  if (!cache) return rebuildImageMetadataCache(normalizedFolders)
+
+  const addedFolders = normalizedFolders.filter((folderPath) => !cache.folders.includes(folderPath))
+  const { imagesByFolder: addedImages, folderErrors: addedErrors } = await scanFolders(addedFolders)
+  const imagesByFolder = Object.fromEntries(
+    normalizedFolders.map((folderPath) => [
+      folderPath,
+      addedImages[folderPath] ?? cache.imagesByFolder[folderPath] ?? [],
+    ]),
+  )
+  const folderErrors = Object.fromEntries(
+    normalizedFolders.flatMap((folderPath) => {
+      const error = addedErrors[folderPath] ?? cache.folderErrors[folderPath]
+      return error ? [[folderPath, error]] : []
+    }),
+  )
+
   return buildCache(normalizedFolders, imagesByFolder, folderErrors)
 }
 
@@ -272,6 +305,26 @@ export async function pathExists(filePath: string): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+async function mapWithConcurrency<Input, Output>(
+  values: Input[],
+  concurrency: number,
+  worker: (value: Input, index: number) => Promise<Output>,
+): Promise<Output[]> {
+  const results = new Array<Output>(values.length)
+  let nextIndex = 0
+
+  async function runWorker(): Promise<void> {
+    while (nextIndex < values.length) {
+      const index = nextIndex
+      nextIndex += 1
+      results[index] = await worker(values[index], index)
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, () => runWorker()))
+  return results
 }
 
 export { ALL_FOLDERS_VIEW }

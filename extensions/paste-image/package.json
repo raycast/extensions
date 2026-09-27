@@ -7,7 +7,7 @@
   "author": "aftab",
   "license": "MIT",
   "categories": [
-    "Productivity"
+    "Media"
   ],
   "platforms": [
     "macOS"
@@ -16,21 +16,18 @@
     {
       "name": "paste-image",
       "title": "Paste Image",
-      "subtitle": "Search Your Image Folders",
       "description": "Search, preview, and paste images from imported folders.",
       "mode": "view"
     },
     {
       "name": "import-folder",
       "title": "Import Image Folders",
-      "subtitle": "Add Folders to Your Library",
       "description": "Add one or more folders to your searchable image library.",
       "mode": "view"
     },
     {
       "name": "manage-folders",
       "title": "Manage Image Folders",
-      "subtitle": "View or Remove Imported Folders",
       "description": "View, reveal, or remove folders from your image library.",
       "mode": "view"
     }

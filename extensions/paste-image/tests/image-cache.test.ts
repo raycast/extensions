@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises"
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -28,7 +28,9 @@ import {
   removeCachedImage,
   replaceCachedImage,
   saveImageMetadataCache,
+  syncFoldersInCache,
 } from "../src/image-cache"
+import { copyToAvailablePath, renameWithoutOverwrite } from "../src/file-operations"
 import { calculateContainedSize } from "../src/image-preview"
 import { normalizeFolders, parseStoredFolders } from "../src/storage"
 
@@ -142,5 +144,49 @@ describe("metadata cache", () => {
 
     expect(getVisibleImages(cache, folder).map((image) => image.path)).toEqual([newPath])
     expect(removeCachedImage(cache, newPath).allImages).toEqual([])
+  })
+
+  it("reuses cached folders and scans only newly added folders", async () => {
+    const existingFolder = await createTemporaryFolder()
+    const addedFolder = await createTemporaryFolder()
+    await writeFile(path.join(existingFolder, "cached.png"), "cached")
+
+    const existingCache = await rebuildImageMetadataCache([existingFolder])
+    await writeFile(path.join(existingFolder, "not-yet-refreshed.png"), "new")
+    await writeFile(path.join(addedFolder, "added.png"), "added")
+
+    const cache = await syncFoldersInCache(existingCache, [existingFolder, addedFolder])
+
+    expect(cache.imagesByFolder[existingFolder].map((image) => image.name)).toEqual(["cached.png"])
+    expect(cache.imagesByFolder[addedFolder].map((image) => image.name)).toEqual(["added.png"])
+  })
+})
+
+describe("collision-safe file operations", () => {
+  it("does not overwrite an existing rename destination", async () => {
+    const folder = await createTemporaryFolder()
+    const source = path.join(folder, "source.png")
+    const destination = path.join(folder, "destination.png")
+    await writeFile(source, "source")
+    await writeFile(destination, "destination")
+
+    await expect(renameWithoutOverwrite(source, destination)).rejects.toMatchObject({ code: "EEXIST" })
+    expect(await readFile(source, "utf8")).toBe("source")
+    expect(await readFile(destination, "utf8")).toBe("destination")
+  })
+
+  it("atomically selects another copy name when destinations already exist", async () => {
+    const folder = await createTemporaryFolder()
+    const source = path.join(folder, "source.png")
+    const desired = path.join(folder, "photo.png")
+    await writeFile(source, "source")
+    await writeFile(desired, "first")
+    await writeFile(path.join(folder, "photo 2.png"), "second")
+
+    const destination = await copyToAvailablePath(source, desired)
+
+    expect(destination).toBe(path.join(folder, "photo 3.png"))
+    expect(await readFile(destination, "utf8")).toBe("source")
+    expect(await readFile(desired, "utf8")).toBe("first")
   })
 })
