@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-27
 
 - Fix the Open Address row rendering above Top Hit when both match the same typed text, while Top Hit still held the actual selection - the highlighted row was not the one on top, so pressing Enter opened something other than what the list visually suggested. Open Address now renders after Top Hit, matching the selection priority it already had.
 
