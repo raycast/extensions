@@ -1,0 +1,96 @@
+instructions: |
+  SocialFaktory runs the social media of one or more brands. Each brand has its own voice, language and connected channels.
+  Before write-post, call list-brands to find the brand ID. If the user has one brand, use it. If there are several and the request does not name one, ask which brand to write for.
+  write-post writes for X or LinkedIn only. A new brief reserves 3 SocialFaktory credits. The same brandId, platform and brief within 30 minutes reuses the same write and reserves nothing, unless the user signed in again in between. Call it once per request, and do not call it again with a new brief to retry or to get more options unless the user asks.
+  When write-post answers status "still_writing", it includes a textGenerationId. Tell the user the post is still being written. When they ask about it again, call write-post with that textGenerationId and the same brandId and no brief: that checks on the same write for free and never writes again.
+  When write-post answers status "may_still_be_writing", the post may already be on its way. Tell the user, and when they ask again, call write-post with exactly the same brandId, platform and brief: within 30 minutes that reuses the same request and reserves nothing, unless the user signed in again in between. The same brief within 30 minutes also returns the same write, so to get fresh variants, change the brief. After a refusal such as not enough credits, the same brief is a new request once the user has fixed the cause.
+  When write-post answers status "previous_write_failed", the earlier write of that brief failed. Tell the user, and only call write-post again with the brief if they want to try once more, which reserves 3 credits.
+  When write-post fails because the connection to SocialFaktory was renewed, do not call it again right away. Ask the user to check their credit balance first, in case the first attempt went through.
+  Show every variant write-post returns in full and exactly as written, each one separately, so the user can pick one. Do not rewrite or shorten them. A variant can carry a violation: a note that it still breaks one of the brand's writing rules. Show that note under the variant.
+  This extension cannot publish, schedule, edit or delete posts, and it cannot generate video. When asked to, say so and point the user to https://www.socialfaktory.com.
+  In list-posts, a queued post waits for the publisher, a scheduled post goes out at scheduled_at, and a published post gets a release_url and metrics once the channel reports back, which takes a few minutes. A failed post carries a failure_code. Show times in the user's time zone.
+  In get-wallet, available_balance is what the user can spend now, reserved_balance is held by work in progress, and total_balance is both together.
+  When a tool fails with a message about credits, plans, permissions or brands, relay that message and do not retry. When it asks for Sign in Again, tell the user to use that action in any SocialFaktory command in Raycast.
+evals:
+  - input: "@socialfaktory how many credits do I have left?"
+    mocks:
+      get-wallet:
+        available_balance: 1240
+        reserved_balance: 3
+        total_balance: 1243
+    expected:
+      - callsTool: get-wallet
+      - meetsCriteria: "Says that 1,240 credits are available"
+  - input: "@socialfaktory what is scheduled to go out next?"
+    mocks:
+      list-posts:
+        page: 1
+        pages: 1
+        posts:
+          - id: post_8fQ2
+            status: scheduled
+            caption: "Our oat milk latte is back for autumn. Come by this week and try it."
+            scheduled_at: "2026-10-02T08:30:00Z"
+            published_at: null
+            release_url: null
+            failure_code: null
+            metrics: {}
+            channel_id: sacc_3kP9
+            provider: instagram
+    expected:
+      - callsTool: list-posts
+      - meetsCriteria: "Mentions the Instagram post about the oat milk latte and when it goes out"
+  - input: "@socialfaktory write a LinkedIn post for Acme Coffee announcing our new oat milk latte"
+    mocks:
+      list-brands:
+        - id: brand_7Kp2
+          name: Acme Coffee
+          description: A neighborhood coffee roaster
+          status: active
+          language: en
+        - id: brand_9Lm4
+          name: Acme Bakery
+          description: Sourdough and pastries
+          status: active
+          language: en
+      write-post:
+        status: succeeded
+        platform: linkedin
+        variants:
+          - text: "Our new oat milk latte is here. Smooth, nutty and made with beans we roast every morning. Stop by and tell us what you think."
+          - text: "Fall called and we answered: meet the oat milk latte. Available at every Acme Coffee from today!"
+            violation: "uses an exclamation mark the brand avoids"
+          - text: "Plant based, roasted in house, poured with care. Our oat milk latte lands on the menu today."
+    expected:
+      - callsTool: list-brands
+      - callsTool:
+          name: write-post
+          arguments:
+            brandId: brand_7Kp2
+            platform: linkedin
+      - includes: "oat milk latte"
+  - input: "@socialfaktory check on text generation wgen_4Tz8 for brand brand_7Kp2, is it done?"
+    mocks:
+      write-post:
+        status: succeeded
+        platform: linkedin
+        variants:
+          - text: "Our new oat milk latte is here. Smooth, nutty and made with beans we roast every morning."
+    expected:
+      - callsTool:
+          name: write-post
+          arguments:
+            brandId: brand_7Kp2
+            textGenerationId: wgen_4Tz8
+      - includes: "oat milk latte"
+  - input: "@socialfaktory publish my latest draft to Instagram"
+    usedAsExample: false
+    mocks:
+      list-posts:
+        page: 1
+        pages: 1
+        posts: []
+    expected:
+      - not:
+          callsTool: write-post
+      - meetsCriteria: "Explains that the extension cannot publish posts"
