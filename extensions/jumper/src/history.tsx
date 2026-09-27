@@ -1,17 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Icon,
-  Keyboard,
-  List,
-  PopToRootType,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { excludeFromHistory, includeInHistory, loadHistoryState, removeFromHistory } from "./lib/load-history";
-import { activateApp, type RunningApp } from "./lib/macos";
+import { excludeFromHistory, includeInHistory, loadHistoryState, removeFromHistory } from "./lib/apps/load-history";
+import { SwitchAction } from "./components/switch-action";
+import { activateApp, type RunningApp } from "./lib/platform/macos";
 
 async function load() {
   const { apps, currentHidden, excluded } = await loadHistoryState();
@@ -46,7 +37,7 @@ export default function Command() {
             accessories={index === 0 ? [{ tag: "Current" }] : [{ text: `${index} back` }]}
             actions={
               <ActionPanel>
-                <SwitchAction app={app} />
+                <SwitchToApp app={app} />
                 <Action
                   title="Remove from History"
                   icon={Icon.EyeDisabled}
@@ -84,7 +75,7 @@ export default function Command() {
                   icon={Icon.Eye}
                   onAction={() => update(includeInHistory(app), `Included ${app.name} in history`)}
                 />
-                <SwitchAction app={app} />
+                <SwitchToApp app={app} />
                 <Action.ShowInFinder path={app.path} />
                 <Action.CopyToClipboard title="Copy Bundle Identifier" content={app.bundleId} />
               </ActionPanel>
@@ -96,22 +87,12 @@ export default function Command() {
   );
 }
 
-function SwitchAction({ app }: { app: RunningApp }) {
+function SwitchToApp({ app }: { app: RunningApp }) {
   return (
-    <Action
+    <SwitchAction
       title="Switch to App"
-      icon={Icon.ArrowRight}
-      onAction={async () => {
-        // Activate first: closing the window with Immediate unmounts this view and kills the
-        // command before open() runs (ADR-009, https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md).
-        try {
-          await activateApp(app);
-        } catch (error) {
-          await showFailureToast(error, { title: `Could not switch to ${app.name}` });
-          return;
-        }
-        await closeMainWindow({ popToRootType: PopToRootType.Immediate });
-      }}
+      failureTitle={`Could not switch to ${app.name}`}
+      onSwitch={() => activateApp(app)}
     />
   );
 }

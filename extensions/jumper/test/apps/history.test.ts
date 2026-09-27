@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applyRemovals, excludeApps, removeApp } from "../src/lib/history.ts";
+import { applyRemovals, excludeApps, removeApp } from "../../src/lib/apps/history.ts";
 
 const app = (bundleId: string, name: string) => ({ bundleId, name });
 const finder = app("com.apple.finder", "Finder");

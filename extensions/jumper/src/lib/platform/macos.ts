@@ -1,5 +1,5 @@
 import { open } from "@raycast/api";
-import { recentApps } from "swift:../../swift";
+import { recentApps } from "swift:../../../swift";
 
 export interface RunningApp {
   bundleId: string;

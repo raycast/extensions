@@ -1,9 +1,9 @@
 import { closeMainWindow, environment, PopToRootType, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { loadHistory } from "./load-history";
-import { activateApp } from "./macos";
+import { activateApp } from "../platform/macos";
 import { navigate, type Direction, type NavState } from "./navigation";
-import { readJson, writeJson } from "./storage";
+import { readJson, writeJson } from "../platform/storage";
 
 const STATE_KEY = "nav-state";
 

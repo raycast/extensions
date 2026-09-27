@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { navigate, type NavState } from "../src/lib/navigation.ts";
+import { navigate, type NavState } from "../../src/lib/apps/navigation.ts";
 
 // Simulates macOS: activating an app moves it to the front of the MRU list.
 function activate(mru: string[], app: string): string[] {

@@ -3,7 +3,7 @@
 import PackageDescription
 
 // Native helper for the Raycast extension. Built by `ray build` via raycast/extensions-swift-tools,
-// which generates the TypeScript bindings imported as `swift:../../swift` (see src/lib/macos.ts).
+// which generates the TypeScript bindings imported as `swift:../../swift` (see src/lib/platform/macos.ts).
 // Requires Xcode 16.3+. See ADR-008 in https://github.com/mattherwig/jumper/blob/main/docs/DECISIONS.md.
 let package = Package(
   name: "JumperNative",

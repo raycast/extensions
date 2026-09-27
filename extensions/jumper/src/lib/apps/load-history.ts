@@ -1,6 +1,6 @@
 import { applyRemovals, excludeApps, removeApp, type Removals } from "./history";
-import { getRecentApps, type RunningApp } from "./macos";
-import { readJson, writeJson } from "./storage";
+import { getRecentApps, type RunningApp } from "../platform/macos";
+import { readJson, writeJson } from "../platform/storage";
 
 const REMOVALS_KEY = "removed-apps";
 const EXCLUDED_KEY = "excluded-apps";
