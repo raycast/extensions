@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clocky",
+  "title": "Clocky",
+  "description": "Clocky helps you keep track of your work hours in a simple and flexible way. Clock in, clock out, track breaks, and monitor your daily or weekly time balance — perfect for flexible working hours and trust-based schedules.",
+  "icon": "extension_icon.png",
+  "author": "jeffnawroth",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "targetWeeklyHours",
+      "title": "Weekly Target Hours",
+      "type": "textfield",
+      "default": "40",
+      "required": false,
+      "placeholder": "40",
+      "description": "Your planned working hours per week."
+    },
+    {
+      "name": "workDaysPerWeek",
+      "title": "Work Days per Week",
+      "type": "textfield",
+      "default": "5",
+      "required": false,
+      "placeholder": "5",
+      "description": "How many days you typically work each week."
+    },
+    {
+      "name": "forgotClockOutThresholdMinutes",
+      "title": "Forgot Clock Out After (minutes)",
+      "type": "textfield",
+      "default": "15",
+      "required": false,
+      "placeholder": "15",
+      "description": "How long the computer must have been asleep before Status suggests you forgot to clock out."
+    },
+    {
+      "name": "forgotClockInThresholdMinutes",
+      "title": "Forgot Clock In After (minutes)",
+      "type": "textfield",
+      "default": "30",
+      "required": false,
+      "placeholder": "30",
+      "description": "How long you can be awake without an active session before Status suggests you forgot to clock in."
+    }
+  ],
+  "commands": [
+    {
+      "name": "clock-in",
+      "title": "Clock In",
+      "subtitle": "Start working session",
+      "description": "Starts tracking your work time and records your current session start.",
+      "mode": "view"
+    },
+    {
+      "name": "clock-out",
+      "title": "Clock Out",
+      "subtitle": "End working session",
+      "description": "Stops tracking and calculates your total working time including breaks and daily delta.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-pause",
+      "title": "Toggle Pause",
+      "subtitle": "Pause / resume work",
+      "description": "Toggles your break state and tracks total pause duration automatically.",
+      "mode": "view"
+    },
+    {
+      "name": "today",
+      "title": "Today",
+      "subtitle": "Daily time overview",
+      "description": "Shows your worked hours, break time, and current daily delta compared to your target hours.",
+      "mode": "view"
+    },
+    {
+      "name": "week",
+      "title": "Week",
+      "subtitle": "Weekly summary",
+      "description": "Displays your weekly working time, daily breakdown, and overall time balance (plus/minus hours).",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "subtitle": "Live work status",
+      "description": "Shows your current state (working, paused, or off) and live time delta for today.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "history",
+      "title": "Adjust Entries",
+      "subtitle": "Manual time adjustments",
+      "description": "Add, edit, or delete sessions and pauses to keep your time records accurate.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.2",
+    "@types/react": "19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
