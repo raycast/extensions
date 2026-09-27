@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Fix Database Names in Deploy Service, Deployments, and AI Tools] - {PR_MERGE_DATE}
+## [Fix Database Names in Deploy Service, Deployments, and AI Tools] - 2026-09-27
 
 - Fix databases showing up by their id, with no status, in `Deploy Service`, `Deployments`, and the AI tools on recent Dokploy versions, which stopped including database names and statuses in the project list these read from. The AI tools can find a database by name again.
 
