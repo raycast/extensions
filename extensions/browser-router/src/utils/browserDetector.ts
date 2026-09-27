@@ -316,7 +316,6 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
         path.join(localAppData, "Arc", "Application", "Arc.exe"),
         path.join(localAppData, "Microsoft", "WindowsApps", "Arc.exe"),
       ].filter(Boolean),
-      singleProfile: true,
     },
     {
       id: "opera",

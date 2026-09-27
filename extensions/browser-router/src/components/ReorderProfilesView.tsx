@@ -5,7 +5,7 @@ import { setCustomProfileOrder, setSortMode } from "../utils/storage";
 
 interface ReorderProfilesViewProps {
   initialProfiles: BrowserProfile[];
-  onOrderChanged: (newOrderIds: string[]) => void;
+  onOrderChanged: (newOrderIds: string[], newMode?: "alphabetical" | "custom") => void;
 }
 
 export function ReorderProfilesView({ initialProfiles, onOrderChanged }: ReorderProfilesViewProps) {
@@ -73,7 +73,14 @@ export function ReorderProfilesView({ initialProfiles, onOrderChanged }: Reorder
       if (browserCmp !== 0) return browserCmp;
       return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
     });
-    await persistOrder(next, "Reset to Alphabetical Order");
+    setProfiles(next);
+    await setCustomProfileOrder([]);
+    await setSortMode("alphabetical");
+    onOrderChanged([], "alphabetical");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Reset to Alphabetical Order",
+    });
   }
 
   return (

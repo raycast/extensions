@@ -133,12 +133,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
   }, [searchQuery, preferences.defaultSearchEngine, preferences.customSearchUrl]);
 
   async function handleLaunch(profile: BrowserProfile, incognito = false) {
-    await recordProfileLaunch(profile.id);
-    setLaunchCountsState((prev) => ({
-      ...prev,
-      [profile.id]: (prev[profile.id] || 0) + 1,
-    }));
-    await launchBrowserProfile(profile, targetUrl || undefined, incognito);
+    const success = await launchBrowserProfile(profile, targetUrl || undefined, incognito);
+    if (success) {
+      await recordProfileLaunch(profile.id);
+      setLaunchCountsState((prev) => ({
+        ...prev,
+        [profile.id]: (prev[profile.id] || 0) + 1,
+      }));
+    }
   }
 
   async function handleToggleFavorite(profileId: string) {
@@ -183,9 +185,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
     });
   }
 
-  function handleOrderChanged(newIds: string[]) {
+  function handleOrderChanged(newIds: string[], newMode?: SortMode) {
     setCustomOrderState(newIds);
-    setSortModeState("custom");
+    setSortModeState(newMode || "custom");
   }
 
   function getSortedProfilesForReorder(): BrowserProfile[] {
@@ -320,49 +322,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
               />
             </ActionPanel.Section>
 
-            <ActionPanel.Section title="Profile Sorting & Arrangement">
-              <ActionPanel.Submenu
-                title={`Sort: ${getSortModeLabel(sortMode)}`}
-                icon={Icon.BarChart}
-                shortcut={Keyboard.Shortcut.Common.Save}
-              >
-                <Action
-                  title="Alphabetical (a → Z)"
-                  icon={sortMode === "alphabetical" ? Icon.Checkmark : Icon.Text}
-                  onAction={() => handleSwitchSortMode("alphabetical")}
-                />
-                <Action
-                  title="Reverse Alphabetical (Z → a)"
-                  icon={sortMode === "reverse-alphabetical" ? Icon.Checkmark : Icon.Text}
-                  onAction={() => handleSwitchSortMode("reverse-alphabetical")}
-                />
-                <Action
-                  title="Most Frequently Used (MRU)"
-                  icon={sortMode === "frequently-used" ? Icon.Checkmark : Icon.BarChart}
-                  onAction={() => handleSwitchSortMode("frequently-used")}
-                />
-                <Action
-                  title="Custom Order"
-                  icon={sortMode === "custom" ? Icon.Checkmark : Icon.List}
-                  onAction={() => handleSwitchSortMode("custom")}
-                />
-              </ActionPanel.Submenu>
-
-              {sortMode === "custom" ? (
-                <Action.Push
-                  title="Reorder Profiles Layout…"
-                  icon={Icon.List}
-                  shortcut={Keyboard.Shortcut.Common.OpenWith}
-                  target={
-                    <ReorderProfilesView
-                      initialProfiles={getSortedProfilesForReorder()}
-                      onOrderChanged={handleOrderChanged}
-                    />
-                  }
-                />
-              ) : null}
-            </ActionPanel.Section>
-
             <ActionPanel.Section title="Search & Filter Mode">
               <Action
                 title={mode === "query" ? "Switch to Profile Filter Mode" : "Switch to Search Query Mode"}
@@ -417,6 +376,49 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
               ) : null}
             </ActionPanel.Section>
 
+            <ActionPanel.Section title="Profile Sorting & Arrangement">
+              <ActionPanel.Submenu
+                title={`Sort: ${getSortModeLabel(sortMode)}`}
+                icon={Icon.BarChart}
+                shortcut={Keyboard.Shortcut.Common.Save}
+              >
+                <Action
+                  title="Alphabetical (a → Z)"
+                  icon={sortMode === "alphabetical" ? Icon.Checkmark : Icon.Text}
+                  onAction={() => handleSwitchSortMode("alphabetical")}
+                />
+                <Action
+                  title="Reverse Alphabetical (Z → a)"
+                  icon={sortMode === "reverse-alphabetical" ? Icon.Checkmark : Icon.Text}
+                  onAction={() => handleSwitchSortMode("reverse-alphabetical")}
+                />
+                <Action
+                  title="Most Frequently Used (MRU)"
+                  icon={sortMode === "frequently-used" ? Icon.Checkmark : Icon.BarChart}
+                  onAction={() => handleSwitchSortMode("frequently-used")}
+                />
+                <Action
+                  title="Custom Order"
+                  icon={sortMode === "custom" ? Icon.Checkmark : Icon.List}
+                  onAction={() => handleSwitchSortMode("custom")}
+                />
+              </ActionPanel.Submenu>
+
+              {sortMode === "custom" ? (
+                <Action.Push
+                  title="Reorder Profiles Layout…"
+                  icon={Icon.List}
+                  shortcut={Keyboard.Shortcut.Common.OpenWith}
+                  target={
+                    <ReorderProfilesView
+                      initialProfiles={getSortedProfilesForReorder()}
+                      onOrderChanged={handleOrderChanged}
+                    />
+                  }
+                />
+              ) : null}
+            </ActionPanel.Section>
+
             <ActionPanel.Section title="Help & Feedback">
               <Action.Push
                 title="User Manual & Guide"
@@ -425,16 +427,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
                 target={<UserManualView />}
               />
               <Action.Push
-                title="What's New (Changelog)"
-                icon={Icon.Stars}
-                shortcut={Keyboard.Shortcut.Common.Copy}
-                target={<ChangelogView onDismiss={handleDismissUpdateBanner} />}
-              />
-              <Action.Push
                 title="Send Feedback / Feature Request"
                 icon={Icon.Envelope}
                 shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
                 target={<FeedbackForm />}
+              />
+              <Action.Push
+                title="What's New (Changelog)"
+                icon={Icon.Stars}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+                target={<ChangelogView onDismiss={handleDismissUpdateBanner} />}
               />
             </ActionPanel.Section>
 
