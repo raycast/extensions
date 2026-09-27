@@ -1,0 +1,79 @@
+instructions: |
+  Use list-open-ports to identify a listening process before killing by name or parent.
+  Pass that listening process's PID to kill-open-port-process, even when killing its parent.
+  Use kill-process-on-port for a direct request to kill a listener on a known port.
+  Report the tool's result accurately, including when a process survives a kill signal.
+
+evals:
+  - input: "@port-manager I want to be able to kill a service on port 3000"
+    mocks:
+      list-open-ports: '[{"pid":1234,"name":"node","ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
+      kill-process-on-port: "Killed process 1234 listening on port 3000."
+    expected:
+      - callsTool:
+          name: kill-process-on-port
+          arguments:
+            port: 3000
+      - includes: "3000"
+  - input: "@port-manager What services are listening on TCP ports?"
+    mocks:
+      list-open-ports: '[{"pid":1234,"name":"node","ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
+    expected:
+      - callsTool: list-open-ports
+      - includes: "3000"
+  - input: "@port-manager Show my named ports"
+    mocks:
+      list-named-ports: '[{"port":3000,"name":"Next.js"}]'
+    expected:
+      - callsTool: list-named-ports
+      - includes: "Next.js"
+  - input: "@port-manager Name port 3000 Next.js"
+    mocks:
+      create-named-port: 'Named port 3000 as "Next.js".'
+    expected:
+      - callsTool:
+          name: create-named-port
+          arguments:
+            port: 3000
+            name: Next.js
+  - input: "@port-manager Rename port 3000 to Development Server"
+    mocks:
+      list-open-ports: '[{"pid":1234,"name":"node","ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
+      list-named-ports: '[{"port":3000,"name":"Next.js"}]'
+      update-named-port: 'Updated port 3000 as "Development Server".'
+    expected:
+      - callsTool:
+          name: update-named-port
+          arguments:
+            port: 3000
+            name: Development Server
+  - input: "@port-manager Delete the saved name for port 3000"
+    mocks:
+      delete-named-port: "Removed the saved name for port 3000."
+    expected:
+      - callsTool:
+          name: delete-named-port
+          arguments:
+            port: 3000
+  - input: "@port-manager Kill all processes with the same name as the service on port 3000"
+    mocks:
+      list-open-ports: '[{"pid":1234,"name":"node","ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
+      kill-open-port-process: 'Sent a termination request to all processes named "node".'
+    expected:
+      - callsTool:
+          name: kill-open-port-process
+          arguments:
+            pid: 1234
+            target: all
+    usedAsExample: false
+  - input: "@port-manager Kill the parent of the service listening on port 3000"
+    mocks:
+      list-open-ports: '[{"pid":1234,"name":"node","parentPid":1200,"ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
+      kill-open-port-process: "Killed parent process 1200."
+    expected:
+      - callsTool:
+          name: kill-open-port-process
+          arguments:
+            pid: 1234
+            target: parent
+    usedAsExample: false

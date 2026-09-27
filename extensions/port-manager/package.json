@@ -16,7 +16,8 @@
     "pernielsentikaer",
     "0xdhrv",
     "MaaxGr",
-    "tony.nguyen"
+    "tony.nguyen",
+    "alexi.build"
   ],
   "license": "MIT",
   "commands": [
@@ -97,6 +98,43 @@
       "mode": "menu-bar",
       "icon": "command-icon.png",
       "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "kill-process-on-port",
+      "title": "Kill Process on Port",
+      "description": "Kill the process listening on a TCP port and verify that it exits"
+    },
+    {
+      "name": "list-open-ports",
+      "title": "List Open Ports",
+      "description": "List TCP listeners with their ports, addresses, exposure, process details, and named port labels"
+    },
+    {
+      "name": "kill-open-port-process",
+      "title": "Kill Open Port Process",
+      "description": "Kill a listed TCP listener by its PID, all processes with its name, or its parent; always pass the listener's PID"
+    },
+    {
+      "name": "list-named-ports",
+      "title": "List Named Ports",
+      "description": "List saved names for TCP ports"
+    },
+    {
+      "name": "create-named-port",
+      "title": "Create Named Port",
+      "description": "Save a name for a TCP port that does not have one yet"
+    },
+    {
+      "name": "update-named-port",
+      "title": "Update Named Port",
+      "description": "Change the saved name of an existing named TCP port"
+    },
+    {
+      "name": "delete-named-port",
+      "title": "Delete Named Port",
+      "description": "Remove a saved TCP port name"
     }
   ],
   "preferences": [
