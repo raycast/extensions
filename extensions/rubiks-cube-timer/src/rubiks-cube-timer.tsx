@@ -19,7 +19,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import { makeScramble } from "./help/scramble";
+import { make2x2Scramble, makeScramble } from "./help/scramble";
 import { scrambleImage, statsImage, timerImage } from "./help/screen";
 import { Solve, effectiveTime, exportToCsTimer, importFromCsTimer, mergeSolves } from "./help/cstimer";
 
@@ -213,9 +213,13 @@ export default function command() {
     precision = "tenths",
     inspection = false,
     inspectionSeconds = "15",
+    hideInspection = true,
+    cubeSize = "3x3",
+    hideTimer = false,
   } = getPreferenceValues<Preferences.RubiksCubeTimer>();
   const step = STEP_SECONDS[precision] ?? STEP_SECONDS.tenths;
   const intervalMs = STEP_INTERVAL_MS[precision] ?? STEP_INTERVAL_MS.tenths;
+  const nextScramble = cubeSize === "2x2" ? make2x2Scramble : makeScramble;
 
   const parsedInspection = Number.parseFloat(inspectionSeconds);
   const inspectSec = Number.isFinite(parsedInspection) && parsedInspection > 0 ? parsedInspection : 15;
@@ -225,7 +229,7 @@ export default function command() {
   const { value: stored, setValue: setSolves, isLoading } = useLocalStorage<Solve[]>("solves", []);
   const solves = stored ?? [];
 
-  const [scramble, setScramble] = useState(() => makeScramble());
+  const [scramble, setScramble] = useState(() => nextScramble());
   const [phase, setPhase] = useState<Phase>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [lastTime, setLastTime] = useState(0);
@@ -258,7 +262,10 @@ export default function command() {
     setElapsed(0);
     startRef.current = Date.now();
     setPhase("inspecting");
-    intervalRef.current = setInterval(() => tick(1000), 100); // inspection shows whole seconds
+    // A hidden inspection shows a static label, so there's nothing to update during it.
+    if (!hideInspection) {
+      intervalRef.current = setInterval(() => tick(1000), 100); // inspection shows whole seconds
+    }
   }
 
   function beginSolve(fromInspection: boolean) {
@@ -274,7 +281,10 @@ export default function command() {
     setElapsed(0);
     startRef.current = Date.now();
     setPhase("solving");
-    intervalRef.current = setInterval(() => tick(step * 1000), intervalMs); // one bucket per shown step
+    // A hidden timer shows a static label, so there's nothing to update while solving.
+    if (!hideTimer) {
+      intervalRef.current = setInterval(() => tick(step * 1000), intervalMs); // one bucket per shown step
+    }
   }
 
   function finishSolve() {
@@ -285,7 +295,7 @@ export default function command() {
     setLastPenalty(penalty);
     const solve: Solve = { time: finalTime, scramble, date: Math.floor(Date.now() / 1000), penalty };
     setSolves([solve, ...solves]);
-    setScramble(makeScramble());
+    setScramble(nextScramble());
     setPhase("idle");
   }
 
@@ -299,7 +309,7 @@ export default function command() {
 
   function newScramble() {
     if (phase !== "idle") return;
-    setScramble(makeScramble());
+    setScramble(nextScramble());
     setLastTime(0);
     setLastPenalty(0);
   }
@@ -356,10 +366,11 @@ export default function command() {
   let centerText: string;
   let big: boolean;
   if (phase === "solving") {
-    centerText = formatRunning(elapsed, step);
+    centerText = hideTimer ? "Solving…" : formatRunning(elapsed, step);
     big = true;
   } else if (phase === "inspecting") {
-    if (elapsed > dnfMs) centerText = "DNF";
+    if (hideInspection) centerText = "Inspecting…";
+    else if (elapsed > dnfMs) centerText = "DNF";
     else if (elapsed > plus2Ms) centerText = "+2";
     else centerText = String(Math.max(0, Math.ceil(inspectSec) - Math.floor(elapsed / 1000)));
     big = true;

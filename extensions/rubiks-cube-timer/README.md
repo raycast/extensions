@@ -4,8 +4,8 @@ Time your Rubik's Cube solves right inside Raycast — get a random scramble, st
 
 ## Features
 
-- **Random 3×3 scrambles** — a fresh scramble for every solve
-- **Timer** — start and stop with Enter, with a live count while you solve
+- **Random scrambles** — a fresh 3×3 (or 2×2) scramble for every solve
+- **Timer** — start and stop with Enter, with a live count while you solve (or a hidden timer if you prefer)
 - **Adjustable precision** — count up in whole seconds, half seconds, tenths, or hundredths (the final time is always millisecond-accurate)
 - **Optional inspection** — a WCA-style countdown before the solve, with +2 / DNF penalties
 - **Session stats** — best, ao5, and ao12 shown between solves
@@ -24,9 +24,16 @@ Open the command preferences (⌘, → Extensions, or "Configure Command") and s
 
 The recorded time is always exact regardless of this setting; it only changes how finely the running timer ticks.
 
+## Other settings
+
+- **Cube** — scramble a **3×3** (default) or a **2×2**.
+- **Hidden Timer** — hide the running time while solving (shows "Solving…" instead); the final time still appears when you stop.
+
 ## Inspection
 
 Enable **Inspection** in the preferences to get a countdown before each solve (default 15 seconds, configurable via **Inspection Time**). Enter starts the countdown, Enter again starts the solve. Going over the inspection time adds **+2**; going 2 seconds past it is a **DNF**.
+
+By default the countdown itself is hidden ("Inspecting…"); turn off **Hidden Inspection** if you want to see the seconds tick down.
 
 ## Import / export
 
