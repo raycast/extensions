@@ -62,7 +62,7 @@
     {
       "name": "search-gifs",
       "title": "Search GIFs",
-      "description": "Find GIFs or GIPHY Clips by keyword and return links to the matching media and source pages"
+      "description": "Find GIFs or GIPHY Clips by keyword and return media links and available source page links"
     }
   ],
   "preferences": [

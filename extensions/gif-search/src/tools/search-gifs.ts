@@ -6,7 +6,7 @@ type Input = {
   service?: "giphy" | "giphy-clips" | "klipy" | "finergifs";
 };
 
-/** Search a GIF provider and return links that can be shared with the user. */
+/** Search a GIF provider and return media links and available source page links. */
 export default async function searchGifs({ query, service = "giphy" }: Input) {
   const api = await getAPIByServiceName(service);
   if (!api) return [];
@@ -15,6 +15,6 @@ export default async function searchGifs({ query, service = "giphy" }: Input) {
   return results.map((gif) => ({
     title: gif.title,
     mediaUrl: service === "giphy-clips" ? gif.download_url : gif.gif_url,
-    pageUrl: gif.url,
+    ...(gif.url ? { pageUrl: gif.url } : {}),
   }));
 }
