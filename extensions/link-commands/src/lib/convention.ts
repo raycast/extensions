@@ -18,8 +18,8 @@ import type { ScriptCommand } from "./types";
  *
  * The environment used to lead the title (`@work · Sprint Board` / `Linear`), and commands written in
  * that form are still read correctly: the title-anchored sigil is honoured first, then the subtitle.
- * Only the writer changed. Nothing here rewrites a file on disk, so a collection migrates one command
- * at a time as its commands are recreated.
+ * Only the writer changed. Nothing here rewrites files in bulk, so a collection migrates one command at a
+ * time: as its commands are recreated, or through the list's per-command Move Environment to Subtitle.
  *
  * Everything here degrades rather than fails. A command written by someone who has never heard of
  * the convention still parses — it simply has no environment and no category, and its brand is
@@ -116,6 +116,32 @@ export const facetsOf = (command: Pick<ScriptCommand, "title" | "packageName">):
     brand: split.brand,
     category: split.category,
   };
+};
+
+/**
+ * The writer's side of `splitPackage`: brand, then scope, then category. One function for every writer, so
+ * a command created by the form and one migrated from the older title form end up with the same subtitle
+ * rather than two orders the reader happens to accept equally.
+ */
+export const joinPackage = ({ brand, environment, category }: Omit<Facets, "name">) =>
+  [brand, environment ? `@${environment}` : undefined, category ? `#${category}` : undefined]
+    .filter(Boolean)
+    .join(` ${SEPARATOR} `);
+
+/** Whether a command still leads its title with `@env · `, the form written before the scope moved. */
+export const hasTitleEnvironment = (title: string) => ENVIRONMENT_PATTERN.test(title);
+
+/**
+ * The same command in the current form: the title reduced to the name, and the scope moved onto the
+ * subtitle beside the brand and category. Undefined when the title carries no scope, so there is nothing
+ * to move. Built from `facetsOf`, so where a hand edit left a second scope on the subtitle as well, the
+ * title's wins here exactly as it already wins in the list — what the row showed is what the file says.
+ */
+export const subtitleFormOf = (command: Pick<ScriptCommand, "title" | "packageName">) => {
+  if (!hasTitleEnvironment(command.title)) return undefined;
+
+  const { name, ...facets } = facetsOf(command);
+  return { title: name, packageName: joinPackage(facets) };
 };
 
 const titleCase = (value: string) =>

@@ -1,3 +1,5 @@
+import { joinPackage } from "./convention";
+
 const FALLBACK_LINK_ICON = "https://api.iconify.design/mingcute/link-line.svg";
 
 const FALLBACK_FOLDER_ICON = "https://api.iconify.design/mingcute/folder-line.svg";
@@ -222,9 +224,7 @@ export const buildScript = (draft: ScriptDraft) => {
   const category = draft.category?.trim().replace(/^#/, "");
   const brand = brandOf(draft);
 
-  const subtitle = [brand, environment ? `@${environment}` : undefined, category ? `#${category}` : undefined]
-    .filter(Boolean)
-    .join(" · ");
+  const subtitle = joinPackage({ brand, environment, category });
   const icon = draft.iconReference ?? defaultIconFor(draft.target);
 
   const lines = [

@@ -1,5 +1,6 @@
-import { access, chmod, copyFile, stat } from "node:fs/promises";
+import { access, chmod, copyFile, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
+import { moveEnvironmentToSubtitle } from "./move-environment";
 
 const MAX_COPIES = 50;
 
@@ -17,6 +18,22 @@ const exists = (path: string) =>
 export const makeExecutable = async (path: string) => {
   const stats = await stat(path);
   await chmod(path, stats.mode | 0o111);
+};
+
+/**
+ * Rewrites one script in place rather than writing a fresh file beside it: the filename is the command's
+ * deeplink identifier, so renaming would break every link to it. The mode is restored explicitly after the
+ * write, for the same reason `duplicateScript` copies it — a script that silently stopped being executable
+ * would vanish from Raycast with no hint why.
+ */
+export const moveEnvironmentInScript = async (path: string) => {
+  const contents = await readFile(path, "utf8");
+  const rewritten = moveEnvironmentToSubtitle(contents);
+  if (rewritten === contents) throw new Error("The title carries no environment to move");
+
+  const stats = await stat(path);
+  await writeFile(path, rewritten, "utf8");
+  await chmod(path, stats.mode);
 };
 
 const freeCopyPath = async (directory: string, base: string, extension: string, index = 0): Promise<string> => {
