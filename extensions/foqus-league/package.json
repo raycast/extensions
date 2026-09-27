@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "foqus-league",
+  "title": "Foqus League",
+  "description": "Stats for Raycast Focus. Hours, streaks, weekly leagues and a shareable recap. Everything stays on your Mac.",
+  "icon": "icon.png",
+  "author": "filipimiparebine",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "focus-stats",
+      "title": "Show League",
+      "subtitle": "Foqus League",
+      "description": "Your week at a glance: time focused, streak, league and calendar.",
+      "mode": "view"
+    },
+    {
+      "name": "focus-wrapped",
+      "title": "Show Recap",
+      "subtitle": "Foqus League",
+      "description": "One card with your totals and records. Copy it or save it as a PNG.",
+      "mode": "view"
+    },
+    {
+      "name": "focus-sessions",
+      "title": "Browse Sessions",
+      "subtitle": "Foqus League",
+      "description": "Browse, add, edit or delete sessions.",
+      "mode": "view"
+    },
+    {
+      "name": "focus-menu-bar",
+      "title": "Menu Bar Stats",
+      "subtitle": "Foqus League",
+      "description": "Today's focused time and one-click starts for recent goals. Keep it on: it records your sessions.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "weekStart",
+      "title": "Week Starts On",
+      "type": "dropdown",
+      "required": false,
+      "default": "monday",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "monday"
+        },
+        {
+          "title": "Sunday",
+          "value": "sunday"
+        }
+      ],
+      "description": "First day of the week for totals, leagues and the calendar."
+    },
+    {
+      "name": "menuBarFormat",
+      "title": "Menu Bar Shows",
+      "type": "dropdown",
+      "required": false,
+      "default": "today",
+      "data": [
+        {
+          "title": "Today's time",
+          "value": "today"
+        },
+        {
+          "title": "This week's time",
+          "value": "week"
+        },
+        {
+          "title": "Current streak",
+          "value": "streak"
+        }
+      ],
+      "description": "Which number the menu bar shows."
+    },
+    {
+      "name": "dailyGoal",
+      "title": "Daily Goal",
+      "description": "Minutes per day to count as a focused day. Five focused days make a perfect week.",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "placeholder": "60"
+    },
+    {
+      "name": "leagues",
+      "title": "League Thresholds",
+      "description": "Hours per week for 🥈 Silver, 🥇 Gold and 💎 Diamond, comma separated. Bronze starts at 0.",
+      "type": "textfield",
+      "required": false,
+      "default": "10,20,40",
+      "placeholder": "10,20,40"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "typecheck": "ray build -e dist -o node_modules/.cache/foqus-league && tsc --noEmit",
+    "test": "npm run typecheck --silent && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test src/lib/*.test.ts",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
