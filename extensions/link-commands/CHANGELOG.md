@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Plain Names in the Create Form] - {PR_MERGE_DATE}
+## [Plain Names in the Create Form] - 2026-09-27
 
 ### Fixed
 
