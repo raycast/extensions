@@ -8,6 +8,23 @@ import { fileExistsSync } from "../utils";
 
 const AVATAR_DOWNLOAD_CONCURRENCY = 6;
 
+// shared by all `useAvatars` instances, so list rows don't each start their own downloads
+let activeAvatarDownloads = 0;
+const pendingAvatarDownloads: (() => void)[] = [];
+
+async function withAvatarDownloadSlot<T>(download: () => Promise<T>): Promise<T> {
+  if (activeAvatarDownloads >= AVATAR_DOWNLOAD_CONCURRENCY) {
+    await new Promise<void>((resolve) => pendingAvatarDownloads.push(resolve));
+  }
+  activeAvatarDownloads++;
+  try {
+    return await download();
+  } finally {
+    activeAvatarDownloads--;
+    pendingAvatarDownloads.shift()?.();
+  }
+}
+
 /**
  * Avatars of private projects and groups are only served with authentication, and `/uploads/...`
  * web URLs ignore API tokens, so they are downloaded via the API avatar endpoints
@@ -29,9 +46,11 @@ async function localAvatarSource(avatarUrl: string): Promise<string> {
     return localFilepath;
   }
   await fs.mkdir(path.dirname(localFilepath), { recursive: true });
-  await gitlab.downloadFile(gitlab.joinUrl(`/api/v4/${match[1]}s/${match[2]}/avatar`), {
-    localFilepath: `${localFilepath}.download`,
-  });
+  await withAvatarDownloadSlot(() =>
+    gitlab.downloadFile(gitlab.joinUrl(`/api/v4/${match[1]}s/${match[2]}/avatar`), {
+      localFilepath: `${localFilepath}.download`,
+    }),
+  );
   await fs.rename(`${localFilepath}.download`, localFilepath);
   return localFilepath;
 }
@@ -41,17 +60,15 @@ export function useAvatars(avatarUrls: (string | undefined)[]): Record<string, s
   const { data } = useCachedPromise(
     async (urls: string[]): Promise<Record<string, string>> => {
       const sources: Record<string, string> = {};
-      const queue = [...urls];
-      const worker = async () => {
-        for (let avatarUrl = queue.shift(); avatarUrl; avatarUrl = queue.shift()) {
+      await Promise.all(
+        urls.map(async (avatarUrl) => {
           try {
             sources[avatarUrl] = await localAvatarSource(avatarUrl);
           } catch {
             // keep the text icon fallback for avatars that can't be downloaded
           }
-        }
-      };
-      await Promise.all(Array.from({ length: AVATAR_DOWNLOAD_CONCURRENCY }, worker));
+        }),
+      );
       return sources;
     },
     [[...new Set(avatarUrls.filter((avatarUrl): avatarUrl is string => !!avatarUrl))].sort()],

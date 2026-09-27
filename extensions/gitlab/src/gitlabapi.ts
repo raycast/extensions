@@ -360,6 +360,8 @@ function paramString(params: { [key: string]: any }): string {
   return prefix + queryParts.join("&");
 }
 
+const PARALLEL_PAGE_BATCH_SIZE = 4;
+
 function getNextPageNumber(page_response: Response): number | undefined {
   const header = page_response.headers.get("x-next-page");
   return header ? parseInt(header) : undefined;
@@ -837,9 +839,16 @@ export class GitLab {
 
       const totalPages = parseInt(response.headers.get("x-total-pages") ?? "");
       if (totalPages > 1) {
-        const pageNumbers = Array.from({ length: totalPages - 1 }, (_, index) => index + 2);
-        const pages = await Promise.all(pageNumbers.map(async (page) => toJsonOrError(await fetchPage(page))));
-        return json.concat(...pages);
+        // fetch the remaining pages in small parallel batches to bound concurrent requests
+        for (let batchStart = 2; batchStart <= totalPages; batchStart += PARALLEL_PAGE_BATCH_SIZE) {
+          const pageNumbers = Array.from(
+            { length: Math.min(PARALLEL_PAGE_BATCH_SIZE, totalPages - batchStart + 1) },
+            (_, index) => batchStart + index,
+          );
+          const pages = await Promise.all(pageNumbers.map(async (page) => toJsonOrError(await fetchPage(page))));
+          json = json.concat(...pages);
+        }
+        return json;
       }
 
       let next_page = getNextPageNumber(response);

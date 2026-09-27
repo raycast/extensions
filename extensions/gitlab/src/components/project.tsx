@@ -166,7 +166,23 @@ export function MyProjectsDropdown(props: {
   includeAllItem?: boolean;
 }): React.ReactNode {
   const { projects: myprojects, isLoading } = useMyProjects();
-  const avatarSources = useAvatars(myprojects.map(projectIconUrl));
+  // the selected project can be outside the member projects (e.g. opened from "All" in Search Projects),
+  // so it is fetched by ID and pinned to keep the selection
+  const { data: selectedProject } = useCachedPromise(
+    async (id: string): Promise<Project> => gitlab.getProject(Number(id)),
+    [props.value ?? ""],
+    {
+      execute: !!props.value && props.value !== "-" && !myprojects.some((project) => `${project.id}` === props.value),
+    },
+  );
+  const dropdownProjects = useMemo(
+    () =>
+      selectedProject && !myprojects.some((project) => project.id === selectedProject.id)
+        ? [selectedProject, ...myprojects]
+        : myprojects,
+    [myprojects, selectedProject],
+  );
+  const avatarSources = useAvatars(dropdownProjects.map(projectIconUrl));
   const [recentProjectIds, setRecentProjectIds] = useCachedState<number[]>("my-projects-dropdown-recent", []);
   const includeAllItem = props.includeAllItem !== false;
 
@@ -175,7 +191,7 @@ export function MyProjectsDropdown(props: {
   const { recentProjects, groupSections } = useMemo(() => {
     const currentProjectId = props.value && props.value !== "-" ? [Number(props.value)] : [];
     const recentProjects = [...new Set([...currentProjectId, ...recentProjectIds])]
-      .map((id) => myprojects.find((project) => project.id === id))
+      .map((id) => dropdownProjects.find((project) => project.id === id))
       .filter((project): project is Project => !!project)
       .slice(0, RECENT_PROJECTS_COUNT);
     const showRepositoryGroupName = getPreferences().showRepositoryGroupName;
@@ -192,7 +208,7 @@ export function MyProjectsDropdown(props: {
       recentProjects,
       groupSections: [...groups].sort(([first], [second]) => first.localeCompare(second)),
     };
-  }, [myprojects, props.value, recentProjectIds]);
+  }, [dropdownProjects, myprojects, props.value, recentProjectIds]);
 
   return (
     <List.Dropdown
@@ -206,7 +222,7 @@ export function MyProjectsDropdown(props: {
           props.onChange(undefined);
           return;
         }
-        const project = myprojects.find((project) => `${project.id}` === newValue);
+        const project = dropdownProjects.find((project) => `${project.id}` === newValue);
         if (project) {
           setRecentProjectIds((current) =>
             [project.id, ...current.filter((id) => id !== project.id)].slice(0, RECENT_PROJECTS_COUNT),
