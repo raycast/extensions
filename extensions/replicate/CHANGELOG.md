@@ -14,6 +14,7 @@
 - Copying an image no longer needs Finder automation permission
 - The model form no longer waits forever on a prediction cancelled from replicate.com
 - Errors show Replicate's own message instead of "Something went wrong"
+- New icon matching Replicate's current logo
 - Requires Raycast 2.5 or later
 
 ## [Updated Grid component and Replicate name] - 2022-11-05
