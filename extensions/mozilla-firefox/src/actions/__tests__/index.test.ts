@@ -237,7 +237,11 @@ describe("launchFirefox on macOS (via openNewTab)", () => {
     const result = await openNewTab("https://example.com");
 
     expect(result).toBe("success");
-    expect(execFile).toHaveBeenCalledWith("open", ["-a", "Firefox Nightly", "https://example.com"], expect.any(Function));
+    expect(execFile).toHaveBeenCalledWith(
+      "open",
+      ["-a", "Firefox Nightly", "https://example.com"],
+      expect.any(Function),
+    );
   });
 });
 
