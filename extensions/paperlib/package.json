@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paperlib",
+  "title": "Paperlib",
+  "description": "Search your Paperlib library and copy DOI, citation, or BibTeX.",
+  "icon": "icon.png",
+  "author": "jialinli",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-papers",
+      "title": "Search Papers",
+      "subtitle": "Paperlib",
+      "description": "Search the local Paperlib library and copy DOI, citation, or BibTeX.",
+      "mode": "view",
+      "keywords": [
+        "paper",
+        "bibtex",
+        "doi",
+        "citation",
+        "library",
+        "pdf"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiHost",
+      "type": "textfield",
+      "required": false,
+      "title": "Paperlib API Host",
+      "description": "HTTP endpoint exposed by @future-scholars/paperlib-apihost-extension. Paperlib must be running.",
+      "placeholder": "http://127.0.0.1:21227",
+      "default": "http://127.0.0.1:21227"
+    },
+    {
+      "name": "localLibraryFile",
+      "type": "file",
+      "required": false,
+      "title": "Library JSON or CSV",
+      "description": "Optional export used when the API Host is unavailable. Accepts Paperlib CSV or a JSON array of paper records."
+    },
+    {
+      "name": "libraryFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Paperlib Library Folder",
+      "description": "Folder that contains library.json, papers.csv, or default.realm. Defaults to ~/Documents/paperlib."
+    },
+    {
+      "name": "useDemoFallback",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use demo library when Paperlib is offline",
+      "description": "Load a small built-in sample library so search still works in CI and first-run demos."
+    },
+    {
+      "name": "fetchRemoteAbstracts",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Fetch abstracts from Crossref or arXiv",
+      "description": "Paperlib does not store abstracts on paper records. When enabled, missing abstracts are filled from Crossref or arXiv."
+    },
+    {
+      "name": "citationStyle",
+      "type": "dropdown",
+      "required": false,
+      "title": "Citation Style",
+      "description": "Plain-text citation format copied from Search Papers. Matches Paperlib's built-in APA-style export by default.",
+      "default": "apa",
+      "data": [
+        {
+          "title": "APA",
+          "value": "apa"
+        },
+        {
+          "title": "Harvard",
+          "value": "harvard"
+        }
+      ]
+    },
+    {
+      "name": "resultLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Result Limit",
+      "description": "Maximum number of papers to load from Paperlib.",
+      "default": "50",
+      "placeholder": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  }
+}
