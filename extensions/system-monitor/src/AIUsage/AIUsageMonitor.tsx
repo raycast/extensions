@@ -82,10 +82,10 @@ function UsageSection({ name, usage, error }: { name: string; usage?: ProviderUs
 }
 
 export default function AIUsageMonitor({ isActive = false }: { isActive?: boolean }) {
-  const codex = usePromise(() => collectCodexUsage(codexPath, showSparkUsage), [codexPath, showSparkUsage], {
+  const codex = usePromise(collectCodexUsage, [codexPath, showSparkUsage], {
     execute: isActive && showCodexUsage,
   });
-  const claude = usePromise(() => collectClaudeUsage(claudeUsagePath), [claudeUsagePath], {
+  const claude = usePromise(collectClaudeUsage, [claudeUsagePath], {
     execute: isActive && showClaudeUsage,
   });
 

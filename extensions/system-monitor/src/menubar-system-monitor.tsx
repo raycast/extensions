@@ -97,10 +97,10 @@ export default function Command() {
   // Background interval launches should finish fast and unload.
   const isUserLaunch = environment.launchType === LaunchType.UserInitiated;
   const showAIUsage = showCodexUsage || showClaudeUsage;
-  const codexUsage = usePromise(() => collectCodexUsage(codexPath, showSparkUsage), [codexPath, showSparkUsage], {
+  const codexUsage = usePromise(collectCodexUsage, [codexPath, showSparkUsage], {
     execute: isUserLaunch && showCodexUsage,
   });
-  const claudeUsage = usePromise(() => collectClaudeUsage(claudeUsagePath), [claudeUsagePath], {
+  const claudeUsage = usePromise(collectClaudeUsage, [claudeUsagePath], {
     execute: isUserLaunch && showClaudeUsage,
   });
   const isRevalidating = useRef(false);
