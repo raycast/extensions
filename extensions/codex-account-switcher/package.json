@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-account-switcher",
+  "title": "Codex Account Switcher",
+  "description": "Add, remove, switch, and inspect local Codex accounts from Raycast.",
+  "icon": "icon.png",
+  "author": "zhen",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-codex-account",
+      "title": "Codex Account Switcher",
+      "subtitle": "Codex",
+      "description": "Add, remove, switch, and view usage for saved Codex accounts",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "refreshMode",
+          "title": "Usage Refresh",
+          "description": "API refresh is current; local refresh avoids network requests but may be stale.",
+          "type": "dropdown",
+          "required": false,
+          "default": "api",
+          "data": [
+            {
+              "title": "Current via OpenAI",
+              "value": "api"
+            },
+            {
+              "title": "Local Cache Only",
+              "value": "local"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "codex-usage-menu",
+      "title": "Codex Usage in Menu Bar",
+      "subtitle": "Codex",
+      "description": "Show the active Codex account usage in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "refreshMode",
+          "title": "Usage Refresh",
+          "description": "Local cache is recommended for background refresh; API refresh makes a request every five minutes.",
+          "type": "dropdown",
+          "required": false,
+          "default": "local",
+          "data": [
+            {
+              "title": "Local Cache Only",
+              "value": "local"
+            },
+            {
+              "title": "Current via OpenAI",
+              "value": "api"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "codexAuthPath",
+      "title": "codex-auth Executable",
+      "description": "Absolute path to codex-auth 0.3.0 or newer.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/codex-auth"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}
