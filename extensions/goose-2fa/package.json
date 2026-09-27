@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "goose-2fa",
+  "title": "Goose 2FA",
+  "description": "Two-factor code manager sharing a JSON data source with uTools: codes, groups, trash, import/export, screenshot scanning and direct typing",
+  "icon": "icon.png",
+  "author": "eachann_",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "private": false,
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "codes",
+      "title": "Codes",
+      "subtitle": "Goose 2FA",
+      "description": "Search accounts; press Return to copy or paste codes according to preferences",
+      "mode": "view",
+      "keywords": [
+        "2fa",
+        "otp",
+        "totp",
+        "hotp",
+        "goose"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Account name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "viewMode",
+      "title": "Main View Layout",
+      "description": "Choose a list or grid for the main view.",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "data": [
+        {
+          "title": "List (arrow-key navigation)",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "enterAction",
+      "title": "Return Action",
+      "description": "Choose whether Return copies the code or pastes it into the previous field.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy Code",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into Previous Field",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "closeAfterCopy",
+      "title": "After Copy",
+      "description": "Close Raycast and return to the previous app after copying a code.",
+      "label": "Close Raycast and return to desktop",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "dataFile",
+      "title": "Data Source File",
+      "description": "Choose an existing JSON file here, or save current data as a new sync file in Settings & Data. Select the same iCloud file on both clients to sync. The file contains plaintext 2FA secrets.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "node scripts/build-helper.mjs && ray build -e dist",
+    "dev": "node scripts/build-helper.mjs && ray develop",
+    "lint": "ray lint",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.9.0"
+  }
+}
