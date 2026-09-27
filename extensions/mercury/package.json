@@ -135,23 +135,26 @@
       {
         "input": "@mercury what is my current balance",
         "mocks": {
-          "get-accounts": [
-            {
-              "organization": "Not A Real Company Inc.",
-              "kind": "business",
-              "accounts": [
-                {
-                  "accountNumber": "3419732837",
-                  "availableBalance": 1000000,
-                  "currentBalance": 1000000,
-                  "legalBusinessName": "Not A Real Company Inc.",
-                  "name": "Mercury Savings ••2837",
-                  "status": "active"
-                }
-              ],
-              "credit": []
-            }
-          ]
+          "get-accounts": {
+            "organizations": [
+              {
+                "organization": "Not A Real Company Inc.",
+                "kind": "business",
+                "accounts": [
+                  {
+                    "accountNumber": "3419732837",
+                    "availableBalance": 1000000,
+                    "currentBalance": 1000000,
+                    "legalBusinessName": "Not A Real Company Inc.",
+                    "name": "Mercury Savings ••2837",
+                    "status": "active"
+                  }
+                ],
+                "credit": []
+              }
+            ],
+            "unavailable": []
+          }
         },
         "expected": [
           {
@@ -168,18 +171,21 @@
       {
         "input": "@mercury Show me my latest transactions",
         "mocks": {
-          "get-transactions": [
-            {
-              "organization": "Jane Doe",
-              "accountId": "acct_001",
-              "id": "tx_001",
-              "amount": -50.25,
-              "counterpartyName": "Superstore",
-              "createdAt": "2025-02-26T14:00:00Z",
-              "status": "sent",
-              "kind": "debitCardTransaction"
-            }
-          ]
+          "get-transactions": {
+            "transactions": [
+              {
+                "organization": "Jane Doe",
+                "accountId": "acct_001",
+                "id": "tx_001",
+                "amount": -50.25,
+                "counterpartyName": "Superstore",
+                "createdAt": "2025-02-26T14:00:00Z",
+                "status": "sent",
+                "kind": "debitCardTransaction"
+              }
+            ],
+            "unavailable": []
+          }
         },
         "expected": [
           {
@@ -209,7 +215,9 @@
             "period": "month",
             "topExpenses": [],
             "topIncome": [],
-            "transactionsByType": {}
+            "transactionsByType": {},
+            "largestTransactions": [],
+            "unavailable": []
           }
         },
         "expected": [
@@ -226,24 +234,27 @@
       {
         "input": "@mercury how much is in my treasury account",
         "mocks": {
-          "get-treasury": [
-            {
-              "organization": "Jane Doe",
-              "id": "trs_001",
-              "status": "active",
-              "createdAt": "2025-01-02T00:00:00Z",
-              "availableBalance": 250000,
-              "currentBalance": 250000,
-              "recentNetReturns": [
-                {
-                  "month": "2026-08-01",
-                  "netAmount": 812.44,
-                  "treasuryFee": 20.83,
-                  "status": "charged"
-                }
-              ]
-            }
-          ]
+          "get-treasury": {
+            "treasury": [
+              {
+                "organization": "Jane Doe",
+                "id": "trs_001",
+                "status": "active",
+                "createdAt": "2025-01-02T00:00:00Z",
+                "availableBalance": 250000,
+                "currentBalance": 250000,
+                "recentNetReturns": [
+                  {
+                    "month": "2026-08-01",
+                    "netAmount": 812.44,
+                    "treasuryFee": 20.83,
+                    "status": "charged"
+                  }
+                ]
+              }
+            ],
+            "unavailable": []
+          }
         },
         "expected": [
           {
@@ -260,25 +271,28 @@
       {
         "input": "@mercury which of my cards are frozen",
         "mocks": {
-          "get-cards": [
-            {
-              "organization": "Jane Doe",
-              "id": "card_001",
-              "accountId": "acct_001",
-              "lastFour": "4242",
-              "nameOnCard": "Jane Doe",
-              "nickname": "Travel",
-              "status": "frozen",
-              "type": "virtual",
-              "kind": "debit",
-              "expiration": {
-                "month": 4,
-                "year": 2028
-              },
-              "spendLimit": null,
-              "physicalCardStatus": null
-            }
-          ]
+          "get-cards": {
+            "cards": [
+              {
+                "organization": "Jane Doe",
+                "id": "card_001",
+                "accountId": "acct_001",
+                "lastFour": "4242",
+                "nameOnCard": "Jane Doe",
+                "nickname": "Travel",
+                "status": "frozen",
+                "type": "virtual",
+                "kind": "debit",
+                "expiration": {
+                  "month": 4,
+                  "year": 2028
+                },
+                "spendLimit": null,
+                "physicalCardStatus": null
+              }
+            ],
+            "unavailable": []
+          }
         },
         "expected": [
           {

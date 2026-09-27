@@ -24,6 +24,8 @@ export interface Snapshot {
   credit: CreditAccount[];
   /** Undefined until Treasury has answered at least once. Mercury takes ~10 s to return it. */
   treasury?: TreasuryAccount[];
+  /** When the request that fetched `treasury` started, so an older, slower one can't replace it. */
+  treasuryAt?: string;
   updatedAt: string;
 }
 
@@ -38,19 +40,34 @@ async function writeSnapshot(loginId: string, snapshot: Snapshot) {
   await LocalStorage.setItem(snapshotKey(loginId), JSON.stringify(snapshot));
 }
 
+/** Saves in flight per login. Each waits for the one before it, so two reads never race one write. */
+const saving = new Map<string, Promise<unknown>>();
+
 /**
  * Write a snapshot unless the login was removed in the meantime (a Treasury response can arrive
- * ~10 s after Remove). `update` sees what's saved now, so an older request can't overwrite a newer one.
+ * ~10 s after Remove). `update` sees what's saved now and returns undefined to keep it, so an
+ * older request can't overwrite a newer one. Returns the snapshot that is saved afterward.
  */
 async function save(
   loginId: string,
   update: (saved?: Snapshot) => Snapshot | undefined,
 ): Promise<Snapshot | undefined> {
-  if (!(await hasLogin(loginId))) return undefined;
-  const saved = await readSnapshot(loginId);
-  const next = update(saved);
-  if (next) await writeSnapshot(loginId, next);
-  return next ?? saved;
+  // ponytail: serialized within this command only; two commands (menu bar and a list) can still interleave.
+  const run = (saving.get(loginId) ?? Promise.resolve())
+    .catch(() => {})
+    .then(async () => {
+      if (!(await hasLogin(loginId))) return undefined;
+      const saved = await readSnapshot(loginId);
+      const next = update(saved);
+      if (next) await writeSnapshot(loginId, next);
+      return next ?? saved;
+    });
+  saving.set(loginId, run);
+  try {
+    return await run;
+  } finally {
+    if (saving.get(loginId) === run) saving.delete(loginId);
+  }
 }
 
 /** Fetch accounts and credit (fast), then Treasury (slow), saving after each so neither waits on the other. */
@@ -66,23 +83,31 @@ export async function refreshSnapshot(
   const fresh: Snapshot = { accounts, credit, updatedAt: startedAt };
   let snapshot =
     (await save(login.id, (saved) =>
-      saved && saved.updatedAt > startedAt ? undefined : { ...fresh, treasury: saved?.treasury },
+      saved && saved.updatedAt > startedAt
+        ? undefined
+        : { ...fresh, treasury: saved?.treasury, treasuryAt: saved?.treasuryAt },
     )) ?? fresh;
   onUpdate(snapshot, "accounts");
 
   try {
     const treasuryAccounts = await treasury;
-    snapshot = (await save(login.id, (saved) => ({ ...(saved ?? fresh), treasury: treasuryAccounts }))) ?? {
-      ...snapshot,
-      treasury: treasuryAccounts,
-    };
+    snapshot = (await save(login.id, (saved) =>
+      saved?.treasuryAt && saved.treasuryAt > startedAt
+        ? undefined
+        : { ...(saved ?? fresh), treasury: treasuryAccounts, treasuryAt: startedAt },
+    )) ?? { ...snapshot, treasury: treasuryAccounts, treasuryAt: startedAt };
     onUpdate(snapshot, "treasury");
   } catch (error) {
     log.log("Treasury unavailable:", error instanceof Error ? error.message : String(error));
-    // A 403 means this organization has no Treasury. Any other failure leaves it unknown (the last
-    // saved value, or undefined), so a total never quietly drops Treasury and the next refresh retries.
-    const treasury = error instanceof MercuryForbiddenError ? [] : snapshot.treasury;
-    snapshot = { ...snapshot, treasury };
+    // A 403 means this organization has no Treasury. Any other failure keeps the newest saved value
+    // (undefined if Treasury never answered), so a total never quietly drops Treasury, a newer
+    // refresh's result isn't replaced, and the next refresh retries.
+    const forbidden = error instanceof MercuryForbiddenError;
+    snapshot = (await save(login.id, (saved) =>
+      forbidden && !(saved?.treasuryAt && saved.treasuryAt > startedAt)
+        ? { ...(saved ?? snapshot), treasury: [], treasuryAt: startedAt }
+        : undefined,
+    )) ?? { ...snapshot, treasury: forbidden ? [] : snapshot.treasury };
     onUpdate(snapshot, "treasury");
   }
   return snapshot;

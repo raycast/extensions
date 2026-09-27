@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { fakerKey } from "@chrismessina/raycast-faker";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { getOrganization, log, MercuryAuthError } from "./mercury";
+import { getOrganization, log, MercuryAuthError, toError } from "./mercury";
 
 /**
  * One connected Mercury account (an organization, in API terms): a personal or a business login.
@@ -111,4 +111,23 @@ export async function requireLogins(): Promise<MercuryLogin[]> {
   if (logins.length === 0)
     throw new Error("No Mercury account is connected. Add one with the Manage Accounts command.");
   return logins;
+}
+
+/**
+ * Run `load` for every login, for the AI tools. One login failing (an expired token, a timeout)
+ * doesn't hide the others: its organization is listed in `unavailable` instead. Throws only when
+ * every login fails.
+ */
+export async function loadEachLogin<T>(load: (login: MercuryLogin) => Promise<T>) {
+  const logins = await requireLogins();
+  const settled = await Promise.allSettled(logins.map(load));
+  const results: Array<{ login: MercuryLogin; value: T }> = [];
+  const unavailable: Array<{ organization: string; reason: string }> = [];
+  settled.forEach((result, index) => {
+    if (result.status === "fulfilled") results.push({ login: logins[index], value: result.value });
+    else unavailable.push({ organization: logins[index].name, reason: toError(result.reason).message });
+  });
+  // Every login failed, so the first failure is the answer.
+  if (results.length === 0) throw toError((settled[0] as PromiseRejectedResult).reason);
+  return { results, unavailable };
 }

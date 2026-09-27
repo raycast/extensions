@@ -30,6 +30,8 @@ const SINCE_THE_BEGINNING = "2000-01-01";
 interface Loaded {
   transactions: LoadedTransaction[];
   failures: Array<{ login: MercuryLogin; error: Error }>;
+  /** Some request returned a full page, so older transactions exist beyond what's listed. */
+  capped: boolean;
 }
 
 interface Directory {
@@ -69,7 +71,7 @@ async function loadLogin(login: MercuryLogin, path: string): Promise<LoadedTrans
 }
 
 async function loadTransactions(scope: TransactionScope, filter: string, search: string): Promise<Loaded> {
-  const loaded: Loaded = { transactions: [], failures: [] };
+  const loaded: Loaded = { transactions: [], failures: [], capped: false };
   const jobs: Array<{ login: MercuryLogin; path: string }> = [];
 
   if (scope.kind === "all") {
@@ -115,6 +117,7 @@ async function loadTransactions(scope: TransactionScope, filter: string, search:
       loaded.failures.push({ login, error });
       return;
     }
+    if (result.value.length >= PAGE) loaded.capped = true;
     loaded.transactions.push(...result.value);
   });
 
@@ -334,6 +337,29 @@ export function TransactionList({
           ))}
         </List.Section>
       ))}
+      {!isLoading && data?.capped && (
+        <List.Section title="Older Transactions">
+          <List.Item
+            icon={Icon.Info}
+            title={`Showing the newest ${PAGE} per account`}
+            subtitle={search ? "Narrow the search to see older matches" : "Search to find older transactions"}
+            detail={
+              <List.Item.Detail
+                markdown={`Only the newest ${PAGE} transactions per account are listed. Search runs on Mercury's servers and reaches your full history.`}
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Open Transactions in Mercury"
+                  icon={getFavicon("https://mercury.com")}
+                  url="https://app.mercury.com/transactions"
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
   );
 }

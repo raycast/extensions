@@ -1,4 +1,4 @@
-import { requireLogins } from "../logins";
+import { loadEachLogin } from "../logins";
 import { Account, getAccounts, getAllPages, log, Transaction } from "../mercury";
 
 type Input = {
@@ -16,9 +16,6 @@ export default async function (input: Input = {}) {
   const { period = "month" } = input;
 
   try {
-    const logins = await requireLogins();
-    const accounts: Account[] = (await Promise.all(logins.map((login) => getAccounts(login.token)))).flat();
-
     // Calculate date range based on period
     const startDate = new Date();
 
@@ -34,18 +31,21 @@ export default async function (input: Input = {}) {
         break;
     }
 
-    // Fetch every transaction in the period, across every connected Mercury account
-    const allTransactions: Transaction[] = (
-      await Promise.all(
-        logins.map((login) =>
-          getAllPages<Transaction>(
-            login.token,
-            `/transactions?limit=1000&start=${startDate.toISOString().split("T")[0]}`,
-            "transactions",
-          ),
+    // Fetch accounts and every transaction in the period, for each connected Mercury account.
+    // An organization that can't be reached is reported in `unavailable` rather than failing the rest.
+    const { results, unavailable } = await loadEachLogin(async (login) => {
+      const [accounts, transactions] = await Promise.all([
+        getAccounts(login.token),
+        getAllPages<Transaction>(
+          login.token,
+          `/transactions?limit=1000&start=${startDate.toISOString().split("T")[0]}`,
+          "transactions",
         ),
-      )
-    ).flat();
+      ]);
+      return { accounts, transactions };
+    });
+    const accounts: Account[] = results.flatMap(({ value }) => value.accounts);
+    const allTransactions: Transaction[] = results.flatMap(({ value }) => value.transactions);
 
     // Calculate financial metrics
     const totalBalance = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
@@ -125,6 +125,7 @@ export default async function (input: Input = {}) {
       topExpenses,
       topIncome,
       largestTransactions,
+      unavailable,
     };
   } catch (error) {
     log.error("Error analyzing finances:", error);

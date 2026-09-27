@@ -1,4 +1,4 @@
-import { requireLogins } from "../logins";
+import { loadEachLogin } from "../logins";
 import { getCards } from "../mercury";
 
 type Input = {
@@ -10,13 +10,13 @@ type Input = {
 
 /**
  * Retrieves Mercury debit and credit cards for every connected Mercury account.
- * Never includes full card numbers or CVCs.
+ * Never includes full card numbers or CVCs. Organizations that couldn't be reached are listed in
+ * `unavailable`.
  */
 export default async function (input: Input = {}) {
-  const logins = await requireLogins();
-  const results = await Promise.all(
-    logins.map(async (login) => (await getCards(login.token)).map((card) => ({ organization: login.name, ...card }))),
+  const { results, unavailable } = await loadEachLogin(async (login) =>
+    (await getCards(login.token)).map((card) => ({ organization: login.name, ...card })),
   );
-  const cards = results.flat();
-  return input.status ? cards.filter((card) => card.status === input.status) : cards;
+  const cards = results.flatMap(({ value }) => value);
+  return { cards: input.status ? cards.filter((card) => card.status === input.status) : cards, unavailable };
 }

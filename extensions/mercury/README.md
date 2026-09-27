@@ -26,6 +26,8 @@ After generating a token, make sure to save it in a secure password manager. You
 
 **Important:** Treat your Mercury API token as securely as you would treat any password. Someone who obtains your token can interact with your accounts on your behalf. Never store tokens in source control. If you accidentally expose a token, immediately revoke it and generate a new one from your Mercury dashboard.
 
+Mercury deletes a token that hasn't been used for 45 days, and emails your admins 7 days beforehand. If the extension suddenly stops authenticating, generate a new token and update it in **Manage Accounts**.
+
 ### Token Permission Tiers
 
 There are three types of tokens:
