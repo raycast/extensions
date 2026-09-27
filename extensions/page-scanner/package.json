@@ -1,0 +1,249 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "page-scanner",
+  "title": "Page Scanner",
+  "description": "Capture the tab in front as a vector PDF, through the Page Scanner Chrome extension.",
+  "icon": "icon.png",
+  "author": "sbd530",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "scan-current-tab",
+      "title": "Scan Current Tab",
+      "subtitle": "Page Scanner",
+      "description": "Capture the tab in front of your browser as a vector PDF (or PNG or JPEG), save it and copy the file.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-up",
+      "title": "Set up Page Scanner",
+      "subtitle": "Page Scanner",
+      "description": "Connect Raycast to the Page Scanner extension in Chrome.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "saveDirectory",
+      "title": "Save To",
+      "description": "Where scans are written. Downloads when left empty.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "fileName",
+      "title": "File Name",
+      "description": "A name template: {host}, {name} (the browser's suggestion), {date}, {time}, {ext}. A / makes a folder. The browser's suggestion when empty.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "{host}-{date}-{time}"
+    },
+    {
+      "name": "format",
+      "title": "Format",
+      "description": "The file a scan produces.",
+      "type": "dropdown",
+      "required": false,
+      "default": "pdf",
+      "data": [
+        {
+          "title": "PDF (Vector, Selectable Text)",
+          "value": "pdf"
+        },
+        {
+          "title": "PNG",
+          "value": "png"
+        },
+        {
+          "title": "JPEG",
+          "value": "jpeg"
+        }
+      ]
+    },
+    {
+      "name": "pageSize",
+      "title": "Page Size",
+      "description": "How a PDF is paged.",
+      "type": "dropdown",
+      "required": false,
+      "default": "a4",
+      "data": [
+        {
+          "title": "A4 Pages",
+          "value": "a4"
+        },
+        {
+          "title": "US Letter Pages",
+          "value": "letter"
+        },
+        {
+          "title": "Single Long Page",
+          "value": "auto"
+        }
+      ]
+    },
+    {
+      "name": "markdown",
+      "title": "Markdown",
+      "description": "The page's text as Markdown as well, or instead of the file.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "No Markdown",
+          "value": "none"
+        },
+        {
+          "title": "Also Save a Markdown File Beside It",
+          "value": "beside"
+        },
+        {
+          "title": "Only the Markdown",
+          "value": "only"
+        }
+      ]
+    },
+    {
+      "name": "scheme",
+      "title": "Theme",
+      "description": "Which of a page's two themes to capture.",
+      "type": "dropdown",
+      "required": false,
+      "default": "extension",
+      "data": [
+        {
+          "title": "As in Page Scanner's Settings",
+          "value": "extension"
+        },
+        {
+          "title": "The Browser's (Auto)",
+          "value": "auto"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "name": "pageWidth",
+      "title": "Page Width",
+      "description": "The width the page is laid out at before the capture.",
+      "type": "dropdown",
+      "required": false,
+      "default": "extension",
+      "data": [
+        {
+          "title": "As in Page Scanner's Settings",
+          "value": "extension"
+        },
+        {
+          "title": "The Window's",
+          "value": "window"
+        },
+        {
+          "title": "A4 Sheet",
+          "value": "a4"
+        },
+        {
+          "title": "US Letter Sheet",
+          "value": "letter"
+        }
+      ]
+    },
+    {
+      "name": "hide",
+      "title": "Hide Clutter",
+      "description": "Ads, cookie banners, chat widgets and pop-ups to hide before the capture.",
+      "type": "dropdown",
+      "required": false,
+      "default": "extension",
+      "data": [
+        {
+          "title": "As in Page Scanner's Settings",
+          "value": "extension"
+        },
+        {
+          "title": "Hide All of Them",
+          "value": "all"
+        },
+        {
+          "title": "Hide None of Them",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "afterScan",
+      "title": "After Scanning",
+      "description": "What happens once the file is saved.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy the File",
+          "value": "copy"
+        },
+        {
+          "title": "Show in Finder",
+          "value": "reveal"
+        },
+        {
+          "title": "Open It",
+          "value": "open"
+        },
+        {
+          "title": "Open the Capture in Page Scanner's Editor",
+          "value": "editor"
+        }
+      ]
+    },
+    {
+      "name": "browser",
+      "title": "Browser",
+      "description": "The connected browser to use, by label or id, when more than one is connected.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "vendor": "node scripts/vendor-cli.mjs",
+    "prebuild": "npm run vendor",
+    "build": "ray build -e dist",
+    "predev": "npm run vendor",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@page-scanner/cli": "0.3.2",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "esbuild": "0.25.12",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "ws": "8.21.3"
+  }
+}
