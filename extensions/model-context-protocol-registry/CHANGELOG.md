@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add ZoneFoundry for Sonos MCP Server] - {PR_MERGE_DATE}
+## [Add ZoneFoundry for Sonos MCP Server] - 2026-09-27
 
 - Add ZoneFoundry for Sonos to the official registry: control your Sonos speakers (play music, volume, grouping, moving playback between rooms, switching to TV, spoken announcements and reminders) through the official Sonos cloud, with no home bridge. Hosted remote Streamable HTTP server at https://relay.zonefoundry.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
 
