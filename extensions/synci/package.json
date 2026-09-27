@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "synci",
+  "title": "Synci",
+  "description": "Search transactions, check balances and holdings, monitor connections, and ask Raycast AI about your finances with Synci.",
+  "icon": "synci-mark.png",
+  "author": "tonning",
+  "access": "public",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "description": "Search transactions across your connected accounts with account and date filters",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search for transactions",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "check-balances",
+      "title": "Check Balances",
+      "description": "View balances, currency totals, and the latest sync for your accounts",
+      "mode": "view"
+    },
+    {
+      "name": "view-holdings",
+      "title": "View Holdings",
+      "description": "Explore investment and crypto holdings, quantities, market values, and account details",
+      "mode": "view",
+      "keywords": [
+        "portfolio",
+        "positions",
+        "investments",
+        "stocks",
+        "crypto"
+      ]
+    },
+    {
+      "name": "recent-spending",
+      "title": "Show Recent Spending",
+      "description": "Explore booked outflows by currency, merchant, and account",
+      "mode": "view"
+    },
+    {
+      "name": "connection-status",
+      "title": "Open Connection Status",
+      "description": "Check connection health, consent expiry, and open connections in Synci",
+      "mode": "view"
+    },
+    {
+      "name": "reconnect-synci",
+      "title": "Reconnect Synci",
+      "description": "Choose which Synci accounts Raycast can access and approve updated permissions",
+      "mode": "no-view",
+      "keywords": [
+        "reauthorize",
+        "authorize",
+        "permissions",
+        "scopes",
+        "sign in",
+        "account access"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-accounts",
+      "title": "List Accounts",
+      "description": "Find connected bank, investment, and crypto accounts, their IDs, balance timestamps, and history coverage. Use before querying an account by ID."
+    },
+    {
+      "name": "get-account-balance",
+      "title": "Get Account Balance",
+      "description": "Read recent balance snapshots, cash balances, and broker-reported totals for an account. Always report the as_of timestamp and distinguish credit availability from money owned."
+    },
+    {
+      "name": "list-transactions",
+      "title": "List Transactions",
+      "description": "Read a page of transactions with date, account, and settlement-status filters. Includes payees, categories, and investment activity. Follow meta.has_more and next_cursor for complete results; check earliest_available_date before calculating totals."
+    },
+    {
+      "name": "list-holdings",
+      "title": "List Holdings",
+      "description": "Read investment and crypto positions, quantities, prices, and market values across all permitted accounts or one account. Values reflect the last provider sync."
+    },
+    {
+      "name": "list-connections",
+      "title": "List Connections",
+      "description": "Check bank/provider connection health, consent expiry, and sync status. Read-only; connection management happens in Synci."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "spendingPeriod",
+      "title": "Default Spending Period",
+      "description": "Initial time period shown in Recent Spending",
+      "type": "dropdown",
+      "required": false,
+      "default": "month",
+      "data": [
+        {
+          "title": "Last 7 Days",
+          "value": "7"
+        },
+        {
+          "title": "Last 30 Days",
+          "value": "30"
+        },
+        {
+          "title": "This Month",
+          "value": "month"
+        }
+      ]
+    },
+    {
+      "name": "showDetails",
+      "title": "Transaction Details",
+      "description": "Open transactions with a side panel instead of a full-width list. Press Enter on a transaction to view its details.",
+      "type": "checkbox",
+      "label": "Show transaction side panel by default",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:source": "eslint src && prettier --check src tests",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "evals": "ray evals",
+    "format": "prettier --write .",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.1",
+    "decimal.js": "^10.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.2"
+  }
+}
