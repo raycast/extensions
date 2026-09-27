@@ -183,6 +183,7 @@ export function runSpeedTest(
         result.ping = speedtestEventData.ping;
         result.download = speedtestEventData.download;
         result.upload = speedtestEventData.upload;
+        result.packetLoss = speedtestEventData.packetLoss;
         result.interface = {
           isp: speedtestEventData.isp,
           ...speedtestEventData.interface,

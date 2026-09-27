@@ -13,7 +13,7 @@ export default async function runSpeedtest() {
     upload: speedToString(result.upload.bandwidth),
     pingMs: result.ping.latency,
     jitterMs: result.ping.jitter,
-    packetLossPercent: result.ping.packetLoss,
+    packetLossPercent: result.packetLoss,
     isp: result.isp,
     server: `${result.server.name}, ${result.server.location}`,
     resultUrl: result.result.url,
