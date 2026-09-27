@@ -1,5 +1,8 @@
 # ShareX Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+- Add QR Code and Clipboard Upload commands.
+
 ## [Fix] - 2026-06-25
 - Include media files stored directly in the configured screenshots folder.
 
