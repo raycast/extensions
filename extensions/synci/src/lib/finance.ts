@@ -1,3 +1,4 @@
+import { categoryOptions, transactionCategory } from "./categories";
 import Decimal from "decimal.js";
 import { accountBalance, dateOnly, decimal, transactionName } from "./format";
 import type { FinancialAccount, FinancialConnection, Period, Transaction } from "./types";
@@ -36,15 +37,16 @@ export function balanceTotals(accounts: FinancialAccount[]) {
   return { totals: [...totals.entries()].sort(([a], [b]) => a.localeCompare(b)), unavailable };
 }
 
-export function spendingSummary(transactions: Transaction[]) {
+export function spendingSummary(transactions: Transaction[], groupBy: "merchant" | "category" = "merchant") {
   const currencies = new Map<
     string,
     {
       amount: Decimal;
       count: number;
-      merchants: Map<string, { amount: Decimal; count: number; transactions: Transaction[] }>;
+      groups: Map<string, { amount: Decimal; count: number; transactions: Transaction[] }>;
     }
   >();
+  const categoryLabels = new Map(categoryOptions(transactions).map((name) => [name.toLowerCase(), name]));
   let invalid = 0;
   const seen = new Set<number>();
   for (const transaction of transactions) {
@@ -57,16 +59,19 @@ export function spendingSummary(transactions: Transaction[]) {
       continue;
     }
     if (!amount.isNegative()) continue;
-    const entry = currencies.get(transaction.currency) ?? { amount: new Decimal(0), count: 0, merchants: new Map() };
-    const merchantName = transactionName(transaction);
-    const merchant = entry.merchants.get(merchantName) ?? { amount: new Decimal(0), count: 0, transactions: [] };
+    const entry = currencies.get(transaction.currency) ?? { amount: new Decimal(0), count: 0, groups: new Map() };
+    const merchantName =
+      groupBy === "category"
+        ? (categoryLabels.get((transactionCategory(transaction) ?? "").toLowerCase()) ?? "Uncategorized")
+        : transactionName(transaction);
+    const merchant = entry.groups.get(merchantName) ?? { amount: new Decimal(0), count: 0, transactions: [] };
     const outflow = amount.abs();
     entry.amount = entry.amount.plus(outflow);
     entry.count++;
     merchant.amount = merchant.amount.plus(outflow);
     merchant.count++;
     merchant.transactions.push(transaction);
-    entry.merchants.set(merchantName, merchant);
+    entry.groups.set(merchantName, merchant);
     currencies.set(transaction.currency, entry);
   }
   return { currencies: [...currencies.entries()].sort(([a], [b]) => a.localeCompare(b)), invalid };

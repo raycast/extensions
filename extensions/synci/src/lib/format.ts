@@ -83,7 +83,13 @@ export function markdown(value: string): string {
   // Raycast also parses LaTeX: backslash-escaped parentheses would turn
   // ordinary percentages into equations. Entities keep those characters literal.
   const entities: Record<string, string> = { "&": "&amp;", "\\": "&#92;", $: "&#36;", "(": "&#40;", ")": "&#41;" };
-  return value.replace(/[&\\$()`*_{}[\]#+.!|<>~-]/g, (character) => entities[character] ?? `\\${character}`);
+  return (
+    value
+      .replace(/[&\\$()`*_{}[\]#+.!|<>~-]/g, (character) => entities[character] ?? `\\${character}`)
+      // Decimal points cannot start Markdown lists. Keep them literal so Raycast's
+      // sticky heading does not display an unnecessary backslash in amounts.
+      .replace(/(\d)\\\.(?=\d)/g, "$1.")
+  );
 }
 
 export function accountSection(account: FinancialAccount): "banks" | "brokerages" | "crypto" {

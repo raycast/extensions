@@ -1,3 +1,5 @@
+import { CopyErrorDetails } from "./diagnostics";
+import { AccountDetails } from "./account-details";
 import { Action, ActionPanel, Detail, environment, Icon, Keyboard } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
@@ -10,7 +12,6 @@ import {
   accountBalance,
   accountName,
   accountUrl,
-  compareTransactionsNewestFirst,
   dateLabel,
   markdown,
   money,
@@ -28,7 +29,7 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
   const account = accounts.data?.find(({ id }) => id === initialAccount.id) ?? initialAccount;
   const balance = accountBalance(account);
   const currency = balance.currency || account.currency || "";
-  const [showDetails, setShowDetails] = useDetails("account-overview");
+  const [showDetails, setShowDetails] = useDetails("account-overview", true);
   const [range, setRange] = useCachedState<HistoryRange>("balance-history-range", "30d", {
     cacheNamespace: "synci-views",
   });
@@ -39,17 +40,16 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
     [account.id],
     { abortable: historyAbort, onError: () => {} },
   );
-  const activity = usePromise(
-    (id: number) => api.transactionBatch({ accountId: String(id) }, 1, activityAbort.current?.signal),
-    [account.id],
-    { abortable: activityAbort, onError: () => {} },
-  );
+  const activity = usePromise((id: number) => api.recentTransactions(id, activityAbort.current?.signal), [account.id], {
+    abortable: activityAbort,
+    onError: () => {},
+  });
   const series = balanceHistory(history.data ?? [], currency, range);
   const chart = historyChart(series.points, currency, environment.appearance === "dark");
   const rangeTitle = HISTORY_RANGES.find(({ value }) => value === range)?.title ?? "Last 30 Days";
   const first = series.points[0];
   const last = series.points.at(-1);
-  const recent = [...(activity.data?.data ?? [])].sort(compareTransactionsNewestFirst).slice(0, 5);
+  const recent = activity.data ?? [];
   const typeLabel = series.type?.toLowerCase().replace(/_/g, " ") || "reported";
   const coverage = first && last ? `${dateLabel(first.date)} – ${dateLabel(last.date)}` : "No dated history";
   const refresh = () => {
@@ -78,7 +78,7 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
     activity.error
       ? `Couldn't load activity: ${markdown(activity.error.message)}`
       : activity.isLoading && !activity.data
-        ? "Loading recent transactions…"
+        ? "Checking account history for the latest transactions…"
         : recent.length
           ? recent
               .map(
@@ -99,6 +99,9 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
         markdown="# Account Unavailable\n\nThis account is no longer available to Raycast. Reconnect Synci to review account access."
         actions={
           <ActionPanel>
+            {(accounts.error || history.error || activity.error) && (
+              <CopyErrorDetails error={accounts.error || history.error || activity.error} />
+            )}
             <CommonActions refresh={refresh} />
           </ActionPanel>
         }
@@ -135,6 +138,11 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
       }
       actions={
         <ActionPanel>
+          <Action.Push
+            title="View Account Details"
+            icon={Icon.PersonLines}
+            target={<AccountDetails account={account} />}
+          />
           <Action.Push
             title="View Transactions"
             icon={Icon.Receipt}
@@ -174,6 +182,9 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
             url={accountUrl(account)}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
+          {(accounts.error || history.error || activity.error) && (
+            <CopyErrorDetails error={accounts.error || history.error || activity.error} />
+          )}
           <CommonActions refresh={refresh} />
         </ActionPanel>
       }

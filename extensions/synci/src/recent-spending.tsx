@@ -1,3 +1,4 @@
+import { useCachedState } from "@raycast/utils";
 import { useDetails } from "./hooks/use-details";
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -41,6 +42,17 @@ function RecentSpending() {
   const toggleDetails = (
     <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
   );
+  const [groupBy, setGroupBy] = useCachedState<"merchant" | "category">("spending-group", "merchant", {
+    cacheNamespace: "synci-views",
+  });
+  const groupLabel = groupBy === "category" ? "Categories" : "Merchants";
+  const grouping = (
+    <Action
+      title={groupBy === "merchant" ? "Group by Category" : "Group by Merchant"}
+      icon={Icon.Tag}
+      onAction={() => setGroupBy(groupBy === "merchant" ? "category" : "merchant")}
+    />
+  );
   const accounts = useAccounts();
   const abortable = useRef<AbortController | null>(null);
   const { data, error, isLoading, revalidate } = usePromise(
@@ -52,7 +64,10 @@ function RecentSpending() {
     [period, accountId],
     { abortable, onError: () => {} },
   );
-  const summary = spendingSummary(data?.period === period && data.accountId === accountId ? data.transactions : []);
+  const summary = spendingSummary(
+    data?.period === period && data.accountId === accountId ? data.transactions : [],
+    groupBy,
+  );
   const refresh = () => {
     void revalidate();
     void accounts.revalidate();
@@ -88,7 +103,7 @@ function RecentSpending() {
     <List
       isLoading={isLoading || accounts.isLoading}
       isShowingDetail={showDetails && !!summary.currencies.length && !failure}
-      searchBarPlaceholder="Find a merchant or currency…"
+      searchBarPlaceholder={groupBy === "category" ? "Find a category or currency…" : "Find a merchant or currency…"}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Spending Period (Booking Date)"
@@ -103,6 +118,7 @@ function RecentSpending() {
     >
       {failure ? (
         <ErrorView error={failure} retry={refresh}>
+          {grouping}
           {toggleDetails}
           {filters}
         </ErrorView>
@@ -119,6 +135,7 @@ function RecentSpending() {
               }
               actions={
                 <ActionPanel>
+                  {grouping}
                   {toggleDetails}
                   {filters}
                   <CommonActions refresh={refresh} />
@@ -127,14 +144,14 @@ function RecentSpending() {
             />
           )}
           {summary.currencies.map(([currency, total]) => {
-            const merchants = [...total.merchants.entries()].sort(([, a], [, b]) => b.amount.comparedTo(a.amount));
+            const merchants = [...total.groups.entries()].sort(([, a], [, b]) => b.amount.comparedTo(a.amount));
             const transactions = merchants.flatMap(([, merchant]) => merchant.transactions);
             const explanation = `Booked outflows filtered by booking date. Transaction lists are sorted by Synci's mapped date. Transfers, cash withdrawals, and investment purchases may be included. Pending transactions and incoming refunds are excluded. No currency conversion.${summary.invalid ? ` ${summary.invalid} records with invalid amounts or missing currencies were excluded.` : ""}`;
             return (
               <List.Section
                 key={currency}
                 title={`${currency} · ${accountLabel}`}
-                subtitle={`${total.count} booked outflows`}
+                subtitle={showDetails ? `${total.count} outflows` : `${total.count} outflows · ${groupLabel}`}
               >
                 <List.Item
                   id={`summary-${currency}`}
@@ -147,12 +164,12 @@ function RecentSpending() {
                       markdown={`# ${markdown(periodLabel)}\n\n## ${markdown(money(total.amount.toString(), currency))}\n\n${total.count} booked outflows · ${markdown(accountLabel)}\n\n${explanation}`}
                       metadata={
                         <List.Item.Detail.Metadata>
-                          <List.Item.Detail.Metadata.Label title="Top Merchants" />
+                          <List.Item.Detail.Metadata.Label title={`Top ${groupLabel}`} />
                           {merchants.slice(0, 10).map(([name, merchant]) => (
                             <List.Item.Detail.Metadata.Label
                               key={name}
                               title={name}
-                              icon={merchantIcon(merchant.transactions)}
+                              icon={groupBy === "category" ? Icon.Tag : merchantIcon(merchant.transactions)}
                               text={money(merchant.amount.toString(), currency)}
                             />
                           ))}
@@ -184,6 +201,7 @@ function RecentSpending() {
                         title="Copy Summary"
                         content={`${periodLabel} · ${accountLabel}\nBooked outflows: ${money(total.amount.toString(), currency)}\n${total.count} transactions\n\n${explanation}`}
                       />
+                      {grouping}
                       {toggleDetails}
                       {filters}
                       <CommonActions refresh={refresh} />
@@ -195,7 +213,7 @@ function RecentSpending() {
                     key={name}
                     id={`${currency}-${name}`}
                     title={name}
-                    icon={merchantIcon(merchant.transactions)}
+                    icon={groupBy === "category" ? Icon.Tag : merchantIcon(merchant.transactions)}
                     accessories={[
                       { text: money(merchant.amount.toString(), currency) },
                       { tag: `${merchant.amount.div(total.amount).times(100).toFixed(0)}%` },
@@ -213,6 +231,7 @@ function RecentSpending() {
                           icon={Icon.Receipt}
                           target={<Outflows transactions={merchant.transactions} title={name} />}
                         />
+                        {grouping}
                         {toggleDetails}
                         {filters}
                         <CommonActions refresh={refresh} />

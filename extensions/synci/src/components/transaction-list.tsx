@@ -1,3 +1,5 @@
+import { CategoryFilter } from "./category-filter";
+import { categoryOptions } from "../lib/categories";
 import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
@@ -25,23 +27,24 @@ export function TransactionList({
   const [search, setSearch] = useState(initialQuery);
   const [accountId, setAccountId] = useState(initialAccountId);
   const [period, setPeriod] = useState<Period>("all");
+  const [category, setCategory] = useState<string | undefined>();
   const [status, setStatus] = useState("all");
   const [showDetails, setShowDetails] = useDetails("transactions", getPreferenceValues<Preferences>().showDetails);
   const accounts = useAccounts();
   const abortable = useRef<AbortController | null>(null);
-  const queryKey = JSON.stringify([search, accountId, period, status]);
+  const queryKey = JSON.stringify([search, accountId, period, status, category]);
   const amount = amountSearch(search);
   const loadedKey = useRef("");
   const { data, error, isLoading, revalidate, pagination } = usePromise(
-    (search: string, accountId: string, period: Period, status: string) =>
+    (search: string, accountId: string, period: Period, status: string, category: string | undefined) =>
       async ({ page, cursor }: { page: number; cursor?: number }) => {
         return api.transactionBatch(
-          { search, accountId, period, booked: status === "all" ? undefined : status === "booked" },
+          { search, accountId, period, category, booked: status === "all" ? undefined : status === "booked" },
           cursor ?? page + 1,
           abortable.current?.signal,
         );
       },
-    [search, accountId, period, status],
+    [search, accountId, period, status, category],
     {
       abortable,
       onError: () => {},
@@ -58,6 +61,7 @@ export function TransactionList({
     <>
       <ActionPanel.Section title="Filters">
         <PeriodActions period={period} onChange={setPeriod} />
+        <CategoryFilter categories={categoryOptions(data ?? [])} value={category} onChange={setCategory} />
         <ActionPanel.Submenu title="Filter by Status" icon={Icon.Filter}>
           {[
             ["all", "All Transactions"],
@@ -115,7 +119,7 @@ export function TransactionList({
                   ? amount
                     ? "Looking through the selected account and date range for this amount…"
                     : "Loading transactions from Synci…"
-                  : "Try another search, account, period, or status. Search names and descriptions, or enter an amount such as 50.25 or -50.25."
+                  : "Try another search, account, period, status, or category. Search names and descriptions, or enter an amount such as 50.25 or -50.25."
               }
               icon={Icon.MagnifyingGlass}
               actions={
@@ -132,7 +136,7 @@ export function TransactionList({
               title={group.title}
               subtitle={
                 index === 0
-                  ? `${transactions?.length ?? 0} loaded · ${PERIODS.find((item) => item.value === period)?.title ?? "All Time"}`
+                  ? `${transactions?.length ?? 0} loaded · ${category === undefined ? (PERIODS.find((item) => item.value === period)?.title ?? "All Time") : category || "Uncategorized"}`
                   : undefined
               }
             >
@@ -150,7 +154,7 @@ export function TransactionList({
               ))}
             </List.Section>
           ))}
-          {amount && transactions?.length && pagination?.hasMore ? (
+          {(amount || category !== undefined) && transactions?.length && pagination?.hasMore ? (
             <List.Item
               id="load-more"
               title={isLoading ? "Searching Older Transactions…" : "Search Older Transactions"}

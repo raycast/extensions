@@ -1,3 +1,4 @@
+import { CopyErrorDetails } from "./diagnostics";
 import { Action, ActionPanel, Detail, Icon, List, launchCommand, LaunchType, popToRoot } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { createContext, useContext, type ComponentType, type ReactNode } from "react";
@@ -26,6 +27,7 @@ export function withSynci<P extends object>(Command: ComponentType<P>) {
           actions={
             <ActionPanel>
               <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <CopyErrorDetails error={error} />
               <Action.OpenInBrowser title="Open Synci" url={APP_URL} />
             </ActionPanel>
           }
@@ -57,6 +59,7 @@ export function ErrorView({ error, retry, children }: { error: Error; retry: () 
           {!(error instanceof SignInRequiredError) && (
             <Action title="Reconnect Synci" icon={Icon.Person} onAction={reconnect} />
           )}
+          <CopyErrorDetails error={error} />
           <Action.OpenInBrowser title="Open Synci" url={APP_URL} />
           {children}
         </ActionPanel>

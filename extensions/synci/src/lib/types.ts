@@ -32,6 +32,13 @@ export interface FinancialAccount {
   custom_name?: string | null;
   display_name?: string | null;
   product_name?: string | null;
+  owner_name?: string | null;
+  bban?: string | null;
+  iban?: string | null;
+  bic?: string | null;
+  scan?: string | null;
+  account_number_masked?: string | null;
+  cash_account_type?: string | null;
   currency?: string | null;
   enabled: boolean;
   account_category?: string | null;
@@ -77,6 +84,7 @@ export interface Transaction {
   } | null;
   additional_information?: string | null;
   enriched?: {
+    category_general?: string | null;
     counterparty?: { name?: string | null; logo_url?: string | null } | null;
     intermediary?: { name?: string | null; logo_url?: string | null } | null;
     [key: string]: unknown;

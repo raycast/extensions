@@ -1,3 +1,5 @@
+import type { LaunchProps } from "@raycast/api";
+import { AccountDetails } from "./components/account-details";
 import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { useState, type ReactNode } from "react";
 import { createDeeplink } from "@raycast/utils";
@@ -92,6 +94,11 @@ function AccountItem({
             target={<AccountOverview account={account} />}
           />
           <Action.Push
+            title="View Account Details"
+            icon={Icon.PersonLines}
+            target={<AccountDetails account={account} />}
+          />
+          <Action.Push
             title="View Transactions"
             icon={Icon.Receipt}
             target={<TransactionList initialAccountId={String(account.id)} navigationTitle={accountName(account)} />}
@@ -126,7 +133,7 @@ function AccountItem({
   );
 }
 
-function CheckBalances() {
+function CheckBalances(props: LaunchProps<{ launchContext: { accountId?: string } }>) {
   const { data, error, isLoading, revalidate } = useAccounts(true);
   const [filter, setFilter] = useState("enabled");
   const [search, setSearch] = useState("");
@@ -143,6 +150,10 @@ function CheckBalances() {
   const toggleDetails = (
     <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
   );
+  const initialId = props.launchContext?.accountId;
+  const initialAccount =
+    typeof initialId === "string" ? data?.find((account) => String(account.id) === initialId) : undefined;
+  if (initialAccount) return <AccountOverview account={initialAccount} />;
   return (
     <List
       isLoading={isLoading}
@@ -166,7 +177,12 @@ function CheckBalances() {
           {!isLoading && !accounts.length && (
             <EmptyState
               title={search ? "No Matching Accounts" : "No Accounts"}
-              description="Connect an account in Synci, or change the account filter."
+              description={
+                search
+                  ? "Try another account name, institution, or currency, or change the account filter."
+                  : "Connect an account in Synci, or change the account filter."
+              }
+              icon={search ? Icon.MagnifyingGlass : Icon.Wallet}
               refresh={revalidate}
             />
           )}

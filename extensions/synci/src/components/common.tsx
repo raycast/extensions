@@ -106,14 +106,16 @@ export function EmptyState({
   title,
   description,
   refresh,
+  icon = Icon.Tray,
 }: {
   title: string;
   description: string;
   refresh?: () => void;
+  icon?: Icon;
 }) {
   return (
     <List.EmptyView
-      icon="synci-mark.png"
+      icon={{ source: icon, tintColor: Color.SecondaryText }}
       title={title}
       description={description}
       actions={

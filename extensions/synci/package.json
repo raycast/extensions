@@ -32,9 +32,13 @@
     },
     {
       "name": "check-balances",
-      "title": "Check Balances",
-      "description": "View balances, currency totals, and the latest sync for your accounts",
-      "mode": "view"
+      "title": "View Accounts",
+      "description": "View account balances, history, and recent activity",
+      "mode": "view",
+      "keywords": [
+        "balance",
+        "balances"
+      ]
     },
     {
       "name": "view-holdings",
@@ -74,6 +78,17 @@
         "sign in",
         "account access"
       ]
+    },
+    {
+      "name": "menu-bar-balance",
+      "title": "Synci Balance",
+      "description": "Show balances for selected accounts in the macOS menu bar",
+      "mode": "menu-bar",
+      "platforms": [
+        "macOS"
+      ],
+      "interval": "15m",
+      "disabledByDefault": true
     }
   ],
   "tools": [

@@ -10,6 +10,65 @@ const page = (data: unknown[], current = 1, last = 1) =>
   });
 
 describe("Synci API", () => {
+  it("finds the newest mapped transactions across every account page, including empty pages", async () => {
+    const older = Array.from({ length: 6 }, (_, id) => ({
+      id: id + 100,
+      booking_date: "2026-09-27",
+      mapped_fields: { date: "2026-09-01" },
+    }));
+    const newest = { id: 1, booking_date: "2026-08-01", mapped_fields: { date: "2026-09-27" } };
+    const next = { id: 2, mapped_fields: { date: "2026-09-26" } };
+    const transport = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(page(older, 1, 3))
+      .mockResolvedValueOnce(page([], 2, 3))
+      .mockResolvedValueOnce(page([next, newest, older[5], { id: 3, mapped_fields: null }], 3, 3));
+    const result = await new SynciClient(async () => "token", transport).recentTransactions(42);
+    expect(result.map(({ id }) => id)).toEqual([1, 2, 105, 104, 103]);
+    expect(transport).toHaveBeenCalledTimes(3);
+    for (const [index, [input]] of transport.mock.calls.entries()) {
+      const url = new URL(String(input));
+      expect(url.searchParams.get("filter[financial_account_id]")).toBe("42");
+      expect(url.searchParams.get("sort")).toBe("-id");
+      expect(url.searchParams.get("page[number]")).toBe(String(index + 1));
+      expect(url.searchParams.get("omit_sensitive_identifiers")).toBe("1");
+      expect(url.searchParams.has("filter[booking_date_after]")).toBe(false);
+      expect(url.searchParams.has("filter[booked]")).toBe(false);
+    }
+  });
+  it("returns an empty recent-activity list only after the account's final page", async () => {
+    const transport = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(page([], 1, 2))
+      .mockResolvedValueOnce(page([], 2, 2));
+    expect(await new SynciClient(async () => "token", transport).recentTransactions(42)).toEqual([]);
+    expect(transport).toHaveBeenCalledTimes(2);
+  });
+  it("does not present a partial recent-activity list when a later page fails", async () => {
+    const transport = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(page([{ id: 1, mapped_fields: { date: "2026-09-27" } }], 1, 2))
+      .mockResolvedValueOnce(new Response("private upstream response", { status: 500 }));
+    await expect(new SynciClient(async () => "token", transport).recentTransactions(42)).rejects.toThrow("HTTP 500");
+  });
+  it("reports unverified recent activity without scanning an oversized history", async () => {
+    const transport = vi.fn<typeof fetch>().mockResolvedValue(page([{ id: 1 }], 1, 101));
+    await expect(new SynciClient(async () => "token", transport).recentTransactions(42)).rejects.toThrow(
+      "too large to verify the latest activity",
+    );
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
+  it("cancels recent-activity pagination before issuing another request", async () => {
+    const controller = new AbortController();
+    const transport = vi.fn<typeof fetch>().mockImplementation(async () => {
+      controller.abort();
+      return page([{ id: 1 }], 1, 2);
+    });
+    await expect(
+      new SynciClient(async () => "token", transport).recentTransactions(42, controller.signal),
+    ).rejects.toThrow();
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
   it("loads complete balance history for the selected account with a stable dated sort", async () => {
     const transport = vi
       .fn<typeof fetch>()

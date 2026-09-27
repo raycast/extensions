@@ -2,7 +2,7 @@ import { API_URL } from "./config";
 import { dateRange } from "./finance";
 import { SignInRequiredError } from "./oauth-session";
 import { restoreMissingBalances } from "./balances";
-import { accountBalance, decimal } from "./format";
+import { accountBalance, compareTransactionsNewestFirst, decimal } from "./format";
 import { amountSearch } from "./transaction-search";
 import type {
   AccountHolding,
@@ -15,20 +15,16 @@ import type {
   Transaction,
 } from "./types";
 
-export class SynciApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-  ) {
-    super(message);
-  }
-}
+import { SynciApiError } from "./diagnostics";
+import { categoryMatches } from "./categories";
+export { SynciApiError } from "./diagnostics";
 
 export interface TransactionQuery {
   search?: string;
   accountId?: string;
   period?: Period;
   booked?: boolean;
+  category?: string;
 }
 
 export function transactionParams(query: TransactionQuery, now = new Date()): Record<string, string> {
@@ -50,9 +46,9 @@ export class SynciClient {
     private transport: typeof fetch = fetch,
   ) {}
 
-  async page<T>(path: string, params: Record<string, string>, page: number, signal?: AbortSignal): Promise<Page<T>> {
+  private async request(path: string, params: Record<string, string>, signal?: AbortSignal): Promise<unknown> {
     const url = new URL(`${API_URL}${path}`);
-    url.search = new URLSearchParams({ ...params, "page[size]": "100", "page[number]": String(page) }).toString();
+    url.search = new URLSearchParams(params).toString();
     const token = await this.token();
     signal?.throwIfAborted();
     let response: Response;
@@ -64,7 +60,7 @@ export class SynciClient {
       });
     } catch (error) {
       if (signal?.aborted) throw error;
-      throw new Error("Could not reach Synci. Check your internet connection and try again.");
+      throw new SynciApiError("Could not reach Synci. Check your internet connection and try again.", 0, "network");
     }
     if (response.status === 401) throw new SignInRequiredError();
     if (response.status === 403)
@@ -79,7 +75,15 @@ export class SynciClient {
         `Synci could not load this data (HTTP ${response.status}). Try again shortly.`,
         response.status,
       );
-    const payload = (await response.json().catch(() => null)) as Page<T> | null;
+    return response.json().catch(() => null);
+  }
+
+  async page<T>(path: string, params: Record<string, string>, page: number, signal?: AbortSignal): Promise<Page<T>> {
+    const payload = (await this.request(
+      path,
+      { ...params, "page[size]": "100", "page[number]": String(page) },
+      signal,
+    )) as Page<T> | null;
     if (
       !payload ||
       !Array.isArray(payload.data) ||
@@ -89,7 +93,7 @@ export class SynciClient {
       payload.meta.current_page !== page ||
       payload.meta.last_page < page
     )
-      throw new Error("Synci returned an unexpected response. Refresh to try again.");
+      throw new SynciApiError("Synci returned an unexpected response. Refresh to try again.", 0, "response");
     return payload;
   }
 
@@ -111,6 +115,16 @@ export class SynciClient {
       { include: "financial_connection.institution", omit_sensitive_identifiers: "1", sort: "name,id" },
       signal,
     );
+  }
+  async accountDetails(accountId: number, signal?: AbortSignal): Promise<FinancialAccount> {
+    const payload = (await this.request(
+      `/finance/accounts/${accountId}`,
+      { include: "financial_connection.institution", omit_sensitive_identifiers: "0" },
+      signal,
+    )) as { data?: FinancialAccount } | null;
+    if (!payload?.data || String(payload.data.id) !== String(accountId))
+      throw new SynciApiError("Synci returned unexpected account details. Refresh to try again.", 0, "response");
+    return payload.data;
   }
   async accountsWithBalances(signal?: AbortSignal): Promise<FinancialAccount[]> {
     const accounts = await this.accounts(signal);
@@ -189,6 +203,24 @@ export class SynciClient {
   transactions(query: TransactionQuery, page: number, signal?: AbortSignal) {
     return this.page<Transaction>("/finance/transactions", transactionParams(query), page, signal);
   }
+  async recentTransactions(accountId: number, signal?: AbortSignal): Promise<Transaction[]> {
+    // Output rules can change mapped dates after server pagination. Scan every
+    // page in stable ID order before claiming these are the newest transactions.
+    const params = { ...transactionParams({ accountId: String(accountId) }), sort: "-id" };
+    const transactions = new Map<number, Transaction>();
+    const maxPages = 100;
+    for (let page = 1; page <= maxPages; page++) {
+      const result = await this.page<Transaction>("/finance/transactions", params, page, signal);
+      if (result.meta.last_page > maxPages)
+        throw new Error(
+          "This account's history is too large to verify the latest activity. Open View Transactions to browse it.",
+        );
+      for (const transaction of result.data) transactions.set(transaction.id, transaction);
+      if (page === result.meta.last_page)
+        return [...transactions.values()].sort(compareTransactionsNewestFirst).slice(0, 5);
+    }
+    throw new Error("The account history could not be loaded completely. Refresh to try again.");
+  }
   async transactionBatch(query: TransactionQuery, startPage: number, signal?: AbortSignal) {
     const amount = amountSearch(query.search);
     // Rules may remove every item on a server page. Skip such pages so Raycast's
@@ -198,13 +230,19 @@ export class SynciClient {
       // scope for numeric searches. Return the first matching page promptly.
       const response = await this.transactions(amount ? { ...query, search: undefined } : query, page, signal);
       const hasMore = response.meta.current_page < response.meta.last_page;
-      if (amount) {
-        const matches = response.data.filter(amount.matches);
+      if (amount || query.category !== undefined) {
+        const matches = response.data.filter(
+          (transaction) => (!amount || amount.matches(transaction)) && categoryMatches(transaction, query.category),
+        );
         if (matches.length || !hasMore) return { data: matches, hasMore, cursor: page + 1 };
         continue;
       }
       if (response.data.length || !hasMore) return { data: response.data, hasMore, cursor: page + 1 };
     }
+    if (query.category !== undefined)
+      throw new Error(
+        "Category search scanned 10,000 records. Choose a shorter period or a single account and try again.",
+      );
     if (amount) {
       throw new Error(
         "Amount search scanned 10,000 records. Choose a shorter period or a single account and try again.",

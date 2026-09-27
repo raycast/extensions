@@ -173,9 +173,13 @@ describe("presentation", () => {
   });
   it("keeps currencies and parentheses out of Raycast's LaTeX renderer", () => {
     const result = markdown("$12.50 (-64.55%) \\(x\\) & Co");
-    expect(result).toContain("&#36;12\\.50 &#40;\\-64\\.55%&#41;");
+    expect(result).toContain("&#36;12.50 &#40;\\-64.55%&#41;");
     expect(result).not.toContain("\\(");
     expect(result).toContain("&amp; Co");
+  });
+  it("keeps decimal amounts literal in sticky headings without allowing ordered lists", () => {
+    expect(markdown(money("200.54", "EUR", "en-US"))).toBe("€200.54");
+    expect(markdown("1. Transfer\n2. Payment")).toBe("1\\. Transfer\n2\\. Payment");
   });
   it("handles malformed amounts and unusual currencies", () => {
     expect(decimal("Infinity")).toBeUndefined();

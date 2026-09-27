@@ -1,3 +1,4 @@
+import { copyDiagnostics } from "./components/diagnostics";
 import { launchCommand, LaunchType, popToRoot, showToast, Toast } from "@raycast/api";
 import { session } from "./lib/auth";
 
@@ -9,6 +10,7 @@ export default async function ReconnectSynci() {
       style: Toast.Style.Failure,
       title: "Could Not Reconnect Synci",
       message: error instanceof Error ? error.message : "Try again to update account access.",
+      secondaryAction: { title: "Copy Error Details", onAction: () => copyDiagnostics(error) },
       primaryAction: {
         title: "Try Again",
         onAction: () => launchCommand({ name: "reconnect-synci", type: LaunchType.UserInitiated }),
