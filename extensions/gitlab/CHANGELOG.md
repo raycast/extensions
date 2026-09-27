@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Project avatars, grouped project dropdown, and paginated project search] - {PR_MERGE_DATE}
+## [Project avatars, grouped project dropdown, and paginated project search] - 2026-09-27
 
 - Show avatars of private projects and groups; avatars are downloaded with authentication and cached locally
 - Fix project dropdown search only finding projects from the first page
