@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jumper",
+  "title": "Jumper",
+  "description": "Jump to any app, tab, or session: step back and forward through recent apps like browser history, or search tabs, windows, and sessions across apps.",
+  "icon": "extension-icon.png",
+  "author": "matt_herwig",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "app switcher",
+    "tab switcher",
+    "window switcher",
+    "switch apps",
+    "switch tabs",
+    "previous app",
+    "recent apps",
+    "browser tabs",
+    "terminal tabs",
+    "claude sessions",
+    "chrome tabs",
+    "harpoon"
+  ],
+  "commands": [
+    {
+      "name": "back",
+      "title": "Back",
+      "subtitle": "Jumper",
+      "description": "Switch to the app you used before this one, like a browser's Back button. Run again to keep going back. Best bound to a hotkey.",
+      "mode": "no-view",
+      "keywords": [
+        "previous app",
+        "last app",
+        "go back"
+      ]
+    },
+    {
+      "name": "forward",
+      "title": "Forward",
+      "subtitle": "Jumper",
+      "description": "Undo a Back step. Best bound to a hotkey.",
+      "mode": "no-view",
+      "keywords": [
+        "next app",
+        "go forward"
+      ]
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle",
+      "subtitle": "Jumper",
+      "description": "Flip between your two most recent apps. Run again to flip back. Best bound to a hotkey.",
+      "mode": "no-view",
+      "keywords": [
+        "last app",
+        "previous app",
+        "switch app"
+      ]
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Jumper",
+      "description": "List running apps from most to least recently used and switch to any of them.",
+      "mode": "view",
+      "keywords": [
+        "recent apps",
+        "app switcher",
+        "switch app"
+      ]
+    },
+    {
+      "name": "tabs",
+      "title": "Tabs",
+      "subtitle": "Jumper",
+      "description": "Search tabs, windows, and sessions across running apps (browsers, terminals, Claude, Muse, and any app's windows) and jump to one.",
+      "mode": "view",
+      "keywords": [
+        "tab switcher",
+        "switch tab",
+        "browser tabs",
+        "terminal tabs",
+        "windows",
+        "sessions",
+        "harpoon"
+      ]
+    },
+    {
+      "name": "app-tabs",
+      "title": "Tabs in Current App",
+      "subtitle": "Jumper",
+      "description": "Search the tabs, windows, or sessions of the app you're in and jump to one.",
+      "mode": "view",
+      "keywords": [
+        "tab switcher",
+        "switch tab",
+        "windows"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsc -p test/tsconfig.json && node --import ./test/setup.mjs --test --experimental-strip-types --no-warnings 'test/**/*.test.ts'",
+    "check": "npm run test && npm run lint && npm run build",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
