@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { createHash } from "node:crypto";
 
 import type { CachedTaskPayload, ExtensionPreferences } from "./types";
 
@@ -15,10 +16,13 @@ export async function setActiveTaskId(taskId: string): Promise<void> {
 }
 
 export function buildTaskCacheKey(preferences: ExtensionPreferences): string {
-  const viewScope = preferences.viewIdOrUrl.trim().toLowerCase();
+  const accountScope = createHash("sha256")
+    .update(preferences.clickupApiToken?.trim() ?? "")
+    .digest("hex");
+  const viewScope = preferences.viewIdOrUrl?.trim().toLowerCase() ?? "";
   const closedScope = preferences.showClosedTasks ? "closed" : "open";
 
-  return [TASK_CACHE_PREFIX, preferences.teamId.trim(), closedScope, viewScope].join(":");
+  return [TASK_CACHE_PREFIX, accountScope, preferences.teamId?.trim() ?? "", closedScope, viewScope].join(":");
 }
 
 export async function getCachedTaskPayload(cacheKey: string): Promise<CachedTaskPayload | undefined> {

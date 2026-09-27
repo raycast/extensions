@@ -70,8 +70,8 @@ export default function Command() {
       }
 
       const [cachedPayload, storedActiveTaskId] = await Promise.all([
-        getCachedTaskPayload(cacheKey),
-        getActiveTaskId(),
+        getCachedTaskPayload(cacheKey).catch(() => undefined),
+        getActiveTaskId().catch(() => undefined),
       ]);
 
       if (cancelled) {
@@ -94,7 +94,7 @@ export default function Command() {
           activeTaskIdRef.current = activeTask.id;
 
           if (activeTask.id !== selectedId) {
-            void persistActiveTaskId(activeTask.id, activeTaskIdRef);
+            void persistActiveTaskId(activeTask.id, activeTaskIdRef).catch(() => undefined);
           }
         }
       } else {
@@ -123,12 +123,6 @@ export default function Command() {
           tasks: result.tasks,
         };
 
-        await setCachedTaskPayload(cacheKey, nextCachePayload);
-
-        if (cancelled) {
-          return;
-        }
-
         const selectedId = activeTaskIdRef.current ?? storedActiveTaskId;
         const nextActiveTask = getVisibleActiveTask(result.tasks, selectedId);
 
@@ -136,7 +130,7 @@ export default function Command() {
           activeTaskIdRef.current = nextActiveTask.id;
 
           if (nextActiveTask.id !== selectedId) {
-            void persistActiveTaskId(nextActiveTask.id, activeTaskIdRef);
+            void persistActiveTaskId(nextActiveTask.id, activeTaskIdRef).catch(() => undefined);
           }
         }
 
@@ -147,6 +141,8 @@ export default function Command() {
           viewName: result.view.name,
           viewUrl: result.view.url,
         });
+
+        void setCachedTaskPayload(cacheKey, nextCachePayload).catch(() => undefined);
       } catch (error) {
         if (!cancelled) {
           setState((currentState) => ({
@@ -289,7 +285,7 @@ function handleSelectTask(
     ...currentState,
     activeTask: task,
   }));
-  void persistActiveTaskId(task.id, activeTaskIdRef);
+  void persistActiveTaskId(task.id, activeTaskIdRef).catch(() => undefined);
 }
 
 async function persistActiveTaskId(taskId: string, activeTaskIdRef: { current: string | undefined }): Promise<void> {
