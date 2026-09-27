@@ -1,0 +1,16 @@
+syntax = "proto3";
+package blip;
+
+import "device.proto";
+
+message UserAgent {
+  string device_make = 100;
+  string device_model = 101;
+  blip.DeviceKind device_kind = 102;
+  string os_name = 200;
+  string os_version = 201;
+  string app_id = 300;
+  string app_name = 301;
+  string app_version = 302;
+  string app_build = 304;
+}

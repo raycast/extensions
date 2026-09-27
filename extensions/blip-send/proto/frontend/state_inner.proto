@@ -1,0 +1,60 @@
+syntax = "proto3";
+package frontend;
+
+import "user.proto";
+import "peerid.proto";
+import "frontend/error.proto";
+import "google/protobuf/timestamp.proto";
+
+enum MessagingStatus {
+  CLOSED = 0;
+  PENDING = 1;
+  OPEN = 2;
+  CLOSING = 3;
+}
+
+enum NotificationPermissionStatus {
+  UNKNOWN = 0;
+  CHECKING = 1;
+  DENIED = 2;
+  GRANTED = 3;
+}
+
+message Config {
+  bool auto_accept_disabled = 2;
+  bool auto_save_media_to_library = 3;
+  string custom_default_save_path = 4;
+  uint32 limit_upload_mbps = 5;
+  uint32 limit_download_mbps = 6;
+}
+
+message Users {
+  map<string, blip.User> discovered = 1;
+  map<string, bool> contacts = 3;
+  repeated frontend.PeerInteraction recent_interactions = 4;
+}
+
+message PeerInteraction {
+  google.protobuf.Timestamp time = 1;
+  blip.PeerId peer_id = 2;
+  bool initiated_by_peer = 3;
+}
+
+message Messaging {
+  frontend.MessagingStatus status = 1;
+  bool prevent_reconnect = 2;
+  bool initial_sync_complete = 3;
+  frontend.Err error = 999;
+}
+
+message PushNotifications {
+  frontend.NotificationPermissionStatus permissions = 1;
+  int32 service_type = 2;
+  bytes token = 3;
+}
+
+message SystemInfo {
+  bool is_asleep = 1;
+  bool is_network_available = 2;
+  string available_network_kind = 3;
+}

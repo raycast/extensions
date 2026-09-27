@@ -1,0 +1,13 @@
+syntax = "proto3";
+package blip;
+
+
+message NotificationToken {
+  enum ServiceKind {
+    Unknown = 0;
+    APNS = 1;
+    FCM = 2;
+  }
+  blip.NotificationToken.ServiceKind service = 1;
+  bytes bytes = 2;
+}

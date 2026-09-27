@@ -1,0 +1,8 @@
+syntax = "proto3";
+package blip;
+
+import "google/protobuf/timestamp.proto";
+
+message Plan {
+  google.protobuf.Timestamp subscribed_at = 1;
+}
