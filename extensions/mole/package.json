@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "jlrochin",
   "contributors": [
-    "adria_navarrete"
+    "adria_navarrete",
+    "alexi.build"
   ],
   "platforms": [
     "macOS"
@@ -236,6 +237,13 @@
           ]
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "open-cleanup",
+      "title": "Open Cleanup Command",
+      "description": "Open a Mole cleanup command from AI. The command previews what it will change and asks for confirmation before removing files. Use clean for system caches and logs, purge for development build artifacts, installer for downloaded installer files, uninstall for an app and its residual files, or optimize for system maintenance."
     }
   ],
   "dependencies": {

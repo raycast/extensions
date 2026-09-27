@@ -1,5 +1,10 @@
 # Mole Changelog
 
+## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Added Ask Mole AI tool to open Clean System, Purge Dev Artifacts, Clean Installers, Uninstall App, and Optimize System with their existing review flows
+- Added YAML evals for AI command selection and documented Ask Mole in the README
+
 ## [Stability Improvements] - 2026-04-23
 
 - Fixed System Status crashes when Mole returns null values for optional status arrays
