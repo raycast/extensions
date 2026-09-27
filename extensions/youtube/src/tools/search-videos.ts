@@ -1,4 +1,5 @@
 import { searchVideos } from "../lib/youtubeapi";
+import { videoUrl } from "../lib/urls";
 
 type Input = {
   /** The words or topic to search for on YouTube. */
@@ -14,6 +15,6 @@ export default async function tool({ query }: Input) {
     publishedAt: video.publishedAt,
     description: video.description,
     views: video.statistics?.viewCount,
-    url: `https://www.youtube.com/watch?v=${video.id}`,
+    url: videoUrl(video.id),
   }));
 }

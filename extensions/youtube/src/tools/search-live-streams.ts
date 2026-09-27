@@ -1,4 +1,5 @@
 import { searchVideos } from "../lib/youtubeapi";
+import { videoUrl } from "../lib/urls";
 
 type Input = {
   /** The words or topic to search for among live YouTube streams. */
@@ -12,6 +13,6 @@ export default async function tool({ query }: Input) {
     title: video.title,
     channel: video.channelTitle,
     description: video.description,
-    url: `https://www.youtube.com/watch?v=${video.id}`,
+    url: videoUrl(video.id),
   }));
 }

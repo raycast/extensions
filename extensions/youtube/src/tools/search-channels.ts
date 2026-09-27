@@ -1,4 +1,5 @@
 import { searchChannels } from "../lib/youtubeapi";
+import { channelUrl } from "../lib/urls";
 
 type Input = {
   /** The name or topic of the YouTube channel to find. */
@@ -12,6 +13,6 @@ export default async function tool({ query }: Input) {
     title: channel.title,
     description: channel.description,
     subscribers: channel.statistics?.subscriberCount,
-    url: `https://www.youtube.com/channel/${channel.id}`,
+    url: channelUrl(channel.id),
   }));
 }
