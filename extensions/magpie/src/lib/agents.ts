@@ -14,6 +14,13 @@ export const AGENTS: { name: string; id: string }[] = [
   { name: "omp", id: "omp" },
   { name: "Devin", id: "devin" },
   { name: "Hermes Agent", id: "hermes" },
+  { name: "MiMo Code", id: "mimocode" },
+  { name: "Cline", id: "cline" },
+  { name: "Qoder", id: "qoder" },
+  { name: "Qoder CN", id: "qoder-cn" },
+  { name: "Grok Build", id: "grok" },
+  { name: "ZCode", id: "zcode" },
+  { name: "Alma", id: "alma" },
 ];
 
 const BY_NAME = new Map(AGENTS.map((agent) => [agent.name, agent.id]));

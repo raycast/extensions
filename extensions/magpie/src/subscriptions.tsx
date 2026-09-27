@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import type { AccountRow } from "./lib/parse";
 import { parseAccounts } from "./lib/parse";
+import { ReloadAction } from "./lib/reload-action";
 import { reportMagpieError } from "./lib/report-error";
 import { useMagpie } from "./lib/use-magpie";
 
@@ -30,11 +31,13 @@ export default function Subscriptions() {
         <List.EmptyView
           title="Couldn't load quotas"
           description={error.message}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data && data.length === 0 ? (
         <List.EmptyView
           title="No subscriptions"
           description="magpie has no Claude, Codex, Copilot, or Grok sign-in to show."
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : (
         [...groups.entries()].map(([agent, accounts]) => (

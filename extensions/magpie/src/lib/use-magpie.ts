@@ -3,8 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { magpie } from "./exec";
 
-type Preferences = { binaryPath?: string };
-
 export function useMagpie<T>(
   args: string[],
   parse: (stdout: string) => T,
@@ -17,6 +15,7 @@ export function useMagpie<T>(
   const [tick, setTick] = useState(0);
   const [state, setState] = useState<{
     isLoading: boolean;
+    scope?: string;
     data?: T;
     error?: Error;
   }>({ isLoading: true });
@@ -24,17 +23,28 @@ export function useMagpie<T>(
   useEffect(() => {
     let cancelled = false;
     const command = JSON.parse(key) as string[];
-    setState((current) => ({ ...current, isLoading: true, error: undefined }));
+    setState((current) => ({
+      isLoading: true,
+      scope: key,
+      error: undefined,
+      data: current.scope === key ? current.data : undefined,
+    }));
     magpie(binaryPath, command, timeoutMs)
       .then((stdout) => {
-        if (!cancelled)
-          setState({ isLoading: false, data: parseRef.current(stdout) });
+        if (!cancelled) {
+          setState({
+            isLoading: false,
+            scope: key,
+            data: parseRef.current(stdout),
+          });
+        }
       })
       .catch((error: unknown) => {
         if (!cancelled) {
           setState((current) => ({
-            ...current,
             isLoading: false,
+            scope: key,
+            data: current.scope === key ? current.data : undefined,
             error: error instanceof Error ? error : new Error(String(error)),
           }));
         }

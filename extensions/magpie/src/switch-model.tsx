@@ -14,12 +14,16 @@ import { useEffect, useRef, useState } from "react";
 
 import { agentIcon, modelIcon, type IconSpec } from "./lib/icons";
 import type { AgentRow, ModelEntry } from "./lib/parse";
-import { parseAgents, parseConfirmation, parseModels } from "./lib/parse";
+import {
+  parseAgents,
+  parseConfirmation,
+  parseModels,
+  sameModel,
+} from "./lib/parse";
 import { reportMagpieError } from "./lib/report-error";
 import { magpie } from "./lib/exec";
+import { ReloadAction } from "./lib/reload-action";
 import { useMagpie } from "./lib/use-magpie";
-
-type Preferences = { binaryPath?: string };
 
 export default function SwitchModel() {
   const { isLoading, data, error, revalidate } = useMagpie(["ls"], parseAgents);
@@ -31,11 +35,13 @@ export default function SwitchModel() {
         <List.EmptyView
           title="Couldn't list agents"
           description={error.message}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data?.length === 0 ? (
         <List.EmptyView
           title="No agents"
           description="magpie did not find an installed agent."
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : (
         data?.map((agent) => (
@@ -89,7 +95,10 @@ function ModelList({
 }) {
   const { pop } = useNavigation();
   const { binaryPath } = getPreferenceValues<Preferences>();
-  const { isLoading, data, error } = useMagpie(["models"], parseModels);
+  const { isLoading, data, error, revalidate } = useMagpie(
+    ["models"],
+    parseModels,
+  );
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   useReport(error);
@@ -126,17 +135,19 @@ function ModelList({
         <List.EmptyView
           title="Couldn't list models"
           description={error.message}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data?.empty ? (
         <List.EmptyView
           title="No models"
           description="Add a provider with magpie provider add, then run magpie sync."
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : (
         data?.sections.map((section) => (
           <List.Section key={section.title} title={section.title}>
             {section.models.map((model) => {
-              const current = model.id === agent.model;
+              const current = sameModel(agent.model, model.id);
               return (
                 <List.Item
                   key={model.id}

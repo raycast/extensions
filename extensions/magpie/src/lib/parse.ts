@@ -288,6 +288,11 @@ export function parseAccounts(text: string): AccountRow[] {
   });
 }
 
+/** Gateway-routed models are stored as `magpie/<catalog id>`. */
+export function sameModel(configured: string, catalogId: string): boolean {
+  return configured === catalogId || configured === `magpie/${catalogId}`;
+}
+
 export function parseConfirmation(stdout: string): {
   summary: string;
   notice?: string;

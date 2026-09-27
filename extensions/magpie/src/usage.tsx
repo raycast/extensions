@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import type { UsageReport } from "./lib/parse";
 import { parseUsage } from "./lib/parse";
+import { ReloadAction } from "./lib/reload-action";
 import { reportMagpieError } from "./lib/report-error";
 import { useMagpie } from "./lib/use-magpie";
 
@@ -55,17 +56,19 @@ export default function Usage() {
         <List.EmptyView
           title="Couldn't load usage"
           description={error.message}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data && !data.ok ? (
         <List.EmptyView
           title="Couldn't parse usage"
           description={data.raw}
-          actions={<Reload actions={revalidate} />}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data?.ok && data.empty ? (
         <List.EmptyView
           title="No calls in this period"
           description={data.path}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data?.ok ? (
         <UsageSections usage={data} onReload={revalidate} />
@@ -146,13 +149,5 @@ function UsageItem({
         </ActionPanel>
       }
     />
-  );
-}
-
-function Reload({ actions }: { actions: () => void }) {
-  return (
-    <ActionPanel>
-      <Action title="Reload" icon={Icon.ArrowClockwise} onAction={actions} />
-    </ActionPanel>
   );
 }

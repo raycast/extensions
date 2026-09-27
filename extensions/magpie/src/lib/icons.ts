@@ -15,6 +15,7 @@ const AGENT_ICONS: Record<string, IconSpec> = {
   omp: { file: "agents/omp.svg", mono: true },
   devin: { file: "agents/devin.svg", mono: true },
   hermes: { file: "agents/hermes.svg", mono: true },
+  grok: { file: "agents/xai.svg", mono: true },
 };
 
 const PROVIDERS: Record<string, IconSpec> = {

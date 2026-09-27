@@ -12,9 +12,8 @@ import { useEffect, useRef, useState } from "react";
 import { magpie } from "./lib/exec";
 import { parseConfirmation, parseProfiles } from "./lib/parse";
 import { reportMagpieError } from "./lib/report-error";
+import { ReloadAction } from "./lib/reload-action";
 import { useMagpie } from "./lib/use-magpie";
-
-type Preferences = { binaryPath?: string };
 
 export default function Profiles() {
   const { isLoading, data, error, revalidate } = useMagpie(
@@ -59,11 +58,13 @@ export default function Profiles() {
         <List.EmptyView
           title="Couldn't list profiles"
           description={error.message}
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : data?.empty ? (
         <List.EmptyView
           title="No profiles"
           description="Save one in the terminal with magpie save <name>."
+          actions={<ReloadAction onReload={revalidate} />}
         />
       ) : (
         data?.profiles.map((profile) => (
