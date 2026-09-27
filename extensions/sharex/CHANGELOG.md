@@ -1,6 +1,6 @@
 # ShareX Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-09-27
 - Add QR Code and Clipboard Upload commands.
 
 ## [Fix] - 2026-06-25
