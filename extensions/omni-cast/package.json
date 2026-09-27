@@ -1,0 +1,236 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omni-cast",
+  "title": "OmniCast",
+  "description": "Search and run OmniWM commands in plain English.",
+  "icon": "extension-icon.png",
+  "author": "imprisonedmind",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "commands",
+      "title": "OmniWM Commands",
+      "subtitle": "OmniCast",
+      "description": "Search and run every common OmniWM action",
+      "mode": "view"
+    },
+    {
+      "name": "maximize",
+      "title": "Maximize",
+      "subtitle": "OmniWM",
+      "description": "Toggle the current tiled column across the full available width",
+      "keywords": [
+        "m"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-default-tile",
+      "title": "Reset",
+      "subtitle": "OmniWM",
+      "description": "Return the focused window to a neutral standalone tiled state",
+      "keywords": [
+        "r",
+        "reset",
+        "normal"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "left-half",
+      "title": "Left Half",
+      "subtitle": "OmniWM",
+      "description": "Make the focused column half width without moving it",
+      "keywords": [
+        "lh"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "right-half",
+      "title": "Right Half",
+      "subtitle": "OmniWM",
+      "description": "Make the focused column half width without moving it",
+      "keywords": [
+        "rh"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "one-quarter",
+      "title": "One Quarter",
+      "subtitle": "OmniWM",
+      "description": "Make the focused column one-quarter width without moving it",
+      "keywords": [
+        "oq",
+        "25%"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "three-quarters",
+      "title": "Three Quarters",
+      "subtitle": "OmniWM",
+      "description": "Make the focused column three-quarters width without moving it",
+      "keywords": [
+        "tq",
+        "75%"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "top-left",
+      "title": "Top Left",
+      "subtitle": "OmniWM",
+      "description": "Join the column on the left and move the window to the top",
+      "keywords": [
+        "tl"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "top-right",
+      "title": "Top Right",
+      "subtitle": "OmniWM",
+      "description": "Join the column on the right and move the window to the top",
+      "keywords": [
+        "tr"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-left",
+      "title": "Bottom Left",
+      "subtitle": "OmniWM",
+      "description": "Join the column on the left at the bottom",
+      "keywords": [
+        "bl"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "bottom-right",
+      "title": "Bottom Right",
+      "subtitle": "OmniWM",
+      "description": "Join the column on the right at the bottom",
+      "keywords": [
+        "br"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "move-left",
+      "title": "Move Left",
+      "subtitle": "OmniWM",
+      "description": "Move the entire focused column left",
+      "keywords": [
+        "ml"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "move-right",
+      "title": "Move Right",
+      "subtitle": "OmniWM",
+      "description": "Move the entire focused column right",
+      "keywords": [
+        "mr"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "move-up",
+      "title": "Move up",
+      "subtitle": "OmniWM",
+      "description": "Move the focused window up inside its column",
+      "keywords": [
+        "mu"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "move-down",
+      "title": "Move Down",
+      "subtitle": "OmniWM",
+      "description": "Move the focused window down inside its column",
+      "keywords": [
+        "md"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "workspace-1",
+      "title": "Workspace 1",
+      "subtitle": "OmniWM",
+      "description": "Switch to workspace 1",
+      "keywords": [
+        "w1"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "workspace-2",
+      "title": "Workspace 2",
+      "subtitle": "OmniWM",
+      "description": "Switch to workspace 2",
+      "keywords": [
+        "w2"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "workspace-3",
+      "title": "Workspace 3",
+      "subtitle": "OmniWM",
+      "description": "Switch to workspace 3",
+      "keywords": [
+        "w3"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "workspace-4",
+      "title": "Workspace 4",
+      "subtitle": "OmniWM",
+      "description": "Switch to workspace 4",
+      "keywords": [
+        "w4"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "workspace-5",
+      "title": "Workspace 5",
+      "subtitle": "OmniWM",
+      "description": "Switch to workspace 5",
+      "keywords": [
+        "w5"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
