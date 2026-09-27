@@ -1,23 +1,29 @@
 import { Detail, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchTypes } from "../../api";
-import { PokemonType } from "../../types";
+import { PokemonType, Type } from "../../types";
 import { calculateEffectiveness } from "../../utils";
 
 export default function WeaknessMetadata(props: {
   type?: string;
   types: PokemonType[];
+  allTypes?: Type[];
 }) {
   const TagListComponent =
     props.type === "detail"
       ? Detail.Metadata.TagList
       : List.Item.Detail.Metadata.TagList;
 
-  const { data: allTypes } = usePromise(fetchTypes);
+  // Only fetch when the caller didn't already provide the full type list.
+  const { data: fetchedTypes } = usePromise(fetchTypes, [], {
+    execute: !props.allTypes,
+  });
+
+  const allTypes = props.allTypes ?? fetchedTypes ?? [];
 
   const { weak, resistant, immune } = calculateEffectiveness(
     props.types,
-    allTypes || [],
+    allTypes,
   );
 
   const tagList = [];

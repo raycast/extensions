@@ -56,7 +56,6 @@ export default function PokemonForms(props: {
                     <PokemonMetadata pokemon={form} formtypes={formTypes} />
                     <List.Item.Detail.Metadata.Separator />
                     <WeaknessMetadata types={formTypes} />
-                    <List.Item.Detail.Metadata.Separator />
                     {(form.pokemonstats?.length ?? 0) > 0 && (
                       <>
                         <List.Item.Detail.Metadata.Separator />

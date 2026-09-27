@@ -157,6 +157,7 @@ export interface EvolutionSpecies {
 
 export interface PokemonSpeciesName extends Name {
   genus: string;
+  name: string;
   language_id: number;
 }
 

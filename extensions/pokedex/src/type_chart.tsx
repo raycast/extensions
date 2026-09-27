@@ -39,13 +39,21 @@ export default function TypeChart(props: { arguments: { search?: string } }) {
                       title="Type"
                       text="Attacking"
                     />
-                    <StrengthMetadata type="detail" types={[{ type }]} />
+                    <StrengthMetadata
+                      type="detail"
+                      types={[{ type }]}
+                      allTypes={types}
+                    />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Type"
                       text="Defending"
                     />
-                    <WeaknessMetadata type="detail" types={[{ type }]} />
+                    <WeaknessMetadata
+                      type="detail"
+                      types={[{ type }]}
+                      allTypes={types}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />
