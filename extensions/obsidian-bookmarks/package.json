@@ -8,7 +8,8 @@
   "contributors": [
     "moeyua",
     "iwex",
-    "qfettes"
+    "qfettes",
+    "victorcaz"
   ],
   "categories": [
     "Productivity",
@@ -37,7 +38,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
     "front-matter": "^4.0.2",
     "fuse.js": "^6.6.0",
     "run-applescript": "^6.0.0",
@@ -46,8 +48,8 @@
     "ts-dedent": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -118,6 +120,10 @@
           "value": "openUrl"
         },
         {
+          "title": "Open Link in Current Window",
+          "value": "openUrlInCurrentWindow"
+        },
+        {
           "title": "Copy Link",
           "value": "copyUrl"
         },
@@ -158,6 +164,10 @@
         {
           "title": "Open Link",
           "value": "openUrl"
+        },
+        {
+          "title": "Open Link in Current Window",
+          "value": "openUrlInCurrentWindow"
         },
         {
           "title": "Copy Link",
@@ -220,6 +230,15 @@
       "title": "Check for Duplicates",
       "description": "Check for duplicate bookmarks when saving a new bookmark. If enabled, shows a warning when attempting to save a URL that already exists.",
       "label": "Check for Duplicates"
+    },
+    {
+      "name": "faviconField",
+      "title": "Favicon Field",
+      "description": "The frontmatter field used to override the favicon shown in search results. Its value can be a website URL (the favicon of that site is used) or a direct image URL (used as-is). Defaults to 'favicon' when left blank.",
+      "type": "textfield",
+      "placeholder": "favicon",
+      "default": "favicon",
+      "required": false
     }
   ]
 }
