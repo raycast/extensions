@@ -1,5 +1,10 @@
 # GIF Search Changelog
 
+## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Add Ask AI search for GIFs and GIPHY Clips with direct media links.
+- Add YAML evals for GIF and clip requests.
+
 ## [Separate GIF copy and paste] - 2026-09-18
 
 - Paste GIF and Paste GIF Square now resolve the file and call paste directly, without copying first or closing the window before paste.

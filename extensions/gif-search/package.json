@@ -21,7 +21,8 @@
     "tim_gailey",
     "clins1994",
     "0xdhrv",
-    "Olli0103"
+    "Olli0103",
+    "alexi.build"
   ],
   "license": "MIT",
   "categories": [
@@ -55,6 +56,13 @@
       "description": "Browse and search your recently used GIFs across all services",
       "mode": "view",
       "icon": "recents-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-gifs",
+      "title": "Search GIFs",
+      "description": "Find GIFs or GIPHY Clips by keyword and return links to the matching media and source pages"
     }
   ],
   "preferences": [
