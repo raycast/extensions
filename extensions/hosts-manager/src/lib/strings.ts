@@ -1,0 +1,50 @@
+/**
+ * All user-facing copy.
+ *
+ * Raycast only supports US English, so the text lives here as plain English
+ * instead of going through a localization layer.
+ */
+export const strings = {
+  searchPlaceholder: "Search profiles",
+  viewHostsFile: "View Current Hosts File",
+  openFullView: "Open in Full View",
+  sectionPublic: "Public",
+  sectionProfiles: "Profiles",
+  publicConfiguration: "Public Configuration",
+  editPublicConfiguration: "Edit Public Configuration",
+  newProfile: "New Profile",
+  editProfile: "Edit Profile",
+  renameProfile: "Rename Profile",
+  applyProfile: "Apply Profile",
+  cancelApply: "Cancel Apply",
+  deleteProfile: "Delete Profile",
+  deleteConfirmTitle: (name: string) => `Delete "${name}"?`,
+  deleteConfirmMessage:
+    "This profile will be removed. This action cannot be undone.",
+  delete: "Delete",
+  applied: (name: string) => `Applied ${name}`,
+  cancelled: (name: string) => `Cancelled ${name}`,
+  deleted: (name: string) => `Deleted ${name}`,
+  publicConfigurationSaved: "Public configuration saved",
+  contentField: "content",
+  nameField: "Name",
+  namePlaceholder: "Staging",
+  nameRequired: "A name is required",
+  save: "Save",
+  saveAndApply: "Save & Apply",
+  createProfile: "Create Profile",
+  createAndApply: "Create & Apply",
+  rename: "Rename",
+  editProfileTitle: (name: string) => `Edit ${name}`,
+  renameProfileTitle: (name: string) => `Rename ${name}`,
+  profileCreated: "Profile created",
+  profileCreatedAndApplied: "Profile created and applied",
+  profileSaved: "Profile saved",
+  profileSavedAndApplied: "Profile saved and applied",
+  profileRenamed: "Profile renamed",
+  currentHostsFile: "Current /etc/hosts",
+  failedToReadHosts: "Failed to read `/etc/hosts`:",
+  dnsRefreshFailed: "Saved, but refreshing the DNS cache failed.",
+  failedPrefix: (title: string) => `Failed: ${title}`,
+  adminCancelled: "Administrator authorization was cancelled.",
+};
