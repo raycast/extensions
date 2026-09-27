@@ -39,6 +39,9 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
       logger.log(`${method} ${path} aborted`);
       throw error;
     }
+    // A mistyped Server URL isn't a stopped server; say which preference to fix.
+    if (!URL.canParse(baseUrl()))
+      throw new Error(`Server URL "${baseUrl()}" isn't a valid URL. Fix it in preferences.`);
     logger.warn(`${method} ${path} failed`, error);
     if (error instanceof Error && error.name === "TimeoutError") throw new Error("Osaurus didn't respond in time");
     throw new ServerDownError();
@@ -202,6 +205,9 @@ export async function runningApps(): Promise<string[]> {
 // The app listening on the server's port, remembered so a restart after Stop picks the same build.
 // Process discovery and app control only make sense when the server URL points at this Mac.
 export function isLocalServer(): boolean {
+  // A mistyped Server URL ("http://[") isn't local; requests to it fail as a down server, whose
+  // empty view points to the Server URL preference.
+  if (!URL.canParse(baseUrl())) return false;
   const { hostname } = new URL(baseUrl());
   return hostname === "localhost" || hostname === "[::1]" || /^127(?:\.\d{1,3}){3}$/.test(hostname);
 }

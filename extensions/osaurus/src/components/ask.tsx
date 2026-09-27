@@ -8,6 +8,7 @@ import {
   launchCommand,
   LaunchType,
   List,
+  openExtensionPreferences,
   useNavigation,
 } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
@@ -124,18 +125,27 @@ export function Ask({ initialModel }: { initialModel?: string }) {
       {serverDown ? (
         <ServerDownEmptyView onReady={revalidate} />
       ) : error ? (
-        <List.EmptyView icon={Icon.Warning} title="Couldn't load models" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load models"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       ) : models && models.length === 0 ? (
         <List.EmptyView
           icon={Icon.Download}
           title="No chat models yet"
-          description="Pull one in Manage Models. Embedding models can't answer questions."
+          description="Add one with Search Models. Embedding models can't answer questions."
           actions={
             <ActionPanel>
               <Action
-                title="Open Manage Models"
-                icon={Icon.ComputerChip}
-                onAction={() => launchCommand({ name: "manage-models", type: LaunchType.UserInitiated })}
+                title="Search Models"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => launchCommand({ name: "search-models", type: LaunchType.UserInitiated })}
               />
             </ActionPanel>
           }

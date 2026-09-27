@@ -1,4 +1,16 @@
-import { Action, AI, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  AI,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
@@ -125,7 +137,12 @@ export default function Command() {
           icon={Icon.Warning}
           title="Couldn't load models"
           description={error.message}
-          actions={<ActionPanel>{serverActions}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              {serverActions}
+            </ActionPanel>
+          }
         />
       ) : models?.length ? (
         <List.EmptyView
