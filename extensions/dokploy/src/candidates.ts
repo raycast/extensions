@@ -1,4 +1,5 @@
 import { Icon, LocalStorage } from "@raycast/api";
+import { mapWithConcurrency } from "./concurrency";
 import { Instance, instanceId, tokenForInstance } from "./instances";
 import { Project, ServiceCollections } from "./interfaces";
 import { isModernProject } from "./utils";
@@ -49,6 +50,8 @@ const STATUS_FIELDS: Record<Kind, string> = {
   redis: "applicationStatus",
   compose: "composeStatus",
 };
+
+const PROJECT_CONCURRENCY = 5;
 
 export interface Candidate {
   id: string;
@@ -139,7 +142,19 @@ export async function loadCandidates(): Promise<LoadCandidatesResult> {
       const { url, headers } = tokenForInstance(instance);
       const response = await fetch(url + "project.all", { headers });
       if (!response.ok) throw new Error(`${response.status}`);
-      const projects = (await response.json()) as Project[];
+      const summaries = (await response.json()) as Project[];
+
+      // For owner/admin keys `project.all` only carries each database's id (no name or status) and
+      // no service's `appName` - `project.one` has the full rows.
+      const detailed = await mapWithConcurrency(summaries, PROJECT_CONCURRENCY, async (summary) => {
+        const detailResponse = await fetch(`${url}project.one?projectId=${summary.projectId}`, { headers });
+        if (!detailResponse.ok) throw new Error(`${summary.name}: ${detailResponse.status}`);
+        return (await detailResponse.json()) as Project;
+      });
+      const failed = detailed.find((result) => result.status === "rejected");
+      if (failed) throw failed.reason;
+      const projects = detailed.map((result) => (result as PromiseFulfilledResult<Project>).value);
+
       return candidatesForInstance(instance, projects);
     }),
   );
