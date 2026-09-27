@@ -6,6 +6,12 @@
 
 - **Move Environment to Subtitle** in the Search view, offered only on commands that still lead their title with `@work · `. It rewrites that one file from `@work · Sprint Board` / `Linear · #dev` to `Sprint Board` / `Linear · @work · #dev`, the form new commands are written in, after a confirmation that shows both lines before and after. Only the title and subtitle lines change; the filename, and so the command's deeplink, stays as it is. Raycast may address a command by its title, so a hotkey, alias or deeplink pointing at it might need re-assigning afterwards, which is why this is never done in bulk.
 
+## [Plain Names in the Create Form] - 2026-09-27
+
+### Fixed
+
+- The Environment and Category dropdowns in the Create Link Command form listed existing values in their raw sigil form — `@work`, `#media` — instead of the plain name shown everywhere else in the extension. They now read `Work` and `Media`, matching the Search view's filter dropdown and detail pane. Nothing written to disk changes: a command's subtitle still reads ` · @work` / ` · #media`, so existing collections and the older sigil-anchored form are unaffected.
+
 ## [Scope on the Subtitle] - 2026-09-25
 
 ### Changed
