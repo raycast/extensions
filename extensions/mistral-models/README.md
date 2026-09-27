@@ -33,10 +33,10 @@ Enter credentials only in the Raycast password preference. The extension does no
 
 Requires Bun and Node.js 22.22.2 or later.
 
-1. Install the locked dependencies:
+1. Install dependencies from the submitted npm lockfile:
 
    ```sh
-   bun install --frozen-lockfile
+   npm ci
    ```
 
 2. Load the extension into Raycast with hot reload:
@@ -51,7 +51,9 @@ Requires Bun and Node.js 22.22.2 or later.
    bun run release:check
    ```
 
-The checks cover formatting, TypeScript, tests, Raycast validation, and the production build. The build writes to `dist/` without publishing. Tests mock HTTP requests and do not use API credits. They do not verify account access or Raycast behavior.
+The checks cover formatting, TypeScript, tests, Raycast validation, and the production build. The build generates preference types before the standalone type check. It writes to `dist/` without publishing. Tests mock HTTP requests and do not use API credits. They do not verify account access or Raycast behavior.
+
+Bun runs the development scripts and tests. The Store submission includes `package-lock.json`, not the local `bun.lock`.
 
 Follow the [release checklist](RELEASE.md) for live testing and submission.
 

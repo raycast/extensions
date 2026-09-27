@@ -2,10 +2,10 @@
 
 ## Build
 
-1. Install dependencies from the lockfile:
+1. Install dependencies from the submitted npm lockfile:
 
    ```sh
-   bun install --frozen-lockfile
+   npm ci
    ```
 
 2. Run the release checks:
@@ -17,12 +17,12 @@
 3. Check dependencies for known vulnerabilities:
 
    ```sh
-   bun audit
+   npm audit
    ```
 
 The release checks stop on failure and build into `dist/`. They do not install or publish the build. The audit requires network access and checks dependency advisories, not application security.
 
-Raycast Store CI requires `package-lock.json`. After dependency changes, update it with `npm install --package-lock-only --ignore-scripts`. Check the npm dependency versions before submission. Keep `bun.lock` for local development.
+Raycast Store CI uses `package-lock.json`. After dependency changes, update it with `npm install --package-lock-only --ignore-scripts`. Verify it with `npm ci` before submission. Bun runs local scripts and tests. The local `bun.lock` does not ship in the Store submission.
 
 ## Live tests
 

@@ -42,7 +42,7 @@
     "format": "prettier --write .",
     "test": "bun test",
     "format:check": "prettier --check .",
-    "release:check": "bun run format:check && bun run typecheck && bun test && bun run lint && bun run build"
+    "release:check": "bun run format:check && bun run build && bun run typecheck && bun test && bun run lint"
   },
   "version": "1.0.0",
   "private": true,
