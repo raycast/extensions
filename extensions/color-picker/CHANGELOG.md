@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Enable Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Enable Ask AI Raycast Command] - 2026-09-27
 
 - Register the seven existing color tools with Raycast AI
 - Enable the Ask Color Picker entry in Raycast search
