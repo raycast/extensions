@@ -7,6 +7,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import { parseResult } from "../util/parser";
+import { parseTrackSearchResults } from "../util/search-tracks";
 import { fromEmptyOrNullable } from "../util/option";
 import * as music from "../util/scripts";
 import { Track } from "../util/models";
@@ -39,7 +40,7 @@ export default async function getLibraryTracks(input?: Input) {
 
   return await pipe(
     tracksTE,
-    TE.map(parseResult<Track>()),
+    TE.map((raw) => (searchTerm ? parseTrackSearchResults(raw, searchTerm) : parseResult<Track>()(raw))),
     TE.map((tracksOption) =>
       pipe(
         tracksOption,
