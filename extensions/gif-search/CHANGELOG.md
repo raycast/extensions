@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Add Ask AI search for GIFs and GIPHY Clips with direct media links.
 - Add YAML evals for GIF and clip requests.
