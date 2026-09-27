@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Open with Terminal command] - {PR_MERGE_DATE}
+## [Open with Terminal command] - 2026-09-27
 
 - Add `Open with Terminal` command that opens the selected file manager item in Terminal
 - Use `wt.exe` (for Terminal) so the default profile is used instead of CMD every time
