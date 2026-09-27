@@ -43,6 +43,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "apmzoom",
+    title: "apMZoomAI · Dongdaemun Wholesale",
+    description:
+      "Search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, find stalls by building, floor and stall number, and open each item or stall on apMZoomAI, in eight languages. Read-only; never returns prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in and no API key.",
+    icon: "https://www.apmzoom.com/pwa-icon-192.png",
+    homepage: "https://github.com/apmleokeo-gif/apmzoom-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.apmzoom.com/mcp"],
+    },
+  },
+  {
     name: "atono",
     title: "Atono",
     description:
