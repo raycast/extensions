@@ -1,0 +1,31 @@
+instructions: |
+  Use the system status tool for questions about this Mac's current CPU, memory, disk, or battery readings.
+  Treat the readings as a snapshot and do not infer a trend from one sample.
+  If battery is null, say that battery data is unavailable.
+
+evals:
+  - input: "@raycast-system-monitor How much disk space is available on my Mac?"
+    mocks:
+      get-system-status:
+        sampledAt: "2026-09-26T12:00:00.000Z"
+        cpuUsagePercent: 18
+        memory: { totalGB: 16, usedGB: 9, pressure: Normal, swapUsedMB: 0 }
+        disks:
+          - { name: Macintosh HD, totalGB: 500, availableGB: 125, isExternal: false }
+        battery: null
+    expected:
+      - callsTool: get-system-status
+      - includes: "125"
+  - input: "@raycast-system-monitor What is my current CPU usage and memory pressure?"
+    mocks:
+      get-system-status:
+        sampledAt: "2026-09-26T12:00:00.000Z"
+        cpuUsagePercent: 42
+        memory: { totalGB: 16, usedGB: 12, pressure: Warning, swapUsedMB: 512 }
+        disks:
+          - { name: Macintosh HD, totalGB: 500, availableGB: 125, isExternal: false }
+        battery: null
+    expected:
+      - callsTool: get-system-status
+      - includes: "42"
+      - includes: "Warning"

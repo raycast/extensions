@@ -1,5 +1,10 @@
 # System Monitor Changelog
 
+## [Add Ask AI System Status] - {PR_MERGE_DATE}
+
+- Add Ask System Monitor in Raycast AI with current CPU, memory, disk, and battery readings
+- Add YAML evals for disk availability, CPU usage, and memory pressure questions
+
 ## [Menu Bar Process Safety] - 2026-09-21
 
 - Keep background refreshes process-free by collecting CPU and storage without external programs
