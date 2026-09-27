@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Opus Growth MCP Server] - 2026-09-27
+
+- Add Opus Growth to the community registry: manage advertising from chat across Google, Meta, Microsoft, TikTok and LinkedIn (campaigns, ad groups, creatives, audiences, bidding, keywords and extensions), plus reporting and SEO with Search Console, GA4, GTM, Google Business Profile and YouTube. Hosted remote Streamable HTTP server at https://mcp.opus-growth.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
 ## [Add ZoneFoundry for Sonos MCP Server] - 2026-09-27
 
 - Add ZoneFoundry for Sonos to the official registry: control your Sonos speakers (play music, volume, grouping, moving playback between rooms, switching to TV, spoken announcements and reminders) through the official Sonos cloud, with no home bridge. Hosted remote Streamable HTTP server at https://relay.zonefoundry.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
