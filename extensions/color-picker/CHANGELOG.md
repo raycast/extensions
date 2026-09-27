@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [Enable Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Register the seven existing color tools with Raycast AI
+- Enable the Ask Color Picker entry in Raycast search
+
 ## [Fix Color Picking and Conversion] - 2026-09-25
 
 - Stop showing an error after picking a color when the optional menu bar command is disabled or unavailable
