@@ -1,11 +1,13 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 
 import BondDetailView from "./bond-detail";
 import { getFavorites, isFavoriteSecid, toggleFavorite } from "./favorites";
-import { DASH, fmtPct, fmtSignedPct, fmtUntil } from "./format";
+import { DASH, Formatter } from "./format";
 import { fetchQuotes, isYieldMisleading, moexUrl, searchBonds, smartLabUrl } from "./moex";
+import { useLocale } from "./preferences";
+import { Strings, describeError, priceLabel } from "./strings";
 import { BondRef, FavoriteItem, Quote } from "./types";
 
 const MIN_QUERY = 2;
@@ -21,7 +23,7 @@ function favoriteToRef(item: FavoriteItem): BondRef {
   return {
     secid: item.secid,
     shortname: item.shortname,
-    isin: null,
+    isin: item.isin,
     fullname: null,
     emitent: null,
     boardid: item.boardid,
@@ -30,6 +32,7 @@ function favoriteToRef(item: FavoriteItem): BondRef {
 }
 
 export default function Command() {
+  const { fmt, t } = useLocale();
   const [searchText, setSearchText] = useState("");
   const abortable = useRef<AbortController>(null);
 
@@ -53,15 +56,15 @@ export default function Command() {
   const onToggleFavorite = useCallback(
     async (ref: BondRef) => {
       const wasFavorite = isFavoriteSecid(favorites ?? [], ref.secid);
-      await toggleFavorite({ secid: ref.secid, shortname: ref.shortname, boardid: ref.boardid });
+      await toggleFavorite({ secid: ref.secid, shortname: ref.shortname, boardid: ref.boardid, isin: ref.isin });
       reloadFavorites();
       await showToast({
         style: Toast.Style.Success,
-        title: wasFavorite ? "Убрано из избранного" : "Добавлено в избранное",
+        title: wasFavorite ? t.removedFromFavorites : t.addedToFavorites,
         message: ref.shortname,
       });
     },
-    [favorites, reloadFavorites],
+    [favorites, reloadFavorites, t],
   );
 
   const rows = data ?? [];
@@ -72,22 +75,24 @@ export default function Command() {
       throttle
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Название, тикер или ISIN — например «сегежа», «26238», RU000A10CB66"
+      searchBarPlaceholder={t.searchPlaceholder}
     >
       {rows.length === 0 ? (
-        <EmptyState query={query} error={error} favorites={favorites ?? []} onRetry={revalidate} />
+        <EmptyState query={query} error={error} favorites={favorites ?? []} onRetry={revalidate} t={t} />
       ) : (
-        <List.Section title={searching ? `Найдено: ${rows.length}` : "Избранное"}>
+        <List.Section title={searching ? t.found(rows.length) : t.favorites}>
           {rows.map(({ ref, quote, failed }) => (
             <BondListItem
               key={ref.secid}
               bondRef={ref}
               quote={quote}
               failed={failed}
-              onRefresh={revalidate}
               starred={isFavoriteSecid(favorites ?? [], ref.secid)}
               onToggleFavorite={() => onToggleFavorite(ref)}
               onFavoritesChange={reloadFavorites}
+              onRefresh={revalidate}
+              fmt={fmt}
+              t={t}
             />
           ))}
         </List.Section>
@@ -101,21 +106,23 @@ function EmptyState({
   error,
   favorites,
   onRetry,
+  t,
 }: {
   query: string;
   error: Error | undefined;
   favorites: FavoriteItem[];
   onRetry: () => void;
+  t: Strings;
 }) {
   if (error) {
     return (
       <List.EmptyView
         icon={{ source: Icon.WifiDisabled, tintColor: Color.Red }}
-        title="MOEX не отвечает"
-        description={error.message}
+        title={t.emptyOffline}
+        description={describeError(error, t)}
         actions={
           <ActionPanel>
-            <Action title="Повторить" icon={Icon.ArrowClockwise} onAction={onRetry} />
+            <Action title={t.retry} icon={Icon.ArrowClockwise} onAction={onRetry} />
           </ActionPanel>
         }
       />
@@ -126,23 +133,17 @@ function EmptyState({
     return (
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
-        title={favorites.length === 0 ? "Начните вводить название" : "Избранное пусто"}
-        description="Подойдёт часть названия («сегежа»), номер выпуска («26238») или ISIN (RU000A10CB66)."
+        title={favorites.length === 0 ? t.emptyStartTitle : t.emptyFavoritesTitle}
+        description={t.emptyStartHint}
       />
     );
   }
 
   if (query.length < MIN_QUERY) {
-    return <List.EmptyView icon={Icon.Keyboard} title="Нужно минимум 2 символа" />;
+    return <List.EmptyView icon={Icon.Keyboard} title={t.emptyTooShort} />;
   }
 
-  return (
-    <List.EmptyView
-      icon={Icon.QuestionMark}
-      title="Ничего не нашлось"
-      description="Попробуйте тикер, ISIN или имя эмитента. Показываются только торгующиеся выпуски."
-    />
-  );
+  return <List.EmptyView icon={Icon.QuestionMark} title={t.emptyNotFound} description={t.emptyNotFoundHint} />;
 }
 
 function BondListItem({
@@ -153,6 +154,8 @@ function BondListItem({
   onToggleFavorite,
   onFavoritesChange,
   onRefresh,
+  fmt,
+  t,
 }: {
   bondRef: BondRef;
   quote: Quote | undefined;
@@ -161,6 +164,8 @@ function BondListItem({
   onToggleFavorite: () => void;
   onFavoritesChange: () => void;
   onRefresh: () => void;
+  fmt: Formatter;
+  t: Strings;
 }) {
   const moex = moexUrl(bondRef.secid, quote?.boardid ?? bondRef.boardid);
   const smartLab = smartLabUrl(bondRef.secid);
@@ -170,43 +175,44 @@ function BondListItem({
       icon={starred ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Coin}
       title={bondRef.shortname}
       subtitle={bondRef.emitent ?? bondRef.fullname ?? bondRef.secid}
-      accessories={buildAccessories(quote, failed)}
+      accessories={buildAccessories(quote, failed, fmt, t)}
       actions={
         <ActionPanel>
           <Action.Push
-            title="Открыть карточку"
+            title={t.openCard}
             icon={Icon.Sidebar}
             target={
               <BondDetailView
                 secid={bondRef.secid}
                 shortname={bondRef.shortname}
                 boardid={bondRef.boardid}
+                isin={bondRef.isin}
                 emitent={bondRef.emitent}
                 onFavoritesChange={onFavoritesChange}
               />
             }
           />
           <Action
-            title={starred ? "Убрать из избранного" : "В избранное"}
+            title={starred ? t.removeFromFavorites : t.addToFavorites}
             icon={starred ? Icon.StarDisabled : Icon.Star}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             onAction={onToggleFavorite}
           />
           <Action
-            title="Обновить котировки"
+            title={t.refreshQuotes}
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onRefresh}
           />
-          <ActionPanel.Section title="Скопировать">
+          <ActionPanel.Section title={t.copySection}>
             {bondRef.isin ? (
               <Action.CopyToClipboard title="ISIN" content={bondRef.isin} shortcut={Keyboard.Shortcut.Common.Copy} />
             ) : null}
-            <Action.CopyToClipboard title="Код бумаги" content={bondRef.secid} />
+            <Action.CopyToClipboard title={t.copySecid} content={bondRef.secid} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Открыть">
-            {moex ? <Action.OpenInBrowser title="На MOEX" url={moex} /> : null}
-            {smartLab ? <Action.OpenInBrowser title="На Smart-Lab" url={smartLab} /> : null}
+          <ActionPanel.Section title={t.openSection}>
+            {moex ? <Action.OpenInBrowser title={t.openOnMoex} url={moex} /> : null}
+            {smartLab ? <Action.OpenInBrowser title={t.openOnSmartLab} url={smartLab} /> : null}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -214,15 +220,20 @@ function BondListItem({
   );
 }
 
-function buildAccessories(quote: Quote | undefined, failed = false): List.Item.Accessory[] {
+function buildAccessories(
+  quote: Quote | undefined,
+  failed: boolean,
+  fmt: Formatter,
+  t: Strings,
+): List.Item.Accessory[] {
   if (failed) {
     // Отличаем «запрос не дошёл» от «по бумаге нет сделок»: прочерк на месте обеих
     // ситуаций выдаёт недоступный MOEX за пустые данные.
     return [
       {
-        tag: { value: "нет данных", color: Color.Orange },
+        tag: { value: t.noQuoteData, color: Color.Orange },
         icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
-        tooltip: "Котировки не загрузились. ⌘R — обновить",
+        tooltip: t.noQuoteDataTooltip,
       },
     ];
   }
@@ -233,13 +244,13 @@ function buildAccessories(quote: Quote | undefined, failed = false): List.Item.A
   if (isYieldMisleading(quote.durationDays, quote.yieldPct)) {
     // У бумаги с погашением на днях MOEX пересчитывает копейки в годовые и выдаёт 457 %.
     // В списке это читается как ошибка, поэтому показываем то, что реально имеет смысл, — срок.
-    const until = fmtUntil(quote.matDate);
+    const until = fmt.until(quote.matDate);
     accessories.push({
-      text: until ? `гасится ${until}` : "скоро гасится",
-      tooltip: `Годовая доходность ${fmtPct(quote.yieldPct, 1)} — на таком горизонте число условное`,
+      text: until ? t.maturesIn(until) : t.maturesSoon,
+      tooltip: t.misleadingYieldTooltip(fmt.pct(quote.yieldPct, 1)),
     });
   } else if (quote.yieldPct !== null) {
-    accessories.push({ text: `YTM ${fmtPct(quote.yieldPct, 1)}`, tooltip: "Доходность к погашению" });
+    accessories.push({ text: `${t.ytm} ${fmt.pct(quote.yieldPct, 1)}`, tooltip: t.ytmTooltip });
   }
 
   if (quote.price.value !== null) {
@@ -249,13 +260,13 @@ function buildAccessories(quote: Quote | undefined, failed = false): List.Item.A
         : quote.changePct > 0
           ? Color.Green
           : Color.Red;
-    const change = quote.changePct === null ? "" : ` ${fmtSignedPct(quote.changePct, 1)}`;
+    const change = quote.changePct === null ? "" : ` ${fmt.signedPct(quote.changePct, 1)}`;
     accessories.push({
-      tag: { value: `${quote.price.value.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} %${change}`, color },
-      tooltip: quote.price.label ?? undefined,
+      tag: { value: `${fmt.loose(quote.price.value, 2)}${fmt.language === "ru" ? " %" : "%"}${change}`, color },
+      tooltip: priceLabel(quote.price, fmt, t) ?? undefined,
     });
   } else {
-    accessories.push({ tag: { value: "нет сделок", color: Color.SecondaryText } });
+    accessories.push({ tag: { value: t.noTrades, color: Color.SecondaryText } });
   }
 
   return accessories;

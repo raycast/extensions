@@ -13,17 +13,30 @@ import {
   QuotesResult,
   Row,
 } from "./types";
-import { parseIsoDate, todayMsk } from "./format";
+import { todayMsk } from "./format";
 
 const ISS_BASE = "https://iss.moex.com/iss";
 const TIMEOUT_MS = 10_000;
 /** Батч котировок режем на куски: длина URL у ISS не резиновая. */
 const QUOTE_CHUNK = 30;
 
+export type IssErrorKind = "timeout" | "offline" | "status" | "unknown-bond";
+
+/**
+ * Текст здесь всегда английский — он идёт в логи. Пользователю сообщение подбирает UI
+ * по `kind`, на выбранном языке.
+ */
 export class IssError extends Error {
-  constructor(message: string) {
+  readonly kind: IssErrorKind;
+  readonly status?: number;
+  readonly secid?: string;
+
+  constructor(kind: IssErrorKind, message: string, extra: { status?: number; secid?: string } = {}) {
     super(message);
     this.name = "IssError";
+    this.kind = kind;
+    this.status = extra.status;
+    this.secid = extra.secid;
   }
 }
 
@@ -45,12 +58,12 @@ export async function issFetch(path: string, params: Params, signal?: AbortSigna
   } catch (error) {
     if (signal?.aborted) throw error;
     if (error instanceof Error && error.name === "TimeoutError") {
-      throw new IssError("MOEX не ответил за 10 секунд");
+      throw new IssError("timeout", "MOEX did not respond within 10 seconds");
     }
-    throw new IssError("Нет связи с MOEX ISS");
+    throw new IssError("offline", "No connection to MOEX ISS");
   }
 
-  if (!response.ok) throw new IssError(`MOEX ISS ответил ${response.status}`);
+  if (!response.ok) throw new IssError("status", `MOEX ISS returned ${response.status}`, { status: response.status });
   return (await response.json()) as IssResponse;
 }
 
@@ -111,38 +124,21 @@ export function selectMarketRow<T extends Row>(rows: T[], preferredBoard?: strin
   );
 }
 
-/** Одна цена по чёткому приоритету + подпись, откуда она взята. */
+/** Одна цена по чёткому приоритету; подпись «откуда она» собирает UI на своём языке. */
 export function pickPrice(security: Row | undefined, market: Row | undefined): PricePick {
+  const time = str(market, "UPDATETIME");
+  const shortTime = time ? time.slice(0, 5) : null;
+
   const last = num(market, "LAST");
-  if (last !== null) {
-    const time = str(market, "UPDATETIME");
-    return { value: last, source: "last", label: time ? `сделка ${time.slice(0, 5)}` : "последняя сделка" };
-  }
+  if (last !== null) return { value: last, source: "last", stamp: shortTime };
 
   const marketPrice = num(market, "MARKETPRICE");
-  if (marketPrice !== null) {
-    const time = str(market, "UPDATETIME");
-    return { value: marketPrice, source: "market", label: time ? `рыночная ${time.slice(0, 5)}` : "рыночная цена" };
-  }
+  if (marketPrice !== null) return { value: marketPrice, source: "market", stamp: shortTime };
 
   const prev = num(security, "PREVPRICE");
-  if (prev !== null) {
-    const prevDate = str(security, "PREVDATE");
-    return {
-      value: prev,
-      source: "prev",
-      label: prevDate ? `закрытие ${fmtShortDate(prevDate)}` : "предыдущее закрытие",
-    };
-  }
+  if (prev !== null) return { value: prev, source: "prev", stamp: str(security, "PREVDATE") };
 
-  return { value: null, source: "none", label: null };
-}
-
-function fmtShortDate(iso: string): string {
-  const parsed = parseIsoDate(iso);
-  if (!parsed) return iso;
-  const [y, m, d] = parsed;
-  return `${String(d).padStart(2, "0")}.${String(m).padStart(2, "0")}.${y}`;
+  return { value: null, source: "none", stamp: null };
 }
 
 function pickYield(security: Row | undefined, market: Row | undefined): number | null {
@@ -328,7 +324,8 @@ export async function fetchBond(
   );
 
   const securities = toRows(response.securities);
-  if (securities.length === 0) throw new IssError(`MOEX не знает бумагу ${secid}`);
+  if (securities.length === 0)
+    throw new IssError("unknown-bond", `MOEX does not know the security ${secid}`, { secid });
 
   const { security, market } = alignBoards(securities, toRows(response.marketdata), preferredBoard);
   const board = str(market, "BOARDID") ?? str(security, "BOARDID");
@@ -337,7 +334,7 @@ export async function fetchBond(
   if (quote.price.value === null) {
     const fallback = await fetchLastHistory(secid, board, signal);
     if (fallback) {
-      quote.price = { value: fallback.close, source: "history", label: `закрытие ${fmtShortDate(fallback.date)}` };
+      quote.price = { value: fallback.close, source: "history", stamp: fallback.date };
       quote.yieldPct = quote.yieldPct ?? fallback.yieldClose;
     }
   }

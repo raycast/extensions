@@ -1,19 +1,10 @@
-import { Action, ActionPanel, Color, Detail, Icon, Toast, showToast, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef } from "react";
 
+import { buildMarkdown, buildPlainText, offerType } from "./card";
 import { getFavorites, isFavoriteSecid, toggleFavorite } from "./favorites";
-import {
-  DASH,
-  couponFrequency,
-  fmtBigMoney,
-  fmtDate,
-  fmtDuration,
-  fmtListLevel,
-  fmtMoney,
-  fmtPct,
-  fmtUntil,
-} from "./format";
+import { DASH, Formatter } from "./format";
 import {
   fetchBond,
   fetchBondization,
@@ -23,18 +14,21 @@ import {
   nextOffer,
   smartLabUrl,
 } from "./moex";
-import { buildMarkdown, buildPlainText, offerType } from "./card";
+import { useLocale } from "./preferences";
+import { Strings, describeError } from "./strings";
 import { BondDetail as BondDetailData, Bondization } from "./types";
 
 interface Props {
   secid: string;
   shortname: string;
   boardid: string | null;
+  isin?: string | null;
   emitent?: string | null;
   onFavoritesChange?: () => void;
 }
 
-export default function BondDetailView({ secid, shortname, boardid, emitent, onFavoritesChange }: Props) {
+export default function BondDetailView({ secid, shortname, boardid, isin, emitent, onFavoritesChange }: Props) {
+  const { fmt, t } = useLocale();
   const abortable = useRef<AbortController>(null);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -50,64 +44,69 @@ export default function BondDetailView({ secid, shortname, boardid, emitent, onF
   const { data: favorites, revalidate: reloadFavorites } = useCachedPromise(getFavorites, [], { initialData: [] });
   const starred = isFavoriteSecid(favorites ?? [], secid);
 
+  const bond = data?.bond;
+  const bondization = data?.bondization;
+
   const onToggleFavorite = useCallback(async () => {
-    await toggleFavorite({ secid, shortname: data?.bond.shortname ?? shortname, boardid });
+    await toggleFavorite({
+      secid,
+      shortname: bond?.shortname ?? shortname,
+      boardid,
+      isin: bond?.isin ?? isin ?? null,
+    });
     reloadFavorites();
     onFavoritesChange?.();
     await showToast({
       style: Toast.Style.Success,
-      title: starred ? "Убрано из избранного" : "Добавлено в избранное",
-      message: data?.bond.shortname ?? shortname,
+      title: starred ? t.removedFromFavorites : t.addedToFavorites,
+      message: bond?.shortname ?? shortname,
     });
-  }, [secid, shortname, boardid, data, starred, reloadFavorites, onFavoritesChange]);
+  }, [secid, shortname, boardid, isin, bond, starred, reloadFavorites, onFavoritesChange, t]);
 
   if (error && !data) {
     return (
       <Detail
-        markdown={`# Не получилось загрузить\n\n${error.message}\n\nMOEX ISS мог не ответить или пропал интернет.`}
+        markdown={`# ${t.loadFailedTitle}\n\n${describeError(error, t)}\n\n${t.loadFailedHint}`}
         actions={
           <ActionPanel>
-            <Action title="Повторить" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action title={t.retry} icon={Icon.ArrowClockwise} onAction={revalidate} />
           </ActionPanel>
         }
       />
     );
   }
 
-  const bond = data?.bond;
-  const bondization = data?.bondization;
-
   return (
     <Detail
       isLoading={isLoading}
       navigationTitle={bond?.shortname ?? shortname}
-      markdown={bond ? buildMarkdown(bond, bondization, emitent) : "Загружаю данные MOEX…"}
-      metadata={bond ? buildMetadata(bond, bondization, emitent) : undefined}
+      markdown={bond ? buildMarkdown(bond, bondization, emitent, fmt, t) : t.loading}
+      metadata={bond ? buildMetadata(bond, bondization, emitent, fmt, t) : undefined}
       actions={
         <ActionPanel>
           <Action
-            title={starred ? "Убрать из избранного" : "В избранное"}
+            title={starred ? t.removeFromFavorites : t.addToFavorites}
             icon={starred ? Icon.StarDisabled : Icon.Star}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             onAction={onToggleFavorite}
           />
           <Action
-            title="Обновить"
+            title={t.refresh}
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
-          <ActionPanel.Section title="Скопировать">
+          <ActionPanel.Section title={t.copySection}>
             {bond?.isin ? (
               <Action.CopyToClipboard title="ISIN" content={bond.isin} shortcut={Keyboard.Shortcut.Common.Copy} />
             ) : null}
-            <Action.CopyToClipboard title="Код бумаги" content={secid} />
+            <Action.CopyToClipboard title={t.copySecid} content={secid} />
             {bond ? (
-              <Action.CopyToClipboard title="Карточку текстом" content={buildPlainText(bond, bondization, emitent)} />
+              <Action.CopyToClipboard title={t.copyCard} content={buildPlainText(bond, bondization, emitent, fmt, t)} />
             ) : null}
           </ActionPanel.Section>
-          <ActionPanel.Section title="Открыть">
-            <OpenLinks secid={secid} boardid={bond?.boardid ?? boardid} />
+          <ActionPanel.Section title={t.openSection}>
+            <OpenLinks secid={secid} boardid={bond?.boardid ?? boardid} t={t} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -115,98 +114,105 @@ export default function BondDetailView({ secid, shortname, boardid, emitent, onF
   );
 }
 
-function OpenLinks({ secid, boardid }: { secid: string; boardid: string | null }) {
+function OpenLinks({ secid, boardid, t }: { secid: string; boardid: string | null; t: Strings }) {
   const moex = moexUrl(secid, boardid);
   const smartLab = smartLabUrl(secid);
   return (
     <>
-      {moex ? <Action.OpenInBrowser title="На MOEX" url={moex} /> : null}
-      {smartLab ? <Action.OpenInBrowser title="На Smart-Lab" url={smartLab} /> : null}
+      {moex ? <Action.OpenInBrowser title={t.openOnMoex} url={moex} /> : null}
+      {smartLab ? <Action.OpenInBrowser title={t.openOnSmartLab} url={smartLab} /> : null}
     </>
   );
 }
 
-function buildMetadata(bond: BondDetailData, bondization: Bondization | undefined, emitent?: string | null) {
+function buildMetadata(
+  bond: BondDetailData,
+  bondization: Bondization | undefined,
+  emitent: string | null | undefined,
+  fmt: Formatter,
+  t: Strings,
+) {
   const offer = nextOffer(bondization?.offers ?? []);
   const offerDate = offer?.date ?? bond.offerDate ?? bond.putOptionDate ?? bond.callOptionDate;
+  const offerLabel = offerType(offer?.type);
   const amortized = hasAmortization(bondization?.amortizations ?? []);
-  const matUntil = fmtUntil(bond.matDate);
-  const couponUntil = fmtUntil(bond.nextCoupon);
-  const offerUntil = fmtUntil(offerDate);
   const face = bond.faceValue ?? bond.currentFaceValue;
   const issuedFace = initialFaceValue(bondization?.amortizations ?? []);
+  const matUntil = fmt.until(bond.matDate);
+  const couponUntil = fmt.until(bond.nextCoupon);
+  const offerUntil = fmt.until(offerDate);
 
   return (
     <Detail.Metadata>
       <Detail.Metadata.Label
-        title="Доходность к погашению"
-        text={bond.yieldPct === null ? DASH : fmtPct(bond.yieldPct)}
+        title={t.yieldToMaturity}
+        text={fmt.pct(bond.yieldPct)}
         icon={bond.yieldPct === null ? undefined : { source: Icon.LineChart, tintColor: Color.Green }}
       />
       {bond.yieldToOffer !== null ? (
-        <Detail.Metadata.Label title="Доходность к оферте" text={fmtPct(bond.yieldToOffer)} />
+        <Detail.Metadata.Label title={t.yieldToOffer} text={fmt.pct(bond.yieldToOffer)} />
       ) : null}
-      <Detail.Metadata.Label title="Дюрация" text={fmtDuration(bond.durationDays)} />
-      <Detail.Metadata.Label title="НКД" text={fmtMoney(bond.accruedInt, bond.faceUnit)} />
+      <Detail.Metadata.Label title={t.duration} text={fmt.duration(bond.durationDays)} />
+      <Detail.Metadata.Label title={t.accruedInterest} text={fmt.money(bond.accruedInt, bond.faceUnit)} />
       <Detail.Metadata.Separator />
 
       <Detail.Metadata.Label
-        title="Купон"
-        text={`${bond.couponPercent === null ? DASH : fmtPct(bond.couponPercent)} · ${fmtMoney(bond.couponValue, bond.faceUnit)}`}
+        title={t.coupon}
+        text={`${fmt.pct(bond.couponPercent)} · ${fmt.money(bond.couponValue, bond.faceUnit)}`}
       />
-      <Detail.Metadata.Label title="Периодичность" text={couponFrequency(bond.couponPeriod) ?? DASH} />
+      <Detail.Metadata.Label title={t.frequency} text={fmt.couponFrequency(bond.couponPeriod) ?? DASH} />
       <Detail.Metadata.Label
-        title="Ближайший купон"
-        text={`${fmtDate(bond.nextCoupon)}${couponUntil ? ` · ${couponUntil}` : ""}`}
+        title={t.nextCoupon}
+        text={`${fmt.date(bond.nextCoupon)}${couponUntil ? ` · ${couponUntil}` : ""}`}
       />
       <Detail.Metadata.Separator />
 
-      <Detail.Metadata.Label title="Погашение" text={`${fmtDate(bond.matDate)}${matUntil ? ` · ${matUntil}` : ""}`} />
+      <Detail.Metadata.Label title={t.maturity} text={`${fmt.date(bond.matDate)}${matUntil ? ` · ${matUntil}` : ""}`} />
       {offerDate ? (
         <Detail.Metadata.Label
-          title={offerType(offer?.type) ? `Оферта (${offerType(offer?.type)})` : "Оферта"}
-          text={`${fmtDate(offerDate)}${offerUntil ? ` · ${offerUntil}` : ""}`}
+          title={offerLabel ? t.offerOf(offerLabel) : t.offer}
+          text={`${fmt.date(offerDate)}${offerUntil ? ` · ${offerUntil}` : ""}`}
           icon={{ source: Icon.Alarm, tintColor: Color.Orange }}
         />
       ) : null}
-      <Detail.Metadata.TagList title="Амортизация">
+      <Detail.Metadata.TagList title={t.amortization}>
         <Detail.Metadata.TagList.Item
-          text={amortized ? "есть" : "нет, погашение разом"}
+          text={amortized ? t.amortizationYes : t.amortizationNo}
           color={amortized ? Color.Orange : Color.SecondaryText}
         />
       </Detail.Metadata.TagList>
       <Detail.Metadata.Separator />
 
       <Detail.Metadata.Label
-        title="Номинал"
-        text={`${fmtMoney(face, bond.faceUnit)}${
+        title={t.faceValue}
+        text={`${fmt.money(face, bond.faceUnit)}${
           issuedFace !== null && face !== null && issuedFace !== face
-            ? ` (при выпуске ${fmtMoney(issuedFace, bond.faceUnit)})`
+            ? ` ${t.atIssue(fmt.money(issuedFace, bond.faceUnit))}`
             : ""
         }`}
       />
       <Detail.Metadata.Label
-        title="В обращении"
+        title={t.outstanding}
         text={
           bond.issueSizePlaced === null || face === null
             ? DASH
-            : `${fmtBigMoney(bond.issueSizePlaced * face, bond.faceUnit)} · ${bond.issueSizePlaced.toLocaleString("ru-RU")} шт.`
+            : `${fmt.bigMoney(bond.issueSizePlaced * face, bond.faceUnit)} · ${fmt.loose(bond.issueSizePlaced, 0)} ${t.pieces}`
         }
       />
-      <Detail.Metadata.TagList title="Тип выпуска">
+      <Detail.Metadata.TagList title={t.issueType}>
         {bond.bondType ? <Detail.Metadata.TagList.Item text={bond.bondType} color={Color.Blue} /> : null}
         {bond.bondSubtype ? <Detail.Metadata.TagList.Item text={bond.bondSubtype} color={Color.SecondaryText} /> : null}
         <Detail.Metadata.TagList.Item
-          text={fmtListLevel(bond.listLevel)}
+          text={fmt.listLevel(bond.listLevel)}
           color={bond.listLevel === 3 ? Color.Orange : Color.SecondaryText}
         />
       </Detail.Metadata.TagList>
       <Detail.Metadata.Separator />
 
-      {emitent ? <Detail.Metadata.Label title="Эмитент" text={emitent} /> : null}
-      <Detail.Metadata.Label title="ISIN" text={bond.isin ?? DASH} />
-      <Detail.Metadata.Label title="Код бумаги" text={bond.secid} />
-      <Detail.Metadata.Label title="Режим торгов" text={bond.boardName ?? bond.boardid ?? DASH} />
+      {emitent ? <Detail.Metadata.Label title={t.issuer} text={emitent} /> : null}
+      <Detail.Metadata.Label title={t.isin} text={bond.isin ?? DASH} />
+      <Detail.Metadata.Label title={t.securityCode} text={bond.secid} />
+      <Detail.Metadata.Label title={t.board} text={bond.boardName ?? bond.boardid ?? DASH} />
     </Detail.Metadata>
   );
 }

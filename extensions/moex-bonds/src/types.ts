@@ -26,8 +26,11 @@ export type PriceSource = "last" | "market" | "prev" | "history" | "none";
 export interface PricePick {
   value: number | null;
   source: PriceSource;
-  /** Человеческая подпись: «сделка 18:53», «закрытие 28.08.2026». */
-  label: string | null;
+  /**
+   * Время сделки «18:53» для last/market либо дата закрытия «2026-08-28» для prev/history.
+   * Готовую подпись собирает UI на выбранном языке — здесь только данные.
+   */
+  stamp: string | null;
 }
 
 /** Чего достаточно, чтобы запросить котировку: код бумаги и её основной режим торгов. */
@@ -116,4 +119,6 @@ export interface FavoriteItem {
   secid: string;
   shortname: string;
   boardid: string | null;
+  /** Сохраняем, чтобы действие «копировать ISIN» работало и без поиска. */
+  isin: string | null;
 }

@@ -22,6 +22,8 @@ export async function getFavorites(): Promise<FavoriteItem[]> {
       secid: item.secid,
       shortname: item.shortname,
       boardid: typeof item.boardid === "string" ? item.boardid : null,
+      // У записей, сохранённых до появления поля, ISIN просто нет — это не ошибка.
+      isin: typeof item.isin === "string" ? item.isin : null,
     }));
   } catch {
     return [];

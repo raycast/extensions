@@ -20,6 +20,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language of the list and bond card. Issuer and issue-type values always come from MOEX as they are.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Русский",
+          "value": "ru"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.0",
     "@raycast/utils": "^2.0.1"

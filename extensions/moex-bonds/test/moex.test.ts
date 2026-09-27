@@ -7,6 +7,7 @@ import {
   alignBoards,
   fetchQuotes,
   hasAmortization,
+  IssError,
   isYieldMisleading,
   issFetch,
   moexUrl,
@@ -72,7 +73,7 @@ test("pickPrice идёт по приоритету LAST → MARKETPRICE → PREV
   const last = pickPrice(security, { LAST: 100.25, MARKETPRICE: 100.1, UPDATETIME: "18:53:25" });
   assert.equal(last.value, 100.25);
   assert.equal(last.source, "last");
-  assert.equal(last.label, "сделка 18:53");
+  assert.equal(last.stamp, "18:53");
 
   const market = pickPrice(security, { LAST: null, MARKETPRICE: 100.1, UPDATETIME: "18:53:25" });
   assert.equal(market.value, 100.1);
@@ -81,7 +82,7 @@ test("pickPrice идёт по приоритету LAST → MARKETPRICE → PREV
   const prev = pickPrice(security, { LAST: null, MARKETPRICE: null });
   assert.equal(prev.value, 99.5);
   assert.equal(prev.source, "prev");
-  assert.equal(prev.label, "закрытие 28.08.2026");
+  assert.equal(prev.stamp, "2026-08-28");
 
   const nothing = pickPrice({}, {});
   assert.equal(nothing.value, null);
@@ -178,7 +179,7 @@ test("сетевая ошибка превращается в понятное �
     }) as typeof fetch;
     await assert.rejects(issFetch("/securities.json", { q: "офз" }), (error: Error) => {
       assert.equal(error.name, "IssError");
-      assert.equal(error.message, "Нет связи с MOEX ISS");
+      assert.equal((error as IssError).kind, "offline");
       return true;
     });
   } finally {
@@ -196,7 +197,7 @@ test("таймаут MOEX тоже читается по-человечески"
     }) as typeof fetch;
     await assert.rejects(issFetch("/securities.json", { q: "офз" }), (error: Error) => {
       assert.equal(error.name, "IssError");
-      assert.match(error.message, /не ответил/);
+      assert.equal((error as IssError).kind, "timeout");
       return true;
     });
   } finally {

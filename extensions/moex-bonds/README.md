@@ -4,8 +4,9 @@ Search Russian bonds on the [Moscow Exchange](https://www.moex.com/) by name, ti
 ISIN and read the full bond card. Data comes from the public
 [MOEX ISS API](https://iss.moex.com/iss/reference/) — no API key, no account, no setup.
 
-The bond card is written in Russian: the extension covers a Russian-only market and the
-terminology (НКД, оферта, амортизация) has no natural English equivalent traders use.
+The interface is English by default. Russian can be switched on in the extension preferences,
+since the market and its terminology are Russian. Issuer names and issue types always come
+from MOEX exactly as the exchange publishes them.
 
 ## Features
 
@@ -17,6 +18,7 @@ terminology (НКД, оферта, амортизация) has no natural Englis
   its currency, amount outstanding, listing level and issue type.
 - **Favorites.** `⌘⇧F` adds a bond; with an empty search field the list shows your favorites
   with live quotes.
+- **Language.** English by default, Russian available in preferences.
 - **Actions.** `⌘R` refresh, `⌘⇧C` copy ISIN, copy the card as plain text, open the issue on
   MOEX or Smart-Lab.
 
@@ -57,7 +59,9 @@ numbers. They are handled explicitly:
 |---|---|
 | `src/moex.ts` | ISS client: search, batched quotes, bond card, coupons, history fallback |
 | `src/card.ts` | Card text builders (markdown and clipboard) — pure functions, covered by tests |
-| `src/format.ts` | Numbers, dates, currencies, Russian plurals |
+| `src/format.ts` | Numbers, dates, currencies and plurals, per language |
+| `src/strings.ts` | Every user-facing string in English and Russian |
+| `src/preferences.ts` | Reads the language preference |
 | `src/search-bond.tsx` | Live search list |
 | `src/bond-detail.tsx` | Bond card |
 | `src/favorites.ts` | Favorites in LocalStorage |
