@@ -1,0 +1,188 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omlx",
+  "title": "oMLX",
+  "version": "1.0.0",
+  "description": "Use locally running oMLX models as AI providers in Raycast",
+  "icon": "extension-icon.png",
+  "author": "60400",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "omlx",
+    "mlx",
+    "local",
+    "ai",
+    "llm",
+    "apple-silicon",
+    "mac"
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "tools": [
+    {
+      "name": "list-models",
+      "title": "List Models",
+      "description": "List oMLX models with their load status, size, type, and capabilities. Optionally filter to only loaded or only available models."
+    },
+    {
+      "name": "load-model",
+      "title": "Load Model",
+      "description": "Load an oMLX model into memory so it can serve requests. Use list-models first to find the model ID."
+    },
+    {
+      "name": "eject-model",
+      "title": "Eject Model",
+      "description": "Eject an oMLX model from memory. Use list-models first to find loaded model IDs."
+    },
+    {
+      "name": "pin-model",
+      "title": "Pin or Unpin Model",
+      "description": "Pin a model to keep it in memory (prevents automatic eviction), or unpin it."
+    },
+    {
+      "name": "get-server-status",
+      "title": "Get Server Status",
+      "description": "Check if the oMLX server is running and get stats: version, uptime, loaded models, speed, memory usage, cache efficiency."
+    },
+    {
+      "name": "get-model-stats",
+      "title": "Get Model Stats",
+      "description": "Get historical usage stats for a specific model from past requests: average speed (tok/s), total tokens served, cache hit rate. This is not a benchmark — it reflects real usage, not a controlled test. Use list-models first to find model IDs."
+    },
+    {
+      "name": "search-models",
+      "title": "Search Models",
+      "description": "Search for models on HuggingFace. Returns model name, size, parameters, and download count. Results are MLX-compatible models only."
+    },
+    {
+      "name": "download-model",
+      "title": "Download Model",
+      "description": "Download a model from HuggingFace. Use search-models first to find the repo ID."
+    },
+    {
+      "name": "get-download-progress",
+      "title": "Get Download Progress",
+      "description": "Check the progress of active and recent model downloads."
+    },
+    {
+      "name": "cancel-download",
+      "title": "Cancel Download",
+      "description": "Cancel an active model download. Use get-download-progress first to find the task ID."
+    },
+    {
+      "name": "get-recommended-models",
+      "title": "Get Recommended Models",
+      "description": "Get trending and popular MLX models from HuggingFace."
+    },
+    {
+      "name": "reload-models",
+      "title": "Reload Models",
+      "description": "Rescan the model directory to discover newly added or removed models."
+    },
+    {
+      "name": "start-server",
+      "title": "Start Server",
+      "description": "Start the oMLX server if it is not already running."
+    },
+    {
+      "name": "stop-server",
+      "title": "Stop Server",
+      "description": "Stop the oMLX server. All loaded models will be unloaded."
+    },
+    {
+      "name": "restart-server",
+      "title": "Restart Server",
+      "description": "Restart the oMLX server. Active requests will be interrupted."
+    },
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "description": "Check if a new version of oMLX is available."
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-models",
+      "title": "Manage Models",
+      "description": "View, load, eject, pin, and delete oMLX models",
+      "mode": "view"
+    },
+    {
+      "name": "server-status",
+      "title": "Serving Stats",
+      "description": "View oMLX serving stats, speed, cache efficiency, and active models",
+      "mode": "view"
+    },
+    {
+      "name": "start-stop",
+      "title": "Start/Stop Server",
+      "description": "Start, stop, or restart the oMLX server",
+      "mode": "view"
+    },
+    {
+      "name": "download-model",
+      "title": "Download Model",
+      "description": "Search and download models from HuggingFace",
+      "mode": "view"
+    },
+    {
+      "name": "manage-downloads",
+      "title": "Manage Downloads",
+      "description": "View download progress, cancel, retry, or remove downloads",
+      "mode": "view"
+    },
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "description": "Check if a new version of oMLX is available",
+      "mode": "view"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Web Dashboard",
+      "description": "Open the oMLX web dashboard in your browser",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "type": "textfield",
+      "required": true,
+      "default": "http://127.0.0.1:8000/v1",
+      "description": "oMLX server base URL (including /v1)",
+      "placeholder": "http://127.0.0.1:8000/v1"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": true,
+      "description": "Found in ~/.omlx/settings.json under auth.api_key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

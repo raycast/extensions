@@ -1,0 +1,143 @@
+instructions: |
+  Use list-models before load-model, eject-model, pin-model, or get-model-stats to resolve a model name to its exact ID.
+  When the user says "eject all idle models" or "eject everything except X", call list-models first to get loaded models, then call eject-model for each one that matches.
+  Use search-models or get-recommended-models before download-model to find the HuggingFace repo ID. Use get-recommended-models when the user asks what's trending or popular without a specific query.
+  Use get-download-progress before cancel-download to find the task ID.
+  Use get-server-status to check if the server is running before suggesting load or eject actions.
+  Model IDs are exact strings like "Qwen3.8-27B-4bit" — always resolve them via list-models, never guess.
+  When reporting stats, include units: "tok/s" for speed, "%" for cache efficiency, "GB" for memory.
+  Use reload-models when the user says they added or removed model files manually and want oMLX to pick them up.
+  For anything not available through these tools — benchmarks, model settings, server configuration, speculative decoding, context length, sampling parameters — tell users to open the oMLX web dashboard at their server URL + /admin/dashboard. Do not suggest editing config files, and do not improvise workarounds.
+  get-model-stats returns historical usage data, not benchmark results — do not present it as benchmarking.
+  Only suggest actions that correspond to available tools.
+
+evals:
+  - input: "@omlx which models are loaded?"
+    mocks:
+      list-models:
+        - id: "Qwen3.8-27B-4bit"
+          loaded: true
+          pinned: true
+          type: "vlm"
+          thinking: true
+          size: "15.5 GB"
+        - id: "Qwen3.8-9B-mlx-4Bit"
+          loaded: true
+          pinned: true
+          type: "llm"
+          thinking: true
+          size: "4.8 GB"
+    expected:
+      - callsTool:
+          name: "list-models"
+          arguments:
+            filter: "loaded"
+      - includes: "Qwen3.8-27B"
+      - includes: "Qwen3.8-9B"
+
+  - input: "@omlx eject the 9B model"
+    mocks:
+      list-models:
+        - id: "Qwen3.8-27B-4bit"
+          loaded: true
+          pinned: true
+          type: "vlm"
+          size: "15.5 GB"
+        - id: "Qwen3.8-9B-mlx-4Bit"
+          loaded: true
+          pinned: true
+          type: "llm"
+          size: "4.8 GB"
+      eject-model:
+        success: true
+        modelId: "Qwen3.8-9B-mlx-4Bit"
+        message: "Qwen3.8-9B-mlx-4Bit ejected"
+    expected:
+      - callsTool: "list-models"
+      - callsTool:
+          name: "eject-model"
+          arguments:
+            modelId: "Qwen3.8-9B-mlx-4Bit"
+
+  - input: "@omlx is the server running?"
+    mocks:
+      get-server-status:
+        running: true
+        version: "0.6.4"
+        uptime: "17h 5m"
+        modelsLoaded: 2
+        activeRequests: 0
+        memoryUsed: "20.63GB"
+        memoryMax: "107.52GB"
+    expected:
+      - callsTool: "get-server-status"
+      - includes: "running"
+
+  - input: "@omlx find a small Qwen vision model"
+    mocks:
+      search-models:
+        - repoId: "mlx-community/Qwen2.5-VL-3B-4bit"
+          name: "Qwen2.5-VL-3B-4bit"
+          size: "2.1 GB"
+          params: "3B"
+          downloads: 1500
+          likes: 42
+        - repoId: "mlx-community/Qwen2.5-VL-7B-4bit"
+          name: "Qwen2.5-VL-7B-4bit"
+          size: "4.8 GB"
+          params: "7B"
+          downloads: 3200
+          likes: 89
+    expected:
+      - callsTool:
+          name: "search-models"
+          arguments:
+            query:
+              includes: "Qwen"
+
+  - input: "@omlx how fast is the 27B model?"
+    mocks:
+      list-models:
+        - id: "Qwen3.8-27B-4bit"
+          loaded: true
+          type: "vlm"
+          size: "15.5 GB"
+      get-model-stats:
+        modelId: "Qwen3.8-27B-4bit"
+        scope: "session"
+        avgPrefillTps: 514.7
+        avgGenerationTps: 36.0
+        totalRequests: 45
+        cacheEfficiency: 85.8
+    expected:
+      - callsTool: "list-models"
+      - callsTool:
+          name: "get-model-stats"
+          arguments:
+            modelId: "Qwen3.8-27B-4bit"
+      - includes: "36"
+
+  - input: "@omlx how's my download going?"
+    mocks:
+      get-download-progress:
+        downloads:
+          - taskId: "abc123"
+            repoId: "mlx-community/Llama-3.1-8B-4bit"
+            status: "downloading"
+            progress: "67%"
+            downloaded: "3.2 GB"
+            totalSize: "4.8 GB"
+    expected:
+      - callsTool: "get-download-progress"
+      - includes: "67%"
+
+  - input: "@omlx can you run a benchmark?"
+    mocks: {}
+    expected:
+      - not:
+          callsTool: "list-models"
+      - not:
+          callsTool: "get-model-stats"
+      - not:
+          callsTool: "get-server-status"
+      - includes: "web dashboard"
