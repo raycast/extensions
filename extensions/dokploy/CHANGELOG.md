@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2026-09-27
 
 - Add 7 read-only AI tools: List Instances, List Projects, List Services, Get Service, Get Service Logs, List Deployments, and Get Deployment Logs. Search across every configured instance by name, project, or kind.
 
