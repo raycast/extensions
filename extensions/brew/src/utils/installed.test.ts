@@ -104,7 +104,7 @@ describe("isInstalledOnRequest", () => {
 });
 
 describe("dependedOnNames", () => {
-  it("unions keg runtime deps with cask formula deps, normalising tap-qualified names", () => {
+  it("unions keg runtime deps with cask formula deps, normalizing tap-qualified names", () => {
     const names = dependedOnNames(
       installedMap(
         [formula({ name: "ada-url", linked_keg: "4.0.0", installed: [keg("4.0.0", false, ["fmt"])] })],

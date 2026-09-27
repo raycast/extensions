@@ -747,7 +747,7 @@ export function OutdatedActionSections(
   props: OutdatedActionProps & {
     /**
      * Omit the pin action. For rows that hoist a selection-aware pin action
-     * of their own — two Pin entries with different selection behaviour would
+     * of their own — two Pin entries with different selection behavior would
      * otherwise share the panel.
      */
     omitPin?: boolean;

@@ -55,7 +55,7 @@ export interface MetadataOptions {
 
 /**
  * A checkmark prefix, so an installed dependency reads as such without relying
- * on colour alone. U+2713 rather than an SF Symbols codepoint: this has to
+ * on color alone. U+2713 rather than an SF Symbols codepoint: this has to
  * render on Windows too.
  */
 const INSTALLED_TAG_PREFIX = "✓ ";
@@ -137,11 +137,19 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
   return rows;
 }
 
-/** Trailing statistics rows, identical in both views. */
-function statisticsRows(options: MetadataOptions): MetadataRow[] {
+/**
+ * Trailing statistics rows, identical in both views.
+ *
+ * Empty for a package from a third-party tap, separator included — Homebrew
+ * publishes analytics for its own two taps only, so there is nothing there to
+ * head with a rule.
+ */
+function statisticsRows(options: MetadataOptions, tap: string | null | undefined): MetadataRow[] {
+  const rows = analyticsRows(options.detail.data, options.detail.failed, tap);
+  if (rows.length === 0) return [];
   return [
     { kind: "separator", key: "stats-sep" },
-    ...analyticsRows(options.detail.data, options.detail.failed).map(
+    ...rows.map(
       (row): MetadataRow => ({
         kind: "label",
         key: `stat-${row.key}`,
@@ -214,7 +222,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     rows.push({ kind: "label", key: "keg-only", title: "Keg Only", text: "Yes" });
   }
 
-  return [...rows, ...statisticsRows(options)];
+  return [...rows, ...statisticsRows(options, formula.tap)];
 }
 
 export function caskMetadataRows(cask: Cask, options: MetadataOptions): MetadataRow[] {
@@ -271,7 +279,7 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
   rows.push({ kind: "separator", key: "auto-sep" });
   rows.push({ kind: "label", key: "auto-updates", title: "Auto Updates", text: cask.auto_updates ? "Yes" : "No" });
 
-  return [...rows, ...statisticsRows(options)];
+  return [...rows, ...statisticsRows(options, cask.tap)];
 }
 
 /// Renderers — one per metadata namespace, both driven by the rows above

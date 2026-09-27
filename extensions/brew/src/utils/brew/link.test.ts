@@ -91,6 +91,10 @@ describe("caskHasSymlinkArtifacts", () => {
     expect(caskHasSymlinkArtifacts({ artifacts: fontInter })).toBe(false);
   });
 
+  it("is true for a PowerShell completion, which is Symlinked like the others", () => {
+    expect(caskHasSymlinkArtifacts({ artifacts: [{ pwsh_completion: ["foo.ps1"] }] })).toBe(true);
+  });
+
   it("is false for an empty artifact list", () => {
     expect(caskHasSymlinkArtifacts({ artifacts: [] })).toBe(false);
   });

@@ -236,7 +236,7 @@ export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: (
           }
           // Settle by REPLACING the animated toast rather than mutating it, so
           // its Cancel action cannot outlive the operation (see utils/toast.ts).
-          // Deliberately not showSuccessHUD: that honours Close After Action and
+          // Deliberately not showSuccessHUD: that honors Close After Action and
           // would shut the window on a read-only check, hiding the refreshed row.
           if (brewIsOutdated(fresh)) {
             // Finding the update is only half the errand. Without the action
@@ -647,7 +647,7 @@ export async function unpin(item: Pinnable, kind: PinKind): Promise<boolean> {
   }
 }
 
-/** How many of a long symlink plan to show before summarising the rest. */
+/** How many of a long symlink plan to show before summarizing the rest. */
 const LINK_PREVIEW_LIMIT = 12;
 
 /**

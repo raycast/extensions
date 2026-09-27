@@ -1,5 +1,5 @@
 /**
- * The semantic colour and icon vocabulary for the whole extension.
+ * The semantic color and icon vocabulary for the whole extension.
  *
  * One definition, because Search, Show Installed and Show Outdated were each
  * choosing their own and had drifted into contradicting one another: Search
@@ -7,9 +7,9 @@
  * "upgrade failed" in the upgrade flow, and Show Outdated marked the same state
  * with a GREY check — the "done" glyph for something conspicuously not done.
  *
- * The colours in use, and what each already means:
+ * The colors in use, and what each already means:
  *
- * | Colour          | Meaning                                      |
+ * | Color          | Meaning                                      |
  * |-----------------|----------------------------------------------|
  * | Green           | up to date / upgraded                        |
  * | Blue            | in progress, or purely informational         |
@@ -21,12 +21,12 @@
  * Orange is the one free slot, and it reads as "there is something to do here"
  * without the alarm of red — an available update is not an error. Blue and
  * orange each carry two shades of one meaning, which is why `STATUS_COLOR`
- * names six entries over five colours: `inProgress`/`info` are both blue,
+ * names six entries over five colors: `inProgress`/`info` are both blue,
  * `attention` is orange whether it is an update or a warning.
  *
  * That table used to cover only a package's install state while ten other files
  * hardcoded `Color.*` with their own meanings. `STATUS_COLOR` below is the same
- * vocabulary named, so a new surface picks a meaning rather than a colour.
+ * vocabulary named, so a new surface picks a meaning rather than a color.
  */
 
 import { Color, Icon, Image, List } from "@raycast/api";
@@ -96,7 +96,7 @@ export function vulnerableIcon(severity: VulnSeverity): Image.ImageLike {
   return { source: Icon.Shield, tintColor: SEVERITY_COLOR[severity] };
 }
 
-/** The colour of the "Outdated" tag, kept in step with the icon. */
+/** The color of the "Outdated" tag, kept in step with the icon. */
 export const UPDATE_AVAILABLE_COLOR = STATUS_COLOR.attention;
 
 /**

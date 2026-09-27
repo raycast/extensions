@@ -142,7 +142,7 @@ export function brewAvailableVersion(item: Cask | Formula): string | undefined {
  * The version line: what is INSTALLED, plus what is available when they differ.
  *
  * Never leads with `versions.stable` on an installed package — that is the
- * version on offer, not the one present, and labelling it "installed" claimed a
+ * version on offer, not the one present, and labeling it "installed" claimed a
  * version the user did not have.
  *
  * Lives here rather than in the component that renders it: it is pure string
@@ -455,6 +455,39 @@ export function brewCompare(lhs: string, rhs: string, target: string): number {
 export function brewInstallCommand(installable: Cask | Formula | Nameable): string {
   const identifier = brewIdentifier(installable);
   return `${brewExecutable()} install ${brewCaskOption(installable)} ${identifier}`.replace(/ +/g, " ");
+}
+
+/**
+ * `brew install --adopt --cask <token>` for a cask known only by its token.
+ *
+ * The Adopt scan carries tokens, not whole `Cask` records — it loads a record
+ * to compare versions and lets it go — and casting a bare `{ token }` to `Cask`
+ * to reach `brewAdoptCommand` would be a lie the type system happens to allow.
+ * Adoption is cask-only (`--adopt` does nothing for a formula), so the `--cask`
+ * flag is unconditional here.
+ *
+ * `appdir` is the folder the scan found the app in, passed explicitly because
+ * brew also reads `HOMEBREW_CASK_OPTS` from its own `brew.env` files, which the
+ * extension never sees. An explicit `--appdir` beats every source of that
+ * (`cask/config.rb`: explicit, then env, then default), so brew adopts in the
+ * folder that was checked rather than one configured elsewhere.
+ */
+export function brewAdoptCaskCommand(token: string, appdir: string): string {
+  return [brewExecutable(), ...brewAdoptCaskArgs(token, appdir)].map(shellQuote).join(" ");
+}
+
+/**
+ * The same command as arguments to `brew`, for the streaming runner, which
+ * spawns the executable itself. One source for both, so the confirmation lists
+ * exactly what runs. An array, so a folder with a space stays one argument.
+ */
+export function brewAdoptCaskArgs(token: string, appdir: string): string[] {
+  return ["install", "--adopt", "--cask", `--appdir=${appdir}`, token];
+}
+
+/** Single-quote a word for a POSIX shell, unless it needs none. */
+function shellQuote(word: string): string {
+  return /^[\w@%+=:,./-]+$/.test(word) ? word : `'${word.replace(/'/g, "'\\''")}'`;
 }
 
 /**

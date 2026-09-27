@@ -90,6 +90,36 @@ export {
 
 // Link / unlink casks (`brew {link,unlink} --cask`, Homebrew 7)
 export { brewCaskLinkPreview, caskHasSymlinkArtifacts } from "./link";
+export {
+  ADOPT_INDEX_FILE,
+  adoptClassification,
+  adoptIndexEntry,
+  adoptOperation,
+  adoptProgressText,
+  isAdoptPhase,
+  isOwnedByCurrentUser,
+  bundleRelativeLinkSources,
+  conflictingInstalledCasks,
+  identitySignal,
+  isMacAppStoreApp,
+  missingLinkedComponents,
+  readBundleVersion,
+  scanForAdoptableApps,
+  versionRelationship,
+} from "./adopt";
+export type {
+  AdoptableApp,
+  AdoptCandidate,
+  AdoptClassification,
+  AdoptIndex,
+  AdoptIndexEntry,
+  AdoptOperation,
+  AdoptTier,
+  IdentitySignal,
+  InstalledApplication,
+  VersionRelationship,
+} from "./adopt";
+export { loadAdoptIndex, loadCasksByToken, rebuildCaskIndex } from "./fetch";
 export type { CaskLinkVerb } from "./link";
 
 // Install preview (`brew install --dry-run`)
@@ -159,6 +189,8 @@ export {
   brewCompare,
   brewInstallCommand,
   brewAdoptCommand,
+  brewAdoptCaskCommand,
+  brewAdoptCaskArgs,
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";
