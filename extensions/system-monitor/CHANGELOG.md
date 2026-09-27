@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Add Ask AI System Status] - {PR_MERGE_DATE}
+## [Add Ask AI System Status] - 2026-09-27
 
 - Add Ask System Monitor in Raycast AI with current CPU, memory, disk, and battery readings
 - Add YAML evals for disk availability, CPU usage, and memory pressure questions
