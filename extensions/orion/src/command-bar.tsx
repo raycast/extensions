@@ -771,22 +771,11 @@ export default function Command() {
         />
       }
     >
-      {address && (!isHandingOffAutomaticTarget || automaticTarget === openAddressItemId) && (
-        <List.Section title="Open Address">
-          <List.Item
-            id={openAddressItemId}
-            icon={Icon.Globe}
-            title={`Open “${query.trim()}” in Default Browser`}
-            subtitle={address}
-            actions={
-              <ActionPanel>
-                <OpenInDefaultBrowserAction url={address} immediatePopToRoot />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      )}
-
+      {/* Rendered before Open Address to match automaticTarget's own
+          priority above: when both match, Top Hit already wins the
+          selection, so it must also be the first, visually selected row -
+          otherwise the highlighted row is not the one on top, and Enter does
+          something other than what the list visually suggests. */}
       {topHit && (!isHandingOffAutomaticTarget || automaticTarget === topHitItemId) && (
         <List.Section title="Top Hit">
           {topHit.kind === "tab" ? (
@@ -801,6 +790,22 @@ export default function Command() {
           ) : (
             <UrlListItem id={topHitItemId} item={topHit.item} accessory={topHit.source} />
           )}
+        </List.Section>
+      )}
+
+      {address && (!isHandingOffAutomaticTarget || automaticTarget === openAddressItemId) && (
+        <List.Section title="Open Address">
+          <List.Item
+            id={openAddressItemId}
+            icon={Icon.Globe}
+            title={`Open “${query.trim()}” in Default Browser`}
+            subtitle={address}
+            actions={
+              <ActionPanel>
+                <OpenInDefaultBrowserAction url={address} immediatePopToRoot />
+              </ActionPanel>
+            }
+          />
         </List.Section>
       )}
 

@@ -943,6 +943,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "zonefoundry",
+    title: "ZoneFoundry for Sonos",
+    description:
+      "Sonos MCP server. Control your Sonos speakers from Raycast: play songs, artists and playlists, set the volume, group rooms, move music to another room, switch to TV, and send spoken announcements and reminders. Works through the official Sonos cloud with no home bridge; needs the free ZoneFoundry iOS app signed in to your Sonos account. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://zonefoundry.dev/apple-touch-icon.png",
+    homepage: "https://zonefoundry.dev/guides/ai-agent-control/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://relay.zonefoundry.dev/mcp"],
+    },
+  },
+  {
     name: "grafana",
     title: "Grafana",
     description:

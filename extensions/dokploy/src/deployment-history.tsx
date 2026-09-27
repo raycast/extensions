@@ -14,6 +14,14 @@ export interface Deployment {
   rollbackId: string | null;
 }
 
+/**
+ * `deployment.all`/`deployment.allByCompose` don't document a guaranteed order - sort explicitly
+ * rather than trust the response order for "most recent"/"latest" semantics.
+ */
+export function sortDeploymentsByRecency(deployments: Deployment[]): Deployment[] {
+  return [...deployments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
 export const STATUS_COLORS: Record<Deployment["status"], Color> = {
   running: Color.Yellow,
   done: Color.Green,
