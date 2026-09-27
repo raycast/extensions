@@ -1,12 +1,12 @@
 import { closeMainWindow, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import { exec, spawn } from "child_process";
+import { execFile, spawn } from "child_process";
 import { existsSync } from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
 import { SEARCH_ENGINE } from "../constants";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const RELEASE_VARIANT = "Firefox";
 
@@ -67,7 +67,7 @@ async function launchFirefox(url: string, browserApp: string): Promise<void> {
   if (process.platform === "win32") {
     await spawnFirefoxWindows(getWindowsFirefoxExe(browserApp), url);
   } else {
-    await execAsync(`open -a "${browserApp}" "${url}"`);
+    await execFileAsync("open", ["-a", browserApp, url]);
   }
 }
 

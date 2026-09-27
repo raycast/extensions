@@ -14,13 +14,13 @@ vi.mock("fs", () => ({
 }));
 
 vi.mock("child_process", () => ({
-  exec: vi.fn(),
+  execFile: vi.fn(),
   spawn: vi.fn(),
 }));
 
 import { closeMainWindow, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
 import { existsSync } from "fs";
-import { spawn } from "child_process";
+import { execFile, spawn } from "child_process";
 
 // Import after the mocks are in place so the module under test picks them up.
 import { buildNewTabUrl, looksLikeUrl, newTabTitle, openNewTab, openInNewWindow } from "../index";
@@ -197,6 +197,47 @@ describe("launchFirefox on Windows (via openNewTab)", () => {
         message: expect.stringContaining("Firefox Developer Edition"),
       }),
     );
+  });
+});
+
+const mockExecFileSuccess = () =>
+  vi.mocked(execFile).mockImplementation((_file, _args, callback) => {
+    (callback as (error: Error | null) => void)(null);
+    return undefined as never;
+  });
+
+describe("launchFirefox on macOS (via openNewTab)", () => {
+  const originalPlatform = process.platform;
+
+  beforeEach(() => {
+    Object.defineProperty(process, "platform", { value: "darwin", configurable: true });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
+    vi.clearAllMocks();
+  });
+
+  it("passes the URL as an open argv and does not interpolate it into a shell string", async () => {
+    const injected = 'https://example.com"; echo hello; "';
+    setBrowserApp("Firefox");
+    mockExecFileSuccess();
+
+    const result = await openNewTab(injected);
+
+    expect(result).toBe("success");
+    expect(execFile).toHaveBeenCalledWith("open", ["-a", "Firefox", injected], expect.any(Function));
+    expect(spawn).not.toHaveBeenCalled();
+  });
+
+  it("passes Firefox Nightly as a single -a argument", async () => {
+    setBrowserApp("Firefox Nightly");
+    mockExecFileSuccess();
+
+    const result = await openNewTab("https://example.com");
+
+    expect(result).toBe("success");
+    expect(execFile).toHaveBeenCalledWith("open", ["-a", "Firefox Nightly", "https://example.com"], expect.any(Function));
   });
 });
 
