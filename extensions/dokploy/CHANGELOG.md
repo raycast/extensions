@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [AI Tools: Deploy and Control Services] - {PR_MERGE_DATE}
+## [AI Tools: Deploy and Control Services] - 2026-09-27
 
 - Add 2 AI tools that change a service, each asking you to confirm first: Deploy Service (rebuild an application or Compose stack from its latest source, or restart a database with its data kept) and Control Service (start, stop, or reload).
 - AI tools can now narrow a service lookup by environment, so a service with the same name in e.g. `production` and `staging` can be told apart.
