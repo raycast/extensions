@@ -1,5 +1,9 @@
 # Orion Changelog
 
+## [Command Bar] - {PR_MERGE_DATE}
+
+- Fix the Open Address row rendering above Top Hit when both match the same typed text, while Top Hit still held the actual selection - the highlighted row was not the one on top, so pressing Enter opened something other than what the list visually suggested. Open Address now renders after Top Hit, matching the selection priority it already had.
+
 ## [Command Bar] - 2026-09-26
 
 - Focus the tab currently visible in Orion when the Command Bar opens with an empty query, and keep following it if you switch tabs directly in Orion while the Command Bar stays open, instead of leaving selection to Raycast's own default. When Top Hit ranks two open tabs with the same URL as an equal match, prefer the one currently visible in Orion over an arbitrary duplicate.
