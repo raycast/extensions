@@ -1,0 +1,102 @@
+{
+  "took": 5,
+  "total": 6,
+  "matchSuggest": [
+    {
+      "text": "arsenal",
+      "offset": 0,
+      "length": 7,
+      "options": [
+        {
+          "text": "Sunderland - Arsenal",
+          "score": 0.0,
+          "payload": {
+            "matchDate": "2026-09-12T19:00:00Z",
+            "leagueId": 47,
+            "id": "5795453",
+            "homeTeamId": "8472",
+            "awayTeamId": "9825",
+            "homeName": "Sunderland",
+            "awayName": "Arsenal",
+            "leagueName": "Premier League",
+            "statusId": 1
+          }
+        },
+        {
+          "text": "Napoli - Arsenal",
+          "score": -5.0,
+          "payload": {
+            "matchDate": "2026-09-09T19:00:00Z",
+            "leagueId": 42,
+            "id": "6106318",
+            "homeTeamId": "9875",
+            "awayTeamId": "9825",
+            "homeName": "Napoli",
+            "awayName": "Arsenal",
+            "leagueName": "Champions League",
+            "statusId": 6,
+            "homeScore": 0,
+            "awayScore": 1
+          }
+        },
+        {
+          "text": "Ipswich Town - Arsenal",
+          "score": -7.0,
+          "payload": {
+            "matchDate": "2026-09-15T19:00:00Z",
+            "leagueId": 133,
+            "id": "6099332",
+            "homeTeamId": "9902",
+            "awayTeamId": "9825",
+            "homeName": "Ipswich Town",
+            "awayName": "Arsenal",
+            "leagueName": "EFL Cup",
+            "statusId": 1
+          }
+        }
+      ]
+    }
+  ],
+  "teamSuggest": [
+    {
+      "text": "arsenal",
+      "offset": 0,
+      "length": 7,
+      "options": [
+        {
+          "text": "Arsenal|9825",
+          "score": 300990.0,
+          "payload": {
+            "matchDate": "0001-01-01T00:00:00",
+            "leagueId": 47,
+            "id": "9825",
+            "newsLanguages": [],
+            "leagueName": "Premier League"
+          }
+        },
+        {
+          "text": "Arsenal (W)|258657",
+          "score": 300041.0,
+          "payload": {
+            "matchDate": "0001-01-01T00:00:00",
+            "leagueId": 9227,
+            "id": "258657",
+            "newsLanguages": [],
+            "leagueName": "WSL"
+          }
+        },
+        {
+          "text": "Arsenal U21|950214",
+          "score": 300008.0,
+          "payload": {
+            "matchDate": "0001-01-01T00:00:00",
+            "leagueId": 9084,
+            "id": "950214",
+            "newsLanguages": [],
+            "leagueName": "Premier League 2"
+          }
+        }
+      ]
+    }
+  ]
+}
