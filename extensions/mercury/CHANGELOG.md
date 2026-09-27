@@ -1,5 +1,26 @@
 # Mercury Changelog
 
+## [Multiple Accounts, Statements, and Menu Bar] - {PR_MERGE_DATE}
+
+- Connect more than one Mercury account, such as personal and business, from the new Manage Accounts command. Your existing API key is imported automatically
+- Balances load instantly from an encrypted cache, then refresh in the background
+- Added Search Transactions: search all your accounts at once, with a detail sidebar, categories, receipts, and export to CSV, Markdown, or plain text
+- Each account's transactions can be filtered by status (pending, failed) or category
+- Added View Statements: download statements, open them as PDFs, or download a whole year at once
+- Added a Mercury Balance menu bar command. Hold ⌥ to choose which accounts count toward the total
+- Added wire details you can view, copy, or save as a text file
+- Added your Treasury account, with its transactions, and credit balances for business accounts
+- Added a View Cards command, with each card's transactions
+- Added AI tools for Treasury and cards; `@mercury` can now search transactions across all accounts and report your largest transactions
+- Removed the AI Account Summary command. Ask `@mercury` in Raycast AI instead, which supports follow-up questions and your chosen model
+- Added Debug Logging and Strict Redaction preferences for troubleshooting
+- Fixed missing counterparty icons in the transactions list
+- Invalid API tokens now show why Mercury rejected them, with an action to update the token
+- Error toasts now include an action to copy the error
+- Updated keyboard shortcuts to standard Raycast conventions
+- Migrated to Raycast API v2 and removed the `node-fetch` dependency
+- Added setup help for finding your Mercury API token
+
 ## [Initial Version] - 2023-08-29
 
 - View Mercury accounts and balances

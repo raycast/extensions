@@ -12,26 +12,94 @@
   "commands": [
     {
       "name": "view-transactions",
-      "title": "View Accounts & Transactions",
+      "title": "Manage Accounts",
       "subtitle": "Mercury",
-      "description": "View accounts and transactions for your Mercury Account",
+      "description": "View balances and account details, and add or remove Mercury accounts",
       "mode": "view"
     },
     {
-      "name": "ai-account-summary",
-      "title": "AI Account Summary",
-      "subtitle": "Get an AI-generated summary of your accounts",
-      "description": "Fetches all accounts and transactions, and provides an AI-generated summary",
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "subtitle": "Mercury",
+      "description": "Search transactions across all your Mercury accounts",
       "mode": "view"
+    },
+    {
+      "name": "view-cards",
+      "title": "View Cards",
+      "subtitle": "Mercury",
+      "description": "View your Mercury debit and credit cards",
+      "mode": "view"
+    },
+    {
+      "name": "view-statements",
+      "title": "View Statements",
+      "subtitle": "Mercury",
+      "description": "Download and open monthly Mercury statements",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-balance",
+      "title": "Mercury Balance",
+      "subtitle": "Mercury",
+      "description": "Your Mercury balances in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "type": "dropdown",
+          "required": false,
+          "title": "Refresh Every",
+          "description": "How often to fetch new balances from Mercury.",
+          "default": "1h",
+          "data": [
+            {
+              "title": "10 Minutes",
+              "value": "10m"
+            },
+            {
+              "title": "1 Hour",
+              "value": "1h"
+            },
+            {
+              "title": "12 Hours",
+              "value": "12h"
+            },
+            {
+              "title": "24 Hours",
+              "value": "24h"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
     {
       "name": "apiKey",
       "type": "password",
-      "required": true,
-      "title": "Mercury API Key",
-      "description": "Your Mercury API key"
+      "required": false,
+      "title": "Legacy API Key",
+      "description": "Older versions kept a token here. It's added to Manage Accounts automatically."
+    },
+    {
+      "name": "verboseLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
     }
   ],
   "tools": [
@@ -43,12 +111,22 @@
     {
       "name": "get-transactions",
       "title": "Get Transactions",
-      "description": "Retrieves transactions for a specific account or all accounts"
+      "description": "Retrieves recent transactions across all accounts, or for one account, with optional search and date range"
     },
     {
       "name": "analyze-finances",
       "title": "Analyze Finances",
-      "description": "Analyzes financial data from Mercury accounts and provides insights"
+      "description": "Analyzes cash flow, spending by type, top counterparties, and the largest transactions for a period"
+    },
+    {
+      "name": "get-treasury",
+      "title": "Get Treasury",
+      "description": "Retrieves Mercury Treasury accounts, their balances, and recent monthly returns"
+    },
+    {
+      "name": "get-cards",
+      "title": "Get Cards",
+      "description": "Retrieves Mercury debit and credit cards with their status, spend limits, and expiration"
     }
   ],
   "ai": {
@@ -57,16 +135,26 @@
       {
         "input": "@mercury what is my current balance",
         "mocks": {
-          "get-accounts": [
-            {
-              "accountNumber": "3419732837",
-              "availableBalance": 1000000,
-              "currentBalance": 1000000,
-              "legalBusinessName": "Not A Real Company Inc.",
-              "name": "Mercury Savings ••2837",
-              "status": "active"
-            }
-          ]
+          "get-accounts": {
+            "organizations": [
+              {
+                "organization": "Not A Real Company Inc.",
+                "kind": "business",
+                "accounts": [
+                  {
+                    "accountNumber": "3419732837",
+                    "availableBalance": 1000000,
+                    "currentBalance": 1000000,
+                    "legalBusinessName": "Not A Real Company Inc.",
+                    "name": "Mercury Savings ••2837",
+                    "status": "active"
+                  }
+                ],
+                "credit": []
+              }
+            ],
+            "unavailable": []
+          }
         },
         "expected": [
           {
@@ -83,16 +171,21 @@
       {
         "input": "@mercury Show me my latest transactions",
         "mocks": {
-          "get-transactions": [
-            {
-              "id": "tx_001",
-              "amount": -50.25,
-              "counterpartyName": "Superstore",
-              "createdAt": "2025-02-26T14:00:00Z",
-              "status": "completed",
-              "kind": "debitCardTransaction"
-            }
-          ]
+          "get-transactions": {
+            "transactions": [
+              {
+                "organization": "Jane Doe",
+                "accountId": "acct_001",
+                "id": "tx_001",
+                "amount": -50.25,
+                "counterpartyName": "Superstore",
+                "createdAt": "2025-02-26T14:00:00Z",
+                "status": "sent",
+                "kind": "debitCardTransaction"
+              }
+            ],
+            "unavailable": []
+          }
         },
         "expected": [
           {
@@ -122,7 +215,9 @@
             "period": "month",
             "topExpenses": [],
             "topIncome": [],
-            "transactionsByType": {}
+            "transactionsByType": {},
+            "largestTransactions": [],
+            "unavailable": []
           }
         },
         "expected": [
@@ -135,29 +230,112 @@
             }
           }
         ]
+      },
+      {
+        "input": "@mercury how much is in my treasury account",
+        "mocks": {
+          "get-treasury": {
+            "treasury": [
+              {
+                "organization": "Jane Doe",
+                "id": "trs_001",
+                "status": "active",
+                "createdAt": "2025-01-02T00:00:00Z",
+                "availableBalance": 250000,
+                "currentBalance": 250000,
+                "recentNetReturns": [
+                  {
+                    "month": "2026-08-01",
+                    "netAmount": 812.44,
+                    "treasuryFee": 20.83,
+                    "status": "charged"
+                  }
+                ]
+              }
+            ],
+            "unavailable": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-treasury",
+              "arguments": {}
+            }
+          },
+          {
+            "includes": "250"
+          }
+        ]
+      },
+      {
+        "input": "@mercury which of my cards are frozen",
+        "mocks": {
+          "get-cards": {
+            "cards": [
+              {
+                "organization": "Jane Doe",
+                "id": "card_001",
+                "accountId": "acct_001",
+                "lastFour": "4242",
+                "nameOnCard": "Jane Doe",
+                "nickname": "Travel",
+                "status": "frozen",
+                "type": "virtual",
+                "kind": "debit",
+                "expiration": {
+                  "month": 4,
+                  "year": 2028
+                },
+                "spendLimit": null,
+                "physicalCardStatus": null
+              }
+            ],
+            "unavailable": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-cards",
+              "arguments": {
+                "status": "frozen"
+              }
+            }
+          },
+          {
+            "includes": "4242"
+          }
+        ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.16.3",
-    "@types/node-fetch": "^2.6.11",
-    "node-fetch": "^3.3.2"
+    "@chrismessina/raycast-downloader": "^0.1.5",
+    "@chrismessina/raycast-faker": "^0.1.1",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
+    "build": "npm run copy-runner && ray build -e dist",
+    "dev": "npm run copy-runner && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "copy-runner": "node -e \"const p=require('path'),f=require('fs'),s=p.join('node_modules','@chrismessina','raycast-downloader','dist','runner.bundle.js');if(!f.existsSync(s))throw new Error('Missing '+s+' — run the package build.');f.copyFileSync(s,p.join('assets','raycast-downloader-runner.js'))\"",
+    "verify-runner": "node -e \"const f=require('fs'),p=require('path'),c=require('crypto');const a=p.join('assets','raycast-downloader-runner.js'),b=p.join('node_modules','@chrismessina','raycast-downloader','dist','runner.bundle.js');const h=x=>{if(!f.existsSync(x))throw new Error('Missing '+x+' \\u2014 run npm install, then npm run copy-runner.');return c.createHash('sha256').update(f.readFileSync(x)).digest('hex')};const A=h(a),B=h(b);if(A!==B){console.error('Runner asset is STALE \\u2014 it does not match the installed package.\\\\n  asset : '+A+'\\\\n  bundle: '+B+'\\\\nRun: npm run copy-runner');process.exit(1)}console.log('runner asset matches the installed bundle ('+A.slice(0,12)+')')\""
+  },
+  "contributors": [
+    "chrismessina"
+  ]
 }
