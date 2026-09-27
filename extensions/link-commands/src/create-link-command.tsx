@@ -21,6 +21,7 @@ import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
+import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
 
 /** Sentinel for the "New…" dropdown entry — a value no real environment or category can hold. */
 const NEW_VALUE = "\u0000new";
@@ -116,7 +117,8 @@ const Command = () => {
   const preferences = getPreferenceValues<Preferences>();
   const directories = parseDirectoryPreference(preferences.scriptDirectories);
 
-  const [title, setTitle] = useState("");
+  const [titleState, setTitleState] = useState<TitleState>({ title: "", suggestion: "", touched: false });
+  const { title } = titleState;
   const [target, setTarget] = useState("");
   const [environment, setEnvironment] = useState("");
   const [newEnvironment, setNewEnvironment] = useState("");
@@ -146,6 +148,24 @@ const Command = () => {
   // Mirrors the generator's own guard rather than restating it loosely: `open -a` takes no query, so a
   // search target has nothing an app could stand in for, and a folder has no web surface to fall back to.
   const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
+
+  /**
+   * Re-suggested from the change handlers rather than derived on render, because the title is a field the
+   * person owns: a derived value would snap back the moment they typed over it. Target and Desktop App are
+   * the two inputs that change what the command *does*, so they are the two that re-propose its name. The
+   * brand is resolved the same way the Package placeholder is, so the title and the subtitle agree.
+   */
+  const suggestTitleFor = (nextTarget: string, nextDesktopApplication: string) =>
+    setTitleState((state) =>
+      titleSuggested(
+        state,
+        suggestTitle({
+          target: nextTarget,
+          brand: packageForTarget(nextTarget.trim(), learned) ?? brandFor(nextTarget.trim()),
+          desktopApplication: nextDesktopApplication || undefined,
+        }),
+      ),
+    );
 
   // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
   // only the resolved string.
@@ -279,7 +299,14 @@ const Command = () => {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Netflix" value={title} onChange={setTitle} />
+      <Form.TextField
+        id="title"
+        title="Title"
+        placeholder="Netflix"
+        info="Suggested from the target until you type your own. Clear the field to get suggestions back."
+        value={title}
+        onChange={(next) => setTitleState((state) => titleEdited(state, next))}
+      />
       <Form.TextField
         id="target"
         title="Target"
@@ -288,7 +315,10 @@ const Command = () => {
 
 Put {query} anywhere in a URL to make it a search command: Raycast prompts for the value and percent-encodes it before opening.`}
         value={target}
-        onChange={setTarget}
+        onChange={(next) => {
+          setTarget(next);
+          suggestTitleFor(next, desktopApplication);
+        }}
       />
 
       <Form.Separator />
@@ -368,7 +398,10 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
           title="Desktop App"
           info="The native app for this service, if it has one. Picking it turns the command into a surface router: it opens the app where the app is installed and the target where it is not, so the same command works on machines that differ in what they have. It stays argument-free, so it still fires from a hotkey."
           value={desktopApplication}
-          onChange={setDesktopApplication}
+          onChange={(next) => {
+            setDesktopApplication(next);
+            suggestTitleFor(target, next);
+          }}
         >
           <Form.Dropdown.Item title="None — always open the target" value="" />
           {(applications ?? []).map((app) => (

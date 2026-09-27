@@ -163,7 +163,7 @@ const escapeForShell = (value: string) => value.replace(/([\\"`$])/g, "\\$1");
  * placeholder has nothing an app could stand in for. A non-URL target is excluded for the same kind of
  * reason — a folder has no web equivalent to fall back to.
  */
-const routerAppOf = (draft: ScriptDraft) =>
+export const routerAppOf = (draft: ScriptDraft) =>
   draft.desktopApplication && !findPlaceholder(draft.target) && /^https?:\/\//i.test(draft.target)
     ? draft.desktopApplication
     : undefined;
