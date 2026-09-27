@@ -3,7 +3,11 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Support macOS and Windows with native platform shortcuts.
-- Search transactions in mapped-date order, with account, booking-date, and status filters.
+- Search transactions grouped by mapped date, with account, booking-date, and status filters.
+- Show enriched merchant logos with colorful payee initials as a fallback.
+- Explore account overviews with dated balance charts, recent activity, and optional account details.
+- View daily spending charts and export loaded search results to CSV or a spreadsheet.
+- Remember sidebar choices separately for each view.
 - Check balances and currency totals, inspect sync dates, and create account Quicklinks.
 - View brokerage and crypto holdings with account filters, position details, and currency totals.
 - Explore recent booked outflows by merchant and currency, with enriched merchant logos when available.

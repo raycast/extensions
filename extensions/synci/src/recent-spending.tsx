@@ -1,3 +1,4 @@
+import { useDetails } from "./hooks/use-details";
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
@@ -5,20 +6,26 @@ import { CommonActions, ToggleDetailsAction } from "./components/common";
 import { ErrorView, withSynci } from "./components/session";
 import { TransactionItem } from "./components/transaction";
 import { merchantIcon } from "./components/merchant-icon";
+import { SpendingChart } from "./components/spending-chart";
+import { transactionGroups } from "./lib/transaction-groups";
 import { useAccounts } from "./hooks/use-data";
 import { api } from "./lib/api";
 import { PERIODS, spendingSummary } from "./lib/finance";
-import { accountName, compareTransactionsNewestFirst, markdown, money } from "./lib/format";
+import { accountName, markdown, money } from "./lib/format";
 import type { Period, Transaction } from "./lib/types";
 
 function Outflows({ transactions, title }: { transactions: Transaction[]; title: string }) {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useDetails("spending-transactions");
   return (
     <List navigationTitle={title} isShowingDetail={showDetails} searchBarPlaceholder="Filter these transactions…">
-      {[...transactions].sort(compareTransactionsNewestFirst).map((transaction) => (
-        <TransactionItem key={transaction.id} transaction={transaction} showDetails={showDetails}>
-          <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
-        </TransactionItem>
+      {transactionGroups(transactions).map((group) => (
+        <List.Section key={group.date || "unknown"} title={group.title}>
+          {group.transactions.map((transaction) => (
+            <TransactionItem key={transaction.id} transaction={transaction} showDetails={showDetails} showDate={false}>
+              <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
+            </TransactionItem>
+          ))}
+        </List.Section>
       ))}
     </List>
   );
@@ -30,7 +37,7 @@ function RecentSpending() {
     ["7", "30", "month"].includes(preference) ? (preference as Period) : "month",
   );
   const [accountId, setAccountId] = useState("all");
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useDetails("spending");
   const toggleDetails = (
     <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
   );
@@ -159,6 +166,19 @@ function RecentSpending() {
                         title="View Outflows"
                         icon={Icon.Receipt}
                         target={<Outflows title={`${currency} Outflows`} transactions={transactions} />}
+                      />
+                      <Action.Push
+                        title="View Spending Chart"
+                        icon={Icon.LineChart}
+                        target={
+                          <SpendingChart
+                            transactions={transactions}
+                            period={period}
+                            currency={currency}
+                            account={accountLabel}
+                            transactionsView={<Outflows title={`${currency} Outflows`} transactions={transactions} />}
+                          />
+                        }
                       />
                       <Action.CopyToClipboard
                         title="Copy Summary"

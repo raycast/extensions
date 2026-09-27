@@ -1,6 +1,6 @@
+import { useDetails } from "./hooks/use-details";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { CommonActions, EmptyState, healthColor, ToggleDetailsAction } from "./components/common";
-import { useState } from "react";
 import { ErrorView, withSynci } from "./components/session";
 import { useConnections } from "./hooks/use-data";
 import { APP_URL } from "./lib/config";
@@ -98,7 +98,7 @@ function ConnectionItem({
 }
 
 function ConnectionStatus() {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useDetails("connections");
   const toggleDetails = () => setShowDetails((value) => !value);
   const { data, error, isLoading, revalidate } = useConnections();
   const connections = [...(data ?? [])].sort(

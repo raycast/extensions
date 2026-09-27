@@ -1,3 +1,4 @@
+import { useDetails } from "../hooks/use-details";
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { createDeeplink, usePromise } from "@raycast/utils";
 import { useRef, useState, type ReactNode } from "react";
@@ -149,7 +150,7 @@ function HoldingItem({
 
 export function HoldingsList({ initialAccountId = "all" }: { initialAccountId?: string }) {
   const [accountId, setAccountId] = useState(initialAccountId);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useDetails("holdings");
   const [search, setSearch] = useState("");
   const abortable = useRef<AbortController | null>(null);
   const { data, error, isLoading, revalidate } = usePromise(

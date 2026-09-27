@@ -10,6 +10,8 @@ import { balanceTotals } from "./lib/finance";
 import { supportsHoldings } from "./lib/holdings";
 import { accountBalance, accountName, accountUrl, dateLabel, markdown, money } from "./lib/format";
 import type { FinancialAccount } from "./lib/types";
+import { AccountOverview } from "./components/account-overview";
+import { useDetails } from "./hooks/use-details";
 
 function AccountItem({
   account,
@@ -85,6 +87,11 @@ function AccountItem({
       actions={
         <ActionPanel>
           <Action.Push
+            title="View Account Overview"
+            icon={Icon.LineChart}
+            target={<AccountOverview account={account} />}
+          />
+          <Action.Push
             title="View Transactions"
             icon={Icon.Receipt}
             target={<TransactionList initialAccountId={String(account.id)} navigationTitle={accountName(account)} />}
@@ -123,7 +130,7 @@ function CheckBalances() {
   const { data, error, isLoading, revalidate } = useAccounts(true);
   const [filter, setFilter] = useState("enabled");
   const [search, setSearch] = useState("");
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useDetails("balances");
   const accounts =
     data?.filter(
       (account) =>

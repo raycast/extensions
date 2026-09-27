@@ -129,7 +129,7 @@
     {
       "name": "showDetails",
       "title": "Transaction Details",
-      "description": "Open transactions with a side panel instead of a full-width list. Press Enter on a transaction to view its details.",
+      "description": "Initial transaction layout before a saved sidebar choice exists. Changes made with Show/Hide Details are remembered. Press Enter to view transaction details.",
       "type": "checkbox",
       "label": "Show transaction side panel by default",
       "required": false,

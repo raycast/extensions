@@ -2,6 +2,9 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { api } from "../lib/api";
+import { useDetails } from "../hooks/use-details";
+import { transactionGroups } from "../lib/transaction-groups";
+import { TransactionExport } from "./transaction-export";
 import { PERIODS } from "../lib/finance";
 import type { Period } from "../lib/types";
 import { useAccounts } from "../hooks/use-data";
@@ -23,7 +26,7 @@ export function TransactionList({
   const [accountId, setAccountId] = useState(initialAccountId);
   const [period, setPeriod] = useState<Period>("all");
   const [status, setStatus] = useState("all");
-  const [showDetails, setShowDetails] = useState(getPreferenceValues<Preferences>().showDetails);
+  const [showDetails, setShowDetails] = useDetails("transactions", getPreferenceValues<Preferences>().showDetails);
   const accounts = useAccounts();
   const abortable = useRef<AbortController | null>(null);
   const queryKey = JSON.stringify([search, accountId, period, status]);
@@ -82,6 +85,8 @@ export function TransactionList({
           return true;
         })
       : undefined;
+  const groups = transactionGroups(transactions ?? []);
+  const exportRows = groups.flatMap((group) => group.transactions);
   const failure = error || accounts.error;
   return (
     <List
@@ -121,21 +126,30 @@ export function TransactionList({
               }
             />
           )}
-          <List.Section
-            title={PERIODS.find((item) => item.value === period)?.title}
-            subtitle={`${transactions?.length ?? 0} loaded${amount ? ` · Amount ${amount.label}` : ""}${status !== "all" ? ` · ${status}` : ""} · Mapped date`}
-          >
-            {transactions?.map((transaction) => (
-              <TransactionItem
-                key={transaction.id}
-                transaction={transaction}
-                showDetails={showDetails}
-                refresh={refresh}
-              >
-                {filters}
-              </TransactionItem>
-            ))}
-          </List.Section>
+          {groups.map((group, index) => (
+            <List.Section
+              key={group.date || "unknown"}
+              title={group.title}
+              subtitle={
+                index === 0
+                  ? `${transactions?.length ?? 0} loaded · ${PERIODS.find((item) => item.value === period)?.title ?? "All Time"}`
+                  : undefined
+              }
+            >
+              {group.transactions.map((transaction) => (
+                <TransactionItem
+                  key={transaction.id}
+                  transaction={transaction}
+                  showDetails={showDetails}
+                  showDate={false}
+                  refresh={refresh}
+                >
+                  {filters}
+                  <TransactionExport transactions={exportRows} />
+                </TransactionItem>
+              ))}
+            </List.Section>
+          ))}
           {amount && transactions?.length && pagination?.hasMore ? (
             <List.Item
               id="load-more"

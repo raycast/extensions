@@ -167,7 +167,15 @@ describe("presentation", () => {
     );
   });
   it("does not interpret transaction text as markdown or embedded images", () => {
-    expect(markdown("![x](https://tracker.test) | <tag>")).toBe("\\!\\[x\\]\\(https://tracker\\.test\\) \\| \\<tag\\>");
+    expect(markdown("![x](https://tracker.test) | <tag>")).toBe(
+      "\\!\\[x\\]&#40;https://tracker\\.test&#41; \\| \\<tag\\>",
+    );
+  });
+  it("keeps currencies and parentheses out of Raycast's LaTeX renderer", () => {
+    const result = markdown("$12.50 (-64.55%) \\(x\\) & Co");
+    expect(result).toContain("&#36;12\\.50 &#40;\\-64\\.55%&#41;");
+    expect(result).not.toContain("\\(");
+    expect(result).toContain("&amp; Co");
   });
   it("handles malformed amounts and unusual currencies", () => {
     expect(decimal("Infinity")).toBeUndefined();

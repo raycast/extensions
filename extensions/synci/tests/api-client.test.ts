@@ -10,6 +10,19 @@ const page = (data: unknown[], current = 1, last = 1) =>
   });
 
 describe("Synci API", () => {
+  it("loads complete balance history for the selected account with a stable dated sort", async () => {
+    const transport = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(page([{ id: 1 }], 1, 2))
+      .mockResolvedValueOnce(page([{ id: 2 }], 2, 2));
+    const records = await new SynciClient(async () => "token", transport).accountBalanceHistory(42);
+    expect(records).toEqual([{ id: 1 }, { id: 2 }]);
+    for (const [input] of transport.mock.calls) {
+      const url = new URL(String(input));
+      expect(url.pathname).toBe("/api/v1/finance/accounts/42/balances");
+      expect(url.searchParams.get("sort")).toBe("-reference_date,-id");
+    }
+  });
   it("encodes queries and includes safe read-only parameters", async () => {
     const transport = vi.fn<typeof fetch>().mockResolvedValue(page([]));
     const client = new SynciClient(async () => "token", transport);

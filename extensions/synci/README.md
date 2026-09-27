@@ -23,7 +23,7 @@ Bring your bank, investment, and crypto accounts into Raycast. Find a payment, c
 | Command                    | What it does                                                                                                      |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **Search Transactions**    | Find payments by payee, description, or exact amount. Filter by account, date, and status, then open the details. |
-| **Check Balances**         | See balances across your accounts, grouped by currency, with the latest sync timestamps.                          |
+| **Check Balances**         | See balances by currency, then open an account overview with balance history and recent activity.                 |
 | **View Holdings**          | Explore investment and crypto positions, including quantities, prices, and market values.                         |
 | **Show Recent Spending**   | See where your money went over the last week, last 30 days, or this month, with a breakdown by merchant.          |
 | **Open Connection Status** | Spot connections that need attention and open Synci to manage them.                                               |
@@ -50,6 +50,12 @@ Bring your bank, investment, and crypto accounts into Raycast. Find a payment, c
 
 </details>
 
+## See how your finances change
+
+Open **Check Balances**, select an account, and press Enter for its overview. Explore recorded balances over 7 days, 30 days, 3 months, a year, or all available history, alongside recent transactions and account details. History coverage depends on your institution; accounts with too few dated balances show that clearly.
+
+In **Show Recent Spending**, select a currency total and choose **View Spending Chart** to see daily booked outflows for the selected period. Charts are generated locally and adapt to Raycast’s light and dark appearance.
+
 ## Ask Synci
 
 Open **Ask Synci** in Raycast, or mention **@Synci** in AI Chat. Ask in your own words:
@@ -65,7 +71,7 @@ AI tools share your Synci sign-in. You'll need Raycast Pro and an active Synci s
 
 ## Made for your keyboard
 
-Browse full-width lists, or toggle a side panel for a closer look. Use account and date filters, copy amounts and details, and create Quicklinks to the accounts you check most often. Merchant logos appear when available.
+Browse full-width lists, or toggle a side panel for a closer look. Use account and date filters, copy amounts and details, and create Quicklinks to the accounts you check most often. Merchant logos appear when available, with colorful payee initials as a fallback. Transactions are grouped by date, and each view remembers your sidebar choice. Export loaded search results as CSV, or copy them straight into a spreadsheet.
 
 | Action                        | macOS | Windows      |
 | ----------------------------- | ----- | ------------ |
@@ -90,9 +96,9 @@ No API keys or personal OAuth app to configure. If you add more accounts later, 
 
 You choose which accounts to share. The extension provides read-only access and doesn't move money, place trades, or change your financial records. Sign out from the action menu whenever you need to.
 
-The extension adds no analytics and doesn't save financial records locally. When you use **Ask Synci**, the requested financial data is sent to Raycast AI to answer your question and may remain in your chat history. Raycast's AI privacy settings apply.
+The extension adds no analytics and doesn't cache financial records locally. CSV files are saved to your Downloads folder only when you choose to export; spreadsheet copying happens only when you select that action. When you use **Ask Synci**, the requested financial data is sent to Raycast AI to answer your question and may remain in your chat history. Raycast's AI privacy settings apply.
 
-Balances and holdings reflect the latest provider sync. Currency totals stay separate. Recent Spending shows booked outflows, which can include transfers and cash withdrawals; pending payments and incoming refunds are excluded.
+Balances and holdings reflect the latest provider sync. Currency totals stay separate. Balance charts keep currencies and balance types separate. Balance change includes deposits and withdrawals and is not investment return. Recent Spending filters by booking date and shows booked outflows, which can include transfers and cash withdrawals; pending payments and incoming refunds are excluded.
 
 ## Built in the open
 

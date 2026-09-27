@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
-import { APP_URL, SYNCI_GREEN } from "../lib/config";
+import { APP_URL } from "../lib/config";
 import {
   accountName,
   accountUrl,
@@ -15,6 +15,7 @@ import type { Transaction } from "../lib/types";
 import type { ReactNode } from "react";
 import { CommonActions } from "./common";
 import { transactionMetadata } from "../lib/transaction-details";
+import { merchantIcon } from "./merchant-icon";
 
 function description(transaction: Transaction) {
   return `# ${markdown(transactionName(transaction))}\n\n## ${markdown(money(transaction.amount, transaction.currency))}\n\n${markdown(transactionDescription(transaction) || "No description provided.")}`;
@@ -117,31 +118,35 @@ function TransactionActions({
 export function TransactionItem({
   transaction,
   showDetails = false,
+  showDate = true,
   children,
   refresh,
 }: {
   transaction: Transaction;
   showDetails?: boolean;
+  showDate?: boolean;
   children?: ReactNode;
   refresh?: () => void;
 }) {
-  const outgoing = decimal(transaction.amount)?.isNegative();
+  const incoming = decimal(transaction.amount)?.isPositive();
   return (
     <List.Item
       id={String(transaction.id)}
       title={transactionName(transaction)}
       subtitle={showDetails ? undefined : accountName(transaction.financial_account)}
-      icon={{
-        source: outgoing ? Icon.ArrowUp : Icon.ArrowDown,
-        tintColor: outgoing ? Color.SecondaryText : SYNCI_GREEN,
-      }}
+      icon={merchantIcon([transaction])}
       accessories={[
         ...(!transaction.booked ? [{ tag: { value: "Pending", color: Color.Orange } }] : []),
         {
-          text: money(transaction.amount, transaction.currency),
+          text: {
+            value: money(transaction.amount, transaction.currency),
+            color: incoming ? Color.Green : Color.PrimaryText,
+          },
           tooltip: `${transaction.amount} ${transaction.currency}`,
         },
-        ...(!showDetails ? [{ text: dateLabel(transactionDate(transaction)), tooltip: "Synci mapped date" }] : []),
+        ...(!showDetails && showDate
+          ? [{ text: dateLabel(transactionDate(transaction)), tooltip: "Synci mapped date" }]
+          : []),
       ]}
       keywords={[
         accountName(transaction.financial_account),

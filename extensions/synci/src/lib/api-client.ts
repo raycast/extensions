@@ -156,6 +156,9 @@ export class SynciClient {
       signal,
     );
   }
+  accountBalanceHistory(accountId: number, signal?: AbortSignal) {
+    return this.all<BalanceEntry>(`/finance/accounts/${accountId}/balances`, { sort: "-reference_date,-id" }, signal);
+  }
   accountHoldings(accountId: number, signal?: AbortSignal) {
     return this.all<AccountHolding>(`/finance/accounts/${accountId}/holdings`, { sort: "-market_value,-id" }, signal);
   }

@@ -80,7 +80,10 @@ export function dateLabel(value?: string | null, includeTime = false): string {
 }
 
 export function markdown(value: string): string {
-  return value.replace(/[\\`*_{}[\]()#+.!|<>~-]/g, "\\$&");
+  // Raycast also parses LaTeX: backslash-escaped parentheses would turn
+  // ordinary percentages into equations. Entities keep those characters literal.
+  const entities: Record<string, string> = { "&": "&amp;", "\\": "&#92;", $: "&#36;", "(": "&#40;", ")": "&#41;" };
+  return value.replace(/[&\\$()`*_{}[\]#+.!|<>~-]/g, (character) => entities[character] ?? `\\${character}`);
 }
 
 export function accountSection(account: FinancialAccount): "banks" | "brokerages" | "crypto" {
