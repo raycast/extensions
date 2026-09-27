@@ -1,0 +1,30 @@
+# Switcheroo Changelog
+
+## [Initial Release] - {PR_MERGE_DATE}
+
+- Manage Switcheroo keyboard remapper configuration directly from Raycast.
+
+- **View Remaps** — list and manage all configured keyboard remapping rules.
+
+- Distinguish remap types with emoji icons and refreshed View Remaps and
+  Add Remap screenshots.
+
+- **Add Remap** — create a new keyboard remapping rule from Raycast.
+
+- Recover from failed edits with **Discard Edits and Reload**, without
+  overwriting newer configuration changes or silently discarding unsaved input.
+
+- **Restart Switcheroo** — restart the Switcheroo service (auto-detects Homebrew
+  and standalone install layouts and refuses ambiguous/foreign jobs).
+
+- **View Logs** — view recent Switcheroo log output.
+
+- **Edit Config** — open the Switcheroo configuration file in your default editor.
+
+- Supports the Switcheroo daemon installed independently via Homebrew
+  (`brew install switcheroo`) or the standalone `install.sh` script. The daemon
+  is not bundled with this extension and must be installed separately.
+
+- README documents step-by-step Homebrew setup, the standalone `install.sh`
+  path, Accessibility permission grant for each layout, local install before
+  Store approval, troubleshooting, and update/uninstall steps.
