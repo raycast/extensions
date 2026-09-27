@@ -15,30 +15,24 @@ way to get those combinations back: Raycast owns the hotkey, Heed claims nothing
 | Focus Window Left / Right / Above / Below | Move to the nearest window in that direction. Sharing a row or column beats being closer, and the edge is a dead end rather than a wrap. |
 | Focus Window | Every visible window by name, in that same order, with the app it belongs to and its size. Pick one to focus it. |
 | Toggle / Enable / Disable Focus Follows Mouse | Heed's pointer focus, without reaching for the menu bar. |
+| Release / Restore Shortcuts | Unregister every shortcut Heed holds, so the combinations are free for Raycast, or give Heed its defaults back. |
+| Enable / Disable Mouse Follows Focus | The pointer follows a command into the window it focused, instead of staying behind and dragging focus back on the next mouse movement. |
 
-Assign a Raycast hotkey to any of them, then free the combination Heed holds, for example:
-
-```sh
-defaults write io.github.rbstp.heed focusNextHotkey ''
-```
+Assign a Raycast hotkey to any of the focus commands, then run **Release Shortcuts** once so Heed
+lets go of the combinations. That frees every shortcut Heed holds, the numbered ones included, which
+no command here replaces; to keep some, clear single fields in Heed's **Settings** window instead,
+from its menu bar icon or with `open heed://settings`. Either takes effect at once.
 
 Windows completely covered by other windows are skipped, and the order is spatial rather than
 stacking, so stepping through does not reorder what you are stepping through.
 
 ## Requirements
 
-Heed 0.12.0 or later with Accessibility permission granted. 0.12.0 is the first signed and
-notarized build, so Gatekeeper opens it without a detour through System Settings:
+Heed 0.13.0 or later on Apple silicon, macOS 14 or later, with Accessibility permission granted.
+Releases are signed and notarized, so Gatekeeper opens them without a detour through System Settings:
 
 ```sh
 brew install --cask rbstp/tap/heed
-```
-
-Pair it with `warpPointer` for the full effect: the cursor then follows focus into the window a
-command moved it to, instead of staying behind and dragging focus back on the next mouse movement.
-
-```sh
-defaults write io.github.rbstp.heed warpPointer -bool true
 ```
 
 ## How it works
