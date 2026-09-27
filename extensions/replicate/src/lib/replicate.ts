@@ -1,5 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
+import { lookup } from "node:dns/promises";
 import { readFile, writeFile } from "node:fs/promises";
+import { isIP } from "node:net";
 import { basename, extname } from "node:path";
 import { CollectionResponse, CollectionsResponse, Model, Prediction, ReplicateFile, SearchResponse } from "../types";
 import { extensionFor } from "../utils/output";
@@ -159,6 +161,52 @@ export const uploadBytes = async (bytes: Buffer, filename: string, type?: string
 export const uploadFile = async (path: string) => uploadBytes(await readFile(path), basename(path));
 
 const DOWNLOAD_TIMEOUT_MS = 20_000;
+const MAX_REDIRECTS = 5;
+
+const isPublicAddress = (address: string) => {
+  const ip = address.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i)?.[1] ?? address;
+  if (isIP(ip) === 4) {
+    const [a, b] = ip.split(".").map(Number);
+    return !(
+      a === 0 ||
+      a === 10 ||
+      a === 127 ||
+      (a === 100 && b >= 64 && b <= 127) ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168)
+    );
+  }
+  const lower = ip.toLowerCase();
+  return !(lower === "::" || lower === "::1" || /^f[cd]/.test(lower) || /^fe[89ab]/.test(lower));
+};
+
+const isPublicHost = async (url: URL) => {
+  const host = url.hostname.replace(/^\[|\]$/g, "");
+  const addresses = isIP(host)
+    ? [host]
+    : (await lookup(host, { all: true }).catch(() => [])).map((entry) => entry.address);
+  return addresses.length > 0 && addresses.every(isPublicAddress);
+};
+
+// Blocks links to this computer or its network, whose replies would otherwise be uploaded to Replicate.
+const fetchPublic = async (link: string) => {
+  let url = new URL(link);
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (!/^https?:$/.test(url.protocol) || !(await isPublicHost(url))) {
+      throw new Error("That link points to this computer or a private network, so nothing ran.");
+    }
+    const response = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      redirect: "manual",
+      signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+    }).catch(() => undefined);
+    const location = response?.headers.get("location");
+    if (!response || response.status < 300 || response.status >= 400 || !location) return response;
+    url = new URL(location, url);
+  }
+  return undefined;
+};
 
 // Some sites refuse Replicate's servers (Wikimedia answers them 403), so a linked image is copied over.
 export const imageForModel = async (url: string) => {
@@ -173,10 +221,7 @@ export const imageForModel = async (url: string) => {
     return url;
   }
 
-  const response = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT },
-    signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
-  }).catch(() => undefined);
+  const response = await fetchPublic(url);
   const type = response?.headers.get("content-type") ?? undefined;
   if (!response?.ok || type?.startsWith("text/html")) {
     const status = response && !response.ok ? ` (${response.status})` : "";

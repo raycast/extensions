@@ -36,11 +36,16 @@ export const ModelField = ({ field, defaultValue }: Props) => {
   if (field.kind === "file") {
     return (
       <>
-        <Form.FilePicker id={field.name} title={title} info={field.info} allowMultipleSelection={false} />
+        <Form.FilePicker
+          id={field.name}
+          title={title}
+          info={field.info}
+          allowMultipleSelection={field.schema.type === "array"}
+        />
         <Form.TextField
           id={`${field.name}__url`}
-          title={`${field.title} URL`}
-          placeholder="https://"
+          title={field.schema.type === "array" ? `${field.title} URLs` : `${field.title} URL`}
+          placeholder={field.schema.type === "array" ? "https://…, https://…" : "https://"}
           defaultValue={value}
         />
       </>

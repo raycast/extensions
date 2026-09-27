@@ -42,9 +42,15 @@ export const savedOutputs = async () => {
 };
 
 export const predictionItems = (prediction: Prediction, saved: SavedOutputs) => {
-  const paths = saved[prediction.id]?.filter(Boolean);
-  if (!paths?.length) return outputItems(prediction.output);
-  return outputItems(paths.map((path) => pathToFileURL(path).href));
+  const paths = saved[prediction.id] ?? [];
+  if (!paths.some(Boolean)) return outputItems(prediction.output);
+  const local = (path: string) => pathToFileURL(path).href;
+  const remote = files(outputItems(prediction.output));
+  // A copy that failed to download falls back to its remote file instead of disappearing.
+  const urls = remote.length
+    ? remote.map((item, index) => (paths[index] ? local(paths[index]) : item.url))
+    : paths.filter(Boolean).map(local);
+  return outputItems(urls);
 };
 
 export const isSaved = (url: string) => url.startsWith("file:");

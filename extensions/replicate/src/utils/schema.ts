@@ -20,7 +20,7 @@ const kindOf = (schema: OptionSchema, name: string, enums: string[]): FieldKind 
   if (enums.length) return "select";
   if (schema.type === "boolean") return "boolean";
   if (schema.type === "integer" || schema.type === "number") return "number";
-  if (schema.format === "uri") return "file";
+  if (schema.format === "uri" || (schema.type === "array" && schema.items?.format === "uri")) return "file";
   return LONG_TEXT.test(name) ? "textarea" : "text";
 };
 

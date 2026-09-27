@@ -25,6 +25,15 @@ const readList = async <T>(key: string): Promise<T[]> => {
 
 const writeList = <T>(key: string, list: T[]) => LocalStorage.setItem(key, JSON.stringify(list));
 
+// Two chats can save at once; without a queue the later write drops the other's model.
+let pendingWrite: Promise<unknown> = Promise.resolve();
+
+const updateList = <T>(key: string, change: (list: T[]) => T[]) => {
+  const next = pendingWrite.then(async () => writeList(key, change(await readList<T>(key))));
+  pendingWrite = next.catch(() => undefined);
+  return next;
+};
+
 export const keptModels = () => readList<KeptModel>(KEPT_KEY);
 
 export const keptModelIds = async () => (await keptModels()).map((model) => model.id);
@@ -113,35 +122,25 @@ export const registeredModels = async () => {
   return [...yours, ...others.filter((model): model is AI.RegisteredModel => Boolean(model))];
 };
 
-const keep = async (id: string, stamp: Omit<KeptModel, "id">) => {
-  const kept = await keptModels();
-  const known = kept.some((model) => model.id === id);
-  await writeList(
-    KEPT_KEY,
-    known ? kept.map((model) => (model.id === id ? { ...model, ...stamp } : model)) : [...kept, { id, ...stamp }],
+const keep = (id: string, stamp: Omit<KeptModel, "id">) =>
+  updateList<KeptModel>(KEPT_KEY, (kept) =>
+    kept.some((model) => model.id === id)
+      ? kept.map((model) => (model.id === id ? { ...model, ...stamp } : model))
+      : [...kept, { id, ...stamp }],
   );
-};
 
 export const addModel = (id: string) => keep(id, { addedAt: Date.now() });
 
 export const recordUse = (id: string) => keep(id, { usedAt: Date.now() });
 
-export const hideModel = async (id: string) => {
-  const hidden = await hiddenModelIds();
-  if (!hidden.includes(id)) await writeList(HIDDEN_KEY, [...hidden, id]);
-};
+export const hideModel = (id: string) =>
+  updateList<string>(HIDDEN_KEY, (hidden) => (hidden.includes(id) ? hidden : [...hidden, id]));
 
-export const unhideModel = async (id: string) =>
-  writeList(
-    HIDDEN_KEY,
-    (await hiddenModelIds()).filter((entry) => entry !== id),
-  );
+export const unhideModel = (id: string) =>
+  updateList<string>(HIDDEN_KEY, (hidden) => hidden.filter((entry) => entry !== id));
 
 export const removeModel = async (id: string) => {
-  await writeList(
-    KEPT_KEY,
-    (await keptModels()).filter((model) => model.id !== id),
-  );
+  await updateList<KeptModel>(KEPT_KEY, (kept) => kept.filter((model) => model.id !== id));
   // Without the hide, a popular model the user removed returns on the next daily refresh.
   const popular = await popularModelIds().catch((): string[] => []);
   if (popular.includes(id)) await hideModel(id);

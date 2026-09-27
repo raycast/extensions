@@ -14,6 +14,29 @@ export type FormValues = Record<string, string | string[] | boolean>;
 const asNumber = (value: string, field: Field) =>
   field.schema.type === "integer" ? Number.parseInt(value, 10) : Number.parseFloat(value);
 
+const splitList = (text: string) =>
+  text
+    .split(/[\n,]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const parseJsonList = (text: string) => {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const listValue = (text: string, field: Field) => {
+  const items = parseJsonList(text) ?? splitList(text);
+  const itemType = field.schema.items?.type;
+  return itemType === "integer" || itemType === "number" ? items.map(Number) : items;
+};
+
+const isList = (field: Field) => field.schema.type === "array";
+
 export const buildInput = async (fields: Field[], values: FormValues) => {
   const input: Record<string, unknown> = {};
 
@@ -21,10 +44,11 @@ export const buildInput = async (fields: Field[], values: FormValues) => {
     const value = values[field.name];
 
     if (field.kind === "file") {
-      const [path] = Array.isArray(value) ? value : [];
-      const url = String(values[`${field.name}__url`] ?? "").trim();
-      if (path) input[field.name] = await uploadFile(path);
-      else if (url) input[field.name] = url;
+      const paths = Array.isArray(value) ? value : [];
+      const typed = String(values[`${field.name}__url`] ?? "").trim();
+      const urls = isList(field) ? splitList(typed) : [typed].filter(Boolean);
+      const files = paths.length ? await Promise.all(paths.map(uploadFile)) : urls;
+      if (files.length) input[field.name] = isList(field) ? files : files[0];
       continue;
     }
     if (field.kind === "boolean") {
@@ -34,7 +58,8 @@ export const buildInput = async (fields: Field[], values: FormValues) => {
 
     const text = String(value ?? "").trim();
     if (!text) continue;
-    input[field.name] = field.kind === "number" ? asNumber(text, field) : text;
+    if (isList(field)) input[field.name] = listValue(text, field);
+    else input[field.name] = field.kind === "number" ? asNumber(text, field) : text;
   }
 
   return input;
@@ -67,9 +92,9 @@ export const ModelForm = ({ model: listed, onOpen }: Props) => {
   const handleSubmit = async (values: FormValues) => {
     if (!model) return;
 
-    const missing = fields.filter(
-      (field) => field.required && field.kind !== "boolean" && !String(values[field.name] ?? "").trim(),
-    );
+    const provided = (field: Field) =>
+      [values[field.name], values[`${field.name}__url`]].some((value) => String(value ?? "").trim());
+    const missing = fields.filter((field) => field.required && field.kind !== "boolean" && !provided(field));
     if (missing.length) {
       await showToast({
         style: Toast.Style.Failure,
