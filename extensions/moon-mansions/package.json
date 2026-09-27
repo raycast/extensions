@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moon-mansions",
+  "title": "Moon Mansions",
+  "description": "Moon phase, illumination, zodiac sign and Abu Ma'shar lunar mansion.",
+  "icon": "extension_icon.png",
+  "author": "minhaaj_rehman",
+  "categories": ["Other"],
+  "keywords": ["moon", "mansion", "manazil", "zodiac", "astrology"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "info",
+      "title": "Show Moon Info",
+      "description": "Phase, illumination, zodiac and lunar mansion",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Moon in Menu Bar",
+      "description": "Phase emoji, illumination % and mansion in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
