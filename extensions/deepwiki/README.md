@@ -1,12 +1,13 @@
 # DeepWiki Raycast Extension
 
-This extension allows you to quickly search for, open, and crawl documentation for GitHub repositories on [DeepWiki](https://deepwiki.com/).
+This extension allows you to quickly search for, open, crawl, and ask questions about documentation for GitHub repositories on [DeepWiki](https://deepwiki.com/).
 
 ## Features
 
 - **Open DeepWiki Page:** Quickly open the DeepWiki page for a GitHub repository using its URL, `owner/repo` identifier, or the current browser tab URL.
 - **Search DeepWiki Repos:** Search for repositories indexed by DeepWiki directly within Raycast.
 - **Crawl DeepWiki Docs:** Crawl all documentation pages for a specified repository on DeepWiki and copy the combined content to your clipboard in an LLM-friendly Markdown format, using either explicit input or the current browser tab URL.
+- **Ask AI:** Ask Raycast AI a question using a DeepWiki page as context.
 
 ## Commands
 
@@ -30,10 +31,16 @@ This extension allows you to quickly search for, open, and crawl documentation f
 ### Crawl DeepWiki Docs
 
 - **Action:** Crawls all linked documentation pages within a DeepWiki repository scope (e.g., everything under `https://deepwiki.com/owner/repo/`) and copies the combined text content to the clipboard.
-- **Input:** Accepts a GitHub repository URL or `owner/repo` identifier. If left empty, the command tries to use the current browser tab URL via the Raycast Browser Extension.
+- **Input:** Accepts a GitHub URL, DeepWiki URL, or `owner/repo` identifier. If left empty, the command tries to use the current browser tab URL via the Raycast Browser Extension.
 - **Output:** Combined Markdown content on the clipboard, suitable for pasting into LLMs or text editors.
 - **Progress:** Shows toasts indicating which page is currently being crawled.
 - **Usage:** Activate Raycast, type `Crawl DeepWiki Docs`, optionally enter a repository identifier, and press Enter. Alternatively, use the `Cmd+Shift+K` shortcut on a result in the "Search DeepWiki Repos" command.
+
+### Ask AI
+
+- **Action:** Answers a question using the text of a DeepWiki page and cites the page URL.
+- **Input:** Enter a question and optionally a GitHub URL, DeepWiki URL, or `owner/repo` identifier. If the repository is empty, the command uses the current browser tab URL via the Raycast Browser Extension.
+- **Usage:** Activate Raycast, type `Ask AI`, enter your question and repository, and press Enter. Raycast AI access is required.
 
 ## Setup
 

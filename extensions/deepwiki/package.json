@@ -38,6 +38,26 @@
       "mode": "view"
     },
     {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "description": "Ask Raycast AI a question using a DeepWiki page as context.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "required": true,
+          "placeholder": "Question about the repository"
+        },
+        {
+          "name": "repoIdentifier",
+          "type": "text",
+          "required": false,
+          "placeholder": "Optional: GitHub URL or org/repo; falls back to current tab"
+        }
+      ]
+    },
+    {
       "name": "crawl-deepwiki-docs",
       "title": "Crawl DeepWiki Docs",
       "description": "Crawl DeepWiki docs for a repo URL, org/repo, or the current browser tab.",
@@ -50,6 +70,13 @@
           "placeholder": "Optional: GitHub URL or org/repo; falls back to current tab"
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "read-deepwiki-page",
+      "title": "Read DeepWiki Page",
+      "description": "Read documentation from a DeepWiki repository page for AI questions."
     }
   ],
   "dependencies": {

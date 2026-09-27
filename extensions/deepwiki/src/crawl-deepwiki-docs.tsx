@@ -2,6 +2,7 @@ import { showToast, Toast, Clipboard, LaunchProps } from "@raycast/api"
 import fetch, { Response as FetchResponse } from "node-fetch"
 import * as cheerio from "cheerio"
 import { URL } from "url"
+import { getDeepWikiUrls } from "./deepwiki-url"
 import { getRepoIdentifierFromArgumentOrCurrentTab } from "./get-repo-identifier"
 
 const MAX_CONCURRENCY = 5 // Limit concurrent fetches
@@ -11,33 +12,6 @@ interface CrawlStats {
   attempted: number
   successful: number
   failed: number
-}
-
-function isValidHttpUrl(string: string): boolean {
-  try {
-    const url = new URL(string)
-    return url.protocol === "http:" || url.protocol === "https:"
-  } catch {
-    return false
-  }
-}
-
-function getBaseUrl(repoIdentifier: string): string | null {
-  if (isValidHttpUrl(repoIdentifier)) {
-    const url = new URL(repoIdentifier)
-    if (url.hostname === "github.com" || url.hostname === "www.github.com") {
-      const pathParts = url.pathname.split("/").filter(Boolean)
-      if (pathParts.length >= 2) {
-        return `https://deepwiki.com/${pathParts[0]}/${pathParts[1]}/`
-      }
-    }
-  } else {
-    const parts = repoIdentifier.split("/")
-    if (parts.length === 2 && parts[0] && parts[1]) {
-      return `https://deepwiki.com/${parts[0]}/${parts[1]}/`
-    }
-  }
-  return null
 }
 
 async function crawlPage(
@@ -104,13 +78,14 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     return
   }
 
-  const baseUrl = getBaseUrl(repoIdentifier)
-
-  if (!baseUrl) {
+  let baseUrl: string
+  try {
+    baseUrl = getDeepWikiUrls(repoIdentifier).repositoryUrl
+  } catch (error) {
     await showToast(
       Toast.Style.Failure,
       "Invalid Repository Identifier",
-      "Please use format 'org/repo' or a GitHub URL.",
+      error instanceof Error ? error.message : "Enter an owner/repo identifier, GitHub URL, or DeepWiki URL.",
     )
     return
   }

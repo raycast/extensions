@@ -1,5 +1,11 @@
 # DeepWiki Changelog
 
+## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Add an Ask AI command that answers questions with a DeepWiki page as context.
+- Add a DeepWiki page tool and YAML eval for Raycast AI.
+- Use one repository URL parser across Open DeepWiki Page, Crawl DeepWiki Docs, and Ask AI.
+
 ## [Search History and Avatars] - 2026-08-03
 
 - Added recent search history when the search field is empty

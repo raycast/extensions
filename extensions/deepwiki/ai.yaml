@@ -1,0 +1,15 @@
+instructions: |
+  For questions about a repository's DeepWiki documentation, read its page first.
+  Base the answer on the page content and cite its URL. Say when the page does not contain the answer.
+evals:
+  - input: "@deepwiki What does the React reconciler do in facebook/react?"
+    mocks:
+      read-deepwiki-page:
+        url: "https://deepwiki.com/facebook/react"
+        content: "The reconciler compares the new React element tree with the previous tree and schedules the needed updates."
+    expected:
+      - callsTool:
+          name: read-deepwiki-page
+          arguments:
+            repoIdentifier: facebook/react
+      - includes: "reconciler"
