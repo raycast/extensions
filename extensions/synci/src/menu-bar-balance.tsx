@@ -10,11 +10,11 @@ import { copyDiagnostics } from "./components/diagnostics";
 export default function MenuBarBalance() {
   // Never start an interactive OAuth flow from a background menu-bar refresh.
   const abortable = useRef<AbortController | null>(null);
-  const { data, error, isLoading, revalidate } = usePromise(
-    () => api.accountsWithBalances(abortable.current?.signal),
-    [],
-    { abortable, onError: () => {} },
-  );
+  // Keep recurring refreshes lightweight; missing summaries stay unavailable.
+  const { data, error, isLoading, revalidate } = usePromise(() => api.accounts(abortable.current?.signal), [], {
+    abortable,
+    onError: () => {},
+  });
   const [selectedIds, setSelectedIds] = useCachedState<string[]>("menu-bar-accounts", [], {
     cacheNamespace: "synci-views",
   });

@@ -58,7 +58,7 @@ In **Show Recent Spending**, select a currency total and choose **View Spending 
 
 Choose **View Account Details** on an account to see the bank details Synci provides, including IBAN, BIC/SWIFT, account holder, and account number. Copy a single field or all available details from the action menu.
 
-On macOS, enable **Synci Balance** in Raycast’s extension settings and turn on **Show in Menu Bar**. Use **Accounts in Total** to select accounts and **Menu Bar Display** to choose a currency or show only the icon. Totals remain separate by currency and reflect the last provider sync. Turn on **Background Refresh** for updates every 15 minutes, or choose **Refresh** in the menu. Click an account to open its overview.
+On macOS, enable **Synci Balance** in Raycast’s extension settings and turn on **Show in Menu Bar**. Use **Accounts in Total** to select accounts and **Menu Bar Display** to choose a currency or show only the icon. Totals remain separate by currency and reflect the last provider sync. Accounts without a reported summary balance appear as unavailable; open **View Accounts** to check their recorded balances. Turn on **Background Refresh** for updates every 15 minutes, or choose **Refresh** in the menu. Click an account to open its overview.
 
 ## Ask Synci
 
