@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { Candidate, DeployType, resolveCandidate } from "../candidates";
+import { assertConfirmedCandidate, rememberConfirmedCandidate } from "../confirmed-candidate";
 import { SERVICE_ACTIONS, callServiceAction } from "../service-actions";
 
 // Deliberately a closed list: the model's `action` argument is never passed to Dokploy unchecked,
@@ -52,6 +53,7 @@ async function lookup(input: Input): Promise<Candidate> {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const candidate = await lookup(input);
+  await rememberConfirmedCandidate("control-service", input, candidate);
   return {
     style: input.action === "stop" ? Action.Style.Destructive : Action.Style.Regular,
     message: `${LABELS[input.action]} ${candidate.name}? ${CONSEQUENCES[input.action]}`,
@@ -67,6 +69,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 /** Starts, stops, or reloads (restarts) a service. To rebuild it from source, use `deploy-service` instead. */
 export default async function tool(input: Input) {
   const candidate = await lookup(input);
+  await assertConfirmedCandidate("control-service", input, candidate);
 
   await callServiceAction(
     candidate.url,

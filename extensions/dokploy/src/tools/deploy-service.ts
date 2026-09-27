@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { Candidate, DeployType, resolveCandidate } from "../candidates";
+import { assertConfirmedCandidate, rememberConfirmedCandidate } from "../confirmed-candidate";
 import { callServiceAction } from "../service-actions";
 
 type Input = {
@@ -30,6 +31,7 @@ function isBuiltFromSource(candidate: Candidate) {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const candidate = await lookup(input);
+  await rememberConfirmedCandidate("deploy-service", input, candidate);
   return {
     style: Action.Style.Regular,
     message: isBuiltFromSource(candidate)
@@ -51,6 +53,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  */
 export default async function tool(input: Input) {
   const candidate = await lookup(input);
+  await assertConfirmedCandidate("deploy-service", input, candidate);
 
   await callServiceAction(
     candidate.url,
