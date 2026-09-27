@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Fix Destination Connection Test and MongoDB Delete] - {PR_MERGE_DATE}
+## [Fix Destination Connection Test and MongoDB Delete] - 2026-09-27
 
 - Fix `Add Destination`'s connection test, which always reported "Connection Failed" because it called a misspelled route. A failed test now also shows Dokploy's reason.
 - Fix deleting a MongoDB service, which sent the request to the wrong route and never deleted it.
