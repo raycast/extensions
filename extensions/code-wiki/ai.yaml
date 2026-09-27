@@ -1,0 +1,22 @@
+instructions: |
+  Use the repository wiki tool when the user asks to open Code Wiki documentation for a specific GitHub repository.
+  Use the search tool when the user wants to find repositories on Code Wiki.
+  These tools open pages in the browser. They do not read or answer questions from the wiki.
+evals:
+  - input: "@code-wiki Open the Code Wiki for https://github.com/facebook/react"
+    mocks:
+      open-repo-wiki: "Opened https://codewiki.google/github.com/facebook/react"
+    expected:
+      - callsTool:
+          name: open-repo-wiki
+          arguments:
+            repository: "https://github.com/facebook/react"
+  - input: "@code-wiki Search for React repositories on Code Wiki"
+    mocks:
+      search-repo-wikis: "Opened https://codewiki.google/search?q=React"
+    expected:
+      - callsTool:
+          name: search-repo-wikis
+          arguments:
+            query:
+              includes: React
