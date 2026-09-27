@@ -1,5 +1,6 @@
 import { Application, closeMainWindow, getApplications, open, showHUD } from "@raycast/api";
-import { readFile } from "fs/promises";
+import { execFile } from "child_process";
+import { promisify } from "util";
 
 export const bundleID = "io.github.rbstp.heed";
 
@@ -10,10 +11,18 @@ export function findHeed(apps: Application[]): Application | undefined {
 }
 
 /// The bundle's marketing version, read from its Info.plist: the app answers nothing over the URL,
-/// so what it understands has to be known before asking.
+/// so what it understands has to be known before asking. `plutil` reads XML and binary alike.
 async function version(app: Application): Promise<string | undefined> {
-  const plist = await readFile(`${app.path}/Contents/Info.plist`, "utf8");
-  return /<key>CFBundleShortVersionString<\/key>\s*<string>(\d+(?:\.\d+)*)<\/string>/.exec(plist)?.[1];
+  const { stdout } = await promisify(execFile)("/usr/bin/plutil", [
+    "-extract",
+    "CFBundleShortVersionString",
+    "raw",
+    "-o",
+    "-",
+    `${app.path}/Contents/Info.plist`,
+  ]);
+  const text = stdout.trim();
+  return /^\d+(\.\d+)*$/.test(text) ? text : undefined;
 }
 
 function older(version: string, than: string): boolean {
