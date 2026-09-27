@@ -13,7 +13,7 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { access, chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
 import { categoryName, environmentName, facetCounts, splitPackage } from "./lib/convention";
 import { learnedPackages, packageForTarget } from "./lib/link-command";
@@ -150,22 +150,24 @@ const Command = () => {
   const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
 
   /**
-   * Re-suggested from the change handlers rather than derived on render, because the title is a field the
-   * person owns: a derived value would snap back the moment they typed over it. Target and Desktop App are
-   * the two inputs that change what the command *does*, so they are the two that re-propose its name. The
-   * brand is resolved the same way the Package placeholder is, so the title and the subtitle agree.
+   * The title is a field the person owns, so the suggestion is offered to it rather than bound to it: a bound
+   * value would snap back the moment they typed over it. It is re-offered whenever it changes, which covers
+   * Target and Desktop App, the two inputs that change what the command *does*, and also the collection
+   * finishing discovery after the person has started typing, so a host it files under `Jira` stops being
+   * titled `Atlassian`. The brand is resolved the same way the Package placeholder is, so the title and the
+   * subtitle agree.
    */
-  const suggestTitleFor = (nextTarget: string, nextDesktopApplication: string) =>
-    setTitleState((state) =>
-      titleSuggested(
-        state,
-        suggestTitle({
-          target: nextTarget,
-          brand: packageForTarget(nextTarget.trim(), learned) ?? brandFor(nextTarget.trim()),
-          desktopApplication: nextDesktopApplication || undefined,
-        }),
-      ),
-    );
+  const titleSuggestion = suggestTitle({
+    target,
+    brand: packageForTarget(target.trim(), learned) ?? brandFor(target.trim()),
+    desktopApplication: desktopApplication || undefined,
+  });
+
+  useEffect(() => setTitleState((state) => titleSuggested(state, titleSuggestion)), [titleSuggestion]);
+
+  // A field left empty falls back to the suggestion, so Enter while the field is still focused and empty
+  // creates the same command tabbing away would.
+  const effectiveTitle = title.trim() || titleSuggestion || "";
 
   // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
   // only the resolved string.
@@ -239,9 +241,9 @@ const Command = () => {
 
   const placeholder = findPlaceholder(target);
   const filename =
-    title.trim() && target.trim()
+    effectiveTitle && target.trim()
       ? scriptFilename({
-          title,
+          title: effectiveTitle,
           target,
           environment: chosenEnvironment || undefined,
           packageName: resolvedPackage || undefined,
@@ -250,7 +252,7 @@ const Command = () => {
   const preview = filename && placeholder ? `${filename} — prompts for “${placeholder}”` : filename;
 
   const submit = async () => {
-    if (!title.trim() || !target.trim()) {
+    if (!effectiveTitle || !target.trim()) {
       await showFailureToast(new Error("A title and a target are both required"), { title: "Nothing to create" });
       return;
     }
@@ -265,7 +267,7 @@ const Command = () => {
     try {
       const path = await createScript({
         directory,
-        title,
+        title: effectiveTitle,
         target,
         reuseIcon: await reusableIcon(discovered?.commands ?? [], directory, resolvedPackage),
         environment: chosenEnvironment,
@@ -303,9 +305,10 @@ const Command = () => {
         id="title"
         title="Title"
         placeholder="Netflix"
-        info="Suggested from the target until you type your own. Clear the field to get suggestions back."
+        info="Suggested from the target. Leave it empty to use the suggestion."
         value={title}
         onChange={(next) => setTitleState((state) => titleEdited(state, next))}
+        onBlur={() => setTitleState((state) => (state.title.trim() ? state : titleSuggested(state, titleSuggestion)))}
       />
       <Form.TextField
         id="target"
@@ -315,10 +318,7 @@ const Command = () => {
 
 Put {query} anywhere in a URL to make it a search command: Raycast prompts for the value and percent-encodes it before opening.`}
         value={target}
-        onChange={(next) => {
-          setTarget(next);
-          suggestTitleFor(next, desktopApplication);
-        }}
+        onChange={setTarget}
       />
 
       <Form.Separator />
@@ -398,10 +398,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
           title="Desktop App"
           info="The native app for this service, if it has one. Picking it turns the command into a surface router: it opens the app where the app is installed and the target where it is not, so the same command works on machines that differ in what they have. It stays argument-free, so it still fires from a hotkey."
           value={desktopApplication}
-          onChange={(next) => {
-            setDesktopApplication(next);
-            suggestTitleFor(target, next);
-          }}
+          onChange={setDesktopApplication}
         >
           <Form.Dropdown.Item title="None — always open the target" value="" />
           {(applications ?? []).map((app) => (
