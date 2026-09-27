@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "magpie",
+  "title": "Magpie",
+  "description": "Front end for magpie, the local app that assigns each coding agent a model. Switch models, apply profiles, and view usage and quota.",
+  "icon": "magpie.png",
+  "author": "dengpeng",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-model",
+      "title": "Switch Agent Model",
+      "icon": "magpie.png",
+      "description": "List installed agents and switch the model each one uses",
+      "mode": "view",
+      "keywords": [
+        "magpie",
+        "model",
+        "agent"
+      ]
+    },
+    {
+      "name": "profiles",
+      "title": "Use Profile",
+      "icon": "magpie.png",
+      "description": "List saved magpie profiles and apply one",
+      "mode": "view",
+      "keywords": [
+        "magpie",
+        "profile"
+      ]
+    },
+    {
+      "name": "usage",
+      "title": "Show Usage",
+      "icon": "magpie.png",
+      "description": "Show magpie token usage by agent and model",
+      "mode": "view",
+      "keywords": [
+        "magpie",
+        "usage",
+        "tokens"
+      ]
+    },
+    {
+      "name": "subscriptions",
+      "title": "Show Subscription Quotas",
+      "icon": "magpie.png",
+      "description": "Show subscription allowance and reset times known to magpie",
+      "mode": "view",
+      "keywords": [
+        "magpie",
+        "quota",
+        "subscription",
+        "account"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Magpie CLI Path",
+      "description": "Path to the magpie executable. ~, $HOME, and ${HOME} are expanded. The path is not passed through a shell.",
+      "default": "~/.local/bin/magpie",
+      "placeholder": "~/.local/bin/magpie"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "test": "tsx --test --test-reporter spec",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

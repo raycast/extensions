@@ -1,0 +1,45 @@
+[
+  {
+    "agent": "codex",
+    "user": "ada@example.com · Team",
+    "plan": "team",
+    "active": true,
+    "on": true,
+    "windows": [
+      {
+        "name": "5 hours",
+        "used": 0,
+        "remaining": 100,
+        "resetsAt": "2026-09-25T20:22:18+08:00"
+      },
+      {
+        "name": "7 days",
+        "used": 23,
+        "remaining": 77,
+        "resetsAt": "2026-09-27T07:31:04+08:00"
+      }
+    ]
+  },
+  {
+    "agent": "grok",
+    "user": "ada@example.com",
+    "active": true,
+    "on": false,
+    "windows": [
+      {
+        "name": "7 days",
+        "used": 0,
+        "remaining": 100,
+        "resetsAt": "2026-10-02T01:43:44.099304Z"
+      }
+    ]
+  },
+  {
+    "agent": "claude",
+    "user": "ada@example.com",
+    "active": false,
+    "on": true,
+    "error": "quota unavailable",
+    "windows": []
+  }
+]
