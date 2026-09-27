@@ -1,0 +1,180 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycash",
+  "title": "RayCash",
+  "description": "Menu bar balances and recent transactions across your linked financial institutions, via SimpleFIN Bridge.",
+  "icon": "extension-icon.png",
+  "author": "zeev",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "setup",
+      "title": "Set Up SimpleFIN",
+      "description": "Claim a SimpleFIN setup token and get your Access URL, without using a terminal.",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Menu Bar",
+      "description": "Balances and recent transactions in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "2h"
+    },
+    {
+      "name": "accounts",
+      "title": "Accounts",
+      "description": "Dynamically rename, hide, or exclude accounts from your net worth.",
+      "mode": "view"
+    },
+    {
+      "name": "transactions",
+      "title": "Transactions",
+      "description": "View a tabular list of recent transactions across all accounts.",
+      "mode": "view"
+    },
+    {
+      "name": "refresh",
+      "title": "Refresh Balances",
+      "description": "Force a refresh of RayCash balances.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessUrl",
+      "title": "SimpleFIN Access URL",
+      "description": "Paste the URL from the Set Up SimpleFIN command. Stored encrypted by Raycast.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "prefArchiveDays",
+      "title": "Local Archive Limit (Days)",
+      "description": "How many days of historical transactions to keep in local cache. Leave blank for 365.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefAccountTxn",
+      "title": "Transactions Per Account",
+      "description": "How many recent transactions to list inside each account submenu. Leave blank for 8.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefGlobalTxnCount",
+      "title": "Global Transactions Count",
+      "description": "How many recent transactions to show in the combined list at the bottom. Leave blank for 15, or 0 for none.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefGlobalTxnDays",
+      "title": "Global Transactions Days",
+      "description": "Show all transactions from the last X days in the combined list. Leave blank for 7.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefTitleMode",
+      "title": "Menu Bar Title",
+      "description": "What to display next to the icon in the menu bar.",
+      "type": "dropdown",
+      "default": "total",
+      "required": false,
+      "data": [
+        {
+          "title": "Net Total",
+          "value": "total"
+        },
+        {
+          "title": "Icon Only",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "prefGroupByDate",
+      "title": "Grouping",
+      "label": "Group transactions by date",
+      "description": "Off shows one flat list with the date on each row, divided where the day changes. On collapses each earlier day into its own submenu and leaves today expanded.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "prefRowTemplate",
+      "title": "Row Template",
+      "description": "What each transaction row shows. Tokens: {date} {amount} {payee} {payee_raw} {description} {memo} {account} {posted} {pending} {id}. Text between tokens is literal, and an empty token takes its punctuation with it. {date} uses the Day Heading Format unless you give it one, e.g. {date:EEE MMM d}. {account} is dropped inside an account submenu. Leave blank for {date} • {amount} • {payee} ({account})",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefDisableAlignment",
+      "title": "Alignment",
+      "label": "Disable pseudo alignment",
+      "description": "Amounts and dates are padded with width-matched Unicode spaces so they line up in a column, since the menu font's digits are proportional. Check this to leave them unpadded — useful if the padding copies badly into another app or renders oddly at your font size.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "prefDateFormat",
+      "title": "Day Heading Format",
+      "description": "ICU pattern for the day headings when grouping is on: yyyy MM dd EEE MMMM. Note dd is day-of-month, not DD. Today and Yesterday are always named. Leave blank for MM-dd.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefDefaultCurrency",
+      "title": "Hide Currency Symbol / Code",
+      "description": "Enter a symbol or code to strip from amounts (e.g., '$', 'USD', '€'). Leave blank to show currency on all amounts.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefPositiveColor",
+      "title": "Positive / Income Color",
+      "description": "Hex (e.g. 2ECC71, #0f0) or HTML color (lime, blueviolet). Leave blank for #0f0.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "prefNegativeColor",
+      "title": "Negative / Expense Color",
+      "description": "Hex (e.g. E74C3C, #f00) or HTML color (red, tomato). Leave blank for #f00.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "minIntervalMinutes",
+      "title": "Minimum Fetch Interval (Minutes)",
+      "description": "Hard floor between network requests. SimpleFIN suggests ~90 mins. Leave blank for 90.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
