@@ -171,7 +171,9 @@ function Show-Toast([string]$title, [string]$body) {
 
 function Complete-Session($s) {
   $script:done = $true
-  $script:closeAt = (Get-NowMs) + 12000
+  $showWindow = $s.overlay -ne $false
+  # A hidden timer stays hidden; the process only lives long enough for the sound to play.
+  $script:closeAt = (Get-NowMs) + $(if ($showWindow) { 12000 } else { 6000 })
   $isFocus = $s.kind -eq 'focus'
   $time.Text = 'Done'
   $sub.Text = if ($isFocus) { 'Time for a break' } else { 'Back to focus' }
@@ -181,8 +183,10 @@ function Complete-Session($s) {
   Set-Arc 1
   $pauseBtn.Visibility = 'Collapsed'
   $stopBtn.Visibility = 'Collapsed'
-  $win.Visibility = 'Visible'
-  $win.Opacity = 1
+  if ($showWindow) {
+    $win.Visibility = 'Visible'
+    $win.Opacity = 1
+  }
   $title = if ($isFocus) { 'Focus session complete' } else { 'Break is over' }
   $body = if ($isFocus) { if ($s.label) { "$($s.label). Time for a break." } else { 'Time for a break.' } } else { 'Ready for the next focus session?' }
   Show-Toast $title $body
@@ -307,5 +311,9 @@ $first = Read-State
 if ($null -eq $first -or $first -is [string] -or $first.id -ne $Id -or $first.stoppedAt) { Write-Log 'no session'; exit 0 }
 Write-Log 'started'
 $win.Add_ContentRendered({ Update-View; $timer.Start() })
-[void]$win.ShowDialog()
+# Show() plus a dispatcher loop instead of ShowDialog(): hiding a modal window ends
+# ShowDialog, which would kill the timer (and its alarm) when the user hides it.
+$win.Add_Closed({ [Windows.Threading.Dispatcher]::CurrentDispatcher.InvokeShutdown() })
+$win.Show()
+[Windows.Threading.Dispatcher]::Run()
 Write-Log 'closed'

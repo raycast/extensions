@@ -29,7 +29,17 @@ const NUM = `style="font-variant-numeric: tabular-nums"`;
 const W = 440;
 
 export const MIN = 60_000;
-export const DAY = 24 * 60 * MIN;
+
+// Calendar math, not fixed 24-hour steps, so daylight-saving changes never shift a day.
+export const startOfDay = (t: number) => {
+  const d = new Date(t);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+};
+
+export const addDays = (day: number, n: number) => {
+  const d = new Date(day);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n).getTime();
+};
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
@@ -171,7 +181,7 @@ export function heatmap(counts: Map<number, number>, today: number, weeks = 18) 
   const top = 32;
   // Columns are weeks starting on Monday; the last column holds today.
   const dow = (new Date(today).getDay() + 6) % 7;
-  const start = today - (dow + (weeks - 1) * 7) * DAY;
+  const start = addDays(today, -(dow + (weeks - 1) * 7));
   const level = (n: number) => (n === 0 ? 0 : n <= 1 ? 0.3 : n <= 3 ? 0.55 : n <= 5 ? 0.8 : 1);
   const square = (x: number, y: number, size: number, o: number, r: number) =>
     o === 0
@@ -180,9 +190,9 @@ export function heatmap(counts: Map<number, number>, today: number, weeks = 18) 
   let cells = "";
   for (let w = 0; w < weeks; w++) {
     for (let d = 0; d < 7; d++) {
-      const day = start + (w * 7 + d) * DAY;
-      if (day > today + DAY / 2) continue;
-      const n = counts.get(new Date(new Date(day).toDateString()).getTime()) ?? 0;
+      const day = addDays(start, w * 7 + d);
+      if (day > today) continue;
+      const n = counts.get(day) ?? 0;
       cells += square(left + w * (cell + gap), top + d * (cell + gap), cell, level(n), 4);
     }
   }

@@ -29,20 +29,10 @@ import {
   saveHistory,
 } from "./storage";
 import * as svg from "./svg";
-import { DAY, MIN, clock, duration, hhmm } from "./svg";
-
-type Prefs = {
-  focusMinutes?: string;
-  shortBreakMinutes?: string;
-  longBreakMinutes?: string;
-  longBreakInterval?: string;
-  dailyGoal?: string;
-  showOverlay?: boolean;
-  playSound?: boolean;
-};
+import { MIN, addDays, clock, duration, hhmm, startOfDay } from "./svg";
 
 function settings() {
-  const p = getPreferenceValues<Prefs>();
+  const p = getPreferenceValues<Preferences.Pomodoro>();
   const n = (v: string | undefined, fallback: number) => (Number(v) > 0 ? Number(v) : fallback);
   return {
     minutes: {
@@ -57,22 +47,21 @@ function settings() {
   };
 }
 
-const startOfDay = (t: number) => new Date(new Date(t).toDateString()).getTime();
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const sumFocus = (list: Session[]) => list.reduce((t, s) => t + s.focusedMs, 0);
 
 function dayTitle(day: number, today: number) {
   if (day === today) return "Today";
-  if (day === today - DAY) return "Yesterday";
+  if (day === addDays(today, -1)) return "Yesterday";
   return new Date(day).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
 function streakOf(completedDays: Set<number>, today: number) {
-  let day = completedDays.has(today) ? today : today - DAY;
+  let day = completedDays.has(today) ? today : addDays(today, -1);
   let streak = 0;
   while (completedDays.has(day)) {
     streak++;
-    day = startOfDay(day - DAY / 2);
+    day = addDays(day, -1);
   }
   return streak;
 }
@@ -267,12 +256,12 @@ export default function Command() {
 
   // Charts
   const week = Array.from({ length: 7 }, (_, i) => {
-    const day = startOfDay(today - (6 - i) * DAY + DAY / 2);
+    const day = addDays(today, i - 6);
     const ms = sumFocus(history.filter((s) => startOfDay(s.endedAt) === day));
     return { label: new Date(day).toLocaleDateString("en-US", { weekday: "short" }), ms, today: day === today };
   });
   const weekMs = week.reduce((t, d) => t + d.ms, 0);
-  const weekDone = history.filter((s) => s.completed && s.endedAt >= today - 6 * DAY).length;
+  const weekDone = history.filter((s) => s.completed && s.endedAt >= addDays(today, -6)).length;
   const counts = new Map<number, number>();
   for (const s of history)
     if (s.completed) counts.set(startOfDay(s.endedAt), (counts.get(startOfDay(s.endedAt)) ?? 0) + 1);

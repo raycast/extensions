@@ -8,7 +8,7 @@ A Pomodoro timer for Raycast on Windows. Type `pomodoro`, write what you are abo
 - **Notification and sound** when a session ends, even with Raycast closed.
 - **Big timer in Raycast** with the ring, the end time and your progress in the current cycle.
 - **History** grouped by day, with a timeline of each day. Sessions stopped after at least one minute are kept and marked.
-- **Charts:** today's progress toward your daily goal, the last 7 days, a 16-week heatmap, streaks and the time of day you focus best.
+- **Charts:** today's progress toward your daily goal, the last 7 days, an 18-week heatmap, streaks and the time of day you focus best.
 - **Export** the whole history as CSV.
 
 ## Preferences
