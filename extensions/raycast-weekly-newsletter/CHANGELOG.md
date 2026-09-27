@@ -4,6 +4,7 @@
 
 - Added AI tools to list recent Raycast Weekly posts and read full posts.
 - Added YAML evals for finding and summarizing posts.
+- Updated the Raycast API dependency to version 2.5.2.
 
 ## [Update Posts Loading and Cache] - 2026-05-06
 
