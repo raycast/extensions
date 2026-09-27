@@ -1,5 +1,10 @@
 # Dokploy Changelog
 
+## [Fix Destination Connection Test and MongoDB Delete] - 2026-09-27
+
+- Fix `Add Destination`'s connection test, which always reported "Connection Failed" because it called a misspelled route. A failed test now also shows Dokploy's reason.
+- Fix deleting a MongoDB service, which sent the request to the wrong route and never deleted it.
+
 ## [AI Tools: Deploy and Control Services] - 2026-09-27
 
 - Add 2 AI tools that change a service, each asking you to confirm first: Deploy Service (rebuild an application or Compose stack from its latest source, or restart a database with its data kept) and Control Service (start, stop, or reload).

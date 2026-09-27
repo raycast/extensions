@@ -120,6 +120,10 @@ export default function Services({
           body = { mariadbId: id };
           endpoint = "mariadb.remove";
           break;
+        case "mongo":
+          body = { mongoId: id };
+          endpoint = "mongo.remove";
+          break;
         case "mysql":
           body = { mysqlId: id };
           endpoint = "mysql.remove";
