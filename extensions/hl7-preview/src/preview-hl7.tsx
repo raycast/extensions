@@ -17,7 +17,17 @@ import { useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fieldDef } from "./definitions";
 import { Message, isEmpty, parseHL7 } from "./hl7";
-import { HistoryEntry, clearHistory, entryTitle, forget, loadHistory, openEntry, remember, toEntry } from "./history";
+import {
+  HistoryEntry,
+  clearHistory,
+  entryTitle,
+  isKeepingPastViews,
+  forget,
+  loadHistory,
+  openEntry,
+  remember,
+  toEntry,
+} from "./history";
 import { messageMarkdown, messageType, segmentName } from "./render";
 import { Source, readClipboard, readFinderSelection, readSource } from "./sources";
 
