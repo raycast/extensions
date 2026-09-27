@@ -1,5 +1,11 @@
 # Port Manager Changelog
 
+## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Let Ask AI list open ports and create, edit, or delete named ports
+- Let Ask AI kill a port's listener, all processes with a listed name, or a listed process's parent after confirmation
+- Add YAML evals for these requests, including killing a service on port 3000
+
 ## [Verified Kills] - 2026-09-19
 
 - After a kill, wait for the process to actually exit before reporting success. A process that ignores the signal now shows "Process Still Running" with a one-key Force Kill instead of a false "Killed Process"
