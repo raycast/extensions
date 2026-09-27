@@ -1,0 +1,23 @@
+{
+  "name": "tweek-task-manager",
+  "title": "Tweek Task Manager",
+  "version": "1.0.0",
+  "mcpServer": {
+    "name": "@tweek",
+    "endpoint": "https://tweek.so/mcp",
+    "restBaseUrl": "https://tweek.so/api/v1"
+  },
+  "preferences": {
+    "defaultCalendar": "string",
+    "hideCompleted": "boolean",
+    "dateFormat": "MM/dd/yyyy | dd/MM/yyyy",
+    "weekStartsOn": "Monday | Sunday",
+    "defaultTaskColor": "string"
+  },
+  "commands": [
+    "src/commands/dashboard.tsx",
+    "src/commands/create-task.tsx",
+    "src/commands/quick-add.tsx",
+    "src/commands/search-tasks.tsx"
+  ]
+}
