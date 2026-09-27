@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Optional AI Usage] - 2026-09-23
+## [Optional AI Usage] - {PR_MERGE_DATE}
 
 - Add optional AI Usage views to both the main command and menu-bar dropdown for Codex and Claude quota windows
 - Keep Codex, Claude, and Spark visibility independently configurable, with Spark hidden by default
