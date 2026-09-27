@@ -23,7 +23,7 @@ export type SearchMetadata = {
   title: string;
   description: string;
   type: MetadataType;
-  image: string;
+  image?: string;
   audio?: string;
 };
 
@@ -38,7 +38,7 @@ export type SearchResult = {
   type: MetadataType;
   title: string;
   description: string;
-  image: string;
+  image?: string;
   audio?: string;
   source: string;
   universalLink: string;
@@ -49,8 +49,3 @@ export type CacheData = {
   link: string;
   searchResult: SearchResult;
 };
-
-export interface ApiError {
-  code: string;
-  message: string;
-}

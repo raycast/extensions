@@ -7,7 +7,8 @@
   "author": "sjdonado",
   "contributors": [
     "ridemountainpig",
-    "0xdhrv"
+    "0xdhrv",
+    "ray.dhruv"
   ],
   "icon": "icon.png",
   "categories": [
@@ -99,27 +100,27 @@
     {
       "name": "instanceUrl",
       "title": "Self-Hosted Instance URL",
-      "description": "Base URL of a self-hosted I Don't Have Spotify instance (e.g. https://idhs.example.com). Leave empty to use the default instance.",
+      "description": "Base URL of a self-hosted instance (e.g. https://idhs.example.com). The public instance requires a browser login and does not support direct conversion from Raycast.",
       "type": "textfield",
       "placeholder": "https://idonthavespotify.sjdonado.com",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^2.2.7",
+    "@raycast/api": "^2.5.1",
     "play-sound": "^1.1.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.1.1",
+    "@types/node": "26.6.2",
     "@types/play-sound": "^1.1.2",
-    "@types/react": "19.2.17",
-    "@typescript-eslint/eslint-plugin": "^8.64.0",
-    "@typescript-eslint/parser": "^8.64.0",
-    "eslint": "^10.7.0",
+    "@types/react": "19.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.9.5",
+    "prettier": "^3.9.9",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -127,9 +128,23 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "node --test tests/*.test.mjs"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
+  ],
+  "tools": [
+    {
+      "name": "convert-link",
+      "title": "Convert Music Link",
+      "description": "Convert a supplied music URL to one streaming platform or all available platforms. Returns metadata, verified-match flags, and a universal sharing link."
+    },
+    {
+      "name": "get-supported-platforms",
+      "title": "Get Supported Platforms",
+      "description": "List the nine destination services supported by this extension. Does not check availability for a particular song."
+    }
   ]
 }
