@@ -16,5 +16,5 @@ The 10-second background refresh updates CPU and storage without starting extern
 
 ## Data and Privacy
 
-- All system data (CPU, memory, disk, battery, processes) is read locally via macOS tools (`system_profiler`, `sysctl`, `ps`, `pmset`, `iostat`, `diskutil`); the extension makes no network requests.
+- The monitoring commands read system data locally via macOS tools (`system_profiler`, `sysctl`, `ps`, `pmset`, `iostat`, `diskutil`). When you use Ask System Monitor, Raycast AI receives the current CPU, memory, disk, and battery readings. The AI tool does not include your serial number, hostname, or process list.
 - **System Info** and the **Copy System Report** action include your Mac's serial number and hostname. Review the report before sharing it.
