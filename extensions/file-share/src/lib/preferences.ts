@@ -3,11 +3,6 @@ import os from "node:os";
 import path from "node:path";
 import { CONTROL_PORT, DEFAULT_PORT, PORT_RANGE } from "./types";
 
-type RawPreferences = {
-  port?: string;
-  receiveDirectory?: string;
-};
-
 export type ResolvedPreferences = {
   port: number;
   /** Set when the configured port is unusable, so the panel can say why the fallback was used. */
@@ -28,7 +23,7 @@ export function expandHome(input: string): string {
 }
 
 export function resolvePreferences(): ResolvedPreferences {
-  const raw = getPreferenceValues<RawPreferences>();
+  const raw = getPreferenceValues<Preferences>();
 
   let port = DEFAULT_PORT;
   let portProblem: string | undefined;
