@@ -12,6 +12,7 @@ interface ChromiumBrowserDef {
   userDir: string;
   fallbackIcon: string;
   exeCandidates: string[];
+  singleProfile?: boolean;
 }
 
 interface ChromiumProfileInfo {
@@ -57,7 +58,7 @@ function findLogoInAppDir(exePath: string): string | undefined {
 
 function getExtractedAssetIcon(browserId: string, exePath?: string): string | undefined {
   try {
-    const known = ["chrome", "edge", "brave", "vivaldi"];
+    const known = ["chrome", "edge", "brave", "vivaldi", "dia"];
     if (known.includes(browserId)) {
       return `extracted/${browserId}.png`;
     }
@@ -85,9 +86,19 @@ function getExtractedAssetIcon(browserId: string, exePath?: string): string | un
   return undefined;
 }
 
+function fileExists(filePath: string): boolean {
+  if (!filePath) return false;
+  try {
+    fs.accessSync(filePath, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function findExe(candidates: string[]): string | undefined {
   for (const c of candidates) {
-    if (c && fs.existsSync(c)) {
+    if (c && fileExists(c)) {
       return c;
     }
   }
@@ -99,7 +110,10 @@ function cleanRegistryCmd(cmd: string): string {
   return match ? match[1] : cmd.replace(/"/g, "").trim();
 }
 
+let cachedRegistryBrowsers: Map<string, string> | null = null;
+
 function getBrowsersFromRegistry(): Map<string, string> {
+  if (cachedRegistryBrowsers) return cachedRegistryBrowsers;
   const map = new Map<string, string>();
   if (process.platform !== "win32") return map;
 
@@ -134,6 +148,7 @@ function getBrowsersFromRegistry(): Map<string, string> {
               else if (lowerKey.includes("firefox")) map.set("firefox", cleaned);
               else if (lowerKey.includes("arc")) map.set("arc", cleaned);
               else if (lowerKey.includes("opera")) map.set("opera", cleaned);
+              else if (lowerKey.includes("dia")) map.set("dia", cleaned);
             }
           }
         }
@@ -143,7 +158,77 @@ function getBrowsersFromRegistry(): Map<string, string> {
     }
   }
 
+  cachedRegistryBrowsers = map;
   return map;
+}
+
+let cachedPackagedBrowsers: ChromiumBrowserDef[] | null = null;
+
+function detectDynamicPackagedBrowsers(localAppData: string, knownIds: Set<string>): ChromiumBrowserDef[] {
+  if (cachedPackagedBrowsers) {
+    for (const b of cachedPackagedBrowsers) {
+      knownIds.add(b.id);
+    }
+    return cachedPackagedBrowsers;
+  }
+  const discovered: ChromiumBrowserDef[] = [];
+  const packagesDir = path.join(localAppData, "Packages");
+  if (!fs.existsSync(packagesDir)) return discovered;
+
+  const ignorePrefixes = [
+    "Microsoft.",
+    "5319275A.WhatsAppDesktop",
+    "SpotifyAB.",
+    "Raycast.",
+    "TelegramMessengerLLP.",
+    "Clipchamp.",
+    "B9ECED6F.",
+    "NVIDIACorp.",
+    "21090PaddyXu.",
+    "Deepender.",
+  ];
+
+  try {
+    const entries = fs.readdirSync(packagesDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const pkgName = entry.name;
+      if (ignorePrefixes.some((p) => pkgName.startsWith(p))) continue;
+
+      const localCacheDir = path.join(packagesDir, pkgName, "LocalCache", "Local");
+      if (!fs.existsSync(localCacheDir)) continue;
+
+      try {
+        const subdirs = fs.readdirSync(localCacheDir, { withFileTypes: true });
+        for (const sub of subdirs) {
+          if (!sub.isDirectory()) continue;
+          const candidateUserData = path.join(localCacheDir, sub.name, "User Data");
+          const localState = path.join(candidateUserData, "Local State");
+          if (fs.existsSync(localState)) {
+            const rawId = sub.name.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+            if (knownIds.has(rawId)) continue;
+
+            const winAppsExe = path.join(localAppData, "Microsoft", "WindowsApps", `${sub.name}.exe`);
+            discovered.push({
+              id: rawId,
+              name: sub.name,
+              userDir: candidateUserData,
+              fallbackIcon: "extension-icon.png",
+              exeCandidates: [winAppsExe].filter(Boolean),
+            });
+            knownIds.add(rawId);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  cachedPackagedBrowsers = discovered;
+  return discovered;
 }
 
 export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
@@ -231,6 +316,7 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
         path.join(localAppData, "Arc", "Application", "Arc.exe"),
         path.join(localAppData, "Microsoft", "WindowsApps", "Arc.exe"),
       ].filter(Boolean),
+      singleProfile: true,
     },
     {
       id: "opera",
@@ -243,7 +329,47 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
         path.join(programFiles, "Opera", "launcher.exe"),
       ].filter(Boolean),
     },
+    {
+      id: "dia",
+      name: "Dia",
+      userDir: (function () {
+        const pkgDir = path.join(
+          localAppData,
+          "Packages",
+          "TheBrowserCompany.Dia_ttt1ap7aakyb4",
+          "LocalCache",
+          "Local",
+          "Dia",
+          "User Data",
+        );
+        if (fs.existsSync(pkgDir)) return pkgDir;
+        try {
+          const packagesDir = path.join(localAppData, "Packages");
+          if (fs.existsSync(packagesDir)) {
+            const matches = fs.readdirSync(packagesDir).filter((d) => d.startsWith("TheBrowserCompany.Dia"));
+            for (const m of matches) {
+              const candidate = path.join(packagesDir, m, "LocalCache", "Local", "Dia", "User Data");
+              if (fs.existsSync(candidate)) return candidate;
+            }
+          }
+        } catch {
+          // ignore
+        }
+        return path.join(localAppData, "Dia", "User Data");
+      })(),
+      fallbackIcon: "extracted/dia.png",
+      exeCandidates: [
+        registryBrowsers.get("dia") || "",
+        path.join(localAppData, "Microsoft", "WindowsApps", "Dia.exe"),
+        path.join(localAppData, "Dia", "Application", "Dia.exe"),
+      ].filter(Boolean),
+      singleProfile: true,
+    },
   ];
+
+  const knownIds = new Set(chromiumConfigs.map((c) => c.id));
+  const dynamicPackaged = detectDynamicPackagedBrowsers(localAppData, knownIds);
+  chromiumConfigs.push(...dynamicPackaged);
 
   for (const config of chromiumConfigs) {
     const exe = findExe(config.exeCandidates);
@@ -251,6 +377,27 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
 
     const extractedIcon = getExtractedAssetIcon(config.id, exe);
     const logoIcon = extractedIcon || findLogoInAppDir(exe);
+
+    // Browsers with unified window/spaces architecture (e.g. Dia, Arc) do not support multi-window CLI profile targeting.
+    // Emit a single clean top-level launcher entry for seamless URL and search routing.
+    if (config.singleProfile || config.id === "dia" || config.id === "arc") {
+      const profileId = `${config.id}_default`;
+      const customName = nicknames[profileId];
+      profiles.push({
+        id: profileId,
+        browserId: config.id,
+        browserName: config.name,
+        profileName: "Default",
+        displayName: customName || config.name,
+        profileDirectory: "default-no-arg",
+        executablePath: exe,
+        userDataDir: config.userDir,
+        iconPath: logoIcon,
+        fallbackIcon: config.fallbackIcon,
+      });
+      continue;
+    }
+
     const localStatePath = path.join(config.userDir, "Local State");
 
     const detectedForBrowser: BrowserProfile[] = [];
@@ -413,6 +560,15 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
   for (const p of profiles) {
     p.isFavorite = favIds.includes(p.id);
   }
+
+  // Always keep profiles organized in alphabetical order:
+  // 1. Group browsers alphabetically by browser name (A -> Z)
+  // 2. Sub-sort profiles within each browser by display name (A -> Z)
+  profiles.sort((a, b) => {
+    const browserCmp = a.browserName.localeCompare(b.browserName, undefined, { sensitivity: "base" });
+    if (browserCmp !== 0) return browserCmp;
+    return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+  });
 
   return profiles;
 }
