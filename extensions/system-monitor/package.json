@@ -19,7 +19,8 @@
     "jadenmajid",
     "ADCAdams",
     "TurboCoder13",
-    "Olli0103"
+    "Olli0103",
+    "zellux"
   ],
   "commands": [
     {
@@ -154,8 +155,57 @@
         {
           "title": "Network",
           "value": "network"
+        },
+        {
+          "title": "AI Usage",
+          "value": "ai-usage"
         }
       ]
+    },
+    {
+      "name": "showCodexUsage",
+      "description": "Show remaining Codex usage in an optional AI Usage tab.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Codex Usage",
+      "label": "Show Codex usage",
+      "default": false
+    },
+    {
+      "name": "showSparkUsage",
+      "description": "Include Spark windows alongside the other Codex usage windows.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Codex Spark Usage",
+      "label": "Show Spark usage",
+      "default": false
+    },
+    {
+      "name": "showClaudeUsage",
+      "description": "Show remaining Claude usage in an optional AI Usage tab.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Claude Usage",
+      "label": "Show Claude usage",
+      "default": false
+    },
+    {
+      "name": "codexPath",
+      "description": "Codex CLI executable. A bare name is resolved from PATH.",
+      "type": "textfield",
+      "required": false,
+      "title": "Codex CLI Path",
+      "default": "codex",
+      "placeholder": "codex"
+    },
+    {
+      "name": "claudeUsagePath",
+      "description": "Path to Claude Desktop's local plan usage history file.",
+      "type": "textfield",
+      "required": false,
+      "title": "Claude Usage File",
+      "default": "~/Library/Application Support/Claude/plan-usage-history.json",
+      "placeholder": "~/Library/Application Support/Claude/plan-usage-history.json"
     },
     {
       "name": "displayModeCpu",

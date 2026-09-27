@@ -8,6 +8,14 @@ This is a [Raycast](https://raycast.com/) extension that allows you to monitor y
 
 ❕ You can toggle between free and used display modes for CPU, Memory and more in `Preferences`.
 
+## Optional AI Usage
+
+The **AI Usage** tab and menu-bar dropdown can show the remaining Codex and Claude five-hour and weekly quota windows. Codex and Claude can be disabled independently. When both are disabled, the AI Usage UI is hidden and no AI usage collector runs.
+
+- Codex usage comes from the signed-in local Codex CLI. Spark windows are hidden unless explicitly enabled.
+- Claude usage comes from Claude Desktop's local plan usage history file.
+- AI usage refreshes only while the AI Usage tab is selected or the menu-bar dropdown is open.
+
 ## Custom Menubar Text
 
 ❕ You can customise the menubar dropdown text in `Preferences`. Hover over the textbox to see what tags are available for each module. There are two tags that are always available: `<BR>` adds a linebreak, and `<MODE>` shows "Free" and "Used" depending on display mode.
@@ -17,4 +25,5 @@ The 10-second background refresh updates CPU and storage without starting extern
 ## Data and Privacy
 
 - All system data (CPU, memory, disk, battery, processes) is read locally via macOS tools (`system_profiler`, `sysctl`, `ps`, `pmset`, `iostat`, `diskutil`); the extension makes no network requests.
+- Optional Codex usage starts the configured local Codex CLI, which may contact OpenAI according to the CLI's own behavior. Optional Claude usage reads a local file and makes no network request.
 - **System Info** and the **Copy System Report** action include your Mac's serial number and hostname. Review the report before sharing it.

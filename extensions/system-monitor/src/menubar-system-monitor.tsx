@@ -6,12 +6,14 @@ import {
   getPreferenceValues,
   Image,
   LocalStorage,
+  openExtensionPreferences,
   showHUD,
   environment,
   LaunchType,
 } from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
+import os from "node:os";
 
 import { formatTemperature } from "./Temperature/TemperatureUtils";
 import { formatBytes, openActivityMonitorAppleScript } from "./utils";
@@ -19,13 +21,24 @@ import { DiskInterface } from "./Interfaces";
 import { loadMenuBarSnapshot, PINNED_STAT_KEY } from "./menubar/load-snapshot";
 import { readMenuBarSnapshot } from "./menubar/snapshot-cache";
 import { PinnedStat, snapshotValue } from "./menubar/types";
+import { collectClaudeUsage, collectCodexUsage, formatUsageReset, type ProviderUsage } from "./lib/ai-usage";
+import { formatUptime } from "./lib/uptime";
 
 const cache = new Cache();
 
 export default function Command() {
   const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
-  const { displayModeCpu, displayModeBattery, displayModeDisk, displayModeMemory } =
-    getPreferenceValues<ExtensionPreferences>();
+  const {
+    displayModeCpu,
+    displayModeBattery,
+    displayModeDisk,
+    displayModeMemory,
+    showCodexUsage,
+    showSparkUsage,
+    showClaudeUsage,
+    codexPath,
+    claudeUsagePath,
+  } = getPreferenceValues<ExtensionPreferences>();
   const { cpuMenubarFormat, memoryMenubarFormat, powerMenubarFormat, networkMenubarFormat, diskMenubarFormat } =
     getPreferenceValues<Preferences.MenubarSystemMonitor>();
 
@@ -83,6 +96,13 @@ export default function Command() {
   // while the menu is open. Poll for live updates only in that case.
   // Background interval launches should finish fast and unload.
   const isUserLaunch = environment.launchType === LaunchType.UserInitiated;
+  const showAIUsage = showCodexUsage || showClaudeUsage;
+  const codexUsage = usePromise(collectCodexUsage, [codexPath, showSparkUsage], {
+    execute: isUserLaunch && showCodexUsage,
+  });
+  const claudeUsage = usePromise(collectClaudeUsage, [claudeUsagePath], {
+    execute: isUserLaunch && showClaudeUsage,
+  });
   const isRevalidating = useRef(false);
   useInterval(
     () => {
@@ -93,6 +113,14 @@ export default function Command() {
       });
     },
     isUserLaunch ? 2000 : null,
+  );
+  useInterval(
+    () => {
+      if (!isUserLaunch) return;
+      if (showCodexUsage && !codexUsage.isLoading) void codexUsage.revalidate();
+      if (showClaudeUsage && !claudeUsage.isLoading) void claudeUsage.revalidate();
+    },
+    isUserLaunch && showAIUsage ? 60_000 : null,
   );
 
   const formatTags = (
@@ -156,7 +184,30 @@ export default function Command() {
     >
       <MenuBarExtra.Section title="System Info">
         <MenuBarExtra.Item title="macOS" subtitle={`${data?.osInfo?.release}` || "Loading..."} icon={Icon.Finder} />
+        <MenuBarExtra.Item title="Uptime" subtitle={formatUptime(os.uptime())} icon={Icon.Clock} />
       </MenuBarExtra.Section>
+
+      {showAIUsage ? (
+        <MenuBarExtra.Section title="AI Usage">
+          {showCodexUsage ? (
+            <UsageItems
+              provider="Codex"
+              usage={codexUsage.data}
+              error={codexUsage.error}
+              isLoading={codexUsage.isLoading}
+              showReset
+            />
+          ) : null}
+          {showClaudeUsage ? (
+            <UsageItems
+              provider="Claude"
+              usage={claudeUsage.data}
+              error={claudeUsage.error}
+              isLoading={claudeUsage.isLoading}
+            />
+          ) : null}
+        </MenuBarExtra.Section>
+      ) : null}
 
       <MenuBarExtra.Section title="Storage">
         {data?.storage?.map((disk: DiskInterface, index: number) => (
@@ -274,7 +325,47 @@ export default function Command() {
           icon={Icon.Bolt}
           onAction={() => runAppleScript(openActivityMonitorAppleScript())}
         />
+        <MenuBarExtra.Item title="System Monitor Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
+  );
+}
+
+function UsageItems({
+  provider,
+  usage,
+  error,
+  isLoading,
+  showReset = false,
+}: {
+  provider: string;
+  usage?: ProviderUsage;
+  error?: Error;
+  isLoading: boolean;
+  showReset?: boolean;
+}) {
+  if (error) {
+    return <MenuBarExtra.Item title={`${provider} unavailable`} subtitle={error.message} icon={Icon.ExclamationMark} />;
+  }
+
+  if (!usage) {
+    return <MenuBarExtra.Item title={provider} subtitle={isLoading ? "Loading…" : "—"} icon={Icon.Gauge} />;
+  }
+
+  return (
+    <>
+      {usage.windows.map((window) => {
+        const reset = showReset ? formatUsageReset(window.resetsAt) : null;
+        const resetSubtitle = reset && reset !== "Reset time unavailable" ? ` · resets in ${reset}` : "";
+        return (
+          <MenuBarExtra.Item
+            key={window.id}
+            title={`${provider} · ${window.label}`}
+            subtitle={`${window.remainingPercent}% remaining${resetSubtitle}`}
+            icon={Icon.Gauge}
+          />
+        );
+      })}
+    </>
   );
 }

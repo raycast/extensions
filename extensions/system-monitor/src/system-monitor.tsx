@@ -6,11 +6,14 @@ import MemoryMonitor from "./Memory/MemoryMonitor";
 import NetworkMonitor from "./Network/NetworkMonitor";
 import PowerMonitor from "./Power/PowerMonitor";
 import DiskMonitor from "./Disk/DiskMonitor";
+import AIUsageMonitor from "./AIUsage/AIUsageMonitor";
 
-const { defaultView } = getPreferenceValues<ExtensionPreferences>();
+const { defaultView, showCodexUsage, showClaudeUsage } = getPreferenceValues<ExtensionPreferences>();
+const showAIUsage = showCodexUsage || showClaudeUsage;
 
 export default function SystemMonitor() {
-  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(defaultView);
+  const initialView = defaultView === "ai-usage" && !showAIUsage ? "system-info" : defaultView;
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(initialView);
 
   return (
     <List
@@ -25,6 +28,7 @@ export default function SystemMonitor() {
       <DiskMonitor isActive={selectedItemId === "disk"} />
       <PowerMonitor isActive={selectedItemId === "power"} />
       <NetworkMonitor isActive={selectedItemId === "network"} />
+      {showAIUsage ? <AIUsageMonitor isActive={selectedItemId === "ai-usage"} /> : null}
     </List>
   );
 }
