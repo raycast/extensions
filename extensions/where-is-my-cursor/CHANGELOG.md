@@ -1,5 +1,11 @@
 # Where's Cursor Changelog
 
+## [Store Review Fixes] - {PR_MERGE_DATE}
+
+- Compile the Swift helper from source at build time instead of shipping a prebuilt binary.
+- Show a failure toast when the Swift helper fails to compile, launch, or run.
+- Rewrite the README with a clearer explanation of how the extension works, plus demo GIFs for each mode.
+
 ## [Big update] - 2025-09-01
 
 General improvement with revised binary code and Raycast extension options of "Where's My Cursor" extension.
