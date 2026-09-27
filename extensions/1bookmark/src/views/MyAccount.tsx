@@ -3,6 +3,8 @@ import { trpc } from "@/utils/trpc.util";
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { useCachedState } from "@raycast/utils";
 import { EditProfileNameForm } from "./EditProfileNameForm";
+import { MovedToDesktopView } from "./MovedToDesktopView";
+import { DesktopAppNudgeItem } from "../components/DesktopAppNudgeItem";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
 import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
@@ -18,6 +20,7 @@ const Body = () => {
 
   return (
     <List isLoading={isLoading}>
+      <DesktopAppNudgeItem />
       <List.Section title="User Information">
         <List.Item icon={Icon.Envelope} title="Email" subtitle={data?.email} />
         <List.Item
@@ -34,6 +37,25 @@ const Body = () => {
                   onPop={refetch}
                 />
               )}
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          icon={Icon.AddPerson}
+          title="Add Account"
+          keywords={["add account", "switch account", "multiple accounts"]}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add Account"
+                icon={Icon.AddPerson}
+                target={
+                  <MovedToDesktopView
+                    title="Add Account"
+                    lead="Signing in with more than one account is done in the 1bookmark Desktop app."
+                  />
+                }
+              />
             </ActionPanel>
           }
         />

@@ -5,6 +5,8 @@ const DEFAULT_API_URL = "https://1bookmark.net/";
 // apiUrl is not used in production environment. So in production, DEFAULT_API_URL is used.
 export const API_URL = (getPreferenceValues().apiUrl as string) || DEFAULT_API_URL;
 export const API_URL_TRPC = new URL("/api/trpc", API_URL).toString();
+// Download page of the 1bookmark Desktop app (macOS, Windows, Linux).
+export const DESKTOP_DOWNLOAD_URL = new URL("/downloads", API_URL).toString();
 
 export const CACHED_KEY_SESSION_TOKEN = "session-token";
 export const CACHED_KEY_ME = "me";
@@ -24,9 +26,3 @@ export const CACHED_KEY_RECENT_SELECTED_TAGS = "recent-selected-tags";
 export const CACHED_KEY_DISABLED_SPACE_IDS = "disabled-space-ids";
 
 export const CACHED_KEY_RANKING_ENTRIES = "ranking-entries";
-
-export const CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL = "space-verifying-auth-email";
-export const CACHED_KEY_SPACE_AUTH_CODE_SENT = "space-auth-code-sent";
-
-// Toggle state of the bookmark list detail panel (search view only).
-export const CACHED_KEY_SHOWING_DETAIL = "bookmark-showing-detail";

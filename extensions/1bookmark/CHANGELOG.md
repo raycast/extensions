@@ -1,5 +1,20 @@
 # 1Bookmark Changelog
 
+## [Focus on Search and Add] - {PR_MERGE_DATE}
+
+- 0.15.0
+- 📄 The login screen now links to the Terms of Service and Privacy Policy.
+- 🔍 The extension now keeps just search and add, in maintenance mode. The 1bookmark Desktop app covers everything it does and is the recommended way to use 1bookmark.
+- 💻 The 1bookmark Desktop app is now the main client for everything else. A space now has a single **Manage Space** action (`⌘M`) that opens a short note with a link to the Desktop app download page, and the **Import Bookmarks** command does the same.
+- 📥 Importing bookmarks from browsers moved to the Desktop app, so the browser importer is no longer bundled with the extension.
+- 👤 **Add Account** in My Account and **Add New Space** (`⌘N`) in the Spaces view point to the Desktop app as well.
+- 💻 The **Spaces** and **My Account** views now start with a **Try the 1bookmark Desktop App** item that opens the Desktop app download page.
+- 📱 The bookmark detail panel (**Show/Hide Details**) is removed to keep the search list simple.
+- 👥 The **Spaces** view still enables and disables spaces for search, since that is specific to your Raycast session.
+- 🔐 Per-space email re-authentication is gone. A space's email policy now only decides who can join it, so once you are a member its bookmarks always show up — sign in with the account that belongs to the space instead.
+- 🔍 Tag subscription is removed. The search list is no longer split into tagged/untagged sections, so every bookmark is ranked together. The tag dropdown in the search bar is gone as well.
+- 🔍 Search now matches tag names too. A bookmark whose tag matches your keyword now appears in the results instead of being missed. Tag-only matches rank below name/URL matches, but a bookmark you often pick for that keyword can still move up, just like any other result. Tags add no ranking bonus, and bookmarks without tags are never penalized.
+
 ## [Subscribed Tag Check Icon] - 2026-08-30
 
 - 0.14.0
