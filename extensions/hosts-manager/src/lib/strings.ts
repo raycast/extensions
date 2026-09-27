@@ -30,6 +30,8 @@ export const strings = {
   nameField: "Name",
   namePlaceholder: "Staging",
   nameRequired: "A name is required",
+  nameInvalid: "Names cannot contain line breaks.",
+  nameReserved: "This name is reserved. Pick another one.",
   save: "Save",
   saveAndApply: "Save & Apply",
   createProfile: "Create Profile",

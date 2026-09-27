@@ -19,7 +19,9 @@ export function CommonConfigForm({
   const s = strings;
 
   async function handleSubmit(values: { content: string }) {
-    const saved = await commitStore(store, {
+    const saved = await commitStore({
+      previous: store,
+      next: store,
       sync: true,
       successTitle: s.publicConfigurationSaved,
       commonContent: values.content,

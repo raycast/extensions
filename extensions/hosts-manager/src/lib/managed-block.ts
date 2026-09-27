@@ -46,6 +46,16 @@ function profileHeader(name: string): string {
   return `#-------- ${name} --------`;
 }
 
+/**
+ * True when `name` would produce the header Hosts Manager reserves for the
+ * public section, which would make the profile indistinguishable from it: the
+ * parser would fold its entries into the public content, so cancelling or
+ * deleting the profile could never remove them again.
+ */
+export function isReservedProfileName(name: string): boolean {
+  return isCommonHeader(profileHeader(name.trim()));
+}
+
 /** Normalizes line endings and drops trailing blank lines so re-composing is stable. */
 function contentLines(content: string): string[] {
   const normalized = content.replace(/\r\n/g, "\n").replace(/\s+$/, "");

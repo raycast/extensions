@@ -24,15 +24,28 @@ import {
 export default function Command() {
   const [store, setStore] = useState<HostsStore>();
   const [hostsContent, setHostsContent] = useState("");
+  const [hostsReadFailed, setHostsReadFailed] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
   const reload = useCallback(async () => {
     const [nextStore, hosts] = await Promise.all([
       loadStore(),
-      readHostsFile().catch(() => ""),
+      readHostsFile().then(
+        (value) => ({ value }),
+        (error: unknown) => ({ error }),
+      ),
     ]);
     setStore(nextStore);
-    setHostsContent(hosts);
+    if ("value" in hosts) {
+      setHostsContent(hosts.value);
+      setHostsReadFailed(undefined);
+    } else {
+      setHostsReadFailed(
+        hosts.error instanceof Error
+          ? hosts.error.message
+          : String(hosts.error),
+      );
+    }
     setIsLoading(false);
   }, []);
 
@@ -44,25 +57,38 @@ export default function Command() {
     return <List isLoading={isLoading} />;
   }
 
-  // The public section is what /etc/hosts holds outside the applied profile.
-  const publicContent = parseManagedBlock(hostsContent).commonContent;
   const s = strings;
+
+  // The public section is what /etc/hosts holds outside the applied profile.
+  // When the file could not be read its content is unknown, so editing stays
+  // unavailable: saving would write an empty public section back into the file.
+  const publicContent = hostsReadFailed
+    ? undefined
+    : parseManagedBlock(hostsContent).commonContent;
+  const readErrorMarkdown = `${s.failedToReadHosts}\n\n${hostsReadFailed ?? ""}`;
+  const fileMarkdown = hostsReadFailed
+    ? readErrorMarkdown
+    : contentMarkdown(hostsContent);
 
   // Arrow consts (rather than function declarations) keep TypeScript's
   // narrowing of `store` from the guard above inside these callbacks.
   const applyProfile = async (profile: HostsProfile) => {
-    const committed = await commitStore(
-      { ...store, activeProfileId: profile.id },
-      { sync: true, successTitle: s.applied(profile.name) },
-    );
+    const committed = await commitStore({
+      previous: store,
+      next: { ...store, activeProfileId: profile.id },
+      sync: true,
+      successTitle: s.applied(profile.name),
+    });
     if (committed) await reload();
   };
 
   const cancelApply = async (profile: HostsProfile) => {
-    const committed = await commitStore(
-      { ...store, activeProfileId: null },
-      { sync: true, successTitle: s.cancelled(profile.name) },
-    );
+    const committed = await commitStore({
+      previous: store,
+      next: { ...store, activeProfileId: null },
+      sync: true,
+      successTitle: s.cancelled(profile.name),
+    });
     if (committed) await reload();
   };
 
@@ -78,17 +104,16 @@ export default function Command() {
     if (!confirmed) return;
 
     const isActive = profile.id === store.activeProfileId;
-    const committed = await commitStore(
-      {
+    const committed = await commitStore({
+      previous: store,
+      next: {
         ...store,
         profiles: store.profiles.filter((item) => item.id !== profile.id),
         activeProfileId: isActive ? null : store.activeProfileId,
       },
-      {
-        sync: isActive,
-        successTitle: s.deleted(profile.name),
-      },
-    );
+      sync: isActive,
+      successTitle: s.deleted(profile.name),
+    });
     if (committed) await reload();
   };
 
@@ -102,7 +127,7 @@ export default function Command() {
         id="hosts-file"
         title={s.viewHostsFile}
         icon={Icon.Eye}
-        detail={<List.Item.Detail markdown={contentMarkdown(hostsContent)} />}
+        detail={<List.Item.Detail markdown={fileMarkdown} />}
         actions={
           <ActionPanel>
             <Action.Push
@@ -121,21 +146,29 @@ export default function Command() {
           title={s.publicConfiguration}
           icon={Icon.Globe}
           detail={
-            <List.Item.Detail markdown={contentMarkdown(publicContent)} />
+            <List.Item.Detail
+              markdown={
+                publicContent === undefined
+                  ? readErrorMarkdown
+                  : contentMarkdown(publicContent)
+              }
+            />
           }
           actions={
             <ActionPanel>
-              <Action.Push
-                title={s.editPublicConfiguration}
-                icon={Icon.Pencil}
-                target={
-                  <CommonConfigForm
-                    store={store}
-                    content={publicContent}
-                    onDone={reload}
-                  />
-                }
-              />
+              {publicContent !== undefined && (
+                <Action.Push
+                  title={s.editPublicConfiguration}
+                  icon={Icon.Pencil}
+                  target={
+                    <CommonConfigForm
+                      store={store}
+                      content={publicContent}
+                      onDone={reload}
+                    />
+                  }
+                />
+              )}
               <Action.Push
                 title={s.newProfile}
                 icon={Icon.Plus}

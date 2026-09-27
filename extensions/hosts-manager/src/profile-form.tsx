@@ -8,6 +8,7 @@ import {
 import { randomUUID } from "node:crypto";
 import { useState } from "react";
 import { commitStore } from "./lib/apply";
+import { isReservedProfileName } from "./lib/managed-block";
 import { strings } from "./lib/strings";
 import type { HostsProfile, HostsStore } from "./lib/storage";
 
@@ -25,6 +26,18 @@ type NewProfileValues = { name: string; content: string };
 type ContentValues = { content: string };
 
 /**
+ * A name has to survive the round trip through its section header, so empty,
+ * multi-line and reserved names are rejected before anything is written.
+ */
+function validateProfileName(raw: string): string | undefined {
+  const name = raw.trim();
+  if (name === "") return strings.nameRequired;
+  if (/[\r\n]/.test(name)) return strings.nameInvalid;
+  if (isReservedProfileName(name)) return strings.nameReserved;
+  return undefined;
+}
+
+/**
  * Persists `next`, creating it when the id is unknown. /etc/hosts is
  * rewritten when the profile is the applied one, or when `apply` asks for it.
  */
@@ -38,19 +51,18 @@ async function saveProfile(
 ): Promise<boolean> {
   const exists = store.profiles.some((item) => item.id === next.id);
   const apply = options.apply ?? false;
-  return commitStore(
-    {
+  return commitStore({
+    previous: store,
+    next: {
       ...store,
       profiles: exists
         ? store.profiles.map((item) => (item.id === next.id ? next : item))
         : [...store.profiles, next],
       activeProfileId: apply ? next.id : store.activeProfileId,
     },
-    {
-      sync: apply || next.id === store.activeProfileId,
-      successTitle: options.successTitle,
-    },
-  );
+    sync: apply || next.id === store.activeProfileId,
+    successTitle: options.successTitle,
+  });
 }
 
 export function NewProfileForm({ store, onDone }: BaseProps) {
@@ -59,11 +71,12 @@ export function NewProfileForm({ store, onDone }: BaseProps) {
   const s = strings;
 
   async function handleSubmit(values: NewProfileValues, apply: boolean) {
-    const name = values.name.trim();
-    if (name === "") {
-      setNameError(s.nameRequired);
+    const nameError = validateProfileName(values.name);
+    if (nameError) {
+      setNameError(nameError);
       return;
     }
+    const name = values.name.trim();
 
     const saved = await saveProfile(
       store,
@@ -175,11 +188,12 @@ export function RenameProfileForm({
   const s = strings;
 
   async function handleSubmit(values: { name: string }) {
-    const name = values.name.trim();
-    if (name === "") {
-      setNameError(s.nameRequired);
+    const nameError = validateProfileName(values.name);
+    if (nameError) {
+      setNameError(nameError);
       return;
     }
+    const name = values.name.trim();
 
     const saved = await saveProfile(
       store,
