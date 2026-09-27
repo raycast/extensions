@@ -98,11 +98,12 @@ describe("render", () => {
 
   it("keeps patient notes and notes of a new order in place", () => {
     const [msg] = parseHL7(
-      "MSH|^~\\&\rPID|1\rNTE|1||Patient note\rORC|NW\rOBR|1||||A^Test A\rOBX|1|NM|A^Test A||1\rORC|NW\rNTE|1||Order B note\rOBR|2||||B^Test B",
+      "MSH|^~\\&\rPID|1\rNTE|1||Patient note\rORC|NW\rOBR|1|||A^Test A\rOBX|1|NM|A^Test A||1\rORC|NW\rNTE|1||Order B note\rOBR|2|||B^Test B",
     );
     const md = messageMarkdown(msg, { showSegments: false });
     expect(md.indexOf("> Patient note")).toBeLessThan(md.indexOf("## Results"));
-    expect(md.indexOf("Order B note")).toBeGreaterThan(md.indexOf("### 2. Test B"));
+    expect(md.indexOf("### 2. Test B (B)")).toBeGreaterThan(-1);
+    expect(md.indexOf("Order B note")).toBeGreaterThan(md.indexOf("### 2. Test B (B)"));
   });
 
   it("lists every segment unless hidden", () => {
@@ -122,16 +123,21 @@ describe("render", () => {
 
   it("shows the material of each order from OBR-15", () => {
     const [msg] = parseHL7(fixture("orm-repeated-material.hl7"));
-    expect(
-      material(
-        msg.segments.find((s) => s.name === "OBR"),
-        msg,
-      ),
-    ).toBe("VB, LIHE, LIHE");
+    expect(material(msg.segments.find((s) => s.name === "OBR"))).toBe("VB, LIHE, LIHE");
     const [serum] = parseHL7("MSH|^~\\&\rOBR|1||||||||||||||SEGN&&&03^Serum-B");
-    expect(material(serum.segments[1], serum)).toBe("SEGN (Serum-B)");
+    expect(material(serum.segments[1])).toBe("SEGN (Serum-B)");
     const [standard] = parseHL7("MSH|^~\\&\rOBR|1||||||||||||||BLD&Whole blood&HL70070^HEP&Heparin");
-    expect(material(standard.segments[1], standard)).toBe("Whole blood");
+    expect(material(standard.segments[1])).toBe("Whole blood");
+  });
+
+  it("keeps each order's SPM specimen with that order", () => {
+    const [msg] = parseHL7(
+      "MSH|^~\\&\rOBR|1|||A^Test A\rOBX|1|NM|A^Test A||1\rSPM|1|||SER^Serum^HL70487\rOBR|2|||B^Test B\rOBX|1|NM|B^Test B||2\rSPM|1|||UR^Urine^HL70487",
+    );
+    const md = messageMarkdown(msg, { showSegments: false });
+    expect(md).toContain("### 1. Test A (A)\nMaterial: Serum (SER)\n");
+    expect(md).toContain("### 2. Test B (B)\nMaterial: Urine (UR)\n");
+    expect(md).not.toContain("Serum, Urine");
   });
 
   it("says when a message carries no material", () => {

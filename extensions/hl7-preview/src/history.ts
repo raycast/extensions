@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { createHash } from "node:crypto";
 import { parseHL7 } from "./hl7";
 import { messageSummary, patientOf } from "./render";
@@ -6,7 +6,8 @@ import { Source, readSource } from "./sources";
 
 /**
  * A previous view. It keeps a copy of the message text, so it reopens as it was seen even when
- * the file has moved or changed since. Stored in Raycast's local encrypted storage.
+ * the file has moved or changed since. Stored in Raycast's local encrypted storage, and only when
+ * the user turns on the "Keep past views" preference, as it holds patient data.
  */
 export interface HistoryEntry {
   key: string;
@@ -40,8 +41,24 @@ export async function loadHistory(): Promise<HistoryEntry[]> {
   }
 }
 
-async function save(entries: HistoryEntry[]): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_ENTRIES)));
+export function isKeepingPastViews(): boolean {
+  return getPreferenceValues<Preferences>().keepPastViews === true;
+}
+
+/**
+ * Every change to the history runs through this queue, one after another, each on the latest
+ * stored list. So a slow save can never restore a removed entry or drop a newer one.
+ */
+let queue: Promise<void> = Promise.resolve();
+
+function update(change: (entries: HistoryEntry[]) => HistoryEntry[]): Promise<void> {
+  queue = queue
+    .then(async () => {
+      const entries = change(await loadHistory());
+      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_ENTRIES)));
+    })
+    .catch(() => undefined);
+  return queue;
 }
 
 function entryKey(source: Source): string {
@@ -67,21 +84,22 @@ export function toEntry(source: Source): HistoryEntry {
   };
 }
 
-/** Moves the sources to the top of the history. */
+/** Moves the sources to the top of the history, when the user keeps past views. */
 export async function remember(sources: Source[]): Promise<void> {
+  if (!isKeepingPastViews()) return;
   // A pasted message too large to copy could never reopen, so it is not kept.
   const added = sources.filter((s) => s.path || s.text.length <= MAX_TEXT_LENGTH).map(toEntry);
   if (added.length === 0) return;
   const keys = new Set(added.map((e) => e.key));
-  await save([...added, ...(await loadHistory()).filter((e) => !keys.has(e.key))]);
+  await update((entries) => [...added, ...entries.filter((e) => !keys.has(e.key))]);
 }
 
-export async function forget(key: string): Promise<void> {
-  await save((await loadHistory()).filter((e) => e.key !== key));
+export function forget(key: string): Promise<void> {
+  return update((entries) => entries.filter((e) => e.key !== key));
 }
 
-export async function clearHistory(): Promise<void> {
-  await LocalStorage.removeItem(STORAGE_KEY);
+export function clearHistory(): Promise<void> {
+  return update(() => []);
 }
 
 /** The stored copy of a view, else its file as it is now. */

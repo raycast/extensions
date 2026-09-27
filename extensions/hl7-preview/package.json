@@ -9,12 +9,26 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "preview-hl7",
       "title": "Preview HL7",
       "description": "Paste an HL7 file or message, or reopen a past view searchable by patient name.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keepPastViews",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Past Views",
+      "label": "Keep past views",
+      "description": "Keep a copy of each opened message, patient data included, in Raycast's local encrypted storage, so it can be reopened and searched by patient. Off by default."
     }
   ],
   "dependencies": {

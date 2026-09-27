@@ -135,12 +135,12 @@ export function patientOf(m: Message): { name: string; id: string; born: string 
 }
 
 /**
- * Material of an order: OBR-15 (v2.3–2.5), else the message's SPM-4 specimen types (v2.5+).
+ * Material of an order: OBR-15 (v2.3–2.5), else the SPM-4 specimen types of that order (v2.5+).
  * OBR-15.1 is the specimen as code&text, OBR-15.2 the additives. The text of .1 wins. Without it,
  * the code shows with .2 in brackets: some labs (IMD) put the material text there, e.g.
  * `SEGN&&&03^Serum-B` reads "SEGN (Serum-B)".
  */
-export function material(obr: Segment | undefined, m: Message): string {
+export function material(obr: Segment | undefined, specimens: Segment[] = []): string {
   const fromObr = (field(obr, 15)?.repetitions ?? [])
     .map((rep) => {
       const [code = "", text = ""] = (rep[0] ?? []).map(clean);
@@ -150,8 +150,7 @@ export function material(obr: Segment | undefined, m: Message): string {
     })
     .filter(Boolean);
   if (fromObr.length) return fromObr.join(", ");
-  return m.segments
-    .filter((s) => s.name === "SPM")
+  return specimens
     .map((spm) => coded(spm, 4))
     .filter(Boolean)
     .join(", ");
@@ -167,12 +166,15 @@ interface Order {
   /** NTE lines between the OBR and its first OBX. */
   notes: string[];
   results: Result[];
+  /** SPM segments of this order only, so one order's specimen never shows on another. */
+  specimens: Segment[];
 }
 
 /**
  * OBR segments with their OBX results, each with the NTE lines that follow it.
  * NTE lines before the first ORC or OBR belong to the message (e.g. patient notes). NTE lines after
  * an ORC and before its OBR belong to that next order, not to the previous result.
+ * SPM segments belong to the open order; one before any OBR (as in OML) belongs to the next OBR.
  */
 function collectOrders(segments: Segment[]): { general: string[]; orders: Order[] } {
   const general: string[] = [];
@@ -180,6 +182,7 @@ function collectOrders(segments: Segment[]): { general: string[]; orders: Order[
   let order: Order | undefined;
   let result: Result | undefined;
   let pending: string[] = [];
+  let pendingSpecimens: Segment[] = [];
   let inOrders = false;
   for (const s of segments) {
     if (s.name === "ORC") {
@@ -188,17 +191,21 @@ function collectOrders(segments: Segment[]): { general: string[]; orders: Order[
       result = undefined;
     } else if (s.name === "OBR") {
       inOrders = true;
-      order = { obr: s, notes: pending, results: [] };
+      order = { obr: s, notes: pending, results: [], specimens: pendingSpecimens };
       pending = [];
+      pendingSpecimens = [];
       orders.push(order);
       result = undefined;
     } else if (s.name === "OBX") {
       if (!order) {
-        order = { notes: [], results: [] };
+        order = { notes: [], results: [], specimens: [] };
         orders.push(order);
       }
       result = { obx: s, notes: [] };
       order.results.push(result);
+    } else if (s.name === "SPM") {
+      if (order) order.specimens.push(s);
+      else pendingSpecimens.push(s);
     } else if (s.name === "NTE") {
       const note = readable(field(s, 3));
       if (result ?? order) (result ?? order)!.notes.push(note);
@@ -268,7 +275,7 @@ export function messageMarkdown(m: Message, options: { showEmpty?: boolean; show
   if (orders.length) {
     const hasResults = orders.some((o) => o.results.length);
     out.push("---", "", `## ${hasResults ? "Results" : "Orders"}`, "");
-    if (orders.some((o) => o.obr) && !orders.some((o) => material(o.obr, m))) {
+    if (orders.some((o) => o.obr) && !orders.some((o) => material(o.obr, o.specimens))) {
       out.push("> No material in this message: OBR-15 is empty and there is no SPM segment.", "");
     }
     orders.forEach((order, i) => {
@@ -280,7 +287,7 @@ export function messageMarkdown(m: Message, options: { showEmpty?: boolean; show
         const observed = component(obr, 7);
         const status = component(obr, 25);
         const facts = [
-          material(obr, m) && `Material: ${material(obr, m)}`,
+          material(obr, order.specimens) && `Material: ${material(obr, order.specimens)}`,
           received && `received ${timestamp(received)}`,
           !received && observed && `observed ${timestamp(observed)}`,
           status && withMeaning("OBR", 25, status),

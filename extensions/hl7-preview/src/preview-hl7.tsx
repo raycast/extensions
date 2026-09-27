@@ -8,6 +8,7 @@ import {
   Keyboard,
   List,
   confirmAlert,
+  openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
@@ -28,8 +29,8 @@ interface Document {
 export default function Command() {
   const { push, pop } = useNavigation();
   // Finder answers only while it is frontmost, so the selection is read once, at launch.
-  const { data: finder = [] } = usePromise(readFinderSelection);
-  const { data: history = [], revalidate } = usePromise(loadHistory);
+  const { data: finder = [], isLoading: finderLoading } = usePromise(readFinderSelection);
+  const { data: history = [], isLoading: historyLoading, revalidate } = usePromise(loadHistory);
   const [searchText, setSearchText] = useState("");
   const previous = useRef("");
 
@@ -77,7 +78,12 @@ export default function Command() {
   ];
 
   return (
-    <List searchText={searchText} onSearchTextChange={onSearchTextChange} searchBarPlaceholder="Paste here…">
+    <List
+      isLoading={finderLoading || historyLoading}
+      searchText={searchText}
+      onSearchTextChange={onSearchTextChange}
+      searchBarPlaceholder="Paste here…"
+    >
       <List.EmptyView
         icon={Icon.Clipboard}
         title="Paste an HL7 file or message"
@@ -92,7 +98,7 @@ export default function Command() {
               onAction={showPastViews}
             />
             <Action
-              title="Choose File…"
+              title="Choose File"
               icon={Icon.Finder}
               shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
               onAction={chooseFile}
@@ -121,7 +127,20 @@ function PastViewsList() {
 
   return (
     <List isLoading={isLoading} navigationTitle="Past Views" searchBarPlaceholder="Search by patient…">
-      <List.EmptyView icon={Icon.Clock} title="No past views yet" />
+      {isKeepingPastViews() ? (
+        <List.EmptyView icon={Icon.Clock} title="No past views yet" />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Lock}
+          title="Past views are off"
+          description="Turn on Keep Past Views in the preferences to keep a copy of each message, patient data included, on this Mac."
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
       {history.map((entry) => (
         <List.Item
           key={entry.key}
@@ -256,7 +275,7 @@ function DocumentView({ initial }: { initial: Source[] }) {
               onAction={paste}
             />
             <Action
-              title="Choose File…"
+              title="Choose File"
               icon={Icon.Finder}
               shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
               onAction={chooseFile}
