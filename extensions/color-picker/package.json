@@ -20,7 +20,8 @@
     "elibattistoni",
     "clins1994",
     "just_me",
-    "ray.dhruv"
+    "ray.dhruv",
+    "alexi.build"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -157,6 +158,43 @@
           "placeholder": "#FF6363"
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "description": "Convert a CSS color to a requested format."
+    },
+    {
+      "name": "name-color",
+      "title": "Name Color",
+      "description": "Find the closest names for a CSS color."
+    },
+    {
+      "name": "list-saved-colors",
+      "title": "List Saved Colors",
+      "description": "List colors in Color Picker history or favorites."
+    },
+    {
+      "name": "save-colors",
+      "title": "Save Colors",
+      "description": "Save CSS colors to Color Picker history or favorites."
+    },
+    {
+      "name": "analyze-contrast",
+      "title": "Analyze Contrast",
+      "description": "Check WCAG contrast between foreground and background colors."
+    },
+    {
+      "name": "generate-color-scale",
+      "title": "Generate Color Scale",
+      "description": "Generate an 11-step OKLCH color scale from an opaque base color."
+    },
+    {
+      "name": "format-palette",
+      "title": "Format Palette",
+      "description": "Format CSS colors as JSON, CSS variables, or CSS classes."
     }
   ],
   "preferences": [
