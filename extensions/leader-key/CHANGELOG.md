@@ -1,6 +1,6 @@
 # Leader Key Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Find configured Leader Key shortcuts through Ask AI.
 - Add YAML evals for finding shortcuts.
