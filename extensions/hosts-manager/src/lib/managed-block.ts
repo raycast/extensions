@@ -32,6 +32,14 @@ const LEGACY_END_MARKER = "# ===== hosts-manager:END =====";
 /** Matches `#-------- <name> --------`, the shape of every section header. */
 const SECTION_HEADER = /^#-------- (.+) --------$/;
 
+/**
+ * First line of a section Hosts Manager wrote. Section headers are plain text
+ * that anyone can type, so ownership is proven with this marker instead of the
+ * header shape alone: without it, a section the user wrote themselves could be
+ * mistaken for the applied profile and replaced on the next write.
+ */
+export const OWNERSHIP_MARKER = "# Managed by Hosts Manager";
+
 function isCommonHeader(line: string): boolean {
   const trimmed = line.trim();
   return trimmed === COMMON_HEADER || LEGACY_COMMON_HEADERS.includes(trimmed);
@@ -56,6 +64,24 @@ export function isReservedProfileName(name: string): boolean {
   return isCommonHeader(profileHeader(name.trim()));
 }
 
+function headerName(line: string): string {
+  return SECTION_HEADER.exec(line.trim())?.[1]?.trim() ?? "";
+}
+
+/**
+ * Index of the section Hosts Manager owns, or -1 when the file has none.
+ *
+ * Only the marker counts as ownership: a same-shaped header the user typed is
+ * their content, and rewriting it would delete entries Hosts Manager never
+ * wrote.
+ */
+function findManagedProfileIndex(lines: string[]): number {
+  return lines.findIndex(
+    (line, index) =>
+      isProfileHeader(line) && lines[index + 1]?.trim() === OWNERSHIP_MARKER,
+  );
+}
+
 /** Normalizes line endings and drops trailing blank lines so re-composing is stable. */
 function contentLines(content: string): string[] {
   const normalized = content.replace(/\r\n/g, "\n").replace(/\s+$/, "");
@@ -70,7 +96,7 @@ function contentLines(content: string): string[] {
  */
 export function parseManagedBlock(original: string): ManagedContent {
   const lines = removeLegacyBlock(original.replace(/\r\n/g, "\n").split("\n"));
-  const profileIndex = lines.findIndex(isProfileHeader);
+  const profileIndex = findManagedProfileIndex(lines);
   const publicEnd = profileIndex === -1 ? lines.length : profileIndex;
   const commonContent = lines
     .slice(0, publicEnd)
@@ -82,15 +108,14 @@ export function parseManagedBlock(original: string): ManagedContent {
     return { commonContent, profile: null };
   }
 
-  const match = SECTION_HEADER.exec(lines[profileIndex].trim());
+  const body = lines.slice(profileIndex + 1);
+  if (body[0]?.trim() === OWNERSHIP_MARKER) body.shift();
+
   return {
     commonContent,
     profile: {
-      name: match?.[1]?.trim() ?? "",
-      content: lines
-        .slice(profileIndex + 1)
-        .join("\n")
-        .trim(),
+      name: headerName(lines[profileIndex]),
+      content: body.join("\n").trim(),
     },
   };
 }
@@ -102,6 +127,7 @@ export function renderManagedBlock(content: ManagedContent): string {
     lines.push(
       "",
       profileHeader(content.profile.name),
+      OWNERSHIP_MARKER,
       ...contentLines(content.profile.content),
     );
   }
