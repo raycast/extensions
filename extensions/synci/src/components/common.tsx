@@ -80,7 +80,7 @@ export function PeriodActions({
 }) {
   return (
     <ActionPanel.Submenu
-      title="Change Period"
+      title="Filter by Booking Date"
       icon={Icon.Calendar}
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "p" },

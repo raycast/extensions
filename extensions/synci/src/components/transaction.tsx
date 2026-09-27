@@ -7,6 +7,7 @@ import {
   decimal,
   markdown,
   money,
+  transactionDate,
   transactionDescription,
   transactionName,
 } from "../lib/format";
@@ -102,7 +103,7 @@ function TransactionActions({
         />
         <Action.CopyToClipboard
           title="Copy Transaction"
-          content={`${transactionName(transaction)}\n${money(transaction.amount, transaction.currency)}\n${dateLabel(transaction.booking_date)} · ${accountName(transaction.financial_account)}\n${transactionDescription(transaction)}`}
+          content={`${transactionName(transaction)}\n${money(transaction.amount, transaction.currency)}\n${dateLabel(transactionDate(transaction))} · ${accountName(transaction.financial_account)}\n${transactionDescription(transaction)}`}
         />
         <Action.CopyToClipboard title="Copy Transaction ID" content={String(transaction.id)} />
         <Action.CopyToClipboard title="Copy Transaction JSON" content={JSON.stringify(transaction, null, 2)} />
@@ -140,7 +141,7 @@ export function TransactionItem({
           text: money(transaction.amount, transaction.currency),
           tooltip: `${transaction.amount} ${transaction.currency}`,
         },
-        ...(!showDetails ? [{ text: dateLabel(transaction.booking_date), tooltip: "Booking date" }] : []),
+        ...(!showDetails ? [{ text: dateLabel(transactionDate(transaction)), tooltip: "Synci mapped date" }] : []),
       ]}
       keywords={[
         accountName(transaction.financial_account),
@@ -148,7 +149,7 @@ export function TransactionItem({
         transaction.currency,
         String(transaction.amount),
         money(transaction.amount, transaction.currency),
-        transaction.booking_date || "",
+        transactionDate(transaction) || "",
         String(transaction.id),
       ]}
       detail={

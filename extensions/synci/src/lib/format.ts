@@ -57,6 +57,15 @@ export function transactionDescription(transaction: Transaction): string {
   );
 }
 
+export function transactionDate(transaction: Transaction): string | undefined {
+  // Synci resolves account date preferences and rule overrides on the server.
+  return transaction.mapped_fields?.date || undefined;
+}
+
+export function compareTransactionsNewestFirst(a: Transaction, b: Transaction): number {
+  return (transactionDate(b) || "").localeCompare(transactionDate(a) || "") || b.id - a.id;
+}
+
 export function dateOnly(value: Date): string {
   return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
 }

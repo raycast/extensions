@@ -37,6 +37,24 @@ describe("merchant logos", () => {
       merchantLogo([transaction({ enriched: { intermediary: { logo_url: "https://example.com/processor.png" } } })]),
     ).toBeUndefined();
   });
+  it("chooses the newest logo by mapped date rather than booking date", () => {
+    expect(
+      merchantLogo([
+        transaction({
+          id: 2,
+          booking_date: "2026-09-25",
+          mapped_fields: { date: "2026-09-23" },
+          enriched: { counterparty: { logo_url: "https://example.com/old.png" } },
+        }),
+        transaction({
+          id: 1,
+          booking_date: "2026-09-20",
+          mapped_fields: { date: "2026-09-24" },
+          enriched: { counterparty: { logo_url: "https://example.com/new.png" } },
+        }),
+      ]),
+    ).toBe("https://example.com/new.png");
+  });
   it.each([
     "/etc/passwd",
     "file:///tmp/logo.png",

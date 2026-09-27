@@ -1,4 +1,5 @@
 import type { Transaction } from "./types";
+import { compareTransactionsNewestFirst } from "./format";
 
 /** Select a counterparty logo from the newest enriched transaction in this payee group. */
 export function merchantLogo(transactions: Transaction[]): string | undefined {
@@ -8,9 +9,7 @@ export function merchantLogo(transactions: Transaction[]): string | undefined {
     transactions.map((transaction) => transaction.enriched?.counterparty?.name?.trim().toLowerCase()).filter(Boolean),
   );
   if (counterparties.size > 1) return undefined;
-  const newestFirst = [...transactions].sort(
-    (a, b) => (b.booking_date || "").localeCompare(a.booking_date || "") || b.id - a.id,
-  );
+  const newestFirst = [...transactions].sort(compareTransactionsNewestFirst);
   for (const transaction of newestFirst) {
     const source = transaction.enriched?.counterparty?.logo_url;
     if (!source) continue;

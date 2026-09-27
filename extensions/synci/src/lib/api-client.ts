@@ -35,7 +35,7 @@ export function transactionParams(query: TransactionQuery, now = new Date()): Re
   const range = dateRange(query.period ?? "all", now);
   return {
     include: "financial_account.financial_connection.institution,enriched",
-    sort: "-booking_date,-id",
+    sort: "-mapped_fields.date,-id",
     omit_sensitive_identifiers: "1",
     ...(query.search?.trim() ? { "filter[search]": query.search.trim() } : {}),
     ...(query.accountId && query.accountId !== "all" ? { "filter[financial_account_id]": query.accountId } : {}),

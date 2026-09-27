@@ -123,7 +123,7 @@ export function TransactionList({
           )}
           <List.Section
             title={PERIODS.find((item) => item.value === period)?.title}
-            subtitle={`${transactions?.length ?? 0} loaded${amount ? ` · Amount ${amount.label}` : ""}${status !== "all" ? ` · ${status}` : ""} · Booking date`}
+            subtitle={`${transactions?.length ?? 0} loaded${amount ? ` · Amount ${amount.label}` : ""}${status !== "all" ? ` · ${status}` : ""} · Mapped date`}
           >
             {transactions?.map((transaction) => (
               <TransactionItem

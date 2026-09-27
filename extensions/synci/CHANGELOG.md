@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Support macOS and Windows with native platform shortcuts.
-- Search transactions with account, booking-date, and status filters.
+- Search transactions in mapped-date order, with account, booking-date, and status filters.
 - Check balances and currency totals, inspect sync dates, and create account Quicklinks.
 - View brokerage and crypto holdings with account filters, position details, and currency totals.
 - Explore recent booked outflows by merchant and currency, with enriched merchant logos when available.

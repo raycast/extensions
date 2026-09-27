@@ -1,4 +1,4 @@
-import { accountName, dateLabel, money, transactionDescription, transactionName } from "./format";
+import { accountName, dateLabel, money, transactionDate, transactionDescription, transactionName } from "./format";
 import type { Transaction } from "./types";
 
 const mainFields = new Set([
@@ -59,12 +59,10 @@ export function transactionMetadata(transaction: Transaction): [string, string][
     ["Account", accountName(transaction.financial_account)],
     ["Institution", transaction.financial_account?.financial_connection?.institution?.name || "Not reported"],
     ["Status", transaction.booked ? "Booked" : "Pending"],
+    ["Synci Display Date", dateLabel(transactionDate(transaction))],
     ["Booking Date", dateLabel(transaction.booking_date)],
     ["Value Date", dateLabel(transaction.value_date)],
   ];
-  if (transaction.mapped_fields?.date && transaction.mapped_fields.date !== transaction.booking_date) {
-    main.push(["Synci Display Date", dateLabel(transaction.mapped_fields.date)]);
-  }
   main.push(["Transaction ID", String(transaction.id)]);
 
   const advanced = Object.entries(transaction)

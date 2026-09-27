@@ -8,14 +8,14 @@ import { merchantIcon } from "./components/merchant-icon";
 import { useAccounts } from "./hooks/use-data";
 import { api } from "./lib/api";
 import { PERIODS, spendingSummary } from "./lib/finance";
-import { accountName, markdown, money } from "./lib/format";
+import { accountName, compareTransactionsNewestFirst, markdown, money } from "./lib/format";
 import type { Period, Transaction } from "./lib/types";
 
 function Outflows({ transactions, title }: { transactions: Transaction[]; title: string }) {
   const [showDetails, setShowDetails] = useState(false);
   return (
     <List navigationTitle={title} isShowingDetail={showDetails} searchBarPlaceholder="Filter these transactions…">
-      {transactions.map((transaction) => (
+      {[...transactions].sort(compareTransactionsNewestFirst).map((transaction) => (
         <TransactionItem key={transaction.id} transaction={transaction} showDetails={showDetails}>
           <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
         </TransactionItem>
@@ -83,7 +83,11 @@ function RecentSpending() {
       isShowingDetail={showDetails && !!summary.currencies.length && !failure}
       searchBarPlaceholder="Find a merchant or currency…"
       searchBarAccessory={
-        <List.Dropdown tooltip="Spending Period" value={period} onChange={(value) => setPeriod(value as Period)}>
+        <List.Dropdown
+          tooltip="Spending Period (Booking Date)"
+          value={period}
+          onChange={(value) => setPeriod(value as Period)}
+        >
           {PERIODS.filter((item) => item.value !== "all").map((item) => (
             <List.Dropdown.Item key={item.value} value={item.value} title={item.title} />
           ))}
@@ -117,10 +121,8 @@ function RecentSpending() {
           )}
           {summary.currencies.map(([currency, total]) => {
             const merchants = [...total.merchants.entries()].sort(([, a], [, b]) => b.amount.comparedTo(a.amount));
-            const transactions = merchants
-              .flatMap(([, merchant]) => merchant.transactions)
-              .sort((a, b) => (b.booking_date || "").localeCompare(a.booking_date || "") || b.id - a.id);
-            const explanation = `Booked outflows by booking date. Transfers, cash withdrawals, and investment purchases may be included. Pending transactions and incoming refunds are excluded. No currency conversion.${summary.invalid ? ` ${summary.invalid} records with invalid amounts or missing currencies were excluded.` : ""}`;
+            const transactions = merchants.flatMap(([, merchant]) => merchant.transactions);
+            const explanation = `Booked outflows filtered by booking date. Transaction lists are sorted by Synci's mapped date. Transfers, cash withdrawals, and investment purchases may be included. Pending transactions and incoming refunds are excluded. No currency conversion.${summary.invalid ? ` ${summary.invalid} records with invalid amounts or missing currencies were excluded.` : ""}`;
             return (
               <List.Section
                 key={currency}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { detailFields, transactionMetadata } from "../src/lib/transaction-details";
-import { money } from "../src/lib/format";
+import { dateLabel, money } from "../src/lib/format";
 import type { Transaction } from "../src/lib/types";
 
 const transaction: Transaction = {
@@ -14,6 +14,19 @@ const transaction: Transaction = {
 };
 
 describe("transaction details", () => {
+  it("shows the mapped date before the original booking and value dates", () => {
+    const result = transactionMetadata({
+      ...transaction,
+      value_date: "2026-09-24",
+      mapped_fields: { date: "2026-09-23" },
+    });
+    expect(result).toContainEqual(["Synci Display Date", dateLabel("2026-09-23")]);
+    expect(result).toContainEqual(["Booking Date", dateLabel("2026-09-25")]);
+    expect(result).toContainEqual(["Value Date", dateLabel("2026-09-24")]);
+    expect(result.findIndex(([title]) => title === "Synci Display Date")).toBeLessThan(
+      result.findIndex(([title]) => title === "Booking Date"),
+    );
+  });
   it("puts main fields before every additional API field, including unrecognized fields", () => {
     const result = transactionMetadata({
       ...transaction,

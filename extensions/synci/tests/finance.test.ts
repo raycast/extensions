@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { balanceTotals, connectionState, dateRange, spendingSummary } from "../src/lib/finance";
-import { accountBalance, accountUrl, dateLabel, decimal, markdown, money, transactionName } from "../src/lib/format";
+import {
+  accountBalance,
+  accountUrl,
+  compareTransactionsNewestFirst,
+  dateLabel,
+  decimal,
+  markdown,
+  money,
+  transactionDate,
+  transactionName,
+} from "../src/lib/format";
 import type { FinancialAccount, FinancialConnection, Transaction } from "../src/lib/types";
 
 const transaction = (overrides: Partial<Transaction> = {}): Transaction => ({
@@ -96,6 +106,34 @@ describe("calendar dates", () => {
   it("does not shift ISO date-only strings across time zones", () => {
     expect(dateLabel("2026-09-25")).toContain("25");
     expect(dateLabel("invalid")).toBe("Not reported");
+  });
+});
+
+describe("transaction dates", () => {
+  it("uses Synci's mapped date even when both bank dates differ", () => {
+    expect(
+      transactionDate(
+        transaction({
+          booking_date: "2026-09-25",
+          value_date: "2026-09-24",
+          mapped_fields: { date: "2026-09-23" },
+        }),
+      ),
+    ).toBe("2026-09-23");
+  });
+  it("sorts by mapped date descending with an ID tie-breaker and missing dates last", () => {
+    const records = [
+      transaction({ id: 9, booking_date: "2026-09-26", mapped_fields: null }),
+      transaction({ id: 4, booking_date: "2026-09-25", mapped_fields: { date: "2026-09-23" } }),
+      transaction({ id: 2, booking_date: "2026-09-20", mapped_fields: { date: "2026-09-24" } }),
+      transaction({ id: 3, booking_date: "2026-09-19", mapped_fields: { date: "2026-09-24" } }),
+    ];
+    expect(records.sort(compareTransactionsNewestFirst).map(({ id }) => id)).toEqual([3, 2, 4, 9]);
+  });
+  it("does not invent a mapped date from a raw bank date when Synci omits it", () => {
+    expect(dateLabel(transactionDate(transaction({ booking_date: "2026-09-25", mapped_fields: null })))).toBe(
+      "Not reported",
+    );
   });
 });
 

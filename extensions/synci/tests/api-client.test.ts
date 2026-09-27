@@ -21,6 +21,7 @@ describe("Synci API", () => {
     expect(url.searchParams.get("filter[financial_account_id]")).toBe("42");
     expect(url.searchParams.get("omit_sensitive_identifiers")).toBe("1");
     expect(url.searchParams.get("include")?.split(",")).toContain("enriched");
+    expect(url.searchParams.get("sort")).toBe("-mapped_fields.date,-id");
     expect(init?.headers).toMatchObject({ Authorization: "Bearer token", Accept: "application/json" });
     expect(init?.redirect).toBe("error");
   });
@@ -42,6 +43,24 @@ describe("Synci API", () => {
     const result = await new SynciClient(async () => "token", transport).transactionBatch({}, 1);
     expect(result).toEqual({ data: [{ id: 2 }], hasMore: true, cursor: 3 });
   });
+  it("requests mapped-date ordering before pagination and preserves that order across spending pages", async () => {
+    const newest = { id: 1, booking_date: "2026-09-20", mapped_fields: { date: "2026-09-25" } };
+    const older = { id: 2, booking_date: "2026-09-25", mapped_fields: { date: "2026-09-24" } };
+    const transport = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(page([newest], 1, 2))
+      .mockResolvedValueOnce(page([older], 2, 2));
+    expect(await new SynciClient(async () => "token", transport).spending({ period: "month" })).toEqual([
+      newest,
+      older,
+    ]);
+    expect(transport).toHaveBeenCalledTimes(2);
+    for (const [index, [input]] of transport.mock.calls.entries()) {
+      const params = new URL(String(input)).searchParams;
+      expect(params.get("sort")).toBe("-mapped_fields.date,-id");
+      expect(params.get("page[number]")).toBe(String(index + 1));
+    }
+  });
   it("finds amounts beyond the first page while retaining the account, date, and status filters", async () => {
     const transport = vi
       .fn<typeof fetch>()
@@ -62,6 +81,9 @@ describe("Synci API", () => {
     expect(params.get("filter[financial_account_id]")).toBe("42");
     expect(params.get("filter[booked]")).toBe("1");
     expect(params.has("filter[booking_date_after]")).toBe(true);
+    for (const [input] of transport.mock.calls) {
+      expect(new URL(String(input)).searchParams.get("sort")).toBe("-mapped_fields.date,-id");
+    }
   });
   it("returns a matching page promptly and resumes at the next unconsumed page", async () => {
     const transport = vi.fn<typeof fetch>().mockResolvedValueOnce(
