@@ -240,3 +240,15 @@ export function runSpeedTest(
     },
   };
 }
+
+/** Run a speed test without progress updates and return its final result. */
+export function runSpeedTestOnce(): Promise<SpeedtestResult> {
+  return new Promise((resolve, reject) => {
+    runSpeedTest(
+      () => {},
+      (result) => (result.error ? reject(new Error(result.error)) : resolve(result)),
+      reject,
+      () => {},
+    );
+  });
+}

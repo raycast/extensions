@@ -1,5 +1,10 @@
 # Speedtest Changelog
 
+## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Added Ask Speedtest in Raycast AI to run a speed test and answer questions about the current connection.
+- Added YAML evals for speed and latency questions.
+
 ## [Live Speed Meter] - 2026-09-09
 
 - The command now opens on a live speed meter: download and upload speedometers side by side (the running one animates, the other waits), bandwidth-over-time charts and a ping → download → upload phase strip, all rebuilt from generated SVG on every progress event.
