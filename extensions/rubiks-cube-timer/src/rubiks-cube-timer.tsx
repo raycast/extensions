@@ -21,7 +21,7 @@ import {
 import { useLocalStorage } from "@raycast/utils";
 import { make2x2Scramble, makeScramble } from "./help/scramble";
 import { scrambleImage, statsImage, timerImage } from "./help/screen";
-import { Solve, effectiveTime, exportToCsTimer, importFromCsTimer, mergeSolves } from "./help/cstimer";
+import { CubeSize, Solve, effectiveTime, exportToCsTimer, importFromCsTimer, mergeSolves } from "./help/cstimer";
 
 function formatTime(ms: number, decimals = 2): string {
   if (!Number.isFinite(ms)) return "DNF";
@@ -229,6 +229,11 @@ export default function command() {
   const { value: stored, setValue: setSolves, isLoading } = useLocalStorage<Solve[]>("solves", []);
   const solves = stored ?? [];
 
+  // Solves are tagged with a cube size (older ones default to 3x3). History, stats, and export are
+  // scoped to the selected cube so 2x2 and 3x3 times never mix.
+  const sizeOf = (s: Solve): CubeSize => s.size ?? "3x3";
+  const cubeSolves = solves.filter((s) => sizeOf(s) === cubeSize);
+
   const [scramble, setScramble] = useState(() => nextScramble());
   const [phase, setPhase] = useState<Phase>("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -293,7 +298,7 @@ export default function command() {
     const penalty = inspectionPenaltyRef.current;
     setLastTime(finalTime);
     setLastPenalty(penalty);
-    const solve: Solve = { time: finalTime, scramble, date: Math.floor(Date.now() / 1000), penalty };
+    const solve: Solve = { time: finalTime, scramble, date: Math.floor(Date.now() / 1000), penalty, size: cubeSize };
     setSolves([solve, ...solves]);
     setScramble(nextScramble());
     setPhase("idle");
@@ -315,40 +320,48 @@ export default function command() {
   }
 
   function deleteLast() {
-    setSolves(solves.slice(1));
+    const idx = solves.findIndex((s) => sizeOf(s) === cubeSize);
+    if (idx === -1) return;
+    setSolves(solves.filter((_, i) => i !== idx));
   }
 
   async function clearAll() {
-    if (solves.length === 0) return;
+    if (cubeSolves.length === 0) return;
     const confirmed = await confirmAlert({
-      title: "Clear all times?",
-      message: `This permanently deletes all ${solves.length} saved solves. Export first if you want a backup.`,
+      title: `Clear all ${cubeSize} times?`,
+      message: `This permanently deletes all ${cubeSolves.length} saved ${cubeSize} solves. Export first if you want a backup.`,
       icon: Icon.Trash,
       primaryAction: { title: "Clear All", style: Alert.ActionStyle.Destructive },
     });
     if (confirmed) {
-      await setSolves([]);
+      await setSolves(solves.filter((s) => sizeOf(s) !== cubeSize));
     }
   }
 
   async function handleImport(imported: Solve[], options: ImportOptions): Promise<boolean> {
-    // "replace" starts from an empty list (forgets local solves); otherwise merge into existing.
-    const base = options.replace ? [] : solves;
-    const merged = mergeSolves(base, imported);
+    // Imported solves are tagged with the selected cube (csTimer files don't carry a cube size).
+    const tagged = imported.map((s) => ({ ...s, size: cubeSize }));
     const minMs = options.minSeconds * 1000;
-    // Filter on effective time so +2 (and DNF) match the value users see.
-    const result = minMs > 0 ? merged.filter((s) => effectiveTime(s) >= minMs) : merged;
+    const keep = (s: Solve) => minMs === 0 || effectiveTime(s) >= minMs;
+    // "replace" forgets the selected cube's solves; the other cube's history is always kept.
+    const otherCube = solves.filter((s) => sizeOf(s) !== cubeSize);
+    const base = options.replace ? otherCube : solves;
+    const result = mergeSolves(base, tagged).filter(keep);
 
-    // Replacing, or a filter/empty import that would wipe the saved list, is as destructive as
-    // "Clear All Times" — confirm before discarding existing solves.
-    const discardsHistory = solves.length > 0 && (options.replace || result.length === 0);
+    // Replacing, or a filter/empty import that would wipe this cube's saved solves, is as destructive
+    // as "Clear All Times" — confirm before discarding them.
+    const remainingForCube = result.filter((s) => sizeOf(s) === cubeSize).length;
+    const discardsHistory = cubeSolves.length > 0 && (options.replace || remainingForCube === 0);
     if (discardsHistory) {
       const confirmed = await confirmAlert({
-        title: result.length === 0 ? "This import removes all your solves" : "Replace saved solves?",
+        title:
+          remainingForCube === 0
+            ? `This import removes all your ${cubeSize} solves`
+            : `Replace saved ${cubeSize} solves?`,
         message:
-          result.length === 0
-            ? `Your ${solves.length} saved solves would be discarded with nothing kept. Export first if you want a backup.`
-            : `Your ${solves.length} saved solves will be replaced by ${result.length} imported. Export first if you want a backup.`,
+          remainingForCube === 0
+            ? `Your ${cubeSolves.length} saved ${cubeSize} solves would be discarded with nothing kept. Export first if you want a backup.`
+            : `Your ${cubeSolves.length} saved ${cubeSize} solves will be replaced by ${remainingForCube} imported. Export first if you want a backup.`,
         icon: Icon.Trash,
         primaryAction: { title: "Replace", style: Alert.ActionStyle.Destructive },
       });
@@ -392,16 +405,17 @@ export default function command() {
   // Stats only change when a solve is added, so compute them (and their image) once per solve
   // instead of on every timer tick. They're shown only at rest, so they can never jump.
   const statsUri = useMemo(() => {
-    if (solves.length === 0) return "";
-    const eff = solves.map(effectiveTime);
+    const scoped = solves.filter((s) => (s.size ?? "3x3") === cubeSize);
+    if (scoped.length === 0) return "";
+    const eff = scoped.map(effectiveTime);
     const finite = eff.filter((t) => Number.isFinite(t));
     const dash = "–";
     const best = finite.length > 0 ? formatTime(Math.min(...finite)) : dash;
     const ao5 = averageOf(eff, 5);
     const ao12 = averageOf(eff, 12);
-    const text = `best ${best}  ·  ao5 ${ao5 !== undefined ? formatTime(ao5) : dash}  ·  ao12 ${ao12 !== undefined ? formatTime(ao12) : dash}  ·  solves ${solves.length}`;
+    const text = `best ${best}  ·  ao5 ${ao5 !== undefined ? formatTime(ao5) : dash}  ·  ao12 ${ao12 !== undefined ? formatTime(ao12) : dash}  ·  solves ${scoped.length}`;
     return statsImage(text, environment.appearance);
-  }, [solves]);
+  }, [solves, cubeSize]);
   const statsBlock = phase === "idle" && statsUri ? `![stats](${statsUri})` : "";
 
   const markdown = [`![scramble](${top})`, timerBlock, statsBlock].filter(Boolean).join("\n\n");
@@ -441,7 +455,7 @@ export default function command() {
             title="Export to Cstimer"
             icon={Icon.Upload}
             shortcut={shortcut(["cmd", "shift"], "e")}
-            target={<ExportForm solves={solves} />}
+            target={<ExportForm solves={cubeSolves} />}
           />
           <Action.Push
             title="Import from Cstimer"
