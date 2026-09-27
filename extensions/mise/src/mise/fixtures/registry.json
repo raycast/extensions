@@ -1,0 +1,33 @@
+[
+  {
+    "short": "jq",
+    "backends": ["aqua:jqlang/jq", "asdf:mise-plugins/asdf-jq"],
+    "bins": ["jq"],
+    "description": "Command-line JSON processor"
+  },
+  {
+    "short": "1password",
+    "backends": ["vfox:mise-plugins/vfox-1password", "aqua:1password/cli"],
+    "bins": ["op"],
+    "description": "Password manager developed by AgileBits Inc",
+    "aliases": ["1password-cli", "op"]
+  },
+  {
+    "short": "node",
+    "backends": ["core:node"],
+    "bins": ["node", "npm", "npx"],
+    "description": "Node.js® is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web apps, command line tools and scripts (Builtin plugin)"
+  },
+  {
+    "short": "ripgrep",
+    "backends": ["aqua:BurntSushi/ripgrep", "asdf:https://gitlab.com/wt0f/asdf-ripgrep", "cargo:ripgrep"],
+    "bins": ["rg"],
+    "description": "ripgrep recursively searches directories for a regex pattern while respecting your gitignore",
+    "aliases": ["rg"]
+  },
+  {
+    "short": "ag",
+    "backends": ["vfox:mise-plugins/vfox-ag", "asdf:mise-plugins/mise-ag"],
+    "description": "The Silver Searcher: A code searching tool similar to ack, with a focus on speed"
+  }
+]

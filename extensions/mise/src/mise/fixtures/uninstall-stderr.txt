@@ -1,0 +1,3 @@
+mise by @jdx – removing 1 tool
+mise ✓ jq@1.7.1  0ms
+mise ████████████████ 1/1 · removed 1 tool in 0ms
