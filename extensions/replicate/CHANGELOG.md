@@ -1,6 +1,6 @@
 # Replicate Changelog
 
-## [Replicate models in Raycast AI] - {PR_MERGE_DATE}
+## [Replicate models in Raycast AI] - 2026-09-27
 
 - Replicate models can be picked in Raycast AI's model picker (requires Raycast Pro). Image models reply with the image, editing models change an attached image or the last one in the chat, and text models stream their answer. A status section shows progress while a model runs
 - New Raycast AI Models screen in the Replicate menu: popular image, image-editing and text models are offered and refreshed daily. Search Replicate to add any other model, hide popular ones, and set per-model chat defaults such as an aspect ratio. Models you've chatted with stay until you remove them

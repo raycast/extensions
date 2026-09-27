@@ -551,5 +551,8 @@
     "lint": "ray lint && tsc --noEmit",
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
