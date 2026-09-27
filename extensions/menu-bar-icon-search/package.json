@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "menu-bar-icon-search",
+  "title": "Menu Bar Icon Search",
+  "description": "Search and open menu bar app icons, including hidden icons.",
+  "icon": "menu-bar-icon.png",
+  "author": "mguellsegarra",
+  "homepage": "https://ondori.dev",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "preferences": [
+    {
+      "name": "includeSystemItems",
+      "title": "System Items",
+      "description": "Show macOS controls such as Bluetooth, Sound, Wi-Fi, Control Center, and Clock.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Include system menu bar items"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-menu-bar",
+      "title": "Search Menu Bar Icons",
+      "description": "Find and open an app icon in the menu bar.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.0.0"
+  }
+}
