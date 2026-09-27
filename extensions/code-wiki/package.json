@@ -54,8 +54,8 @@
     },
     {
       "name": "search-repo-wikis",
-      "title": "Search Repository Wikis",
-      "description": "Search for repositories on Code Wiki"
+      "title": "Get Repository Search Link",
+      "description": "Get a Code Wiki repository search link without opening the browser or listing results"
     }
   ],
   "dependencies": {

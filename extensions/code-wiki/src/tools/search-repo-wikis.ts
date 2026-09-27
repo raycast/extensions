@@ -1,4 +1,3 @@
-import { open } from "@raycast/api";
 import { repoSearchURL } from "../lib/code-wiki-url";
 
 type Input = {
@@ -6,9 +5,7 @@ type Input = {
   query: string;
 };
 
-/** Open Code Wiki search results for repositories. */
-export default async function tool(input: Input) {
-  const url = repoSearchURL(input.query);
-  await open(url);
-  return `Opened ${url}`;
+/** Return a Code Wiki search link without opening the browser or listing results. */
+export default function tool(input: Input) {
+  return repoSearchURL(input.query);
 }
