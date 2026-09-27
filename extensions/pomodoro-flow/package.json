@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro-flow",
+  "title": "Pomodoro Flow",
+  "description": "A calm, full-featured Pomodoro timer for Raycast and your menu bar",
+  "icon": "icon.png",
+  "author": "anthonyboisclair",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro Flow",
+      "subtitle": "Focus timer",
+      "description": "Start, pause, adjust, and move through your Pomodoro cycle",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Pomodoro Flow in Menu Bar",
+      "subtitle": "Focus timer",
+      "description": "Control your Pomodoro timer from the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "stats",
+      "title": "Pomodoro Statistics",
+      "subtitle": "Focus history",
+      "description": "Review completed Pomodoros by day, month, and year",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusMinutes",
+      "title": "Focus Duration",
+      "description": "Minutes in a focus session",
+      "type": "textfield",
+      "default": "25",
+      "required": true
+    },
+    {
+      "name": "shortBreakMinutes",
+      "title": "Short Break",
+      "description": "Minutes in a short break",
+      "type": "textfield",
+      "default": "5",
+      "required": true
+    },
+    {
+      "name": "longBreakMinutes",
+      "title": "Long Break",
+      "description": "Minutes in a long break",
+      "type": "textfield",
+      "default": "15",
+      "required": true
+    },
+    {
+      "name": "longBreakEvery",
+      "title": "Long Break Interval",
+      "description": "Take a long break after this many focus sessions",
+      "type": "dropdown",
+      "default": "4",
+      "required": true,
+      "data": [
+        {
+          "title": "Every 2 sessions",
+          "value": "2"
+        },
+        {
+          "title": "Every 3 sessions",
+          "value": "3"
+        },
+        {
+          "title": "Every 4 sessions",
+          "value": "4"
+        },
+        {
+          "title": "Every 5 sessions",
+          "value": "5"
+        },
+        {
+          "title": "Every 6 sessions",
+          "value": "6"
+        }
+      ]
+    },
+    {
+      "name": "autoStartBreaks",
+      "title": "Auto-start Breaks",
+      "description": "Automatically begin a break after focus completes",
+      "label": "Start the next break automatically",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoStartFocus",
+      "title": "Auto-start Focus",
+      "description": "Automatically begin focus after a break completes",
+      "label": "Start the next focus session automatically",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "sound",
+      "title": "Completion Sound",
+      "description": "Play the Pomodoro Flow chime when each session finishes",
+      "label": "Play a sound when a session ends",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "fix-prettier": "prettier --write src",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
