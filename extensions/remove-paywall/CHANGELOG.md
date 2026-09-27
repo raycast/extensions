@@ -1,6 +1,6 @@
 # Remove Paywall Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Added an Ask AI tool that returns a paywall removal link for an article URL
 - Added YAML evals for standard and Medium article requests
