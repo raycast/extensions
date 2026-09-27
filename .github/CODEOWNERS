@@ -1709,6 +1709,7 @@
 /extensions/modify-hash                                             @tisfeng @0xdhrv
 /extensions/modrinth                                                @soradotwav @muhammadrizo-y
 /extensions/modrinth-search                                         @MagnusHJensen
+/extensions/moex-bonds                                              @Atolstikoff
 /extensions/moji                                                    @Kasper4649
 /extensions/mole                                                    @jlrochin @adrianavarrete @alexibuild
 /extensions/mollie-for-raycast                                      @thomasotter
@@ -2557,7 +2558,7 @@
 /extensions/sharding-tools                                          @kevinwang0224
 /extensions/share-a-quote                                           @alexibuild
 /extensions/share-my-code                                           @jairaume
-/extensions/sharex                                                  @zxc-rv
+/extensions/sharex                                                  @zxc-rv @TheTimmaeh
 /extensions/shell                                                   @KELiON @emiara @kevinm6 @MohamedK1 @AnirudhG07 @pernielsentikaer @Sataros221
 /extensions/shell-alias                                             @clemclx
 /extensions/shell-apps                                              @Kxrbx
@@ -3191,7 +3192,7 @@
 /extensions/windows-default-wallpapers                              @muhammadrizo-y
 /extensions/windows-domain                                          @tonka3000
 /extensions/windows-environment-variables                           @devohmycode
-/extensions/windows-terminal                                        @theycallhermax @artistro08
+/extensions/windows-terminal                                        @theycallhermax @artistro08 @muhammadrizo-y
 /extensions/windows-to-linux-path                                   @Showtc
 /extensions/windsurf                                                @vikasbnsl
 /extensions/winget                                                  @ercaneray @ilia-glushchenko @Net-zen

@@ -16,6 +16,7 @@ import { useEffect, useMemo } from "react";
 import { NewTabMenuEntry, Profile, UnsupportedPatternError, resolveNewTabMenuOrder } from "./new-tab-menu";
 
 interface WindowsTerminalSettings {
+  defaultProfile?: string;
   profiles: {
     list: Profile[];
   };
@@ -86,7 +87,12 @@ function Actions(props: { name: string; quake: boolean }) {
         icon={Icon.PlusSquare}
         title={props.quake ? "Open in Quake Window" : "Open in New Tab"}
         onAction={async () => {
-          const args = props.quake ? ["-w", "_quake", "new-tab", "-p", props.name] : ["new-tab", "-p", props.name];
+          // -w 0 targets the most recently used window (a new window is created if none
+          // exists). Without -w, wt always opens a new window unless the user changed
+          // windowingBehavior away from its "useNew" default.
+          const args = props.quake
+            ? ["-w", "_quake", "new-tab", "-p", props.name]
+            : ["-w", "0", "new-tab", "-p", props.name];
           execFile("wt.exe", args, getSpawnOptions());
           await closeMainWindow();
         }}
@@ -95,7 +101,9 @@ function Actions(props: { name: string; quake: boolean }) {
         icon={Icon.PlusTopRightSquare}
         title="Open in New Window"
         onAction={async () => {
-          execFile("wt.exe", ["-p", props.name], getSpawnOptions());
+          // -w -1 forces a new window even if the user set windowingBehavior to
+          // useExisting/useAnyExisting.
+          execFile("wt.exe", ["-w", "-1", "new-tab", "-p", props.name], getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -149,13 +157,19 @@ function getKeywords(item: Profile) {
   return [];
 }
 
+function isDefaultProfile(item: Profile) {
+  return PROFILES.defaultProfile === item.guid || PROFILES.defaultProfile === item.name;
+}
+
 function ProfileItem(props: { item: Profile; quake: boolean }) {
+  const isDefault = isDefaultProfile(props.item);
   return (
     <List.Item
       key={props.item.guid}
       icon={getIcon(props.item)}
       title={props.item.name}
       keywords={getKeywords(props.item)}
+      accessories={isDefault ? [{ text: "Default" }] : undefined}
       actions={<Actions name={props.item.name} quake={props.quake} />}
     />
   );
