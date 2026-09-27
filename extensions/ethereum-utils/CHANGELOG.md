@@ -1,5 +1,9 @@
 # Changelog
 
+## [ENSv2 Support] - 2026-09-23
+
+- Resolve ENS records directly through ethers and the Universal Resolver
+
 ## [Add RPC URLs to search chain] - 2025-01-21
 
 ## [Added "Convert Decimal Units" command] - 2024-09-08

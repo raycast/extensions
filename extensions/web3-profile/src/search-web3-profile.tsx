@@ -1,31 +1,55 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActionPanel, List, Action, Image, Icon, useNavigation } from "@raycast/api";
+import { QueryClient, QueryClientProvider, useQueries, useQuery } from "@tanstack/react-query";
+import {
+  getBalanceQueryOptions,
+  getEnsAddressQueryOptions,
+  getEnsAvatarQueryOptions,
+  getEnsTextQueryOptions,
+  hashFn,
+  structuralSharing,
+} from "@wagmi/core/query";
 import { fetchSuggestions } from "./lib/fetchSuggestions";
-import { WagmiConfig, createClient, useEnsAddress, useEnsAvatar, useBalance, useEnsResolver } from "wagmi";
-import { getDefaultProvider } from "ethers";
-import { useEnsRecords } from "./lib/useEnsRecords";
+import { type Address } from "viem";
+import { mainnet } from "viem/chains";
+import {
+  decodeEnsAddress,
+  ENS_ADDRESS_RECORD_ENTRIES,
+  ENS_ADDRESS_RECORDS,
+  ENS_TEXT_RECORD_KEYS,
+  normalizeEnsName,
+  wagmiConfig,
+  type EnsRecords,
+} from "./lib/ens";
 
-const client = createClient({
-  autoConnect: true,
-  provider: getDefaultProvider(),
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryKeyHashFn: hashFn,
+      retry: 1,
+      staleTime: 60_000,
+      structuralSharing,
+    },
+  },
 });
 
 export default function Command() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SearchWeb3Profile />
+    </QueryClientProvider>
+  );
+}
+
+function SearchWeb3Profile() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [ensSuggestions, setEnsSuggestions] = useState<string[]>([]);
-
-  useEffect(() => {
-    setEnsSuggestions([]);
-
-    fetchSuggestions(
-      searchTerm,
-      (results: string[]) => {
-        setEnsSuggestions(results);
-      },
-      setIsLoading
-    );
-  }, [searchTerm]);
+  const suggestionsQuery = useQuery({
+    queryKey: ["ensSuggestions", searchTerm.toLowerCase()],
+    queryFn: () => fetchSuggestions(searchTerm),
+    enabled: searchTerm.length > 2,
+  });
+  const ensSuggestions = suggestionsQuery.data ?? [];
+  const isLoading = suggestionsQuery.isFetching;
 
   let title;
 
@@ -58,11 +82,7 @@ export default function Command() {
               <Action.Push
                 title="Show Profile"
                 icon={Icon.AppWindowSidebarLeft}
-                target={
-                  <WagmiConfig client={client}>
-                    <ProfileDetail name={name} />
-                  </WagmiConfig>
-                }
+                target={<ProfileDetail name={name} />}
               />
             </ActionPanel>
           }
@@ -72,34 +92,78 @@ export default function Command() {
   );
 }
 
+interface EnsProfile {
+  address?: Address;
+  avatar?: string;
+  balance?: string;
+  records: EnsRecords;
+}
+
+function useEnsProfile(name: string) {
+  let normalizedName: string | undefined;
+  try {
+    normalizedName = normalizeEnsName(name);
+  } catch {
+    normalizedName = undefined;
+  }
+  const enabled = normalizedName !== undefined;
+
+  const avatarQuery = useQuery({
+    ...getEnsAvatarQueryOptions(wagmiConfig, { name: normalizedName, chainId: mainnet.id }),
+    enabled,
+  });
+  const textQueries = useQueries({
+    queries: ENS_TEXT_RECORD_KEYS.map((key) => ({
+      ...getEnsTextQueryOptions(wagmiConfig, { name: normalizedName, key, chainId: mainnet.id }),
+      enabled,
+    })),
+  });
+  const addressQueries = useQueries({
+    queries: ENS_ADDRESS_RECORD_ENTRIES.map(([, { coinType }]) => ({
+      ...getEnsAddressQueryOptions(wagmiConfig, { name: normalizedName, coinType, chainId: mainnet.id }),
+      enabled,
+    })),
+  });
+
+  const records: EnsRecords = {
+    texts: Object.fromEntries(
+      ENS_TEXT_RECORD_KEYS.flatMap((key, index) => (textQueries[index].data ? [[key, textQueries[index].data]] : []))
+    ),
+    addresses: Object.fromEntries(
+      ENS_ADDRESS_RECORD_ENTRIES.flatMap(([key, { coinType }], index) => {
+        const rawAddress = addressQueries[index].data;
+        const address = rawAddress ? decodeEnsAddress(rawAddress, coinType) : undefined;
+        return address ? [[key, address]] : [];
+      })
+    ),
+  };
+  const address = records.addresses.ethereum as Address | undefined;
+  const balanceQuery = useQuery({
+    ...getBalanceQueryOptions(wagmiConfig, { address, chainId: mainnet.id }),
+    enabled: address !== undefined,
+  });
+  const profile: EnsProfile = {
+    address,
+    avatar: avatarQuery.data ?? undefined,
+    balance: balanceQuery.data?.formatted,
+    records,
+  };
+  const isLoading =
+    enabled &&
+    (avatarQuery.isPending ||
+      textQueries.some((query) => query.isPending) ||
+      addressQueries.some((query) => query.isPending) ||
+      (address !== undefined && balanceQuery.isPending));
+
+  return { profile, isLoading };
+}
+
 function ProfileDetail({ name }: { name: string }) {
-  const [shouldFetchAvatar, setShouldFetchAvatar] = useState(false);
-
-  const { data: ensAvatar, isLoading: isEnsAvatarLoading } = useEnsAvatar({
-    addressOrName: name,
-    enabled: shouldFetchAvatar,
-  });
-  const { data: ensAddress, isLoading: isEnsAddressLoading } = useEnsAddress({ name });
-  const { data: ensRecords, isLoading: isEnsRecordsLoading } = useEnsRecords({ name });
-  const { data: balance, isLoading: isBalanceLoading } = useBalance({ addressOrName: name });
-
+  const { profile, isLoading } = useEnsProfile(name);
+  const { address: ensAddress, avatar: ensAvatar, records: ensRecords, balance } = profile;
+  const { texts: ensTextRecords, addresses: ensAddresses } = ensRecords;
+  const telegram = ensTextRecords["org.telegram"];
   const { pop } = useNavigation();
-
-  useEnsResolver({
-    name,
-    onSuccess: async (resolver) => {
-      if (!resolver) return;
-      const avatarText = await resolver.getText("avatar");
-
-      // Ignore Avatars that use the Zora Contract
-      // https://github.com/ensdomains/ens-avatar/issues/21
-      if (avatarText && !avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")) {
-        setShouldFetchAvatar(true);
-      }
-    },
-  });
-
-  const isLoading = isEnsAddressLoading || isEnsAvatarLoading || isEnsRecordsLoading || isBalanceLoading;
 
   return isLoading ? (
     <List isLoading searchBarPlaceholder={name} enableFiltering={false}>
@@ -117,38 +181,35 @@ function ProfileDetail({ name }: { name: string }) {
                 icon={{ source: "rainbow.png" }}
                 url={`https://rainbow.me/${name}`}
               />
-              <Action.OpenInBrowser
-                title="Open on Etherscan"
-                icon={{ source: { light: "etherscan.png", dark: "etherscan-dark.png" } }}
-                url={`https://etherscan.io/address/${ensAddress}`}
-              />
-              <Action.OpenInBrowser
-                title="Open on OpenSea"
-                icon="opensea.png"
-                url={`https://opensea.io/${ensAddress}`}
-              />
-              {ensRecords && ensRecords["com.github"] && (
+              {ensAddress && (
+                <Action.OpenInBrowser
+                  title="Open on Etherscan"
+                  icon={{ source: { light: "etherscan.png", dark: "etherscan-dark.png" } }}
+                  url={`https://etherscan.io/address/${ensAddress}`}
+                />
+              )}
+              {ensAddress && (
+                <Action.OpenInBrowser
+                  title="Open on OpenSea"
+                  icon="opensea.png"
+                  url={`https://opensea.io/${ensAddress}`}
+                />
+              )}
+              {ensTextRecords["com.github"] && (
                 <Action.OpenInBrowser
                   title="Open on GitHub"
                   icon={{ source: { light: "github.png", dark: "github-dark.png" } }}
-                  url={`https://github.com/${ensRecords["com.github"]}`}
+                  url={`https://github.com/${ensTextRecords["com.github"]}`}
                 />
               )}
-              {ensRecords && ensRecords["com.instagram"] && (
-                <Action.OpenInBrowser
-                  title="Open on Instagram"
-                  icon="instagram.png"
-                  url={`https://instagram.com/${ensRecords["com.instagram"]}`}
-                />
-              )}
-              {ensRecords && ensRecords["com.twitter"] && (
+              {ensTextRecords["com.twitter"] && (
                 <Action.OpenInBrowser
                   title="Open on Twitter"
                   icon="twitter.png"
-                  url={`https://twitter.com/${ensRecords["com.twitter"]}`}
+                  url={`https://twitter.com/${ensTextRecords["com.twitter"]}`}
                 />
               )}
-              <Action.CopyToClipboard title="Copy Address" content={String(ensAddress)} />
+              {ensAddress && <Action.CopyToClipboard title="Copy Address" content={ensAddress} />}
             </ActionPanel>
           }
           detail={
@@ -161,65 +222,44 @@ function ProfileDetail({ name }: { name: string }) {
                       icon={{ source: ensAvatar, mask: Image.Mask.Circle }}
                     />
                   )}
-                  {ensRecords?.description && (
-                    <List.Item.Detail.Metadata.Label title="Description" text={ensRecords.description} />
+                  {ensTextRecords.description && (
+                    <List.Item.Detail.Metadata.Label title="Description" text={ensTextRecords.description} />
                   )}
-                  {ensRecords?.pronouns && (
-                    <List.Item.Detail.Metadata.Label title="Pronouns" text={ensRecords.pronouns} />
+                  {ensTextRecords.url && (
+                    <List.Item.Detail.Metadata.Link title="URL" text={ensTextRecords.url} target={ensTextRecords.url} />
                   )}
-                  {ensRecords?.keywords && (
-                    <List.Item.Detail.Metadata.TagList title="Keywords">
-                      {ensRecords.keywords.split(",").map((keyword) => (
-                        <List.Item.Detail.Metadata.TagList.Item key={keyword} text={keyword.trim()} />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
-                  )}
-                  {ensRecords?.url && (
-                    <List.Item.Detail.Metadata.Link title="URL" text={ensRecords.url} target={ensRecords.url} />
-                  )}
-                  {ensRecords?.website && (
+                  {ensTextRecords.website && (
                     <List.Item.Detail.Metadata.Link
                       title="Website"
-                      text={ensRecords.website}
-                      target={ensRecords.website}
+                      text={ensTextRecords.website}
+                      target={ensTextRecords.website}
                     />
                   )}
-                  {ensRecords && ensRecords["email"] && (
-                    <List.Item.Detail.Metadata.Label title="Email" text={ensRecords["email"]} />
+                  {ensTextRecords.email && (
+                    <List.Item.Detail.Metadata.Label title="Email" text={ensTextRecords.email} />
                   )}
-                  {ensRecords && ensRecords["com.github"] && (
+                  {ensTextRecords["com.github"] && (
                     <List.Item.Detail.Metadata.Link
                       title="GitHub"
-                      text={ensRecords["com.github"]}
-                      target={ensRecords["com.github"]}
+                      text={ensTextRecords["com.github"]}
+                      target={`https://github.com/${ensTextRecords["com.github"]}`}
                     />
                   )}
-                  {ensRecords && ensRecords["com.instagram"] && (
-                    <List.Item.Detail.Metadata.Link
-                      title="Instagram"
-                      text={ensRecords["com.instagram"]}
-                      target={ensRecords["com.instagram"]}
-                    />
-                  )}
-                  {ensRecords && ensRecords["com.twitter"] && (
+                  {ensTextRecords["com.twitter"] && (
                     <List.Item.Detail.Metadata.Link
                       title="Twitter"
-                      text={`@${ensRecords["com.twitter"]}`}
-                      target={ensRecords["com.twitter"]}
+                      text={`@${ensTextRecords["com.twitter"]}`}
+                      target={`https://twitter.com/${ensTextRecords["com.twitter"]}`}
                     />
                   )}
-                  {ensRecords && ensRecords["com.discord"] && (
-                    <List.Item.Detail.Metadata.Link
-                      title="Discord"
-                      text={ensRecords["com.discord"]}
-                      target={ensRecords["com.discord"]}
-                    />
+                  {ensTextRecords["com.discord"] && (
+                    <List.Item.Detail.Metadata.Label title="Discord" text={ensTextRecords["com.discord"]} />
                   )}
-                  {ensRecords && ensRecords["org.telegram"] && (
+                  {telegram && (
                     <List.Item.Detail.Metadata.Link
                       title="Telegram"
-                      text={ensRecords["org.telegram"]}
-                      target={ensRecords["org.telegram"]}
+                      text={telegram}
+                      target={`https://t.me/${telegram.replace(/^@/, "")}`}
                     />
                   )}
                 </List.Item.Detail.Metadata>
@@ -231,40 +271,45 @@ function ProfileDetail({ name }: { name: string }) {
           title="Wallet"
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Address" content={String(ensAddress)} />
-              <Action.OpenInBrowser
-                title="Open on Etherscan"
-                icon={{ source: { light: "etherscan.png", dark: "etherscan-dark.png" } }}
-                url={`https://etherscan.io/address/${ensAddress}`}
-              />
+              {ensAddress && <Action.CopyToClipboard title="Copy Address" content={ensAddress} />}
+              {ensAddress && (
+                <Action.OpenInBrowser
+                  title="Open on Etherscan"
+                  icon={{ source: { light: "etherscan.png", dark: "etherscan-dark.png" } }}
+                  url={`https://etherscan.io/address/${ensAddress}`}
+                />
+              )}
               <Action.OpenInBrowser
                 title="Open on Rainbow Web"
                 icon={{ source: "rainbow.png" }}
                 url={`https://rainbow.me/${name}`}
               />
-              <Action.OpenInBrowser
-                title="Open on OpenSea"
-                icon="opensea.png"
-                url={`https://opensea.io/${ensAddress}`}
-              />
+              {ensAddress && (
+                <Action.OpenInBrowser
+                  title="Open on OpenSea"
+                  icon="opensea.png"
+                  url={`https://opensea.io/${ensAddress}`}
+                />
+              )}
             </ActionPanel>
           }
           detail={
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Address" text={String(ensAddress)} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Link
-                    title="Etherscan"
-                    text="Etherscan"
-                    target={`https://etherscan.io/address/${ensAddress}`}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="Balance"
-                    text={`${Number(balance?.formatted).toFixed(2)} ETH`}
-                  />
+                  {Object.entries(ENS_ADDRESS_RECORDS).map(([key, { label }]) => {
+                    const address = ensAddresses[key as keyof typeof ENS_ADDRESS_RECORDS];
+                    return address ? <List.Item.Detail.Metadata.Label key={key} title={label} text={address} /> : null;
+                  })}
+                  {balance !== undefined && (
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Ethereum Balance"
+                        text={`${Number(balance).toFixed(2)} ETH`}
+                      />
+                    </>
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
