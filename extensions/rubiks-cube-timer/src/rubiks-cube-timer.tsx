@@ -315,6 +315,11 @@ export default function command() {
   function newScramble() {
     if (phase !== "idle") return;
     setScramble(nextScramble());
+    clearLastResult();
+  }
+
+  // Clears the "last result" shown in the center so it never lingers after the solve is gone.
+  function clearLastResult() {
     setLastTime(0);
     setLastPenalty(0);
   }
@@ -323,6 +328,7 @@ export default function command() {
     const idx = solves.findIndex((s) => sizeOf(s) === cubeSize);
     if (idx === -1) return;
     setSolves(solves.filter((_, i) => i !== idx));
+    clearLastResult();
   }
 
   async function clearAll() {
@@ -335,6 +341,7 @@ export default function command() {
     });
     if (confirmed) {
       await setSolves(solves.filter((s) => sizeOf(s) !== cubeSize));
+      clearLastResult();
     }
   }
 
@@ -343,25 +350,27 @@ export default function command() {
     const tagged = imported.map((s) => ({ ...s, size: cubeSize }));
     const minMs = options.minSeconds * 1000;
     const keep = (s: Solve) => minMs === 0 || effectiveTime(s) >= minMs;
-    // "replace" forgets the selected cube's solves; the other cube's history is always kept.
+
+    // The other cube's history is never touched. "replace" forgets this cube's existing solves;
+    // the cutoff only applies to this cube (existing + imported).
     const otherCube = solves.filter((s) => sizeOf(s) !== cubeSize);
-    const base = options.replace ? otherCube : solves;
-    const result = mergeSolves(base, tagged).filter(keep);
+    const currentBase = options.replace ? [] : cubeSolves;
+    const currentCube = mergeSolves(currentBase, tagged).filter(keep);
+    const result = [...otherCube, ...currentCube].sort((a, b) => b.date - a.date);
 
     // Replacing, or a filter/empty import that would wipe this cube's saved solves, is as destructive
     // as "Clear All Times" — confirm before discarding them.
-    const remainingForCube = result.filter((s) => sizeOf(s) === cubeSize).length;
-    const discardsHistory = cubeSolves.length > 0 && (options.replace || remainingForCube === 0);
+    const discardsHistory = cubeSolves.length > 0 && (options.replace || currentCube.length === 0);
     if (discardsHistory) {
       const confirmed = await confirmAlert({
         title:
-          remainingForCube === 0
+          currentCube.length === 0
             ? `This import removes all your ${cubeSize} solves`
             : `Replace saved ${cubeSize} solves?`,
         message:
-          remainingForCube === 0
+          currentCube.length === 0
             ? `Your ${cubeSolves.length} saved ${cubeSize} solves would be discarded with nothing kept. Export first if you want a backup.`
-            : `Your ${cubeSolves.length} saved ${cubeSize} solves will be replaced by ${remainingForCube} imported. Export first if you want a backup.`,
+            : `Your ${cubeSolves.length} saved ${cubeSize} solves will be replaced by ${currentCube.length} imported. Export first if you want a backup.`,
         icon: Icon.Trash,
         primaryAction: { title: "Replace", style: Alert.ActionStyle.Destructive },
       });
@@ -369,6 +378,7 @@ export default function command() {
     }
 
     await setSolves(result);
+    clearLastResult();
     return true;
   }
 
