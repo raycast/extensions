@@ -150,7 +150,7 @@ ${beautified}
           <Action.CopyToClipboard
             title="Copy Beautified Formula"
             content={beautified}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
           />
         </ActionPanel>
       }
