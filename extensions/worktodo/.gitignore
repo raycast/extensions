@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.build/
+coverage/
+raycast-env.d.ts
+.DS_Store
+.env
+.env.*
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+*.partial
+worktodo-backup-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.json
+.worktodo-backup-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.json.*.tmp
