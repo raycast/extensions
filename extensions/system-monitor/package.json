@@ -19,7 +19,8 @@
     "jadenmajid",
     "ADCAdams",
     "TurboCoder13",
-    "Olli0103"
+    "Olli0103",
+    "zellux"
   ],
   "commands": [
     {
@@ -168,7 +169,7 @@
       "required": false,
       "title": "Codex Usage",
       "label": "Show Codex usage",
-      "default": true
+      "default": false
     },
     {
       "name": "showSparkUsage",
@@ -186,7 +187,7 @@
       "required": false,
       "title": "Claude Usage",
       "label": "Show Claude usage",
-      "default": true
+      "default": false
     },
     {
       "name": "codexPath",
