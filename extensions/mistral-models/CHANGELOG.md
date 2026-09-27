@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial release] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add Mistral API models to Raycast's native AI model picker.
 - Store the API key in a password preference.
