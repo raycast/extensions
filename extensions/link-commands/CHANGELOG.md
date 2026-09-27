@@ -1,5 +1,11 @@
 # Link Commands Changelog
 
+## [Plain Names in the Create Form] - 2026-09-27
+
+### Fixed
+
+- The Environment and Category dropdowns in the Create Link Command form listed existing values in their raw sigil form — `@work`, `#media` — instead of the plain name shown everywhere else in the extension. They now read `Work` and `Media`, matching the Search view's filter dropdown and detail pane. Nothing written to disk changes: a command's subtitle still reads ` · @work` / ` · #media`, so existing collections and the older sigil-anchored form are unaffected.
+
 ## [Scope on the Subtitle] - 2026-09-25
 
 ### Changed
