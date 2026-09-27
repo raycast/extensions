@@ -1,0 +1,216 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "octarine",
+  "title": "Octarine",
+  "description": "Search your Octarine workspaces from Raycast",
+  "icon": "icon.png",
+  "author": "aerz",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "workspaceRoots",
+      "type": "textfield",
+      "required": true,
+      "title": "Workspace Paths",
+      "description": "Paths to Octarine workspaces or folders containing them, separated by commas.",
+      "placeholder": "~/path/to/workspace, ~/path/to/folder"
+    },
+    {
+      "name": "excludedWorkspaces",
+      "type": "textfield",
+      "placeholder": "Workspace A, Workspace B",
+      "title": "Workspaces to Exclude",
+      "required": false,
+      "description": "Workspace names Raycast should skip, separated by commas."
+    },
+    {
+      "name": "excludedFoldersInWorkspaces",
+      "type": "textfield",
+      "placeholder": "Folder A, Folder B",
+      "title": "Folders to Exclude",
+      "required": false,
+      "description": "Folder names to exclude from note and attachment results across all workspaces, separated by commas."
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "description": "Open a workspace in Octarine",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "workspace",
+          "type": "text",
+          "required": false,
+          "placeholder": "Workspace name",
+          "description": "Specify the workspace name to open it directly"
+        }
+      ]
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search notes across Octarine workspaces",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showWorkspaceNoteCount",
+          "type": "checkbox",
+          "title": "Search Results",
+          "description": "Adds a note count to each workspace section title.",
+          "label": "Show a note count in each workspace section",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showPinnedNotesFirst",
+          "type": "checkbox",
+          "title": "",
+          "description": "Moves pinned notes to the top of results in each workspace.",
+          "label": "Show pinned notes first",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "searchContent",
+          "type": "checkbox",
+          "title": "",
+          "description": "Searches note content alongside note titles and file paths.",
+          "label": "Include note content by default",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "previewNotesByDefault",
+          "type": "checkbox",
+          "title": "",
+          "description": "Shows the selected note beside the results list when Search Notes opens.",
+          "label": "Show a note preview by default",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-attachments",
+      "title": "Search Attachments",
+      "description": "Search attachments across Octarine workspaces",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showWorkspaceAttachmentCount",
+          "type": "checkbox",
+          "title": "Attachment Results",
+          "description": "Adds an attachment count to each workspace section title.",
+          "label": "Show an attachment count in each workspace section",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "flattenWorkspaceSections",
+          "type": "checkbox",
+          "title": "",
+          "description": "Applies when All Extensions is selected.",
+          "label": "Show attachments in one list",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "listViewByDefault",
+          "type": "checkbox",
+          "title": "",
+          "description": "Opens Search Attachments in List view instead of Grid.",
+          "label": "Show attachments in a list by default",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "excludeFileExtensions",
+          "type": "textfield",
+          "title": "File Extensions to Exclude",
+          "description": "Extensions to omit from results, separated by commas. A leading dot is optional.",
+          "placeholder": "png, mp4, pdf",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-daily-desk-note",
+      "title": "Open Daily Desk Note",
+      "description": "Find and open Daily Desk notes by date",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "date",
+          "type": "text",
+          "required": false,
+          "placeholder": "feb 3"
+        },
+        {
+          "name": "workspace",
+          "type": "text",
+          "required": false,
+          "placeholder": "Workspace name"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultWorkspace",
+          "type": "textfield",
+          "title": "Default Workspace",
+          "required": false,
+          "description": "Enter a workspace name to select when the command opens. Leave blank to show notes from all workspaces.",
+          "placeholder": "Workspace name"
+        },
+        {
+          "name": "showFilename",
+          "type": "checkbox",
+          "title": "Daily Note Titles",
+          "label": "Use the file name as the result title",
+          "required": false,
+          "default": false,
+          "description": "Shows the file name without its extension, such as 2023-02-18. The formatted date or week label appears as the subtitle."
+        },
+        {
+          "name": "useLastWorkspace",
+          "type": "checkbox",
+          "title": "Date Suggestions",
+          "label": "Use the last workspace for date suggestions",
+          "required": false,
+          "default": true,
+          "description": "When you search all workspaces, date suggestions use the workspace where you last opened a note."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "ray publish"
+  }
+}

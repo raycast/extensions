@@ -1,0 +1,17 @@
+# global
+.DS_Store
+.ignore
+
+# dependencies
+/node_modules
+/coverage
+
+# raycast
+raycast-env.d.ts
+
+# typescript
+*.tsbuildinfo
+.eslintcache
+
+# nix
+/.direnv
