@@ -1,42 +1,52 @@
 # Release checklist
 
-## Reproducible build
+## Build
 
-Use the committed `bun.lock` with Bun and the Node.js version required by Raycast's CLI. From the source directory:
+1. Install dependencies from the lockfile:
 
-```sh
-bun install --frozen-lockfile
-bun run release:check
-bun audit
-```
+   ```sh
+   bun install --frozen-lockfile
+   ```
 
-`release:check` stops on formatting, type, test, Raycast validation, or build failures. It produces the production bundle in `dist/`; it does not publish or install it. The audit needs network access and checks known dependency advisories, not application security.
+2. Run the release checks:
 
-Raycast Store CI requires `package-lock.json`. Keep it alongside `bun.lock`; generate it with `npm install --package-lock-only --ignore-scripts` and verify the npm-resolved dependency tree before submission. Bun remains the local development runner.
+   ```sh
+   bun run release:check
+   ```
 
-## Live acceptance checks
+3. Check dependencies for known vulnerabilities:
 
-Automated tests mock API transport. Before release, load the extension with `bun run dev` and verify in Raycast using your own API key (requests may be billed):
+   ```sh
+   bun audit
+   ```
 
-- Preferences show only the required password field; existing keys remain usable.
-- Refresh loads latest chat models without duplicate labels, Codestral, or Voxtral.
-- AI Chat streams a complete answer and correctly uses conversation history.
-- An image works on a model reporting vision support.
-- A tool-capable model completes a Raycast tool round trip without duplicate execution.
-- Cancelling a long response stops it; another prompt still works afterward.
-- Missing/invalid credentials show a useful error without exposing the key.
+The release checks stop on failure and build into `dist/`. They do not install or publish the build. The audit requires network access and checks dependency advisories, not application security.
 
-Interrupted-stream recovery is covered by deterministic tests; a successful normal live answer does not exercise every recovery path.
+Raycast Store CI requires `package-lock.json`. After dependency changes, update it with `npm install --package-lock-only --ignore-scripts`. Check the npm dependency versions before submission. Keep `bun.lock` for local development.
 
-## Before public distribution
+## Live tests
 
-- Confirm `author: m1n` is the intended Raycast Store account.
-- Review README, help, changelog, and the logo attribution in `assets/README.md`.
-- Confirm permission to distribute the logo and retain required upstream license notices.
-- Prepare Store screenshots and metadata if submitting to the Store.
-- Run the checks above against the exact source being submitted.
-- Obtain explicit approval before publishing. No publishing command is part of `release:check`.
+Automated tests mock HTTP requests. Load the extension with `bun run dev` for local checks. Before submission, also test the distribution build in Raycast. Use your own API key and expect API charges.
 
-## Data handling
+- Preferences show one required password field and retain existing keys.
+- Refresh lists latest chat models without duplicate names, Codestral, or Voxtral.
+- AI Chat completes an answer and uses earlier messages correctly.
+- A model with image support accepts an image.
+- A model with tool support completes a tool request without duplicate execution.
+- Canceling stops the response, and the next prompt works.
+- Missing or invalid credentials produce a useful error without exposing the key.
 
-The API key is entered in Raycast's password preference. The extension sends the supplied conversation, system instructions, attachments, and tool definitions/results to Mistral for inference. It has no custom analytics or conversation storage. Raycast and Mistral manage their own data handling. Never include credentials, personal chat logs, `.env` files, or local Raycast settings in a release.
+The recovery tests cover interrupted streams. A normal live answer does not test every recovery path.
+
+## Store submission
+
+1. Check the author account, `m1n`.
+2. Review the README, help, changelog, and icon attribution in `assets/README.md`.
+3. Confirm logo distribution rights and retain required license notices.
+4. Add screenshots or a screencast without credentials or private chat content.
+5. Run the release checks against the source for submission.
+6. With publishing approval, run `bun run publish`.
+7. Complete the PR description and record the test results.
+8. Mark the PR ready for review after live testing and screenshots are complete.
+
+Never submit API keys, personal chat logs, `.env` files, or local Raycast settings. The README describes the data sent to Mistral.
