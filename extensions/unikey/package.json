@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unikey",
+  "title": "UniKey",
+  "description": "Local-first password vault in ~/.unikey with instant search and copy",
+  "icon": "command-icon.png",
+  "author": "dishant_sharma",
+  "platforms": [
+    "macOS"
+  ],
+"categories": [
+    "Security",
+    "Productivity"
+  ],
+  "keywords": ["password", "vault", "keychain", "security", "clipboard", "fuzzy search", "credentials"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "UniKey",
+      "description": "Search the UniKey vault, copy or paste any secret",
+      "mode": "view"
+    },
+    {
+      "name": "add-password",
+      "title": "Add Password",
+      "description": "Create a new password entry in the UniKey vault",
+      "mode": "view"
+    },
+    {
+      "name": "manage-groups",
+      "title": "Manage Groups",
+      "description": "Create, rename, or delete groups in the UniKey vault",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Vault Path",
+      "type": "textfield",
+      "default": "~/.unikey",
+      "required": false,
+      "placeholder": "~/.unikey",
+      "description": "Directory where the encrypted vault lives"
+    },
+    {
+      "name": "clipboardClearSeconds",
+      "title": "Clear Clipboard After (Seconds)",
+      "onlyIntegers": true,
+      "type": "textfield",
+      "default": "30",
+      "required": false,
+      "description": "0 disables auto-clear"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "fzf": "^0.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx ray publish"
+  }
+}
