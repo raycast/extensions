@@ -26,7 +26,7 @@ The recorded time is always exact regardless of this setting; it only changes ho
 
 ## Other settings
 
-- **Cube** — scramble a **3×3** (default) or a **2×2**.
+- **Cube** — scramble a **3×3** (default) or a **2×2**. Each cube keeps its own history, stats, and csTimer import/export, so 2×2 and 3×3 times never mix.
 - **Hidden Timer** — hide the running time while solving (shows "Solving…" instead); the final time still appears when you stop.
 
 ## Inspection
