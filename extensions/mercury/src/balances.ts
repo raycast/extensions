@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fakerKey } from "@chrismessina/raycast-faker";
 import { LocalStorage } from "@raycast/api";
+import { balancesLock, withFileLock } from "./file-lock";
 import { hasLogin, MercuryLogin } from "./logins";
 import {
   Account,
@@ -40,28 +41,31 @@ async function writeSnapshot(loginId: string, snapshot: Snapshot) {
   await LocalStorage.setItem(snapshotKey(loginId), JSON.stringify(snapshot));
 }
 
-/** Saves in flight per login. Each waits for the one before it, so two reads never race one write. */
+/** Saves in flight per login in this command, queued so they don't poll the file lock against each other. */
 const saving = new Map<string, Promise<unknown>>();
 
 /**
  * Write a snapshot unless the login was removed in the meantime (a Treasury response can arrive
  * ~10 s after Remove). `update` sees what's saved now and returns undefined to keep it, so an
  * older request can't overwrite a newer one. Returns the snapshot that is saved afterward.
+ * Read, decide, and write happen inside a file lock, so the menu bar and an open list can't
+ * interleave them.
  */
 async function save(
   loginId: string,
   update: (saved?: Snapshot) => Snapshot | undefined,
 ): Promise<Snapshot | undefined> {
-  // ponytail: serialized within this command only; two commands (menu bar and a list) can still interleave.
   const run = (saving.get(loginId) ?? Promise.resolve())
     .catch(() => {})
-    .then(async () => {
-      if (!(await hasLogin(loginId))) return undefined;
-      const saved = await readSnapshot(loginId);
-      const next = update(saved);
-      if (next) await writeSnapshot(loginId, next);
-      return next ?? saved;
-    });
+    .then(() =>
+      withFileLock(balancesLock(loginId), async () => {
+        if (!(await hasLogin(loginId))) return undefined;
+        const saved = await readSnapshot(loginId);
+        const next = update(saved);
+        if (next) await writeSnapshot(loginId, next);
+        return next ?? saved;
+      }),
+    );
   saving.set(loginId, run);
   try {
     return await run;

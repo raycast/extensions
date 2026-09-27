@@ -22,7 +22,7 @@ export interface LoadedTransaction extends Transaction {
 }
 
 const ALL = "all";
-// ponytail: one page (500 per login, newest first); search reaches older history on the server.
+// One page (500 per login, newest first); search reaches older history on the server.
 const PAGE = 500;
 // The per-account endpoint returns only the last 30 days unless a start date is sent.
 const SINCE_THE_BEGINNING = "2000-01-01";

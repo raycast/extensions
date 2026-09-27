@@ -1,5 +1,6 @@
-import { Clipboard, Toast } from "@raycast/api";
+import { Clipboard, launchCommand, Toast } from "@raycast/api";
 import { withFaker } from "@chrismessina/raycast-faker";
+import { showFailureToast } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 
 const API_BASE_URL = "https://api.mercury.com/api/v1";
@@ -73,6 +74,15 @@ export function toError(error: unknown): Error {
 export function copyErrorAction(error: unknown): Toast.ActionOptions {
   const message = error instanceof Error ? error.message : String(error);
   return { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+}
+
+/** Opens another command of this extension, with a failure toast if Raycast can't launch it. */
+export async function openCommand(options: Parameters<typeof launchCommand>[0], title: string) {
+  try {
+    await launchCommand(options);
+  } catch (error) {
+    await showFailureToast(error, { title, primaryAction: copyErrorAction(error) });
+  }
 }
 
 /** Mercury rejected the API token (HTTP 401). */

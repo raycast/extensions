@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { fakerKey } from "@chrismessina/raycast-faker";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { balancesLock, withFileLock } from "./file-lock";
 import { getOrganization, log, MercuryAuthError, toError } from "./mercury";
 
 /**
@@ -101,8 +102,11 @@ export async function hasLogin(id: string) {
 }
 
 export async function removeLogin(id: string) {
-  await writeLogins((await readLogins()).filter((login) => login.id !== id));
-  await LocalStorage.removeItem(fakerKey(`balances:${id}`));
+  // Under the balances lock, so a save that already checked the login can't write it back.
+  await withFileLock(balancesLock(id), async () => {
+    await writeLogins((await readLogins()).filter((login) => login.id !== id));
+    await LocalStorage.removeItem(fakerKey(`balances:${id}`));
+  });
 }
 
 /** For AI tools: every saved login, or an error that tells the user what to do. */

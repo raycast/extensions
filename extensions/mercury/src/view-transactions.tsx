@@ -7,7 +7,6 @@ import {
   confirmAlert,
   Icon,
   Keyboard,
-  launchCommand,
   LaunchType,
   List,
   showToast,
@@ -24,7 +23,7 @@ import { TreasuryView } from "./components/TreasuryView";
 import { WireDetails, wireDetailsText } from "./components/WireDetails";
 import { accountLabel, capitalize, formatCurrency } from "./format";
 import { loadLogins, MercuryLogin, removeLogin } from "./logins";
-import { Account, CreditAccount, MercuryAuthError, TreasuryAccount } from "./mercury";
+import { Account, CreditAccount, MercuryAuthError, openCommand, TreasuryAccount } from "./mercury";
 
 // Kept under the original command name (`view-transactions`) so existing hotkeys and aliases still work.
 export default function ManageAccounts() {
@@ -382,7 +381,10 @@ function ViewStatementsAction({ accountId }: { accountId: string }) {
       icon={Icon.Receipt}
       shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
       onAction={() =>
-        launchCommand({ name: "view-statements", type: LaunchType.UserInitiated, context: { accountId } })
+        openCommand(
+          { name: "view-statements", type: LaunchType.UserInitiated, context: { accountId } },
+          "Couldn't open statements",
+        )
       }
     />
   );

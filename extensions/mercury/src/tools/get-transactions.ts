@@ -39,7 +39,7 @@ const MAX_LIMIT = 1000;
 export default async function getTransactions(input: Input = {}) {
   const { accountId, search, end, status } = input;
   const limit = Math.min(Math.max(input.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
-  // ponytail: one page of up to 1000 per login is the ceiling; paginate if the AI ever needs more.
+  // One page of up to 1000 per login is the ceiling; paginate if the AI ever needs more.
   const params = new URLSearchParams({ limit: String(limit), order: "desc", start: input.start ?? "2000-01-01" });
   if (search) params.set("search", search);
   if (end) params.set("end", end);

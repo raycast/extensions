@@ -4,7 +4,6 @@ import {
   getPreferenceValues,
   Icon,
   Keyboard,
-  launchCommand,
   LaunchType,
   LocalStorage,
   MenuBarExtra,
@@ -15,7 +14,7 @@ import { usePromise } from "@raycast/utils";
 import { readSnapshot, refreshSnapshot, Snapshot } from "./balances";
 import { accountLabel, formatCurrency } from "./format";
 import { loadLogins, MercuryLogin } from "./logins";
-import { log, MercuryAuthError, toError } from "./mercury";
+import { log, MercuryAuthError, openCommand, toError } from "./mercury";
 
 const SHOW_BALANCE_KEY = "menu-bar-show-balance";
 const EXCLUDED_KEY = "menu-bar-excluded-accounts";
@@ -126,9 +125,13 @@ export default function MenuBarBalance() {
     setOverrides((current) => ({ ...current, showBalance: next }));
   }
 
-  const openManageAccounts = () => launchCommand({ name: "view-transactions", type: LaunchType.UserInitiated });
+  const openManageAccounts = () =>
+    openCommand({ name: "view-transactions", type: LaunchType.UserInitiated }, "Couldn't open Manage Accounts");
   const openTransactions = (filter: string) =>
-    launchCommand({ name: "search-transactions", type: LaunchType.UserInitiated, context: { filter } });
+    openCommand(
+      { name: "search-transactions", type: LaunchType.UserInitiated, context: { filter } },
+      "Couldn't open transactions",
+    );
 
   return (
     <MenuBarExtra
