@@ -1,0 +1,212 @@
+import assert from "node:assert/strict";
+import { lstat, mkdtemp, mkdir, readFile, rm, symlink, utimes, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import {
+  addDeepLink,
+  decodeDeepLinks,
+  deleteDeepLink,
+  resolveStorageConfigurationAt,
+  withStorageLock,
+  type StorageConfiguration,
+} from "../src/storage.js";
+
+const validDeepLink = {
+  id: "8DB1E10D-20DB-4A4B-95B8-845156B4873A",
+  title: "Product Details",
+  urlString: "demoapp://product/123",
+  createdAt: "2026-08-11T09:00:00Z",
+  updatedAt: "2026-08-11T09:00:00Z",
+};
+
+test("validates deep links and supplies the companion app defaults", () => {
+  assert.deepEqual(decodeDeepLinks(JSON.stringify([validDeepLink])), [
+    { ...validDeepLink, group: "", tags: [], isFavorite: false },
+  ]);
+  assert.throws(() => decodeDeepLinks(JSON.stringify([{ ...validDeepLink, urlString: 42 }])), /index 0/);
+  assert.throws(
+    () => decodeDeepLinks(JSON.stringify([{ ...validDeepLink, createdAt: "2026-02-31T09:00:00Z" }])),
+    /index 0/,
+  );
+  assert.throws(() => decodeDeepLinks(JSON.stringify([validDeepLink, validDeepLink])), /duplicate/);
+});
+
+test("falls back to default storage only when the integration manifest is absent", async (t) => {
+  const applicationSupport = await temporaryDirectory(t);
+  const defaultStorage = path.join(applicationSupport, "deeplinks.json");
+  await writeFile(defaultStorage, "[]\n");
+
+  assert.deepEqual(await resolveStorageConfigurationAt(applicationSupport), {
+    storagePath: defaultStorage,
+    environmentsPath: path.join(applicationSupport, "environments.json"),
+  });
+
+  await writeFile(path.join(applicationSupport, "integration.json"), "not json\n");
+  await assert.rejects(() => resolveStorageConfigurationAt(applicationSupport), /manifest contains invalid JSON/);
+});
+
+test("does not silently use default storage when the active storage is unavailable", async (t) => {
+  const applicationSupport = await temporaryDirectory(t);
+  await writeFile(path.join(applicationSupport, "deeplinks.json"), "[]\n");
+  await writeFile(
+    path.join(applicationSupport, "integration.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      storagePath: path.join(applicationSupport, "missing.json"),
+      environmentsPath: path.join(applicationSupport, "environments.json"),
+    }),
+  );
+
+  await assert.rejects(() => resolveStorageConfigurationAt(applicationSupport), /missing\.json/);
+});
+
+test("atomic updates preserve a custom storage symlink", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const targetPath = path.join(directory, "actual", "deeplinks.json");
+  const symlinkPath = path.join(directory, "shared.json");
+  await mkdir(path.dirname(targetPath));
+  await writeFile(targetPath, `${JSON.stringify([validDeepLink])}\n`);
+  await symlink(targetPath, symlinkPath);
+
+  const configuration: StorageConfiguration = {
+    storagePath: symlinkPath,
+    environmentsPath: path.join(directory, "environments.json"),
+  };
+  await addDeepLink(configuration, {
+    title: "Cart",
+    urlString: "demoapp://cart",
+    group: "Checkout",
+    tags: ["smoke"],
+    isFavorite: true,
+  });
+
+  assert.equal((await lstat(symlinkPath)).isSymbolicLink(), true);
+  assert.equal(decodeDeepLinks(await readFile(targetPath, "utf8")).length, 2);
+});
+
+test("concurrent additions preserve every mutation", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  await writeFile(storagePath, "[]\n");
+  const configuration: StorageConfiguration = {
+    storagePath,
+    environmentsPath: path.join(directory, "environments.json"),
+  };
+
+  await Promise.all(
+    Array.from({ length: 20 }, (_, index) =>
+      addDeepLink(configuration, {
+        title: `Concurrent ${index}`,
+        urlString: `demoapp://concurrent/${index}`,
+        group: "",
+        tags: [],
+        isFavorite: false,
+      }),
+    ),
+  );
+
+  const links = decodeDeepLinks(await readFile(storagePath, "utf8"));
+  assert.equal(links.length, 20);
+  assert.equal(new Set(links.map((link) => link.urlString)).size, 20);
+});
+
+test("concurrent add and delete preserve both mutations", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  await writeFile(storagePath, `${JSON.stringify([validDeepLink])}\n`);
+  const configuration: StorageConfiguration = {
+    storagePath,
+    environmentsPath: path.join(directory, "environments.json"),
+  };
+
+  await Promise.all([
+    addDeepLink(configuration, {
+      title: "New link",
+      urlString: "demoapp://new",
+      group: "",
+      tags: [],
+      isFavorite: false,
+    }),
+    deleteDeepLink(configuration, validDeepLink.id),
+  ]);
+
+  const links = decodeDeepLinks(await readFile(storagePath, "utf8"));
+  assert.deepEqual(
+    links.map((link) => link.urlString),
+    ["demoapp://new"],
+  );
+});
+
+test("does not reclaim an existing lock solely because it is old", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const ownerPath = path.join(lockPath, "owner");
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(ownerPath, "replacement-writer\n");
+  const oldDate = new Date(0);
+  await utimes(lockPath, oldDate, oldDate);
+
+  await assert.rejects(
+    () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
+    /Timed out waiting/,
+  );
+
+  assert.equal(await readFile(ownerPath, "utf8"), "replacement-writer\n");
+});
+
+test("recovers a lock whose recorded writer is no longer running", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(
+    path.join(lockPath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: 2_147_483_647 })}\n`,
+  );
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+});
+
+test("recovers an empty lock left before owner metadata was written", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+});
+
+test("does not release a lock that was replaced by another writer", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const ownerPath = path.join(lockPath, "owner");
+  await writeFile(storagePath, "[]\n");
+
+  await assert.rejects(
+    () =>
+      withStorageLock(storagePath, async () => {
+        await rm(lockPath, { recursive: true });
+        await mkdir(lockPath);
+        await writeFile(ownerPath, "replacement-writer\n");
+      }),
+    /ownership changed/,
+  );
+
+  assert.equal(await readFile(ownerPath, "utf8"), "replacement-writer\n");
+});
+
+async function temporaryDirectory(t: test.TestContext): Promise<string> {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "simulator-deep-linker-test-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  return directory;
+}
