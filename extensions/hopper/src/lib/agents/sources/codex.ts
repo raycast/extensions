@@ -6,8 +6,9 @@
 // for other apps (ADR-022).
 //
 // Threads from the app open with its codex://threads/<id> link, while the app runs. A CLI thread is listed while
-// a `codex` process in a terminal works in its folder (that process is its host). Verified with Codex 26.924
-// (app) and CLI 0.157.
+// a `codex` process in a terminal works in its folder (that process is its host): only the folder's latest thread
+// updated since that process started, since earlier threads there were other, finished runs. Verified with Codex
+// 26.924 (app) and CLI 0.157.
 
 import type { Process } from "../../platform/model";
 import type { Agent, AgentContext, AgentSource, AgentStatus, Host } from "../model";
@@ -105,6 +106,22 @@ export function terminalFor(cwd: string | undefined, processes: Process[]): Proc
   return matches.length === 1 ? matches[0] : undefined;
 }
 
+/**
+ * Each terminal's thread: the CLI thread in its folder updated last, if that was since the process started (a
+ * `codex` just started, before its first message, has none yet; older threads in the folder were other runs).
+ */
+export function liveCliThreads(threads: Thread[], processes: Process[]): Map<string, Process> {
+  const latest = new Map<number, { thread: Thread; terminal: Process }>();
+  for (const thread of threads) {
+    if (thread.source !== "cli" || thread.updatedAt === undefined) continue;
+    const terminal = terminalFor(thread.cwd, processes);
+    if (!terminal || thread.updatedAt < terminal.startedAt) continue;
+    const current = latest.get(terminal.pid);
+    if (!current || thread.updatedAt > current.thread.updatedAt!) latest.set(terminal.pid, { thread, terminal });
+  }
+  return new Map([...latest.values()].map(({ thread, terminal }) => [thread.id, terminal]));
+}
+
 /** Threads with a live host, as agents; `tails` maps a thread id to its rollout's end. */
 export function toAgents(
   threads: Thread[],
@@ -112,10 +129,11 @@ export function toAgents(
   processes: Process[],
   appRunning: boolean,
 ): Agent[] {
+  const terminals = liveCliThreads(threads, processes);
   return threads.flatMap((thread): Agent[] => {
     let host: Host;
     if (thread.source === "cli") {
-      const terminal = terminalFor(thread.cwd, processes);
+      const terminal = terminals.get(thread.id);
       if (!terminal) return [];
       host = { kind: "process", pid: terminal.pid, tty: terminal.tty };
     } else {

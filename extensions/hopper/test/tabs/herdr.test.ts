@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadTabs, selectTab } from "../../src/lib/tabs/load.ts";
 import { fromSnapshot, herdr, herdrPlaceKey } from "../../src/lib/tabs/sources/herdr.ts";
+import { herdrClient } from "../../src/lib/platform/processes.ts";
 import { app, fakePlatform } from "../fake-platform.ts";
 import { proc } from "../agents/helpers.ts";
 
@@ -70,6 +71,39 @@ test("discovered through the herdr client's terminal; selecting focuses the tab 
   assert.ok(marker && setTitle.startsWith("client.window_title.set"));
   assert.equal(clearTitle, "client.window_title.clear {}");
   assert.ok(platform.scripts.some((s) => s.includes(`(name of term as text) is "${marker}"`)));
+});
+
+test("each herdr session is listed under the terminal of its own client; a detached one isn't listed", async () => {
+  const iterm = { ...app("com.googlecode.iterm2", "iTerm"), pid: 60 };
+  const dir = "/Users/me/.config/herdr";
+  const snapshots: Record<string, object> = {
+    [`${dir}/herdr.sock`]: { workspaces: [{ workspace_id: "w1", label: "default-ws" }] },
+    [`${dir}/sessions/work/herdr.sock`]: { workspaces: [{ workspace_id: "w1", label: "work-ws" }] },
+    [`${dir}/sessions/idle/herdr.sock`]: { workspaces: [{ workspace_id: "w1", label: "idle-ws" }] },
+  };
+  const platform = fakePlatform({
+    listDir: async (path) =>
+      path === dir ? ["herdr.sock"] : path === `${dir}/sessions` ? ["work", "idle"] : ["herdr.sock"],
+    socketRequest: async (path) => ({ id: "hopper", result: { snapshot: snapshots[path] } }),
+    processes: async () => [
+      // The default session's client in Ghostty; the newer one in iTerm is attached to "work"; "idle" has none.
+      proc(53, 50, "ttys001", "herdr", { startedAt: 1, sockets: [`${dir}/herdr-client.sock`] }),
+      proc(63, 60, "ttys004", "herdr", { startedAt: 2, sockets: [`${dir}/sessions/work/herdr-client.sock`] }),
+    ],
+  });
+  const tabs = await herdr.discover!([ghostty, iterm], platform);
+  assert.deepEqual(
+    tabs.map((t) => [t.title, t.app.name, t.hostTty]),
+    [
+      ["default-ws", "Ghostty", "ttys001"],
+      ["work-ws", "iTerm", "ttys004"],
+    ],
+  );
+});
+
+test("herdr clients whose connections can't be read: the most recent client hosts every session", async () => {
+  const processes = [proc(53, 50, "ttys001", "herdr", { startedAt: 1 }), proc(63, 60, "ttys004", "herdr", { startedAt: 2 })];
+  assert.equal(herdrClient(processes, "/h/sessions/work/herdr.sock")?.pid, 63);
 });
 
 test("herdr not running or no client in a known terminal: nothing listed", async () => {

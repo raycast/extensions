@@ -30,8 +30,8 @@ import RaycastSwiftMacros
   readWindows(bundleIds: bundleIds)
 }
 
-@raycast func focusWindow(bundleId: String, index: Int, title: String, tab: String?) -> Bool {
-  raiseWindow(bundleId: bundleId, index: index, title: title, tab: tab)
+@raycast func focusWindow(bundleId: String, index: Int, title: String, tab: String?, tabIndex: Int) -> Bool {
+  raiseWindow(bundleId: bundleId, index: index, title: title, tab: tab, tabIndex: tabIndex)
 }
 
 @raycast func sidebarRows(bundleId: String, container: String, rowRole: String) -> [SidebarRow] {

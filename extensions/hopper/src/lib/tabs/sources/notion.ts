@@ -8,6 +8,10 @@
 //
 // Each tab's detail is its page's parents (ADR-016): every tab keeps a web view whose URL ends in the page id,
 // and Notion's local cache (notion.db) links each page to its parent.
+//
+// Tabs are matched to their web views by title. Web views are read window by window, front first, so a title the
+// front tab bar shows n times takes the first n different page URLs with that title: two pages both named
+// "Roadmap" are two entries, each with its own page, while one page open in two tabs stays one entry.
 
 import type { App, AppWindows, Platform, Tab, TabSource, WebPage } from "../model";
 import { fromRows, openSidebarEntry, type SidebarRef, type SidebarSpec } from "./sidebar";
@@ -28,14 +32,25 @@ const DB = "Library/Application Support/Notion/notion.db";
 const MAX_PATH = 36;
 const SEPARATOR = " / ";
 
-/** Tabs of the front window, then Notion's other windows. Tabs with the same page appear once. */
-export function fromTabBar(app: App, names: string[], appWindows: AppWindows["windows"]): Tab[] {
+/**
+ * Tabs of the front window, each with its page URL when a web view shows it (see the top of this file), then
+ * Notion's other windows. Tabs with the same page appear once.
+ */
+export function fromTabBar(app: App, names: string[], appWindows: AppWindows["windows"], pages: WebPage[] = []): Tab[] {
   const [front, ...others] = appWindows;
+  const urlsByTitle = new Map<string, string[]>();
+  for (const page of pages) {
+    const urls = urlsByTitle.get(page.title) ?? [];
+    if (!urls.includes(page.url)) urlsByTitle.set(page.title, [...urls, page.url]);
+  }
+  const count = (title: string) => names.filter((name) => name === title).length;
   const rows = [...new Set(names)].map((title) => ({ title, text: "", selected: false }));
-  return [
-    ...fromRows(app, TAB_BAR, rows, front?.title),
-    ...fromWindows(app, others).map((t) => ({ ...t, active: false })),
-  ];
+  const tabs = fromRows(app, TAB_BAR, rows, front?.title).flatMap((tab): Tab<Ref>[] => {
+    const urls = (urlsByTitle.get(tab.title) ?? []).slice(0, count(tab.title));
+    if (urls.length <= 1) return [urls[0] ? { ...tab, ref: { ...tab.ref, url: urls[0] } } : tab];
+    return urls.map((url) => ({ ...tab, key: `${tab.key}:${pageId(url) ?? url}`, ref: { ...tab.ref, url } }));
+  });
+  return [...tabs, ...fromWindows(app, others).map((t) => ({ ...t, active: false }))];
 }
 
 /** The page id (dashed UUID) at the end of a Notion page URL, e.g. ".../p/Looper-3c1b...3569". */
@@ -113,36 +128,22 @@ export function tabLink(url: string): string | undefined {
   }
 }
 
-/**
- * Keeps the page URL of each tab-bar tab whose page is open in a web view (matched by title; first wins), in the
- * ref only: `Tab.url` would replace the parents shown as detail with the host.
- */
-export function withUrls(tabs: Tab[], pages: WebPage[]): Tab[] {
-  const urlByTitle = new Map<string, string>();
-  for (const page of pages) if (!urlByTitle.has(page.title)) urlByTitle.set(page.title, page.url);
-  return tabs.map((tab) => {
-    const url = tab.source === TAB_BAR.id ? urlByTitle.get(tab.title) : undefined;
-    return url ? { ...tab, ref: { ...(tab.ref as SidebarRef), url } } : tab;
-  });
-}
-
-/** Tab title → its page's parents (nearest first), for the tabs whose page could be found. */
+/** Page id → its parents (nearest first), for the open pages found in the cache. */
 async function readParents(pages: WebPage[], platform: Platform): Promise<Map<string, string[]>> {
-  const idByTitle = new Map<string, string>();
-  for (const page of pages) {
-    const id = pageId(page.url);
-    if (id && !idByTitle.has(page.title)) idByTitle.set(page.title, id);
-  }
-  if (idByTitle.size === 0) return new Map();
-  const rows = await platform.querySqlite(`${platform.homeDir()}/${DB}`, ancestorsQuery([...idByTitle.values()]));
-  const byId = parseAncestors(rows);
-  return new Map([...idByTitle].map(([title, id]) => [title, byId.get(id) ?? []]));
+  const ids = [...new Set(pages.flatMap((page) => pageId(page.url) ?? []))];
+  if (ids.length === 0) return new Map();
+  return parseAncestors(await platform.querySqlite(`${platform.homeDir()}/${DB}`, ancestorsQuery(ids)));
 }
 
-/** Sets each tab's detail to its page's parents: shortened for display, in full for hover and search. */
+/**
+ * Sets each tab's detail to its page's parents: shortened for display, in full for hover and search. The page URL
+ * stays in the ref only: `Tab.url` would replace the parents shown as detail with the host.
+ */
 export function withParents(tabs: Tab[], parents: Map<string, string[]>): Tab[] {
   return tabs.map((tab) => {
-    const path = tab.source === TAB_BAR.id ? parents.get(tab.title) : undefined;
+    const url = tab.source === TAB_BAR.id ? (tab.ref as Ref).url : undefined;
+    const id = url && pageId(url);
+    const path = id ? parents.get(id) : undefined;
     if (!path?.length) return tab;
     return { ...tab, detail: shortPath(path), detailFull: [...path].reverse().join(SEPARATOR) };
   });
@@ -167,8 +168,9 @@ export const notion: TabSource<Ref> = {
       app,
       rows.map((r) => r.title),
       appWindows,
+      pages,
     );
-    return withUrls(withParents(tabs, parents), pages) as Tab<Ref>[];
+    return withParents(tabs, parents) as Tab<Ref>[];
   },
   // Window entries carry source "windows", so their selection is routed there, not here.
   select: async (tab, platform) => {

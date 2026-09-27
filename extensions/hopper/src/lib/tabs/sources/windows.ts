@@ -7,8 +7,9 @@ import { TabGoneError, type App, type AppWindows, type Platform, type Tab, type 
 interface Ref {
   index: number;
   title: string;
-  /** Native tab to select in the window. */
+  /** Native tab to select in the window: its title and 0-based position (which tells same-titled tabs apart). */
   tab?: string;
+  tabIndex?: number;
   /** The window's document URL (see AXWindow.document), kept for Recently Closed. */
   document?: string;
 }
@@ -35,6 +36,7 @@ export function fromWindows(app: App, appWindows: AppWindows["windows"]): Tab<Re
           index: w.index,
           title: w.title,
           tab: t.title,
+          tabIndex: j,
           ...(t.selected && w.document ? { document: w.document } : {}),
         },
       }));
@@ -70,8 +72,9 @@ export const windows: TabSource<Ref> = {
   list: (app, platform) => listAll([app], platform),
   listAll,
   select: async (tab, platform) => {
-    const { index, title, tab: nativeTab } = tab.ref;
-    if (!(await platform.raiseWindow(tab.app.bundleId, index, title, nativeTab))) {
+    const { index, title, tab: nativeTab, tabIndex } = tab.ref;
+    const target = nativeTab !== undefined ? { title: nativeTab, index: tabIndex ?? -1 } : undefined;
+    if (!(await platform.raiseWindow(tab.app.bundleId, index, title, target))) {
       throw new TabGoneError("Window no longer exists");
     }
   },

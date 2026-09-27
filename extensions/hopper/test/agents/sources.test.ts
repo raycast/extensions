@@ -1,7 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { toAgents as cliAgents } from "../../src/lib/agents/sources/cli.ts";
-import { codex, statusOf as codexStatus, terminalFor, threadsDb } from "../../src/lib/agents/sources/codex.ts";
+import {
+  codex,
+  liveCliThreads,
+  statusOf as codexStatus,
+  terminalFor,
+  threadsDb,
+} from "../../src/lib/agents/sources/codex.ts";
 import {
   cursor,
   parseHeaders,
@@ -187,6 +193,22 @@ test("codex: a terminal thread's host is the one Codex process working in its fo
   const processes = [proc(1, 0, "ttys001", "codex", { cwd: "/a" }), proc(2, 0, "ttys002", "codex", { cwd: "/b" })];
   assert.equal(terminalFor("/a", processes)?.pid, 1);
   assert.equal(terminalFor("/a", [...processes, proc(3, 0, "ttys003", "codex", { cwd: "/a" })]), undefined);
+});
+
+test("codex: a terminal hosts only its folder's latest thread, and only if updated since it started", () => {
+  const thread = (id: string, cwd: string, updatedAt: number) => ({ id, source: "cli", cwd, updatedAt });
+  const processes = [
+    proc(1, 0, "ttys001", "codex", { cwd: "/a", startedAt: 100 }),
+    proc(2, 0, "ttys002", "codex", { cwd: "/b", startedAt: 100 }),
+  ];
+  const threads = [
+    thread("old", "/a", 50), // an earlier run in /a, finished before this process started
+    thread("live", "/a", 200),
+    thread("earlier", "/a", 150), // updated since, but not the latest
+    thread("stale", "/b", 90), // /b's process hasn't written a thread yet
+    { id: "app", source: "vscode", cwd: "/a", updatedAt: 300 },
+  ];
+  assert.deepEqual([...liveCliThreads(threads, processes)].map(([id, p]) => [id, p.pid]), [["live", 1]]);
 });
 
 test("codex: app threads open by link while the app runs; CLI threads need their terminal", async () => {

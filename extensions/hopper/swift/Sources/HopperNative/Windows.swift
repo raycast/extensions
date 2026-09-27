@@ -42,14 +42,18 @@ func readWindows(bundleIds: [String]) -> [AppWindows] {
   }
 }
 
-/// Raise the window with this title (falling back to its index), then select the native tab with this title.
+/// Raise the window at `index` (1-based) if it still has this title, else the first window with this title (the
+/// order changed), else the one at `index` (the title changed); then select the native tab at `tabIndex` (0-based)
+/// or, if it moved, the first with that title. Positions tell same-titled windows and tabs apart.
 /// The caller still has to bring the app to the front (Raycast `open()`, ADR-007).
-func raiseWindow(bundleId: String, index: Int, title: String, tab: String?) -> Bool {
+func raiseWindow(bundleId: String, index: Int, title: String, tab: String?, tabIndex: Int) -> Bool {
   guard let pid = pid(of: bundleId) else { return false }
   let windows = children(appElement(pid), kAXWindowsAttribute)
+  let atIndex = index >= 1 && index <= windows.count ? windows[index - 1] : nil
   let window =
-    windows.first { string($0, kAXTitleAttribute) == title }
-    ?? (index >= 1 && index <= windows.count ? windows[index - 1] : nil)
+    atIndex.flatMap { string($0, kAXTitleAttribute) == title ? $0 : nil }
+    ?? windows.first { string($0, kAXTitleAttribute) == title }
+    ?? atIndex
   guard let window else { return false }
   if bool(window, kAXMinimizedAttribute) {
     AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
@@ -57,7 +61,10 @@ func raiseWindow(bundleId: String, index: Int, title: String, tab: String?) -> B
   AXUIElementSetAttributeValue(window, kAXMainAttribute as CFString, kCFBooleanTrue)
   AXUIElementPerformAction(window, kAXRaiseAction as CFString)
   if let tab {
-    guard let button = nativeTabs(window).first(where: { string($0, kAXTitleAttribute) == tab }) else { return false }
+    let tabs = nativeTabs(window)
+    let atIndex = tabIndex >= 0 && tabIndex < tabs.count && string(tabs[tabIndex], kAXTitleAttribute) == tab
+    guard let button = atIndex ? tabs[tabIndex] : tabs.first(where: { string($0, kAXTitleAttribute) == tab })
+    else { return false }
     AXUIElementPerformAction(button, kAXPressAction as CFString)
   }
   return true

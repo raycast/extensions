@@ -17,8 +17,11 @@ export interface Platform {
   accessibilityTrusted(): Promise<boolean>;
   /** Standard windows of each app, front to back, with their native tab bars. Apps not running are omitted. */
   windows(bundleIds: string[]): Promise<AppWindows[]>;
-  /** Raise the window (by title, else index) and select a native tab in it. False if not found. */
-  raiseWindow(bundleId: string, index: number, title: string, tab?: string): Promise<boolean>;
+  /**
+   * Raise the window (at `index` while it has `title`, else by title, else by index) and select a native tab in it
+   * (at its position while it has that title, else by title). False if not found.
+   */
+  raiseWindow(bundleId: string, index: number, title: string, tab?: { title: string; index: number }): Promise<boolean>;
   /** Rows of an in-window list, see SidebarQuery. */
   sidebarRows(bundleId: string, query: SidebarQuery): Promise<SidebarRow[]>;
   /** Open the row called `name` (matched as in SidebarQuery.namePattern). False if not found. */
@@ -66,6 +69,8 @@ export interface Process {
   startedAt: number;
   /** Working directory; only read for processes with a terminal, "" otherwise. */
   cwd: string;
+  /** Paths of the Unix sockets it's connected to; only read for herdr clients (which session they're attached to). */
+  sockets?: string[];
 }
 
 export interface GitRepo {

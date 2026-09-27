@@ -27,7 +27,7 @@ test("a window with a native tab bar becomes one entry per tab; others one windo
       ["window", "Ghostty", false, "Minimized"],
     ],
   );
-  assert.deepEqual(tabs[1].ref, { index: 1, title: "~/a", tab: "~/b" });
+  assert.deepEqual(tabs[1].ref, { index: 1, title: "~/a", tab: "~/b", tabIndex: 1 });
 });
 
 test("only the front window's selected tab is active", () => {
@@ -66,6 +66,29 @@ test("reads many apps in one call", async () => {
     tabs.map((t) => t.app.name),
     ["Ghostty", "Finder"],
   );
+});
+
+test("selecting passes the window's and native tab's positions, which tell same-titled ones apart", async () => {
+  const calls: unknown[][] = [];
+  const platform = fakePlatform({ raiseWindow: async (...args) => (calls.push(args), true) });
+  const tabs = fromWindows(ghostty, [
+    { index: 1, title: "zsh", minimized: false, tabs: [] },
+    {
+      index: 2,
+      title: "zsh",
+      minimized: false,
+      tabs: [
+        { title: "zsh", selected: true },
+        { title: "zsh", selected: false },
+      ],
+    },
+  ]);
+  for (const tab of tabs) await windows.select(tab, platform);
+  assert.deepEqual(calls, [
+    ["com.mitchellh.ghostty", 1, "zsh", undefined],
+    ["com.mitchellh.ghostty", 2, "zsh", { title: "zsh", index: 0 }],
+    ["com.mitchellh.ghostty", 2, "zsh", { title: "zsh", index: 1 }],
+  ]);
 });
 
 test("selecting a window that's gone throws TabGoneError", async () => {

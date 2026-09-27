@@ -166,6 +166,50 @@ test("Notion: a tab with a known page opens by deep link (switches to it, or reo
   assert.equal(notion.reopenTarget?.(looper), undefined, "no page URL: not reopenable");
 });
 
+test("Notion: same-titled tabs of different pages are separate entries, each opening its own page", async () => {
+  const urls: string[] = [];
+  const page = (id: string) => `https://app.notion.com/p/Roadmap-${id}`;
+  const a = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  const b = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  const c = "cccccccccccccccccccccccccccccccc";
+  const platform = fakePlatform({
+    // Two "Roadmap" tabs in the front window; the same Q/A page open twice.
+    sidebarRows: async () => [row("Roadmap"), row("Q/A"), row("Roadmap"), row("Q/A")],
+    windows: async () => [{ bundleId: "notion.id", windows: [win(1, "Q/A"), win(2, "Other")] }],
+    // Front window's web views first, then a third "Roadmap" open in the other window.
+    webPages: async () => [
+      { title: "Roadmap", url: page(a) },
+      { title: "Q/A", url: "https://app.notion.com/p/Q-A-3dbb24976dd380f0b0feff9b483e686e" },
+      { title: "Roadmap", url: page(b) },
+      { title: "Q/A", url: "https://app.notion.com/p/Q-A-3dbb24976dd380f0b0feff9b483e686e" },
+      { title: "Roadmap", url: page(c) },
+    ],
+    querySqlite: async () =>
+      [a, b].map((id, i) => ({
+        root: `${id.slice(0, 8)}-${id.slice(8, 12)}-${id.slice(12, 16)}-${id.slice(16, 20)}-${id.slice(20)}`,
+        depth: 1,
+        tab: "block",
+        type: "page",
+        title: i === 0 ? "Product" : "Marketing",
+      })),
+    openUrl: async (url) => {
+      urls.push(url);
+    },
+  });
+  const tabs = (await notion.list(notionApp, platform)).filter((t) => t.source === "notion");
+  assert.deepEqual(
+    tabs.map((t) => [t.title, t.detail]),
+    [
+      ["Roadmap", "Product"],
+      ["Roadmap", "Marketing"],
+      ["Q/A", undefined],
+    ],
+  );
+  assert.equal(new Set(tabs.map((t) => t.key)).size, 3);
+  await notion.select(tabs[1], platform);
+  assert.deepEqual(urls, [`notion://app.notion.com/p/Roadmap-${b}?deepLinkOpenNewTab=true`]);
+});
+
 test("tabLink: https Notion URLs only", () => {
   assert.equal(
     tabLink("https://app.notion.com/p/Looper-3c1b24976dd380a89df7fdac87f63569"),

@@ -35,7 +35,8 @@ export const macosPlatform: Platform = {
   runAppleScript: (script) => runAppleScript(script, { timeout: APPLESCRIPT_TIMEOUT }),
   accessibilityTrusted: () => accessibilityTrusted(),
   windows: async (bundleIds) => (await appWindows(bundleIds)) as AppWindows[],
-  raiseWindow: (bundleId, index, title, tab) => focusWindow(bundleId, index, title, tab ?? null),
+  raiseWindow: (bundleId, index, title, tab) =>
+    focusWindow(bundleId, index, title, tab?.title ?? null, tab?.index ?? -1),
   sidebarRows: async (bundleId, query) => (await sidebarRows(bundleId, query.container, query.rowRole)) as SidebarRow[],
   openSidebarRow: (bundleId, query, name) =>
     openSidebar(bundleId, query.container, query.rowRole, name, query.namePattern ?? "", query.keyboard ?? false),

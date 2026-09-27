@@ -24,7 +24,7 @@ function terminalOf(agent: Agent, byPid: Map<number, Process>, processes: Proces
     agent.host.kind === "process"
       ? byPid.get(agent.host.pid)
       : agent.host.kind === "herdr"
-        ? herdrClient(processes)
+        ? herdrClient(processes, agent.host.socket)
         : undefined;
   const app = proc && appOfProcess(proc.pid, byPid, apps);
   return app && proc ? { app, tty: proc.tty, cwd: proc.cwd } : undefined;

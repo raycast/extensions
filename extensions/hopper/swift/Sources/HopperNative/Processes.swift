@@ -16,7 +16,13 @@ struct RunningProcess: Codable {
   let startedAt: Double
   /// Working directory, for processes with a terminal only (agents' projects); "" otherwise or if unreadable.
   let cwd: String
+  /// Paths of the Unix sockets the process is connected to, for herdr clients only (which session each is
+  /// attached to: `<session dir>/herdr-client.sock`); empty otherwise.
+  let sockets: [String]
 }
+
+/// Processes whose socket connections are read (see RunningProcess.sockets).
+private let socketsReadFor: Set<String> = ["herdr"]
 
 private let interpreters: Set<String> = ["node", "bun", "deno", "python", "python3", "ruby"]
 
@@ -39,15 +45,41 @@ func readProcesses() -> [RunningProcess] {
     let command = withUnsafeBytes(of: &comm) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
     let start = proc.kp_proc.p_starttime
     let tty = ttyName(proc.kp_eproc.e_tdev)
+    let name = tty.isEmpty ? command : (commandName(pid: pid, executable: command) ?? command)
     return RunningProcess(
       pid: pid,
       ppid: Int(proc.kp_eproc.e_ppid),
       tty: tty,
-      name: tty.isEmpty ? command : (commandName(pid: pid, executable: command) ?? command),
+      name: name,
       startedAt: Double(start.tv_sec) * 1000 + Double(start.tv_usec) / 1000,
-      cwd: tty.isEmpty ? "" : (workingDirectory(pid: pid) ?? "")
+      cwd: tty.isEmpty ? "" : (workingDirectory(pid: pid) ?? ""),
+      sockets: !tty.isEmpty && socketsReadFor.contains(name) ? connectedSockets(pid: pid) : []
     )
   }
+}
+
+/// Paths of the Unix sockets `pid` has connected to (each socket's peer address), without duplicates.
+private func connectedSockets(pid: Int) -> [String] {
+  let bytes = proc_pidinfo(Int32(pid), PROC_PIDLISTFDS, 0, nil, 0)
+  guard bytes > 0 else { return [] }
+  var fds = [proc_fdinfo](repeating: proc_fdinfo(), count: Int(bytes) / MemoryLayout<proc_fdinfo>.stride)
+  let read = proc_pidinfo(Int32(pid), PROC_PIDLISTFDS, 0, &fds, bytes)
+  guard read > 0 else { return [] }
+  var paths: [String] = []
+  for fd in fds.prefix(Int(read) / MemoryLayout<proc_fdinfo>.stride)
+  where fd.proc_fdtype == UInt32(PROX_FDTYPE_SOCKET) {
+    var info = socket_fdinfo()
+    let size = Int32(MemoryLayout<socket_fdinfo>.size)
+    guard proc_pidfdinfo(Int32(pid), fd.proc_fd, PROC_PIDFDSOCKETINFO, &info, size) == size,
+      info.psi.soi_family == AF_UNIX
+    else { continue }
+    var unix = info.psi.soi_proto.pri_un
+    let path = withUnsafeBytes(of: &unix.unsi_caddr.ua_sun.sun_path) {
+      String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self)
+    }
+    if !path.isEmpty && !paths.contains(path) { paths.append(path) }
+  }
+  return paths
 }
 
 private func workingDirectory(pid: Int) -> String? {
