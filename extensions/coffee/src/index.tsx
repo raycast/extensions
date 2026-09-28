@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useCachedState, useExec } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { formatDuration, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
 import { maybeAutoCaffeinate } from "./status";
@@ -158,10 +158,15 @@ function useWindowsCaffeinateInfo(execute: boolean) {
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
+  const [cachedCaffeinated, setCachedCaffeinated] = useCachedState("caffeinateStatus", false);
+
   const { isLoading, data, mutate } = useCaffeinateInfo(true);
 
-  const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data.isRunning;
-  const isEffectiveLoading = hasLaunchContext ? false : isLoading;
+  const caffeinateStatus = hasLaunchContext
+    ? props?.launchContext?.caffeinated
+    : isLoading
+      ? cachedCaffeinated
+      : data.isRunning;
   const preferences = getPreferenceValues<Preferences.Index>();
   const isHideEnabled = Boolean(preferences.hidenWhenDecaffeinated);
 
@@ -170,15 +175,37 @@ export default function Command(props: LaunchProps) {
 
   const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
 
+  useEffect(() => {
+    if (hasLaunchContext && props.launchContext?.caffeinated !== undefined) {
+      setCachedCaffeinated(props.launchContext.caffeinated);
+    } else if (!isLoading) {
+      setCachedCaffeinated(data.isRunning);
+    }
+  }, [hasLaunchContext, props.launchContext?.caffeinated, isLoading, data.isRunning, setCachedCaffeinated]);
+
+  const isUserInitiated =
+    props.launchType === LaunchType.UserInitiated || environment.launchType === LaunchType.UserInitiated;
+
+  const [userInitiatedAt, setUserInitiatedAt] = useState(() => (isUserInitiated ? Date.now() : 0));
   const [visibleUntil, setVisibleUntil] = useState(() =>
-    environment.launchType === LaunchType.UserInitiated ? Date.now() + HIDE_DECAFFEINATED_DELAY_MS : 0,
+    isUserInitiated ? Date.now() + HIDE_DECAFFEINATED_DELAY_MS : 0,
   );
+
+  const prevLaunchTypeRef = useRef(props.launchType);
+  if (prevLaunchTypeRef.current !== props.launchType) {
+    prevLaunchTypeRef.current = props.launchType;
+    if (props.launchType === LaunchType.UserInitiated) {
+      setUserInitiatedAt(Date.now());
+      setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
+    }
+  }
 
   const prevStatusRef = useRef(displayCaffeinateStatus);
   const justDecaffeinated = prevStatusRef.current && !displayCaffeinateStatus;
   prevStatusRef.current = displayCaffeinateStatus;
 
-  const isGracePeriod = isHideEnabled && (justDecaffeinated || Date.now() < visibleUntil);
+  const isUserInitiatedGrace = userInitiatedAt > 0 && Date.now() - userInitiatedAt < HIDE_DECAFFEINATED_DELAY_MS;
+  const isGracePeriod = isHideEnabled && (justDecaffeinated || isUserInitiatedGrace || Date.now() < visibleUntil);
 
   useEffect(() => {
     if (displayCaffeinateStatus) {
@@ -190,10 +217,11 @@ export default function Command(props: LaunchProps) {
 
   useEffect(() => {
     if (!isGracePeriod || !isHideEnabled) return;
-    const remaining = Math.max(0, (visibleUntil || Date.now() + HIDE_DECAFFEINATED_DELAY_MS) - Date.now());
+    const deadline = Math.max(visibleUntil, userInitiatedAt > 0 ? userInitiatedAt + HIDE_DECAFFEINATED_DELAY_MS : 0);
+    const remaining = Math.max(0, deadline - Date.now());
     const timer = setTimeout(() => setTick((t) => t + 1), remaining);
     return () => clearTimeout(timer);
-  }, [isGracePeriod, isHideEnabled, visibleUntil]);
+  }, [isGracePeriod, isHideEnabled, visibleUntil, userInitiatedAt]);
 
   useEffect(() => {
     setLocalCaffeinateStatus(null);
@@ -235,6 +263,7 @@ export default function Command(props: LaunchProps) {
 
   const handleStartFor = async (seconds: number | null, durationLabel: string) => {
     setLocalCaffeinateStatus(true);
+    setCachedCaffeinated(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
     const reason =
       seconds === null
@@ -250,6 +279,7 @@ export default function Command(props: LaunchProps) {
       });
     } catch {
       setLocalCaffeinateStatus(null);
+      setCachedCaffeinated(false);
     }
   };
 
@@ -276,6 +306,7 @@ export default function Command(props: LaunchProps) {
       );
     } catch {
       setLocalCaffeinateStatus(null);
+      setCachedCaffeinated(true);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to decaffeinate",
@@ -284,13 +315,14 @@ export default function Command(props: LaunchProps) {
       return;
     }
     setLocalCaffeinateStatus(false);
+    setCachedCaffeinated(false);
     if (isHideEnabled) {
       setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
       showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
   };
 
-  if (isHideEnabled && !displayCaffeinateStatus && !isEffectiveLoading && !isGracePeriod) {
+  if (isHideEnabled && !displayCaffeinateStatus && !isGracePeriod) {
     return null;
   }
 
