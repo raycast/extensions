@@ -105,6 +105,16 @@ export async function parseResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
+// Every list asks for this many rows at a time. The next page passes the sort
+// timestamp of the last row as `before`, which the API treats as a strict
+// upper bound on its own sort key, so pages never overlap or skip.
+export const PAGE_SIZE = 50;
+
+export function nextPage<T>(rows: T[], sortKey: (row: T) => string | null | undefined) {
+  const last = rows.length ? sortKey(rows[rows.length - 1]) : null;
+  return { hasMore: rows.length === PAGE_SIZE && !!last, cursor: last || undefined };
+}
+
 export function query(params: Record<string, string | number | undefined>): string {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([name, value]) => {
