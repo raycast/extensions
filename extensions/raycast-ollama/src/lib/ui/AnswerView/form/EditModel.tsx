@@ -54,6 +54,8 @@ export function EditModel(props: Props): React.JSX.Element {
 
   const [CheckboxAdvanced, SetCheckboxAdvanced]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
+  const [UseGlobalDefaults, SetUseGlobalDefaults]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    React.useState(true);
 
   const { handleSubmit, itemProps, setValue } = useForm<FormData>({
     onSubmit(values) {
@@ -64,10 +66,10 @@ export function EditModel(props: Props): React.JSX.Element {
       keep_alive: "5m",
     },
     validation: {
-      server: FormValidation.Required,
-      model: FormValidation.Required,
+      server: () => (UseGlobalDefaults ? undefined : FormValidation.Required),
+      model: () => (UseGlobalDefaults ? undefined : FormValidation.Required),
       thinking: ValidationThinking,
-      keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
+      keep_alive: (_value) => ValidationKeepAlive(CheckboxAdvanced, _value),
     },
   });
 
@@ -129,10 +131,13 @@ export function EditModel(props: Props): React.JSX.Element {
             id="useGlobalDefaults"
             title="Use Global Defaults"
             label="Use global default model settings (configured in preferences)"
-            defaultValue={itemProps.useGlobalDefaults.value}
-            onChange={(v) => setValue("useGlobalDefaults", v)}
+            defaultValue={UseGlobalDefaults}
+            onChange={(v) => {
+              SetUseGlobalDefaults(v);
+              setValue("useGlobalDefaults", v);
+            }}
           />
-          {!itemProps.useGlobalDefaults.value && (
+          {!UseGlobalDefaults && (
             <React.Fragment>
               <Form.Dropdown title="Server" {...itemProps.server}>
                 {[...Model.keys()].sort().map((s) => (
@@ -143,19 +148,18 @@ export function EditModel(props: Props): React.JSX.Element {
                 {itemProps.server.value &&
                   Model.get(itemProps.server.value)
                     ?.filter((model) => {
-                      if (
-                        !model.capabilities ||
-                        !props.capabilities ||
-                        model.capabilities.length < props.capabilities.length
-                      )
-                        return false;
-                      if (
-                        props.capabilities.length !==
-                        model.capabilities.filter(
-                          (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
-                        ).length
-                      )
-                        return false;
+                      // If command has capability requirements, filter by them
+                      if (props.capabilities && props.capabilities.length > 0) {
+                        if (!model.capabilities || model.capabilities.length < props.capabilities.length) return false;
+                        if (
+                          props.capabilities.length !==
+                          model.capabilities.filter(
+                            (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
+                          ).length
+                        )
+                          return false;
+                      }
+                      // If no capability requirements, allow all models (including those with empty capabilities)
                       return true;
                     })
                     ?.sort()
@@ -163,7 +167,7 @@ export function EditModel(props: Props): React.JSX.Element {
               </Form.Dropdown>
             </React.Fragment>
           )}
-          {itemProps.useGlobalDefaults.value && (
+          {UseGlobalDefaults && (
             <React.Fragment>
               <Form.Description title="Global Default Server" text={globalDefaults?.server || "Local"} />
               <Form.Description title="Global Default Model" text={globalDefaults?.model || "(not set)"} />

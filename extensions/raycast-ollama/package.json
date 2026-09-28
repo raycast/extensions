@@ -161,7 +161,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-browser-summarize"
+            "command": "browser-summarize"
           }
         },
         {
@@ -171,7 +171,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-browser-summarize"
+            "command": "browser-summarize"
           }
         }
       ]
@@ -201,7 +201,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-casual"
+            "command": "casual"
           }
         },
         {
@@ -211,7 +211,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-casual"
+            "command": "casual"
           }
         }
       ]
@@ -230,7 +230,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-code-explain"
+            "command": "codeexplain"
           }
         },
         {
@@ -240,7 +240,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-code-explain"
+            "command": "codeexplain"
           }
         }
       ]
@@ -270,7 +270,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-confident"
+            "command": "confident"
           }
         },
         {
@@ -280,7 +280,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-confident"
+            "command": "confident"
           }
         }
       ]
@@ -299,7 +299,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-explain"
+            "command": "explain"
           }
         },
         {
@@ -309,7 +309,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-explain"
+            "command": "explain"
           }
         }
       ]
@@ -339,7 +339,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-fix-spelling-grammar"
+            "command": "fix"
           }
         },
         {
@@ -349,7 +349,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-fix-spelling-grammar"
+            "command": "fix"
           }
         }
       ]
@@ -379,7 +379,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-friendly"
+            "command": "friendly"
           }
         },
         {
@@ -389,7 +389,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-friendly"
+            "command": "friendly"
           }
         }
       ]
@@ -408,7 +408,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-image-describe"
+            "command": "imagedescribe"
           }
         },
         {
@@ -418,7 +418,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-image-describe"
+            "command": "imagedescribe"
           }
         }
       ]
@@ -437,7 +437,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-image-to-text"
+            "command": "image-to-text"
           }
         },
         {
@@ -447,7 +447,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-image-to-text"
+            "command": "image-to-text"
           }
         }
       ]
@@ -477,7 +477,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-improve-writing"
+            "command": "improve"
           }
         },
         {
@@ -487,7 +487,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-improve-writing"
+            "command": "improve"
           }
         }
       ]
@@ -517,7 +517,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-longer"
+            "command": "longer"
           }
         },
         {
@@ -527,7 +527,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-longer"
+            "command": "longer"
           }
         }
       ]
@@ -557,7 +557,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-professional"
+            "command": "professional"
           }
         },
         {
@@ -567,7 +567,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-professional"
+            "command": "professional"
           }
         }
       ]
@@ -597,7 +597,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-shorter"
+            "command": "shorter"
           }
         },
         {
@@ -607,7 +607,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-shorter"
+            "command": "shorter"
           }
         }
       ]
@@ -5303,7 +5303,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-translate"
+            "command": "translate"
           }
         },
         {
@@ -5313,7 +5313,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-translate"
+            "command": "translate"
           }
         }
       ]
@@ -5343,7 +5343,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-tweet"
+            "command": "tweet"
           }
         },
         {
@@ -5353,7 +5353,7 @@
           "mode": "view",
           "command": "ollama-edit-command",
           "arguments": {
-            "command": "ollama-tweet"
+            "command": "tweet"
           }
         }
       ]
