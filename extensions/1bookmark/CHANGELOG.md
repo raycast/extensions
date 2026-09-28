@@ -1,6 +1,6 @@
 # 1Bookmark Changelog
 
-## [Focus on Search and Add] - {PR_MERGE_DATE}
+## [Focus on Search and Add] - 2026-09-28
 
 - 0.15.0
 - 📄 The login screen now links to the Terms of Service and Privacy Policy.
