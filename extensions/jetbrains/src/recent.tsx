@@ -85,7 +85,7 @@ export default function ProjectList(): React.JSX.Element {
     </>
   );
 
-  const favHint = isWin ? "Ctrl+F" : "⌘+F";
+  const favHint = isWin ? "Ctrl+Shift+F" : "⌘+⇧+F";
   const sortHint = isWin ? "Ctrl+S" : "⌃+S";
 
   return (

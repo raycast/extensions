@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, popToRoot, showToast, Toast, Icon, Keyboard, captureException } from "@raycast/api";
 import React, { useCallback, useEffect, useState } from "react";
-import { AppHistory, isWin, symbolFromChar, symbolFromMod } from "./util";
+import { AppHistory, symbolFromChar, symbolFromMod } from "./util";
 import { useLocalStorage } from "@raycast/utils";
 import { useAppHistory } from "./useAppHistory";
 
@@ -73,14 +73,7 @@ export function SortTools({
 
   return (
     <List navigationTitle="Choose Application Sort Order" filtering={false} searchBarPlaceholder="Sort applications">
-      <List.Section
-        title="Choose Order"
-        subtitle={
-          screenshotMode
-            ? `${isWin ? "Ctrl+S" : "⌃+S"} to save${pop ? ` – ${isWin ? "Ctrl+C" : "⌃+C"} to cancel` : ""}`
-            : undefined
-        }
-      >
+      <List.Section title="Choose Order">
         {tools.sort(sortTools(order)).map((tool, id) => (
           <List.Item
             key={`${tool.title} ${tool.version}`}
