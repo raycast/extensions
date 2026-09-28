@@ -66,63 +66,63 @@
       "default": false,
       "label": "Certificate Validation Enabled"
     },
-{
-    "name": "ollamaApiKey",
-    "description": "Ollama API Key used by Web Search Tools",
-    "type": "password",
-    "required": false,
-    "title": "Ollama API Key"
-  },
-  {
-    "name": "ollamaDefaultServer",
-    "description": "Default Ollama server to use for all commands",
-    "type": "textfield",
-    "required": false,
-    "title": "Default Server",
-    "placeholder": "Local"
-  },
-  {
-    "name": "ollamaDefaultModel",
-    "description": "Default model to use for all commands. Must match an installed model name exactly (e.g., 'llama3.2', 'mistral:7b'). Use the 'Global Model Settings' command for a dropdown selection.",
-    "type": "textfield",
-    "required": false,
-    "title": "Default Model",
-    "placeholder": "llama3.2"
-  },
-  {
-    "name": "ollamaDefaultThinking",
-    "description": "Default thinking effort for all commands",
-    "type": "dropdown",
-    "required": false,
-    "title": "Default Thinking Effort",
-    "data": [
-      {
-        "title": "None",
-        "value": "none"
-      },
-      {
-        "title": "Low",
-        "value": "low"
-      },
-      {
-        "title": "Medium",
-        "value": "medium"
-      },
-      {
-        "title": "High",
-        "value": "high"
-      }
-    ],
-    "default": "none"
-  },
-  {
-    "name": "ollamaDefaultKeepAlive",
-    "description": "Default keep alive duration for models",
-    "type": "textfield",
-    "required": false,
-    "title": "Default Keep Alive",
-    "placeholder": "5m"
-  }
+    {
+      "name": "ollamaApiKey",
+      "description": "Ollama API Key used by Web Search Tools",
+      "type": "password",
+      "required": false,
+      "title": "Ollama API Key"
+    },
+    {
+      "name": "ollamaDefaultServer",
+      "description": "Default Ollama server to use for all commands",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Server",
+      "placeholder": "Local"
+    },
+    {
+      "name": "ollamaDefaultModel",
+      "description": "Default model to use for all commands. Must match an installed model name exactly (e.g., 'llama3.2', 'mistral:7b'). Use the 'Global Model Settings' command for a dropdown selection.",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Model",
+      "placeholder": "llama3.2"
+    },
+    {
+      "name": "ollamaDefaultThinking",
+      "description": "Default thinking effort for all commands",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Thinking Effort",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "name": "ollamaDefaultKeepAlive",
+      "description": "Default keep alive duration for models",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Keep Alive",
+      "placeholder": "5m"
+    }
   ],
   "tools": [
     {
@@ -152,7 +152,29 @@
       "title": "Summarize Website",
       "subtitle": "Ollama",
       "description": "Summarize content from current Website.",
-      "mode": "view"
+      "mode": "view",
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-browser-summarize"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-browser-summarize"
+          }
+        }
+      ]
     },
     {
       "name": "ollama-casual",
@@ -170,6 +192,28 @@
           "label": "Replace the selected text automatically",
           "default": false
         }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-casual"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-casual"
+          }
+        }
       ]
     },
     {
@@ -177,7 +221,29 @@
       "title": "Explain Code Step by Step",
       "subtitle": "Ollama",
       "description": "Explain the selected code step by step",
-      "mode": "view"
+      "mode": "view",
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-code-explain"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-code-explain"
+          }
+        }
+      ]
     },
     {
       "name": "ollama-confident",
@@ -195,6 +261,28 @@
           "label": "Replace the selected text automatically",
           "default": false
         }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-confident"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-confident"
+          }
+        }
       ]
     },
     {
@@ -202,7 +290,29 @@
       "title": "Explain This in Simple Terms",
       "subtitle": "Ollama",
       "description": "Explain selected text in simple terms",
-      "mode": "view"
+      "mode": "view",
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-explain"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-explain"
+          }
+        }
+      ]
     },
     {
       "name": "ollama-fix-spelling-grammar",
@@ -219,6 +329,28 @@
           "title": "Auto-Replace Selected Text",
           "label": "Replace the selected text automatically",
           "default": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-fix-spelling-grammar"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-fix-spelling-grammar"
+          }
         }
       ]
     },
@@ -238,6 +370,28 @@
           "label": "Replace the selected text automatically",
           "default": false
         }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-friendly"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-friendly"
+          }
+        }
       ]
     },
     {
@@ -245,14 +399,58 @@
       "title": "Describe Content of Image",
       "subtitle": "Ollama",
       "description": "Describe content of the image on the clipboard or selected from finder",
-      "mode": "view"
+      "mode": "view",
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-image-describe"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-image-describe"
+          }
+        }
+      ]
     },
     {
       "name": "ollama-image-to-text",
       "title": "Get Text from Image",
       "subtitle": "Ollama",
       "description": "Get text from image on the clipboard or selected from finder",
-      "mode": "view"
+      "mode": "view",
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-image-to-text"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-image-to-text"
+          }
+        }
+      ]
     },
     {
       "name": "ollama-improve-writing",
@@ -269,6 +467,28 @@
           "title": "Auto-Replace Selected Text",
           "label": "Replace the selected text automatically",
           "default": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-improve-writing"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-improve-writing"
+          }
         }
       ]
     },
@@ -288,6 +508,28 @@
           "label": "Replace the selected text automatically",
           "default": false
         }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-longer"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-longer"
+          }
+        }
       ]
     },
     {
@@ -306,6 +548,28 @@
           "label": "Replace the selected text automatically",
           "default": false
         }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-professional"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-professional"
+          }
+        }
       ]
     },
     {
@@ -323,6 +587,28 @@
           "title": "Auto-Replace Selected Text",
           "label": "Replace the selected text automatically",
           "default": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-shorter"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-shorter"
+          }
         }
       ]
     },
@@ -5008,6 +5294,28 @@
             }
           ]
         }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-translate"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-translate"
+          }
+        }
       ]
     },
     {
@@ -5025,6 +5333,28 @@
           "title": "Auto-Replace Selected Text",
           "label": "Replace the selected text automatically",
           "default": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "change-model",
+          "title": "Change Model",
+          "icon": "box",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-tweet"
+          }
+        },
+        {
+          "name": "change-reasoning",
+          "title": "Change Reasoning",
+          "icon": "glasses",
+          "mode": "view",
+          "command": "ollama-edit-command",
+          "arguments": {
+            "command": "ollama-tweet"
+          }
         }
       ]
     },
@@ -5082,6 +5412,79 @@
       "subtitle": "Ollama",
       "description": "Manage configured MCP Server",
       "mode": "view"
+    },
+    {
+      "name": "ollama-edit-command",
+      "title": "Edit Command Settings",
+      "subtitle": "Ollama",
+      "description": "Change model, reasoning effort, and keep alive for a specific command",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Casual",
+              "value": "casual"
+            },
+            {
+              "title": "Code Explain",
+              "value": "codeexplain"
+            },
+            {
+              "title": "Confident",
+              "value": "confident"
+            },
+            {
+              "title": "Explain",
+              "value": "explain"
+            },
+            {
+              "title": "Fix Spelling & Grammar",
+              "value": "fix"
+            },
+            {
+              "title": "Friendly",
+              "value": "friendly"
+            },
+            {
+              "title": "Image Describe",
+              "value": "imagedescribe"
+            },
+            {
+              "title": "Image to Text",
+              "value": "image-to-text"
+            },
+            {
+              "title": "Improve Writing",
+              "value": "improve"
+            },
+            {
+              "title": "Longer",
+              "value": "longer"
+            },
+            {
+              "title": "Professional",
+              "value": "professional"
+            },
+            {
+              "title": "Shorter",
+              "value": "shorter"
+            },
+            {
+              "title": "Translate",
+              "value": "translate"
+            },
+            {
+              "title": "Tweet",
+              "value": "tweet"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "ollama-configure",
