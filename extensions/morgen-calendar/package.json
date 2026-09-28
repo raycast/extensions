@@ -1,0 +1,47 @@
+{
+  "name": "morgen-calendar",
+  "type": "module",
+  "title": "Morgen Calendar",
+  "description": "Create and manage Morgen calendar events and native tasks from Raycast.",
+  "icon": "morgen-icon.png",
+  "author": "ctacta621",
+  "platforms": ["Windows"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    { "name": "create-event", "title": "Create Event", "description": "Add an event to a connected Morgen calendar", "mode": "view" },
+    { "name": "events", "title": "View Events", "description": "Browse upcoming events across your Morgen calendars", "mode": "view" },
+    { "name": "create-task", "title": "Create Task", "description": "Add a native Morgen task", "mode": "view" },
+    { "name": "tasks", "title": "View Tasks", "description": "Browse and complete native Morgen tasks", "mode": "view" }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Morgen API Key",
+      "description": "Copy your key from platform.morgen.so/developers-api. Your Morgen plan must include API access.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "bundle": "ray bundle -o ../morgen-calendar.rayext",
+    "publish": "ray publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
