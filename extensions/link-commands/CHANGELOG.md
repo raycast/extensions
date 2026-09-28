@@ -1,5 +1,12 @@
 # Link Commands Changelog
 
+## [Suggested Titles] - 2026-09-28
+
+### Added
+
+- **Title** on the create form is filled in from the target as you type it: `Netflix` for a plain link, `Search Netflix` for a `{query}` URL, `Open Downloads` for a folder and `Open Linear` for a surface router, re-suggested when **Desktop App** changes. The brand is the one **Package** would use, so a host the collection has already filed under `Jira` is titled `Jira` rather than `Atlassian`.
+- A suggestion never overwrites your own words. Once you type a title of your own the field is left alone; empty it and the suggestion comes back when you leave the field, or is used as-is if you create the command straight away.
+
 ## [Move Environment to Subtitle] - 2026-09-27
 
 ### Added
