@@ -206,6 +206,18 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-resend-wallpapers",
+      "title": "Get Resend Wallpapers",
+      "description": "List current Resend wallpapers with their names and image URLs. Use this before choosing a wallpaper."
+    },
+    {
+      "name": "set-resend-wallpaper",
+      "title": "Set Resend Wallpaper",
+      "description": "Set a Resend wallpaper by its exact name from Get Resend Wallpapers."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^1.17.0",
