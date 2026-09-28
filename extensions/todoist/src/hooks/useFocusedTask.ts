@@ -2,19 +2,17 @@ import { getPreferenceValues, Toast, environment, showToast } from "@raycast/api
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
-import { initialSync, SyncData, Task, updateTask } from "../api";
+import { CachedDataParams, initialSync, SyncData, Task, updateTask } from "../api";
 import { truncateMiddle } from "../helpers/menu-bar";
 
-import useCachedData from "./useCachedData";
-
-export const useFocusedTask = () => {
+/** Takes the cached data from the caller, so the hook doesn't parse the whole cache again for each task. */
+export const useFocusedTask = ({ data, setData }: CachedDataParams) => {
   const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
   const { focusLabelName } = getPreferenceValues<Preferences>();
 
   const { commandMode } = environment;
 
   const [focusedTask, setFocusedTask] = useCachedState("todoist.focusedTask", { id: "", content: "" });
-  const [data, setData] = useCachedData();
 
   async function unfocusTask() {
     if (!focusedTask.id) {

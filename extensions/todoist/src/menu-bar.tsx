@@ -19,6 +19,7 @@ import { truncateMiddle } from "./helpers/menu-bar";
 import { sortByDefault, sortByPriority } from "./helpers/sortBy";
 import { getTasksForTodayView, getTasksForUpcomingView } from "./helpers/tasks";
 import { withTodoistApi } from "./helpers/withTodoistApi";
+import useCachedData from "./hooks/useCachedData";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
@@ -31,7 +32,8 @@ const MENU_BAR_CACHE_KEY = "menu-bar-data";
 
 function MenuBar() {
   const { data, setData, isLoading } = useSyncData(true, MENU_BAR_RESOURCE_TYPES, MENU_BAR_CACHE_KEY);
-  const { focusedTask, unfocusTask } = useFocusedTask();
+  const [cachedData, setCachedData] = useCachedData();
+  const { focusedTask, unfocusTask } = useFocusedTask({ data: cachedData, setData: setCachedData });
   const {
     view,
     filter,

@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [Fix out-of-memory crash when scrolling tasks] - {PR_MERGE_DATE}
+
+- Fix "Command Out of Memory" when moving quickly through task lists: selecting a task no longer re-reads and parses the whole cached Todoist data or lists every installed application.
+- Build the "Set Parent Task", "Move Task to Project", "Add Label", "Assign to" and "Add Location Reminder" submenus when they are opened instead of on every selection change.
+
 ## [Daily Planning and Inbox Triage Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

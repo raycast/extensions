@@ -19,6 +19,7 @@ import { truncateMiddle } from "../helpers/menu-bar";
 import { priorities, getPriorityIcon } from "../helpers/priorities";
 import { rescheduleDuePayload } from "../helpers/repeat";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
+import useCachedData from "../hooks/useCachedData";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { useIsTodoistInstalled } from "../hooks/useIsTodoistInstalled";
 
@@ -33,7 +34,8 @@ function getFailureMessage(title: string, error: unknown) {
 }
 
 const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
-  const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
+  const [cachedData, setCachedData] = useCachedData();
+  const { focusedTask, unfocusTask, focusTask } = useFocusedTask({ data: cachedData, setData: setCachedData });
   const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
   const { useConfetti } = getPreferenceValues<Preferences>();
 
