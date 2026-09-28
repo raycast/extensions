@@ -44,6 +44,7 @@ import {
   getErrorMessage,
   isFileEntry,
   isFolderEntry,
+  isMac,
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isValidHexColor,
