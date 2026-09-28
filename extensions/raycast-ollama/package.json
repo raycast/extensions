@@ -5084,6 +5084,13 @@
       "mode": "view"
     },
     {
+      "name": "ollama-configure",
+      "title": "Configure Command Models",
+      "subtitle": "Ollama",
+      "description": "Configure model, thinking effort, and keep alive for each command",
+      "mode": "view"
+    },
+    {
       "name": "ollama-global-settings",
       "title": "Global Model Settings",
       "subtitle": "Ollama",

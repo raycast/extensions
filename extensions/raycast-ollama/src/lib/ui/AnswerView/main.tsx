@@ -20,6 +20,7 @@ import { EditModel } from "./form/EditModel";
 import { Creativity, PromptInputSource } from "../../enum";
 import { RaycastImage } from "../../types";
 import { OllamaApiModelCapability } from "../../ollama/enum";
+import { GetResolvedSettingsCommandAnswer } from "../../settings/settings";
 
 interface props {
   prompt: string;
@@ -68,6 +69,26 @@ export function AnswerView(props: props): React.JSX.Element {
   const autoReplace = props.autoReplace === true;
   const pasteFirst = autoReplace;
   const pasted = React.useRef(false);
+
+  // Resolved settings for display (custom or global defaults)
+  const [resolvedSettings, setResolvedSettings] = React.useState<
+    { server: string; model: string; thinking: string; keepAlive: string } | undefined
+  >(undefined);
+
+  React.useEffect(() => {
+    if (props.command) {
+      const loadResolved = async () => {
+        const settings = await GetResolvedSettingsCommandAnswer(props.command as CommandAnswer);
+        setResolvedSettings({
+          server: settings.server,
+          model: settings.model.main.tag,
+          thinking: settings.model.main.thinking === false ? "none" : String(settings.model.main.thinking || "none"),
+          keepAlive: settings.model.main.keep_alive || "5m",
+        });
+      };
+      loadResolved();
+    }
+  }, [props.command]);
 
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
@@ -254,7 +275,7 @@ export function AnswerView(props: props): React.JSX.Element {
 
   return (
     <Detail
-      markdown={`${imageView}
+      markdown={`${resolvedSettings ? `**Model:** ${resolvedSettings.model} (${resolvedSettings.server})  \n**Thinking:** ${resolvedSettings.thinking === "none" ? "None" : resolvedSettings.thinking}  \n**Keep Alive:** ${resolvedSettings.keepAlive}  \n---\n` : ""}${imageView}
 ${
   thinking !== ""
     ? `
