@@ -1,6 +1,6 @@
 # Mercury Changelog
 
-## [Multiple Accounts, Statements, and Menu Bar] - {PR_MERGE_DATE}
+## [Multiple Accounts, Statements, and Menu Bar] - 2026-09-28
 
 - Connect more than one Mercury account, such as personal and business, from the new Manage Accounts command. Your existing API key is imported automatically
 - Balances load instantly from an encrypted cache, then refresh in the background

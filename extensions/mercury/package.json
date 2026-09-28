@@ -337,5 +337,8 @@
   },
   "contributors": [
     "chrismessina"
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
