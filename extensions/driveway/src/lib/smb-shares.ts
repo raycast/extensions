@@ -32,6 +32,9 @@ async function view(target: string, extraFlags: string[] = []): Promise<string> 
 }
 
 const EXPECT_TIMEOUT_S = Math.ceil(SMBUTIL_TIMEOUT_MS / 1000);
+// Distinct from anything smbutil returns, so a prompt that never arrived
+// is not reported as a rejected password.
+const PROMPT_TIMEOUT_EXIT = 120;
 
 // Tcl substitutes inside double quotes, so escape anything that could start
 // a substitution or close the string early.
@@ -55,7 +58,7 @@ function viewWithPassword(target: string, password: string): Promise<string> {
     "expect {",
     `  -re {[Pp]assword[^\\r\\n]*:} { send -- "${tclQuote(password)}\\r"; exp_continue }`,
     "  -re {[^\\r\\n]*\\r?\\n} { append captured $expect_out(0,string); exp_continue }",
-    "  timeout { exit 1 }",
+    `  timeout { exit ${PROMPT_TIMEOUT_EXIT} }`,
     "  eof {}",
     "}",
     "puts -nonewline $captured",
@@ -74,9 +77,16 @@ function viewWithPassword(target: string, password: string): Promise<string> {
         resolve(stdout);
         return;
       }
-      // The captured text came from a terminal the password was typed into,
-      // so it is never surfaced; the message is fixed instead.
-      reject(new Error("Couldn't list shares. Check the username and password for this host."));
+      // The captured text came from a terminal the password was typed into, so
+      // it is matched against but never surfaced. Three failures look alike
+      // from the outside, and saying which one it was saves a lot of guessing.
+      if (code === PROMPT_TIMEOUT_EXIT) {
+        reject(new Error("Timed out waiting for a password prompt from smbutil."));
+      } else if (/connection failed|no route to host|not responding/i.test(stdout)) {
+        reject(new Error("Couldn't reach this host."));
+      } else {
+        reject(new Error("The server rejected that username and password."));
+      }
     });
     child.stdin.end(script);
   });
