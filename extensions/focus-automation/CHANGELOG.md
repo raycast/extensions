@@ -1,6 +1,6 @@
 # Focus Automation Changelog
 
-## [Reliability fixes] - {PR_MERGE_DATE}
+## [Reliability fixes] - 2026-09-28
 
 - Fixed: if Google access was revoked or expired, reconnecting could get stuck. Reconnect now always works.
 - Fixed: clicking Start on a Focus prompt could, very rarely, end the session the instant it started. Added a short delay to prevent it.
