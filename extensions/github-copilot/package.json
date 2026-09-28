@@ -11,7 +11,8 @@
     "darchen_gautier",
     "pedro_dcc",
     "xilopaint",
-    "jakoss"
+    "jakoss",
+    "slmnbruno"
   ],
   "owner": "github",
   "access": "public",
@@ -70,11 +71,18 @@
       "description": "Searches for GitHub repositories. Can search recent repositories, repositories by owner, or use a query filter to find repositories."
     }
   ],
+  "ai": {
+    "modelProvider": "copilot-models"
+  },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.63",
+    "@ai-sdk/openai": "^4.0.75",
+    "@ai-sdk/openai-compatible": "^3.0.55",
     "@octokit/core": "^7.0.6",
     "@octokit/rest": "^22.0.1",
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.2.2",
+    "ai": "^7.0.114"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
