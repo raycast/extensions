@@ -4,7 +4,7 @@
   "title": "Paste Image",
   "description": "Search, preview, manage, and paste images from your folders.",
   "icon": "extension-icon.png",
-  "author": "aftab",
+  "author": "aftabrehan",
   "license": "MIT",
   "categories": [
     "Media"
