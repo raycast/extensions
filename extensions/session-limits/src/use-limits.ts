@@ -14,7 +14,7 @@ import { loadProviders } from "./core/load";
 import type { ProviderState } from "./core/types";
 import { connectClaudeBridge, disconnectClaudeBridge } from "./providers/claude-bridge";
 
-const cache = new Cache({ namespace: "session-limits-v3" });
+const cache = new Cache({ namespace: "session-limits-v4" });
 const settings = getPreferenceValues<Preferences>();
 const cacheKey = createHash("sha256")
   .update(JSON.stringify([settings, process.env.CODEX_HOME, process.env.CLAUDE_CONFIG_DIR]))

@@ -9,8 +9,8 @@ export function parseCodexUsage(data: unknown): UsageWindow[] {
   function addLimits(value: unknown, prefix: string, name?: string) {
     const limits = record(value);
     for (const [key, fallback] of [
-      ["primary_window", "Session"],
-      ["secondary_window", "Weekly"],
+      ["primary_window", "Usage limit"],
+      ["secondary_window", "Usage limit"],
     ]) {
       const window = record(limits[key]);
       const usedPercent = percent(window.used_percent);
@@ -47,38 +47,26 @@ export function parseCodexUsage(data: unknown): UsageWindow[] {
     });
   return windows;
 }
-/** App-server buckets contain camelCase windows and may include several model limits. */
+/** Show the account's normal quota only; reserve/model buckets are separate allowances. */
 export function parseCodexRpcUsage(data: unknown): UsageWindow[] {
   const root = record(data);
-  const buckets = { ...record(root.rateLimitsByLimitId) };
   const primary = record(root.rateLimits);
-  const primaryId = text(primary.limitId) || "codex";
-  if (Object.keys(primary).length && !(primaryId in buckets)) buckets[primaryId] = primary;
-  const windows: UsageWindow[] = [];
-  for (const [id, value] of Object.entries(buckets)) {
-    const bucket = record(value);
-    const name = text(bucket.limitName) || (id === "codex" ? undefined : id);
-    const convert = (value: unknown) => {
-      const window = record(value);
-      return {
-        used_percent: window.usedPercent,
-        limit_window_seconds:
-          typeof window.windowDurationMins === "number" ? window.windowDurationMins * 60 : undefined,
-        reset_at: window.resetsAt,
-      };
+  const primaryId = text(primary.limitId);
+  const primaryIsNormal = Object.keys(primary).length > 0 && (!primaryId || primaryId === "codex");
+  const canonical = record(record(root.rateLimitsByLimitId).codex);
+  const bucket = Object.keys(canonical).length > 0 ? canonical : primaryIsNormal ? primary : {};
+  const convert = (value: unknown) => {
+    const window = record(value);
+    return {
+      used_percent: window.usedPercent,
+      limit_window_seconds:
+        typeof window.windowDurationMins === "number" ? window.windowDurationMins * 60 : undefined,
+      reset_at: window.resetsAt,
     };
-    const parsed = parseCodexUsage({
-      rate_limit: { primary_window: convert(bucket.primary), secondary_window: convert(bucket.secondary) },
-    });
-    windows.push(
-      ...parsed.map((window) => ({
-        ...window,
-        id: `${id}-${window.id}`,
-        label: name ? `${name} · ${window.label}` : window.label,
-      })),
-    );
-  }
-  return windows;
+  };
+  return parseCodexUsage({
+    rate_limit: { primary_window: convert(bucket.primary), secondary_window: convert(bucket.secondary) },
+  });
 }
 
 export async function fetchCodex(options: ProviderOptions): Promise<ProviderSnapshot> {

@@ -47,6 +47,8 @@ This is illustrative data, not a live integration. Replace timestamps and percen
 
 The official Codex CLI owns authentication and its lifecycle. The selected profile directory, `$CODEX_HOME`, or `~/.codex` determines the profile. The extension starts the CLI app-server to read quota windows; it does not read authentication files or call private usage endpoints. Install and sign in to the official CLI before using this adapter.
 
+The dashboard shows the account's main weekly limit, plus a 5-hour limit when Codex reports one. Separate reserve and model-specific pools are omitted. Window labels follow the reported duration.
+
 ### Claude Code
 
 Choose **Connect Claude Code** once to add a local status-line integration to your Claude settings. The selected directory, `$CLAUDE_CONFIG_DIR`, or `~/.claude` determines the profile. Your existing status-line command is preserved. The integration runs locally when Claude Code updates its status line and saves only the reported quota windows and observation time for Raycast to read.
