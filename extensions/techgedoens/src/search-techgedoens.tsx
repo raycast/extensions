@@ -23,7 +23,7 @@ import {
 } from "./article-archive";
 import { createArticleDetailMarkdown } from "./article-detail";
 import { Article, ARTICLES_PER_FEED_PAGE, fetchArticleSearchPage } from "./articles";
-import { strings, translateCategory, type Strings } from "./strings";
+import { CATEGORY_OPTIONS, strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "browser" | "reader";
 type ArticleCategoryFilter = "__all_categories__" | (typeof CATEGORY_OPTIONS)[number];
@@ -31,16 +31,6 @@ type ArticleCategoryFilter = "__all_categories__" | (typeof CATEGORY_OPTIONS)[nu
 const MINIMUM_SEARCH_LENGTH = 2;
 const SEARCH_DELAY_MS = 400;
 const FILTER_ALL_CATEGORIES = "__all_categories__";
-const CATEGORY_OPTIONS = [
-  "Testberichte",
-  "Software & Dienste",
-  "Digital Lifehacks & Tipps",
-  "Techgedöns Originals",
-  "Aus dem WWW",
-  "Virales & Unterhaltung",
-  "Kurzmeldungen",
-] as const;
-
 export default function SearchTechgedoensCommand() {
   const preferences = getPreferenceValues<Preferences.SearchTechgedoens>();
   const translations = strings;

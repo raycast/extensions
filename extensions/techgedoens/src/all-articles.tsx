@@ -26,7 +26,7 @@ import {
   setArticleFavoriteStatus,
   setArticleReadStatus,
 } from "./article-archive";
-import { strings, translateCategory, type Strings } from "./strings";
+import { CATEGORY_OPTIONS, strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "reader" | "browser";
 type ArticleStatusFilter = "__all_statuses__" | "__favorites__" | "__read__" | "__unread__";
@@ -40,16 +40,6 @@ const FILTER_UNREAD = "__unread__";
 const FILTER_ALL_CATEGORIES = "__all_categories__";
 const LAST_STATUS_FILTER_KEY = "all-articles-last-status-filter-v1";
 const DEFAULT_ARCHIVE_PAGE_SIZE = 30;
-const CATEGORY_OPTIONS = [
-  "Testberichte",
-  "Software & Dienste",
-  "Digital Lifehacks & Tipps",
-  "Techgedöns Originals",
-  "Aus dem WWW",
-  "Virales & Unterhaltung",
-  "Kurzmeldungen",
-] as const;
-
 export default function AllArticlesCommand() {
   const preferences = getPreferenceValues<Preferences.AllArticles>();
   const translations = strings;

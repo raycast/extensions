@@ -141,17 +141,34 @@ Articles:
 ${articleContext}`,
 };
 
+export const CATEGORY_OPTIONS = [
+  "Tests & Eindrücke",
+  "Software & Dienste",
+  "Digitale Lifehacks",
+  "Techgedöns Originals",
+  "Webfundstücke",
+  "Netzkultur & Virales",
+  "Kurzmeldungen",
+] as const;
+
 const categoryLabels: Record<string, string> = {
-  Testberichte: "Testberichte",
-  "Ausgepackt & Ausprobiert | Testberichte": "Testberichte",
-  "Software & Dienste": "Apps & Dienste",
-  "Software, Web-Apps & Dienste": "Apps & Dienste",
-  "Digital Lifehacks & Tipps": "Digital Lifehacks",
-  "Digital Lifehacks, Tipps & Erklärbär 1x1": "Digital Lifehacks",
+  Testberichte: "Tests & Eindrücke",
+  "Ausgepackt & Ausprobiert | Testberichte": "Tests & Eindrücke",
+  "Tests & Eindrücke": "Tests & Eindrücke",
+  "Software & Dienste": "Software & Dienste",
+  "Software, Web-Apps & Dienste": "Software & Dienste",
+  "Apps & Dienste": "Software & Dienste",
+  "Digital Lifehacks & Tipps": "Digitale Lifehacks",
+  "Digital Lifehacks, Tipps & Erklärbär 1x1": "Digitale Lifehacks",
+  "Digital Lifehacks": "Digitale Lifehacks",
+  "Digitale Lifehacks": "Digitale Lifehacks",
   "Techgedöns Originals": "Techgedöns Originals",
-  "Aus dem WWW": "Aus dem WWW",
-  "Sehens- und lesenswertes aus dem WWW": "Aus dem WWW",
-  "Virales & Unterhaltung": "Ein ♥ für virale Unterhaltung",
+  "Aus dem WWW": "Webfundstücke",
+  "Sehens- und lesenswertes aus dem WWW": "Webfundstücke",
+  Webfundstücke: "Webfundstücke",
+  "Virales & Unterhaltung": "Netzkultur & Virales",
+  "Ein ♥ für virale Unterhaltung": "Netzkultur & Virales",
+  "Netzkultur & Virales": "Netzkultur & Virales",
   Kurzmeldungen: "Kurzmeldungen",
   "Kurzmeldungen & Pressebox": "Kurzmeldungen",
 };
