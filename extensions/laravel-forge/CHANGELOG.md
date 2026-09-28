@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-28
 
 - Stop sending dropped connections, rejected tokens, rate limits and Forge outages to the extension's error reports
 
