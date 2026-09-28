@@ -41,14 +41,16 @@
       "title": "Start Stream",
       "subtitle": "OBS Control",
       "description": "Start Stream",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "stop-stream",
       "title": "Stop Stream",
       "subtitle": "OBS Control",
       "description": "Stop OBS Stream",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-virtual-cam",
@@ -62,14 +64,16 @@
       "title": "Start Virtual Camera",
       "subtitle": "OBS Control",
       "description": "Start Virtual Camera",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "stop-virtual-cam",
       "title": "Stop Virtual Camera",
       "subtitle": "OBS Control",
       "description": "Stop Virtual Camera",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-recording",
@@ -83,14 +87,16 @@
       "title": "Start Recording",
       "subtitle": "OBS Control",
       "description": "Start Recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "stop-recording",
       "title": "Stop Recording",
       "subtitle": "OBS Control",
       "description": "Stop Recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-pause-recording",
@@ -104,14 +110,16 @@
       "title": "Pause Recording",
       "subtitle": "OBS Control",
       "description": "Pause Recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "resume-recording",
       "title": "Resume Recording",
       "subtitle": "OBS Control",
       "description": "Resume Recording",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-studio-mode",
@@ -139,14 +147,16 @@
       "title": "Start Replay Buffer",
       "subtitle": "OBS Control",
       "description": "Start Replay Buffer",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "stop-replay-buffer",
       "title": "Stop Replay Buffer",
       "subtitle": "OBS Control",
       "description": "Stop Replay Buffer",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
