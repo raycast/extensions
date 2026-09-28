@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
@@ -31,16 +31,64 @@ async function view(target: string, extraFlags: string[] = []): Promise<string> 
   return stdout;
 }
 
+const EXPECT_TIMEOUT_S = Math.ceil(SMBUTIL_TIMEOUT_MS / 1000);
+
+// Tcl substitutes inside double quotes, so escape anything that could start
+// a substitution or close the string early.
+function tclQuote(value: string): string {
+  return value.replace(/[\\$"[\]]/g, (char) => `\\${char}`);
+}
+
+// `man smbutil` gives view only -A, -N, -G, -g, -a and -f, with the password
+// inside the URL, where any process running as this user can read it from the
+// process arguments for as long as smbutil runs. So its prompt is answered
+// over a pty instead: the password reaches expect on stdin and is written to
+// the terminal smbutil reads from, appearing in neither process's arguments
+// nor its environment.
+function viewWithPassword(target: string, password: string): Promise<string> {
+  const script = [
+    `set timeout ${EXPECT_TIMEOUT_S}`,
+    // Nothing reaches our stdout except the lines collected below.
+    "log_user 0",
+    `spawn /usr/bin/smbutil -v view -f "${tclQuote(target)}"`,
+    "set captured {}",
+    "expect {",
+    `  -re {[Pp]assword[^\\r\\n]*:} { send -- "${tclQuote(password)}\\r"; exp_continue }`,
+    "  -re {[^\\r\\n]*\\r?\\n} { append captured $expect_out(0,string); exp_continue }",
+    "  timeout { exit 1 }",
+    "  eof {}",
+    "}",
+    "puts -nonewline $captured",
+    // Propagate smbutil's own status, so a rejected login still throws.
+    "catch wait result",
+    "exit [lindex $result 3]",
+  ].join("\n");
+
+  return new Promise((resolve, reject) => {
+    const child = spawn("/usr/bin/expect", ["-"], { timeout: SMBUTIL_TIMEOUT_MS + 5_000 });
+    let stdout = "";
+    child.stdout.on("data", (chunk) => (stdout += chunk));
+    child.once("error", reject);
+    child.once("close", (code) => {
+      if (code === 0) {
+        resolve(stdout);
+        return;
+      }
+      // The captured text came from a terminal the password was typed into,
+      // so it is never surfaced; the message is fixed instead.
+      reject(new Error("Couldn't list shares. Check the username and password for this host."));
+    });
+    child.stdin.end(script);
+  });
+}
+
 // Enumeration is itself authenticated, so this throws on a bad host or
-// credentials.
-// Without a password this is Keychain-only: it lists shares for a host
-// macOS already holds a credential for, and fails otherwise.
+// credentials. Called without a password it is Keychain-only: it lists shares
+// for a host macOS already holds a credential for, and fails otherwise.
 export async function listShares(host: string, user: string, password?: string): Promise<string[]> {
-  // -N authenticates from the Keychain and prompts for nothing, so a host
-  // that has been connected to before never needs a password on the command
-  // line, where any process running as this user could read it while smbutil
-  // runs. The username is pinned either way, so this cannot silently
-  // authenticate as somebody else.
+  // -N authenticates from the Keychain and prompts for nothing, which is both
+  // quicker and one fewer place a credential has to travel. The username is
+  // pinned either way, so this cannot silently authenticate as someone else.
   try {
     return parseShares(await view(user ? `//${user}@${host}` : `//${host}`, ["-N"]));
   } catch (error) {
@@ -48,9 +96,5 @@ export async function listShares(host: string, user: string, password?: string):
   }
 
   // No usable Keychain credential, so the password has to be supplied.
-  // smbutil offers no way to pass one off the command line: `man smbutil`
-  // lists only -A, -N, -G, -g, -a and -f for view, with the password inside
-  // the URL. execFile at least avoids a shell, so it is never logged to
-  // history or re-parsed.
-  return parseShares(await view(`//${user}:${password}@${host}`));
+  return parseShares(await viewWithPassword(user ? `//${user}@${host}` : `//${host}`, password));
 }
