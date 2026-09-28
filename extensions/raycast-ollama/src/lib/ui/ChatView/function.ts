@@ -196,15 +196,10 @@ async function Inference(
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> {
-  await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
-
   const msgRequestBody: OllamaApiChatMessage[] = GetMessagesForInference(chat, query, image);
   let isFirstMessage = true;
 
   while (true) {
-    let thinkingStarted = false;
-    let responseStarted = false;
-
     /* Set Model */
     let model = chat.models.main;
     if (tools.length && chat.models.tools) {
@@ -227,7 +222,7 @@ async function Inference(
     if (tools.length) body.tools = GetOllamaApiTools(tools);
 
     try {
-      await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
+      await showToast({ style: Toast.Style.Animated, title: "🔌 Connecting to Ollama..." });
       const emiter = await o.OllamaApiChat(body);
 
       /* Push first Assistant message and save changes with setChat() */
@@ -276,9 +271,11 @@ async function Inference(
       }
 
       const processEmiter = () => {
+        let thinkingStarted = false;
+        let responseStarted = false;
+
         /* Get Tools Call */
         emiter.on("tool_calls", (data: OllamaApiChatMessageToolCall[]) => {
-          /* Push "tool_calls" on messages */
           const message = msgRequestBody.findLast((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
           if (message?.tool_calls) message.tool_calls.push(...data);
           else if (message) message.tool_calls = data;
@@ -286,9 +283,7 @@ async function Inference(
           setChat((prevState) => {
             if (!prevState) return undefined;
 
-            /* Update tool_calls of last Assistant Message */
             const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
-              /* Skip all value except last */
               if (groupIndex != groupArr.length - 1) return group;
 
               const updatedMsg = group.messages.map((value, valueIndex, valueArr) => {
@@ -296,7 +291,6 @@ async function Inference(
                   value.role === OllamaApiChatMessageRole.ASSISTANT &&
                   valueIndex === valueArr.findLastIndex((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
 
-                /* Skip all value except last Assistant Message */
                 if (!isLastAssistant) return value;
 
                 return {
@@ -311,7 +305,6 @@ async function Inference(
             return { ...prevState, messages: updatedMessages };
           });
 
-          /* Push Tool Function into Array */
           for (const toolcall of data) {
             const tool = tools.find((v) => v.name === toolcall.function.name);
             if (tool) toolCalls.push(tool.fn(toolcall.function.arguments));
@@ -320,7 +313,6 @@ async function Inference(
 
         /* Get Thinking Text */
         emiter.on("thinking", async (data: string) => {
-          /* showToast when thinking process started */
           if (!thinkingStarted) {
             thinkingStarted = true;
             await showToast({
@@ -334,9 +326,7 @@ async function Inference(
           setChat((prevState) => {
             if (!prevState) return undefined;
 
-            /* Update thinking of last Assistant Message */
             const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
-              /* Skip all value except last */
               if (groupIndex != groupArr.length - 1) return group;
 
               const updatedMsg = group.messages.map((value, valueIndex, valueArr) => {
@@ -344,7 +334,6 @@ async function Inference(
                   value.role === OllamaApiChatMessageRole.ASSISTANT &&
                   valueIndex === valueArr.findLastIndex((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
 
-                /* Skip all value except last Assistant Message */
                 if (!isLastAssistant) return value;
 
                 return {
@@ -362,7 +351,6 @@ async function Inference(
 
         /* Get Response Text */
         emiter.on("data", async (data: string) => {
-          /* showToast when  process started */
           if (!responseStarted) {
             responseStarted = true;
             await showToast({
@@ -374,9 +362,7 @@ async function Inference(
           setChat((prevState) => {
             if (!prevState) return undefined;
 
-            /* Update content of last Assistant Message */
             const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
-              /* Skip all value except last */
               if (groupIndex != groupArr.length - 1) return group;
 
               const updatedMsg = group.messages.map((value, valueIndex, valueArr) => {
@@ -384,7 +370,6 @@ async function Inference(
                   value.role === OllamaApiChatMessageRole.ASSISTANT &&
                   valueIndex === valueArr.findLastIndex((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
 
-                /* Skip all value except last Assistant Message */
                 if (!isLastAssistant) return value;
 
                 return { ...value, content: value.content + data };
@@ -402,7 +387,6 @@ async function Inference(
       /* Get Metadata */
       await new Promise<void>((resolve) => {
         emiter.once("done", async (data: OllamaApiChatResponse) => {
-          /* Continue Iteration on ToolCalls */
           if (toolCalls.length) {
             await showToast({
               style: Toast.Style.Animated,
@@ -422,9 +406,7 @@ async function Inference(
             setChat((prevState) => {
               if (!prevState) return undefined;
 
-              /* Push Tool Messages on last Message */
               const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
-                /* Skip all value except last */
                 if (groupIndex != groupArr.length - 1) return group;
 
                 return {
@@ -436,14 +418,11 @@ async function Inference(
               return { ...prevState, messages: updatedMessages };
             });
           } else {
-            /* Set Last Message */
             await showToast({ style: Toast.Style.Success, title: "👍 Done." });
             setChat((prevState) => {
               if (!prevState) return undefined;
 
-              /* Update Metadata of last Message */
               const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
-                /* Skip all value except last */
                 if (groupIndex != groupArr.length - 1) return group;
 
                 return { ...data, images: image, messages: group.messages };
@@ -457,7 +436,6 @@ async function Inference(
       });
       emiter.removeAllListeners();
 
-      /* Brake Loop if no tool was required */
       if (!toolCalls.length) {
         break;
       }
