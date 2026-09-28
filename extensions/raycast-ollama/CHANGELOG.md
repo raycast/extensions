@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-09-28
 
 - Replaced generic "💾 Loading..." toast with descriptive "🔌 Connecting to Ollama..." toast at inference start.
 - Kept "🤔 Thinking...", "✍️ Typing...", "🧰 Tool Calling...", "👍 Done." toasts for stream phases.
