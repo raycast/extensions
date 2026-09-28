@@ -39,6 +39,19 @@ export const reauthorize = async (): Promise<string> => {
   return provider.authorize();
 };
 
+// Model provider entry points run in the background outside of `withAccessToken`, where
+// Raycast refuses to show the sign-in UI. Surface that as an actionable message instead.
+export const authorizeModelProvider = async (): Promise<string> => {
+  try {
+    return await provider.authorize();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("not available when command is launched in background")) {
+      throw new Error("Sign in to GitHub first by opening any GitHub Copilot command.");
+    }
+    throw error;
+  }
+};
+
 export const getOctokit = (): Octokit => {
   if (!octokitInstance) {
     throw new Error("Octokit instance not initialized. Please authenticate first.");
