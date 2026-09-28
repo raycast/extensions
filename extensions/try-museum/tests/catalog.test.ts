@@ -33,7 +33,9 @@ function fixture() {
       requests.push(url.split("/").at(-1) ?? "");
       if (offline) throw new Error("offline");
       if (url.endsWith("manifest.json")) return { total: 1, batches: [{ file: batch, count: 1 }] };
-      return invalid ? [{ ...artwork, palette: [] }] : [artwork];
+      return invalid
+        ? [{ ...artwork, palette: [] }]
+        : [{ ...artwork, title: batch === first ? artwork.title : "Updated Artwork" }];
     },
   });
   return {
@@ -48,6 +50,9 @@ function fixture() {
     },
     goOffline: () => {
       offline = true;
+    },
+    goOnline: () => {
+      offline = false;
     },
     corruptNetwork: () => {
       invalid = true;
@@ -111,6 +116,53 @@ test("concurrent callers share a catalog request", async () => {
   const [a, b] = await Promise.all([f.load(1000), f.load(1000)]);
   assert.equal(a, b);
   assert.deepEqual(f.requests, ["manifest.json", first]);
+});
+
+test("forced refresh during a fresh cache read loads updated data and coalesces callers", async () => {
+  const f = fixture();
+  await f.load(1000);
+  f.changeBatch();
+
+  const cached = f.load(1000);
+  const refresh = f.load(1000, true);
+  assert.equal(f.load(1000, true), refresh);
+  assert.equal(f.load(1000), refresh);
+
+  const cachedResult = await cached;
+  assert.equal(f.load(1000), refresh);
+  assert.equal(f.load(1000, true), refresh);
+  const refreshedResult = await refresh;
+  assert.equal(cachedResult.artworks[0].title, "Artwork");
+  assert.equal(refreshedResult.artworks[0].title, "Updated Artwork");
+  assert.deepEqual(f.requests, ["manifest.json", first, "manifest.json", second]);
+
+  await f.load(1000, true);
+  assert.deepEqual(f.requests, ["manifest.json", first, "manifest.json", second, "manifest.json"]);
+});
+
+test("callers reuse a forced load that is already pending", async () => {
+  const f = fixture();
+  const refresh = f.load(1000, true);
+  assert.equal(f.load(1000, true), refresh);
+  assert.equal(f.load(1000), refresh);
+  await refresh;
+  assert.deepEqual(f.requests, ["manifest.json", first]);
+});
+
+test("queued refresh retries even when the preceding load fails", async () => {
+  const f = fixture();
+  f.goOffline();
+  const initial = f.load(1000);
+  // Restore connectivity before the queued refresh begins.
+  const reconnect = initial.catch(() => f.goOnline());
+  const refresh = f.load(1000, true);
+
+  await assert.rejects(initial, /Check your connection/);
+  await reconnect;
+  const result = await refresh;
+  assert.equal(result.stale, false);
+  assert.equal(result.artworks[0].id, artwork.id);
+  assert.deepEqual(f.requests, ["manifest.json", "manifest.json", first]);
 });
 
 test("manifest traversal, duplicate IDs, and incorrect totals cannot replace the cache", async () => {

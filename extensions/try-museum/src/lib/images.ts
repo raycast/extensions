@@ -1,7 +1,7 @@
 import { Clipboard, environment, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { constants } from "node:fs";
-import { copyFile, mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, rename, stat, writeFile } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -31,7 +31,7 @@ async function fetchImage(artwork: Artwork): Promise<string> {
   return path;
 }
 
-export function cachedImage(artwork: Artwork) {
+function cachedImage(artwork: Artwork) {
   let request = pending.get(artwork.image.key);
   if (!request) {
     request = fetchImage(artwork).finally(() => pending.delete(artwork.image.key));
@@ -71,7 +71,7 @@ export async function setWallpaper(artwork: Artwork) {
   // NSWorkspace requires a desktop-compatible image; keep the PNG in supportPath for future logins.
   const png = `${source}.png`;
   try {
-    await readFile(png);
+    await access(png, constants.R_OK);
   } catch {
     await promisify(execFile)("/usr/bin/sips", ["-s", "format", "png", source, "--out", png]);
   }

@@ -3,8 +3,8 @@ import { batchSchema, manifestSchema, MUSEUM_URL, type Artwork, type Manifest } 
 
 const metadataSchema = z.object({ checkedAt: z.number().finite(), manifest: manifestSchema });
 
-export type Catalog = { artworks: Artwork[]; checkedAt: number; stale: boolean };
-export type CatalogStorage = {
+type Catalog = { artworks: Artwork[]; checkedAt: number; stale: boolean };
+type CatalogStorage = {
   read: (key: string) => Promise<unknown>;
   write: (key: string, value: unknown) => Promise<void>;
 };
@@ -18,7 +18,7 @@ export function createCatalogLoader({
   fetchJson: (url: string) => Promise<unknown>;
   now?: () => number;
 }) {
-  let pending: Promise<Catalog> | undefined;
+  let pending: { promise: Promise<Catalog>; forced: boolean } | undefined;
 
   async function readMetadata() {
     try {
@@ -86,10 +86,13 @@ export function createCatalogLoader({
   }
 
   return (refreshMs: number, force = false): Promise<Catalog> => {
-    if (!pending)
-      pending = load(refreshMs, force).finally(() => {
-        pending = undefined;
-      });
-    return pending;
+    if (pending && (!force || pending.forced)) return pending.promise;
+
+    const run = () => load(refreshMs, force);
+    const promise = (pending ? pending.promise.then(run, run) : run()).finally(() => {
+      if (pending?.promise === promise) pending = undefined;
+    });
+    pending = { promise, forced: force };
+    return promise;
   };
 }

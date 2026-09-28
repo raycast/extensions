@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { attribution, MUSEUM_URL, type Artwork } from "../lib/artworks";
 import { copyImage, downloadImage, setWallpaper } from "../lib/images";
 
-async function perform(title: string, success: string, action: () => Promise<unknown>) {
+async function perform(title: string, success: string, action: () => Promise<string | void>) {
   const toast = await showToast({ style: Toast.Style.Animated, title });
   try {
     const result = await action();

@@ -65,7 +65,7 @@ export function searchArtworks(index: ReturnType<typeof indexArtworks>, hex: str
       let nearestDistance = Infinity;
       let coverage = 0;
       for (const color of colors) {
-        const delta = Math.hypot(...color.lab.map((value, i) => value - target[i]));
+        const delta = Math.hypot(color.lab[0] - target[0], color.lab[1] - target[1], color.lab[2] - target[2]);
         nearestDistance = Math.min(nearestDistance, delta);
         if (!compatibleHue(target, color.lab)) continue;
         distance = Math.min(distance, delta);

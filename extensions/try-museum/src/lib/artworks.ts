@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const MUSEUM_URL = "https://trymuseum.com";
-export const IMAGE_BASE_URL = "https://media.trymuseum.com/";
+const IMAGE_BASE_URL = "https://media.trymuseum.com/";
 
 const relativePath = z
   .string()
