@@ -74,7 +74,9 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     computers,
     otherDevices,
     isLoading: discoveryLoading,
-  } = useNetworkDiscovery();
+    hasRun: discoveryHasRun,
+    refresh: runDiscovery,
+  } = useNetworkDiscovery({ auto: false });
   const { push } = useNavigation();
 
   async function load() {
@@ -197,6 +199,15 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     }
   }
 
+  const discoverAction = (
+    <Action
+      title={discoveryHasRun ? "Discover on Network Again" : "Discover on Network"}
+      icon={Icon.Network}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onAction={runDiscovery}
+    />
+  );
+
   const addServerAction = (
     <Action
       title="Add Drive"
@@ -269,14 +280,24 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       isLoading={isLoading}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
-      actions={<ActionPanel>{addServerAction}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {addServerAction}
+          {discoverAction}
+        </ActionPanel>
+      }
     >
       {nothingToShow && (
         <List.EmptyView
           title="No Drives"
-          description="Run Add Drive to save one, or turn on Network Discovery in Preferences to find servers on your network."
+          description="Run Add Drive to save one, or Discover on Network to see what's already reachable."
           icon={Icon.HardDrive}
-          actions={<ActionPanel>{addServerAction}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              {addServerAction}
+              {discoverAction}
+            </ActionPanel>
+          }
         />
       )}
       <List.Section title="Saved Drives">
@@ -378,6 +399,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                     onAction={() => push(<EditServer server={server} onSaved={load} onDuplicate={setSelectedId} />)}
                   />
                   {addServerAction}
+                  {discoverAction}
                   <Action
                     title="Remove Server"
                     icon={Icon.Trash}
@@ -404,6 +426,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               onMountRequested={pollUntilMounted}
               onUnmountAll={() => unmountAllOnHost(host)}
               onServerAdded={load}
+              onRefresh={runDiscovery}
             />
           ))}
         </List.Section>
@@ -417,6 +440,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               protocol="smb"
               subtitle="SMB · sign in to browse"
               onServerAdded={load}
+              onRefresh={runDiscovery}
               onBrowse={() =>
                 push(
                   <BrowseHostShares
@@ -441,6 +465,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               host={h.host}
               protocol={h.protocol}
               onServerAdded={load}
+              onRefresh={runDiscovery}
             />
           ))}
         </List.Section>
@@ -454,6 +479,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               icon={COMPUTER_ICON}
               subtitle={c.model ?? "Computer on network"}
               onServerAdded={load}
+              onRefresh={runDiscovery}
               onBrowse={() =>
                 push(
                   <BrowseHostShares
@@ -473,7 +499,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       {otherDevicesNotSaved.length > 0 && (
         <List.Section title="Other Devices on Network">
           {otherDevicesNotSaved.map((host) => (
-            <DiscoveredHostItem key={host} host={host} onServerAdded={load} />
+            <DiscoveredHostItem key={host} host={host} onServerAdded={load} onRefresh={runDiscovery} />
           ))}
         </List.Section>
       )}

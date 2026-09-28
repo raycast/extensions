@@ -8,11 +8,11 @@ Discover, save, and mount SMB and WebDAV network drives from Raycast, without op
 
 1. Open **Add Drive** and enter a host and share path. Alias, username, and protocol are optional.
 2. Or open **Discover Devices** to see drives already visible on your network, and save the ones you want.
-3. Use **Manage Drives** to connect, disconnect, edit, or remove any saved drive. It lists whatever discovery finds below your saved drives, so you can mount something new without leaving it.
+3. Use **Manage Drives** to connect, disconnect, edit, or remove any saved drive. It opens straight to your saved drives; run **Discover on Network** (⌘⇧D) from its action menu to list what else is reachable, below them.
 
 **Preferences**
 
-- **Network Discovery**: three independent switches control how drives are found. Bonjour/mDNS is on by default and finds drives and computers that announce themselves. Subnet scan and "show all devices" are off by default, since both actively probe your network and take longer. All three run in Manage Drives as well as Discover Devices, so leaving the active ones on makes both commands busier while they work through the subnet.
+- **Network Discovery**: three independent switches control which sources are used. Bonjour/mDNS is on by default and finds drives and computers that announce themselves. Subnet scan and "show all devices" are off by default, since both actively probe every address on your network and take longer. Discover Devices runs them as soon as it opens; Manage Drives only when you ask it to, so opening it is never held up by a scan.
 - **Domain / IP**: optionally always include one specific host, useful if you connect to the same server every time and would rather not add it manually. The username and password set here are used for this host only, never for anything found on the network.
 
 **Background commands**
