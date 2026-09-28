@@ -91,6 +91,71 @@ export default function ServiceDomains({
     }
   }
 
+  async function failedResponse(response: Response): Promise<Error> {
+    const err = (await response.json().catch(() => undefined)) as ErrorResult | undefined;
+    return new Error(err?.message ?? `Request failed with status ${response.status}`);
+  }
+
+  // `domain.toggleEnable` takes no target state - it flips whatever the server has. The row may be
+  // stale (the domain changed elsewhere since this list loaded), so re-read the domain first and
+  // only flip it when it isn't already in the state this action asks for.
+  async function toggleDomain(domain: Domain) {
+    const isCompose = service.type === "compose";
+    const wantEnabled = domain.enabled === false;
+
+    if (!wantEnabled) {
+      const options: Alert.Options = {
+        title: `Disable ${domain.host}?`,
+        message: isCompose
+          ? "Compose domains are Docker labels - the service keeps answering on this domain until the stack is redeployed."
+          : "The service stops answering on this domain until it is enabled again. Its settings are kept.",
+        primaryAction: {
+          style: Alert.ActionStyle.Destructive,
+          title: "Disable Domain",
+        },
+      };
+      if (!(await confirmAlert(options))) return;
+    }
+
+    const toast = await showToast(Toast.Style.Animated, `${wantEnabled ? "Enabling" : "Disabling"} ${domain.host}…`);
+    try {
+      const currentResponse = await fetch(`${url}domain.one?domainId=${domain.domainId}`, { headers });
+      if (!currentResponse.ok) throw await failedResponse(currentResponse);
+      const current = (await currentResponse.json()) as Domain;
+      if ((current.enabled !== false) === wantEnabled) {
+        toast.style = Toast.Style.Success;
+        toast.title = `${domain.host} is already ${wantEnabled ? "enabled" : "disabled"}`;
+        revalidate();
+        return;
+      }
+
+      const response = await fetch(url + "domain.toggleEnable", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ domainId: domain.domainId }),
+      });
+      if (!response.ok) {
+        const err = await failedResponse(response);
+        throw response.status === 404 ? new Error(`${err.message} (needs Dokploy v0.30.0 or later)`) : err;
+      }
+      const result = (await response.json()) as { enabled?: boolean | null; requiresRedeploy?: boolean };
+      revalidate();
+      // Only possible if something else flipped it between the re-read and the toggle.
+      if (typeof result.enabled === "boolean" && result.enabled !== wantEnabled) {
+        throw new Error(
+          `${domain.host} was changed elsewhere at the same time and is now ${result.enabled ? "enabled" : "disabled"}.`,
+        );
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = `${wantEnabled ? "Enabled" : "Disabled"} ${domain.host}`;
+      if (result.requiresRedeploy ?? isCompose) toast.message = "Redeploy the compose to apply the change.";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Could not ${wantEnabled ? "enable" : "disable"} domain`;
+      toast.message = `${error}`;
+    }
+  }
+
   return (
     <List isLoading={isLoading} navigationTitle={`${service.name} - Domains`}>
       {error ? (
@@ -152,6 +217,16 @@ export default function ServiceDomains({
                   title="Add Domain"
                   target={<AddDomainForm service={service} onCreated={revalidate} />}
                 />
+                {domain.enabled === false ? (
+                  <Action icon={Icon.Play} title="Enable Domain" onAction={() => toggleDomain(domain)} />
+                ) : (
+                  <Action
+                    icon={Icon.Pause}
+                    title="Disable Domain"
+                    style={Action.Style.Destructive}
+                    onAction={() => toggleDomain(domain)}
+                  />
+                )}
                 <Action
                   icon={Icon.Trash}
                   title="Delete Domain"

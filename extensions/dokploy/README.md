@@ -27,6 +27,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - View Domains (Applications and Compose stacks)
             - Open Domain
             - Copy URL
+            - Enable / Disable Domain
             - Delete Domain
             - Add Domain
         - View Backups (Databases and Compose stacks)
