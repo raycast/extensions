@@ -1,21 +1,41 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { BASE, Session, ago, dashboardUrl, headers, isOwnQuestion, parseResponse, query } from "./api";
+import {
+  BASE,
+  PAGE_SIZE,
+  Session,
+  ago,
+  dashboardUrl,
+  headers,
+  isOwnQuestion,
+  nextPage,
+  parseResponse,
+  query,
+} from "./api";
 import Transcript from "./transcript";
 import ErrorView from "./error-view";
 
 export default function Inbox() {
-  const url = `${BASE}/api/v1/sessions/${query({ limit: 50 })}`;
-  const { isLoading, data, error, revalidate } = useFetch(url, {
-    headers: headers(),
-    parseResponse: (response) => parseResponse<{ sessions: Session[] }>(response),
-    keepPreviousData: true,
-  });
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
+    (options) => `${BASE}/api/v1/sessions/${query({ limit: PAGE_SIZE, before: options.cursor })}`,
+    {
+      headers: headers(),
+      parseResponse: (response) => parseResponse<{ sessions: Session[] }>(response),
+      // The page cursor comes from the raw rows; the owner's own questions are
+      // dropped only after that, so a page full of them still pages on.
+      mapResult: (result) => ({
+        data: (result.sessions || []).filter((s) => !isOwnQuestion(s.session_id)),
+        ...nextPage(result.sessions || [], (s) => s.last_message_at),
+      }),
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
 
-  const sessions = (data?.sessions || []).filter((s) => !isOwnQuestion(s.session_id));
+  const sessions = data || [];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search chats">
+    <List isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search chats">
       {error ? <ErrorView message={error.message} retry={revalidate} /> : null}
       {error ? null : (
         <List.EmptyView
