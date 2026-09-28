@@ -1,6 +1,6 @@
 # Bitbucket Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-09-28
 
 - Cache the repository list and start fetching pull requests as repo pages arrive instead of waiting for the full workspace scan to finish
 - Fix "Search My Open Pull Requests": Bitbucket removed the workspace-wide "PRs for a user" endpoint it relied on, causing a 404; it now reuses the same per-repo scan as Search All Open Pull Requests, filtered to PRs you authored or are a requested reviewer on
