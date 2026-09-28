@@ -48,6 +48,10 @@ export interface Redis extends Service {
   redisId: string;
   applicationStatus: "idle";
 }
+export interface Libsql extends Service {
+  libsqlId: string;
+  applicationStatus: "idle";
+}
 export interface Compose extends Service {
   composeId: string;
   composeStatus: "idle" | "done";
@@ -61,6 +65,8 @@ export interface ServiceCollections {
   postgres: Postgres[];
   redis: Redis[];
   compose: Compose[];
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  libsql?: Libsql[];
 }
 
 export interface Environment extends ServiceCollections {

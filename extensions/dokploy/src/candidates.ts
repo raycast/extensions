@@ -6,11 +6,11 @@ import { isModernProject } from "./utils";
 
 type Kind = keyof Pick<
   ServiceCollections,
-  "applications" | "mariadb" | "mongo" | "mysql" | "postgres" | "redis" | "compose"
+  "applications" | "mariadb" | "mongo" | "mysql" | "postgres" | "redis" | "libsql" | "compose"
 >;
 /** `Candidate.deployType`'s own value space - the singular route-name form, not `Kind`'s plural
  * collection-key form. Shared with the AI tools, which filter/report on this. */
-export type DeployType = "application" | "mariadb" | "mongo" | "mysql" | "postgres" | "redis" | "compose";
+export type DeployType = "application" | "mariadb" | "mongo" | "mysql" | "postgres" | "redis" | "libsql" | "compose";
 // The deploy route is named after the singular kind ("application.deploy"), while the collection
 // on an environment/project is keyed by the plural ("applications") - both map from the same Kind.
 const KIND_ID_FIELDS: Record<Kind, string> = {
@@ -20,6 +20,7 @@ const KIND_ID_FIELDS: Record<Kind, string> = {
   mysql: "mysqlId",
   postgres: "postgresId",
   redis: "redisId",
+  libsql: "libsqlId",
   compose: "composeId",
 };
 const DEPLOY_TYPES: Record<Kind, DeployType> = {
@@ -29,6 +30,7 @@ const DEPLOY_TYPES: Record<Kind, DeployType> = {
   mysql: "mysql",
   postgres: "postgres",
   redis: "redis",
+  libsql: "libsql",
   compose: "compose",
 };
 const KIND_ICONS: Record<Kind, string> = {
@@ -38,6 +40,7 @@ const KIND_ICONS: Record<Kind, string> = {
   mysql: "mysql.svg",
   postgres: "postgres.svg",
   redis: "redis.svg",
+  libsql: "libsql.svg",
   compose: "circuit-board.svg",
 };
 // Same fields services.tsx reads per kind when building its own service status accessory.
@@ -48,6 +51,7 @@ const STATUS_FIELDS: Record<Kind, string> = {
   mysql: "applicationStatus",
   postgres: "applicationStatus",
   redis: "applicationStatus",
+  libsql: "applicationStatus",
   compose: "composeStatus",
 };
 
@@ -85,7 +89,7 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
   for (const project of projects) {
     for (const scope of scopesForProject(project)) {
       for (const kind of Object.keys(KIND_ID_FIELDS) as Kind[]) {
-        for (const service of scope.services[kind]) {
+        for (const service of scope.services[kind] ?? []) {
           const raw = service as unknown as Record<string, string>;
           const id = raw[KIND_ID_FIELDS[kind]];
           candidates.push({

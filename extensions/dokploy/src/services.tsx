@@ -90,6 +90,7 @@ export default function Services({
     ...scope.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
     ...scope.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
     ...scope.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
+    ...(scope.libsql ?? []).map((l) => ({ ...l, type: "libsql", id: l.libsqlId, status: l.applicationStatus })),
     ...scope.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
   ];
 
@@ -131,6 +132,10 @@ export default function Services({
         case "postgres":
           body = { postgresId: id };
           endpoint = "postgres.remove";
+          break;
+        case "libsql":
+          body = { libsqlId: id };
+          endpoint = "libsql.remove";
           break;
         case "redis":
           body = { redisId: id };
@@ -174,6 +179,7 @@ export default function Services({
     mysql: "mysql.svg",
     postgres: "postgres.svg",
     redis: "redis.svg",
+    libsql: "libsql.svg",
   };
 
   const totalServices = getTotalServices(scope);
