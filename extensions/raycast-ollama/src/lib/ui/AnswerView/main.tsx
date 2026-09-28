@@ -6,7 +6,6 @@ import {
   closeMainWindow,
   Detail,
   Icon,
-  List,
   PopToRootType,
   showToast,
   Toast,
@@ -256,14 +255,6 @@ export function AnswerView(props: props): React.JSX.Element {
       </Detail.Metadata>
     );
   }
-
-  if (thinking === "" && answer === "")
-    return (
-      <List isLoading={loading || IsLoadingModel} actions={!loading && !IsLoadingModel && <AnswerAction />}>
-        {""}
-        <List.EmptyView icon={Icon.CircleProgress} title="Loading Model" />
-      </List>
-    );
 
   return (
     <Detail

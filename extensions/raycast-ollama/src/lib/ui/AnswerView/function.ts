@@ -120,9 +120,6 @@ async function Inference(
   thinking: ThinkingEffort = false,
   keep_alive?: string,
 ): Promise<void> {
-  let thinkingStarted = false;
-  let responseStarted = false;
-
   const body: OllamaApiGenerateRequestBody = {
     model: model.tag.name,
     prompt: prompt,
@@ -134,14 +131,16 @@ async function Inference(
   };
   if (keep_alive) body.keep_alive = keep_alive;
 
-  await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
   try {
+    await showToast({ style: Toast.Style.Animated, title: "🔌 Connecting to Ollama..." });
+
     const emiter = await model.server.ollama.OllamaApiGenerate(body);
 
+    let thinkingStarted = false;
+    let responseStarted = false;
+
     const processEmiter = () => {
-      // Get Thinking Text
       emiter.on("thinking", async (data) => {
-        // showToast when thinking process started
         if (!thinkingStarted) {
           thinkingStarted = true;
           await showToast({
@@ -152,9 +151,7 @@ async function Inference(
         setThinking((prevState) => prevState + data);
       });
 
-      // Get Response Text
       emiter.on("data", async (data) => {
-        // showToast when  process started
         if (!responseStarted) {
           responseStarted = true;
           await showToast({
@@ -167,7 +164,6 @@ async function Inference(
     };
     processEmiter();
 
-    // Get Metadata
     await new Promise<void>((resolve) => {
       emiter.on("done", async (data) => {
         await showToast({ style: Toast.Style.Success, title: "👍 Done." });
