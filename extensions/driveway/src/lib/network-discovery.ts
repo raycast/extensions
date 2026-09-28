@@ -54,7 +54,8 @@ export function parseBrowseInstances(output: string): string[] {
 }
 
 // Matches "...can be reached at host.local.:445" in `dns-sd -L` output.
-// Untested against a live advertising device; check here if nothing appears.
+// Verified against a live advertiser: "SUMILIAN._smb._tcp.local. can be
+// reached at sumilian.local.:445 (interface 13)" resolves to sumilian.local.
 async function resolveInstanceHost(serviceType: string, instanceName: string): Promise<string | undefined> {
   const output = await runDnsSd(["-L", instanceName, serviceType, "local."], BONJOUR_RESOLVE_MS);
   const match = output.match(/can be reached at ([^\s:]+):/);

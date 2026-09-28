@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Keyboard } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Keyboard, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ServerEntry } from "./lib/share";
 import { unmountShare } from "./lib/mount";
@@ -6,12 +6,15 @@ import { getServers } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
 import { DiscoveredDriveItem, DiscoveredHostItem } from "./components/DiscoveredDrive";
+import { BrowseHostShares } from "./components/BrowseHostShares";
 
 export default function Command() {
   const [servers, setServers] = useState<ServerEntry[] | null>(null);
   const { mounted, volumes, refreshMounted, pollUntilMounted } = useMountStatus();
+  const { push } = useNavigation();
   const {
     smbShares,
+    smbHostsNeedingCredentials,
     webdavHosts,
     otherDevices,
     isLoading: discoveryLoading,
@@ -47,9 +50,17 @@ export default function Command() {
     );
   });
 
+  // SMB hosts macOS holds no credential for: listed so they can be browsed.
+  const expandedHostKeys = new Set([...smbByHost.keys()].map((h) => h.toLowerCase()));
+  const smbHostsToBrowse = smbHostsNeedingCredentials.filter(
+    (host) =>
+      !expandedHostKeys.has(host.toLowerCase()) &&
+      !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase() && (s.protocol ?? "smb") === "smb"),
+  );
+
   // Drop ping-only hosts already listed with a known protocol, or saved.
   const protocolKnownHosts = new Set(
-    [...smbByHost.keys(), ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
+    [...smbByHost.keys(), ...smbHostsToBrowse, ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
   );
   const otherDevicesNotSaved = otherDevices.filter(
     (host) =>
@@ -68,7 +79,11 @@ export default function Command() {
 
   const isLoading = servers === null || discoveryLoading;
   const nothingFound =
-    !isLoading && smbByHost.size === 0 && webdavNotSaved.length === 0 && otherDevicesNotSaved.length === 0;
+    !isLoading &&
+    smbByHost.size === 0 &&
+    smbHostsToBrowse.length === 0 &&
+    webdavNotSaved.length === 0 &&
+    otherDevicesNotSaved.length === 0;
 
   return (
     <List isLoading={isLoading} navigationTitle="Discover Devices">
@@ -107,6 +122,32 @@ export default function Command() {
           ))}
         </List.Section>
       ))}
+      {smbHostsToBrowse.length > 0 && (
+        <List.Section title="SMB Servers">
+          {smbHostsToBrowse.map((host) => (
+            <DiscoveredHostItem
+              key={host}
+              host={host}
+              protocol="smb"
+              subtitle="SMB — browse to sign in"
+              onServerAdded={load}
+              onRefresh={refreshDiscovery}
+              onBrowse={() =>
+                push(
+                  <BrowseHostShares
+                    server={{ id: host, host, protocol: "smb" }}
+                    mounted={mounted}
+                    volumes={volumes}
+                    onMountRequested={pollUntilMounted}
+                    onChanged={refreshMounted}
+                    onServerAdded={load}
+                  />,
+                )
+              }
+            />
+          ))}
+        </List.Section>
+      )}
       {webdavNotSaved.length > 0 && (
         <List.Section title="WebDAV">
           {webdavNotSaved.map((h) => (

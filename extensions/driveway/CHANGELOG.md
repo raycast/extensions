@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Save, mount, and unmount multiple network drives over **SMB** and **WebDAV**, each with an optional alias and username. A **WebDAV (insecure, no TLS)** option is available for a trusted local network whose server has no valid certificate.
-- **Network Discovery** finds servers on your local network through three independently toggled sources: Bonjour/mDNS browsing, an active subnet scan that confirms WebDAV with an RFC 4918 `OPTIONS` capability check rather than just an open port, and a ping sweep that lists any reachable device regardless of protocol. SMB hosts expand into their individual shares; WebDAV and presence-only hosts appear at the host level.
+- **Network Discovery** finds servers on your local network through three independently toggled sources: Bonjour/mDNS browsing, an active subnet scan that confirms WebDAV with an RFC 4918 `OPTIONS` capability check rather than just an open port, and a ping sweep that lists any reachable device regardless of protocol. An SMB host expands into its individual shares once macOS holds a credential for it, so no stored password is ever sent to a machine you haven't connected to; anything else appears at the host level with a Browse Shares action that asks for credentials for that host alone.
 - **Discover Devices** runs that discovery as its own command, with a Refresh action to re-scan on demand.
 - **Manage Drives** lists saved drives with live connection status and disk usage, plus **Browse Shares on This Host…** for one-time-credential share discovery on any saved SMB host.
 - **Mount All** and **Unmount All** act on every saved drive at once.

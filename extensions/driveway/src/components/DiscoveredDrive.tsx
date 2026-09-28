@@ -256,16 +256,28 @@ export function DiscoveredHostItem(props: {
   protocol?: Protocol;
   onServerAdded: () => void;
   onRefresh?: () => void;
+  // Supplied for an SMB host whose shares need credentials. The caller owns
+  // the browse view, so this component doesn't have to import it.
+  onBrowse?: () => void;
+  subtitle?: string;
 }) {
   const { push } = useNavigation();
 
   return (
     <List.Item
       title={props.host}
-      subtitle={props.protocol ? PROTOCOL_LABELS[props.protocol] : "Device found on network"}
+      subtitle={props.subtitle ?? (props.protocol ? PROTOCOL_LABELS[props.protocol] : "Device found on network")}
       icon={Icon.Globe}
       actions={
         <ActionPanel>
+          {props.onBrowse && (
+            <Action
+              title="Browse Shares on This Host…"
+              icon={Icon.MagnifyingGlass}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+              onAction={props.onBrowse}
+            />
+          )}
           <Action
             title="Add Drive"
             icon={Icon.Plus}

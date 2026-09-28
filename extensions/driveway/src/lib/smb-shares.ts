@@ -33,7 +33,9 @@ async function view(target: string, extraFlags: string[] = []): Promise<string> 
 
 // Enumeration is itself authenticated, so this throws on a bad host or
 // credentials.
-export async function listShares(host: string, user: string, password: string): Promise<string[]> {
+// Without a password this is Keychain-only: it lists shares for a host
+// macOS already holds a credential for, and fails otherwise.
+export async function listShares(host: string, user: string, password?: string): Promise<string[]> {
   // -N authenticates from the Keychain and prompts for nothing, so a host
   // that has been connected to before never needs a password on the command
   // line, where any process running as this user could read it while smbutil

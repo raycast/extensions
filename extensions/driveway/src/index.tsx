@@ -2,7 +2,6 @@ import {
   ActionPanel,
   Action,
   Alert,
-  Form,
   List,
   showToast,
   Toast,
@@ -15,15 +14,14 @@ import {
 } from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
-import { listShares } from "./lib/smb-shares";
-import { VolumeUsage } from "./lib/disk-usage";
 import { ServerForm, ServerFormInput } from "./components/ServerForm";
 import { buildShare, PROTOCOL_LABELS, ServerEntry } from "./lib/share";
-import { findMountedShare, unmountShare, MountLocation, UnreachableError, connectShare } from "./lib/mount";
+import { findMountedShare, unmountShare, UnreachableError, connectShare } from "./lib/mount";
 import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
 import { AddServer, DiscoveredDriveItem, DiscoveredHostItem, diskUsageAccessories } from "./components/DiscoveredDrive";
+import { BrowseHostShares } from "./components/BrowseHostShares";
 
 function EditServer({
   server,
@@ -56,112 +54,19 @@ function EditServer({
   );
 }
 
-// One-time credentials to browse any saved host's shares. Held in state only.
-function BrowseHostShares(props: {
-  server: ServerEntry;
-  mounted: MountLocation[];
-  volumes: VolumeUsage[];
-  onMountRequested: (entry: { host: string; path?: string }) => Promise<MountLocation | undefined>;
-  onChanged: () => void;
-  onServerAdded: () => void;
-}) {
-  const [credentials, setCredentials] = useState<{ user: string; password: string } | null>(null);
-  const [shares, setShares] = useState<string[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!credentials) return;
-
-    let cancelled = false;
-    setIsLoading(true);
-    setError(null);
-
-    listShares(props.server.host, credentials.user, credentials.password)
-      .then((result) => {
-        if (!cancelled) setShares(result);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message.replace(/\s+/g, " ") : "Failed to list shares");
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [credentials]);
-
-  async function unmountAllOnHost() {
-    const hostMounted = props.mounted.filter((m) => m.host.toLowerCase() === props.server.host.toLowerCase());
-    if (!hostMounted.length) return;
-    await Promise.all(
-      hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
-    );
-    props.onChanged();
-  }
-
-  if (!credentials) {
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Browse Shares"
-              icon={Icon.MagnifyingGlass}
-              onSubmit={(values: { user: string; password: string }) =>
-                setCredentials({ user: values.user.trim(), password: values.password })
-              }
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField id="user" title="Username" defaultValue={props.server.user} />
-        <Form.PasswordField id="password" title="Password" />
-      </Form>
-    );
-  }
-
-  return (
-    <List isLoading={isLoading} navigationTitle={`Shares on ${props.server.host}`}>
-      {error && (
-        <List.EmptyView
-          title="Failed to List Shares"
-          description={error}
-          icon={Icon.Warning}
-          actions={
-            <ActionPanel>
-              <Action title="Try Different Credentials" icon={Icon.Key} onAction={() => setCredentials(null)} />
-            </ActionPanel>
-          }
-        />
-      )}
-      {shares && shares.length === 0 && !error && <List.EmptyView title="No Shares Found" icon={Icon.HardDrive} />}
-      {(shares ?? []).map((vol) => (
-        <DiscoveredDriveItem
-          key={vol}
-          vol={vol}
-          host={props.server.host}
-          volumes={props.volumes}
-          mounted={props.mounted}
-          onChanged={props.onChanged}
-          onMountRequested={props.onMountRequested}
-          onUnmountAll={unmountAllOnHost}
-          onServerAdded={props.onServerAdded}
-        />
-      ))}
-    </List>
-  );
-}
-
 // selectId arrives from Add Drive when the drive was already saved: the form
 // closes and lands here with the existing entry selected.
 export default function Command(props: LaunchProps<{ launchContext: { selectId?: string } }>) {
   const [servers, setServers] = useState<ServerEntry[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | undefined>(props.launchContext?.selectId);
   const { mounted, volumes, refreshMounted, pollUntilMounted } = useMountStatus();
-  const { smbShares, webdavHosts, otherDevices, isLoading: discoveryLoading } = useNetworkDiscovery();
+  const {
+    smbShares,
+    smbHostsNeedingCredentials,
+    webdavHosts,
+    otherDevices,
+    isLoading: discoveryLoading,
+  } = useNetworkDiscovery();
   const { push } = useNavigation();
 
   async function load() {
@@ -313,9 +218,18 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       ),
   );
 
+  // SMB hosts macOS holds no credential for. Listed at host level rather
+  // than silently dropped, so they can be browsed with credentials on demand.
+  const expandedHostKeys = new Set([...smbByHost.keys()].map((h) => h.toLowerCase()));
+  const smbHostsToBrowse = smbHostsNeedingCredentials.filter(
+    (host) =>
+      !expandedHostKeys.has(host.toLowerCase()) &&
+      !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase() && (s.protocol ?? "smb") === "smb"),
+  );
+
   // Drop ping-only hosts already listed with a known protocol, or saved.
   const protocolKnownHosts = new Set(
-    [...smbByHost.keys(), ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
+    [...smbByHost.keys(), ...smbHostsToBrowse, ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
   );
   const otherDevicesNotSaved = otherDevices.filter(
     (host) =>
@@ -323,7 +237,8 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase()),
   );
 
-  const hasDiscovered = smbByHost.size > 0 || webdavNotSaved.length > 0 || otherDevicesNotSaved.length > 0;
+  const hasDiscovered =
+    smbByHost.size > 0 || smbHostsToBrowse.length > 0 || webdavNotSaved.length > 0 || otherDevicesNotSaved.length > 0;
   const isLoading = servers === null || discoveryLoading;
   const nothingToShow = (servers?.length ?? 0) === 0 && !hasDiscovered && !isLoading;
 
@@ -341,42 +256,6 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
           icon={Icon.HardDrive}
           actions={<ActionPanel>{addServerAction}</ActionPanel>}
         />
-      )}
-      {[...smbByHost.entries()].map(([host, vols]) => (
-        <List.Section key={host} title={`Discovered on ${host}`}>
-          {vols.map((vol) => (
-            <DiscoveredDriveItem
-              key={vol}
-              vol={vol}
-              host={host}
-              volumes={volumes}
-              mounted={mounted}
-              onChanged={refreshMounted}
-              onMountRequested={pollUntilMounted}
-              onUnmountAll={() => unmountAllOnHost(host)}
-              onServerAdded={load}
-            />
-          ))}
-        </List.Section>
-      ))}
-      {webdavNotSaved.length > 0 && (
-        <List.Section title="Discovered WebDAV Servers">
-          {webdavNotSaved.map((h) => (
-            <DiscoveredHostItem
-              key={`${h.host}-${h.protocol}`}
-              host={h.host}
-              protocol={h.protocol}
-              onServerAdded={load}
-            />
-          ))}
-        </List.Section>
-      )}
-      {otherDevicesNotSaved.length > 0 && (
-        <List.Section title="Other Devices on Network">
-          {otherDevicesNotSaved.map((host) => (
-            <DiscoveredHostItem key={host} host={host} onServerAdded={load} />
-          ))}
-        </List.Section>
       )}
       <List.Section title="Saved Drives">
         {(servers ?? []).map((server) => {
@@ -490,6 +369,67 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
           );
         })}
       </List.Section>
+      {[...smbByHost.entries()].map(([host, vols]) => (
+        <List.Section key={host} title={`Discovered on ${host}`}>
+          {vols.map((vol) => (
+            <DiscoveredDriveItem
+              key={vol}
+              vol={vol}
+              host={host}
+              volumes={volumes}
+              mounted={mounted}
+              onChanged={refreshMounted}
+              onMountRequested={pollUntilMounted}
+              onUnmountAll={() => unmountAllOnHost(host)}
+              onServerAdded={load}
+            />
+          ))}
+        </List.Section>
+      ))}
+      {smbHostsToBrowse.length > 0 && (
+        <List.Section title="Discovered SMB Servers">
+          {smbHostsToBrowse.map((host) => (
+            <DiscoveredHostItem
+              key={host}
+              host={host}
+              protocol="smb"
+              subtitle="SMB — browse to sign in"
+              onServerAdded={load}
+              onBrowse={() =>
+                push(
+                  <BrowseHostShares
+                    server={{ id: host, host, protocol: "smb" }}
+                    mounted={mounted}
+                    volumes={volumes}
+                    onMountRequested={pollUntilMounted}
+                    onChanged={refreshMounted}
+                    onServerAdded={load}
+                  />,
+                )
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {webdavNotSaved.length > 0 && (
+        <List.Section title="Discovered WebDAV Servers">
+          {webdavNotSaved.map((h) => (
+            <DiscoveredHostItem
+              key={`${h.host}-${h.protocol}`}
+              host={h.host}
+              protocol={h.protocol}
+              onServerAdded={load}
+            />
+          ))}
+        </List.Section>
+      )}
+      {otherDevicesNotSaved.length > 0 && (
+        <List.Section title="Other Devices on Network">
+          {otherDevicesNotSaved.map((host) => (
+            <DiscoveredHostItem key={host} host={host} onServerAdded={load} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
