@@ -109,6 +109,11 @@ Confirm that OmniWM is running, IPC is enabled, and this succeeds in Terminal:
 /opt/homebrew/bin/omniwmctl query focused-window --format json
 ```
 
+OmniWM updates can change the IPC protocol used by `omniwmctl`. Quit and reopen
+OmniWM after updating so the running app and bundled CLI use the same protocol.
+If the command still fails, re-enable **IPC** in OmniWM Settings and reinstall
+the CLI from OmniWM's status menu.
+
 ### A window remains floating
 
 Use **Reset**. It leaves native macOS full screen, returns a floating window to tiling, and separates it into a neutral standalone tile when necessary.

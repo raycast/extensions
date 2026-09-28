@@ -7,7 +7,7 @@
   "author": "imprisonedmind",
   "license": "MIT",
   "categories": [
-    "Productivity"
+    "System"
   ],
   "platforms": [
     "macOS"
@@ -146,7 +146,7 @@
     },
     {
       "name": "move-up",
-      "title": "Move up",
+      "title": "Move Up",
       "subtitle": "OmniWM",
       "description": "Move the focused window up inside its column",
       "keywords": [

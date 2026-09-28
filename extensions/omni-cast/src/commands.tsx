@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { runOmniWM } from "./omniwm";
+import { runOmniWM, runStandaloneTiledOmniWM } from "./omniwm";
 
 type Category =
   | "Raycast Style"
@@ -17,6 +17,7 @@ type CommandDefinition = {
   category: Category;
   steps: string[][];
   keywords?: string[];
+  run?: typeof runOmniWM;
 };
 
 const command = (
@@ -41,13 +42,16 @@ const fixedCommands: CommandDefinition[] = [
     "command",
     "toggle-container-full-primary-span",
   ),
-  sequence(
-    "Reset",
-    "Return the window to a neutral standalone tiled state",
-    "Raycast Style",
-    ["command", "set-container-primary-span", "50%"],
-    ["command", "reset-window-secondary-span"],
-  ),
+  {
+    ...sequence(
+      "Reset",
+      "Return the window to a neutral standalone tiled state",
+      "Raycast Style",
+      ["command", "set-container-primary-span", "50%"],
+      ["command", "reset-window-secondary-span"],
+    ),
+    run: runStandaloneTiledOmniWM,
+  },
   command(
     "Maximize Width",
     "Toggle full width for the focused column",
@@ -787,22 +791,6 @@ const fixedCommands: CommandDefinition[] = [
     "raise-all-floating-windows",
   ),
   command(
-    "Assign Scratchpad Window",
-    "Assign the focused window to the scratchpad",
-    "Utilities",
-    "command",
-    "scratchpad",
-    "assign",
-  ),
-  command(
-    "Toggle Scratchpad",
-    "Show or hide the scratchpad window",
-    "Utilities",
-    "command",
-    "scratchpad",
-    "toggle",
-  ),
-  command(
     "Toggle Quake Terminal",
     "Show or hide OmniWM's quake terminal",
     "Utilities",
@@ -855,7 +843,35 @@ const numberedWorkspaceCommands: CommandDefinition[] = Array.from(
   ),
 ]);
 
-const commands = [...fixedCommands, ...numberedWorkspaceCommands];
+const numberedScratchpadCommands: CommandDefinition[] = Array.from(
+  { length: 10 },
+  (_, index) => index + 1,
+).flatMap((scratchpad) => [
+  command(
+    `Assign Scratchpad ${scratchpad}`,
+    `Assign the focused window to scratchpad slot ${scratchpad}`,
+    "Utilities",
+    "command",
+    "scratchpad",
+    "assign",
+    String(scratchpad),
+  ),
+  command(
+    `Toggle Scratchpad ${scratchpad}`,
+    `Show or hide the windows in scratchpad slot ${scratchpad}`,
+    "Utilities",
+    "command",
+    "scratchpad",
+    "toggle",
+    String(scratchpad),
+  ),
+]);
+
+const commands = [
+  ...fixedCommands,
+  ...numberedWorkspaceCommands,
+  ...numberedScratchpadCommands,
+];
 const categories: Category[] = [
   "Raycast Style",
   "Navigation",
@@ -868,7 +884,7 @@ const categories: Category[] = [
 ];
 
 async function execute(item: CommandDefinition) {
-  await runOmniWM(item.title, item.steps);
+  await (item.run ?? runOmniWM)(item.title, item.steps);
 }
 
 export default function Commands() {

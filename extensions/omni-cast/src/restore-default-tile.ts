@@ -1,8 +1,7 @@
-import { runOmniWM } from "./omniwm";
+import { runStandaloneTiledOmniWM } from "./omniwm";
 
 export default () =>
-  runOmniWM("Reset", [
-    ["command", "expel-window-from-column"],
+  runStandaloneTiledOmniWM("Reset", [
     ["command", "set-container-primary-span", "50%"],
     ["command", "reset-window-secondary-span"],
   ]);
