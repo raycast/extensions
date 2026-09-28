@@ -14,8 +14,8 @@ const REQUEST_TIMEOUT_MS = 20_000;
 // The Threads API refuses user insights with a `since` before this date (2024-04-13).
 const INSIGHTS_EARLIEST_UNIX = 1712991600;
 
-// 100 pages × 100 replies ≈ 10k replies; past that a giveaway draw is stale anyway and
-// the loop must not spin on the rate limit.
+// 100 pages × 100 replies ≈ 10k replies. Past that the list is reported as truncated and
+// the giveaway refuses to draw, rather than spinning on the rate limit.
 const REPLY_PAGE_LIMIT = 100;
 
 /**
@@ -275,6 +275,17 @@ function nextCursor(paging?: Paging): string | undefined {
   return paging?.next ? paging.cursors?.after : undefined;
 }
 
+/**
+ * Whether `cursor` was already followed. A repeated cursor re-fetches the same page
+ * until the page cap, spending the rate limit and duplicating every item on it, so
+ * the caller stops and reports the list as incomplete — more may exist, unreachable.
+ */
+function isRepeatedCursor(cursor: string, seen: Set<string>): boolean {
+  if (seen.has(cursor)) return true;
+  seen.add(cursor);
+  return false;
+}
+
 interface PostsResponse {
   data?: Array<{
     id: string;
@@ -309,6 +320,7 @@ export async function getPosts(
   options: GetPostsOptions,
 ): Promise<{ posts: ThreadsPost[]; truncated: boolean }> {
   const collected: ThreadsPost[] = [];
+  const seenCursors = new Set<string>();
   let after: string | undefined;
   let truncated = false;
 
@@ -339,7 +351,7 @@ export async function getPosts(
     // the cap and only then is it a truncation.
     if (!after || items.length === 0) break;
 
-    if (collected.length >= options.maxPosts) {
+    if (collected.length >= options.maxPosts || isRepeatedCursor(after, seenCursors)) {
       truncated = true;
       break;
     }
@@ -464,7 +476,7 @@ interface ConversationResponse {
 
 export interface RepliesResult {
   replies: ThreadsReply[];
-  /** True when the page cap was hit, so the tail of the conversation is missing. */
+  /** True when paging stopped early — the cap, or a repeated cursor — so replies may be missing. */
   truncated: boolean;
   /**
    * Replies the API returned without a username — how it represents a private
@@ -479,6 +491,9 @@ export interface RepliesResult {
 /** Every reply, at every nesting depth, under one of the user's own posts. */
 export async function getReplies(accessToken: string, postId: string): Promise<RepliesResult> {
   const replies: ThreadsReply[] = [];
+  // Overlapping pages must not hand one reply a second chance in the draw.
+  const seenIds = new Set<string>();
+  const seenCursors = new Set<string>();
   let dropped = 0;
   let hidden = 0;
   let after: string | undefined;
@@ -493,6 +508,8 @@ export async function getReplies(accessToken: string, postId: string): Promise<R
     const data = await apiGet<ConversationResponse>(`/${postId}/conversation`, params, accessToken);
 
     for (const raw of data.data ?? []) {
+      if (seenIds.has(raw.id)) continue;
+      seenIds.add(raw.id);
       if (raw.hide_status && HIDDEN_REPLY_STATUSES.has(raw.hide_status)) {
         hidden++;
         continue;
@@ -512,6 +529,7 @@ export async function getReplies(accessToken: string, postId: string): Promise<R
 
     after = nextCursor(data.paging);
     if (!after) return { replies, truncated: false, dropped, hidden };
+    if (isRepeatedCursor(after, seenCursors)) break;
   }
 
   return { replies, truncated: true, dropped, hidden };

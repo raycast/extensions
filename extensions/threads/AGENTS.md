@@ -119,10 +119,14 @@ already did.
   error-only-when-empty check therefore never fires again once anything is cached, and the list
   renders stale numbers as current. Every command that caches must render `StaleDataSection`
   when `error && data` — not just the empty-state view.
-- **The giveaway gates its draw on `isLoading` and on `error`, not just on `data`.** The cache
-  hands back the previous reply list while it revalidates, _and keeps it after a failed
-  reload_, so a draw started in either state uses an entry pool that is already out of date.
-  That is the one thing a giveaway must never do.
+- **The giveaway gates its draw on `isLoading`, `error`, and `truncated`, not just on `data`.**
+  The cache hands back the previous reply list while it revalidates, _and keeps it after a
+  failed reload_, so a draw started in either state uses an entry pool that is already out of
+  date. That is the one thing a giveaway must never do. A `truncated` list is the same failure
+  from the other side: replies past where paging stopped would silently have no chance to win.
+- **Paging stops on a repeated cursor, and `getReplies` dedupes by reply ID.** A repeated cursor
+  re-fetches one page until the cap; with "one entry per account" off, each copy was another
+  entry in the draw. Both loops then report `truncated`, since more items may exist.
 - **Hidden replies are excluded from the draw.** `/conversation` returns them to the post's
   owner (`hide_status` `HIDDEN`, `COVERED`, `BLOCKED`, `RESTRICTED`), so without the filter a
   spam account the host hid could win. They are counted and reported like private replies.

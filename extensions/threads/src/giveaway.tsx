@@ -177,7 +177,7 @@ function GiveawayForm({ accessToken, post }: { accessToken: string; post: Thread
             `${countOf(data.replies.length, "reply")} from ${countOf(usernames.length, "account")}`,
             data.dropped > 0 ? `${countOf(data.dropped, "reply")} from private accounts excluded` : "",
             data.hidden > 0 ? `${countOf(data.hidden, "hidden or blocked reply")} excluded` : "",
-            data.truncated ? `only the first ${formatNumber(data.loaded)} were loaded` : "",
+            data.truncated ? `only the first ${formatNumber(data.loaded)} could be loaded, so no draw can be made` : "",
           ]
             .filter(Boolean)
             .join(" — ")
@@ -201,6 +201,15 @@ function GiveawayForm({ accessToken, post }: { accessToken: string; post: Thread
       await showError("The reply list is still loading. Draw again once it finishes.", {
         title: "Replies Not Ready",
       });
+      return;
+    }
+    // Replies past where paging stopped would have no chance to win, and nothing on the
+    // results would say so.
+    if (data.truncated) {
+      await showError(
+        `Only the first ${formatNumber(data.loaded)} replies could be loaded, so the rest would have no chance to win.`,
+        { title: "Reply List Incomplete" },
+      );
       return;
     }
 

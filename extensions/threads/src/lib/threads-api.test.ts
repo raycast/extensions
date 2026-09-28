@@ -127,6 +127,14 @@ describe("getPosts", () => {
     expect(posts).toHaveLength(3);
     expect(truncated).toBe(true);
   });
+
+  it("stops on a repeated cursor instead of paging to the cap", async () => {
+    const spy = mockFetch(() => jsonResponse(postPage(100, "REPOST_FACADE", "same")));
+    const { posts, truncated } = await getPosts("t", { maxPosts: 5 });
+    expect(posts).toHaveLength(0);
+    expect(truncated).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("insights parsing", () => {
@@ -289,6 +297,42 @@ describe("getReplies", () => {
     expect(replies.map((r) => r.username)).toEqual(["user0", "user1", "user6"]);
     expect({ hidden, dropped }).toEqual({ hidden: 4, dropped: 0 });
     expect(new URL(String(spy.mock.calls[0][0])).searchParams.get("fields")).toContain("hide_status");
+  });
+
+  it("stops on a repeated cursor and reports the list as incomplete", async () => {
+    const spy = mockFetch(() =>
+      jsonResponse({
+        data: [{ id: "1", username: "amy", timestamp: "2026-09-01T00:00:00+0000" }],
+        paging: { cursors: { after: "same" }, next: "https://next" },
+      }),
+    );
+    const { replies, truncated } = await getReplies("t", "post");
+    expect(replies.map((r) => r.username)).toEqual(["amy"]);
+    expect(truncated).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("counts a reply once when pages overlap", async () => {
+    mockFetch((url) =>
+      url.searchParams.get("after") === "p2"
+        ? jsonResponse({
+            data: [
+              { id: "2", username: "ben", timestamp: "2026-09-01T00:00:00+0000" },
+              { id: "3", text: "private", timestamp: "2026-09-01T00:00:00+0000" },
+            ],
+          })
+        : jsonResponse({
+            data: [
+              { id: "1", username: "amy", timestamp: "2026-09-01T00:00:00+0000" },
+              { id: "2", username: "ben", timestamp: "2026-09-01T00:00:00+0000" },
+              { id: "3", text: "private", timestamp: "2026-09-01T00:00:00+0000" },
+            ],
+            paging: { cursors: { after: "p2" }, next: "https://next" },
+          }),
+    );
+    const { replies, dropped } = await getReplies("t", "post");
+    expect(replies.map((r) => r.id)).toEqual(["1", "2"]);
+    expect(dropped).toBe(1);
   });
 });
 
