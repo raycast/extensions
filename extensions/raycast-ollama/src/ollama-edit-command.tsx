@@ -34,6 +34,7 @@ export default function Command(props: Props): React.JSX.Element {
     onData: () => {
       const loadSettings = async () => {
         const settings = await GetResolvedSettingsCommandAnswer(command);
+        SetCheckboxAdvanced(!!settings.model.main.keep_alive);
         setValue("server", settings.server);
         setValue("model", settings.model.main.tag);
         setValue(
@@ -120,11 +121,8 @@ export default function Command(props: Props): React.JSX.Element {
           <Form.Dropdown title="Model" {...itemProps.model}>
             {itemProps.server.value &&
               Model.get(itemProps.server.value)
-                ?.filter((model) => {
-                  if (!model.capabilities || model.capabilities.length < 1) return false;
-                  return true;
-                })
-                ?.sort()
+                ?.slice()
+                ?.sort((a, b) => a.name.localeCompare(b.name))
                 ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
           </Form.Dropdown>
           {hasCustomServer && (

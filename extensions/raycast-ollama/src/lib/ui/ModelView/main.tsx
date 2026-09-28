@@ -195,25 +195,28 @@ export function ModelView(): React.JSX.Element {
             />
             <Action title="No" icon={Icon.XMarkCircle} />
           </ActionPanel.Submenu>
-          <Action
-            title="Set as Default Model"
-            icon={Icon.Star}
-            onAction={async () => {
-              const defaults = await GetGlobalDefaultModel();
-              await SetGlobalDefaultModel({
-                ...defaults,
-                model: prop.model.detail.name,
-                server: prop.model.server.name,
-              });
-              await showToast({ style: Toast.Style.Success, title: "Default model updated" });
-            }}
-          />
           <Action.OpenInBrowser
             title="Models Library"
             icon={Icon.Globe}
             url="https://ollama.com/library"
             shortcut={Shortcut.OpenLibrary}
           />
+          <ActionPanel.Submenu title="Set as Default Model" icon={Icon.Star}>
+            <Action
+              title={`Yes, Use "${prop.model.detail.name}" as Default`}
+              icon={Icon.CheckCircle}
+              onAction={async () => {
+                const defaults = await GetGlobalDefaultModel();
+                await SetGlobalDefaultModel({
+                  ...defaults,
+                  model: prop.model.detail.name,
+                  server: prop.model.server.name,
+                });
+                await showToast({ style: Toast.Style.Success, title: "Default model updated" });
+              }}
+            />
+            <Action title="No" icon={Icon.XMarkCircle} />
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section title="Ollama Server">
           <Action title="Add Server" icon={Icon.NewDocument} onAction={() => setShowNewServerForm(true)} />

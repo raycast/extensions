@@ -4,7 +4,7 @@ import * as React from "react";
 import { GetModels, isThinkingModel } from "./lib/ui/function";
 import { ThinkingEffort } from "./lib/enum";
 import { ValidationKeepAlive, ValidationThinking } from "./lib/ui/valitadion";
-import { GetGlobalDefaultModel, SetGlobalDefaultModel } from "./lib/settings/settings";
+import { GetGlobalDefaultModel, SetGlobalDefaultModel, ClearGlobalDefaultModel } from "./lib/settings/settings";
 
 interface FormData {
   server: string;
@@ -69,6 +69,20 @@ export default function GlobalSettings(): React.JSX.Element {
   const ActionView = (
     <ActionPanel>
       <Action.SubmitForm onSubmit={handleSubmit} />
+      <Action
+        title="Reset to Preferences"
+        icon={Icon.ArrowCounterClockwise}
+        onAction={async () => {
+          await ClearGlobalDefaultModel();
+          const defaults = await GetGlobalDefaultModel();
+          setValue("server", defaults.server);
+          setValue("model", defaults.model);
+          setValue("thinking", defaults.thinking);
+          setValue("keep_alive", defaults.keepAlive);
+          SetCheckboxAdvanced(defaults.keepAlive !== "5m");
+          await showToast({ style: Toast.Style.Success, title: "Using Raycast Preferences" });
+        }}
+      />
       <Action title="Close" icon={Icon.Xmark} onAction={() => {}} />
     </ActionPanel>
   );
@@ -148,7 +162,7 @@ export default function GlobalSettings(): React.JSX.Element {
           />
           <Form.Description
             title="Tip"
-            text="Set these values in Raycast Preferences → Extensions → Ollama AI. The dropdowns above show available servers/models for reference."
+            text="Saving here overrides Raycast Preferences until you use Reset to Preferences. The dropdowns above show available servers/models."
           />
         </React.Fragment>
       )}

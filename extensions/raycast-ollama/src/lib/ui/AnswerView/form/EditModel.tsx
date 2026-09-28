@@ -37,6 +37,8 @@ export function EditModel(props: Props): React.JSX.Element {
       const loadSettings = async () => {
         const settings = await GetResolvedSettingsCommandAnswer(props.command);
         const hasCustom = !!settings.model.main.tag;
+        SetUseGlobalDefaults(!hasCustom);
+        SetCheckboxAdvanced(!!settings.model.main.keep_alive);
         setValue("useGlobalDefaults", !hasCustom);
         setValue("server", settings.server);
         setValue("model", settings.model.main.tag);
@@ -66,8 +68,8 @@ export function EditModel(props: Props): React.JSX.Element {
       keep_alive: "5m",
     },
     validation: {
-      server: () => (UseGlobalDefaults ? undefined : FormValidation.Required),
-      model: () => (UseGlobalDefaults ? undefined : FormValidation.Required),
+      server: UseGlobalDefaults ? undefined : FormValidation.Required,
+      model: UseGlobalDefaults ? undefined : FormValidation.Required,
       thinking: ValidationThinking,
       keep_alive: (_value) => ValidationKeepAlive(CheckboxAdvanced, _value),
     },

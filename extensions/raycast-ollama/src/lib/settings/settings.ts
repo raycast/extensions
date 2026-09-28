@@ -291,6 +291,13 @@ export async function SetGlobalDefaultModel(values: {
 }
 
 /**
+ * Clear saved Global Default Model Settings so Raycast Preferences apply again.
+ */
+export async function ClearGlobalDefaultModel(): Promise<void> {
+  await LocalStorage.removeItem(GLOBAL_DEFAULTS_KEY);
+}
+
+/**
  * Get Resolved Settings for Command Answer (with fallback to global defaults).
  * @param command - command type.
  * @returns Resolved Settings.
