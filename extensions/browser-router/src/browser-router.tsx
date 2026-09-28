@@ -77,10 +77,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
     checkFirstRunAndVersion();
   }, []);
 
-  async function handleDismissUpdateBanner() {
+  async function markUpdateBannerSeen() {
     await LocalStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, true);
     await setLastSeenVersion(CURRENT_VERSION);
     setShowUpdateBanner(false);
+  }
+
+  async function handleDismissUpdateBanner() {
+    await markUpdateBannerSeen();
     await showToast({
       style: Toast.Style.Success,
       title: "Announcement Dismissed",
@@ -436,7 +440,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
                 title="What's New (Changelog)"
                 icon={Icon.Stars}
                 shortcut={Keyboard.Shortcut.Common.Copy}
-                target={<ChangelogView onDismiss={handleDismissUpdateBanner} />}
+                target={<ChangelogView onDismiss={markUpdateBannerSeen} />}
               />
             </ActionPanel.Section>
 
@@ -505,8 +509,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
                 <Action.Push
                   title="View What's New"
                   icon={Icon.Eye}
-                  target={<ChangelogView onDismiss={handleDismissUpdateBanner} />}
-                  onPush={handleDismissUpdateBanner}
+                  target={<ChangelogView onDismiss={markUpdateBannerSeen} />}
+                  onPush={markUpdateBannerSeen}
                 />
                 <Action
                   title="Dismiss Announcement"

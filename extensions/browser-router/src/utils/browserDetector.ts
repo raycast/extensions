@@ -379,7 +379,7 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
 
     // Browsers with unified window/spaces architecture (e.g. Dia, Arc) do not support multi-window CLI profile targeting.
     // Emit a single clean top-level launcher entry for seamless URL and search routing.
-    if (config.singleProfile || config.id === "dia" || config.id === "arc") {
+    if (config.singleProfile || config.id === "dia") {
       const profileId = `${config.id}_default`;
       const customName = nicknames[profileId];
       profiles.push({

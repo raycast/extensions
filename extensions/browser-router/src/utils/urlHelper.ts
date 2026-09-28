@@ -45,9 +45,9 @@ export function isLikelyUrl(input: string): boolean {
 
   // Domain name without spaces (e.g. github.com, sub.domain.co.uk/docs)
   if (!/\s/.test(trimmed)) {
-    // Exclude standalone programming file names/keywords with extensions (e.g. react.js, node.js, python3.11)
-    const codeExtPattern =
-      /\.(js|ts|jsx|tsx|py|rs|cpp|c|cs|java|go|rb|php|css|html|json|md|txt|log|env|yml|yaml|xml|sh|bat|cmd|exe|dll)$/i;
+    // Exclude standalone programming file names/keywords with non-TLD file extensions (e.g. react.js, node.js)
+    // Note: real country-code TLDs like .sh, .py, .rs, and .md are preserved as valid domains.
+    const codeExtPattern = /\.(js|ts|jsx|tsx|cpp|cs|json|txt|log|env|yml|yaml|xml|bat|cmd|exe|dll)$/i;
     if (!trimmed.includes("/") && codeExtPattern.test(trimmed)) {
       return false;
     }
