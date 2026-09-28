@@ -227,23 +227,65 @@ async function GetLegacySettingsCommandChat(): Promise<Types.RaycastChat[]> {
   throw new Error("No saved chat");
 }
 
+const GLOBAL_DEFAULTS_KEY = "ollama_global_defaults";
+
 /**
- * Get Global Default Model Settings from Preferences.
+ * Get Global Default Model Settings from LocalStorage, falling back to Preferences.
  * @returns Global Default Model Settings.
  */
-export function GetGlobalDefaultModel(): {
+export async function GetGlobalDefaultModel(): Promise<{
   server: string;
   model: string;
   thinking: string;
   keepAlive: string;
-} {
+}> {
+  // Try LocalStorage first
+  const stored: string | undefined = await LocalStorage.getItem(GLOBAL_DEFAULTS_KEY);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === "object" && parsed !== null) {
+        const obj = parsed as Record<string, unknown>;
+        const server = obj.server != null ? String(obj.server) : "Local";
+        const model = obj.model != null ? String(obj.model) : "";
+        const thinking = obj.thinking != null ? String(obj.thinking) : "none";
+        const keepAlive = obj.keepAlive != null ? String(obj.keepAlive) : "5m";
+        return { server, model, thinking, keepAlive };
+      }
+    } catch {
+      // Fall through to preferences
+    }
+  }
+  // Fall back to Preferences
   const preferences = getPreferenceValues<Preferences>();
-  return {
-    server: preferences.ollamaDefaultServer || "Local",
-    model: preferences.ollamaDefaultModel || "",
-    thinking: preferences.ollamaDefaultThinking || "none",
-    keepAlive: preferences.ollamaDefaultKeepAlive || "5m",
+  const getStringPref = (val: string | number | boolean | undefined): string => {
+    if (typeof val === "string") return val;
+    if (typeof val === "number") return String(val);
+    if (typeof val === "boolean") return val ? "true" : "false";
+    return "";
   };
+  const serverPref = getStringPref(preferences.ollamaDefaultServer) || "Local";
+  const modelPref = getStringPref(preferences.ollamaDefaultModel) || "";
+  const thinkingPref = getStringPref(preferences.ollamaDefaultThinking) || "none";
+  const keepAlivePref = getStringPref(preferences.ollamaDefaultKeepAlive) || "5m";
+  return {
+    server: serverPref,
+    model: modelPref,
+    thinking: thinkingPref,
+    keepAlive: keepAlivePref,
+  };
+}
+
+/**
+ * Save Global Default Model Settings to LocalStorage.
+ */
+export async function SetGlobalDefaultModel(values: {
+  server: string;
+  model: string;
+  thinking: string;
+  keepAlive: string;
+}): Promise<void> {
+  await LocalStorage.setItem(GLOBAL_DEFAULTS_KEY, JSON.stringify(values));
 }
 
 /**
@@ -264,7 +306,7 @@ export async function GetResolvedSettingsCommandAnswer(
     // No custom settings, fall through to global defaults
   }
   // Fall back to global defaults
-  const globalDefaults = GetGlobalDefaultModel();
+  const globalDefaults = await GetGlobalDefaultModel();
   const server = await GetOllamaServerByName(globalDefaults.server);
   return {
     server: globalDefaults.server,

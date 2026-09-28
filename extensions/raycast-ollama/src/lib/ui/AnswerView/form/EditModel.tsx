@@ -54,7 +54,7 @@ export function EditModel(props: props): React.JSX.Element {
     },
   });
 
-  const globalDefaults = GetGlobalDefaultModel();
+  const { data: globalDefaults } = usePromise(GetGlobalDefaultModel, []);
 
   const [CheckboxAdvanced, SetCheckboxAdvanced]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
@@ -112,10 +112,12 @@ export function EditModel(props: props): React.JSX.Element {
     props.setShow(false);
   }
 
-  const hasCustomModel = itemProps.model.value && itemProps.model.value !== globalDefaults.model;
-  const hasCustomServer = itemProps.server.value && itemProps.server.value !== globalDefaults.server;
-  const hasCustomThinking = itemProps.thinking.value && itemProps.thinking.value !== globalDefaults.thinking;
-  const hasCustomKeepAlive = itemProps.keep_alive.value && itemProps.keep_alive.value !== globalDefaults.keepAlive;
+  const hasCustomModel = itemProps.model.value && globalDefaults && itemProps.model.value !== globalDefaults.model;
+  const hasCustomServer = itemProps.server.value && globalDefaults && itemProps.server.value !== globalDefaults.server;
+  const hasCustomThinking =
+    itemProps.thinking.value && globalDefaults && itemProps.thinking.value !== globalDefaults.thinking;
+  const hasCustomKeepAlive =
+    itemProps.keep_alive.value && globalDefaults && itemProps.keep_alive.value !== globalDefaults.keepAlive;
 
   return (
     <Form actions={ActionView} isLoading={IsLoadingModel}>
@@ -148,9 +150,11 @@ export function EditModel(props: props): React.JSX.Element {
                 ?.sort()
                 ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
           </Form.Dropdown>
-          {hasCustomServer && <Form.Description title="Global Default Server" text={globalDefaults.server} />}
+          {hasCustomServer && (
+            <Form.Description title="Global Default Server" text={globalDefaults?.server || "Local"} />
+          )}
           {hasCustomModel && (
-            <Form.Description title="Global Default Model" text={globalDefaults.model || "(not set)"} />
+            <Form.Description title="Global Default Model" text={globalDefaults?.model || "(not set)"} />
           )}
           <Form.Dropdown title="Thinking Effort" info={InfoThinking} {...itemProps.thinking}>
             <Form.Dropdown.Item title="None" value="none" key="none" />
@@ -168,9 +172,9 @@ export function EditModel(props: props): React.JSX.Element {
             <Form.Description
               title="Global Default Thinking"
               text={
-                globalDefaults.thinking === "none"
+                globalDefaults?.thinking === "none"
                   ? "None"
-                  : globalDefaults.thinking.charAt(0).toUpperCase() + globalDefaults.thinking.slice(1)
+                  : globalDefaults?.thinking?.charAt(0).toUpperCase() + globalDefaults?.thinking?.slice(1) || "None"
               }
             />
           )}
@@ -181,7 +185,9 @@ export function EditModel(props: props): React.JSX.Element {
             onChange={SetCheckboxAdvanced}
           />
           {CheckboxAdvanced && <Form.TextField title="Keep Alive" info={InfoKeepAlive} {...itemProps.keep_alive} />}
-          {hasCustomKeepAlive && <Form.Description title="Global Default Keep Alive" text={globalDefaults.keepAlive} />}
+          {hasCustomKeepAlive && (
+            <Form.Description title="Global Default Keep Alive" text={globalDefaults?.keepAlive || "5m"} />
+          )}
           {props.command === CommandAnswer.TRANSLATE && (
             <React.Fragment>
               <Form.Separator />

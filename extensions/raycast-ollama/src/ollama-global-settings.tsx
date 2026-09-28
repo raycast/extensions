@@ -4,6 +4,7 @@ import * as React from "react";
 import { GetModels, isThinkingModel } from "./lib/ui/function";
 import { ThinkingEffort } from "./lib/enum";
 import { ValidationKeepAlive, ValidationThinking } from "./lib/ui/valitadion";
+import { GetGlobalDefaultModel, SetGlobalDefaultModel } from "./lib/settings/settings";
 
 interface FormData {
   server: string;
@@ -23,7 +24,7 @@ export default function GlobalSettings(): React.JSX.Element {
     },
   });
 
-  const { handleSubmit, itemProps } = useForm<FormData>({
+  const { handleSubmit, itemProps, setValue } = useForm<FormData>({
     onSubmit(values) {
       Submit(values);
     },
@@ -40,6 +41,18 @@ export default function GlobalSettings(): React.JSX.Element {
     },
   });
 
+  // Load current global defaults
+  React.useEffect(() => {
+    const loadDefaults = async () => {
+      const defaults = await GetGlobalDefaultModel();
+      setValue("server", defaults.server);
+      setValue("model", defaults.model);
+      setValue("thinking", defaults.thinking);
+      setValue("keep_alive", defaults.keepAlive);
+    };
+    loadDefaults();
+  }, []);
+
   const [CheckboxAdvanced, SetCheckboxAdvanced]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
 
@@ -51,13 +64,16 @@ export default function GlobalSettings(): React.JSX.Element {
   );
 
   async function Submit(values: FormData): Promise<void> {
-    void values;
-    // Save to preferences - preferences are read-only at runtime, so we show a toast
-    // The user needs to set these in Raycast Preferences
+    await SetGlobalDefaultModel({
+      server: values.server,
+      model: values.model,
+      thinking: values.thinking,
+      keepAlive: CheckboxAdvanced ? values.keep_alive : "5m",
+    });
     await showToast({
       style: Toast.Style.Success,
-      title: "Global Defaults",
-      message: "Please set these values in Raycast Preferences → Extensions → Ollama AI",
+      title: "Global Defaults Saved",
+      message: "Defaults updated successfully",
     });
   }
 

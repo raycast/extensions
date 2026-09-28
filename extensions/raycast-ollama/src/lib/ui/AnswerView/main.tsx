@@ -176,7 +176,7 @@ export function AnswerView(props: props): React.JSX.Element {
     if (pasteFirst) outputActions.reverse();
 
     return (
-      <ActionPanel title="Actions">
+      <>
         {outputActions[0]}
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
@@ -212,7 +212,7 @@ export function AnswerView(props: props): React.JSX.Element {
           />
         )}
         {outputActions[1]}
-      </ActionPanel>
+      </>
     );
   }
 
@@ -287,7 +287,7 @@ export function AnswerView(props: props): React.JSX.Element {
 
   return (
     <Detail
-      markdown={`${resolvedSettings ? `**Model:** ${resolvedSettings.model} (${resolvedSettings.server})  \n**Thinking:** ${resolvedSettings.thinking === "none" ? "None" : resolvedSettings.thinking}  \n**Keep Alive:** ${resolvedSettings.keepAlive}  \n---\n` : ""}${imageView}
+      markdown={`${imageView}
 ${
   thinking !== ""
     ? `
