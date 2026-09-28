@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "author": "vedant_kalipatnapu",
   "license": "MIT",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "platforms": [
     "macOS"
@@ -101,7 +101,7 @@
     "typecheck": "tsc --noEmit && node --check assets/claude-statusline.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run build",
+    "check": "npm run build && npm run typecheck && npm run lint && npm run format:check",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {

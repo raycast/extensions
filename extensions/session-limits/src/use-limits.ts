@@ -11,11 +11,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadProviders } from "./core/load";
-import type { ProviderState, Settings } from "./core/types";
+import type { ProviderState } from "./core/types";
 import { connectClaudeBridge, disconnectClaudeBridge } from "./providers/claude-bridge";
 
 const cache = new Cache({ namespace: "session-limits-v3" });
-const settings = getPreferenceValues<Settings>();
+const settings = getPreferenceValues<Preferences>();
 const cacheKey = createHash("sha256")
   .update(JSON.stringify([settings, process.env.CODEX_HOME, process.env.CLAUDE_CONFIG_DIR]))
   .digest("hex");
@@ -61,10 +61,22 @@ export function useLimits() {
   const [isLoading, setLoading] = useState(true);
   const mounted = useRef(true);
   const inFlight = useRef<Promise<void> | null>(null);
+  const queuedRefresh = useRef<Promise<void> | null>(null);
   const actionInFlight = useRef(false);
 
   const fetchLimits = useCallback((force: boolean): Promise<void> => {
-    if (inFlight.current) return inFlight.current;
+    if (inFlight.current) {
+      if (!force) return inFlight.current;
+      // A connection change can invalidate the active request. Forced callers
+      // must await a new reading, sharing one queued refresh while it is pending.
+      if (!queuedRefresh.current) {
+        queuedRefresh.current = inFlight.current.then(() => {
+          queuedRefresh.current = null;
+          return fetchLimits(true);
+        });
+      }
+      return queuedRefresh.current;
+    }
     const task = (async () => {
       if (mounted.current) setLoading(true);
       try {

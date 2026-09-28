@@ -31,9 +31,3 @@ export interface ProviderState {
   snapshot?: ProviderSnapshot;
   error?: string;
 }
-
-export interface Settings extends ProviderOptions {
-  enableCodex: boolean;
-  enableClaude: boolean;
-  customProviderFile?: string;
-}

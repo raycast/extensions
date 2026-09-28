@@ -1,11 +1,11 @@
 import { fetchClaude } from "../providers/claude";
 import { fetchCodex } from "../providers/codex";
 import { fetchCustomProviders } from "../providers/custom";
-import type { ProviderSnapshot, ProviderState, Settings } from "./types";
+import type { ProviderOptions, ProviderSnapshot, ProviderState } from "./types";
 import { BridgeConflict, BridgeWaiting, ConnectionRequired } from "./errors";
 
 export async function loadProviders(
-  settings: Settings,
+  settings: Preferences & Pick<ProviderOptions, "claudeBridgeDirectory">,
   previous: ProviderState[] = [],
 ): Promise<ProviderState[]> {
   const tasks: Promise<ProviderState[]>[] = [];
