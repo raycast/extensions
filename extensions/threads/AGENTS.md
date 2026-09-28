@@ -8,8 +8,10 @@ absolute path would publish a machine path and stop resolving the moment it land
 ## What this is
 
 A Raycast extension for Threads. Most commands are thin `no-view` wrappers that build a
-threads.com URL and `open` it — there is no Threads API client here and no authentication.
-The one command that does real work is **Download Threads Media**.
+threads.com URL and `open` it. Three commands — **Analytics**, **Analytics Menu Bar**, and
+**Giveaway** — talk to the Threads Graph API with a long-lived access token the user pastes
+into the `accessToken` extension preference. **Download Threads Media** scrapes threads.com
+directly and needs no token.
 
 macOS and Windows per the manifest. Requires the Raycast app and `ray` on PATH.
 
@@ -32,6 +34,24 @@ Manifest-driven: every entry in `package.json` → `commands` maps 1:1 to a `src
 - **URL-builder commands** — `feed`, `activity`, `search`, `view-profile`, `view-insights`,
   `quick-thread`, `quick-follow`, `new-thread`. Each constructs a URL and opens it.
   `src/lib/post-intent.ts` and `src/lib/follow-intent.ts` are pure URL constructors.
+- **API commands** — `analytics`, `analytics-menu-bar`, `giveaway`. All read the token via
+  `getAccessToken()` in `src/lib/threads-auth.ts` and fetch with `useCachedPromise`.
+  - `src/lib/threads-api.ts` — the Graph API client (`/me`, `/me/threads`, `/{id}/insights`,
+    `/me/threads_insights`, `/{id}/conversation`). Mirrors the client in the
+    `threads-analytics` project. The token goes in the `Authorization` header, never the
+    query string, so it can't leak through a logged URL.
+  - `src/lib/threads-auth.ts` — Raycast side: reads the preference and turns API errors into
+    House Style toasts. **Logs under `[threads-auth]`** — never `[threads-api]`, which names a
+    module that must not log at all.
+  - `src/lib/giveaway.ts` — pure entry filtering and the draw (`randomInt`-backed shuffle,
+    one win per account across all prizes). Ported from `threads-analytics`.
+  - `src/lib/format.ts` — display helpers. The `Intl` formatters are module-level on purpose:
+    constructing them dominates the cost, and they run several times per list item per render.
+  - `src/components/token-views.tsx` — the three shared token states (missing, failed cold,
+    failed while cached data shows). Put new token copy here, not in a command.
+  - **Analytics shows raw API numbers only.** No engagement rates, averages, or deltas — that
+    is a deliberate scope decision, not an omission.
+
 - **`src/download-thread-media.tsx`** — resolves a post, then downloads each item.
   - `src/lib/threads-post.ts` — resolves a Threads **post** link (canonical, `?xmt`-decorated,
     or `/share/`) to `{ canonicalUrl, code, media[] }`. A profile or feed URL is rejected: the
@@ -40,6 +60,110 @@ Manifest-driven: every entry in `package.json` → `commands` maps 1:1 to a `src
     mapping, response validation, URL redaction. The file-destroying mistakes live here, which
     is why it is kept free of `@raycast/api` and covered by real-filesystem tests.
   - `src/lib/download-media.ts` — streams one media URL to disk with a progress toast.
+
+### The rate limit shapes every design choice here
+
+Threads reads share one per-hour, per-user budget across all three commands, and **there is no
+batch endpoint: one post's metrics is one request.** What that buys:
+
+- **Post metrics are lifetime totals, not period-scoped**, so `analytics.tsx` splits its two
+  loads: `loadAccount` is keyed on the period (3 calls), `loadPosts` is not (1 + `MAX_POSTS`).
+  Keying both on the period made every dropdown change re-run the whole fan-out — three period
+  switches could exhaust the hour. The period filters the already-loaded posts client-side.
+- **`MAX_POSTS` is 25**, not "everything in the period". Raising it raises the per-open cost
+  one-for-one.
+- **`getPosts` always requests `limit=100`**, never "however many posts are still missing".
+  Reposts are filtered _after_ the response arrives, so a page sized to the shortfall can come
+  back entirely reposts and make no progress: a repost-heavy account then paged through its
+  whole history five at a time, every 30 minutes, from the menu bar. `POST_PAGE_LIMIT` caps it.
+
+### Error classes are the contract, not decoration
+
+`apiGet` classifies every failure once, in `throwApiError`, because each class has a different
+fix and a different blast radius:
+
+| Class                    | Meta codes               | Means                                  |
+| ------------------------ | ------------------------ | -------------------------------------- |
+| `TokenExpiredError`      | 190                      | paste a new token                      |
+| `RateLimitedError`       | 4, 17, 32, 613, HTTP 429 | wait; every other call will fail too   |
+| `MissingPermissionError` | 10, 200–299              | re-mint with the scope it names        |
+| `ThreadsApiError`        | everything else          | ordinary failure; per-item only if 4xx |
+
+> 🚨 **Only a refusal may be swallowed: an unclassified, non-transient `ThreadsApiError` with a
+> 4xx status.** `nullIfRefused` is the one place that decides this, and every degrade-to-`null`
+> path goes through it. It is an allowlist on purpose. Swallowing everything made a throttled run
+> look like 100 posts that happen to have no insights — and `useCachedPromise` then stored that
+> as a _successful_ result, so the wrong numbers came back instantly on the next launch with no
+> error anywhere. Rethrowing only the three classes above still let a 5xx, a timeout, or an
+> offline `fetch` through the same way. `mapWithConcurrency` stops handing out work on the first
+> rejection for the same reason; all of this is covered by tests that were checked against the
+> reverted behaviour.
+>
+> **"Transient" is `is_transient: true` in the body, or code 2.** Meta sends those with HTTP 400
+> often enough that the status alone read a hiccup on its side as a verdict on the post. **Code 1
+> is transient only when flagged:** some objects answer code 1 on every request, and treating
+> that as transient let one such post fail the whole list on every launch. The tension is real —
+> transient errors must not be swallowed, but a permanent per-post error must not block the rest
+> — so don't widen `TRANSIENT_CODES` without evidence that the code is never per-object.
+
+A non-JSON body (an HTML gateway page) is kept as the message. It is the only diagnostic there
+is, and reporting a bare status threw away what the API actually said.
+
+`scopeForPath` maps the endpoint to the scope, so a token minted without
+`threads_manage_insights` gets the same actionable toast that a missing `threads_read_replies`
+already did.
+
+### Things that look like bugs but are load-bearing
+
+- **`useCachedPromise` keeps returning cached data after a failed revalidation.** An
+  error-only-when-empty check therefore never fires again once anything is cached, and the list
+  renders stale numbers as current. Every command that caches must render `StaleDataSection`
+  when `error && data` — not just the empty-state view.
+- **The giveaway gates its draw on `isLoading` and on `error`, not just on `data`.** The cache
+  hands back the previous reply list while it revalidates, _and keeps it after a failed
+  reload_, so a draw started in either state uses an entry pool that is already out of date.
+  That is the one thing a giveaway must never do.
+- **Hidden replies are excluded from the draw.** `/conversation` returns them to the post's
+  owner (`hide_status` `HIDDEN`, `COVERED`, `BLOCKED`, `RESTRICTED`), so without the filter a
+  spam account the host hid could win. They are counted and reported like private replies.
+- **`countMentions` ignores an `@` preceded by `[a-z0-9._]`**, which is what keeps an email
+  address from counting as a tag. The lookbehind is ASCII-only so that CJK text running straight
+  into a mention (`謝謝@amy`) still counts. Trailing dots are stripped as punctuation, and a
+  match that is only dots (`@...`) is dropped rather than counted as an empty handle.
+- **Every hook passes `onError`.** Without it `@raycast/utils` shows its own
+  "Failed to fetch latest data" toast — carrying neither Copy Error nor Open Preferences — on
+  top of ours. In the menu bar it fires on any non-background launch.
+- **The menu bar title falls back to no title, never to `–`.** Every `TITLE_METRICS` entry
+  returns `null` for both "no data yet" and "the API withheld this metric"; a dash pinned in
+  the menu bar reads as a broken command with nowhere to explain itself.
+- **`MENU_BAR_TITLE_MAX_CHARS` is 20, against the List's 80.** The menu bar is shared with
+  every other menu extra, and CJK text runs roughly twice as wide per character — the
+  `Latest Post` option appends three counts after the text, so the text itself has to be short.
+- **The menu bar cannot toast from a background refresh**, so an expired token also renders as
+  an item in the menu and swaps the icon. `launchCommand("analytics")` falls back to opening
+  threads.com/insights if the Analytics command is disabled.
+- **The token cannot be renewed in place.** Preferences are read-only from code, so the
+  `refresh_access_token` flow `threads-analytics` uses doesn't apply; the user pastes a new
+  token when the expired toast appears.
+- **Account insights degrade to `null`, per-post insights to `null`, private and hidden replies
+  to a count.** A failure confined to one section must not discard the sections that loaded —
+  the source project does the same. Anything that is not a refusal still propagates.
+- **The account section's period label comes from `AccountData.since`/`until`, not from the
+  dropdown.** `keepPreviousData` and the cache both hand back numbers fetched for another
+  period, and a label computed at render time put them under the wrong dates.
+- **"Posts in Period" carries a `+`, and the Posts section says "newest 25 only", only when the
+  period itself is incomplete** — that is, `getPosts` reported `truncated` _and_ the oldest
+  loaded post is still inside the period. `truncated` alone only means older posts exist.
+  "Posts in Period" is counted against `AccountData.since`, the same window as the numbers
+  beside it; the Posts section uses the dropdown's. The rule lives in `postsInWindow` in
+  `format.ts`, where it is tested — it was wrong twice while it lived untested in `analytics.tsx`.
+- **`getPosts` has no date cutoff.** Every caller wants the newest N, and Analytics filters by
+  period client-side. A `since` option existed for a while with no caller but its own tests.
+- **Prize quantity and Minimum Mentions go through `parseWholeNumber`, never `parseInt`.**
+  `parseInt("1O")` is `1`, so a typo meaning ten prizes quietly drew one winner.
+- **The daily views table labels each row with the API's `end_time` as-is**, as the source
+  project does. Meta doesn't document whether that is the start or the end of the day's bucket;
+  if the rows turn out a day late against threads.com/insights, subtract a day there.
 
 ## Resolving a post
 
@@ -67,7 +191,7 @@ yields media, keeping a media-less match as a fallback so a text post still reso
 
 > 🚨 **Only `<script>` contents are scanned, never the whole document.** `indexBraces` treats
 > every `"` as a JSON string delimiter, so one unbalanced quote earlier in the page — `5"
-> nails` in body text, or a quote inside an HTML comment — leaves the scanner stuck "inside a
+nails` in body text, or a quote inside an HTML comment — leaves the scanner stuck "inside a
 > string" and the payload's braces are never indexed at all. The post then fails with
 > "Couldn't read this post's media" for a reason that has nothing to do with the post. Real
 > pages survive only by luck: their ~340 quotes outside `<script>` happen to be even. Each
@@ -81,7 +205,7 @@ yields media, keeping a media-less match as a fallback so a text post still reso
 > caption full of `{` made resolution quadratic — 11s for 5,000 braces, versus 5ms now. A
 > fixture in `npm test` asserts it stays under 1.5s.
 >
-> A known ceiling remains: cost is quadratic in the number of *back-references*, measured at
+> A known ceiling remains: cost is quadratic in the number of _back-references_, measured at
 > 10 refs → 2ms, 500 → 27ms, 2000 → 272ms. Real pages carry 4–10. Cache parsed candidate
 > intervals if a page ever arrives with hundreds.
 
@@ -166,7 +290,7 @@ reservation behind, and the next attempt steps to `name (1)`.
 - **Redacts signed CDN URLs** with `redactUrl` in every log line and `copyContext` this code
   composes. Those `oh`/`oe` parameters are a working, time-limited grant of access, and the user
   pastes Copy Error into bug reports. **The guarantee stops at composed strings:** a caught
-  error is passed to `failToast` and stringified as-is, so a URL embedded in some *upstream*
+  error is passed to `failToast` and stringified as-is, so a URL embedded in some _upstream_
   error message would not be redacted. No such message has been observed — `statusText` is a
   short reason phrase — which is why this is documented rather than guarded.
 - **Refuses a concurrent run.** A no-view command can be relaunched while the first is still
@@ -216,18 +340,25 @@ parser — the payload never arrives.
 
 ## Logging and testability
 
-**`src/lib/threads-post.ts` and `src/lib/media-files.ts` must not import `@raycast/api`** —
+**`src/lib/threads-post.ts`, `src/lib/media-files.ts`, `src/lib/threads-api.ts`,
+`src/lib/giveaway.ts`, `src/lib/format.ts`, and `src/lib/constants.ts` must not import
+`@raycast/api`** —
 directly, or transitively through `@chrismessina/raycast-logger`, which calls
 `getPreferenceValues()`. `@raycast/api` is a runtime-resolved shim with no real entry point, so
 importing it makes a module unloadable outside Raycast and therefore untestable. This is the
 fleet convention; see the same note atop `raycast-attio/src/lib/export-format.ts` and
 `raycast-memory-store/src/lib/url.ts`.
 
-Those two modules therefore **report rather than log**: `resolveThreadsPost` puts its diagnosis
-in the value it returns and in its error messages, and `convertImage` returns
-`{ path, skipped? }`. The Raycast-side callers — `src/lib/download-media.ts` and
-`src/download-thread-media.tsx` — import `logger` and do the logging, prefixed with the module
-name (`[download-threads-media]`, `[download-media]`).
+Those modules therefore **report rather than log**: `resolveThreadsPost` puts its diagnosis in
+the value it returns and in its error messages, `convertImage` returns `{ path, skipped? }`,
+and `threads-api.ts` carries its diagnosis in the error class it throws. The Raycast-side
+callers import `logger` and do the logging, each prefixed with **its own** module name —
+`[download-threads-media]`, `[download-media]`, `[threads-auth]`, `[analytics]`,
+`[analytics-menu-bar]`, `[giveaway]`.
+
+> A log line prefixed with the name of a module that cannot log sends the next maintainer to a
+> file with no `logger` import, where the obvious "fix" is to add one — which makes the module
+> unloadable under vitest and breaks its own test file.
 
 `logger.log` is gated by the **Debug Logging** preference; `logger.error` always emits. The
 preference must be named exactly `verboseLogging` — that is what the logger reads — and its
@@ -276,6 +407,9 @@ Then `npm test` for the parser fixtures, and `npm run test:live` for the real po
 - **The top CHANGELOG entry's date is `{PR_MERGE_DATE}` — never a real date.** Raycast CI
   substitutes it on merge, so writing today's date ships a wrong one and has to be corrected by
   hand. Only already-merged entries below it carry real dates.
+- **A new CHANGELOG entry is added above the previous one, never in place of it.** An entry
+  carrying a real date has shipped; rewriting or replacing it erases release history. The
+  CHANGELOG diff for a new release should be additions only.
 - **House Style applies.** Every `Toast.Style.Failure` carries a Copy Error action — use
   `showError` / `failToast` from `@chrismessina/raycast-kit` rather than hand-rolling, and
   `countOf` over `${n} items`.
