@@ -70,27 +70,42 @@ export async function connectShare(share: Share): Promise<void> {
   await mountShare(share);
 }
 
+// `mount` can't tell https WebDAV from http WebDAV: both report the same
+// fstype. So mounts are matched by family, not by the full protocol.
+export type MountFamily = "smb" | "webdav";
+
+export function mountFamily(protocol: Protocol = "smb"): MountFamily {
+  return protocol === "smb" ? "smb" : "webdav";
+}
+
 export type MountLocation = {
   host: string;
   path: string;
   mountPoint: string;
+  family: MountFamily;
 };
 
 export type ShareLocation = {
   host: string;
   // Undefined for a browse-only entry; never matches a mounted share.
   path?: string;
+  // Absent on older entries; treated as "smb", as everywhere else.
+  protocol?: Protocol;
 };
 
-function normalize(host: string, path: string | undefined): { host: string; path: string } {
+// Mirrors serverIdentity in lib/share.ts: SMB share names are
+// case-insensitive, WebDAV URL paths usually are not. The two have to agree,
+// or a drive can count as distinct when saved yet match another's mount.
+function normalize(host: string, path: string | undefined, family: MountFamily): { host: string; path: string } {
+  const segments = (path ?? "")
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .join("/");
+
   return {
     host: host.trim().toLowerCase(),
-    path: (path ?? "")
-      .split("/")
-      .map((segment) => segment.trim())
-      .filter(Boolean)
-      .join("/")
-      .toLowerCase(),
+    path: family === "smb" ? segments.toLowerCase() : segments,
   };
 }
 
@@ -114,7 +129,8 @@ export function parseMountOutput(stdout: string): MountLocation[] {
 
     const [, source, mountPoint, options] = match;
     const optionList = options.split(",").map((option) => option.trim());
-    if (!optionList.some((option) => MOUNT_FS_TYPES.has(option))) continue;
+    const fsType = optionList.find((option) => MOUNT_FS_TYPES.has(option));
+    if (!fsType) continue;
 
     // WebDAV sources are full URLs; strip any scheme, then the "//".
     const withoutScheme = source.replace(/^[a-z][a-z0-9+.-]*:/i, "");
@@ -125,7 +141,12 @@ export function parseMountOutput(stdout: string): MountLocation[] {
     const [host, ...pathParts] = afterAuth.split("/");
     if (!host) continue;
 
-    shares.push({ host, path: pathParts.join("/"), mountPoint });
+    shares.push({
+      host,
+      path: pathParts.join("/"),
+      mountPoint,
+      family: fsType === MOUNT_FS_TYPE.smb ? "smb" : "webdav",
+    });
   }
 
   return shares;
@@ -137,9 +158,11 @@ export async function listMountedShares(): Promise<MountLocation[]> {
 }
 
 export function findMountedShare(mounted: MountLocation[], entry: ShareLocation): MountLocation | undefined {
-  const target = normalize(entry.host, entry.path);
+  const family = mountFamily(entry.protocol);
+  const target = normalize(entry.host, entry.path, family);
   return mounted.find((share) => {
-    const candidate = normalize(share.host, share.path);
+    if (share.family !== family) return false;
+    const candidate = normalize(share.host, share.path, family);
     return candidate.host === target.host && candidate.path === target.path;
   });
 }

@@ -96,7 +96,9 @@ function BrowseHostShares(props: {
   async function unmountAllOnHost() {
     const hostMounted = props.mounted.filter((m) => m.host.toLowerCase() === props.server.host.toLowerCase());
     if (!hostMounted.length) return;
-    await Promise.all(hostMounted.map((m) => unmountShare({ host: m.host, path: m.path }).catch(() => undefined)));
+    await Promise.all(
+      hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
+    );
     props.onChanged();
   }
 
@@ -174,7 +176,9 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   async function unmountAllOnHost(host: string) {
     const hostMounted = mounted.filter((m) => m.host.toLowerCase() === host.toLowerCase());
     if (!hostMounted.length) return;
-    await Promise.all(hostMounted.map((m) => unmountShare({ host: m.host, path: m.path }).catch(() => undefined)));
+    await Promise.all(
+      hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
+    );
     await refreshMounted();
   }
 

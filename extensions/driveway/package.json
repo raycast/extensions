@@ -62,11 +62,26 @@
           "title": "Interval",
           "description": "How often to retry drives with Auto-Reconnect enabled. This command checks every 5 minutes, but only does anything once this much time has actually passed. To turn the command off entirely, use the Background Refresh toggle above instead — this only sets cadence.",
           "data": [
-            { "title": "Every 5 minutes", "value": "5" },
-            { "title": "Every 10 minutes", "value": "10" },
-            { "title": "Every 15 minutes", "value": "15" },
-            { "title": "Every 30 minutes", "value": "30" },
-            { "title": "Every hour", "value": "60" }
+            {
+              "title": "Every 5 minutes",
+              "value": "5"
+            },
+            {
+              "title": "Every 10 minutes",
+              "value": "10"
+            },
+            {
+              "title": "Every 15 minutes",
+              "value": "15"
+            },
+            {
+              "title": "Every 30 minutes",
+              "value": "30"
+            },
+            {
+              "title": "Every hour",
+              "value": "60"
+            }
           ],
           "default": "10",
           "required": false
@@ -86,10 +101,22 @@
           "title": "Refresh Interval",
           "description": "How often status re-checks itself in the background. Opening the menu always shows the last-known status instantly, then refreshes for real only once this much time has passed. To stop background refresh entirely (rely on the menu's own Refresh item only), use the Background Refresh toggle above instead — this only sets cadence.",
           "data": [
-            { "title": "Every 1 minute", "value": "1" },
-            { "title": "Every 5 minutes", "value": "5" },
-            { "title": "Every 10 minutes", "value": "10" },
-            { "title": "Every 30 minutes", "value": "30" }
+            {
+              "title": "Every 1 minute",
+              "value": "1"
+            },
+            {
+              "title": "Every 5 minutes",
+              "value": "5"
+            },
+            {
+              "title": "Every 10 minutes",
+              "value": "10"
+            },
+            {
+              "title": "Every 30 minutes",
+              "value": "30"
+            }
           ],
           "default": "1",
           "required": false
@@ -151,8 +178,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.0",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/api": "^1.100.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.0",

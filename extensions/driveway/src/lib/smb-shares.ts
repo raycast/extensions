@@ -22,13 +22,33 @@ function parseShares(output: string): string[] {
 
 const SMBUTIL_TIMEOUT_MS = 10_000;
 
-// Enumeration is itself authenticated, so this throws on a bad host or
-// credentials. execFile avoids shell quoting, though the password is still
-// visible to `ps`. The timeout is required: without a TTY, smbutil can
-// block forever on a password prompt that never appears.
-export async function listShares(host: string, user: string, password: string): Promise<string[]> {
-  const { stdout } = await execFileAsync("/usr/bin/smbutil", ["-v", "view", "-f", `//${user}:${password}@${host}`], {
+// The timeout is required: without a TTY, smbutil can block forever on a
+// password prompt that never appears.
+async function view(target: string, extraFlags: string[] = []): Promise<string> {
+  const { stdout } = await execFileAsync("/usr/bin/smbutil", ["-v", "view", ...extraFlags, "-f", target], {
     timeout: SMBUTIL_TIMEOUT_MS,
   });
-  return parseShares(stdout);
+  return stdout;
+}
+
+// Enumeration is itself authenticated, so this throws on a bad host or
+// credentials.
+export async function listShares(host: string, user: string, password: string): Promise<string[]> {
+  // -N authenticates from the Keychain and prompts for nothing, so a host
+  // that has been connected to before never needs a password on the command
+  // line, where any process running as this user could read it while smbutil
+  // runs. The username is pinned either way, so this cannot silently
+  // authenticate as somebody else.
+  try {
+    return parseShares(await view(user ? `//${user}@${host}` : `//${host}`, ["-N"]));
+  } catch (error) {
+    if (!password) throw error;
+  }
+
+  // No usable Keychain credential, so the password has to be supplied.
+  // smbutil offers no way to pass one off the command line: `man smbutil`
+  // lists only -A, -N, -G, -g, -a and -f for view, with the password inside
+  // the URL. execFile at least avoids a shell, so it is never logged to
+  // history or re-parsed.
+  return parseShares(await view(`//${user}:${password}@${host}`));
 }
