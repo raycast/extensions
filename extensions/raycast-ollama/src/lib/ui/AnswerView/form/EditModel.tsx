@@ -6,6 +6,7 @@ import {
   GetOllamaServerByName,
   SetSettingsCommandAnswer,
   GetResolvedSettingsCommandAnswer,
+  HasCustomCommandSettings,
   GetGlobalDefaultModel,
 } from "../../../settings/settings";
 import { SettingsCommandAnswer } from "../../../settings/types";
@@ -36,7 +37,7 @@ export function EditModel(props: Props): React.JSX.Element {
     onData: () => {
       const loadSettings = async () => {
         const settings = await GetResolvedSettingsCommandAnswer(props.command);
-        const hasCustom = !!settings.model.main.tag;
+        const hasCustom = await HasCustomCommandSettings(props.command);
         SetUseGlobalDefaults(!hasCustom);
         SetCheckboxAdvanced(!!settings.model.main.keep_alive);
         setValue("useGlobalDefaults", !hasCustom);
