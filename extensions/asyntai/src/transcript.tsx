@@ -16,9 +16,12 @@ export default function Transcript(props: { sessionId: string; title: string }) 
     const who = m.role === "user" ? "Visitor" : "Assistant";
     return `**${who}**\n\n${safeMarkdown(m.content || "")}`;
   });
-  let markdown = `# ${props.title}\n\n${lines.join("\n\n---\n\n") || "_No messages._"}`;
+  // The title can be a visitor's email, phone or ticket subject, so it is
+  // escaped like the messages, and kept on one line so it stays a heading.
+  const heading = `# ${safeMarkdown(props.title.replace(/\s+/g, " "))}`;
+  let markdown = `${heading}\n\n${lines.join("\n\n---\n\n") || "_No messages._"}`;
   if (error) {
-    markdown = `# ${props.title}\n\n**Asyntai did not answer.**\n\n${safeMarkdown(error.message)}`;
+    markdown = `${heading}\n\n**Asyntai did not answer.**\n\n${safeMarkdown(error.message)}`;
   } else if (isLoading && !messages.length) {
     markdown = "";
   }
