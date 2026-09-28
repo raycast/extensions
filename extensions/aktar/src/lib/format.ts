@@ -47,12 +47,22 @@ export function formatLink(url: string, filename: string, format: OutputFormat) 
   const image = isImageName(filename);
   switch (format) {
     case "markdown":
-      return image ? `![](${url})` : `[${filename}](${url})`;
+      return image ? `![](${url})` : `[${escapeMarkdown(filename)}](${url})`;
     case "html":
-      return image ? `<img src="${url}" alt="">` : `<a href="${url}">${filename}</a>`;
+      return image
+        ? `<img src="${escapeHTML(url)}" alt="">`
+        : `<a href="${escapeHTML(url)}">${escapeHTML(filename)}</a>`;
     default:
       return url;
   }
+}
+
+function escapeMarkdown(text: string) {
+  return text.replace(/[\\[\]]/g, "\\$&");
+}
+
+function escapeHTML(text: string) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 export const FORMAT_TITLES: Record<OutputFormat, string> = {

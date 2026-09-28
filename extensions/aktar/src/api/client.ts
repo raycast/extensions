@@ -143,8 +143,8 @@ async function request<T>(method: string, route: string, options: RequestOptions
       if (error.code === "ECONNREFUSED") {
         reject(new AktarError("not-running", "Aktar isn't running, or its local API is turned off."));
       } else if (error.code === "EPIPE" || error.code === "ECONNRESET") {
-        // Aktar closes the connection before reading the body when it rejects a request.
-        reject(new AktarError("unauthorized", "Aktar closed the connection. Try connecting again."));
+        // Aktar closes the connection early when it rejects a request, or when it quits mid-upload.
+        reject(new AktarError("request-failed", "Aktar closed the connection before the request finished."));
       } else {
         reject(new AktarError("request-failed", error.message));
       }
