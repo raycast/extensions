@@ -4,7 +4,7 @@
 
 - Add `Open Agents Window` command: opens Agents Window for VSCode, opens Antigravity 2.0 for Antigravity IDE
 - Add support for `Antigravity IDE` (replaces Antigravity)
-- Add `Open in new tab` preference: opens the folder
+- Add `Open in new tab` preference: opens the folder in a new terminal tab
 - Use `wt.exe` (for Windows Terminal) so the default profile is used instead of CMD every time
 - Optimize Git branch fetching with caching
 - Bump all dependencies to the latest
