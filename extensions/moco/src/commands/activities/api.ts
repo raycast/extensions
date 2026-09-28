@@ -1,16 +1,12 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import axios from "axios";
+import { showToast, Toast } from "@raycast/api";
+import { api } from "../../utils/api";
 import { z } from "zod";
 import { Activity } from "./types";
 import { Project } from "../projects/types";
-import { Preferences } from "../../types";
 
 import { Task } from "../tasks/types";
 import { Customer } from "../customers/types";
 import { User } from "../user/types";
-
-const preferences = getPreferenceValues<Preferences>();
-axios.defaults.baseURL = `https://${preferences.url_prefix}.mocoapp.com/api/v1`;
 
 const activitySchema = z.array(
   z.object({
@@ -61,17 +57,12 @@ export const fetchActivities = async (
 
   const from_date = new Date(new Date().getTime() - lookbackDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-  const { data } = await axios.get(`/activities`, {
+  const { data } = await api.get(`/activities`, {
     params: {
       project_id: projectID,
       user_id: userID,
       from: from_date,
       to: today,
-    },
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Token token=${preferences.apikey}`,
     },
   });
 
@@ -111,28 +102,14 @@ export const startActivity = async (values: any): Promise<boolean | void> => {
     style: Toast.Style.Animated,
     title: `${verb.charAt(0).toUpperCase() + verb.slice(1)}ing activity...`,
   });
-  axios.interceptors.request.use((request) => {
-    console.log("Starting Request", JSON.stringify(request, null, 2));
-    return request;
-  });
-  const result = await axios
-    .post(
-      `/activities`,
-      {
-        date: values.date,
-        description: values.description,
-        hours: values.hours,
-        project_id: values.projectID,
-        task_id: values.taskID,
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Token token=${preferences.apikey}`,
-        },
-      },
-    )
+  const result = await api
+    .post(`/activities`, {
+      date: values.date,
+      description: values.description,
+      hours: values.hours,
+      project_id: values.projectID,
+      task_id: values.taskID,
+    })
     .then((response) => {
       if (response.status == 200) {
         toast.style = Toast.Style.Success;
@@ -162,18 +139,8 @@ export const toggleActivity = async (activityID: number, startActivity: boolean)
     title: `${startActivity ? "Starting" : "Stopping"} activity...`,
   });
 
-  const result = await axios
-    .patch(
-      `/activities/${activityID}/${startActivity ? "start_timer" : "stop_timer"}`,
-      {},
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Token token=${preferences.apikey}`,
-        },
-      },
-    )
+  const result = await api
+    .patch(`/activities/${activityID}/${startActivity ? "start_timer" : "stop_timer"}`, {})
     .then((response) => {
       if (response.status == 200) {
         toast.style = Toast.Style.Success;
@@ -203,22 +170,12 @@ export const editActivity = async (values: any, activityID: number): Promise<boo
     title: "Updating activity...",
   });
 
-  const result = await axios
-    .put(
-      `/activities/${activityID}`,
-      {
-        date: values.date,
-        description: values.description,
-        hours: values.hours,
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Token token=${preferences.apikey}`,
-        },
-      },
-    )
+  const result = await api
+    .put(`/activities/${activityID}`, {
+      date: values.date,
+      description: values.description,
+      hours: values.hours,
+    })
     .then((response) => {
       if (response.status == 200) {
         toast.style = Toast.Style.Success;
@@ -248,14 +205,8 @@ export const deleteActivity = async (activityID: number): Promise<boolean | void
     title: "Deleting activity...",
   });
 
-  const result = await axios
-    .delete(`/activities/${activityID}`, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        authorization: `Token token=${preferences.apikey}`,
-      },
-    })
+  const result = await api
+    .delete(`/activities/${activityID}`)
     .then((response) => {
       if (response.status == 204) {
         toast.style = Toast.Style.Success;
