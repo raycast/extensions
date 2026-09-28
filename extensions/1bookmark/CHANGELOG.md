@@ -1,6 +1,6 @@
 # 1Bookmark Changelog
 
-## [Raycast 1 Compatibility] - {PR_MERGE_DATE}
+## [Raycast 1 Compatibility] - 2026-09-28
 
 - 0.15.1
 - 🐛 The extension can be updated on Raycast 1 again. Since 0.14.0 it required a newer Raycast API than Raycast 1 provides, so Raycast 1 stayed on 0.13.0.
