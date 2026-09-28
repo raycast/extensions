@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Use GitHub Copilot models in Raycast AI] - {PR_MERGE_DATE}
+## [Use GitHub Copilot models in Raycast AI] - 2026-09-28
 
 - Provide your GitHub Copilot models to Raycast AI Chat, Quick AI and AI Commands (requires Raycast Pro)
 - Only list models your Copilot plan lets you pick, plus Copilot's Auto model
