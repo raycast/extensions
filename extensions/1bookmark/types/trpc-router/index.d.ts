@@ -401,6 +401,7 @@ declare const appRouter: _trpc_server.TRPCBuiltRouter<{
                 name: string;
                 tags: string[];
                 url: string;
+                source?: "web" | "desktop" | "mobile" | undefined;
                 deviceId?: string | undefined;
                 useOneTimePass?: boolean | undefined;
             };
@@ -1243,6 +1244,16 @@ declare const appRouter: _trpc_server.TRPCBuiltRouter<{
             output: void;
             meta: object;
         }>;
+        createAppEvent: _trpc_server.TRPCMutationProcedure<{
+            input: {
+                type: "DESKTOP_APP_OPEN" | "DESKTOP_QUICK_SEARCH_OPEN" | "DESKTOP_QUICK_ADD_OPEN" | "MOBILE_APP_OPEN" | "MOBILE_SHARE_ADD_OPEN";
+                data?: Record<string, string> | undefined;
+            };
+            output: {
+                recorded: boolean;
+            };
+            meta: object;
+        }>;
     }>>;
     login: _trpc_server.TRPCBuiltRouter<{
         ctx: {
@@ -1283,7 +1294,9 @@ declare const appRouter: _trpc_server.TRPCBuiltRouter<{
         generateMagicLink: _trpc_server.TRPCMutationProcedure<{
             input: {
                 email: string;
-                source?: "mobile" | "web" | "desktop" | undefined;
+                next?: unknown;
+                source?: "web" | "desktop" | "mobile" | undefined;
+                extensionName?: unknown;
             };
             output: void;
             meta: object;
