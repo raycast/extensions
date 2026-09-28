@@ -33,7 +33,6 @@
             "placeholder": "/usr/local/bin/keyden"
         }
     ],
-    "tools": [],
     "dependencies": {
         "@raycast/api": "^1.104.20",
         "@raycast/utils": "^2.2.7"

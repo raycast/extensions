@@ -16,7 +16,7 @@ export type TotpEntry = {
     id: string;
     issuer: string;
     account: string;
-    code: string;
+    code?: string;
     isPinned: boolean;
     expiresAt: number;
 };
@@ -83,40 +83,42 @@ export function parseKeydenList(output: string, fetchedAt = Date.now()): TotpEnt
         .split(/\r?\n/)
         .map((line) => line.trim())
         .filter(Boolean)
-        .map((line, index) => {
+        .flatMap((line, index) => {
             const isPinned = line.startsWith("📌");
             const normalizedLine = isPinned ? line.slice("📌".length).trimStart() : line;
             const resultSeparator = normalizedLine.lastIndexOf(" -> ");
 
             if (resultSeparator === -1) {
-                throw new Error(`Unable to parse Keyden output on line ${index + 1}.`);
+                return [];
             }
 
             const identity = normalizedLine.slice(0, resultSeparator).trim();
             const result = normalizedLine.slice(resultSeparator + " -> ".length).trim();
-            const resultMatch = result.match(/^(\d+)\s+\((\d+)s\)$/);
+            const resultMatch = result.match(/^(.+)\s+\((\d+)s\)$/);
             const identitySeparator = identity.indexOf(":");
 
             if (!resultMatch || !identity) {
-                throw new Error(`Unable to parse Keyden output on line ${index + 1}.`);
+                return [];
             }
 
             const issuer = (identitySeparator === -1 ? identity : identity.slice(0, identitySeparator)).trim();
             const account = identitySeparator === -1 ? "" : identity.slice(identitySeparator + 1).trim();
-            const [, code, remainingSeconds] = resultMatch;
+            const [, rawCode, remainingSeconds] = resultMatch;
 
-            if (!issuer || (identitySeparator !== -1 && !account)) {
-                throw new Error(`Keyden returned an incomplete account on line ${index + 1}.`);
+            if (!issuer && !account) {
+                return [];
             }
 
-            return {
-                id: `${issuer}:${account}:${index}`,
-                issuer,
-                account,
-                code,
-                isPinned,
-                expiresAt: fetchedAt + Number(remainingSeconds) * 1_000,
-            };
+            return [
+                {
+                    id: `${issuer}:${account}:${index}`,
+                    issuer,
+                    account,
+                    code: /^\d+$/.test(rawCode) ? rawCode : undefined,
+                    isPinned,
+                    expiresAt: fetchedAt + Number(remainingSeconds) * 1_000,
+                },
+            ];
         });
 }
 
@@ -128,9 +130,14 @@ export async function listTotps(configuredPath?: string): Promise<TotpSnapshot> 
             timeout: 5_000,
         });
         const fetchedAt = Date.now();
+        const entries = parseKeydenList(stdout, fetchedAt);
+
+        if (stdout.trim() && entries.length === 0) {
+            throw new Error("Keyden returned output, but no TOTP accounts could be parsed.");
+        }
 
         return {
-            entries: parseKeydenList(stdout, fetchedAt),
+            entries,
             fetchedAt,
         };
     } catch (error) {

@@ -13,21 +13,23 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { KeydenPathError, listTotps, TotpEntry, TotpSnapshot } from "./keyden";
 
 const AVATAR_COLORS = ["#4F7DF3", "#7857D9", "#C84B9B", "#D94B4B", "#D9822B", "#2F9E74", "#2185A6"];
+const NO_ISSUER_LABEL = "No Issuer";
 const avatarCache = new Map<string, ReturnType<typeof getAvatarIcon>>();
 
-function getIssuerAvatar(issuer: string) {
-    const cachedAvatar = avatarCache.get(issuer);
+function getEntryAvatar(entry: TotpEntry) {
+    const label = entry.issuer || entry.account;
+    const cachedAvatar = avatarCache.get(label);
     if (cachedAvatar) return cachedAvatar;
 
     let hash = 0;
-    for (const character of issuer) hash = (hash * 31 + (character.codePointAt(0) ?? 0)) >>> 0;
+    for (const character of label) hash = (hash * 31 + (character.codePointAt(0) ?? 0)) >>> 0;
 
-    const initial = Array.from(issuer.trim())[0]?.toLocaleUpperCase() ?? "?";
+    const initial = Array.from(label.trim())[0]?.toLocaleUpperCase() ?? "?";
     const avatar = getAvatarIcon(initial, {
         background: AVATAR_COLORS[hash % AVATAR_COLORS.length],
         gradient: true,
     });
-    avatarCache.set(issuer, avatar);
+    avatarCache.set(label, avatar);
     return avatar;
 }
 
@@ -55,13 +57,21 @@ function TotpDetail({ entry, now }: { entry: TotpEntry; now: number }) {
 
     return (
         <List.Item.Detail
-            markdown={`# ${formatTotpCode(entry.code)}`}
+            markdown={
+                entry.code
+                    ? `# ${formatTotpCode(entry.code)}`
+                    : "# TOTP Unavailable\n\nKeyden could not generate a code for this account."
+            }
             metadata={
                 <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Issuer" text={entry.issuer} icon={Icon.Building} />
+                    <List.Item.Detail.Metadata.Label title="Issuer" text={entry.issuer || "—"} icon={Icon.Building} />
                     <List.Item.Detail.Metadata.Label title="Account" text={entry.account || "—"} icon={Icon.Person} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="TOTP Code" text={entry.code} icon={Icon.Key} />
+                    <List.Item.Detail.Metadata.Label
+                        title="TOTP Code"
+                        text={entry.code || "Unavailable"}
+                        icon={entry.code ? Icon.Key : { source: Icon.Warning, tintColor: Color.Yellow }}
+                    />
                     <List.Item.Detail.Metadata.Label
                         title="Remaining"
                         text={`${remainingSeconds} second${remainingSeconds === 1 ? "" : "s"}`}
@@ -91,20 +101,27 @@ function TotpListItem({
     return (
         <List.Item
             id={`${idPrefix}:${entry.id}`}
-            icon={getIssuerAvatar(entry.issuer)}
+            icon={getEntryAvatar(entry)}
             title={entry.account || entry.issuer}
-            subtitle={showIssuer && entry.account ? entry.issuer : undefined}
-            keywords={[entry.issuer, entry.account]}
-            accessories={[{ text: `${remainingSeconds}s`, icon: getCountdownIcon(remainingSeconds) }]}
+            subtitle={showIssuer && entry.account ? entry.issuer || NO_ISSUER_LABEL : undefined}
+            keywords={[entry.issuer, entry.account].filter(Boolean)}
+            accessories={[
+                ...(entry.code
+                    ? []
+                    : [{ text: "Unavailable", icon: { source: Icon.Warning, tintColor: Color.Yellow } }]),
+                { text: `${remainingSeconds}s`, icon: getCountdownIcon(remainingSeconds) },
+            ]}
             detail={<TotpDetail entry={entry} now={now} />}
             actions={
                 <ActionPanel>
-                    <Action.CopyToClipboard
-                        title="Copy TOTP Code"
-                        content={entry.code}
-                        concealed
-                        icon={Icon.Clipboard}
-                    />
+                    {entry.code ? (
+                        <Action.CopyToClipboard
+                            title="Copy TOTP Code"
+                            content={entry.code}
+                            concealed
+                            icon={Icon.Clipboard}
+                        />
+                    ) : null}
                     <Action
                         title="Refresh Codes"
                         icon={Icon.ArrowClockwise}
@@ -239,7 +256,7 @@ export default function Command() {
                     {sections.map((section) => (
                         <List.Section
                             key={section.issuer}
-                            title={section.issuer}
+                            title={section.issuer || NO_ISSUER_LABEL}
                             subtitle={`${section.entries.length}`}
                         >
                             {section.entries.map((entry) => (
