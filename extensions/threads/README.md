@@ -6,21 +6,7 @@ A basic extension for quickly navigating Threads. Post updates, follow users, vi
 
 ## Threads Access Token
 
-The **Analytics**, **Analytics Menu Bar**, and **Giveaway** commands read from the Threads API
-and need a long-lived access token, entered once in the extension preferences. The other
-commands work without one.
-
-1. Go to [developers.facebook.com](https://developers.facebook.com) and create an app with the
-   **Access the Threads API** use case.
-2. Generate an access token with the `threads_basic`, `threads_manage_insights`, and
-   `threads_read_replies` permissions. A [step-by-step guide](https://threads-analytics.app/en/token-guide)
-   walks through it with screenshots.
-3. Paste it into **Threads Access Token** in the extension preferences.
-
-Tokens expire after 60 days. When that happens the commands show a **Threads Access Token
-Expired** message with a shortcut to the preferences, and the menu bar shows a warning item —
-generate a new token and paste it in. A token missing one of the permissions, and a token the
-API is rate-limiting, are reported the same way and name what to do about it.
+**Analytics**, **Analytics Menu Bar**, and **Giveaway** need a Threads API access token with the `threads_basic`, `threads_manage_insights`, and `threads_read_replies` permissions. Follow the [token guide](https://threads-analytics.app/en/token-guide), then paste the token into **Threads Access Token** in the extension preferences. Tokens expire after 60 days.
 
 ## Available Commands
 
@@ -100,55 +86,24 @@ View your account insights and analytics.
 
 ### Analytics
 
-Shows the raw metrics the Threads API reports, with nothing derived from them.
-
-- **Account** — followers, and views, likes, replies, reposts, and quotes for the selected
-  period, plus a day-by-day views table
-- **Posts** — your 25 most recent posts, filtered to the selected period, each with its
-  views, likes, replies, reposts, quotes, and shares
+View raw account and post metrics from the Threads API.
 
 **Options:**
 
-- **Period** (search bar dropdown) - Last 7, 14, 30 (default), or 90 days
-
-Post metrics are lifetime totals rather than period figures, so changing the period filters
-the posts already loaded instead of fetching them again. The list is capped at 25 posts
-because the Threads API charges one request per post and the hourly budget is shared with the
-other two commands.
+- **Period** - Last 7, 14, 30 (default), or 90 days
 
 ### Analytics Menu Bar
 
-Keeps one number in the macOS menu bar. The menu lists your account metrics for the chosen
-period and your five most recent posts with their views, likes, and replies. Refreshes every
-30 minutes; **Open Analytics** launches the full Analytics command.
+Show a Threads metric in the menu bar, refreshed every 30 minutes.
 
 **Preferences:**
 
-- **Menu Bar Title** - What sits next to the icon: your follower count (default), or views,
-  likes, or replies in the chosen period, or your latest post, or nothing at all. **Latest
-  Post** shows the post's first line followed by its views, likes, and replies —
-  `Today I learned something… · 1.2K · 56 · 7`. Hover the icon for the full figures. When the
-  API doesn't report a metric, the icon appears on its own rather than showing a dash.
-- **Period** - Show account metrics for the last 7 (default), 14, 30, or 90 days
+- **Menu Bar Title** - Follower count (default), views, likes, or replies in the period, your latest post, or icon only
+- **Period** - Last 7 (default), 14, 30, or 90 days
 
 ### Giveaway
 
-Draws winners from the replies to one of your posts.
-
-1. Pick the giveaway post from your recent posts.
-2. Set the entry conditions: one entry per account, must have comment text, required keywords
-   (comma-separated, any match), minimum number of tagged accounts, a replied-before cutoff,
-   and accounts to exclude. Your own replies are never entered, tagging you doesn't count
-   toward the mention requirement, and the same account tagged twice counts once.
-3. Add one or more prizes with a quantity each (add or remove prizes from the action menu).
-4. **Draw Winners** — an account wins at most once across all prizes. Redraw from the action menu, or copy
-   the results as text to post.
-
-The Threads API can only verify replies; repost, follow, and like conditions have to be
-checked manually on the winners. The token needs the `threads_read_replies` permission.
-Replies from private accounts arrive without a username and cannot be entered, and replies you
-hid (or from accounts you blocked or restricted) are left out of the draw — the form reports
-how many were excluded for each reason.
+Draw winners from the replies to one of your posts, filtered by keywords, mentions, reply time, or excluded accounts.
 
 ### Download Threads Media
 
