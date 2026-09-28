@@ -269,7 +269,7 @@
     },
     {
       "name": "volume-up",
-      "title": "Volume up",
+      "title": "Volume Up",
       "subtitle": "Apple Music",
       "description": "Increase Music volume",
       "disabledByDefault": true,
