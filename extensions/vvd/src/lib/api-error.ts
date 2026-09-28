@@ -35,7 +35,7 @@ export class VvdApiError extends Error {
 export class NotConnectedError extends Error {
   constructor() {
     super(
-      "Connect vvd first — run the Connect vvd command or paste an API key in the extension preferences.",
+      "Connect your account first — run the Connect Account command or paste an API key in the extension preferences.",
     )
     this.name = "NotConnectedError"
   }
@@ -92,7 +92,7 @@ export function describeError(err: unknown): DescribedError {
         kind: "not-connected",
         title: "vvd didn't accept the key",
         message:
-          "It may have been revoked. Run Connect vvd again, or paste a fresh key in the extension preferences.",
+          "It may have been revoked. Run Connect Account again, or paste a fresh key in the extension preferences.",
       }
     }
     if (err.code === "UPGRADE_REQUIRED") {

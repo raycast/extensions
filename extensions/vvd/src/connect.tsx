@@ -21,6 +21,7 @@ import {
   type Connection,
   type Me,
   clearConnectKey,
+  fingerprintKey,
   getConnection,
   me,
   pollConnect,
@@ -72,12 +73,21 @@ export default function Command() {
         },
       )
       if (controller.signal.aborted || result.status === "cancelled") return
+      if (result.status === "error") {
+        setPhase({
+          kind: "failed",
+          title: "vvd stopped answering",
+          message: result.message,
+        })
+        return
+      }
       if (result.status === "approved") {
         await storeConnectKey(origin, result.key)
         const who = await me({
           origin,
           key: result.key,
           source: "connect",
+          fingerprint: fingerprintKey(result.key),
         }).catch(() => null)
         setPhase({ kind: "done", name: who?.name ?? "you" })
         await showToast({
@@ -93,7 +103,7 @@ export default function Command() {
               kind: "failed",
               title: "Connection declined",
               message:
-                "You chose not to connect Raycast. Run Connect vvd again whenever you like.",
+                "You chose not to connect Raycast. Run Connect Account again whenever you like.",
             }
           : {
               kind: "failed",
@@ -160,7 +170,6 @@ export default function Command() {
 
   return (
     <Detail
-      navigationTitle="Connect vvd"
       isLoading={phase.kind === "checking" || phase.kind === "waiting"}
       markdown={markdownFor(phase, origin)}
       actions={
@@ -179,15 +188,15 @@ export default function Command() {
 function markdownFor(phase: Phase, origin: string): string {
   switch (phase.kind) {
     case "checking":
-      return "# Connect vvd\n\nChecking your connection…"
+      return "# Connect your account\n\nChecking your connection…"
     case "connected": {
       const how =
         phase.connection.source === "preference"
           ? "with the API key in the extension preferences"
-          : "through Connect vvd — approved in your browser"
+          : "through Connect Account — approved in your browser"
       const who = phase.who ? `Signed in as **${phase.who.name}**` : "Connected"
       const problem = phase.problem ? `\n\n> ⚠️ ${phase.problem}` : ""
-      return `# Connect vvd\n\n${who}, ${how}.\n\n${origin}${problem}`
+      return `# Connected\n\n${who}, ${how}.\n\n${origin}${problem}`
     }
     case "waiting":
       return [
@@ -290,7 +299,7 @@ function Actions({
               })
             }
           />
-          <Action.OpenInBrowser title="Open Vvd" url={origin} />
+          <Action.OpenInBrowser title="Open Website" url={origin} />
         </ActionPanel>
       )
     case "disconnected":
@@ -298,7 +307,7 @@ function Actions({
         <ActionPanel>
           <Action title="Connect Again" icon={Icon.Person} onAction={begin} />
           <Action.OpenInBrowser
-            title="Revoke the Key in Vvd"
+            title="Revoke Key in Browser"
             icon={Icon.Key}
             url={apiKeysUrl(origin)}
           />

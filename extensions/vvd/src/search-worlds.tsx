@@ -84,7 +84,7 @@ function WorldSection({
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser title="Open in Vvd" url={url} />
+                  <Action.OpenInBrowser title="Open in Browser" url={url} />
                   <Action.Push
                     title="Search This World"
                     icon={Icon.MagnifyingGlass}

@@ -110,6 +110,22 @@ describe("waitForApproval", () => {
     assert.equal(polls, 3)
   })
 
+  it("gives up after repeated poll failures and reports the last one", async () => {
+    let polls = 0
+    const result = await waitForApproval(
+      async () => {
+        polls += 1
+        throw new Error(`Rate limit exceeded (${polls})`)
+      },
+      { intervalMs: 1, deadlineMs: 10_000, sleep },
+    )
+    assert.deepEqual(result, {
+      status: "error",
+      message: "Rate limit exceeded (5)",
+    })
+    assert.equal(polls, 5)
+  })
+
   it("stops on a denial", async () => {
     const result = await waitForApproval(async () => ({ status: "denied" }), {
       intervalMs: 1,

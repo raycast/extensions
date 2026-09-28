@@ -19,6 +19,8 @@ import { CaptureForm } from "./capture-form"
 export const LAST_WORLD_KEY = "vvd.lastWorldId"
 
 interface Row {
+  /** The world the row was read from — a row from another world is never shown. */
+  worldId: string
   id: string
   name: string
   documentType: string
@@ -53,9 +55,15 @@ export function WorldSearch({
   const query = searchText.trim()
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
-    async (_origin: string, worldId: string, q: string): Promise<Row[]> => {
+    async (
+      _origin: string,
+      _fingerprint: string,
+      worldId: string,
+      q: string,
+    ): Promise<Row[]> => {
       if (q) {
         return (await searchWorld(connection, worldId, q)).map((r) => ({
+          worldId,
           id: r.documentId,
           name: r.name,
           documentType: r.documentType,
@@ -65,6 +73,7 @@ export function WorldSearch({
       }
       return (await listDocuments(connection, worldId, { limit: 50 })).map(
         (d) => ({
+          worldId,
           id: d.id,
           name: d.name,
           documentType: d.documentType,
@@ -73,10 +82,13 @@ export function WorldSearch({
         }),
       )
     },
-    [connection.origin, world.id, query],
+    [connection.origin, connection.fingerprint, world.id, query],
     { keepPreviousData: true, onError: () => {} },
   )
-  const rows = data ?? []
+  // keepPreviousData keeps the last rows while a new query loads — right within
+  // one world, wrong across a world switch (their ids would be opened under the
+  // new world's slug). Only rows from the selected world are ever shown.
+  const rows = (data ?? []).filter((row) => row.worldId === world.id)
 
   const pickWorld = (id: string) => {
     setPickedWorldId(id)
@@ -138,7 +150,7 @@ export function WorldSearch({
                 />
               ) : null}
               <Action.OpenInBrowser
-                title="Open World in Vvd"
+                title="Open World in Browser"
                 url={worldUrl(connection.origin, world.slug)}
               />
             </ActionPanel>
@@ -188,7 +200,7 @@ export function WorldSearch({
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.OpenInBrowser title="Open in Vvd" url={url} />
+                      <Action.OpenInBrowser title="Open in Browser" url={url} />
                       <Action
                         title={showDetail ? "Hide Details" : "Show Details"}
                         icon={Icon.Sidebar}
@@ -226,7 +238,7 @@ export function WorldSearch({
                         />
                       ) : null}
                       <Action.OpenInBrowser
-                        title="Open World in Vvd"
+                        title="Open World in Browser"
                         icon={Icon.Globe}
                         url={worldUrl(connection.origin, world.slug)}
                       />
@@ -262,9 +274,13 @@ function DocumentPane({
 }) {
   const kind = documentKind(row.documentType)
   const { data, isLoading, error } = useCachedPromise(
-    async (_origin: string, worldId: string, documentId: string) =>
-      getDocument(connection, worldId, documentId),
-    [connection.origin, world.id, row.id],
+    async (
+      _origin: string,
+      _fingerprint: string,
+      worldId: string,
+      documentId: string,
+    ) => getDocument(connection, worldId, documentId),
+    [connection.origin, connection.fingerprint, world.id, row.id],
     { onError: () => {} },
   )
 

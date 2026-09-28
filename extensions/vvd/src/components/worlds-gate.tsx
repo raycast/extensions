@@ -44,7 +44,7 @@ export function WorldsGate({
           description="Create your first world in vvd, then come back."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open Vvd" url={origin} />
+              <Action.OpenInBrowser title="Open Website" url={origin} />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}

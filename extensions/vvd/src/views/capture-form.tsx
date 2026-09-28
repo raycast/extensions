@@ -116,7 +116,7 @@ export function CaptureForm({
           toast.title = `${label} created without its text`
           toast.message = described.message
           toast.primaryAction = {
-            title: "Open in vvd",
+            title: "Open in Browser",
             onAction: () => void open(url),
           }
           return
@@ -138,7 +138,7 @@ export function CaptureForm({
       toast.title = `${label} created`
       toast.message = `${created.name} · ${world.name}`
       toast.primaryAction = {
-        title: "Open in vvd",
+        title: "Open in Browser",
         shortcut: { modifiers: ["cmd"], key: "o" },
         onAction: () => void open(url),
       }
@@ -180,7 +180,10 @@ export function CaptureForm({
           description="Quick Capture writes into a world where you're an editor. Ask for edit access, or create a world of your own."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open Vvd" url={connection.origin} />
+              <Action.OpenInBrowser
+                title="Open Website"
+                url={connection.origin}
+              />
             </ActionPanel>
           }
         />

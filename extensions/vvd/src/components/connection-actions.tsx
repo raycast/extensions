@@ -14,7 +14,7 @@ export function ConnectActions({ origin }: { origin: string }) {
   return (
     <ActionPanel>
       <Action
-        title="Connect Vvd"
+        title="Connect Account"
         icon={Icon.Person}
         onAction={() =>
           launchCommand({ name: "connect", type: LaunchType.UserInitiated })

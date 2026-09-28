@@ -1,12 +1,13 @@
 /**
  * The vvd platform API from Raycast: one place that knows where the key lives
- * (the extension preference, or the one "Connect vvd" stored) and one fetch
+ * (the extension preference, or the one "Connect Account" stored) and one fetch
  * that speaks the `/api/v1` envelope. Every command calls the typed functions
  * below; none of them builds a URL or reads a preference on its own.
  */
 import { LocalStorage, getPreferenceValues } from "@raycast/api"
+import { createHash } from "node:crypto"
 
-import { NotConnectedError, VvdApiError, errorFromResponse } from "./api-error"
+import { NotConnectedError, errorFromResponse } from "./api-error"
 import {
   type ConnectStart,
   type PollOutcome,
@@ -14,12 +15,6 @@ import {
   parsePollResponse,
 } from "./connect-flow"
 import { type Query, apiUrl, normalizeOrigin } from "./urls"
-
-/** Declared in package.json; typed here so the build doesn't need raycast-env.d.ts. */
-interface ExtensionPreferences {
-  apiKey?: string
-  origin?: string
-}
 
 const STORED_KEY = "vvd.accessKey"
 const STORED_KEY_ORIGIN = "vvd.accessKeyOrigin"
@@ -29,26 +24,49 @@ export interface Connection {
   key: string
   /** Where the key came from — the preference wins over a stored connect key. */
   source: "preference" | "connect"
+  /**
+   * A short, non-secret identity for the credential — what cached data is
+   * scoped by. Two keys at the same origin are two accounts; a cache keyed by
+   * origin alone would show the first account's worlds under the second.
+   */
+  fingerprint: string
+}
+
+/** The first 12 hex characters of the key's SHA-256: stable, and useless to an attacker. */
+export function fingerprintKey(key: string): string {
+  return createHash("sha256").update(key).digest("hex").slice(0, 12)
 }
 
 export function preferredOrigin(): string {
-  return normalizeOrigin(getPreferenceValues<ExtensionPreferences>().origin)
+  return normalizeOrigin(getPreferenceValues<Preferences>().origin)
 }
 
 /**
  * The credential to send, or null when there is none. A key pasted into the
- * preference always wins; otherwise the key "Connect vvd" minted, but only for
+ * preference always wins; otherwise the key "Connect Account" minted, but only for
  * the origin it was minted at — pointing the extension at a beta build must not
  * send the production key there.
  */
 export async function getConnection(): Promise<Connection | null> {
   const origin = preferredOrigin()
-  const pasted = getPreferenceValues<ExtensionPreferences>().apiKey?.trim()
-  if (pasted) return { origin, key: pasted, source: "preference" }
+  const pasted = getPreferenceValues<Preferences>().apiKey?.trim()
+  if (pasted) {
+    return {
+      origin,
+      key: pasted,
+      source: "preference",
+      fingerprint: fingerprintKey(pasted),
+    }
+  }
   const stored = await LocalStorage.getItem<string>(STORED_KEY)
   const storedOrigin = await LocalStorage.getItem<string>(STORED_KEY_ORIGIN)
   if (stored && (storedOrigin ?? origin) === origin) {
-    return { origin, key: stored, source: "connect" }
+    return {
+      origin,
+      key: stored,
+      source: "connect",
+      fingerprint: fingerprintKey(stored),
+    }
   }
   return null
 }
@@ -290,7 +308,11 @@ export async function pollConnect(
     signal,
   })
   const json: unknown = await response.json().catch(() => null)
-  if (response.status >= 500)
-    throw new VvdApiError("vvd is unavailable", response.status)
+  // 202 pending · 403 denied · 410 expired are the flow's own answers; anything
+  // else that isn't a success (a rate limit, a malformed request, an outage) is
+  // an error the command should show, not a reason to keep waiting.
+  if (!response.ok && ![202, 403, 410].includes(response.status)) {
+    throw errorFromResponse(response.status, json)
+  }
   return parsePollResponse(response.status, json)
 }

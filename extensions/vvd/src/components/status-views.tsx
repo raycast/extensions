@@ -14,7 +14,7 @@ export function NotConnectedEmptyView({ origin }: { origin: string }) {
   return (
     <List.EmptyView
       icon={Icon.Person}
-      title="Connect vvd to get started"
+      title="Connect your account to get started"
       description="Approve once in your browser — no key to paste."
       actions={<ConnectActions origin={origin} />}
     />

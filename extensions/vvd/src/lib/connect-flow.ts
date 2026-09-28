@@ -87,11 +87,16 @@ export type WaitResult =
   | { status: "denied" }
   | { status: "expired" }
   | { status: "cancelled" }
+  | { status: "error"; message: string }
+
+/** Consecutive poll failures before the flow gives up and shows the last error. */
+export const MAX_CONSECUTIVE_POLL_FAILURES = 5
 
 /**
- * Poll until the request resolves. A transient poll failure (network blip) is
- * retried on the next tick rather than ending the flow — the person is busy
- * approving in a browser and would not know why the window gave up.
+ * Poll until the request resolves. One failed poll (a network blip, a rate
+ * limit) is retried on the next tick — the person is busy approving in a
+ * browser and would not know why the window gave up. Failures that keep
+ * coming are a real problem, and the last one's message is what to show.
  */
 export async function waitForApproval(
   poll: () => Promise<PollOutcome>,
@@ -99,14 +104,22 @@ export async function waitForApproval(
 ): Promise<WaitResult> {
   const now = options.now ?? (() => Date.now())
   const deadline = now() + options.deadlineMs
+  let failures = 0
   while (true) {
     if (options.signal?.aborted) return { status: "cancelled" }
     if (now() >= deadline) return { status: "expired" }
     let outcome: PollOutcome | null = null
     try {
       outcome = await poll()
-    } catch {
-      outcome = null
+      failures = 0
+    } catch (err) {
+      failures += 1
+      if (failures >= MAX_CONSECUTIVE_POLL_FAILURES) {
+        return {
+          status: "error",
+          message: err instanceof Error ? err.message : String(err),
+        }
+      }
     }
     if (outcome && outcome.status !== "pending") return outcome
     await options.sleep(options.intervalMs)

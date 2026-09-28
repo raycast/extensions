@@ -63,14 +63,15 @@
     },
     {
       "name": "connect",
-      "title": "Connect vvd",
+      "title": "Connect Account",
       "subtitle": "vvd",
       "description": "Log in with vvd \u2014 approve once in your browser, no key to paste.",
       "mode": "view",
       "keywords": [
         "login",
         "log in",
-        "account",
+        "connect",
+        "vvd",
         "api key"
       ]
     }
@@ -79,15 +80,15 @@
     {
       "name": "apiKey",
       "type": "password",
-      "title": "API key",
-      "description": "Optional. Leave empty and run \"Connect vvd\" to log in from your browser instead. Keys are minted at Settings \u2192 API keys and look like vvd_live_\u2026.",
+      "title": "API Key",
+      "description": "Optional. Leave empty and run \"Connect Account\" to log in from your browser instead. Keys are minted at Settings \u2192 API keys and look like vvd_live_\u2026.",
       "placeholder": "vvd_live_\u2026",
       "required": false
     },
     {
       "name": "origin",
       "type": "textfield",
-      "title": "vvd origin",
+      "title": "vvd Origin",
       "description": "Where your vvd lives. Change it only to point at a beta or local build.",
       "placeholder": "https://vvd.world",
       "default": "https://vvd.world",
