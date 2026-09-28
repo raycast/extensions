@@ -1,0 +1,274 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aktar",
+  "title": "Aktar",
+  "description": "Upload files to your own S3, R2, B2 or MinIO storage, search your upload history, and browse your buckets with the Aktar menu bar app.",
+  "icon": "extension-icon.png",
+  "author": "merttopuz",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "s3",
+    "r2",
+    "cloudflare",
+    "backblaze",
+    "minio",
+    "upload",
+    "share",
+    "bucket",
+    "screenshot"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "upload-clipboard",
+      "title": "Upload Clipboard",
+      "subtitle": "Aktar",
+      "description": "Upload the file or image on your clipboard and copy its link.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-finder-selection",
+      "title": "Upload Selected Files",
+      "subtitle": "Aktar",
+      "description": "Upload the files selected in Finder to your default destination and copy their links.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-file",
+      "title": "Upload File",
+      "subtitle": "Aktar",
+      "description": "Pick files, a destination, and an optional folder, then upload them and copy their links.",
+      "mode": "view"
+    },
+    {
+      "name": "search-uploads",
+      "title": "Search Uploads",
+      "subtitle": "Aktar",
+      "description": "Search your upload history, copy links in any format, and delete uploads.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-buckets",
+      "title": "Browse Buckets",
+      "subtitle": "Aktar",
+      "description": "Browse the folders and files in your destinations' buckets: copy links, create temporary links, rename, move, delete, and upload.",
+      "mode": "view"
+    },
+    {
+      "name": "connect",
+      "title": "Connect to Aktar",
+      "subtitle": "Aktar",
+      "description": "Pair this extension with the Aktar app. Aktar asks you to approve the connection once.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copyFormat",
+      "title": "Copy Format",
+      "description": "What the primary copy action and uploads put on your clipboard.",
+      "type": "dropdown",
+      "required": false,
+      "default": "aktar",
+      "data": [
+        {
+          "title": "Same as Aktar's Output Setting",
+          "value": "aktar"
+        },
+        {
+          "title": "URL",
+          "value": "url"
+        },
+        {
+          "title": "Markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "HTML",
+          "value": "html"
+        }
+      ]
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Only needed if you don't use Connect to Aktar. Copy it from Aktar > Settings > Integrations.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "port",
+      "title": "Port",
+      "description": "Only used together with the API Token above. Must match the port in Aktar > Settings > Integrations.",
+      "type": "textfield",
+      "required": false,
+      "default": "47913"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-destinations",
+      "title": "List Destinations",
+      "description": "List the storage destinations (buckets) configured in Aktar, and which one is the default."
+    },
+    {
+      "name": "search-uploads",
+      "title": "Search Uploads",
+      "description": "Search the files uploaded with Aktar by name, newest first, with their public links."
+    },
+    {
+      "name": "list-bucket-files",
+      "title": "List Bucket Files",
+      "description": "List the folders and files in one folder of a destination's bucket, including files not uploaded with Aktar."
+    },
+    {
+      "name": "create-share-link",
+      "title": "Create Share Link",
+      "description": "Create a temporary, presigned link to a file in a bucket that works even when the bucket is private."
+    }
+  ],
+  "ai": {
+    "instructions": "Aktar uploads files to the user's own S3-compatible storage. A destination is one configured bucket; when the user doesn't name one, use the default destination. Public links come from search-uploads or list-bucket-files; only use create-share-link when the user asks for a temporary or private link, or when a file has no public link.",
+    "evals": [
+      {
+        "input": "@aktar Which buckets do I have?",
+        "mocks": {
+          "list-destinations": {
+            "destinations": [
+              {
+                "id": "4E0C2F9B-2B8B-4D62-9E0D-6F1B7B3A9A11",
+                "name": "Screenshots",
+                "provider": "Cloudflare R2",
+                "bucket": "screenshots",
+                "isDefault": true
+              },
+              {
+                "id": "9A1D3C44-7E21-4B55-8C3B-0B8F3F2E6D22",
+                "name": "Backups",
+                "provider": "Backblaze B2",
+                "bucket": "backups",
+                "isDefault": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-destinations"
+          }
+        ]
+      },
+      {
+        "input": "@aktar Find the link to the invoice PDF I uploaded",
+        "mocks": {
+          "search-uploads": {
+            "count": 1,
+            "uploads": [
+              {
+                "filename": "invoice-2026-09.pdf",
+                "url": "https://files.example.com/2026/09/invoice-2026-09.pdf",
+                "destination": "Screenshots",
+                "size": "182 KB",
+                "uploadedAt": "2026-09-20T10:15:00Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-uploads",
+              "arguments": {
+                "query": {
+                  "includes": "invoice"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aktar What's in the 2026 folder of my Backups bucket?",
+        "mocks": {
+          "list-bucket-files": {
+            "destination": "Backups",
+            "folder": "2026/",
+            "folders": [
+              "2026/09/"
+            ],
+            "files": [
+              {
+                "key": "2026/notes.md",
+                "size": "4 KB",
+                "url": null
+              }
+            ],
+            "hasMore": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-bucket-files",
+              "arguments": {
+                "destination": {
+                  "includes": "Backups"
+                },
+                "folder": {
+                  "includes": "2026"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aktar Give me a private link to 2026/notes.md in Backups that expires in 2 hours",
+        "mocks": {
+          "create-share-link": {
+            "url": "https://backups.s3.example.com/2026/notes.md?X-Amz-Signature=abc",
+            "expiresAt": "2026-09-27T12:00:00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-share-link",
+              "arguments": {
+                "key": "2026/notes.md",
+                "expiresInHours": 2
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
