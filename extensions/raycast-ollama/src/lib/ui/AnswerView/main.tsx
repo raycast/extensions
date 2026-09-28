@@ -273,6 +273,18 @@ export function AnswerView(props: props): React.JSX.Element {
     );
   }
 
+  function ModelSelector(): React.JSX.Element | null {
+    if (!props.command || !resolvedSettings) return null;
+    return (
+      <Action
+        title={`Model: ${resolvedSettings.model} (${resolvedSettings.server})`}
+        icon={Icon.Box}
+        onAction={() => setShowSelectModelForm(true)}
+        shortcut={Shortcut.ChangeModel}
+      />
+    );
+  }
+
   return (
     <Detail
       markdown={`${resolvedSettings ? `**Model:** ${resolvedSettings.model} (${resolvedSettings.server})  \n**Thinking:** ${resolvedSettings.thinking === "none" ? "None" : resolvedSettings.thinking}  \n**Keep Alive:** ${resolvedSettings.keepAlive}  \n---\n` : ""}${imageView}
@@ -290,7 +302,15 @@ ${thinking}
 }
 ${answer}`}
       isLoading={loading || IsLoadingModel}
-      actions={!loading && !IsLoadingModel && <AnswerAction />}
+      actions={
+        !loading &&
+        !IsLoadingModel && (
+          <ActionPanel title="Actions">
+            <ModelSelector />
+            <AnswerAction />
+          </ActionPanel>
+        )
+      }
       metadata={
         !loading &&
         !IsLoadingModel &&
