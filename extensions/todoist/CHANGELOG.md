@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix out-of-memory crash when scrolling tasks] - {PR_MERGE_DATE}
+## [Fix out-of-memory crash when scrolling tasks] - 2026-09-28
 
 - Fix "Command Out of Memory" when moving quickly through task lists: selecting a task no longer re-reads and parses the whole cached Todoist data or lists every installed application.
 - Build the "Set Parent Task", "Move Task to Project", "Add Label", "Assign to" and "Add Location Reminder" submenus when they are opened instead of on every selection change.
