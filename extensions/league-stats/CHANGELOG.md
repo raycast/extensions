@@ -1,6 +1,6 @@
 # League Stats Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-28
 
 - Search a player by Riot ID. The region is detected automatically.
 - Player page: ranked Solo/Duo and Flex, win rate over the loaded games, and recent games with result, champion, KDA, queue, length, and date.
