@@ -139,6 +139,7 @@ export function formatDuration(ms: number): string {
   return negative ? `-${text}` : text;
 }
 
+/** Marks that the menu-bar command has actually run, meaning it's enabled/added to the menu bar. */
 export async function markMenuBarSeen(): Promise<void> {
   await LocalStorage.setItem(MENU_BAR_SEEN_KEY, String(Date.now()));
 }

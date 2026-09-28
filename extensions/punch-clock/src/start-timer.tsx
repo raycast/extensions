@@ -5,7 +5,8 @@ import {
   confirmAlert,
   Form,
   Icon,
-  openExtensionPreferences,
+  launchCommand,
+  LaunchType,
   popToRoot,
   showToast,
   Toast,
@@ -19,6 +20,17 @@ interface FormValues {
   hours: string;
   minutes: string;
   breakMinutes: string;
+}
+
+async function showMenuBar() {
+  try {
+    await launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
+  } catch {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to open Work Timer",
+    });
+  }
 }
 
 export default function StartTimer() {
@@ -88,8 +100,8 @@ export default function StartTimer() {
             title: "Enable the Menu Bar to See Your Timer",
             message: `Timer started, ends around ${formatClock(state.endTime)}. Enable "Work Timer" in your menu bar to see the countdown.`,
             primaryAction: {
-              title: "Open Extension Preferences",
-              onAction: () => openExtensionPreferences(),
+              title: "Show in Menu Bar",
+              onAction: () => void showMenuBar(),
             },
             dismissAction: { title: "OK" },
           });
@@ -112,7 +124,7 @@ export default function StartTimer() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Start Timer" icon={Icon.Play} onSubmit={handleSubmit} />
-          <Action title="Enable Menu Bar…" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
+          <Action title="Show in Menu Bar…" icon={Icon.Gear} onAction={() => void showMenuBar()} />
         </ActionPanel>
       }
     >
