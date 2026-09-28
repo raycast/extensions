@@ -1,6 +1,6 @@
 # Jetbrains Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-09-28
 
 - Add support for Windows platform
 - Add cross-platform keyboard shortcuts
