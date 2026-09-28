@@ -187,6 +187,14 @@ export function ModelView(): React.JSX.Element {
             onAction={() => setShowPullModelForm(true)}
             shortcut={Shortcut.New}
           />
+          <ActionPanel.Submenu title="Delete Model" icon={Icon.Trash} shortcut={Shortcut.Remove}>
+            <Action
+              title={`Yes, Delete "${prop.model.detail.name}" Model`}
+              icon={Icon.Trash}
+              onAction={() => DeleteModel(prop.model, RevalidateModels)}
+            />
+            <Action title="No" icon={Icon.XMarkCircle} />
+          </ActionPanel.Submenu>
           <Action
             title="Set as Default Model"
             icon={Icon.Star}
@@ -200,14 +208,6 @@ export function ModelView(): React.JSX.Element {
               await showToast({ style: Toast.Style.Success, title: "Default model updated" });
             }}
           />
-          <ActionPanel.Submenu title="Delete Model" icon={Icon.Trash} shortcut={Shortcut.Remove}>
-            <Action
-              title={`Yes, Delete "${prop.model.detail.name}" Model`}
-              icon={Icon.Trash}
-              onAction={() => DeleteModel(prop.model, RevalidateModels)}
-            />
-            <Action title="No" icon={Icon.XMarkCircle} />
-          </ActionPanel.Submenu>
           <Action.OpenInBrowser
             title="Models Library"
             icon={Icon.Globe}

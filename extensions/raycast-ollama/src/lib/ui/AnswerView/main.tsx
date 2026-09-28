@@ -190,22 +190,6 @@ export function AnswerView(props: props): React.JSX.Element {
           shortcut={Shortcut.ToggleQuickLook}
           onAction={() => setShowAnswerMetadata((prevState) => !prevState)}
         />
-        {props.command && (
-          <>
-            <Action
-              title="Change Model"
-              icon={Icon.Box}
-              onAction={() => setShowSelectModelForm(true)}
-              shortcut={Shortcut.ChangeModel}
-            />
-            <Action
-              title="Change Reasoning"
-              icon={Icon.Glasses}
-              onAction={() => setShowSelectModelForm(true)}
-              shortcut={Shortcut.ChangeReasoning}
-            />
-          </>
-        )}
         {Model && !loading && answer && (
           <Action
             title="Continue as Chat"
@@ -226,6 +210,22 @@ export function AnswerView(props: props): React.JSX.Element {
           />
         )}
         {outputActions[1]}
+        {props.command && (
+          <>
+            <Action
+              title="Change Model"
+              icon={Icon.Box}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={Shortcut.ChangeModel}
+            />
+            <Action
+              title="Change Reasoning"
+              icon={Icon.Glasses}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={Shortcut.ChangeReasoning}
+            />
+          </>
+        )}
       </>
     );
   }
