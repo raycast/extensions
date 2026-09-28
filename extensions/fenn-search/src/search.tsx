@@ -106,7 +106,7 @@ function SearchActions({
             content={resultPlainText(result)}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          {localFile && <Action.ShowInFinder path={result.original_file} shortcut={Keyboard.Shortcut.Common.Refresh} />}
+          {localFile && <Action.ShowInFinder path={result.original_file} />}
           <Action.CopyToClipboard
             title="Copy File Path"
             content={result.original_file}

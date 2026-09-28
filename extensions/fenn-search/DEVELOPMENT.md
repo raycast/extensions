@@ -44,8 +44,6 @@ Store screenshots are in `metadata/`, in this order:
 2. `fenn-search-2.png`: spoken words in audio, with transcript excerpts and time ranges.
 3. `fenn-search-3.png`: visual text inside a Sketch file.
 
-All three are 2000 × 1250 PNGs. Copies in `media/` support the README. They were resized proportionally from the supplied screenshots, with only background padding added; the search results and interface were not edited.
+All three are 2000 × 1250 PNGs. Copies in `media/` support the README. They were captured with Raycast’s native Capture Window command using the same custom wallpaper. The capture files are used unchanged, without resizing, padding, or editing the interface or search results.
 
 The extension icon is `assets/icon.png`, a 512 × 512 PNG. Keep the changelog's `{PR_MERGE_DATE}` placeholder; Raycast replaces it when the submission is merged.
-
-Only the extension directory is intended for the public Raycast repository. Its MIT license does not apply to the Fenn application or backend. Publishing and the packaged-app release check are separate steps from preparing this listing.

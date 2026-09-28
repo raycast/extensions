@@ -18,9 +18,9 @@ Find a moment by the text that appears on screen. In this example, searching `N2
 
 ### Spoken words in audio
 
-Search what was said in a recording and read matching transcript excerpts with their time ranges. Here, `auto renewal` finds spoken passages in `audio_may_2026.mp3`.
+Search what was said in a recording and read matching transcript excerpts with their time ranges. Here, `auto renewal` finds spoken passages in an MP3 whose filename does not contain the query.
 
-![Searching auto renewal finds spoken passages in audio_may_2026.mp3, with transcript excerpts and timestamp ranges](media/spoken-words-in-audio.png)
+![Searching auto renewal finds spoken passages in an MP3, with transcript excerpts and timestamp ranges](media/spoken-words-in-audio.png)
 
 ### Content inside Sketch files
 
