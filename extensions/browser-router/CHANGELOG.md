@@ -1,6 +1,6 @@
 # Browser Router Changelog
 
-## [v1.1] - {PR_MERGE_DATE}
+## [v1.1] - 2026-09-28
 
 - Added **Smart Profile Sorting** with 4 modes: Alphabetical (A → Z), Reverse Alphabetical (Z → A), Most Frequently Used (MRU with launch tracking), and Custom Order.
 - Added interactive **Custom Profile Reordering Layout** with live position rank badges (`#1`, `#2`, `#3`) and keyboard controls (`Alt + Up/Down`, `Ctrl + Shift + Up/Down`, `Reset to Alphabetical`).
