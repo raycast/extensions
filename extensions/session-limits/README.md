@@ -1,15 +1,19 @@
-# Session Limits
+<img src="assets/icon.png" width="64" height="64" alt="session limits" />
 
-Codex and Claude Code quotas in Raycast. See remaining usage, reset times, and an optional menu-bar view.
+# session limits
 
-## Use
+see how much codex and claude code you have left, right in raycast.
 
-Open **Show Session Limits**. Press **Enter** for quota details or **⌘R** to refresh. Run **Session Limits Menu Bar** for the optional menu-bar view.
+<img src="media/session-limits-detail.png" width="720" alt="session limits quota preview" />
 
-## Connect
+## get started
 
-- **Codex:** Sign in to the Codex CLI. Session Limits picks it up automatically.
-- **Claude Code:** Choose **Connect Claude Code**, then use Claude to update your limits. Requires Claude Code 2.1.251+ with Pro or Max.
-- **Other providers:** Add a [custom quota snapshot](docs/providers.md).
+open **show session limits**. hit **enter** for quota details or **⌘r** to refresh. for a quick glance, run **session limits menu bar**.
 
-[Website](https://vkalipat.github.io/raycast-session-limits/) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)
+## connect
+
+- **codex:** sign in to the codex cli and you're set.
+- **claude code:** choose **connect claude code**, then use claude to update your limits. you'll need claude code 2.1.251+ and pro or max.
+- **other providers:** add a [custom quota snapshot](docs/providers.md).
+
+[website](https://vkalipat.github.io/raycast-session-limits/) · [contributing](CONTRIBUTING.md) · [mit license](LICENSE)
