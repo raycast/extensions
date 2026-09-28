@@ -1,7 +1,6 @@
 # Tinkerer Club for Raycast
 
-<img width="1000" height="625" alt="Tinkerer Club prompt browser in Raycast" src="media/tinkerer-club.png" />
-
+<img width="1000" height="625" alt="Tinkerer Club prompt browser in Raycast with fictional demo content" src="metadata/tinkerer-club-3.png" />
 
 Browse Tinkerer Club from Raycast: read the feed and articles, inspect comments, search community content, reuse shared prompts, and publish updates. A menu-bar command keeps recent activity within reach, while optional Raycast AI tools can search and summarize club content.
 
@@ -41,6 +40,10 @@ Raycast opens the extension preferences on first use. Enter:
 - **API Key:** enter the raw member key. Do not add `Bearer`.
 
 Run **Tinkerer Club Menu Bar** once if you want the menu-bar item to stay active.
+
+### Screenshots with fictional content
+
+In the extension's Raycast preferences, enable **Screenshot Demo Mode**. Feed posts, comments, articles, prompts, search results, and the menu bar then use fictional local fixtures. No API calls or writes reach Tinkerer Club while this setting is enabled. The avatar illustrations are generated from fixed demo seeds; they do not represent club members. Turn the setting off when you are done capturing screenshots to return to your account.
 
 ## Raycast AI
 

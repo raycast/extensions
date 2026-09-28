@@ -6,7 +6,7 @@ Reviewed against the current Raycast preparation, publishing, extension-guidelin
 
 - [x] Manifest uses the current compatible Raycast API and declares macOS support.
 - [x] Extension and commands use concise, title-case names and US English.
-- [x] API credentials use a required password preference and are never hardcoded.
+- [x] API credentials use a password preference and are never hardcoded. The key may be omitted only for local screenshot demo mode; live requests fail clearly without it.
 - [x] Remote API origins require HTTPS; localhost HTTP is limited to development.
 - [x] Expected network and validation failures use toasts, with loading states in remote views.
 - [x] Comments, replies, reactions, posts, and generic mutations require confirmation.
@@ -21,14 +21,14 @@ Reviewed against the current Raycast preparation, publishing, extension-guidelin
 
 ## Before Submission
 
-- [ ] `needs_evidence`: Confirm that the platform owner permits a public third-party extension to use the Tinkerer Club name, icon, and authenticated API. Keep the “unofficial” disclaimer unless endorsement is documented.
-- [ ] `needs_evidence`: Confirm the platform's API terms permit public distribution and these read/write workflows.
-- [x] Five Store screenshots cover Feed, Articles, Prompts, AI search, and the menu-bar view.
+- [x] The extension author confirms Kitze granted permission for a public third-party extension to use the Tinkerer Club name, icon, and authenticated API. The “unofficial” disclaimer remains because endorsement was not stated.
+- [x] The extension author confirms that Kitze's permission covers public Raycast Store distribution of the extension's read/write workflows.
+- [x] Three Store screenshots cover Feed, Articles, and Prompts with fictional local demo content.
 - [x] All metadata screenshots are 2000 x 1250 PNGs with a consistent background and pass `ray lint` metadata validation.
-- [x] Member names, handles, and avatars are redacted in the Store screenshots. No API keys or unrelated application windows are visible.
+- [x] Store screenshots use fictional names, handles, posts, and prompt content with generated demo avatars. No real member content or API keys are visible.
 - [ ] Replace `{PR_MERGE_DATE}` in `CHANGELOG.md` only if the Raycast publishing workflow does not fill it.
-- [ ] Run `npm ci && npm run check` from a clean checkout.
-- [ ] Submit with `npm run publish`; review the generated public PR before requesting Store review.
+- [x] Run `npm ci && npm run check` from an isolated PR-branch checkout (2026-09-28).
+- [x] The public Store submission is [PR #31009](https://github.com/raycast/extensions/pull/31009).
 
 ## Reviewer Notes
 

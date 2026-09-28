@@ -113,8 +113,17 @@
       "title": "API Key",
       "description": "A member API key created in Tinkerer Club Settings. It is sent in the x-api-key header.",
       "type": "password",
-      "required": true,
+      "required": false,
       "placeholder": "tnk_…"
+    },
+    {
+      "name": "demoMode",
+      "title": "Screenshot Demo Mode",
+      "label": "Use fictional demo content",
+      "description": "Show fictional local data for Store screenshots. No requests or changes are sent to Tinkerer Club while enabled.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
@@ -137,8 +146,8 @@
     "fix-lint": "ray lint --fix",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "check": "npm run typecheck && npm test && npm run lint && npm run build",
+    "test": "vitest run --dir tests",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
     "publish": "npx @raycast/api@latest publish"
   }
 }

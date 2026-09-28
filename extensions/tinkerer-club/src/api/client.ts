@@ -105,6 +105,9 @@ export class TinkererApiClient {
   }
 
   private async request(url: string, init: RequestInit, externalSignal?: AbortSignal): Promise<JsonValue> {
+    if (!this.apiKey.trim()) {
+      throw new TinkererApiError("Add an API key in preferences, or enable Screenshot Demo Mode.");
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
     const forwardAbort = () => controller.abort();

@@ -103,7 +103,10 @@ export function parseArticle(value: JsonValue, baseUrl: string, isDraft = false)
   const coverUrl = resolveUrl(optionalString(candidate, ["metaImageUrl", "coverImageUrl", "imageUrl"]), baseUrl);
   const returnedUrl = resolveUrl(optionalString(candidate, ["href", "url", "webUrl", "permalink"]), baseUrl);
   const url =
-    returnedUrl ?? (!isDraft ? new URL(`/posts/${encodeURIComponent(id)}`, `${baseUrl}/`).toString() : undefined);
+    returnedUrl ??
+    (!isDraft && candidate.isDemo !== true
+      ? new URL(`/posts/${encodeURIComponent(id)}`, `${baseUrl}/`).toString()
+      : undefined);
   const slug = optionalString(candidate, ["slug"]);
   const topics = [...new Set([...stringList(candidate.topics), ...stringList(candidate.hashtags)])];
   const readingTimeMinutes = optionalNumber(candidate, [
