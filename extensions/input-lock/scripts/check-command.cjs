@@ -63,6 +63,62 @@ function run(confirmed) {
   };
 }
 
+async function checkSignalExit() {
+  const test = run(true);
+  const command = test.command();
+  await tick();
+  test.child.emit("close", null, "SIGKILL");
+  await command;
+  assert.equal(
+    test.huds.at(-1),
+    "Input Lock failed: helper terminated by SIGKILL",
+    "signal exits must name the signal",
+  );
+}
+
+async function checkTrailingRecord(endStdout) {
+  const test = run(true);
+  let settled = false;
+  const command = test.command().then(() => {
+    settled = true;
+  });
+  await tick();
+  test.child.stdout.emit(
+    "data",
+    '{"phase":"locked","message":"locked"}\n{"phase":"rea',
+  );
+  await tick();
+  assert.equal(test.huds.includes("Inputs unlocked with Touch ID"), false);
+  test.child.stdout.emit(
+    "data",
+    'dy","message":"released","reason":"touchID"}',
+  );
+  if (endStdout) test.child.stdout.emit("end");
+  test.child.emit("close", 0, null);
+  await tick();
+  try {
+    assert.equal(
+      test.huds.at(-1),
+      "Inputs unlocked with Touch ID",
+      "final unterminated record must be handled",
+    );
+    assert.equal(
+      test.huds.filter((message) => message === "Inputs unlocked with Touch ID")
+        .length,
+      1,
+      "stdout end and child close must not duplicate the final HUD",
+    );
+    assert.equal(
+      settled,
+      false,
+      "final trailing HUD must be awaited after child exit",
+    );
+  } finally {
+    test.finishHUD();
+    await command;
+  }
+}
+
 (async () => {
   const confirmed = run(true);
   let settled = false;
@@ -109,8 +165,22 @@ function run(confirmed) {
   await cancelled.command();
   assert.equal(cancelled.confirmations[0]?.primaryAction?.title, "Lock Inputs");
   assert.equal(cancelled.spawns.length, 0, "cancel must not start a helper");
+  let failures = 0;
+  for (const [name, check] of [
+    ["signal exit", checkSignalExit],
+    ["trailing record on stdout end", () => checkTrailingRecord(true)],
+    ["trailing record on child close", () => checkTrailingRecord(false)],
+  ]) {
+    try {
+      await check();
+    } catch (error) {
+      failures++;
+      console.error(`FAIL ${name}: ${error.message}`);
+    }
+  }
+  assert.equal(failures, 0, "signal and trailing-record checks must pass");
   console.log(
-    "command check passed: direct lock, cancel, helper lifetime, final HUD",
+    "command check passed: direct lock, cancel, helper lifetime, final HUD, signals, trailing records",
   );
 })().catch((error) => {
   console.error(error.stack);

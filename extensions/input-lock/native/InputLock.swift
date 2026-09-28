@@ -50,10 +50,19 @@ struct CommandChord {
 
 let lockedMessage = "Hold left and right Command for 3 seconds to use Touch ID. Keep holding for 8 seconds to force unlock."
 
+func writeJSON<Value: Encodable>(_ value: Value) {
+    do {
+        try FileHandle.standardOutput.write(contentsOf: JSONEncoder().encode(value) + Data([0x0a]))
+    } catch {
+        fputs("failed to write helper status: \(error)\n", stderr)
+        exit(1)
+    }
+}
+
 func emit(_ phase: LockPhase, _ message: String, reason: String? = nil) {
     var line = ["phase": phase.rawValue, "message": message]
     if let reason { line["reason"] = reason }
-    FileHandle.standardOutput.write(try! JSONEncoder().encode(line) + Data([0x0a]))
+    writeJSON(line)
 }
 
 func probe() {
@@ -74,6 +83,10 @@ func probe() {
         callback: { _, _, event, _ in Unmanaged.passUnretained(event) }, userInfo: nil
     )
     var activePassthroughTapCreated = false
+    if let eventTap {
+        CGEvent.tapEnable(tap: eventTap, enable: false)
+        CFMachPortInvalidate(eventTap)
+    }
     if let activeTap, let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, activeTap, 0) {
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         activePassthroughTapCreated = CGEvent.tapIsEnabled(tap: activeTap)
@@ -93,8 +106,7 @@ func probe() {
         touchIDAvailable: touchIDAvailable, passiveEventTapCreated: eventTap != nil,
         activePassthroughTapCreated: activePassthroughTapCreated, errors: errors
     )
-    do { FileHandle.standardOutput.write(try JSONEncoder().encode(result) + Data([0x0a])) }
-    catch { fputs("failed to encode probe result: \(error)\n", stderr); exit(1) }
+    writeJSON(result)
 }
 
 func selfTest() {
@@ -366,6 +378,7 @@ final class LockController {
 }
 
 let arguments = Array(CommandLine.arguments.dropFirst())
+signal(SIGPIPE, SIG_IGN)
 switch arguments {
 case ["--probe"]: probe()
 case ["--self-test"]: selfTest()

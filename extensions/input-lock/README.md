@@ -26,7 +26,7 @@ On first use, macOS requests the required permissions. If either permission or T
 
 ## Build and run
 
-Requires Node.js and Apple's Swift command-line tools on the development machine. End users receive the native helper in the extension assets; there is no separate Mac application.
+Requires Node.js. The committed native helper supports command development without a Swift toolchain. Changes to `native/InputLock.swift` require Apple's Swift command-line tools and an explicit rebuild before running, packaging, or publishing. End users receive the native helper in the extension assets; there is no separate Mac application.
 
 ```sh
 npm ci
@@ -36,16 +36,17 @@ npm run dev
 If the selected Xcode installation has an unaccepted license while Command Line Tools are installed, use a per-command override:
 
 ```sh
-DEVELOPER_DIR=/Library/Developer/CommandLineTools npm run dev
+DEVELOPER_DIR=/Library/Developer/CommandLineTools npm run build:native
 ```
 
-The build script compiles `native/InputLock.swift` for arm64 and x86_64, combines both into `assets/input-lock`, and applies an ad-hoc code signature. It uses only Apple frameworks. The extension runtime has no network access or telemetry code. The executable is committed alongside its source and build script because Store CI builds the Raycast command directly.
+The build script compiles `native/InputLock.swift` for arm64 and x86_64, combines both into `assets/input-lock`, and applies an ad-hoc code signature. It uses only Apple frameworks. The extension-owned runtime makes no network requests and contains no telemetry code. This is a source observation; it has no network sandbox. The executable is committed alongside its source and build script because Store CI builds the Raycast command directly.
 
 ```sh
 npm run build
 npm run lint
 npx tsc --noEmit
 node scripts/check-command.cjs
+python3 scripts/check-native.py
 ./assets/input-lock --self-test
 ./assets/input-lock --probe
 ```
@@ -73,7 +74,7 @@ Local checks verified SIGTERM cleanup, parent-process exit cleanup, release of b
 
 A final launch through Raycast with the development watcher stopped created an enabled active tap with keyboard and pointer filtering and no scroll-wheel interception. Both idle sleep assertions were present during the session and absent after termination. The installed and packaged builds use the same command source and native helper. The final bundle is `dist/input-lock.rayext`. All test timers and development processes were stopped after validation.
 
-On 2026-09-28, a Raycast launch reproduced a first-use gate that timed out without entering lock. That activation gate was removed. The corrected command emitted `locked`, then `unlocking`, then `ready` with `reason: touchID`. The user confirmed typing and pointer actions were blocked and restored after Touch ID. The command check covers direct activation, cancellation, helper lifetime, and final status feedback.
+On 2026-09-28, a Raycast launch reproduced a first-use gate that timed out without entering lock. That activation gate was removed. The corrected command emitted `locked`, then `unlocking`, then `ready` with `reason: touchID`. The user confirmed typing and pointer actions were blocked and restored after Touch ID. The command check covers direct activation, cancellation, helper lifetime, final status feedback, signal diagnostics, and trailing status records. The native check covers Command timing and clean failure when the output pipe closes.
 
 Device hot-plugging, permission revocation, screen lock, user switching, and external-display recovery still need physical acceptance checks. UI automation can bypass the event tap, so synthetic typing is not evidence of physical input blocking.
 

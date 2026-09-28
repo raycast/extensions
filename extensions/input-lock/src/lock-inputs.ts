@@ -34,35 +34,41 @@ export default async function Command() {
         console.error("Could not show Input Lock status", error),
       );
   };
+  const handleRecord = (line: string) => {
+    try {
+      const event = JSON.parse(line) as LockEvent;
+      console.log("Input Lock helper event", event);
+      lastPhase = event.phase;
+      if (event.phase === "locked")
+        notify("Typing and clicks blocked. Hold both Command keys to unlock.");
+      if (event.phase === "unlocking") notify("Waiting for Touch ID…");
+      if (event.phase === "error")
+        notify(`Input Lock failed: ${event.message}`);
+      if (event.phase === "ready" && event.reason)
+        notify(
+          event.reason === "touchID"
+            ? "Inputs unlocked with Touch ID"
+            : "Inputs unlocked",
+        );
+    } catch {
+      console.error("Invalid helper output", line);
+    }
+  };
+  const flushPending = () => {
+    if (!pending) return;
+    const line = pending;
+    pending = "";
+    handleRecord(line);
+  };
 
   helper.stdout.setEncoding("utf8");
   helper.stdout.on("data", (chunk: string) => {
     pending += chunk;
     const lines = pending.split("\n");
     pending = lines.pop() ?? "";
-    for (const line of lines) {
-      try {
-        const event = JSON.parse(line) as LockEvent;
-        console.log("Input Lock helper event", event);
-        lastPhase = event.phase;
-        if (event.phase === "locked")
-          notify(
-            "Typing and clicks blocked. Hold both Command keys to unlock.",
-          );
-        if (event.phase === "unlocking") notify("Waiting for Touch ID…");
-        if (event.phase === "error")
-          notify(`Input Lock failed: ${event.message}`);
-        if (event.phase === "ready" && event.reason)
-          notify(
-            event.reason === "touchID"
-              ? "Inputs unlocked with Touch ID"
-              : "Inputs unlocked",
-          );
-      } catch {
-        console.error("Invalid helper output", line);
-      }
-    }
+    for (const line of lines) handleRecord(line);
   });
+  helper.stdout.on("end", flushPending);
   helper.stderr.setEncoding("utf8");
   helper.stderr.on("data", (chunk: string) => (stderr += chunk));
 
@@ -74,16 +80,19 @@ export default async function Command() {
       resolve();
     });
     helper.on("close", async (code, signal) => {
+      flushPending();
       console.log("Input Lock helper exit", {
         code,
         signal,
         lastPhase,
         stderr,
       });
-      if (code !== 0 && lastPhase !== "error")
-        notify(
-          `Input Lock failed: ${stderr.trim() || `helper exited ${code}`}`,
-        );
+      if (code !== 0 && lastPhase !== "error") {
+        const exitReason = signal
+          ? `helper terminated by ${signal}`
+          : `helper exited ${code}`;
+        notify(`Input Lock failed: ${stderr.trim() || exitReason}`);
+      }
       await feedback;
       resolve();
     });

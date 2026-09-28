@@ -22,10 +22,10 @@
   ],
   "scripts": {
     "build:native": "sh scripts/build-native.sh",
-    "build": "npm run build:native && ray build -e dist",
-    "dev": "npm run build:native && ray develop",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "npm run build:native && ray publish"
+    "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "^2.5.3"
