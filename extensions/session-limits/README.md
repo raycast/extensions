@@ -4,7 +4,7 @@
 
 see how much codex and claude code you have left, right in raycast.
 
-<img src="media/session-limits-detail.png" width="720" alt="session limits quota preview" />
+<img src="media/quota-readout.svg" width="640" alt="codex session quota readout" />
 
 ## get started
 
