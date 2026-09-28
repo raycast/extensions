@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Faster Deployments Feed] - {PR_MERGE_DATE}
+
+- `Deployments` now loads each instance with a single request on Dokploy v0.29.0+, instead of one request per service. Services that have never been deployed are no longer listed. Older instances keep working the previous way.
+
 ## [libSQL Services] - 2026-09-28
 
 - Show libSQL databases (Dokploy v0.29.0+) in `Services`, `Deploy Service`, and the AI tools, with Deploy, Rebuild, Start, Stop, Reload, `View Logs`, `View Environment`, and `Delete`. They were previously left out entirely.

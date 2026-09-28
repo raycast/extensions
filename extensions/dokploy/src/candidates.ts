@@ -43,6 +43,10 @@ const KIND_ICONS: Record<Kind, string> = {
   libsql: "libsql.svg",
   compose: "circuit-board.svg",
 };
+export function iconForDeployType(deployType: DeployType): string {
+  const kind = (Object.keys(DEPLOY_TYPES) as Kind[]).find((candidate) => DEPLOY_TYPES[candidate] === deployType);
+  return kind ? KIND_ICONS[kind] : Icon.Box;
+}
 // Same fields services.tsx reads per kind when building its own service status accessory.
 const STATUS_FIELDS: Record<Kind, string> = {
   applications: "applicationStatus",
@@ -128,40 +132,45 @@ export interface LoadCandidatesResult {
   hasInstances: boolean;
 }
 
+export async function loadConfiguredInstances(): Promise<Instance[]> {
+  const raw = await LocalStorage.getItem<string>("instances");
+  return raw ? JSON.parse(raw) : [];
+}
+
+/** Every application/database/compose service on one instance, flattened into `Candidate`s. */
+export async function loadInstanceCandidates(instance: Instance): Promise<Candidate[]> {
+  const { url, headers } = tokenForInstance(instance);
+  const response = await fetch(url + "project.all", { headers });
+  if (!response.ok) throw new Error(`${response.status}`);
+  const summaries = (await response.json()) as Project[];
+
+  // For owner/admin keys `project.all` only carries each database's id (no name or status) and
+  // no service's `appName` - `project.one` has the full rows.
+  const detailed = await mapWithConcurrency(summaries, PROJECT_CONCURRENCY, async (summary) => {
+    const detailResponse = await fetch(`${url}project.one?projectId=${summary.projectId}`, { headers });
+    if (!detailResponse.ok) throw new Error(`${summary.name}: ${detailResponse.status}`);
+    return (await detailResponse.json()) as Project;
+  });
+  const failed = detailed.find((result) => result.status === "rejected");
+  if (failed) throw failed.reason;
+  const projects = detailed.map((result) => (result as PromiseFulfilledResult<Project>).value);
+
+  return candidatesForInstance(instance, projects);
+}
+
 /**
- * Fans out to every configured instance's `project.all`, flattening every application/database/
- * compose service found into one list of `Candidate`s. A rejected instance doesn't drop out of the
- * results silently - it's reported separately in `failedInstances` so callers can tell "this
- * instance has nothing" apart from "this instance couldn't be reached."
+ * Fans out to every configured instance, flattening every application/database/compose service
+ * found into one list of `Candidate`s. A rejected instance doesn't drop out of the results
+ * silently - it's reported separately in `failedInstances` so callers can tell "this instance has
+ * nothing" apart from "this instance couldn't be reached."
  */
 export async function loadCandidates(): Promise<LoadCandidatesResult> {
-  const raw = await LocalStorage.getItem<string>("instances");
-  const instances: Instance[] = raw ? JSON.parse(raw) : [];
+  const instances = await loadConfiguredInstances();
   if (instances.length === 0) {
     return { candidates: [], failedInstances: [], hasInstances: false };
   }
 
-  const results = await Promise.allSettled(
-    instances.map(async (instance) => {
-      const { url, headers } = tokenForInstance(instance);
-      const response = await fetch(url + "project.all", { headers });
-      if (!response.ok) throw new Error(`${response.status}`);
-      const summaries = (await response.json()) as Project[];
-
-      // For owner/admin keys `project.all` only carries each database's id (no name or status) and
-      // no service's `appName` - `project.one` has the full rows.
-      const detailed = await mapWithConcurrency(summaries, PROJECT_CONCURRENCY, async (summary) => {
-        const detailResponse = await fetch(`${url}project.one?projectId=${summary.projectId}`, { headers });
-        if (!detailResponse.ok) throw new Error(`${summary.name}: ${detailResponse.status}`);
-        return (await detailResponse.json()) as Project;
-      });
-      const failed = detailed.find((result) => result.status === "rejected");
-      if (failed) throw failed.reason;
-      const projects = detailed.map((result) => (result as PromiseFulfilledResult<Project>).value);
-
-      return candidatesForInstance(instance, projects);
-    }),
-  );
+  const results = await Promise.allSettled(instances.map(loadInstanceCandidates));
 
   return {
     candidates: results.flatMap((result) => (result.status === "fulfilled" ? result.value : [])),
