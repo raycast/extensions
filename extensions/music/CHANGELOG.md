@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Playback and Search Reliability] - {PR_MERGE_DATE}
+## [Playback and Search Reliability] - 2026-09-28
 
 - Added timeouts for Music scripts and fixed subprocess completion handling.
 - Wait for Music to confirm shuffle and repeat changes before showing success, and recognize Repeat All as enabled.
