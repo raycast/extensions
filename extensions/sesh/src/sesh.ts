@@ -8,6 +8,7 @@ export interface Session {
   Score: number; // The score of the session (from Zoxide)
   Attached: number; // Whether the session is currently attached
   Windows: number; // The number of windows in the session
+  Icon?: string;
 }
 
 export interface Window {

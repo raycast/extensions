@@ -8,6 +8,9 @@ import { openApp } from "./app";
 import { WindowList } from "./windows";
 
 function getIcon(session: Session) {
+  if (session.Icon) {
+    return session.Icon;
+  }
   switch (session.Src) {
     case "tmux":
       return {

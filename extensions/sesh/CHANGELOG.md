@@ -3,6 +3,7 @@
 ## [Connect to worktree from browser] - 2026-09-28
 
 - Add a Connect to Worktree from Browser command that reads the GitHub issue or pull request from your active browser tab and connects to its worktree, creating it if it doesn't exist
+- Show the custom icon (such as an emoji) set on a session or wildcard in your sesh config in place of the default source icon
 
 ## [Search and connect to windows] - 2026-09-23
 
