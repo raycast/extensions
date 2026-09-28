@@ -1,6 +1,6 @@
 # Popcorn Raycast Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-28
 - Add Windows platform support and use VLC as the default player on Windows.
 - Add Windows-compatible keyboard shortcuts and platform-common open/copy shortcuts.
 - Fall back to an available player when no default player is selected.
