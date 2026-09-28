@@ -83,7 +83,7 @@
   },
   {
     "name": "ollamaDefaultModel",
-    "description": "Default model to use for all commands",
+    "description": "Default model to use for all commands. Must match an installed model name exactly (e.g., 'llama3.2', 'mistral:7b'). Use the 'Global Model Settings' command for a dropdown selection.",
     "type": "textfield",
     "required": false,
     "title": "Default Model",
