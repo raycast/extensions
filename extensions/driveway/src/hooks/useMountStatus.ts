@@ -15,14 +15,22 @@ export function useMountStatus() {
     return mountedShares;
   }
 
-  // A slow server can take a moment to appear, so poll rather than
-  // refresh once.
-  async function pollUntilMounted(entry: { host: string; path?: string }, attempts = 60, intervalMs = 500) {
-    for (let i = 0; i < attempts; i++) {
+  // A slow server can take a moment to appear, so poll rather than refresh
+  // once. The interval ramps up: a local mount lands in well under a second
+  // and used to sit out the rest of a fixed 500ms tick before being noticed,
+  // while a slow server still backs off rather than running `df` in a tight
+  // loop for half a minute.
+  async function pollUntilMounted(entry: { host: string; path?: string }, timeoutMs = 30_000) {
+    const deadline = Date.now() + timeoutMs;
+    let interval = 100;
+
+    while (Date.now() < deadline) {
       const mountedShares = await refreshMounted();
       const match = findMountedShare(mountedShares, entry);
       if (match) return match;
-      await delay(intervalMs);
+
+      await delay(interval);
+      interval = Math.min(Math.round(interval * 1.5), 500);
     }
     return undefined;
   }
