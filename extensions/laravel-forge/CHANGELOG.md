@@ -1,5 +1,9 @@
 # Laravel Forge Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Stop sending dropped connections, rejected tokens, rate limits and Forge outages to the extension's error reports
+
 ## [Improvements] - 2026-09-03
 
 - Name the extension in every request to Forge, so their support can trace calls this extension made
