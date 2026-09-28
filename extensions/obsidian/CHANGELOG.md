@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Previous Daily Note Command] - {PR_MERGE_DATE}
+
+- Add a command to open the previous daily note in Obsidian
+
 ## [Fix Search Media crash when opened via hotkey] - 2026-09-24
 
 - Fix a crash in Search Media when the command is launched without a search argument, e.g. via a hotkey

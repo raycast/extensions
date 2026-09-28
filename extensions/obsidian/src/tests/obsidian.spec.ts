@@ -244,6 +244,16 @@ describe("obsidian", () => {
       expect(url).toBe("obsidian://adv-uri?daily=true&vault=Test%20Vault");
     });
 
+    it("should generate an Advanced URI command URL", () => {
+      const url = getObsidianTarget({
+        type: ObsidianTargetType.Command,
+        vault: mockVault,
+        commandId: "daily-notes:goto-prev",
+      });
+
+      expect(url).toBe("obsidian://adv-uri?commandid=daily-notes%3Agoto-prev&vault=Test%20Vault");
+    });
+
     it("should generate DailyNoteAppend URL with append mode", () => {
       const url = getObsidianTarget({
         type: ObsidianTargetType.DailyNoteAppend,

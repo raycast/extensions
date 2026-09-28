@@ -4,8 +4,10 @@ import { Obsidian, ObsidianTargetType } from "@/obsidian";
 export default function Command() {
   return (
     <DailyNote
-      actionTitle="Daily Note"
-      getTarget={(vault) => Obsidian.getTarget({ type: ObsidianTargetType.DailyNote, vault })}
+      actionTitle="Previous Daily Note"
+      getTarget={(vault) =>
+        Obsidian.getTarget({ type: ObsidianTargetType.Command, vault, commandId: "daily-notes:goto-prev" })
+      }
     />
   );
 }
