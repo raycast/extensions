@@ -1,6 +1,6 @@
 # Launchd Monitor Changelog
 
-## [Fix Missing Job Labels] - 2026-09-28
+## [Fix Missing Job Labels] - {PR_MERGE_DATE}
 
 - Show a setup action instead of crashing when no launchd job labels are configured
 
