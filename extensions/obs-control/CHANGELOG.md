@@ -1,6 +1,6 @@
 # OBS Control Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2026-09-28
 
 - Added explicit start and stop commands for recording, streaming, virtual camera, and replay buffer
 - Added explicit pause and resume recording commands
