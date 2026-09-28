@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [libSQL Services] - {PR_MERGE_DATE}
+## [libSQL Services] - 2026-09-28
 
 - Show libSQL databases (Dokploy v0.29.0+) in `Services`, `Deploy Service`, and the AI tools, with Deploy, Rebuild, Start, Stop, Reload, `View Logs`, `View Environment`, and `Delete`. They were previously left out entirely.
 
