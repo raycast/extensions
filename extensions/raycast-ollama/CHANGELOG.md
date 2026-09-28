@@ -1,5 +1,11 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-09-28
+
+- Replaced generic "💾 Loading..." toast with descriptive "🔌 Connecting to Ollama..." toast at inference start.
+- Kept "🤔 Thinking...", "✍️ Typing...", "🧰 Tool Calling...", "👍 Done." toasts for stream phases.
+- Removed redundant loading toast that duplicated top-border spinner.
+
 ## [Raycast Model Provider] - 2026-09-24
 
 - Use models from your local and remote Ollama servers directly in Raycast AI, with streamed responses, conversation history, vision, and tool calling when supported.
