@@ -21,6 +21,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - View Build Logs
             - Roll Back
             - Cancel / Delete
+            - Stop Running Builds / Cancel Queued Deployments
         - View Environment
             - Edit Variables
             - Copy Environment File
@@ -56,7 +57,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - View Logs
 - Deployments
     - See the most recent deployment of every deployed Application and Compose stack across every configured instance, sorted by recency.
-        - View Deployments (full history: Roll Back, Cancel, Delete)
+        - View Deployments (full history: Roll Back, Cancel, Delete, Stop Running Builds, Cancel Queued Deployments)
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Logs
