@@ -119,6 +119,7 @@ export function EpisodeList({
       <List.EmptyView
         title="No Episodes"
         description="Use the watched filter in the Actions menu to show episodes again."
+        actions={<ActionPanel>{watchedFilterAction}</ActionPanel>}
       />
       {seasonsToShow.map((season) => {
         const seasonEpisodes = filterEpisodes(episodesBySeason[Number(season)]);
