@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Enable or Disable a Domain] - {PR_MERGE_DATE}
+
+- Add `Enable Domain` / `Disable Domain` to a service's domains (Dokploy v0.30.0+). Disabling asks for confirmation first. On a Compose stack, the change applies on the next redeploy.
+
 ## [Faster Deployments Feed] - 2026-09-28
 
 - `Deployments` now loads each instance with a single request on Dokploy v0.29.0+, instead of one request per service. Services that have never been deployed are no longer listed. Older instances keep working the previous way.

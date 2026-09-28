@@ -91,6 +91,51 @@ export default function ServiceDomains({
     }
   }
 
+  // `domain.toggleEnable` flips whatever the server currently has, so the toast reports the state
+  // it returns rather than the one this (possibly stale) row showed.
+  async function toggleDomain(domain: Domain) {
+    const isCompose = service.type === "compose";
+    const disabling = domain.enabled !== false;
+
+    if (disabling) {
+      const options: Alert.Options = {
+        title: `Disable ${domain.host}?`,
+        message: isCompose
+          ? "Compose domains are Docker labels - the service keeps answering on this domain until the stack is redeployed."
+          : "The service stops answering on this domain until it is enabled again. Its settings are kept.",
+        primaryAction: {
+          style: Alert.ActionStyle.Destructive,
+          title: "Disable Domain",
+        },
+      };
+      if (!(await confirmAlert(options))) return;
+    }
+
+    const toast = await showToast(Toast.Style.Animated, `${disabling ? "Disabling" : "Enabling"} ${domain.host}…`);
+    try {
+      const response = await fetch(url + "domain.toggleEnable", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ domainId: domain.domainId }),
+      });
+      if (!response.ok) {
+        const err = (await response.json().catch(() => undefined)) as ErrorResult | undefined;
+        const message = err?.message ?? `Request failed with status ${response.status}`;
+        throw new Error(response.status === 404 ? `${message} (needs Dokploy v0.30.0 or later)` : message);
+      }
+      const result = (await response.json()) as { enabled?: boolean | null; requiresRedeploy?: boolean };
+      const enabled = result.enabled ?? !disabling;
+      toast.style = Toast.Style.Success;
+      toast.title = `${enabled ? "Enabled" : "Disabled"} ${domain.host}`;
+      if (result.requiresRedeploy ?? isCompose) toast.message = "Redeploy the compose to apply the change.";
+      revalidate();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Could not ${disabling ? "disable" : "enable"} domain`;
+      toast.message = `${error}`;
+    }
+  }
+
   return (
     <List isLoading={isLoading} navigationTitle={`${service.name} - Domains`}>
       {error ? (
@@ -152,6 +197,16 @@ export default function ServiceDomains({
                   title="Add Domain"
                   target={<AddDomainForm service={service} onCreated={revalidate} />}
                 />
+                {domain.enabled === false ? (
+                  <Action icon={Icon.Play} title="Enable Domain" onAction={() => toggleDomain(domain)} />
+                ) : (
+                  <Action
+                    icon={Icon.Pause}
+                    title="Disable Domain"
+                    style={Action.Style.Destructive}
+                    onAction={() => toggleDomain(domain)}
+                  />
+                )}
                 <Action
                   icon={Icon.Trash}
                   title="Delete Domain"
