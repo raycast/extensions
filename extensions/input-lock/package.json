@@ -17,7 +17,7 @@
       "name": "lock-inputs",
       "title": "Lock Inputs",
       "description": "Block typing and clicks while keeping scrolling available",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "scripts": {

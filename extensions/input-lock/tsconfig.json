@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "commonjs",
     "target": "ES2022",
+    "jsx": "react-jsx",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

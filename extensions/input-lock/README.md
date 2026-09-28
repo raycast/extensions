@@ -4,18 +4,22 @@ A local Raycast MVP that blocks typing and clicks while keeping the current desk
 
 This is a temporary input guard. Anyone who knows the recovery gesture can unlock it. Use the macOS lock screen to protect private data.
 
-![Lock confirmation with unlock instructions](media/lock-confirmation.jpg)
+![Selected duration and lock confirmation](media/lock-confirmation.jpg)
 
 ## Use
 
 Requires macOS 13 or later, Raycast, and an enrolled Touch ID fingerprint.
 
-1. Run **Lock Inputs** in Raycast and confirm **Lock Inputs**. The helper starts the lock, the Raycast window closes, and the desktop stays visible.
+1. Run **Lock Inputs** in Raycast, choose a duration, and confirm **Lock Inputs**. The Raycast window closes and the desktop stays visible.
 2. To unlock, hold both Command keys for 3 seconds, release, and touch the sensor when macOS prompts. Holding both keys continuously for 8 seconds is the recovery route.
+
+Choose **10 minutes**, **30 minutes**, **60 minutes**, **2 hours**, **5 hours**, or **Indefinitely** for each session. Timed sessions unlock automatically when their duration ends. The timer starts when input blocking begins.
+
+**Indefinitely** has no duration limit. If Command-key detection fails while the worker remains responsive, automatic health recovery will not detect that failure. Choose a timed session when you need a recovery route independent of the keyboard gesture.
 
 Assign a hotkey in Raycast Settings → Extensions → Input Lock → Lock Inputs.
 
-The installed extension works with the development watcher stopped. It is ready for daily use as a temporary input guard on the Mac used for these checks. The user tested the scroll-enabled build and confirmed the lock works; physical typing and pointer blocking and Touch ID unlock were also confirmed. Use it directly from Raycast between sessions.
+The installed extension works with the development watcher stopped. The user confirmed physical typing and pointer blocking, scrolling, and Touch ID unlock on the previous local build. The recovery checks below distinguish that hardware observation from the new supervisor checks.
 
 ### Permissions
 
@@ -26,7 +30,7 @@ On first use, macOS requests the required permissions. If either permission or T
 
 ## Build and run
 
-Requires Node.js. The committed native helper supports command development without a Swift toolchain. Changes to `native/InputLock.swift` require Apple's Swift command-line tools and an explicit rebuild before running, packaging, or publishing. End users receive the native helper in the extension assets; there is no separate Mac application.
+Requires Node.js. The committed native helper supports command development without a Swift toolchain. Changes under `native/` require Apple's Swift command-line tools and an explicit rebuild before running, packaging, or publishing. End users receive the native helper in the extension assets; there is no separate Mac application.
 
 ```sh
 npm ci
@@ -39,7 +43,7 @@ If the selected Xcode installation has an unaccepted license while Command Line 
 DEVELOPER_DIR=/Library/Developer/CommandLineTools npm run build:native
 ```
 
-The build script compiles `native/InputLock.swift` for arm64 and x86_64, combines both into `assets/input-lock`, and applies an ad-hoc code signature. It uses only Apple frameworks. The extension-owned runtime makes no network requests and contains no telemetry code. This is a source observation; it has no network sandbox. The executable is committed alongside its source and build script because Store CI builds the Raycast command directly.
+The build script compiles the native sources for arm64 and x86_64, combines both into `assets/input-lock`, and applies an ad-hoc code signature. It uses only Apple frameworks. The extension-owned runtime makes no network requests and contains no telemetry code. This is a source observation; it has no network sandbox. The executable is committed alongside its source and build script because Store CI builds the Raycast command directly.
 
 ```sh
 npm run build
@@ -53,7 +57,9 @@ python3 scripts/check-native.py
 
 ## Technical scope
 
-The no-view Raycast command awaits one helper process for the entire lock session. The helper owns a session event tap, idle display and system sleep assertions, the unlock chord, and Touch ID authentication. JSON lines on stdout report `ready`, `preparing`, `locked`, `unlocking`, and `error` states. An OS file lock prevents nested lock sessions.
+The Raycast command awaits a guardian process for the entire lock session. The same executable starts an input worker that owns the session event tap, idle display and system sleep assertions, the unlock chord, and Touch ID authentication. JSON lines on stdout report `ready`, `preparing`, `locked`, `unlocking`, and `error` states. Heartbeats and control messages remain private between the two native processes. An OS file lock prevents nested lock sessions.
+
+The guardian arms monitoring before input blocking starts. The worker sends main-loop progress every second. Five seconds without progress, the selected duration ending, or the Raycast parent exiting triggers recovery. The guardian requests release, then force-terminates its owned worker after one second if necessary. It confirms worker termination before reporting recovery. The worker's PID remains reserved until it is reaped, preventing escalation from targeting a reused PID.
 
 | Input or behavior | Implementation | Validation |
 | --- | --- | --- |
@@ -67,14 +73,19 @@ The no-view Raycast command awaits one helper process for the entire lock sessio
 | Idle sleep | Display and system idle sleep assertions held during lock | Assertion creation and teardown verified |
 | Touch ID unlock | Apple's biometric authentication policy | User confirmed physical unlock on 2026-09-28 |
 | Recovery gesture | Both Command keys held for 8 seconds | Timing self-check passed; physical recovery check pending |
+| Duration selection | Fresh choice before each session; no saved value | Live Raycast form refuses an empty choice and resets after cancellation; all six values checked |
+| Automatic duration release | Guardian deadline starts at monotonic activation | Actual supervisor checked with a shortened test-only duration and delayed startup |
+| Frozen worker recovery | Independent guardian, 5-second heartbeat limit and 1-second termination grace | Signed installed build launched through Raycast; frozen worker terminated in 5.71 seconds, event tap and both sleep assertions disappeared |
 
-The helper releases its event tap and wake assertions on normal unlock, SIGTERM/SIGINT, parent-process exit, permission loss, a disabled event tap, display reconfiguration, sleep, or session resignation. A helper crash also removes its process-owned event tap and power assertions. Manual sleep and lid-close behavior are not overridden. As a last resort, terminating the `input-lock` process releases the guard.
+The worker releases its event tap and wake assertions on normal unlock, SIGTERM/SIGINT, guardian exit, permission loss, a disabled event tap, display reconfiguration, sleep, or session resignation. Worker termination also removes its process-owned event tap and power assertions. Manual sleep and lid-close behavior are not overridden. If the guardian disappears, a responsive worker releases itself. Simultaneous guardian loss and a frozen worker is outside this guarantee.
 
-Local checks verified SIGTERM cleanup, parent-process exit cleanup, release of both wake assertions, and refusal of a second lock process. Build, lint, TypeScript, and the Command-chord self-check passed.
+As a last resort, force-quit the **input-lock** worker in Activity Monitor or terminate its exact PID with `kill -KILL <worker-pid>`. Ordinary termination depends on the worker's main loop. A reboot should not be necessary.
 
-A final launch through Raycast with the development watcher stopped created an enabled active tap with keyboard and pointer filtering and no scroll-wheel interception. Both idle sleep assertions were present during the session and absent after termination. The installed and packaged builds use the same command source and native helper. The final bundle is `dist/input-lock.rayext`. All test timers and development processes were stopped after validation.
+The bounded native harness covers duration validation, startup refusal, ordinary unlock, activation-based expiry, a frozen worker using production recovery timings, parent loss, guardian termination and loss, late output closure, closed or full output, and refusal of private workers launched by another executable. Its simulated workers compile only into the check binary and never create input taps. The release binary accepts only the six duration tokens.
 
-On 2026-09-28, a Raycast launch reproduced a first-use gate that timed out without entering lock. That activation gate was removed. The corrected command emitted `locked`, then `unlocking`, then `ready` with `reason: touchID`. The user confirmed typing and pointer actions were blocked and restored after Touch ID. The command check covers direct activation, cancellation, helper lifetime, final status feedback, signal diagnostics, and trailing status records. The native check covers Command timing and clean failure when the output pipe closes.
+Build, lint, TypeScript, Command timing, universal architecture and signature checks passed. An independent source review of the new process and pipe boundary found two issues that were fixed and checked before packaging. A final launch through Raycast with development stopped created an enabled tap with keyboard and pointer filtering and no scroll-wheel interception. The worker was then frozen deliberately; its guardian released it and macOS removed its tap and sleep assertions. The installed helper and `dist/input-lock.rayext` contain the same signed native asset. Test timers and helper processes were stopped after validation.
+
+On 2026-09-28, a first-use gesture gate that prevented locking was removed. The user then confirmed typing and pointer actions were blocked and restored after Touch ID. The command check now also covers all duration choices, a fresh empty form, cancellation, helper lifetime, final status feedback, signal diagnostics, recovery feedback and trailing status records.
 
 Device hot-plugging, permission revocation, screen lock, user switching, and external-display recovery still need physical acceptance checks. UI automation can bypass the event tap, so synthetic typing is not evidence of physical input blocking.
 

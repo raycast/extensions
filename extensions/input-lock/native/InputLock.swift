@@ -52,7 +52,9 @@ let lockedMessage = "Hold left and right Command for 3 seconds to use Touch ID. 
 
 func writeJSON<Value: Encodable>(_ value: Value) {
     do {
-        try FileHandle.standardOutput.write(contentsOf: JSONEncoder().encode(value) + Data([0x0a]))
+        let data = try JSONEncoder().encode(value) + Data([0x0a])
+        let count = data.withUnsafeBytes { Darwin.write(STDOUT_FILENO, $0.baseAddress, $0.count) }
+        guard count == data.count else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
     } catch {
         fputs("failed to write helper status: \(error)\n", stderr)
         exit(1)
@@ -110,6 +112,8 @@ func probe() {
 }
 
 func selfTest() {
+    for token in ["600", "1800", "3600", "7200", "18000", "indefinite"] { precondition(LockDuration(token) != nil) }
+    for token in ["", "0", "-1", "1", "nan", "601"] { precondition(LockDuration(token) == nil) }
     var chord = CommandChord()
     chord.flagsChanged(rawFlags: 0x8, keyCode: 55, commandHeld: true, fallbackKeyDown: true, at: 0)
     chord.flagsChanged(rawFlags: 0x18, keyCode: 54, commandHeld: true, fallbackKeyDown: true, at: 0.1)
@@ -164,6 +168,8 @@ final class LockController {
     private let parentPID = getppid()
     private let lockPath = NSTemporaryDirectory() + "raycast-input-lock.lock"
     private var lockFD: Int32 = -1
+    private var controlPending = Data()
+    private var lastHeartbeat: TimeInterval = 0
 
     func testEscape() {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
@@ -213,6 +219,7 @@ final class LockController {
     }
 
     func start() {
+        guard makeNonblocking(STDIN_FILENO), makeNonblocking(STDOUT_FILENO) else { fail("guardianStartup", "Could not arm the recovery connection") }
         lockFD = open(lockPath, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
         guard lockFD >= 0 else { fail("singleInstance", "Could not open instance lock") }
         guard flock(lockFD, LOCK_EX | LOCK_NB) == 0 else { fail("alreadyActive", "Input Lock is already active") }
@@ -274,9 +281,9 @@ final class LockController {
         })
         CFRunLoopAddSource(CFRunLoopGetMain(), tapSource, .commonModes)
         guard CGEvent.tapIsEnabled(tap: tap) else { fail("eventTap", "The input tap was disabled") }
-        phase = .locked
-        emit(phase, lockedMessage)
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in self?.tick() }
+        writeJSON(["kind": "prepared"])
+        timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in self?.tick() }
+        if let timer { RunLoop.main.add(timer, forMode: .common) }
         withExtendedLifetime(self) { RunLoop.main.run() }
     }
 
@@ -307,8 +314,12 @@ final class LockController {
     }
 
     private func tick() {
+        guard phase == .preparing || phase == .locked || phase == .unlocking else { return }
+        guard getppid() == parentPID else { finish(reason: "watchdog"); return }
+        readControl()
         guard phase == .locked || phase == .unlocking else { return }
-        guard getppid() == parentPID else { finish(reason: "parentExited"); return }
+        let now = ProcessInfo.processInfo.systemUptime
+        if now - lastHeartbeat >= 1 { writeJSON(["kind": "heartbeat"]); lastHeartbeat = now }
         guard AXIsProcessTrusted(), CGPreflightListenEventAccess() else { finish(reason: "permissionLost"); return }
         guard let tap, CGEvent.tapIsEnabled(tap: tap) else { finish(reason: "eventTapDisabled"); return }
         guard let duration = chord.heldFor(at: ProcessInfo.processInfo.systemUptime) else { return }
@@ -316,6 +327,29 @@ final class LockController {
         if duration >= 3 && !chord.authenticationTriggered {
             chord.authenticationTriggered = true
             authenticate()
+        }
+    }
+
+    private func readControl() {
+        var bytes = [UInt8](repeating: 0, count: 1024)
+        let count = read(STDIN_FILENO, &bytes, bytes.count)
+        if count == 0 || (count < 0 && errno != EAGAIN && errno != EINTR) { finish(reason: "watchdog"); return }
+        guard count > 0 else { return }
+        controlPending.append(contentsOf: bytes.prefix(count))
+        guard controlPending.count <= 2048 else { finish(reason: "watchdog"); return }
+        while let end = controlPending.firstIndex(of: 10) {
+            let line = Data(controlPending[..<end])
+            controlPending.removeSubrange(...end)
+            guard let packet = try? JSONDecoder().decode([String: String].self, from: line) else { finish(reason: "watchdog"); return }
+            if packet["command"] == "activate", phase == .preparing {
+                let activation = ProcessInfo.processInfo.systemUptime
+                writeJSON(["kind": "active", "uptime": String(activation)])
+                phase = .locked
+                lastHeartbeat = activation
+                emit(phase, lockedMessage)
+            } else if packet["command"] == "release" {
+                finish(reason: packet["reason"] == "timeout" ? "timeout" : "watchdog")
+            } else { finish(reason: "watchdog"); return }
         }
     }
 
@@ -375,14 +409,4 @@ final class LockController {
         if lockFD >= 0 { close(lockFD) }
         lockFD = -1
     }
-}
-
-let arguments = Array(CommandLine.arguments.dropFirst())
-signal(SIGPIPE, SIG_IGN)
-switch arguments {
-case ["--probe"]: probe()
-case ["--self-test"]: selfTest()
-case ["--test-escape"]: LockController().testEscape()
-case ["--lock"]: LockController().start()
-default: fputs("usage: input-lock [--lock|--probe|--self-test|--test-escape]\n", stderr); exit(2)
 }
