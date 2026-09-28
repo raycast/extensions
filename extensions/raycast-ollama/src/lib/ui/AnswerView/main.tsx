@@ -74,6 +74,7 @@ export function AnswerView(props: props): React.JSX.Element {
   const [resolvedSettings, setResolvedSettings] = React.useState<
     { server: string; model: string; thinking: string; keepAlive: string } | undefined
   >(undefined);
+  const [settingsVersion, setSettingsVersion] = React.useState(0);
 
   React.useEffect(() => {
     if (props.command) {
@@ -88,7 +89,7 @@ export function AnswerView(props: props): React.JSX.Element {
       };
       loadResolved();
     }
-  }, [props.command]);
+  }, [props.command, settingsVersion]);
 
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
@@ -120,9 +121,14 @@ export function AnswerView(props: props): React.JSX.Element {
   const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
 
+  const revalidate = React.useCallback(async () => {
+    await RevalidateModel();
+    setSettingsVersion((v) => v + 1);
+  }, [RevalidateModel]);
+
   React.useEffect(() => {
-    if (!showSelectModelForm) RevalidateModel();
-  }, [showSelectModelForm]);
+    if (!showSelectModelForm) revalidate();
+  }, [showSelectModelForm, revalidate]);
 
   React.useEffect(() => {
     if (!autoReplace || pasted.current) return;
@@ -160,7 +166,7 @@ export function AnswerView(props: props): React.JSX.Element {
       <EditModel
         command={props.command}
         setShow={setShowSelectModelForm}
-        revalidate={RevalidateModel}
+        revalidate={revalidate}
         capabilities={props.capabilities}
       />
     );

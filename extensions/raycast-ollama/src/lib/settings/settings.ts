@@ -239,24 +239,7 @@ export async function GetGlobalDefaultModel(): Promise<{
   thinking: string;
   keepAlive: string;
 }> {
-  // Try LocalStorage first
-  const stored: string | undefined = await LocalStorage.getItem(GLOBAL_DEFAULTS_KEY);
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed && typeof parsed === "object" && parsed !== null) {
-        const obj = parsed as Record<string, unknown>;
-        const server = obj.server != null ? String(obj.server) : "Local";
-        const model = obj.model != null ? String(obj.model) : "";
-        const thinking = obj.thinking != null ? String(obj.thinking) : "none";
-        const keepAlive = obj.keepAlive != null ? String(obj.keepAlive) : "5m";
-        return { server, model, thinking, keepAlive };
-      }
-    } catch {
-      // Fall through to preferences
-    }
-  }
-  // Fall back to Preferences
+  // Preferences are the primary source of truth
   const preferences = getPreferenceValues<Preferences>();
   const getStringPref = (val: string | number | boolean | undefined): string => {
     if (typeof val === "string") return val;
@@ -268,6 +251,25 @@ export async function GetGlobalDefaultModel(): Promise<{
   const modelPref = getStringPref(preferences.ollamaDefaultModel) || "";
   const thinkingPref = getStringPref(preferences.ollamaDefaultThinking) || "none";
   const keepAlivePref = getStringPref(preferences.ollamaDefaultKeepAlive) || "5m";
+
+  // Allow LocalStorage override for explicit saves via form
+  const stored: string | undefined = await LocalStorage.getItem(GLOBAL_DEFAULTS_KEY);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === "object" && parsed !== null) {
+        const obj = parsed as Record<string, unknown>;
+        return {
+          server: obj.server != null ? String(obj.server) : serverPref,
+          model: obj.model != null ? String(obj.model) : modelPref,
+          thinking: obj.thinking != null ? String(obj.thinking) : thinkingPref,
+          keepAlive: obj.keepAlive != null ? String(obj.keepAlive) : keepAlivePref,
+        };
+      }
+    } catch {
+      // Use preferences
+    }
+  }
   return {
     server: serverPref,
     model: modelPref,

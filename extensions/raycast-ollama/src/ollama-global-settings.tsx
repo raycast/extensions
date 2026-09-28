@@ -57,6 +57,15 @@ export default function GlobalSettings(): React.JSX.Element {
   const [CheckboxAdvanced, SetCheckboxAdvanced]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
 
+  // Initialize CheckboxAdvanced from loaded keep_alive
+  React.useEffect(() => {
+    const initAdvanced = async () => {
+      const defaults = await GetGlobalDefaultModel();
+      SetCheckboxAdvanced(defaults.keepAlive !== "5m");
+    };
+    initAdvanced();
+  }, []);
+
   const ActionView = (
     <ActionPanel>
       <Action.SubmitForm onSubmit={handleSubmit} />

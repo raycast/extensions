@@ -11,6 +11,24 @@ import { SettingsCommandAnswer } from "./lib/settings/types";
 import { EditModel } from "./lib/ui/AnswerView/form/EditModel";
 import { OllamaApiModelCapability } from "./lib/ollama/enum";
 
+const COMMAND_CAPABILITIES: Record<CommandAnswer, OllamaApiModelCapability[]> = {
+  [CommandAnswer.CASUAL]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.CODE_EXPLAIN]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.CONFIDENT]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.EXPLAIN]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.FIX]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.FRIENDLY]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.IMAGE_DESCRIBE]: [OllamaApiModelCapability.VISION],
+  [CommandAnswer.IMAGE_TO_TEXT]: [OllamaApiModelCapability.VISION],
+  [CommandAnswer.IMPROVE]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.LONGER]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.PROFESSIONAL]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.SHORTER]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.TRANSLATE]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.TWEET]: [OllamaApiModelCapability.COMPLETION],
+  [CommandAnswer.BROWSER_SUMMARIZE]: [OllamaApiModelCapability.COMPLETION],
+};
+
 interface CommandConfig {
   command: CommandAnswer;
   title: string;
@@ -43,6 +61,7 @@ const COMMAND_METADATA: Record<CommandAnswer, { title: string; subtitle: string 
   [CommandAnswer.SHORTER]: { title: "Make Shorter", subtitle: "Make selected text shorter" },
   [CommandAnswer.TRANSLATE]: { title: "Translate", subtitle: "Translate selected text" },
   [CommandAnswer.TWEET]: { title: "Rephrase as Tweet", subtitle: "Rephrase selected text as Tweet" },
+  [CommandAnswer.BROWSER_SUMMARIZE]: { title: "Summarize Website", subtitle: "Summarize content from current Website" },
 };
 
 function formatThinking(thinking: boolean | string | undefined): string {
@@ -66,7 +85,11 @@ export default function ConfigureModels(): React.JSX.Element {
   const [editCommand, setEditCommand] = React.useState<CommandAnswer | null>(null);
   const [editCapabilities, setEditCapabilities] = React.useState<OllamaApiModelCapability[] | undefined>(undefined);
 
-  const { data: AllCommands, isLoading } = usePromise(async () => {
+  const {
+    data: AllCommands,
+    isLoading,
+    revalidate: revalidateCommands,
+  } = usePromise(async () => {
     const commands: CommandConfig[] = [];
     for (const [command, meta] of Object.entries(COMMAND_METADATA)) {
       const cmd = command as CommandAnswer;
@@ -94,11 +117,12 @@ export default function ConfigureModels(): React.JSX.Element {
       model: { main: { server: { url: "" }, tag: "" } },
     });
     await showToast({ style: Toast.Style.Success, title: "Reset to global defaults" });
+    revalidateCommands();
   }
 
-  function handleEdit(command: CommandAnswer, capabilities?: OllamaApiModelCapability[]) {
+  function handleEdit(command: CommandAnswer) {
     setEditCommand(command);
-    setEditCapabilities(capabilities);
+    setEditCapabilities(COMMAND_CAPABILITIES[command]);
     setShowEditForm(true);
   }
 
@@ -107,7 +131,7 @@ export default function ConfigureModels(): React.JSX.Element {
       <EditModel
         command={editCommand}
         setShow={setShowEditForm}
-        revalidate={() => Promise.resolve()}
+        revalidate={revalidateCommands}
         capabilities={editCapabilities}
       />
     );

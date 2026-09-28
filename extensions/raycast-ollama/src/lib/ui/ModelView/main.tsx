@@ -195,6 +195,7 @@ export function ModelView(): React.JSX.Element {
               await SetGlobalDefaultModel({
                 ...defaults,
                 model: prop.model.detail.name,
+                server: prop.model.server.name,
               });
               await showToast({ style: Toast.Style.Success, title: "Default model updated" });
             }}

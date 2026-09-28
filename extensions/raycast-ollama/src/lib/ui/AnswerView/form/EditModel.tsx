@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import * as React from "react";
-import { OllamaApiModelCapability } from "../../../ollama/enum";
 import { CommandAnswer } from "../../../settings/enum";
 import {
   GetOllamaServerByName,
@@ -13,18 +12,13 @@ import { SettingsCommandAnswer } from "../../../settings/types";
 import { GetModels, isThinkingModel } from "../../function";
 import { InfoKeepAlive } from "../../info";
 import { ValidationKeepAlive, ValidationThinking } from "../../valitadion";
-import { ThinkingEffort } from "../../../enum";
 import { ThinkingEffort as ThinkingEffortOllama } from "../../../ollama/types";
 
-interface props {
+interface Props {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
   revalidate: CallableFunction;
   command: CommandAnswer;
-  capabilities?: OllamaApiModelCapability[];
-  server?: string;
-  model?: string;
-  thinking?: ThinkingEffort;
-  keep_alive?: string;
+  capabilities?: string[];
 }
 
 interface FormData {
@@ -32,16 +26,18 @@ interface FormData {
   model: string;
   thinking: string;
   keep_alive: string;
+  useGlobalDefaults: boolean;
 }
 
-export function EditModel(props: props): React.JSX.Element {
+export function EditModel(props: Props): React.JSX.Element {
   const InfoThinking = "Thinking Effort";
 
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
     onData: () => {
-      // Load effective settings (custom or global defaults)
       const loadSettings = async () => {
         const settings = await GetResolvedSettingsCommandAnswer(props.command);
+        const hasCustom = !!settings.model.main.tag;
+        setValue("useGlobalDefaults", !hasCustom);
         setValue("server", settings.server);
         setValue("model", settings.model.main.tag);
         setValue(
@@ -64,6 +60,7 @@ export function EditModel(props: props): React.JSX.Element {
       Submit(values);
     },
     initialValues: {
+      useGlobalDefaults: true,
       keep_alive: "5m",
     },
     validation: {
@@ -94,26 +91,31 @@ export function EditModel(props: props): React.JSX.Element {
   );
 
   async function Submit(values: FormData): Promise<void> {
-    const s = await GetOllamaServerByName(values.server);
-    const o: SettingsCommandAnswer = {
-      server: values.server,
-      model: {
-        main: {
-          server: s,
-          tag: values.model,
-          thinking: values.thinking === "none" ? false : (values.thinking as ThinkingEffortOllama),
-          keep_alive: CheckboxAdvanced ? values.keep_alive : undefined,
+    if (values.useGlobalDefaults) {
+      await SetSettingsCommandAnswer(props.command, {
+        server: "",
+        model: { main: { server: { url: "" }, tag: "" } },
+      });
+    } else {
+      const s = await GetOllamaServerByName(values.server);
+      const o: SettingsCommandAnswer = {
+        server: values.server,
+        model: {
+          main: {
+            server: s,
+            tag: values.model,
+            thinking: values.thinking === "none" ? false : (values.thinking as ThinkingEffortOllama),
+            keep_alive: CheckboxAdvanced ? values.keep_alive : undefined,
+          },
         },
-      },
-    };
-    await SetSettingsCommandAnswer(props.command, o);
+      };
+      await SetSettingsCommandAnswer(props.command, o);
+    }
     await showToast({ style: Toast.Style.Success, title: "Saved" });
     props.revalidate();
     props.setShow(false);
   }
 
-  const hasCustomModel = itemProps.model.value && globalDefaults && itemProps.model.value !== globalDefaults.model;
-  const hasCustomServer = itemProps.server.value && globalDefaults && itemProps.server.value !== globalDefaults.server;
   const hasCustomThinking =
     itemProps.thinking.value && globalDefaults && itemProps.thinking.value !== globalDefaults.thinking;
   const hasCustomKeepAlive =
@@ -123,38 +125,49 @@ export function EditModel(props: props): React.JSX.Element {
     <Form actions={ActionView} isLoading={IsLoadingModel}>
       {!IsLoadingModel && Model && (
         <React.Fragment>
-          <Form.Dropdown title="Server" {...itemProps.server}>
-            {[...Model.keys()].sort().map((s) => (
-              <Form.Dropdown.Item title={s} value={s} key={s} />
-            ))}
-          </Form.Dropdown>
-          <Form.Dropdown title="Model" {...itemProps.model}>
-            {itemProps.server.value &&
-              Model.get(itemProps.server.value)
-                ?.filter((model) => {
-                  if (
-                    !model.capabilities ||
-                    !props.capabilities ||
-                    model.capabilities.length < props.capabilities.length
-                  )
-                    return false;
-                  if (
-                    props.capabilities.length !==
-                    model.capabilities.filter(
-                      (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
-                    ).length
-                  )
-                    return false;
-                  return true;
-                })
-                ?.sort()
-                ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
-          </Form.Dropdown>
-          {hasCustomServer && (
-            <Form.Description title="Global Default Server" text={globalDefaults?.server || "Local"} />
+          <Form.Checkbox
+            id="useGlobalDefaults"
+            title="Use Global Defaults"
+            label="Use global default model settings (configured in preferences)"
+            defaultValue={itemProps.useGlobalDefaults.value}
+            onChange={(v) => setValue("useGlobalDefaults", v)}
+          />
+          {!itemProps.useGlobalDefaults.value && (
+            <React.Fragment>
+              <Form.Dropdown title="Server" {...itemProps.server}>
+                {[...Model.keys()].sort().map((s) => (
+                  <Form.Dropdown.Item title={s} value={s} key={s} />
+                ))}
+              </Form.Dropdown>
+              <Form.Dropdown title="Model" {...itemProps.model}>
+                {itemProps.server.value &&
+                  Model.get(itemProps.server.value)
+                    ?.filter((model) => {
+                      if (
+                        !model.capabilities ||
+                        !props.capabilities ||
+                        model.capabilities.length < props.capabilities.length
+                      )
+                        return false;
+                      if (
+                        props.capabilities.length !==
+                        model.capabilities.filter(
+                          (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
+                        ).length
+                      )
+                        return false;
+                      return true;
+                    })
+                    ?.sort()
+                    ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+              </Form.Dropdown>
+            </React.Fragment>
           )}
-          {hasCustomModel && (
-            <Form.Description title="Global Default Model" text={globalDefaults?.model || "(not set)"} />
+          {itemProps.useGlobalDefaults.value && (
+            <React.Fragment>
+              <Form.Description title="Global Default Server" text={globalDefaults?.server || "Local"} />
+              <Form.Description title="Global Default Model" text={globalDefaults?.model || "(not set)"} />
+            </React.Fragment>
           )}
           <Form.Dropdown title="Thinking Effort" info={InfoThinking} {...itemProps.thinking}>
             <Form.Dropdown.Item title="None" value="none" key="none" />
@@ -188,7 +201,7 @@ export function EditModel(props: props): React.JSX.Element {
           {hasCustomKeepAlive && (
             <Form.Description title="Global Default Keep Alive" text={globalDefaults?.keepAlive || "5m"} />
           )}
-          {props.command === CommandAnswer.TRANSLATE && (
+          {props.command === "translate" && (
             <React.Fragment>
               <Form.Separator />
               <Form.Description title="note" text="It is highly recommended to use the TranslateGemma model." />
