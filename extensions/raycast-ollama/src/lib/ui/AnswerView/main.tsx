@@ -20,6 +20,7 @@ import { EditModel } from "./form/EditModel";
 import { Creativity, PromptInputSource } from "../../enum";
 import { RaycastImage } from "../../types";
 import { OllamaApiModelCapability } from "../../ollama/enum";
+import { GetResolvedSettingsCommandAnswer } from "../../settings/settings";
 
 interface props {
   prompt: string;
@@ -69,6 +70,27 @@ export function AnswerView(props: props): React.JSX.Element {
   const pasteFirst = autoReplace;
   const pasted = React.useRef(false);
 
+  // Resolved settings for display (custom or global defaults)
+  const [resolvedSettings, setResolvedSettings] = React.useState<
+    { server: string; model: string; thinking: string; keepAlive: string } | undefined
+  >(undefined);
+  const [settingsVersion, setSettingsVersion] = React.useState(0);
+
+  React.useEffect(() => {
+    if (props.command) {
+      const loadResolved = async () => {
+        const settings = await GetResolvedSettingsCommandAnswer(props.command as CommandAnswer);
+        setResolvedSettings({
+          server: settings.server,
+          model: settings.model.main.tag,
+          thinking: settings.model.main.thinking === false ? "none" : String(settings.model.main.thinking || "none"),
+          keepAlive: settings.model.main.keep_alive || "5m",
+        });
+      };
+      loadResolved();
+    }
+  }, [props.command, settingsVersion]);
+
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
       Run(
@@ -99,9 +121,14 @@ export function AnswerView(props: props): React.JSX.Element {
   const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
 
+  const revalidate = React.useCallback(async () => {
+    await RevalidateModel();
+    setSettingsVersion((v) => v + 1);
+  }, [RevalidateModel]);
+
   React.useEffect(() => {
-    if (!showSelectModelForm) RevalidateModel();
-  }, [showSelectModelForm]);
+    if (!showSelectModelForm) revalidate();
+  }, [showSelectModelForm, revalidate]);
 
   React.useEffect(() => {
     if (!autoReplace || pasted.current) return;
@@ -139,12 +166,8 @@ export function AnswerView(props: props): React.JSX.Element {
       <EditModel
         command={props.command}
         setShow={setShowSelectModelForm}
-        revalidate={RevalidateModel}
+        revalidate={revalidate}
         capabilities={props.capabilities}
-        server={!IsLoadingModel && Model ? Model.server.name : undefined}
-        model={!IsLoadingModel && Model ? Model.tag.name : undefined}
-        thinking={!IsLoadingModel && Model ? Model.thinking : undefined}
-        keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
       />
     );
 
@@ -159,7 +182,7 @@ export function AnswerView(props: props): React.JSX.Element {
     if (pasteFirst) outputActions.reverse();
 
     return (
-      <ActionPanel title="Actions">
+      <>
         {outputActions[0]}
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
@@ -167,14 +190,6 @@ export function AnswerView(props: props): React.JSX.Element {
           shortcut={Shortcut.ToggleQuickLook}
           onAction={() => setShowAnswerMetadata((prevState) => !prevState)}
         />
-        {props.command && (
-          <Action
-            title="Change Model"
-            icon={Icon.Box}
-            onAction={() => setShowSelectModelForm(true)}
-            shortcut={Shortcut.ChangeModel}
-          />
-        )}
         {Model && !loading && answer && (
           <Action
             title="Continue as Chat"
@@ -195,7 +210,23 @@ export function AnswerView(props: props): React.JSX.Element {
           />
         )}
         {outputActions[1]}
-      </ActionPanel>
+        {props.command && (
+          <>
+            <Action
+              title="Change Model"
+              icon={Icon.Box}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={Shortcut.ChangeModel}
+            />
+            <Action
+              title="Change Reasoning"
+              icon={Icon.Glasses}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={Shortcut.ChangeReasoning}
+            />
+          </>
+        )}
+      </>
     );
   }
 
@@ -256,6 +287,18 @@ export function AnswerView(props: props): React.JSX.Element {
     );
   }
 
+  function ModelSelector(): React.JSX.Element | null {
+    if (!props.command || !resolvedSettings) return null;
+    return (
+      <Action
+        title={`Model: ${resolvedSettings.model} (${resolvedSettings.server})`}
+        icon={Icon.Box}
+        onAction={() => setShowSelectModelForm(true)}
+        shortcut={Shortcut.ChangeModel}
+      />
+    );
+  }
+
   return (
     <Detail
       markdown={`${imageView}
@@ -273,7 +316,15 @@ ${thinking}
 }
 ${answer}`}
       isLoading={loading || IsLoadingModel}
-      actions={!loading && !IsLoadingModel && <AnswerAction />}
+      actions={
+        !loading &&
+        !IsLoadingModel && (
+          <ActionPanel title="Actions">
+            <ModelSelector />
+            <AnswerAction />
+          </ActionPanel>
+        )
+      }
       metadata={
         !loading &&
         !IsLoadingModel &&

@@ -3,7 +3,11 @@ import * as React from "react";
 import { Ollama } from "../../ollama/ollama";
 import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse, ThinkingEffort } from "../../ollama/types";
 import { CommandAnswer } from "../../settings/enum";
-import { AddSettingsCommandChat, GetOllamaServerByName, GetSettingsCommandAnswer } from "../../settings/settings";
+import {
+  AddSettingsCommandChat,
+  GetOllamaServerByName,
+  GetResolvedSettingsCommandAnswer,
+} from "../../settings/settings";
 import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { GetAvailableModel, PromptTokenImageParser, PromptTokenParser } from "../function";
 import { Creativity, PromptInputSource } from "../../enum";
@@ -21,7 +25,7 @@ import { RaycastImage } from "../../types";
 export async function GetModel(command?: CommandAnswer, server?: string, model?: string): Promise<Types.UiModel> {
   let settings: SettingsCommandAnswer | undefined;
   if (command) {
-    settings = await GetSettingsCommandAnswer(command);
+    settings = await GetResolvedSettingsCommandAnswer(command);
     server = settings.server;
     model = settings.model.main.tag;
   } else if (!server || !model) throw new Error("server and model need to be defined");

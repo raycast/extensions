@@ -119,18 +119,15 @@ export function ClipboardConversation(chat?: RaycastChat): string {
 function GetMessagesForInference(chat: RaycastChat, query: string, image?: RaycastImage[]): OllamaApiChatMessage[] {
   const messages: OllamaApiChatMessage[] = [];
 
-  /* Add System Prompt */
   messages.push({
     role: OllamaApiChatMessageRole.SYSTEM,
     content: getSystemPrompt(),
   });
 
-  /* Slice Messages */
   chat.messages
     .slice(chat.messages.length - Number(preferences.ollamaChatHistoryMessagesNumber))
     .forEach((v) => messages.push(...v.messages));
 
-  /* Add User Query */
   messages.push({
     role: OllamaApiChatMessageRole.USER,
     content: query,
@@ -140,11 +137,9 @@ function GetMessagesForInference(chat: RaycastChat, query: string, image?: Rayca
   return messages;
 }
 
-/* Get Mcp Server Tools */
 async function ToolsMcp(mcpServerNames: string[]): Promise<Tool[]> {
   const tools: Tool[] = [];
 
-  /* Get Configures Mcp Server from LocalStorage */
   let config: McpServerConfig;
   try {
     const configRaw = await LocalStorage.getItem<string>("mcp_server_config");
@@ -161,13 +156,10 @@ async function ToolsMcp(mcpServerNames: string[]): Promise<Tool[]> {
     return tools;
   }
 
-  /* Get Tools from all Mcp Server */
   for (const name of mcpServerNames) {
-    /* Get Mcp Server Param */
     const c = config.mcpServers[name];
     if (!c) continue;
 
-    /* Get Tools */
     try {
       const t = await ToolMcp(config.mcpServers[name]);
       tools.push(...t);
@@ -200,7 +192,6 @@ async function Inference(
   let isFirstMessage = true;
 
   while (true) {
-    /* Set Model */
     let model = chat.models.main;
     if (tools.length && chat.models.tools) {
       model = chat.models.tools;
@@ -208,7 +199,6 @@ async function Inference(
       model = chat.models.vision;
     }
 
-    /* Init Ollama Client and set Request Body */
     const o = new Ollama(model.server);
     const body: OllamaApiChatRequestBody = {
       model: model.tag,
@@ -217,7 +207,6 @@ async function Inference(
       keep_alive: model.keep_alive,
     };
 
-    /* Init Tools Array and Add Tools into the body */
     const toolCalls: Promise<ToolResult>[] = [];
     if (tools.length) body.tools = GetOllamaApiTools(tools);
 
@@ -255,9 +244,7 @@ async function Inference(
         setChat((prevState) => {
           if (!prevState) return undefined;
 
-          /* Push new Assistant Message on last Message */
           const updatedMessages = prevState.messages.map((group, groupIndex, groupArr) => {
-            /* Skip all value except last */
             if (groupIndex != groupArr.length - 1) return group;
 
             return {
