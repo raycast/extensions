@@ -43,4 +43,7 @@ export interface JobStatus {
 }
 
 export type OverallStatus =
-  "all-ok" | "has-failures" | "has-running" | "not-loaded";
+  | "all-ok"
+  | "has-failures"
+  | "has-running"
+  | "not-loaded";
