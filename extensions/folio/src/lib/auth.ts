@@ -64,12 +64,6 @@ async function workerPost<T>(path: string, body: Record<string, unknown>): Promi
     // non-JSON error body; handled below
   }
   if (!res.ok) {
-    console.log("[folio-auth] worker error", {
-      path,
-      status: res.status,
-      error: json.error,
-      description: json.error_description,
-    });
     const err = typeof json.error === "string" ? json.error : `HTTP ${res.status}`;
     const desc = typeof json.error_description === "string" ? `: ${json.error_description}` : "";
     throw new AuthError(
@@ -92,12 +86,7 @@ export async function signIn(): Promise<void> {
     scope: SCOPES,
     // Raycast adds response_type=code, state, code_challenge and code_challenge_method=S256 itself.
   });
-  console.log("[folio-auth] opening consent page", {
-    endpoint: discovery.authorization_endpoint,
-    redirectUri: request.redirectURI,
-  });
   const { authorizationCode } = await client.authorize(request);
-  console.log("[folio-auth] authorization code received, exchanging via worker", { worker: prefs().authWorkerUrl });
   const tokens = await workerPost<WorkerTokenResponse>("/oauth/token", {
     grant_type: "authorization_code",
     code: authorizationCode,
@@ -105,7 +94,6 @@ export async function signIn(): Promise<void> {
     redirect_uri: request.redirectURI,
   });
   await client.setTokens(tokens);
-  console.log("[folio-auth] tokens stored", { expiresIn: tokens.expires_in, scope: tokens.scope });
 }
 
 let refreshInFlight: Promise<string> | null = null;
@@ -212,7 +200,7 @@ export async function sessionInfo(): Promise<{
   return out;
 }
 
-/** The exact redirect URI Raycast uses; maintainers register this in the SnapTrade dashboard. */
+/** The exact redirect URI Raycast uses; maintainers register this in the SnapTrade dashboard. Development builds only. */
 export async function redirectUriForRegistration(): Promise<string> {
   const discovery = await getDiscovery();
   const request = await client.authorizationRequest({

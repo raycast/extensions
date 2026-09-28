@@ -136,35 +136,10 @@
       "name": "useFixtures",
       "title": "Data Source",
       "label": "Use bundled fixture data (demo mode)",
-      "description": "Render sample Wealthsimple, Questrade and IBKR accounts instead of calling SnapTrade. Useful for screenshots and development.",
+      "description": "Render sample Wealthsimple, Questrade and IBKR accounts instead of calling SnapTrade. Lets you try Folio without signing in.",
       "type": "checkbox",
       "required": false,
       "default": false
-    },
-    {
-      "name": "enableDevPersonalKey",
-      "title": "Developer",
-      "label": "Use a SnapTrade Personal API key instead of OAuth (developers only)",
-      "description": "Bypass OAuth with your own SnapTrade Personal API key (clientId + consumerKey, HMAC-signed requests). For extension development only, not for Store users.",
-      "type": "checkbox",
-      "required": false,
-      "default": false
-    },
-    {
-      "name": "devClientId",
-      "title": "Personal Client ID (Dev)",
-      "description": "SnapTrade Personal API clientId. Only used when the developer checkbox is enabled.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "YOUR-CLIENT-ID"
-    },
-    {
-      "name": "devConsumerKey",
-      "title": "Personal Consumer Key (Dev)",
-      "description": "SnapTrade Personal API consumerKey. Stored by Raycast as a password preference; never written to disk by Folio.",
-      "type": "password",
-      "required": false,
-      "placeholder": "consumer key"
     }
   ],
   "dependencies": {

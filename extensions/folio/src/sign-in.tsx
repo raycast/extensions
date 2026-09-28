@@ -104,10 +104,6 @@ export default function SignInCommand() {
       "",
       "Turn off *Use bundled fixture data* in preferences to use your own accounts.",
     );
-  } else if (mode === "dev-personal-key") {
-    lines.push(
-      "**Developer key mode is on.** Requests are HMAC-signed with your SnapTrade Personal API key (clientId + consumerKey). OAuth sign-in is bypassed.",
-    );
   } else if (session === undefined) {
     lines.push("Checking session…");
   } else if (signedIn) {
@@ -145,16 +141,7 @@ export default function SignInCommand() {
       markdown={lines.join("\n")}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Mode"
-            text={
-              mode === "fixtures"
-                ? "Demo fixtures"
-                : mode === "dev-personal-key"
-                  ? "Personal API key (dev)"
-                  : "OAuth (read-only)"
-            }
-          />
+          <Detail.Metadata.Label title="Mode" text={mode === "fixtures" ? "Demo fixtures" : "OAuth (read-only)"} />
           <Detail.Metadata.Label
             title="Status"
             text={mode !== "oauth" ? "n/a" : signedIn ? "Signed in" : "Signed out"}
@@ -163,30 +150,36 @@ export default function SignInCommand() {
           {session?.updatedAt ? (
             <Detail.Metadata.Label title="Token updated" text={session.updatedAt.toLocaleString()} />
           ) : null}
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Auth worker" text={p.authWorkerUrl || "not set"} />
-          <Detail.Metadata.Label title="Client ID" text={p.oauthClientId || "not set"} />
-          <Detail.Metadata.Label title="Redirect URI" text="https://raycast.com/redirect?packageName=Extension" />
+          {environment.isDevelopment && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.Label title="Auth worker" text={p.authWorkerUrl || "not set"} />
+              <Detail.Metadata.Label title="Client ID" text={p.oauthClientId || "not set"} />
+              <Detail.Metadata.Label title="Redirect URI" text="https://raycast.com/redirect?packageName=Extension" />
+            </>
+          )}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           {mode === "oauth" && !signedIn && (
-            <Action title="Sign In with SnapTrade" icon={Icon.Person} onAction={doSignIn} />
+            <Action title="Sign in with SnapTrade" icon={Icon.Person} onAction={doSignIn} />
           )}
           {mode === "oauth" && signedIn && (
-            <Action title="Sign out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={doSignOut} />
+            <Action title="Sign Out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={doSignOut} />
           )}
           {mode === "oauth" && signedIn && <Action title="Sign in Again" icon={Icon.Repeat} onAction={doSignIn} />}
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          {mode === "oauth" && !busy && (
+          {environment.isDevelopment && mode === "oauth" && !busy && (
             <Action
               title="Copy Redirect URI (for OAuth App Registration)"
               icon={Icon.Clipboard}
               onAction={copyRedirectUri}
             />
           )}
-          <Action.OpenInBrowser title="Open SnapTrade Dashboard" url="https://dashboard.snaptrade.com" />
+          {environment.isDevelopment && (
+            <Action.OpenInBrowser title="Open SnapTrade Dashboard" url="https://dashboard.snaptrade.com" />
+          )}
           <NavigationActions />
         </ActionPanel>
       }

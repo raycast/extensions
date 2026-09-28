@@ -3,13 +3,11 @@
  * OAuth mode (the Store build): Bearer auth only. Never sends clientId, consumerKey, userId,
  * userSecret, timestamp or Signature. On 401: refresh once through the worker and retry once;
  * then surface a sign-in error.
- * Dev mode (off by default): a developer's own Personal API key, HMAC-signed like the official SDK.
  */
 import { SNAPTRADE_API_BASE } from "./discovery";
 import { AuthError, getAccessToken } from "./auth";
-import { authMode, prefs } from "./preferences";
+import { authMode } from "./preferences";
 import { cacheGet, cacheSet } from "./cache";
-import { signPersonalRequest } from "./personal";
 
 export class ApiError extends Error {
   constructor(
@@ -34,40 +32,6 @@ export interface RequestOptions {
 
 async function bearer(force = false): Promise<string> {
   return getAccessToken({ force });
-}
-
-/** Dev-only: signed request against the same endpoint using a Personal API key (clientId + consumerKey). */
-async function personalOnce<T>(
-  path: string,
-  opts: RequestOptions,
-): Promise<{ status: number; data: T | undefined; raw: string }> {
-  const { devClientId, devConsumerKey } = prefs();
-  if (!devClientId || !devConsumerKey)
-    throw new AuthError("Developer key enabled but clientId/consumerKey are empty.", "not-configured");
-  const signed = signPersonalRequest(
-    { clientId: devClientId, consumerKey: devConsumerKey },
-    SNAPTRADE_API_BASE,
-    path,
-    opts.query ?? {},
-    opts.body,
-  );
-  const res = await fetch(signed.url, {
-    method: opts.method ?? "GET",
-    headers: {
-      ...signed.headers,
-      Accept: "application/json",
-      ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
-    },
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
-  const raw = await res.text();
-  let data: T | undefined;
-  try {
-    data = raw ? (JSON.parse(raw) as T) : undefined;
-  } catch {
-    data = undefined;
-  }
-  return { status: res.status, data, raw };
 }
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
@@ -112,16 +76,11 @@ export async function snaptrade<T>(path: string, opts: RequestOptions = {}): Pro
     if (hit !== undefined) return hit;
   }
 
-  let result: { status: number; data: T | undefined; raw: string };
-  if (authMode() === "dev-personal-key") {
-    result = await personalOnce<T>(path, opts);
-  } else {
-    let token = await bearer();
-    result = await once<T>(url, opts, token);
-    if (result.status === 401) {
-      token = await bearer(true); // refresh once
-      result = await once<T>(url, opts, token); // retry once
-    }
+  let token = await bearer();
+  let result = await once<T>(url, opts, token);
+  if (result.status === 401) {
+    token = await bearer(true); // refresh once
+    result = await once<T>(url, opts, token); // retry once
   }
   if (result.status === 401) {
     throw new AuthError("SnapTrade rejected the session. Sign in again.", "signed-out");
