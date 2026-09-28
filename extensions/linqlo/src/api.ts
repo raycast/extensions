@@ -4,11 +4,7 @@ export function api<T>(
   path: string,
   options: { body?: unknown; signal?: AbortSignal } = {},
 ) {
-  return request<T>(
-    getPreferenceValues<{ apiKey: string }>().apiKey,
-    path,
-    options,
-  );
+  return request<T>(getPreferenceValues<Preferences>().apiKey, path, options);
 }
 export async function getCollections() {
   return (await api<{ collections: Collection[] }>("/collections")).collections;
