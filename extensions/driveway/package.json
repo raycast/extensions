@@ -1,0 +1,175 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "driveway",
+  "title": "DriveWay",
+  "description": "Discover, mount, and unmount SMB and WebDAV network drives. Save multiple servers with aliases and reconnect or mount them all at once. (The Domain/IP preference is for one always-included host, not where you add multiple servers.)",
+  "icon": "icon.png",
+  "author": "pankajpopli",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "smb",
+    "webdav",
+    "network drive",
+    "nas",
+    "mount",
+    "server"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Drives",
+      "description": "View, edit, remove, connect, and disconnect your saved drives. If Domain/IP is set in Preferences, also browse that server's shares live.",
+      "mode": "view"
+    },
+    {
+      "name": "add-server",
+      "title": "Add Drive",
+      "description": "Save a new drive (host, share path, optional alias and username) to your list.",
+      "mode": "view"
+    },
+    {
+      "name": "scan-network",
+      "title": "Discover Devices",
+      "description": "Finds SMB/WebDAV servers on your local network via Bonjour/mDNS and/or a subnet scan, per the Network Discovery preferences below.",
+      "mode": "view"
+    },
+    {
+      "name": "mount-shares",
+      "title": "Mount All",
+      "description": "Mount every saved, reachable drive at once.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unmount-shares",
+      "title": "Unmount All",
+      "description": "Unmount every currently connected saved drive at once.",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-reconnect",
+      "title": "Auto-Reconnect",
+      "description": "Runs in the background and silently reconnects saved drives with Auto-Reconnect enabled. Never touches drives without it, and never unmounts anything. Actual cadence is controlled by the Interval preference below.",
+      "mode": "no-view",
+      "interval": "5m",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "name": "pref_auto_reconnect_interval",
+          "title": "Interval",
+          "description": "How often to retry drives with Auto-Reconnect enabled. This command checks every 5 minutes, but only does anything once this much time has actually passed. To turn the command off entirely, use the Background Refresh toggle above instead — this only sets cadence.",
+          "data": [
+            { "title": "Every 5 minutes", "value": "5" },
+            { "title": "Every 10 minutes", "value": "10" },
+            { "title": "Every 15 minutes", "value": "15" },
+            { "title": "Every 30 minutes", "value": "30" },
+            { "title": "Every hour", "value": "60" }
+          ],
+          "default": "10",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "DriveWay Menu Bar",
+      "description": "Shows saved drives in the menu bar with live connection status and one-click mount/unmount.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "name": "pref_menu_bar_refresh_interval",
+          "title": "Refresh Interval",
+          "description": "How often status re-checks itself in the background. Opening the menu always shows the last-known status instantly, then refreshes for real only once this much time has passed. To stop background refresh entirely (rely on the menu's own Refresh item only), use the Background Refresh toggle above instead — this only sets cadence.",
+          "data": [
+            { "title": "Every 1 minute", "value": "1" },
+            { "title": "Every 5 minutes", "value": "5" },
+            { "title": "Every 10 minutes", "value": "10" },
+            { "title": "Every 30 minutes", "value": "30" }
+          ],
+          "default": "1",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "pref_discovery_bonjour",
+      "title": "Network Discovery",
+      "label": "Bonjour/mDNS discovery",
+      "description": "Finds self-advertising SMB/WebDAV servers. Fast, passive. See README for details.",
+      "default": true,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "name": "pref_discovery_subnet_scan",
+      "title": "",
+      "label": "Scan local subnet",
+      "description": "Probes for open SMB/WebDAV ports. Slower, active scan. See README for details.",
+      "default": false,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "name": "pref_discovery_all_devices",
+      "title": "",
+      "label": "Show all network devices",
+      "description": "Pings everything, any protocol. Broadest, noisiest option. See README for details.",
+      "default": false,
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "pref_discovery_host",
+      "title": "Domain / IP",
+      "description": "Always include this one host (optional). For multiple servers, use Add Drive instead.",
+      "placeholder": "e.g. 192.168.1.10 (one host only)",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "pref_discovery_username",
+      "title": "Username",
+      "description": "Username for the host above (optional).",
+      "placeholder": "e.g. jane",
+      "required": false
+    },
+    {
+      "type": "password",
+      "name": "pref_discovery_password",
+      "title": "Password",
+      "description": "Password for the host above (optional).",
+      "placeholder": "Password for the host above",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

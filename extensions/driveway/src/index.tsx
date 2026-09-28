@@ -1,0 +1,491 @@
+import {
+  ActionPanel,
+  Action,
+  Alert,
+  Form,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  Color,
+  confirmAlert,
+  useNavigation,
+  Keyboard,
+  LaunchProps,
+} from "@raycast/api";
+import { exec } from "child_process";
+import { useEffect, useState } from "react";
+import { listShares } from "./lib/smb-shares";
+import { VolumeUsage } from "./lib/disk-usage";
+import { ServerForm, ServerFormInput } from "./components/ServerForm";
+import { buildShare, PROTOCOL_LABELS, ServerEntry } from "./lib/share";
+import { findMountedShare, unmountShare, MountLocation, UnreachableError, connectShare } from "./lib/mount";
+import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
+import { useMountStatus } from "./hooks/useMountStatus";
+import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
+import { AddServer, DiscoveredDriveItem, DiscoveredHostItem, diskUsageAccessories } from "./components/DiscoveredDrive";
+
+function EditServer({
+  server,
+  onSaved,
+  onDuplicate,
+}: {
+  server: ServerEntry;
+  onSaved: () => void;
+  onDuplicate: (existingId: string) => void;
+}) {
+  const { pop } = useNavigation();
+
+  async function handleSave(values: ServerFormInput) {
+    await updateServer(server.id, values);
+    await showToast({ style: Toast.Style.Success, title: "Server updated" });
+    onSaved();
+    pop();
+  }
+
+  return (
+    <ServerForm
+      submitTitle="Save Changes"
+      initialValues={{ ...server, path: server.path ?? "" }}
+      onSave={handleSave}
+      onDuplicate={(existingId) => {
+        onDuplicate(existingId);
+        pop();
+      }}
+    />
+  );
+}
+
+// One-time credentials to browse any saved host's shares. Held in state only.
+function BrowseHostShares(props: {
+  server: ServerEntry;
+  mounted: MountLocation[];
+  volumes: VolumeUsage[];
+  onMountRequested: (entry: { host: string; path?: string }) => Promise<MountLocation | undefined>;
+  onChanged: () => void;
+  onServerAdded: () => void;
+}) {
+  const [credentials, setCredentials] = useState<{ user: string; password: string } | null>(null);
+  const [shares, setShares] = useState<string[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!credentials) return;
+
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+
+    listShares(props.server.host, credentials.user, credentials.password)
+      .then((result) => {
+        if (!cancelled) setShares(result);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message.replace(/\s+/g, " ") : "Failed to list shares");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [credentials]);
+
+  async function unmountAllOnHost() {
+    const hostMounted = props.mounted.filter((m) => m.host.toLowerCase() === props.server.host.toLowerCase());
+    if (!hostMounted.length) return;
+    await Promise.all(hostMounted.map((m) => unmountShare({ host: m.host, path: m.path }).catch(() => undefined)));
+    props.onChanged();
+  }
+
+  if (!credentials) {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Browse Shares"
+              icon={Icon.MagnifyingGlass}
+              onSubmit={(values: { user: string; password: string }) =>
+                setCredentials({ user: values.user.trim(), password: values.password })
+              }
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.TextField id="user" title="Username" defaultValue={props.server.user} />
+        <Form.PasswordField id="password" title="Password" />
+      </Form>
+    );
+  }
+
+  return (
+    <List isLoading={isLoading} navigationTitle={`Shares on ${props.server.host}`}>
+      {error && (
+        <List.EmptyView
+          title="Failed to List Shares"
+          description={error}
+          icon={Icon.Warning}
+          actions={
+            <ActionPanel>
+              <Action title="Try Different Credentials" icon={Icon.Key} onAction={() => setCredentials(null)} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {shares && shares.length === 0 && !error && <List.EmptyView title="No Shares Found" icon={Icon.HardDrive} />}
+      {(shares ?? []).map((vol) => (
+        <DiscoveredDriveItem
+          key={vol}
+          vol={vol}
+          host={props.server.host}
+          volumes={props.volumes}
+          mounted={props.mounted}
+          onChanged={props.onChanged}
+          onMountRequested={props.onMountRequested}
+          onUnmountAll={unmountAllOnHost}
+          onServerAdded={props.onServerAdded}
+        />
+      ))}
+    </List>
+  );
+}
+
+// selectId arrives from Add Drive when the drive was already saved: the form
+// closes and lands here with the existing entry selected.
+export default function Command(props: LaunchProps<{ launchContext: { selectId?: string } }>) {
+  const [servers, setServers] = useState<ServerEntry[] | null>(null);
+  const [selectedId, setSelectedId] = useState<string | undefined>(props.launchContext?.selectId);
+  const { mounted, volumes, refreshMounted, pollUntilMounted } = useMountStatus();
+  const { smbShares, webdavHosts, otherDevices, isLoading: discoveryLoading } = useNetworkDiscovery();
+  const { push } = useNavigation();
+
+  async function load() {
+    const [entries] = await Promise.all([getServers(), refreshMounted()]);
+    setServers(entries);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function unmountAllOnHost(host: string) {
+    const hostMounted = mounted.filter((m) => m.host.toLowerCase() === host.toLowerCase());
+    if (!hostMounted.length) return;
+    await Promise.all(hostMounted.map((m) => unmountShare({ host: m.host, path: m.path }).catch(() => undefined)));
+    await refreshMounted();
+  }
+
+  async function handleRemove(server: ServerEntry) {
+    const confirmed = await confirmAlert({
+      title: `Remove ${server.alias || server.host}?`,
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    await removeServer(server.id);
+    await showToast({ style: Toast.Style.Success, title: "Server removed" });
+    await load();
+  }
+
+  async function handleToggleAutoMount(server: ServerEntry) {
+    const next = !server.autoMount;
+    await setAutoMount(server.id, next);
+    await showToast({
+      style: Toast.Style.Success,
+      title: next ? "Auto-reconnect enabled" : "Auto-reconnect disabled",
+      message: server.alias || server.host,
+    });
+    await load();
+  }
+
+  async function handleConnect(server: ServerEntry, options?: { open?: boolean }) {
+    let share;
+    try {
+      share = buildShare(server);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid server",
+        message: error instanceof Error ? error.message : "Check the saved host and path.",
+      });
+      return;
+    }
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Connecting to ${share.label}…`,
+    });
+
+    try {
+      await connectShare(share);
+      toast.style = Toast.Style.Success;
+      toast.title = `Mount requested for ${share.label}`;
+      const connected = await pollUntilMounted(server);
+      if (connected) {
+        toast.title = `Connected to ${share.label}`;
+        if (options?.open) {
+          exec(`open "${connected.mountPoint}"`);
+        }
+      }
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      if (error instanceof UnreachableError) {
+        toast.title = error.message;
+      } else {
+        toast.title = `Couldn't mount ${share.label}`;
+        toast.message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "open failed";
+      }
+    }
+  }
+
+  async function handleBrowse(server: ServerEntry) {
+    const existing = findMountedShare(mounted, server);
+    if (existing) {
+      exec(`open "${existing.mountPoint}"`);
+      return;
+    }
+    await handleConnect(server, { open: true });
+  }
+
+  async function handleUnmount(server: ServerEntry) {
+    let share;
+    try {
+      share = buildShare(server);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid server",
+        message: error instanceof Error ? error.message : "Check the saved host and path.",
+      });
+      return;
+    }
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Unmounting ${share.label}…`,
+    });
+
+    try {
+      await unmountShare(server);
+      toast.style = Toast.Style.Success;
+      toast.title = `Unmounted ${share.label}`;
+      await load();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Couldn't unmount ${share.label}`;
+      toast.message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "unmount failed";
+    }
+  }
+
+  const addServerAction = (
+    <Action
+      title="Add Drive"
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+      onAction={() => push(<AddServer onSaved={load} onDuplicate={setSelectedId} />)}
+    />
+  );
+
+  const savedKeys = new Set(
+    (servers ?? []).filter((s) => s.path?.trim()).map((s) => `${s.host.toLowerCase()}/${(s.path ?? "").toLowerCase()}`),
+  );
+
+  // All sources merge into one shape; only SMB hosts expand into shares.
+  const smbByHost = new Map<string, string[]>();
+  for (const { host, vol } of smbShares) {
+    if (savedKeys.has(`${host.toLowerCase()}/${vol.toLowerCase()}`)) continue;
+    const existing = smbByHost.get(host) ?? [];
+    existing.push(vol);
+    smbByHost.set(host, existing);
+  }
+
+  const webdavNotSaved = webdavHosts.filter(
+    (h) =>
+      !(servers ?? []).some(
+        (s) => s.host.toLowerCase() === h.host.toLowerCase() && (s.protocol ?? "smb") === h.protocol,
+      ),
+  );
+
+  // Drop ping-only hosts already listed with a known protocol, or saved.
+  const protocolKnownHosts = new Set(
+    [...smbByHost.keys(), ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
+  );
+  const otherDevicesNotSaved = otherDevices.filter(
+    (host) =>
+      !protocolKnownHosts.has(host.toLowerCase()) &&
+      !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase()),
+  );
+
+  const hasDiscovered = smbByHost.size > 0 || webdavNotSaved.length > 0 || otherDevicesNotSaved.length > 0;
+  const isLoading = servers === null || discoveryLoading;
+  const nothingToShow = (servers?.length ?? 0) === 0 && !hasDiscovered && !isLoading;
+
+  return (
+    <List
+      isLoading={isLoading}
+      selectedItemId={selectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
+      actions={<ActionPanel>{addServerAction}</ActionPanel>}
+    >
+      {nothingToShow && (
+        <List.EmptyView
+          title="No Drives"
+          description="Run Add Drive to save one, or turn on Network Discovery in Preferences to find servers on your network."
+          icon={Icon.HardDrive}
+          actions={<ActionPanel>{addServerAction}</ActionPanel>}
+        />
+      )}
+      {[...smbByHost.entries()].map(([host, vols]) => (
+        <List.Section key={host} title={`Discovered on ${host}`}>
+          {vols.map((vol) => (
+            <DiscoveredDriveItem
+              key={vol}
+              vol={vol}
+              host={host}
+              volumes={volumes}
+              mounted={mounted}
+              onChanged={refreshMounted}
+              onMountRequested={pollUntilMounted}
+              onUnmountAll={() => unmountAllOnHost(host)}
+              onServerAdded={load}
+            />
+          ))}
+        </List.Section>
+      ))}
+      {webdavNotSaved.length > 0 && (
+        <List.Section title="Discovered WebDAV Servers">
+          {webdavNotSaved.map((h) => (
+            <DiscoveredHostItem
+              key={`${h.host}-${h.protocol}`}
+              host={h.host}
+              protocol={h.protocol}
+              onServerAdded={load}
+            />
+          ))}
+        </List.Section>
+      )}
+      {otherDevicesNotSaved.length > 0 && (
+        <List.Section title="Other Devices on Network">
+          {otherDevicesNotSaved.map((host) => (
+            <DiscoveredHostItem key={host} host={host} onServerAdded={load} />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title="Saved Drives">
+        {(servers ?? []).map((server) => {
+          const hasPath = Boolean(server.path?.trim());
+          let label = server.alias || server.host;
+          try {
+            label = buildShare(server).label;
+          } catch {
+            // keep the fallback label above if the saved entry is no longer valid
+          }
+
+          const match = hasPath ? findMountedShare(mounted, server) : undefined;
+          const connected = Boolean(match);
+          const protocol = server.protocol ?? "smb";
+          // Skip the username tag when the subtitle already shows it.
+          const userAlreadyShown =
+            server.user &&
+            (server.host.toLowerCase().includes(server.user.toLowerCase()) ||
+              (server.path ?? "").toLowerCase().includes(server.user.toLowerCase()));
+
+          return (
+            <List.Item
+              key={server.id}
+              id={server.id}
+              title={label}
+              subtitle={hasPath ? `${server.host}/${server.path}` : server.host}
+              accessories={[
+                ...(connected
+                  ? [
+                      {
+                        tag: { value: "Connected", color: Color.Green },
+                        icon: Icon.CheckCircle,
+                      },
+                    ]
+                  : []),
+                ...diskUsageAccessories(match?.mountPoint, volumes),
+                // Only for non-SMB entries; SMB is the implied default.
+                ...(protocol !== "smb" ? [{ tag: { value: PROTOCOL_LABELS[protocol] }, tooltip: "Protocol" }] : []),
+                ...(server.autoMount ? [{ icon: Icon.ArrowClockwise, tooltip: "Auto-reconnect enabled" }] : []),
+                ...(!hasPath ? [{ tag: { value: "No share selected", color: Color.SecondaryText } }] : []),
+                ...(server.user && !userAlreadyShown
+                  ? [{ icon: Icon.Person, text: server.user, tooltip: "Username" }]
+                  : []),
+              ]}
+              icon={Icon.HardDrive}
+              actions={
+                <ActionPanel>
+                  {hasPath &&
+                    (connected ? (
+                      <Action
+                        title="Unmount"
+                        icon={Icon.Eject}
+                        shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        onAction={() => handleUnmount(server)}
+                      />
+                    ) : (
+                      <Action title="Connect" icon={Icon.Plug} onAction={() => handleConnect(server, { open: true })} />
+                    ))}
+                  {hasPath && (
+                    <Action
+                      title="Browse"
+                      icon={Icon.Finder}
+                      shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      onAction={() => handleBrowse(server)}
+                    />
+                  )}
+                  {hasPath && (
+                    <Action
+                      title={server.autoMount ? "Disable Auto-Reconnect" : "Enable Auto-Reconnect"}
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      onAction={() => handleToggleAutoMount(server)}
+                    />
+                  )}
+                  {protocol === "smb" && (
+                    <Action
+                      title="Browse Shares on This Host…"
+                      icon={Icon.MagnifyingGlass}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                      onAction={() =>
+                        push(
+                          <BrowseHostShares
+                            server={server}
+                            mounted={mounted}
+                            volumes={volumes}
+                            onMountRequested={pollUntilMounted}
+                            onChanged={refreshMounted}
+                            onServerAdded={load}
+                          />,
+                        )
+                      }
+                    />
+                  )}
+                  <Action
+                    title="Edit Server"
+                    icon={Icon.Pencil}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    onAction={() => push(<EditServer server={server} onSaved={load} onDuplicate={setSelectedId} />)}
+                  />
+                  {addServerAction}
+                  <Action
+                    title="Remove Server"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={() => handleRemove(server)}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+    </List>
+  );
+}
