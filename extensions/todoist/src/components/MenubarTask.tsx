@@ -19,23 +19,23 @@ import { truncateMiddle } from "../helpers/menu-bar";
 import { priorities, getPriorityIcon } from "../helpers/priorities";
 import { rescheduleDuePayload } from "../helpers/repeat";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
-import useCachedData from "../hooks/useCachedData";
-import { useFocusedTask } from "../hooks/useFocusedTask";
+import type { FocusedTaskState } from "../hooks/useFocusedTask";
 import { useIsTodoistInstalled } from "../hooks/useIsTodoistInstalled";
 
 type MenuBarTaskProps = {
   task: Task;
   data?: SyncData;
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
+  /** From the menu bar command, so each task doesn't read and parse the cache itself. */
+  focus: FocusedTaskState;
 };
 
 function getFailureMessage(title: string, error: unknown) {
   return error instanceof Error && error.message ? `${title}: ${error.message}` : title;
 }
 
-const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
-  const [cachedData, setCachedData] = useCachedData();
-  const { focusedTask, unfocusTask, focusTask } = useFocusedTask({ data: cachedData, setData: setCachedData });
+const MenuBarTask = ({ task, data, setData, focus }: MenuBarTaskProps) => {
+  const { focusedTask, unfocusTask, focusTask } = focus;
   const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
   const { useConfetti } = getPreferenceValues<Preferences>();
 
@@ -156,7 +156,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
           icon={{ source: "sub-task.svg", tintColor: Color.SecondaryText }}
         >
           {subTasks.map((task) => (
-            <MenuBarTask key={task.id} task={task} data={data} setData={setData} />
+            <MenuBarTask key={task.id} task={task} data={data} setData={setData} focus={focus} />
           ))}
         </MenuBarExtra.Submenu>
       ) : null}

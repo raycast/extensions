@@ -63,3 +63,5 @@ export const useFocusedTask = ({ data, setData }: CachedDataParams) => {
 
   return { focusedTask, unfocusTask, focusTask };
 };
+
+export type FocusedTaskState = ReturnType<typeof useFocusedTask>;

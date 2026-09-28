@@ -4,6 +4,7 @@
 
 - Fix "Command Out of Memory" when moving quickly through task lists: selecting a task no longer re-reads and parses the whole cached Todoist data or lists every installed application.
 - Build the "Set Parent Task", "Move Task to Project", "Add Label", "Assign to" and "Add Location Reminder" submenus when they are opened instead of on every selection change.
+- Parse the cached Todoist data once for the menu bar instead of once per task.
 
 ## [Daily Planning and Inbox Triage Skill] - 2026-09-24
 
