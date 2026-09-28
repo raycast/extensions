@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Suggested Titles] - {PR_MERGE_DATE}
+## [Suggested Titles] - 2026-09-28
 
 ### Added
 
