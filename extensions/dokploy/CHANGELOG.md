@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Enable or Disable a Domain] - {PR_MERGE_DATE}
+## [Enable or Disable a Domain] - 2026-09-28
 
 - Add `Enable Domain` / `Disable Domain` to a service's domains (Dokploy v0.30.0+). Disabling asks for confirmation first. On a Compose stack, the change applies on the next redeploy.
 
