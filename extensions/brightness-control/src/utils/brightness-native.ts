@@ -23,7 +23,10 @@ async function tryNative(call: () => Promise<MonitorResult[]>): Promise<MonitorR
   if (!isWindows) return null;
   try {
     const result = await call();
-    if (!Array.isArray(result)) return null;
+    // An empty list means native found nothing (both WMI and DDC/CI paths
+    // came up empty) — treat it as unavailable so the PowerShell fallback
+    // still gets a chance instead of reporting "no monitors" immediately.
+    if (!Array.isArray(result) || result.length === 0) return null;
     return result;
   } catch (error) {
     console.warn("Native brightness backend failed, falling back to PowerShell:", error);

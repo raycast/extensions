@@ -13,7 +13,7 @@ export default async () => {
       ? showDisplayName
         ? `${result.displayName}: ${result.brightness}%`
         : `Brightness set to ${result.brightness}%`
-      : "Brightness increased";
+      : "Brightness decreased";
   await showBrightnessFeedback(message, closeRaycast);
 };
 

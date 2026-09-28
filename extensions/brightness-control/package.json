@@ -187,8 +187,5 @@
   "platforms": [
     "macOS",
     "Windows"
-  ],
-  "allowScripts": {
-    "esbuild": true
-  }
+  ]
 }

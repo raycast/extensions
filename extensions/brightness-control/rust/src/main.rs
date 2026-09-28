@@ -67,6 +67,13 @@ fn run_action(action: Action) -> Result<Vec<MonitorResult>, String> {
         eprintln!("brightness ddc path skipped: {e}");
     }
 
+    // Never report an empty list as success: the TS bridge treats an empty
+    // result as "native found nothing" and falls back to PowerShell, but an
+    // explicit error makes the contract obvious for any direct CLI use too.
+    if results.is_empty() {
+        return Err("No brightness-capable monitors found".to_string());
+    }
+
     Ok(results)
 }
 

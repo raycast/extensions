@@ -29,7 +29,13 @@ const BRIGHTNESS_PS1 = `param(
     [string]$Action,
 
     [Parameter(Mandatory=$false)]
-    [int]$Value = 0
+    [int]$Value = 0,
+
+    # Cache tag derived from the script source (passed by the caller).
+    # The DDC wrapper DLL filename includes it, so a future script change
+    # never reuses a DLL compiled from older sources.
+    [Parameter(Mandatory=$false)]
+    [string]$DllTag = "v1"
 )
 
 # DDC/CI interop compiled on first use and cached as a DLL in $env:TEMP
@@ -144,8 +150,9 @@ try {
     try {
         # Loading a cached wrapper DLL (~50ms) is far cheaper than compiling
         # the C# on every invocation (~1s). Best-effort: any failure falls
-        # back to compiling in-memory.
-        $ddcDll = Join-Path $env:TEMP "brightness-control-ddc.dll"
+        # back to compiling in-memory. The filename carries the caller-passed
+        # source tag, so a script update never loads a stale DLL.
+        $ddcDll = Join-Path $env:TEMP "brightness-control-ddc-$DllTag.dll"
         $ddcLoaded = $false
         try {
             if (Test-Path $ddcDll) {
@@ -245,6 +252,19 @@ function powershellCandidates(): string[] {
   return ["powershell.exe", `${systemRoot}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`];
 }
 
+/**
+ * Short tag derived from the script source, passed as `-DllTag` so the
+ * cached DDC wrapper DLL filename changes whenever the script does.
+ * A stale DLL from an older release can never be reused.
+ */
+function scriptTag(): string {
+  let hash = 5381;
+  for (let i = 0; i < BRIGHTNESS_PS1.length; i++) {
+    hash = ((hash * 33) ^ BRIGHTNESS_PS1.charCodeAt(i)) >>> 0;
+  }
+  return hash.toString(36);
+}
+
 async function runBrightnessScript(action: "get" | "set" | "offset", value: number = 0): Promise<ScriptResult> {
   const scriptPath = ensureScript();
   const args = [
@@ -258,6 +278,8 @@ async function runBrightnessScript(action: "get" | "set" | "offset", value: numb
     action,
     "-Value",
     String(value),
+    "-DllTag",
+    scriptTag(),
   ];
 
   let stdout: string | null = null;
