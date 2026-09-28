@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
+import { withBookmarksLock } from "./bookmarks-lock";
 import { VAULT_MARKER_DIR } from "./vault";
 
 export interface BookmarkTag {
@@ -73,40 +74,89 @@ function normalizeUrlForCompare(raw: string): string {
   }
 }
 
-/** Empty is only the right answer for "this vault has never saved a bookmark" (no file yet) — the
- *  one case ENOENT actually means. Anything else (a permission error, a half-written file from a
- *  crash mid-rename, disk trouble) has to be a real failure: every write in this module reads the
- *  file, modifies it in memory, and writes the WHOLE thing back, so treating a transient read
- *  failure as "empty" would have the next save silently replace every existing bookmark with just
- *  the one being added or changed. Letting it throw here means a caller either surfaces the error
- *  (an in-app command with a toast) or the mutation itself stops rather than clobbering real data. */
-async function readBookmarksFile(vaultPath: string): Promise<BookmarksFile> {
+async function exists(file: string): Promise<boolean> {
+  try {
+    await fs.access(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** The file's contents as they are right now, plus the raw text (null when there's no file yet).
+ *
+ *  Empty is only the right answer for "this vault has never saved a bookmark" (no file yet).
+ *  Anything else (a permission error, a half-written file, disk trouble) has to be a real failure:
+ *  every write here puts the WHOLE file back, so treating a transient read failure as "empty" would
+ *  have the next save replace every existing bookmark with just the one being changed. And a
+ *  missing file is only trusted as "never saved" when nothing says otherwise: MarkdownOS keeps the
+ *  previous version alongside as `.bak`, and iCloud leaves a `.<name>.icloud` placeholder for a file
+ *  it hasn't downloaded, so either one means the bookmarks exist and just can't be read right now. */
+async function readBookmarksFile(vaultPath: string): Promise<{ data: BookmarksFile; raw: string | null }> {
+  const file = bookmarksFilePath(vaultPath);
   let raw: string;
   try {
-    raw = await fs.readFile(bookmarksFilePath(vaultPath), "utf8");
+    raw = await fs.readFile(file, "utf8");
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { bookmarks: [], tags: [], pinnedTagIds: [] };
-    throw error;
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    const placeholder = path.join(path.dirname(file), `.${path.basename(file)}.icloud`);
+    if (await exists(placeholder)) {
+      throw new Error("Your bookmarks are still downloading from iCloud. Nothing was changed. Try again shortly.");
+    }
+    if (await exists(`${file}.bak`)) {
+      throw new Error(
+        "Your bookmarks file is missing (a backup is still there). Nothing was changed. Open MarkdownOS to check your bookmarks.",
+      );
+    }
+    return { data: { bookmarks: [], tags: [], pinnedTagIds: [] }, raw: null };
   }
   const parsed = JSON.parse(raw) as Partial<BookmarksFile>;
   return {
-    bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : [],
-    tags: Array.isArray(parsed.tags) ? parsed.tags : [],
-    pinnedTagIds: Array.isArray(parsed.pinnedTagIds) ? parsed.pinnedTagIds : [],
+    data: {
+      bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : [],
+      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+      pinnedTagIds: Array.isArray(parsed.pinnedTagIds) ? parsed.pinnedTagIds : [],
+    },
+    raw,
   };
 }
 
-async function writeBookmarksFile(vaultPath: string, data: BookmarksFile): Promise<void> {
-  const dir = bookmarksDir(vaultPath);
-  await fs.mkdir(dir, { recursive: true });
+/** Only ever called while holding the lock (see mutateBookmarks). A temp name unique to this write,
+ *  not just to this process: every Raycast command shares one pid, so a pid-only name let two
+ *  concurrent writes share a temp file. The previous contents are kept as `.bak`, as MarkdownOS does. */
+async function writeBookmarksFile(vaultPath: string, json: string, previousRaw: string | null): Promise<void> {
   const file = bookmarksFilePath(vaultPath);
-  const temp = `${file}.tmp-${process.pid}`;
-  await fs.writeFile(temp, JSON.stringify(data, null, 2));
-  await fs.rename(temp, file);
+  if (previousRaw !== null) await fs.writeFile(`${file}.bak`, previousRaw).catch(() => {});
+  const temp = `${file}.tmp-${process.pid}-${randomUUID()}`;
+  try {
+    await fs.writeFile(temp, json);
+    await fs.rename(temp, file);
+  } catch (error) {
+    await fs.unlink(temp).catch(() => {});
+    throw error;
+  }
+}
+
+/**
+ * Every change to bookmarks.json goes through here: take the lock, read the file as it is NOW,
+ * apply the change to that, write it back, release. Two overlapping actions — two Raycast commands,
+ * or a command and MarkdownOS — can no longer start from the same snapshot and have the second
+ * write erase the first. `change` must not do network work; anything slow happens before this.
+ * Nothing is written if the change turns out to change nothing.
+ */
+async function mutateBookmarks<T>(vaultPath: string, change: (data: BookmarksFile) => T | Promise<T>): Promise<T> {
+  return withBookmarksLock(bookmarksDir(vaultPath), async () => {
+    const { data, raw } = await readBookmarksFile(vaultPath);
+    const before = JSON.stringify(data, null, 2);
+    const result = await change(data);
+    const after = JSON.stringify(data, null, 2);
+    if (after !== before) await writeBookmarksFile(vaultPath, after, raw);
+    return result;
+  });
 }
 
 export async function loadBookmarks(vaultPath: string): Promise<{ bookmarks: Bookmark[]; tags: BookmarkTag[] }> {
-  const { bookmarks, tags } = await readBookmarksFile(vaultPath);
+  const { bookmarks, tags } = (await readBookmarksFile(vaultPath)).data;
   return { bookmarks, tags };
 }
 
@@ -115,37 +165,40 @@ export async function updateBookmark(
   id: string,
   patch: { title?: string; searchTerms?: string },
 ): Promise<void> {
-  const data = await readBookmarksFile(vaultPath);
-  const existing = data.bookmarks.find((b) => b.id === id);
-  if (!existing) return;
-  if (patch.title !== undefined) {
-    const trimmed = patch.title.trim();
-    existing.title = trimmed || existing.fetchedTitle || hostnameFallback(existing.url);
-    existing.titleIsCustom = trimmed.length > 0;
-  }
-  if (patch.searchTerms !== undefined) existing.searchTerms = patch.searchTerms.trim();
-  existing.updatedAt = new Date().toISOString();
-  await writeBookmarksFile(vaultPath, data);
+  await mutateBookmarks(vaultPath, (data) => {
+    const existing = data.bookmarks.find((b) => b.id === id);
+    if (!existing) return;
+    if (patch.title !== undefined) {
+      const trimmed = patch.title.trim();
+      existing.title = trimmed || existing.fetchedTitle || hostnameFallback(existing.url);
+      existing.titleIsCustom = trimmed.length > 0;
+    }
+    if (patch.searchTerms !== undefined) existing.searchTerms = patch.searchTerms.trim();
+    existing.updatedAt = new Date().toISOString();
+  });
 }
 
 export async function setBookmarkArchived(vaultPath: string, id: string, archived: boolean): Promise<void> {
-  const data = await readBookmarksFile(vaultPath);
-  const existing = data.bookmarks.find((b) => b.id === id);
-  if (!existing) return;
-  existing.archivedAt = archived ? (existing.archivedAt ?? new Date().toISOString()) : null;
-  await writeBookmarksFile(vaultPath, data);
+  await mutateBookmarks(vaultPath, (data) => {
+    const existing = data.bookmarks.find((b) => b.id === id);
+    if (!existing) return;
+    existing.archivedAt = archived ? (existing.archivedAt ?? new Date().toISOString()) : null;
+  });
 }
 
 export async function setBookmarkTag(vaultPath: string, id: string, tagId: string, checked: boolean): Promise<void> {
-  const data = await readBookmarksFile(vaultPath);
-  const existing = data.bookmarks.find((b) => b.id === id);
-  if (!existing) return;
-  existing.tagIds = checked
-    ? existing.tagIds.includes(tagId)
-      ? existing.tagIds
-      : [...existing.tagIds, tagId]
-    : existing.tagIds.filter((t) => t !== tagId);
-  await writeBookmarksFile(vaultPath, data);
+  await mutateBookmarks(vaultPath, (data) => {
+    const existing = data.bookmarks.find((b) => b.id === id);
+    if (!existing) return;
+    if (checked) {
+      // A tag deleted in MarkdownOS after this list was loaded would otherwise be written onto the
+      // bookmark as an id that names nothing — the same check the app's own bookmarks:addTag makes.
+      if (existing.tagIds.includes(tagId) || !data.tags.some((t) => t.id === tagId)) return;
+      existing.tagIds = [...existing.tagIds, tagId];
+    } else {
+      existing.tagIds = existing.tagIds.filter((t) => t !== tagId);
+    }
+  });
 }
 
 // Same headers/caps as main/handlers/bookmarks.ts's own page fetch — an unknown User-Agent gets a
@@ -280,10 +333,12 @@ export async function addBookmark(vaultPath: string, rawUrl: string, customTitle
     return { status: "invalid-url" };
   }
 
-  const data = await readBookmarksFile(vaultPath);
+  // A quick check before the slow fetches below, so an obvious duplicate answers at once. Not the
+  // final word — see the re-check under the lock at the end.
   const target = normalizeUrlForCompare(url);
-  const existing = data.bookmarks.find((b) => normalizeUrlForCompare(b.url) === target);
-  if (existing) return { status: "duplicate", existing };
+  const findDuplicate = (data: BookmarksFile) => data.bookmarks.find((b) => normalizeUrlForCompare(b.url) === target);
+  const early = findDuplicate((await readBookmarksFile(vaultPath)).data);
+  if (early) return { status: "duplicate", existing: early };
 
   const id = randomUUID();
   const trimmedTitle = customTitle.trim();
@@ -307,24 +362,44 @@ export async function addBookmark(vaultPath: string, rawUrl: string, customTitle
     enriching: false,
   };
 
-  // Re-read right before writing rather than reusing `data` from above: the title and favicon
-  // fetches in between can take several seconds, and writing back that stale snapshot would
-  // silently discard any edit, archive, or delete made elsewhere while this was still in flight.
-  // The dedupe check above is still against the early read — a duplicate created in that same
-  // window is an acceptable race, but losing unrelated data to it is not.
-  const latest = await readBookmarksFile(vaultPath);
-  latest.bookmarks = [bookmark, ...latest.bookmarks];
-  await writeBookmarksFile(vaultPath, latest);
-  return { status: "created", bookmark };
+  // Inserted into the file as it is NOW, under the lock — the fetches above can take several
+  // seconds, and anything saved elsewhere meanwhile has to survive. The duplicate check runs again
+  // here too, against that same latest state: the same url may have been saved in the meantime.
+  const result = await mutateBookmarks(vaultPath, (latest): AddBookmarkResult => {
+    const duplicate = findDuplicate(latest);
+    if (duplicate) return { status: "duplicate", existing: duplicate };
+    latest.bookmarks = [bookmark, ...latest.bookmarks];
+    return { status: "created", bookmark };
+  });
+  // Named after this bookmark's own fresh id, so nothing else can be using it.
+  if (result.status === "duplicate" && faviconFile) {
+    await fs.unlink(path.join(bookmarksDir(vaultPath), "favicons", faviconFile)).catch(() => {});
+  }
+  return result;
+}
+
+/** A favicon file only this bookmark can be using: one named after its own id, which is how this
+ *  extension (and older MarkdownOS versions) name the files they create. MarkdownOS now names
+ *  icons by their content (`fav-<hash>.<ext>`) and shares one file between every bookmark with the
+ *  same icon, so deleting one of those here could blank the icon of every other bookmark using it
+ *  — and whether the app is about to reference it can't be known from outside. Those are left for
+ *  MarkdownOS to manage. */
+function ownsFaviconFile(bookmark: Bookmark): boolean {
+  const file = bookmark.faviconFile;
+  return !!file && (file.startsWith(`${bookmark.id}.`) || file.startsWith(`${bookmark.id}-`));
 }
 
 export async function deleteBookmark(vaultPath: string, id: string): Promise<void> {
-  const data = await readBookmarksFile(vaultPath);
-  const existing = data.bookmarks.find((b) => b.id === id);
-  if (!existing) return;
-  data.bookmarks = data.bookmarks.filter((b) => b.id !== id);
-  await writeBookmarksFile(vaultPath, data);
-  if (existing.faviconFile) {
-    await fs.unlink(path.join(bookmarksDir(vaultPath), "favicons", existing.faviconFile)).catch(() => {});
+  const orphanedIcon = await mutateBookmarks(vaultPath, (data) => {
+    const existing = data.bookmarks.find((b) => b.id === id);
+    if (!existing) return null;
+    data.bookmarks = data.bookmarks.filter((b) => b.id !== id);
+    const file = existing.faviconFile;
+    return file && ownsFaviconFile(existing) && !data.bookmarks.some((b) => b.faviconFile === file) ? file : null;
+  });
+  // Only once the deletion is saved — a save that failed must not leave the bookmark pointing at an
+  // icon that's already gone. Safe outside the lock: nothing else can reference a file it owns.
+  if (orphanedIcon) {
+    await fs.unlink(path.join(bookmarksDir(vaultPath), "favicons", orphanedIcon)).catch(() => {});
   }
 }
