@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { BASE, Ticket, ago, dashboardUrl, headers, parseResponse, query } from "./api";
+import { BASE, PAGE_SIZE, Ticket, ago, dashboardUrl, headers, nextPage, parseResponse, query } from "./api";
 import Transcript from "./transcript";
 import ErrorView from "./error-view";
 
@@ -12,17 +12,24 @@ const STATUS_COLOR: Record<string, Color> = {
 };
 
 export default function Tickets() {
-  const url = `${BASE}/api/v1/tickets/${query({ limit: 100 })}`;
-  const { isLoading, data, error, revalidate } = useFetch(url, {
-    headers: headers(),
-    parseResponse: (response) => parseResponse<{ tickets: Ticket[] }>(response),
-    keepPreviousData: true,
-  });
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
+    (options) => `${BASE}/api/v1/tickets/${query({ limit: PAGE_SIZE, before: options.cursor })}`,
+    {
+      headers: headers(),
+      parseResponse: (response) => parseResponse<{ tickets: Ticket[] }>(response),
+      mapResult: (result) => ({
+        data: result.tickets || [],
+        ...nextPage(result.tickets || [], (t) => t.created_at),
+      }),
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
 
-  const tickets = data?.tickets || [];
+  const tickets = data || [];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search tickets">
+    <List isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search tickets">
       {error ? <ErrorView message={error.message} retry={revalidate} /> : null}
       {error ? null : (
         <List.EmptyView
