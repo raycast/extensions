@@ -52,7 +52,7 @@ export default async function command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "Some SMB shares were not unmounted",
-      message: problems.join(" — "),
+      message: problems.join("; "),
     });
     return;
   }

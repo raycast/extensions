@@ -55,7 +55,7 @@ export default async function command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "Some SMB shares were not mounted",
-      message: failures.join(" — "),
+      message: failures.join("; "),
     });
     return;
   }

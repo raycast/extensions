@@ -102,7 +102,7 @@ export default function Command() {
       {nothingFound && (
         <List.EmptyView
           title="No Devices Found"
-          description="Nothing discovered yet — check Network Discovery in Preferences, or a server may need a moment to respond."
+          description="Nothing discovered yet. Check Network Discovery in Preferences, or a server may need a moment to respond."
           icon={Icon.Globe}
           actions={
             <ActionPanel>

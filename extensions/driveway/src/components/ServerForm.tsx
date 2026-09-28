@@ -96,21 +96,21 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
         ))}
       </Form.Dropdown>
       {protocol === "webdav-http" && (
-        <Form.Description text="⚠️ Sends credentials and files unencrypted — trusted local networks only." />
+        <Form.Description text="⚠️ Sends credentials and files unencrypted over the network. Trusted local networks only." />
       )}
       <Form.TextField
         id="alias"
         title="Alias (optional)"
         placeholder="e.g. media-server"
         defaultValue={initialValues?.alias}
-        info="Shown in Manage SMB Servers and in toasts instead of the IP address. Defaults to the last part of the share path if left blank."
+        info="Shown in Manage Drives and in toasts instead of the IP address. Defaults to the last part of the share path if left blank."
       />
       <Form.TextField
         id="host"
         title="IP address or hostname"
         placeholder="e.g. 192.168.1.10 or 192.168.1.10:8443"
         defaultValue={initialValues?.host}
-        info="A :port suffix is optional — mainly useful for WebDAV, which often runs on a non-default port. SMB is almost always on its standard port."
+        info="A :port suffix is optional, mainly useful for WebDAV, which often runs on a non-default port. SMB is almost always on its standard port."
         error={hostError}
         onChange={() => setHostError(undefined)}
         onBlur={(event) => {
@@ -137,10 +137,10 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
           title="Username (optional)"
           placeholder="e.g. jane"
           defaultValue={initialValues?.user}
-          info="Set this so macOS mounts as the same account every time — it's what lets Keychain match a saved password instead of prompting again"
+          info="Set this so macOS mounts as the same account every time. It's what lets Keychain match a saved password instead of prompting again."
         />
       ) : (
-        <Form.Description text="WebDAV doesn't use a username — Keychain matches by server, and any password or certificate prompt happens right here when you connect." />
+        <Form.Description text="WebDAV doesn't use a username. Keychain matches by server, and any password or certificate prompt happens right here when you connect." />
       )}
     </Form>
   );

@@ -101,7 +101,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={server.id}
               title={busyId === server.id ? `${label}…` : label}
-              subtitle={match ? "Connected — click to unmount" : "Click to connect"}
+              subtitle={match ? "Connected, click to unmount" : "Click to connect"}
               icon={match ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
               onAction={() => handleToggle(server)}
             />

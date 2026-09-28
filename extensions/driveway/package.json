@@ -34,7 +34,7 @@
     {
       "name": "scan-network",
       "title": "Discover Devices",
-      "description": "Finds SMB/WebDAV servers on your local network via Bonjour/mDNS and/or a subnet scan, per the Network Discovery preferences below.",
+      "description": "Finds SMB and WebDAV servers, computers, and other devices on your local network via Bonjour/mDNS, a subnet scan, and a ping sweep, per the Network Discovery preferences below.",
       "mode": "view"
     },
     {
@@ -60,7 +60,7 @@
           "type": "dropdown",
           "name": "pref_auto_reconnect_interval",
           "title": "Interval",
-          "description": "How often to retry drives with Auto-Reconnect enabled. This command checks every 5 minutes, but only does anything once this much time has actually passed. To turn the command off entirely, use the Background Refresh toggle above instead — this only sets cadence.",
+          "description": "How often to retry drives with Auto-Reconnect enabled. This command checks every 5 minutes, but only does anything once this much time has actually passed. To turn the command off entirely, use the Background Refresh toggle above instead. This only sets cadence.",
           "data": [
             {
               "title": "Every 5 minutes",
@@ -99,7 +99,7 @@
           "type": "dropdown",
           "name": "pref_menu_bar_refresh_interval",
           "title": "Refresh Interval",
-          "description": "How often status re-checks itself in the background. Opening the menu always shows the last-known status instantly, then refreshes for real only once this much time has passed. To stop background refresh entirely (rely on the menu's own Refresh item only), use the Background Refresh toggle above instead — this only sets cadence.",
+          "description": "How often status re-checks itself in the background. Opening the menu always shows the last-known status instantly, then refreshes for real only once this much time has passed. To stop background refresh entirely (rely on the menu's own Refresh item only), use the Background Refresh toggle above instead. This only sets cadence.",
           "data": [
             {
               "title": "Every 1 minute",
