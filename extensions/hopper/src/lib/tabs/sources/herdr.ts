@@ -3,10 +3,12 @@
 // herdr, found through the parent chain of the client attached to that session (connected to its herdr-client.sock); in terminals that report panes (iTerm, cmux, Terminal)
 // the client's tty also finds the terminal tab holding herdr, which is selected with it (Tab.within). One `session.snapshot` request on herdr's local socket
 // (one per named session) returns every workspace, tab, pane and agent; `tab.focus` / `pane.focus` switch herdr's
-// clients there. The agent level reads the same snapshot for herdr's agents (agents/sources/herdr.ts; ADR-023).
+// clients there. The agent level reads the same snapshot for herdr's agents (agents/sources/herdr.ts; ADR-023),
+// which point at these tabs and their panes; selecting a pane is this source's (selectPane; ADR-028).
 
 import { appOfProcess, herdrClient } from "../../platform/processes";
 import { focusTerminalNamed, GHOSTTY } from "./ghostty";
+import type { Process } from "../../platform/model";
 import type { App, Platform, Tab, TabSource } from "../model";
 
 const CONFIG_DIR = ".config/herdr";
@@ -36,6 +38,13 @@ export interface HerdrAgent {
   agent_session?: { agent?: string; kind?: string; value?: string };
   cwd?: string;
   foreground_cwd?: string;
+}
+
+/** The app whose terminal runs a client of the session at `socket`, and that client's tty. */
+export function clientOf(socket: string, processes: Process[], apps: App[]): { app: App; tty: string } | undefined {
+  const client = herdrClient(processes, socket);
+  const app = client && appOfProcess(client.pid, new Map(processes.map((p) => [p.pid, p])), apps);
+  return app && client ? { app, tty: client.tty } : undefined;
 }
 
 /** Socket paths of the default session and every named one. */
@@ -174,10 +183,6 @@ export async function revealClient(platform: Platform, socket: string, app: App)
   }
 }
 
-/** Focus a pane: herdr's clients switch to its workspace, tab and pane. */
-export const focusPane = (platform: Platform, socket: string, paneId: string) =>
-  focus(platform, socket, "pane.focus", { pane_id: paneId });
-
 export const herdr: TabSource<Ref> = {
   id: "herdr",
   bundleIds: [],
@@ -185,12 +190,10 @@ export const herdr: TabSource<Ref> = {
   discover: async (apps, platform) => {
     const [snapshots, processes] = await Promise.all([readSnapshots(platform), platform.processes()]);
     if (snapshots.length === 0) return [];
-    const byPid = new Map(processes.map((p) => [p.pid, p]));
     return snapshots.flatMap(({ socket, snapshot }) => {
-      const client = herdrClient(processes, socket);
-      const app = client && appOfProcess(client.pid, byPid, apps);
+      const client = clientOf(socket, processes, apps);
       // No client attached in a terminal we know: nothing to bring forward, so nothing to jump to.
-      return app ? fromSnapshot(app, socket, snapshot, client.tty) : [];
+      return client ? fromSnapshot(client.app, socket, snapshot, client.tty) : [];
     });
   },
   select: async (tab, platform) => {
@@ -198,5 +201,10 @@ export const herdr: TabSource<Ref> = {
     if (ref.tabId !== undefined) await focus(platform, ref.socket, "tab.focus", { tab_id: ref.tabId });
     else await focus(platform, ref.socket, "workspace.focus", { workspace_id: ref.workspaceId });
     if (!tab.within) await revealClient(platform, ref.socket, tab.app);
+  },
+  /** A pane of the tab (an agent's, from herdr's snapshot): herdr's clients switch to its workspace, tab and pane. */
+  selectPane: async (tab, paneId, platform) => {
+    await focus(platform, tab.ref.socket, "pane.focus", { pane_id: paneId });
+    if (!tab.within) await revealClient(platform, tab.ref.socket, tab.app);
   },
 };

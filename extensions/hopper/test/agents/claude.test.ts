@@ -77,7 +77,7 @@ test("status: waiting is blocked (commands hidden), busy and shell working, post
   assert.equal(waitingLabel(undefined), "Needs input");
 });
 
-test("desktop sessions open by deep link with the app's title; terminal ones are processes", () => {
+test("desktop sessions point at their tab in the Claude app, with its deep link; terminal ones are processes", () => {
   const agents = toAgents(
     [
       live({ pid: 1, sessionId: "cli-a", entrypoint: "claude-desktop", hostSessionId: "local_a" }),
@@ -90,16 +90,20 @@ test("desktop sessions open by deep link with the app's title; terminal ones are
     ],
   );
   assert.deepEqual(
-    agents.map((a) => [a.key, a.title, a.host, a.seenAt, a.placeKey]),
+    agents.map((a) => [a.key, a.title, a.host, a.seenAt]),
     [
       [
         "claude:cli-a",
         "Fix tabs",
-        { kind: "link", bundleId: "com.anthropic.claudefordesktop", url: "claude://code/continue?session=local_a" },
+        {
+          kind: "place",
+          tabKey: "com.anthropic.claudefordesktop:code:local_a",
+          bundleId: "com.anthropic.claudefordesktop",
+          url: "claude://code/continue?session=local_a",
+        },
         9,
-        "com.anthropic.claudefordesktop:code:local_a",
       ],
-      ["claude:cli-b", "hopper", { kind: "process", pid: 2, tty: "" }, undefined, undefined],
+      ["claude:cli-b", "hopper", { kind: "process", pid: 2, tty: "" }, undefined],
     ],
   );
   assert.equal(agents[1].resumeCommand, "cd /Users/me/Projects/hopper && claude --resume cli-b");

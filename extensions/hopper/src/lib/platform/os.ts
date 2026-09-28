@@ -58,7 +58,11 @@ export const macosPlatform: Platform = {
   readFiles: async (dir, name, depth) => {
     const paths = await findFiles(dir, name, depth);
     const files = await Promise.all(
-      paths.map(async (path) => ({ path, text: await readFile(path, "utf8").catch(() => "") })),
+      paths.map(async (path) => ({
+        path,
+        text: await readFile(path, "utf8").catch(() => ""),
+        modified: (await stat(path).catch(() => undefined))?.mtimeMs,
+      })),
     );
     return files.filter((f) => f.text !== "");
   },

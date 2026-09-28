@@ -4,7 +4,12 @@
 // Sessions started by the Claude app also have the app's session file (ADR-014): its title, when it was last
 // focused, and a post-turn summary that says whether the last turn ended asking for input.
 
-import { codeSessionKey, SESSIONS_DIR as DESKTOP_DIR, SESSION_FILE as DESKTOP_FILE } from "../../tabs/sources/claude";
+import {
+  codeSessionKey,
+  codeSessionUrl,
+  SESSIONS_DIR as DESKTOP_DIR,
+  SESSION_FILE as DESKTOP_FILE,
+} from "../../tabs/sources/claude";
 import type { Agent, AgentContext, AgentSource, AgentStatus, Host } from "../model";
 
 const REGISTRY_DIR = ".claude/sessions";
@@ -148,9 +153,10 @@ export function toAgents(live: LiveSession[], desktop: DesktopSession[]): Agent[
     const { status, detail } = statusOf(session, app);
     const host: Host = session.hostSessionId
       ? {
-          kind: "link",
+          kind: "place",
+          tabKey: codeSessionKey(CLAUDE_APP, session.hostSessionId),
           bundleId: CLAUDE_APP,
-          url: `claude://code/continue?session=${encodeURIComponent(session.hostSessionId)}`,
+          url: codeSessionUrl(session.hostSessionId),
         }
       : { kind: "process", pid: session.pid, tty: "" };
     return {
@@ -168,7 +174,6 @@ export function toAgents(live: LiveSession[], desktop: DesktopSession[]): Agent[
       host,
       resumeCommand: `cd ${shellQuote(session.cwd || "~")} && claude --resume ${session.sessionId}`,
       sessionIds: [session.sessionId],
-      ...(session.hostSessionId ? { placeKey: codeSessionKey(CLAUDE_APP, session.hostSessionId) } : {}),
     };
   });
 }

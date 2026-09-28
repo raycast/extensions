@@ -1,16 +1,23 @@
 // Agents in herdr's panes, with herdr's own status (it detects agents through hooks or screen manifests). Same
-// snapshot as the herdr places (tabs/sources/herdr.ts, which owns the protocol); jumping focuses the pane over
-// herdr's socket, then the terminal running herdr comes forward (locate.ts; ADR-022, ADR-023).
+// snapshot as the herdr places (tabs/sources/herdr.ts, which owns the protocol): each agent's host is the herdr
+// tab showing its pane, listed under the terminal running herdr's client; the tab source focuses the pane
+// (ADR-022, ADR-023, ADR-028).
 
+import type { App } from "../../platform/model";
 import type { Agent, AgentContext, AgentSource, AgentStatus } from "../model";
-import { herdrPlaceKey, readSnapshots, workspaceName, type Snapshot } from "../../tabs/sources/herdr";
-
-export { focusPane } from "../../tabs/sources/herdr";
+import {
+  clientOf,
+  herdrPlaceKey,
+  herdrWorkspaceKey,
+  readSnapshots,
+  workspaceName,
+  type Snapshot,
+} from "../../tabs/sources/herdr";
 
 const STATUSES = new Set<AgentStatus>(["blocked", "working", "done", "idle", "unknown"]);
 
-/** Agents in one session's snapshot. */
-export function fromSnapshot(snapshot: Snapshot, socket: string): Agent[] {
+/** Agents in one session's snapshot; `app` runs the session's client (undefined: none in a known app). */
+export function fromSnapshot(snapshot: Snapshot, socket: string, app?: App): Agent[] {
   return (snapshot.agents ?? []).flatMap((a): Agent[] => {
     if (!a.pane_id) return [];
     const product = a.display_agent || a.agent || "Agent";
@@ -28,8 +35,16 @@ export function fromSnapshot(snapshot: Snapshot, socket: string): Agent[] {
         title: a.name || a.title || a.terminal_title_stripped || place,
         cwd: a.foreground_cwd || a.cwd,
         status,
-        host: { kind: "herdr", socket, paneId: a.pane_id, label: `herdr › ${place}` },
-        ...(a.tab_id ? { placeKey: herdrPlaceKey(snapshot, socket, a.tab_id) } : {}),
+        host: {
+          kind: "place",
+          // Its tab's entry, else its workspace's; neither known: matches no tab, and only the terminal comes forward.
+          tabKey:
+            (a.tab_id && herdrPlaceKey(snapshot, socket, a.tab_id)) ||
+            (a.workspace_id ? herdrWorkspaceKey(socket, a.workspace_id) : ""),
+          paneId: a.pane_id,
+          ...(app ? { bundleId: app.bundleId } : {}),
+          label: `herdr › ${place}`,
+        },
         ...(session ? { sessionIds: [session] } : {}),
       },
     ];
@@ -40,6 +55,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const herdr: AgentSource = {
   id: "herdr",
-  list: async ({ platform }: AgentContext) =>
-    (await readSnapshots(platform)).flatMap(({ socket, snapshot }) => fromSnapshot(snapshot, socket)),
+  list: async ({ platform, processes, apps }: AgentContext) =>
+    (await readSnapshots(platform)).flatMap(({ socket, snapshot }) =>
+      fromSnapshot(snapshot, socket, clientOf(socket, processes, apps)?.app),
+    ),
 };

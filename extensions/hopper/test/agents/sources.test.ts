@@ -66,30 +66,22 @@ test("cursor: blocked, working, done from Cursor's own flags; old idle and archi
   });
 });
 
-test("cursor: headers from the composerHeaders table, the old blob when Cursor has no table", async () => {
+test("cursor: headers from the composerHeaders table; Cursor without it (before 3.15) fails", async () => {
   const header = { id: "a", unread: 1, blocking: 0, updatedAt: 5, folder: "/p/app" };
-  const run = async (hasTable: boolean) => {
-    const queries: string[] = [];
-    const platform = fakePlatform({
-      querySqlite: async (_db, sql) => {
-        queries.push(sql);
-        if (sql.includes("from composerHeaders")) {
+  const run = (hasTable: boolean) =>
+    cursor.list({
+      platform: fakePlatform({
+        querySqlite: async (_db, sql) => {
+          if (!sql.includes("from composerHeaders")) return [];
           if (!hasTable) throw new Error("no such table: composerHeaders");
           return [header];
-        }
-        if (sql.includes("allComposers")) return [header];
-        return [];
-      },
-    });
-    const agents = await cursor.list({
-      platform,
+        },
+      }),
       apps: [{ name: "Cursor", bundleId: "com.todesktop.230313mzl4w4u92", path: "/Applications/Cursor.app" }],
       now: 10,
     } as never);
-    return { ids: agents.map((a) => a.id), legacy: queries.some((q) => q.includes("allComposers")) };
-  };
-  assert.deepEqual(await run(true), { ids: ["a"], legacy: false });
-  assert.deepEqual(await run(false), { ids: ["a"], legacy: true });
+  assert.deepEqual((await run(true)).map((a) => a.id), ["a"]);
+  await assert.rejects(run(false), /no such table/);
 });
 
 test("cursor: an agent saved as aborted is working while its transcript's turn is open", async () => {
@@ -137,8 +129,8 @@ const snapshot = {
   },
 };
 
-test("herdr: agents from a snapshot, with the session they run and their pane", () => {
-  const agents = fromSnapshot(snapshotOf(snapshot)!, "/s");
+test("herdr: agents from a snapshot, with the session they run and the herdr tab and pane showing them", () => {
+  const agents = fromSnapshot(snapshotOf(snapshot)!, "/s", { bundleId: "g", name: "Ghostty", path: "/G.app" });
   assert.deepEqual(
     agents.map((a) => [a.product, a.id, a.status, a.cwd, a.sessionIds, a.host]),
     [
@@ -148,7 +140,7 @@ test("herdr: agents from a snapshot, with the session they run and their pane", 
         "blocked",
         "/p/api",
         ["s1"],
-        { kind: "herdr", socket: "/s", paneId: "w1:p1", label: "herdr › api › agents" },
+        { kind: "place", tabKey: "herdr:/s:w1:t1", paneId: "w1:p1", bundleId: "g", label: "herdr › api › agents" },
       ],
       [
         "Pi",
@@ -156,7 +148,7 @@ test("herdr: agents from a snapshot, with the session they run and their pane", 
         "unknown",
         undefined,
         undefined,
-        { kind: "herdr", socket: "/s", paneId: "w1:p2", label: "herdr › api › agents" },
+        { kind: "place", tabKey: "herdr:/s:w1:t1", paneId: "w1:p2", bundleId: "g", label: "herdr › api › agents" },
       ],
     ],
   );

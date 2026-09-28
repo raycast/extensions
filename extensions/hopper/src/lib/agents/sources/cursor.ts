@@ -26,13 +26,8 @@ const FIELDS = `json_extract(h, '$.composerId') as id,
   json_extract(h, '$.lastUpdatedAt') as updatedAt,
   json_extract(h, '$.workspaceIdentifier.uri.fsPath') as folder`;
 
-/** Cursor 3.15+ keeps one header per row (subagents are their parent's, so left out); the old blob stops updating. */
+/** One header per row since Cursor 3.15 (subagents are their parent's, so left out). */
 const HEADERS = `select ${FIELDS} from (select value as h from composerHeaders where isSubagent = 0)`;
-
-/** Before 3.15: all headers in one JSON blob. */
-const LEGACY_HEADERS = `select ${FIELDS} from (select e.value as h
-  from ItemTable, json_each(json_extract(ItemTable.value, '$.allComposers')) e
-  where ItemTable.key = 'composer.composerHeaders')`;
 
 const statusQuery = (ids: string[]) =>
   `select substr(key, 14) as id, json_extract(value, '$.status') as status from cursorDiskKV
@@ -129,8 +124,8 @@ export const cursor: AgentSource = {
   list: async ({ platform, apps, now }: AgentContext) => {
     if (!apps.some((a) => a.bundleId === BUNDLE_ID)) return [];
     const db = `${platform.homeDir()}/${DB}`;
-    // No composerHeaders table (Cursor before 3.15) fails the query.
-    const rows = await platform.querySqlite(db, HEADERS).catch(() => platform.querySqlite(db, LEGACY_HEADERS));
+    // Cursor before 3.15 has no composerHeaders table: the query fails and the source is reported unavailable.
+    const rows = await platform.querySqlite(db, HEADERS);
     const headers = parseHeaders(rows).filter((h) => !h.archived && !h.draft);
     if (headers.length === 0) return [];
     const statuses = await platform.querySqlite(db, statusQuery(headers.map((h) => h.id)));

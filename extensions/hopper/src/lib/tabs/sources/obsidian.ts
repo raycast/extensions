@@ -1,6 +1,7 @@
 // Obsidian: the tabs of every open vault, in all its windows (main and popouts), with each note's folder as
 // detail. Obsidian's app list (obsidian.json) marks the vaults with an open window, and each vault saves its
-// layout to .obsidian/workspace.json within a second of any change: every tab (a leaf), its file, and the
+// layout to workspace.json in its config folder (.obsidian, or another dot-folder set with "Override config
+// folder"; synced vaults can have both, one per device, so the newest wins) within a second of any change: every tab (a leaf), its file, and the
 // active one. Sidebar leaves (file explorer, search...) are not tabs and are skipped, as are empty "New tab"s.
 //
 // Selecting presses the tab's header through Accessibility: Obsidian's web UI marks it with the DOM class
@@ -135,6 +136,16 @@ async function readText(dir: string, name: RegExp, platform: Platform): Promise<
   return (await platform.readFiles(dir, name, 0))[0]?.text;
 }
 
+/** The vault's layout: the most recently saved workspace.json among its dot-folders. */
+async function workspaceText(vaultPath: string, platform: Platform): Promise<string> {
+  const dirs = (await platform.listDir(vaultPath)).filter((d) => d.startsWith(".") && d !== ".trash");
+  const files = await Promise.all(
+    dirs.map((d) => platform.readFiles(`${vaultPath}/${d}`, /^workspace\.json$/, 0).catch(() => [])),
+  );
+  const newest = files.flat().sort((a, b) => (b.modified ?? 0) - (a.modified ?? 0))[0];
+  return newest?.text ?? "";
+}
+
 export const obsidian: TabSource<Ref> = {
   id: "obsidian",
   bundleIds: [BUNDLE_ID],
@@ -144,13 +155,12 @@ export const obsidian: TabSource<Ref> = {
     const tabs = (
       await Promise.all(
         vaults.map(async (vault) => {
-          const text = await readText(`${vault.path}/.obsidian`, /^workspace\.json$/, platform).catch(() => "");
-          return fromWorkspace(app, vault, text ?? "");
+          return fromWorkspace(app, vault, await workspaceText(vault.path, platform));
         }),
       )
     ).flat();
     if (tabs.length > 0) return tabs;
-    // No layout found (a moved config folder, a new format): offer Obsidian's windows instead.
+    // No layout found (a new format): offer Obsidian's windows instead.
     const all = await platform.windows([app.bundleId]);
     return fromWindows(app, all.find((w) => w.bundleId === app.bundleId)?.windows ?? []) as Tab[] as Tab<Ref>[];
   },

@@ -3,12 +3,9 @@
 import type { App, Platform } from "../platform/model";
 import { projectOf, type Project } from "../projects/project";
 import { selectTab } from "../tabs/load";
-import type { Tab } from "../tabs/model";
-import { inHerdr, locate } from "./locate";
+import { inHerdr, locate, type TabsOf } from "./locate";
 import type { Agent, AgentContext, LocatedAgent } from "./model";
 import { AGENT_SOURCES } from "./registry";
-import { focusPane } from "./sources/herdr";
-import { revealClient } from "../tabs/sources/herdr";
 import { applySeen, SEEN_KEY, sortAgents, type SeenMap } from "./status";
 
 export interface ListedAgent extends LocatedAgent {
@@ -22,8 +19,8 @@ export interface AgentLoadResult {
 }
 
 export interface LoadOptions {
-  /** Reads tabs of the given apps (terminal apps hosting agents), e.g. tabs/load.ts loadTabs. */
-  loadTabs: (apps: App[]) => Promise<Tab[]>;
+  /** Tabs already read (Search), or how to read the tabs of the apps hosting agents (tabs/load.ts loadTabs). */
+  tabs: TabsOf;
   now: number;
 }
 
@@ -47,7 +44,7 @@ export async function loadAgents(apps: App[], platform: Platform, options: LoadO
   const applied = applySeen(merged, seen, options.now);
   await platform.saveJson(SEEN_KEY, applied.seen);
 
-  const located = await locate(applied.agents, apps, processes, options.loadTabs);
+  const located = await locate(applied.agents, apps, processes, options.tabs);
   const cwds = [...new Set(located.flatMap((a) => (a.cwd ? [a.cwd] : [])))];
   const repos = new Map(cwds.map((cwd, i) => [cwd, i]));
   const found = cwds.length > 0 ? await platform.gitRepos(cwds) : [];
@@ -65,7 +62,7 @@ export async function loadAgents(apps: App[], platform: Platform, options: LoadO
  * them itself, with a status; so are those another source already describes.
  */
 export function mergeAgents(agents: Agent[], runsInHerdr: (pid: number) => boolean): Agent[] {
-  const herdr = agents.filter((a) => a.host.kind === "herdr");
+  const herdr = agents.filter((a) => a.source === "herdr");
   const herdrBySession = new Map(herdr.flatMap((a) => (a.sessionIds ?? []).map((id) => [id, a] as const)));
   const absorbed = new Set<string>();
   // A process another source already describes (Codex's thread in that terminal) isn't listed again as a bare CLI.
@@ -73,19 +70,12 @@ export function mergeAgents(agents: Agent[], runsInHerdr: (pid: number) => boole
     agents.flatMap((a) => (a.source !== "cli" && a.host.kind === "process" ? [a.host.pid] : [])),
   );
   const result = agents.flatMap((agent): Agent[] => {
-    if (agent.host.kind === "herdr") return [agent];
+    if (agent.source === "herdr") return [agent];
     if (agent.source === "cli" && agent.host.kind === "process" && claimedPids.has(agent.host.pid)) return [];
     const pane = agent.sessionIds?.map((id) => herdrBySession.get(id)).find(Boolean);
     if (pane) {
       absorbed.add(pane.key);
-      return [
-        {
-          ...agent,
-          host: pane.host,
-          placeKey: pane.placeKey,
-          status: agent.status === "unknown" ? pane.status : agent.status,
-        },
-      ];
+      return [{ ...agent, host: pane.host, status: agent.status === "unknown" ? pane.status : agent.status }];
     }
     if (agent.source === "cli" && herdr.length > 0 && agent.host.kind === "process" && runsInHerdr(agent.host.pid)) {
       return [];
@@ -96,18 +86,14 @@ export function mergeAgents(agents: Agent[], runsInHerdr: (pid: number) => boole
 }
 
 /**
- * Selects the agent's place: focuses its herdr pane, opens its link, or selects its tab and pane. Returns the app
- * to bring to the front (the caller activates it; ADR-004 / ADR-009 decide when). Marks the agent seen.
+ * Selects the agent's tab and pane with the tab's own source, or opens its link. Returns the app to bring to the
+ * front (the caller activates it; ADR-004 / ADR-009 decide when). Marks the agent seen.
  */
 export async function jumpToAgent(agent: LocatedAgent, platform: Platform, now: number): Promise<App> {
   const location = agent.location;
   if (!location) throw new Error(`Can't tell where this ${agent.product} runs`);
-  if (location.herdr) {
-    await focusPane(platform, location.herdr.socket, location.herdr.paneId);
-    if (!location.tab) await revealClient(platform, location.herdr.socket, location.app);
-  }
-  if (location.url) await platform.openUrl(location.url, location.app.path);
   if (location.tab) await selectTab(location.tab, platform, location.paneId);
+  else if (location.url) await platform.openUrl(location.url, location.app.path);
   const seen = await platform.loadJson<SeenMap>(SEEN_KEY, {});
   await platform.saveJson(SEEN_KEY, { ...seen, [agent.key]: now });
   return location.app;

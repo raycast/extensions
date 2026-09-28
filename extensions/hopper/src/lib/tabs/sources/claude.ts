@@ -68,8 +68,11 @@ export function parseSession(text: string): CodeSession | undefined {
   };
 }
 
-/** Tab key of a Code session; the agent level uses it to show the session's status on its tab. */
+/** Tab key of a Code session; the agent level points its Claude Code agents at it. */
 export const codeSessionKey = (bundleId: string, sessionId: string) => `${bundleId}:code:${sessionId}`;
+
+/** Deep link that opens a Code session in the app (what Claude's Dock menu uses; ADR-014). */
+export const codeSessionUrl = (sessionId: string) => `claude://code/continue?session=${encodeURIComponent(sessionId)}`;
 
 /** Most recently focused first; `activeTitle` (the open session) marks one as active. */
 export function fromSessions(app: App, sessions: CodeSession[], activeTitle?: string): Tab<Ref>[] {
@@ -154,7 +157,7 @@ export const claude: TabSource<Ref> = {
   },
   select: async (tab, platform) => {
     if ("sessionId" in tab.ref) {
-      await platform.openUrl(`claude://code/continue?session=${encodeURIComponent(tab.ref.sessionId)}`);
+      await platform.openUrl(codeSessionUrl(tab.ref.sessionId));
     } else if ("path" in tab.ref) {
       await platform.openUrl(`claude://claude.ai/${tab.ref.path}`);
     } else {

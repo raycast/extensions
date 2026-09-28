@@ -51,6 +51,7 @@ function platformWith(overrides = {}) {
       if (dir === "/Users/me/Obsidian/Work/.obsidian") return [{ path: "", text: workspace }];
       return [];
     },
+    listDir: async (dir: string) => (dir === "/Users/me/Obsidian/Work" ? [".obsidian", "Projects", "Welcome.md"] : []),
     ...overrides,
   });
 }
@@ -76,6 +77,21 @@ test("Obsidian: every tab of the vault's windows, with its folder, skipping side
       ["Welcome", "Work", false, true, 0],
     ],
   );
+});
+
+test("Obsidian: a renamed config folder, the newest layout when there are several", async () => {
+  const other = JSON.stringify({ main: { type: "tabs", children: [leaf("m", "Mobile.md", "Mobile")] } });
+  const platform = platformWith({
+    readFiles: async (dir: string) => {
+      if (dir === "/Users/me/Library/Application Support/obsidian") return [{ path: "", text: appList }];
+      if (dir === "/Users/me/Obsidian/Work/.obsidian") return [{ path: "", text: other, modified: 1 }];
+      if (dir === "/Users/me/Obsidian/Work/.obsidian-desktop") return [{ path: "", text: workspace, modified: 2 }];
+      return [];
+    },
+    listDir: async (dir: string) => (dir === "/Users/me/Obsidian/Work" ? [".obsidian", ".obsidian-desktop"] : []),
+  });
+  const tabs = await obsidian.list(obsidianApp, platform);
+  assert.deepEqual(tabs.map((t) => t.title), ["Welcome", "Roadmap", "Welcome", "Graph view", "Welcome"]);
 });
 
 test("Obsidian: selecting presses the tab's header in the vault's windows", async () => {

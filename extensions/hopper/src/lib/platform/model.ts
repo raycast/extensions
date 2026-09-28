@@ -37,8 +37,11 @@ export interface Platform {
   saveJson(key: string, value: unknown): Promise<void>;
   /** The user's home folder, for sources that read an app's own data files. */
   homeDir(): string;
-  /** Text of the files under `dir` (up to `depth` levels down) whose name matches `name`. [] if `dir` is missing. */
-  readFiles(dir: string, name: RegExp, depth: number): Promise<{ path: string; text: string }[]>;
+  /**
+   * Text and last-modified time (ms) of the files under `dir` (up to `depth` levels down) whose name matches `name`.
+   * [] if `dir` is missing.
+   */
+  readFiles(dir: string, name: RegExp, depth: number): Promise<{ path: string; text: string; modified?: number }[]>;
   /** Names of the entries in `dir`, [] if it's missing. */
   listDir(dir: string): Promise<string[]>;
   /** Open a URL or file path with `appPath` (an .app path), or with its registered app if omitted. */

@@ -139,3 +139,26 @@ test("a herdr tab in iTerm also selects the iTerm split running herdr", async ()
   await selectTab(place, platform);
   assert.match(scripts.at(-1)!, /if \(id of s\) is "S-2" then/);
 });
+
+test("selecting a pane of a herdr tab (an agent's) focuses it in herdr, then the terminal split holding herdr", async () => {
+  const iterm = { ...app("com.googlecode.iterm2", "iTerm"), pid: 60 };
+  const calls: string[] = [];
+  const platform = fakePlatform({
+    listDir: async (dir) => (dir.endsWith(".config/herdr") ? ["herdr.sock"] : []),
+    socketRequest: async (_path, request) => {
+      const { method, params } = request as { method: string; params: object };
+      if (method !== "session.snapshot") calls.push(`${method} ${JSON.stringify(params)}`);
+      return { id: "hopper", result: method === "session.snapshot" ? { snapshot } : {} };
+    },
+    processes: async () => [proc(61, 60, "ttys007", "login"), proc(62, 61, "ttys007", "herdr")],
+    runAppleScript: async (script) => {
+      if (/is "S-2" then/.test(script)) calls.push("select S-2");
+      return script.includes("repeat with p in sessions")
+        ? `1\u001fS-1\u001fzsh\u001ftrue\u001fS-1=/dev/ttys006,S-2=/dev/ttys007,\u001e`
+        : "ok";
+    },
+  });
+  const { tabs } = await loadTabs([iterm], platform);
+  await selectTab(tabs.find((t) => t.title === "agents")!, platform, "w1:p1");
+  assert.deepEqual(calls, ['pane.focus {"pane_id":"w1:p1"}', "select S-2"]);
+});

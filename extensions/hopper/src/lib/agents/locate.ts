@@ -1,12 +1,13 @@
 // PURE: from where an agent runs (its Host) to where to jump (a Location): the app, and the tab and pane in it.
 //
 // A terminal agent is a process: its parent chain leads to the app that owns its terminal, and its tty is one of
-// that app's panes (tabs/model.ts Pane), or in Ghostty (no ttys) the only pane in its folder. An agent inside
-// herdr runs in herdr's server, not in an app: herdr focuses the pane itself, and the terminal running a herdr
-// client comes forward. Terminals without panes (any app on the windows fallback) are still located to the app.
+// that app's panes (tabs/model.ts Pane), or in Ghostty (no ttys) the only pane in its folder. An agent in a place
+// the tab level lists (a Claude Code session, a herdr pane) names that tab by key. Either way the tab's own source
+// selects it; agents never know how. Terminals without panes (any app on the windows fallback) are still located
+// to the app.
 
 import type { App, Process } from "../platform/model";
-import { appOfProcess, herdrClient, inHerdr } from "../platform/processes";
+import { appOfProcess, inHerdr } from "../platform/processes";
 import type { Tab } from "../tabs/model";
 import type { Agent, LocatedAgent, Location } from "./model";
 
@@ -18,41 +19,50 @@ interface Terminal {
   cwd: string;
 }
 
-/** The app and tty an agent's host runs in, for hosts that are terminal processes (directly or through herdr). */
-function terminalOf(agent: Agent, byPid: Map<number, Process>, processes: Process[], apps: App[]) {
-  const proc =
-    agent.host.kind === "process"
-      ? byPid.get(agent.host.pid)
-      : agent.host.kind === "herdr"
-        ? herdrClient(processes, agent.host.socket)
-        : undefined;
+/** Tabs already read (Search), or a reader for the tabs of some apps. */
+export type TabsOf = Tab[] | ((apps: App[]) => Promise<Tab[]>);
+
+/** The app and tty of an agent that is a terminal process. */
+function terminalOf(agent: Agent, byPid: Map<number, Process>, apps: App[]): Terminal | undefined {
+  const proc = agent.host.kind === "process" ? byPid.get(agent.host.pid) : undefined;
   const app = proc && appOfProcess(proc.pid, byPid, apps);
   return app && proc ? { app, tty: proc.tty, cwd: proc.cwd } : undefined;
 }
 
 /**
- * Locations for `agents`. `loadTabs` reads the tabs of the given apps (only terminal apps that host agents are
- * asked for); callers that already have tabs return them.
+ * Locations for `agents`. Given a reader, only the apps whose tabs are needed are read: terminals hosting agents,
+ * and apps of places that can't be opened by link.
  */
 export async function locate(
   agents: Agent[],
   apps: App[],
   processes: Process[],
-  loadTabs: (apps: App[]) => Promise<Tab[]>,
+  tabsOf: TabsOf,
 ): Promise<LocatedAgent[]> {
   const byPid = new Map(processes.map((p) => [p.pid, p]));
-  const terminals = new Map<string, Terminal | undefined>(
-    agents.map((a) => [a.key, terminalOf(a, byPid, processes, apps)]),
-  );
-  const hostApps = [
-    ...new Map([...terminals.values()].flatMap((t) => (t ? [[t.app.bundleId, t.app] as const] : []))).values(),
-  ];
-  const tabs = hostApps.length > 0 ? await loadTabs(hostApps).catch(() => []) : [];
-
+  const terminals = new Map(agents.map((a) => [a.key, terminalOf(a, byPid, apps)]));
+  const tabs = Array.isArray(tabsOf) ? tabsOf : await readNeeded(agents, terminals, apps, tabsOf);
   return agents.map((agent): LocatedAgent => {
     const location = locationOf(agent, terminals.get(agent.key), tabs, apps);
     return location ? { ...agent, location } : agent;
   });
+}
+
+async function readNeeded(
+  agents: Agent[],
+  terminals: Map<string, Terminal | undefined>,
+  apps: App[],
+  read: (apps: App[]) => Promise<Tab[]>,
+): Promise<Tab[]> {
+  const needed = new Set<string>();
+  for (const agent of agents) {
+    const { host } = agent;
+    const terminal = terminals.get(agent.key);
+    if (terminal) needed.add(terminal.app.bundleId);
+    if (host.kind === "place" && !host.url && host.bundleId) needed.add(host.bundleId);
+  }
+  const hostApps = apps.filter((a) => needed.has(a.bundleId));
+  return hostApps.length > 0 ? await read(hostApps).catch(() => []) : [];
 }
 
 function locationOf(agent: Agent, terminal: Terminal | undefined, tabs: Tab[], apps: App[]): Location | undefined {
@@ -61,14 +71,23 @@ function locationOf(agent: Agent, terminal: Terminal | undefined, tabs: Tab[], a
     const app = apps.find((a) => a.bundleId === host.bundleId);
     return app && { app, label: host.label ?? app.name, url: host.url };
   }
+  if (host.kind === "place") {
+    const tab = tabs.find((t) => t.key === host.tabKey);
+    const app = tab?.app ?? apps.find((a) => a.bundleId === host.bundleId);
+    if (!app) return undefined;
+    return {
+      app,
+      label: host.label ? `${host.label} (${app.name})` : app.name,
+      ...(tab ? { tab, ...(host.paneId !== undefined ? { paneId: host.paneId } : {}) } : {}),
+      ...(host.url ? { url: host.url } : {}),
+    };
+  }
   if (!terminal) return undefined;
   const match = findPane(tabs, terminal);
-  const place = match ? `${terminal.app.name} › ${match.tab.title}` : terminal.app.name;
   return {
     app: terminal.app,
-    label: host.kind === "herdr" ? `${host.label} (${terminal.app.name})` : place,
+    label: match ? `${terminal.app.name} › ${match.tab.title}` : terminal.app.name,
     ...(match ? { tab: match.tab, paneId: match.paneId } : {}),
-    ...(host.kind === "herdr" ? { herdr: { socket: host.socket, paneId: host.paneId } } : {}),
   };
 }
 

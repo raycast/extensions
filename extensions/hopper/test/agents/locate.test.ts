@@ -45,23 +45,30 @@ test("a process belongs to the app among its ancestors", () => {
   assert.equal(inHerdr(14, byPid), false);
 });
 
-test("locate: terminal agents to their exact pane, else their app; links and herdr panes", async () => {
+test("locate: terminal agents to their exact pane, else their app; places to their tab; links", async () => {
   const asked: string[][] = [];
+  const herdrTab = { ...tab("herdr:/s:w1", []), source: "herdr" };
   const located = await locate(
     [
       agent("claude", { host: { kind: "process", pid: 14, tty: "ttys004" } }),
       agent("codex", { host: { kind: "process", pid: 22, tty: "ttys009" } }),
-      agent("desktop", { host: { kind: "link", bundleId: claudeApp.bundleId, url: "claude://x" } }),
-      agent("herdr", { host: { kind: "herdr", socket: "/s", paneId: "w1:p1", label: "herdr › api" } }),
+      agent("cursor", { host: { kind: "link", bundleId: claudeApp.bundleId, url: "cursor://x", label: "Cursor › a" } }),
+      agent("desktop", {
+        host: { kind: "place", tabKey: "claude:s", bundleId: claudeApp.bundleId, url: "claude://x" },
+      }),
+      agent("herdr", {
+        host: { kind: "place", tabKey: "herdr:/s:w1", paneId: "w1:p1", bundleId: iterm.bundleId, label: "herdr › api" },
+      }),
       agent("lost", { host: { kind: "process", pid: 999, tty: "" } }),
     ],
     [iterm, ghostty, claudeApp],
     processes,
     async (apps) => {
       asked.push(apps.map((a) => a.name));
-      return [tab("zsh", [{ id: "S1", tty: "ttys004" }])];
+      return [tab("zsh", [{ id: "S1", tty: "ttys004" }]), herdrTab];
     },
   );
+  // Apps of places with a link aren't read (the Claude app's sidebar is slow): the link opens them.
   assert.deepEqual(asked, [["iTerm", "Ghostty"]]);
   const by = new Map(located.map((a) => [a.key, a.location]));
   assert.deepEqual(
@@ -69,12 +76,27 @@ test("locate: terminal agents to their exact pane, else their app; links and her
     ["iTerm › zsh", "S1", "zsh"],
   );
   assert.deepEqual([by.get("codex")?.label, by.get("codex")?.tab], ["Ghostty", undefined]);
-  assert.deepEqual([by.get("desktop")?.app.name, by.get("desktop")?.url], ["Claude", "claude://x"]);
+  assert.deepEqual([by.get("cursor")?.label, by.get("cursor")?.url], ["Cursor › a", "cursor://x"]);
   assert.deepEqual(
-    [by.get("herdr")?.label, by.get("herdr")?.herdr, by.get("herdr")?.paneId],
-    ["herdr › api (iTerm)", { socket: "/s", paneId: "w1:p1" }, "S1"],
+    [by.get("desktop")?.app.name, by.get("desktop")?.label, by.get("desktop")?.url, by.get("desktop")?.tab],
+    ["Claude", "Claude", "claude://x", undefined],
+  );
+  assert.deepEqual(
+    [by.get("herdr")?.label, by.get("herdr")?.tab?.key, by.get("herdr")?.paneId],
+    ["herdr › api (iTerm)", "herdr:/s:w1", "w1:p1"],
   );
   assert.equal(by.get("lost"), undefined);
+});
+
+test("locate: tabs already read (Search) are used as they are, and find places whose app wasn't read", async () => {
+  const claudeTab = { ...tab("claude:s", []), app: claudeApp, source: "claude" };
+  const [desktop] = await locate(
+    [agent("desktop", { host: { kind: "place", tabKey: "claude:s", bundleId: claudeApp.bundleId, url: "claude://x" } })],
+    [claudeApp],
+    [],
+    [claudeTab],
+  );
+  assert.deepEqual([desktop.location?.tab?.key, desktop.location?.label], ["claude:s", "Claude"]);
 });
 
 test("merge: herdr's pane hosts the session it shares; CLIs inside herdr or claimed by a source drop out", () => {
@@ -85,9 +107,9 @@ test("merge: herdr's pane hosts the session it shares; CLIs inside herdr or clai
         source: "herdr",
         status: "working",
         sessionIds: ["s1"],
-        host: { kind: "herdr", socket: "/s", paneId: "p1", label: "herdr" },
+        host: { kind: "place", tabKey: "herdr:/s:w1", paneId: "p1" },
       }),
-      agent("herdr:p2", { source: "herdr", host: { kind: "herdr", socket: "/s", paneId: "p2", label: "herdr" } }),
+      agent("herdr:p2", { source: "herdr", host: { kind: "place", tabKey: "herdr:/s:w1", paneId: "p2" } }),
       agent("cli:32", { source: "cli", status: "unknown", host: { kind: "process", pid: 32, tty: "ttys020" } }),
       agent("codex:t", { source: "codex", host: { kind: "process", pid: 22, tty: "ttys009" } }),
       agent("cli:22", { source: "cli", status: "unknown", host: { kind: "process", pid: 22, tty: "ttys009" } }),
@@ -97,8 +119,8 @@ test("merge: herdr's pane hosts the session it shares; CLIs inside herdr or clai
   assert.deepEqual(
     merged.map((a) => [a.key, a.host.kind]),
     [
-      ["claude:s1", "herdr"],
-      ["herdr:p2", "herdr"],
+      ["claude:s1", "place"],
+      ["herdr:p2", "place"],
       ["codex:t", "process"],
     ],
   );
@@ -117,7 +139,7 @@ test("loadAgents: sources in parallel, a failing one reported, projects attached
     gitRepos: async (dirs) => dirs.map(() => ({ root: "/r/app", mainRoot: "/r/app" })),
   });
   const result = await loadAgents([iterm, ghostty], platform, {
-    loadTabs: async () => [tab("zsh", [{ id: "S1", tty: "ttys004" }])],
+    tabs: async () => [tab("zsh", [{ id: "S1", tty: "ttys004" }])],
     now: 1000,
   });
   assert.deepEqual(result.failures, [
@@ -134,27 +156,17 @@ test("loadAgents: sources in parallel, a failing one reported, projects attached
   );
 });
 
-test("jumping selects the pane, opens links, focuses herdr, and marks the agent seen", async () => {
+test("jumping selects the tab and pane with the tab's source, else opens the link, and marks the agent seen", async () => {
   const calls: string[] = [];
   const platform = fakePlatform({
     runAppleScript: async (script) => (calls.push(script.includes('"S1"') ? "select S1" : script), "ok"),
     openUrl: async (url) => void calls.push(`open ${url}`),
-    socketRequest: async (_path, request) => {
-      calls.push(`herdr ${(request as { method: string }).method}`);
-      return { id: "hopper", result: {} };
-    },
   });
-  const location = {
-    app: iterm,
-    label: "iTerm",
-    tab: tab("zsh", [{ id: "S1", tty: "ttys004" }]),
-    paneId: "S1",
-    herdr: { socket: "/s", paneId: "p1" },
-  };
+  const location = { app: iterm, label: "iTerm", tab: tab("zsh", [{ id: "S1", tty: "ttys004" }]), paneId: "S1", url: "x://" };
   const app = await jumpToAgent({ ...agent("a"), location }, platform, 42);
   await jumpToAgent({ ...agent("b"), location: { app: claudeApp, label: "Claude", url: "claude://x" } }, platform, 43);
   assert.equal(app.name, "iTerm");
-  assert.deepEqual(calls, ["herdr pane.focus", "select S1", "open claude://x"]);
+  assert.deepEqual(calls, ["select S1", "open claude://x"]);
   assert.deepEqual(await platform.loadJson("agents:seen", {}), { a: 42, b: 43 });
   await assert.rejects(jumpToAgent(agent("nowhere"), platform, 1), /Can't tell where/);
 });

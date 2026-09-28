@@ -7,11 +7,11 @@ import { getRecentApps } from "./macos";
 import type { App } from "./model";
 import { macosPlatform } from "./os";
 
-/** All agents. `tabs`: tabs already read (Search), reused to locate terminal agents. */
+/** All agents. `tabs`: tabs already read (Search), reused to locate agents instead of reading apps again. */
 export async function loadAllAgents(options: { tabs?: Tab[] } = {}): Promise<AgentLoadResult & { apps: App[] }> {
   const apps = await getRecentApps();
   const result = await loadAgents(apps, macosPlatform, {
-    loadTabs: async (hosts) => options.tabs ?? (await loadTabs(hosts, macosPlatform)).tabs,
+    tabs: options.tabs ?? (async (hosts) => (await loadTabs(hosts, macosPlatform)).tabs),
     now: Date.now(),
   });
   return { ...result, apps };

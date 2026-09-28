@@ -62,17 +62,14 @@ export function SearchList({ scope }: { scope: Scope }) {
     { execute: tabs.length > 0, keepPreviousData: true },
   );
   const agentByTab = new Map(
-    (agentData?.agents ?? []).flatMap((a) => {
-      const key = placeOf(a);
-      return key ? [[key, a] as const] : [];
-    }),
+    (agentData?.agents ?? []).flatMap((a) => (a.location?.tab ? [[a.location.tab.key, a] as const] : [])),
   );
   // Every located agent also has a row of its own in its app's section, so searching its name finds it; except
   // where its tab already says the same (a Claude Code session is both a tab and an agent, same title).
   const tabTitles = new Map(tabs.map((t) => [t.key, t.title]));
   const agents = (agentData?.agents ?? []).filter((a) => {
     if (!a.location || (scope === "current" && a.location.app.bundleId !== current?.bundleId)) return false;
-    const place = placeOf(a);
+    const place = a.location.tab?.key;
     return !(place && tabTitles.get(place) === a.title);
   });
   const entries: Entry[] = [...tabs.map(tabEntry), ...agents.map(agentEntry)];
@@ -213,11 +210,6 @@ function ClosedItem({ entry, onForget }: { entry: ClosedTab; onForget: () => voi
       }
     />
   );
-}
-
-/** Key of the tab that shows an agent: where it was located, or the tab its source says shows it. */
-function placeOf(agent: ListedAgent): string | undefined {
-  return agent.location?.tab?.key ?? agent.placeKey;
 }
 
 /** A row of Search: a tab, or an agent, in the shape search reads, with its app for grouping. */
