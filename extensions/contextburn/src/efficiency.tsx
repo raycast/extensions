@@ -56,7 +56,6 @@ export default function Command() {
             "useful_share_tokens",
             "reread_share_tokens",
             "useful_share_cost",
-            "paid_tokens_per_useful_token",
             "cost_usd",
             "hours",
           ];
@@ -64,6 +63,8 @@ export default function Command() {
             setError("contextburn returned JSON in an unexpected shape. Update the CLI: `pip install -U contextburn`.");
             return;
           }
+          // With no sessions in the window the CLI reports this ratio as null.
+          if (parsed.paid_tokens_per_useful_token == null) parsed.paid_tokens_per_useful_token = 0;
           setData(parsed as Efficiency);
         } catch {
           setError("contextburn returned output that is not JSON.");
