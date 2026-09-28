@@ -12,7 +12,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { getScheduleRange, writeEvents } from "./lib/api";
-import { batchFailure } from "./lib/envelope";
+import { batchFailure, rowError } from "./lib/envelope";
 import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
 import { maybeNotifyTransitions } from "./lib/notify";
 import { signOut } from "./lib/oauth";
@@ -77,7 +77,8 @@ export default function Command() {
     if (!model.current) return;
     const result = await writeEvents([{ op: "reflect", id: model.current.id, status }]);
     // A 2xx can still carry a rejected row; do not report a false success.
-    const failed = result.ok ? batchFailure(result.data)?.error : result;
+    const failedRow = result.ok ? batchFailure(result.data) : undefined;
+    const failed = !result.ok ? result : failedRow ? rowError(failedRow) : undefined;
     await showHUD(
       !failed
         ? status === "kept"
@@ -85,8 +86,7 @@ export default function Command() {
           : "Marked the block skipped"
         : `Could not update the block: ${failed.message}`,
     );
-    const applied = !failed;
-    if (applied) revalidate();
+    if (!failed) revalidate();
   }
 
   return (

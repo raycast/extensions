@@ -22,7 +22,7 @@ you already use: glance at your dial day, capture blocks, and check them off.
   Your explicit day/week choice is remembered.
   Day view groups blocks into Now / Up next / Later / Done, with check-off,
   edit (including the calendar home and mirrors), move, shift, and delete.
-  Filter by area or activity, or hide non-blocking and reference blocks. `⌘F` searches every block by text. A **Join**
+  Filter by area or activity, or hide non-blocking and reference blocks. `⌘F` searches blocks by name, from the last 7 days to the next 30. A **Join**
   action opens a block's meeting link.
 - **Add Block** — one capture. An explicit date and time schedules the
   block; a bare idea saves to the Inbox. Use native Start and End date-time pickers (for example, “tomorrow at 10am”);

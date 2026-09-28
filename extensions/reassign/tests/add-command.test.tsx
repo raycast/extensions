@@ -339,6 +339,40 @@ it.each([
   expect(captured.plannedDate).toBe(expectedDate);
 });
 
+it("an AI park draft preserves the typed time window when Find a Time runs", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 22, 12));
+  mock.plan.mockResolvedValue({ ok: true, data: { results: [] } });
+  const text = "lunch tomorrow 60m in the evening";
+  const draft = blockDraft({ intents: [{ op: "park", name: "Lunch", durationMinutes: 60 }] });
+  expect(draft.destination).toBe("inbox");
+  expect(draft.start).toBeNull();
+
+  const tree = render(text);
+  const fillAction = tree.find((n) => n.props.title === "Fill with AI…")!;
+  const target = (fillAction.props as unknown as { target: ReactElement<{ onFill: (d: unknown) => void }> }).target;
+  target.props.onFill(draft);
+  const filled = render(text);
+  await filled
+    .find((n) => n.props.title === "Find a Time")!
+    .props.onSubmit({
+      ...values,
+      name: "Lunch",
+      duration: "60m",
+    });
+  expect(mock.plan).toHaveBeenCalledTimes(1);
+  expect(mock.plan).toHaveBeenCalledWith([
+    expect.objectContaining({
+      durationMinutes: 60,
+      earliest: "2026-09-23T17:00",
+      latest: "2026-09-23T21:00",
+      autoCommitBest: false,
+    }),
+  ]);
+  expect(mock.capture).not.toHaveBeenCalled();
+  expect(mock.create).not.toHaveBeenCalled();
+});
+
 it("AI schedule followed by Inbox retains the newly chosen date", async () => {
   const scheduled = blockDraft({
     intents: [{ op: "create", name: "Lunch", start: "2026-10-12T12:00", end: "2026-10-12T13:00" }],

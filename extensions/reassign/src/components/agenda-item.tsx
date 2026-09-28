@@ -156,8 +156,9 @@ function eventSource(event: ScheduleEvent, calendars: Calendar[], defaultCalenda
   const homeId = homeCalendarId(event, defaultCalendarId);
   const home = homeId ? calendars.find((c) => c.id === homeId) : undefined;
   if (home) return home.name;
-  if (!event.source || event.source === "reassign") return "";
-  return event.source;
+  const synced = event.source && event.source !== "reassign" ? event.source : "";
+  // A known home is not Reassign-only, also while GET /calendars loads or after it fails.
+  return synced || (homeId ? "Connected calendar" : "");
 }
 
 /** A human status label for a reflected block, or "" when it is still open. */
