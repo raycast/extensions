@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.rayext
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+*.local.json
+raycast-env.d.ts
+release/
