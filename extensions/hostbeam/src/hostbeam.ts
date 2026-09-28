@@ -46,6 +46,8 @@ export interface HostbeamConfig {
   settings?: {
     sentence?: string;
     copySentence?: boolean;
+    /** Saved since "just the path" became the app's default (2026-09-28). */
+    pathDefault?: boolean;
     /** Preferences → General → Beaming → "Let other apps control Hostbeam".
      *  On by default since Hostbeam 0.1.26, so a missing key means allowed;
      *  only a saved `false` refuses. This extension is one of the "other apps". */
@@ -62,16 +64,54 @@ export function readConfig(): HostbeamConfig | null {
   }
 }
 
-/** The paste-ready text for one or more remote paths, using the sentence the
- *  user configured — the same rule the app applies, so a copy from here and a
- *  copy from the app's own Recent list give you the same thing. */
+/** The sentence Hostbeam suggests, and its default until 2026-09-28. */
+const SUGGESTED_SENTENCE = "Use this screenshot: {path}";
+/** What the suggested sentence says for a file that is not a picture. */
+const FILE_SENTENCE = "Use this file: {path}";
+const IMAGE_EXTENSIONS = new Set([
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "heic",
+  "heif",
+  "avif",
+  "tif",
+  "tiff",
+  "bmp",
+]);
+
+/** Whether a beam puts the sentence around the path. Off by default since
+ *  2026-09-28; a config saved before then with it on and the sentence
+ *  untouched was nobody's choice and reads as off, as in the app. */
+function copiesSentence(cfg: HostbeamConfig | null): boolean {
+  const s = cfg?.settings;
+  if (!s?.copySentence) return false;
+  return Boolean(s.pathDefault) || (s.sentence ?? "") !== SUGGESTED_SENTENCE;
+}
+
+/** The paste-ready text for one or more remote paths — exactly what the app
+ *  put on the clipboard for them (its `render_sentence`), so a copy from here
+ *  and a copy from the app's own Recent list give you the same thing. Just the
+ *  paths by default, a space apart: a lone path is what coding agents attach
+ *  as the picture itself, and Claude Code and Gemini CLI split a paste at
+ *  spaces. With the sentence on, one sentence per line. */
 export function sentenceFor(
   cfg: HostbeamConfig | null,
   paths: string[],
 ): string {
   const template = cfg?.settings?.sentence ?? "";
-  const one = (path: string) =>
-    template.includes("{path}") ? template.split("{path}").join(path) : path;
+  if (!(copiesSentence(cfg) && template.includes("{path}")))
+    return paths.join(" ");
+  const one = (path: string) => {
+    const ext = path.split(".").pop()?.toLowerCase() ?? "";
+    const tpl =
+      template === SUGGESTED_SENTENCE && !IMAGE_EXTENSIONS.has(ext)
+        ? FILE_SENTENCE
+        : template;
+    return tpl.split("{path}").join(path);
+  };
   return paths.map(one).join("\n");
 }
 

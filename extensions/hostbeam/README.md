@@ -10,8 +10,9 @@ settings, and asks the app to do the work.
 ## Before you start
 
 - **Install Hostbeam for Mac** — from [hostbeam.app](https://hostbeam.app), or
-  `brew install --cask punkabeat/tap/hostbeam`. Hostbeam is free for 5 beams a
-  day; a one-time license removes the limit.
+  `brew install --cask punkabeat/tap/hostbeam`. Hostbeam is free to use, with
+  no limit; if you keep using it, a one-time license hides its occasional
+  reminder.
 - **Open it once and add a host.** The commands work with the hosts you set up
   there.
 
