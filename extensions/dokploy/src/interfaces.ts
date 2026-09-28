@@ -7,6 +7,15 @@ export interface DockerContainer {
   status: string;
 }
 
+export interface DockerDiskUsageItem {
+  type: string;
+  totalCount: number;
+  active: number;
+  size: string;
+  reclaimable: string;
+  sizeBytes: number;
+}
+
 export type ProjectId = string;
 
 export interface Service {

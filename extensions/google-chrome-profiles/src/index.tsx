@@ -22,7 +22,6 @@ import {
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
   GoogleChromeBookmarkURL,
-  GoogleChromeInfoCache,
   GoogleChromeLocalState,
   getSelectedBrowser,
   Profile,
@@ -38,6 +37,7 @@ import {
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
+import { extractProfiles, filterProfiles } from "./util/profiles";
 import { getFavicon } from "@raycast/utils";
 
 const ProfileItem = (props: {
@@ -107,6 +107,7 @@ const ProfileItem = (props: {
 
 export default function Command() {
   const browser = getSelectedBrowser();
+  const [searchText, setSearchText] = useState("");
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
@@ -132,7 +133,7 @@ export default function Command() {
   }
 
   const infoCache = localState?.profile.info_cache;
-  const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
+  const profiles = infoCache && extractProfiles(infoCache);
 
   const deleteProfile = async (profile: Profile) => {
     if (
@@ -158,19 +159,22 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
+    <List
+      isLoading={!profiles && !error}
+      searchBarPlaceholder="Search Profile"
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
       {profiles &&
-        profiles
-          .sort(sortAlphabetically)
-          .map((profile, index) => (
-            <ProfileItem
-              key={profile.directory}
-              index={index}
-              profile={profile}
-              browser={browser}
-              onDelete={deleteProfile}
-            />
-          ))}
+        filterProfiles(profiles, searchText).map((profile, index) => (
+          <ProfileItem
+            key={profile.directory}
+            index={index}
+            profile={profile}
+            browser={browser}
+            onDelete={deleteProfile}
+          />
+        ))}
     </List>
   );
 }
@@ -178,29 +182,6 @@ export default function Command() {
 //------------
 // Utils
 //------------
-
-const extractProfileFromInfoCache =
-  (infoCache: GoogleChromeInfoCache) =>
-  (infoCacheKey: string): Profile => {
-    const profile = infoCache[infoCacheKey];
-
-    return {
-      directory: infoCacheKey,
-      name: profile.name,
-      givenName: profile.gaia_given_name,
-      ...(profile.gaia_name &&
-        profile.user_name &&
-        profile.last_downloaded_gaia_picture_url_with_size && {
-          ga: {
-            name: profile.gaia_name,
-            email: profile.user_name,
-            pictureURL: profile.last_downloaded_gaia_picture_url_with_size,
-          },
-        }),
-    };
-  };
-
-const sortAlphabetically = (a: Profile, b: Profile) => a.name.localeCompare(b.name);
 
 const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): GoogleChromeBookmarkURL[] =>
   folder.children.flatMap((e) => {
@@ -319,6 +300,7 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
       isLoading={!bookmarkFile && !error}
       searchBarPlaceholder={`Search Bookmark in ${props.profile.name}`}
       onSearchTextChange={onSearchTextChange}
+      filtering={false}
     >
       {!searchText && (
         <List.Section>
@@ -448,8 +430,8 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
       <Action
         title={`Open in ${props.browser.appName}`}
         icon={Icon.Globe}
-        onAction={() => {
-          openGoogleChrome(
+        onAction={async () => {
+          await openGoogleChrome(
             props.profile,
             props.target,
             async () => {

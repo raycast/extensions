@@ -7,6 +7,26 @@
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
+  "preferences": [
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "title": "Date Format",
+      "description": "Preferred date format for numeric dates (e.g. 1/11).",
+      "required": false,
+      "default": "mdy",
+      "data": [
+        {
+          "title": "Month / Day (MM/DD)",
+          "value": "mdy"
+        },
+        {
+          "title": "Day / Month (DD/MM)",
+          "value": "dmy"
+        }
+      ]
+    }
+  ],
   "contributors": [
     "tm.wrnr",
     "ir4n",
@@ -122,6 +142,41 @@
           "label": "Default Due Date & Time",
           "placeholder": "e.g. 6pm, in 2 hours, tomorrow 9am, tonight",
           "description": "Optional default due date or time for tab reminders (e.g. \"6pm\", \"tonight\", \"tomorrow 9am\", \"in 2 hours\"). Leave empty for no due date.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-reminder-from-selected-email",
+      "title": "Create Reminder from Selected Email",
+      "subtitle": "Apple Reminders",
+      "description": "Create a reminder from the selected email in Apple Mail.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "createImmediately",
+          "type": "checkbox",
+          "label": "Create Reminder Immediately",
+          "description": "When enabled, the reminder is created immediately in your default list without opening the form.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "defaultListName",
+          "type": "textfield",
+          "title": "Default List",
+          "label": "Default List",
+          "placeholder": "e.g. Inbox, Work, or Reminders",
+          "description": "Default list to add email reminders to. Leave empty to use Reminders' default list.",
+          "required": false
+        },
+        {
+          "name": "defaultDueDate",
+          "type": "textfield",
+          "title": "Default Due Date & Time",
+          "label": "Default Due Date & Time",
+          "placeholder": "e.g. 6pm, in 2 hours, tomorrow 9am, tonight",
+          "description": "Optional default due date or time for email reminders (e.g. \"6pm\", \"tonight\", \"tomorrow 9am\", \"in 2 hours\"). Leave empty for no due date.",
           "required": false
         }
       ]
@@ -343,6 +398,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "apple-reminders-weekly-review",
+        "title": "Weekly Review and Action Capture"
+      }
+    ],
     "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- Never add the recurrence field unless the user explicitly asks for a repeating reminder (for example: every day, weekly, monthly, yearly, weekdays, weekends).\\n- If the user does not explicitly ask for recurrence, omit recurrence entirely.\\n- Requests like \"today\", \"tomorrow\", or a specific date without recurrence keywords must be treated as one-off reminders (no recurrence field).\\n- Example: \"ask uncle for car today\" should call create-reminder without recurrence.\\n- Only include dueDate, priority, or recurrence when the user's request explicitly contains a corresponding date/time word, priority word such as urgent or important, an exclamation mark, or a recurrence word. Otherwise omit the field entirely. Never default priority to low.\\n- For title-only, Inbox, Backlog, or generic capture reminders, call create-reminder with only the title and any explicitly requested list.\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
     "evals": [
       {
@@ -822,7 +883,7 @@
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.1",
-    "@raycast/api": "^1.104.25",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.3.0",
     "chrono-node": "^2.10.1",
     "date-fns": "^4.4.0",

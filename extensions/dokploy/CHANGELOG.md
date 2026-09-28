@@ -1,5 +1,50 @@
 # Dokploy Changelog
 
+## [Fix Database Names in Deploy Service, Deployments, and AI Tools] - 2026-09-27
+
+- Fix databases showing up by their id, with no status, in `Deploy Service`, `Deployments`, and the AI tools on recent Dokploy versions, which stopped including database names and statuses in the project list these read from. The AI tools can find a database by name again.
+
+## [Fix Destination Connection Test and MongoDB Delete] - 2026-09-27
+
+- Fix `Add Destination`'s connection test, which always reported "Connection Failed" because it called a misspelled route. A failed test now also shows Dokploy's reason.
+- Fix deleting a MongoDB service, which sent the request to the wrong route and never deleted it.
+
+## [AI Tools: Deploy and Control Services] - 2026-09-27
+
+- Add 2 AI tools that change a service, each asking you to confirm first: Deploy Service (rebuild an application or Compose stack from its latest source, or restart a database with its data kept) and Control Service (start, stop, or reload).
+- AI tools can now narrow a service lookup by environment, so a service with the same name in e.g. `production` and `staging` can be told apart.
+
+## [AI Tools] - 2026-09-27
+
+- Add 7 read-only AI tools: List Instances, List Projects, List Services, Get Service, Get Service Logs, List Deployments, and Get Deployment Logs. Search across every configured instance by name, project, or kind.
+
+## [Docker Cleanup] - 2026-09-26
+
+- Add a `Docker Cleanup` action to the `Docker` command: shows disk usage per category (containers, images, volumes, build cache) and lets you clean stopped containers, unused images, unused volumes, the build cache, or run a full prune, each behind a confirmation dialog. Requires an org-admin API key.
+
+## [Menu Bar Server Health] - 2026-09-26
+
+- Add a `Server Health` menu bar command showing disk/memory/container status for every configured instance, without opening Raycast's main window. The icon tints red when any instance's disk usage crosses a configurable threshold.
+
+## [Deployments Feed Command] - 2026-09-25
+
+- Add a `Deployments` command showing the most recent deployment for every Application and Compose stack across every configured instance, sorted by recency. Opens straight into the full deployment history (rollback, cancel, delete) for whichever one you pick.
+
+## [Sort Projects, Services, and Docker by Frecency] - 2026-09-25
+
+- **Projects**, **Services**, and **Docker** now sort by how often you actually open each one, not raw API order - matching how **Deploy Service** already sorts. Scoped per instance, so frequently-used items in one account never affect another's ranking.
+
+## [Switch Instances Without Leaving the Screen] - 2026-09-25
+
+- Add an instance switcher to **Projects**, **Docker**, **S3 Destinations**, and **Users** - pick a different configured instance right from where you are, no need to go back to **Instances** first.
+- The **Instances** screen now shows a checkmark on whichever instance is currently active. Switching only happens when you actually choose to open a screen for a specific instance - arrowing past its row in the list no longer does it silently.
+
+## [Edit and Delete Instances] - 2026-09-24
+
+- Add `Edit Instance` and `Delete Instance` actions to the **Instances** screen. Editing re-verifies the API key the same way adding one does; deleting only removes the instance from Raycast and doesn't revoke the key or change anything on the Dokploy server.
+- Editing or deleting the currently active instance keeps the extension's cached connection in sync automatically.
+- Fix **Services** failing to load for any project managed with Dokploy's environments feature - entering it from **Projects** or **Environments** errored instead of showing the service list.
+
 ## [Fix Services list not refreshing after Create/Delete] - 2026-09-24
 
 - `Create Application`, `Create Database` and `Delete` popped back to Raycast's root (or, for Delete, stopped there without navigating at all) before the refreshed list actually loaded, so the change only showed up after fully restarting Raycast. Fixed so the **Services** list updates immediately.

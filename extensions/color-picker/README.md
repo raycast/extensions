@@ -14,6 +14,8 @@ A simple system-wide color picker. The color picker can be triggered with a stan
 - Convert any color to a different format
 - Get the color name for a hex code
 
+In Convert Color, type or paste a CSS color into the search field to see all available formats. You can also launch it with a color argument or selected text. Display P3 is supported by the macOS picker and the P3 output format in extension preferences.
+
 ## API
 
 This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].

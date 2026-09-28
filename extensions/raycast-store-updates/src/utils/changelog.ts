@@ -10,7 +10,7 @@ export interface ChangelogVersion {
 
 // The date after a heading's title, which is optional and lenient on purpose. A random 250
 // of the monorepo's changelogs (2026-09-22, 868 headings, every one parsed to a row) had
-// headings with no date (`## [Maintenance]`), single-digit days (`2023-11-5`), parenthesised
+// headings with no date (`## [Maintenance]`), single-digit days (`2023-11-5`), parenthesized
 // dates (`(2022-03-19)`) and misspelled placeholders (`{PR_MREGE_DATE}`); a reviewer later
 // found a month-name form (`- March, 4 2024`, extensions/turso). En and em dashes are accepted
 // as the separator too. A stricter pattern either drops those sections, bullets included, or
@@ -48,7 +48,7 @@ function calendarDate(stamp: string): Date | undefined {
 /**
  * Splits a CHANGELOG.md into its version sections, newest first (source order).
  *
- * Returns an empty array for anything it cannot recognise — a changelog with no `##`
+ * Returns an empty array for anything it cannot recognize — a changelog with no `##`
  * headings at all, or an empty file — which is the caller's signal to fall back to
  * rendering the raw markdown rather than showing an empty list.
  */
@@ -110,4 +110,61 @@ export function formatVersionAge(date: Date | undefined): string | undefined {
     if (value >= 1) return RELATIVE.format(-value, unit);
   }
   return "just now";
+}
+
+/** One commit in a CHANGELOG.md's history: its SHA and the version titles the file held there. */
+export interface ChangelogCommit {
+  sha: string;
+  /** Null when the file at this commit could not be read. */
+  titles: string[] | null;
+}
+
+/**
+ * Pairs each version row with the commit that added it, or undefined when that cannot be shown.
+ *
+ * `history` is the file's commit history, newest first; `before` is the titles the file
+ * held just before the oldest of those commits (empty when that commit created it). Nothing
+ * touches the file between two consecutive commits in its history, so a commit added exactly
+ * the titles it holds that the next-older state lacks. Titles, not dates, are compared, so
+ * the commit that stamps `{PR_MERGE_DATE}` adds nothing. They are counted as a multiset,
+ * so a repeated title ("Update") pairs one occurrence per commit, newest commit to topmost
+ * row — which is only right in a newest-first file, so in any other file a repeated title
+ * is left unpaired. A row whose heading text was edited later pairs with that edit, where
+ * its current text first appeared; a row older than the history stays unpaired.
+ *
+ * Nothing is paired unless the displayed rows are exactly the newest commit's titles: the
+ * feed and the displayed file are fetched separately, and a feed that lags the file would
+ * otherwise hand a new row's duplicate title to an older commit.
+ */
+export function attributeVersions(
+  versions: ChangelogVersion[],
+  history: ChangelogCommit[],
+  before: string[] | null,
+): (string | undefined)[] {
+  const result: (string | undefined)[] = versions.map(() => undefined);
+  const shown = versions.map((v) => v.title);
+  if (shown.join("\n") !== history[0]?.titles?.join("\n")) return result;
+  const dates = versions.flatMap((v) => (v.date ? [v.date.getTime()] : []));
+  // First against last, not every pair: one hand-typed date out of order in a long history
+  // would otherwise unpair every repeated title in a file that is plainly newest-first.
+  const newestFirst = dates.length > 1 && dates[0] > dates[dates.length - 1];
+  const repeated = new Set(shown.filter((t, i) => shown.indexOf(t) !== i));
+  for (let i = 0; i < history.length; i++) {
+    const titles = history[i].titles;
+    const older = i + 1 < history.length ? history[i + 1].titles : before;
+    if (!titles || !older) break;
+    const remaining = new Map<string, number>();
+    for (const t of older) remaining.set(t, (remaining.get(t) ?? 0) + 1);
+    for (const t of titles) {
+      const left = remaining.get(t) ?? 0;
+      if (left > 0) {
+        remaining.set(t, left - 1);
+        continue;
+      }
+      if (repeated.has(t) && !newestFirst) continue;
+      const row = versions.findIndex((v, index) => v.title === t && result[index] === undefined);
+      if (row !== -1) result[row] = history[i].sha;
+    }
+  }
+  return result;
 }

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix Authenticator TOTP URIs without a label] - 2026-09-24
+
+- Fix "Failed to parse authenticator key" for `otpauth://` URIs that have no label (e.g. `otpauth://totp?secret=...`)
+
 ## [Fix] - 2026-09-23
 
 - Copied passwords and other secrets are now marked confidential with `concealed`, which keeps them out of the Clipboard History, instead of the deprecated `transient` flag

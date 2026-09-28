@@ -37,6 +37,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-startups",
+      "title": "List Startups",
+      "description": "Find TrustMRR startups by category, sale status, or revenue. Returns a paginated list with revenue and sale metrics."
+    },
+    {
+      "name": "get-startup",
+      "title": "Get Startup",
+      "description": "Get full TrustMRR metrics and details for a startup by its slug."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.8",
     "@raycast/utils": "^1.17.0"

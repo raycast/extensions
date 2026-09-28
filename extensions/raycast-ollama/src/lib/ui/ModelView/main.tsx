@@ -51,7 +51,7 @@ export function ModelView(): React.JSX.Element {
         onChange={setSelectedServer}
         defaultValue={SelectedServer ? SelectedServer : "Local"}
       >
-        {Servers && Servers.map((s) => <List.Dropdown.Item title={s} value={s} />)}
+        {Servers && Servers.map((s) => <List.Dropdown.Item key={s} title={s} value={s} />)}
       </List.Dropdown>
     );
   }
@@ -71,14 +71,19 @@ export function ModelView(): React.JSX.Element {
             {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Capabilities">
                 {prop.model.show.capabilities.map((c) => (
-                  <List.Item.Detail.Metadata.TagList.Item icon={IconsCapabilities[c]} text={c} color={Color.Purple} />
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={c}
+                    icon={IconsCapabilities[c]}
+                    text={c}
+                    color={Color.Purple}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
             {prop.model.detail.details.families && prop.model.detail.details.families.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Families">
                 {prop.model.detail.details.families.map((f) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={f} />
+                  <List.Item.Detail.Metadata.TagList.Item key={f} text={f} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
@@ -119,6 +124,7 @@ export function ModelView(): React.JSX.Element {
               <List.Item.Detail.Metadata.TagList title="Parameters">
                 {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
                   <List.Item.Detail.Metadata.TagList.Item
+                    key={p}
                     text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
                   />
                 ))}

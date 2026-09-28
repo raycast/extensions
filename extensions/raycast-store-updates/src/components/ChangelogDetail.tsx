@@ -1,8 +1,9 @@
 import { Color, Detail, Icon, Image, List } from "@raycast/api";
 import { useChangelog } from "../hooks/useChangelog";
+import { useChangelogCommits } from "../hooks/useChangelogCommits";
 import { StoreItem } from "../types";
 import { ChangelogActions } from "./ChangelogActions";
-import { formatVersionAge, parseChangelog } from "../utils/changelog";
+import { attributeVersions, formatVersionAge, parseChangelog } from "../utils/changelog";
 
 interface ChangelogDetailProps {
   slug: string;
@@ -33,7 +34,9 @@ function versionIcon(index: number, count: number): Image.ImageLike {
 
 export function ChangelogDetail({ slug, title, items, currentIndex }: ChangelogDetailProps) {
   const { data: changelog, isLoading } = useChangelog(slug);
+  const { data: history } = useChangelogCommits(slug);
   const versions = parseChangelog(changelog);
+  const versionCommits = attributeVersions(versions, history?.history ?? [], history?.before ?? null);
   const actions = <ChangelogActions items={items} currentIndex={currentIndex} changelog={changelog} slug={slug} />;
 
   // Fall back to the raw document whenever the file has no version headings to split on.
@@ -81,7 +84,7 @@ export function ChangelogDetail({ slug, title, items, currentIndex }: ChangelogD
                   currentIndex={currentIndex}
                   changelog={changelog}
                   slug={slug}
-                  selectedVersion={{ title: version.title, body: version.body }}
+                  selectedVersion={{ title: version.title, body: version.body, commit: versionCommits[index] }}
                 />
               }
             />

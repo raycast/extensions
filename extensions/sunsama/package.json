@@ -313,7 +313,16 @@
       "required": false,
       "title": "Workspace URL",
       "placeholder": "https://app.sunsama.com/group/your-workspace",
-      "description": "Lets Open in Sunsama jump straight to a task. Copy it from the address bar while Sunsama is open. Without it, Open in Sunsama opens the app's home page."
+      "description": "Lets Open in Sunsama jump straight to a task on the web. Copy it from the address bar while Sunsama is open. Not needed with deep links on."
+    },
+    {
+      "name": "useDeepLinks",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Open Tasks",
+      "label": "Use Deep Links",
+      "description": "Open tasks in the Sunsama desktop app (sunsama://) instead of the website. Needs the app installed."
     }
   ],
   "title": "Sunsama",

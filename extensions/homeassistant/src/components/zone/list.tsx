@@ -37,8 +37,8 @@ export function ZoneList(props: { state: State }): React.ReactElement {
   );
 }
 
-export function ZonesList(): React.ReactElement {
-  const [searchText, setSearchText] = useState<string>();
+export function ZonesList(props: { initialSearchText?: string | undefined }): React.ReactElement {
+  const [searchText, setSearchText] = useState<string | undefined>(props.initialSearchText);
   const { states: allStates, error, isLoading } = useVisibleHAStates();
   const { entityAliases, favoriteEntityIds } = useEntityOverrides();
   const { states } = useStateSearch(searchText, "zone", "", allStates, entityAliases);
@@ -64,7 +64,12 @@ export function ZonesList(): React.ReactElement {
   const otherStates = sortByDisplayName(others);
 
   return (
-    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+    <List
+      searchBarPlaceholder="Filter by name or ID..."
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
       {favoriteStates.length > 0 && (
         <List.Section title="Favorites" subtitle={`${favoriteStates.length}`}>
           {favoriteStates.map((state) => (

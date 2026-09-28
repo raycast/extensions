@@ -3,7 +3,7 @@
 # Raycast Store Updates
 
 [![Raycast Store](https://img.shields.io/badge/Raycast-Store-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/chrismessina/raycast-store-updates)
-[![Licence MIT](https://img.shields.io/badge/Licence-MIT-22C55E?style=flat-square)](LICENSE)
+[![License MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 [![Follow @chrismessina](https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social)](https://github.com/chrismessina)
 [![Stars](https://img.shields.io/github/stars/chrismessina/raycast-store-updates?style=social)](https://github.com/chrismessina/raycast-store-updates/stargazers)
 
@@ -29,6 +29,7 @@
 - **Read/Unread Tracking** — Optional. Mark items read to keep the list tidy, with "Mark All as Read" and undo
 - **Time Grouping** — Today / Yesterday / Previous 7 Days / Previous 30 Days / Earlier
 - **Menu Bar Badge** — A background count of what is new since you last looked, scoped to everything or to just your installed extensions
+- **Ask AI** — Ask Raycast about recent Store releases and updates, with optional keyword, date range, and installed-extension filters
 
 ---
 
@@ -58,18 +59,22 @@ To keep an eye on things passively, enable **Store Updates Menu Bar** — it ref
 | View Store Updates | `view` | The full chronological list of new, updated, and removed extensions |
 | Store Updates Menu Bar | `menu-bar` | A badge of unseen Store activity, refreshed every hour in the background |
 
+The **Find Store Updates** tool works in Raycast's Ask AI chat. Mention `@raycast-store-updates` to ask about new or updated extensions. You can search by keyword, date range, or installed extension.
+
+If GitHub cannot load updates, Ask AI still shows new extensions from the Store feed and explains why updates are missing. Update searches use the latest 50 GitHub pull requests. Ask AI warns when those requests do not cover the full date range you asked about.
+
 ### Actions
 
 | Action | Shortcut | Description |
 | --- | --- | --- |
 | View Changelog | <kbd>⏎</kbd> | Read the extension's changelog inside Raycast |
-| Open in Raycast Store | <kbd>⌥</kbd><kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> | Deep-link straight to the Store page in Raycast |
+| View Extension in Store | <kbd>⌥</kbd><kbd>⇧</kbd><kbd>⌘</kbd><kbd>O</kbd> | Deep-link straight to the Store page in Raycast |
 | Open in Browser | `Common.Open` | Open the Store listing on the web |
 | Copy Latest Changes | `Common.Copy` | Copy only the latest release's changelog entry |
 | Copy Extension URL | `Common.CopyName` | Copy the Store URL |
 | Open Changelog in Browser | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>L</kbd> | Open `CHANGELOG.md` on GitHub |
 | Refresh | `Common.Refresh` | Re-fetch the list |
-| Check for Extension Updates | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>U</kbd> | Run Raycast's own updater on your installed extensions |
+| Update Installed Extensions | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>U</kbd> | Run Raycast's own updater on your installed extensions |
 | Show/Hide macOS-only | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>M</kbd> | Toggle platform-exclusive macOS extensions |
 | Show/Hide Windows-only | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>W</kbd> | Toggle platform-exclusive Windows extensions |
 | Filter by Category | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>F</kbd> | Pick a single category |
@@ -126,8 +131,8 @@ raycast-store-updates/
 | `npm run fix-lint` | Auto-fix lint issues |
 | `npm run publish` | Publish to the Raycast Store |
 
-There is no test suite. Verification is `npm run build`, `npm run lint`, and exercising the
-commands in `npm run dev`.
+Verification is `npm run build`, `npm run lint`, `npm test`, and
+`npx ray evals --non-interactive --exit-on-error`. Test the commands and Ask AI tool in Raycast.
 
 ### Clone & Run
 

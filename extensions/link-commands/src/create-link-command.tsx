@@ -15,7 +15,7 @@ import { access, chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { useState } from "react";
 import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
-import { facetCounts, splitTypedPackage } from "./lib/convention";
+import { categoryName, environmentName, facetCounts, splitPackage } from "./lib/convention";
 import { learnedPackages, packageForTarget } from "./lib/link-command";
 import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
@@ -190,7 +190,7 @@ const Command = () => {
    * was being typed.
    */
   const hoistPackageFields = (typed: string) => {
-    const fields = splitTypedPackage(typed);
+    const fields = splitPackage(typed);
     if (!fields.environment && !fields.category) return;
 
     const notes: string[] = [];
@@ -302,13 +302,13 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
       <Form.Dropdown
         id="environment"
         title="Environment"
-        info='Prefixes the title with "@work · " and the filename with "work.", so the command gets its own section in the list and can be filtered on.'
+        info='Adds " · @work" to the subtitle and prefixes the filename with "work.", so the command gets its own section in the list and can be filtered on. The title stays the name alone.'
         value={environment}
         onChange={setEnvironment}
       >
         <Form.Dropdown.Item title="None" value="" />
         {facets.environments.map((entry) => (
-          <Form.Dropdown.Item key={entry.value} title={`@${entry.value}`} value={entry.value} />
+          <Form.Dropdown.Item key={entry.value} title={environmentName(entry.value)} value={entry.value} />
         ))}
         <Form.Dropdown.Item title="New…" value={NEW_VALUE} />
       </Form.Dropdown>
@@ -347,7 +347,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
       >
         <Form.Dropdown.Item title="None" value="" />
         {facets.categories.map((entry) => (
-          <Form.Dropdown.Item key={entry.value} title={`#${entry.value}`} value={entry.value} />
+          <Form.Dropdown.Item key={entry.value} title={categoryName(entry.value)} value={entry.value} />
         ))}
         <Form.Dropdown.Item title="New…" value={NEW_VALUE} />
       </Form.Dropdown>

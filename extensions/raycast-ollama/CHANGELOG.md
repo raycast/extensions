@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Raycast Model Provider] - 2026-09-24
+
+- Use models from your local and remote Ollama servers directly in Raycast AI, with streamed responses, conversation history, vision, and tool calling when supported.
+
 ## [Improvement] - 2026-09-22
 
 - [Improvement] new per-command "Auto-Replace Selected Text" preference on the commands that rewrite their input: when enabled, the generated answer replaces the selected text automatically instead of waiting for you to copy or paste it. Disabled by default, and skipped when the answer did not complete cleanly or when the input came from the clipboard rather than a selection.

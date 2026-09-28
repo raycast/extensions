@@ -19,7 +19,8 @@
     "jadenmajid",
     "ADCAdams",
     "TurboCoder13",
-    "Olli0103"
+    "Olli0103",
+    "alexi.build"
   ],
   "commands": [
     {
@@ -89,6 +90,13 @@
         }
       ],
       "interval": "10s"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-system-status",
+      "title": "Get System Status",
+      "description": "Read current CPU, memory, disk storage, and battery status on this Mac"
     }
   ],
   "dependencies": {

@@ -1,5 +1,6 @@
-import { open, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { openFolder } from "./utils/open-folder";
 
 export default function Command() {
-  return open(getPreferenceValues<Preferences.Documents>().documentsdir);
+  return openFolder(getPreferenceValues<Preferences.Documents>().documentsdir);
 }

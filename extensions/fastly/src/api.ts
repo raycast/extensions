@@ -185,7 +185,11 @@ export async function getServiceDomains(serviceId: string): Promise<string[]> {
   }
 }
 
-export async function getServiceStats(serviceId: string, serviceType: string): Promise<FastlyStats> {
+export async function getServiceStats(
+  serviceId: string,
+  serviceType: string,
+  options?: { throwOnError?: boolean },
+): Promise<FastlyStats> {
   try {
     const now = new Date();
     const from = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -247,6 +251,11 @@ export async function getServiceStats(serviceId: string, serviceType: string): P
 
     return aggregated;
   } catch (error) {
+    // Views tolerate missing stats; tools pass throwOnError so an API failure
+    // isn't reported as a service with zero traffic.
+    if (options?.throwOnError) {
+      throw error;
+    }
     console.error(`Failed to fetch stats for service ${serviceId}:`, error);
     return {};
   }

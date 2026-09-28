@@ -63,6 +63,7 @@ export function resolveQuickAddReminder(
   lists: QuickAddList[],
   now: Date = new Date(),
   defaultListName?: string,
+  dateFormatPreference?: string,
 ): ParsedQuickAddReminder {
   const mentionedList = findListInText(inputText, lists) ?? findListInText(reminder.title, lists);
   let { title } = reminder;
@@ -92,7 +93,7 @@ export function resolveQuickAddReminder(
   }
 
   if (!dueDate) {
-    const extracted = extractDueDateFromText(inputText, now);
+    const extracted = extractDueDateFromText(inputText, now, dateFormatPreference);
     if (extracted.dueDate) {
       dueDate = formatDueDate(extracted.dueDate);
       title = stripListMentions(extracted.title || title, mentionedList);

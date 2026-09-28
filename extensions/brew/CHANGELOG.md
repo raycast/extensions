@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Fix Services menu bar background refresh] - 2026-09-24
+
+- Services Menu Bar no longer fails with "Toast API is not available when command is launched in background" when a background refresh can't fetch services; the error is shown in the menu instead (click it to retry)
+
 ## [Homebrew 7 support] - 2026-09-21
 
 - Show Installed now lists formulae you asked for and their dependencies in separate sections; a dependency nothing else needs is tagged Unused. ⌘D still hides the dependencies section.

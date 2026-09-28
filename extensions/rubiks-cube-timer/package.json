@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rubiks-cube-timer",
+  "title": "Rubiks Cube Timer",
+  "version": "1.0.0",
+  "description": "Time your Rubik's Cube solves with random scrambles and csTimer import/export. No account required.",
+  "icon": "icon.png",
+  "author": "nokoniko",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rubiks-cube-timer",
+      "title": "Rubiks Cube Timer",
+      "subtitle": "Times your solves",
+      "description": "Get a random scramble and time your solve.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "precision",
+          "title": "Timer Precision",
+          "description": "How finely the running timer counts up. The final time is always exact.",
+          "type": "dropdown",
+          "required": false,
+          "default": "tenths",
+          "data": [
+            {
+              "title": "Seconds (1, 2, 3)",
+              "value": "whole"
+            },
+            {
+              "title": "Half seconds (1, 1.5, 2)",
+              "value": "half"
+            },
+            {
+              "title": "Tenths (1, 1.1, 1.2)",
+              "value": "tenths"
+            },
+            {
+              "title": "Hundredths (1, 1.01, 1.02)",
+              "value": "hundredths"
+            }
+          ]
+        },
+        {
+          "name": "inspection",
+          "title": "Inspection",
+          "label": "Enable inspection countdown",
+          "description": "Enter starts an inspection countdown before the solve. Going over adds +2; going 2s past it is a DNF.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "inspectionSeconds",
+          "title": "Inspection Time",
+          "description": "Length of the inspection countdown in seconds (WCA is 15).",
+          "type": "textfield",
+          "required": false,
+          "default": "15"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

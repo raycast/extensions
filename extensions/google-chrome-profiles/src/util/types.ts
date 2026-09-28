@@ -74,7 +74,7 @@ export type Profile = {
     /**
      * The GA user profile picture URL.
      */
-    pictureURL: string;
+    pictureURL?: string;
   };
 };
 

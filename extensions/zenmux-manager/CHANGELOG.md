@@ -1,5 +1,15 @@
 # ZenMux Manager Changelog
 
+## [AI Models] - 2026-09-24
+
+- Provide ZenMux chat models to Raycast AI Chat, Quick AI, and AI Commands.
+- Add a Model API Key preference for Subscription (`sk-ss-v1-...`) and PAYG (`sk-ai-v1-...`) keys. The Platform API key stays account-only.
+- Discover the live ZenMux catalog, including context length, vision, and reasoning capabilities.
+- Offer Minimal, Low, Medium, and High reasoning effort for models whose catalog sets `capabilities.reasoning` to true, and send the selected effort as `reasoning_effort`. Medium is the default.
+- Reject interrupted streams and malformed tool calls, and preserve refusal text.
+- Enable tool calling when catalog metadata is absent, while respecting explicit unsupported flags.
+- Stream text, reasoning, and tool calls from ZenMux's OpenAI-compatible chat endpoint.
+
 ## [Initial Release] - 2026-05-20
 
 - Add ZenMux subscription quota dashboard.

@@ -73,7 +73,9 @@ Raycast extensions cannot run as permanent background daemons. If Raycast or the
 Open **Edit Media**, choose one file, and select an operation:
 
 - Resize and/or crop an image or video
-- Change audio or video playback speed from 0.25× to 4×
+- Change audio or video playback speed from 0.25× to 40×. For video, optionally choose 24, 30, or 60 fps and remove audio in the same edit
+- Change video frame rate to 24, 30, or 60 fps, keeping audio unless removal is selected
+- Remove audio to create a silent MP4 video at its original speed
 - Extract an audio stream as MP3, M4A, WAV, or FLAC
 - Normalize loudness to a chosen LUFS target
 - Burn an external subtitle file into video

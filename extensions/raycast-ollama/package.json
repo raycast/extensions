@@ -86,6 +86,9 @@
       "description": "Performs a web search for a single query and returns relevant results."
     }
   ],
+  "ai": {
+    "modelProvider": "models"
+  },
   "commands": [
     {
       "name": "ollama-chat",
@@ -5032,9 +5035,11 @@
     }
   ],
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.48",
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "@raycast/api": "^2.2.0",
+    "@raycast/api": "2.5.0",
     "@raycast/utils": "^2.3.1",
+    "ai": "^7.0.0",
     "file-type": "^21.3.1"
   },
   "devDependencies": {
@@ -5051,6 +5056,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   }
 }

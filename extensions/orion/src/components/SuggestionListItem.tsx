@@ -13,7 +13,9 @@ const SuggestionListItem = (props: { suggestion: string; id?: string }) => {
       accessories={[{ text: getSearchEngineName() }]}
       actions={
         <ActionPanel>
-          <OpenInOrionAction url={buildSearchUrl(suggestion)} title="Search in Orion" />
+          {/* SuggestionListItem only renders inside the Command Bar, so this
+              always forces an immediate pop to root - see OpenTabAction. */}
+          <OpenInOrionAction url={buildSearchUrl(suggestion)} title="Search in Orion" immediatePopToRoot />
           <Action.CopyToClipboard
             title="Copy Suggestion"
             content={suggestion}
