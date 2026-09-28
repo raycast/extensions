@@ -30,6 +30,7 @@ export default function GlobalSettings(): React.JSX.Element {
     },
     initialValues: {
       server: "Local",
+      model: "",
       thinking: "none",
       keep_alive: "5m",
     },
@@ -87,10 +88,13 @@ export default function GlobalSettings(): React.JSX.Element {
             ))}
           </Form.Dropdown>
           <Form.Dropdown title="Default Model" {...itemProps.model}>
-            {itemProps.server.value &&
+            {itemProps.server.value && Model.get(itemProps.server.value) ? (
               Model.get(itemProps.server.value)
                 ?.sort()
-                ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+                ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)
+            ) : (
+              <Form.Dropdown.Item title="Select a server first" value="" />
+            )}
           </Form.Dropdown>
           <Form.Dropdown title="Default Thinking Effort" info={InfoThinking} {...itemProps.thinking}>
             <Form.Dropdown.Item title="None" value={String(ThinkingEffort.None)} key={String(ThinkingEffort.None)} />
