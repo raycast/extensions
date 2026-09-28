@@ -1,6 +1,6 @@
 # Brightness Control Changelog
 
-## [Instant brightness on Windows and Min Brightness command] - {PR_MERGE_DATE}
+## [Instant brightness on Windows and Min Brightness command] - 2026-09-28
 
 - Add `Min Brightness` command
 - Add `Close Raycast` preference: disable to keep Raycast open
