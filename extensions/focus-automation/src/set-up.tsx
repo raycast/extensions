@@ -549,11 +549,6 @@ function StatusScreen() {
           <Action title="Reconnect Google" icon={Icon.Link} onAction={reconnect} />
           <Action title="Test It Now" icon={Icon.Play} onAction={fireTestPrompt} />
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          <Action.OpenInBrowser
-            title="Send Feedback"
-            icon={Icon.SpeechBubble}
-            url="mailto:pierre.marie.mogenet@gmail.com?subject=Focus%20Automation%20feedback"
-          />
           {environment.isDevelopment && (
             <Action
               title="Reset Onboarding (Dev)"
@@ -562,6 +557,11 @@ function StatusScreen() {
               onAction={resetOnboarding}
             />
           )}
+          <Action.OpenInBrowser
+            title="Send Feedback"
+            icon={Icon.SpeechBubble}
+            url="mailto:pierre.marie.mogenet@gmail.com?subject=Focus%20Automation%20feedback"
+          />
         </ActionPanel>
       }
     />
