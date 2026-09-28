@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix notes not loading when a file name contains a backslash] - {PR_MERGE_DATE}
+## [Fix notes not loading when a file name contains a backslash] - 2026-09-28
 
 - Fix Search Note and Bookmarked Notes showing no notes for a vault when any note's file name contains a backslash
 
