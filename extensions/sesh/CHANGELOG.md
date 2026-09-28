@@ -1,5 +1,9 @@
 # Sesh Changelog
 
+## [Connect to worktree from browser] - 2026-09-28
+
+- Add a Connect to Worktree from Browser command that reads the GitHub issue or pull request from your active browser tab and connects to its worktree, creating it if it doesn't exist
+
 ## [Search and connect to windows] - 2026-09-23
 
 - Add a Connect to Window command that lists every tmux window, grouped by session, and jumps straight to the one you pick, even when several windows share a name

@@ -122,3 +122,16 @@ export function isTmuxRunning(): Promise<boolean> {
     execFile("tmux", ["ls"], { env: getEnv() }, (error, _, stderr) => resolve(!(error || stderr)));
   });
 }
+
+export function connectToBrowserWorktree(): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    execFile("sesh", ["worktree", "connect", "--browser", "--switch"], { env: getEnv() }, (error, _, stderr) => {
+      if (error) {
+        console.error("error ", error);
+        console.error("stderr ", stderr);
+        return reject(stderr.trim() || error.message);
+      }
+      return resolve();
+    });
+  });
+}
