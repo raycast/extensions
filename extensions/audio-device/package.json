@@ -218,6 +218,23 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "list-audio-devices",
+      "title": "List Audio Devices",
+      "description": "List available input or output devices, their IDs, and which one is currently active. Use before switching to a named device."
+    },
+    {
+      "name": "set-audio-device",
+      "title": "Set Audio Device",
+      "description": "Switch the active input or output device using an ID from List Audio Devices."
+    },
+    {
+      "name": "set-audio-volume",
+      "title": "Set Audio Volume",
+      "description": "Set the current input or output device volume to a percentage from 0 to 100."
+    }
+  ],
   "preferences": [
     {
       "name": "systemOutput",
