@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  Color,
+  Grid,
+  Icon,
+  open,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { runAppleScript, runPowerShellScript, usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
@@ -22,6 +33,7 @@ import {
   gitBranchColor,
   keepSectionOrder,
   layout,
+  openInNewTerminalTab,
   showGitBranch,
   terminalApp,
 } from "./lib/preferences";
@@ -37,9 +49,11 @@ import {
   isValidHexColor,
   isWin,
   isWorkspaceEntry,
+  uppercaseWindowsDriveLetter,
 } from "./lib/utils";
 import { Shortcut } from "./lib/shortcuts";
 import { getEditorApplication } from "./utils/editor";
+import { execFilePromise } from "./utils/exec";
 import { getGitBranch } from "./utils/git";
 import { OpenInShell } from "./lib/actions";
 
@@ -77,7 +91,14 @@ export default function Command() {
     >
       <ListOrGridSection title="Pinned Projects">
         {pinnedEntries.filter(filterEntriesByType(type)).map((entry: EntryLike, index: number) => (
-          <EntryItem key={`pinned-${index}`} entry={entry} pinned={true} {...pinnedMethods} {...removeMethods} />
+          <EntryItem
+            key={`pinned-${index}`}
+            entry={entry}
+            pinned={true}
+            index={index}
+            {...pinnedMethods}
+            {...removeMethods}
+          />
         ))}
       </ListOrGridSection>
       <ListOrGridSection title="Recent Projects">
@@ -85,7 +106,7 @@ export default function Command() {
           ?.filter(filterUnpinnedEntries(pinnedEntries))
           ?.filter(filterEntriesByType(type))
           .map((entry: EntryLike, index: number) => (
-            <EntryItem key={index} entry={entry} {...pinnedMethods} {...removeMethods} />
+            <EntryItem key={index} entry={entry} index={index} {...pinnedMethods} {...removeMethods} />
           ))}
       </ListOrGridSection>
     </ListOrGrid>
@@ -121,7 +142,7 @@ function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
   );
 }
 
-function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & RemoveMethods) {
+function EntryItem(props: { entry: EntryLike; pinned?: boolean; index: number } & PinMethods & RemoveMethods) {
   if (isWorkspaceEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.workspace.configPath} />;
   } else if (isFolderEntry(props.entry)) {
@@ -153,15 +174,63 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
   }
 }
 
+function isWindowsTerminalApp(app: Application): boolean {
+  const name = app?.windowsAppId;
+  if (name === "Microsoft.WindowsTerminal_8wekyb3d8bbwe") return true;
+  return app.path.split(/[/\\]/).pop()?.toLowerCase() === "wt.exe";
+}
+
+async function openFolderInTerminal(terminal: Application, directory: string, newTab: boolean) {
+  // Opening a folder in Windows Terminal via file association always starts
+  // cmd; launching wt.exe directly respects the user's default profile.
+  if (isWin && isWindowsTerminalApp(terminal)) {
+    const args = newTab ? ["new-tab", "-d", directory] : ["-d", directory];
+    await execFilePromise("wt.exe", args);
+    return;
+  }
+  if (isMac && newTab && isAppleTerminalApp(terminal)) {
+    await openMacTerminalNewTab(directory);
+    return;
+  }
+  await open(directory, terminal);
+}
+
+function isAppleTerminalApp(app: Application): boolean {
+  if (app.bundleId === "com.apple.Terminal") return true;
+  return app.name.toLowerCase() === "terminal";
+}
+
+async function openMacTerminalNewTab(directory: string) {
+  const escapedDir = directory.replace(/'/g, `'\\''`);
+  await runAppleScript(`
+    tell application "Terminal"
+      activate
+      if (count of windows) = 0 then
+        do script "cd '${escapedDir}' && clear"
+      else
+        tell application "System Events" to keystroke "t" using command down
+        delay 0.3
+        do script "cd '${escapedDir}' && clear" in selected tab of front window
+      end if
+    end tell
+  `);
+}
+
 function LocalItem(
-  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods,
+  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean; index: number } & PinMethods &
+    RemoveMethods,
 ) {
   const name = decodeURIComponent(basename(props.uri));
-  const path = fileURLToPath(props.uri);
+  const path = uppercaseWindowsDriveLetter(fileURLToPath(props.uri));
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
   const keywords = path.split("/");
   const [gitBranch, setGitBranch] = useState<string | null>(null);
+  // Stagger branch lookups down the list so dozens of git resolutions don't
+  // land at once and stall the action panel until they all settle. Top items
+  // resolve first; later ones trickle in (capped). Cached paths resolve
+  // instantly regardless of their slot.
+  const fetchDelay = 150 + Math.min(props.index * 60, 1200);
 
   const { data: editorApp } = usePromise(async () => {
     return getEditorApplication(build);
@@ -182,12 +251,18 @@ function LocalItem(
     }
 
     if (showGitBranch) {
-      fetchGitBranch();
+      // Defer past first paint so the list (and Ctrl+K) stays responsive
+      // while git processes resolve.
+      const timer = setTimeout(fetchGitBranch, fetchDelay);
+      return () => {
+        mounted = false;
+        clearTimeout(timer);
+      };
     }
     return () => {
       mounted = false;
     };
-  }, [path, name]);
+  }, [path, name, fetchDelay]);
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
@@ -262,17 +337,18 @@ function LocalItem(
               onAction={getAction(true)}
               shortcut={Shortcut.AlternateOpen}
             />
-            <Action.OpenWith path={path} shortcut={Shortcut.OpenWith} />
+            <Action.OpenWith path={path} shortcut={Shortcut.Open} />
             {isFolderEntry(props.entry) && terminalApp && (
               <Action
                 title={`Open with ${terminalApp.name}`}
                 icon={{ fileIcon: terminalApp.path }}
                 shortcut={Shortcut.OpenInTerminal}
-                onAction={() =>
-                  open(path, terminalApp).catch(() =>
+                onAction={() => {
+                  if (!terminalApp) return;
+                  openFolderInTerminal(terminalApp, path, openInNewTerminalTab).catch(() =>
                     showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`),
-                  )
-                }
+                  );
+                }}
               />
             )}
           </ActionPanel.Section>
@@ -289,7 +365,8 @@ function LocalItem(
 }
 
 function RemoteItem(
-  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods,
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean; index: number } & PinMethods &
+    RemoveMethods,
 ) {
   const remoteDisplay = getRemoteDisplay(props.entry, props.uri, props.subtitle);
   const remoteIconPath = getRemoteFileIconPath(props.uri, getEntryRemoteAuthority(props.entry));
@@ -574,7 +651,6 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
         onAction={() => props.removeEntry(props.entry)}
         shortcut={Shortcut.Remove}
       />
-
       <Action
         icon={Icon.Trash}
         title="Remove All Recent Projects"

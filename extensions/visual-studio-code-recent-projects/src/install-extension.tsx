@@ -9,7 +9,7 @@ import {
 } from "./lib/extension-actions";
 import { Shortcut } from "./lib/shortcuts";
 import { useLocalExtensions } from "./extensions";
-import { Extension } from "./lib/vscode";
+import { Extension, getExtensionsGalleryName } from "./lib/vscode";
 import { compactNumberFormat } from "./lib/utils";
 
 export interface GalleryQueryResult {
@@ -183,10 +183,13 @@ export default function InstallExtensionRootCommand() {
   }
   const extensions = data?.results ? data?.results[0].extensions : undefined;
   const totalExtensionCount = getTotalResultCount(data);
+  // Gallery name comes from the selected app's own product.json, so custom
+  // marketplace URLs configured in the app are reflected here.
+  const galleryName = getExtensionsGalleryName();
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search by Name or ID in VS Code Marketplace"
+      searchBarPlaceholder={`Search by Name or ID in ${galleryName}`}
       onSearchTextChange={setSearchText}
       throttle
     >

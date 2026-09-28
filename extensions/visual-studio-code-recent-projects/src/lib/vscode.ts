@@ -94,13 +94,29 @@ function macApplicationPath(appName: string, ...segments: string[]) {
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
 }
 
+function macAntigravityCliPath(): string {
+  return macApplicationPath("Antigravity IDE.app", "Contents", "Resources", "app", "bin", "antigravity-ide");
+}
+
+function macAntigravityProgramPath(): string {
+  return macApplicationPath("Antigravity IDE.app", "Contents", "Resources", "app");
+}
+
+function windowsAntigravityCliPath(programsFolder: string): string {
+  return path.join(programsFolder, "Antigravity IDE", "bin", "antigravity-ide.cmd");
+}
+
+function windowsAntigravityProgramPath(programsFolder: string): string {
+  return path.join(programsFolder, "Antigravity IDE");
+}
+
 function cliPaths(): Record<string, string> {
   let cliPaths: Record<string, string> = {};
 
   if (isWin) {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
-      Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
+      "Antigravity IDE": windowsAntigravityCliPath(programsFolder),
       Code: resolveWindowsVSCodePath(path.join("Microsoft VS Code", "bin", "code.cmd")),
       "Code - Insiders": resolveWindowsVSCodePath(path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd")),
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
@@ -120,7 +136,7 @@ function cliPaths(): Record<string, string> {
 
   if (isMac) {
     cliPaths = {
-      Antigravity: macApplicationPath("Antigravity.app", "Contents", "Resources", "app", "bin", "antigravity"),
+      "Antigravity IDE": macAntigravityCliPath(),
       Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code"),
       "Code - Insiders": macApplicationPath(
         "Visual Studio Code - Insiders.app",
@@ -170,7 +186,7 @@ function programPaths(): Record<string, string> {
   if (isWin) {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     programPaths = {
-      Antigravity: path.join(programsFolder, "Antigravity"),
+      "Antigravity IDE": windowsAntigravityProgramPath(programsFolder),
       Code: resolveWindowsVSCodePath("Microsoft VS Code"),
       "Code - Insiders": resolveWindowsVSCodePath("Microsoft VS Code Insiders"),
       Cursor: path.join(programsFolder, "cursor"),
@@ -190,7 +206,7 @@ function programPaths(): Record<string, string> {
 
   if (isMac) {
     programPaths = {
-      Antigravity: macApplicationPath("Antigravity.app", "Contents", "Resources", "app"),
+      "Antigravity IDE": macAntigravityProgramPath(),
       Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app"),
       "Code - Insiders": macApplicationPath("Visual Studio Code - Insiders.app", "Contents", "Resources", "app"),
       Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app"),
@@ -288,6 +304,10 @@ class VSCodeCLI {
     );
   }
 
+  openAgentsWindowSync() {
+    child_process.execFileSync(this.cliFilename, ["--agents"], this.execOptions);
+  }
+
   async newWindow() {
     const editorApp = await getEditorApplication(build);
     open("", editorApp);
@@ -337,9 +357,9 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
   const extensionsRootFolder = path.join(os.homedir(), `.${getBuildScheme()}/extensions`);
-  const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
-  if (await fileExists(extensionsManifrestFilename)) {
-    const data = await afs.readFile(extensionsManifrestFilename, { encoding: "utf-8" });
+  const extensionsManifestFilename = path.join(extensionsRootFolder, "extensions.json");
+  if (await fileExists(extensionsManifestFilename)) {
+    const data = await afs.readFile(extensionsManifestFilename, { encoding: "utf-8" });
     const extensions = JSON.parse(data) as ExtensionMetaRoot[] | undefined;
     if (extensions && extensions.length > 0) {
       const result: Extension[] = [];
@@ -371,13 +391,53 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
 }
 
 export function getBuildNamePreference(): string {
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   const build = prefs.build as string;
+  // The preference value stays "Antigravity" so existing settings keep working,
+  // but the app was rebranded to "Antigravity IDE".
+  if (build === "Antigravity") {
+    return "Antigravity IDE";
+  }
   return build;
 }
 
+function getExtensionsGalleryServiceUrl(): string | undefined {
+  try {
+    const productJSONPath = getProductJSONPath();
+    if (productJSONPath && fs.existsSync(productJSONPath)) {
+      const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as {
+        extensionsGallery?: { serviceUrl?: string };
+      };
+      return productJSON.extensionsGallery?.serviceUrl;
+    }
+  } catch {
+    // Ignore unreadable product.json and fall back to the build default below.
+  }
+  return undefined;
+}
+
+export function getExtensionsGalleryName(): string {
+  const serviceUrl = getExtensionsGalleryServiceUrl();
+  if (serviceUrl) {
+    const normalizedUrl = serviceUrl.toLowerCase();
+    if (normalizedUrl.includes("marketplace.visualstudio.com")) return "VS Code Marketplace";
+    // Cursor routes Open VSX through its own proxy (marketplace.cursorapi.com),
+    // so treat Cursor hosts as Open VSX as well.
+    if (normalizedUrl.includes("open-vsx.org") || normalizedUrl.includes("cursor")) return "Open VSX";
+    // Custom marketplace URL configured in the app — show its host.
+    try {
+      return new URL(normalizedUrl).host;
+    } catch {
+      return serviceUrl;
+    }
+  }
+  // Fall back to the build default when product.json is unavailable.
+  const build = getBuildNamePreference();
+  return build === "Code" || build === "Code - Insiders" ? "VS Code Marketplace" : "Open VSX";
+}
+
 const buildSchemes: Record<string, string> = {
-  Antigravity: "antigravity",
+  "Antigravity IDE": "antigravity-ide",
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",

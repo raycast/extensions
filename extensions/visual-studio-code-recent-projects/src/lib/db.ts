@@ -131,6 +131,7 @@ export function useRecentEntries() {
           return;
         }
 
+        removeEntriesFromStoredGlobalState([entry]);
         suppressStorageEntries([entryKey]);
         await showStorageEntriesHiddenToast("Entry removed");
       },
@@ -157,6 +158,7 @@ export function useRecentEntries() {
             },
           })
         ) {
+          removeEntriesFromStoredGlobalState(visibleFallbackEntries);
           suppressStorageEntries(visibleStorageEntryKeys);
           await showStorageEntriesHiddenToast("All visible entries removed");
         }
@@ -188,6 +190,10 @@ export function useRecentEntries() {
           databasePath,
         );
       }
+
+      // The entry can also exist as a storage.json copy, which would resurface
+      // on the next launch once session suppression resets.
+      removeEntriesFromStoredGlobalState([entry]);
 
       if (entryKey && isStorageEntry) {
         suppressStorageEntries([entryKey]);
@@ -271,6 +277,7 @@ export function useRecentEntries() {
         })
       ) {
         await saveEntries([], recentEntriesStorageKeys, databasePath);
+        removeEntriesFromStoredGlobalState(combinedEntries ?? []);
         suppressStorageEntries(visibleStorageEntryKeys);
         await revalidate();
         showToast(
@@ -414,6 +421,95 @@ function getStoredGlobalState(): StoredGlobalState | undefined {
     return JSON.parse(storageContents) as StoredGlobalState;
   } catch {
     return undefined;
+  }
+}
+
+function getEntryUris(entry: EntryLike): string[] {
+  if ("folderUri" in entry) {
+    return [entry.folderUri];
+  }
+
+  if ("workspace" in entry) {
+    return entry.workspace?.configPath ? [entry.workspace.configPath] : [];
+  }
+
+  if ("fileUri" in entry) {
+    return [entry.fileUri];
+  }
+
+  return [];
+}
+
+/**
+ * Removes entries from `storage.json` (`backupWorkspaces` and
+ * `profileAssociations`). The visible list merges the state database with
+ * these storage-backed copies, so deleting from the database alone lets
+ * removed entries resurface on the next launch.
+ *
+ * Returns true when the file was changed. Never throws — callers treat this
+ * as best-effort persistence on top of session suppression.
+ */
+function removeEntriesFromStoredGlobalState(entries: EntryLike[]): boolean {
+  const storageJsonPath = getStorageJsonPath();
+  if (!fs.existsSync(storageJsonPath)) {
+    return false;
+  }
+
+  let state: StoredGlobalState;
+  try {
+    state = JSON.parse(fs.readFileSync(storageJsonPath, "utf8")) as StoredGlobalState;
+  } catch {
+    return false;
+  }
+
+  const uris = new Set(entries.flatMap((entry) => getEntryUris(entry)));
+  if (uris.size === 0) {
+    return false;
+  }
+
+  let changed = false;
+
+  const folders = state.backupWorkspaces?.folders;
+  if (folders) {
+    // Keep records we cannot positively identify instead of crashing on them.
+    const remaining = folders.filter((folder) => !folder?.folderUri || !uris.has(folder.folderUri));
+    if (remaining.length !== folders.length) {
+      state.backupWorkspaces!.folders = remaining;
+      changed = true;
+    }
+  }
+
+  const workspaces = state.backupWorkspaces?.workspaces;
+  if (workspaces) {
+    // Keep records we cannot positively identify instead of crashing on them.
+    const remaining = workspaces.filter(
+      (workspace) => !workspace?.workspace?.configPath || !uris.has(workspace.workspace.configPath),
+    );
+    if (remaining.length !== workspaces.length) {
+      state.backupWorkspaces!.workspaces = remaining;
+      changed = true;
+    }
+  }
+
+  const associations = state.profileAssociations?.workspaces;
+  if (associations) {
+    for (const uri of Object.keys(associations)) {
+      if (uris.has(uri)) {
+        delete associations[uri];
+        changed = true;
+      }
+    }
+  }
+
+  if (!changed) {
+    return false;
+  }
+
+  try {
+    fs.writeFileSync(storageJsonPath, JSON.stringify(state));
+    return true;
+  } catch {
+    return false;
   }
 }
 
