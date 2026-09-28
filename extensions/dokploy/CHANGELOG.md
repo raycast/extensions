@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Faster Deployments Feed] - {PR_MERGE_DATE}
+## [Faster Deployments Feed] - 2026-09-28
 
 - `Deployments` now loads each instance with a single request on Dokploy v0.29.0+, instead of one request per service. Services that have never been deployed are no longer listed. Older instances keep working the previous way.
 
