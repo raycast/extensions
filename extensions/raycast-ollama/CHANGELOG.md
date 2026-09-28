@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-09-28
 
 - Added per-command model settings with global defaults fallback
 - Added "Change Model" and "Change Reasoning" actions to 15 commands (accessible from root search)
