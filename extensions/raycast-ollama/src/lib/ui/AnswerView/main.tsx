@@ -141,10 +141,6 @@ export function AnswerView(props: props): React.JSX.Element {
         setShow={setShowSelectModelForm}
         revalidate={RevalidateModel}
         capabilities={props.capabilities}
-        server={!IsLoadingModel && Model ? Model.server.name : undefined}
-        model={!IsLoadingModel && Model ? Model.tag.name : undefined}
-        thinking={!IsLoadingModel && Model ? Model.thinking : undefined}
-        keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
       />
     );
 

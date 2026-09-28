@@ -117,6 +117,10 @@ export default function GlobalSettings(): React.JSX.Element {
             title="Note"
             text="These global defaults are used by all commands unless a command has its own custom model settings configured via 'Change Model' in the command's action panel."
           />
+          <Form.Description
+            title="Tip"
+            text="Set these values in Raycast Preferences → Extensions → Ollama AI. The dropdowns above show available servers/models for reference."
+          />
         </React.Fragment>
       )}
     </Form>

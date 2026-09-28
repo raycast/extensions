@@ -256,51 +256,38 @@ export async function GetResolvedSettingsCommandAnswer(
 ): Promise<Types.SettingsCommandAnswer> {
   try {
     const settings = await GetSettingsCommandAnswer(command);
-    if (settings.useGlobalDefaults) {
-      const globalDefaults = GetGlobalDefaultModel();
-      const server = await GetOllamaServerByName(globalDefaults.server);
-      return {
-        server: globalDefaults.server,
-        model: {
-          main: {
-            server: server,
-            tag: globalDefaults.model,
-            thinking: globalDefaults.thinking === "none" ? false : (globalDefaults.thinking as ThinkingEffortOllama),
-            keep_alive: globalDefaults.keepAlive,
-          },
-        },
-        useGlobalDefaults: true,
-      };
+    // Has custom settings if model tag is set
+    if (settings.model.main.tag) {
+      return settings;
     }
-    return settings;
   } catch {
-    // Fall back to global defaults
-    const globalDefaults = GetGlobalDefaultModel();
-    const server = await GetOllamaServerByName(globalDefaults.server);
-    return {
-      server: globalDefaults.server,
-      model: {
-        main: {
-          server: server,
-          tag: globalDefaults.model,
-          thinking: globalDefaults.thinking === "none" ? false : (globalDefaults.thinking as ThinkingEffortOllama),
-          keep_alive: globalDefaults.keepAlive,
-        },
-      },
-      useGlobalDefaults: true,
-    };
+    // No custom settings, fall through to global defaults
   }
+  // Fall back to global defaults
+  const globalDefaults = GetGlobalDefaultModel();
+  const server = await GetOllamaServerByName(globalDefaults.server);
+  return {
+    server: globalDefaults.server,
+    model: {
+      main: {
+        server: server,
+        tag: globalDefaults.model,
+        thinking: globalDefaults.thinking === "none" ? false : (globalDefaults.thinking as ThinkingEffortOllama),
+        keep_alive: globalDefaults.keepAlive,
+      },
+    },
+  };
 }
 
 /**
- * Check if Command has Custom Settings (not using global defaults).
+ * Check if Command has Custom Settings.
  * @param command - command type.
  * @returns True if command has custom settings.
  */
 export async function HasCustomCommandSettings(command: Enum.CommandAnswer): Promise<boolean> {
   try {
     const settings = await GetSettingsCommandAnswer(command);
-    return !settings.useGlobalDefaults;
+    return !!settings.model.main.tag;
   } catch {
     return false;
   }

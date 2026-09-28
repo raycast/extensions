@@ -28,7 +28,6 @@ export interface SettingsChatModels {
 export interface SettingsCommandAnswer {
   server: string;
   model: SettingsModels;
-  useGlobalDefaults?: boolean;
 }
 
 export interface LegacyRaycastChatMessage extends OllamaApiGenerateStats {
