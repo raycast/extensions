@@ -1,6 +1,6 @@
 # Threads Changelog
 
-## [Analytics and Giveaway] - {PR_MERGE_DATE}
+## [Analytics and Giveaway] - 2026-09-28
 
 - Add an **Analytics** command showing account and post metrics for the last 7, 14, 30, or 90 days.
 - Add an **Analytics Menu Bar** command that keeps a metric of your choice in the menu bar.
