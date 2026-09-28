@@ -1,7 +1,7 @@
 import * as Types from "./types";
 import * as Enum from "./enum";
-import { OllamaServer } from "../ollama/types";
-import { LocalStorage } from "@raycast/api";
+import { OllamaServer, ThinkingEffort as ThinkingEffortOllama } from "../ollama/types";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
 /**
  * Get Ollama Servers.
@@ -225,4 +225,83 @@ async function GetLegacySettingsCommandChat(): Promise<Types.RaycastChat[]> {
     });
   }
   throw new Error("No saved chat");
+}
+
+/**
+ * Get Global Default Model Settings from Preferences.
+ * @returns Global Default Model Settings.
+ */
+export function GetGlobalDefaultModel(): {
+  server: string;
+  model: string;
+  thinking: string;
+  keepAlive: string;
+} {
+  const preferences = getPreferenceValues<Preferences>();
+  return {
+    server: preferences.ollamaDefaultServer || "Local",
+    model: preferences.ollamaDefaultModel || "",
+    thinking: preferences.ollamaDefaultThinking || "none",
+    keepAlive: preferences.ollamaDefaultKeepAlive || "5m",
+  };
+}
+
+/**
+ * Get Resolved Settings for Command Answer (with fallback to global defaults).
+ * @param command - command type.
+ * @returns Resolved Settings.
+ */
+export async function GetResolvedSettingsCommandAnswer(
+  command: Enum.CommandAnswer,
+): Promise<Types.SettingsCommandAnswer> {
+  try {
+    const settings = await GetSettingsCommandAnswer(command);
+    if (settings.useGlobalDefaults) {
+      const globalDefaults = GetGlobalDefaultModel();
+      const server = await GetOllamaServerByName(globalDefaults.server);
+      return {
+        server: globalDefaults.server,
+        model: {
+          main: {
+            server: server,
+            tag: globalDefaults.model,
+            thinking: globalDefaults.thinking === "none" ? false : (globalDefaults.thinking as ThinkingEffortOllama),
+            keep_alive: globalDefaults.keepAlive,
+          },
+        },
+        useGlobalDefaults: true,
+      };
+    }
+    return settings;
+  } catch {
+    // Fall back to global defaults
+    const globalDefaults = GetGlobalDefaultModel();
+    const server = await GetOllamaServerByName(globalDefaults.server);
+    return {
+      server: globalDefaults.server,
+      model: {
+        main: {
+          server: server,
+          tag: globalDefaults.model,
+          thinking: globalDefaults.thinking === "none" ? false : (globalDefaults.thinking as ThinkingEffortOllama),
+          keep_alive: globalDefaults.keepAlive,
+        },
+      },
+      useGlobalDefaults: true,
+    };
+  }
+}
+
+/**
+ * Check if Command has Custom Settings (not using global defaults).
+ * @param command - command type.
+ * @returns True if command has custom settings.
+ */
+export async function HasCustomCommandSettings(command: Enum.CommandAnswer): Promise<boolean> {
+  try {
+    const settings = await GetSettingsCommandAnswer(command);
+    return !settings.useGlobalDefaults;
+  } catch {
+    return false;
+  }
 }

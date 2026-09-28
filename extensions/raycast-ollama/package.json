@@ -66,13 +66,63 @@
       "default": false,
       "label": "Certificate Validation Enabled"
     },
-    {
-      "name": "ollamaApiKey",
-      "description": "Ollama API Key used by Web Search Tools",
-      "type": "password",
-      "required": false,
-      "title": "Ollama API Key"
-    }
+{
+    "name": "ollamaApiKey",
+    "description": "Ollama API Key used by Web Search Tools",
+    "type": "password",
+    "required": false,
+    "title": "Ollama API Key"
+  },
+  {
+    "name": "ollamaDefaultServer",
+    "description": "Default Ollama server to use for all commands",
+    "type": "textfield",
+    "required": false,
+    "title": "Default Server",
+    "placeholder": "Local"
+  },
+  {
+    "name": "ollamaDefaultModel",
+    "description": "Default model to use for all commands",
+    "type": "textfield",
+    "required": false,
+    "title": "Default Model",
+    "placeholder": "llama3.2"
+  },
+  {
+    "name": "ollamaDefaultThinking",
+    "description": "Default thinking effort for all commands",
+    "type": "dropdown",
+    "required": false,
+    "title": "Default Thinking Effort",
+    "data": [
+      {
+        "title": "None",
+        "value": "none"
+      },
+      {
+        "title": "Low",
+        "value": "low"
+      },
+      {
+        "title": "Medium",
+        "value": "medium"
+      },
+      {
+        "title": "High",
+        "value": "high"
+      }
+    ],
+    "default": "none"
+  },
+  {
+    "name": "ollamaDefaultKeepAlive",
+    "description": "Default keep alive duration for models",
+    "type": "textfield",
+    "required": false,
+    "title": "Default Keep Alive",
+    "placeholder": "5m"
+  }
   ],
   "tools": [
     {
@@ -5031,6 +5081,13 @@
       "title": "Manage MCP Server",
       "subtitle": "Ollama",
       "description": "Manage configured MCP Server",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-global-settings",
+      "title": "Global Model Settings",
+      "subtitle": "Ollama",
+      "description": "Configure global default model settings for all commands",
       "mode": "view"
     }
   ],
