@@ -401,19 +401,23 @@ export function getBuildNamePreference(): string {
   return build;
 }
 
-function getExtensionsGalleryServiceUrl(): string | undefined {
+function getExtensionsGallery(): { serviceUrl?: string; itemUrl?: string } {
   try {
     const productJSONPath = getProductJSONPath();
     if (productJSONPath && fs.existsSync(productJSONPath)) {
       const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as {
-        extensionsGallery?: { serviceUrl?: string };
+        extensionsGallery?: { serviceUrl?: string; itemUrl?: string };
       };
-      return productJSON.extensionsGallery?.serviceUrl;
+      return productJSON.extensionsGallery ?? {};
     }
   } catch {
     // Ignore unreadable product.json and fall back to the build default below.
   }
-  return undefined;
+  return {};
+}
+
+function getExtensionsGalleryServiceUrl(): string | undefined {
+  return getExtensionsGallery().serviceUrl;
 }
 
 export function getExtensionsGalleryName(): string {
@@ -434,6 +438,38 @@ export function getExtensionsGalleryName(): string {
   // Fall back to the build default when product.json is unavailable.
   const build = getBuildNamePreference();
   return build === "Code" || build === "Code - Insiders" ? "VS Code Marketplace" : "Open VSX";
+}
+
+const FALLBACK_GALLERY_QUERY_URL =
+  "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=3.0-preview.1";
+
+/**
+ * The gallery query endpoint for the selected app's configured marketplace
+ * (`extensionsGallery.serviceUrl` in its `product.json`). Open VSX and its
+ * proxies implement the same gallery API as the VS Code Marketplace, so the
+ * same request body works. Falls back to the VS Code Marketplace endpoint
+ * when `product.json` is unavailable.
+ */
+export function getExtensionsGalleryQueryUrl(): string {
+  const serviceUrl = getExtensionsGalleryServiceUrl()?.replace(/\/+$/, "");
+  if (!serviceUrl) {
+    return FALLBACK_GALLERY_QUERY_URL;
+  }
+  return `${serviceUrl}/extensionquery?api-version=3.0-preview.1`;
+}
+
+const FALLBACK_GALLERY_ITEM_URL = "https://marketplace.visualstudio.com/items";
+
+/**
+ * The web page for an extension in the selected app's configured marketplace
+ * (`extensionsGallery.itemUrl` in its `product.json`). Open VSX implements
+ * the same `?itemName=` adapter as the VS Code Marketplace, so the same shape
+ * works for both. Falls back to the VS Code Marketplace page when
+ * `product.json` is unavailable.
+ */
+export function getExtensionsGalleryItemUrl(extensionID: string): string {
+  const itemUrl = getExtensionsGallery().itemUrl?.replace(/\/+$/, "") || FALLBACK_GALLERY_ITEM_URL;
+  return `${itemUrl}?itemName=${extensionID}`;
 }
 
 const buildSchemes: Record<string, string> = {

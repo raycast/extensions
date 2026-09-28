@@ -254,6 +254,7 @@ export function useRecentEntries() {
           },
         })
       ) {
+        removeEntriesFromStoredGlobalState(combinedEntries ?? []);
         suppressStorageEntries(visibleStorageEntryKeys);
         await showStorageEntriesHiddenToast("All visible entries removed");
       }

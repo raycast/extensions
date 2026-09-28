@@ -9,7 +9,7 @@ import {
 } from "./lib/extension-actions";
 import { Shortcut } from "./lib/shortcuts";
 import { useLocalExtensions } from "./extensions";
-import { Extension, getExtensionsGalleryName } from "./lib/vscode";
+import { Extension, getExtensionsGalleryName, getExtensionsGalleryQueryUrl } from "./lib/vscode";
 import { compactNumberFormat } from "./lib/utils";
 
 export interface GalleryQueryResult {
@@ -248,7 +248,9 @@ function useGalleryQuery(searchText: string): {
   isLoading: boolean;
 } {
   // reference for impl. https://github.com/microsoft/vscode/blob/12ae331012923024bedaf873ba4259a8c64db020/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
-  const url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=3.0-preview.1";
+  // The endpoint comes from the selected app's own product.json, so forks
+  // search their configured gallery (Open VSX, Cursor's proxy, custom URLs).
+  const url = getExtensionsGalleryQueryUrl();
   const headers = {
     "content-type": "application/json",
     "accept-encoding": "gzip",

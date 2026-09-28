@@ -9,8 +9,14 @@ const execFileAsync = promisify(execFile);
 
 // Resolved branches per directory, so remounts (scrolling, filtering) reuse
 // them instead of spawning `git` again. In-flight requests are shared too,
-// so items pointing at the same folder don't duplicate work.
-const branchCache = new Map<string, string | null>();
+// so items pointing at the same folder don't duplicate work. Entries expire
+// after a short TTL so a checkout while the list is open is picked up on the
+// next effect run instead of serving the first value forever.
+const BRANCH_CACHE_TTL_MS = 30_000;
+
+type BranchCacheEntry = { value: string | null; expiresAt: number };
+
+const branchCache = new Map<string, BranchCacheEntry>();
 const branchInflight = new Map<string, Promise<string | null>>();
 
 export async function getGitBranch(directoryPath: string): Promise<string | null> {
@@ -29,7 +35,11 @@ export async function getGitBranch(directoryPath: string): Promise<string | null
   }
 
   if (branchCache.has(dir)) {
-    return branchCache.get(dir) ?? null;
+    const cached = branchCache.get(dir);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    branchCache.delete(dir);
   }
   const pending = branchInflight.get(dir);
   if (pending) {
@@ -38,7 +48,7 @@ export async function getGitBranch(directoryPath: string): Promise<string | null
   // resolveGitBranch never rejects (unexpected errors resolve to null), so
   // sharing the promise cannot produce unhandled rejections.
   const promise = resolveGitBranch(dir).then((branch) => {
-    branchCache.set(dir, branch);
+    branchCache.set(dir, { value: branch, expiresAt: Date.now() + BRANCH_CACHE_TTL_MS });
     branchInflight.delete(dir);
     return branch;
   });
