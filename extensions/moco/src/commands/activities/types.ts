@@ -27,3 +27,19 @@ export type Activity = {
   updated_at: string;
   status?: StatusType;
 };
+
+// hours: "" starts a timer, a number logs that many hours.
+export type StartActivityRequest = {
+  date: string;
+  description: string;
+  hours: number | "";
+  projectID?: number | null;
+  taskID: number;
+};
+
+// Only the given fields are sent to MOCO.
+export type EditActivityRequest = {
+  date?: string;
+  description?: string;
+  hours?: number;
+};

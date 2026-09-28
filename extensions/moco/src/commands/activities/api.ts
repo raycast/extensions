@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { api } from "../../utils/api";
 import { z } from "zod";
-import { Activity } from "./types";
+import { Activity, EditActivityRequest, StartActivityRequest } from "./types";
 import { Project } from "../projects/types";
 
 import { Task } from "../tasks/types";
@@ -96,7 +96,7 @@ export const fetchActivities = async (
     .sort((a, b) => (a.created_at > b.created_at || a.updated_at > b.updated_at ? -1 : 1));
 };
 
-export const startActivity = async (values: any): Promise<boolean | void> => {
+export const startActivity = async (values: StartActivityRequest): Promise<boolean | void> => {
   const verb = values.hours === "" ? "start" : "logg";
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -164,7 +164,7 @@ export const toggleActivity = async (activityID: number, startActivity: boolean)
   return result;
 };
 
-export const editActivity = async (values: any, activityID: number): Promise<boolean | void> => {
+export const editActivity = async (values: EditActivityRequest, activityID: number): Promise<boolean | void> => {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Updating activity...",

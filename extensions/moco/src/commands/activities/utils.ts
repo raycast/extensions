@@ -14,3 +14,16 @@ export function toDecimalTime(time: string) {
   const [hours, minutes] = time.split(":");
   return Number(hours) + Number(minutes) / 60;
 }
+
+// Accepted time input: "h:mm" or decimal hours with "." or ",".
+export const TIME_PATTERN = /^\d+(:[0-5]\d)?$|^\d+([.,]\d+)?$/;
+
+export function validateTime(value: string | undefined): string | undefined {
+  const time = value?.trim() ?? "";
+  return time === "" || TIME_PATTERN.test(time) ? undefined : "Use h:mm or decimal hours, e.g. 1:30 or 1.5";
+}
+
+export function parseHours(time: string): number {
+  const trimmed = time.trim();
+  return trimmed.includes(":") ? toDecimalTime(trimmed) : Number(trimmed.replace(",", "."));
+}
