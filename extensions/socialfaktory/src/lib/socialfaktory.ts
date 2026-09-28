@@ -12,8 +12,9 @@ import {
 } from "./auth";
 import { fileLock } from "./lock";
 import { McpClient } from "./mcp";
+import { connectedChannels, publish, type Publication, type PublishDependencies } from "./publishing";
 import { createSession } from "./session";
-import type { Brand, PostPage, PostStatus, Wallet } from "./types";
+import type { Brand, Channel, Post, PostPage, PostStatus, Wallet } from "./types";
 import { abortableSleep } from "./time";
 import {
   findSameWrite,
@@ -59,6 +60,14 @@ const writing: WriteDependencies = {
   sent: new Map(),
 };
 
+const publishing: PublishDependencies = {
+  call,
+  now: writing.now,
+  lock: writing.lock,
+  account: accountKey,
+  storage: localStore,
+};
+
 export async function listBrands(signal?: AbortSignal): Promise<Brand[]> {
   const { brands } = await call<{ brands: Brand[] }>("list_brands", {}, { signal });
   const names = Object.fromEntries(brands.map((brand) => [brand.id, brand.name]));
@@ -84,6 +93,19 @@ export function listPosts(
     { brand_id: filter.brandId, status: filter.status, page: filter.page },
     { signal },
   );
+}
+
+export async function listConnectedChannels(
+  brandId: string,
+  platform: string,
+  signal?: AbortSignal,
+): Promise<Channel[]> {
+  const { channels } = await call<{ channels: Channel[] }>("list_channels", { brand_id: brandId }, { signal });
+  return connectedChannels(channels, platform);
+}
+
+export function publishPost(publication: Publication): Promise<Post> {
+  return publish(publishing, publication);
 }
 
 export function getWallet(signal?: AbortSignal): Promise<Wallet> {

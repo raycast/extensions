@@ -303,7 +303,7 @@ export async function writeForTool(dependencies: WriteDependencies, input: ToolI
 }
 
 function answerFor(target: WriteTarget, generation: PolledWrite): ToolResult {
-  const variants = writtenVariants(generation);
+  const variants = writtenVariants(generation, generation.platform ?? target.platform);
   if (!isFinished(generation)) {
     return {
       status: "still_writing",

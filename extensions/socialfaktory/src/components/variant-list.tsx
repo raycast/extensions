@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { firstLine, isFinished, isVariant, platformName, variantSlots, variantText } from "../lib/format";
 import {
+  listConnectedChannels,
   pollWriting,
   startWriting,
   type PolledWrite,
@@ -10,7 +11,8 @@ import {
   type WriteRequest,
   type WriteTarget,
 } from "../lib/socialfaktory";
-import type { Variant } from "../lib/types";
+import type { Channel, Variant } from "../lib/types";
+import { PublishActions } from "./publish-actions";
 import { SignInAgainAction } from "./sign-in-again";
 import { UNREACHABLE_ADVICE, UNREACHABLE_TITLE, failureTitle, requestFrom, retryRequest } from "../lib/writing";
 
@@ -30,7 +32,17 @@ export function VariantList({ request, record }: Props) {
   const [error, setError] = useState<Error>();
   const [done, setDone] = useState(false);
   const [checking, setChecking] = useState(false);
-  const platform = platformName(generation?.platform ?? record?.platform ?? request?.platform ?? "x");
+  const provider = generation?.platform ?? record?.platform ?? request?.platform ?? "x";
+  const platform = platformName(provider);
+  const brandId = request?.brandId ?? record?.brandId ?? "";
+  const {
+    data: channels,
+    isLoading: loadingChannels,
+    revalidate: reloadChannels,
+  } = usePromise(listConnectedChannels, [brandId, provider], {
+    execute: Boolean(brandId),
+    failureToastOptions: { title: "Could not load your connected accounts" },
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -130,7 +142,14 @@ export function VariantList({ request, record }: Props) {
       />
       {!error &&
         slots.map((variant, index) => (
-          <VariantItem key={index} variant={variant} index={index} platform={platform} retry={retry} />
+          <VariantItem
+            key={index}
+            variant={variant}
+            index={index}
+            platform={platform}
+            retry={retry}
+            publish={{ brandId, platform: provider, channels, loading: loadingChannels, reload: reloadChannels }}
+          />
         ))}
     </List>
   );
@@ -141,11 +160,13 @@ function VariantItem({
   index,
   platform,
   retry,
+  publish,
 }: {
   variant: Variant;
   index: number;
   platform: string;
   retry?: ReactNode;
+  publish: { brandId: string; platform: string; channels: Channel[] | undefined; loading: boolean; reload: () => void };
 }) {
   const number = index + 1;
 
@@ -202,6 +223,7 @@ function VariantItem({
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Post" content={text} />
           <Action.Paste title="Paste Post" content={text} />
+          <PublishActions {...publish} parts={variant.parts ?? []} />
           {retry}
         </ActionPanel>
       }

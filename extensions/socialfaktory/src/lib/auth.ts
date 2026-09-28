@@ -7,6 +7,7 @@ import {
   REFRESH_TIMEOUT_MS,
   TOOL_SIGN_IN_WAIT_MS,
   TokenEndpointError,
+  grantIsCurrent,
   registerClient,
   refreshAccessToken,
   requestTokens,
@@ -25,7 +26,7 @@ export const MCP_URL = `${SITE_URL}/mcp`;
 const AUTHORIZE_URL = `${SITE_URL}/oauth/authorize`;
 const TOKEN_URL = `${SITE_URL}/oauth/token`;
 const REGISTER_URL = `${SITE_URL}/oauth/register`;
-const SCOPE = "read generate";
+const SCOPE = "read generate publish";
 const REGISTRATION_KEY = "oauth-registration";
 const ACCOUNT_KEY = "oauth-account";
 const ACCOUNT_LEASE_KEY = "oauth-account-lease";
@@ -92,6 +93,7 @@ export function accountKey(): Promise<string> {
 
 export async function hasFreshCredentials(): Promise<boolean> {
   if (personalToken()) return true;
+  if (!grantIsCurrent((await storedRegistration())?.scope, SCOPE)) return false;
   const tokens = await oauthClient.getTokens();
   return Boolean(tokens?.accessToken && !tokens.isExpired());
 }
@@ -140,6 +142,7 @@ export async function forgetTokens(staleAccessToken: string): Promise<void> {
 }
 
 async function signIn(): Promise<string> {
+  if (!grantIsCurrent((await storedRegistration())?.scope, SCOPE)) await oauthClient.removeTokens();
   const tokens = await oauthClient.getTokens();
   if (tokens?.accessToken && !tokens.isExpired()) return tokens.accessToken;
   if (tokens?.refreshToken) {

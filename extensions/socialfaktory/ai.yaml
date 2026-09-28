@@ -7,7 +7,9 @@ instructions: |
   When write-post answers status "previous_write_failed", the earlier write of that brief failed. Tell the user, and only call write-post again with the brief if they want to try once more, which reserves 3 credits.
   When write-post fails because the connection to SocialFaktory was renewed, do not call it again right away. Ask the user to check their credit balance first, in case the first attempt went through.
   Show every variant write-post returns in full and exactly as written, each one separately, so the user can pick one. Do not rewrite or shorten them. A variant can carry a violation: a note that it still breaks one of the brand's writing rules. Show that note under the variant.
-  This extension cannot publish, schedule, edit or delete posts, and it cannot generate video. When asked to, say so and point the user to https://www.socialfaktory.com.
+  publish-post publishes text on X or LinkedIn, now or at scheduledAt, from the brand's connected account. Only call it when the user asked to post or schedule, with the exact text they approved: never rewrite it, and never publish a variant the user did not pick. Pass scheduledAt in ISO 8601 with the user's time zone offset, or leave it out to publish now. A write-post variant that is an X thread has a line holding only --- between its posts: pass it to publish-post with those lines kept.
+  When publish-post answers status "choose_account", ask the user which of the listed accounts to use and call it again with that channelId. When it answers "no_connected_account", tell the user to connect that network at https://www.socialfaktory.com.
+  This extension cannot edit or delete posts, cannot post images or video, and cannot publish on TikTok, Instagram, YouTube, Facebook or Pinterest, and it cannot generate video. When asked to, say so and point the user to https://www.socialfaktory.com.
   In list-posts, a queued post waits for the publisher, a scheduled post goes out at scheduled_at, and a published post gets a release_url and metrics once the channel reports back, which takes a few minutes. A failed post carries a failure_code. Show times in the user's time zone.
   In get-wallet, available_balance is what the user can spend now, reserved_balance is held by work in progress, and total_balance is both together.
   When a tool fails with a message about credits, plans, permissions or brands, relay that message and do not retry. When it asks for Sign in Again, tell the user to use that action in any SocialFaktory command in Raycast.
@@ -93,4 +95,25 @@ evals:
     expected:
       - not:
           callsTool: write-post
-      - meetsCriteria: "Explains that the extension cannot publish posts"
+      - meetsCriteria: "Explains that the extension can only publish text posts on X or LinkedIn, not on Instagram"
+  - input: "@socialfaktory post this on X for Acme Coffee: Our oat milk latte is back for autumn. Come by this week."
+    mocks:
+      list-brands:
+        - id: brand_7Kp2
+          name: Acme Coffee
+          description: A neighborhood coffee roaster
+          status: active
+          language: en
+      publish-post:
+        status: queued
+        postId: post_5Rt1
+        account: "@acmecoffee"
+        scheduledAt: null
+    expected:
+      - callsTool: list-brands
+      - callsTool:
+          name: publish-post
+          arguments:
+            brandId: brand_7Kp2
+            text: "Our oat milk latte is back for autumn. Come by this week."
+      - meetsCriteria: "Says the post was sent to X from @acmecoffee"

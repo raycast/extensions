@@ -82,7 +82,7 @@ function WritePost() {
         onChange={() => setBriefError(undefined)}
       />
       <Form.Description
-        text={`A new brief reserves ${WRITE_RESERVE_CREDITS} credits and settles at what it used. The same brief within 30 minutes shows that write again. Nothing is published.`}
+        text={`A new brief reserves ${WRITE_RESERVE_CREDITS} credits and settles at what it used. The same brief within 30 minutes shows that write again. Nothing is published until you post or schedule a variant.`}
       />
     </Form>
   );

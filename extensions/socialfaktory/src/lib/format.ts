@@ -71,12 +71,13 @@ export function variantSlots(generation: Pick<TextGeneration, "status" | "varian
   return Array.from({ length: count }, (_, index) => variants[index] ?? { status: "pending" });
 }
 
-export function writtenVariants(generation: Pick<TextGeneration, "variants">): WrittenVariant[] {
+export function writtenVariants(generation: Pick<TextGeneration, "variants">, platform?: string): WrittenVariant[] {
+  const separator = platform === "x" ? "\n---\n" : "\n\n";
   return generation.variants
     .filter(isVariant)
     .filter((variant) => variant.status === "succeeded")
     .flatMap((variant) => {
-      const text = variantText(variant);
+      const text = (variant.parts ?? []).join(separator);
       if (!text) return [];
       return [variant.violation ? { text, violation: variant.violation } : { text }];
     });

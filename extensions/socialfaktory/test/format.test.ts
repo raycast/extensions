@@ -83,16 +83,20 @@ describe("variantSlots", () => {
 });
 
 describe("writtenVariants", () => {
-  it("joins the parts of a thread, keeps the style violation and drops failed variants", () => {
-    assert.deepEqual(writtenVariants(finishedThread), [
-      { text: "Launch day is here.\n\nHere is what changed." },
+  it("marks the posts of a thread with a --- line, keeps the style violation and drops failed variants", () => {
+    assert.deepEqual(writtenVariants(finishedThread, "x"), [
+      { text: "Launch day is here.\n---\nHere is what changed." },
       { text: "We shipped the new editor!", violation: "uses an exclamation mark the brand avoids" },
     ]);
   });
 
+  it("joins a LinkedIn post's parts as paragraphs", () => {
+    assert.equal(writtenVariants(finishedThread, "linkedin")[0].text, "Launch day is here.\n\nHere is what changed.");
+  });
+
   it("skips empty slots", () => {
     assert.deepEqual(
-      writtenVariants(generation({ status: "succeeded", variants: [null, { status: "succeeded", parts: ["One"] }] })),
+      writtenVariants(generation({ status: "succeeded", variants: [null, { status: "succeeded", parts: ["One"] }] }), "x"),
       [{ text: "One" }],
     );
   });

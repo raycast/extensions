@@ -970,13 +970,13 @@ describe("writeForTool", () => {
     assert.equal(failureTitle(true), "Could not check the post");
   });
 
-  it("describes writing as X and LinkedIn only, and tracking across all seven platforms", () => {
+  it("describes writing and posting as X and LinkedIn only, and tracking across all seven platforms", () => {
     const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as { description: string };
     const readme = readFileSync(join(process.cwd(), "README.md"), "utf8");
     const intro = readme.split("\n").find((line) => line.trim() && !line.startsWith("#")) ?? "";
 
     for (const text of [manifest.description, intro]) {
-      assert.match(text, /^Write X and LinkedIn posts in your brand's voice/);
+      assert.match(text, /^Write, post and schedule X and LinkedIn posts in your brand's voice/);
       assert.match(text, /TikTok, Instagram, YouTube, X, LinkedIn, Facebook and Pinterest/);
     }
   });

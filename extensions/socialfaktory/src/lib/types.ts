@@ -35,6 +35,16 @@ export type PostPage = {
   pages: number;
 };
 
+export type Channel = {
+  id: string;
+  provider: string;
+  handle: string | null;
+  status: string;
+  caption_limit: number | null;
+  media_required: boolean;
+  max_media: number | null;
+};
+
 export type Wallet = {
   available_balance: number;
   reserved_balance: number;

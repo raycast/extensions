@@ -17,6 +17,7 @@ import {
   TOOL_SIGN_IN_WAIT_MS,
   TokenEndpointError,
   TokenTimeoutError,
+  grantIsCurrent,
   refreshAccessToken,
   registerClient,
   withLease,
@@ -1056,5 +1057,23 @@ describe("token request timeouts", () => {
   it("gives the refresh less time than the lease and the code exchange a full minute", () => {
     assert.ok(REFRESH_TIMEOUT_MS < LEASE_MS - 5_000);
     assert.ok(CODE_EXCHANGE_TIMEOUT_MS >= 60_000);
+  });
+});
+
+describe("grantIsCurrent", () => {
+  it("accepts a registration made for every scope the extension asks for", () => {
+    assert.equal(grantIsCurrent("read generate publish", "read generate publish"), true);
+  });
+
+  it("accepts the same scopes in another order", () => {
+    assert.equal(grantIsCurrent("publish read generate", "read generate publish"), true);
+  });
+
+  it("asks for a new sign-in when the registration predates publishing", () => {
+    assert.equal(grantIsCurrent("read generate", "read generate publish"), false);
+  });
+
+  it("asks for a new sign-in when there is no registration", () => {
+    assert.equal(grantIsCurrent(undefined, "read generate publish"), false);
   });
 });

@@ -22,6 +22,12 @@ const SETTLE_MIN_MS = 150;
 const SETTLE_SPREAD_MS = 250;
 const SETTLE_CHECKS = 2;
 
+export function grantIsCurrent(grantedScope: string | undefined, wantedScope: string): boolean {
+  if (!grantedScope) return false;
+  const granted = new Set(grantedScope.split(" "));
+  return wantedScope.split(" ").every((scope) => granted.has(scope));
+}
+
 export type TokenSnapshot = {
   accessToken: string;
   refreshToken?: string;
