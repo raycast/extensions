@@ -3,6 +3,7 @@
 ## [Fix] - {PR_MERGE_DATE}
 
 - Use cache API to prevent menu bar icon flicker on background update cycles.
+- Keep menu bar item visible until caffeination cache is initialized on startup to avoid flicker.
 
 ## [Fix, Enhancement] - 2026-09-26
 

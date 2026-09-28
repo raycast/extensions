@@ -158,7 +158,7 @@ function useWindowsCaffeinateInfo(execute: boolean) {
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
-  const [cachedCaffeinated, setCachedCaffeinated] = useCachedState("caffeinateStatus", false);
+  const [cachedCaffeinated, setCachedCaffeinated] = useCachedState<boolean>("caffeinateStatus");
 
   const { isLoading, data, mutate } = useCaffeinateInfo(true);
 
@@ -201,7 +201,7 @@ export default function Command(props: LaunchProps) {
   }
 
   const prevStatusRef = useRef(displayCaffeinateStatus);
-  const justDecaffeinated = prevStatusRef.current && !displayCaffeinateStatus;
+  const justDecaffeinated = prevStatusRef.current === true && displayCaffeinateStatus === false;
   prevStatusRef.current = displayCaffeinateStatus;
 
   const isUserInitiatedGrace = userInitiatedAt > 0 && Date.now() - userInitiatedAt < HIDE_DECAFFEINATED_DELAY_MS;
@@ -322,13 +322,13 @@ export default function Command(props: LaunchProps) {
     }
   };
 
-  if (isHideEnabled && !displayCaffeinateStatus && !isGracePeriod) {
+  if (isHideEnabled && displayCaffeinateStatus === false && !isGracePeriod) {
     return null;
   }
 
   return (
     <MenuBarExtra
-      isLoading={false}
+      isLoading={isLoading && cachedCaffeinated === undefined}
       icon={
         displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
