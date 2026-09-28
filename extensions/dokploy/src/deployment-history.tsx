@@ -88,6 +88,9 @@ export default function DeploymentHistory({
         .length;
     },
     initialData: undefined,
+    // Missing on older Dokploy versions and on tokens without deployment read access; the row
+    // already surfaces `queueError`, so skip useFetch's default failure toast.
+    onError: () => {},
   });
 
   function refresh() {
