@@ -1,21 +1,28 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { BASE, Lead, ago, dashboardUrl, headers, parseResponse, query } from "./api";
+import { BASE, Lead, PAGE_SIZE, ago, dashboardUrl, headers, nextPage, parseResponse, query } from "./api";
 import Transcript from "./transcript";
 import ErrorView from "./error-view";
 
 export default function Leads() {
-  const url = `${BASE}/api/v1/leads/${query({ limit: 100 })}`;
-  const { isLoading, data, error, revalidate } = useFetch(url, {
-    headers: headers(),
-    parseResponse: (response) => parseResponse<{ leads: Lead[] }>(response),
-    keepPreviousData: true,
-  });
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
+    (options) => `${BASE}/api/v1/leads/${query({ limit: PAGE_SIZE, before: options.cursor })}`,
+    {
+      headers: headers(),
+      parseResponse: (response) => parseResponse<{ leads: Lead[] }>(response),
+      mapResult: (result) => ({
+        data: result.leads || [],
+        ...nextPage(result.leads || [], (lead) => lead.started_at),
+      }),
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
 
-  const leads = data?.leads || [];
+  const leads = data || [];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search leads">
+    <List isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search leads">
       {error ? <ErrorView message={error.message} retry={revalidate} /> : null}
       {error ? null : (
         <List.EmptyView
