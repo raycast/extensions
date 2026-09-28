@@ -3,15 +3,26 @@ import { runPowerShellScript } from "@raycast/utils";
 import fs from "node:fs";
 import path from "node:path";
 
+const STATS_LINE = /^OK /m;
+
 export interface CaptureStats {
   capturedSec: number;
   outSamples: number;
   rms: number;
 }
 
-/** Escapes a value for a single-quoted PowerShell string literal. */
-function psQuote(value: string): string {
-  return `'${value.replace(/'/g, "''")}'`;
+/**
+ * Passes a path into PowerShell as base64.
+ *
+ * runPowerShellScript pipes the script through stdin, which Windows PowerShell
+ * 5.1 decodes with the console OEM code page rather than UTF-8. A literal path
+ * would arrive mangled for anyone whose profile name contains a non-ASCII
+ * character (Seyma, Muller, Jose, Lukasz...), so the bootstrap stays pure ASCII
+ * and PowerShell rebuilds the real string on the other side.
+ */
+function psDecodedPath(value: string): string {
+  const encoded = Buffer.from(value, "utf8").toString("base64");
+  return `[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}'))`;
 }
 
 /**
@@ -26,7 +37,10 @@ export function captureFilePath(): string {
  * Records the system's default output ("what you hear") via the bundled
  * WASAPI loopback script and returns the path of a 16 kHz mono s16le WAV.
  */
-export async function recordSystemAudio(durationSeconds: number): Promise<{ wavPath: string; stats: CaptureStats }> {
+export async function recordSystemAudio(
+  durationSeconds: number,
+  signal?: AbortSignal,
+): Promise<{ wavPath: string; stats: CaptureStats }> {
   fs.mkdirSync(environment.supportPath, { recursive: true });
   const wavPath = captureFilePath();
   const scriptPath = path.join(environment.assetsPath, "record-loopback.ps1");
@@ -38,18 +52,23 @@ export async function recordSystemAudio(durationSeconds: number): Promise<{ wavP
   // file with Invoke-Expression, which also sidesteps execution policy.
   const script = [
     `$RecorderDuration = ${Math.floor(durationSeconds)}`,
-    `$RecorderOutFile = ${psQuote(wavPath)}`,
+    `$RecorderOutFile = ${psDecodedPath(wavPath)}`,
     `$RecorderRate = 16000`,
-    `Invoke-Expression (Get-Content -LiteralPath ${psQuote(scriptPath)} -Raw)`,
+    `Invoke-Expression (Get-Content -LiteralPath (${psDecodedPath(scriptPath)}) -Raw)`,
   ].join("\n");
 
   // Recording itself takes durationSeconds; leave generous headroom for the
   // one-time Add-Type C# compilation (~1-2 s) and process startup.
   const stdout = await runPowerShellScript(script, {
     timeout: durationSeconds * 1000 + 25000,
+    signal,
     parseOutput: ({ stdout, stderr, exitCode, timedOut }) => {
       if (timedOut) throw new Error("Recording timed out.");
-      if (exitCode !== 0) throw new Error(stderr.trim() || `PowerShell exited with code ${exitCode}.`);
+      // A .NET exception inside Invoke-Expression still exits 0 and prints
+      // nothing to stdout, so the stats line is what actually proves success.
+      if (exitCode !== 0 || !STATS_LINE.test(stdout)) {
+        throw new Error(stderr.trim() || `The recorder failed with exit code ${exitCode}.`);
+      }
       return stdout;
     },
   });

@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import fs from "node:fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addToHistory } from "./lib/history";
 import { captureFilePath, recordSystemAudio } from "./lib/recorder";
-import { recognizeWavFile } from "./lib/shazam";
-import { CopyActions, OpenActions } from "./lib/track-actions";
+import { provider, recognizeWavFile } from "./lib/recognition";
+import { TrackDetail } from "./lib/track-detail";
 import type { RecognizedTrack } from "./lib/types";
 
 type Stage =
@@ -22,15 +21,18 @@ const SILENCE_RMS_THRESHOLD = 0.0005;
 export default function RecognizeCommand() {
   const [stage, setStage] = useState<Stage>({ kind: "recording" });
   const running = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   const duration = parseInt(getPreferenceValues<Preferences.Recognize>().duration, 10);
 
   const run = useCallback(async () => {
     if (running.current) return;
     running.current = true;
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       setStage({ kind: "recording" });
-      const { wavPath, stats } = await recordSystemAudio(duration);
+      const { wavPath, stats } = await recordSystemAudio(duration, controller.signal);
       if (stats.outSamples === 0 || stats.rms < SILENCE_RMS_THRESHOLD) {
         setStage({ kind: "no-match", silent: true });
         return;
@@ -46,24 +48,39 @@ export default function RecognizeCommand() {
       await addToHistory(track);
       setStage({ kind: "match", track });
     } catch (error) {
+      // An aborted run was either superseded by a newer one or the window is
+      // closing; in both cases its failure is not worth showing.
+      if (controller.signal.aborted) return;
+      // The error view below already shows this; a toast on top would be noise.
       setStage({ kind: "error", message: error instanceof Error ? error.message : String(error) });
-      await showFailureToast(error, { title: "Recognition failed" });
     } finally {
-      running.current = false;
-      // Never keep the raw recording around: silent captures and failures must
-      // clean up just like a successful match does. Windows can still have the
-      // file locked, and that must not stop the user from trying again - the
-      // next capture overwrites it anyway.
-      try {
-        fs.rmSync(captureFilePath(), { force: true });
-      } catch {
-        // ignored on purpose
+      // Only the run that still owns the controller may reset state and delete
+      // the capture - a superseded run must not touch its successor's file.
+      if (abortRef.current === controller) {
+        running.current = false;
+        abortRef.current = null;
+        // Never keep the raw recording around: silent captures and failures
+        // clean up just like a successful match does. Windows can still have
+        // the file locked, and that must not block a retry.
+        try {
+          fs.rmSync(captureFilePath(), { force: true });
+        } catch {
+          // ignored on purpose
+        }
       }
     }
   }, [duration]);
 
   useEffect(() => {
     void run();
+    // Closing the window mid-recording has to stop the PowerShell child as
+    // well; otherwise it keeps going and writes the clip after cleanup ran.
+    return () => {
+      abortRef.current?.abort();
+      // Clearing the guard lets a remount start a fresh run; React invokes
+      // effects twice in development, and the first one is aborted above.
+      running.current = false;
+    };
   }, [run]);
 
   const retryAction = (
@@ -80,26 +97,20 @@ export default function RecognizeCommand() {
       return (
         <Detail
           isLoading
-          navigationTitle="Recognize Song"
           markdown={`## Listening…\n\nRecording ${duration} seconds of system audio. Keep the music playing.`}
         />
       );
     case "recognizing":
       return (
-        <Detail
-          isLoading
-          navigationTitle="Recognize Song"
-          markdown={`## Identifying…\n\nFingerprinting the recording and asking Shazam.`}
-        />
+        <Detail isLoading markdown={`## Identifying…\n\nSending the recording to ${provider.name} for recognition.`} />
       );
     case "no-match":
       return (
         <Detail
-          navigationTitle="Recognize Song"
           markdown={
             stage.silent
               ? `## Nothing to Hear\n\nThe recording came back silent. Make sure music is actually playing on your **default output device**, then try again.`
-              : `## No Match\n\nShazam couldn't identify this one. Try again during a clearer, more distinctive part of the song.`
+              : `## No Match\n\n${provider.name} couldn't identify this one. Try again during a clearer, more distinctive part of the song.`
           }
           actions={<ActionPanel>{retryAction}</ActionPanel>}
         />
@@ -107,46 +118,11 @@ export default function RecognizeCommand() {
     case "error":
       return (
         <Detail
-          navigationTitle="Recognize Song"
           markdown={`## Something Went Wrong\n\n\`\`\`\n${stage.message}\n\`\`\``}
           actions={<ActionPanel>{retryAction}</ActionPanel>}
         />
       );
     case "match":
-      return <MatchView track={stage.track} retryAction={retryAction} />;
+      return <TrackDetail track={stage.track} extraActions={retryAction} />;
   }
-}
-
-function MatchView({ track, retryAction }: { track: RecognizedTrack; retryAction: React.ReactNode }) {
-  const cover = track.coverUrl ? `![Cover](${track.coverUrl}?raycast-width=220&raycast-height=220)\n\n` : "";
-  return (
-    <Detail
-      navigationTitle={track.title}
-      markdown={`${cover}# ${track.title}\n\n### ${track.artist}`}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Artist" text={track.artist} />
-          {track.album && <Detail.Metadata.Label title="Album" text={track.album} />}
-          {track.year && <Detail.Metadata.Label title="Released" text={track.year} />}
-          {track.shazamUrl && (
-            <>
-              <Detail.Metadata.Separator />
-              <Detail.Metadata.Link title="Shazam" target={track.shazamUrl} text="View on Shazam" />
-            </>
-          )}
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <OpenActions track={track} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <CopyActions track={track} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>{retryAction}</ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
 }

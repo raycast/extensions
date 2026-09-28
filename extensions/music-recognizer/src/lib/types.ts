@@ -5,10 +5,12 @@ export interface RecognizedTrack {
   album?: string;
   year?: string;
   coverUrl?: string;
-  shazamUrl?: string;
-  spotifyUri?: string;
+  /** Provider's own page for the track, when it publishes one. */
+  songUrl?: string;
+  /** Web link: works whether or not the desktop app is installed. */
+  spotifyUrl?: string;
   youtubeMusicUrl?: string;
-  appleMusicUrl: string;
+  appleMusicUrl?: string;
   /** Unix epoch milliseconds. */
   recognizedAt: number;
 }

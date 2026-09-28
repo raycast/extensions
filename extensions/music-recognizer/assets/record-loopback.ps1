@@ -1,8 +1,8 @@
 # WASAPI loopback recorder (inline C#, no external DLLs or binaries).
 #
 # Captures the system's default render device ("what you hear"), downmixes to
-# mono, resamples to 16 kHz s16le and writes a WAV file - the exact input
-# format the Shazam fingerprint algorithm expects.
+# mono, resamples to 16 kHz s16le and writes a WAV file - a compact format
+# the recognition provider accepts directly, so no ffmpeg is ever needed.
 #
 # The extension prepends variable assignments ($RecorderDuration,
 # $RecorderOutFile, $RecorderRate) before executing this script; the fallbacks

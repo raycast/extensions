@@ -2,11 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "music-recognizer",
   "title": "Music Recognizer",
-  "description": "Identify the song playing on your PC. Records a few seconds of system audio and identifies it with Shazam's recognition service, with quick links to Spotify, YouTube Music, Apple Music, and Shazam.",
+  "description": "Identify the song playing on your PC by recording a few seconds of system audio.",
   "icon": "icon.png",
   "author": "erenalparslan",
   "categories": [
     "Media"
+  ],
+  "keywords": [
+    "song",
+    "music",
+    "identify",
+    "recognition",
+    "now playing",
+    "what song is this",
+    "audio"
   ],
   "license": "MIT",
   "platforms": [
@@ -15,22 +24,29 @@
   "commands": [
     {
       "name": "recognize",
-      "title": "Recognize Song",
+      "title": "Recognize",
       "description": "Listen to what's playing and identify the song.",
       "mode": "view"
     },
     {
       "name": "history",
-      "title": "Recognition History",
+      "title": "History",
       "description": "Browse previously recognized songs.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "apiToken",
+      "title": "AudD API Token",
+      "description": "Your personal AudD API token from dashboard.audd.io. AudD offers a limited free trial; continued use needs a paid AudD plan.",
+      "type": "password",
+      "required": true
+    },
+    {
       "name": "duration",
       "title": "Recording Duration",
-      "description": "How long to record system audio before recognition. Shazam's fingerprint uses at most 8 seconds of audio; 5 is usually plenty.",
+      "description": "How long to record system audio before recognition. 5 seconds is usually plenty; longer clips only help when the recording is noisy.",
       "type": "dropdown",
       "required": false,
       "default": "5",
@@ -76,18 +92,13 @@
         {
           "title": "Apple Music",
           "value": "applemusic"
-        },
-        {
-          "title": "Shazam",
-          "value": "shazam"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^2.2.7",
-    "shazamio-core": "^1.3.1"
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -103,8 +114,5 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "allowScripts": {
-    "esbuild@0.27.7": true
   }
 }

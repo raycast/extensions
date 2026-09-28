@@ -14,6 +14,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { clearHistory, getHistory, removeFromHistory } from "./lib/history";
 import { CopyActions, OpenActions } from "./lib/track-actions";
+import { TrackDetail } from "./lib/track-detail";
 import type { RecognizedTrack } from "./lib/types";
 
 export default function HistoryCommand() {
@@ -39,20 +40,24 @@ export default function HistoryCommand() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search recognized songs">
-      <List.EmptyView
-        icon={Icon.Music}
-        title="No songs recognized yet"
-        description="Play some music and run “Recognize Song”."
-        actions={
-          <ActionPanel>
-            <Action
-              title="Recognize Song"
-              icon={Icon.Microphone}
-              onAction={() => launchCommand({ name: "recognize", type: LaunchType.UserInitiated })}
-            />
-          </ActionPanel>
-        }
-      />
+      {!isLoading && (
+        <List.EmptyView
+          icon={Icon.Music}
+          title="No songs recognized yet"
+          description="Play some music and run “Recognize”."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Recognize"
+                icon={Icon.Microphone}
+                onAction={async () => {
+                  await launchCommand({ name: "recognize", type: LaunchType.UserInitiated });
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {history.map((track) => (
         <List.Item
           key={track.id}
@@ -67,6 +72,13 @@ export default function HistoryCommand() {
             <ActionPanel>
               <ActionPanel.Section>
                 <OpenActions track={track} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.Push
+                  title="Show Details"
+                  icon={Icon.Eye}
+                  target={<TrackDetail track={track} navigationTitle={track.title} />}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <CopyActions track={track} />
