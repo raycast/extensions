@@ -1,6 +1,6 @@
 # QR Code Sharing Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-28
 
 - Search saved content and see its code next to the list, redrawn as the selection moves
 - Create an entry straight from the search bar, with the code previewed before it is saved
