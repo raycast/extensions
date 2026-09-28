@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { spawn } from "child_process";
+import { execFileSync, spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { allSounds, BASE_URL, Sound } from "./sounds";
@@ -12,6 +12,9 @@ export type Mix = { master: number; sounds: Record<string, MixSound>; timer?: Sl
 export type MixInput = { soundId: string; volume: number }[];
 
 const stateFile = path.join(environment.supportPath, "mix.json");
+const lockDir = path.join(environment.supportPath, "mix.lock");
+const LOCK_STALE_MS = 10_000;
+const LOCK_TIMEOUT_MS = 5_000;
 const legacyRegistryFile = path.join(environment.supportPath, "pid-registry.json");
 const cacheDir = path.join(environment.supportPath, "sounds");
 
@@ -84,6 +87,45 @@ function isAlive(pid: number) {
   }
 }
 
+/** Command lines of the given processes, keyed by pid. Processes that have exited are missing. */
+function processCommands(pids: number[]): Map<number, string> {
+  const commands = new Map<number, string>();
+  if (pids.length === 0) return commands;
+  if (process.platform === "win32") {
+    for (const pid of pids) if (isAlive(pid)) commands.set(pid, "");
+    return commands;
+  }
+  let output: string;
+  try {
+    output = execFileSync("/bin/ps", ["-ww", "-o", "pid=,command=", "-p", pids.join(",")], { encoding: "utf8" });
+  } catch (error) {
+    // ps exits non-zero when some pids are gone but still prints the rest.
+    output = String((error as { stdout?: unknown }).stdout ?? "");
+  }
+  for (const line of output.split("\n")) {
+    const match = /^\s*(\d+)\s(.*)$/.exec(line);
+    if (match) commands.set(Number(match[1]), match[2]);
+  }
+  return commands;
+}
+
+// A saved pid may have exited and been reused by an unrelated process, so only trust it while its
+// command line still identifies the process Moodist started.
+function ownsProcess(pid: number, marker: string, commands = processCommands([pid])): boolean {
+  const command = commands.get(pid);
+  if (command === undefined) return false;
+  return process.platform === "win32" || command.includes(marker);
+}
+
+function soundMarker(id: string): string {
+  return localFile(requireSound(id));
+}
+
+function timerMarker(timer: SleepTimer): string {
+  return `${stateFile} ${timer.endsAt}`;
+}
+
+/** Signal a process Moodist started. Callers must check `ownsProcess` first. */
 function kill(pid: number) {
   // On macOS the detached loop runs in its own process group; kill the group so afplay dies too.
   const targets = process.platform === "win32" ? [pid] : [-pid, pid];
@@ -123,10 +165,42 @@ function readMix(): Mix {
 }
 
 function writeMix(mix: Mix) {
-  fs.mkdirSync(environment.supportPath, { recursive: true });
-  const tmp = `${stateFile}.tmp`;
+  const tmp = `${stateFile}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(mix));
   fs.renameSync(tmp, stateFile);
+}
+
+const sleepCell = new Int32Array(new SharedArrayBuffer(4));
+
+function isStaleLock(): boolean {
+  try {
+    return Date.now() - fs.statSync(lockDir).mtimeMs > LOCK_STALE_MS;
+  } catch {
+    return false;
+  }
+}
+
+// Commands and the timer process run in separate processes, so every read-modify-write of mix.json
+// holds this lock. Nothing inside may await. It must stay in sync with the lock in TIMER_SCRIPT.
+function withLock<T>(fn: () => T): T {
+  fs.mkdirSync(environment.supportPath, { recursive: true });
+  const deadline = Date.now() + LOCK_TIMEOUT_MS;
+  for (;;) {
+    try {
+      fs.mkdirSync(lockDir);
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      if (isStaleLock()) fs.rmSync(lockDir, { recursive: true, force: true });
+      else if (Date.now() > deadline) throw new Error("Moodist is busy. Try again.");
+      else Atomics.wait(sleepCell, 0, 0, 20);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    fs.rmSync(lockDir, { recursive: true, force: true });
+  }
 }
 
 /** Stops loops left running by the Swift looper that earlier releases used. */
@@ -135,9 +209,11 @@ function stopLegacyLoops() {
   try {
     const registry: unknown = JSON.parse(fs.readFileSync(legacyRegistryFile, "utf8"));
     const entries = isRecord(registry) && Array.isArray(registry.entries) ? registry.entries : [];
-    for (const entry of entries) {
-      const pid = isRecord(entry) ? asPid(entry.pid) : undefined;
-      if (pid) kill(pid);
+    const commands = processCommands(
+      entries.flatMap((entry) => (isRecord(entry) && asPid(entry.pid) ? [entry.pid as number] : [])),
+    );
+    for (const pid of commands.keys()) {
+      if (ownsProcess(pid, "/looper", commands)) kill(pid);
     }
   } catch {
     // unreadable registry; nothing to stop
@@ -156,13 +232,12 @@ function pauseSounds(mix: Mix): number {
   return paused;
 }
 
-/** Current mix, with dead processes marked as paused and an expired sleep timer applied. */
-export function getMix(): Mix {
-  stopLegacyLoops();
-  const mix = readMix();
+/** Marks sounds whose process is gone as paused and applies an expired sleep timer. Returns whether anything changed. */
+function reconcile(mix: Mix): boolean {
   let changed = false;
-  for (const entry of Object.values(mix.sounds)) {
-    if (entry.pid && !isAlive(entry.pid)) {
+  const commands = processCommands(Object.values(mix.sounds).flatMap((entry) => (entry.pid ? [entry.pid] : [])));
+  for (const [id, entry] of Object.entries(mix.sounds)) {
+    if (entry.pid && !ownsProcess(entry.pid, soundMarker(id), commands)) {
       delete entry.pid;
       changed = true;
     }
@@ -172,8 +247,29 @@ export function getMix(): Mix {
     delete mix.timer;
     changed = true;
   }
-  if (changed) writeMix(mix);
-  return mix;
+  return changed;
+}
+
+/** Current mix, with dead processes marked as paused and an expired sleep timer applied. */
+export function getMix(): Mix {
+  return withLock(() => {
+    stopLegacyLoops();
+    const mix = readMix();
+    if (reconcile(mix)) writeMix(mix);
+    return mix;
+  });
+}
+
+/** Apply `update` to the latest saved mix and save it, without other commands or the timer interleaving. */
+function updateMix<T>(update: (mix: Mix) => T): T {
+  return withLock(() => {
+    stopLegacyLoops();
+    const mix = readMix();
+    reconcile(mix);
+    const result = update(mix);
+    writeMix(mix);
+    return result;
+  });
 }
 
 export function playingCount(mix: Mix): number {
@@ -255,28 +351,25 @@ function start(mix: Mix, id: string, file: string) {
 /** Start a sound, adding it to the mix if needed. Keeps its mix volume unless one is given. */
 export async function play(id: string, volume?: number) {
   const file = await ensureDownloaded(requireSound(id));
-  const mix = getMix();
-  mix.sounds[id] = { ...mix.sounds[id], volume: clampVolume(volume ?? mix.sounds[id]?.volume ?? defaultVolume()) };
-  start(mix, id, file);
-  writeMix(mix);
+  updateMix((mix) => {
+    mix.sounds[id] = { ...mix.sounds[id], volume: clampVolume(volume ?? mix.sounds[id]?.volume ?? defaultVolume()) };
+    start(mix, id, file);
+  });
 }
 
 /** Stop a sound and remove it from the mix. */
 export function stop(id: string) {
-  const mix = getMix();
-  const entry = mix.sounds[id];
-  if (!entry) return;
-  if (entry.pid) kill(entry.pid);
-  delete mix.sounds[id];
-  writeMix(mix);
+  updateMix((mix) => {
+    const entry = mix.sounds[id];
+    if (!entry) return;
+    if (entry.pid) kill(entry.pid);
+    delete mix.sounds[id];
+  });
 }
 
 /** Stop every sound but keep the mix so it can resume. */
 export function pause(): number {
-  const mix = getMix();
-  const paused = pauseSounds(mix);
-  writeMix(mix);
-  return paused;
+  return updateMix(pauseSounds);
 }
 
 /** Start every paused sound in the mix. */
@@ -284,15 +377,15 @@ export async function resume(): Promise<number> {
   const before = getMix();
   const ids = Object.keys(before.sounds).filter((id) => !before.sounds[id].pid);
   const files = await downloadAll(ids);
-  const mix = getMix();
-  let started = 0;
-  for (const id of ids) {
-    if (!mix.sounds[id] || mix.sounds[id].pid) continue;
-    start(mix, id, files[id]);
-    started++;
-  }
-  writeMix(mix);
-  return started;
+  return updateMix((mix) => {
+    let started = 0;
+    for (const id of ids) {
+      if (!mix.sounds[id] || mix.sounds[id].pid) continue;
+      start(mix, id, files[id]);
+      started++;
+    }
+    return started;
+  });
 }
 
 export type ToggleResult = { action: "paused" | "resumed"; count: number } | { action: "empty" };
@@ -306,35 +399,35 @@ export async function togglePlayback(): Promise<ToggleResult> {
 
 /** Stop every sound and clear the mix. Returns how many sounds were in it. */
 export function stopAll(): number {
-  const mix = getMix();
-  pauseSounds(mix);
-  const count = Object.keys(mix.sounds).length;
-  mix.sounds = {};
-  delete mix.preset;
-  writeMix(mix);
-  return count;
+  return updateMix((mix) => {
+    pauseSounds(mix);
+    const count = Object.keys(mix.sounds).length;
+    mix.sounds = {};
+    delete mix.preset;
+    return count;
+  });
 }
 
 // The player process can't change volume live, so changing volume restarts the loop at the new level.
 export async function setVolume(id: string, volume: number) {
   const file = await ensureDownloaded(requireSound(id));
-  const mix = getMix();
-  const entry = mix.sounds[id];
-  if (!entry) return;
-  entry.volume = clampVolume(volume);
-  if (entry.pid) start(mix, id, file);
-  writeMix(mix);
+  updateMix((mix) => {
+    const entry = mix.sounds[id];
+    if (!entry) return;
+    entry.volume = clampVolume(volume);
+    if (entry.pid) start(mix, id, file);
+  });
 }
 
 export async function setMaster(volume: number) {
   const before = getMix();
   const files = await downloadAll(Object.keys(before.sounds).filter((id) => before.sounds[id].pid));
-  const mix = getMix();
-  mix.master = clampVolume(volume);
-  for (const id of Object.keys(files)) {
-    if (mix.sounds[id]?.pid) start(mix, id, files[id]);
-  }
-  writeMix(mix);
+  updateMix((mix) => {
+    mix.master = clampVolume(volume);
+    for (const id of Object.keys(files)) {
+      if (mix.sounds[id]?.pid) start(mix, id, files[id]);
+    }
+  });
 }
 
 /** Replace the mix with the given sounds and start them all. */
@@ -342,40 +435,65 @@ export async function loadMix(sounds: MixInput, master: number, presetId?: strin
   const valid = sounds.filter((s) => findSound(s.soundId));
   if (valid.length === 0) throw new Error("This mix has no playable sounds");
   const files = await downloadAll(valid.map((s) => s.soundId));
-  const mix = getMix();
-  pauseSounds(mix);
-  mix.master = clampVolume(master);
-  mix.sounds = Object.fromEntries(valid.map((s) => [s.soundId, { volume: clampVolume(s.volume) }]));
-  if (presetId) mix.preset = presetId;
-  else delete mix.preset;
-  for (const s of valid) start(mix, s.soundId, files[s.soundId]);
-  writeMix(mix);
+  updateMix((mix) => {
+    pauseSounds(mix);
+    mix.master = clampVolume(master);
+    mix.sounds = Object.fromEntries(valid.map((s) => [s.soundId, { volume: clampVolume(s.volume) }]));
+    if (presetId) mix.preset = presetId;
+    else delete mix.preset;
+    for (const s of valid) start(mix, s.soundId, files[s.soundId]);
+  });
 }
 
 // Runs in a detached Node process so the timer fires even when no Raycast command is open.
-// It must stay in sync with `kill` and the Mix shape above.
+// It must stay in sync with `withLock`, `ownsProcess`, `kill`, and the Mix shape above.
 const TIMER_SCRIPT = `
 const fs = require("fs");
-const [file, endsAt] = process.argv.slice(1);
-setTimeout(() => {
+const { execFileSync } = require("child_process");
+const [file, endsAt, lock, soundsDir] = process.argv.slice(1);
+const sleepCell = new Int32Array(new SharedArrayBuffer(4));
+function owns(pid) {
+  if (process.platform === "win32") {
+    try { process.kill(pid, 0); return true; } catch { return false; }
+  }
+  try {
+    return execFileSync("/bin/ps", ["-ww", "-o", "command=", "-p", String(pid)], { encoding: "utf8" }).includes(soundsDir);
+  } catch { return false; }
+}
+function withLock(fn) {
+  for (;;) {
+    try { fs.mkdirSync(lock); break; } catch (error) {
+      if (error.code !== "EEXIST") return;
+      try {
+        if (Date.now() - fs.statSync(lock).mtimeMs > ${LOCK_STALE_MS}) fs.rmSync(lock, { recursive: true, force: true });
+      } catch {}
+      Atomics.wait(sleepCell, 0, 0, 20);
+    }
+  }
+  try { fn(); } finally { fs.rmSync(lock, { recursive: true, force: true }); }
+}
+setTimeout(() => withLock(() => {
   let mix;
   try { mix = JSON.parse(fs.readFileSync(file, "utf8")); } catch { return; }
   if (!mix.timer || mix.timer.endsAt !== Number(endsAt)) return;
   for (const entry of Object.values(mix.sounds || {})) {
     if (!entry.pid) continue;
-    for (const target of process.platform === "win32" ? [entry.pid] : [-entry.pid, entry.pid]) {
-      try { process.kill(target, "SIGTERM"); } catch {}
+    if (owns(entry.pid)) {
+      for (const target of process.platform === "win32" ? [entry.pid] : [-entry.pid, entry.pid]) {
+        try { process.kill(target, "SIGTERM"); } catch {}
+      }
     }
     delete entry.pid;
   }
   delete mix.timer;
-  fs.writeFileSync(file + ".tmp", JSON.stringify(mix));
-  fs.renameSync(file + ".tmp", file);
-}, Math.max(0, Number(endsAt) - Date.now()));
+  const tmp = file + "." + process.pid + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(mix));
+  fs.renameSync(tmp, file);
+}), Math.max(0, Number(endsAt) - Date.now()));
 `;
 
 function stopTimerProcess(timer: SleepTimer | undefined) {
-  if (timer?.pid && isAlive(timer.pid)) kill(timer.pid);
+  if (timer?.pid && ownsProcess(timer.pid, timerMarker(timer))) kill(timer.pid);
 }
 
 /** Pause the mix after `minutes`. Replaces any running timer. */
@@ -383,29 +501,29 @@ export function setTimer(minutes: number): SleepTimer {
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > MAX_TIMER_MINUTES) {
     throw new Error(`Timer must be between 1 and ${MAX_TIMER_MINUTES} minutes`);
   }
-  const mix = getMix();
-  stopTimerProcess(mix.timer);
-  const endsAt = Date.now() + minutes * 60_000;
-  const child = spawn(process.execPath, ["-e", TIMER_SCRIPT, stateFile, String(endsAt)], {
-    detached: true,
-    stdio: "ignore",
-    windowsHide: true,
+  return updateMix((mix) => {
+    stopTimerProcess(mix.timer);
+    const endsAt = Date.now() + minutes * 60_000;
+    const child = spawn(process.execPath, ["-e", TIMER_SCRIPT, stateFile, String(endsAt), lockDir, cacheDir], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    });
+    // If the timer process can't start, getMix still applies the expiry the next time any command runs.
+    child.on("error", () => undefined);
+    child.unref();
+    mix.timer = { endsAt, minutes, pid: child.pid };
+    return mix.timer;
   });
-  // If the timer process can't start, getMix still applies the expiry the next time any command runs.
-  child.on("error", () => undefined);
-  child.unref();
-  mix.timer = { endsAt, minutes, pid: child.pid };
-  writeMix(mix);
-  return mix.timer;
 }
 
 export function cancelTimer(): boolean {
-  const mix = getMix();
-  if (!mix.timer) return false;
-  stopTimerProcess(mix.timer);
-  delete mix.timer;
-  writeMix(mix);
-  return true;
+  return updateMix((mix) => {
+    if (!mix.timer) return false;
+    stopTimerProcess(mix.timer);
+    delete mix.timer;
+    return true;
+  });
 }
 
 export function formatMinutes(minutes: number): string {

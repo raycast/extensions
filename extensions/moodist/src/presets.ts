@@ -42,6 +42,7 @@ const LEGACY_SOUND_IDS: Record<string, string> = {
   "beta-waves": "binaural-beta",
   "theta-waves": "binaural-theta",
   "delta-waves": "binaural-delta",
+  "deep-space": "brown-noise",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
