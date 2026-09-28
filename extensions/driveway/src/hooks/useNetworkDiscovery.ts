@@ -67,9 +67,10 @@ export function useNetworkDiscovery(): NetworkDiscoveryResult {
     // Only the host named in Preferences gets the saved password. A host that
     // merely turned up on the network hasn't been vouched for, and listing its
     // shares with stored credentials would send them to every machine on the
-    // subnet with port 445 open. Everything else is Keychain-only, so a host
-    // expands silently once it has been connected to, and otherwise waits to
-    // be browsed deliberately.
+    // subnet with port 445 open. Everything else is listed only if the server
+    // will authenticate this user without a password, so a host expands
+    // silently when it already has a session and otherwise waits to be
+    // browsed deliberately.
     function expandSmbHost(host: string, vouchedFor: boolean) {
       const key = host.toLowerCase();
       if (expandedHosts.current.has(key)) return;

@@ -83,18 +83,17 @@ function viewWithPassword(target: string, password: string): Promise<string> {
 }
 
 // Enumeration is itself authenticated, so this throws on a bad host or
-// credentials. Called without a password it is Keychain-only: it lists shares
-// for a host macOS already holds a credential for, and fails otherwise.
+// credentials.
+//
+// With no password, -N is the only option: `man smbutil` documents it purely
+// as "don't prompt", not as a Keychain lookup, so it succeeds only where the
+// server can authenticate this user without one. That is what lets a host be
+// listed without sending it a stored credential it has no claim to.
+//
+// With a password there is nothing to gain from trying -N first: it cannot
+// use the password, and failing costs a full connect and authentication
+// round trip before the real attempt even starts.
 export async function listShares(host: string, user: string, password?: string): Promise<string[]> {
-  // -N authenticates from the Keychain and prompts for nothing, which is both
-  // quicker and one fewer place a credential has to travel. The username is
-  // pinned either way, so this cannot silently authenticate as someone else.
-  try {
-    return parseShares(await view(user ? `//${user}@${host}` : `//${host}`, ["-N"]));
-  } catch (error) {
-    if (!password) throw error;
-  }
-
-  // No usable Keychain credential, so the password has to be supplied.
-  return parseShares(await viewWithPassword(user ? `//${user}@${host}` : `//${host}`, password));
+  const target = user ? `//${user}@${host}` : `//${host}`;
+  return parseShares(password ? await viewWithPassword(target, password) : await view(target, ["-N"]));
 }
