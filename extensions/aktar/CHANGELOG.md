@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-28
 
 - Upload Clipboard, Upload Selected Files, and Upload File commands
 - Search Uploads with previews, copy formats, and delete
