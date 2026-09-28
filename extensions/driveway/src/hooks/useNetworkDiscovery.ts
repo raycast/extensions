@@ -10,9 +10,11 @@ import {
 import { listShares } from "../lib/smb-shares";
 import {
   discoverAllDevices,
+  discoverComputers,
   discoverViaBonjour,
   discoverViaSubnetScan,
   mergeDiscoveredHosts,
+  DiscoveredComputer,
   DiscoveredHost,
 } from "../lib/network-discovery";
 
@@ -24,6 +26,8 @@ export type NetworkDiscoveryResult = {
   // host level and are browsed on demand instead.
   smbHostsNeedingCredentials: string[];
   webdavHosts: DiscoveredHost[];
+  // Machines announcing themselves with no file-sharing service advertised.
+  computers: DiscoveredComputer[];
   // Ping-sweep hosts, unfiltered. Callers dedupe against the lists above.
   otherDevices: string[];
   isLoading: boolean;
@@ -38,6 +42,7 @@ export function useNetworkDiscovery(): NetworkDiscoveryResult {
   const [smbShares, setSmbShares] = useState<DiscoveredSmbShare[]>([]);
   const [smbHostsNeedingCredentials, setSmbHostsNeedingCredentials] = useState<string[]>([]);
   const [webdavHosts, setWebdavHosts] = useState<DiscoveredHost[]>([]);
+  const [computers, setComputers] = useState<DiscoveredComputer[]>([]);
   const [otherDevices, setOtherDevices] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const expandedHosts = useRef(new Set<string>());
@@ -52,6 +57,7 @@ export function useNetworkDiscovery(): NetworkDiscoveryResult {
     setSmbShares([]);
     setSmbHostsNeedingCredentials([]);
     setWebdavHosts([]);
+    setComputers([]);
     setOtherDevices([]);
     setIsLoading(true);
 
@@ -100,6 +106,12 @@ export function useNetworkDiscovery(): NetworkDiscoveryResult {
 
       if (bonjourEnabled()) {
         tasks.push(discoverViaBonjour().then(handleHosts));
+        tasks.push(
+          discoverComputers().then((found) => {
+            if (cancelled() || !found.length) return;
+            setComputers(found);
+          }),
+        );
       }
       if (subnetScanEnabled()) {
         tasks.push(discoverViaSubnetScan(handleHosts).then(() => undefined));
@@ -126,5 +138,13 @@ export function useNetworkDiscovery(): NetworkDiscoveryResult {
     discover();
   }, []);
 
-  return { smbShares, smbHostsNeedingCredentials, webdavHosts, otherDevices, isLoading, refresh: discover };
+  return {
+    smbShares,
+    smbHostsNeedingCredentials,
+    webdavHosts,
+    computers,
+    otherDevices,
+    isLoading,
+    refresh: discover,
+  };
 }

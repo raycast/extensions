@@ -53,20 +53,40 @@ export function parseBrowseInstances(output: string): string[] {
   return [...names];
 }
 
+// A computer that announces itself without advertising a file-sharing
+// service. `model` is the same TXT field Finder labels devices with.
+export type DiscoveredComputer = { host: string; model?: string };
+
 // Matches "...can be reached at host.local.:445" in `dns-sd -L` output.
-// Verified against a live advertiser: "SUMILIAN._smb._tcp.local. can be
-// reached at sumilian.local.:445 (interface 13)" resolves to sumilian.local.
-async function resolveInstanceHost(serviceType: string, instanceName: string): Promise<string | undefined> {
+// Verified against live advertisers: "SUMILIAN._smb._tcp.local. can be
+// reached at sumilian.local.:445 (interface 13)" resolves to sumilian.local,
+// and a _device-info._tcp lookup adds a " model=MacSamba" line.
+async function resolveInstance(serviceType: string, instanceName: string): Promise<DiscoveredComputer | undefined> {
   const output = await runDnsSd(["-L", instanceName, serviceType, "local."], BONJOUR_RESOLVE_MS);
-  const match = output.match(/can be reached at ([^\s:]+):/);
-  return match ? match[1].replace(/\.$/, "") : undefined;
+  const reached = output.match(/can be reached at ([^\s:]+):/);
+  if (!reached) return undefined;
+
+  const model = output.match(/\bmodel=(\S+)/);
+  return { host: reached[1].replace(/\.$/, ""), model: model?.[1] };
+}
+
+async function browseInstances(serviceType: string): Promise<DiscoveredComputer[]> {
+  const browseOutput = await runDnsSd(["-B", serviceType, "local."], BONJOUR_BROWSE_MS);
+  const instances = parseBrowseInstances(browseOutput);
+  const resolved = await Promise.all(instances.map((name) => resolveInstance(serviceType, name)));
+  return resolved.filter((entry): entry is DiscoveredComputer => Boolean(entry));
 }
 
 async function browseAndResolve(serviceType: string, protocol: DiscoveredHost["protocol"]): Promise<DiscoveredHost[]> {
-  const browseOutput = await runDnsSd(["-B", serviceType, "local."], BONJOUR_BROWSE_MS);
-  const instances = parseBrowseInstances(browseOutput);
-  const resolved = await Promise.all(instances.map((name) => resolveInstanceHost(serviceType, name)));
-  return resolved.filter((host): host is string => Boolean(host)).map((host) => ({ host, protocol }));
+  return (await browseInstances(serviceType)).map(({ host }) => ({ host, protocol }));
+}
+
+// _device-info._tcp is how Finder lists machines that announce themselves
+// but advertise no file-sharing service of their own. They often still serve
+// SMB once opened, so they're listed and browsed on demand rather than
+// probed, which would make this source active rather than passive.
+export async function discoverComputers(): Promise<DiscoveredComputer[]> {
+  return browseInstances("_device-info._tcp");
 }
 
 export async function discoverViaBonjour(): Promise<DiscoveredHost[]> {

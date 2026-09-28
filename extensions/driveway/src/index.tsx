@@ -20,7 +20,14 @@ import { findMountedShare, unmountShare, UnreachableError, connectShare } from "
 import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
-import { AddServer, DiscoveredDriveItem, DiscoveredHostItem, diskUsageAccessories } from "./components/DiscoveredDrive";
+import {
+  AddServer,
+  COMPUTER_ICON,
+  DiscoveredDriveItem,
+  DiscoveredHostItem,
+  diskUsageAccessories,
+  savedDriveIcon,
+} from "./components/DiscoveredDrive";
 import { BrowseHostShares } from "./components/BrowseHostShares";
 
 function EditServer({
@@ -64,6 +71,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     smbShares,
     smbHostsNeedingCredentials,
     webdavHosts,
+    computers,
     otherDevices,
     isLoading: discoveryLoading,
   } = useNetworkDiscovery();
@@ -227,10 +235,20 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase() && (s.protocol ?? "smb") === "smb"),
   );
 
-  // Drop ping-only hosts already listed with a known protocol, or saved.
-  const protocolKnownHosts = new Set(
+  const sharingHosts = new Set(
     [...smbByHost.keys(), ...smbHostsToBrowse, ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
   );
+
+  // Machines that announced themselves but advertise no sharing service.
+  // Finder lists these too; most still serve SMB once you open them.
+  const computersNotKnown = computers.filter(
+    (c) =>
+      !sharingHosts.has(c.host.toLowerCase()) &&
+      !(servers ?? []).some((s) => s.host.toLowerCase() === c.host.toLowerCase()),
+  );
+
+  // Drop ping-only hosts already listed with a known protocol, or saved.
+  const protocolKnownHosts = new Set([...sharingHosts, ...computersNotKnown.map((c) => c.host.toLowerCase())]);
   const otherDevicesNotSaved = otherDevices.filter(
     (host) =>
       !protocolKnownHosts.has(host.toLowerCase()) &&
@@ -238,7 +256,11 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   );
 
   const hasDiscovered =
-    smbByHost.size > 0 || smbHostsToBrowse.length > 0 || webdavNotSaved.length > 0 || otherDevicesNotSaved.length > 0;
+    smbByHost.size > 0 ||
+    smbHostsToBrowse.length > 0 ||
+    webdavNotSaved.length > 0 ||
+    computersNotKnown.length > 0 ||
+    otherDevicesNotSaved.length > 0;
   const isLoading = servers === null || discoveryLoading;
   const nothingToShow = (servers?.length ?? 0) === 0 && !hasDiscovered && !isLoading;
 
@@ -300,7 +322,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                   ? [{ icon: Icon.Person, text: server.user, tooltip: "Username" }]
                   : []),
               ]}
-              icon={Icon.HardDrive}
+              icon={savedDriveIcon(server, connected)}
               actions={
                 <ActionPanel>
                   {hasPath &&
@@ -393,7 +415,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               key={host}
               host={host}
               protocol="smb"
-              subtitle="SMB — browse to sign in"
+              subtitle="SMB · sign in to browse"
               onServerAdded={load}
               onBrowse={() =>
                 push(
@@ -419,6 +441,31 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               host={h.host}
               protocol={h.protocol}
               onServerAdded={load}
+            />
+          ))}
+        </List.Section>
+      )}
+      {computersNotKnown.length > 0 && (
+        <List.Section title="Computers on Network">
+          {computersNotKnown.map((c) => (
+            <DiscoveredHostItem
+              key={c.host}
+              host={c.host}
+              icon={COMPUTER_ICON}
+              subtitle={c.model ?? "Computer on network"}
+              onServerAdded={load}
+              onBrowse={() =>
+                push(
+                  <BrowseHostShares
+                    server={{ id: c.host, host: c.host, protocol: "smb" }}
+                    mounted={mounted}
+                    volumes={volumes}
+                    onMountRequested={pollUntilMounted}
+                    onChanged={refreshMounted}
+                    onServerAdded={load}
+                  />,
+                )
+              }
             />
           ))}
         </List.Section>

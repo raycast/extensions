@@ -5,7 +5,7 @@ import { unmountShare } from "./lib/mount";
 import { getServers } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
-import { DiscoveredDriveItem, DiscoveredHostItem } from "./components/DiscoveredDrive";
+import { COMPUTER_ICON, DiscoveredDriveItem, DiscoveredHostItem } from "./components/DiscoveredDrive";
 import { BrowseHostShares } from "./components/BrowseHostShares";
 
 export default function Command() {
@@ -16,6 +16,7 @@ export default function Command() {
     smbShares,
     smbHostsNeedingCredentials,
     webdavHosts,
+    computers,
     otherDevices,
     isLoading: discoveryLoading,
     refresh: refreshDiscovery,
@@ -58,10 +59,20 @@ export default function Command() {
       !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase() && (s.protocol ?? "smb") === "smb"),
   );
 
-  // Drop ping-only hosts already listed with a known protocol, or saved.
-  const protocolKnownHosts = new Set(
+  const sharingHosts = new Set(
     [...smbByHost.keys(), ...smbHostsToBrowse, ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
   );
+
+  // Machines that announced themselves but advertise no sharing service.
+  // Finder lists these too; most still serve SMB once you open them.
+  const computersNotKnown = computers.filter(
+    (c) =>
+      !sharingHosts.has(c.host.toLowerCase()) &&
+      !(servers ?? []).some((s) => s.host.toLowerCase() === c.host.toLowerCase()),
+  );
+
+  // Drop ping-only hosts already listed with a known protocol, or saved.
+  const protocolKnownHosts = new Set([...sharingHosts, ...computersNotKnown.map((c) => c.host.toLowerCase())]);
   const otherDevicesNotSaved = otherDevices.filter(
     (host) =>
       !protocolKnownHosts.has(host.toLowerCase()) &&
@@ -83,6 +94,7 @@ export default function Command() {
     smbByHost.size === 0 &&
     smbHostsToBrowse.length === 0 &&
     webdavNotSaved.length === 0 &&
+    computersNotKnown.length === 0 &&
     otherDevicesNotSaved.length === 0;
 
   return (
@@ -129,7 +141,7 @@ export default function Command() {
               key={host}
               host={host}
               protocol="smb"
-              subtitle="SMB — browse to sign in"
+              subtitle="SMB · sign in to browse"
               onServerAdded={load}
               onRefresh={refreshDiscovery}
               onBrowse={() =>
@@ -157,6 +169,32 @@ export default function Command() {
               protocol={h.protocol}
               onServerAdded={load}
               onRefresh={refreshDiscovery}
+            />
+          ))}
+        </List.Section>
+      )}
+      {computersNotKnown.length > 0 && (
+        <List.Section title="Computers on Network">
+          {computersNotKnown.map((c) => (
+            <DiscoveredHostItem
+              key={c.host}
+              host={c.host}
+              icon={COMPUTER_ICON}
+              subtitle={c.model ?? "Computer on network"}
+              onServerAdded={load}
+              onRefresh={refreshDiscovery}
+              onBrowse={() =>
+                push(
+                  <BrowseHostShares
+                    server={{ id: c.host, host: c.host, protocol: "smb" }}
+                    mounted={mounted}
+                    volumes={volumes}
+                    onMountRequested={pollUntilMounted}
+                    onChanged={refreshMounted}
+                    onServerAdded={load}
+                  />,
+                )
+              }
             />
           ))}
         </List.Section>

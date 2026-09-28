@@ -18,6 +18,49 @@ import { buildShare, PROTOCOL_LABELS, Protocol } from "../lib/share";
 import { connectShare, findMountedShare, unmountShare, MountLocation, UnreachableError } from "../lib/mount";
 import { addServer, DuplicateServerError } from "../lib/storage";
 
+// One icon per kind of discovered thing, so the list reads at a glance:
+// a share you can mount, a server to sign in to, a web-based server, a
+// machine that only announced itself.
+// Finder shows every network server as a screen, whatever protocol it
+// speaks, and keeps drive shapes for things you can actually mount. Same
+// idea here, so protocol is carried by the subtitle and tag rather than by
+// four icon shapes nobody can tell apart at 16px.
+//
+// Swap these four if the shapes read better the other way round; nothing
+// else needs to change.
+export const SERVER_ICON = Icon.Monitor; // a host you sign in to
+export const SHARE_ICON = Icon.HardDrive; // a share you can mount
+export const DEVICE_ICON = Icon.Network; // answered a ping, nothing more
+export const COMPUTER_ICON = { source: Icon.Desktop, tintColor: Color.SecondaryText };
+
+// Discovered rows sit in secondary grey so saved drives stay the list your
+// eye lands on. Colour means one of two things only: green for connected,
+// orange for the protocol that sends credentials in the clear.
+export function discoveredHostIcon(protocol?: Protocol): { source: Icon; tintColor?: Color } {
+  switch (protocol) {
+    case "smb":
+    case "webdav":
+      return { source: SERVER_ICON, tintColor: Color.SecondaryText };
+    case "webdav-http":
+      return { source: SERVER_ICON, tintColor: Color.Orange };
+    default:
+      return { source: DEVICE_ICON, tintColor: Color.SecondaryText };
+  }
+}
+
+// Saved drives keep full-strength icons, so they stay the primary list
+// against the grey discovered rows.
+export function savedDriveIcon(
+  entry: { path?: string; protocol?: Protocol },
+  connected: boolean,
+): { source: Icon; tintColor?: Color } {
+  if (connected) return { source: SHARE_ICON, tintColor: Color.Green };
+  // No share chosen yet, so this is still a server rather than a drive.
+  if (!entry.path?.trim()) return { source: SERVER_ICON };
+  if ((entry.protocol ?? "smb") === "webdav-http") return { source: SHARE_ICON, tintColor: Color.Orange };
+  return { source: SHARE_ICON };
+}
+
 // Usage tags for any mounted share, saved or discovered, matched by mount point.
 export function diskUsageAccessories(mountPoint: string | undefined, volumes: VolumeUsage[]) {
   if (!mountPoint) return [];
@@ -109,8 +152,11 @@ export function DiscoveredDriveItem(props: {
           onRefresh={props.onRefresh}
         />
       }
-      icon={mnt ? { source: Icon.CheckCircle, tintColor: Color.Green } : { source: Icon.Circle }}
-      accessories={diskUsageAccessories(match?.mountPoint, props.volumes)}
+      icon={{ source: SHARE_ICON, tintColor: mnt ? Color.Green : Color.SecondaryText }}
+      accessories={[
+        ...(mnt ? [{ tag: { value: "Connected", color: Color.Green }, icon: Icon.CheckCircle }] : []),
+        ...diskUsageAccessories(match?.mountPoint, props.volumes),
+      ]}
     />
   );
 }
@@ -260,6 +306,8 @@ export function DiscoveredHostItem(props: {
   // the browse view, so this component doesn't have to import it.
   onBrowse?: () => void;
   subtitle?: string;
+  // Overrides the protocol-derived icon, for a machine with no known service.
+  icon?: { source: Icon; tintColor?: Color };
 }) {
   const { push } = useNavigation();
 
@@ -267,7 +315,7 @@ export function DiscoveredHostItem(props: {
     <List.Item
       title={props.host}
       subtitle={props.subtitle ?? (props.protocol ? PROTOCOL_LABELS[props.protocol] : "Device found on network")}
-      icon={Icon.Globe}
+      icon={props.icon ?? discoveredHostIcon(props.protocol)}
       actions={
         <ActionPanel>
           {props.onBrowse && (
