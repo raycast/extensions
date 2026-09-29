@@ -1,6 +1,6 @@
 # Wispr Flow Changelog
 
-## [Faster Search Transcripts] - {PR_MERGE_DATE}
+## [Faster Search Transcripts] - 2026-09-29
 
 - Fixed Search Transcripts opening on the list from the previous run before showing current transcripts
 - Fixed a delay on open caused by the app filter query scanning every row, including stored audio
