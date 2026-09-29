@@ -1,5 +1,5 @@
 import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
-import { ignoredExpiry, preferredExpiry } from "./lib/expiry";
+import { expiryWarning, preferredExpiry } from "./lib/expiry";
 import { onlyFiles, uploadPaths } from "./lib/upload";
 
 export default async function Command() {
@@ -23,8 +23,8 @@ export default async function Command() {
 
   const expires = preferredExpiry();
   const uploads = await uploadPaths(files, { expires });
-  // The failure toast stays up when Aktar was too old to auto-delete.
-  if (uploads.length === files.length && !ignoredExpiry(uploads, expires)) {
+  // The failure toast stays up when Delete After didn't take.
+  if (uploads.length === files.length && !expiryWarning(uploads, expires)) {
     await showHUD(
       uploads.length === 1
         ? `Uploaded ${uploads[0].filename}, link copied`

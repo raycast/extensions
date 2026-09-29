@@ -1,5 +1,6 @@
 import { launchCommand, LaunchType, open, showToast, Toast } from "@raycast/api";
 import { AktarError } from "../api/client";
+import { isExpiryNotSetUp } from "./expiry";
 
 export const AKTAR_BUNDLE_ID = "com.getaktar.mac";
 export const AKTAR_DOWNLOAD_URL = "https://getaktar.com";
@@ -50,8 +51,8 @@ export async function showAktarFailure(error: unknown, title: string) {
       toast.title = describeConnectionError(error).title;
       toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };
       toast.secondaryAction = { title: "Download Aktar", onAction: () => open(AKTAR_DOWNLOAD_URL) };
-    } else if (error.status === 409) {
-      // Auto-delete isn't set up for the destination yet; Aktar's message says where to do it.
+    } else if (isExpiryNotSetUp(error)) {
+      // Aktar's message says where to set auto-delete up.
       toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };
     }
   }

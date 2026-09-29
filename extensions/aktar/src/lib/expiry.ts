@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { AktarError } from "../api/client";
 import type { Upload } from "../api/types";
 
 /** The auto-delete times Aktar accepts, in days. 0 keeps the file forever. */
@@ -33,11 +34,28 @@ export function formatExpiryDate(expiresAt: string) {
 }
 
 /**
- * Aktar versions before 0.5.0 ignore `expires` and answer without an
- * `expiresAt` field, so the file was kept forever.
+ * Why a Delete After request didn't take, or undefined when every upload got
+ * an expiry. Aktar versions before 0.5.0 ignore `expires` and answer without
+ * an `expiresAt` field; a `null` one means Aktar kept the file anyway.
  */
-export function ignoredExpiry(uploads: Upload[], expires: number | undefined) {
-  return Boolean(expires) && uploads.some((upload) => upload.expiresAt === undefined);
+export function expiryWarning(uploads: Upload[], expires: number | undefined) {
+  if (!expires) return undefined;
+  const kept = uploads.filter((upload) => !upload.expiresAt);
+  if (kept.length === 0) return undefined;
+  const subject = kept.length === 1 ? (uploads.length === 1 ? "It" : "1 file") : `${kept.length} files`;
+  const verb = kept.length === 1 ? "was" : "were";
+  if (kept.some((upload) => upload.expiresAt === undefined)) {
+    return `Update Aktar to 0.5.0 or later to use Delete After. ${subject} ${verb} kept forever.`;
+  }
+  return `Aktar didn't apply Delete After. ${subject} ${verb} kept forever.`;
 }
 
-export const EXPIRY_UNSUPPORTED_MESSAGE = "Update Aktar to 0.5.0 or later to use Delete After. It was kept forever.";
+/**
+ * Aktar refuses `expires` for a destination whose bucket doesn't have its
+ * lifecycle rules yet. That answer is a 409, but so is an upload cancelled in
+ * Aktar, so the message tells them apart. It applies to the whole
+ * destination, so every other file in a batch would fail the same way.
+ */
+export function isExpiryNotSetUp(error: unknown) {
+  return error instanceof AktarError && error.status === 409 && error.message.startsWith("Auto-delete isn't set up");
+}

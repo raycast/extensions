@@ -1,10 +1,10 @@
 import { Clipboard, open, showToast, Toast } from "@raycast/api";
 import { stat } from "node:fs/promises";
 import path from "node:path";
-import { AktarError, getStatus, uploadFile } from "../api/client";
+import { getStatus, uploadFile } from "../api/client";
 import type { Upload } from "../api/types";
 import { showAktarFailure } from "./errors";
-import { EXPIRY_UNSUPPORTED_MESSAGE, ignoredExpiry } from "./expiry";
+import { expiryWarning, isExpiryNotSetUp } from "./expiry";
 import { fetchFormat, formatUploads } from "./output";
 
 export type UploadTarget = {
@@ -59,13 +59,21 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
       uploads.push(upload);
     } catch (error) {
       failures.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
-      // A rejected Delete After (not set up for the destination, or an invalid value)
-      // would fail every remaining file the same way, so stop and show Aktar's message.
-      const rejectedExpiry =
-        Boolean(target.expires) && error instanceof AktarError && [400, 409].includes(error.status ?? 0);
-      if (paths.length === 1 || (rejectedExpiry && uploads.length === 0)) {
+      if (paths.length === 1) {
         await showAktarFailure(error, "Upload failed");
         return [];
+      }
+      // Auto-delete not being set up applies to the whole destination, so the
+      // remaining files would fail the same way. Any other error is about this
+      // file only, and the rest still go up.
+      if (isExpiryNotSetUp(error)) {
+        if (uploads.length === 0) {
+          await showAktarFailure(error, "Upload failed");
+          return [];
+        }
+        const reason = error instanceof Error ? error.message : String(error);
+        failures.push(...paths.slice(index + 1).map((rest) => `${path.basename(rest)}: ${reason}`));
+        break;
       }
     }
   }
@@ -74,13 +82,14 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     await Clipboard.copy(formatUploads(uploads, await fetchFormat()));
   }
 
+  const warning = expiryWarning(uploads, target.expires);
   if (failures.length === 0) {
     toast.style = Toast.Style.Success;
     toast.title = uploads.length === 1 ? `Uploaded ${uploads[0].filename}` : `Uploaded ${uploads.length} files`;
     toast.message = uploads.length === 1 ? "Link copied to clipboard" : "Links copied to clipboard";
-    if (ignoredExpiry(uploads, target.expires)) {
+    if (warning) {
       toast.style = Toast.Style.Failure;
-      toast.message = `${toast.message}. ${EXPIRY_UNSUPPORTED_MESSAGE}`;
+      toast.message = `${toast.message}. ${warning}`;
     }
     if (uploads.length === 1) {
       toast.primaryAction = { title: "Open in Browser", onAction: () => open(uploads[0].url) };
@@ -88,7 +97,7 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
   } else {
     toast.style = Toast.Style.Failure;
     toast.title = `Uploaded ${uploads.length} of ${paths.length} files`;
-    toast.message = failures[0];
+    toast.message = warning ? `${failures[0]}. ${warning}` : failures[0];
   }
   return uploads;
 }
