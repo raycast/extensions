@@ -1,6 +1,6 @@
 # Executor Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-29
 
 - Search connected tools and run them with native input forms, explicit review, and formatted results.
 - Use @executor in Raycast AI to discover, compose, and run tools in Executor's TypeScript code mode.
