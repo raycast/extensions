@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Container Actions] - {PR_MERGE_DATE}
+## [Container Actions] - 2026-09-29
 
 - Add `Restart`, `Start`, `Stop`, `Kill` and `Remove Container` to the Docker containers list. Only the actions that fit the container's current state are shown. `Stop`, `Kill` and `Remove` ask for confirmation first, and for an application's Swarm-managed container the confirmation explains that Swarm will start a replacement. Everything except `Restart` needs Dokploy v0.29.0 or later.
 - Add `Refresh` to the Docker containers list.
