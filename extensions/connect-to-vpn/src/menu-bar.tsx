@@ -18,6 +18,7 @@ export default function Command() {
     getActionForService,
     hideInvalidDevices,
     refreshServices,
+    refreshServicesFromAction,
     error,
   } = useNetworkServices();
 
@@ -41,8 +42,11 @@ export default function Command() {
       try {
         const timestamp = await getMenuBarRefreshTimestamp();
         if (cancelled) return;
-        if (lastTimestamp !== undefined && timestamp > lastTimestamp) await refreshServices();
-        lastTimestamp = timestamp;
+        if (lastTimestamp === undefined) {
+          lastTimestamp = timestamp;
+        } else if (timestamp > lastTimestamp && (await refreshServices()) === "refreshed") {
+          lastTimestamp = timestamp;
+        }
       } catch (err) {
         console.error("Unable to check for VPN updates:", err);
       } finally {
@@ -94,7 +98,7 @@ export default function Command() {
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Refresh Status" onAction={refreshServices} />
+        <MenuBarExtra.Item title="Refresh Status" onAction={refreshServicesFromAction} />
         <MenuBarExtra.Item title="Open Network Settings…" onAction={openNetworkSettings} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

@@ -14,7 +14,7 @@ export default function Command() {
     favoriteServices,
     invalidServices,
     otherServices,
-    refreshServices,
+    refreshServicesFromAction,
     error,
     addToFavorites,
     removeFromFavorites,
@@ -26,24 +26,26 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search network services…">
-      <List.EmptyView
-        icon={error ? Icon.ExclamationMark : Icon.Network}
-        title={error ? "Unable to Load Network Services" : "No Network Services Found"}
-        description={
-          error ? error.message : "Configure and authenticate your VPN in System Settings, then refresh this list."
-        }
-        actions={
-          <ActionPanel>
-            <Action
-              title="Refresh Services"
-              icon={Icon.ArrowClockwise}
-              onAction={refreshServices}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-            />
-            <Action title="Open Network Settings" icon={Icon.Gear} onAction={openNetworkSettings} />
-          </ActionPanel>
-        }
-      />
+      {favoriteServices.length === 0 && otherServices.length === 0 && invalidServices.length === 0 && (
+        <List.EmptyView
+          icon={error ? Icon.ExclamationMark : Icon.Network}
+          title={error ? "Unable to Load Network Services" : "No Network Services Found"}
+          description={
+            error ? error.message : "Configure and authenticate your VPN in System Settings, then refresh this list."
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh Services"
+                icon={Icon.ArrowClockwise}
+                onAction={refreshServicesFromAction}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+              <Action title="Open Network Settings" icon={Icon.Gear} onAction={openNetworkSettings} />
+            </ActionPanel>
+          }
+        />
+      )}
       {favoriteServices.length > 0 && (
         <List.Section title="Favorites">
           {favoriteServices.map((service) => (
@@ -110,7 +112,7 @@ export default function Command() {
             )}
             <Action
               title="Refresh"
-              onAction={refreshServices}
+              onAction={refreshServicesFromAction}
               shortcut={Keyboard.Shortcut.Common.Refresh}
               icon={Icon.ArrowClockwise}
             />

@@ -9,7 +9,9 @@
 - Show shortcut feedback after requesting a connection change, without claiming the VPN has already connected.
 - Discover added and removed services when refreshing, and remove redundant menu bar status checks.
 - Keep favorites attached to their service when macOS network order changes, preserve manual favorite order, and fix duplicate or hidden-service entries.
-- Include disabled VPN configurations when non-VPN filtering is turned off.
+- Include disabled VPN configurations and physical services such as Wi-Fi, Bluetooth PAN, and Thunderbolt Bridge when non-VPN filtering is turned off.
+- Retry menu bar refresh signals after busy or interrupted refreshes, and explain when a manual refresh cannot run.
+- Repair tied favorite positions so migrated favorites can be reordered, and keep setup guidance out of empty search results.
 - Recover from malformed saved data and temporary status-check failures, and show useful empty and error states.
 
 ## [Bug fix] - 2026-09-21

@@ -82,9 +82,14 @@ export const getNetworkServices = async (favs: Record<string, boolean>, order: R
     })),
   );
 
-  // Older versions keyed favorites by their position in Network Settings. Migrate once,
-  // using the current service order, so later reordering cannot favorite a different VPN.
-  if ([...Object.keys(favs), ...Object.keys(order)].some((key) => /^\d+$/.test(key))) {
+  // Migrate legacy IDs and repair tied positions so moving a favorite always changes its order.
+  const favoriteServices = serviceStatuses.filter((service) => service.favorite).sort((a, b) => a.order - b.order);
+  const hasLegacyMetadata = [...Object.keys(favs), ...Object.keys(order)].some((key) => /^\d+$/.test(key));
+  const hasTiedOrder = new Set(favoriteServices.map((service) => service.order)).size !== favoriteServices.length;
+  if (hasLegacyMetadata || hasTiedOrder) {
+    favoriteServices.forEach((service, index) => {
+      service.order = index;
+    });
     await Promise.all([
       saveFavorites(
         Object.fromEntries(serviceStatuses.filter((service) => service.favorite).map((service) => [service.id, true])),
@@ -126,8 +131,8 @@ export function useNetworkServices() {
   const refreshing = useRef(false);
   const revision = useRef(0);
 
-  const refreshServices = useCallback(async () => {
-    if (refreshing.current || pendingActions.current.size > 0) return;
+  const refreshServices = useCallback(async (): Promise<"refreshed" | "busy" | "superseded" | "failed"> => {
+    if (refreshing.current || pendingActions.current.size > 0) return "busy";
     refreshing.current = true;
     const startedAtRevision = revision.current;
     setIsLoading(true);
@@ -141,7 +146,7 @@ export function useNetworkServices() {
           service.status = update.status;
         }
       }
-      if (revision.current !== startedAtRevision) return;
+      if (revision.current !== startedAtRevision) return "superseded";
       // Read the normalized metadata from the services, including any legacy migration.
       setFavorites(
         Object.fromEntries(
@@ -160,13 +165,29 @@ export function useNetworkServices() {
       settleChecks.current = {};
       setNetworkServices(services);
       setError(undefined);
+      return "refreshed";
     } catch (err) {
       if (!isSessionGone(err)) setError(err instanceof Error ? err : new Error(String(err)));
+      return "failed";
     } finally {
       refreshing.current = false;
       setIsLoading(false);
     }
   }, []);
+
+  const refreshServicesFromAction = async () => {
+    const result = await refreshServices();
+    if (result === "busy" || result === "superseded") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Refresh Not Completed",
+        message:
+          result === "busy"
+            ? "Wait for the current VPN action or refresh to finish, then try again."
+            : "Services changed during the refresh. Please try again.",
+      });
+    }
+  };
 
   useEffect(() => {
     void refreshServices();
@@ -384,6 +405,7 @@ export function useNetworkServices() {
     otherServices,
     invalidServices,
     refreshServices,
+    refreshServicesFromAction,
     error,
     addToFavorites,
     removeFromFavorites,
