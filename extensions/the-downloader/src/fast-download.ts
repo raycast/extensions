@@ -71,10 +71,10 @@ function isAbort(error: unknown): boolean {
   return error instanceof AbortError;
 }
 
-/** Wire a Stop action to the toast and return the AbortSignal the runner consumes. */
+/** Make Stop the toast's first action and return the AbortSignal the runner consumes. */
 function attachStop(toast: Toast): { signal: AbortSignal } {
   const controller = new AbortController();
-  toast.secondaryAction = { title: "Stop", onAction: () => controller.abort() };
+  toast.primaryAction = { title: "Stop Download", onAction: () => controller.abort() };
   return { signal: controller.signal };
 }
 

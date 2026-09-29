@@ -139,14 +139,14 @@ function failSession(session: DownloadSession, toast: Toast, error?: unknown) {
  */
 function failToast(toast: Toast, error: unknown): boolean {
   // Clear the in-flight "Stop" action up front — every failure path below
-  // either sets its own secondary action or wants none, and a dead Stop
-  // button left over from startAbortable would do nothing.
+  // either sets its own actions or wants none, and a dead Stop button left
+  // over from startAbortable would do nothing.
+  toast.primaryAction = undefined;
   toast.secondaryAction = undefined;
   if (error instanceof AbortError) {
     toast.style = Toast.Style.Failure;
     toast.title = "Cancelled";
     toast.message = undefined;
-    toast.primaryAction = undefined;
     return false;
   }
   if (error instanceof RosettaRequiredError) {
@@ -213,14 +213,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   /**
    * Wire an AbortController to a toast: returns the signal for the runner
-   * options and a `done()` to call on completion. The toast gains a "Stop"
-   * secondary action that aborts the in-flight child, and the controller is
-   * tracked so unmount cleanup can kill anything still running.
+   * options and a `done()` to call on completion. The toast's first action
+   * becomes "Stop Download", which aborts the in-flight child, and the
+   * controller is tracked so unmount cleanup can kill anything still running.
    */
   function startAbortable(toast: Toast, session?: DownloadSession): { signal: AbortSignal; done: () => void } {
     const controller = new AbortController();
     activeAbort.current = controller;
-    toast.secondaryAction = { title: "Stop", onAction: () => controller.abort() };
+    toast.primaryAction = { title: "Stop Download", onAction: () => controller.abort() };
     session?.onStop(() => controller.abort());
     return {
       signal: controller.signal,
