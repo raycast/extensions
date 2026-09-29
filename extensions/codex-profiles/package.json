@@ -1,0 +1,58 @@
+{
+  "name": "codex-profiles",
+  "title": "Codex Profiles",
+  "description": "Switch ChatGPT between your local Codex profiles.",
+  "icon": "icon.png",
+  "author": "hamza_alchbli",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-profile",
+      "title": "Switch Profile",
+      "subtitle": "Work / Personal",
+      "description": "Open a separate ChatGPT window with its own local profile state.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-profiles",
+      "title": "Manage Profiles",
+      "description": "Create, rename, and remove local Codex profiles.",
+      "mode": "view"
+    },
+    {
+      "name": "open-first-profile",
+      "title": "Switch to Profile 1",
+      "subtitle": "Required profile",
+      "description": "Open the required first profile directly; assign a Raycast hotkey for quick access.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-second-profile",
+      "title": "Switch to Profile 2",
+      "subtitle": "The next profile in the list",
+      "description": "Open the second profile directly; assign a Raycast hotkey for quick access.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.8",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
