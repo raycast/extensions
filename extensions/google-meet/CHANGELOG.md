@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Added Aside support] - {PR_MERGE_DATE}
+## [Added Aside support] - 2026-09-29
 
 ## [Fix Arc Detection] - 2026-08-07
 
