@@ -1,4 +1,4 @@
-// Search, ranking, and preview-highlight logic, ported from main/handlers/vault.ts so results
+// Search, ranking, and preview logic, ported from main/handlers/vault.ts so results
 // here rank the same way they do inside MarkdownOS itself.
 //
 // This deliberately does NOT use Raycast's built-in list filtering. That filter is fuzzy
@@ -13,8 +13,8 @@
 import type { Note } from "./notes";
 
 /** Folds curly quotes to straight ones for MATCHING only. One character in, one out — so every
- *  index found in a folded string is still valid against the original, which is what lets the
- *  highlight ranges below be applied to untouched display text. Ported verbatim. */
+ *  index found in a folded string is still valid against the original, which is what lets a
+ *  match found here point at the right place in the untouched display text. Ported verbatim. */
 export function straightenQuotes(text: string): string {
   return text.replace(/[‘’‚‛]/g, "'").replace(/[“”„‟]/g, '"');
 }
@@ -84,118 +84,18 @@ export function searchNotes(notes: Note[], query: string): Note[] {
   return scored.map((entry) => entry.note);
 }
 
-/* ── Preview highlighting ──────────────────────────────────────────────────────────────────── */
-
-interface Range {
-  start: number;
-  end: number;
-}
-
-/**
- * Spans of raw markdown that must not be highlighted, because inserting the highlight's own
- * delimiters there would break the construct rather than mark anything:
- *
- *  - a link's `(target)`, where a stray backtick turns `![](https://…/photo-1.png)` into a dead
- *    link. Only the target half is protected; a match in the visible label is exactly what
- *    someone wants to see marked.
- *  - a code span, which cannot nest inside another code span.
- *  - the delimiters of an emphasis run — but NOT its contents. A code span nests inside emphasis
- *    perfectly well, so a match inside text the note already bolded still gets highlighted; only
- *    a match straddling the `**` itself has to be skipped, since that would split the run.
- */
-// Unterminated fence included (`|$`): while a note is being written the last fence is often still
-// open, and its contents are code all the same.
-const FENCED_CODE = /```[\s\S]*?(?:```|$)/g;
+/* ── Preview ───────────────────────────────────────────────────────────────────────────────── */
 
 /*
- * All inline constructs in ONE regex, so a single left-to-right pass consumes each whole
- * construct and the next alternative cannot borrow its delimiters. Scanning them separately is
- * subtly wrong: run on its own, `\*[^*\n]+\*` pairs the trailing asterisk of `**Commodo**` with
- * the leading asterisk of a later `**officia**` and protects the 285 characters between them,
- * silently suppressing every highlight in that stretch.
+ * The preview marks nothing: it only scrolls to the first match (see trimToMatch).
  *
- * Order is what makes the pass correct — code before emphasis (asterisks inside code are not
- * emphasis), and `**` before `*` so a strong span is never read as an em span plus strays.
- *
- * Emphasis is confined to one line because it cannot span a blank line; matching across newlines
- * let one unpaired `**` pair with a distant one and swallow whole paragraphs.
+ * Matches used to be wrapped as inline code, the one thing Raycast's Detail view draws with a
+ * background — it renders CommonMark and strips HTML, so `<mark>` shows as plain text. But inline
+ * code also switches to a smaller monospace face, so a matched word visibly jumped out of its line,
+ * worst of all in the title heading. Bold is the only mark that leaves the line alone, and it can't
+ * show inside a heading, which is already bold. With nothing that marks a match without breaking
+ * the layout, the preview doesn't mark matches at all.
  */
-const INLINE_CONSTRUCTS = /`[^`\n]*`|!?\[[^\]]*\]\([^)]*\)|\*\*[^\n]*?\*\*|~~[^\n]*?~~|\*[^*\n]+\*/g;
-
-function protectedSpans(markdown: string): Range[] {
-  const spans: Range[] = [];
-  for (const match of markdown.matchAll(FENCED_CODE)) {
-    spans.push({ start: match.index, end: match.index + match[0].length });
-  }
-  for (const match of markdown.matchAll(INLINE_CONSTRUCTS)) {
-    const text = match[0];
-    const at = match.index;
-    if (/^!?\[/.test(text)) {
-      spans.push({ start: at + text.lastIndexOf("](") + 1, end: at + text.length });
-    } else if (text.startsWith("`")) {
-      spans.push({ start: at, end: at + text.length });
-    } else {
-      const delimiter = text.startsWith("**") || text.startsWith("~~") ? 2 : 1;
-      spans.push({ start: at, end: at + delimiter });
-      spans.push({ start: at + text.length - delimiter, end: at + text.length });
-    }
-  }
-  spans.sort((a, b) => a.start - b.start);
-  return spans;
-}
-
-/** Every occurrence of every term outside `blocked`, merged where they overlap so a highlight is
- *  never drawn twice over the same characters (searching `not note` against "Notes" is one range,
- *  not two). Pass an empty `blocked` to find matches regardless of where they sit. */
-function findTermRanges(markdown: string, terms: string[], blocked: Range[]): Range[] {
-  const haystack = straightenQuotes(markdown).toLowerCase();
-  const found: Range[] = [];
-
-  for (const term of terms) {
-    let from = 0;
-    for (;;) {
-      const start = haystack.indexOf(term, from);
-      if (start === -1) break;
-      const end = start + term.length;
-      if (!blocked.some((span) => start < span.end && end > span.start)) found.push({ start, end });
-      from = end;
-    }
-  }
-
-  found.sort((a, b) => a.start - b.start);
-  const merged: Range[] = [];
-  for (const range of found) {
-    const last = merged[merged.length - 1];
-    if (last && range.start <= last.end) last.end = Math.max(last.end, range.end);
-    else merged.push({ ...range });
-  }
-  return merged;
-}
-
-/**
- * Marks each range as an inline code span, which Raycast renders with a real background tint —
- * the nearest thing to a `<mark>` the Detail view offers. An actual `<mark>` is not an option:
- * Detail renders CommonMark and silently strips HTML tags, so it would highlight nothing (the
- * app's own notes contain `<mark>` already, and it comes through as plain text).
- *
- * The tint alone is the highlight — no `**` on top of it. Bolding as well reads as redundant
- * where the background already marks the text, and inside a run the note had already bolded it
- * produces `****`like this`****`.
- *
- * Applied back-to-front so each insertion can't shift the indices of the ranges still to come.
- */
-function applyHighlights(markdown: string, ranges: Range[]): string {
-  let result = markdown;
-  for (let i = ranges.length - 1; i >= 0; i--) {
-    const { start, end } = ranges[i];
-    const text = result.slice(start, end);
-    // A backtick inside the match would close the span early and garble the rest of the line.
-    // Leaving that one unmarked is a better outcome than a broken render.
-    if (text.includes("`")) continue;
-    result = `${result.slice(0, start)}\`${text}\`${result.slice(end)}`;
-  }
-  return result;
-}
 
 // Roughly how much text the detail pane shows before it starts scrolling, and how much text to
 // keep in front of the match so it reads in context rather than starting abruptly. Both are
@@ -283,27 +183,16 @@ function trimToMatch(markdown: string, matchIndex: number): string {
   return `*⋯*\n\n${markdown.slice(lineStart)}`;
 }
 
-/**
- * Trims so the first match is in view, then emphasises every match.
- *
- * Trimming happens before highlighting, and the ranges are then found a second time against the
- * trimmed text rather than having their indices adjusted. Recomputing is cheap (one note, a few
- * kilobytes) and removes the whole class of off-by-N bugs that index arithmetic across two
- * transformations invites.
- */
-function highlightAndTrim(markdown: string, terms: string[]): string {
-  if (terms.length === 0) return markdown;
-
-  // Anchor the trim on a match that can actually be marked, so the pane lands somewhere the eye
-  // has something to find. Falling back to any match at all matters for the common case of a term
-  // the note itself already bolded: nothing there is highlightable, but it's still where the
-  // reader wants to be taken.
-  const highlightable = findTermRanges(markdown, terms, protectedSpans(markdown));
-  const anchor = highlightable.length > 0 ? highlightable : findTermRanges(markdown, terms, []);
-  if (anchor.length === 0) return markdown;
-
-  const trimmed = trimToMatch(markdown, anchor[0].start);
-  return applyHighlights(trimmed, findTermRanges(trimmed, terms, protectedSpans(trimmed)));
+/** Where the first occurrence of any term starts in `markdown`, or -1. Terms arrive lowercased
+ *  with quotes folded (parseSearchTerms), so the text is folded the same way to compare. */
+function firstMatchIndex(markdown: string, terms: string[]): number {
+  const haystack = straightenQuotes(markdown).toLowerCase();
+  let first = -1;
+  for (const term of terms) {
+    const index = haystack.indexOf(term);
+    if (index !== -1 && (first === -1 || index < first)) first = index;
+  }
+  return first;
 }
 
 /**
@@ -312,11 +201,11 @@ function highlightAndTrim(markdown: string, terms: string[]): string {
  * The title is rendered as a heading above the body because a note's title lives in frontmatter,
  * not in its text — so the body alone starts mid-thought with nothing naming what you're looking
  * at. It's prepended AFTER the body is trimmed, so it stays at the top even when the body has
- * been cut to bring a match into view, and it's highlighted separately so a query matching the
- * title shows there too.
+ * been cut to bring a match into view.
  */
 export function buildPreview(markdown: string, query: string, title: string): string {
   const terms = parseSearchTerms(query);
-  const heading = highlightAndTrim(`# ${title}`, terms);
-  return `${heading}\n\n${highlightAndTrim(markdown, terms)}`;
+  const at = terms.length > 0 ? firstMatchIndex(markdown, terms) : -1;
+  const body = at === -1 ? markdown : trimToMatch(markdown, at);
+  return `# ${title}\n\n${body}`;
 }
