@@ -1,6 +1,6 @@
 # Folio Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-29
 
 - Sign In with SnapTrade (OAuth, PKCE, read-only) with token refresh and revoke through the Folio auth worker
 - Show Portfolio: net worth per currency, accounts grouped by institution, holdings per account
