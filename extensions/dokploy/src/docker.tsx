@@ -143,6 +143,15 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
     );
   }
 
+  const refreshAction = (
+    <Action
+      icon={Icon.ArrowClockwise}
+      title="Refresh"
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={() => revalidate()}
+    />
+  );
+
   return (
     <List navigationTitle="Docker" isLoading={isLoading} searchBarAccessory={dropdown}>
       {/* Its own row, not attached to any container's own actions - disk usage/prune here targets
@@ -154,6 +163,8 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
         actions={
           <ActionPanel>
             <Action.Push icon={Icon.Trash} title="Docker Cleanup" target={<DockerCleanup instance={instance} />} />
+            {/* Also here so the list can still be refreshed when it has no containers left. */}
+            {refreshAction}
           </ActionPanel>
         }
       />
@@ -181,14 +192,7 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
                   {isUp && containerAction(container, "stop")}
                   {isUp && containerAction(container, "kill")}
                 </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    icon={Icon.ArrowClockwise}
-                    title="Refresh"
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={() => revalidate()}
-                  />
-                </ActionPanel.Section>
+                <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
                 <ActionPanel.Section>{containerAction(container, "remove")}</ActionPanel.Section>
               </ActionPanel>
             }
