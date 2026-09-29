@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Container Files and Docker Events] - {PR_MERGE_DATE}
+## [Container Files and Docker Events] - 2026-09-29
 
 - Add `Browse Files` to running containers in the Docker list: a read-only view of the container's folders and text files (the first 512 KB of a large file), with `Copy Path` and `Copy Content`.
 - Add `Docker Events`: container, image, volume and network events on the server from the last 5 minutes up to 24 hours, newest first, with each event's details one shortcut away.
