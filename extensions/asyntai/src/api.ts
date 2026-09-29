@@ -22,7 +22,10 @@ export function newAskSession(): string {
 
 export function isOwnQuestion(sessionId: string | null | undefined): boolean {
   if (typeof sessionId !== "string") return false;
-  return [ASK_MARKER, ...OTHER_MARKERS].some((marker) => sessionId.startsWith(marker));
+  // The chat API stores a caller's session id as "api_" + the id, and the
+  // sessions list returns that stored form.
+  const id = sessionId.startsWith("api_") ? sessionId.slice(4) : sessionId;
+  return [ASK_MARKER, ...OTHER_MARKERS].some((marker) => id.startsWith(marker));
 }
 
 // `Preferences` comes from raycast-env.d.ts, generated from package.json.
