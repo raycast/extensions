@@ -33,6 +33,8 @@ type EditorApi = {
     y: number;
   };
   exportImageCanvas(framed: boolean): { width: number; height: number };
+  keyboardShortcuts(event: object): void;
+  toolKeyboard(event: object): void;
 };
 function editor() {
   const draws: unknown[][] = [];
@@ -71,15 +73,33 @@ function editor() {
     if (!elements.has(key)) elements.set(key, makeElement());
     return elements.get(key)!;
   };
+  let focusedTool: string | undefined;
+  const tools = [
+    "rectangle",
+    "circle",
+    "freeform",
+    "paint",
+    "crop",
+    "text",
+  ].map((tool) => ({
+    ...makeElement(),
+    dataset: { tool },
+    hidden: false,
+    tabIndex: tool === "rectangle" ? 0 : -1,
+    focus: () => {
+      focusedTool = tool;
+    },
+  }));
   const source = readFileSync(resolve("assets/editor.js"), "utf8").replace(
     / {2}start\(\)\.catch\(\(error\) => \{[\s\S]*?\n {2}\}\);/,
-    "globalThis.editor = { state, newPage, addMask, applyCrop, resetCrop, undo, redo, clearAll, setupCanvas, canvasPoint, cropBounds, exportImageCanvas, setTool, pointerUp };",
+    "globalThis.editor = { state, newPage, addMask, applyCrop, resetCrop, undo, redo, clearAll, setupCanvas, canvasPoint, cropBounds, exportImageCanvas, setTool, pointerUp, keyboardShortcuts, toolKeyboard };",
   );
   const sandbox = {
     editor: undefined as EditorApi | undefined,
     document: {
       querySelector: element,
-      querySelectorAll: () => [],
+      querySelectorAll: (selector: string) =>
+        selector === ".tool" ? tools : [],
       createElement: () => element(`canvas-${elements.size}`),
     },
     window: { addEventListener() {} },
@@ -93,7 +113,15 @@ function editor() {
   const original = { width: 1000, height: 600 };
   api.state.pages = [api.newPage(original)];
   api.state.entitlement = { plan: "pro" };
-  return { api, original, elements, draws, translations };
+  return {
+    api,
+    original,
+    elements,
+    draws,
+    translations,
+    tools,
+    focusedTool: () => focusedTool,
+  };
 }
 
 function crop(api: EditorApi, rect: object) {
@@ -211,4 +239,50 @@ test("redactions drawn after cropping keep source coordinates on restoration", (
   const mask = api.state.pages[0].masks[0];
   assert.equal(mask.x, 300);
   assert.equal(mask.y, 150);
+});
+
+test("Enter on native controls does not apply a pending crop", () => {
+  const { api } = editor();
+  api.state.tool = "crop";
+  api.state.draft = { x: 100, y: 80, width: 400, height: 200 };
+  let prevented = 0;
+  const event = (input: boolean, button: boolean) => ({
+    key: "Enter",
+    preventDefault: () => {
+      prevented++;
+    },
+    target: { matches: () => input, closest: () => (button ? {} : null) },
+  });
+  api.keyboardShortcuts(event(true, false));
+  api.keyboardShortcuts(event(false, true));
+  assert.equal(api.state.pages[0].crop, null);
+  assert.equal(prevented, 0);
+  api.keyboardShortcuts(event(false, false));
+  assert.equal(api.state.pages[0].crop!.width, 400);
+  assert.equal(prevented, 1);
+});
+
+test("tool arrow navigation skips hidden tools and keeps one keyboard tab stop", () => {
+  const { api, tools, focusedTool } = editor();
+  tools[4].hidden = true;
+  api.toolKeyboard({
+    key: "ArrowRight",
+    currentTarget: tools[3],
+    preventDefault() {},
+  });
+  assert.equal(api.state.tool, "text");
+  assert.equal(focusedTool(), "text");
+  assert.deepEqual(
+    tools
+      .filter((tool) => tool.tabIndex === 0)
+      .map((tool) => tool.dataset.tool),
+    ["text"],
+  );
+  api.toolKeyboard({
+    key: "Home",
+    currentTarget: tools[5],
+    preventDefault() {},
+  });
+  assert.equal(api.state.tool, "rectangle");
+  assert.equal(focusedTool(), "rectangle");
 });

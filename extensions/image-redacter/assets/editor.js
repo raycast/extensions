@@ -209,6 +209,7 @@
   function bindControls() {
     $$(".tool").forEach((button) => {
       button.addEventListener("click", () => setTool(button.dataset.tool));
+      button.addEventListener("keydown", toolKeyboard);
     });
     $("#effect").addEventListener("change", (event) => setEffect(event.target.value));
     bindRange("#mosaicSize", "#mosaicValue", (value) => {
@@ -253,8 +254,12 @@
   }
 
   function bindRange(inputSelector, outputSelector, onInput) {
-    $(inputSelector).addEventListener("input", (event) => {
+    const input = $(inputSelector);
+    const updateTrack = () => input.style.setProperty("--range-fill", `${(Number(input.value) - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100}%`);
+    updateTrack();
+    input.addEventListener("input", (event) => {
       const value = Number(event.target.value);
+      updateTrack();
       $(outputSelector).textContent = `${value} px`;
       onInput(value);
     });
@@ -276,11 +281,24 @@
       const active = button.dataset.tool === tool;
       button.classList.toggle("active", active);
       button.setAttribute("aria-checked", String(active));
+      button.tabIndex = active ? 0 : -1;
     });
     $("#paintOptions").hidden = tool !== "paint";
     $("#cropControls").hidden = tool !== "crop";
     updateCropControls();
     drawOverlay();
+  }
+
+  function toolKeyboard(event) {
+    const keys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+    if (!keys.includes(event.key)) return;
+    event.preventDefault();
+    const tools = $$(".tool").filter((button) => !button.hidden);
+    const index = tools.indexOf(event.currentTarget);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? tools.length - 1
+      : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + tools.length) % tools.length;
+    setTool(tools[next].dataset.tool);
+    tools[next].focus();
   }
 
   function changePage(step) {
@@ -874,7 +892,7 @@
 
   function createWatermarkBadge(height) {
     const label = `Redacted with ${PRODUCT_NAME}`;
-    const font = `600 ${Math.round(height * .4)}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    const font = `600 ${Math.round(height * .4)}px "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     const padding = height * .3;
     const markSize = height * .6;
     const gap = height * .24;
@@ -1073,6 +1091,7 @@
   function keyboardShortcuts(event) {
     const modifier = event.metaKey || event.ctrlKey;
     if ($("#upgradeDialog").open) return;
+    if (event.target?.matches("input, select, textarea, [contenteditable]")) return;
     if (modifier && event.key.toLowerCase() === "z") {
       event.preventDefault();
       event.shiftKey ? redo() : undo();
@@ -1082,7 +1101,7 @@
     } else if (state.kind === "pdf" && (event.key === "PageDown" || event.key === "PageUp")) {
       event.preventDefault();
       changePage(event.key === "PageDown" ? 1 : -1);
-    } else if (event.key === "Enter" && state.tool === "crop") {
+    } else if (event.key === "Enter" && state.tool === "crop" && !event.target?.closest("button, a")) {
       event.preventDefault();
       applyCrop();
     } else if (event.key === "Escape" && state.tool === "crop") {
