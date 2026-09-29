@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-09-29
 
 - Added an Ask AI tool that locks the keyboard for a requested duration
 - Allowed custom durations through Ask AI
