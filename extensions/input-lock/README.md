@@ -1,6 +1,6 @@
 # Input Lock
 
-A local Raycast MVP that blocks typing and clicks while keeping the current desktop visible and scrolling available. Tap either Command key three times within 1.5 seconds, then use Touch ID to unlock. Hold both Command keys for 8 seconds to unlock without authentication if recovery is needed.
+A local Raycast MVP that blocks typing and clicks while keeping the current desktop visible and scrolling available. Tap either or both Command keys three times within 1.5 seconds, then use Touch ID to unlock. Hold both Command keys for 8 seconds to unlock without authentication if recovery is needed.
 
 This is a temporary input guard. Anyone who knows the recovery gesture can unlock it. Use the macOS lock screen to protect private data.
 
@@ -9,7 +9,7 @@ This is a temporary input guard. Anyone who knows the recovery gesture can unloc
 Requires macOS 13 or later, Raycast, and an enrolled Touch ID fingerprint.
 
 1. Run **Lock Inputs** in Raycast, select a duration, and press Enter to lock immediately. The Raycast window closes and the desktop stays visible.
-2. To unlock, tap either Command key three times within 1.5 seconds and touch the sensor when macOS prompts. Holding both keys continuously for 8 seconds is the recovery route.
+2. To unlock, tap either or both Command keys three times within 1.5 seconds and touch the sensor when macOS prompts. Holding both keys continuously for 8 seconds is the recovery route.
 
 Choose **10 minutes**, **30 minutes**, **60 minutes**, **2 hours**, **5 hours**, or **Indefinitely** for each session. Timed sessions unlock automatically when their duration ends. The timer starts when input blocking begins.
 
@@ -82,6 +82,8 @@ As a last resort, force-quit the **input-lock** worker in Activity Monitor or te
 The bounded native harness covers duration validation, startup refusal, ordinary unlock, activation-based expiry, a frozen worker using production recovery timings, parent loss, guardian termination and loss, late output closure, closed or full output, and refusal of private workers launched by another executable. Its simulated workers compile only into the check binary and never create input taps. The release binary accepts only the six duration tokens.
 
 On 2026-09-28, build, lint, TypeScript, Command timing, universal architecture and signature checks passed. An independent source review of the new process and pipe boundary found two issues that were fixed and checked before packaging. A final launch through Raycast with development stopped created an enabled tap with keyboard and pointer filtering and no scroll-wheel interception. The worker was then frozen deliberately; its guardian released it and macOS removed its tap and sleep assertions. The installed helper and `dist/input-lock.rayext` contain the same signed native asset. Test timers and helper processes were stopped after validation.
+
+On 2026-09-29, a physical test showed that simultaneous taps of both Command keys were rejected. The detector now counts a tap when all pressed Command keys are released, supporting either key or both keys together. A regression check feeds the real modifier-event sequence through the chord and tap detectors. Physical acceptance of the correction remains pending.
 
 On 2026-09-29, the form and confirmation were replaced with direct duration actions, and triple Command taps replaced the Touch ID hold trigger. The command harness, native gesture self-test, lint, TypeScript build, universal binary signature, and permission probe passed. The installed Raycast list was inspected; physical triple-tap and Touch ID acceptance remains pending.
 

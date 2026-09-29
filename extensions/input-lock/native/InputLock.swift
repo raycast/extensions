@@ -67,14 +67,13 @@ struct CommandTap {
         guard sides != previousSides else { return false }
         let previous = previousSides
         previousSides = sides
-        if sides == 3 { sequence = .blocked; return false }
         switch sequence {
         case .blocked:
             if sides == 0 { sequence = .idle }
         case .idle:
             if sides != 0 { sequence = .pressed(count: 0, startedAt: time) }
         case let .pressed(count, startedAt):
-            guard sides == 0 else { sequence = .blocked; return false }
+            guard sides == 0 else { return false }
             guard time - startedAt <= 1.5 else { sequence = .idle; return false }
             if count == 2 { sequence = .idle; return true }
             sequence = .released(count: count + 1, startedAt: startedAt)
@@ -88,7 +87,7 @@ struct CommandTap {
     }
 }
 
-let lockedMessage = "Tap either Command key 3 times quickly to use Touch ID. Hold both Command keys for 8 seconds to force unlock."
+let lockedMessage = "Tap either or both Command keys 3 times quickly to use Touch ID. Hold both Command keys for 8 seconds to force unlock."
 
 func writeJSON<Value: Encodable>(_ value: Value) {
     do {
@@ -172,15 +171,29 @@ func selfTest() {
     fallback.flagsChanged(rawFlags: 0, keyCode: 55, commandHeld: true, fallbackKeyDown: true, at: 1)
     fallback.flagsChanged(rawFlags: 0, keyCode: 54, commandHeld: true, fallbackKeyDown: true, at: 2)
     precondition(fallback.leftDown && fallback.rightDown && fallback.startedAt == 2)
-    for sides in [[true, true, true], [false, false, false], [true, false, true]] {
+    for sides in [[1, 1, 1], [2, 2, 2], [1, 2, 1], [1, 3, 2]] {
         var taps = CommandTap()
-        for (index, left) in sides.enumerated() {
+        for (index, side) in sides.enumerated() {
             let time = Double(index) * 0.3
-            precondition(!taps.update(leftDown: left, rightDown: !left, at: time))
-            precondition(!taps.update(leftDown: left, rightDown: !left, at: time + 0.01))
+            precondition(!taps.update(leftDown: side & 1 != 0, rightDown: side & 2 != 0, at: time))
+            precondition(!taps.update(leftDown: side & 1 != 0, rightDown: side & 2 != 0, at: time + 0.01))
             precondition(taps.update(leftDown: false, rightDown: false, at: time + 0.1) == (index == 2))
             precondition(!taps.update(leftDown: false, rightDown: false, at: time + 0.11))
         }
+    }
+    var bothChord = CommandChord(), bothTaps = CommandTap()
+    for index in 0..<3 {
+        let time = Double(index) * 0.3
+        let events: [(UInt64, Int64)] = [(0x8, 55), (0x18, 54), (0x18, 54), (0x10, 55), (0, 54)]
+        for (eventIndex, event) in events.enumerated() {
+            let at = time + Double(eventIndex) * 0.02
+            let commandHeld = event.0 != 0
+            bothChord.flagsChanged(rawFlags: event.0 | (commandHeld ? 0x100000 : 0), keyCode: event.1,
+                                   commandHeld: commandHeld, fallbackKeyDown: false, at: at)
+            precondition(bothTaps.update(leftDown: bothChord.leftDown, rightDown: bothChord.rightDown, at: at)
+                         == (index == 2 && eventIndex == events.count - 1))
+        }
+        precondition(!bothTaps.update(leftDown: false, rightDown: false, at: time + 0.1))
     }
     var taps = CommandTap()
     precondition(!taps.update(leftDown: true, rightDown: false, at: 0))
@@ -198,6 +211,7 @@ func selfTest() {
     precondition(!taps.update(leftDown: true, rightDown: true, at: 5.7))
     precondition(!taps.update(leftDown: false, rightDown: true, at: 5.8))
     precondition(!taps.update(leftDown: false, rightDown: false, at: 5.9))
+    taps.reset()
     for index in 0..<3 {
         let time = 6 + Double(index) * 0.2
         precondition(!taps.update(leftDown: true, rightDown: false, at: time))
@@ -268,7 +282,7 @@ final class LockController {
         CFRunLoopAddSource(CFRunLoopGetMain(), tapSource, .commonModes)
         guard CGEvent.tapIsEnabled(tap: tap) else { endEscapeTest(passed: false, message: "The input tap was disabled") }
         escapeDeadline = ProcessInfo.processInfo.systemUptime + 15
-        emit(.ready, "Tap either Command key 3 times quickly within 15 seconds", reason: "escapeTest")
+        emit(.ready, "Tap either or both Command keys 3 times quickly within 15 seconds", reason: "escapeTest")
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in self?.tickEscapeTest() }
         withExtendedLifetime(self) { RunLoop.main.run() }
     }
