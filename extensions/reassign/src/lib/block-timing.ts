@@ -1,4 +1,5 @@
 import { parseDuration, todayISO } from "./format";
+import { MAX_DURATION_MINUTES, MIN_SPAN_MINUTES } from "./wire";
 
 export interface TimingFields {
   start: Date | null;
@@ -57,8 +58,8 @@ export function resolveBlockTiming(fields: TimingFields): BlockTiming {
 }
 
 function validateMinutes(minutes: number) {
-  // The server stores a span of 5 minutes or more.
-  if (!Number.isFinite(minutes) || minutes < 5 || minutes > 1440) {
+  // The Add form caps a block at one day (see MAX_DURATION_MINUTES).
+  if (!Number.isFinite(minutes) || minutes < MIN_SPAN_MINUTES || minutes > MAX_DURATION_MINUTES) {
     throw new Error(
       "End must be at least 5 minutes after Start, and the block must be at most 24 hours. For an overnight block, choose the next day for End.",
     );

@@ -5,6 +5,8 @@ Nothing should be pushed or marked ready for review until the live checks below 
 ## Automated checks
 
 Run `npm test`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
+`npm run lint` (`ray lint`) checks only `src/`. Also run
+`npx eslint src tests` and `npx prettier --check src tests`.
 The tests cover duration preservation, overnight ranges, refresh failures, shared
 OAuth credentials across isolated command modules, logout during login, failed
 form submissions, Now's sign-in action, Inbox pagination, feedback requests, and

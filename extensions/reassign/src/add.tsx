@@ -27,7 +27,7 @@ import {
   PlanRequest,
   writeEvents,
 } from "./lib/api";
-import { batchFailure } from "./lib/envelope";
+import { batchFailure, needsSignIn } from "./lib/envelope";
 import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
 import {
   addDaysISO,
@@ -56,7 +56,7 @@ import {
 } from "./components/calendar-fields";
 import { ScheduleContext } from "./lib/launch-context";
 import { parseCapture } from "./lib/nl-parse";
-import { WEB_BASE } from "./lib/wire";
+import { isEventKind, MAX_DURATION_MINUTES, WEB_BASE, type EventKind } from "./lib/wire";
 
 interface FormValues extends CalendarFormValues {
   name: string;
@@ -69,20 +69,52 @@ interface FormValues extends CalendarFormValues {
   notes: string;
 }
 
+// Raycast omits a field that does not render (Duration, and the fields under details).
+type SubmitValues = Pick<FormValues, "name" | "start" | "end"> & Partial<Omit<FormValues, "name" | "start" | "end">>;
+
 /** The optional block fields, sent only when set (empty means "leave to the server"). */
 function optionalFields(values: FormValues): {
   notes?: string;
   areaId?: string;
   activityTypeId?: string;
-  kind?: string;
+  kind?: EventKind;
 } {
-  const out: { notes?: string; areaId?: string; activityTypeId?: string; kind?: string } = {};
+  const out: { notes?: string; areaId?: string; activityTypeId?: string; kind?: EventKind } = {};
   const notes = values.notes.trim();
   if (notes) out.notes = notes;
   if (values.areaId) out.areaId = values.areaId;
   if (values.activityTypeId) out.activityTypeId = values.activityTypeId;
-  if (values.kind) out.kind = values.kind;
+  if (isEventKind(values.kind)) out.kind = values.kind;
   return out;
+}
+
+/** The timing inputs, with the native picker's full-day flag for each boundary. */
+function timingFieldsOf(values: Pick<FormValues, "start" | "end" | "duration">) {
+  return {
+    ...values,
+    startFullDay: Boolean(values.start && Form.DatePicker.isFullDay(values.start)),
+    endFullDay: Boolean(values.end && Form.DatePicker.isFullDay(values.end)),
+  };
+}
+
+/** Check the name, notes and times of a submit. A failure shows a toast and gives null. */
+async function prepareSubmit(values: FormValues): Promise<{ finalName: string; timing: BlockTiming } | null> {
+  const finalName = values.name.trim() || "(untitled)";
+  const tooLong = textLimitError(finalName, values.notes);
+  if (tooLong) {
+    await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
+    return null;
+  }
+  try {
+    return { finalName, timing: resolveBlockTiming(timingFieldsOf(values)) };
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Check the block times",
+      message: error instanceof Error ? error.message : "Choose valid times.",
+    });
+    return null;
+  }
 }
 
 /**
@@ -146,13 +178,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const hasEndTime = Boolean(end && !Form.DatePicker.isFullDay(end));
   const showDuration = !(hasStartTime && hasEndTime);
   const primaryIsInbox = !hasStartTime && !hasEndTime && (aiDestination === "inbox" || !duration.trim());
-  const timingFields = {
-    start,
-    end,
-    duration,
-    startFullDay: Boolean(start && Form.DatePicker.isFullDay(start)),
-    endFullDay: Boolean(end && Form.DatePicker.isFullDay(end)),
-  };
+  const timingFields = timingFieldsOf({ start, end, duration });
   let timingPreview = primaryIsInbox
     ? hasNamedDate && planningDate
       ? `Inbox — planned for ${planningDate}, no time set`
@@ -169,21 +195,21 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     timingError = error instanceof Error ? error.message : "Check the times.";
   }
 
-  function changeStart(value: Date | null) {
+  // When a boundary is cleared, keep the last explicit range as the duration.
+  function keepRangeAsDuration() {
     if (hasStartTime && hasEndTime && start && end) {
       const minutes = wallMinutes(start, end);
-      if (minutes > 0 && minutes <= 1440) setDuration(humanDuration(minutes));
+      if (minutes > 0 && minutes <= MAX_DURATION_MINUTES) setDuration(humanDuration(minutes));
     }
+  }
+  function changeStart(value: Date | null) {
+    keepRangeAsDuration();
     setStart(value);
     setPlanningDate(value ? todayISO(value) : undefined);
     setHasNamedDate(Boolean(value));
   }
   function changeEnd(value: Date | null) {
-    // When a boundary is cleared, keep the last explicit range as the duration.
-    if (hasStartTime && hasEndTime && start && end) {
-      const minutes = wallMinutes(start, end);
-      if (minutes > 0 && minutes <= 1440) setDuration(humanDuration(minutes));
-    }
+    keepRangeAsDuration();
     setEnd(value);
   }
 
@@ -217,7 +243,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     await popToRoot({ clearSearchBar: true });
   }
 
-  async function submitOnce(values: FormValues, action: (values: FormValues) => Promise<void>) {
+  async function submitOnce(values: SubmitValues, action: (values: FormValues) => Promise<void>) {
     if (submitting.current || saved.current) return;
     submitting.current = true;
     try {
@@ -228,29 +254,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   }
 
   async function handleSchedule(values: FormValues) {
-    const finalName = values.name.trim() || "(untitled)";
-    const tooLong = textLimitError(finalName, values.notes);
-    if (tooLong) {
-      await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
-      return;
-    }
+    const prepared = await prepareSubmit(values);
+    if (!prepared) return;
+    const { finalName, timing } = prepared;
     const extras = optionalFields(values);
     const calendar = calendarCreateFields(values);
-    let timing: BlockTiming;
-    try {
-      timing = resolveBlockTiming({
-        ...values,
-        startFullDay: Boolean(values.start && Form.DatePicker.isFullDay(values.start)),
-        endFullDay: Boolean(values.end && Form.DatePicker.isFullDay(values.end)),
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Check the block times",
-        message: error instanceof Error ? error.message : "Choose valid times.",
-      });
-      return;
-    }
     if (timing.kind === "exact") {
       const result = await runMutation("Scheduling…", `Scheduled “${finalName}”`, () =>
         writeEvents([
@@ -292,27 +300,9 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   }
 
   async function handleInbox(values: FormValues) {
-    const finalName = values.name.trim() || "(untitled)";
-    const tooLong = textLimitError(finalName, values.notes);
-    if (tooLong) {
-      await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
-      return;
-    }
-    let timing: BlockTiming;
-    try {
-      timing = resolveBlockTiming({
-        ...values,
-        startFullDay: Boolean(values.start && Form.DatePicker.isFullDay(values.start)),
-        endFullDay: Boolean(values.end && Form.DatePicker.isFullDay(values.end)),
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Check the block times",
-        message: error instanceof Error ? error.message : "Choose valid times.",
-      });
-      return;
-    }
+    const prepared = await prepareSubmit(values);
+    if (!prepared) return;
+    const { finalName, timing } = prepared;
     const durationMinutes = timing.kind === "inbox" ? ctx?.durationMinutes : timing.minutes;
     // Keep a chosen or named day as the planned date; do not tag with today by default.
     const plannedDate =
@@ -336,12 +326,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   // A definitive auth or Pro refusal gates the form, like the other commands.
   // Other errors fall through — the pickers stay empty and the submit toast tells.
   if (taxonomy && !taxonomy.ok) {
-    if (
-      taxonomy.code === "signed_out" ||
-      taxonomy.code === "unauthenticated" ||
-      taxonomy.code === "unauthorized" ||
-      taxonomy.code === "permission"
-    ) {
+    if (needsSignIn(taxonomy.code) || taxonomy.code === "permission") {
       return refusalView(taxonomy, revalidate);
     }
   }
@@ -369,14 +354,14 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     <Action.SubmitForm
       title={!hasStartTime && !hasEndTime && duration.trim() ? "Find a Time" : "Schedule Block"}
       icon={Icon.Calendar}
-      onSubmit={(values: FormValues) => submitOnce(values, handleSchedule)}
+      onSubmit={(values: SubmitValues) => submitOnce(values, handleSchedule)}
     />
   );
   const inboxAction = (
     <Action.SubmitForm
       title="Save to Inbox"
       icon={Icon.Tray}
-      onSubmit={(values: FormValues) => submitOnce(values, handleInbox)}
+      onSubmit={(values: SubmitValues) => submitOnce(values, handleInbox)}
     />
   );
 
@@ -523,7 +508,7 @@ interface FlexibleArgs {
   latest?: string;
   areaId?: string;
   activityTypeId?: string;
-  kind?: string;
+  kind?: EventKind;
   notes?: string;
   calendar: CalendarWriteFields;
   push: (element: ReactNode) => void;
@@ -581,14 +566,7 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
   }
 
   const outcome = readOutcome(result.data);
-  if (outcome.kind === "committed") {
-    toast.style = Toast.Style.Success;
-    toast.title = `Scheduled “${args.name}”`;
-    if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
-    await applyCalendar(outcome.eventId, args.calendar, toast);
-    await args.onSaved();
-    return;
-  }
+  if (outcome.kind === "committed") return finishCommitted(toast, outcome, args);
   if (outcome.kind === "proposals") {
     if (searchWindow.nextDay) {
       toast.style = Toast.Style.Success;
@@ -639,14 +617,7 @@ function ProposalsList(props: {
       return;
     }
     const outcome = readOutcome(result.data);
-    if (outcome.kind === "committed") {
-      toast.style = Toast.Style.Success;
-      toast.title = `Scheduled “${props.name}”`;
-      if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
-      await applyCalendar(outcome.eventId, props.calendar, toast);
-      await props.onSaved();
-      return;
-    }
+    if (outcome.kind === "committed") return finishCommitted(toast, outcome, props);
     if (outcome.kind === "proposals") {
       setState({
         options: outcome.options,
@@ -682,14 +653,7 @@ function ProposalsList(props: {
         await replan(toast);
         return;
       }
-      if (outcome?.kind === "committed") {
-        toast.style = Toast.Style.Success;
-        toast.title = `Scheduled “${props.name}”`;
-        if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
-        await applyCalendar(outcome.eventId, props.calendar, toast);
-        await props.onSaved();
-        return;
-      }
+      if (outcome?.kind === "committed") return finishCommitted(toast, outcome, props);
       if (!result.ok) failToast(toast, result);
       else if (outcome?.kind === "failed" && outcome.error) failToast(toast, outcome.error);
       else {
@@ -719,6 +683,21 @@ function ProposalsList(props: {
       ))}
     </List>
   );
+}
+
+type Committed = Extract<ReturnType<typeof readOutcome>, { kind: "committed" }>;
+
+/** A booked plan: the success toast with Undo, the chosen calendar, then close the form. */
+async function finishCommitted(
+  toast: Toast,
+  outcome: Committed,
+  block: { name: string; calendar: CalendarWriteFields; onSaved: () => Promise<void> },
+): Promise<void> {
+  toast.style = Toast.Style.Success;
+  toast.title = `Scheduled “${block.name}”`;
+  if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
+  await applyCalendar(outcome.eventId, block.calendar, toast);
+  await block.onSaved();
 }
 
 /**

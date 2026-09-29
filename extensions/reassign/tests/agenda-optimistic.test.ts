@@ -41,3 +41,65 @@ it("keeps reflect and delete updates, and leaves unrelated events alone", () => 
   expect(reflected[0].reflect).toEqual({ status: "kept" });
   expect(reflected[1]).toBe(other);
 });
+
+const mk = (id: string, start: string, end: string): ScheduleEvent => ({ id, name: id, start, end });
+
+it("forward shift reorders a row that crosses a back-to-back neighbor's start", () => {
+  const events = [mk("a", "2026-09-22T09:00", "2026-09-22T09:10"), mk("b", "2026-09-22T09:10", "2026-09-22T09:20")];
+  const out = transformEvents(events, { op: "shift", id: "a", byMinutes: 15 });
+  expect(out.map((e) => e.start)).toEqual(["2026-09-22T09:10", "2026-09-22T09:15"]);
+});
+
+it("forward shift reorders even when the post-shift blocks do not overlap", () => {
+  const events = [mk("a", "2026-09-22T09:00", "2026-09-22T09:30"), mk("b", "2026-09-22T09:05", "2026-09-22T09:10")];
+  const out = transformEvents(events, { op: "shift", id: "a", byMinutes: 15 });
+  expect(out.map((e) => e.start)).toEqual(["2026-09-22T09:05", "2026-09-22T09:15"]);
+  const sorted = out.slice().sort((x, y) => x.start.localeCompare(y.start));
+  expect(sorted[0].end <= sorted[1].start).toBe(true);
+});
+
+it("backward shift reorders a row that crosses a neighbor's start (mirror image)", () => {
+  const events = [mk("a", "2026-09-22T09:00", "2026-09-22T09:10"), mk("b", "2026-09-22T09:05", "2026-09-22T09:15")];
+  const out = transformEvents(events, { op: "shift", id: "b", byMinutes: -15 });
+  expect(out.map((e) => e.start)).toEqual(["2026-09-22T08:50", "2026-09-22T09:00"]);
+});
+
+it("uses the same start-comparator as buildRangeAgenda on start-minute ties", () => {
+  // Shift A onto B's start minute; both now start at 09:15. The optimistic
+  // sort uses the same comparator as buildRangeAgenda, so the orderings agree.
+  const events = [mk("a", "2026-09-22T09:00", "2026-09-22T09:10"), mk("b", "2026-09-22T09:15", "2026-09-22T09:25")];
+  const out = transformEvents(events, { op: "shift", id: "a", byMinutes: 15 });
+  const authoritative = events
+    .map((e) => (e.id === "a" ? { ...e, start: "2026-09-22T09:15", end: "2026-09-22T09:25" } : e))
+    .slice()
+    .sort((a, b) => a.start.localeCompare(b.start));
+  expect(out.map((e) => e.id)).toEqual(authoritative.map((e) => e.id));
+});
+
+it("returns unaffected rows by reference on a real shift", () => {
+  const a = mk("a", "2026-09-22T09:00", "2026-09-22T09:10");
+  const b = mk("b", "2026-09-22T09:10", "2026-09-22T09:20");
+  const c = mk("c", "2026-09-22T09:20", "2026-09-22T09:30");
+  const out = transformEvents([a, b, c], { op: "shift", id: "a", byMinutes: 25 });
+  expect(out.find((e) => e.id === "b")).toBe(b);
+  expect(out.find((e) => e.id === "c")).toBe(c);
+  expect(out.find((e) => e.id === "a")).not.toBe(a);
+});
+
+it("delete preserves the survivors' relative order", () => {
+  const a = mk("a", "2026-09-22T09:00", "2026-09-22T09:10");
+  const b = mk("b", "2026-09-22T09:10", "2026-09-22T09:20");
+  const c = mk("c", "2026-09-22T09:20", "2026-09-22T09:30");
+  const out = transformEvents([a, b, c], { op: "delete", id: "b" });
+  expect(out.map((e) => e.id)).toEqual(["a", "c"]);
+});
+
+it("reflect does not re-sort and returns unrelated rows by reference", () => {
+  // Input deliberately NOT in start order, to confirm reflect does not sort.
+  const a = mk("a", "2026-09-22T09:10", "2026-09-22T09:20");
+  const b = mk("b", "2026-09-22T09:00", "2026-09-22T09:10");
+  const out = transformEvents([a, b], { op: "reflect", id: "a", status: "kept" });
+  expect(out.map((e) => e.id)).toEqual(["a", "b"]);
+  expect(out[1]).toBe(b);
+  expect(out[0].reflect).toEqual({ status: "kept" });
+});

@@ -9,6 +9,7 @@ const shared = vi.hoisted(() => ({
   storage: new Map<string, string>(),
   authorize: vi.fn(),
   writes: 0,
+  cacheCleared: 0,
 }));
 vi.mock("@raycast/api", () => ({
   environment: {
@@ -16,8 +17,17 @@ vi.mock("@raycast/api", () => ({
       return shared.path;
     },
   },
+  Cache: class {
+    clear = () => {
+      shared.cacheCleared++;
+    };
+  },
   LocalStorage: {
     getItem: async (k: string) => shared.storage.get(k),
+    allItems: async () => Object.fromEntries(shared.storage),
+    removeItem: async (k: string) => {
+      shared.storage.delete(k);
+    },
     setItem: async (k: string, v: string) => {
       shared.storage.set(k, v);
     },
@@ -49,6 +59,7 @@ beforeEach(async () => {
   shared.path = await mkdtemp(join(tmpdir(), "reassign-auth-test-"));
   shared.storage.clear();
   shared.writes = 0;
+  shared.cacheCleared = 0;
   shared.authorize.mockReset();
   shared.tokens = { accessToken: "old", refreshToken: "refresh", isExpired: () => true };
 });
@@ -73,7 +84,7 @@ for (const [status, payload] of [
     );
     const auth = await import("../src/lib/oauth");
     await expect(auth.getAccessToken()).rejects.toThrow();
-    expect(shared.tokens.refreshToken).toBe("refresh");
+    expect(shared.tokens?.refreshToken).toBe("refresh");
     expect(shared.writes).toBe(0);
   });
 }
@@ -96,7 +107,7 @@ it("keeps credentials on a network failure", async () => {
   );
   const auth = await import("../src/lib/oauth");
   await expect(auth.getAccessToken()).rejects.toThrow("offline");
-  expect(shared.tokens.refreshToken).toBe("refresh");
+  expect(shared.tokens?.refreshToken).toBe("refresh");
 });
 it("serializes isolated command refresh and logout against the shared store", async () => {
   let finish!: (r: Response) => void;
@@ -134,7 +145,7 @@ it("coalesces expired reads across isolated commands", async () => {
   const second = await import("../src/lib/oauth");
   expect(await Promise.all([first.getAccessToken(), second.getAccessToken()])).toEqual(["fresh", "fresh"]);
   expect(fetch).toHaveBeenCalledTimes(1);
-  expect(shared.tokens.refreshToken).toBe("refresh");
+  expect(shared.tokens?.refreshToken).toBe("refresh");
 });
 it("does not commit a login that was cancelled by another command's logout", async () => {
   let finish!: (v: { authorizationCode: string }) => void;
@@ -295,4 +306,28 @@ it.each([
   await expect(login).rejects.toThrow("Signed out");
   expect(shared.tokens?.accessToken).toBe(newerLogin ? "new-session" : undefined);
   expect(shared.writes).toBe(newerLogin ? 1 : 0);
+});
+for (const failure of [
+  async () => Response.json({}, { status: 503 }),
+  async (): Promise<Response> => {
+    throw new Error("offline");
+  },
+]) {
+  it("authorize resolves on a transient refresh failure, so the view renders", async () => {
+    vi.stubGlobal("fetch", vi.fn(failure));
+    const auth = await import("../src/lib/oauth");
+    await expect(auth.authorize()).resolves.toBe("old");
+    expect(shared.tokens?.refreshToken).toBe("refresh");
+    expect(shared.authorize).not.toHaveBeenCalled();
+  });
+}
+it("signOut clears the cached data and notify keys of the old account", async () => {
+  shared.storage.set("notified:2026-09-29:e1:09:00:start", "1");
+  shared.storage.set("agenda-filter", "all");
+  const auth = await import("../src/lib/oauth");
+  await auth.signOut();
+  expect(shared.cacheCleared).toBe(1);
+  expect(shared.storage.has("notified:2026-09-29:e1:09:00:start")).toBe(false);
+  expect(shared.storage.get("agenda-filter")).toBe("all");
+  expect(shared.tokens).toBeUndefined();
 });

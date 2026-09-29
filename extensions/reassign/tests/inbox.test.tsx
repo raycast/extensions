@@ -129,18 +129,18 @@ beforeEach(() => {
 
 it("Remove Idea revalidates after a successful remove", async () => {
   mock.manage.mockResolvedValueOnce({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
-  const tree = InboxCommand();
+  const tree = InboxCommand({});
   await findByTitle(tree, "Remove Idea")!.props.onAction!();
   expect(mock.revalidate).toHaveBeenCalledTimes(1);
 });
 
 it("Remove Idea keeps the inbox list visible after a failed network remove (fix)", async () => {
   mock.manage.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
-  const before = InboxCommand();
+  const before = InboxCommand({});
   expect(findByTitle(before, "Read paper")).toBeDefined();
   await findByTitle(before, "Remove Idea")!.props.onAction!();
   expect(mock.revalidate).not.toHaveBeenCalled();
-  const after = InboxCommand();
+  const after = InboxCommand({});
   expect(findByTitle(after, "Read paper")).toBeDefined();
   expect(findByTitle(after, "Could not load your plan")).toBeUndefined();
 });
@@ -150,7 +150,7 @@ it("Remove Idea does not revalidate when the server rejects the batch", async ()
     ok: true,
     data: { results: [{ index: 0, status: "error", error: { code: "not_found", message: "Gone" } }] },
   });
-  const tree = InboxCommand();
+  const tree = InboxCommand({});
   await findByTitle(tree, "Remove Idea")!.props.onAction!();
   expect(mock.revalidate).not.toHaveBeenCalled();
 });

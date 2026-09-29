@@ -8,7 +8,7 @@ const shared = vi.hoisted(() => ({
   path: "",
   storage: new Map<string, string>(),
   tokens: undefined as { accessToken: string; refreshToken?: string; isExpired: () => boolean } | undefined,
-  beforeCommit: async (_operation: string) => {},
+  beforeCommit: (async () => {}) as (operation: string) => Promise<void>,
 }));
 vi.mock("@raycast/api", () => ({
   environment: {
@@ -16,8 +16,15 @@ vi.mock("@raycast/api", () => ({
       return shared.path;
     },
   },
+  Cache: class {
+    clear = () => {};
+  },
   LocalStorage: {
     getItem: async (key: string) => shared.storage.get(key),
+    allItems: async () => Object.fromEntries(shared.storage),
+    removeItem: async (key: string) => {
+      shared.storage.delete(key);
+    },
     setItem: async (key: string, value: string) => {
       await shared.beforeCommit("setItem");
       shared.storage.set(key, value);

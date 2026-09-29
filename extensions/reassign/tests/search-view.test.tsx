@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 
 type SearchEvent = { id: string; name: string; date: string; start: string; end: string };
 type OkData = { ok: true; data: { events: SearchEvent[] } };
-type ErrorData = { ok: false; code: "network"; message: string };
+type ErrorData = { ok: false; code: "network" | "unauthenticated" | "permission" | "scope"; message: string };
 
 const mock = vi.hoisted(() => ({
   slots: [] as unknown[],
@@ -11,6 +11,7 @@ const mock = vi.hoisted(() => ({
   laggy: undefined as OkData | ErrorData | undefined,
   error: undefined as ErrorData | undefined,
   loading: false,
+  pending: false,
   options: undefined as { execute: boolean; keepPreviousData: boolean } | undefined,
   events: [] as SearchEvent[],
 }));
@@ -61,11 +62,17 @@ vi.mock("@raycast/api", () => ({
 // `keepPreviousData: true` republishes the previous query's data (laggyDataRef)
 // under that empty key. The mock keeps the real hook's observable behaviour:
 // a non-empty query resolves and pins `laggy`; an empty query falls back to it.
+// `pending` models the very first in-flight fetch in a mounted SearchView, where
+// `laggyDataRef.current` is still undefined and `keepPreviousData` republishes
+// `undefined` as `data` while `isLoading === true`.
 vi.mock("@raycast/utils", () => ({
   useCachedPromise: (_fn: unknown, args: unknown[], options: { execute: boolean; keepPreviousData: boolean }) => {
     mock.options = options;
     const [query] = args as [string];
     if (query.length > 0) {
+      if (mock.pending) {
+        return { data: undefined, isLoading: options.execute && mock.loading, revalidate: mock.revalidate };
+      }
       const result = mock.error ?? { ok: true as const, data: { events: mock.events } };
       mock.laggy = result;
       return { data: result, isLoading: options.execute && mock.loading, revalidate: mock.revalidate };
@@ -117,6 +124,7 @@ beforeEach(() => {
   mock.events = [hit];
   mock.error = undefined;
   mock.loading = false;
+  mock.pending = false;
   mock.options = undefined;
   mock.revalidate.mockReset();
 });
@@ -163,7 +171,7 @@ it("keeps displaying results for a non-empty query (the fix does not over-correc
 
 it.each(["", "   "])("ignores a retained API refusal for a blank query %j", (blank) => {
   const searchTree = render("standup");
-  mock.error = { ok: false, code: "network", message: "offline" };
+  mock.error = { ok: false, code: "unauthenticated", message: "expired" };
   expect(render().some((node) => node.type === "refusalView")).toBe(true);
 
   // Clearing while an earlier response is arriving leaves that response cached.
@@ -186,4 +194,74 @@ it("disables fetching and loading when a pending query is cleared to whitespace"
   expect(tree.find((node) => node.type === List)?.props.isLoading).toBe(false);
   expect(tree.filter((node) => node.type === "Item")).toHaveLength(0);
   expect(tree.find((node) => node.type === "EmptyView")?.props.title).toBe("Search your blocks");
+});
+
+it("shows neutral 'Searching…' copy while the first in-flight fetch is pending", () => {
+  // The fix must show a neutral loading state — not a bogus 'No matches' verdict.
+  mock.pending = true;
+  mock.loading = true;
+
+  const tree = render("standup");
+
+  expect(tree.find((n) => n.type === List)?.props.isLoading).toBe(true);
+  const empty = tree.find((n) => n.type === "EmptyView");
+  expect(empty?.props.title).toBe("Searching…");
+  expect(empty?.props.description).toBe(`Finding blocks that match “standup”.`);
+});
+
+it("still shows 'No matches' once a non-empty query resolves with zero results", () => {
+  // Guards against over-correction: a genuine empty result must keep its copy.
+  mock.events = [];
+  const tree = render("standup");
+
+  expect(tree.filter((n) => n.type === "Item")).toHaveLength(0);
+  const empty = tree.find((n) => n.type === "EmptyView");
+  expect(empty?.props.title).toBe("No matches");
+  expect(empty?.props.description).toBe(`Nothing matches “standup”.`);
+});
+
+it("switches from 'Searching…' to 'No matches' once an empty result resolves", () => {
+  // First: in-flight window -> neutral copy.
+  mock.pending = true;
+  mock.loading = true;
+  let tree = render("standup");
+  expect(tree.find((n) => n.type === List)?.props.isLoading).toBe(true);
+  expect(tree.find((n) => n.type === "EmptyView")?.props.title).toBe("Searching…");
+
+  // Then: server answers with zero results -> definitive 'No matches' copy.
+  mock.pending = false;
+  mock.loading = false;
+  mock.events = [];
+  tree = render("standup");
+  expect(tree.find((n) => n.type === List)?.props.isLoading).toBe(false);
+  expect(tree.filter((n) => n.type === "Item")).toHaveLength(0);
+  expect(tree.find((n) => n.type === "EmptyView")?.props.title).toBe("No matches");
+  expect(tree.find((n) => n.type === "EmptyView")?.props.description).toBe(`Nothing matches “standup”.`);
+});
+
+it("keeps the search bar editable when a search fails", () => {
+  mock.error = { ok: false, code: "network", message: "offline" };
+  const tree = render("standup");
+
+  // A network error must not swap in a bare List that drops the query.
+  expect(tree.some((n) => n.type === "refusalView")).toBe(false);
+  const list = tree.find((n) => n.type === List);
+  expect(list?.props.searchText).toBe("standup");
+  expect(list?.props.onSearchTextChange).toBeTypeOf("function");
+  const empty = tree.find((n) => n.type === "EmptyView");
+  expect(empty?.props.title).toBe("Could not search");
+  expect(empty?.props.description).toBe("offline");
+  const retry = tree.find((n) => n.props.title === "Try Again");
+  retry?.props.onAction?.();
+  expect(mock.revalidate).toHaveBeenCalledTimes(1);
+
+  // The user can edit the failed query.
+  typeIntoSearchBar(tree, "stand");
+  mock.error = undefined;
+  expect(render().find((n) => n.type === "Item")?.props.title).toBe("Standup");
+});
+
+it.each(["unauthenticated", "permission", "scope"] as const)("sends a %s refusal to the gate view", (code) => {
+  mock.error = { ok: false, code, message: "no" };
+  expect(render("standup").some((n) => n.type === "refusalView")).toBe(true);
 });

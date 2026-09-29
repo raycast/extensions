@@ -41,6 +41,23 @@ export const MAX_NAME_LENGTH = 200;
 export const MAX_NOTES_LENGTH = 2000;
 export const MAX_FEEDBACK_LENGTH = 4000;
 
+// Span limits (minutes). A stored span is 5 min to 168 h. A duration (Inbox, a
+// flexible block) is at most one day. The Add form also caps an exact block at
+// one day, because the planning window is at most 24 h.
+export const MIN_SPAN_MINUTES = 5;
+export const MAX_SPAN_MINUTES = 168 * 60;
+export const MAX_DURATION_MINUTES = 24 * 60;
+
+export const EVENT_KINDS = ["blocking", "non_blocking", "reference"] as const;
+export type EventKind = (typeof EVENT_KINDS)[number];
+
+export const REFLECT_STATUSES = ["kept", "skipped", "changed", "added"] as const;
+export type ReflectStatus = (typeof REFLECT_STATUSES)[number];
+
+export function isEventKind(value: unknown): value is EventKind {
+  return (EVENT_KINDS as readonly unknown[]).includes(value);
+}
+
 export const PATHS = {
   schedule: "/schedule",
   events: "/events",

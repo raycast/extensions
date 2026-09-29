@@ -64,7 +64,9 @@ function Command() {
         <Action.Push
           title="Schedule This Idea…"
           icon={Icon.Calendar}
-          target={<BacklogScheduleForm item={item} onSubmit={(start) => scheduleItem(item.id, start)} />}
+          target={
+            <BacklogScheduleForm item={item} todayIso={todayIso} onSubmit={(start) => scheduleItem(item.id, start)} />
+          }
         />
         <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
         <Action

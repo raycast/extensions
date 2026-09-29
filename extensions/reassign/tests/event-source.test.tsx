@@ -126,4 +126,27 @@ describe("the row keywords and accessory", () => {
     expect(keywords).toEqual([]);
     expect(accessories.some((a) => a.icon === "Calendar")).toBe(false);
   });
+
+  test("do not leak the placeholder into keywords while the calendar list is empty", () => {
+    const { keywords } = agendaRowFor(nativeEvent, []);
+    expect(keywords).not.toContain("Connected calendar");
+  });
+
+  test("do not leak the placeholder into keywords when the list loads but misses the home id", () => {
+    const { keywords } = agendaRowFor(nativeEvent, [{ id: "other", name: "Other" } as Calendar]);
+    expect(keywords).not.toContain("Connected calendar");
+    expect(keywords).toEqual([]);
+  });
+
+  test("keep the placeholder in the accessory tooltip while the calendar list is empty", () => {
+    const { accessories } = agendaRowFor(nativeEvent, []);
+    expect(accessories.some((a) => a.icon === "Calendar" && a.tooltip === "Connected calendar")).toBe(true);
+  });
+
+  test("still index a calendar literally named 'Connected calendar' once it resolves", () => {
+    const namedCalendar = { id: "work", name: "Connected calendar" } as Calendar;
+    const { keywords, accessories } = agendaRowFor(nativeEvent, [namedCalendar]);
+    expect(keywords).toContain("Connected calendar");
+    expect(accessories.some((a) => a.icon === "Calendar" && a.tooltip === "Connected calendar")).toBe(true);
+  });
 });

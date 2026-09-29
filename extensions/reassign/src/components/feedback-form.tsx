@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FeedbackKind, sendFeedback } from "../lib/api";
 import { MAX_FEEDBACK_LENGTH } from "../lib/wire";
@@ -6,8 +7,23 @@ import { failToast } from "../lib/feedback";
 /** A short form to send real feedback to the Reassign team (POST /feedback). */
 export function FeedbackForm() {
   const { pop } = useNavigation();
+  const [sending, setSending] = useState(false);
+  // A ref, not the state: a second Cmd+Enter can run before the re-render.
+  const inFlight = useRef(false);
 
   async function submit(values: { message: string; kind: FeedbackKind }) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setSending(true);
+    try {
+      await send(values);
+    } finally {
+      inFlight.current = false;
+      setSending(false);
+    }
+  }
+
+  async function send(values: { message: string; kind: FeedbackKind }) {
     const message = values.message.trim();
     if (!message) {
       await showToast({ style: Toast.Style.Failure, title: "Write a message first" });
@@ -34,6 +50,7 @@ export function FeedbackForm() {
 
   return (
     <Form
+      isLoading={sending}
       navigationTitle="Send Feedback"
       actions={
         <ActionPanel>

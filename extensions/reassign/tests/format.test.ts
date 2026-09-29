@@ -5,10 +5,11 @@ import {
   datePart,
   formatRange,
   isLocalDateTime,
+  parseDuration,
   textLimitError,
   localMinutesBetween,
 } from "../src/lib/format";
-import { eventRange, spanMinutes } from "../src/lib/schedule-model";
+import { eventRange, parseReach, spanMinutes } from "../src/lib/schedule-model";
 
 const span = (start: string, end: string) => ({ start, end });
 
@@ -63,4 +64,36 @@ it("names the field that is over the server text limit", () => {
   expect(textLimitError("x".repeat(200), "y".repeat(2000))).toBeNull();
   expect(textLimitError("x".repeat(201))).toMatch(/name to 200/);
   expect(textLimitError("ok", "y".repeat(2001))).toMatch(/notes to 2000/);
+});
+
+it.each([
+  ["lunch 1h 12:30", 60, "1h"],
+  ["lunch 1.5h 12:30", 90, "1.5h"],
+  ["deep work 2h 14:00", 120, "2h"],
+  ["lunch 1h 9:30", 60, "1h"],
+  ["lunch 1h 30m 12:30", 90, "1h 30m"],
+  ["lunch 1h 5m", 65, "1h 5m"],
+  ["lunch 1h5", 65, "1h5"],
+  ["lunch 1 hour 5 minutes", 65, "1 hour 5 minutes"],
+  ["lunch 2 hours 5 mins", 125, "2 hours 5 mins"],
+  ["focus 2h 1.5h", 120, "2h"],
+  ["lunch 1h 60m", 120, "1h 60m"],
+  ["lunch 1h 90m", 150, "1h 90m"],
+  ["lunch 2h 75 min", 195, "2h 75 min"],
+  ["lunch 1 hour 60 minutes", 120, "1 hour 60 minutes"],
+])("does not swallow a following 24h clock's hour for %s", (input, minutes, match) => {
+  // The matched substring must not include the clock's hour digits, otherwise
+  // `parseCapture` would delete them from the title (`12:30` -> `:30`).
+  expect(parseDuration(` ${input} `)).toEqual({ minutes, match });
+});
+
+it("reads a minutes part of 60 or more only with an explicit unit", () => {
+  // A bare "1h60" has no unit, so the strict [0-5]?\d form does not read it.
+  expect(parseDuration(" lunch 1h60 ")).toBeNull();
+});
+
+it("reads a form scope, and falls back to this block for an unknown value", () => {
+  expect(parseReach("future")).toBe("future");
+  expect(parseReach("all")).toBe("all");
+  for (const value of ["this", undefined, "", "everything"]) expect(parseReach(value)).toBe("this");
 });

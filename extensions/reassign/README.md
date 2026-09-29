@@ -41,7 +41,8 @@ you already use: glance at your dial day, capture blocks, and check them off.
 - **Search Blocks** — search directly from Raycast, with an optional query argument.
   This is also available inside Agenda with `⌘F`.
 - **Now** — the current block in the menu bar, with the time remaining, check-off
-  and Join actions, and a heads-up notification before each block starts.
+  and Join actions. When you turn it on in preferences, a heads-up notification
+  also comes before each block starts.
 
 ## Getting started
 

@@ -10,6 +10,8 @@ const mock = vi.hoisted(() => ({
   capture: vi.fn(),
   create: vi.fn(),
   plan: vi.fn(),
+  confirm: vi.fn(),
+  calendar: {} as Record<string, unknown>,
   root: vi.fn(),
   push: vi.fn(),
 }));
@@ -47,9 +49,10 @@ vi.mock("@raycast/api", () => ({
     }),
   }),
   Icon: {},
+  List: Object.assign("List", { Item: "ListItem" }),
   popToRoot: mock.root,
   useNavigation: () => ({ push: mock.push }),
-  showToast: async () => ({}),
+  showToast: async () => ({ hide: async () => undefined }),
   Toast: { Style: {} },
 }));
 vi.mock("@raycast/utils", () => ({
@@ -63,13 +66,14 @@ vi.mock("../src/lib/api", () => ({
   writeEvents: (ops: unknown[]) => mock.create(ops[0]),
   backlogCapture: mock.capture,
   planSchedule: mock.plan,
+  confirmSchedule: mock.confirm,
 }));
 vi.mock("../src/components/ai-fill-form", () => ({ AiFillForm: "AiFillForm" }));
 vi.mock("../src/components/states", () => ({ refusalView: vi.fn() }));
 vi.mock("../src/components/calendar-fields", () => ({
   useCalendars: () => ({ writable: [] }),
-  calendarCreateFields: () => ({}),
-  hasCalendarChange: () => false,
+  calendarCreateFields: () => mock.calendar,
+  hasCalendarChange: (fields: Record<string, unknown>) => Object.keys(fields).length > 0,
   CalendarFields: "CalendarFields",
   CALENDAR_DEFAULT: "",
 }));
@@ -118,7 +122,8 @@ beforeEach(() => {
   mock.slots = [];
   mock.cursor = 0;
   mock.fullDays = new WeakSet();
-  for (const fn of [mock.capture, mock.create, mock.root, mock.plan, mock.push]) fn.mockReset();
+  mock.calendar = {};
+  for (const fn of [mock.capture, mock.create, mock.root, mock.plan, mock.confirm, mock.push]) fn.mockReset();
   mock.capture.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
   mock.create.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
 });
@@ -413,4 +418,96 @@ it("refuses a name over the server limit before it sends anything", async () => 
     .find((n) => n.props.title === "Save to Inbox")!
     .props.onSubmit({ ...values, name: "x".repeat(201) });
   expect(mock.capture).not.toHaveBeenCalled();
+});
+
+it("routes a recurring capture to the web and sends no write", () => {
+  const tree = render("gym every monday 7am");
+  expect(tree.some((n) => n.type === "SubmitForm")).toBe(false);
+  expect(tree.find((n) => n.type === "Description")?.props.title).toBe("Repeating blocks");
+  expect(mock.create).not.toHaveBeenCalled();
+  expect(mock.capture).not.toHaveBeenCalled();
+  expect(mock.plan).not.toHaveBeenCalled();
+});
+
+// ProposalsList: the pushed slot picker for a flexible block.
+const NOON = new Date(2026, 8, 22, 12);
+function proposals(token: string, expiresAt: Date) {
+  const result = {
+    commitToken: token,
+    expiresAt: expiresAt.toISOString(),
+    options: [{ start: "2026-09-22T14:00", end: "2026-09-22T15:30" }],
+  };
+  return { ok: true, data: { results: [{ index: 0, status: "ok", result }] } };
+}
+const booked = {
+  ok: true,
+  data: { undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "ev1" } } }] },
+};
+
+/** Submit a duration-only block and give the slot action of the pushed list. */
+async function openProposals(expiresAt: Date) {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOON);
+  mock.plan.mockResolvedValueOnce(proposals("tok-1", expiresAt));
+  await render()
+    .find((n) => n.props.title === "Schedule Block")!
+    .props.onSubmit({ ...values, duration: "90m" });
+  const list = mock.push.mock.calls[0][0] as ReactElement<Record<string, unknown>>;
+  // The list keeps its own hook slots, apart from the form.
+  mock.slots = [];
+  return () => {
+    mock.cursor = 0;
+    const tree = nodes((list.type as (props: unknown) => unknown)(list.props));
+    const action = tree.find((n) => n.props.title === "Use This Slot")!;
+    return (action.props as unknown as { onAction: () => Promise<void> }).onAction;
+  };
+}
+
+it("re-plans instead of sending an expired commit token", async () => {
+  const slot = await openProposals(new Date(NOON.getTime() - 60_000));
+  mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
+  await slot()();
+  expect(mock.confirm).not.toHaveBeenCalled();
+  expect(mock.plan).toHaveBeenCalledTimes(2);
+  const [first, second] = mock.plan.mock.calls.map((call) => call[0][0]);
+  expect(second.requestId).not.toBe(first.requestId);
+  expect(second.autoCommitBest).toBe(false);
+
+  // The fresh proposals replace the stale ones, so the next pick sends the new token.
+  mock.confirm.mockResolvedValueOnce(booked);
+  await slot()();
+  expect(mock.confirm).toHaveBeenCalledWith([{ token: "tok-2", choice: 0 }]);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("re-plans when the server refuses the token with not_found", async () => {
+  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
+  mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "gone" });
+  mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
+  await slot()();
+  expect(mock.confirm).toHaveBeenCalledWith([{ token: "tok-1", choice: 0 }]);
+  expect(mock.plan).toHaveBeenCalledTimes(2);
+  expect(mock.root).not.toHaveBeenCalled();
+});
+
+it("sends one commit for a double tap on a slot", async () => {
+  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
+  let answer: (value: unknown) => void = () => undefined;
+  mock.confirm.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+  const pick = slot();
+  const taps = Promise.all([pick(), pick()]);
+  await vi.waitFor(() => expect(mock.confirm).toHaveBeenCalledTimes(1));
+  answer(booked);
+  await taps;
+  expect(mock.confirm).toHaveBeenCalledTimes(1);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("a committed slot applies the chosen calendar, then closes the form", async () => {
+  mock.calendar = { calendarId: "work" };
+  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
+  mock.confirm.mockResolvedValueOnce(booked);
+  await slot()();
+  expect(mock.create).toHaveBeenCalledWith({ op: "update", id: "ev1", calendarId: "work" });
+  expect(mock.root).toHaveBeenCalledTimes(1);
 });

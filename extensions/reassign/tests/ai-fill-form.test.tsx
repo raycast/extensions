@@ -6,6 +6,8 @@ const mock = vi.hoisted(() => ({
   fill: vi.fn(),
   pop: vi.fn(),
   toast: { hide: vi.fn() },
+  showToast: vi.fn(),
+  effects: [] as (() => void | (() => void))[],
 }));
 vi.mock("react", () => ({
   useState: (initial: unknown) => {
@@ -23,6 +25,9 @@ vi.mock("react", () => ({
     if (!(slot in mock.slots)) mock.slots[slot] = { current: initial };
     return mock.slots[slot];
   },
+  useEffect: (fn: () => void | (() => void)) => {
+    mock.effects.push(fn);
+  },
 }));
 vi.mock("@raycast/api", () => ({
   Action: "Action",
@@ -30,7 +35,7 @@ vi.mock("@raycast/api", () => ({
   Form: Object.assign(() => null, { TextArea: "TextArea", Description: "Description" }),
   Icon: {},
   Toast: { Style: {} },
-  showToast: async () => mock.toast,
+  showToast: mock.showToast,
   useNavigation: () => ({ pop: mock.pop }),
 }));
 vi.mock("../src/lib/api", () => ({ previewBlock: mock.preview }));
@@ -58,6 +63,10 @@ beforeEach(() => {
   mock.fill.mockReset();
   mock.pop.mockReset();
   mock.preview.mockResolvedValue(response);
+  mock.toast = { hide: vi.fn() };
+  mock.showToast.mockReset();
+  mock.showToast.mockImplementation(async () => mock.toast);
+  mock.effects = [];
 });
 it("requires accepting the preview before filling the parent form", async () => {
   await render().props.actions.props.children[1].props.onAction();
@@ -105,4 +114,34 @@ it("refuses a suggested calendar that is not writable", async () => {
   await render().props.actions.props.children[1].props.onAction();
   expect(render().props.actions.props.children[0]).toBeNull();
   expect(mock.fill).not.toHaveBeenCalled();
+});
+
+it("tells the user when a press lands while an old request is still out", async () => {
+  let resolve!: (response: unknown) => void;
+  mock.preview.mockReturnValue(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  const pending = render().props.actions.props.children[1].props.onAction();
+  render().props.children[0].props.onChange("a different idea");
+  await render().props.actions.props.children[1].props.onAction();
+  expect(mock.preview).toHaveBeenCalledTimes(1);
+  expect(mock.showToast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "Already drafting a suggestion" }));
+  resolve(response);
+  await pending;
+});
+it("hides the toast of a request that resolves after the form closes", async () => {
+  let resolve!: (response: unknown) => void;
+  mock.preview.mockReturnValue(
+    new Promise((r) => {
+      resolve = r;
+    }),
+  );
+  const pending = render().props.actions.props.children[1].props.onAction();
+  const cleanups = mock.effects.map((fn) => fn()).filter((c): c is () => void => typeof c === "function");
+  cleanups.forEach((c) => c());
+  resolve(response);
+  await pending;
+  expect(mock.toast.hide).toHaveBeenCalled();
 });

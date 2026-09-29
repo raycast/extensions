@@ -42,7 +42,7 @@
     {
       "name": "search",
       "title": "Search Blocks",
-      "description": "Find blocks by name or notes across your schedule.",
+      "description": "Find blocks by name across your schedule.",
       "mode": "view",
       "arguments": [
         {

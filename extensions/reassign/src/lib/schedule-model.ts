@@ -4,6 +4,7 @@
 // account timezone. The end is after the start. Durations are computed here.
 
 import { clockPart, datePart, localMinutesBetween } from "./format";
+import { REFLECT_STATUSES, type EventKind, type ReflectStatus } from "./wire";
 
 export interface Area {
   id: string;
@@ -21,7 +22,7 @@ export interface ActivityType {
 export type Now = string;
 
 export interface ReflectState {
-  status?: "kept" | "skipped" | "changed" | "added";
+  status?: ReflectStatus;
 }
 
 export interface ScheduleEvent {
@@ -30,7 +31,7 @@ export interface ScheduleEvent {
   end: string; // local datetime
   name: string;
   notes?: string;
-  kind?: "blocking" | "non_blocking" | "reference";
+  kind?: EventKind;
   source?: string;
   recurrence?: string;
   readOnly?: boolean;
@@ -64,7 +65,7 @@ export interface BacklogItem {
   notes?: string;
   durationMinutes?: number;
   plannedDate?: string;
-  kind?: "blocking" | "non_blocking" | "reference"; // the kind the block takes when scheduled
+  kind?: EventKind; // the kind the block takes when scheduled
   areaId?: string | null;
   activityTypeId?: string | null;
   [key: string]: unknown;
@@ -141,12 +142,12 @@ export function nowWallClock(now: Now): { date: string; minutes: number; local: 
   return { date: datePart(now), minutes: minutesFromClock(clockPart(now)) ?? 0, local: now };
 }
 
-export type ReflectStatus = "kept" | "skipped" | "changed" | "added";
+export type { ReflectStatus };
 
 /** The terminal reflect state of a block, or null when it is still open. */
 export function reflectState(event: ScheduleEvent): ReflectStatus | null {
   const state = event.reflect?.status;
-  return state === "kept" || state === "skipped" || state === "changed" || state === "added" ? state : null;
+  return state && REFLECT_STATUSES.includes(state) ? state : null;
 }
 
 /** True when the block carries a terminal reflect state. */
@@ -212,6 +213,11 @@ export function splitOccurrenceId(id: string): { seriesId: string; date: string 
 /** Which blocks of a series an edit covers. */
 export type SeriesReach = "this" | "future" | "all";
 
+/** A form's scope value. An unknown value is "this", never a whole-series write. */
+export function parseReach(value: unknown): SeriesReach {
+  return value === "future" || value === "all" ? value : "this";
+}
+
 /**
  * The write target: the `@DATE` occurrence id for this block, plus
  * `scope: "future"` for later blocks, or the bare series id for all of them.
@@ -272,8 +278,9 @@ export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): To
     done: [],
   };
 
-  // On a non-today view there is no "now"; everything is upcoming or reflected.
-  // Decorate each future event with its start once, then sort on that.
+  // A non-today view has no live "now": a future day's blocks are upcoming or
+  // reflected, and a past day's already-ended (still check-off-able) blocks go to
+  // Done. Decorate each future event with its start once, then sort on that.
   const future: { event: ScheduleEvent; start: number }[] = [];
   for (const event of events) {
     if (isReflected(event)) {
@@ -281,8 +288,16 @@ export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): To
       continue;
     }
     const range = eventRange(event, day.date);
-    if (!range || !isToday) {
-      future.push({ event, start: range?.start ?? 0 });
+    if (!range) {
+      future.push({ event, start: 0 });
+      continue;
+    }
+    if (!isToday) {
+      if (day.date < clock.date && (localMinutesBetween(schedule.now, event.end) ?? Infinity) <= 0) {
+        sections.done.push(event); // past but unreviewed — still check-off-able
+      } else {
+        future.push({ event, start: range.start });
+      }
       continue;
     }
     if (range.start <= nowMinutes && nowMinutes < range.end) {

@@ -1,5 +1,6 @@
 import * as chrono from "chrono-node";
-import { addMinutesHM, humanDuration, parseDuration, relativeDayLabel, todayISO } from "./format";
+import { wallMinutes } from "./block-timing";
+import { addMinutesHM, clockHM, humanDuration, parseDuration, relativeDayLabel, todayISO } from "./format";
 
 // Client-side capture parsing with chrono-node. It never commits on its own —
 // the command always shows this preview first. Recurrence is out of scope; we
@@ -41,41 +42,43 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
   let remaining = ` ${input} `;
 
   const duration = parseDuration(remaining);
-  if (duration) remaining = remaining.replace(duration.match, " ");
+  // Chrono reads any bare duration ("3h") as an offset from now, so strip each
+  // token that parseDuration reads. The first one still sets the minutes.
+  for (let d = duration; d; d = parseDuration(remaining)) remaining = remaining.replace(d.match, " ");
 
   let date: string | undefined;
   let dateExplicit = false;
   let start: string | undefined;
   let end: string | undefined;
   let rangeMinutes: number | undefined;
+  let window: Window | undefined;
   const normalized = normalizeTimeWords(remaining);
   const results = chrono.parse(normalized.text, ref, { forwardDate: true });
   if (results.length > 0) {
     const result = results[0];
     const from = normalized.originalOffset(result.index);
     const to = normalized.originalOffset(result.index + result.text.length);
-    remaining = remaining.slice(0, from) + " " + remaining.slice(to);
-    date = todayISO(result.start.date());
     // A bare time ("3pm") sets a date, but the text did not name a day. Mark the
     // date explicit only when chrono is certain of a day component.
     dateExplicit =
       result.start.isCertain("day") || result.start.isCertain("weekday") || result.start.isCertain("month");
-    if (result.start.isCertain("hour")) start = toHM(result.start.date());
+    // Chrono reads "evening" as an implied hour. Keep the word as a window, and
+    // keep chrono's date only when the text named a day or today's window ended.
+    if (!result.start.isCertain("hour")) window = extractWindow(result.text);
+    const prefix = remaining.slice(0, from);
+    // Strip only a full "in the"; a bare "in" can end the name ("check in tonight").
+    remaining = (window ? prefix.replace(/\bin\s+the\s*$/i, "") : prefix) + " " + remaining.slice(to);
+    if (!window || dateExplicit || clockHM(ref) >= window.latest) date = todayISO(result.start.date());
+    if (result.start.isCertain("hour")) start = clockHM(result.start.date());
     if (result.end?.isCertain("hour")) {
-      end = toHM(result.end.date());
-      const from = result.start.date();
-      const to = result.end.date();
+      end = clockHM(result.end.date());
       // Calendar minutes match the API's wall-clock ranges, including DST days.
-      rangeMinutes =
-        (Date.UTC(to.getFullYear(), to.getMonth(), to.getDate(), to.getHours(), to.getMinutes()) -
-          Date.UTC(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(), from.getMinutes())) /
-        60000;
+      rangeMinutes = wallMinutes(result.start.date(), result.end.date());
       if (rangeMinutes <= 0) rangeMinutes += 24 * 60;
     }
   }
 
-  let window: Window | undefined;
-  if (!start) {
+  if (!start && !window) {
     window = extractWindow(remaining);
     if (window) remaining = remaining.replace(window.match, " ");
   }
@@ -84,37 +87,42 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
 
   // Derive the commit shape. `dateExplicit` records whether the text named a
   // date, so a caller can tell "no time, but a day" from "no time at all".
+  const today = todayISO(ref);
   if (start) {
     if (!end) end = addMinutesHM(start, duration?.minutes ?? 30);
-    return withPreview({
-      kind: "exact",
-      name,
-      date: date ?? todayISO(ref),
-      dateExplicit,
-      start,
-      end,
-      durationMinutes: rangeMinutes ?? duration?.minutes ?? 30,
-      hasRecurrence,
-    });
+    return withPreview(
+      {
+        kind: "exact",
+        name,
+        date: date ?? today,
+        dateExplicit,
+        start,
+        end,
+        durationMinutes: rangeMinutes ?? duration?.minutes ?? 30,
+        hasRecurrence,
+      },
+      today,
+    );
   }
   if (duration) {
     return withPreview(
       {
         kind: "flexible",
         name,
-        date: date ?? todayISO(ref),
+        date: date ?? today,
         dateExplicit,
         durationMinutes: duration.minutes,
         earliest: window?.earliest,
         latest: window?.latest,
         hasRecurrence,
       },
+      today,
       window?.label,
     );
   }
   // Keep a named date on an otherwise timeless capture ("lunch tomorrow"), so
   // the caller can offer to pick a time instead of dropping the day.
-  return withPreview({ kind: "unschedulable", name, date, dateExplicit, hasRecurrence });
+  return withPreview({ kind: "unschedulable", name, date, dateExplicit, hasRecurrence }, today);
 }
 
 /** Give chrono clock tokens while retaining offsets into the original title. */
@@ -137,9 +145,8 @@ function normalizeTimeWords(input: string): { text: string; originalOffset: (off
 }
 
 /** Attach the human preview string to a parsed capture. */
-function withPreview(base: Omit<ParsedCapture, "preview">, windowLabel?: string): ParsedCapture {
+function withPreview(base: Omit<ParsedCapture, "preview">, todayIso: string, windowLabel?: string): ParsedCapture {
   const displayName = base.name || "(untitled)";
-  const todayIso = todayISO();
   let preview = displayName;
   if (base.kind === "exact" && base.date && base.start) {
     preview = `${displayName} · ${relativeDayLabel(base.date, todayIso)} · ${base.start}–${base.end}`;
@@ -169,8 +176,4 @@ function cleanName(text: string): string {
     .replace(/[.,;:]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function toHM(date: Date): string {
-  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BlockDraft, blockDraft } from "../lib/ai-draft";
 import { previewBlock } from "../lib/api";
 import { failToast } from "../lib/feedback";
@@ -21,9 +21,24 @@ export function AiFillForm(props: {
   const [loading, setLoading] = useState(false);
   const generation = useRef(0);
   const busy = useRef(false);
+  // On close, a late result must hide its toast, not say "Suggestion ready".
+  useEffect(
+    () => () => {
+      generation.current++;
+    },
+    [],
+  );
 
   async function suggest() {
-    if (busy.current) return;
+    if (busy.current) {
+      // The old request still runs. Its result is dropped if the text changed.
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Already drafting a suggestion",
+        message: "Wait for it to finish, then try again.",
+      });
+      return;
+    }
     if (!text.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "Describe a block first" });
       return;

@@ -124,8 +124,13 @@ export function humanDuration(minutes: number): string {
  * Returns the minutes and the matched substring, or null when none is found.
  */
 export function parseDuration(text: string): { minutes: number; match: string } | null {
-  const hm = /(\d+)\s*h(?:ours?|rs?)?\s*(\d{1,2})\s*(?:m(?:in(?:ute)?s?)?)?\b/i.exec(text); // 1h30, 1 hour 30 minutes
-  if (hm) return { minutes: Number(hm[1]) * 60 + Number(hm[2]), match: hm[0] };
+  // 1h30, 1h 5m, 1h 90m, 1 hour 30 minutes. An explicit m unit allows any minutes. The bare form
+  // keeps [0-5]?\d and (?![\d.]|\s*:), so it does not eat a clock's HH (1h 12:30) or a decimal (2h 1.5h).
+  const hm =
+    /(?<![\d.])(\d+)\s*h(?:ours?|rs?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?\b|([0-5]?\d)(?![\d.]|\s*:)\s*(?:m(?:in(?:ute)?s?)?)?\b)/i.exec(
+      text,
+    );
+  if (hm) return { minutes: Number(hm[1]) * 60 + Number(hm[2] ?? hm[3]), match: hm[0] };
   const hours = /(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?\b/i.exec(text); // 2h, 1.5h
   if (hours) return { minutes: Math.round(Number(hours[1]) * 60), match: hours[0] };
   const mins = /(\d+)\s*m(?:in(?:ute)?s?)?\b/i.exec(text); // 45m, 90 min

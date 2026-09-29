@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { SearchEvent, searchEvents } from "../lib/api";
+import { needsSignIn } from "../lib/envelope";
 import { datePart, formatRange, relativeDayLabel, todayISO } from "../lib/format";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
 import { refusalView } from "./states";
@@ -20,9 +21,16 @@ export function SearchView(props: { initialQuery?: string }) {
     keepPreviousData: true,
   });
 
-  if (query.length > 0 && data && !data.ok) return refusalView(data, revalidate);
+  const failure = query.length > 0 && data && !data.ok ? data : undefined;
+  // Only a sign-in or Pro refusal leaves the search. Other errors keep the query editable.
+  if (failure && (needsSignIn(failure.code) || failure.code === "permission")) return refusalView(failure, revalidate);
 
   const events = query.length === 0 || !data?.ok ? [] : data.data.events;
+  // The first in-flight fetch (or any refetch) for a non-empty query has not
+  // produced a result yet: keepPreviousData leaves `data` undefined on the very
+  // first fetch, and `isLoading` is true on every fetch. Guard the empty-state
+  // copy on it so we never assert "No matches" before the server has answered.
+  const searching = query.length > 0 && (data === undefined || isLoading);
   const todayIso = todayISO();
   const groups = groupByDate(events);
 
@@ -62,15 +70,30 @@ export function SearchView(props: { initialQuery?: string }) {
           ))}
         </List.Section>
       ))}
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={query.length === 0 ? "Search your blocks" : "No matches"}
-        description={
-          query.length === 0
-            ? "Type a word to find a block by name, from the last 7 days to the next 30."
-            : `Nothing matches “${query}”.`
-        }
-      />
+      {failure && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not search"
+          description={failure.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={query.length === 0 ? "Search your blocks" : searching ? "Searching…" : "No matches"}
+          description={
+            query.length === 0
+              ? "Type a word to find a block by name, from the last 7 days to the next 30."
+              : searching
+                ? `Finding blocks that match “${query}”.`
+                : `Nothing matches “${query}”.`
+          }
+        />
+      )}
     </List>
   );
 }

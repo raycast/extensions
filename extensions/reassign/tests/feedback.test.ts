@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
 const mock = vi.hoisted(() => ({
-  undo: vi.fn<(tokens: string[]) => Promise<{ ok: boolean; data?: unknown }>>(),
+  undo: vi.fn<(tokens: string[]) => Promise<ApiResult<unknown>>>(),
 }));
 
 vi.mock("@raycast/api", () => ({
@@ -13,7 +13,8 @@ vi.mock("../src/lib/api", () => ({
 }));
 
 import type { Toast } from "@raycast/api";
-import { applyUndoToast } from "../src/lib/feedback";
+import type { ApiResult } from "../src/lib/api";
+import { applyUndoToast, describeError } from "../src/lib/feedback";
 
 type ToastState = {
   style?: string;
@@ -93,7 +94,7 @@ it("finalises the toast after a retry that follows a failed undo", async () => {
 });
 
 it("ignores queued duplicate actions during undo and after success", async () => {
-  let finish!: (result: { ok: boolean }) => void;
+  let finish!: (result: ApiResult<unknown>) => void;
   mock.undo.mockImplementation(() => new Promise((resolve) => (finish = resolve)));
   const toast: ToastState = {};
   applyUndoToast(toast as unknown as Toast, "tok-1");
@@ -105,7 +106,7 @@ it("ignores queued duplicate actions during undo and after success", async () =>
   await action.onAction(toast);
   expect(mock.undo).toHaveBeenCalledTimes(1);
 
-  finish({ ok: true });
+  finish({ ok: true, data: {} });
   await pending;
   await action.onAction(toast);
   expect(mock.undo).toHaveBeenCalledTimes(1);
@@ -129,4 +130,13 @@ it("restores the action after a rejected request and allows a successful retry",
   expect(mock.undo).toHaveBeenCalledTimes(2);
   expect(toast.style).toBe("success");
   expect(toast.primaryAction).toBeUndefined();
+});
+
+// The feedback cap is 30 per hour, so "wait a moment" is wrong there. Show the
+// server reason, and keep the generic hint only for a bare 429.
+it("rate_limited shows the server message and falls back for a bare 429", () => {
+  const capped = describeError({ ok: false, code: "rate_limited", message: "Try again in an hour.", status: 429 });
+  expect(capped).toEqual({ title: "Too many requests", message: "Try again in an hour." });
+  const bare = describeError({ ok: false, code: "rate_limited", message: "Request failed (429).", status: 429 });
+  expect(bare).toEqual({ title: "Too many requests", message: "Wait a moment, then try again." });
 });

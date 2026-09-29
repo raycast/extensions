@@ -1,16 +1,33 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-vi.mock("../src/lib/oauth", () => ({
-  getAccessToken: vi.fn(async () => "token"),
-  NotAuthorizedError: class extends Error {},
-  SignedOutError: class extends Error {},
-}));
-import { getSchedule, getScheduleWithBacklog, rebaseOnSeries, sendFeedback, writeEvents } from "../src/lib/api";
+// session-lock reads `environment` only in a call; the test uses its error class.
+vi.mock("@raycast/api", () => ({ environment: {} }));
+vi.mock("../src/lib/oauth", () => {
+  // Match the real hierarchy: SignedOutError is a NotAuthorizedError.
+  class NotAuthorizedError extends Error {}
+  class SignedOutError extends NotAuthorizedError {}
+  return { getAccessToken: vi.fn(async () => "token"), NotAuthorizedError, SignedOutError };
+});
+import {
+  getSchedule,
+  getScheduleWithBacklog,
+  planSchedule,
+  rebaseOnSeries,
+  sendFeedback,
+  writeEvents,
+} from "../src/lib/api";
+import { getAccessToken, NotAuthorizedError, SignedOutError } from "../src/lib/oauth";
+import { SessionLockTimeoutError } from "../src/lib/session-lock";
 const fetchMock = vi.fn();
 beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  vi.mocked(getAccessToken).mockReset();
+  vi.mocked(getAccessToken).mockImplementation(async () => "token");
+});
 it("loads all Inbox pages, retaining date and includeBacklog", async () => {
   fetchMock
     .mockResolvedValueOnce(Response.json({ backlogCount: 51, backlog: [{ id: "first" }], nextBacklogOffset: 50 }))
@@ -105,7 +122,7 @@ it("moves an occurrence change onto the series anchor by the same wall minutes",
   const occurrence = { date: "2026-09-21", start: "2026-09-21T09:00", end: "2026-09-21T10:00" };
   expect(await rebaseOnSeries("series", occurrence, { start: "2026-09-21T11:30", end: "2026-09-21T10:15" })).toEqual({
     ok: true,
-    data: { start: "2026-09-01T11:30", end: "2026-09-01T10:15" },
+    data: { start: "2026-09-01T11:30", end: "2026-09-01T10:15", anchorStart: "2026-09-01T09:00" },
   });
   expect(Object.fromEntries(new URL(fetchMock.mock.calls[0][0]).searchParams)).toEqual({
     from: "2026-09-21",
@@ -127,21 +144,154 @@ it("gives the series the chosen clock and length, also from a changed occurrence
   const edited = { date: "2026-09-21", start: "2026-09-22T14:00", end: "2026-09-22T15:00" };
   expect(await rebaseOnSeries("series", edited, { start: "2026-09-23T14:30" })).toEqual({
     ok: true,
-    data: { start: "2026-09-03T14:30" },
+    data: { start: "2026-09-03T14:30", anchorStart: "2026-09-01T09:00" },
   });
   // A new end keeps the series start and takes the new length (90 minutes).
   expect(await rebaseOnSeries("series", edited, { end: "2026-09-22T15:30" })).toEqual({
     ok: true,
-    data: { end: "2026-09-01T10:30" },
+    data: { end: "2026-09-01T10:30", anchorStart: "2026-09-01T09:00" },
   });
 });
+const busy = () => Response.json({ error: { code: "internal", message: "Busy" } }, { status: 503 });
+/** Settle a request that waits on the 300 ms retry back-off. */
+async function withFakeBackoff<T>(call: () => Promise<T>): Promise<T> {
+  vi.useFakeTimers();
+  const pending = call();
+  await vi.advanceTimersByTimeAsync(300);
+  return pending;
+}
 it("retries a 503 once for a read, but never for a plain write", async () => {
-  const busy = () => Response.json({ error: { code: "internal", message: "Busy" } }, { status: 503 });
   fetchMock.mockImplementation(async () => busy());
   expect(await writeEvents([{ op: "shift", id: "id", byMinutes: 15 }])).toMatchObject({ ok: false, code: "internal" });
   expect(fetchMock).toHaveBeenCalledTimes(1);
   fetchMock.mockReset();
   fetchMock.mockResolvedValueOnce(busy()).mockResolvedValueOnce(Response.json({ days: [] }));
-  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: true });
+  expect(await withFakeBackoff(() => getSchedule("2026-09-21"))).toMatchObject({ ok: true });
   expect(fetchMock).toHaveBeenCalledTimes(2);
+});
+it("reports a session-lock timeout as a local failure, not as a network one", async () => {
+  vi.mocked(getAccessToken).mockRejectedValueOnce(new SessionLockTimeoutError());
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "internal" });
+  vi.mocked(getAccessToken).mockResolvedValueOnce("old").mockRejectedValueOnce(new SessionLockTimeoutError());
+  fetchMock.mockResolvedValue(Response.json({ error: { code: "unauthorized" } }, { status: 401 }));
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "internal" });
+});
+it("maps a failed first token read to signed_out or unauthenticated", async () => {
+  vi.mocked(getAccessToken).mockRejectedValueOnce(new SignedOutError("Signed out"));
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "signed_out" });
+  vi.mocked(getAccessToken).mockRejectedValueOnce(new NotAuthorizedError("Session expired"));
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "unauthenticated" });
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+it("refreshes the token once on a 401, then retries once", async () => {
+  vi.mocked(getAccessToken).mockResolvedValueOnce("old").mockResolvedValueOnce("new");
+  fetchMock
+    .mockResolvedValueOnce(Response.json({ error: { code: "unauthorized" } }, { status: 401 }))
+    .mockResolvedValueOnce(Response.json({ days: [] }));
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: true });
+  expect(getAccessToken).toHaveBeenLastCalledWith({ force: true });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(fetchMock.mock.calls[1][1].headers.authorization).toBe("Bearer new");
+});
+it("returns a second 401 and does not loop", async () => {
+  fetchMock.mockImplementation(async () => Response.json({ error: { code: "unauthorized" } }, { status: 401 }));
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "unauthorized" });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(getAccessToken).toHaveBeenCalledTimes(2);
+});
+it("maps a refresh that a sign-out cancelled to signed_out", async () => {
+  vi.mocked(getAccessToken)
+    .mockResolvedValueOnce("old")
+    .mockRejectedValueOnce(new SignedOutError("Signed out during refresh"));
+  fetchMock.mockResolvedValue(Response.json({ error: { code: "unauthorized" } }, { status: 401 }));
+  expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "signed_out" });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+it("retries a 503 plan once when every request has a requestId, with the same id", async () => {
+  fetchMock.mockResolvedValueOnce(busy()).mockResolvedValueOnce(Response.json({ results: [] }));
+  const plan = { name: "Focus", durationMinutes: 60, requestId: "a" };
+  expect(await withFakeBackoff(() => planSchedule([plan]))).toMatchObject({ ok: true });
+  const ids = fetchMock.mock.calls.map((c) => JSON.parse(c[1].body).requests[0].requestId);
+  expect(ids).toEqual(["a", "a"]);
+});
+it("does not retry a 503 plan when one request has no requestId", async () => {
+  fetchMock.mockImplementation(async () => busy());
+  const plans = [
+    { name: "Focus", durationMinutes: 60, requestId: "a" },
+    { name: "Gym", durationMinutes: 45 },
+  ];
+  expect(await planSchedule(plans)).toMatchObject({ ok: false, code: "internal" });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+it("retries a 503 once for a body with a submissionId, with the same id", async () => {
+  fetchMock.mockResolvedValueOnce(busy()).mockResolvedValueOnce(new Response(null, { status: 204 }));
+  expect(await withFakeBackoff(() => sendFeedback("Nice", "idea"))).toEqual({ ok: true, data: undefined });
+  const ids = fetchMock.mock.calls.map((c) => JSON.parse(c[1].body).submissionId);
+  expect(ids).toHaveLength(2);
+  expect(ids[0]).toBe(ids[1]);
+});
+it("does not show a non-JSON error page as the message", async () => {
+  const page = "<!DOCTYPE html><html><body>FUNCTION_INVOCATION_TIMEOUT</body></html>";
+  fetchMock.mockResolvedValue(new Response(page, { status: 504, headers: { "content-type": "text/html" } }));
+  expect(await getSchedule("2026-09-21")).toEqual({
+    ok: false,
+    code: "internal",
+    message: "Request failed (504).",
+    status: 504,
+  });
+});
+it("gives a code-less 403 a clear message", async () => {
+  fetchMock.mockResolvedValue(new Response("Forbidden", { status: 403 }));
+  expect(await getSchedule("2026-09-21")).toMatchObject({
+    ok: false,
+    message: "Reassign blocked the request (403). Try again later.",
+    status: 403,
+  });
+});
+it.each([
+  ["an empty body", () => new Response(null, { status: 200 })],
+  ["an HTML page", () => new Response("<html>Sign in to Wi-Fi</html>", { status: 200 })],
+])("reports a 2xx with %s as a failure, not as data", async (_label, reply) => {
+  fetchMock.mockImplementation(async () => reply());
+  expect(await writeEvents([{ op: "delete", id: "id" }])).toMatchObject({ ok: false, code: "internal", status: 200 });
+});
+it("aborts a stalled request, and warns that a write can have landed", async () => {
+  const controller = new AbortController();
+  const timeout = vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+  fetchMock.mockImplementation(
+    (_url: string, init: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        // Like fetch: reject at once for a signal that is already aborted.
+        if (init.signal?.aborted) reject(init.signal.reason);
+        init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+      }),
+  );
+  const read = getSchedule("2026-09-21");
+  const write = writeEvents([{ op: "delete", id: "id" }]);
+  controller.abort(new DOMException("The operation timed out.", "TimeoutError"));
+  expect(await read).toEqual({ ok: false, code: "network", message: "Reassign did not answer in time. Try again." });
+  expect(await write).toEqual({
+    ok: false,
+    code: "network",
+    message: "Reassign did not answer in time. The change can have been saved. Check it before you try again.",
+  });
+  expect(timeout).toHaveBeenCalledWith(65_000);
+  // A timed-out write is never sent again.
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  timeout.mockRestore();
+});
+
+// The timeout also covers the body read. A write that times out there has landed.
+it("reports a body-read timeout on a POST as a possible save", async () => {
+  const body = new ReadableStream({
+    start(controller) {
+      controller.error(Object.assign(new Error("The operation timed out."), { name: "TimeoutError" }));
+    },
+  });
+  fetchMock.mockResolvedValue(new Response(body, { status: 200 }));
+  expect(await writeEvents([{ op: "delete", id: "e1" }])).toEqual({
+    ok: false,
+    code: "network",
+    message: "Reassign did not answer in time. The change can have been saved. Check it before you try again.",
+  });
 });

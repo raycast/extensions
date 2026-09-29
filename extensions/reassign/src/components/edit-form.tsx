@@ -2,15 +2,18 @@ import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { rebaseOnSeries, type UpdateOp } from "../lib/api";
 import { showApiError } from "../lib/feedback";
-import type { ActivityType, Area, ScheduleEvent, SeriesReach } from "../lib/schedule-model";
+import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
 import {
   homeCalendarId,
   occurrenceTarget,
+  parseReach,
   resolveActivity,
   resolveArea,
   splitOccurrenceId,
 } from "../lib/schedule-model";
 import { localMinutesBetween, localToDate, textLimitError, toLocalDateTime } from "../lib/format";
+import { MAX_SPAN_MINUTES, MIN_SPAN_MINUTES } from "../lib/wire";
+import { ScopeDropdown } from "./scope-dropdown";
 import { CALENDAR_NONE, CalendarFields, CalendarFormValues, calendarEditFields, useCalendars } from "./calendar-fields";
 
 interface EditFormValues extends CalendarFormValues {
@@ -76,7 +79,7 @@ export function EditForm(props: {
     if (end && end !== event.end) {
       // The server stores a span of 5 minutes to 168 hours; check it before the round-trip.
       const minutes = localMinutesBetween(event.start, end) ?? 0;
-      if (minutes < 5 || minutes > 168 * 60) {
+      if (minutes < MIN_SPAN_MINUTES || minutes > MAX_SPAN_MINUTES) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Check the end time",
@@ -108,7 +111,7 @@ export function EditForm(props: {
       pop();
       return;
     }
-    const reach = recurring ? ((values.scope as SeriesReach) ?? "this") : "this";
+    const reach = recurring ? parseReach(values.scope) : "this";
     if (recurring) {
       // The server applies a calendar change to the whole series only.
       if ((patch.calendarId !== undefined || patch.mirrorCalendarIds) && reach !== "all") {
@@ -205,13 +208,7 @@ export function EditForm(props: {
           )}
         </>
       )}
-      {recurring && (
-        <Form.Dropdown id="scope" title="Applies to" defaultValue="this">
-          <Form.Dropdown.Item value="this" title="This block only" />
-          <Form.Dropdown.Item value="future" title="This and all later blocks" />
-          <Form.Dropdown.Item value="all" title="Every block in the series" />
-        </Form.Dropdown>
-      )}
+      {recurring && <ScopeDropdown />}
     </Form>
   );
 }

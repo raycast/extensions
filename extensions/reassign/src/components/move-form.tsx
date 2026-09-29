@@ -2,8 +2,9 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { rebaseOnSeries, type UpdateOp } from "../lib/api";
 import { showApiError } from "../lib/feedback";
 import { localToDate, toLocalDateTime } from "../lib/format";
-import type { ScheduleEvent, SeriesReach } from "../lib/schedule-model";
-import { occurrenceTarget, splitOccurrenceId } from "../lib/schedule-model";
+import type { ScheduleEvent } from "../lib/schedule-model";
+import { occurrenceTarget, parseReach, splitOccurrenceId } from "../lib/schedule-model";
+import { ScopeDropdown } from "./scope-dropdown";
 
 interface MoveFormValues {
   start: Date | null; // new date + time in one field
@@ -28,12 +29,16 @@ export function MoveForm(props: { event: ScheduleEvent; onMove: (op: UpdateOp) =
       return;
     }
     const start = toLocalDateTime(values.start);
-    // Nothing changed — skip the round-trip and return to the list.
-    if (start === event.start) {
+    const reach = recurring ? parseReach(values.scope) : "this";
+    // For "this" / "future" the occurrence's own start is the move reference, so
+    // an unchanged start is a true no-op. For "all" the rebase re-anchors the
+    // series from the occurrence's original id date, so an unchanged start can
+    // still be a real re-anchor when the occurrence was moved on its own (its id
+    // keeps the original date while `event.start` sits on another day or clock).
+    if (start === event.start && reach !== "all") {
       pop();
       return;
     }
-    const reach = recurring ? ((values.scope as SeriesReach) ?? "this") : "this";
     const target = occurrenceTarget(event.id, reach);
     let next = start;
     if (reach === "all" && occurrence) {
@@ -41,6 +46,12 @@ export function MoveForm(props: { event: ScheduleEvent; onMove: (op: UpdateOp) =
       const rebased = await rebaseOnSeries(target.id, { ...event, date: occurrence.date }, { start });
       if (!rebased.ok) return showApiError(rebased);
       next = rebased.data.start ?? start;
+      // The rebased start equals the anchor's current start only when the series
+      // is already on this block's wall time — a true no-op; skip the write.
+      if (next === rebased.data.anchorStart) {
+        pop();
+        return;
+      }
     }
     if (await onMove({ op: "update", ...target, start: next })) pop();
   }
@@ -61,13 +72,7 @@ export function MoveForm(props: { event: ScheduleEvent; onMove: (op: UpdateOp) =
         type={Form.DatePicker.Type.DateTime}
         defaultValue={localToDate(event.start)}
       />
-      {recurring && (
-        <Form.Dropdown id="scope" title="Applies to" defaultValue="this">
-          <Form.Dropdown.Item value="this" title="This block only" />
-          <Form.Dropdown.Item value="future" title="This and all later blocks" />
-          <Form.Dropdown.Item value="all" title="Every block in the series" />
-        </Form.Dropdown>
-      )}
+      {recurring && <ScopeDropdown />}
     </Form>
   );
 }

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { useCachedPromise, useLocalStorage, withAccessToken } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AgendaActions,
   AgendaNavActions,
@@ -14,6 +14,7 @@ import { SearchView } from "./components/search-view";
 import { refusalView } from "./components/states";
 import { reassignProvider } from "./lib/oauth";
 import { ApiError, getSchedule, getScheduleRange } from "./lib/api";
+import { showApiError } from "./lib/feedback";
 import { addDaysISO, relativeDayLabel, todayISO } from "./lib/format";
 import {
   buildRangeAgenda,
@@ -49,10 +50,13 @@ interface KindFilter {
 /** The Agenda command: a single day (default) or the next week, one toggle apart. */
 function Command() {
   // Persist the scope and kind toggles across launches (useState resets on close).
-  const { value: storedScope, setValue: setScope } = useLocalStorage<AgendaScope>("agenda.scope", "day");
+  const scopeStore = useLocalStorage<AgendaScope>("agenda.scope", "day");
+  const { value: storedScope, setValue: setScope } = scopeStore;
   const scope = storedScope ?? "day";
-  const { value: hideNonBlocking, setValue: setHideNonBlocking } = useLocalStorage("agenda.hideNonBlocking", false);
-  const { value: hideReference, setValue: setHideReference } = useLocalStorage("agenda.hideReference", false);
+  const nonBlockingStore = useLocalStorage("agenda.hideNonBlocking", false);
+  const { value: hideNonBlocking, setValue: setHideNonBlocking } = nonBlockingStore;
+  const referenceStore = useLocalStorage("agenda.hideReference", false);
+  const { value: hideReference, setValue: setHideReference } = referenceStore;
   const onToggleScope = () => setScope(scope === "day" ? "week" : "day");
   const hideNB = hideNonBlocking ?? false;
   const hideRef = hideReference ?? false;
@@ -62,6 +66,9 @@ function Command() {
     onToggleNonBlocking: () => setHideNonBlocking(!hideNB),
     onToggleReference: () => setHideReference(!hideRef),
   };
+  // Pick no view until the stored values load. Else a stored Week first mounts
+  // DayView, which sends a fetch that the command then discards.
+  if (scopeStore.isLoading || nonBlockingStore.isLoading || referenceStore.isLoading) return <List isLoading />;
   return scope === "day" ? (
     <DayView scope={scope} onToggleScope={onToggleScope} kind={kind} />
   ) : (
@@ -117,9 +124,24 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
   const [date, setDate] = useState(todayISO());
   const [showingDetail, setShowingDetail] = useState(true);
   const [filter, setFilter] = useState("all");
-  const { data, isLoading, revalidate, mutate } = useCachedPromise(getSchedule, [date], {
+  const {
+    data: fetched,
+    isLoading,
+    revalidate,
+    mutate,
+  } = useCachedPromise(getSchedule, [date], {
     keepPreviousData: true,
   });
+  const data = useLastGood(fetched, date, isLoading);
+  // The first view uses the device date. The account timezone can put "today" on
+  // another date, so move to the account day once, unless the user moved first.
+  const anchored = useRef(false);
+  useEffect(() => {
+    if (anchored.current || isLoading || !fetched?.ok) return;
+    anchored.current = true;
+    const accountDay = nowWallClock(fetched.data.now).date;
+    if (accountDay !== date) setDate(accountDay);
+  }, [fetched, isLoading]);
   const {
     mutate: applyMutation,
     lastUndoToken,
@@ -136,6 +158,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
 
   // Reset the filter on a day change; a day's areas may not exist on the next.
   function goToDay(delta: number) {
+    anchored.current = true;
     setFilter("all");
     setDate(addDaysISO(date, delta));
   }
@@ -188,7 +211,8 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
       )
     : [];
   const isEmpty = model ? filtered.every(([, events]) => events.length === 0) : Boolean(data?.ok && !isLoading);
-  const isFiltered = filter !== "all" || hideNonBlocking || hideReference;
+  const totalEvents = model ? sections.reduce((sum, key) => sum + model.sections[key].length, 0) : 0;
+  const isFiltered = (filter !== "all" || hideNonBlocking || hideReference) && totalEvents > 0;
   const backlogCount = data?.ok ? (data.data.backlogCount ?? 0) : 0;
 
   return (
@@ -349,13 +373,14 @@ interface WeekDay {
 function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: KindFilter }) {
   const [showingDetail, setShowingDetail] = useState(true);
   const {
-    data,
+    data: fetched,
     isLoading,
     revalidate,
     mutate: cacheMutate,
   } = useCachedPromise(loadWeek, [todayISO()], {
     keepPreviousData: true,
   });
+  const data = useLastGood(fetched, "week", isLoading);
   const { mutate, lastUndoToken, runUndo } = useAgendaMutations<WeekResult | undefined>({
     revalidate,
     optimistic: { mutate: cacheMutate, forOps: buildWeekOptimistic },
@@ -458,14 +483,42 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
 
 export default withAccessToken(reassignProvider)(Command);
 
+// A blip in the connection. A refusal for auth or Pro still takes the full screen.
+const TRANSIENT_CODES: ReadonlySet<string> = new Set(["network", "internal", "rate_limited"]);
+
+/**
+ * Keep the last good payload for `key` over a transient error, and show a toast.
+ * The API returns errors as values, so the cache stores them and a blip would
+ * otherwise replace the list. A cached error shows as loading while it refetches.
+ */
+function useLastGood<T extends { ok: true }>(
+  data: T | ApiError | undefined,
+  key: string,
+  isLoading: boolean,
+): T | ApiError | undefined {
+  const last = useRef<{ key: string; value: T } | undefined>(undefined);
+  // Only a fresh payload counts. keepPreviousData can hold another key's payload while it loads.
+  if (data?.ok && !isLoading) last.current = { key, value: data };
+  const kept = last.current?.key === key ? last.current.value : undefined;
+  const transient = data && !data.ok && TRANSIENT_CODES.has(data.code) ? data : undefined;
+  useEffect(() => {
+    if (transient && kept && !isLoading) void showApiError(transient);
+  }, [data, isLoading]);
+  if (!transient) return data;
+  if (kept) return kept;
+  return isLoading ? undefined : data;
+}
+
 type WeekResult = { ok: true; todayIso: string; days: WeekDay[] } | ApiError;
 
-// Read the whole week in one range call, then map to one agenda per day.
-async function loadWeek(startISO: string): Promise<WeekResult> {
-  const dates = Array.from({ length: WEEK_DAYS }, (_, i) => addDaysISO(startISO, i));
-  const result = await getScheduleRange(startISO, dates[dates.length - 1]);
+// Read the whole week in one range call, then map to one agenda per day. The
+// account "today" can be one day off the device day, so read one day on each
+// side and start the 7 days on the account day.
+async function loadWeek(deviceDay: string): Promise<WeekResult> {
+  const result = await getScheduleRange(addDaysISO(deviceDay, -1), addDaysISO(deviceDay, WEEK_DAYS));
   if (!result.ok) return result;
   const todayIso = nowWallClock(result.data.now).date;
+  const dates = Array.from({ length: WEEK_DAYS }, (_, i) => addDaysISO(todayIso, i));
   const days = buildRangeAgenda(result.data, dates).map((model) => ({ date: model.date, model }));
   return { ok: true, todayIso, days };
 }

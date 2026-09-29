@@ -70,7 +70,7 @@ export function BlockDetail(props: {
   const activity = resolveActivity(event, activityTypes);
   const status = reflectLabel(event);
   const notes = typeof event.notes === "string" ? event.notes.trim() : "";
-  const source = eventSource(event, calendars, defaultCalendarId);
+  const source = homeCalendarLabel(event, calendars, defaultCalendarId);
   const mirrors = (event.mirrorCalendarIds ?? [])
     .map((id) => calendars.find((c) => c.id === id)?.name)
     .filter(Boolean)
@@ -119,7 +119,7 @@ function eventKeywords(
   defaultCalendarId?: string | null,
 ): string[] {
   const words = areaActivityNames(event, areas, activityTypes);
-  const source = eventSource(event, calendars, defaultCalendarId);
+  const source = homeCalendarName(event, calendars, defaultCalendarId);
   if (source) words.push(source);
   return words;
 }
@@ -142,23 +142,38 @@ function accessories(
   if (isRecurring(event)) items.push({ icon: Icon.Repeat, tooltip: "Repeats" });
   const meeting = eventMeeting(event);
   if (meeting) items.push({ icon: Icon.Video, tooltip: meeting.label ?? "Has a meeting link" });
-  const source = eventSource(event, calendars, defaultCalendarId);
+  const source = homeCalendarLabel(event, calendars, defaultCalendarId);
   if (source) items.push({ icon: Icon.Calendar, tooltip: source });
   items.push({ text: formatRange(event) });
   return items;
 }
 
 /**
- * The calendar a block lives in, or "" for a Reassign-only block. The name comes
- * from GET /calendars by the home calendar id; an unknown one falls back to `source`.
+ * The resolved calendar name or sync origin of a block, or "" when it cannot be
+ * named yet. Never returns the "Connected calendar" loading placeholder, so it is
+ * safe to feed to `List.Item.keywords` (a search-index prop): the placeholder must
+ * not leak into the built-in search index. The name comes from GET /calendars by
+ * the home calendar id; an unknown one falls back to `source` for a synced block.
  */
-function eventSource(event: ScheduleEvent, calendars: Calendar[], defaultCalendarId?: string | null): string {
+function homeCalendarName(event: ScheduleEvent, calendars: Calendar[], defaultCalendarId?: string | null): string {
   const homeId = homeCalendarId(event, defaultCalendarId);
   const home = homeId ? calendars.find((c) => c.id === homeId) : undefined;
   if (home) return home.name;
-  const synced = event.source && event.source !== "reassign" ? event.source : "";
-  // A known home is not Reassign-only, also while GET /calendars loads or after it fails.
-  return synced || (homeId ? "Connected calendar" : "");
+  return event.source && event.source !== "reassign" ? event.source : "";
+}
+
+/**
+ * The calendar label of a block for user-read surfaces (the BlockDetail
+ * "Calendar" label and the accessory tooltip). Returns the resolved name, the
+ * sync origin, or the "Connected calendar" placeholder while GET /calendars
+ * cannot yet name a known home; "" for a Reassign-only block (rendered as
+ * "Reassign" by callers). Differs from `homeCalendarName` only in the placeholder.
+ */
+function homeCalendarLabel(event: ScheduleEvent, calendars: Calendar[], defaultCalendarId?: string | null): string {
+  const name = homeCalendarName(event, calendars, defaultCalendarId);
+  if (name) return name;
+  const homeId = homeCalendarId(event, defaultCalendarId);
+  return homeId ? "Connected calendar" : "";
 }
 
 /** A human status label for a reflected block, or "" when it is still open. */

@@ -4,6 +4,8 @@ import {
   buildTodayModel,
   buildMenuBarModel,
   buildRangeAgenda,
+  collectAgendaFilters,
+  eventMatchesFilter,
   homeCalendarId,
   isRecurring,
   isTailRow,
@@ -12,6 +14,7 @@ import {
   type Now,
   type ScheduleEvent,
   type ScheduleResponse,
+  type TodayModel,
 } from "../src/lib/schedule-model";
 
 // Guards the DayView stale-data leak: `useCachedPromise(getSchedule, [date],
@@ -162,6 +165,58 @@ it("does not bucket a non-today present day against the payload's live clock", (
   expect(model!.sections.later.map((e) => e.name)).toEqual(["noon"]);
 });
 
+it("routes a past day's already-ended unreflected block to Done, not Up next", () => {
+  // A strictly past day has no live "now", but its already-ended blocks are
+  // "past but unreviewed — still check-off-able" — the same notion the
+  // today-branch encodes. A reflected past-day block and an ended-but-unreflected
+  // sibling both belong in Done, so the day renders under one header instead of
+  // splitting already-happened blocks across "Done" and "Up next".
+  const pastDay = addDaysISO(dayA, -1); // "2026-09-21"
+  const schedule: ScheduleResponse = {
+    timezone: "Europe/Ljubljana",
+    now: makeNow(dayA, "10:30"), // 2026-09-22T10:30 — the day after pastDay
+    days: [
+      {
+        date: pastDay,
+        events: [
+          makeEvent(pastDay, "past-unreflected", "09:00", "10:00"),
+          makeEvent(pastDay, "past-reflected", "11:00", "12:00", { reflect: { status: "kept" } }),
+        ],
+      },
+    ],
+    areas: [],
+    activityTypes: [],
+  };
+  const model = buildTodayModel(schedule, pastDay);
+  expect(model).not.toBeNull();
+  expect(model!.sections.now).toEqual([]);
+  expect(model!.sections.upNext).toEqual([]);
+  expect(model!.sections.later).toEqual([]);
+  expect(model!.sections.done.map((e) => e.name).sort()).toEqual(["past-reflected", "past-unreflected"]);
+});
+
+it("leaves a still-running overnight block on a past day in Up next, not Done", () => {
+  // The fix only routes already-ended past-day blocks to Done. An overnight
+  // block that started on the past day and is still running on the clock day
+  // has not ended, so it stays upcoming — the disclosed limitation. "Now" is
+  // never populated on a non-today view regardless.
+  const pastDay = addDaysISO(dayA, -1); // "2026-09-21"
+  const overnight = makeEvent(pastDay, "overnight", "23:30", "01:00"); // ends 2026-09-22T01:00
+  const schedule: ScheduleResponse = {
+    timezone: "Europe/Ljubljana",
+    now: makeNow(dayA, "00:30"), // 2026-09-22T00:30 — overnight is still running
+    days: [{ date: pastDay, events: [overnight] }],
+    areas: [],
+    activityTypes: [],
+  };
+  const model = buildTodayModel(schedule, pastDay);
+  expect(model).not.toBeNull();
+  expect(model!.sections.now).toEqual([]);
+  expect(model!.sections.upNext.map((e) => e.name)).toEqual(["overnight"]);
+  expect(model!.sections.later).toEqual([]);
+  expect(model!.sections.done).toEqual([]);
+});
+
 it("reads the wall clock straight from `now`", () => {
   expect(nowWallClock("2026-09-23T00:30")).toEqual({ date: "2026-09-23", minutes: 30, local: "2026-09-23T00:30" });
 });
@@ -229,4 +284,41 @@ it("never puts another day's events on today's clock in the menu bar", () => {
   const model = buildMenuBarModel(schedule);
   expect(model.current).toBeNull();
   expect(model.upcoming).toEqual([]);
+});
+
+// The Agenda area/activity dropdown reads these two helpers.
+const areaA = { id: "a", name: "Work", color: "#f00" };
+const areaB = { id: "b", name: "Home", color: "#0f0" };
+const deep = { id: "deep", name: "Deep work" };
+const filterEvents = {
+  a1: makeEvent(dayA, "a1", "09:00", "10:00", { areaId: "a", activityTypeId: "deep" }),
+  b1: makeEvent(dayA, "b1", "11:00", "12:00", { areaId: "b" }),
+  a2: makeEvent(dayA, "a2", "13:00", "14:00", { areaId: "a", activityTypeId: "deep" }),
+  gone: makeEvent(dayA, "gone", "15:00", "16:00", { areaId: "deleted", activityTypeId: "deleted" }),
+};
+const filterModel: TodayModel = {
+  now: makeNow(dayA),
+  areas: [areaA, areaB],
+  activityTypes: [deep],
+  sections: { now: [filterEvents.a1], upNext: [filterEvents.b1], later: [filterEvents.gone], done: [filterEvents.a2] },
+  freeSlots: [],
+};
+
+it("collects each area and activity once, in section order", () => {
+  expect(collectAgendaFilters(filterModel)).toEqual({ areas: [areaA, areaB], activities: [deep] });
+});
+
+it.each([
+  ["all", "b1", true],
+  ["nocolon", "b1", true],
+  ["area:a", "a1", true],
+  ["area:a", "b1", false],
+  ["area:b", "b1", true],
+  ["activity:deep", "a2", true],
+  ["activity:deep", "b1", false],
+  ["area:deleted", "gone", false],
+  ["activity:deleted", "gone", false],
+])("eventMatchesFilter(%s) for %s is %s", (filter, id, expected) => {
+  const event = filterEvents[id as keyof typeof filterEvents];
+  expect(eventMatchesFilter(event, filterModel, filter)).toBe(expected);
 });

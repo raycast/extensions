@@ -1,5 +1,6 @@
 import { shiftWallMinutes } from "./block-timing";
 import { humanDuration, isLocalDateTime, localMinutesBetween, localToDate, toLocalDateTime } from "./format";
+import { isEventKind, MAX_DURATION_MINUTES, MIN_SPAN_MINUTES } from "./wire";
 
 export interface AiPreview {
   intents: Record<string, unknown>[];
@@ -70,8 +71,7 @@ export function blockDraft(preview: AiPreview): BlockDraft {
       );
     draft.calendarId = intent.calendarId;
   }
-  if (!["blocking", "non_blocking", "reference"].includes(draft.kind))
-    throw new Error("The suggested block type is invalid.");
+  if (!isEventKind(draft.kind)) throw new Error("The suggested block type is invalid.");
   if (intent.op === "park") {
     if (intent.start != null || intent.end != null)
       throw new Error("The Inbox suggestion includes a time. Ask for a scheduled block instead.");
@@ -79,8 +79,8 @@ export function blockDraft(preview: AiPreview): BlockDraft {
       if (
         typeof intent.durationMinutes !== "number" ||
         !Number.isInteger(intent.durationMinutes) ||
-        intent.durationMinutes < 5 ||
-        intent.durationMinutes > 1440
+        intent.durationMinutes < MIN_SPAN_MINUTES ||
+        intent.durationMinutes > MAX_DURATION_MINUTES
       )
         throw new Error("The suggested duration is invalid.");
       draft.duration = humanDuration(intent.durationMinutes);
@@ -92,7 +92,8 @@ export function blockDraft(preview: AiPreview): BlockDraft {
     throw new Error("The suggestion needs a valid date and time range.");
   const duration = localMinutesBetween(intent.start, intent.end) ?? 0;
   // The server stores a span of 5 minutes to one day from this form.
-  if (duration < 5 || duration > 1440) throw new Error("The suggested duration must be between 5 minutes and one day.");
+  if (duration < MIN_SPAN_MINUTES || duration > MAX_DURATION_MINUTES)
+    throw new Error("The suggested duration must be between 5 minutes and one day.");
   draft.start = localToDate(intent.start);
   if (Number.isNaN(draft.start.getTime()) || toLocalDateTime(draft.start) !== intent.start)
     throw new Error("The suggested local time does not exist. Choose another time.");

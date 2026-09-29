@@ -36,7 +36,12 @@ export function describeError(error: ApiError): { title: string; message?: strin
     case "batch_rejected":
       return { title: "The changes were not applied", message: error.message };
     case "rate_limited":
-      return { title: "Too many requests", message: "Wait a moment, then try again." };
+      // The server reason names the window (the feedback cap is one hour).
+      // A bare 429 has only the generic "Request failed (429)." text.
+      return {
+        title: "Too many requests",
+        message: /^Request failed \(\d+\)\.$/.test(error.message) ? "Wait a moment, then try again." : error.message,
+      };
     case "network":
       return { title: "Could not reach Reassign", message: error.message };
     default:
@@ -131,15 +136,21 @@ export async function runMutation<T>(
     failToast(toast, result);
     return { ok: false, undoToken: null };
   }
-  // A 2xx can still carry a rejected row. Treat it as a failure, not a false success.
-  const failed = batchFailure(result.data as { results?: BatchResultRow[] });
-  if (failed) {
+  // A 2xx can still carry a rejected row. It is a failure only when no write
+  // landed. The contract marks a failed read-back of a landed row as `internal`,
+  // and that row can come without an undo receipt (the ledger write failed).
+  const receipt = result.data as { results?: BatchResultRow[]; undoToken?: string };
+  const failed = batchFailure(receipt);
+  const landed =
+    !!receipt?.undoToken || !!receipt?.results?.some((row) => row.status === "ok" || row.error?.code === "internal");
+  if (failed && !landed) {
     failToast(toast, rowError(failed));
     return { ok: false, undoToken: null };
   }
   const token = getUndoToken(result.data);
   toast.style = Toast.Style.Success;
   toast.title = successTitle;
+  if (failed) toast.message = "Refresh to see the change.";
   if (token) applyUndoToast(toast, token, opts);
   return { ok: true, undoToken: token };
 }

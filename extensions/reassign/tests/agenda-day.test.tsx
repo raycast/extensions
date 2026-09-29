@@ -1,8 +1,12 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { ReactElement } from "react";
 
 const mock = vi.hoisted(() => ({ data: undefined as unknown, loading: false }));
-vi.mock("react", () => ({ useState: (initial: unknown) => [initial, vi.fn()] }));
+vi.mock("react", () => ({
+  useState: (initial: unknown) => [initial, vi.fn()],
+  useRef: (initial: unknown) => ({ current: initial }),
+  useEffect: () => {},
+}));
 vi.mock("@raycast/api", () => ({
   Action: Object.assign(() => null, { Push: "Push", OpenInBrowser: "OpenInBrowser" }),
   ActionPanel: Object.assign(() => null, { Section: "ActionSection" }),
@@ -40,10 +44,13 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children), ...nodes(node.props.actions)];
 }
 function render() {
-  const element = Agenda() as ReactElement;
+  const element = Agenda({}) as ReactElement;
   return nodes((element.type as (props: unknown) => unknown)(element.props));
 }
+// Pin the device clock, so a run across local midnight cannot split "today".
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 22, 10, 0));
   mock.loading = false;
   mock.data = {
     ok: true,
@@ -55,6 +62,9 @@ beforeEach(() => {
       activityTypes: [],
     },
   };
+});
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 it("keeps empty-day navigation and Add available when the response omits the requested date", () => {

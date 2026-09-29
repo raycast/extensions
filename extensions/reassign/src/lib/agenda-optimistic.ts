@@ -7,7 +7,8 @@ type OptimisticOp = Extract<WriteOp, { op: "reflect" | "delete" | "shift" }>;
 /** Shared row updates for the day and week cache; revalidation supplies date changes. */
 export function transformEvents(events: ScheduleEvent[], op: OptimisticOp): ScheduleEvent[] {
   if (op.op === "delete") return events.filter((event) => event.id !== op.id);
-  return events.map((event) => {
+  let shifted = false;
+  const next = events.map((event) => {
     if (event.id !== op.id) return event;
     if (op.op === "reflect") return { ...event, reflect: { ...event.reflect, status: op.status } };
     // A shift across midnight can change the day bucket and the tail rows.
@@ -21,10 +22,15 @@ export function transformEvents(events: ScheduleEvent[], op: OptimisticOp): Sche
       datePart(event.start) !== datePart(event.end)
     )
       return event;
+    shifted = true;
     return {
       ...event,
       start: addMinutesLocal(event.start, op.byMinutes),
       end: addMinutesLocal(event.end, op.byMinutes),
     };
   });
+  // Re-establish the chronological order invariant `buildRangeAgenda` sets
+  // (`a.start.localeCompare(b.start)`); a same-day shift can move a row past a
+  // neighbor's start minute, and the week view renders the array verbatim.
+  return shifted ? next.slice().sort((a, b) => a.start.localeCompare(b.start)) : next;
 }

@@ -10,9 +10,9 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getScheduleRange, writeEvents } from "./lib/api";
-import { batchFailure, rowError } from "./lib/envelope";
+import { batchFailure, needsSignIn, rowError } from "./lib/envelope";
 import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
 import { maybeNotifyTransitions } from "./lib/notify";
 import { signOut } from "./lib/oauth";
@@ -34,16 +34,22 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  // Fire block-transition notifications on each background tick.
+  // Fire block-transition notifications on each background tick. Skip the cached
+  // payload at launch: its `now` is old. Raycast unloads the command when
+  // isLoading is false, so the bar stays loading until the notify work completes.
+  const [notified, setNotified] = useState<typeof data>(undefined);
+  const notifyPending = prefs.notifyTransitions && !isLoading && Boolean(data?.ok) && notified !== data;
   useEffect(() => {
-    if (data?.ok && prefs.notifyTransitions) void maybeNotifyTransitions(data.data);
-  }, [data, prefs.notifyTransitions]);
+    if (!notifyPending || !data?.ok) return;
+    const payload = data;
+    void maybeNotifyTransitions(payload.data).finally(() => setNotified(payload));
+  }, [notifyPending, data]);
 
   if (!data || !data.ok) {
     const proBlocked = data && !data.ok && data.code === "permission";
     return (
       <MenuBarExtra icon={Icon.Circle} isLoading={isLoading} tooltip="Reassign">
-        {data && !data.ok && ["signed_out", "unauthenticated", "unauthorized"].includes(data.code) && (
+        {data && !data.ok && needsSignIn(data.code) && (
           <MenuBarExtra.Item
             title="Sign in to Reassign"
             icon={Icon.Key}
@@ -90,7 +96,7 @@ export default function Command() {
   }
 
   return (
-    <MenuBarExtra icon={icon} title={title} isLoading={isLoading} tooltip="Reassign">
+    <MenuBarExtra icon={icon} title={title} isLoading={isLoading || notifyPending} tooltip="Reassign">
       {model.current && (
         <MenuBarExtra.Section title="Now">
           <MenuBarExtra.Item

@@ -6,7 +6,10 @@ import { BILLING_URL } from "../lib/wire";
 
 /** Pick the screen for an API refusal: re-auth, the Pro gate, or a retry. */
 export function refusalView(error: ApiError, onRecover: () => void) {
-  if (error.code === "signed_out") return <ReauthView onSignedIn={onRecover} automatic={false} />;
+  // A retry repeats a `scope` 403. Only a new consent grants the missing scope.
+  if (error.code === "signed_out" || error.code === "scope") {
+    return <ReauthView onSignedIn={onRecover} automatic={false} />;
+  }
   if (error.code === "unauthenticated" || error.code === "unauthorized") {
     return <ReauthView onSignedIn={onRecover} />;
   }

@@ -14,7 +14,8 @@ it("reads a confirm row the same way", () => {
   ).toEqual({ kind: "committed", eventId: "event", undoToken: "undo" });
 });
 it("reads proposals and the ISO expiry from the nested API receipt", () => {
-  const options = [{ date: "2026-09-22", start: "09:00", end: "11:00", score: 0.9, reason: "Free morning" }];
+  // Contract shape: each option is { start, end, score?, reason? } with local datetimes.
+  const options = [{ start: "2026-09-22T09:00", end: "2026-09-22T11:00", score: 0.9, reason: "Free morning" }];
   expect(
     readOutcome({
       results: [

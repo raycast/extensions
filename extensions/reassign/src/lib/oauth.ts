@@ -1,4 +1,4 @@
-import { LocalStorage, OAuth } from "@raycast/api";
+import { Cache, LocalStorage, OAuth } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { withSessionLock } from "./session-lock";
 import { AUTHORIZE_URL, CLIENT_ID, OAUTH_RESOURCE, RAYCAST_REDIRECT, SCOPES, TOKEN_URL } from "./wire";
@@ -117,12 +117,22 @@ export async function authorize(): Promise<string> {
   try {
     return await getAccessToken();
   } catch (error) {
-    if (!(error instanceof NotAuthorizedError)) throw error;
+    // A rejection here reaches React.use and shows the crash screen. Render the
+    // command, and let request() report `network` so the view offers Try Again.
+    if (!(error instanceof NotAuthorizedError)) return (await storedAccessToken()) ?? "unavailable";
   }
   // A foreground command launch is an explicit request to connect. Background
   // reads and in-command recovery never call this provider automatically.
   await signInForSession(undefined, generation);
   return getAccessToken();
+}
+
+async function storedAccessToken(): Promise<string | undefined> {
+  try {
+    return (await client.getTokens())?.accessToken || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** The provider that `withAccessToken` wraps each view command with. */
@@ -133,6 +143,13 @@ export async function signOut(): Promise<void> {
   await withSessionLock(async () => {
     await LocalStorage.setItem(SESSION_KEY, JSON.stringify({ generation: randomUUID(), signedOut: true }));
     await client.removeTokens();
+    // useCachedPromise persists to the default Cache namespace. Clear it, so
+    // the next account does not see this account's blocks or calendar ids.
+    new Cache().clear();
+    const stored = await LocalStorage.allItems();
+    for (const key of Object.keys(stored)) {
+      if (key.startsWith("notified:")) await LocalStorage.removeItem(key);
+    }
   });
 }
 

@@ -1,4 +1,5 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import type { ApiResult } from "../src/lib/api";
 const mock = vi.hoisted(() => ({
   writable: [] as { id: string }[],
   calendarFields: {} as Record<string, unknown>,
@@ -7,15 +8,10 @@ const mock = vi.hoisted(() => ({
   hookIndex: 0,
   hookValues: [] as unknown[],
   toast: {},
-  result: { ok: true, data: { results: [{ index: 0, status: "ok" }] } } as {
-    ok: boolean;
-    data?: {
-      results: { index: number; status: string; error?: { code: string; message: string } }[];
-      undoToken?: string;
-    };
-    code?: string;
-    message?: string;
-  },
+  result: { ok: true, data: { results: [{ index: 0, status: "ok" }] } } as ApiResult<{
+    results: { index: number; status: string; error?: { code: string; message: string } }[];
+    undoToken?: string;
+  }>,
   undo: vi.fn(),
   rebase: vi.fn(),
   signIn: vi.fn(),
@@ -89,10 +85,12 @@ vi.mock("../src/components/calendar-fields", () => ({
 import NowCommand from "../src/now";
 import { EditForm } from "../src/components/edit-form";
 import { MoveForm } from "../src/components/move-form";
+import { ScopeDropdown } from "../src/components/scope-dropdown";
 import { BacklogScheduleForm } from "../src/components/backlog-schedule-form";
 import { useAgendaMutations } from "../src/components/agenda-actions";
 import { refusalView } from "../src/components/states";
 import { runMutation } from "../src/lib/feedback";
+import { isoToDate } from "../src/lib/format";
 const event = { id: "id", name: "work", start: "2026-09-21T23:00", end: "2026-09-21T23:30" };
 beforeEach(() => {
   mock.writable = [];
@@ -106,6 +104,9 @@ beforeEach(() => {
   mock.toast = {};
   mock.undo.mockReset();
   mock.undo.mockResolvedValue({ ok: true });
+});
+afterEach(() => {
+  vi.useRealTimers();
 });
 for (const success of [false, true]) {
   it(`edit form pops only on success (${success}), keeping overnight range`, async () => {
@@ -128,14 +129,18 @@ for (const success of [false, true]) {
     expect(mock.pop).toHaveBeenCalledTimes(success ? 1 : 0);
   });
   it(`inbox form pops only on success (${success})`, async () => {
-    const tree = BacklogScheduleForm({ item: { id: "id", name: "idea" }, onSubmit: async () => success });
+    const tree = BacklogScheduleForm({
+      item: { id: "id", name: "idea" },
+      todayIso: "2026-09-22",
+      onSubmit: async () => success,
+    });
     await tree.props.actions.props.children.props.onSubmit({ date: new Date(2026, 8, 22), start: "09:00" });
     expect(mock.pop).toHaveBeenCalledTimes(success ? 1 : 0);
   });
 }
 const okRow = { index: 0, status: "ok" };
 const errorRow = { index: 0, status: "error", error: { code: "conflict", message: "Time occupied" } };
-it.each([
+it.each<typeof mock.result>([
   { ok: false, code: "network", message: "offline" },
   { ok: true, data: { results: [errorRow] } },
   { ok: true, data: { results: [okRow] } },
@@ -152,6 +157,26 @@ it("a rejected row shows its own error", async () => {
     undoToken: null,
   });
   expect(mock.toast).toMatchObject({ title: "That time is already taken", message: "Time occupied" });
+});
+// The contract says a batch whose writes landed is never rejected. A failed
+// read-back row keeps the undo receipt, so the save is a success with Undo.
+it("a landed write with a failed read-back row keeps success and Undo", async () => {
+  const readBack = { index: 0, status: "error", error: { code: "internal", message: "Read-back failed" } };
+  mock.result = { ok: true, data: { results: [readBack], undoToken: "u1" } };
+  expect(await runMutation("Saving", "Saved", async () => mock.result)).toEqual({ ok: true, undoToken: "u1" });
+  expect(mock.toast).toMatchObject({ style: "success", title: "Saved", message: "Refresh to see the change." });
+  expect((mock.toast as { primaryAction?: unknown }).primaryAction).toBeDefined();
+});
+it("a failed read-back row with no undo receipt still counts as landed", async () => {
+  const readBack = { index: 0, status: "error", error: { code: "internal", message: "Read-back failed" } };
+  const result = { ok: true as const, data: { results: [readBack] } };
+  expect(await runMutation("Saving", "Saved", async () => result)).toEqual({ ok: true, undoToken: null });
+  expect(mock.toast).toMatchObject({ style: "success", message: "Refresh to see the change." });
+});
+it("a 2xx with an ok row and an error row counts as landed", async () => {
+  const result = { ok: true as const, data: { results: [okRow, { ...errorRow, index: 1 }] } };
+  expect(await runMutation("Saving", "Saved", async () => result)).toEqual({ ok: true, undoToken: null });
+  expect(mock.toast).toMatchObject({ style: "success", title: "Saved" });
 });
 it("edit form refuses an end that is not after the start", async () => {
   const submit = vi.fn(async () => true);
@@ -198,6 +223,95 @@ it("a whole-series move and end edit apply to the series anchor, not the occurre
   });
   expect(onSubmit).toHaveBeenCalledWith({ op: "update", id: "series", end: "2026-09-01T23:45" });
 });
+
+// Regression: the early "nothing changed — pop" guard used to fire before the
+// scope was considered, so an unchanged-start "Every block in the series"
+// submit on a previously-moved occurrence popped before rebaseOnSeries could
+// run — silently dropping the user's intended re-anchor. The guard now bypasses
+// "all" and lets rebaseOnSeries decide whether the write is a true no-op
+// (rebased start equals the anchor's current start).
+it("scope=all on a day-moved occurrence re-anchors the series with the unchanged start", async () => {
+  mock.rebase.mockReset();
+  mock.rebase.mockResolvedValue({ ok: true, data: { start: "2026-09-02T14:00", anchorStart: "2026-09-01T09:00" } });
+  const onMove = vi.fn(async () => true);
+  const tree = MoveForm({
+    event: { id: "series@2026-09-21", name: "workout", start: "2026-09-22T14:00", end: "2026-09-22T15:00" },
+    onMove,
+  });
+  await tree.props.actions.props.children.props.onSubmit({ start: new Date(2026, 8, 22, 14, 0), scope: "all" });
+  expect(mock.rebase).toHaveBeenCalledWith(
+    "series",
+    expect.objectContaining({ start: "2026-09-22T14:00", date: "2026-09-21" }),
+    { start: "2026-09-22T14:00" },
+  );
+  expect(onMove).toHaveBeenCalledWith({ op: "update", id: "series", start: "2026-09-02T14:00" });
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+});
+
+it("scope=all on a clock-moved occurrence re-anchors the series with the unchanged start", async () => {
+  mock.rebase.mockReset();
+  mock.rebase.mockResolvedValue({ ok: true, data: { start: "2026-09-01T14:00", anchorStart: "2026-09-01T09:00" } });
+  const onMove = vi.fn(async () => true);
+  const tree = MoveForm({
+    event: { id: "series@2026-09-01", name: "workout", start: "2026-09-01T14:00", end: "2026-09-01T15:00" },
+    onMove,
+  });
+  await tree.props.actions.props.children.props.onSubmit({ start: new Date(2026, 8, 1, 14, 0), scope: "all" });
+  // The rebased start equals the submitted start (days = 0), but the anchor's
+  // clock still needs to change from 09:00 to 14:00 — the write must fire.
+  expect(mock.rebase).toHaveBeenCalledWith(
+    "series",
+    expect.objectContaining({ start: "2026-09-01T14:00", date: "2026-09-01" }),
+    { start: "2026-09-01T14:00" },
+  );
+  expect(onMove).toHaveBeenCalledWith({ op: "update", id: "series", start: "2026-09-01T14:00" });
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+});
+
+it("scope=all with an unchanged start skips the write when the anchor is already aligned", async () => {
+  mock.rebase.mockReset();
+  mock.rebase.mockResolvedValue({ ok: true, data: { start: "2026-09-01T09:00", anchorStart: "2026-09-01T09:00" } });
+  const onMove = vi.fn(async () => true);
+  const tree = MoveForm({
+    event: { id: "series@2026-09-01", name: "workout", start: "2026-09-01T09:00", end: "2026-09-01T10:00" },
+    onMove,
+  });
+  await tree.props.actions.props.children.props.onSubmit({ start: new Date(2026, 8, 1, 9, 0), scope: "all" });
+  expect(mock.rebase).toHaveBeenCalledTimes(1);
+  expect(onMove).not.toHaveBeenCalled();
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+});
+
+it.each(["this", "future"] as const)("scope=%s with an unchanged start pops without a round-trip", async (scope) => {
+  mock.rebase.mockReset();
+  const onMove = vi.fn(async () => true);
+  const tree = MoveForm({
+    event: { id: "series@2026-09-01", name: "workout", start: "2026-09-01T09:00", end: "2026-09-01T10:00" },
+    onMove,
+  });
+  await tree.props.actions.props.children.props.onSubmit({ start: new Date(2026, 8, 1, 9, 0), scope });
+  expect(mock.rebase).not.toHaveBeenCalled();
+  expect(onMove).not.toHaveBeenCalled();
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+});
+
+it("scope=all surfacing a rebase failure shows the error and does not pop or write", async () => {
+  mock.rebase.mockReset();
+  mock.rebase.mockResolvedValue({
+    ok: false,
+    code: "not_found",
+    message: "The series was not found. Edit it in Reassign.",
+  });
+  const onMove = vi.fn(async () => true);
+  const tree = MoveForm({
+    event: { id: "series@2026-09-21", name: "workout", start: "2026-09-22T14:00", end: "2026-09-22T15:00" },
+    onMove,
+  });
+  await tree.props.actions.props.children.props.onSubmit({ start: new Date(2026, 8, 22, 14, 0), scope: "all" });
+  expect(mock.rebase).toHaveBeenCalledTimes(1);
+  expect(onMove).not.toHaveBeenCalled();
+  expect(mock.pop).not.toHaveBeenCalled();
+});
 it("sends an unlink with the other edits in one op, and no mirror field", async () => {
   mock.writable = [{ id: "work" }];
   mock.calendarFields = { calendarId: null, mirrorCalendarIds: [] };
@@ -227,7 +341,8 @@ it("keeps the mirrors that the picker cannot show", async () => {
 });
 it("offers the later-blocks choice for any occurrence id", () => {
   const tree = MoveForm({ event: { ...event, id: "series@2026-09-20" }, onMove: vi.fn() });
-  const scope = tree.props.children.find((c: { props?: { id?: string } } | false) => c && c.props?.id === "scope");
+  expect(tree.props.children).toContainEqual(expect.objectContaining({ type: ScopeDropdown }));
+  const scope = ScopeDropdown();
   const values = [scope.props.children]
     .flat(2)
     .filter(Boolean)
@@ -247,12 +362,35 @@ it("intentional logout never starts OAuth on recovery view mount", () => {
   expect(mock.signIn).not.toHaveBeenCalled();
 });
 
+it("a scope refusal offers a manual sign-in, not a retry of the same request", async () => {
+  mock.effects = [];
+  mock.signIn.mockReset();
+  mock.signIn.mockResolvedValue(undefined);
+  const onRecover = vi.fn();
+  const element = refusalView({ ok: false, code: "scope", message: "Missing scope" }, onRecover);
+  const tree = (element.type as (props: unknown) => ReactElementLike)(element.props);
+  mock.effects.forEach((fn) => fn());
+  expect(mock.signIn).not.toHaveBeenCalled();
+  const action = tree.props.children.props.actions.props.children;
+  expect(action.props.title).toBe("Sign in to Reassign");
+  await action.props.onAction();
+  expect(mock.signIn).toHaveBeenCalledTimes(1);
+  expect(onRecover).toHaveBeenCalledTimes(1);
+});
+type ReactElementLike = {
+  props: {
+    children: {
+      props: { actions: { props: { children: { props: { title: string; onAction: () => Promise<void> } } } } };
+    };
+  };
+};
+
 it("Now offers foreground sign-in and reports a failed launch", async () => {
   mock.launch.mockRejectedValueOnce(new Error("cannot launch"));
   mock.hud.mockClear();
   const tree = NowCommand();
   const signInItem = tree.props.children.find(
-    (child: { props?: { title?: string } } | false) => child?.props?.title === "Sign in to Reassign",
+    (child: { props?: { title?: string } } | false) => child && child.props?.title === "Sign in to Reassign",
   );
   expect(signInItem).toBeDefined();
   expect(mock.signIn).not.toHaveBeenCalled();
@@ -288,10 +426,43 @@ it("editing only the name preserves hidden notes", async () => {
 });
 it("rejects invalid clock values without submitting the Inbox form", async () => {
   const submit = vi.fn(async () => true);
-  const tree = BacklogScheduleForm({ item: { id: "id", name: "idea" }, onSubmit: submit });
+  const tree = BacklogScheduleForm({ item: { id: "id", name: "idea" }, todayIso: "2026-09-22", onSubmit: submit });
   await tree.props.actions.props.children.props.onSubmit({ date: new Date(), start: "25:99" });
   expect(submit).not.toHaveBeenCalled();
   expect(mock.pop).not.toHaveBeenCalled();
+});
+
+// Regression: an unplanned Inbox idea (no `plannedDate`) opened on the *device*
+// clock (`todayISO()`) even though every "Today"/"Tomorrow" label in the
+// surrounding Inbox is derived from the account `now` (`nowWallClock(now).date`).
+// When the device and account timezones straddle midnight, the form prefilled
+// the account's tomorrow and a no-edit submit landed the block on the wrong
+// account day. The fix threads the account `todayIso` into the form so the
+// default-date basis matches the labelling basis.
+it("defaults an unplanned idea to the account today, not the device clock", () => {
+  vi.useFakeTimers();
+  // Device already on 2026-09-23; the account (passed via todayIso) is 2026-09-22.
+  vi.setSystemTime(new Date(2026, 8, 23, 9, 0));
+  const tree = BacklogScheduleForm({
+    item: { id: "id", name: "bare idea" },
+    todayIso: "2026-09-22",
+    onSubmit: async () => true,
+  }) as { props: { children: { props: { id?: string; defaultValue?: Date } }[] } };
+  const date = tree.props.children.find((c) => c?.props?.id === "date")!;
+  expect(date.props.defaultValue).toEqual(isoToDate("2026-09-22")); // account today
+  expect(date.props.defaultValue).not.toEqual(isoToDate("2026-09-23")); // device today
+});
+
+it("defaults a planned idea to its plannedDate over the account today", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(2026, 8, 23, 9, 0));
+  const tree = BacklogScheduleForm({
+    item: { id: "id", name: "planned idea", plannedDate: "2026-09-25" },
+    todayIso: "2026-09-22",
+    onSubmit: async () => true,
+  }) as { props: { children: { props: { id?: string; defaultValue?: Date } }[] } };
+  const date = tree.props.children.find((c) => c?.props?.id === "date")!;
+  expect(date.props.defaultValue).toEqual(isoToDate("2026-09-25"));
 });
 
 // Regression: the toast's Undo button (primaryAction.onAction) used to revert

@@ -10,12 +10,18 @@ interface ScheduleFormValues {
 /**
  * Place a parked item into the day with the `schedule` backlog op. It needs a
  * date and a start; the server derives the end from the item's duration. The
- * default date is the item's planned date, else today.
+ * default date is the item's planned date, else the account's "today"
+ * (`todayIso`, derived from the server's `now`), so a bare idea opens on the
+ * same day the surrounding Inbox labels refer to — not the device's clock.
  */
-export function BacklogScheduleForm(props: { item: BacklogItem; onSubmit: (start: string) => Promise<boolean> }) {
-  const { item, onSubmit } = props;
+export function BacklogScheduleForm(props: {
+  item: BacklogItem;
+  todayIso: string;
+  onSubmit: (start: string) => Promise<boolean>;
+}) {
+  const { item, todayIso, onSubmit } = props;
   const { pop } = useNavigation();
-  const defaultDate = isIsoDate(item.plannedDate) ? item.plannedDate : todayISO();
+  const defaultDate = isIsoDate(item.plannedDate) ? item.plannedDate : todayIso;
 
   async function submit(values: ScheduleFormValues) {
     const date = values.date ? todayISO(values.date) : defaultDate;
