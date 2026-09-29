@@ -26,6 +26,7 @@ export interface Conversation {
   updated_at: string;
   created_at: string;
   pinned: boolean;
+  codexThreadId?: string | null;
 }
 
 export interface Model {
@@ -42,7 +43,7 @@ export interface Model {
   vision?: boolean;
 }
 
-export type ReasoningEffort = "none" | "low" | "medium" | "high";
+export type ReasoningEffort = "none" | "low" | "medium" | "high" | "xhigh" | "max";
 
 export type CommandContentSource = "clipboard" | "selectedText" | "browserTab";
 
@@ -108,6 +109,7 @@ export type ModelHook = BaseHook<Record<string, Model>> &
 
 export interface ChatHook {
   data: Chat[];
+  codexThreadId?: string | null;
   errorMsg: string | null;
   setData: Set<Chat[]>;
   isLoading: boolean;

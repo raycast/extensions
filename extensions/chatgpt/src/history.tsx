@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
@@ -10,6 +11,14 @@ import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
 
 export default function History() {
+  return (
+    <AuthGate>
+      <HistoryContent />
+    </AuthGate>
+  );
+}
+
+function HistoryContent() {
   const savedChat = useSavedChat();
   const history = useHistory();
   const [searchText, setSearchText] = useState<string>("");

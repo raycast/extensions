@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +10,7 @@ import { useChat } from "./hooks/useChat";
 import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL } from "./hooks/useModel";
 import { useModelCatalog } from "./hooks/useModelCatalog";
+import { useModelOptions } from "./hooks/useModelOptions";
 import { useQuestion } from "./hooks/useQuestion";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat, Conversation, Model } from "./type";
@@ -21,12 +23,21 @@ import { availableChatModels, initialModelId, selectedChatModel } from "./utils/
 import { isCommandModel } from "./utils/model-catalog";
 
 export default function Ask(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
+  return (
+    <AuthGate>
+      <AskContent {...props} />
+    </AuthGate>
+  );
+}
+
+function AskContent(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
   const conversations = useConversations();
   const snapshot = useModelCatalog();
+  const { options: providerModels } = useModelOptions();
   const modelsLoading = snapshot.isLoading;
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
-  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
+  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : [], props.conversation?.codexThreadId);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
 
   const explicitModel = props.initialModel ?? props.conversation?.model;
@@ -55,7 +66,12 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   const { push } = useNavigation();
   const openedInitialInput = useRef(false);
   // Catalog snapshots keep stable references, so the resolved model can drive effects directly.
-  const currentModel = selectedChatModel(snapshot, selectedModelId, explicitModel ?? conversation.model);
+  const currentModel = selectedChatModel(
+    snapshot,
+    selectedModelId,
+    explicitModel ?? conversation.model,
+    providerModels,
+  );
   const askedInitialQuestion = useRef(false);
   useEffect(() => {
     // Summarize -> Ask must also wait for the chat model to be resolved.
@@ -74,6 +90,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   const availableModels = availableChatModels(
     snapshot,
     explicitModel && isCommandModel(explicitModel.id) ? explicitModel : currentModel,
+    providerModels,
   );
   const submitQuestion = (text: string, files: string[], model = currentModel) => {
     void question.update("");
@@ -110,7 +127,12 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   }, [conversation]);
 
   useEffect(() => {
-    setConversation((previous) => ({ ...previous, chats: chats.data, updated_at: new Date().toISOString() }));
+    setConversation((previous) => ({
+      ...previous,
+      chats: chats.data,
+      codexThreadId: chats.codexThreadId,
+      updated_at: new Date().toISOString(),
+    }));
   }, [chats.data]);
 
   useEffect(() => {
