@@ -25,8 +25,18 @@ function boundaryFor(lead: number): Boundary | null {
   return null;
 }
 
+// A refresh can start a pass while one still sends. Run the passes one at a time,
+// so that each pass reads the dedup keys after the one before it writes them.
+let queue: Promise<void> = Promise.resolve();
+
 /** Fire a system notification for each block that enters a lead band. */
-export async function maybeNotifyTransitions(schedule: ScheduleResponse): Promise<void> {
+export function maybeNotifyTransitions(schedule: ScheduleResponse): Promise<void> {
+  const pass = queue.then(() => notifyPass(schedule));
+  queue = pass.catch(() => undefined);
+  return pass;
+}
+
+async function notifyPass(schedule: ScheduleResponse): Promise<void> {
   const { date: todayIso, minutes: nowMinutes } = nowWallClock(schedule.now);
   // A block whose start falls in account [00:00, 00:10] has its whole lead band
   // (start − 20, start − 10] before account midnight, on the *previous* account
@@ -64,8 +74,8 @@ export async function maybeNotifyTransitions(schedule: ScheduleResponse): Promis
       const key = notifyKey(datePart(event.start), event.id, start, boundary);
       if (stored[key]) continue;
 
-      await fireNotification(event.name || "A block", start, boundary);
-      await LocalStorage.setItem(key, "1");
+      // Keep the key unset after a failure, so a later pass in the band can retry.
+      if (await fireNotification(event.name || "A block", start, boundary)) await LocalStorage.setItem(key, "1");
     }
   }
 
@@ -84,7 +94,8 @@ function notifyKey(date: string, id: string, start: string, boundary: Boundary):
   return `notified:${date}:${id}:${start}:${boundary}`;
 }
 
-async function fireNotification(name: string, start: string, boundary: Boundary): Promise<void> {
+/** Returns true when the notification was sent. */
+async function fireNotification(name: string, start: string, boundary: Boundary): Promise<boolean> {
   const body = boundary === "lead" ? `Coming up at ${start}` : `Starts at ${start}`;
   // Escape quotes and backslashes, and flatten newlines. A raw newline breaks
   // the AppleScript string literal and drops the notification.
@@ -92,7 +103,9 @@ async function fireNotification(name: string, start: string, boundary: Boundary)
   const script = `display notification "${body}" with title "Reassign" subtitle "${safeName}"`;
   try {
     await runAppleScript(script);
+    return true;
   } catch {
     // A failed notification must never break the menu-bar render.
+    return false;
   }
 }

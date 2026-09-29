@@ -76,3 +76,14 @@ it("preserves encoded punctuation and prefers a scraped note to sourceUrl", () =
 it("returns null when notes have a URL but no conferencing host", () => {
   expect(eventMeeting(event({ notes: "Read https://example.com/article." }))).toBeNull();
 });
+
+it("matches a conferencing host only in the URL host, not in the path or query", () => {
+  expect(eventMeeting(event({ notes: "Read https://example.com/?ref=zoom.us" }))).toBeNull();
+  expect(eventMeeting(event({ notes: "Read https://notzoom.us/j/1" }))).toBeNull();
+  expect(eventMeeting(event({ sourceUrl: "https://example.com/meet.google.com/abc" }))).toBeNull();
+  expect(eventMeeting(event({ notes: "Join https://acme.zoom.us/j/1" }))?.url).toBe("https://acme.zoom.us/j/1");
+});
+
+it("reads a host with a trailing dot as the same host", () => {
+  expect(eventMeeting(event({ notes: "Call https://zoom.us./j/1" }))?.url).toBe("https://zoom.us./j/1");
+});

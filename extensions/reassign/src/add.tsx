@@ -39,6 +39,8 @@ import {
   formatRange,
   humanDuration,
   isIsoDate,
+  isLocalDateTime,
+  localToDate,
   parseDuration,
   todayISO,
   toLocalDateTime,
@@ -55,7 +57,7 @@ import {
   useCalendars,
 } from "./components/calendar-fields";
 import { ScheduleContext } from "./lib/launch-context";
-import { parseCapture } from "./lib/nl-parse";
+import { type ParsedCapture, parseCapture } from "./lib/nl-parse";
 import { isEventKind, MAX_DURATION_MINUTES, WEB_BASE, type EventKind } from "./lib/wire";
 
 interface FormValues extends CalendarFormValues {
@@ -128,11 +130,14 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const ctx = props.launchContext;
   const argText = props.arguments?.text?.trim() ?? "";
   const initial = argText || (ctx?.name ?? "");
-  const parsed = argText ? parseCapture(argText) : null;
   const { push } = useNavigation();
 
   // The areas and activity types for the pickers come with the day read.
   const { data: taxonomy, isLoading, revalidate } = useCachedPromise(getSchedule, [todayISO()]);
+  // The account clock minus the device clock, known after the first fresh read.
+  const clockOffset = useRef<number | undefined>(undefined);
+  const accountClock = () => new Date(Date.now() + (clockOffset.current ?? 0));
+  const parsed = argText ? parseCapture(argText, accountClock()) : null;
   const areas = taxonomy?.ok ? (taxonomy.data.areas ?? []) : [];
   const activityTypes = taxonomy?.ok ? (taxonomy.data.activityTypes ?? []) : [];
   const { writable: calendars, defaultId: defaultCalendarId } = useCalendars();
@@ -156,13 +161,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     : parsed?.durationMinutes
       ? humanDuration(parsed.durationMinutes)
       : "";
-  const initialStart = parsed?.start && parsed.date ? combineDateTime(parsed.date, parsed.start) : null;
-  const [start, setStart] = useState<Date | null>(initialStart);
-  const [end, setEnd] = useState<Date | null>(
-    initialStart && parsed?.durationMinutes ? initialEnd(initialStart, parsed.durationMinutes) : null,
-  );
+  const seed = seedTiming(parsed, ctxDate ?? todayISO());
+  const [start, setStart] = useState<Date | null>(seed.start);
+  const [end, setEnd] = useState<Date | null>(seed.end);
   const [duration, setDuration] = useState(durationDefault);
-  const [planningDate, setPlanningDate] = useState<string | undefined>(parsed?.date ?? ctxDate ?? todayISO());
+  const [planningDate, setPlanningDate] = useState<string | undefined>(seed.planningDate);
   const [hasNamedDate, setHasNamedDate] = useState(Boolean(parsed?.dateExplicit || ctxDate));
   const [showDetails, setShowDetails] = useState(false);
   const [details, setDetails] = useState({ areaId: "", activityTypeId: "", kind: "blocking", notes: "" });
@@ -174,6 +177,20 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const [aiDestination, setAiDestination] = useState<"inbox" | "schedule" | null>(null);
   const submitting = useRef(false);
   const saved = useRef(false);
+  const timingEdited = useRef(false);
+
+  // The first parse uses the device clock. The account timezone can put the capture
+  // on another day, so parse again on the account clock, unless the user edited first.
+  useEffect(() => {
+    if (clockOffset.current !== undefined || isLoading || !taxonomy?.ok || !isLocalDateTime(taxonomy.data.now)) return;
+    clockOffset.current = clockOffsetOf(taxonomy.data.now, Date.now());
+    if (timingEdited.current) return;
+    const now = accountClock();
+    const next = seedTiming(argText ? parseCapture(argText, now) : null, ctxDate ?? todayISO(now));
+    setStart(next.start);
+    setEnd(next.end);
+    setPlanningDate(next.planningDate);
+  }, [taxonomy, isLoading]);
   const hasStartTime = Boolean(start && !Form.DatePicker.isFullDay(start));
   const hasEndTime = Boolean(end && !Form.DatePicker.isFullDay(end));
   const showDuration = !(hasStartTime && hasEndTime);
@@ -190,7 +207,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     if (timing.kind === "exact")
       timingPreview = `${todayISO(timing.start)} ${clockHM(timing.start)} → ${todayISO(timing.end)} ${clockHM(timing.end)} · ${humanDuration(timing.minutes)}`;
     else if (!primaryIsInbox && timing.kind === "flexible")
-      timingPreview = `Find ${humanDuration(timing.minutes)} on ${timing.date ?? planningDate ?? todayISO()}`;
+      timingPreview = `Find ${humanDuration(timing.minutes)} on ${timing.date ?? planningDate ?? todayISO(accountClock())}`;
   } catch (error) {
     timingError = error instanceof Error ? error.message : "Check the times.";
   }
@@ -203,17 +220,20 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     }
   }
   function changeStart(value: Date | null) {
+    timingEdited.current = true;
     keepRangeAsDuration();
     setStart(value);
     setPlanningDate(value ? todayISO(value) : undefined);
     setHasNamedDate(Boolean(value));
   }
   function changeEnd(value: Date | null) {
+    timingEdited.current = true;
     keepRangeAsDuration();
     setEnd(value);
   }
 
   function fillDraft(draft: BlockDraft) {
+    timingEdited.current = true;
     setName(draft.name);
     setStart(draft.start);
     const minutes = parseDuration(draft.duration)?.minutes;
@@ -278,8 +298,9 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     if (timing.kind === "flexible") {
       await runFlexible({
         name: finalName,
-        date: timing.date ?? planningDate ?? todayISO(),
+        date: timing.date ?? planningDate ?? todayISO(accountClock()),
         minutes: timing.minutes,
+        now: accountClock(),
         earliest: parsed?.earliest,
         latest: parsed?.latest,
         areaId: extras.areaId,
@@ -504,6 +525,7 @@ interface FlexibleArgs {
   name: string;
   date: string;
   minutes: number;
+  now: Date;
   earliest?: string;
   latest?: string;
   areaId?: string;
@@ -541,10 +563,20 @@ export function planWindow(
   };
 }
 
+/**
+ * The account clock minus the device clock. The server `now` has minute
+ * precision only, so round to 15 minutes: every timezone offset is a multiple
+ * of 15 minutes, and the same timezone then gives exactly 0.
+ */
+export function clockOffsetOf(accountNow: string, deviceMs: number): number {
+  const quarter = 15 * 60_000;
+  return Math.round((localToDate(accountNow).getTime() - deviceMs) / quarter) * quarter || 0; // not -0
+}
+
 /** Find concrete time proposals for the user to review before committing. */
 async function runFlexible(args: FlexibleArgs): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Finding a slot…" });
-  const searchWindow = planWindow(args.date, args.earliest, args.latest);
+  const searchWindow = planWindow(args.date, args.earliest, args.latest, args.now);
   const request: PlanRequest = {
     name: args.name,
     durationMinutes: args.minutes,
@@ -723,6 +755,13 @@ function showNoSlot(toast: Toast, error?: ApiError): void {
   toast.style = Toast.Style.Failure;
   toast.title = "No slot found";
   toast.message = "Try a different day or a shorter block.";
+}
+
+/** The start, end and planned day that a parsed capture seeds into the form. */
+function seedTiming(parsed: ParsedCapture | null, fallbackDate: string) {
+  const start = parsed?.start && parsed.date ? combineDateTime(parsed.date, parsed.start) : null;
+  const end = start && parsed?.durationMinutes ? initialEnd(start, parsed.durationMinutes) : null;
+  return { start, end, planningDate: parsed?.date ?? fallbackDate };
 }
 
 /** A DST-invalid inferred end stays editable instead of crashing the form. */

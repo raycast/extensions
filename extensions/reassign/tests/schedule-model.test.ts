@@ -255,6 +255,24 @@ it("drops a tail row when its start row is in the range, and keeps an orphan tai
   expect(isTailRow(overnight, dayA)).toBe(false);
 });
 
+it("keeps a tail row when its start row is on a fetched day that is not shown", () => {
+  // The week fetches one extra day before the seven days that it shows.
+  const dayBefore = addDaysISO(dayA, -1);
+  const overnight = makeEvent(dayBefore, "overnight", "22:00", "01:00");
+  const schedule: ScheduleResponse = {
+    timezone: "Europe/Ljubljana",
+    now: makeNow(dayA, "00:30"),
+    days: [
+      { date: dayBefore, events: [overnight] },
+      { date: dayA, events: [overnight] },
+    ],
+    areas: [],
+    activityTypes: [],
+  };
+  const [a] = buildRangeAgenda(schedule, [dayA, dayB]);
+  expect(a.events.map((e) => e.name)).toEqual(["overnight"]);
+});
+
 it("addresses an occurrence, the later blocks, or the whole series", () => {
   expect(occurrenceTarget("s@2026-09-22", "this")).toEqual({ id: "s@2026-09-22" });
   expect(occurrenceTarget("s@2026-09-22", "future")).toEqual({ id: "s@2026-09-22", scope: "future" });

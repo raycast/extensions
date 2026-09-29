@@ -77,7 +77,7 @@ vi.mock("../src/components/calendar-fields", () => ({
   CalendarFields: "CalendarFields",
   CALENDAR_DEFAULT: "",
 }));
-import AddCommand, { planWindow } from "../src/add";
+import AddCommand, { clockOffsetOf, planWindow } from "../src/add";
 
 type Values = {
   name: string;
@@ -510,4 +510,11 @@ it("a committed slot applies the chosen calendar, then closes the form", async (
   await slot()();
   expect(mock.create).toHaveBeenCalledWith({ op: "update", id: "ev1", calendarId: "work" });
   expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("rounds the account clock offset to whole quarter hours", () => {
+  // Same timezone: the server minute lags the device by 50 s, and the offset is 0.
+  expect(clockOffsetOf("2026-09-22T12:00", new Date(2026, 8, 22, 12, 0, 50).getTime())).toBe(0);
+  // The account is 5 h 30 min behind the device.
+  expect(clockOffsetOf("2026-09-22T06:30", new Date(2026, 8, 22, 12, 0, 40).getTime())).toBe(-330 * 60_000);
 });

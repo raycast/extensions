@@ -174,20 +174,38 @@ export function resolveArea(item: { areaId?: string | null }, areas: Area[]): Ar
 }
 
 // Known conferencing hosts, for the notes fallback when the API has no meeting.
-const MEETING_HOSTS =
-  /(?:zoom\.us|meet\.google\.com|teams\.microsoft\.com|teams\.live\.com|webex\.com|whereby\.com|meet\.jit\.si|around\.co)/i;
+const MEETING_HOSTS = [
+  "zoom.us",
+  "meet.google.com",
+  "teams.microsoft.com",
+  "teams.live.com",
+  "webex.com",
+  "whereby.com",
+  "meet.jit.si",
+  "around.co",
+];
+
+/** True when the URL host is a known conferencing domain or a subdomain of one. */
+function isMeetingUrl(url: string): boolean {
+  let host: string;
+  try {
+    // A trailing dot is the same host ("zoom.us.").
+    host = new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+  } catch {
+    return false;
+  }
+  return MEETING_HOSTS.some((domain) => host === domain || host.endsWith(`.${domain}`));
+}
 
 /** Scan notes / source URL for a conferencing link (a fallback for synced events). */
 function scrapeMeetingLink(event: ScheduleEvent): string | null {
   const urls = typeof event.notes === "string" ? event.notes.match(/https?:\/\/[^\s<>)"']+/gi) : null;
-  const scraped = urls?.map((url) => url.replace(/[.,;!]+$/, "")).find((url) => MEETING_HOSTS.test(url));
+  const scraped = urls?.map((url) => url.replace(/[.,;!]+$/, "")).find(isMeetingUrl);
   if (scraped) return scraped;
   // Unlike prose, sourceUrl is a structured URL; punctuation may be part of a
   // password or path, so preserve it just like the API's meeting.url field.
   const sourceUrl = event.sourceUrl;
-  return typeof sourceUrl === "string" && /^https?:\/\//i.test(sourceUrl) && MEETING_HOSTS.test(sourceUrl)
-    ? sourceUrl
-    : null;
+  return typeof sourceUrl === "string" && /^https?:\/\//i.test(sourceUrl) && isMeetingUrl(sourceUrl) ? sourceUrl : null;
 }
 
 /**
@@ -335,15 +353,21 @@ export interface DayAgenda {
  * One DayAgenda per requested date, from a single range response (days[]).
  * A date the server omits becomes an empty day, so it never borrows another
  * day's events. A tail row (its start is on an earlier day) drops when its start
- * row is in the range. A tail whose start row sits outside the window survives.
+ * row is on a shown date. A tail whose start row is not shown survives.
  */
 export function buildRangeAgenda(schedule: ScheduleResponse, dates: string[]): DayAgenda[] {
   const days = schedule.days ?? [];
   const byDate = new Map(days.map((d) => [d.date, d]));
   const areas = schedule.areas ?? [];
   const activityTypes = schedule.activityTypes ?? [];
-  // The start-row id of every block across the range (a tail is not a start).
-  const startIds = new Set(days.flatMap((d) => (d.events ?? []).filter((e) => !isTailRow(e, d.date)).map((e) => e.id)));
+  // The start-row id of every block on a shown date. A start on a fetched but
+  // hidden day does not count, or its tail would vanish from the first day.
+  const shown = new Set(dates);
+  const startIds = new Set(
+    days
+      .filter((d) => shown.has(d.date))
+      .flatMap((d) => (d.events ?? []).filter((e) => !isTailRow(e, d.date)).map((e) => e.id)),
+  );
   return dates.map((date) => {
     const day = byDate.get(date);
     const events = day

@@ -196,7 +196,8 @@ export function EditForm(props: {
             value={details.notes ?? currentNotes}
             onChange={(notes) => setDetails((current) => ({ ...current, notes }))}
           />
-          {canPickCalendar && (
+          {/* The picker keeps its first value, so mount it after the calendars load. */}
+          {canPickCalendar && writable.length > 0 && (
             <CalendarFields
               writable={writable}
               defaultId={defaultId}

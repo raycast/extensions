@@ -49,10 +49,24 @@ it("names a block with no name 'A block'", async () => {
   expect(script()).toContain('subtitle "A block"');
 });
 
-it("does not break when runAppleScript rejects, and still writes the dedup key", async () => {
+it("does not break when runAppleScript rejects, and retries the reminder on the next pass", async () => {
   shared.runAppleScript.mockRejectedValueOnce(new Error("x"));
   await expect(maybeNotifyTransitions(scheduleWith("Standup"))).resolves.toBeUndefined();
+  expect(shared.storage.has(`notified:${DAY}:b:10:40:start`)).toBe(false);
+  await maybeNotifyTransitions(scheduleWith("Standup"));
+  expect(shared.runAppleScript).toHaveBeenCalledTimes(2);
   expect(shared.storage.get(`notified:${DAY}:b:10:40:start`)).toBe("1");
+});
+
+it("sends a reminder once when two passes overlap", async () => {
+  let release!: () => void;
+  shared.runAppleScript.mockImplementationOnce(() => new Promise<void>((r) => (release = r)));
+  const first = maybeNotifyTransitions(scheduleWith("Standup"));
+  const second = maybeNotifyTransitions(scheduleWith("Standup"));
+  await vi.waitFor(() => expect(shared.runAppleScript).toHaveBeenCalled());
+  release();
+  await Promise.all([first, second]);
+  expect(shared.runAppleScript).toHaveBeenCalledTimes(1);
 });
 
 it("uses the same tick as the `now` menu-bar interval in package.json", () => {
