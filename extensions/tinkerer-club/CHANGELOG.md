@@ -1,6 +1,6 @@
 # Tinkerer Club Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-29
 
 - Browse the Tinkerer Club feed, conversations, prompts, and articles.
 - Search community content and publish, queue, or save short posts.
