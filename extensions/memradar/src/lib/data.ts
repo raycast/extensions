@@ -12,21 +12,43 @@ const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFin
 const isStr = (v: unknown): v is string => typeof v === "string" && v.length > 0;
 
 /**
- * A payload is usable only if EVERY item carries the fields the UI reads
- * without guarding. The generator OMITS unknown values rather than sending
- * null, so a missing required field means a partial or malformed file, and
- * caching one would evict good data and then throw on render. Optional fields
- * (brand, avg_90d_usd, all_time_low, buy_state) stay optional: their absence
- * is the file's documented contract, not a fault.
+ * A payload is usable only if it carries every field the UI reads WITHOUT
+ * guarding. The generator omits unknown values rather than sending null, so a
+ * missing required field means a partial or malformed file, and caching one
+ * would evict good data and then throw on render.
+ *
+ * WHAT GOES IN HERE IS DECIDED BY THE GENERATOR, NOT BY THE TYPE. A per-item
+ * check runs under .every(), so requiring a field the generator emits
+ * CONDITIONALLY would reject the whole live file the first time one product
+ * lacked it, and every install would freeze on its stale cache. So a field is
+ * required here only when generate-product-pages.js writes it unconditionally:
+ *
+ *   unconditional, in the base object literal (buildRaycastProducts:4752-4767)
+ *     sku, name, slug, category, url, price_usd, tracked_days
+ *   conditional, behind an if (same function, 4768-4779)
+ *     brand, all_time_low, all_time_high, avg_90d_usd, buy_state,
+ *     history_monthly
+ *
+ * buy_state is the live proof of why that line matters: it is absent from 1 of
+ * 232 products today, so requiring it would reject the published file outright.
+ * The conditional fields are guarded where they render instead.
+ *
+ * TOP-LEVEL FIELDS REJECT THE WHOLE PAYLOAD, which is the right severity for
+ * attribution in particular: isStr also rejects "", so an empty licensed-data
+ * credit can never reach the screen. The UI used to default it to "" and render
+ * nothing, which is the licensing boundary failing silently.
  */
 function productsUsable(p: ProductsPayload): boolean {
-  if (!isStr(p?.generated) || !Array.isArray(p?.products) || p.products.length === 0) return false;
+  if (!isStr(p?.generated) || !isStr(p?.attribution) || !isStr(p?.notice)) return false;
+  if (!Array.isArray(p?.products) || p.products.length === 0) return false;
   return p.products.every(
     (i) =>
       isStr(i?.sku) &&
       isStr(i?.name) &&
       isStr(i?.url) &&
       isNum(i?.price_usd) &&
+      isNum(i?.tracked_days) &&
+      (i?.category === "ram" || i?.category === "ssd") &&
       (i.history_monthly === undefined ||
         (Array.isArray(i.history_monthly) &&
           i.history_monthly.every((e) => Array.isArray(e) && isStr(e[0]) && isNum(e[1])))),
@@ -34,7 +56,12 @@ function productsUsable(p: ProductsPayload): boolean {
 }
 
 function marketUsable(p: MarketPayload): boolean {
-  if (!isStr(p?.generated) || !Array.isArray(p?.segments) || p.segments.length === 0) return false;
+  if (!isStr(p?.generated) || !isStr(p?.computed_at) || !isStr(p?.source)) return false;
+  // method, notice and attribution are joined straight into the detail
+  // markdown. A missing one used to print the literal string "undefined" to
+  // the reader, and in attribution's case that is the licensed-data credit.
+  if (!isStr(p?.method) || !isStr(p?.notice) || !isStr(p?.attribution)) return false;
+  if (!Array.isArray(p?.segments) || p.segments.length === 0) return false;
   return p.segments.every(
     (s) =>
       isStr(s?.segment) &&

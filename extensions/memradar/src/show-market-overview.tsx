@@ -151,6 +151,10 @@ function SegmentItem({
                 text={longDate(payload.generated)}
                 icon={stale ? { source: Icon.Warning, tintColor: Color.Orange } : undefined}
               />
+              {/* computed_at, source, method, notice and attribution are all
+                  required by marketUsable now, so these reads cannot be
+                  undefined: a payload missing any of them is rejected on load
+                  and the previous cache keeps serving. */}
               <List.Item.Detail.Metadata.Label
                 title="Figures computed"
                 text={longDate(payload.computed_at.slice(0, 10))}

@@ -1,4 +1,4 @@
-import type { BuyState, Product } from "./types";
+import type { BuyState, PricePoint, Product } from "./types";
 
 export function money(value: number): string {
   return `$${value.toFixed(2)}`;
@@ -41,6 +41,29 @@ export const BUY_STATE_LABEL: Record<BuyState, string> = {
   elevated: "Price is elevated",
 };
 
+/**
+ * all_time_low and all_time_high are written CONDITIONALLY by the generator
+ * (buildRaycastProducts, `if (s.atl)` / `if (s.ath)`), so they cannot be
+ * required in productsUsable without risking the whole payload. They are
+ * guarded here instead, and BOTH halves are checked: the render path only ever
+ * tested the object, so a point present but missing its price reached money()
+ * and threw on .toFixed. Returns undefined so a caller can omit the row.
+ */
+export function pricePoint(point?: PricePoint): PricePoint | undefined {
+  if (!point || typeof point.price_usd !== "number" || !Number.isFinite(point.price_usd)) return undefined;
+  if (typeof point.date !== "string" || point.date.length === 0) return undefined;
+  return point;
+}
+
+/**
+ * buy_state is absent from 1 of 232 products today and its value is not
+ * validated on load, so an unfamiliar string would have indexed BUY_STATE_LABEL
+ * to undefined and rendered an empty tag. Unknown reads as no state at all.
+ */
+export function buyState(value?: string): BuyState | undefined {
+  return value === "good" || value === "typical" || value === "elevated" ? value : undefined;
+}
+
 export function buyStateShort(state?: BuyState): string | undefined {
   if (!state) return undefined;
   return state === "good" ? "Good" : state === "typical" ? "Typical" : "Elevated";
@@ -48,8 +71,11 @@ export function buyStateShort(state?: BuyState): string | undefined {
 
 /** Percent above the all-time low, the figure that makes a low meaningful. */
 export function aboveLow(product: Product): string | undefined {
-  if (!product.all_time_low || product.all_time_low.price_usd <= 0) return undefined;
-  const pct = Math.round(((product.price_usd - product.all_time_low.price_usd) / product.all_time_low.price_usd) * 100);
+  // Through pricePoint, so a point missing its price yields undefined rather
+  // than arithmetic on undefined and a "NaN% above its all-time low".
+  const low = pricePoint(product.all_time_low);
+  if (!low || low.price_usd <= 0) return undefined;
+  const pct = Math.round(((product.price_usd - low.price_usd) / low.price_usd) * 100);
   if (pct <= 0) return "at or below its all-time low";
   return `${pct}% above its all-time low`;
 }

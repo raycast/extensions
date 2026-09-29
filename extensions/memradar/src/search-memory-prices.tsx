@@ -1,13 +1,30 @@
 import { Action, ActionPanel, Cache, Color, Detail, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { useMemo, useRef, useState } from "react";
 import { ageInDays, isStale, loadProducts, matches, STALE_AFTER_DAYS } from "./lib/data";
-import { aboveLow, BUY_STATE_LABEL, historyMarkdown, historyTable, longDate, money } from "./lib/format";
+import {
+  aboveLow,
+  BUY_STATE_LABEL,
+  buyState,
+  historyMarkdown,
+  historyTable,
+  longDate,
+  money,
+  pricePoint,
+} from "./lib/format";
 import type { Product } from "./lib/types";
 
 const cache = new Cache();
 
 type CategoryFilter = "all" | "ram" | "ssd";
+
+// Named here rather than reaching back into the dropdown's JSX, so the empty
+// view can say which category it searched without the two drifting.
+const CATEGORY_LABEL: Record<CategoryFilter, string> = {
+  all: "any category",
+  ram: "RAM",
+  ssd: "SSDs",
+};
 
 const STATE_COLOR: Record<string, Color> = {
   good: Color.Green,
@@ -17,7 +34,13 @@ const STATE_COLOR: Record<string, Color> = {
 
 export default function SearchMemoryPrices() {
   const [showingDetail, setShowingDetail] = useState(false);
-  const [category, setCategory] = useState<CategoryFilter>("all");
+  // ONE SOURCE OF TRUTH. This used to be useState plus the dropdown's own
+  // storeValue, which are two stores for one value: Raycast restored the
+  // dropdown's last selection while React initialised its copy to "all", so on
+  // reopen the control showed one category and the list was filtered by
+  // another until the reader touched it. useCachedState persists the value and
+  // is the value the dropdown renders, so they cannot disagree.
+  const [category, setCategory] = useCachedState<CategoryFilter>("category", "all");
   // Filtering is ours rather than Raycast's so the header can state how many
   // rows a query actually matched. It runs over the payload already in memory:
   // no request is made per keystroke.
@@ -84,7 +107,7 @@ export default function SearchMemoryPrices() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by name, brand or ASIN"
       searchBarAccessory={
-        <List.Dropdown tooltip="Category" storeValue onChange={(v) => setCategory(v as CategoryFilter)}>
+        <List.Dropdown tooltip="Category" value={category} onChange={(v) => setCategory(v as CategoryFilter)}>
           <List.Dropdown.Item title="All" value="all" />
           <List.Dropdown.Item title="RAM" value="ram" />
           <List.Dropdown.Item title="SSDs" value="ssd" />
@@ -103,20 +126,45 @@ export default function SearchMemoryPrices() {
             </ActionPanel>
           }
         />
+      ) : filtered.length === 0 && payload ? (
+        // ONLY reachable on the else branch, so the offline/error view above
+        // always takes precedence: the two cannot render together. Gated on
+        // `payload` as well, so the empty second between mount and first load
+        // does not flash "no products match" at a reader who has not searched.
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No products match"
+          description={
+            query
+              ? `Nothing matches "${query}"${category === "all" ? "" : ` in ${CATEGORY_LABEL[category]}`}. Try fewer words, or a brand or ASIN.`
+              : `No products in ${CATEGORY_LABEL[category]}.`
+          }
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Search on MemRadar" url="https://memradar.com" icon={Icon.Globe} />
+              <Action title="Refresh Data" icon={Icon.ArrowClockwise} onAction={refresh} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.Section title={sectionTitle}>
-          {filtered.map((product) => (
-            <ProductItem
-              key={product.sku}
-              product={product}
-              payloadGenerated={payload?.generated ?? ""}
-              attribution={payload?.attribution ?? ""}
-              notice={payload?.notice ?? ""}
-              showingDetail={showingDetail}
-              onToggleDetail={() => setShowingDetail((v) => !v)}
-              onRefresh={refresh}
-            />
-          ))}
+          {/* Narrowed on `payload` rather than defaulting these to "": an empty
+              attribution is the licensed-data credit silently missing, so a payload
+              without one is now rejected on load instead of rendered blank. */}
+          {payload
+            ? filtered.map((product) => (
+                <ProductItem
+                  key={product.sku}
+                  product={product}
+                  payloadGenerated={payload.generated}
+                  attribution={payload.attribution}
+                  notice={payload.notice}
+                  showingDetail={showingDetail}
+                  onToggleDetail={() => setShowingDetail((v) => !v)}
+                  onRefresh={refresh}
+                />
+              ))
+            : null}
         </List.Section>
       )}
     </List>
@@ -133,7 +181,8 @@ function ProductItem(props: {
   onRefresh: () => void;
 }) {
   const { product, showingDetail } = props;
-  const state = product.buy_state;
+  const state = buyState(product.buy_state);
+  const lowPoint = pricePoint(product.all_time_low);
 
   return (
     <List.Item
@@ -176,9 +225,7 @@ function ProductItem(props: {
             shortcut={{ modifiers: ["cmd"], key: "return" }}
           />
           <Action.CopyToClipboard title="Copy Price" content={money(product.price_usd)} />
-          {product.all_time_low ? (
-            <Action.CopyToClipboard title="Copy All-Time Low" content={money(product.all_time_low.price_usd)} />
-          ) : null}
+          {lowPoint ? <Action.CopyToClipboard title="Copy All-Time Low" content={money(lowPoint.price_usd)} /> : null}
           <Action
             title={showingDetail ? "Hide Side Pane" : "Show Side Pane"}
             icon={Icon.Sidebar}
@@ -212,8 +259,9 @@ function ProductDetail({
     .join("\n")
     .trim();
 
-  const low = product.all_time_low;
-  const high = product.all_time_high;
+  const low = pricePoint(product.all_time_low);
+  const high = pricePoint(product.all_time_high);
+  const state = buyState(product.buy_state);
   const above = aboveLow(product);
   const stale = payloadGenerated ? isStale(payloadGenerated) : false;
 
@@ -223,12 +271,9 @@ function ProductDetail({
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Current price" text={money(product.price_usd)} />
-          {product.buy_state ? (
+          {state ? (
             <List.Item.Detail.Metadata.TagList title="Buy state">
-              <List.Item.Detail.Metadata.TagList.Item
-                text={BUY_STATE_LABEL[product.buy_state]}
-                color={STATE_COLOR[product.buy_state]}
-              />
+              <List.Item.Detail.Metadata.TagList.Item text={BUY_STATE_LABEL[state]} color={STATE_COLOR[state]} />
             </List.Item.Detail.Metadata.TagList>
           ) : null}
           {low ? (
@@ -283,8 +328,9 @@ function ProductDetailView({
   attribution: string;
   notice: string;
 }) {
-  const low = product.all_time_low;
-  const high = product.all_time_high;
+  const low = pricePoint(product.all_time_low);
+  const high = pricePoint(product.all_time_high);
+  const state = buyState(product.buy_state);
   const above = aboveLow(product);
   const stale = payloadGenerated ? isStale(payloadGenerated) : false;
 
@@ -299,12 +345,9 @@ function ProductDetailView({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Current price" text={money(product.price_usd)} />
-          {product.buy_state ? (
+          {state ? (
             <Detail.Metadata.TagList title="Buy state">
-              <Detail.Metadata.TagList.Item
-                text={BUY_STATE_LABEL[product.buy_state]}
-                color={STATE_COLOR[product.buy_state]}
-              />
+              <Detail.Metadata.TagList.Item text={BUY_STATE_LABEL[state]} color={STATE_COLOR[state]} />
             </Detail.Metadata.TagList>
           ) : null}
           {product.avg_90d_usd !== undefined ? (
@@ -338,9 +381,7 @@ function ProductDetailView({
         <ActionPanel>
           <Action.OpenInBrowser title="Open on MemRadar" url={product.url} icon={Icon.Globe} />
           <Action.CopyToClipboard title="Copy Price" content={money(product.price_usd)} />
-          {product.all_time_low ? (
-            <Action.CopyToClipboard title="Copy All-Time Low" content={money(product.all_time_low.price_usd)} />
-          ) : null}
+          {low ? <Action.CopyToClipboard title="Copy All-Time Low" content={money(low.price_usd)} /> : null}
         </ActionPanel>
       }
     />

@@ -16,12 +16,14 @@
   "commands": [
     {
       "name": "search-memory-prices",
+      "subtitle": "MemRadar",
       "title": "Search Memory Prices",
       "description": "Search tracked RAM and SSD prices, with all-time lows and a decade of history.",
       "mode": "view"
     },
     {
       "name": "show-market-overview",
+      "subtitle": "MemRadar",
       "title": "Show Market Overview",
       "description": "See how RAM and SSD prices have moved across each segment.",
       "mode": "view"
