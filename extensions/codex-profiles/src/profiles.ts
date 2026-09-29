@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { access, lstat, mkdir, readdir } from "node:fs/promises";
+import { access, lstat, mkdir, readdir, rmdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -8,6 +8,9 @@ const HOME = homedir();
 const DEFAULT_PATH = join(HOME, ".codex");
 const PROFILES_HOME = join(HOME, ".codex-profiles");
 const LEGACY_PERSONAL_ID = "personal-c48474c6";
+const REGISTRY_LOCK_PATH = join(PROFILES_HOME, ".registry-mutation-lock");
+const REGISTRY_LOCK_TIMEOUT_MS = 10_000;
+const STALE_REGISTRY_LOCK_MS = 30_000;
 
 export interface CodexProfile {
   id: string;
@@ -105,6 +108,32 @@ async function writeRegistry(registry: ProfileRegistry): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(registry));
 }
 
+async function withRegistryLock<T>(operation: () => Promise<T>): Promise<T> {
+  await mkdir(PROFILES_HOME, { recursive: true });
+  const deadline = Date.now() + REGISTRY_LOCK_TIMEOUT_MS;
+  while (true) {
+    try {
+      await mkdir(REGISTRY_LOCK_PATH, { mode: 0o700 });
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      const lockInfo = await stat(REGISTRY_LOCK_PATH).catch(() => undefined);
+      if (lockInfo && Date.now() - lockInfo.mtimeMs > STALE_REGISTRY_LOCK_MS) {
+        await rmdir(REGISTRY_LOCK_PATH).catch(() => undefined);
+        continue;
+      }
+      if (Date.now() >= deadline) throw new Error("Another profile change is still in progress. Try again.");
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  }
+
+  try {
+    return await operation();
+  } finally {
+    await rmdir(REGISTRY_LOCK_PATH).catch(() => undefined);
+  }
+}
+
 function profilesFromRegistry(registry: ProfileRegistry): CodexProfile[] {
   return [
     {
@@ -165,79 +194,90 @@ function slugForName(name: string): string {
 
 export async function createProfile(rawName: string): Promise<CodexProfile> {
   const name = validName(rawName);
-  const registry = await readRegistry();
-  const profiles = profilesFromRegistry(registry);
-  ensureUniqueName(name, profiles);
+  return withRegistryLock(async () => {
+    const registry = await readRegistry();
+    const profiles = profilesFromRegistry(registry);
+    ensureUniqueName(name, profiles);
 
-  await mkdir(PROFILES_HOME, { recursive: true });
-  const baseId = slugForName(name);
-  let id = baseId;
-  let suffix = 2;
-  while (true) {
-    try {
-      await mkdir(join(PROFILES_HOME, id));
-      break;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      id = `${baseId}-${suffix}`;
-      suffix += 1;
+    const baseId = slugForName(name);
+    let id = baseId;
+    let suffix = 2;
+    let path = join(PROFILES_HOME, id);
+    while (true) {
+      try {
+        await mkdir(path);
+        break;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        id = `${baseId}-${suffix}`;
+        suffix += 1;
+        path = join(PROFILES_HOME, id);
+      }
     }
-  }
 
-  registry.profiles.push({ id, name });
-  await writeRegistry(registry);
-  return {
-    id,
-    name,
-    path: join(PROFILES_HOME, id),
-    required: false,
-  };
+    registry.profiles.push({ id, name });
+    try {
+      await writeRegistry(registry);
+    } catch (error) {
+      // Only remove the empty directory created above; never recursively
+      // delete data that ChatGPT or another process may already have written.
+      await rmdir(path).catch(() => undefined);
+      throw error;
+    }
+    return { id, name, path, required: false };
+  });
 }
 
 export async function reattachProfileFolder(id: string, rawName: string): Promise<CodexProfile> {
   if (!validId(id)) throw new Error("That profile folder name is not valid.");
   const name = validName(rawName);
-  const registry = await readRegistry();
-  const profiles = profilesFromRegistry(registry);
-  ensureUniqueName(name, profiles);
-  if (registry.profiles.some((profile) => profile.id === id)) {
-    throw new Error("That folder is already linked to a profile.");
-  }
+  return withRegistryLock(async () => {
+    const registry = await readRegistry();
+    const profiles = profilesFromRegistry(registry);
+    ensureUniqueName(name, profiles);
+    if (registry.profiles.some((profile) => profile.id === id)) {
+      throw new Error("That folder is already linked to a profile.");
+    }
 
-  const path = join(PROFILES_HOME, id);
-  const details = await lstat(path).catch(() => undefined);
-  if (!details?.isDirectory()) throw new Error("That profile folder no longer exists.");
+    const path = join(PROFILES_HOME, id);
+    const details = await lstat(path).catch(() => undefined);
+    if (!details?.isDirectory()) throw new Error("That profile folder no longer exists.");
 
-  registry.profiles.push({ id, name });
-  await writeRegistry(registry);
-  return { id, name, path, required: false };
+    registry.profiles.push({ id, name });
+    await writeRegistry(registry);
+    return { id, name, path, required: false };
+  });
 }
 
 export async function renameProfile(id: string, rawName: string): Promise<void> {
   const name = validName(rawName);
-  const registry = await readRegistry();
-  const profiles = profilesFromRegistry(registry);
-  const target = profiles.find((profile) => profile.id === id);
-  if (!target) throw new Error("Profile not found.");
-  ensureUniqueName(name, profiles, id);
+  await withRegistryLock(async () => {
+    const registry = await readRegistry();
+    const profiles = profilesFromRegistry(registry);
+    const target = profiles.find((profile) => profile.id === id);
+    if (!target) throw new Error("Profile not found.");
+    ensureUniqueName(name, profiles, id);
 
-  if (id === "default") {
-    registry.defaultName = name;
-  } else {
-    const stored = registry.profiles.find((profile) => profile.id === id);
-    if (!stored) throw new Error("Profile not found.");
-    stored.name = name;
-  }
-  await writeRegistry(registry);
+    if (id === "default") {
+      registry.defaultName = name;
+    } else {
+      const stored = registry.profiles.find((profile) => profile.id === id);
+      if (!stored) throw new Error("Profile not found.");
+      stored.name = name;
+    }
+    await writeRegistry(registry);
+  });
 }
 
 export async function removeProfileFromList(id: string): Promise<void> {
   if (id === "default") throw new Error("The required ~/.codex profile cannot be removed.");
-  const registry = await readRegistry();
-  const before = registry.profiles.length;
-  registry.profiles = registry.profiles.filter((profile) => profile.id !== id);
-  if (registry.profiles.length === before) throw new Error("Profile not found.");
-  await writeRegistry(registry);
+  await withRegistryLock(async () => {
+    const registry = await readRegistry();
+    const before = registry.profiles.length;
+    registry.profiles = registry.profiles.filter((profile) => profile.id !== id);
+    if (registry.profiles.length === before) throw new Error("Profile not found.");
+    await writeRegistry(registry);
+  });
 }
 
 export function displayProfilePath(path: string): string {
