@@ -112,3 +112,22 @@ export const getCustomerLayouts = async (): Promise<Record<number, CustomerLayou
 export const storeCustomerLayouts = async (layouts: Record<number, CustomerLayout>): Promise<void> => {
   await LocalStorage.setItem(CUSTOMER_LAYOUTS_KEY, JSON.stringify(layouts));
 };
+
+// Own order of the favorite tasks in the menu bar, as a list of task IDs.
+const FAVORITE_ORDER_KEY = "menu-bar:favorite-order";
+
+export const getFavoriteOrder = async (): Promise<number[]> => {
+  const order = await LocalStorage.getItem<string>(FAVORITE_ORDER_KEY);
+  return order === undefined ? [] : JSON.parse(order);
+};
+
+export const storeFavoriteOrder = async (taskIDs: number[]): Promise<void> => {
+  await LocalStorage.setItem(FAVORITE_ORDER_KEY, JSON.stringify(taskIDs));
+};
+
+// Sorts items by the stored order. Items without a position go to the end and keep their relative order.
+export const sortByFavoriteOrder = <T>(items: T[], order: number[], taskID: (item: T) => number): T[] => {
+  const position = new Map(order.map((id, index) => [id, index]));
+  const positionOf = (item: T) => position.get(taskID(item)) ?? order.length;
+  return [...items].sort((a, b) => positionOf(a) - positionOf(b));
+};

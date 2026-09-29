@@ -9,7 +9,15 @@ import { Task } from "./commands/tasks/types";
 import { Preferences } from "./types";
 import { refreshTodaysActivities } from "./utils/refresh";
 import { useStatuses } from "./utils/useStatuses";
-import { CustomerLayout, getCustomerLayouts, getProjects, getTodaysActivities, StatusType } from "./utils/storage";
+import {
+  CustomerLayout,
+  getCustomerLayouts,
+  getFavoriteOrder,
+  getProjects,
+  getTodaysActivities,
+  sortByFavoriteOrder,
+  StatusType,
+} from "./utils/storage";
 
 export default function Command() {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -17,6 +25,7 @@ export default function Command() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [customerLayouts, setCustomerLayouts] = useState<Record<number, CustomerLayout>>({});
+  const [favoriteOrder, setFavoriteOrder] = useState<number[]>([]);
   const projectStatusState = useStatuses("project");
   const taskStatusState = useStatuses("task");
   const projectStatuses = projectStatusState.statuses ?? new Map<number, StatusType>();
@@ -60,9 +69,10 @@ export default function Command() {
   useEffect(() => {
     // Load everything first and set the state in one go. Raycast keeps showing the previous menu while
     // isLoading is true, so a partial state (activities without projects) would render as a flicker.
-    Promise.all([getTodaysActivities(), getProjects(), getCustomerLayouts()]).then(
-      ([activities, projects, layouts]) => {
+    Promise.all([getTodaysActivities(), getProjects(), getCustomerLayouts(), getFavoriteOrder()]).then(
+      ([activities, projects, layouts, order]) => {
         setCustomerLayouts(layouts);
+        setFavoriteOrder(order);
         setActivities(activities);
         setProjects(projects.filter((project) => project.contract?.active !== false));
         setIsLoading(false);
@@ -78,10 +88,14 @@ export default function Command() {
     .map((project) => ({ ...project, tasks: project.tasks.filter(isTaskVisible) }))
     .filter((project) => project.tasks.length > 0);
   // Favorite tasks show on top, also when their project is hidden. Inactive tasks stay out.
-  const favoriteTasks = projects.flatMap((project) =>
-    project.tasks
-      .filter((task) => task.active !== false && taskStatuses.get(task.id) === StatusType.favorite)
-      .map((task) => ({ project, task })),
+  const favoriteTasks = sortByFavoriteOrder(
+    projects.flatMap((project) =>
+      project.tasks
+        .filter((task) => task.active !== false && taskStatuses.get(task.id) === StatusType.favorite)
+        .map((task) => ({ project, task })),
+    ),
+    favoriteOrder,
+    ({ task }) => task.id,
   );
   const hiddenProjects = projects.filter((project) => projectStatuses.get(project.id) === StatusType.hidden);
   const hiddenCustomerMaps = buildCustomerMaps(hiddenProjects);
@@ -347,6 +361,14 @@ export default function Command() {
               />
             ))}
           </MenuBarExtra.Submenu>
+        ) : null}
+        {favoriteTasks.length > 0 ? (
+          <MenuBarExtra.Item
+            icon={Icon.Star}
+            title="Favorites…"
+            tooltip="Start a favorite or change their order"
+            onAction={() => launchCommand({ name: "favorites", type: LaunchType.UserInitiated })}
+          />
         ) : null}
         <MenuBarExtra.Item
           icon={Icon.Gear}
