@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
@@ -37,13 +37,12 @@ function getIcon(session: Session) {
   }
 }
 
-function formatScore(score: number) {
-  if (score === 0) return undefined;
-  return String(Number.isInteger(score) ? score : score.toFixed(2));
-}
+const ALIAS_AUTO_CONNECT_DELAY_MS = 150;
+const ALIAS_PREFIX = "/";
 
 export default function ConnectCommand() {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
@@ -62,6 +61,25 @@ export default function ConnectCommand() {
     },
   );
   const sessions = isSetupError(error) ? [] : (data ?? []);
+  const aliasQuery = searchText.startsWith(ALIAS_PREFIX)
+    ? searchText.slice(ALIAS_PREFIX.length).toLowerCase()
+    : undefined;
+  const aliasMatch = sessions.find(
+    (session) => session.Alias && session.Alias.toLowerCase() === (aliasQuery ?? searchText.toLowerCase()),
+  );
+  const visibleSessions = aliasMatch
+    ? [aliasMatch]
+    : aliasQuery !== undefined
+      ? sessions.filter((session) => session.Alias && session.Alias.toLowerCase().startsWith(aliasQuery))
+      : sessions;
+  const autoConnectTarget =
+    aliasMatch && (aliasQuery !== undefined || aliasMatch.AliasAutoConnect) ? aliasMatch.Name : undefined;
+
+  useEffect(() => {
+    if (!autoConnectTarget) return;
+    const timer = setTimeout(() => connect(autoConnectTarget), ALIAS_AUTO_CONNECT_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [autoConnectTarget]);
 
   async function connect(session: string) {
     try {
@@ -112,22 +130,26 @@ export default function ConnectCommand() {
   }
 
   return (
-    <List isLoading={isLoading || isConnecting}>
+    <List
+      key={aliasQuery === undefined ? "search" : "alias"}
+      isLoading={isLoading || isConnecting}
+      filtering={aliasQuery === undefined}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
       {renderEmptyView()}
-      {sessions.map((session, index) => {
+      {visibleSessions.map((session, index) => {
         const accessories = [];
 
-        if (session.Src === "tmux") {
+        if (session.Alias) {
+          accessories.push({ tag: session.Alias, tooltip: "Alias" });
+        }
+
+        if (session.Src === "tmux" && !session.TmuxWindows) {
           accessories.push({
             icon: Icon.AppWindow,
             text: String(session.Windows),
             tooltip: session.Windows === 1 ? "Window" : "Windows",
-          });
-        } else {
-          accessories.push({
-            text: formatScore(session.Score),
-            icon: session.Src === "tmuxinator" ? Icon.Box : Icon.Racket,
-            tooltip: "Score",
           });
         }
 
@@ -135,6 +157,8 @@ export default function ConnectCommand() {
           <List.Item
             key={index}
             title={session.Name}
+            keywords={session.Alias ? [session.Alias] : undefined}
+            subtitle={session.TmuxWindows?.map((window) => window.Name).join("  ")}
             icon={getIcon(session)}
             accessories={accessories}
             actions={

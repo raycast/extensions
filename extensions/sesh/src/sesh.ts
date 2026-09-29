@@ -9,6 +9,9 @@ export interface Session {
   Attached: number; // Whether the session is currently attached
   Windows: number; // The number of windows in the session
   Icon?: string;
+  Alias?: string;
+  AliasAutoConnect?: boolean;
+  TmuxWindows?: Window[];
 }
 
 export interface Window {
@@ -21,7 +24,7 @@ export interface Window {
 export const UPGRADE_SESH_MESSAGE = "Please upgrade to the latest version of the sesh CLI";
 
 export function getSessions({ tmuxOnly = false } = {}) {
-  const args = ["list", "--json", ...(tmuxOnly ? ["--tmux"] : [])];
+  const args = ["list", "--json", "--hide-duplicates", ...(tmuxOnly ? ["--tmux"] : [])];
   return new Promise<Session[]>((resolve, reject) => {
     execFile("sesh", args, { env: getEnv() }, (error, stdout, stderr) => {
       if (error || stderr) {
