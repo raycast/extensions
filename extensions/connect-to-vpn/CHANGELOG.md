@@ -5,14 +5,16 @@
 - Clarify extension and command descriptions, service filtering, and sorting preferences.
 - Search services by name or type, refresh from an empty list with a keyboard shortcut, and see connected VPN names in the menu bar tooltip.
 - Fix silent toggle failures when no VPN is selected or the saved VPN is missing, unavailable, or already connecting or disconnecting.
-- Add an action to choose the VPN used by Toggle Last Used without changing its connection.
-- Show shortcut feedback after requesting a connection change, without claiming the VPN has already connected.
+- Append an action to choose the VPN used by Toggle Last Used, with confirmation before changing the shortcut target.
+- Show shortcut feedback after requesting a connection change, and prevent repeated requests while macOS still reports the previous status.
 - Discover added and removed services when refreshing, and remove redundant menu bar status checks.
+- Preserve temporarily missing favorites and protect saved choices from concurrent refreshes and edits.
 - Keep favorites attached to their service when macOS network order changes, preserve manual favorite order, and fix duplicate or hidden-service entries.
 - Include disabled VPN configurations and physical services such as Wi-Fi, Bluetooth PAN, and Thunderbolt Bridge when non-VPN filtering is turned off.
-- Retry menu bar refresh signals after busy or interrupted refreshes, and explain when a manual refresh cannot run.
+- Retry menu bar refresh signals after busy or interrupted refreshes, but wait for the scheduled refresh after a failure. Explain when a manual refresh cannot run.
 - Repair tied favorite positions so migrated favorites can be reordered, and keep setup guidance out of empty search results.
-- Recover from malformed saved data and temporary status-check failures, and show useful empty and error states.
+- Show setup guidance when filtering hides all services, and keep refresh errors visible alongside previously loaded statuses.
+- Recover from malformed saved data and temporary status-check failures.
 
 ## [Bug fix] - 2026-09-21
 

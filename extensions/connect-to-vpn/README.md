@@ -5,7 +5,7 @@ Control your macOS VPN connections from Raycast and the menu bar, with favorites
 ## Setup
 
 1. Configure your VPN in macOS System Settings and complete any authentication required by your VPN provider.
-2. Open **Show Network Services** in Raycast and connect to a VPN, or choose **Use for Toggle Last Used** from its actions.
+2. Open **Show Network Services** in Raycast and connect to a VPN, or choose **Use for Toggle Last Used** from its actions and confirm the shortcut target.
 3. Assign a hotkey to **Toggle Last Used** in Raycast Settings to connect or disconnect that VPN directly.
 
 The extension controls services exposed by macOS network tools. VPN apps that manage connections independently may require their own app or Raycast extension.
@@ -20,7 +20,7 @@ Connecting and disconnecting labels mean macOS has been asked to change the conn
 
 ## Favorites and filtering
 
-Favorites retain their manual order regardless of connection status. They are saved by service name so changing the network service order in macOS does not move a favorite to a different VPN. Existing favorites are migrated using the network order at the first run of this version. Renaming a service requires selecting it and adding it to favorites again.
+Favorites retain their manual order regardless of connection status. They are saved by service name so changing the network service order in macOS does not move a favorite to a different VPN. Existing favorites are migrated using the network order when their services are listed. Saved entries for temporarily absent services are retained. Renaming a service requires selecting it and adding it to favorites again.
 
 **Filter Services** hides unavailable and non-VPN entries by default. Turn it off to see other network services, including disabled VPN configurations. Unavailable services cannot be connected from the extension.
 
@@ -32,4 +32,4 @@ Favorites retain their manual order regardless of connection status. They are sa
 
 ## Development
 
-Run `npm ci`, then `npm test`, `npx tsc --noEmit`, `npm run build`, and `npm run lint`. The regression tests mock Raycast storage and macOS commands; they do not change VPN connections. Use `npm run dev` for manual verification in Raycast.
+Run `npm ci`, then `npm run build`, `npm test`, `npx tsc --noEmit`, and `npm run lint`. The regression tests use the development-only React test renderer and mock Raycast storage and macOS commands; they do not change VPN connections. Use `npm run dev` for manual verification in Raycast.

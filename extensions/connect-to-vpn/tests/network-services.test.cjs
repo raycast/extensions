@@ -45,6 +45,7 @@ async function mount(ctx, t) {
       renderer.unmount();
     });
   });
+  while (current.isLoading) await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
   return () => current;
 }
 
@@ -57,7 +58,7 @@ test("discovers disabled VPNs, quoted names and physical interfaces with one bat
     [2, "Wi-Fi", "Wi-Fi", "en0"],
   ]);
   ctx.output.statuses = vpnList([[quoted, "Connected"]]);
-  const services = await ctx.network.getNetworkServices({}, {});
+  const services = await ctx.network.getNetworkServices();
   assert.equal(services[`service:${quoted}`].status, "connected");
   assert.equal(services["service:Disabled VPN"].status, "invalid");
   assert.equal(services["service:Wi-Fi"].status, "invalid");
@@ -65,13 +66,13 @@ test("discovers disabled VPNs, quoted names and physical interfaces with one bat
 });
 
 test("migrates numeric favorites once and preserves identity after network reordering", async () => {
-  const ctx = setup();
+  const ctx = setup({ "network-service-favorites": '{"1":true}', "network-service-favorites-order": '{"1":4}' });
   ctx.output.order = serviceOrder([
     [1, "Work VPN"],
     [2, "Home VPN"],
   ]);
   ctx.output.statuses = vpnList([["Work VPN"], ["Home VPN"]]);
-  await ctx.network.getNetworkServices({ 1: true }, { 1: 4 });
+  await ctx.network.getNetworkServices();
   const favs = await ctx.network.loadFavorites();
   const order = await ctx.network.loadFavoriteOrder();
   assert.deepEqual(favs, { "service:Work VPN": true });
@@ -80,7 +81,7 @@ test("migrates numeric favorites once and preserves identity after network reord
     [1, "Home VPN"],
     [2, "Work VPN"],
   ]);
-  const services = await ctx.network.getNetworkServices(favs, order);
+  const services = await ctx.network.getNetworkServices();
   assert.equal(services["service:Work VPN"].favorite, true);
   assert.equal(services["service:Home VPN"].favorite, false);
 });
@@ -88,7 +89,7 @@ test("migrates numeric favorites once and preserves identity after network reord
 test("unsupported fallback status is invalid rather than connectable", async () => {
   const ctx = setup();
   ctx.output.statuses = "";
-  const services = await ctx.network.getNetworkServices({}, {});
+  const services = await ctx.network.getNetworkServices();
   assert.equal(services["service:Work VPN"].status, "invalid");
   assert.deepEqual(ctx.calls[2].args, ["-showpppoestatus", "Work VPN"]);
 });
@@ -312,7 +313,7 @@ test("recent cross-command transition survives the first stale macOS status read
 
 test("background menu bar loads once, uses an adaptive icon, and refreshes on signals without echoing", async (t) => {
   const ctx = setup();
-  ctx.api.environment = { entryPointName: "menu-bar", launchType: "background" };
+  ctx.api.environment = { ...ctx.api.environment, entryPointName: "menu-bar", launchType: "background" };
   ctx.api.Color = { PrimaryText: "primary-text" };
   ctx.api.MenuBarExtra = Object.assign((props) => React.createElement("menu", props), {
     Item: "item",
@@ -328,6 +329,8 @@ test("background menu bar loads once, uses an adaptive icon, and refreshes on si
       renderer.unmount();
     });
   });
+  while (renderer.root.findByType("menu").props.isLoading)
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
   assert.equal(ctx.calls.length, 2);
   assert.deepEqual(renderer.root.findByType("menu").props.icon, {
     source: "network-disconnected.png",
@@ -436,64 +439,21 @@ test("failed and superseded refreshes report that no data was applied", async (t
   assert.match(ctx.toasts.at(-1).message, /changed during the refresh/);
 });
 
-test("menu bar retries the same signal until a refresh actually applies", async (t) => {
-  const ctx = apiMock({ "vpn-menubar-refresh-timestamp": "1" });
-  ctx.api.Color = { PrimaryText: "primary" };
-  ctx.api.MenuBarExtra = Object.assign((props) => React.createElement("menu", props), {
-    Item: "item",
-    Section: "section",
-  });
-  let calls = 0;
-  const outcomes = ["busy", "superseded", "failed", "refreshed"];
-  const refreshServices = async () => outcomes[calls++];
-  const Command = loadSource("menu-bar.tsx", {
-    "@raycast/api": ctx.api,
-    "./network-services": {
-      useNetworkServices: () => ({ favoriteServices: [], otherServices: [], invalidServices: [], refreshServices }),
-    },
-  }).default;
-  let renderer;
-  await act(async () => {
-    renderer = create(React.createElement(Command));
-  });
-  t.after(async () => act(async () => renderer.unmount()));
-  assert.equal(calls, 0);
-  ctx.storage.set("vpn-menubar-refresh-timestamp", "2");
-  for (let i = 1; i <= 4; i++) {
-    await act(async () => new Promise((resolve) => setTimeout(resolve, 510)));
-    assert.equal(calls, i);
-  }
-  await act(async () => new Promise((resolve) => setTimeout(resolve, 510)));
-  assert.equal(calls, 4);
-});
-
-for (const section of ["favoriteServices", "otherServices", "invalidServices", "none", "error"]) {
-  test(`setup empty view is only used when all service lists are empty (${section})`, async (t) => {
-    const ctx = apiMock();
-    const state = {
-      favoriteServices: [],
-      otherServices: [],
-      invalidServices: [],
-      hideInvalidDevices: false,
-      getActionForService: () => ({}),
-    };
-    if (section === "error") state.error = new Error("Unable to read services");
-    else if (section !== "none")
-      state[section] = [service({ status: section === "invalidServices" ? "invalid" : "disconnected" })];
-    ctx.api.List = Object.assign((props) => React.createElement("list", props), {
-      Item: (props) => React.createElement("row", props, props.actions),
+for (const terminal of ["refreshed", "failed"]) {
+  test(`menu bar retries busy/superseded signals but consumes ${terminal} attempts`, async (t) => {
+    const ctx = apiMock({ "vpn-menubar-refresh-timestamp": "1" });
+    ctx.api.Color = { PrimaryText: "primary" };
+    ctx.api.MenuBarExtra = Object.assign((props) => React.createElement("menu", props), {
+      Item: "item",
       Section: "section",
-      EmptyView: "empty",
     });
-    ctx.api.Action = "action";
-    ctx.api.ActionPanel = "actions";
-    ctx.api.Keyboard = { Shortcut: { Common: { Refresh: {} } } };
-    const Command = loadSource("index.tsx", {
+    let calls = 0;
+    const outcomes = ["busy", "superseded", terminal];
+    const refreshServices = async () => outcomes[calls++];
+    const Command = loadSource("menu-bar.tsx", {
       "@raycast/api": ctx.api,
       "./network-services": {
-        useNetworkServices: () => state,
-        normalizeHardwarePort: () => "",
-        transitionLabel: () => undefined,
+        useNetworkServices: () => ({ favoriteServices: [], otherServices: [], invalidServices: [], refreshServices }),
       },
     }).default;
     let renderer;
@@ -501,12 +461,88 @@ for (const section of ["favoriteServices", "otherServices", "invalidServices", "
       renderer = create(React.createElement(Command));
     });
     t.after(async () => act(async () => renderer.unmount()));
-    const empty = renderer.root.findAllByType("empty");
-    assert.equal(empty.length, section === "none" || section === "error" ? 1 : 0);
-    if (empty.length)
-      assert.equal(
-        empty[0].props.title,
-        section === "error" ? "Unable to Load Network Services" : "No Network Services Found",
-      );
+    assert.equal(calls, 0);
+    ctx.storage.set("vpn-menubar-refresh-timestamp", "2");
+    for (let i = 1; i <= 3; i++) {
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 510)));
+      assert.equal(calls, i);
+    }
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 510)));
+    assert.equal(calls, 3);
   });
 }
+
+for (const hideInvalidDevices of [false, true]) {
+  for (const section of ["favoriteServices", "otherServices", "invalidServices", "none", "error"]) {
+    test(`setup empty view is only used when all service lists are empty (${section}, hidden=${hideInvalidDevices})`, async (t) => {
+      const ctx = apiMock();
+      const state = {
+        favoriteServices: [],
+        otherServices: [],
+        invalidServices: [],
+        hideInvalidDevices,
+        getActionForService: () => ({}),
+      };
+      if (section === "error") state.error = new Error("Unable to read services");
+      else if (section !== "none")
+        state[section] = [service({ status: section === "invalidServices" ? "invalid" : "disconnected" })];
+      ctx.api.List = Object.assign((props) => React.createElement("list", props), {
+        Item: (props) => React.createElement("row", props, props.actions),
+        Section: "section",
+        EmptyView: "empty",
+      });
+      ctx.api.Action = "action";
+      ctx.api.ActionPanel = "actions";
+      ctx.api.Keyboard = { Shortcut: { Common: { Refresh: {} } } };
+      const Command = loadSource("index.tsx", {
+        "@raycast/api": ctx.api,
+        "./network-services": {
+          useNetworkServices: () => state,
+          normalizeHardwarePort: () => "",
+          transitionLabel: () => undefined,
+        },
+      }).default;
+      let renderer;
+      await act(async () => {
+        renderer = create(React.createElement(Command));
+      });
+      t.after(async () => act(async () => renderer.unmount()));
+      const empty = renderer.root.findAllByType("empty");
+      assert.equal(
+        empty.length,
+        section === "none" || section === "error" || (section === "invalidServices" && hideInvalidDevices) ? 1 : 0,
+      );
+      if (empty.length)
+        assert.equal(
+          empty[0].props.title,
+          section === "error" ? "Unable to Load Network Services" : "No Network Services Found",
+        );
+    });
+  }
+}
+
+test("a late discovery cannot undo a favorite removal or discard an absent favorite", async (t) => {
+  const ctx = setup({
+    "network-service-favorites": '{"service:Work VPN":true,"service:Absent":true}',
+    "network-service-favorites-order": '{"service:Work VPN":0,"service:Absent":1}',
+  });
+  const current = await mount(ctx, t);
+  ctx.storage.set("network-service-favorites", '{"1":true,"service:Work VPN":true,"service:Absent":true}');
+  let finish, refresh;
+  ctx.output.onRead = (callback) => {
+    finish = callback;
+  };
+  await act(async () => {
+    refresh = current().refreshServices();
+  });
+  await act(async () => current().removeFromFavorites(current().favoriteServices[0]));
+  await act(async () => {
+    finish(null, ctx.output.statuses);
+    assert.equal(await refresh, "superseded");
+  });
+  assert.deepEqual(await ctx.network.loadFavorites(), { "service:Absent": true });
+  ctx.output.onRead = undefined;
+  await act(async () => current().refreshServices());
+  assert.equal(current().favoriteServices.length, 0);
+  assert.deepEqual(await ctx.network.loadFavorites(), { "service:Absent": true });
+});

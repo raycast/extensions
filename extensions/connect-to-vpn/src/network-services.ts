@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { exec, execFile } from "child_process";
 import { Icon, LocalStorage, Toast, getPreferenceValues, showToast, environment, LaunchType } from "@raycast/api";
 import { getVpnStatus, updateVpnStatus } from "./store";
+import { updateFavoriteMetadata } from "./favorite-metadata";
+export { loadFavorites, loadFavoriteOrder } from "./favorite-metadata";
 
 type Preferences = {
   hideInvalidDevices: boolean;
@@ -10,6 +12,7 @@ type Preferences = {
 
 export type NetworkService = {
   id: string;
+  legacyId?: string;
   name: string;
   hardwarePort: string;
   device: string;
@@ -66,43 +69,24 @@ export const setServiceStatus = async (
   // is left showing its transition, and useNetworkServices watches it from an effect instead.
 };
 
-export const getNetworkServices = async (favs: Record<string, boolean>, order: Record<string, number>) => {
+export const getNetworkServices = async () => {
   const [output, vpnStatuses] = await Promise.all([listNetworkServiceOrder(), listVpnStatuses()]);
-  const lines = output.split("\n");
-  const serviceLines = lines.slice(1).join("\n");
-
-  const services = parseServices(serviceLines);
-
+  const services = parseServices(output.split("\n").slice(1).join("\n"));
   const serviceStatuses = await Promise.all(
-    services.map(async ({ legacyId, ...service }) => ({
-      ...service,
-      status: await currentStatus(service, vpnStatuses),
-      favorite: favs[service.id] ?? favs[legacyId] ?? false,
-      order: order[service.id] ?? order[legacyId] ?? 0,
-    })),
+    services.map(async (service) => ({ ...service, status: await currentStatus(service, vpnStatuses) })),
   );
-
-  // Migrate legacy IDs and repair tied positions so moving a favorite always changes its order.
-  const favoriteServices = serviceStatuses.filter((service) => service.favorite).sort((a, b) => a.order - b.order);
-  const hasLegacyMetadata = [...Object.keys(favs), ...Object.keys(order)].some((key) => /^\d+$/.test(key));
-  const hasTiedOrder = new Set(favoriteServices.map((service) => service.order)).size !== favoriteServices.length;
-  if (hasLegacyMetadata || hasTiedOrder) {
-    favoriteServices.forEach((service, index) => {
-      service.order = index;
-    });
-    await Promise.all([
-      saveFavorites(
-        Object.fromEntries(serviceStatuses.filter((service) => service.favorite).map((service) => [service.id, true])),
-      ),
-      saveFavoriteOrder(
-        Object.fromEntries(
-          serviceStatuses.filter((service) => service.favorite).map((service) => [service.id, service.order]),
-        ),
-      ),
-    ]);
-  }
-
-  return Object.fromEntries(serviceStatuses.map((service) => [service.id, service]));
+  // Discovery does not hold the metadata lock. Once it finishes, use the latest saved edits.
+  const { favorites, order } = await updateFavoriteMetadata(services);
+  return Object.fromEntries(
+    serviceStatuses.map((service) => [
+      service.id,
+      {
+        ...service,
+        favorite: favorites[service.id] ?? false,
+        order: order[service.id] ?? 0,
+      },
+    ]),
+  );
 };
 
 // How a service in transition is watched until it settles. Each check is one scutil call of about
@@ -123,8 +107,6 @@ export function useNetworkServices() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [networkServices, setNetworkServices] = useState<Record<string, NetworkService>>({});
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
-  const [favoriteOrder, setFavoriteOrder] = useState<Record<string, number>>({});
   const settleChecks = useRef<Record<string, number>>({});
 
   const pendingActions = useRef(new Set<string>());
@@ -137,8 +119,7 @@ export function useNetworkServices() {
     const startedAtRevision = revision.current;
     setIsLoading(true);
     try {
-      const [favs, order] = await Promise.all([loadFavorites(), loadFavoriteOrder()]);
-      const services = await getNetworkServices(favs, order);
+      const services = await getNetworkServices();
       const update = await getVpnStatus();
       if (update && Date.now() - update.timestamp >= 0 && Date.now() - update.timestamp < 1_000) {
         const service = services[update.serviceId];
@@ -147,21 +128,6 @@ export function useNetworkServices() {
         }
       }
       if (revision.current !== startedAtRevision) return "superseded";
-      // Read the normalized metadata from the services, including any legacy migration.
-      setFavorites(
-        Object.fromEntries(
-          Object.values(services)
-            .filter((service) => service.favorite)
-            .map((service) => [service.id, true]),
-        ),
-      );
-      setFavoriteOrder(
-        Object.fromEntries(
-          Object.values(services)
-            .filter((service) => service.favorite)
-            .map((service) => [service.id, service.order]),
-        ),
-      );
       settleChecks.current = {};
       setNetworkServices(services);
       setError(undefined);
@@ -300,62 +266,50 @@ export function useNetworkServices() {
     }
   };
 
-  const addToFavorites = async (service: NetworkService) => {
+  const editFavorites = async (change: Parameters<typeof updateFavoriteMetadata>[1]) => {
     revision.current += 1;
-    const updatedFavorites = { ...favorites, [service.id]: true };
-    setFavorites(updatedFavorites);
-    await saveFavorites(updatedFavorites);
-    const updatedOrder = { ...favoriteOrder, [service.id]: Math.max(-1, ...Object.values(favoriteOrder)) + 1 };
-    setFavoriteOrder(updatedOrder);
-    await saveFavoriteOrder(updatedOrder);
-    setNetworkServices((currentServices) => ({
-      ...currentServices,
-      [service.id]: { ...currentServices[service.id], favorite: true, order: updatedOrder[service.id] },
-    }));
+    try {
+      const { favorites, order } = await updateFavoriteMetadata(Object.values(networkServices), change);
+      setNetworkServices((current) =>
+        Object.fromEntries(
+          Object.entries(current).map(([id, service]) => [
+            id,
+            {
+              ...service,
+              favorite: favorites[id] ?? false,
+              order: order[id] ?? 0,
+            },
+          ]),
+        ),
+      );
+    } catch (err) {
+      if (!isSessionGone(err)) setError(err instanceof Error ? err : new Error(String(err)));
+    }
   };
 
-  const removeFromFavorites = async (service: NetworkService) => {
-    revision.current += 1;
-    const updatedFavorites = { ...favorites };
-    delete updatedFavorites[service.id];
-    setFavorites(updatedFavorites);
-    await saveFavorites(updatedFavorites);
+  const addToFavorites = (service: NetworkService) =>
+    editFavorites(({ favorites, order }) => {
+      if (favorites[service.id]) return;
+      favorites[service.id] = true;
+      order[service.id] = Math.max(-1, ...Object.values(order)) + 1;
+    });
 
-    const updatedOrder = { ...favoriteOrder };
-    delete updatedOrder[service.id];
-    setFavoriteOrder(updatedOrder);
-    await saveFavoriteOrder(updatedOrder);
-    setNetworkServices((currentServices) => ({
-      ...currentServices,
-      [service.id]: { ...currentServices[service.id], favorite: false, order: 0 },
-    }));
-  };
+  const removeFromFavorites = (service: NetworkService) =>
+    editFavorites(({ favorites, order }) => {
+      delete favorites[service.id];
+      delete order[service.id];
+    });
 
-  const moveFavorite = async ({ service, direction }: { service: NetworkService; direction: "up" | "down" }) => {
-    revision.current += 1;
-    const keys = Object.keys(favoriteOrder)
-      .filter((id) => networkServices[id]?.favorite)
-      .sort((a, b) => favoriteOrder[a] - favoriteOrder[b]);
-    const index = keys.indexOf(service.id);
-    const adjacentIndex = index + (direction === "up" ? -1 : 1);
-    if (index < 0 || adjacentIndex < 0 || adjacentIndex >= keys.length) return;
-
-    const adjacentKey = keys[adjacentIndex];
-    const newOrder = {
-      ...favoriteOrder,
-      [service.id]: favoriteOrder[adjacentKey],
-      [adjacentKey]: favoriteOrder[service.id],
-    };
-
-    setFavoriteOrder(newOrder);
-    await saveFavoriteOrder(newOrder);
-
-    setNetworkServices((currentServices) => ({
-      ...currentServices,
-      [service.id]: { ...currentServices[service.id], order: newOrder[service.id] },
-      [adjacentKey]: { ...currentServices[adjacentKey], order: newOrder[adjacentKey] },
-    }));
-  };
+  const moveFavorite = ({ service, direction }: { service: NetworkService; direction: "up" | "down" }) =>
+    editFavorites(({ favorites, order }) => {
+      const ids = Object.keys(networkServices)
+        .filter((id) => favorites[id])
+        .sort((a, b) => order[a] - order[b]);
+      const index = ids.indexOf(service.id);
+      const adjacent = index + (direction === "up" ? -1 : 1);
+      if (index < 0 || adjacent < 0 || adjacent >= ids.length) return;
+      [order[service.id], order[ids[adjacent]]] = [order[ids[adjacent]], order[service.id]];
+    });
 
   const moveFavoriteUp = (service: NetworkService) => moveFavorite({ service, direction: "up" });
   const moveFavoriteDown = (service: NetworkService) => moveFavorite({ service, direction: "down" });
@@ -481,54 +435,6 @@ export const sortNetworkServices = (
 
     return primaryComparison;
   });
-
-// Local storage keys
-const FAVORITES_KEY = "network-service-favorites";
-const FAVORITES_ORDER_KEY = "network-service-favorites-order";
-
-function parseStoredRecord<T>(raw: string | undefined, isValue: (value: unknown) => value is T): Record<string, T> {
-  if (!raw) return {};
-  try {
-    const value: unknown = JSON.parse(raw);
-    if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
-    const entries: [string, T][] = [];
-    for (const [key, item] of Object.entries(value)) {
-      if (isValue(item)) entries.push([key, item]);
-    }
-    return Object.fromEntries(entries);
-  } catch {
-    return {};
-  }
-}
-
-export const loadFavorites = async (): Promise<Record<string, boolean>> => {
-  const favorites = await LocalStorage.getItem<string>(FAVORITES_KEY);
-  return parseStoredRecord(favorites, (value): value is boolean => typeof value === "boolean");
-};
-
-const saveFavorites = async (favorites: Record<string, boolean>) => {
-  try {
-    await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-  } catch (err) {
-    if (!isSessionGone(err)) console.error("Error saving favorites:", err);
-  }
-};
-
-export const loadFavoriteOrder = async (): Promise<Record<string, number>> => {
-  const order = await LocalStorage.getItem<string>(FAVORITES_ORDER_KEY);
-  return parseStoredRecord(
-    order,
-    (value): value is number => typeof value === "number" && Number.isFinite(value) && value >= 0,
-  );
-};
-
-const saveFavoriteOrder = async (order: Record<string, number>) => {
-  try {
-    await LocalStorage.setItem(FAVORITES_ORDER_KEY, JSON.stringify(order));
-  } catch (err) {
-    if (!isSessionGone(err)) console.error("Error saving favorite order:", err);
-  }
-};
 
 // networksetup can block indefinitely when a service is in a bad state, and the menu bar command
 // refreshes every 30 seconds, so a blocking call stalls the extension host. Raycast gives a command

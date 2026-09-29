@@ -44,8 +44,10 @@ export default function Command() {
         if (cancelled) return;
         if (lastTimestamp === undefined) {
           lastTimestamp = timestamp;
-        } else if (timestamp > lastTimestamp && (await refreshServices()) === "refreshed") {
-          lastTimestamp = timestamp;
+        } else if (timestamp > lastTimestamp) {
+          const result = await refreshServices();
+          // Persistent failures wait for the scheduled refresh instead of spawning processes twice a second.
+          if (result === "refreshed" || result === "failed") lastTimestamp = timestamp;
         }
       } catch (err) {
         console.error("Unable to check for VPN updates:", err);

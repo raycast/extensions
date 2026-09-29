@@ -88,3 +88,33 @@ test("storage and network errors are visible through the shortcut HUD", async ()
   await failed.command();
   assert.match(failed.hud[0], /connection rejected/);
 });
+
+for (const [before, transition] of [
+  ["disconnected", "connecting"],
+  ["connected", "disconnecting"],
+]) {
+  test(`a second toggle does not repeat ${transition} while macOS reports the old status`, async () => {
+    const ctx = setup("Work VPN", [service({ status: before })]);
+    ctx.network.setServiceStatus = async (s, status) => {
+      ctx.requests.push([s, status]);
+      ctx.storage.set("vpn-connection-status", JSON.stringify({ serviceId: s.id, status, timestamp: Date.now() }));
+    };
+    await ctx.command();
+    await ctx.command();
+    assert.equal(ctx.requests.length, 1);
+    assert.match(ctx.hud.at(-1), new RegExp(`already ${transition}`));
+  });
+}
+
+for (const [name, update] of [
+  ["expired", { serviceId: "service:Work VPN", timestamp: Date.now() - 10_000 }],
+  ["future", { serviceId: "service:Work VPN", timestamp: Date.now() + 60_000 }],
+  ["different VPN", { serviceId: "service:Other VPN", timestamp: Date.now() }],
+]) {
+  test(`an ${name} shared transition does not block a new toggle`, async () => {
+    const ctx = setup("Work VPN");
+    ctx.storage.set("vpn-connection-status", JSON.stringify({ status: "connecting", ...update }));
+    await ctx.command();
+    assert.equal(ctx.requests.length, 1);
+  });
+}
