@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  Icon,
+  LaunchProps,
+  Toast,
+  openExtensionPreferences,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { api, newAskSession, safeMarkdown } from "./api";
 
@@ -50,9 +61,13 @@ function Answer(props: { sessionId: string; turns: Turn[]; question: string }) {
   const [answer, setAnswer] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  // Raised by "Try Again", which runs the same question again.
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let alive = true;
+    setError("");
+    setLoading(true);
     api
       .chat(props.question, props.sessionId)
       .then((data) => {
@@ -68,7 +83,7 @@ function Answer(props: { sessionId: string; turns: Turn[]; question: string }) {
     return () => {
       alive = false;
     };
-  }, [props.question, props.sessionId]);
+  }, [props.question, props.sessionId, attempt]);
 
   const turns: Turn[] = [...props.turns, { question: props.question, answer }];
   const history = turns
@@ -98,6 +113,12 @@ function Answer(props: { sessionId: string; turns: Turn[]; question: string }) {
             />
           ) : null}
           {answer ? <Action.CopyToClipboard title="Copy Answer" content={answer} /> : null}
+          {error ? (
+            <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => setAttempt((n) => n + 1)} />
+          ) : null}
+          {error ? (
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          ) : null}
         </ActionPanel>
       }
     />
