@@ -1,5 +1,5 @@
 import { getAccessToken } from "@raycast/utils";
-import { DASHBOARD_URL, clearStoredApiKey } from "./oauth";
+import { DASHBOARD_URL, clearStoredApiKey, getStoredApiKey } from "./oauth";
 import { markSessionRevoked } from "./session";
 
 export const API_URL = "https://api.zerion.io/v1/";
@@ -36,16 +36,25 @@ export function isApiErrorWithStatus(error: unknown, status: number): error is A
   return error instanceof ApiError && error.status === status;
 }
 
-export async function parseApiResponse<T>(response: Response): Promise<T> {
+/**
+ * `apiKey` is the key the request was sent with. It defaults to the
+ * withAccessToken cache, which a command instance keeps for its lifetime;
+ * callers outside that context (menu bar) pass the key they used explicitly.
+ */
+export async function parseApiResponse<T>(response: Response, apiKey: string | undefined = getApiKey()): Promise<T> {
   if (!response.ok) {
     let detail = `Zerion API request failed with status ${response.status}`;
     if (response.status === 401) {
-      // The stored key was revoked or disabled — sign the user out so the
-      // next command launch (or tool call) re-triggers the OAuth flow, and
-      // flag the session so the current command's gate can offer re-sign-in
-      // whichever request hit the 401.
-      await clearStoredApiKey();
-      markSessionRevoked();
+      // The key was revoked or disabled — sign the user out so the next
+      // command launch (or tool call) re-triggers the OAuth flow, and flag the
+      // session so the current command's gate can offer re-sign-in whichever
+      // request hit the 401. Only if the rejected key is still the stored one:
+      // a late 401 from a request sent before re-sign-in must not erase the
+      // key the user just obtained.
+      if (apiKey && apiKey === (await getStoredApiKey())) {
+        await clearStoredApiKey();
+        markSessionRevoked();
+      }
       detail =
         "The Zerion API key is no longer valid, so you have been signed out. Run any Zerion command to sign in again.";
     } else if (response.status === 429) {
@@ -67,8 +76,9 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
 }
 
 export async function apiFetch<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, { headers: getApiHeaders() });
-  return parseApiResponse<T>(response);
+  const apiKey = getApiKey();
+  const response = await fetch(`${API_URL}${path}`, { headers: getApiHeaders(apiKey) });
+  return parseApiResponse<T>(response, apiKey);
 }
 
 // Wire types for the JSON:API responses of api.zerion.io

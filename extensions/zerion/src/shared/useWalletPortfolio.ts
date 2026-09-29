@@ -3,8 +3,8 @@ import { useFetch } from "@raycast/utils";
 import { API_URL, getApiHeaders, parseApiResponse, type ApiPortfolioAttributes } from "./api";
 import type { AddressPortfolio } from "./types";
 
-async function parsePortfolio(response: Response): Promise<AddressPortfolio> {
-  const result = await parseApiResponse<{ data: { attributes: ApiPortfolioAttributes } }>(response);
+async function parsePortfolio(response: Response, apiKey?: string): Promise<AddressPortfolio> {
+  const result = await parseApiResponse<{ data: { attributes: ApiPortfolioAttributes } }>(response, apiKey);
   const { total, changes, positions_distribution_by_chain } = result.data.attributes;
   return {
     totalValue: total.positions,
@@ -25,7 +25,7 @@ export function useWalletPortfolio({ address, apiKey }: { address?: string; apiK
     useMemo(
       () => ({
         headers: getApiHeaders(apiKey),
-        parseResponse: parsePortfolio,
+        parseResponse: (response: Response) => parsePortfolio(response, apiKey),
         execute: Boolean(address),
         onError: (error: Error) => {
           console.error(error);
