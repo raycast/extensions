@@ -1,15 +1,7 @@
-import {
-  Alert,
-  Action,
-  ActionPanel,
-  confirmAlert,
-  environment,
-  Form,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, environment, List, showHUD } from "@raycast/api";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
-import { useState } from "react";
+import { useRef } from "react";
 
 type LockEvent = {
   phase: "preparing" | "locked" | "unlocking" | "ready" | "error";
@@ -35,22 +27,6 @@ export async function lockInputs(selectedDuration: string | undefined) {
     return;
   }
   console.log("Input Lock launch");
-  const confirmed = await confirmAlert({
-    title:
-      selectedDuration === "indefinite"
-        ? "Lock inputs indefinitely?"
-        : `Lock inputs for ${durations[selectedDuration]}?`,
-    message:
-      "Your screen stays visible and scrolling stays enabled. Hold both Command keys for 3 seconds, release, then use Touch ID. Keep holding for 8 seconds to unlock directly. " +
-      (selectedDuration === "indefinite"
-        ? "There is no automatic duration release. If the unlock gesture fails, manual recovery may be needed. "
-        : `Inputs unlock automatically after ${durations[selectedDuration]}. `) +
-      "This is a temporary input guard. Use the macOS lock screen to protect private data.",
-    primaryAction: { title: "Lock Inputs" },
-    dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
-  });
-  if (!confirmed) return;
-
   await showHUD("Preparing Input Lock…");
   const helper = spawn(
     join(environment.assetsPath, "input-lock"),
@@ -78,7 +54,7 @@ export async function lockInputs(selectedDuration: string | undefined) {
         event.phase === "ready" &&
         (event.reason === "timeout" || event.reason === "watchdog");
       if (event.phase === "locked")
-        notify("Typing and clicks blocked. Hold both Command keys to unlock.");
+        notify("Typing and clicks blocked. Tap Command 3 times for Touch ID.");
       if (event.phase === "unlocking") notify("Waiting for Touch ID…");
       if (event.phase === "error")
         notify(`Input Lock failed: ${event.message}`);
@@ -142,43 +118,39 @@ export async function lockInputs(selectedDuration: string | undefined) {
 }
 
 export default function Command() {
-  const [duration, setDuration] = useState("");
-  const [error, setError] = useState<string>();
+  const launching = useRef(false);
+  const startLock = async (duration: string) => {
+    if (launching.current) return;
+    launching.current = true;
+    try {
+      await lockInputs(duration);
+    } finally {
+      launching.current = false;
+    }
+  };
   return (
-    <Form
-      enableDrafts={false}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Lock Inputs"
-            onSubmit={async () => {
-              if (!Object.hasOwn(durations, duration)) {
-                setError("Choose a duration.");
-                return;
-              }
-              setDuration("");
-              await lockInputs(duration);
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown
-        id="duration"
-        title="Duration"
-        value={duration}
-        storeValue={false}
-        error={error}
-        onChange={(value) => {
-          setDuration(value);
-          setError(undefined);
-        }}
+    <List searchBarPlaceholder="Choose a duration to lock inputs">
+      <List.Section
+        title="Lock Inputs"
+        subtitle="Triple-tap Command for Touch ID · scrolling stays available"
       >
-        <Form.Dropdown.Item value="" title="Choose duration" />
         {Object.entries(durations).map(([value, title]) => (
-          <Form.Dropdown.Item key={value} value={value} title={title} />
+          <List.Item
+            key={value}
+            title={title}
+            subtitle={
+              value === "indefinite"
+                ? "No automatic expiry"
+                : "Unlocks automatically"
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Lock Inputs" onAction={() => startLock(value)} />
+              </ActionPanel>
+            }
+          />
         ))}
-      </Form.Dropdown>
-    </Form>
+      </List.Section>
+    </List>
   );
 }

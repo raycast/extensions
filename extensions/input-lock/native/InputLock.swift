@@ -21,7 +21,6 @@ struct CommandChord {
     private(set) var leftDown = false
     private(set) var rightDown = false
     private(set) var startedAt: TimeInterval?
-    var authenticationTriggered = false
 
     mutating func flagsChanged(rawFlags: UInt64, keyCode: Int64, commandHeld: Bool, fallbackKeyDown: Bool, at time: TimeInterval) {
         // Side bits are from the macOS SDK's NX_DEVICELCMDKEYMASK and NX_DEVICERCMDKEYMASK.
@@ -41,14 +40,55 @@ struct CommandChord {
             if startedAt == nil { startedAt = time }
         } else {
             startedAt = nil
-            authenticationTriggered = false
         }
     }
 
     func heldFor(at time: TimeInterval) -> TimeInterval? { startedAt.map { time - $0 } }
 }
 
-let lockedMessage = "Hold left and right Command for 3 seconds to use Touch ID. Keep holding for 8 seconds to force unlock."
+struct CommandTap {
+    private enum Sequence {
+        case idle, blocked
+        case pressed(count: Int, startedAt: TimeInterval)
+        case released(count: Int, startedAt: TimeInterval)
+    }
+    private var sequence = Sequence.idle
+    private var previousSides: UInt8 = 0
+
+    mutating func reset() { sequence = previousSides == 0 ? .idle : .blocked }
+
+    mutating func reset(leftDown: Bool, rightDown: Bool) {
+        previousSides = (leftDown ? 1 : 0) | (rightDown ? 2 : 0)
+        reset()
+    }
+
+    mutating func update(leftDown: Bool, rightDown: Bool, at time: TimeInterval) -> Bool {
+        let sides: UInt8 = (leftDown ? 1 : 0) | (rightDown ? 2 : 0)
+        guard sides != previousSides else { return false }
+        let previous = previousSides
+        previousSides = sides
+        if sides == 3 { sequence = .blocked; return false }
+        switch sequence {
+        case .blocked:
+            if sides == 0 { sequence = .idle }
+        case .idle:
+            if sides != 0 { sequence = .pressed(count: 0, startedAt: time) }
+        case let .pressed(count, startedAt):
+            guard sides == 0 else { sequence = .blocked; return false }
+            guard time - startedAt <= 1.5 else { sequence = .idle; return false }
+            if count == 2 { sequence = .idle; return true }
+            sequence = .released(count: count + 1, startedAt: startedAt)
+        case let .released(count, startedAt):
+            guard previous == 0, sides != 0 else { sequence = .blocked; return false }
+            sequence = time - startedAt <= 1.5
+                ? .pressed(count: count, startedAt: startedAt)
+                : .pressed(count: 0, startedAt: time)
+        }
+        return false
+    }
+}
+
+let lockedMessage = "Tap either Command key 3 times quickly to use Touch ID. Hold both Command keys for 8 seconds to force unlock."
 
 func writeJSON<Value: Encodable>(_ value: Value) {
     do {
@@ -119,12 +159,10 @@ func selfTest() {
     chord.flagsChanged(rawFlags: 0x18, keyCode: 54, commandHeld: true, fallbackKeyDown: true, at: 0.1)
     chord.flagsChanged(rawFlags: 0x18, keyCode: 54, commandHeld: true, fallbackKeyDown: true, at: 0.2)
     precondition(chord.leftDown && chord.rightDown && chord.startedAt == 0.1)
-    precondition(chord.heldFor(at: 3.09)! < 3)
-    precondition(chord.heldFor(at: 3.1)! >= 3)
-    chord.authenticationTriggered = true
+    precondition(chord.heldFor(at: 8.09)! < 8)
     precondition(chord.heldFor(at: 8.1)! >= 8)
     chord.flagsChanged(rawFlags: 0x10, keyCode: 55, commandHeld: true, fallbackKeyDown: false, at: 9)
-    precondition(chord.startedAt == nil && !chord.authenticationTriggered)
+    precondition(chord.startedAt == nil)
     chord.flagsChanged(rawFlags: 0x18, keyCode: 55, commandHeld: true, fallbackKeyDown: true, at: 10)
     precondition(chord.startedAt == 10)
     chord.flagsChanged(rawFlags: 0, keyCode: 54, commandHeld: false, fallbackKeyDown: false, at: 11)
@@ -134,6 +172,42 @@ func selfTest() {
     fallback.flagsChanged(rawFlags: 0, keyCode: 55, commandHeld: true, fallbackKeyDown: true, at: 1)
     fallback.flagsChanged(rawFlags: 0, keyCode: 54, commandHeld: true, fallbackKeyDown: true, at: 2)
     precondition(fallback.leftDown && fallback.rightDown && fallback.startedAt == 2)
+    for sides in [[true, true, true], [false, false, false], [true, false, true]] {
+        var taps = CommandTap()
+        for (index, left) in sides.enumerated() {
+            let time = Double(index) * 0.3
+            precondition(!taps.update(leftDown: left, rightDown: !left, at: time))
+            precondition(!taps.update(leftDown: left, rightDown: !left, at: time + 0.01))
+            precondition(taps.update(leftDown: false, rightDown: false, at: time + 0.1) == (index == 2))
+            precondition(!taps.update(leftDown: false, rightDown: false, at: time + 0.11))
+        }
+    }
+    var taps = CommandTap()
+    precondition(!taps.update(leftDown: true, rightDown: false, at: 0))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 2))
+    precondition(!taps.update(leftDown: true, rightDown: false, at: 3))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 3.1))
+    precondition(!taps.update(leftDown: true, rightDown: false, at: 5))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 5.1))
+    precondition(!taps.update(leftDown: true, rightDown: false, at: 5.2))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 5.3))
+    taps.reset()
+    precondition(!taps.update(leftDown: true, rightDown: false, at: 5.4))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 5.5))
+    precondition(!taps.update(leftDown: true, rightDown: false, at: 5.6))
+    precondition(!taps.update(leftDown: true, rightDown: true, at: 5.7))
+    precondition(!taps.update(leftDown: false, rightDown: true, at: 5.8))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 5.9))
+    for index in 0..<3 {
+        let time = 6 + Double(index) * 0.2
+        precondition(!taps.update(leftDown: true, rightDown: false, at: time))
+        if index == 2 { taps.reset() }
+        precondition(!taps.update(leftDown: false, rightDown: false, at: time + 0.1))
+    }
+    precondition(!taps.update(leftDown: false, rightDown: true, at: 7))
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 7.1))
+    taps.reset(leftDown: true, rightDown: false)
+    precondition(!taps.update(leftDown: false, rightDown: false, at: 7.2))
     emit(.ready, "self-test passed", reason: "selfTest")
 }
 
@@ -155,6 +229,8 @@ private let displayChanged: CGDisplayReconfigurationCallBack = { _, _, userInfo 
 final class LockController {
     private(set) var phase = LockPhase.ready
     private var chord = CommandChord()
+    private var commandTap = CommandTap()
+    private var authenticationRequestPending = false
     private var tap: CFMachPort?
     private var tapSource: CFRunLoopSource?
     private var assertions: [IOPMAssertionID] = []
@@ -180,7 +256,7 @@ final class LockController {
         }
         tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap, place: .headInsertEventTap, options: .listenOnly,
-            eventsOfInterest: CGEventMask(1) << CGEventType.flagsChanged.rawValue,
+            eventsOfInterest: eventMask,
             callback: { _, type, event, userInfo in
                 guard let userInfo else { return Unmanaged.passUnretained(event) }
                 return Unmanaged<LockController>.fromOpaque(userInfo).takeUnretainedValue().handle(type, event)
@@ -192,7 +268,7 @@ final class LockController {
         CFRunLoopAddSource(CFRunLoopGetMain(), tapSource, .commonModes)
         guard CGEvent.tapIsEnabled(tap: tap) else { endEscapeTest(passed: false, message: "The input tap was disabled") }
         escapeDeadline = ProcessInfo.processInfo.systemUptime + 15
-        emit(.ready, "Hold left and right Command for 3 seconds within 15 seconds", reason: "escapeTest")
+        emit(.ready, "Tap either Command key 3 times quickly within 15 seconds", reason: "escapeTest")
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in self?.tickEscapeTest() }
         withExtendedLifetime(self) { RunLoop.main.run() }
     }
@@ -205,9 +281,6 @@ final class LockController {
         }
         let now = ProcessInfo.processInfo.systemUptime
         if now >= deadline { endEscapeTest(passed: false, message: "Escape gesture timed out") }
-        if let duration = chord.heldFor(at: now), duration >= 3 {
-            endEscapeTest(passed: true, message: "Escape gesture passed")
-        }
     }
 
     private func endEscapeTest(passed: Bool, message: String) -> Never {
@@ -309,6 +382,23 @@ final class LockController {
                 fallbackKeyDown: fallbackKeyDown,
                 at: ProcessInfo.processInfo.systemUptime
             )
+            if keyCode != 55 && keyCode != 54 {
+                commandTap.reset()
+            } else if phase == .locked || escapeDeadline != nil {
+                let triggered = commandTap.update(leftDown: chord.leftDown, rightDown: chord.rightDown, at: ProcessInfo.processInfo.systemUptime)
+                if triggered, !authenticationRequestPending {
+                    authenticationRequestPending = true
+                    DispatchQueue.main.async {
+                        guard self.authenticationRequestPending else { return }
+                        self.authenticationRequestPending = false
+                        if self.escapeDeadline != nil {
+                            self.endEscapeTest(passed: true, message: "Command tap gesture passed")
+                        } else if self.phase == .locked { self.authenticate() }
+                    }
+                }
+            }
+        } else if type == .keyDown || type == .leftMouseDown || type == .rightMouseDown || type == .otherMouseDown {
+            commandTap.reset()
         }
         return phase == .locked || phase == .unlocking ? nil : Unmanaged.passUnretained(event)
     }
@@ -324,10 +414,6 @@ final class LockController {
         guard let tap, CGEvent.tapIsEnabled(tap: tap) else { finish(reason: "eventTapDisabled"); return }
         guard let duration = chord.heldFor(at: ProcessInfo.processInfo.systemUptime) else { return }
         if duration >= 8 { finish(reason: "recovery"); return }
-        if duration >= 3 && !chord.authenticationTriggered {
-            chord.authenticationTriggered = true
-            authenticate()
-        }
     }
 
     private func readControl() {
@@ -345,6 +431,8 @@ final class LockController {
                 let activation = ProcessInfo.processInfo.systemUptime
                 writeJSON(["kind": "active", "uptime": String(activation)])
                 phase = .locked
+                chord = CommandChord()
+                commandTap = CommandTap()
                 lastHeartbeat = activation
                 emit(phase, lockedMessage)
             } else if packet["command"] == "release" {
@@ -354,7 +442,8 @@ final class LockController {
     }
 
     private func authenticate() {
-        guard !authenticationInProgress else { return }
+        guard phase == .locked, !authenticationInProgress else { return }
+        commandTap.reset()
         authenticationInProgress = true
         phase = .unlocking
         emit(phase, "Waiting for Touch ID")
@@ -365,6 +454,7 @@ final class LockController {
                 guard let self, self.phase == .unlocking else { return }
                 self.authenticationInProgress = false
                 self.authenticationContext = nil
+                self.commandTap.reset(leftDown: self.chord.leftDown, rightDown: self.chord.rightDown)
                 if success { self.finish(reason: "touchID") }
                 else { self.phase = .locked; emit(self.phase, lockedMessage) }
             }

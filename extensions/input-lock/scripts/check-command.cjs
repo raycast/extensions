@@ -16,8 +16,7 @@ const compiled = ts.transpileModule(readFileSync(sourcePath, "utf8"), {
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 const timedDuration = "600";
 
-function run(confirmed) {
-  const confirmations = [];
+function run() {
   const spawns = [];
   const huds = [];
   const state = [];
@@ -36,16 +35,12 @@ function run(confirmed) {
   commandModule.require = (name) => {
     if (name === "@raycast/api")
       return {
-        Alert: { ActionStyle: { Cancel: "cancel" } },
         environment: { assetsPath: "/test/assets" },
-        Form: Object.assign(() => {}, {
-          Dropdown: Object.assign(() => {}, { Item: "item" }),
-        }),
-        Action: { SubmitForm: "submit" },
+        List: Object.assign(() => {}, { Section: "section", Item: "item" }),
+        Action: "action",
         ActionPanel: "actions",
-        confirmAlert: async (options) => {
-          confirmations.push(options);
-          return confirmed;
+        confirmAlert: async () => {
+          assert.fail("locking must not require a confirmation dialog");
         },
         showHUD: async (message) => {
           huds.push(message);
@@ -54,10 +49,10 @@ function run(confirmed) {
       };
     if (name === "react")
       return {
-        useState: (initial) => {
+        useRef: (initial) => {
           const index = hookIndex++;
-          if (index >= state.length) state.push(initial);
-          return [state[index], (value) => (state[index] = value)];
+          if (index >= state.length) state.push({ current: initial });
+          return state[index];
         },
       };
     if (name === "react/jsx-runtime")
@@ -81,7 +76,6 @@ function run(confirmed) {
       hookIndex = 0;
       return commandModule.exports.default();
     },
-    confirmations,
     spawns,
     huds,
     child,
@@ -90,7 +84,7 @@ function run(confirmed) {
 }
 
 async function checkSignalExit() {
-  const test = run(true);
+  const test = run();
   const command = test.command(timedDuration);
   await tick();
   test.child.emit("close", null, "SIGKILL");
@@ -103,7 +97,7 @@ async function checkSignalExit() {
 }
 
 async function checkTrailingRecord(endStdout) {
-  const test = run(true);
+  const test = run();
   let settled = false;
   const command = test.command(timedDuration).then(() => {
     settled = true;
@@ -159,43 +153,33 @@ async function checkDurations() {
   );
   assert.equal(manifest.commands[0].mode, "view");
   assert.equal(Object.hasOwn(manifest.commands[0], "arguments"), false);
-  const form = run(false).view();
-  assert.equal(form.props.enableDrafts, false);
-  const dropdown = form.props.children;
-  assert.equal(dropdown.props.value, "");
-  assert.equal(dropdown.props.storeValue, false);
-  assert.equal(Object.hasOwn(dropdown.props, "defaultValue"), false);
-  const items = dropdown.props.children.flat();
-  assert.deepEqual(
-    items.map(({ props: { title, value } }) => ({ title, value })),
-    [{ title: "Choose duration", value: "" }, ...choices],
+  const test = run();
+  const list = test.view();
+  assert.equal(list.props.children.type, "section");
+  assert.ok(
+    list.props.children.props.subtitle.includes("Triple-tap Command for Touch ID"),
   );
-  for (const { title, value } of choices) {
-    const test = run(true);
-    const command = test.command(value);
+  assert.ok(
+    list.props.children.props.subtitle.includes("scrolling stays available"),
+  );
+  const items = list.props.children.props.children;
+  assert.equal(items.length, 6);
+  assert.deepEqual(
+    items.map(({ props }) => props.title),
+    choices.map(({ title }) => title),
+  );
+  assert.equal(items.at(-1).props.subtitle, "No automatic expiry");
+  assert.equal(test.spawns.length, 0, "browsing must not start a helper");
+  assert.equal(test.huds.length, 0, "browsing must not close the list");
+  for (const { value } of choices) {
+    const test = run();
+    const items = test.view().props.children.props.children;
+    const action =
+      items[choices.findIndex((choice) => choice.value === value)].props.actions
+        .props.children;
+    assert.equal(action.props.title, "Lock Inputs");
+    const command = action.props.onAction();
     await tick();
-    assert.equal(test.confirmations.length, 1);
-    assert.equal(
-      test.confirmations[0].title,
-      value === "indefinite"
-        ? "Lock inputs indefinitely?"
-        : `Lock inputs for ${title}?`,
-    );
-    assert.equal(test.confirmations[0].primaryAction.title, "Lock Inputs");
-    assert.equal(test.confirmations[0].dismissAction.style, "cancel");
-    if (value === "indefinite") {
-      assert.ok(
-        test.confirmations[0].message.includes(
-          "There is no automatic duration release. If the unlock gesture fails, manual recovery may be needed.",
-        ),
-      );
-    } else {
-      assert.ok(
-        test.confirmations[0].message.includes(
-          `Inputs unlock automatically after ${title}.`,
-        ),
-      );
-    }
     assert.equal(test.spawns.length, 1);
     assert.equal(test.spawns[0][0], "/test/assets/input-lock");
     assert.deepEqual(test.spawns[0][1], ["--lock", value]);
@@ -220,13 +204,8 @@ async function checkInvalidDurations() {
     "__proto__",
     600,
   ]) {
-    const test = run(true);
+    const test = run();
     await test.command(duration);
-    assert.equal(
-      test.confirmations.length,
-      0,
-      "invalid duration must not confirm",
-    );
     assert.equal(
       test.spawns.length,
       0,
@@ -248,7 +227,7 @@ async function checkRecovery() {
       [1, null],
       [null, "SIGKILL"],
     ]) {
-      const test = run(true);
+      const test = run();
       const command = test.command(timedDuration);
       await tick();
       test.child.stdout.emit(
@@ -264,7 +243,7 @@ async function checkRecovery() {
       );
     }
   }
-  const test = run(true);
+  const test = run();
   const command = test.command(timedDuration);
   await tick();
   test.child.stdout.emit(
@@ -279,65 +258,55 @@ async function checkRecovery() {
   ]);
 }
 
-async function checkForm() {
-  const test = run(false);
-  let form = test.view();
-  const submit = (view) => view.props.actions.props.children.props.onSubmit();
-  await submit(form);
-  assert.equal(test.confirmations.length, 0);
-  assert.equal(test.spawns.length, 0);
-  form = test.view();
-  assert.equal(form.props.children.props.error, "Choose a duration.");
-  form.props.children.props.onChange("toString");
-  await submit(test.view());
-  assert.equal(test.confirmations.length, 0);
-  test.view().props.children.props.onChange("1800");
-  form = test.view();
-  assert.equal(form.props.children.props.value, "1800");
-  assert.equal(form.props.children.props.error, undefined);
-  await submit(form);
-  assert.equal(test.confirmations[0].title, "Lock inputs for 30 minutes?");
-  assert.equal(test.spawns.length, 0);
+async function checkRepeatedAction() {
+  const test = run();
+  const action = (index = 0) =>
+    test
+      .view()
+      .props.children.props.children[
+        index
+      ].props.actions.props.children.props.onAction();
+  const command = action();
+  await action(1);
+  await tick();
   assert.equal(
-    test.view().props.children.props.value,
-    "",
-    "cancel requires a fresh choice",
+    test.spawns.length,
+    1,
+    "repeat during preparation must be ignored",
   );
-  await submit(test.view());
-  assert.equal(test.confirmations.length, 1);
+  await action(2);
   assert.equal(
-    run(false).view().props.children.props.value,
-    "",
-    "new launch starts empty",
+    test.spawns.length,
+    1,
+    "repeat during a session must be ignored",
   );
+  test.child.emit("close", 0, null);
+  await command;
+  const nextCommand = action(1);
+  await tick();
+  assert.equal(
+    test.spawns.length,
+    2,
+    "a completed session allows another lock",
+  );
+  assert.deepEqual(test.spawns[1][1], ["--lock", "1800"]);
+  test.child.emit("close", 0, null);
+  await nextCommand;
 }
 
 (async () => {
-  await checkForm();
+  await checkRepeatedAction();
   await checkDurations();
   await checkInvalidDurations();
   await checkRecovery();
-  const confirmed = run(true);
+  const confirmed = run();
   let settled = false;
   const command = confirmed.command(timedDuration).then(() => {
     settled = true;
   });
   await tick();
-  assert.equal(
-    confirmed.confirmations[0]?.primaryAction?.title,
-    "Lock Inputs",
-    "confirmation must offer Lock Inputs",
-  );
-  assert.equal(
-    confirmed.spawns.length,
-    1,
-    "confirmation must start one helper",
-  );
-  assert.deepEqual(
-    confirmed.spawns[0][1],
-    ["--lock", "600"],
-    "confirmation must lock for the selected duration",
-  );
+  assert.equal(confirmed.spawns.length, 1, "action must start one helper");
+  assert.deepEqual(confirmed.spawns[0][1], ["--lock", "600"]);
   assert.equal(settled, false, "command must keep the helper alive");
   confirmed.child.stdout.emit(
     "data",
@@ -358,10 +327,6 @@ async function checkForm() {
   confirmed.finishHUD();
   await command;
 
-  const cancelled = run(false);
-  await cancelled.command(timedDuration);
-  assert.equal(cancelled.confirmations[0]?.primaryAction?.title, "Lock Inputs");
-  assert.equal(cancelled.spawns.length, 0, "cancel must not start a helper");
   let failures = 0;
   for (const [name, check] of [
     ["signal exit", checkSignalExit],
@@ -377,7 +342,7 @@ async function checkForm() {
   }
   assert.equal(failures, 0, "signal and trailing-record checks must pass");
   console.log(
-    "command check passed: empty non-persistent form, six durations, missing/invalid selection, cancel, helper lifetime, final HUD, signals, trailing records, timeout/watchdog recovery, error guard",
+    "command check passed: six direct duration actions, browsing without locking, repeated action guard, invalid duration, helper lifetime, final HUD, signals, trailing records, timeout/watchdog recovery, error guard",
   );
 })().catch((error) => {
   console.error(error.stack);

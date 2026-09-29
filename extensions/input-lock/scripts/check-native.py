@@ -129,4 +129,4 @@ process = subprocess.Popen([helper, "--self-test"], stdout=writer, stderr=subpro
 os.close(writer)
 _, error = process.communicate(timeout=5)
 assert process.returncode == 1 and b"failed to write helper status" in error, (process.returncode, error)
-print("native check passed: duration validation, Command timing, normal/startup exit, activation timeout, frozen-worker watchdog, parent loss, guardian signals/loss, late/broken/full output, worker parent binding")
+print("native check passed: duration validation, triple Command taps and emergency hold, normal/startup exit, activation timeout, frozen-worker watchdog, parent loss, guardian signals/loss, late/broken/full output, worker parent binding")
