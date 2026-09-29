@@ -183,14 +183,51 @@ function trimToMatch(markdown: string, matchIndex: number): string {
   return `*⋯*\n\n${markdown.slice(lineStart)}`;
 }
 
-/** Where the first occurrence of any term starts in `markdown`, or -1. Terms arrive lowercased
- *  with quotes folded (parseSearchTerms), so the text is folded the same way to compare. */
+interface Range {
+  start: number;
+  end: number;
+}
+
+/*
+ * Stretches of raw markdown that never appear in the rendered preview — the same parts
+ * bodyToPlainText (notes.ts) strips before a note is matched, so a note is only ever found by text
+ * that can actually be seen: a link or image's `(target)` (its label IS shown), an HTML comment,
+ * an HTML tag itself (Detail drops tags but keeps what's between them — `<https://…>` autolinks
+ * aren't tags, and do show), and a code fence's own line, whose language name isn't displayed.
+ * One combined pass, left to right, so one construct can't borrow another's delimiters.
+ */
+const HIDDEN_CONSTRUCTS =
+  /<!--[\s\S]*?-->|!?\[[^\]]*\]\([^)]*\)|<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^>\n]*)?\/?>|^```[^\n]*$/gm;
+
+function hiddenSpans(markdown: string): Range[] {
+  const spans: Range[] = [];
+  for (const match of markdown.matchAll(HIDDEN_CONSTRUCTS)) {
+    const text = match[0];
+    const at = match.index;
+    // A link or image: only the `(target)` is hidden.
+    const start = /^!?\[/.test(text) ? at + text.lastIndexOf("](") + 1 : at;
+    spans.push({ start, end: at + text.length });
+  }
+  return spans;
+}
+
+/**
+ * Where the first VISIBLE occurrence of any term starts in `markdown`, or -1 — never one inside a
+ * link target or other hidden markup: scrolling to that would bring text into view that the
+ * preview doesn't show, and could push the real match off-screen. Terms arrive lowercased with
+ * quotes folded (parseSearchTerms), so the text is folded the same way to compare.
+ */
 function firstMatchIndex(markdown: string, terms: string[]): number {
   const haystack = straightenQuotes(markdown).toLowerCase();
+  const hidden = hiddenSpans(markdown);
   let first = -1;
   for (const term of terms) {
-    const index = haystack.indexOf(term);
-    if (index !== -1 && (first === -1 || index < first)) first = index;
+    for (let index = haystack.indexOf(term); index !== -1; index = haystack.indexOf(term, index + 1)) {
+      const end = index + term.length;
+      if (hidden.some((span) => index < span.end && end > span.start)) continue;
+      if (first === -1 || index < first) first = index;
+      break; // later occurrences of this term can only be further down
+    }
   }
   return first;
 }
