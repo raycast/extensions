@@ -1,5 +1,6 @@
 import { execa } from "execa";
 import { Video } from "../types.js";
+import { PROGRESS_TEMPLATE, YtdlpEvent, parseYtdlpLine } from "./progress.js";
 import { DEFAULT_IDLE_MS, runWithWatchdog } from "./run.js";
 
 /**
@@ -107,6 +108,12 @@ const FILEPATH_LINE_RE = new RegExp(`^${FILEPATH_TAG}(.+)$`);
  * `--newline` makes yt-dlp terminate each progress update with a real newline.
  * On a pipe (non-TTY) it otherwise redraws progress with bare `\r`, which a
  * line-buffered reader would sit on until the download finished.
+ *
+ * `--progress-template` swaps the human progress line for raw byte counts,
+ * speed and ETA (see `PROGRESS_TEMPLATE`), which the download view charts.
+ * `--print` implies `--quiet`, which would also hide the `[info] … format(s)`,
+ * `[download] Destination` and `[Merger]` lines the view uses to tell streams
+ * and the merge step apart; `--no-quiet` (yt-dlp 2023.07+) brings them back.
  */
 export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
   const args = ["-o", a.outputTemplate, "--ffmpeg-location", a.ffmpegPath, "--no-playlist"];
@@ -122,7 +129,16 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
   } else {
     args.push("--format", downloadFormat, "--merge-output-format", target);
   }
-  args.push("--progress", "--newline", "--print", `after_move:${FILEPATH_TAG}%(filepath)s`, a.url);
+  args.push(
+    "--no-quiet",
+    "--progress",
+    "--newline",
+    "--progress-template",
+    PROGRESS_TEMPLATE,
+    "--print",
+    `after_move:${FILEPATH_TAG}%(filepath)s`,
+    a.url,
+  );
   return args;
 }
 
@@ -130,22 +146,26 @@ export type VideoDownloadResult = { filePath: string };
 
 /**
  * Run yt-dlp for a media download. `onProgress` receives the download percentage
- * as yt-dlp reports it. Resolves with the downloaded file path on a zero exit;
- * rejects with the stderr text on a non-zero exit, or with a watchdog error if
- * yt-dlp stalls. Progress and the `after_move:filepath` line are read from stdout.
+ * as yt-dlp reports it; `onEvent`, when given, receives every parsed progress,
+ * stream and post-processing event (see `parseYtdlpLine`). Resolves with the
+ * downloaded file path on a zero exit; rejects with the stderr text on a non-zero
+ * exit, or with a watchdog error if yt-dlp stalls. Progress and the
+ * `after_move:filepath` line are read from stdout.
  */
 export async function runVideoDownload(
   binaryPath: string,
   options: VideoDownloadArgs,
   onProgress: (percent: number) => void,
+  onEvent?: (event: YtdlpEvent) => void,
 ): Promise<VideoDownloadResult> {
   let filePath = "";
   // Line-buffered (via onStdoutLine) so a tagged filepath split across two
   // stream chunks is still matched whole.
   const handleLine = (line: string) => {
-    const progress = /\[download\]\s+(\d+(?:\.\d+)?)%/.exec(line);
-    if (progress) {
-      onProgress(Number(progress[1]));
+    const event = parseYtdlpLine(line);
+    if (event) {
+      if (event.type === "progress" && event.progress.percent !== undefined) onProgress(event.progress.percent);
+      onEvent?.(event);
       return;
     }
     const tagged = FILEPATH_LINE_RE.exec(line.trim());

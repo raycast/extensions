@@ -6,7 +6,7 @@ Download videos, audio, image galleries, Spotify music, and complete webpages fr
 
 ## Commands
 
-- **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download.
+- **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
 - **Fast Download** — pass a URL as a command argument and download it instantly using your saved defaults — no form.
 
 ## What you need

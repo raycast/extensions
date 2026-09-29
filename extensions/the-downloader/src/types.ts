@@ -19,4 +19,9 @@ export type Video = {
   /** Absent when the extractor never set it; some extractors emit an explicit `null`. */
   live_status?: string | null;
   formats: Format[];
+  /** Optional fields the download view shows when the extractor provides them. */
+  uploader?: string | null;
+  channel?: string | null;
+  thumbnail?: string | null;
+  extractor_key?: string | null;
 };

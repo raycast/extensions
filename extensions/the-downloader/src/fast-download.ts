@@ -23,6 +23,7 @@ import { AbortError } from "./lib/run.js";
 import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "./lib/monolith.js";
+import { progressMessage } from "./lib/format.js";
 import {
   downloadPath,
   getDenoPath,
@@ -321,8 +322,9 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     const { filePath } = await runVideoDownload(
       ytdlPath,
       { url, format, outputTemplate, ffmpegPath, denoPath: deno, idleMs: getIdleTimeoutMs(), abortSignal: signal },
-      (percent) => {
-        toast.message = `${Math.floor(percent)}%`;
+      () => undefined,
+      (event) => {
+        if (event.type === "progress") toast.message = progressMessage(event.progress) || toast.message;
       },
     );
     toast.style = Toast.Style.Success;

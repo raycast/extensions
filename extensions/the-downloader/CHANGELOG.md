@@ -1,5 +1,13 @@
 # The Downloader Changelog
 
+## [Live Download View] - {PR_MERGE_DATE}
+
+- **See every download live.** Pressing Download now opens a view with a progress ring, speed, time left, downloaded size and elapsed time, a download-speed chart, and a step strip — Prepare → Video → Audio → Merge → Saved when yt-dlp fetches video and audio separately. Galleries and Spotify count files and tracks over time; webpages, transcripts and thumbnails show their step and a running clock. The sidebar lists the title, channel, duration, source, type, format, size, folder and saved file, and the video's thumbnail sits below the chart.
+- **Finished and failed downloads stay on screen** with Open File, Show in Finder, Copy File, Copy Path and Download Another, or the full error with Copy Error. Stop Download (⌃X) cancels from the view; Enter never stops a download.
+- **Esc goes back to the form without cancelling** — the download keeps running and its toast keeps reporting progress, as before.
+- **Richer progress toasts.** Video and audio toasts in Download and Fast Download show speed and time left next to the percentage (`42% · 5.20 MB/s · 0:12 left`). yt-dlp now reports progress through a machine-readable `--progress-template`, and `--no-quiet` keeps its stream and merge messages visible despite `--print`.
+- Upgraded to Raycast API 2.5 and @raycast/utils 2.3, with ESLint 10 and the React 19 / Node 22 types the API expects.
+
 ## [Fix: Download Correctness] - {PR_MERGE_DATE}
 
 - **Deno is optional in Fast Download.** A missing Deno no longer blocks the whole video path — only some extractors (e.g. YouTube) benefit from a JS runtime, so sites like Twitch, Vimeo, or TikTok now download without it, matching the AI tool and transcript behavior.

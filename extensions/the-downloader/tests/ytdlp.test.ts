@@ -11,6 +11,7 @@ import {
   isLiveStream,
   runVideoDownload,
 } from "../src/lib/ytdlp";
+import { PROGRESS_TEMPLATE } from "../src/lib/progress";
 
 function fakeChild() {
   const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
@@ -40,8 +41,11 @@ describe("buildVideoDownloadArgs", () => {
       "mp3",
       "--audio-quality",
       "0",
+      "--no-quiet",
       "--progress",
       "--newline",
+      "--progress-template",
+      PROGRESS_TEMPLATE,
       "--print",
       "after_move:THE-DOWNLOADER-FILEPATH:%(filepath)s",
       "https://example.com/v",
@@ -73,8 +77,11 @@ describe("buildVideoDownloadArgs", () => {
       "bestvideo+bestaudio/best",
       "--merge-output-format",
       "mp4",
+      "--no-quiet",
       "--progress",
       "--newline",
+      "--progress-template",
+      PROGRESS_TEMPLATE,
       "--print",
       "after_move:THE-DOWNLOADER-FILEPATH:%(filepath)s",
       "https://example.com/v",
@@ -153,6 +160,34 @@ describe("runVideoDownload", () => {
     expect(onProgress).toHaveBeenCalledWith(10);
     expect(onProgress).toHaveBeenCalledWith(55);
     expect(onProgress).toHaveBeenCalledWith(100);
+  });
+
+  it("parses the structured progress template into bytes, speed and ETA", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const onProgress = vi.fn();
+    const onEvent = vi.fn();
+    const promise = runVideoDownload("/yt-dlp", options, onProgress, onEvent);
+
+    child.stdout.emit("data", Buffer.from("[info] abc: Downloading 1 format(s): 137+140\n"));
+    child.stdout.emit("data", Buffer.from("[download] Destination: /out/My Video.f137.mp4\n"));
+    child.stdout.emit("data", Buffer.from("THE-DOWNLOADER-PROGRESS:2500000:10000000:NA:1250000.5:6\n"));
+    child.stdout.emit("data", Buffer.from('[Merger] Merging formats into "/out/My Video.mp4"\n'));
+    child.stdout.emit("data", Buffer.from("THE-DOWNLOADER-FILEPATH:/out/My Video.mp4\n"));
+    child.emit("close", 0);
+
+    await expect(promise).resolves.toEqual({ filePath: "/out/My Video.mp4" });
+    expect(onProgress).toHaveBeenCalledWith(25);
+    expect(onEvent.mock.calls.map(([e]) => e)).toEqual([
+      { type: "formats", streams: 2 },
+      { type: "stream-start" },
+      {
+        type: "progress",
+        progress: { percent: 25, downloadedBytes: 2500000, totalBytes: 10000000, speed: 1250000.5, eta: 6 },
+      },
+      { type: "postprocess", step: "merge" },
+    ]);
   });
 
   it("rejects with the stderr text on a non-zero exit", async () => {

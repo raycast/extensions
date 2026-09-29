@@ -15,6 +15,7 @@ import {
   showHUD,
   showInFinder,
   showToast,
+  useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { detectSource } from "../lib/detect.js";
@@ -35,6 +36,8 @@ import { AbortError } from "../lib/run.js";
 import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "../lib/monolith.js";
+import { DownloadInit, DownloadSession } from "../lib/download-session.js";
+import { progressMessage } from "../lib/format.js";
 import extractTranscript from "../transcript.js";
 import {
   downloadPath,
@@ -54,6 +57,7 @@ import {
   normalizeUrl,
   sanitizeVideoTitle,
 } from "../utils.js";
+import { DownloadView } from "./download-view.js";
 import Installer from "./installer.js";
 import Updater from "./updater.js";
 
@@ -87,6 +91,36 @@ const FILETYPE_ICON: Record<Filetype, Icon> = {
 };
 
 const SPOTDL_SETUP_GUIDE_URL = "https://github.com/sth3no/the-downloader/blob/main/SPOTIFY.md";
+
+const QUALITY_TITLE: Record<string, string> = {
+  best: "Best",
+  "1080": "1080p",
+  "720": "720p",
+  "480": "480p",
+  smallest: "Smallest",
+};
+
+const FORMAT_TITLE: Record<string, string> = {
+  mp4: "MP4",
+  mkv: "MKV",
+  webm: "WebM",
+  mp3: "MP3",
+  m4a: "M4A",
+  opus: "Opus",
+  flac: "FLAC",
+};
+
+const formatTitle = (value: string) => FORMAT_TITLE[value] ?? value.toUpperCase();
+
+/** Mirror a finished toast onto the download view. */
+function succeedSession(session: DownloadSession, toast: Toast, filePath?: string) {
+  session.succeed({ filePath: filePath || undefined, title: toast.title, message: toast.message });
+}
+
+/** Mirror a failure toast (after `failToast` or a custom one) onto the download view. */
+function failSession(session: DownloadSession, toast: Toast, error?: unknown) {
+  session.fail({ title: toast.title, message: toast.message, cancelled: error instanceof AbortError });
+}
 
 /** Turn a rejected runner into a red, copyable failure toast — or a neutral "Cancelled" toast when the user pressed Stop. */
 function failToast(toast: Toast, error: unknown) {
@@ -132,6 +166,7 @@ type DownloadFormProps = { initialUrl: string };
 
 export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const audioPreferred = prefs.videoMediaType === "audio";
+  const { push } = useNavigation();
 
   const [url, setUrl] = useState(initialUrl);
   const [filetype, setFiletype] = useState<Filetype>(() =>
@@ -165,10 +200,11 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
    * secondary action that aborts the in-flight child, and the controller is
    * tracked so unmount cleanup can kill anything still running.
    */
-  function startAbortable(toast: Toast): { signal: AbortSignal; done: () => void } {
+  function startAbortable(toast: Toast, session?: DownloadSession): { signal: AbortSignal; done: () => void } {
     const controller = new AbortController();
     activeAbort.current = controller;
     toast.secondaryAction = { title: "Stop", onAction: () => controller.abort() };
+    session?.onStop(() => controller.abort());
     return {
       signal: controller.signal,
       done: () => {
@@ -222,6 +258,26 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   );
 
   const liveStream = !!video && isLiveStream(video);
+
+  /** Start a download view for this submit. yt-dlp metadata, when fetched, fills in the title and details. */
+  function openSession(init: Omit<DownloadInit, "title" | "meta">, withMeta: boolean): DownloadSession {
+    // While a new URL's metadata is still loading, `video` belongs to the previous URL.
+    const meta = withMeta && !metaLoading ? video : undefined;
+    const session = new DownloadSession({
+      ...init,
+      title: meta?.title,
+      meta: meta
+        ? {
+            uploader: meta.uploader ?? meta.channel ?? undefined,
+            duration: meta.duration || undefined,
+            thumbnail: meta.thumbnail ?? undefined,
+            source: meta.extractor_key ?? undefined,
+          }
+        : undefined,
+    });
+    push(<DownloadView session={session} />);
+    return session;
+  }
 
   if (missingTool) {
     return <Installer executable={missingTool} onRefresh={() => setRefresh((r) => r + 1)} />;
@@ -293,7 +349,17 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   ) {
     if (ft === "website") {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
-      const { signal, done } = startAbortable(toast);
+      const session = openSession(
+        {
+          kind: "website",
+          url: submitUrl,
+          folder,
+          format: values.saveMode === "lightweight" ? "Lightweight (no JavaScript)" : "Complete",
+        },
+        false,
+      );
+      const { signal, done } = startAbortable(toast, session);
+      session.working();
       try {
         const { filePath } = await runMonolithSave(getMonolithPath(), {
           url: submitUrl,
@@ -307,8 +373,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.message = path.basename(filePath);
         toast.primaryAction = { title: "Open Folder", onAction: () => showInFinder(filePath) };
         toast.secondaryAction = { title: "Open File", onAction: () => open(filePath) };
+        succeedSession(session, toast, filePath);
       } catch (error) {
         failToast(toast, error);
+        failSession(session, toast, error);
       } finally {
         done();
       }
@@ -317,7 +385,9 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
     if (ft === "transcript") {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Extracting Transcript" });
-      const { signal, done } = startAbortable(toast);
+      const session = openSession({ kind: "transcript", url: submitUrl, folder, format: "Plain text" }, true);
+      const { signal, done } = startAbortable(toast, session);
+      session.working();
       try {
         const { transcript, title } = await extractTranscript(submitUrl, "en", signal);
         const filePath = path.join(folder, `${title}.txt`);
@@ -333,8 +403,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.message = `${title}.txt`;
         toast.primaryAction = { title: "Open", onAction: () => open(filePath) };
         toast.secondaryAction = { title: "Copy Transcript", onAction: () => Clipboard.copy(transcript) };
+        succeedSession(session, toast, filePath);
       } catch (error) {
         failToast(toast, error);
+        failSession(session, toast, error);
       } finally {
         done();
       }
@@ -353,7 +425,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         return;
       }
 
-      const { signal, done } = startAbortable(toast);
+      const session = openSession({ kind: "gallery", url: submitUrl, folder }, false);
+      const { signal, done } = startAbortable(toast, session);
       try {
         const { files } = await runGalleryDownload(
           getGalleryDlPath(),
@@ -366,6 +439,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           },
           (p) => {
             toast.message = `${p.files} files`;
+            session.count(p.files);
           },
         );
         if (files === 0) {
@@ -376,12 +450,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           toast.message = "gallery-dl found no new files — they may already exist, or the gallery needs a login.";
           toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
           toast.secondaryAction = undefined;
+          failSession(session, toast);
         } else {
           toast.style = Toast.Style.Success;
           toast.title = "Gallery Downloaded";
           toast.message = `${files} files`;
           toast.primaryAction = { title: "Open Folder", onAction: () => open(folder) };
           toast.secondaryAction = undefined;
+          succeedSession(session, toast);
         }
       } catch (error) {
         if (isLoginRequiredError(error)) {
@@ -395,6 +471,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         } else {
           failToast(toast, error);
         }
+        failSession(session, toast, error);
       } finally {
         done();
       }
@@ -403,7 +480,9 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
     if (ft === "image") {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Thumbnail" });
-      const { signal, done } = startAbortable(toast);
+      const session = openSession({ kind: "thumbnail", url: submitUrl, folder }, true);
+      const { signal, done } = startAbortable(toast, session);
+      session.working();
       try {
         const { filePath } = await runThumbnailDownload(getytdlPath(), {
           url: submitUrl,
@@ -423,8 +502,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         } else {
           toast.secondaryAction = undefined;
         }
+        succeedSession(session, toast, filePath);
       } catch (error) {
         failToast(toast, error);
+        failSession(session, toast, error);
       } finally {
         done();
       }
@@ -457,7 +538,12 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         return;
       }
 
-      const { signal, done } = startAbortable(toast);
+      const spotifyFormat = String(values.audioFmt ?? livePrefs.spotifyAudioFormat);
+      const session = openSession(
+        { kind: "spotify", url: submitUrl, folder, format: formatTitle(spotifyFormat) },
+        false,
+      );
+      const { signal, done } = startAbortable(toast, session);
       try {
         // A managed spotDL binary that already exists (e.g. installed before the
         // Rosetta guard, or copied from another machine) would otherwise fail
@@ -471,7 +557,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             // Honor the live audioFmt dropdown (the only place FLAC is offered);
             // fall back to the freshly-read preference. Previously this used the
             // stale module-level pref and silently ignored the dropdown.
-            format: String(values.audioFmt ?? livePrefs.spotifyAudioFormat),
+            format: spotifyFormat,
             ffmpegPath: getffmpegPath(),
             clientId,
             clientSecret,
@@ -482,6 +568,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           },
           (p) => {
             toast.message = `${p.tracks} tracks`;
+            session.count(p.tracks);
           },
         );
         toast.style = Toast.Style.Success;
@@ -489,8 +576,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.message = `${tracks} tracks`;
         toast.primaryAction = { title: "Open Folder", onAction: () => open(folder) };
         toast.secondaryAction = undefined;
+        succeedSession(session, toast);
       } catch (error) {
         failToast(toast, error);
+        failSession(session, toast, error);
       } finally {
         done();
       }
@@ -520,7 +609,18 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       title: ft === "audio" ? "Downloading Audio" : "Downloading Video",
       message: "0%",
     });
-    const { signal, done } = startAbortable(toast);
+    const exact = ft === "video" && values.exactFormat && values.exactFormat !== "auto";
+    const formatLabel =
+      ft === "audio"
+        ? formatTitle(String(values.audioFmt ?? prefs.audioFormat))
+        : exact
+          ? `Format ${String(values.exactFormat).split("#")[0]}`
+          : `${QUALITY_TITLE[String(values.quality ?? prefs.videoQuality)] ?? "Best"} · ${formatTitle(String(values.container ?? prefs.videoContainer))}`;
+    const session = openSession(
+      { kind: ft === "audio" ? "audio" : "video", url: submitUrl, folder, format: formatLabel },
+      true,
+    );
+    const { signal, done } = startAbortable(toast, session);
     try {
       const { filePath } = await runVideoDownload(
         getytdlPath(),
@@ -533,8 +633,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           idleMs: getIdleTimeoutMs(),
           abortSignal: signal,
         },
-        (percent) => {
-          toast.message = `${Math.floor(percent)}%`;
+        () => undefined,
+        (event) => {
+          session.ytdlp(event);
+          if (event.type === "progress") toast.message = progressMessage(event.progress) || toast.message;
         },
       );
       toast.style = Toast.Style.Success;
@@ -555,8 +657,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       } else {
         toast.secondaryAction = undefined;
       }
+      succeedSession(session, toast, filePath);
     } catch (error) {
       failToast(toast, error);
+      failSession(session, toast, error);
     } finally {
       done();
     }
