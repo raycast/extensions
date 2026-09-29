@@ -35,104 +35,131 @@ export default function Subscriptions() {
     groups.set(account.agent, list);
   }
 
+  const settled = !isLoading && !quotas.isLoading;
+  const accountsFailed = settled && Boolean(error) && data === undefined;
+  const balancesFailed =
+    settled && Boolean(quotas.error) && balances.length === 0;
+  const hasAccounts = (data?.length ?? 0) > 0;
+  const empty =
+    settled &&
+    !accountsFailed &&
+    !balancesFailed &&
+    !hasAccounts &&
+    balances.length === 0;
+
   return (
     <List
       isLoading={isLoading || quotas.isLoading}
       searchBarPlaceholder="Search subscriptions"
     >
-      {error && !data && balances.length === 0 && !quotas.data ? (
+      {empty ? (
         <List.EmptyView
-          title="Couldn't load quotas"
-          description={error.message}
-          actions={<ReloadAction onReload={reload} />}
-        />
-      ) : !isLoading &&
-        !quotas.isLoading &&
-        (data?.length ?? 0) === 0 &&
-        balances.length === 0 ? (
-        <List.EmptyView
-          title={quotas.error ? "Couldn't load quotas" : "No quotas"}
-          description={
-            quotas.error?.message ??
-            "magpie has no subscription window or provider balance to show."
-          }
+          title="No quotas"
+          description="magpie has no subscription window or provider balance to show."
           actions={<ReloadAction onReload={reload} />}
         />
       ) : (
-        [...groups.entries()].map(([agent, rows]) => (
-          <List.Section key={agent} title={agent}>
-            {rows.map((account, index) => (
-              <List.Item
-                key={`${account.agent}-${account.user}-${index}`}
-                icon={Icon.Person}
-                title={account.user || account.agent}
-                subtitle={subtitle(account)}
-                accessories={[
-                  {
-                    tag: account.active
-                      ? "Signed in"
-                      : account.on
-                        ? "Standby"
-                        : "Off",
-                  },
-                ]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Reload"
-                      icon={Icon.ArrowClockwise}
-                      onAction={reload}
-                    />
-                  </ActionPanel>
-                }
+        <>
+          {accountsFailed ? (
+            <List.Section title="Subscriptions">
+              <FailedRow
+                title="Couldn't load subscriptions"
+                message={error?.message ?? ""}
+                onReload={reload}
               />
-            ))}
-          </List.Section>
-        ))
-      )}
-      {(data?.length ?? 0) > 0 &&
-      quotas.error &&
-      balances.length === 0 &&
-      !quotas.isLoading ? (
-        <List.Section title="Key balances">
-          <List.Item
-            icon={Icon.Warning}
-            title="Couldn't load balances"
-            subtitle={quotas.error.message}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Reload"
-                  icon={Icon.ArrowClockwise}
-                  onAction={reload}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      ) : balances.length > 0 ? (
-        <List.Section title="Key balances">
-          {balances.map((row) => (
-            <List.Item
-              key={`${row.provider}-${row.name}`}
-              icon={Icon.Coins}
-              title={row.name || row.provider}
-              subtitle={row.balance}
-              accessories={[{ tag: row.provider }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Reload"
-                    icon={Icon.ArrowClockwise}
-                    onAction={reload}
+            </List.Section>
+          ) : (
+            [...groups.entries()].map(([agent, rows]) => (
+              <List.Section key={agent} title={agent}>
+                {rows.map((account, index) => (
+                  <List.Item
+                    key={`${account.agent}-${account.user}-${index}`}
+                    icon={Icon.Person}
+                    title={account.user || account.agent}
+                    subtitle={subtitle(account)}
+                    accessories={[
+                      {
+                        tag: account.active
+                          ? "Signed in"
+                          : account.on
+                            ? "Standby"
+                            : "Off",
+                      },
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action
+                          title="Reload"
+                          icon={Icon.ArrowClockwise}
+                          onAction={reload}
+                        />
+                      </ActionPanel>
+                    }
                   />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ) : null}
+                ))}
+              </List.Section>
+            ))
+          )}
+          {balancesFailed ? (
+            <List.Section title="Key balances">
+              <FailedRow
+                title="Couldn't load balances"
+                message={quotas.error?.message ?? ""}
+                onReload={reload}
+              />
+            </List.Section>
+          ) : balances.length > 0 ? (
+            <List.Section title="Key balances">
+              {balances.map((row) => (
+                <List.Item
+                  key={`${row.provider}-${row.name}`}
+                  icon={Icon.Coins}
+                  title={row.name || row.provider}
+                  subtitle={row.balance}
+                  accessories={[{ tag: row.provider }]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Reload"
+                        icon={Icon.ArrowClockwise}
+                        onAction={reload}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          ) : null}
+        </>
+      )}
     </List>
+  );
+}
+
+function FailedRow({
+  title,
+  message,
+  onReload,
+}: {
+  title: string;
+  message: string;
+  onReload: () => void;
+}) {
+  return (
+    <List.Item
+      icon={Icon.Warning}
+      title={title}
+      subtitle={message}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Reload"
+            icon={Icon.ArrowClockwise}
+            onAction={onReload}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
 
