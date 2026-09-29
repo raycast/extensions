@@ -8,6 +8,7 @@
 - Added validation to the start and edit forms by @TheFRedFox
 - Fixed "Hide Project" marking projects as favorites by @TheFRedFox
 - Fixed the API key being written to the log by @TheFRedFox
+- Added an agent guide (`AGENTS.md`) for AI coding tools by @TheFRedFox
 
 ## [v1.1.4] - 2026-08-17
 
