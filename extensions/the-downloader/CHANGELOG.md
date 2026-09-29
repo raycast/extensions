@@ -16,12 +16,13 @@
 - **Fixes.**
   - Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
   - Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
+  - When a download type's tool isn't installed, the setup screen also offers the types that already work (e.g. Download as Video Instead), so a missing tool never blocks the form.
   - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
   - Transcripts never overwrite an existing file with the same title (a number is added).
   - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
-  - A Homebrew-installed spotDL no longer asks for Rosetta on Apple Silicon, and the auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
+  - The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
   - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
-  - Download History refreshes while it's open and shows titles as plain text.
+  - Download History refreshes while it's open, shows titles as plain text, and re-applies an entry or removal that a download finishing in another command overwrote.
   - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
 - **Friendlier setup screens.** The installer explains what the missing tool is for instead of an error banner, shows the terminal command as an alternative, lists the tool, package and website in a sidebar (plus whether Spotify credentials are set, for spotDL), and shows that an install is running.
 - Upgraded to Raycast API 2.5 and @raycast/utils 2.3, with ESLint 10 and the React 19 / Node 22 types the API expects.

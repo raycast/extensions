@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -142,7 +142,20 @@ function InstallerMetadata({ executable, installed }: { executable: string; inst
   );
 }
 
-export default function Installer({ executable, onRefresh }: { executable: string; onRefresh: () => void }) {
+/**
+ * Set-up screen for a missing tool. `alternatives` are actions to download as
+ * another type whose tools are already installed, so a missing tool never
+ * traps the user (e.g. no monolith, but Video would work).
+ */
+export default function Installer({
+  executable,
+  onRefresh,
+  alternatives,
+}: {
+  executable: string;
+  onRefresh: () => void;
+  alternatives?: ReactNode;
+}) {
   const [installed, setInstalled] = useState(false);
   const [busy, setBusy] = useState(false);
   const note = busy ? BUSY_NOTE : "";
@@ -171,7 +184,9 @@ export default function Installer({ executable, onRefresh }: { executable: strin
     <Detail
       isLoading={busy}
       navigationTitle={`Set Up ${toolInfoFor(executable).name}`}
-      actions={<AutoInstall executable={executable} onRefresh={onRefresh} onBusyChange={setBusy} />}
+      actions={
+        <AutoInstall executable={executable} onRefresh={onRefresh} onBusyChange={setBusy} alternatives={alternatives} />
+      }
       markdown={
         note + (isMac ? macOSInstallGuide(executable) : windowsInstallGuide(executable, wingetIdFor(executable)))
       }
@@ -307,10 +322,12 @@ function AutoInstall({
   executable,
   onRefresh,
   onBusyChange,
+  alternatives,
 }: {
   executable: string;
   onRefresh: () => void;
   onBusyChange: (busy: boolean) => void;
+  alternatives?: ReactNode;
 }) {
   const [isLoading, setIsLoadingState] = useState(false);
   const setIsLoading = (value: boolean) => {
@@ -466,6 +483,7 @@ function AutoInstall({
           }}
         />
       )}
+      {alternatives && <ActionPanel.Section title="Instead">{alternatives}</ActionPanel.Section>}
     </ActionPanel>
   );
 }

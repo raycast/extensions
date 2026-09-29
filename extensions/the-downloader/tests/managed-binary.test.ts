@@ -189,19 +189,33 @@ describe("isRosettaInstalled", () => {
 });
 
 describe("needsRosetta", () => {
-  const support = "/Users/me/Library/Application Support/com.raycast.macos/extensions/the-downloader";
+  const intel = () => {
+    const b = Buffer.alloc(32);
+    b.writeUInt32LE(0xfeedfacf, 0);
+    b.writeUInt32LE(0x01000007, 4);
+    return b;
+  };
+  const arm = () => {
+    const b = Buffer.alloc(32);
+    b.writeUInt32LE(0xfeedfacf, 0);
+    b.writeUInt32LE(0x0100000c, 4);
+    return b;
+  };
+  const script = () => Buffer.from("#!/opt/homebrew/opt/python/bin/python3\n");
+  const noRosetta = { appleSilicon: true, rosetta: false };
 
-  it("requires Rosetta for the extension's own x86_64 spotDL on an Apple Silicon Mac without it", () => {
-    expect(needsRosetta(`${support}/spotdl`, support, { appleSilicon: true, rosetta: false })).toBe(true);
+  it("requires Rosetta for an Intel-only spotDL on an Apple Silicon Mac without it, wherever it lives", () => {
+    expect(needsRosetta("/Users/me/bin/spotdl", noRosetta, intel)).toBe(true);
   });
 
-  it("leaves a native spotDL (e.g. Homebrew's) alone", () => {
-    expect(needsRosetta("/opt/homebrew/bin/spotdl", support, { appleSilicon: true, rosetta: false })).toBe(false);
-    expect(needsRosetta(`${support}-other/spotdl`, support, { appleSilicon: true, rosetta: false })).toBe(false);
+  it("leaves native spotDL builds and Homebrew's Python script alone", () => {
+    expect(needsRosetta("/opt/homebrew/bin/spotdl", noRosetta, script)).toBe(false);
+    expect(needsRosetta("/Users/me/bin/spotdl", noRosetta, arm)).toBe(false);
+    expect(needsRosetta("/missing/spotdl", noRosetta, () => undefined)).toBe(false);
   });
 
   it("is false when Rosetta is installed or the Mac is Intel", () => {
-    expect(needsRosetta(`${support}/spotdl`, support, { appleSilicon: true, rosetta: true })).toBe(false);
-    expect(needsRosetta(`${support}/spotdl`, support, { appleSilicon: false, rosetta: false })).toBe(false);
+    expect(needsRosetta("/x/spotdl", { appleSilicon: true, rosetta: true }, intel)).toBe(false);
+    expect(needsRosetta("/x/spotdl", { appleSilicon: false, rosetta: false }, intel)).toBe(false);
   });
 });

@@ -4,6 +4,7 @@ import * as crypto from "node:crypto";
 import { execa } from "execa";
 import { isMac, isWindows } from "./binary.js";
 import { ROSETTA_RUNTIME_PATH } from "./platform-paths.js";
+import { isIntelOnlyExecutable, readExecutableHeader } from "./macho.js";
 
 const RELEASE_API = "https://api.github.com/repos/spotDL/spotify-downloader/releases/latest";
 const USER_AGENT = "the-downloader-raycast";
@@ -48,17 +49,17 @@ export function isRosettaInstalled(): boolean {
 
 /** Friendly error thrown when spotDL can't run because Rosetta 2 is missing on Apple Silicon. */
 /**
- * True when running `binaryPath` needs Rosetta that isn't there: only the
- * extension's own x86_64 spotDL download (inside `managedDir`) on an Apple
- * Silicon Mac without Rosetta. A native spotDL, e.g. Homebrew's, runs as is.
+ * True when running `binaryPath` needs Rosetta that isn't there: an Intel-only
+ * Mach-O (like spotDL's prebuilt binary) on an Apple Silicon Mac without
+ * Rosetta. Decided from the binary's own header, so a native or universal
+ * build — or Homebrew's Python-script spotDL — runs as is, wherever it lives.
  */
 export function needsRosetta(
   binaryPath: string,
-  managedDir: string,
   mac: { appleSilicon: boolean; rosetta: boolean } = { appleSilicon: isAppleSilicon(), rosetta: isRosettaInstalled() },
+  header: () => Buffer | undefined = () => readExecutableHeader(binaryPath),
 ): boolean {
-  const managed = path.resolve(binaryPath).startsWith(path.resolve(managedDir) + path.sep);
-  return managed && mac.appleSilicon && !mac.rosetta;
+  return mac.appleSilicon && !mac.rosetta && isIntelOnlyExecutable(header());
 }
 
 export class RosettaRequiredError extends Error {

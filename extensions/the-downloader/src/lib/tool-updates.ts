@@ -23,6 +23,7 @@ import {
   pendingUpdates,
   readCachedLatest,
   serializeLatest,
+  singleFlight,
   toolsToCheck,
   withTimeout,
 } from "./tool-freshness.js";
@@ -72,9 +73,17 @@ export async function clearToolCheckCache(): Promise<void> {
 
 /** Newest versions of every outdated tool, keyed by tool — from the cache, or a fresh package-manager check. */
 async function latestVersions(): Promise<Partial<Record<ToolId, string>>> {
+  const cached = readCachedLatest(await LocalStorage.getItem<string>(CACHE_KEY), Date.now());
+  return cached ?? freshLatestVersions();
+}
+
+/**
+ * Run the package-manager check and cache a clean result. Single-flight: a
+ * check that outlived a download's time budget keeps running, and the next
+ * download joins it instead of starting a second brew/winget process.
+ */
+const freshLatestVersions = singleFlight(async (): Promise<Partial<Record<ToolId, string>>> => {
   const now = Date.now();
-  const cached = readCachedLatest(await LocalStorage.getItem<string>(CACHE_KEY), now);
-  if (cached) return cached;
   const { outdated, issues } = await checkOutdated();
   const latest: Partial<Record<ToolId, string>> = {};
   for (const tool of Object.keys(TOOL_PATH) as ToolId[]) {
@@ -84,7 +93,7 @@ async function latestVersions(): Promise<Partial<Record<ToolId, string>>> {
   // A partly failed check could hide real updates for hours, so only a clean one is cached.
   if (issues.length === 0) await LocalStorage.setItem(CACHE_KEY, serializeLatest(latest, now));
   return latest;
-}
+});
 
 /** Updates available for the tools behind these executables (e.g. a download's `requiredTools`). */
 export async function findPendingUpdates(executables: string[]): Promise<PendingUpdate[]> {

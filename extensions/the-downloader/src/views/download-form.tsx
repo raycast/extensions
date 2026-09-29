@@ -25,6 +25,7 @@ import {
   clampFiletype,
   defaultFiletype,
   filetypeGuidance,
+  installedAlternatives,
   requiredTools,
   resolveTool,
   supportedFiletypes,
@@ -319,7 +320,30 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   }
 
   if (missingTool) {
-    return <Installer executable={missingTool} onRefresh={() => setRefresh((r) => r + 1)} />;
+    // Other types that work with what's installed, so a missing tool doesn't trap
+    // the user — e.g. an unknown site defaults to Website, but Video may work.
+    const alternatives = installedAlternatives(source, filetype, url, (tool) => fs.existsSync(TOOL_PATH[tool]()));
+    return (
+      <Installer
+        executable={missingTool}
+        onRefresh={() => setRefresh((r) => r + 1)}
+        alternatives={
+          alternatives.length > 0
+            ? alternatives.map((ft) => (
+                <Action
+                  key={ft}
+                  title={`Download as ${FILETYPE_TITLE[ft]} Instead`}
+                  icon={FILETYPE_ICON[ft]}
+                  onAction={() => {
+                    setFiletypeTouched(true);
+                    setFiletype(ft);
+                  }}
+                />
+              ))
+            : undefined
+        }
+      />
+    );
   }
 
   // The adaptive status line, plus a details line once yt-dlp metadata is in.
@@ -605,10 +629,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       );
       const { signal, done } = startAbortable(toast, session);
       try {
-        // A managed spotDL binary that already exists (e.g. installed before the
-        // Rosetta guard, or copied from another machine) would otherwise fail
-        // with a cryptic "Bad CPU type". Surface the friendly hint instead.
-        if (needsRosetta(getSpotdlPath(), environment.supportPath)) throw new RosettaRequiredError();
+        // An Intel-only spotDL (the prebuilt download) on an Apple Silicon Mac
+        // without Rosetta would otherwise fail with a cryptic "Bad CPU type".
+        // Surface the friendly hint instead.
+        if (needsRosetta(getSpotdlPath())) throw new RosettaRequiredError();
         const { tracks } = await runSpotdlDownload(
           getSpotdlPath(),
           {

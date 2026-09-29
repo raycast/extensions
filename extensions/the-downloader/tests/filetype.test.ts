@@ -3,6 +3,7 @@ import {
   clampFiletype,
   defaultFiletype,
   filetypeGuidance,
+  installedAlternatives,
   requiredTools,
   resolveTool,
   supportedFiletypes,
@@ -138,5 +139,22 @@ describe("filetypeGuidance", () => {
   });
   it("explains the gallery restriction (mentions image or gallery)", () => {
     expect(filetypeGuidance("gallery").toLowerCase()).toMatch(/image|gallery/);
+  });
+});
+
+describe("installedAlternatives", () => {
+  const installed = (...tools: string[]) => (tool: string) => tools.includes(tool);
+
+  it("offers the source's other filetypes whose tools are all installed", () => {
+    const ytdlpOnly = installed("yt-dlp", "ffmpeg", "ffprobe");
+    expect(installedAlternatives("webpage", "website", "https://rumble.com/v1", ytdlpOnly)).toEqual(["video", "audio"]);
+  });
+
+  it("offers nothing when the other filetypes are missing tools too", () => {
+    expect(installedAlternatives("webpage", "website", "https://rumble.com/v1", installed())).toEqual([]);
+  });
+
+  it("never offers the current filetype or ones the source doesn't support", () => {
+    expect(installedAlternatives("gallery", "image", "https://reddit.com/r/x", installed("gallery-dl"))).toEqual([]);
   });
 });

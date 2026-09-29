@@ -228,7 +228,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     try {
       // Surface the friendly Rosetta hint for an already-present x86_64 binary
       // on an Apple Silicon Mac without Rosetta, instead of a raw "Bad CPU type".
-      if (needsRosetta(spotdlPath, environment.supportPath)) throw new RosettaRequiredError();
+      if (needsRosetta(spotdlPath)) throw new RosettaRequiredError();
       const { tracks } = await runSpotdlDownload(
         spotdlPath,
         {

@@ -95,3 +95,19 @@ export function requiredTools(source: SourceType, filetype: Filetype, url = ""):
     ? ["yt-dlp", "ffmpeg"]
     : ["yt-dlp", "ffmpeg", "ffprobe", ...(needsJsRuntime(url) ? ["deno"] : [])];
 }
+
+/**
+ * The source's other filetypes whose tools are all installed — what the
+ * Installer can offer instead of installing the missing tool (e.g. an unknown
+ * site defaults to Website, but with no monolith, Video may still work).
+ */
+export function installedAlternatives(
+  source: SourceType,
+  current: Filetype,
+  url: string,
+  isInstalled: (tool: string) => boolean,
+): Filetype[] {
+  return supportedFiletypes(source).filter(
+    (ft) => ft !== current && requiredTools(source, ft, url).every((tool) => isInstalled(tool)),
+  );
+}

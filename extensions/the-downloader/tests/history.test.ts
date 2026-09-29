@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { LocalStorage } from "@raycast/api";
 import { DownloadSession } from "../src/lib/download-session";
 import {
@@ -129,6 +129,28 @@ describe("storage", () => {
     expect((await loadHistory()).map((e) => e.id)).toEqual(["b"]);
     await clearHistory();
     expect(await loadHistory()).toEqual([]);
+  });
+
+  // Another command (Fast Download, the AI tool) has its own write queue, so
+  // its write can land right after ours with a list read before it.
+  const staleWrite = (ids: string[]) =>
+    LocalStorage.setItem("download-history-v1", JSON.stringify(ids.map((id) => entry(id))));
+
+  const ids = async () => (await loadHistory()).map((e) => e.id).sort();
+
+  it("re-records a download that another command's concurrent write dropped", async () => {
+    const recording = recordDownload(entry("mine"));
+    await vi.waitFor(async () => expect(await ids()).toContain("mine"));
+    await staleWrite(["theirs"]);
+    await recording; // waits for the check, which re-applies the entry
+    expect(await ids()).toEqual(["mine", "theirs"]);
+  });
+
+  it("re-removes an entry that another command's concurrent write brought back", async () => {
+    await recordDownload(entry("a"));
+    await removeFromHistory("a");
+    await staleWrite(["a"]);
+    await vi.waitFor(async () => expect(await ids()).toEqual([]), { timeout: 2000 });
   });
 
   it("ignores an undefined entry", async () => {

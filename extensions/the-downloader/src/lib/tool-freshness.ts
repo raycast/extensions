@@ -13,6 +13,15 @@ export const CHECK_TTL_MS = 6 * 60 * 60 * 1000;
 /** How long a download waits for the update check before starting anyway. */
 export const CHECK_BUDGET_MS = 15_000;
 
+/** Wrap `fn` so calls made while a run is in progress share it instead of starting another. */
+export function singleFlight<T>(fn: () => Promise<T>): () => Promise<T> {
+  let running: Promise<T> | undefined;
+  return () =>
+    (running ??= fn().finally(() => {
+      running = undefined;
+    }));
+}
+
 /** `work`'s result, or `fallback` if it fails or takes longer than `ms`. The work itself keeps running. */
 export function withTimeout<T>(work: Promise<T>, ms: number, fallback: T): Promise<T> {
   return new Promise((resolve) => {

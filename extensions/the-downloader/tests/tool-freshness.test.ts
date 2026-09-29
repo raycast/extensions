@@ -19,6 +19,7 @@ import {
   pendingUpdates,
   readCachedLatest,
   serializeLatest,
+  singleFlight,
   toolsToCheck,
   withTimeout,
   ytdlpAgeDays,
@@ -225,6 +226,35 @@ describe("serializeLatest / readCachedLatest", () => {
     expect(readCachedLatest(undefined, NOW)).toBeUndefined();
     expect(readCachedLatest("{not json", NOW)).toBeUndefined();
     expect(readCachedLatest(JSON.stringify({ checkedAt: NOW }), NOW)).toBeUndefined();
+  });
+});
+
+describe("singleFlight", () => {
+  it("shares one run between calls made while it's in progress", async () => {
+    let runs = 0;
+    let finish: (v: string) => void = () => undefined;
+    const check = singleFlight(() => {
+      runs++;
+      return new Promise<string>((resolve) => (finish = resolve));
+    });
+    const first = check();
+    const second = check();
+    finish("done");
+    expect(await first).toBe("done");
+    expect(await second).toBe("done");
+    expect(runs).toBe(1);
+  });
+
+  it("starts a new run once the previous one has settled, even after a failure", async () => {
+    let runs = 0;
+    const check = singleFlight(async () => {
+      runs++;
+      if (runs === 1) throw new Error("boom");
+      return "ok";
+    });
+    await expect(check()).rejects.toThrow("boom");
+    expect(await check()).toBe("ok");
+    expect(runs).toBe(2);
   });
 });
 

@@ -136,19 +136,48 @@ export function groupByDay(entries: HistoryEntry[], now = Date.now()): { title: 
 
 // ---------------------------------------------------------------------------
 // Storage. Writes are chained so two downloads finishing together can't drop
-// each other's entry in a read-modify-write race.
+// each other's entry in a read-modify-write race. The chain is per command,
+// though (each command runs its own copy of this module), and LocalStorage has
+// no lock, so a write can also be checked afterwards and re-applied if another
+// command's concurrent write replaced it.
 // ---------------------------------------------------------------------------
 
 let writeChain: Promise<unknown> = Promise.resolve();
 
-function mutate(change: (list: HistoryEntry[]) => HistoryEntry[]): Promise<HistoryEntry[]> {
-  const next = writeChain.then(async () => {
+/** How long after a write to check that another command's concurrent write didn't undo it. */
+const VERIFY_DELAY_MS = 500;
+const VERIFY_ATTEMPTS = 2;
+
+/**
+ * Apply `change` to the stored list. `written` settles once it's saved;
+ * `verified` settles after `applied` has been checked a moment later (and the
+ * change re-applied if another command's write undid it). `verified` never
+ * rejects.
+ */
+function mutate(
+  change: (list: HistoryEntry[]) => HistoryEntry[],
+  applied?: (list: HistoryEntry[]) => boolean,
+  attempts = VERIFY_ATTEMPTS,
+): { written: Promise<HistoryEntry[]>; verified: Promise<void> } {
+  const written = writeChain.then(async () => {
     const list = change(parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY)));
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     return list;
   });
-  writeChain = next.catch(() => undefined);
-  return next;
+  writeChain = written.catch(() => undefined);
+  const verified =
+    applied && attempts > 0
+      ? written
+          .then(() => new Promise((resolve) => setTimeout(resolve, VERIFY_DELAY_MS)))
+          .then(async () => {
+            if (!applied(await loadHistory())) await mutate(change, applied, attempts - 1).verified;
+          })
+          .catch(() => undefined)
+      : written.then(
+          () => undefined,
+          () => undefined,
+        );
+  return { written, verified };
 }
 
 export async function loadHistory(): Promise<HistoryEntry[]> {
@@ -165,16 +194,26 @@ export async function recordDownload(entry: HistoryEntry | undefined): Promise<v
       if (stat?.isFile()) entry = { ...entry, bytes: stat.size };
     }
     const recorded = entry;
-    await mutate((list) => addEntry(list, recorded));
+    const { written, verified } = mutate(
+      (list) => addEntry(list, recorded),
+      (list) => list.some((e) => e.id === recorded.id),
+    );
+    await written;
+    // Wait for the check too: a no-view command (Fast Download) may end as soon as this returns.
+    await verified;
   } catch (error) {
     console.error("Could not record download history", error);
   }
 }
 
 export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
-  return mutate((list) => removeEntry(list, id));
+  // The check runs in the background, so the History list updates right away.
+  return mutate(
+    (list) => removeEntry(list, id),
+    (list) => !list.some((e) => e.id === id),
+  ).written;
 }
 
 export function clearHistory(): Promise<HistoryEntry[]> {
-  return mutate(() => []);
+  return mutate(() => []).written;
 }
