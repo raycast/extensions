@@ -1,5 +1,13 @@
 # Dokploy Changelog
 
+## [Project Tags] - 2026-09-29
+
+- Show each project's tags in `Projects`, in the tag's own color. Typing a tag name in the search bar finds the projects that carry it.
+- Add `Filter by Tag` to `Projects` to show only the projects with one tag. The choice is remembered per instance, and `Show All Projects` clears it.
+- Add `Edit Tags` to each project to add or remove its tags, and `Create Tag` to make a new tag (name and color) and add it to that project in one step.
+- Add `Refresh` to `Projects`.
+- Tags need Dokploy v0.29.0 or later. On older instances the list looks the same as before.
+
 ## [Container Files and Docker Events] - 2026-09-29
 
 - Add `Browse Files` to running containers in the Docker list: a read-only view of the container's folders and text files (the first 512 KB of a large file), with `Copy Path` and `Copy Content`.
