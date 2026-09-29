@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { loadPreview, MAX_INLINE_BYTES } from "../src/preview";
+import { loadPreview, MAX_INLINE_BYTES, nativePreviewUrl } from "../src/preview";
 import { resultMarkdown } from "../src/search-model";
 
 const signal = () => new AbortController().signal;
@@ -33,13 +33,71 @@ test("small previews retain rounding; large previews stay local URLs without rea
   assert.equal(open.mock.callCount(), 0);
 });
 
-test("stalled preview lookup times out and selection changes cancel immediately", async (context) => {
-  context.mock.method(fs, "stat", () => new Promise(() => {}));
-  await assert.rejects(loadPreview("/stalled/preview.png", signal()), /Preview timed out/);
+test("stalled reads keep one slot until cleanup; new selections use native previews without queuing", async (context) => {
+  const dir = await fs.mkdtemp(join(tmpdir(), "fenn-stalled-preview-"));
+  context.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const path = join(dir, "preview.png");
+  await fs.writeFile(path, "image");
+  let finishRead!: (value: { bytesRead: number }) => void;
+  let enteredRead!: () => void;
+  const reading = new Promise<void>((resolve) => {
+    enteredRead = resolve;
+  });
+  let closeCount = 0;
+  const open = context.mock.method(fs, "open", async () => ({
+    read: () => {
+      enteredRead();
+      return new Promise<{ bytesRead: number }>((resolve) => {
+        finishRead = resolve;
+      });
+    },
+    close: async () => {
+      closeCount++;
+    },
+  }));
   const controller = new AbortController();
-  const pending = loadPreview("/stalled/preview.png", controller.signal);
+  const pending = loadPreview(path, controller.signal);
+  await reading;
+  const rejected = assert.rejects(pending, { name: "AbortError" });
   controller.abort();
-  await assert.rejects(pending, { name: "AbortError" });
+  for (let i = 0; i < 20; i++) {
+    assert.equal(await loadPreview(path, signal()), nativePreviewUrl(path));
+  }
+  assert.equal(open.mock.callCount(), 1);
+  assert.equal(closeCount, 0);
+  finishRead({ bytesRead: 0 });
+  await rejected;
+  assert.equal(closeCount, 1);
+  open.mock.restore();
+  // The slot is released after real cleanup, so later selections can load.
+  assert.equal(await loadPreview(path, signal()), nativePreviewUrl(path));
+});
+
+test("a slow selected preview finishes without a timeout or reselection", async (context) => {
+  const originalStat = fs.stat.bind(fs);
+  let release!: () => void;
+  const delay = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  context.mock.method(fs, "stat", async (...args: Parameters<typeof fs.stat>) => {
+    await delay;
+    return originalStat(...args);
+  });
+  const dir = await fs.mkdtemp(join(tmpdir(), "fenn-slow-preview-"));
+  context.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const path = join(dir, "preview.png");
+  await fs.writeFile(
+    path,
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1cAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  );
+  const pending = loadPreview(path, signal());
+  assert.ok(nativePreviewUrl(path)?.startsWith("file://"));
+  await new Promise((resolve) => setTimeout(resolve, 2100));
+  release();
+  assert.ok((await pending)?.startsWith("data:image/svg+xml;base64,"));
 });
 
 test("missing previews can be omitted without hiding matches", async () => {

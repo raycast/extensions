@@ -5,10 +5,17 @@ import { generatedImageUrl } from "./search-model";
 // Double base64 encoding stays below 1 MiB. Larger files use Raycast's
 // local-file renderer instead of copying the image into detail markdown.
 export const MAX_INLINE_BYTES = 512 * 1024;
-const PREVIEW_TIMEOUT_MS = 2_000;
+// OS filesystem operations cannot reliably be interrupted once submitted.
+// Hold this slot until the operation and handle cleanup actually finish.
+// Other selections use the native URL immediately; never queue more reads.
+let roundingActive = false;
+
+export function nativePreviewUrl(path: string): string | undefined {
+  return generatedImageUrl({ original_file: path, filename: path, generated_file: path });
+}
 
 async function previewUrl(path: string, signal: AbortSignal): Promise<string | undefined> {
-  const original = generatedImageUrl({ original_file: path, filename: path, generated_file: path });
+  const original = nativePreviewUrl(path);
   if (!original) return undefined;
   signal.throwIfAborted();
   const info = await fs.stat(path);
@@ -60,20 +67,14 @@ async function previewUrl(path: string, signal: AbortSignal): Promise<string | u
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
-export async function loadPreview(path: string, callerSignal: AbortSignal): Promise<string | undefined> {
-  const controller = new AbortController();
-  const signal = AbortSignal.any([callerSignal, controller.signal]);
-  const timer = setTimeout(() => controller.abort(new Error("Preview timed out")), PREVIEW_TIMEOUT_MS);
-  let onAbort: () => void = () => {};
+export async function loadPreview(path: string, signal: AbortSignal): Promise<string | undefined> {
+  signal.throwIfAborted();
+  const original = nativePreviewUrl(path);
+  if (!original || roundingActive) return original;
+  roundingActive = true;
   try {
-    signal.throwIfAborted();
-    const aborted = new Promise<never>((_, reject) => {
-      onAbort = () => reject(signal.reason);
-      signal.addEventListener("abort", onAbort, { once: true });
-    });
-    return await Promise.race([previewUrl(path, signal), aborted]);
+    return await previewUrl(path, signal);
   } finally {
-    clearTimeout(timer);
-    signal.removeEventListener("abort", onAbort);
+    roundingActive = false;
   }
 }
