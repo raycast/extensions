@@ -89,8 +89,12 @@ describe("supportedFiletypes", () => {
   it("a spotify source supports only audio", () => {
     expect(supportedFiletypes("spotify")).toEqual(["audio"]);
   });
-  it("a webpage source supports only website", () => {
-    expect(supportedFiletypes("webpage")).toEqual(["website"]);
+  it("an unknown site offers Video and Audio (yt-dlp may support it) besides Website", () => {
+    expect(supportedFiletypes("webpage")).toEqual(["video", "audio", "website"]);
+    expect(defaultFiletype("webpage", true)).toBe("website");
+    expect(clampFiletype("webpage", "video", false)).toBe("video");
+    expect(resolveTool("webpage", "video")).toBe("yt-dlp");
+    expect(requiredTools("webpage", "video", "https://rumble.com/v1")).toEqual(["yt-dlp", "ffmpeg", "ffprobe"]);
   });
   it("a video source supports video, audio, image (thumbnail) and transcript, but not website", () => {
     expect(supportedFiletypes("video")).toEqual(["video", "audio", "image", "transcript"]);

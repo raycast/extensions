@@ -41,13 +41,14 @@ export function resolveTool(source: SourceType, filetype: Filetype): ToolId {
  * Filetype options to even show — so a Pinterest (gallery) link only offers
  * Image, never Video/Audio/Transcript (which would hand an image URL to yt-dlp
  * and fail with "No video formats found"). `website` (monolith) is reserved for
- * unrecognized sites, matching detectSource's webpage fall-through.
+ * unrecognized sites, matching detectSource's webpage fall-through; those also
+ * offer Video and Audio, since yt-dlp supports many sites beyond the allowlist.
  */
 const SUPPORTED: Record<SourceType, Filetype[]> = {
   video: ["video", "audio", "image", "transcript"],
   gallery: ["image"],
   spotify: ["audio"],
-  webpage: ["website"],
+  webpage: ["video", "audio", "website"],
 };
 
 /** The filetypes a detected source supports, in dropdown order. */
@@ -72,7 +73,7 @@ export function filetypeGuidance(source: SourceType): string {
     case "spotify":
       return "Spotify link — only Audio is available; spotDL fetches the tracks.";
     case "webpage":
-      return "Not a known media site — it will be saved as a webpage with monolith.";
+      return "Not a known media site — it will be saved as a webpage with monolith. If it hosts a video, choose Video or Audio to try yt-dlp.";
     case "video":
     default:
       return "Video site — choose Video, Audio, Transcript, or the thumbnail Image.";

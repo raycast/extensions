@@ -15,6 +15,7 @@
 - **Update Libraries is a proper list now**: each tool with what it does, its installed version and a status tag (Up to Date, Update → x.y.z, Not Installed, Check Failed), grouped into Updates Available / Installed / Not Installed. Upgrade one tool or all of them, Check Again (⌘R), copy the version report, or open a tool's website.
 - **Fixes.**
   - Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
+  - Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
   - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
   - Transcripts never overwrite an existing file with the same title (a number is added).
   - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
