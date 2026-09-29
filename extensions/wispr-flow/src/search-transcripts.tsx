@@ -261,7 +261,8 @@ export default function Command() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [uniqueAppsData]);
 
-  const { data: installedApps } = usePromise(getApplications);
+  // Cached so rows carry their app icon on the first paint.
+  const { data: installedApps } = useCachedPromise(() => getApplications());
   const { data: winRegistryMap } = usePromise(() =>
     process.platform === "win32"
       ? getWindowsAppPathMap()
