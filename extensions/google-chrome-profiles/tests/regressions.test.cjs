@@ -162,6 +162,12 @@ test("Bring to Front falls back to a new window unless focusWithoutNewWindow is 
   assert.doesNotMatch(await fallback({ focusWithoutNewWindow: true }), /do shell script/);
 });
 
+test("Profiles menu lookup tries Chrome's usual slot before walking every menu", () => {
+  const { chrome } = setup();
+  const lookup = chrome.profileMenuScript(browser).split("on findProfileMenu()")[1].split("end findProfileMenu")[0];
+  assert.match(lookup, /set end of menuOrder to 8[\s\S]*repeat with menuIndex in menuOrder/);
+});
+
 test("last-used sort puts the most recently active profile first, unknown times last", () => {
   const { profiles } = setup();
   const sorted = profiles.sortByLastUsed([

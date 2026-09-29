@@ -59,8 +59,15 @@ export function profileMenuScript(browser: BrowserConfig): string {
   return `
     on findProfileMenu()
       tell application "System Events" to tell process ${appleScriptString(browser.appName)}
-        repeat with menuIndex from (count menu bar items of menu bar 1) to 1 by -1
-          set barItem to menu bar item menuIndex of menu bar 1
+        -- Chrome's usual Profiles slot first: the full scan walks every tab listed in the Tab menu.
+        set barCount to count menu bar items of menu bar 1
+        set menuOrder to {}
+        if barCount > 7 then set end of menuOrder to 8
+        repeat with menuIndex from barCount to 1 by -1
+          if menuIndex is not 8 then set end of menuOrder to menuIndex
+        end repeat
+        repeat with menuIndex in menuOrder
+          set barItem to menu bar item (contents of menuIndex) of menu bar 1
           if exists menu 1 of barItem then
             repeat with profileItem in menu items of menu 1 of barItem
               if exists attribute "AXIdentifier" of profileItem then
