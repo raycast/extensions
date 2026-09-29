@@ -213,14 +213,6 @@ function CommandFields(props: CommandFormProps & { models: Record<string, Model>
         onChange={(value) => changeSetting("model", value)}
         info={settingInfo("model")}
       />
-      <Form.TextField
-        title="Temperature"
-        placeholder="0 - 2"
-        {...itemProps.temperature}
-        value={effective.temperature}
-        onChange={(value) => changeSetting("temperature", value)}
-        info={settingInfo("temperature")}
-      />
       <Form.Checkbox
         title="Reasoning"
         label="Enable reasoning effort change"

@@ -1,30 +1,16 @@
 import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { Stream } from "openai/streaming";
 import { useEffect, useState } from "react";
 
 import { useChatGPT } from "../hooks/useChatGPT";
 import { AskImageProps, Model } from "../type";
+import { resolveAuthStatus } from "../utils/auth";
 import { toUnit } from "../utils";
+import { AuthGate } from "./auth-required";
 import { LoadFrom, loadFromClipboard, loadFromFinder } from "../utils/load";
-import { countImageTokens, countToken, estimateImagePrice, estimatePrice } from "../utils/token";
-
-const preferences = getPreferenceValues<Preferences>();
-
-const visionModelName: string = (preferences.useVisionModel && preferences.visionModelName) || "gpt-4o";
-
-const VISION_MODEL: Model = {
-  id: visionModelName,
-  updated_at: new Date().toISOString(),
-  created_at: new Date().toISOString(),
-  name: "Default",
-  prompt: "You are a helpful vision assistant.",
-  option: visionModelName,
-  temperature: "1",
-  enableReasoningEffortChange: false,
-  reasoningEffort: "medium",
-  pinned: false,
-  vision: true,
-};
+import { countImageTokens, countToken } from "../utils/token";
+import { DEFAULT_MODEL_OPTION, isModelId, normalizeAvailableOptions, resolveModelOption } from "../utils/model-support";
+import { listCodexAppServerModels } from "../utils/codex-app-server";
+import { requestCodexResponse } from "../utils/codex-responses";
 
 function bufferToDataUrl(mimeType: string, buffer: Buffer) {
   const base64String = buffer.toString("base64");
@@ -32,7 +18,37 @@ function bufferToDataUrl(mimeType: string, buffer: Buffer) {
 }
 
 export function VisionView(props: AskImageProps) {
-  const chatGPT = useChatGPT();
+  return (
+    <AuthGate>
+      <VisionViewWithAuth {...props} />
+    </AuthGate>
+  );
+}
+
+function VisionViewWithAuth(props: AskImageProps) {
+  const preferences = getPreferenceValues<Preferences>();
+  const visionModelName =
+    (preferences.useVisionModel &&
+      preferences.visionModelName &&
+      isModelId(preferences.visionModelName) &&
+      preferences.visionModelName) ||
+    DEFAULT_MODEL_OPTION;
+
+  const VISION_MODEL: Model = {
+    id: visionModelName,
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    name: "Default",
+    prompt: "You are a helpful vision assistant.",
+    option: visionModelName,
+    temperature: "1",
+    enableReasoningEffortChange: false,
+    reasoningEffort: "medium",
+    pinned: false,
+    vision: true,
+  };
+
+  const chatGPT = useChatGPT({ allowMissingApiKey: true });
   const [useStream] = useState<boolean>(() => {
     return getPreferenceValues<{
       useStream: boolean;
@@ -52,7 +68,6 @@ export function VisionView(props: AskImageProps) {
   const [image_prompt_token_count, setImagePromptTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
   const [cumulative_tokens, setCumulativeTokens] = useState(0);
-  const [cumulative_cost, setCumulativeCost] = useState(0);
 
   async function getChatResponse(prompt: string) {
     try {
@@ -64,51 +79,64 @@ export function VisionView(props: AskImageProps) {
         data = await loadFromClipboard();
       }
 
-      let imageUrl = "";
       if (!data) {
         await showToast({ style: Toast.Style.Failure, title: "Error" });
         setLoading(false);
         setResponse("## ⚠️ Data couldn't load. Check image selection or clipboard and try again.");
         return;
       }
-      imageUrl = bufferToDataUrl(`image/${data.type}`, data.data);
-
-      const streamOrCompletion = await chatGPT.chat.completions.create({
-        model: VISION_MODEL.option,
-        temperature: Number(VISION_MODEL.temperature),
-        stream: useStream,
-        messages: [
-          {
-            role: "system",
-            content: `${VISION_MODEL.prompt}`,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `${prompt ? prompt : "Describe this image:"}`,
-              },
-              {
-                type: "image_url",
-                image_url: { url: imageUrl },
-              },
-            ],
-          },
-        ],
-      });
-
+      const auth = await resolveAuthStatus();
       const imageWidth = data.type.width;
       const imageHeight = data.type.height;
       setImageMeta({ height: imageHeight, width: imageWidth, size: data.data.length });
       setImagePromptTokenCount(countImageTokens(imageWidth, imageHeight));
       setPromptTokenCount(countToken(VISION_MODEL.prompt + prompt));
+
+      if (auth.provider === "chatgpt") {
+        const models = await listCodexAppServerModels();
+        const available = normalizeAvailableOptions(
+          models.filter((model) => !model.hidden).map((model) => model.model || model.id),
+        );
+        if (available.length === 0) throw new Error("Your ChatGPT account has no available models.");
+        const model = resolveModelOption(VISION_MODEL.option, available);
+        const result = await requestCodexResponse({
+          model,
+          messages: [{ role: "user", content: prompt || "Describe this image:" }],
+          instructions: VISION_MODEL.prompt,
+          imagePaths: [data.path],
+          stream: useStream,
+          onDelta: (delta) => setResponse((previous) => previous + delta),
+        });
+        return result.text;
+      }
+
+      if (!chatGPT) throw new Error("Add an API key or sign in with ChatGPT to use image commands.");
+      const imageUrl = bufferToDataUrl(`image/${data.type}`, data.data);
+
+      const request = {
+        model: VISION_MODEL.option,
+        instructions: VISION_MODEL.prompt,
+        input: [
+          {
+            role: "user" as const,
+            content: [
+              { type: "input_text" as const, text: prompt || "Describe this image:" },
+              { type: "input_image" as const, image_url: imageUrl, detail: "auto" as const },
+            ],
+          },
+        ],
+        store: false,
+      };
+      const streamOrCompletion = useStream
+        ? await chatGPT.responses.create({ ...request, stream: true })
+        : await chatGPT.responses.create({ ...request, stream: false });
+
       return streamOrCompletion;
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
       setLoading(false);
       setResponse(
-        "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``,
+        "## ⚠️ Could not understand the image. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``,
       );
       return;
     }
@@ -129,12 +157,14 @@ export function VisionView(props: AskImageProps) {
       setResponseTokenCount(countToken(response_));
     }
 
-    if (resp instanceof Stream) {
-      for await (const part of resp) {
-        appendResponse(part.choices[0]?.delta?.content ?? "");
+    if (typeof resp === "string") {
+      appendResponse(resp);
+    } else if (useStream) {
+      for await (const event of resp as AsyncIterable<{ type: string; delta?: string }>) {
+        if (event.type === "response.output_text.delta") appendResponse(event.delta ?? "");
       }
-    } else {
-      appendResponse(resp.choices[0]?.message?.content ?? "");
+    } else if ("output_text" in resp) {
+      appendResponse(resp.output_text);
     }
 
     setLoading(false);
@@ -151,11 +181,6 @@ export function VisionView(props: AskImageProps) {
   useEffect(() => {
     if (loading == false) {
       setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count + image_prompt_token_count);
-      setCumulativeCost(
-        cumulative_cost +
-          estimatePrice(prompt_token_count, response_token_count, VISION_MODEL.option) +
-          estimateImagePrice(image_prompt_token_count),
-      );
     }
   }, [loading]);
 
@@ -182,7 +207,6 @@ export function VisionView(props: AskImageProps) {
               <>
                 <Detail.Metadata.Separator />
                 <Detail.Metadata.Label title="Cumulative Tokens" text={cumulative_tokens.toString()} />
-                <Detail.Metadata.Label title="Cumulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
               </>
             )}
           </Detail.Metadata>

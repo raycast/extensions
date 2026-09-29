@@ -41,7 +41,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
     "require('@raycast/api');require('node:worker_threads').parentPort.postMessage({kind:'ready'});\n",
   );
   const worker = new Worker(path.join(dir, "worker.cjs"), {
-    env: { ...process.env, NODE_ENV: "test" },
+    env: { ...process.env, ...options.env, NODE_ENV: "test" },
     workerData: {
       isDevelopment: false,
       appearance: "light",

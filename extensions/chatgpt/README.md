@@ -12,33 +12,33 @@ Interact with OpenAI's ChatGPT right from your command bar
 
 # Features
 
-### Ask anything, from your favourite thing
+### Ask from your command bar
 
-Straight from your command bar, ask anything that you wanted and get an AI-generated answer without any effort.
+Ask a question from Raycast and get an answer without leaving your current app.
 
 ![Ask anything](metadata/2.png)
 
-### Personalized for you, really
+### Customize your models
 
-Customize the model to your liking. Create and edit custom engines beyond your creativity.
+Create presets and AI commands with your own prompts and settings.
 
 ![Custom model](metadata/3.png)
 
-### Keep continue, with you
+### Continue conversations
 
-Continue talking about everything right where you left off. Be pro without from zero.
+Return to previous conversations and continue where you left off.
 
 ![Initial set-up](metadata/7.png)
 
-### Save the answer, for later
+### Save answers
 
-Got the answer that you wanted? Great. Now you can save it without asking again.
+Save useful answers for later.
 
 ![Saving the answer](metadata/4.png)
 
-### Look-up your past, fast
+### Search history
 
-Automatically save all the question and answer so you can go back digging for the answer you're looking, quickly.
+Find earlier questions and answers in your history.
 
 ![Looking through the question history](metadata/5.png)
 
@@ -55,74 +55,17 @@ insert the result into the frontmost application or copy it to the clipboard.
 
 # Models
 
-Manage chat presets and AI commands together in **Models**. Select a preset and use **Create AI Command from This Model** in its action menu to create a command with the same chat settings.
+**Ask Question** and Full Text Input list the models available to your chosen connection, along with saved presets. New configurations start with GPT-6 Luna. The picker reads model IDs from the OpenAI API or Codex app-server, so new models appear without an extension update. A model may still reject a request if it does not support chat or image input.
 
-- Creating a command from **AI Commands** starts with **Independent Configuration**. Set its model ID, temperature, reasoning, vision and prompt directly; no chat preset is required or created.
-- Creating a command from a preset in **Models** starts with **Inherit from a Model**. The form displays the effective settings directly. Editing a field customizes it only for that command; untouched fields continue to follow the base model. Use the action menu to reset individual fields or restore all inherited settings.
-- Prompt overrides replace the base prompt; prompts are never concatenated. An empty prompt is allowed.
-- Switch an inherited command to independent configuration to copy its currently effective settings and stop following the base model. Either mode can be changed later in the command form.
-- **Ask Question**, Full Text Input and Summarize Website offer base models (Default and custom presets). In **Models**, **Ask with This Model** starts a chat with a base model and **Ask with This Command** starts a conversation with an AI command. **Edit Model** and **Edit AI Command** update them without losing the draft or conversation.
-- **Continue in Chat** preserves the command's messages and effective settings. Command conversations offer that command alongside base models, labeled **Command: <name>** in Ask, Full Text Input and Conversations.
-- Ask remembers the last explicitly selected base model; starting or continuing a command conversation does not replace it. Saved command conversations use the current command settings, or their saved settings if the command was deleted. A remembered model that no longer exists (a removed preset or an old command entry) resolves to its base model or Default, and that choice is remembered instead.
-- Full Text Input also supports editing the selected configuration. Subsequent requests use the saved settings.
-- Existing commands migrate to independent configuration with their original settings, without creating extra model presets. Existing explicit base-model relationships are preserved. A model used by commands cannot be removed until those commands become independent or use another base model.
-- Built-in commands start with independent settings. Importing models preserves any referenced base model missing from the import file, including when restoring an older backup.
-- Saving in Models or AI Commands reads the latest stored settings to preserve changes saved by another command.
+Use **Models** to edit presets and AI commands. Commands can have independent settings or inherit a preset; overrides replace the corresponding preset setting. Existing commands and saved conversations remain available. Create a command from a preset using **Create AI Command from This Model**.
 
-**AI Commands** is available for quick execution and command management. The standalone **Create AI Command** entry has been removed; use the action menu in **Models** to create commands. Existing commands are preserved. Shortcuts or deep links to the removed entry need to be replaced with **Models**.
+# Authentication
 
-GPT-5 model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.
-You can also enable per-model reasoning control in the model form and set the `Effort` (`none`, `low`, `medium`, `high`).
-By default, reasoning effort override is disabled. When it is enabled and set to anything except `none`, the extension sends `reasoning_effort` in Chat Completions requests.
+Add an OpenAI API key in Raycast preferences or use **Sign in with ChatGPT** in the extension. API-key requests use the Responses API and API billing. ChatGPT sign-in uses Codex app-server. Both connections support image input: the API sends image data, while Codex receives local image paths. Choose **Preferred Connection** in extension preferences when both are configured. The API key is preferred by default; if the preferred connection is unavailable, the other is used. Sign out of ChatGPT from the action menu.
 
-### Custom Models
+# Local development
 
-Enable `Use API Endpoint` and set `API Endpoint` in preferences to use a compatible API provider.
-
-When creating or editing a Model or AI Command, the `Model` dropdown loads model IDs from the configured API.
-Search and select an available model, or type any model ID and select `Use "your-model-id"` to use it.
-Manual entry is always available, including when the API cannot list models. There is no separate `Custom model` preference.
-Previously saved model IDs remain selectable even if they are missing from the API response.
-Azure continues to skip model discovery; enter the model ID manually.
-
-# How to use
-
-This extension requires a valid `Secret Key` as your API Key from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**you'll get a `429` error if you're on a `free-tier` account**).
-
-![Initial set-up](metadata/6.png)
-
-> All the preferences value will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
-
-# Preferences
-
-All preferences properties list that can be customize through `Raycast Settings > Extensions > ChatGPT`
-
-| Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
-| ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal OpenAI API key                                                                                     |
-| `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
-| `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
-| `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
-| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
-| `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
-| `isAutoTTS`              | Text-to-Speech         | `boolean`                           | `false`  | `false` | Enable auto text-to-speech everytime you get a generated answer                                                  |
-| `useApiEndpoint`         | Use API Endpoint       | `boolean`                           | `false`  | `false` | Change the OpenAI's default API endpoint to custom endpoint                                                      |
-| `apiEndpoint`            | API Endpoint           | `string`                            | `false`  | `empty` | Custom API endpoint                                                                                              |
-| `useProxy`               | Use Proxy              | `boolean`                           | `false`  | `false` | Each question request will be passed through the proxy                                                           |
-| `proxyProtocol`          | Proxy Protocol         | `http`, `https`, `socks4`, `socks5` | `false`  | `http`  | Proxy protocol option                                                                                            |
-| `proxyHost`              | Proxy Host             | `string`                            | `false`  | `empty` | Proxy host value                                                                                                 |
-| `proxyUsername`          | Proxy Username         | `string`                            | `false`  | `empty` | Proxy username value                                                                                             |
-| `proxyPassword`          | Proxy Password         | `string`                            | `false`  | `empty` | Proxy password value                                                                                             |
-| `useAzure`               | Use Azure OpenAI       | `boolean`                           | `true`   | `false` | Use Azure OPENAI rather than OPENAI                                                                              |
-| `azureEndpoint`          | Azure Endpoint         | `string`                            | `false`  | `empty` | Azure OpenAI resource endpoint                                                                                   |
-| `azureDeploymentName`    | Azure Deployment       | `string`                            | `false`  | `empty` | Azure OpenAI resource deployment                                                                                 |
-
-### How to use Azure OpenAI
-
-1. Copy and paste your Azure OpenAI's `KEY` value to the `API key` field
-2. Copy and paste your Azure OpenAI `Endpoint` value to the `Azure Endpoint` field. Then, Tick the `Use Azure OpenAI` checkbox
-
-3. Copy and paste your Azure OpenAI `Model deployment name` value to the `Azure Deployment` field
+Run `npm run build` once to bundle Codex runtimes for Intel and Apple Silicon macOS and Windows, then run `npm run dev`. Open a ChatGPT command under **Development** in Raycast.
 
 # Support
 
