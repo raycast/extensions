@@ -17,6 +17,7 @@ export const supportedBrowsers = [
   "Yandex",
   "Zen",
   "Dia",
+  "Aside",
 ] as const;
 
 export type SupportedBrowsers = (typeof supportedBrowsers)[number];
