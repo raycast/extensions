@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { environment, getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { startActivity, toggleActivity } from "./commands/activities/api";
 import { Activity, StartActivityRequest } from "./commands/activities/types";
@@ -7,7 +7,7 @@ import { Project } from "./commands/projects/types";
 import { Customer } from "./commands/customers/types";
 import { Task } from "./commands/tasks/types";
 import { Preferences } from "./types";
-import { refreshTodaysActivities } from "./utils/refresh";
+import { refreshCache, refreshTodaysActivities } from "./utils/refresh";
 import { useStatuses } from "./utils/useStatuses";
 import {
   CustomerLayout,
@@ -34,7 +34,7 @@ export default function Command() {
   const changeTaskStatus = taskStatusState.changeStatus;
 
   // Reload today's activities from the API after a timer action. The cache only updates on the next
-  // background_refresher run, so reading it here would show the old state for up to 30s.
+  // background run, so reading it here would show the old state for up to 30s.
   const refreshItems = async () => {
     setIsLoading(true);
     try {
@@ -69,15 +69,31 @@ export default function Command() {
   useEffect(() => {
     // Load everything first and set the state in one go. Raycast keeps showing the previous menu while
     // isLoading is true, so a partial state (activities without projects) would render as a flicker.
-    Promise.all([getTodaysActivities(), getProjects(), getCustomerLayouts(), getFavoriteOrder()]).then(
-      ([activities, projects, layouts, order]) => {
-        setCustomerLayouts(layouts);
-        setFavoriteOrder(order);
-        setActivities(activities);
-        setProjects(projects.filter((project) => project.contract?.active !== false));
-        setIsLoading(false);
-      },
-    );
+    const load = async () => {
+      const [cachedActivities, cachedProjects, layouts, order] = await Promise.all([
+        getTodaysActivities(),
+        getProjects(),
+        getCustomerLayouts(),
+        getFavoriteOrder(),
+      ]);
+      let activities = cachedActivities;
+      let projects = cachedProjects;
+      // Background runs (every 30s, menu closed) refresh the cache from the API. A click only reads the cache,
+      // so the menu opens without waiting for the API. An empty cache (first run) is filled on a click too.
+      if (environment.launchType === LaunchType.Background || cachedProjects.length === 0) {
+        try {
+          ({ activities, projects } = await refreshCache());
+        } catch (error) {
+          console.error("Error refreshing the MOCO cache", error);
+        }
+      }
+      setCustomerLayouts(layouts);
+      setFavoriteOrder(order);
+      setActivities(activities);
+      setProjects(projects.filter((project) => project.contract?.active !== false));
+      setIsLoading(false);
+    };
+    load();
   }, []);
 
   // Hidden projects (project list) and hidden or inactive tasks stay out of the menu.
@@ -198,7 +214,7 @@ export default function Command() {
     <MenuBarExtra
       isLoading={isMenuLoading}
       icon={{ source: runningActivity ? "MocoLogoRunning.png" : "MocoLogo.png" }}
-      // Total time of today as h:mm. Raycast re-runs the command every minute (package.json interval).
+      // Total time of today as h:mm. Raycast re-runs the command every 30s (package.json interval).
       title={isMenuLoading ? undefined : totalTime.slice(0, totalTime.lastIndexOf(":"))}
       tooltip={`Timer ${runningActivity ? "Running" : "Not running"}`}
     >

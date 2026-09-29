@@ -27,26 +27,25 @@ npx prettier --write <files>
 
 ## Structure
 
-| Command (`package.json`)                                                      | Entry                          | Purpose                                                           |
-| ----------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------- |
-| `moco`                                                                        | `src/moco.tsx`                 | project list → tasks → start/log activity                         |
-| `moco_today`                                                                  | `src/moco_today.tsx`           | today's activities                                                |
-| `moco_menu_bar`                                                               | `src/moco_menu_bar.tsx`        | menu bar, `interval: 1m`                                          |
-| `background_refresher`                                                        | `src/background_refresher.tsx` | no-view, `interval: 30s`, fills the cache                         |
-| `start_timer`, `edit_timer`, `menu_actions`, `menu_bar_settings`, `favorites` | `src/<name>.tsx`               | windows opened from the menu bar, also usable from Raycast search |
+| Command (`package.json`)                                                      | Entry                   | Purpose                                                           |
+| ----------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------- |
+| `moco`                                                                        | `src/moco.tsx`          | project list → tasks → start/log activity                         |
+| `moco_today`                                                                  | `src/moco_today.tsx`    | today's activities                                                |
+| `moco_menu_bar`                                                               | `src/moco_menu_bar.tsx` | menu bar, `interval: 30s`, refreshes the cache                    |
+| `start_timer`, `edit_timer`, `menu_actions`, `menu_bar_settings`, `favorites` | `src/<name>.tsx`        | windows opened from the menu bar, also usable from Raycast search |
 
 - `src/commands/<domain>/`: `api.ts` (MOCO requests + zod schema), `types.ts`, `components/`.
 - `src/utils/api.ts`: the shared axios client (base URL, auth header). Always use it, never set headers per request.
 - `src/utils/storage.ts`: all `LocalStorage` access.
-- `src/utils/refresh.ts`: `refreshTodaysActivities()`, and `finishMenuBarForm()` for windows opened from the
+- `src/utils/refresh.ts`: `refreshCache()` (background runs of the menu bar), `refreshTodaysActivities()`, and `finishMenuBarForm()` for windows opened from the
   menu bar (refresh cache → re-render the menu bar → close the window).
 - `src/utils/useStatuses.ts`: favorite/hidden statuses with optimistic updates.
 
 ## Data flow
 
 ```
-background_refresher (30s) → MOCO API → LocalStorage cache (user, todays_activities, projects)
-moco_menu_bar → reads the cache (fast, no API wait) → after a timer action: refreshTodaysActivities()
+moco_menu_bar, background run (30s) → refreshCache() → MOCO API → LocalStorage cache (user, todays_activities, projects)
+moco_menu_bar, click → reads the cache (fast, no API wait) → after a timer action: refreshTodaysActivities()
 views (lists, forms) → useCachedPromise → API, cached between runs
 ```
 
@@ -60,7 +59,7 @@ views (lists, forms) → useCachedPromise → API, cached between runs
 | `status:project:<id>`, `status:task:<id>` | `"favorite"` or `"hidden"` (one status per item)                         |
 | `menu-bar:customer-layouts`               | `{ [customerId]: "submenu" \| "hidden" }`, default inline, `0` = "Other" |
 | `menu-bar:favorite-order`                 | task IDs in menu order, favorites without a position go last             |
-| `user`, `todays_activities`, `projects`   | cache written by `background_refresher`                                  |
+| `user`, `todays_activities`, `projects`   | cache written by the menu bar's background runs                          |
 | `cleanup:legacy-status-keys`              | flag: old `<projectId>` keys (≤ v1.1.4) removed once                     |
 
 ## Raycast limits (tested)

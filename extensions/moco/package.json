@@ -33,7 +33,7 @@
       "subtitle": "MOCO",
       "description": "See if a timer is running with a glance",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "30s"
     },
     {
       "name": "start_timer",
@@ -69,13 +69,6 @@
       "subtitle": "MOCO",
       "description": "Start a favorite task or change the order of the favorites in the menu bar",
       "mode": "view"
-    },
-    {
-      "name": "background_refresher",
-      "title": "Background Refresher",
-      "description": "Refreshes in the background",
-      "mode": "no-view",
-      "interval": "30s"
     }
   ],
   "preferences": [
