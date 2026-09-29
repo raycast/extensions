@@ -16,6 +16,10 @@ export default function Subscriptions() {
     if (error) void reportMagpieError(error);
   }, [error]);
 
+  useEffect(() => {
+    if (quotas.error) void reportMagpieError(quotas.error);
+  }, [quotas.error]);
+
   const balances = (quotas.data ?? []).filter(
     (row) => row.kind === "balance" && row.balance,
   );
@@ -36,7 +40,7 @@ export default function Subscriptions() {
       isLoading={isLoading || quotas.isLoading}
       searchBarPlaceholder="Search subscriptions"
     >
-      {error && !data && balances.length === 0 ? (
+      {error && !data && balances.length === 0 && !quotas.data ? (
         <List.EmptyView
           title="Couldn't load quotas"
           description={error.message}
@@ -47,8 +51,11 @@ export default function Subscriptions() {
         (data?.length ?? 0) === 0 &&
         balances.length === 0 ? (
         <List.EmptyView
-          title="No quotas"
-          description="magpie has no subscription window or provider balance to show."
+          title={quotas.error ? "Couldn't load quotas" : "No quotas"}
+          description={
+            quotas.error?.message ??
+            "magpie has no subscription window or provider balance to show."
+          }
           actions={<ReloadAction onReload={reload} />}
         />
       ) : (
@@ -83,7 +90,27 @@ export default function Subscriptions() {
           </List.Section>
         ))
       )}
-      {balances.length > 0 ? (
+      {(data?.length ?? 0) > 0 &&
+      quotas.error &&
+      balances.length === 0 &&
+      !quotas.isLoading ? (
+        <List.Section title="Key balances">
+          <List.Item
+            icon={Icon.Warning}
+            title="Couldn't load balances"
+            subtitle={quotas.error.message}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Reload"
+                  icon={Icon.ArrowClockwise}
+                  onAction={reload}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : balances.length > 0 ? (
         <List.Section title="Key balances">
           {balances.map((row) => (
             <List.Item
