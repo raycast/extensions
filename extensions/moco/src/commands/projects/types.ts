@@ -11,4 +11,10 @@ export type Project = {
   customer?: Customer;
   tasks: Task[];
   status?: StatusType;
+  contract?: Contract;
+};
+
+export type Contract = {
+  user_id: number;
+  active: boolean;
 };

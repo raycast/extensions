@@ -1,4 +1,7 @@
 import { LocalStorage } from "@raycast/api";
+import { Project } from "../commands/projects/types";
+import { User } from "../commands/user/types";
+import { Activity } from "../commands/activities/types";
 
 export enum StatusType {
   favorite = "favorite",
@@ -33,4 +36,60 @@ export const getAllStatus = async (kind: StatusKind): Promise<Map<number, Status
     }
   }
   return statuses;
+};
+
+export const storeUser = async (user: User) => {
+  return LocalStorage.setItem("user", JSON.stringify(user));
+};
+
+export const getUser = async (): Promise<User | undefined> => {
+  return LocalStorage.getItem("user").then((user) => {
+    if (user === undefined) {
+      return undefined;
+    } else {
+      return JSON.parse(user.toString());
+    }
+  });
+};
+
+export const storeTodaysActivities = async (activities: Activity[]) => {
+  return LocalStorage.setItem("todays_activities", JSON.stringify(activities));
+};
+
+export const getTodaysActivities = async (): Promise<Activity[]> => {
+  const activities = await LocalStorage.getItem("todays_activities");
+  if (activities === undefined) {
+    return [];
+  } else {
+    return JSON.parse(activities.toString());
+  }
+};
+
+export const storeProjects = async (projects: Project[]): Promise<void> => {
+  return LocalStorage.setItem("projects", JSON.stringify(projects));
+};
+
+export const getProjects = async (): Promise<Project[]> => {
+  const projects = await LocalStorage.getItem("projects");
+  if (projects === undefined) {
+    return [];
+  } else {
+    return JSON.parse(projects.toString());
+  }
+};
+
+// Up to v1.1.4, "Add Project to Favorites" and "Hide Project" both wrote "<projectId>" = "favorite".
+// Nothing reads these keys. Remove them once, then remember that the cleanup ran.
+const LEGACY_CLEANUP_KEY = "cleanup:legacy-status-keys";
+
+export const removeLegacyStatusKeys = async (): Promise<void> => {
+  if ((await LocalStorage.getItem(LEGACY_CLEANUP_KEY)) !== undefined) {
+    return;
+  }
+  const items = await LocalStorage.allItems();
+  const legacyKeys = Object.entries(items)
+    .filter(([key, value]) => /^\d+$/.test(key) && (value === "favorite" || value === "hidden"))
+    .map(([key]) => key);
+  await Promise.all(legacyKeys.map((key) => LocalStorage.removeItem(key)));
+  await LocalStorage.setItem(LEGACY_CLEANUP_KEY, true);
 };

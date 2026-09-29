@@ -1,6 +1,6 @@
 import { api } from "../../utils/api";
 import { z } from "zod";
-import { Project } from "./types";
+import { Contract, Project } from "./types";
 import { Customer } from "../customers/types";
 import { Task } from "../tasks/types";
 
@@ -23,11 +23,17 @@ const projectSchema = z.array(
         billable: z.boolean(),
       }),
     ),
+    contract: z
+      .object({
+        user_id: z.number(),
+        active: z.boolean(),
+      })
+      .optional(),
   }),
 );
 
 export const fetchProjects = async (): Promise<Project[]> => {
-  const { data } = await api.get("/projects/assigned");
+  const { data } = await api.get("/projects/assigned?active=true");
 
   const projects = projectSchema.parse(data);
 
@@ -43,6 +49,7 @@ export const fetchProjects = async (): Promise<Project[]> => {
         billable: project.billable as boolean,
         customer: project.customer as Customer,
         tasks: project.tasks as Task[],
+        contract: project.contract as Contract,
       }),
     );
 };

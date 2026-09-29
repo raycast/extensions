@@ -1,3 +1,5 @@
+import { Activity } from "./types";
+
 export function timeDelta(timerStartString: string): number {
   return (Date.now() - Date.parse(timerStartString)) / 1000;
 }
@@ -13,6 +15,17 @@ export function secondsParser(seconds: number) {
 export function toDecimalTime(time: string) {
   const [hours, minutes] = time.split(":");
   return Number(hours) + Number(minutes) / 60;
+}
+
+// The running activity, else the last touched one. Stopping a timer updates updated_at.
+export function currentActivity(activities: Activity[]): Activity | undefined {
+  return (
+    activities.find((activity) => activity.timer_started_at !== null) ??
+    activities.reduce<Activity | undefined>(
+      (latest, activity) => (latest === undefined || activity.updated_at > latest.updated_at ? activity : latest),
+      undefined,
+    )
+  );
 }
 
 // Accepted time input: "h:mm" or decimal hours with "." or ",".

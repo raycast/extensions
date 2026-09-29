@@ -9,6 +9,8 @@ import { parseHours, validateTime } from "../utils";
 interface ActivityStartProps {
   task?: Task;
   projectID?: number | null;
+  // Called after a successful submit. Defaults to popping the form.
+  onSubmitted?: () => Promise<void>;
 }
 
 interface ActivityStartValues {
@@ -19,7 +21,7 @@ interface ActivityStartValues {
   hours: string;
 }
 
-export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID }) => {
+export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, onSubmitted }) => {
   const navi = useNavigation();
   // With a given task the dropdowns are hidden, so the projects are not needed.
   const { data: projects = [], isLoading } = useCachedPromise(fetchProjects, [], {
@@ -43,7 +45,12 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
         projectID: task ? task.projectID : values.projectDropdown ? Number(values.projectDropdown) : projectID,
         taskID: task ? task.id : Number(values.taskDropdown),
       });
-      if (success === true) {
+      if (success !== true) {
+        return;
+      }
+      if (onSubmitted) {
+        await onSubmitted();
+      } else {
         navi.pop();
       }
     },
