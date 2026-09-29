@@ -103,7 +103,6 @@
     "@types/html-to-text": "^9.0.4",
     "@types/mailparser": "^3.4.6",
     "@types/node": "25.9.1",
-    "@types/nodemailer": "^8.0.0",
     "@types/react": "19.2.15",
     "eslint": "^9.39.0",
     "prettier": "^3.8.3",

@@ -397,7 +397,7 @@
     "turndown": "^7.2.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.5.0",
+    "@faker-js/faker": "^10.6.0",
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.11",
