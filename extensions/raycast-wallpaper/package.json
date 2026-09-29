@@ -9,7 +9,8 @@
     "samuelkraft",
     "pernielsentikaer",
     "xilopaint",
-    "stelo"
+    "stelo",
+    "ray.dhruv"
   ],
   "categories": [
     "Media",
@@ -105,7 +106,7 @@
               "value": "current"
             },
             {
-              "title": "Monitor",
+              "title": "All Monitors",
               "value": "every"
             }
           ],
@@ -150,7 +151,7 @@
               "value": "current"
             },
             {
-              "title": "Monitor",
+              "title": "All Monitors",
               "value": "every"
             }
           ],
@@ -219,11 +220,13 @@
     "@raycast/utils": "^2.2.2",
     "axios": "^1.10.0",
     "file-url": "^4.0.0",
-    "fs-extra": "^11.3.0"
+    "fs-extra": "^11.3.0",
+    "heic-convert": "^2.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/fs-extra": "^11.0.4",
+    "@types/heic-convert": "^2.1.1",
     "@types/node": "22.15.3",
     "@types/react": "19.1.2",
     "eslint": "^9.25.1",
@@ -235,7 +238,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS",

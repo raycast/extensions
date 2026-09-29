@@ -1,5 +1,15 @@
 # Raycast Wallpaper Changelog
 
+## [Fix Windows wallpapers and improve reliability] - {PR_MERGE_DATE}
+
+- Convert HEIC wallpapers to full-resolution JPEGs on Windows to prevent blank backgrounds.
+- Fix opening the wallpaper folder when no directory is configured, and create missing download folders.
+- Download wallpapers on demand and report download and wallpaper-setting failures.
+- Retry failed automatic switches without waiting for the full refresh interval.
+- Fix Windows dark-mode detection and appearance settings for newer wallpapers.
+- Fix gallery selection and loading indicators, and clarify the All Monitors option.
+- Report an error when the current monitor cannot be found.
+
 ## [Update default setting] - 2025-06-24
 
 - Update default setting of `Respect System Appearance` to `false` for "Set Raycast Wallpaper" command.
