@@ -849,6 +849,10 @@ export default function Command() {
 
   const currentSnapshot = snapshot ?? fallbackSnapshot;
   const errorMessage = error?.message;
+  const isStale = Boolean(errorMessage && snapshot);
+  const errorMarkdown = isStale
+    ? `# Error\n\n${errorMessage}\n\nThe network, volume, and battery values shown may be out of date.`
+    : `# Error\n\n${errorMessage}`;
   const showSeconds = Boolean(preferences.showSeconds);
   const showInlineDetail = preferences.detailViewMode !== "subpage";
   const timeFormat = preferences.timeFormat ?? "12h";
@@ -862,9 +866,11 @@ export default function Command() {
       title: currentSnapshot.network.connected
         ? (currentSnapshot.network.name ?? "Connected")
         : "Not Connected",
-      accessory: currentSnapshot.network.connected
-        ? "Internet Access"
-        : "Offline",
+      accessory: isStale
+        ? "Stale"
+        : currentSnapshot.network.connected
+          ? "Internet Access"
+          : "Offline",
       icon: getInternetIcon(currentSnapshot),
       detail: buildInternetDetail(currentSnapshot),
     },
@@ -872,7 +878,9 @@ export default function Command() {
       id: "volume",
       label: "Volume",
       title: `${currentSnapshot.volume.level}%`,
-      accessory: currentSnapshot.volume.deviceName?.trim() || "Unknown",
+      accessory: isStale
+        ? "Stale"
+        : currentSnapshot.volume.deviceName?.trim() || "Unknown",
       icon: getVolumeIcon(currentSnapshot),
       detail: buildVolumeDetail(currentSnapshot),
     },
@@ -882,7 +890,7 @@ export default function Command() {
       title: currentSnapshot.battery.available
         ? `${currentSnapshot.battery.percentage ?? "Unknown"}%${currentSnapshot.battery.charging ? " (Charging)" : ""}`
         : "No Battery",
-      accessory: "Battery Status",
+      accessory: isStale ? "Stale" : "Battery Status",
       icon: getBatteryIcon(currentSnapshot),
       detail: buildBatteryDetail(currentSnapshot),
     },
@@ -914,14 +922,20 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail={showInlineDetail}>
-      {errorMessage && !snapshot ? (
+      {errorMessage ? (
         <List.Item
-          title="Unable to load system status"
+          key="error"
+          title={
+            isStale
+              ? "Unable to refresh system status"
+              : "Unable to load system status"
+          }
+          subtitle={isStale ? "Showing last known values" : undefined}
           accessories={[{ text: errorMessage }]}
           icon={Icon.Warning}
           detail={
             showInlineDetail ? (
-              <List.Item.Detail markdown={`# Error\n\n${errorMessage}`} />
+              <List.Item.Detail markdown={errorMarkdown} />
             ) : undefined
           }
           actions={
@@ -930,10 +944,7 @@ export default function Command() {
                 <Action.Push
                   title="Show Details"
                   target={
-                    <StaticDetailPage
-                      title="Error"
-                      markdown={`# Error\n\n${errorMessage}`}
-                    />
+                    <StaticDetailPage title="Error" markdown={errorMarkdown} />
                   }
                 />
               ) : null}
@@ -944,50 +955,51 @@ export default function Command() {
               />
               <Action.CopyToClipboard
                 title="Copy Details"
-                content={`# Error\n\n${errorMessage}`}
+                content={errorMarkdown}
               />
             </ActionPanel>
           }
         />
-      ) : (
-        items.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.title}
-            subtitle={item.label}
-            accessories={[{ text: item.accessory }]}
-            icon={item.icon}
-            detail={
-              showInlineDetail ? (
-                <List.Item.Detail markdown={item.detail} />
-              ) : undefined
-            }
-            actions={
-              <ActionPanel>
-                {!showInlineDetail ? (
-                  <Action.Push
-                    title="Show Details"
-                    target={renderDetailTarget(item)}
+      ) : null}
+      {errorMessage && !snapshot
+        ? null
+        : items.map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.title}
+              subtitle={item.label}
+              accessories={[{ text: item.accessory }]}
+              icon={item.icon}
+              detail={
+                showInlineDetail ? (
+                  <List.Item.Detail markdown={item.detail} />
+                ) : undefined
+              }
+              actions={
+                <ActionPanel>
+                  {!showInlineDetail ? (
+                    <Action.Push
+                      title="Show Details"
+                      target={renderDetailTarget(item)}
+                    />
+                  ) : null}
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
+                    onAction={revalidate}
                   />
-                ) : null}
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd"], key: "r" },
-                    Windows: { modifiers: ["ctrl"], key: "r" },
-                  }}
-                  onAction={revalidate}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Details"
-                  content={cleanCopiedDetail(item.detail)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
-      )}
+                  <Action.CopyToClipboard
+                    title="Copy Details"
+                    content={cleanCopiedDetail(item.detail)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
     </List>
   );
 }
