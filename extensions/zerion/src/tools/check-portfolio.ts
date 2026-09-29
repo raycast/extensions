@@ -1,7 +1,7 @@
 import { withAccessToken } from "@raycast/utils";
-import { apiFetch, type ApiPortfolioAttributes, type ApiPosition } from "../shared/api";
+import { apiFetch, type ApiPortfolioAttributes, type ApiPositionsResponse } from "../shared/api";
 import { resolveIdentity } from "../shared/useWalletIdentity";
-import { getPositionsFilter } from "../shared/useWalletPositions";
+import { collectAllPositions, getPositionsFilter } from "../shared/useWalletPositions";
 import { zerionOAuth } from "../shared/oauth";
 
 type Input = {
@@ -26,16 +26,16 @@ async function tool(input: Input) {
     apiFetch<{ data: { attributes: ApiPortfolioAttributes } }>(
       `wallets/${address}/portfolio?currency=usd&filter[positions]=no_filter`,
     ),
-    apiFetch<{ data: ApiPosition[] }>(
+    apiFetch<ApiPositionsResponse>(
       `wallets/${address}/positions/?currency=usd${getPositionsFilter(address)}&sort=-value`,
-    ),
+    ).then((firstPage) => collectAllPositions(firstPage)),
   ]);
 
   return {
     address,
     ens: identity.ens,
     portfolio: portfolio.data.attributes,
-    positions: positions.data.map((position) => ({
+    positions: positions.map((position) => ({
       name: position.attributes.fungible_info.name,
       symbol: position.attributes.fungible_info.symbol,
       fungible_id: position.relationships.fungible.data.id,

@@ -101,7 +101,7 @@ export function AddressLine({
     }
   }, [error]);
 
-  // Only fetched where Enter opens Performance; shares the cache with its default Period
+  // Only fetched on rows that show the sparkline hint; shares the cache with Performance's default Period
   const { chart } = useWalletChart({ address: action ? undefined : normalizedAddress, period: DEFAULT_PERIOD });
   const performanceIcon = useMemo(() => {
     const light = chart && renderSparkline({ theme: "light", points: chart.points });
@@ -142,18 +142,12 @@ export function AddressLine({
                 : Color.Red,
           },
         },
-        // Without a custom primary action, Enter opens Performance — hint at it with a 1D sparkline
-        ...(action ? [] : [{ icon: performanceIcon, tooltip: "Press ↵ to show Performance" }]),
+        // Rows without a custom primary action get a 1D sparkline hinting at Performance
+        ...(action ? [] : [{ icon: performanceIcon, tooltip: "Press ⌘⇧P to show Performance" }]),
       ]}
       actions={
         <ActionPanel title="Actions">
           {action}
-          <Action.Push
-            title="Show Performance"
-            icon={Icon.LineChart}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            target={<PerformanceView address={normalizedAddress} name={name} />}
-          />
           <Action.OpenInBrowser
             url={`https://app.zerion.io/${normalizedAddress}`}
             title="Open in Zerion Web App"
@@ -184,6 +178,12 @@ export function AddressLine({
             />
           )}
           <SafeAddressActions address={normalizedAddress} onChangeSavedStatus={onChangeSavedStatus} />
+          <Action.Push
+            title="Show Performance"
+            icon={Icon.LineChart}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            target={<PerformanceView address={normalizedAddress} name={name} />}
+          />
         </ActionPanel>
       }
     />

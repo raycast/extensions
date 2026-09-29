@@ -328,3 +328,8 @@ export interface ApiTransactionsResponse {
   links: { self: string; next?: string };
   data: ApiTransaction[];
 }
+
+export interface ApiPositionsResponse {
+  links?: { self?: string; next?: string | null };
+  data: ApiPosition[];
+}

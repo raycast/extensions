@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import { useFetch } from "@raycast/utils";
-import { API_URL, getApiHeaders, parseApiResponse, type ApiPosition } from "./api";
+import {
+  API_URL,
+  getApiHeaders,
+  getApiKey,
+  parseApiResponse,
+  type ApiPosition,
+  type ApiPositionsResponse,
+} from "./api";
 import type { Position } from "./types";
 import { ALL_CHAINS } from "./constants";
 import { isSolanaAddress } from "./useWalletIdentity";
@@ -40,9 +47,30 @@ export function mapPosition(position: ApiPosition): Position {
   };
 }
 
+/**
+ * Collects every position of a wallet, following `links.next` should the API
+ * split them across pages. Today it returns even thousands of positions in a
+ * single response, so this normally completes with the first page alone.
+ */
+export async function collectAllPositions(
+  firstPage: ApiPositionsResponse,
+  apiKey: string | undefined = getApiKey(),
+): Promise<ApiPosition[]> {
+  const positions = [...firstPage.data];
+  let next = firstPage.links?.next;
+  while (next) {
+    const response = await fetch(next, { headers: getApiHeaders(apiKey) });
+    const page = await parseApiResponse<ApiPositionsResponse>(response, apiKey);
+    positions.push(...page.data);
+    next = page.links?.next;
+  }
+  return positions;
+}
+
 async function parsePositions(response: Response): Promise<Position[]> {
-  const result = await parseApiResponse<{ data: ApiPosition[] }>(response);
-  return result.data.map(mapPosition);
+  const apiKey = getApiKey();
+  const firstPage = await parseApiResponse<ApiPositionsResponse>(response, apiKey);
+  return (await collectAllPositions(firstPage, apiKey)).map(mapPosition);
 }
 
 export function useWalletPositions({ address, chain }: { address?: string; chain?: string }) {
