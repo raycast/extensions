@@ -186,6 +186,15 @@
       "required": false
     },
     {
+      "name": "checkToolUpdates",
+      "title": "Check for Tool Updates",
+      "description": "Before a download, check whether the tools it uses (yt-dlp, gallery-dl, ffmpeg…) are outdated and offer to update them.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "cookiesFromBrowser",
       "title": "Gallery: Cookies from Browser",
       "description": "Browser to read cookies from for login-gated galleries.",

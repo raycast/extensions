@@ -31,6 +31,7 @@ import {
 } from "../lib/filetype.js";
 import { composeVideoFormat } from "../lib/video-format.js";
 import { fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
+import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
 import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
@@ -130,8 +131,13 @@ function failSession(session: DownloadSession, toast: Toast, error?: unknown) {
   void recordDownload(entryFromSnapshot(session.getSnapshot()));
 }
 
-/** Turn a rejected runner into a red, copyable failure toast — or a neutral "Cancelled" toast when the user pressed Stop. */
-function failToast(toast: Toast, error: unknown) {
+/**
+ * Turn a rejected runner into a red, copyable failure toast — or a neutral
+ * "Cancelled" toast when the user pressed Stop. Returns true for a plain tool
+ * failure (not a cancel or a specially handled error), where an outdated-tool
+ * hint makes sense.
+ */
+function failToast(toast: Toast, error: unknown): boolean {
   // Clear the in-flight "Stop" action up front — every failure path below
   // either sets its own secondary action or wants none, and a dead Stop
   // button left over from startAbortable would do nothing.
@@ -141,13 +147,13 @@ function failToast(toast: Toast, error: unknown) {
     toast.title = "Cancelled";
     toast.message = undefined;
     toast.primaryAction = undefined;
-    return;
+    return false;
   }
   if (error instanceof RosettaRequiredError) {
     toast.style = Toast.Style.Failure;
     toast.title = "spotDL needs Rosetta 2";
     toast.message = error.message;
-    return;
+    return false;
   }
   if (error instanceof SpotdlDownloadError) {
     const partial =
@@ -161,13 +167,14 @@ function failToast(toast: Toast, error: unknown) {
     } else if (error.summary.action === "open-setup-guide") {
       toast.secondaryAction = { title: "Open Setup Guide", onAction: () => open(SPOTDL_SETUP_GUIDE_URL) };
     }
-    return;
+    return false;
   }
   const message = error instanceof Error ? error.message : "Unknown error";
   toast.style = Toast.Style.Failure;
   toast.title = "Download Failed";
   toast.message = message;
   toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+  return true;
 }
 
 type DownloadFormProps = { initialUrl: string };
@@ -247,7 +254,12 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   // yt-dlp metadata — fetched only for a yt-dlp-bound selection with its tools present.
   const shouldFetchMeta = ytdlpBound && validUrl && !missingTool;
-  const { data: video, isLoading: metaLoading } = usePromise(
+
+  const {
+    data: video,
+    isLoading: metaLoading,
+    revalidate: refetchMeta,
+  } = usePromise(
     async (u: string, fetchIt: boolean) => {
       if (!fetchIt) return undefined;
       const denoPath = getDenoPath();
@@ -266,6 +278,21 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     [url, shouldFetchMeta],
     { onError: () => undefined, abortable: metaAbortable },
   );
+  // Outdated tools are the usual cause of failed downloads (yt-dlp's HTTP 403s,
+  // gallery-dl's broken extractors), so the first time the form needs a set of
+  // tools, check them, offer to update, and re-fetch the metadata once an update
+  // lands. The metadata fetch itself doesn't wait for the answer.
+  const checkedTools = useRef(new Set<string>());
+  useEffect(() => {
+    if (!validUrl || missingTool) return;
+    const tools = requiredTools(source, filetype);
+    const key = tools.join(",");
+    if (checkedTools.current.has(key)) return;
+    checkedTools.current.add(key);
+    void ensureFreshTools(tools).then((outcome) => {
+      if (outcome === "updated") refetchMeta();
+    });
+  }, [validUrl, missingTool, source, filetype, refetchMeta]);
 
   const liveStream = !!video && isLiveStream(video);
 
@@ -406,7 +433,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = { title: "Open File", onAction: () => open(filePath) };
         succeedSession(session, toast, filePath);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "monolith");
         failSession(session, toast, error);
       } finally {
         done();
@@ -436,7 +463,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = { title: "Copy Transcript", onAction: () => Clipboard.copy(transcript) };
         succeedSession(session, toast, filePath);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "yt-dlp");
         failSession(session, toast, error);
       } finally {
         done();
@@ -500,7 +527,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
           toast.secondaryAction = undefined;
         } else {
-          failToast(toast, error);
+          if (failToast(toast, error)) await hintOutdatedTool(toast, "gallery-dl");
         }
         failSession(session, toast, error);
       } finally {
@@ -535,7 +562,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         }
         succeedSession(session, toast, filePath);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "yt-dlp");
         failSession(session, toast, error);
       } finally {
         done();
@@ -609,7 +636,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = undefined;
         succeedSession(session, toast);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "spotdl");
         failSession(session, toast, error);
       } finally {
         done();
@@ -690,7 +717,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       }
       succeedSession(session, toast, filePath);
     } catch (error) {
-      failToast(toast, error);
+      if (failToast(toast, error)) await hintOutdatedTool(toast, "yt-dlp");
       failSession(session, toast, error);
     } finally {
       done();
