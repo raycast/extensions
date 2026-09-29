@@ -58,16 +58,25 @@ export function Body() {
   // Raycast List keeps the previously selected item (by id) even when the items are reordered,
   // so while typing "o" → "ok" a non-top item can stay selected after the ranking changes.
   // Select the first result whenever the keyword changes, but respect manual moves within the same keyword.
+  //
+  // Do not feed manual moves back into selectedItemId. Holding an arrow key moves the cursor faster
+  // than a render round-trip, so a fed-back id arrives stale and pulls the cursor back, bouncing
+  // between two items (#798). After the first manual move, pass undefined so Raycast keeps its own
+  // selection; the next keyword change then sets the first item again, even if it is the same id.
   const firstItemId = searchedList[0]?.id;
-  const [selection, setSelection] = useState<{ keyword: string; itemId?: string }>({ keyword: "" });
-  const selectedItemId = selection.keyword === keyword ? selection.itemId : firstItemId;
+  const [movedManually, setMovedManually] = useState(false);
+  const selectedItemId = movedManually ? undefined : firstItemId;
+  const handleSearchTextChange = useCallback((text: string) => {
+    setKeyword(text);
+    setMovedManually(false);
+  }, []);
   const handleSelectionChange = useCallback(
     (itemId: string | null) => {
       // null can arrive transiently while the list is being updated; ignore it.
-      if (itemId === null) return;
-      setSelection({ keyword, itemId });
+      if (itemId === null || itemId === firstItemId) return;
+      setMovedManually(true);
     },
-    [keyword],
+    [firstItemId],
   );
 
   const { hasSpaceFilter, hasCreatorFilter, hasTagFilter } = filteredData;
@@ -140,7 +149,7 @@ export function Body() {
 
   if (searchedList.length < 1 && hasFilter) {
     return (
-      <List isLoading={isFetching || !me.data} searchText={keyword} onSearchTextChange={setKeyword}>
+      <List isLoading={isFetching || !me.data} searchText={keyword} onSearchTextChange={handleSearchTextChange}>
         <List.Section title={`No results found. ${filterText}`}>
           <List.Item icon={Icon.Folder} title="!<spaceName> (filter by space name) " />
           <List.Item icon={Icon.Person} title="@<creator> (filter by creator) " />
@@ -154,7 +163,7 @@ export function Body() {
     <List
       isLoading={isFetching || !me.data}
       searchText={keyword}
-      onSearchTextChange={setKeyword}
+      onSearchTextChange={handleSearchTextChange}
       selectedItemId={selectedItemId}
       onSelectionChange={handleSelectionChange}
     >

@@ -1,5 +1,10 @@
 # 1Bookmark Changelog
 
+## [Fix Cursor Bouncing] - {PR_MERGE_DATE}
+
+- 0.15.2
+- 🐛 Holding an arrow key in the bookmark list no longer makes the cursor bounce between two items.
+
 ## [Raycast 1 Compatibility] - 2026-09-28
 
 - 0.15.1
