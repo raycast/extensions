@@ -7,7 +7,7 @@ import { spawn } from "node:child_process";
 import { buildGalleryArgs, isLoginRequiredError, runGalleryDownload } from "../src/lib/gallerydl.js";
 
 function fakeChild() {
-  const child = new EventEmitter() as any;
+  const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
   child.stdout = new EventEmitter();
   child.stderr = new EventEmitter();
   child.kill = vi.fn(() => child.emit("close", null));

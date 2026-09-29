@@ -1,150 +1,249 @@
 import { useEffect, useState } from "react";
 import fs from "node:fs";
-import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, environment, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+  Toast,
+  environment,
+  showToast,
+} from "@raycast/api";
 import { execa } from "execa";
 import { getHomebrewPath, getSpotdlPath, getWingetPath, isMac, isWindows } from "../utils.js";
 import { downloadSpotdl, getInstalledVersion, getLatestRelease } from "../lib/managed-binary.js";
-import { friendlyNameFor, HOMEBREW_FORMULAE, isWingetUpdateNotApplicable, WINGET_PACKAGES } from "../lib/tools.js";
+import {
+  friendlyNameFor,
+  HOMEBREW_FORMULAE,
+  isWingetUpdateNotApplicable,
+  toolInfoFor,
+  WINGET_PACKAGES,
+} from "../lib/tools.js";
 import { resetWingetPackagesCache } from "../lib/binary.js";
+import { PackageIssue, ToolStatus, toolStatus, versionReport } from "../lib/tool-status.js";
 
-type PackageIssue = { pkg: string; message: string };
 type CheckResult = { versions: Record<string, string>; outdated: Record<string, string>; checkIssues: PackageIssue[] };
 
-export default function Updater() {
-  const { pop } = useNavigation();
-  const emptyVersions = (): Record<string, string> =>
-    Object.fromEntries([...(isMac ? HOMEBREW_FORMULAE : WINGET_PACKAGES), "spotdl"].map((name) => [name, ""]));
-  const [versions, setVersions] = useState<Record<string, string>>(emptyVersions);
-  const [outdated, setOutdated] = useState<Record<string, string>>(emptyVersions);
-  const [checkIssues, setCheckIssues] = useState<PackageIssue[]>([]);
-  const [upgradeIssues, setUpgradeIssues] = useState<PackageIssue[]>([]);
-  const [upgradingMessage, setUpgradingMessage] = useState<string>("");
+const packages = (): string[] => [...(isMac ? HOMEBREW_FORMULAE : WINGET_PACKAGES), "spotdl"];
 
-  const allUpToDate = Object.values(outdated).every((version) => !version);
-
-  useEffect(() => {
-    if (upgradingMessage) return;
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Checking versions..." });
-    toast.show();
-
-    check()
-      .then(({ versions, outdated, checkIssues }) => {
-        toast.hide();
-        setVersions(versions);
-        setOutdated(outdated);
-        setCheckIssues(checkIssues);
-      })
-      .catch((error) => {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to check versions";
-        toast.message = errorMessage;
-        if (error instanceof Error) {
-          toast.primaryAction = {
-            title: "Copy to Clipboard",
-            onAction: () => {
-              Clipboard.copy(errorMessage);
-            },
-          };
-        }
-      });
-  }, [upgradingMessage]);
-
-  const versionRows = Object.entries(versions)
-    .map(([cli, version]) => {
-      const checkIssue = checkIssues.find((i) => i.pkg === cli);
-      let status: string;
-      if (checkIssue) status = `(check failed: ${truncate(checkIssue.message, 80)})`;
-      else if (version === "not installed") status = "";
-      else if (outdated[cli]) status = `(outdated: ${outdated[cli]})`;
-      else status = "(up to date)";
-      const versionText = version === "" && !checkIssue ? "Checking..." : version || "—";
-      return `${friendlyNameFor(cli)}: ${versionText}${status ? ` ${status}` : ""}`;
-    })
-    .join("\n\n");
-
-  // Check issues keyed to a package-manager itself (brew/winget) — not a single
-  // formula — don't map onto any version row, so render them on their own.
-  // Otherwise a failed `brew info` would leave every row stuck at "Checking..."
-  // with no visible reason.
-  const orphanCheckIssues = checkIssues.filter((i) => !(i.pkg in versions));
-  const checkSection =
-    orphanCheckIssues.length > 0
-      ? `\n\n## Check Issues\n\n${orphanCheckIssues
-          .map((i) => `- **${friendlyNameFor(i.pkg)}**: ${i.message}`)
-          .join("\n")}`
-      : "";
-
-  const upgradeSection =
-    upgradeIssues.length > 0
-      ? `\n\n## Upgrade Issues\n\n${upgradeIssues.map((i) => `- **${friendlyNameFor(i.pkg)}**: ${i.message}`).join("\n")}`
-      : "";
-
-  return (
-    <Detail
-      markdown={
-        ["## Versions", versionRows, upgradingMessage].filter((x) => Boolean(x)).join("\n\n") +
-        checkSection +
-        upgradeSection
-      }
-      actions={
-        <ActionPanel>
-          {allUpToDate ? undefined : (
-            <Action
-              icon={Icon.Download}
-              title="Upgrade"
-              onAction={async () => {
-                const toast = new Toast({ style: Toast.Style.Animated, title: "Upgrading..." });
-                toast.show();
-                try {
-                  setUpgradingMessage("Upgrading... Please do not close Raycast while the upgrade is in progress.");
-                  // Upgrade only what the version check found outdated — a
-                  // blanket `brew upgrade`/`winget upgrade` of every tool
-                  // errors on packages that were never installed through that
-                  // package manager (or not installed at all).
-                  const { issues, attempted } = await upgrade(outdated);
-                  setUpgradeIssues(issues);
-                  toast.style =
-                    issues.length > 0 && issues.length >= attempted ? Toast.Style.Failure : Toast.Style.Success;
-                  toast.title =
-                    issues.length === 0 ? "Upgrade complete" : `Upgrade finished with ${issues.length} issue(s)`;
-                } catch (error) {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Failed to upgrade";
-                  toast.message = error instanceof Error ? error.message : "An unknown error occurred";
-                  if (error instanceof Error) {
-                    toast.primaryAction = {
-                      title: "Copy to Clipboard",
-                      onAction: () => {
-                        Clipboard.copy(error.message);
-                      },
-                    };
-                  }
-                } finally {
-                  setUpgradingMessage("");
-                }
-              }}
-            />
-          )}
-          {upgradeIssues.length > 0 && (
-            <Action
-              icon={Icon.Clipboard}
-              title="Copy Upgrade Issues"
-              onAction={() =>
-                Clipboard.copy(upgradeIssues.map((i) => `${friendlyNameFor(i.pkg)}: ${i.message}`).join("\n"))
-              }
-            />
-          )}
-          <Action icon={Icon.ArrowLeft} title="Back" onAction={pop} />
-        </ActionPanel>
-      }
-    />
-  );
+function statusIcon(status: ToolStatus, upgrading: boolean): Image.ImageLike {
+  if (upgrading) return { source: Icon.CircleProgress, tintColor: Color.Blue };
+  switch (status.kind) {
+    case "checking":
+      return { source: Icon.CircleProgress, tintColor: Color.SecondaryText };
+    case "missing":
+      return { source: Icon.Circle, tintColor: Color.SecondaryText };
+    case "current":
+      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    case "outdated":
+      return { source: Icon.ArrowUpCircle, tintColor: Color.Yellow };
+    case "check-failed":
+      return { source: Icon.ExclamationMark, tintColor: Color.Orange };
+    case "upgrade-failed":
+      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+  }
 }
 
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text;
-  return `${text.slice(0, max - 1)}…`;
+function statusAccessories(status: ToolStatus, upgrading: boolean): List.Item.Accessory[] {
+  if (upgrading) return [{ tag: { value: "Upgrading…", color: Color.Blue } }];
+  switch (status.kind) {
+    case "checking":
+      return [{ text: "Checking…" }];
+    case "missing":
+      return [{ tag: { value: "Not Installed", color: Color.SecondaryText } }];
+    case "current":
+      return [{ text: status.version }, { tag: { value: "Up to Date", color: Color.Green } }];
+    case "outdated":
+      return [{ text: status.version }, { tag: { value: `Update → ${status.latest}`, color: Color.Yellow } }];
+    case "check-failed":
+      return [
+        ...(status.version ? [{ text: status.version }] : []),
+        { tag: { value: "Check Failed", color: Color.Orange }, tooltip: status.message },
+      ];
+    case "upgrade-failed":
+      return [
+        ...(status.version ? [{ text: status.version }] : []),
+        { tag: { value: "Upgrade Failed", color: Color.Red }, tooltip: status.message },
+      ];
+  }
+}
+
+export default function Updater() {
+  const [result, setResult] = useState<CheckResult>();
+  const [checking, setChecking] = useState(true);
+  const [upgrading, setUpgrading] = useState<string[]>([]);
+  const [upgradeIssues, setUpgradeIssues] = useState<PackageIssue[]>([]);
+  const [checkRun, setCheckRun] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setChecking(true);
+    check()
+      .then((next) => {
+        if (active) setResult(next);
+      })
+      .catch(async (error) => {
+        const message = errorMessageOf(error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to check versions",
+          message,
+          primaryAction: { title: "Copy Error", onAction: () => Clipboard.copy(message) },
+        });
+      })
+      .finally(() => {
+        if (active) setChecking(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [checkRun]);
+
+  const versions = result?.versions ?? Object.fromEntries(packages().map((p) => [p, ""]));
+  const outdated = result?.outdated ?? {};
+  const checkIssues = result?.checkIssues ?? [];
+  const rows = Object.keys(versions).map((pkg) => ({
+    pkg,
+    name: toolInfoFor(pkg).name,
+    status:
+      checking && !result
+        ? ({ kind: "checking" } as ToolStatus)
+        : toolStatus(pkg, versions, outdated, checkIssues, upgradeIssues),
+  }));
+  const outdatedPkgs = rows.filter((r) => r.status.kind === "outdated").map((r) => r.pkg);
+  // Issues against brew/winget itself don't belong to one tool row.
+  const managerIssues = checkIssues.filter((i) => !(i.pkg in versions));
+  const busy = checking || upgrading.length > 0;
+
+  async function runUpgrade(pkgs: string[]) {
+    if (upgrading.length > 0 || pkgs.length === 0) return;
+    setUpgrading(pkgs);
+    const label = pkgs.length === 1 ? toolInfoFor(pkgs[0]).name : `${pkgs.length} tools`;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Upgrading ${label}…`,
+      message: "Keep Raycast open until it finishes.",
+    });
+    try {
+      // Upgrade only what the check found outdated — see `upgrade`.
+      const { issues, attempted } = await upgrade(Object.fromEntries(pkgs.map((p) => [p, outdated[p]])));
+      setUpgradeIssues((prev) => [...prev.filter((i) => !pkgs.includes(i.pkg)), ...issues]);
+      toast.style = issues.length > 0 && issues.length >= attempted ? Toast.Style.Failure : Toast.Style.Success;
+      toast.title = issues.length === 0 ? `Upgraded ${label}` : `Upgrade finished with ${issues.length} issue(s)`;
+      toast.message =
+        issues.length > 0 ? issues.map((i) => `${toolInfoFor(i.pkg).name}: ${i.message}`).join("\n") : undefined;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to upgrade";
+      toast.message = errorMessageOf(error);
+      toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessageOf(error)) };
+    } finally {
+      setUpgrading([]);
+      setCheckRun((n) => n + 1);
+    }
+  }
+
+  const checkAgain = (
+    <Action
+      title="Check Again"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={() => setCheckRun((n) => n + 1)}
+    />
+  );
+  const upgradeAll =
+    outdatedPkgs.length > 1 ? (
+      <Action
+        title={`Upgrade All (${outdatedPkgs.length})`}
+        icon={Icon.Download}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "u" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+        }}
+        onAction={() => runUpgrade(outdatedPkgs)}
+      />
+    ) : null;
+  const copyReport = (
+    <Action.CopyToClipboard
+      title="Copy Version Info"
+      content={versionReport(rows)}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+    />
+  );
+
+  const sections: { title: string; filter: (s: ToolStatus) => boolean }[] = [
+    { title: "Updates Available", filter: (s) => s.kind === "outdated" || s.kind === "upgrade-failed" },
+    { title: "Installed", filter: (s) => s.kind === "current" || s.kind === "check-failed" || s.kind === "checking" },
+    { title: "Not Installed", filter: (s) => s.kind === "missing" },
+  ];
+
+  return (
+    <List isLoading={busy} navigationTitle="Update Libraries" searchBarPlaceholder="Search tools">
+      {managerIssues.length > 0 && (
+        <List.Section title="Problems">
+          {managerIssues.map((issue) => (
+            <List.Item
+              key={issue.pkg}
+              title={issue.pkg === "brew" ? "Homebrew" : issue.pkg === "winget" ? "winget" : friendlyNameFor(issue.pkg)}
+              subtitle={issue.message}
+              icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title="Copy Error" content={issue.message} />
+                  {checkAgain}
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {sections.map((section) => {
+        const sectionRows = rows.filter((r) => section.filter(r.status));
+        if (sectionRows.length === 0) return null;
+        return (
+          <List.Section key={section.title} title={section.title} subtitle={String(sectionRows.length)}>
+            {sectionRows.map(({ pkg, name, status }) => {
+              const info = toolInfoFor(pkg);
+              const isUpgrading = upgrading.includes(pkg);
+              const issue =
+                status.kind === "check-failed" || status.kind === "upgrade-failed" ? status.message : undefined;
+              return (
+                <List.Item
+                  key={pkg}
+                  title={name}
+                  subtitle={info.purpose}
+                  icon={statusIcon(status, isUpgrading)}
+                  accessories={statusAccessories(status, isUpgrading)}
+                  actions={
+                    <ActionPanel>
+                      {(status.kind === "outdated" || status.kind === "upgrade-failed") && outdated[pkg] && (
+                        <Action title={`Upgrade ${name}`} icon={Icon.Download} onAction={() => runUpgrade([pkg])} />
+                      )}
+                      {upgradeAll}
+                      {checkAgain}
+                      {issue && <Action.CopyToClipboard title="Copy Error" content={issue} />}
+                      {copyReport}
+                      {info.homepage && (
+                        <Action.OpenInBrowser
+                          title={`Open ${name} Website`}
+                          url={info.homepage}
+                          shortcut={Keyboard.Shortcut.Common.Open}
+                        />
+                      )}
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          </List.Section>
+        );
+      })}
+    </List>
+  );
 }
 
 function errorMessageOf(error: unknown): string {

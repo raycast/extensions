@@ -12,7 +12,7 @@ import { invalidateSpotipyCacheIfStale } from "../src/lib/spotdl-cache.js";
 import { buildSpotdlArgs, runSpotdlDownload, summarizeSpotdlError, SpotdlDownloadError } from "../src/lib/spotdl";
 
 function fakeChild() {
-  const child = new EventEmitter() as any;
+  const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
   child.stdout = new EventEmitter();
   child.stderr = new EventEmitter();
   child.kill = vi.fn(() => child.emit("close", null));

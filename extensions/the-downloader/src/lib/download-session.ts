@@ -76,6 +76,12 @@ function pushSample(samples: number[], value: number): number[] {
   return halved;
 }
 
+/** Sum of every stream size yt-dlp has announced so far. */
+export function knownTotalBytes(s: DownloadSnapshot): number | undefined {
+  const sizes = s.streamBytes.filter((b): b is number => typeof b === "number");
+  return sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) : undefined;
+}
+
 /** The stages shown in the view's step strip, in order. */
 export function stagesFor(kind: DownloadKind, streams: number): Stage[] {
   const prepare: Stage = { key: "prepare", title: "Prepare" };

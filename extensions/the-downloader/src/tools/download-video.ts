@@ -11,11 +11,13 @@ import {
   sanitizeVideoTitle,
 } from "../utils.js";
 import fs from "node:fs";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { fetchVideoInfo, isLiveStream } from "../lib/ytdlp.js";
 import { runWithWatchdog } from "../lib/run.js";
 import { detectSource } from "../lib/detect.js";
 import { filetypeGuidance } from "../lib/filetype.js";
+import { recordDownload } from "../lib/history.js";
 
 type Input = {
   /**
@@ -29,6 +31,7 @@ export default async function tool(input: Input) {
   // Spotify link, or an arbitrary page would otherwise hand the URL to yt-dlp
   // and fail with a raw "No video formats found" dump. Bail early with the same
   // guidance the Download command shows, and route the user to the right tool.
+  const startedAt = Date.now();
   const source = detectSource(input.url);
   if (source !== "video") {
     throw new Error(`${filetypeGuidance(source)} Use the “Download” command to fetch this URL.`);
@@ -109,6 +112,24 @@ export default async function tool(input: Input) {
   if (!filePath) {
     throw new Error("Could not determine downloaded file path");
   }
+
+  // Show AI downloads in the Download History too.
+  await recordDownload({
+    id: randomUUID(),
+    url: input.url,
+    kind: "video",
+    status: "done",
+    title: sanitizeVideoTitle(video.title),
+    uploader: video.uploader ?? video.channel ?? undefined,
+    thumbnail: video.thumbnail ?? undefined,
+    source: video.extractor_key ?? undefined,
+    duration: video.duration || undefined,
+    format: bestFormat ? `${bestFormat.resolution} · ${bestFormat.ext.toUpperCase()}` : undefined,
+    folder: downloadPath,
+    filePath,
+    startedAt,
+    finishedAt: Date.now(),
+  });
 
   return {
     downloadedPath: filePath,

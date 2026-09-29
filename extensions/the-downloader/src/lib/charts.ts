@@ -1,6 +1,7 @@
 import path from "node:path";
-import { DownloadKind, DownloadSnapshot, Stage, stagesFor } from "./download-session.js";
+import { DownloadKind, DownloadSnapshot, Stage, knownTotalBytes, stagesFor } from "./download-session.js";
 import { formatBytes, formatClock, formatSpeed, plural, wrapText } from "./format.js";
+import { kindTitle } from "./kinds.js";
 import { FONT, svg, theme, xml } from "./svg.js";
 
 // The hero image of the download view: a progress ring with four stat tiles next
@@ -30,16 +31,6 @@ const ACCENT: Record<DownloadKind, string> = {
 /** Kinds that report a running count instead of a percentage, and what they count. */
 const COUNTED: Partial<Record<DownloadKind, string>> = { gallery: "file", spotify: "track" };
 
-const KIND_TITLE: Record<DownloadKind, string> = {
-  video: "Video",
-  audio: "Audio",
-  gallery: "Gallery",
-  spotify: "Spotify",
-  website: "Webpage",
-  transcript: "Transcript",
-  thumbnail: "Thumbnail",
-};
-
 const WORKING_LABEL: Partial<Record<DownloadKind, string>> = {
   website: "saving page…",
   transcript: "reading subtitles…",
@@ -56,19 +47,11 @@ export function accentFor(kind: DownloadKind): string {
   return ACCENT[kind];
 }
 
-export function kindTitle(kind: DownloadKind): string {
-  return KIND_TITLE[kind];
-}
-
 export function elapsedSeconds(s: DownloadSnapshot, now: number): number {
   return Math.max(0, ((s.finishedAt ?? now) - s.startedAt) / 1000);
 }
 
-/** Sum of every stream size yt-dlp has announced so far. */
-export function knownTotalBytes(s: DownloadSnapshot): number | undefined {
-  const sizes = s.streamBytes.filter((b): b is number => typeof b === "number");
-  return sizes.length > 0 ? sizes.reduce((a, b) => a + b, 0) : undefined;
-}
+export { kindTitle, knownTotalBytes };
 
 /** Bytes on disk so far: finished streams plus the one in flight. */
 export function downloadedBytes(s: DownloadSnapshot): number | undefined {
@@ -415,4 +398,41 @@ export function heroFrameKey(s: DownloadSnapshot, now: number): string {
     s.items,
     Math.floor(elapsedSeconds(s, now)),
   ].join("-");
+}
+
+// ---------------------------------------------------------------------------
+// History card: stands in for a thumbnail on entries that don't have one
+// (galleries, Spotify, webpages, transcripts).
+// ---------------------------------------------------------------------------
+
+export const CARD_W = 520;
+const CARD_H = 132;
+
+export type CardInput = {
+  kind: DownloadKind;
+  status: "done" | "failed";
+  title: string;
+  /** Short badge text, e.g. "MP4", "HTML" or a file count. */
+  badge: string;
+  badgeCaption?: string;
+  lines: string[];
+};
+
+export function historyCardSvg(card: CardInput): string {
+  const failed = card.status === "failed";
+  const color = failed ? theme.red : accentFor(card.kind);
+  const tile = CARD_H;
+  const x = tile + 20;
+  const titleLines = wrapText(card.title, 30, 2);
+  const badgeSize = card.badge.length > 4 ? 22 : 30;
+  const body = `<rect width="${CARD_W}" height="${CARD_H}" rx="16" fill="${theme.card}"/>
+    <rect width="${tile}" height="${tile}" rx="16" fill="${color}" fill-opacity="0.2"/>
+    ${text(tile / 2, tile / 2 + (card.badgeCaption ? 4 : 10), failed ? "!" : card.badge, { size: failed ? 44 : badgeSize, weight: 800, color, anchor: "middle" })}
+    ${card.badgeCaption && !failed ? text(tile / 2, tile / 2 + 26, card.badgeCaption, { size: 12, color, anchor: "middle" }) : ""}
+    ${titleLines.map((line, i) => text(x, 38 + i * 22, line, { size: 17, weight: 700 })).join("")}
+    ${card.lines
+      .slice(0, 2)
+      .map((line, i) => text(x, 38 + titleLines.length * 22 + 8 + i * 18, line, { size: 12, color: theme.muted }))
+      .join("")}`;
+  return svg(CARD_W, CARD_H, body);
 }

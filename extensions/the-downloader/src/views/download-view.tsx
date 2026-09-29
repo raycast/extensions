@@ -14,30 +14,12 @@ import {
   showHUD,
   useNavigation,
 } from "@raycast/api";
-import { HERO_W, downloadHeroSvg, heroFrameKey, kindTitle, knownTotalBytes } from "../lib/charts.js";
-import { DownloadKind, DownloadSession, DownloadSnapshot, useDownloadSession } from "../lib/download-session.js";
+import { HERO_W, downloadHeroSvg, heroFrameKey } from "../lib/charts.js";
+import { DownloadSession, DownloadSnapshot, knownTotalBytes, useDownloadSession } from "../lib/download-session.js";
+import { KIND_COLOR, KIND_ICON, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
 import { formatBytes, formatClock, plural } from "../lib/format.js";
 import { markdownImage } from "../lib/svg.js";
-
-const KIND_COLOR: Record<DownloadKind, Color> = {
-  video: Color.Blue,
-  audio: Color.Purple,
-  gallery: Color.Yellow,
-  spotify: Color.Green,
-  website: Color.Blue,
-  transcript: Color.Yellow,
-  thumbnail: Color.Yellow,
-};
-
-const KIND_ICON: Record<DownloadKind, Icon> = {
-  video: Icon.Video,
-  audio: Icon.Music,
-  gallery: Icon.Image,
-  spotify: Icon.Music,
-  website: Icon.Globe,
-  transcript: Icon.Document,
-  thumbnail: Icon.Image,
-};
+import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
 
 function statusLabel(s: DownloadSnapshot): { text: string; icon: { source: Icon; tintColor: Color } } {
   switch (s.status) {
@@ -67,24 +49,13 @@ function tildify(p: string): string {
   return p.startsWith(home) ? `~${p.slice(home.length)}` : p;
 }
 
-function hostOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
-
 /** A remote thumbnail sized to the hero's width. `raycast-width` is a query parameter, so merge it into an existing query. */
 function thumbnailMarkdown(url: string, title: string): string {
-  try {
-    const u = new URL(url);
-    if (u.protocol !== "https:") return "";
-    u.searchParams.set("raycast-width", String(HERO_W));
-    return `![${title.replace(/[[\]]/g, "")}](${u.toString()})`;
-  } catch {
-    return "";
-  }
+  const safe = safeImageUrl(url);
+  if (!safe) return "";
+  const u = new URL(safe);
+  u.searchParams.set("raycast-width", String(HERO_W));
+  return `![${title.replace(/[[\]]/g, "")}](${u.toString().replace(/\(/g, "%28").replace(/\)/g, "%29")})`;
 }
 
 /**
@@ -142,9 +113,7 @@ export function DownloadView({ session }: { session: DownloadSession }) {
           </Detail.Metadata.TagList>
           {s.format && <Detail.Metadata.Label title="Format" text={s.format} />}
           {total !== undefined && <Detail.Metadata.Label title="Size" text={formatBytes(total)} />}
-          {s.items > 0 && (
-            <Detail.Metadata.Label title="Saved" text={plural(s.items, s.kind === "spotify" ? "track" : "file")} />
-          )}
+          {s.items > 0 && <Detail.Metadata.Label title="Saved" text={plural(s.items, itemNoun(s.kind))} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Folder" text={tildify(s.folder)} icon={Icon.Folder} />
           {fileName && <Detail.Metadata.Label title="File" text={fileName} icon={Icon.Document} />}
@@ -216,6 +185,12 @@ export function DownloadView({ session }: { session: DownloadSession }) {
                 onAction={pop}
               />
             )}
+            <Action.Push
+              title="Show Download History"
+              icon={Icon.Clock}
+              shortcut={HISTORY_SHORTCUT}
+              target={<DownloadHistory />}
+            />
             <Action.OpenInBrowser title="Open Original" url={s.url} shortcut={Keyboard.Shortcut.Common.Open} />
             <Action.CopyToClipboard title="Copy Original URL" content={s.url} />
           </ActionPanel.Section>

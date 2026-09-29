@@ -71,3 +71,45 @@ const WINGET_UPDATE_NOT_APPLICABLE_CODES = new Set([2316632107, -1978335189]);
 export function isWingetUpdateNotApplicable(exitCode: number | undefined): boolean {
   return exitCode !== undefined && WINGET_UPDATE_NOT_APPLICABLE_CODES.has(exitCode);
 }
+
+export type ToolInfo = { name: string; purpose: string; homepage: string };
+
+/** What each tool does for the extension, for the Installer and the Updater. */
+export const TOOL_INFO: Record<ToolId, ToolInfo> = {
+  "yt-dlp": {
+    name: "yt-dlp",
+    purpose: "Downloads video and audio from YouTube and 1,000+ sites",
+    homepage: "https://github.com/yt-dlp/yt-dlp",
+  },
+  ffmpeg: {
+    name: "ffmpeg",
+    purpose: "Merges video and audio streams and converts audio",
+    homepage: "https://ffmpeg.org",
+  },
+  "gallery-dl": {
+    name: "gallery-dl",
+    purpose: "Downloads image galleries from Reddit, Instagram, Pinterest and more",
+    homepage: "https://github.com/mikf/gallery-dl",
+  },
+  deno: {
+    name: "Deno",
+    purpose: "Runs the JavaScript yt-dlp needs for YouTube",
+    homepage: "https://deno.com",
+  },
+  spotdl: {
+    name: "spotDL",
+    purpose: "Downloads Spotify tracks, albums and playlists",
+    homepage: "https://github.com/spotDL/spotify-downloader",
+  },
+  monolith: {
+    name: "monolith",
+    purpose: "Saves complete webpages as a single HTML file",
+    homepage: "https://github.com/Y2Z/monolith",
+  },
+};
+
+/** Tool info for an executable, winget package ID or Homebrew formula (ffprobe ships with ffmpeg). */
+export function toolInfoFor(name: string): ToolInfo {
+  const id = friendlyNameFor(name === "ffprobe" ? "ffmpeg" : name);
+  return (TOOL_INFO as Record<string, ToolInfo | undefined>)[id] ?? { name, purpose: "", homepage: "" };
+}

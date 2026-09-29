@@ -8,6 +8,9 @@ Download videos, audio, image galleries, Spotify music, and complete webpages fr
 
 - **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
 - **Fast Download** — pass a URL as a command argument and download it instantly using your saved defaults — no form.
+- **Download History** — everything you've downloaded, grouped by day, with thumbnails, search, type filters, and one-keystroke Open, Show in Finder and Download Again.
+
+Before downloading, the form shows what yt-dlp found — channel, duration, views and the best quality — and each Quality choice lists the resolution and estimated size it will fetch. Press ⌘Y for a full preview with the description and every available format.
 
 ## What you need
 

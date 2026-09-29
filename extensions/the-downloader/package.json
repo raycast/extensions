@@ -39,6 +39,14 @@
       "arguments": [
         { "name": "url", "type": "text", "placeholder": "URL", "required": true }
       ]
+    },
+    {
+      "name": "history",
+      "title": "Download History",
+      "subtitle": "The Downloader",
+      "description": "Browse, open and re-download everything you've downloaded with The Downloader.",
+      "mode": "view",
+      "keywords": ["recent", "downloads", "library"]
     }
   ],
   "tools": [

@@ -1,0 +1,138 @@
+import { describe, it, expect, beforeEach } from "vitest";
+import { LocalStorage } from "@raycast/api";
+import { DownloadSession } from "../src/lib/download-session";
+import {
+  HistoryEntry,
+  addEntry,
+  clearHistory,
+  entryFromSnapshot,
+  groupByDay,
+  loadHistory,
+  matchesFilter,
+  parseHistory,
+  recordDownload,
+  removeFromHistory,
+} from "../src/lib/history";
+
+function entry(id: string, patch: Partial<HistoryEntry> = {}): HistoryEntry {
+  return {
+    id,
+    url: `https://example.com/${id}`,
+    kind: "video",
+    status: "done",
+    folder: "/out",
+    startedAt: 0,
+    finishedAt: 0,
+    ...patch,
+  };
+}
+
+describe("entryFromSnapshot", () => {
+  it("captures a finished download with its metadata and size", () => {
+    const session = new DownloadSession(
+      {
+        kind: "video",
+        url: "https://youtu.be/x",
+        folder: "/out",
+        title: "Clip",
+        format: "1080p · MP4",
+        meta: { uploader: "Chan", thumbnail: "https://i.ytimg.com/x.jpg", duration: 90, source: "Youtube" },
+      },
+      1000,
+    );
+    session.ytdlp({ type: "progress", progress: { downloadedBytes: 10, totalBytes: 10 } }, 1500);
+    session.succeed({ filePath: "/out/Clip.mp4" }, 5000);
+    expect(entryFromSnapshot(session.getSnapshot(), "id-1")).toEqual({
+      id: "id-1",
+      url: "https://youtu.be/x",
+      kind: "video",
+      status: "done",
+      title: "Clip",
+      uploader: "Chan",
+      thumbnail: "https://i.ytimg.com/x.jpg",
+      source: "Youtube",
+      duration: 90,
+      format: "1080p · MP4",
+      folder: "/out",
+      filePath: "/out/Clip.mp4",
+      bytes: 10,
+      items: undefined,
+      error: undefined,
+      startedAt: 1000,
+      finishedAt: 5000,
+    });
+  });
+
+  it("keeps the error of a failed download and skips cancelled ones", () => {
+    const failed = new DownloadSession({ kind: "gallery", url: "u", folder: "/out" }, 0);
+    failed.count(2, 10);
+    failed.fail({ title: "Login Required", message: "Sign in first" }, 20);
+    expect(entryFromSnapshot(failed.getSnapshot(), "f")).toMatchObject({
+      status: "failed",
+      error: "Sign in first",
+      items: 2,
+    });
+
+    const cancelled = new DownloadSession({ kind: "video", url: "u", folder: "/out" }, 0);
+    cancelled.fail({ cancelled: true }, 20);
+    expect(entryFromSnapshot(cancelled.getSnapshot())).toBeUndefined();
+  });
+});
+
+describe("list helpers", () => {
+  it("adds newest first, replaces duplicates and caps the length", () => {
+    let list: HistoryEntry[] = [];
+    for (let i = 0; i < 5; i++) list = addEntry(list, entry(String(i)), 3);
+    expect(list.map((e) => e.id)).toEqual(["4", "3", "2"]);
+    list = addEntry(list, entry("3", { title: "again" }), 3);
+    expect(list.map((e) => e.id)).toEqual(["3", "4", "2"]);
+  });
+
+  it("ignores malformed storage", () => {
+    expect(parseHistory(undefined)).toEqual([]);
+    expect(parseHistory("{not json")).toEqual([]);
+    expect(
+      parseHistory(JSON.stringify([entry("ok"), { id: 1 }, null, entry("bad", { kind: "nope" as never })])),
+    ).toEqual([entry("ok")]);
+  });
+
+  it("filters by type and status", () => {
+    expect(matchesFilter(entry("a", { kind: "thumbnail" }), "images")).toBe(true);
+    expect(matchesFilter(entry("a", { kind: "gallery" }), "images")).toBe(true);
+    expect(matchesFilter(entry("a", { kind: "audio" }), "video")).toBe(false);
+    expect(matchesFilter(entry("a", { status: "failed" }), "failed")).toBe(true);
+    expect(matchesFilter(entry("a"), "all")).toBe(true);
+  });
+
+  it("groups by day with Today and Yesterday first", () => {
+    const now = new Date(2026, 8, 29, 15, 0).getTime();
+    const groups = groupByDay(
+      [
+        entry("old", { finishedAt: new Date(2026, 8, 20, 9).getTime() }),
+        entry("today", { finishedAt: new Date(2026, 8, 29, 8).getTime() }),
+        entry("yday", { finishedAt: new Date(2026, 8, 28, 23).getTime() }),
+      ],
+      now,
+    );
+    expect(groups.map((g) => g.title).slice(0, 2)).toEqual(["Today", "Yesterday"]);
+    expect(groups.map((g) => g.entries[0].id)).toEqual(["today", "yday", "old"]);
+  });
+});
+
+describe("storage", () => {
+  beforeEach(() => LocalStorage.clear());
+
+  it("records, removes and clears", async () => {
+    await Promise.all([recordDownload(entry("a", { finishedAt: 1 })), recordDownload(entry("b", { finishedAt: 2 }))]);
+    expect((await loadHistory()).map((e) => e.id).sort()).toEqual(["a", "b"]);
+    await removeFromHistory("a");
+    expect((await loadHistory()).map((e) => e.id)).toEqual(["b"]);
+    await clearHistory();
+    expect(await loadHistory()).toEqual([]);
+  });
+
+  it("ignores an undefined entry", async () => {
+    await recordDownload(undefined);
+    expect(await loadHistory()).toEqual([]);
+  });
+});

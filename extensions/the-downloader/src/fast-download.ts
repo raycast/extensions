@@ -24,6 +24,8 @@ import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "./lib/
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "./lib/monolith.js";
 import { progressMessage } from "./lib/format.js";
+import { DownloadKind, DownloadSession } from "./lib/download-session.js";
+import { entryFromSnapshot, recordDownload } from "./lib/history.js";
 import {
   downloadPath,
   getDenoPath,
@@ -75,6 +77,21 @@ function attachStop(toast: Toast): { signal: AbortSignal } {
   return { signal: controller.signal };
 }
 
+/** Track a download without a view, so it lands in the Download History like the form's do. */
+function track(kind: DownloadKind, url: string, format?: string): DownloadSession {
+  return new DownloadSession({ kind, url, folder: downloadPath, format });
+}
+
+/** Record the outcome the toast now shows. Cancelled downloads are not recorded. */
+function settle(session: DownloadSession, toast: Toast, outcome: { filePath?: string; error?: unknown }) {
+  if (toast.style === Toast.Style.Success) {
+    session.succeed({ filePath: outcome.filePath || undefined, title: toast.title, message: toast.message });
+  } else {
+    session.fail({ title: toast.title, message: toast.message, cancelled: isAbort(outcome.error) });
+  }
+  return recordDownload(entryFromSnapshot(session.getSnapshot()));
+}
+
 function paintCancelled(toast: Toast) {
   toast.style = Toast.Style.Failure;
   toast.title = "Cancelled";
@@ -120,6 +137,8 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     }
 
     const { signal } = attachStop(toast);
+    const session = track("gallery", url);
+    let outcome: { error?: unknown } = {};
     try {
       const { files } = await runGalleryDownload(
         galleryDlPath,
@@ -132,6 +151,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         },
         (p) => {
           toast.message = `${p.files} files`;
+          session.count(p.files);
         },
       );
       if (files === 0) {
@@ -148,6 +168,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.secondaryAction = undefined;
       }
     } catch (error) {
+      outcome = { error };
       if (isAbort(error)) {
         paintCancelled(toast);
       } else if (isLoginRequiredError(error)) {
@@ -166,6 +187,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.secondaryAction = undefined;
       }
     }
+    await settle(session, toast, outcome);
     return;
   }
 
@@ -197,6 +219,8 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     }
 
     const { signal } = attachStop(toast);
+    const session = track("spotify", url, spotifyAudioFormat.toUpperCase());
+    let outcome: { error?: unknown } = {};
     try {
       // Surface the friendly Rosetta hint for an already-present x86_64 binary
       // on an Apple Silicon Mac without Rosetta, instead of a raw "Bad CPU type".
@@ -217,6 +241,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         },
         (p) => {
           toast.message = `${p.tracks} tracks`;
+          session.count(p.tracks);
         },
       );
       toast.style = Toast.Style.Success;
@@ -225,6 +250,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.primaryAction = { title: "Open Folder", onAction: () => open(downloadPath) };
       toast.secondaryAction = undefined;
     } catch (error) {
+      outcome = { error };
       if (isAbort(error)) {
         paintCancelled(toast);
       } else if (error instanceof RosettaRequiredError) {
@@ -258,6 +284,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.secondaryAction = undefined;
       }
     }
+    await settle(session, toast, outcome);
     return;
   }
 
@@ -268,6 +295,12 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     const outputPath = path.join(downloadPath, webpageFilename(url));
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
     const { signal } = attachStop(toast);
+    const session = track(
+      "website",
+      url,
+      webpageSaveMode === "lightweight" ? "Lightweight (no JavaScript)" : "Complete",
+    );
+    let outcome: { filePath?: string; error?: unknown } = {};
     try {
       const { filePath } = await runMonolithSave(monolithPath, {
         url,
@@ -276,12 +309,14 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         idleMs: getIdleTimeoutMs(),
         abortSignal: signal,
       });
+      outcome = { filePath };
       toast.style = Toast.Style.Success;
       toast.title = "Saved";
       toast.message = path.basename(filePath);
       toast.primaryAction = { title: "Open Folder", onAction: () => showInFinder(filePath) };
       toast.secondaryAction = undefined;
     } catch (error) {
+      outcome = { error };
       if (isAbort(error)) {
         paintCancelled(toast);
       } else {
@@ -292,6 +327,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.secondaryAction = undefined;
       }
     }
+    await settle(session, toast, outcome);
     return;
   }
 
@@ -318,15 +354,25 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
 
   const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Video", message: "0%" });
   const { signal } = attachStop(toast);
+  const session = track(
+    config.videoMediaType === "audio" ? "audio" : "video",
+    url,
+    config.videoMediaType === "audio"
+      ? config.audioFormat.toUpperCase()
+      : `${config.videoQuality === "best" ? "Best" : config.videoQuality === "smallest" ? "Smallest" : `${config.videoQuality}p`} · ${config.videoContainer.toUpperCase()}`,
+  );
+  let outcome: { filePath?: string; error?: unknown } = {};
   try {
     const { filePath } = await runVideoDownload(
       ytdlPath,
       { url, format, outputTemplate, ffmpegPath, denoPath: deno, idleMs: getIdleTimeoutMs(), abortSignal: signal },
       () => undefined,
       (event) => {
+        session.ytdlp(event);
         if (event.type === "progress") toast.message = progressMessage(event.progress) || toast.message;
       },
     );
+    outcome = { filePath };
     toast.style = Toast.Style.Success;
     toast.title = "Downloaded";
     toast.message = filePath ? path.basename(filePath) : "Video";
@@ -340,6 +386,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.secondaryAction = undefined;
     }
   } catch (error) {
+    outcome = { error };
     if (isAbort(error)) {
       paintCancelled(toast);
     } else {
@@ -350,4 +397,5 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.secondaryAction = undefined;
     }
   }
+  await settle(session, toast, outcome);
 }

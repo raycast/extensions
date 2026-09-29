@@ -7,6 +7,7 @@ import {
   Clipboard,
   Form,
   Icon,
+  Keyboard,
   Toast,
   environment,
   getPreferenceValues,
@@ -37,6 +38,9 @@ import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "../lib
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "../lib/monolith.js";
 import { DownloadInit, DownloadSession } from "../lib/download-session.js";
+import { entryFromSnapshot, recordDownload } from "../lib/history.js";
+import { QUALITY_VALUES, QualityValue, estimateQuality, maxHeight, qualityTitle } from "../lib/estimate.js";
+import { formatCount, qualityName } from "../lib/media-info.js";
 import { progressMessage } from "../lib/format.js";
 import extractTranscript from "../transcript.js";
 import {
@@ -58,6 +62,8 @@ import {
   sanitizeVideoTitle,
 } from "../utils.js";
 import { DownloadView } from "./download-view.js";
+import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
+import { MediaPreview } from "./media-preview.js";
 import Installer from "./installer.js";
 import Updater from "./updater.js";
 
@@ -112,14 +118,16 @@ const FORMAT_TITLE: Record<string, string> = {
 
 const formatTitle = (value: string) => FORMAT_TITLE[value] ?? value.toUpperCase();
 
-/** Mirror a finished toast onto the download view. */
+/** Mirror a finished toast onto the download view and record it in the history. */
 function succeedSession(session: DownloadSession, toast: Toast, filePath?: string) {
   session.succeed({ filePath: filePath || undefined, title: toast.title, message: toast.message });
+  void recordDownload(entryFromSnapshot(session.getSnapshot()));
 }
 
-/** Mirror a failure toast (after `failToast` or a custom one) onto the download view. */
+/** Mirror a failure toast (after `failToast` or a custom one) onto the download view and record it. */
 function failSession(session: DownloadSession, toast: Toast, error?: unknown) {
   session.fail({ title: toast.title, message: toast.message, cancelled: error instanceof AbortError });
+  void recordDownload(entryFromSnapshot(session.getSnapshot()));
 }
 
 /** Turn a rejected runner into a red, copyable failure toast — or a neutral "Cancelled" toast when the user pressed Stop. */
@@ -173,6 +181,8 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     isValidUrl(initialUrl) ? defaultFiletype(detectSource(initialUrl), audioPreferred) : "video",
   );
   const [filetypeTouched, setFiletypeTouched] = useState(false);
+  // Controlled so the Quality size estimates follow the chosen container.
+  const [container, setContainer] = useState<string>(prefs.videoContainer);
   const [refresh, setRefresh] = useState(0);
   // Ref (not state) so a rapid second submit sees the flag synchronously — a
   // re-render would race with the click. Refs update inside the same event
@@ -283,13 +293,26 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     return <Installer executable={missingTool} onRefresh={() => setRefresh((r) => r + 1)} />;
   }
 
-  // The adaptive status line.
+  // The adaptive status line, plus a details line once yt-dlp metadata is in.
   let statusLabel = "Status";
   let statusText = "Paste a link to download.";
+  let detailsText = "";
+  const metaReady = ytdlpBound && !!video && !metaLoading;
   if (validUrl) {
-    if (ytdlpBound && video) {
+    // While a new URL's metadata loads, `video` still belongs to the previous URL.
+    if (metaReady && video) {
       statusLabel = "Title";
-      statusText = video.duration ? `${video.title} · ${formatHHMM(video.duration)}` : video.title;
+      statusText = video.title;
+      const best = qualityName(maxHeight(video));
+      const views = formatCount(video.view_count);
+      detailsText = [
+        video.uploader ?? video.channel,
+        video.duration ? formatHHMM(video.duration) : undefined,
+        views ? `${views} views` : undefined,
+        best ? `up to ${best}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(" · ");
     } else if (ytdlpBound && metaLoading) {
       statusText = "Fetching details…";
     } else if (ytdlpBound) {
@@ -299,6 +322,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       statusText = filetypeGuidance(source);
     }
   }
+
+  const estimates =
+    metaReady && video
+      ? (Object.fromEntries(QUALITY_VALUES.map((q) => [q, estimateQuality(video, q, container)])) as Record<
+          QualityValue,
+          ReturnType<typeof estimateQuality>
+        >)
+      : undefined;
 
   const urlError =
     url && !validUrl
@@ -673,6 +704,30 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Download} title="Download" onSubmit={handleSubmit} />
           <ActionPanel.Section>
+            {metaReady && video && (
+              <Action.Push
+                icon={Icon.Eye}
+                title="Preview Media"
+                shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                target={<MediaPreview video={video} url={normalizeUrl(url)} />}
+              />
+            )}
+            <Action.Push
+              icon={Icon.Clock}
+              title="Show Download History"
+              shortcut={HISTORY_SHORTCUT}
+              target={<DownloadHistory />}
+            />
+            {validUrl && (
+              <Action.OpenInBrowser
+                title="Open URL in Browser"
+                url={normalizeUrl(url)}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+            )}
+            <Action icon={Icon.Folder} title="Open Download Folder" onAction={() => open(downloadPath)} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
             <Action.OpenInBrowser
               icon={Icon.Info}
@@ -690,6 +745,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       }
     >
       <Form.Description title={statusLabel} text={statusText} />
+      {detailsText && <Form.Description title="Details" text={detailsText} />}
       <Form.TextField
         id="url"
         title="URL"
@@ -718,14 +774,32 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
           {filetype === "video" && (
             <>
-              <Form.Dropdown id="quality" title="Quality" defaultValue={prefs.videoQuality}>
-                <Form.Dropdown.Item value="best" title="Best Available" />
-                <Form.Dropdown.Item value="1080" title="1080p" />
-                <Form.Dropdown.Item value="720" title="720p" />
-                <Form.Dropdown.Item value="480" title="480p" />
-                <Form.Dropdown.Item value="smallest" title="Smallest File" />
+              <Form.Dropdown
+                id="quality"
+                title="Quality"
+                defaultValue={prefs.videoQuality}
+                info={
+                  estimates
+                    ? "Resolution and size of what each choice downloads, estimated from the formats the site lists."
+                    : undefined
+                }
+              >
+                {QUALITY_VALUES.map((q) => (
+                  <Form.Dropdown.Item
+                    key={q}
+                    value={q}
+                    title={qualityTitle(q, estimates?.[q])}
+                    icon={q === "best" ? Icon.Star : q === "smallest" ? Icon.ArrowDown : Icon.Monitor}
+                  />
+                ))}
               </Form.Dropdown>
-              <Form.Dropdown id="container" title="Container" defaultValue={prefs.videoContainer}>
+              <Form.Dropdown
+                id="container"
+                title="Container"
+                value={container}
+                onChange={setContainer}
+                info="MP4 prefers H.264 so the file opens in QuickTime and most players (up to 1080p on YouTube). MKV and WebM take the best streams of any codec."
+              >
                 <Form.Dropdown.Item value="mp4" title="MP4" />
                 <Form.Dropdown.Item value="mkv" title="MKV" />
                 <Form.Dropdown.Item value="webm" title="WebM" />
@@ -748,6 +822,11 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
               key={`audioFmt-${source}`}
               title="Format"
               defaultValue={source === "spotify" ? prefs.spotifyAudioFormat : prefs.audioFormat}
+              info={
+                source === "spotify"
+                  ? undefined
+                  : "MP3 plays everywhere but is re-encoded. M4A and Opus keep the site's original audio when it already comes in that format."
+              }
             >
               <Form.Dropdown.Item value="mp3" title="MP3" />
               <Form.Dropdown.Item value="m4a" title="M4A" />
