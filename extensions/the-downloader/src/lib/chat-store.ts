@@ -74,12 +74,18 @@ export async function findChat(key: string): Promise<StoredChat | undefined> {
 /** Save a chat. Never throws: losing the saved copy must not break the conversation. */
 export async function saveChat(chat: StoredChat): Promise<void> {
   try {
-    await store.mutate((list) => upsertChat(list, chat));
+    await store.mutate(
+      (list) => upsertChat(list, chat),
+      (list) => list.some((c) => c.key === chat.key && c.updatedAt >= chat.updatedAt),
+    );
   } catch (error) {
     console.error("Could not save the chat", error);
   }
 }
 
 export function deleteChat(key: string): Promise<StoredChat[]> {
-  return store.mutate((list) => removeChat(list, key));
+  return store.mutate(
+    (list) => removeChat(list, key),
+    (list) => !list.some((c) => c.key === key),
+  );
 }

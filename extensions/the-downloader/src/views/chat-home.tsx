@@ -59,9 +59,10 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
     refresh();
     (async () => {
       const candidates: Candidate[] = [];
-      const copied = (await Clipboard.readText())?.trim();
+      // Same opt-ins as the Download command.
+      const { autoLoadUrlFromClipboard, enableBrowserExtensionSupport } = getPreferenceValues<ExtensionPreferences>();
+      const copied = autoLoadUrlFromClipboard ? (await Clipboard.readText())?.trim() : undefined;
       if (copied && isValidUrl(copied)) candidates.push({ url: copied, title: "Copied Link", icon: Icon.Clipboard });
-      const { enableBrowserExtensionSupport } = getPreferenceValues<ExtensionPreferences>();
       if (enableBrowserExtensionSupport) {
         try {
           const tab = (await BrowserExtension.getTabs()).find((t) => t.active);

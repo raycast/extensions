@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { LocalStorage } from "@raycast/api";
 import {
   CHAT_LIMIT,
   StoredChat,
@@ -81,5 +82,30 @@ describe("storage", () => {
     await deleteChat("x");
     expect(await findChat("x")).toBeUndefined();
     expect((await loadChats()).map((c) => c.key)).toEqual(["y"]);
+  });
+});
+
+describe("concurrent writes from another command", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("re-applies a save that another command's write replaced", async () => {
+    vi.useFakeTimers();
+    await saveChat(chat("mine", 100));
+    // Another command writes its own list, without our chat, right after ours.
+    await LocalStorage.setItem("video-chats-v1", JSON.stringify([chat("theirs", 50)]));
+    await vi.advanceTimersByTimeAsync(600);
+    expect((await loadChats()).map((c) => c.key)).toEqual(["mine", "theirs"]);
+  });
+
+  it("leaves a newer save of the same chat alone", async () => {
+    vi.useFakeTimers();
+    await saveChat(chat("same", 100, 1));
+    await LocalStorage.setItem("video-chats-v1", JSON.stringify([chat("same", 200, 3)]));
+    await vi.advanceTimersByTimeAsync(600);
+    const [stored] = await loadChats();
+    expect(stored.updatedAt).toBe(200);
+    expect(stored.turns).toHaveLength(3);
   });
 });

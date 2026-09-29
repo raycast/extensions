@@ -25,6 +25,7 @@ import { loadVideoContext } from "../lib/context-cache.js";
 import { maxHeight } from "../lib/estimate.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { formatCount, formatUploadDate, qualityName } from "../lib/media-info.js";
+import { uniqueFilePath } from "../lib/unique-path.js";
 import { ChatTurn, answerQuestion, contextForExport, conversationMarkdown } from "../lib/video-chat.js";
 import {
   VideoContext,
@@ -111,17 +112,8 @@ function engineSettings(prefs: ExtensionPreferences): EngineSettings {
   };
 }
 
-/** A file path in the download folder that doesn't overwrite anything: `name.md`, `name (2).md`, … */
-function freePath(folder: string, name: string, ext: string): string {
-  for (let n = 1; n < 100; n++) {
-    const candidate = path.join(folder, `${name}${n === 1 ? "" : ` (${n})`}${ext}`);
-    if (!fs.existsSync(candidate)) return candidate;
-  }
-  return path.join(folder, `${name} ${Date.now()}${ext}`);
-}
-
-async function saveMarkdown(name: string, content: string, ext = ".md") {
-  const target = freePath(downloadPath, sanitizeVideoTitle(name), ext);
+async function saveMarkdown(name: string, content: string, ext = "md") {
+  const target = uniqueFilePath(downloadPath, sanitizeVideoTitle(name), ext);
   try {
     fs.writeFileSync(target, content, "utf-8");
     await showToast({
@@ -415,7 +407,7 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
               saveMarkdown(
                 `${ctx.video.title} - Transcript`,
                 `${ctx.video.title}\n${url}\n\n${transcriptText(ctx.segments)}\n`,
-                ".txt",
+                "txt",
               )
             }
           />
