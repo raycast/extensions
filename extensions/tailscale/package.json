@@ -137,6 +137,13 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle-dns",
+      "title": "Toggle Tailscale DNS",
+      "subtitle": "Tailscale",
+      "description": "Toggle whether Tailscale accepts DNS settings from the tailnet (accept-dns)",
+      "mode": "no-view"
+    },
+    {
       "name": "netcheck",
       "title": "Netcheck",
       "subtitle": "Tailscale",

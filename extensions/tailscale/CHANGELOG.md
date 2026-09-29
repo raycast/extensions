@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Toggle Tailscale DNS] - {PR_MERGE_DATE}
+
+- Added a command to toggle whether Tailscale accepts DNS settings from the tailnet (`accept-dns`) ([#31714](https://github.com/raycast/extensions/issues/31714))
+
 ## [List Services] - 2026-09-13
 
 - Added a command to list and open services available in the tailnet.
