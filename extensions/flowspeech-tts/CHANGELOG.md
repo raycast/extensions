@@ -1,6 +1,6 @@
 # FlowSpeech TTS Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-29
 
 - Speak selected text with FlowSpeech
 - Speak copied text with FlowSpeech
