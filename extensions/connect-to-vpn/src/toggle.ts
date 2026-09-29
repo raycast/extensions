@@ -1,46 +1,34 @@
-import { LocalStorage, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
-import {
-  getNetworkServices,
-  isSessionGone,
-  LAST_USED_KEY,
-  loadFavoriteOrder,
-  loadFavorites,
-  setServiceStatus,
-} from "./network-services";
+import { LocalStorage, showHUD } from "@raycast/api";
+import { getNetworkServices, isSessionGone, LAST_USED_KEY, setServiceStatus } from "./network-services";
 
 export default async () => {
-  const lastUsedName = await LocalStorage.getItem(LAST_USED_KEY);
   try {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: `Toggling ${lastUsedName}`,
-    });
-
-    const favs = await loadFavorites();
-    const order = await loadFavoriteOrder();
-    const networkServices = await getNetworkServices(favs, order);
-    const ids = Object.keys(networkServices);
-    const lastUsed = ids.find((id) => networkServices[id].name === lastUsedName);
-    if (lastUsed) {
-      const service = networkServices[lastUsed];
-      if (service) {
-        const status = networkServices[lastUsed].status;
-        const newStatus = status === "connected" ? "disconnecting" : "connecting";
-        const newStatusMessage = status === "connected" ? "off" : "on";
-        await setServiceStatus(service, newStatus);
-        await showHUD(`Turned ${lastUsedName} ${newStatusMessage}`, {
-          clearRootSearch: true,
-          popToRootType: PopToRootType.Immediate,
-        });
-      }
+    const lastUsedName = await LocalStorage.getItem<string>(LAST_USED_KEY);
+    if (!lastUsedName) {
+      await showHUD('Choose a VPN in "Show Network Services" first');
+      return;
     }
+
+    const services = Object.values(await getNetworkServices({}, {}));
+    const service = services.find((service) => service.name === lastUsedName);
+    if (!service) {
+      await showHUD(`VPN "${lastUsedName}" was not found. Choose another in Show Network Services`);
+      return;
+    }
+    if (service.status === "invalid") {
+      await showHUD(`VPN "${service.name}" is unavailable. Check Network Settings`);
+      return;
+    }
+    if (service.status === "connecting" || service.status === "disconnecting") {
+      await showHUD(`${service.name} is already ${service.status}`);
+      return;
+    }
+
+    const status = service.status === "connected" ? "disconnecting" : "connecting";
+    await setServiceStatus(service, status);
+    await showHUD(`${status === "connecting" ? "Connecting to" : "Disconnecting from"} ${service.name}`);
   } catch (err) {
     if (isSessionGone(err)) return;
-
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Failed to toggle ${lastUsedName}`,
-      message: String(err),
-    }).catch(() => undefined);
+    await showHUD(`Failed to toggle VPN: ${err instanceof Error ? err.message : String(err)}`).catch(() => undefined);
   }
 };

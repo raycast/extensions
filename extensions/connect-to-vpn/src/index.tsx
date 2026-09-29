@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard, LocalStorage, showToast, Toast } from "@raycast/api";
 import {
   NetworkService,
+  LAST_USED_KEY,
   normalizeHardwarePort,
   openNetworkSettings,
   transitionLabel,
@@ -13,7 +14,8 @@ export default function Command() {
     favoriteServices,
     invalidServices,
     otherServices,
-    fetchServiceStatus,
+    refreshServices,
+    error,
     addToFavorites,
     removeFromFavorites,
     moveFavoriteUp,
@@ -23,7 +25,25 @@ export default function Command() {
   } = useNetworkServices();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search network services…">
+      <List.EmptyView
+        icon={error ? Icon.ExclamationMark : Icon.Network}
+        title={error ? "Unable to Load Network Services" : "No Network Services Found"}
+        description={
+          error ? error.message : "Configure and authenticate your VPN in System Settings, then refresh this list."
+        }
+        actions={
+          <ActionPanel>
+            <Action
+              title="Refresh Services"
+              icon={Icon.ArrowClockwise}
+              onAction={refreshServices}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+            />
+            <Action title="Open Network Settings" icon={Icon.Gear} onAction={openNetworkSettings} />
+          </ActionPanel>
+        }
+      />
       {favoriteServices.length > 0 && (
         <List.Section title="Favorites">
           {favoriteServices.map((service) => (
@@ -56,6 +76,8 @@ export default function Command() {
 
     return (
       <List.Item
+        id={service.id}
+        keywords={[service.hardwarePort, normalizeHardwarePort(service.hardwarePort, service.name)]}
         icon={actionDetails.icon}
         title={service.name}
         subtitle={normalizeHardwarePort(service.hardwarePort, service.name)}
@@ -72,7 +94,26 @@ export default function Command() {
                 icon={service.status === "connected" ? Icon.Eject : Icon.Plug}
               />
             )}
-            <Action title="Refresh" onAction={() => fetchServiceStatus(service)} icon={Icon.ArrowClockwise} />
+            {service.status !== "invalid" && (
+              <Action
+                title="Use for Toggle Last Used"
+                icon={Icon.Switch}
+                onAction={async () => {
+                  try {
+                    await LocalStorage.setItem(LAST_USED_KEY, service.name);
+                    await showToast({ style: Toast.Style.Success, title: `Toggle will use ${service.name}` });
+                  } catch (err) {
+                    await showToast({ style: Toast.Style.Failure, title: "Unable to Save VPN", message: String(err) });
+                  }
+                }}
+              />
+            )}
+            <Action
+              title="Refresh"
+              onAction={refreshServices}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              icon={Icon.ArrowClockwise}
+            />
             <Action
               title="Open Network Settings"
               onAction={openNetworkSettings}
@@ -82,19 +123,19 @@ export default function Command() {
             <Action
               title={service.favorite ? "Remove from Favorites" : "Add to Favorites"}
               onAction={() => (service.favorite ? removeFromFavorites(service) : addToFavorites(service))}
-              icon={service.favorite ? Icon.Star : Icon.Star}
+              icon={Icon.Star}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />
             {service.favorite && (
               <>
                 <Action
-                  title="Move up in Favorites"
+                  title="Move Favorite Earlier"
                   onAction={() => moveFavoriteUp(service)}
                   icon={Icon.ArrowUp}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                 />
                 <Action
-                  title="Move Down in Favorites"
+                  title="Move Favorite Later"
                   onAction={() => moveFavoriteDown(service)}
                   icon={Icon.ArrowDown}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}

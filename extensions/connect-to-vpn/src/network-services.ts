@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { exec, execFile } from "child_process";
 import { Icon, LocalStorage, Toast, getPreferenceValues, showToast, environment, LaunchType } from "@raycast/api";
-import { updateVpnStatus } from "./store";
+import { getVpnStatus, updateVpnStatus } from "./store";
 
 type Preferences = {
   hideInvalidDevices: boolean;
@@ -20,13 +20,13 @@ export type NetworkService = {
 
 const networkServiceStatuses = ["connected", "connecting", "disconnecting", "disconnected", "invalid"] as const;
 
-type NetworkServiceStatus = (typeof networkServiceStatuses)[number];
+export type NetworkServiceStatus = (typeof networkServiceStatuses)[number];
 
 export const LAST_USED_KEY = "network-service-last-used";
 
 export const setServiceStatus = async (
   service: NetworkService,
-  status: NetworkServiceStatus,
+  status: "connecting" | "disconnecting",
   statusUpdateFunction?: (status: NetworkServiceStatus) => void,
 ) => {
   const action = status === "connecting" ? "-connectpppoeservice" : "-disconnectpppoeservice";
@@ -40,7 +40,7 @@ export const setServiceStatus = async (
     await networksetup([action, service.name], CONNECT_TIMEOUT_MS);
   } catch (err) {
     // Put the service back to what it actually is instead of leaving it mid-transition
-    const actual = await currentStatus(service);
+    const actual = await currentStatus(service).catch(() => service.status);
     if (statusUpdateFunction) statusUpdateFunction(actual);
     await updateVpnStatus({
       serviceId: service.id,
@@ -68,27 +68,36 @@ export const setServiceStatus = async (
 
 export const getNetworkServices = async (favs: Record<string, boolean>, order: Record<string, number>) => {
   const [output, vpnStatuses] = await Promise.all([listNetworkServiceOrder(), listVpnStatuses()]);
-  const denylist = ["Wi-Fi", "Bluetooth PAN", "Thunderbolt Bridge"];
   const lines = output.split("\n");
   const serviceLines = lines.slice(1).join("\n");
 
-  const services = parseServices(serviceLines).filter((service) => !denylist.includes(service.name));
+  const services = parseServices(serviceLines);
 
   const serviceStatuses = await Promise.all(
-    services.map(async (service) => ({
+    services.map(async ({ legacyId, ...service }) => ({
       ...service,
       status: await currentStatus(service, vpnStatuses),
-      favorite: !!favs[service.id],
-      order: order[service.id] ?? 0,
+      favorite: favs[service.id] ?? favs[legacyId] ?? false,
+      order: order[service.id] ?? order[legacyId] ?? 0,
     })),
   );
 
-  const servicesMap = serviceStatuses.reduce(
-    (acc, service) => ({ ...acc, [service.id]: service }),
-    {} as Record<string, NetworkService>,
-  );
+  // Older versions keyed favorites by their position in Network Settings. Migrate once,
+  // using the current service order, so later reordering cannot favorite a different VPN.
+  if ([...Object.keys(favs), ...Object.keys(order)].some((key) => /^\d+$/.test(key))) {
+    await Promise.all([
+      saveFavorites(
+        Object.fromEntries(serviceStatuses.filter((service) => service.favorite).map((service) => [service.id, true])),
+      ),
+      saveFavoriteOrder(
+        Object.fromEntries(
+          serviceStatuses.filter((service) => service.favorite).map((service) => [service.id, service.order]),
+        ),
+      ),
+    ]);
+  }
 
-  return servicesMap;
+  return Object.fromEntries(serviceStatuses.map((service) => [service.id, service]));
 };
 
 // How a service in transition is watched until it settles. Each check is one scutil call of about
@@ -113,22 +122,55 @@ export function useNetworkServices() {
   const [favoriteOrder, setFavoriteOrder] = useState<Record<string, number>>({});
   const settleChecks = useRef<Record<string, number>>({});
 
-  useEffect(() => {
-    const loadData = async () => {
-      const favs = await loadFavorites();
-      const order = await loadFavoriteOrder();
-      setFavorites(favs);
-      setFavoriteOrder(order);
-      await fetchDataWithFavorites(favs, order);
-    };
+  const pendingActions = useRef(new Set<string>());
+  const refreshing = useRef(false);
+  const revision = useRef(0);
 
-    loadData().catch((err) => {
-      if (isSessionGone(err)) return;
-
-      console.error("Error loading network services:", err);
-      setError(err as Error);
-    });
+  const refreshServices = useCallback(async () => {
+    if (refreshing.current || pendingActions.current.size > 0) return;
+    refreshing.current = true;
+    const startedAtRevision = revision.current;
+    setIsLoading(true);
+    try {
+      const [favs, order] = await Promise.all([loadFavorites(), loadFavoriteOrder()]);
+      const services = await getNetworkServices(favs, order);
+      const update = await getVpnStatus();
+      if (update && Date.now() - update.timestamp >= 0 && Date.now() - update.timestamp < 1_000) {
+        const service = services[update.serviceId];
+        if (service && service.status === statusBeforeTransition(update.status)) {
+          service.status = update.status;
+        }
+      }
+      if (revision.current !== startedAtRevision) return;
+      // Read the normalized metadata from the services, including any legacy migration.
+      setFavorites(
+        Object.fromEntries(
+          Object.values(services)
+            .filter((service) => service.favorite)
+            .map((service) => [service.id, true]),
+        ),
+      );
+      setFavoriteOrder(
+        Object.fromEntries(
+          Object.values(services)
+            .filter((service) => service.favorite)
+            .map((service) => [service.id, service.order]),
+        ),
+      );
+      settleChecks.current = {};
+      setNetworkServices(services);
+      setError(undefined);
+    } catch (err) {
+      if (!isSessionGone(err)) setError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      refreshing.current = false;
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void refreshServices();
+  }, [refreshServices]);
 
   // A background run has no window to show a toast in
   useEffect(() => {
@@ -153,16 +195,18 @@ export function useNetworkServices() {
       if (!settling.some((service) => service.id === id)) delete settleChecks.current[id];
     }
 
-    const watched = settling.filter((service) => (settleChecks.current[service.id] ?? 0) < SETTLE_MAX_CHECKS);
+    const watched = settling.filter(
+      (service) =>
+        !pendingActions.current.has(service.id) && (settleChecks.current[service.id] ?? 0) < SETTLE_MAX_CHECKS,
+    );
     if (watched.length === 0) return;
-
-    const checks: Record<string, number> = {};
-    for (const service of watched) {
-      checks[service.id] = settleChecks.current[service.id] = (settleChecks.current[service.id] ?? 0) + 1;
-    }
 
     let cancelled = false;
     const timer = setTimeout(async () => {
+      const checks: Record<string, number> = {};
+      for (const service of watched) {
+        checks[service.id] = settleChecks.current[service.id] = (settleChecks.current[service.id] ?? 0) + 1;
+      }
       try {
         // currentStatus rather than the scutil map alone, so a service that map does not cover
         // still settles through the networksetup fallback instead of staying in transition
@@ -197,7 +241,10 @@ export function useNetworkServices() {
           }
         }
       } catch (err) {
-        if (!isSessionGone(err)) console.error("Error while waiting for a service to settle:", err);
+        if (cancelled || isSessionGone(err)) return;
+        console.error("Error while waiting for a service to settle:", err);
+        // Schedule another bounded check after a transient read failure.
+        setNetworkServices((current) => ({ ...current }));
       }
     }, SETTLE_POLL_MS);
 
@@ -207,144 +254,93 @@ export function useNetworkServices() {
     };
   }, [networkServices]);
 
-  const updateServiceStatus = async (service: NetworkService, status: NetworkServiceStatus) => {
+  const updateServiceStatus = async (service: NetworkService, status: "connecting" | "disconnecting") => {
+    if (pendingActions.current.has(service.id)) return;
+    pendingActions.current.add(service.id);
+    revision.current += 1;
+    delete settleChecks.current[service.id];
+    setError(undefined);
     try {
       await setServiceStatus(service, status, (newStatus) => {
         // Update local state with status
         setNetworkServices((currentServices) => ({
           ...currentServices,
-          [service.id]: { ...service, status: newStatus },
+          [service.id]: { ...currentServices[service.id], status: newStatus },
         }));
       });
     } catch (err) {
       if (isSessionGone(err)) return;
 
       console.error(`Error updating service status for ${service.name}:`, err);
-      setError(err as Error);
-    }
-  };
-
-  const fetchServiceStatus = async (service: NetworkService) => {
-    try {
-      console.log(`Fetching status for ${service.name}`);
-      const status = await currentStatus(service);
-      console.log(`Status for ${service.name}: ${status}`);
-
-      // Update local state
-      setNetworkServices((currentServices) => ({
-        ...currentServices,
-        [service.id]: { ...service, status },
-      }));
-
-      // Update shared state
-      await updateVpnStatus({
-        serviceId: service.id,
-        status,
-        timestamp: Date.now(),
-      });
-
-      return status;
-    } catch (err) {
-      if (!isSessionGone(err)) {
-        console.error(`Error fetching service status for ${service.name}:`, err);
-        setError(err as Error);
-      }
-
-      return service.status; // Return current status on error
+      setError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      pendingActions.current.delete(service.id);
+      setNetworkServices((current) => ({ ...current }));
     }
   };
 
   const addToFavorites = async (service: NetworkService) => {
+    revision.current += 1;
     const updatedFavorites = { ...favorites, [service.id]: true };
     setFavorites(updatedFavorites);
-    saveFavorites(updatedFavorites);
-    const updatedOrder = { ...favoriteOrder, [service.id]: Object.keys(favoriteOrder).length };
+    await saveFavorites(updatedFavorites);
+    const updatedOrder = { ...favoriteOrder, [service.id]: Math.max(-1, ...Object.values(favoriteOrder)) + 1 };
     setFavoriteOrder(updatedOrder);
-    saveFavoriteOrder(updatedOrder);
+    await saveFavoriteOrder(updatedOrder);
     setNetworkServices((currentServices) => ({
       ...currentServices,
-      [service.id]: { ...service, favorite: true, order: updatedOrder[service.id] },
+      [service.id]: { ...currentServices[service.id], favorite: true, order: updatedOrder[service.id] },
     }));
   };
 
   const removeFromFavorites = async (service: NetworkService) => {
+    revision.current += 1;
     const updatedFavorites = { ...favorites };
     delete updatedFavorites[service.id];
     setFavorites(updatedFavorites);
-    saveFavorites(updatedFavorites);
+    await saveFavorites(updatedFavorites);
 
     const updatedOrder = { ...favoriteOrder };
     delete updatedOrder[service.id];
     setFavoriteOrder(updatedOrder);
-    saveFavoriteOrder(updatedOrder);
+    await saveFavoriteOrder(updatedOrder);
     setNetworkServices((currentServices) => ({
       ...currentServices,
-      [service.id]: { ...service, favorite: false, order: 0 },
+      [service.id]: { ...currentServices[service.id], favorite: false, order: 0 },
     }));
   };
 
-  const moveFavoriteUp = (service: NetworkService) => {
-    const keys = Object.keys(favoriteOrder).sort((a, b) => favoriteOrder[a] - favoriteOrder[b]);
+  const moveFavorite = async ({ service, direction }: { service: NetworkService; direction: "up" | "down" }) => {
+    revision.current += 1;
+    const keys = Object.keys(favoriteOrder)
+      .filter((id) => networkServices[id]?.favorite)
+      .sort((a, b) => favoriteOrder[a] - favoriteOrder[b]);
     const index = keys.indexOf(service.id);
-    if (index > 0) {
-      const previousKey = keys[index - 1];
-      const newOrder = { ...favoriteOrder };
+    const adjacentIndex = index + (direction === "up" ? -1 : 1);
+    if (index < 0 || adjacentIndex < 0 || adjacentIndex >= keys.length) return;
 
-      // Swap orders with the previous favorite
-      const temp = newOrder[previousKey];
-      newOrder[previousKey] = newOrder[service.id];
-      newOrder[service.id] = temp;
+    const adjacentKey = keys[adjacentIndex];
+    const newOrder = {
+      ...favoriteOrder,
+      [service.id]: favoriteOrder[adjacentKey],
+      [adjacentKey]: favoriteOrder[service.id],
+    };
 
-      setFavoriteOrder(newOrder);
-      saveFavoriteOrder(newOrder);
+    setFavoriteOrder(newOrder);
+    await saveFavoriteOrder(newOrder);
 
-      setNetworkServices((currentServices) => ({
-        ...currentServices,
-        [service.id]: { ...service, order: newOrder[service.id] },
-        [previousKey]: { ...currentServices[previousKey], order: newOrder[previousKey] },
-      }));
-    }
+    setNetworkServices((currentServices) => ({
+      ...currentServices,
+      [service.id]: { ...currentServices[service.id], order: newOrder[service.id] },
+      [adjacentKey]: { ...currentServices[adjacentKey], order: newOrder[adjacentKey] },
+    }));
   };
 
-  const moveFavoriteDown = (service: NetworkService) => {
-    const keys = Object.keys(favoriteOrder).sort((a, b) => favoriteOrder[a] - favoriteOrder[b]);
-    const index = keys.indexOf(service.id);
-    if (index < keys.length - 1) {
-      const nextKey = keys[index + 1];
-      const newOrder = { ...favoriteOrder };
-
-      // Swap orders with the next favorite
-      const temp = newOrder[nextKey];
-      newOrder[nextKey] = newOrder[service.id];
-      newOrder[service.id] = temp;
-
-      setFavoriteOrder(newOrder);
-      saveFavoriteOrder(newOrder);
-
-      setNetworkServices((currentServices) => ({
-        ...currentServices,
-        [service.id]: { ...service, order: newOrder[service.id] },
-        [nextKey]: { ...currentServices[nextKey], order: newOrder[nextKey] },
-      }));
-    }
-  };
+  const moveFavoriteUp = (service: NetworkService) => moveFavorite({ service, direction: "up" });
+  const moveFavoriteDown = (service: NetworkService) => moveFavorite({ service, direction: "down" });
 
   const connectToPPPoEService = (service: NetworkService) => updateServiceStatus(service, "connecting");
   const disconnectFromPPPoEService = (service: NetworkService) => updateServiceStatus(service, "disconnecting");
-
-  const fetchDataWithFavorites = async (favs: Record<string, boolean>, order: Record<string, number>) => {
-    try {
-      const servicesMap = await getNetworkServices(favs, order);
-      setNetworkServices(servicesMap);
-    } catch (err) {
-      if (isSessionGone(err)) return;
-
-      console.error("Error fetching data with favorites:", err);
-      setError(err as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const getActionForService = (service: NetworkService) =>
     ({
@@ -358,10 +354,12 @@ export function useNetworkServices() {
   const favoriteServices = useMemo(
     () =>
       sortNetworkServices(
-        Object.values(networkServices).filter((service) => service.favorite),
+        Object.values(networkServices).filter(
+          (service) => service.favorite && (!hideInvalidDevices || service.status !== "invalid"),
+        ),
         sortBy,
       ),
-    [networkServices, sortBy],
+    [networkServices, sortBy, hideInvalidDevices],
   );
   const otherServices = useMemo(
     () =>
@@ -374,7 +372,7 @@ export function useNetworkServices() {
   const invalidServices = useMemo(
     () =>
       sortNetworkServices(
-        Object.values(networkServices).filter((service) => service.status === "invalid"),
+        Object.values(networkServices).filter((service) => !service.favorite && service.status === "invalid"),
         sortBy,
       ),
     [networkServices, sortBy],
@@ -385,7 +383,8 @@ export function useNetworkServices() {
     favoriteServices,
     otherServices,
     invalidServices,
-    fetchServiceStatus,
+    refreshServices,
+    error,
     addToFavorites,
     removeFromFavorites,
     moveFavoriteUp,
@@ -408,12 +407,8 @@ export function transitionLabel(status: NetworkServiceStatus): string | undefine
 }
 
 export function normalizeHardwarePort(hardwarePort: string, name: string) {
-  return (
-    {
-      "com.wireguard.macos": "WireGuard",
-      [name]: "",
-    }[hardwarePort] || hardwarePort
-  );
+  if (hardwarePort === "com.wireguard.macos") return "WireGuard";
+  return hardwarePort === name ? "" : hardwarePort;
 }
 
 export function openNetworkSettings() {
@@ -429,23 +424,22 @@ export function openNetworkSettings() {
   });
 }
 
-const sortNetworkServices = (
+export const sortNetworkServices = (
   services: NetworkService[],
   sortBy: "ascService" | "descService" | "ascType" | "descType",
 ): NetworkService[] =>
   services.sort((a, b) => {
-    // Sort active statuses first
+    // Manual favorite order takes precedence over connection status.
+    if (a.favorite && !b.favorite) return -1;
+    if (!a.favorite && b.favorite) return 1;
+    if (a.favorite && b.favorite && a.order !== b.order) return a.order - b.order;
+
     if (activeStatusOrder.includes(a.status) && !activeStatusOrder.includes(b.status)) return -1;
     if (!activeStatusOrder.includes(a.status) && activeStatusOrder.includes(b.status)) return 1;
 
-    // Then sort by favorites and order
-    if (a.favorite && !b.favorite) return -1;
-    if (!a.favorite && b.favorite) return 1;
-    if (a.favorite && b.favorite) return a.order - b.order;
-
     // Invalid services go to the bottom
-    if (a.status === "invalid") return 1;
-    if (b.status === "invalid") return -1;
+    if (a.status === "invalid" && b.status !== "invalid") return 1;
+    if (b.status === "invalid" && a.status !== "invalid") return -1;
 
     const order = sortBy.startsWith("asc") ? 1 : -1;
 
@@ -470,9 +464,24 @@ const sortNetworkServices = (
 const FAVORITES_KEY = "network-service-favorites";
 const FAVORITES_ORDER_KEY = "network-service-favorites-order";
 
+function parseStoredRecord<T>(raw: string | undefined, isValue: (value: unknown) => value is T): Record<string, T> {
+  if (!raw) return {};
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+    const entries: [string, T][] = [];
+    for (const [key, item] of Object.entries(value)) {
+      if (isValue(item)) entries.push([key, item]);
+    }
+    return Object.fromEntries(entries);
+  } catch {
+    return {};
+  }
+}
+
 export const loadFavorites = async (): Promise<Record<string, boolean>> => {
   const favorites = await LocalStorage.getItem<string>(FAVORITES_KEY);
-  return favorites ? JSON.parse(favorites) : {};
+  return parseStoredRecord(favorites, (value): value is boolean => typeof value === "boolean");
 };
 
 const saveFavorites = async (favorites: Record<string, boolean>) => {
@@ -485,7 +494,10 @@ const saveFavorites = async (favorites: Record<string, boolean>) => {
 
 export const loadFavoriteOrder = async (): Promise<Record<string, number>> => {
   const order = await LocalStorage.getItem<string>(FAVORITES_ORDER_KEY);
-  return order ? JSON.parse(order) : {};
+  return parseStoredRecord(
+    order,
+    (value): value is number => typeof value === "number" && Number.isFinite(value) && value >= 0,
+  );
 };
 
 const saveFavoriteOrder = async (order: Record<string, number>) => {
@@ -530,7 +542,7 @@ const listVpnStatuses = async (): Promise<Record<string, NetworkServiceStatus>> 
 
   // * (Disconnected)   <uuid> PPP --> L2TP   "Service name"   [PPP:L2TP]
   const regex = /^.\s*\((\w+)\)\s+\S+\s+.*?"(.+)"\s+\[[^\]]*\]\s*$/gm;
-  const statuses: Record<string, NetworkServiceStatus> = {};
+  const statuses: Record<string, NetworkServiceStatus> = Object.create(null);
 
   for (const match of output.matchAll(regex)) {
     const status = match[1].toLowerCase();
@@ -548,6 +560,7 @@ const currentStatus = async (
   service: NetworkService,
   vpnStatuses?: Record<string, NetworkServiceStatus>,
 ): Promise<NetworkServiceStatus> => {
+  if (service.status === "invalid") return "invalid";
   const statuses = vpnStatuses ?? (await listVpnStatuses());
   const status = statuses[service.name];
   if (status) return status;
@@ -559,14 +572,15 @@ const currentStatus = async (
   return showPPPoEStatus(service.name);
 };
 
-const parseServices = (text: string): NetworkService[] => {
-  const regex = /\((\d+)\)\s+(.*?)\s+\(Hardware Port: (.*?), Device: (.*?)\)/g;
+const parseServices = (text: string): (NetworkService & { legacyId: string })[] => {
+  const regex = /^\((\d+|\*)\) +([^\r\n]+)\r?\n\(Hardware Port: (.*?), Device: (.*?)\)\r?$/gm;
   return Array.from(text.matchAll(regex)).map((item) => ({
-    id: item[1],
+    id: `service:${item[2]}`,
+    legacyId: item[1],
     name: item[2],
     hardwarePort: item[3],
     device: item[4],
-    status: "disconnected",
+    status: item[1] === "*" ? "invalid" : "disconnected",
     favorite: false, // Default to not favorite
     order: 0, // Default order
   }));

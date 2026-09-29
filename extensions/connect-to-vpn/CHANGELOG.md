@@ -1,5 +1,17 @@
 # Connect to VPN Changelog
 
+## [Fixes and Improvements] - {PR_MERGE_DATE}
+
+- Clarify extension and command descriptions, service filtering, and sorting preferences.
+- Search services by name or type, refresh from an empty list with a keyboard shortcut, and see connected VPN names in the menu bar tooltip.
+- Fix silent toggle failures when no VPN is selected or the saved VPN is missing, unavailable, or already connecting or disconnecting.
+- Add an action to choose the VPN used by Toggle Last Used without changing its connection.
+- Show shortcut feedback after requesting a connection change, without claiming the VPN has already connected.
+- Discover added and removed services when refreshing, and remove redundant menu bar status checks.
+- Keep favorites attached to their service when macOS network order changes, preserve manual favorite order, and fix duplicate or hidden-service entries.
+- Include disabled VPN configurations when non-VPN filtering is turned off.
+- Recover from malformed saved data and temporary status-check failures, and show useful empty and error states.
+
 ## [Bug fix] - 2026-09-21
 
 - Tint the menu bar icon with the menu bar text colour, so it no longer stays black on a dark menu bar
