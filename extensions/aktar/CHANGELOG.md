@@ -1,5 +1,11 @@
 # Aktar Changelog
 
+## [Delete After] - {PR_MERGE_DATE}
+
+- Delete After option (1, 7, 14, or 30 days) for Upload Clipboard, Upload Selected Files, and Upload File. Aktar puts the file under a `tmp/` folder whose bucket lifecycle rule deletes it on schedule. Needs Aktar 0.5.0 or later
+- Search Uploads shows when an expiring upload will be deleted
+- Clearer messages when auto-delete isn't set up for the destination yet, with a shortcut to Aktar's settings
+
 ## [Initial Version] - 2026-09-28
 
 - Upload Clipboard, Upload Selected Files, and Upload File commands

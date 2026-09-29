@@ -50,6 +50,9 @@ export async function showAktarFailure(error: unknown, title: string) {
       toast.title = describeConnectionError(error).title;
       toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };
       toast.secondaryAction = { title: "Download Aktar", onAction: () => open(AKTAR_DOWNLOAD_URL) };
+    } else if (error.status === 409) {
+      // Auto-delete isn't set up for the destination yet; Aktar's message says where to do it.
+      toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };
     }
   }
   return showToast(toast);
