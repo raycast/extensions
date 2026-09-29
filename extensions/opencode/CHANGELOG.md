@@ -1,6 +1,6 @@
 # OpenCode Changelog
 
-## [Reasoning Levels] - {PR_MERGE_DATE}
+## [Reasoning Levels] - 2026-09-29
 
 - Add reasoning levels for models that support them
 - Send messages without reloading the model list first
