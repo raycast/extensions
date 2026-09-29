@@ -51,11 +51,19 @@ describe("resolveTool", () => {
 });
 
 describe("requiredTools", () => {
-  it("video needs the full yt-dlp toolchain", () => {
-    expect(requiredTools("video", "video")).toEqual(["yt-dlp", "ffmpeg", "ffprobe", "deno"]);
+  it("video needs the yt-dlp toolchain", () => {
+    expect(requiredTools("video", "video", "https://vimeo.com/1")).toEqual(["yt-dlp", "ffmpeg", "ffprobe"]);
   });
-  it("audio on a video site needs the full yt-dlp toolchain", () => {
-    expect(requiredTools("video", "audio")).toEqual(["yt-dlp", "ffmpeg", "ffprobe", "deno"]);
+  it("audio on a video site needs the yt-dlp toolchain", () => {
+    expect(requiredTools("video", "audio", "https://twitch.tv/x")).toEqual(["yt-dlp", "ffmpeg", "ffprobe"]);
+  });
+  it("adds Deno only for YouTube, whose extractor needs a JavaScript runtime", () => {
+    const withDeno = ["yt-dlp", "ffmpeg", "ffprobe", "deno"];
+    expect(requiredTools("video", "video", "https://www.youtube.com/watch?v=abc")).toEqual(withDeno);
+    expect(requiredTools("video", "audio", "https://music.youtube.com/watch?v=abc")).toEqual(withDeno);
+    expect(requiredTools("video", "video", "youtu.be/abc")).toEqual(withDeno);
+    expect(requiredTools("video", "video", "https://notyoutube.com/v")).not.toContain("deno");
+    expect(requiredTools("video", "transcript", "https://youtu.be/abc")).toEqual(["yt-dlp", "ffmpeg"]);
   });
   it("audio on a Spotify source needs spotdl + ffmpeg", () => {
     expect(requiredTools("spotify", "audio")).toEqual(["spotdl", "ffmpeg"]);

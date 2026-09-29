@@ -10,6 +10,26 @@ export const SNOOZE_MS = 24 * 60 * 60 * 1000;
 /** How long a package-manager check is reused. `brew outdated` can take seconds, too slow for every download. */
 export const CHECK_TTL_MS = 6 * 60 * 60 * 1000;
 
+/** How long a download waits for the update check before starting anyway. */
+export const CHECK_BUDGET_MS = 15_000;
+
+/** `work`'s result, or `fallback` if it fails or takes longer than `ms`. The work itself keeps running. */
+export function withTimeout<T>(work: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
@@ -83,14 +103,12 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 | undefined {
 
 /**
  * The tools behind a download's executables, each once. ffprobe ships with
- * ffmpeg; on Windows yt-dlp's winget package bundles both, so ffmpeg isn't a
- * separate update there.
+ * ffmpeg, so it's checked as ffmpeg.
  */
-export function toolsToCheck(executables: string[], platform: NodeJS.Platform): ToolId[] {
+export function toolsToCheck(executables: string[]): ToolId[] {
   const tools = executables
     .map((name) => (name === "ffprobe" ? "ffmpeg" : name))
-    .filter((name): name is ToolId => name in TOOLS)
-    .filter((tool) => !(platform === "win32" && tool === "ffmpeg"));
+    .filter((name): name is ToolId => name in TOOLS);
   return [...new Set(tools)];
 }
 

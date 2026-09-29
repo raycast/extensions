@@ -12,6 +12,7 @@ import { getDenoPath, getGalleryDlPath, getMonolithPath, getSpotdlPath, getffmpe
 import { TOOL_INFO, ToolId, toolInfoFor } from "./tools.js";
 import { checkOutdated, errorMessageOf, upgrade } from "./package-manager.js";
 import {
+  CHECK_BUDGET_MS,
   PendingUpdate,
   SNOOZE_MS,
   describeUpdate,
@@ -23,6 +24,7 @@ import {
   readCachedLatest,
   serializeLatest,
   toolsToCheck,
+  withTimeout,
 } from "./tool-freshness.js";
 
 const CACHE_KEY = "tool-update-check";
@@ -86,7 +88,7 @@ async function latestVersions(): Promise<Partial<Record<ToolId, string>>> {
 
 /** Updates available for the tools behind these executables (e.g. a download's `requiredTools`). */
 export async function findPendingUpdates(executables: string[]): Promise<PendingUpdate[]> {
-  const tools = toolsToCheck(executables, process.platform).filter((tool) => fs.existsSync(TOOL_PATH[tool]()));
+  const tools = toolsToCheck(executables).filter((tool) => fs.existsSync(TOOL_PATH[tool]()));
   if (tools.length === 0) return [];
   const [latest, versions] = await Promise.all([
     latestVersions(),
@@ -146,7 +148,10 @@ export async function ensureFreshTools(executables: string[]): Promise<ToolUpdat
   try {
     const now = Date.now();
     const pending: PendingUpdate[] = [];
-    for (const update of await findPendingUpdates(executables)) {
+    // A slow or wedged check must not hold up the download: past the budget, start anyway.
+    // The check keeps running and caches its result for next time.
+    const found = await withTimeout(findPendingUpdates(executables), CHECK_BUDGET_MS, []);
+    for (const update of found) {
       if (!isSnoozed(await LocalStorage.getItem<string>(snoozeKey(update.tool)), now)) pending.push(update);
     }
     if (pending.length === 0) return "current";
@@ -199,7 +204,7 @@ export async function ensureFreshTools(executables: string[]): Promise<ToolUpdat
 export async function hintOutdatedTool(toast: Toast, executable: string): Promise<void> {
   if (!checksEnabled()) return;
   try {
-    const [update] = await findPendingUpdates([executable]);
+    const [update] = await withTimeout(findPendingUpdates([executable]), CHECK_BUDGET_MS, []);
     if (!update) return;
     const error = toast.message ?? "";
     const name = nameOf(update.tool);

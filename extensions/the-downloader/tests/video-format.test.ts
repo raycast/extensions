@@ -28,15 +28,15 @@ describe("videoFormatSelector", () => {
     });
   });
 
-  // Non-mp4 containers (mkv, webm) impose no codec constraint, so we keep the
-  // simple best-streams selector and let --merge-output-format set the box.
-  describe("non-mp4 containers — codec-agnostic best streams", () => {
+  // mkv takes any codec, so it keeps the simple best-streams selector and lets
+  // --merge-output-format set the box.
+  describe("mkv — codec-agnostic best streams", () => {
     it("maps 'best' to an uncapped selector", () => {
       expect(videoFormatSelector("best", "mkv")).toBe("bestvideo+bestaudio/best");
     });
 
     it("maps '1080' to a 1080-capped selector", () => {
-      expect(videoFormatSelector("1080", "webm")).toBe("bestvideo[height<=1080]+bestaudio/best[height<=1080]");
+      expect(videoFormatSelector("1080", "mkv")).toBe("bestvideo[height<=1080]+bestaudio/best[height<=1080]");
     });
 
     it("maps 'smallest' to a worst-quality selector", () => {
@@ -45,6 +45,17 @@ describe("videoFormatSelector", () => {
 
     it("falls back to the uncapped selector for an unrecognised quality token", () => {
       expect(videoFormatSelector("360", "mkv")).toBe("bestvideo+bestaudio/best");
+    });
+  });
+
+  // WebM only holds VP8/VP9/AV1 video and Opus/Vorbis audio: prefer WebM
+  // streams, and only then fall back to any streams (merged into mkv, see
+  // buildVideoDownloadArgs) instead of a merge that ffmpeg would reject.
+  describe("webm — WebM streams first", () => {
+    it("prefers WebM video and audio, then any streams", () => {
+      expect(videoFormatSelector("1080", "webm")).toBe(
+        "bestvideo[height<=1080][ext=webm]+bestaudio[ext=webm]/best[height<=1080][ext=webm]/bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+      );
     });
   });
 });

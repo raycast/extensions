@@ -268,14 +268,14 @@
     },
     {
       "name": "ffmpegPath",
-      "title": "ffmpeg Path",
+      "title": "FFmpeg Path",
       "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "ffprobePath",
-      "title": "ffprobe Path",
+      "title": "FFprobe Path",
       "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
       "type": "textfield",
       "required": false
@@ -303,7 +303,7 @@
     },
     {
       "name": "monolithPath",
-      "title": "monolith Path",
+      "title": "Monolith Path",
       "description": "Path to the monolith executable. Run `which monolith` to find it.",
       "type": "textfield",
       "required": false

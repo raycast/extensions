@@ -52,7 +52,7 @@ No Homebrew yet? Get it at [brew.sh](https://brew.sh).
 const windowsInstallGuide = (executable: string, wingetId: string) => `${intro(executable)}
 
 Press **↵** to install it with winget. Bigger tools can take a couple of minutes, so keep Raycast open until it finishes.
-${executable === "ffmpeg" || executable === "ffprobe" ? "\n_On Windows, the `yt-dlp` package bundles `ffmpeg` and `ffprobe`._\n" : ""}
+${executable === "ffmpeg" || executable === "ffprobe" ? "\n_On Windows, `ffmpeg` and `ffprobe` come from yt-dlp's `yt-dlp.FFmpeg` package._\n" : ""}
 ---
 
 **Prefer the terminal?**

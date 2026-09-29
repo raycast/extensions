@@ -19,8 +19,7 @@ import {
   isAppleSilicon,
   isRosettaInstalled,
   resolveSpotdlAsset,
-  RosettaRequiredError,
-} from "../src/lib/managed-binary";
+  RosettaRequiredError, needsRosetta } from "../src/lib/managed-binary";
 
 const assets = [
   { name: "spotDL", url: "u0" },
@@ -129,11 +128,10 @@ describe("downloadSpotdl integrity verification", () => {
     expect(vi.mocked(fs.writeFileSync)).not.toHaveBeenCalled();
   });
 
-  it("proceeds without verification when no digest is published", async () => {
+  it("refuses to install when no digest is published, since the bytes can't be verified", async () => {
     stubFetch({ digest: undefined });
-    const p = await downloadSpotdl("/tmp/support");
-    expect(p).toContain("spotdl");
-    expect(vi.mocked(fs.writeFileSync)).toHaveBeenCalled();
+    await expect(downloadSpotdl("/tmp/support")).rejects.toThrow(/verify/i);
+    expect(vi.mocked(fs.writeFileSync)).not.toHaveBeenCalled();
   });
 
   it("refuses a download URL on an unexpected host (before fetching the asset)", async () => {
@@ -187,5 +185,23 @@ describe("isRosettaInstalled", () => {
     setArch("darwin", "arm64");
     vi.mocked(fs.existsSync).mockReturnValue(false);
     expect(isRosettaInstalled()).toBe(false);
+  });
+});
+
+describe("needsRosetta", () => {
+  const support = "/Users/me/Library/Application Support/com.raycast.macos/extensions/the-downloader";
+
+  it("requires Rosetta for the extension's own x86_64 spotDL on an Apple Silicon Mac without it", () => {
+    expect(needsRosetta(`${support}/spotdl`, support, { appleSilicon: true, rosetta: false })).toBe(true);
+  });
+
+  it("leaves a native spotDL (e.g. Homebrew's) alone", () => {
+    expect(needsRosetta("/opt/homebrew/bin/spotdl", support, { appleSilicon: true, rosetta: false })).toBe(false);
+    expect(needsRosetta(`${support}-other/spotdl`, support, { appleSilicon: true, rosetta: false })).toBe(false);
+  });
+
+  it("is false when Rosetta is installed or the Mac is Intel", () => {
+    expect(needsRosetta(`${support}/spotdl`, support, { appleSilicon: true, rosetta: true })).toBe(false);
+    expect(needsRosetta(`${support}/spotdl`, support, { appleSilicon: false, rosetta: false })).toBe(false);
   });
 });

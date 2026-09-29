@@ -15,7 +15,7 @@ const packageManagerMethod: InstallMethod = isWindows ? "winget" : "homebrew";
 /** Every external CLI the extension installs or updates as a unit, and how each is obtained on this platform. */
 export const TOOLS: Record<ToolId, ToolSpec> = {
   "yt-dlp": { id: "yt-dlp", installMethod: packageManagerMethod, wingetId: "yt-dlp.yt-dlp" },
-  ffmpeg: { id: "ffmpeg", installMethod: packageManagerMethod },
+  ffmpeg: { id: "ffmpeg", installMethod: packageManagerMethod, wingetId: "yt-dlp.FFmpeg" },
   "gallery-dl": { id: "gallery-dl", installMethod: packageManagerMethod, wingetId: "mikf.gallery-dl" },
   deno: { id: "deno", installMethod: packageManagerMethod, wingetId: "DenoLand.Deno" },
   spotdl: { id: "spotdl", installMethod: "managed-binary" },
@@ -41,9 +41,13 @@ export function isManagedTool(executable: string): boolean {
   return (TOOLS as Record<string, ToolSpec | undefined>)[executable]?.installMethod === "managed-binary";
 }
 
-/** The winget package ID for an executable. Falls back to yt-dlp's package, which bundles ffmpeg/ffprobe on Windows. */
+/**
+ * The winget package ID for an executable. ffprobe ships in ffmpeg's package
+ * (yt-dlp.FFmpeg). Unknown names fall back to yt-dlp's package.
+ */
 export function wingetIdFor(executable: string): string {
-  return (TOOLS as Record<string, ToolSpec | undefined>)[executable]?.wingetId ?? "yt-dlp.yt-dlp";
+  const id = executable === "ffprobe" ? "ffmpeg" : executable;
+  return (TOOLS as Record<string, ToolSpec | undefined>)[id]?.wingetId ?? "yt-dlp.yt-dlp";
 }
 
 /** The friendly tool name for a winget package ID (e.g. "Y2Z.Monolith" → "monolith"). Returns the input unchanged if it is not a winget package ID (e.g. a Homebrew formula name or "spotdl"). */

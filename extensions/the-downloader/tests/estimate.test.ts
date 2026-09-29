@@ -96,3 +96,25 @@ describe("maxHeight", () => {
     expect(maxHeight({ ...video, formats: [] })).toBeUndefined();
   });
 });
+
+describe("selectFormats for WebM", () => {
+  const mixed: Video = {
+    title: "Mixed",
+    duration: 100,
+    formats: [
+      fmt({ format_id: "250", acodec: "opus", ext: "webm", filesize: 2 * MB }),
+      fmt({ format_id: "140", acodec: "mp4a.40.2", ext: "m4a", filesize: 3 * MB }),
+      fmt({ format_id: "247", vcodec: "vp9", ext: "webm", resolution: "1280x720", height: 720, filesize: 20 * MB }),
+      fmt({ format_id: "137", vcodec: "avc1.640028", ext: "mp4", resolution: "1920x1080", height: 1080, filesize: 40 * MB }),
+    ],
+  };
+
+  it("prefers WebM streams even when a higher mp4 stream exists, like the download selector", () => {
+    expect(selectFormats(mixed, "best", "webm")?.map((f) => f.format_id)).toEqual(["247", "250"]);
+  });
+
+  it("falls back to any streams when the site has no WebM", () => {
+    const noWebm = { ...mixed, formats: mixed.formats!.filter((f) => f.ext !== "webm") };
+    expect(selectFormats(noWebm, "best", "webm")?.map((f) => f.format_id)).toEqual(["137", "140"]);
+  });
+});

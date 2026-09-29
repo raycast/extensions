@@ -43,7 +43,6 @@ export async function fetchVideoInfo(
       "--no-warnings",
       "--quiet",
       "--dump-json",
-      "--format-sort=resolution,ext,tbr",
       url,
     ].filter(Boolean),
     {
@@ -127,7 +126,9 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
     // `/best` covers sites that publish no audio-only stream.
     args.push("--format", "bestaudio/best", "--extract-audio", "--audio-format", target, "--audio-quality", "0");
   } else {
-    args.push("--format", downloadFormat, "--merge-output-format", target);
+    // "webm/mkv": when the selector had to fall back to streams WebM can't hold
+    // (e.g. H.264 + AAC), yt-dlp merges into mkv instead of failing the merge.
+    args.push("--format", downloadFormat, "--merge-output-format", target === "webm" ? "webm/mkv" : target);
   }
   args.push(
     "--no-quiet",

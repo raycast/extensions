@@ -9,6 +9,16 @@ import { spawn, ChildProcess } from "node:child_process";
  */
 export const DEFAULT_IDLE_MS = 120_000;
 
+/**
+ * Most characters kept of each output stream. Callers read the tail (yt-dlp's
+ * final file path, a tool's error), and progress output from a long download
+ * would otherwise pile up in memory for nothing.
+ */
+export const MAX_RETAINED_OUTPUT = 1_000_000;
+
+/** Keep the last `MAX_RETAINED_OUTPUT` characters of `text`. */
+const tail = (text: string) => (text.length > MAX_RETAINED_OUTPUT ? text.slice(-MAX_RETAINED_OUTPUT) : text);
+
 /** Grace period after SIGTERM before escalating to SIGKILL, so a child that ignores SIGTERM still exits and `close` still fires. */
 const KILL_GRACE_MS = 4_000;
 
@@ -17,11 +27,11 @@ export type RunOptions = {
   idleMs: number;
   /** Environment for the child. Defaults to the parent's `process.env`. */
   env?: NodeJS.ProcessEnv;
-  /** Called per stdout chunk so callers can parse incremental progress. The full stdout is also returned on close. */
+  /** Called per stdout chunk so callers can parse incremental progress. Stdout's tail is also returned on close. */
   onStdoutChunk?: (chunk: string) => void;
   /** Called per complete stdout line (newline-buffered across chunks). Use this when a line could be split across stream chunks — e.g. a tagged filepath that must be matched whole. */
   onStdoutLine?: (line: string) => void;
-  /** Called per stderr chunk. The full stderr is also returned on close. */
+  /** Called per stderr chunk. Stderr's tail is also returned on close. */
   onStderrChunk?: (chunk: string) => void;
   /** Override the rejection message when the watchdog fires. */
   idleKillMessage?: string;
@@ -105,8 +115,9 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
 
     // Signal the child's whole process group on POSIX (negative pid) so
     // grandchildren — yt-dlp's ffmpeg post-processor — die with it instead of
-    // orphaning. Falls back to a direct child kill when there's no group
-    // (Windows) or the group has already gone. No signal → SIGTERM.
+    // orphaning. Windows has no process groups: `taskkill /T` ends the whole
+    // tree instead. Falls back to a direct child kill when neither works, and
+    // for the escalation after the grace period. No signal → SIGTERM.
     const killGroup = (signal?: NodeJS.Signals) => {
       const pid = child.pid;
       if (isPosix && typeof pid === "number") {
@@ -116,6 +127,17 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
           return;
         } catch {
           /* group already gone — fall through to a direct child kill */
+        }
+      }
+      if (!isPosix && typeof pid === "number" && !signal) {
+        // Don't kill the parent first: its children would be orphaned and out of taskkill's reach.
+        try {
+          spawn("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore", windowsHide: true }).on("error", () =>
+            child.kill(),
+          );
+          return;
+        } catch {
+          /* taskkill unavailable — fall through to a direct child kill */
         }
       }
       try {
@@ -150,7 +172,7 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
     child.stdout?.on("data", (data: Buffer) => {
       resetIdle();
       const text = data.toString();
-      stdout += text;
+      stdout = tail(stdout + text);
       options.onStdoutChunk?.(text);
       if (options.onStdoutLine) {
         stdoutLineBuffer += text;
@@ -166,7 +188,7 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
     child.stderr?.on("data", (data: Buffer) => {
       resetIdle();
       const text = data.toString();
-      stderr += text;
+      stderr = tail(stderr + text);
       options.onStderrChunk?.(text);
     });
     child.on("error", (err) => settleReject(err));

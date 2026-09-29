@@ -13,6 +13,15 @@
 - **The Download form knows what it's downloading.** Once yt-dlp has read the link, a details line shows the channel, duration, views and the best quality on offer, and every Quality choice shows the resolution and estimated size it will actually fetch for the chosen container (`1080p · ≈ 52.1 MB`, `1080p · 720p max · ≈ 40.2 MB`). Container and audio formats explain their trade-offs.
 - **Media Preview (⌘Y)** from the form: thumbnail, title, stats, the start of the description, and a table of the available formats, with channel, subscribers, views, likes, comments, upload date and best quality in the sidebar.
 - **Update Libraries is a proper list now**: each tool with what it does, its installed version and a status tag (Up to Date, Update → x.y.z, Not Installed, Check Failed), grouped into Updates Available / Installed / Not Installed. Upgrade one tool or all of them, Check Again (⌘R), copy the version report, or open a tool's website.
+- **Fixes.**
+  - Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
+  - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
+  - Transcripts never overwrite an existing file with the same title (a number is added).
+  - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
+  - A Homebrew-installed spotDL no longer asks for Rosetta on Apple Silicon, and the auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
+  - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
+  - Download History refreshes while it's open and shows titles as plain text.
+  - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
 - **Friendlier setup screens.** The installer explains what the missing tool is for instead of an error banner, shows the terminal command as an alternative, lists the tool, package and website in a sidebar (plus whether Spotify credentials are set, for spotDL), and shows that an install is running.
 - Upgraded to Raycast API 2.5 and @raycast/utils 2.3, with ESLint 10 and the React 19 / Node 22 types the API expects.
 

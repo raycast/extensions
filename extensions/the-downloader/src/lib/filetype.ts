@@ -1,5 +1,6 @@
 import { SourceType } from "../types.js";
 import { ToolId } from "./tools.js";
+import { needsJsRuntime } from "./detect.js";
 
 /** What the user wants out of a URL — the Download form's second field. */
 export type Filetype = "image" | "video" | "audio" | "transcript" | "website";
@@ -78,8 +79,12 @@ export function filetypeGuidance(source: SourceType): string {
   }
 }
 
-/** Every executable that must exist for a (source, filetype) selection. */
-export function requiredTools(source: SourceType, filetype: Filetype): string[] {
+/**
+ * Every executable that must exist for a (source, filetype) selection. Deno is
+ * required only for YouTube (see `needsJsRuntime`); elsewhere it's optional,
+ * so a missing Deno doesn't block Vimeo, Twitch and the like.
+ */
+export function requiredTools(source: SourceType, filetype: Filetype, url = ""): string[] {
   const tool = resolveTool(source, filetype);
   if (tool === "monolith") return ["monolith"];
   if (tool === "spotdl") return ["spotdl", "ffmpeg"];
@@ -87,5 +92,5 @@ export function requiredTools(source: SourceType, filetype: Filetype): string[] 
   // tool === "yt-dlp" — transcript and thumbnail need only yt-dlp + ffmpeg.
   return filetype === "transcript" || filetype === "image"
     ? ["yt-dlp", "ffmpeg"]
-    : ["yt-dlp", "ffmpeg", "ffprobe", "deno"];
+    : ["yt-dlp", "ffmpeg", "ffprobe", ...(needsJsRuntime(url) ? ["deno"] : [])];
 }

@@ -21,7 +21,7 @@ import { ensureFreshTools, hintOutdatedTool } from "./lib/tool-updates.js";
 import { isLoginRequiredError, runGalleryDownload } from "./lib/gallerydl.js";
 import { resolveBrowser } from "./lib/browsers.js";
 import { AbortError } from "./lib/run.js";
-import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "./lib/managed-binary.js";
+import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "./lib/monolith.js";
 import { progressMessage } from "./lib/format.js";
@@ -228,7 +228,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     try {
       // Surface the friendly Rosetta hint for an already-present x86_64 binary
       // on an Apple Silicon Mac without Rosetta, instead of a raw "Bad CPU type".
-      if (isAppleSilicon() && !isRosettaInstalled()) throw new RosettaRequiredError();
+      if (needsRosetta(spotdlPath, environment.supportPath)) throw new RosettaRequiredError();
       const { tracks } = await runSpotdlDownload(
         spotdlPath,
         {
@@ -248,10 +248,18 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
           session.count(p.tracks);
         },
       );
-      toast.style = Toast.Style.Success;
-      toast.title = "Downloaded";
-      toast.message = `${tracks} tracks`;
-      toast.primaryAction = { title: "Open Folder", onAction: () => open(downloadPath) };
+      if (tracks === 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Nothing downloaded";
+        toast.message =
+          "spotDL saved no tracks. The playlist may be private or empty; for private playlists, turn on Spotify: User Authentication.";
+        toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = "Downloaded";
+        toast.message = `${tracks} tracks`;
+        toast.primaryAction = { title: "Open Folder", onAction: () => open(downloadPath) };
+      }
       toast.secondaryAction = undefined;
     } catch (error) {
       outcome = { error };

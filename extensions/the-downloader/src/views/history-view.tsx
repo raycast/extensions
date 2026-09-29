@@ -21,7 +21,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { CARD_W, historyCardSvg } from "../lib/charts.js";
-import { formatBytes, formatClock, plural } from "../lib/format.js";
+import { escapeMarkdown, formatBytes, formatClock, plural } from "../lib/format.js";
 import {
   HistoryEntry,
   HistoryFilter,
@@ -96,7 +96,7 @@ function detailMarkdown(e: HistoryEntry): string {
     e.status === "failed" && e.error ? `\n\n\`\`\`\n${e.error.slice(0, 1200).replace(/`{3,}/g, "` ` `")}\n\`\`\`` : "";
   const thumbnail = safeImageUrl(e.thumbnail);
   if (thumbnail) {
-    return `![${titleOf(e).replace(/[[\]]/g, "")}](${thumbnail})\n\n### ${titleOf(e)}${error}`;
+    return `![${titleOf(e).replace(/[[\]]/g, "")}](${thumbnail})\n\n### ${escapeMarkdown(titleOf(e))}${error}`;
   }
   const { badge, caption } = badgeOf(e);
   const lines = [
@@ -135,8 +135,26 @@ export function DownloadHistory() {
   const [filter, setFilter] = useState<HistoryFilter>("all");
   const [showingDetail, setShowingDetail] = useState(true);
 
+  // Downloads can finish while History is open (in the form behind it, Fast
+  // Download or the AI tool), so re-read it every couple of seconds and
+  // re-render only when something changed.
   useEffect(() => {
-    loadHistory().then(setEntries);
+    let active = true;
+    let last = "";
+    const load = () =>
+      loadHistory().then((list) => {
+        const serialized = JSON.stringify(list);
+        if (active && serialized !== last) {
+          last = serialized;
+          setEntries(list);
+        }
+      });
+    void load();
+    const timer = setInterval(load, 2000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
   }, []);
 
   // Files can be moved or deleted after the download; check once per load.

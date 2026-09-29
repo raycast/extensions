@@ -25,8 +25,16 @@ describe("package-manager mapping helpers (platform-independent)", () => {
     const { wingetIdFor } = await loadTools(true);
     expect(wingetIdFor("monolith")).toBe("Y2Z.Monolith");
     expect(wingetIdFor("gallery-dl")).toBe("mikf.gallery-dl");
-    // ffprobe has no winget package of its own — yt-dlp bundles it on Windows.
-    expect(wingetIdFor("ffprobe")).toBe("yt-dlp.yt-dlp");
+    expect(wingetIdFor("something-else")).toBe("yt-dlp.yt-dlp");
+  });
+
+  it("maps ffmpeg and ffprobe to yt-dlp's separate FFmpeg package", async () => {
+    // Installing yt-dlp.yt-dlp again when only ffmpeg is missing is a no-op
+    // ("already installed"), so ffmpeg must name its own package.
+    const { wingetIdFor, friendlyNameFor } = await loadTools(true);
+    expect(wingetIdFor("ffmpeg")).toBe("yt-dlp.FFmpeg");
+    expect(wingetIdFor("ffprobe")).toBe("yt-dlp.FFmpeg");
+    expect(friendlyNameFor("yt-dlp.FFmpeg")).toBe("ffmpeg");
   });
 
   it("friendlyNameFor reverse-maps a winget id and passes unknowns through", async () => {
@@ -48,7 +56,7 @@ describe("derived package lists", () => {
   it("on Windows, WINGET_PACKAGES is deduped and excludes the managed spotdl", async () => {
     const { WINGET_PACKAGES } = await loadTools(true);
     expect(WINGET_PACKAGES).toEqual(
-      expect.arrayContaining(["yt-dlp.yt-dlp", "mikf.gallery-dl", "DenoLand.Deno", "Y2Z.Monolith"]),
+      expect.arrayContaining(["yt-dlp.yt-dlp", "yt-dlp.FFmpeg", "mikf.gallery-dl", "DenoLand.Deno", "Y2Z.Monolith"]),
     );
     expect(WINGET_PACKAGES).not.toContain("spotdl");
     expect(new Set(WINGET_PACKAGES).size).toBe(WINGET_PACKAGES.length);

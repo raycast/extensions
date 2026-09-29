@@ -57,6 +57,14 @@ function matches(host: string, domains: string[]): boolean {
 }
 
 /**
+ * True for YouTube links. yt-dlp needs a JavaScript runtime (Deno) to read
+ * YouTube's player; other sites download without one.
+ */
+export function needsJsRuntime(url: string): boolean {
+  return matches(hostnameOf(url), ["youtube.com", "youtu.be"]);
+}
+
+/**
  * Detect which tool a URL routes to: a video/audio source (yt-dlp), an image
  * gallery (gallery-dl), a Spotify link (spotDL), or — for any other site — a
  * webpage to save with monolith. Video sites are an explicit allowlist; the

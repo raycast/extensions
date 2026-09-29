@@ -32,10 +32,11 @@ import {
 import { composeVideoFormat } from "../lib/video-format.js";
 import { fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
 import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
+import { uniqueFilePath } from "../lib/unique-path.js";
 import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
-import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "../lib/managed-binary.js";
+import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "../lib/monolith.js";
 import { DownloadInit, DownloadSession } from "../lib/download-session.js";
@@ -248,8 +249,9 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   // The required tools must all exist; otherwise the form is replaced by the Installer.
   const missingTool = useMemo(
-    () => (validUrl ? requiredTools(source, filetype).find((name) => !fs.existsSync(TOOL_PATH[name]())) : undefined),
-    [source, filetype, validUrl, refresh],
+    () =>
+      validUrl ? requiredTools(source, filetype, url).find((name) => !fs.existsSync(TOOL_PATH[name]())) : undefined,
+    [source, filetype, url, validUrl, refresh],
   );
 
   // yt-dlp metadata — fetched only for a yt-dlp-bound selection with its tools present.
@@ -285,14 +287,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const checkedTools = useRef(new Set<string>());
   useEffect(() => {
     if (!validUrl || missingTool) return;
-    const tools = requiredTools(source, filetype);
+    const tools = requiredTools(source, filetype, url);
     const key = tools.join(",");
     if (checkedTools.current.has(key)) return;
     checkedTools.current.add(key);
     void ensureFreshTools(tools).then((outcome) => {
       if (outcome === "updated") refetchMeta();
     });
-  }, [validUrl, missingTool, source, filetype, refetchMeta]);
+  }, [validUrl, missingTool, source, filetype, url, refetchMeta]);
 
   const liveStream = !!video && isLiveStream(video);
 
@@ -448,7 +450,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       session.working();
       try {
         const { transcript, title } = await extractTranscript(submitUrl, "en", signal);
-        const filePath = path.join(folder, `${title}.txt`);
+        const filePath = uniqueFilePath(folder, title, "txt");
         // Defense in depth: sanitizeVideoTitle already strips separators, but
         // assert the resolved path stays inside the chosen folder before writing
         // so a pathological title can never escape it.
@@ -458,7 +460,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         fs.writeFileSync(filePath, transcript, "utf-8");
         toast.style = Toast.Style.Success;
         toast.title = "Transcript Saved";
-        toast.message = `${title}.txt`;
+        toast.message = path.basename(filePath);
         toast.primaryAction = { title: "Open", onAction: () => open(filePath) };
         toast.secondaryAction = { title: "Copy Transcript", onAction: () => Clipboard.copy(transcript) };
         succeedSession(session, toast, filePath);
@@ -606,7 +608,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         // A managed spotDL binary that already exists (e.g. installed before the
         // Rosetta guard, or copied from another machine) would otherwise fail
         // with a cryptic "Bad CPU type". Surface the friendly hint instead.
-        if (isAppleSilicon() && !isRosettaInstalled()) throw new RosettaRequiredError();
+        if (needsRosetta(getSpotdlPath(), environment.supportPath)) throw new RosettaRequiredError();
         const { tracks } = await runSpotdlDownload(
           getSpotdlPath(),
           {
@@ -629,6 +631,18 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             session.count(p.tracks);
           },
         );
+        if (tracks === 0) {
+          // A private or empty playlist can exit cleanly with nothing saved —
+          // say so instead of a green "0 tracks".
+          toast.style = Toast.Style.Failure;
+          toast.title = "Nothing downloaded";
+          toast.message =
+            "spotDL saved no tracks. The playlist may be private or empty; for private playlists, turn on Spotify: User Authentication.";
+          toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
+          toast.secondaryAction = undefined;
+          failSession(session, toast);
+          return;
+        }
         toast.style = Toast.Style.Success;
         toast.title = "Download Complete";
         toast.message = `${tracks} tracks`;

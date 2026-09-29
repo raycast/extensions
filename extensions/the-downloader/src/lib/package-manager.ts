@@ -7,6 +7,10 @@ import { HOMEBREW_FORMULAE, isWingetUpdateNotApplicable, WINGET_PACKAGES } from 
 import { resetWingetPackagesCache } from "./binary.js";
 import { PackageIssue } from "./tool-status.js";
 
+/** Caps for package-manager calls, so a wedged brew/winget can't hang a check or an upgrade forever. */
+const CHECK_TIMEOUT_MS = 90_000;
+const UPGRADE_TIMEOUT_MS = 20 * 60_000;
+
 export function errorMessageOf(error: unknown): string {
   return error instanceof Error ? error.message : "An unknown error occurred";
 }
@@ -29,7 +33,7 @@ export async function upgrade(
       if (!outdated[formula]) continue;
       attempted += 1;
       try {
-        await execa(brew, ["upgrade", formula]);
+        await execa(brew, ["upgrade", formula], { timeout: UPGRADE_TIMEOUT_MS });
       } catch (error) {
         issues.push({ pkg: formula, message: errorMessageOf(error) });
       }
@@ -40,7 +44,9 @@ export async function upgrade(
       if (!outdated[pkg]) continue;
       attempted += 1;
       try {
-        await execa(wingetPath, ["upgrade", "--id", pkg, "--accept-source-agreements", "--accept-package-agreements"]);
+        await execa(wingetPath, ["upgrade", "--id", pkg, "--accept-source-agreements", "--accept-package-agreements"], {
+          timeout: UPGRADE_TIMEOUT_MS,
+        });
       } catch (error) {
         // winget exits non-zero when a package has no available upgrade (it
         // may have been upgraded since the check) — not a real failure.
@@ -89,7 +95,9 @@ export async function checkOutdated(): Promise<{ outdated: Record<string, string
       // a webpage), failing the whole batch. List everything outdated on the
       // system instead and filter to our formulae. `current_version` is the
       // newest version available for the (installed, outdated) formula.
-      const { stdout: outdatedOutput } = await execa(getHomebrewPath(), ["outdated", "--json=v2"]);
+      const { stdout: outdatedOutput } = await execa(getHomebrewPath(), ["outdated", "--json=v2"], {
+        timeout: CHECK_TIMEOUT_MS,
+      });
       const info = JSON.parse(outdatedOutput) as { formulae: { name: string; current_version: string }[] };
       for (const { name, current_version } of info.formulae) {
         if (HOMEBREW_FORMULAE.includes(name)) outdated[name] = current_version;
@@ -100,7 +108,7 @@ export async function checkOutdated(): Promise<{ outdated: Record<string, string
   } else if (isWindows) {
     try {
       const wingetPath = await getWingetPath();
-      const { stdout: upgradeOutput } = await execa(wingetPath, ["upgrade"]);
+      const { stdout: upgradeOutput } = await execa(wingetPath, ["upgrade"], { timeout: CHECK_TIMEOUT_MS });
       for (const line of upgradeOutput.split("\n")) {
         for (const pkg of WINGET_PACKAGES) {
           if (line.includes(pkg)) {

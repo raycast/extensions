@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
 import { spawn } from "node:child_process";
-import { AbortError, DEFAULT_IDLE_MS, runWithWatchdog } from "../src/lib/run";
+import { AbortError, DEFAULT_IDLE_MS, MAX_RETAINED_OUTPUT, runWithWatchdog } from "../src/lib/run";
 
 function fakeChild() {
   const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
@@ -99,13 +99,17 @@ describe("runWithWatchdog", () => {
     }
   });
 
-  it("on Windows, falls back to a direct child.kill() rather than signalling a process group", async () => {
+  it("on Windows, kills the whole process tree with taskkill so ffmpeg under yt-dlp dies too", async () => {
     setPlatform("win32");
     const killSpy = vi.spyOn(process, "kill").mockImplementation(() => true);
     try {
       const child = fakeChild();
       (child as unknown as { pid: number }).pid = 4242;
-      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child).mockImplementationOnce(() => {
+        // taskkill ends the tree; the child's close follows.
+        queueMicrotask(() => child.emit("close", null));
+        return new EventEmitter();
+      });
 
       const controller = new AbortController();
       const promise = runWithWatchdog("C:/bin/x.exe", [], { idleMs: 60_000, abortSignal: controller.signal });
@@ -115,12 +119,35 @@ describe("runWithWatchdog", () => {
       controller.abort();
 
       await assertion;
-      // process.kill (negative pid) is the POSIX-only path — must not be used on Windows.
+      expect(spawn).toHaveBeenLastCalledWith(
+        "taskkill",
+        ["/pid", "4242", "/T", "/F"],
+        expect.objectContaining({ stdio: "ignore", windowsHide: true }),
+      );
+      // process.kill (negative pid) is the POSIX-only path, and killing the
+      // parent first would orphan its children before taskkill could find them.
       expect(killSpy).not.toHaveBeenCalled();
-      expect(child.kill).toHaveBeenCalled();
+      expect(child.kill).not.toHaveBeenCalled();
     } finally {
       killSpy.mockRestore();
     }
+  });
+
+  it("on Windows, falls back to a direct child.kill() when taskkill can't be started", async () => {
+    setPlatform("win32");
+    const child = fakeChild();
+    (child as unknown as { pid: number }).pid = 4242;
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child).mockImplementationOnce(() => {
+      throw new Error("spawn taskkill ENOENT");
+    });
+
+    const controller = new AbortController();
+    const promise = runWithWatchdog("C:/bin/x.exe", [], { idleMs: 60_000, abortSignal: controller.signal });
+    const assertion = expect(promise).rejects.toBeInstanceOf(AbortError);
+    controller.abort();
+
+    await assertion;
+    expect(child.kill).toHaveBeenCalled();
   });
 
   it("resolves with code + accumulated stdout/stderr on close", async () => {
@@ -134,6 +161,25 @@ describe("runWithWatchdog", () => {
     child.emit("close", 0);
 
     await expect(promise).resolves.toEqual({ code: 0, stdout: "hello world\n", stderr: "warn\n" });
+  });
+
+  it("keeps only the tail of very long output, so a long download can't grow memory without bound", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const promise = runWithWatchdog("/bin/x", [], { idleMs: 1_000 });
+    const chunk = "x".repeat(MAX_RETAINED_OUTPUT / 2);
+    for (let i = 0; i < 4; i++) {
+      child.stdout.emit("data", Buffer.from(chunk));
+      child.stderr.emit("data", Buffer.from(chunk));
+    }
+    child.stdout.emit("data", Buffer.from("THE-END\n"));
+    child.emit("close", 0);
+
+    const { stdout, stderr } = await promise;
+    expect(stdout.length).toBe(MAX_RETAINED_OUTPUT);
+    expect(stdout.endsWith("THE-END\n")).toBe(true);
+    expect(stderr.length).toBe(MAX_RETAINED_OUTPUT);
   });
 
   it("resolves with a non-zero code rather than rejecting — caller decides what failure means", async () => {

@@ -20,6 +20,7 @@ import {
   readCachedLatest,
   serializeLatest,
   toolsToCheck,
+  withTimeout,
   ytdlpAgeDays,
 } from "../src/lib/tool-freshness";
 
@@ -144,16 +145,17 @@ describe("compareVersions", () => {
 
 describe("toolsToCheck / packageFor", () => {
   it("maps ffprobe onto ffmpeg and drops duplicates", () => {
-    expect(toolsToCheck(["yt-dlp", "ffmpeg", "ffprobe", "deno"], "darwin")).toEqual(["yt-dlp", "ffmpeg", "deno"]);
-    expect(toolsToCheck(["spotdl", "ffmpeg"], "darwin")).toEqual(["spotdl", "ffmpeg"]);
+    expect(toolsToCheck(["yt-dlp", "ffmpeg", "ffprobe", "deno"])).toEqual(["yt-dlp", "ffmpeg", "deno"]);
+    expect(toolsToCheck(["spotdl", "ffmpeg"])).toEqual(["spotdl", "ffmpeg"]);
   });
 
-  it("skips ffmpeg on Windows, where yt-dlp's package bundles it", () => {
-    expect(toolsToCheck(["yt-dlp", "ffmpeg", "ffprobe", "deno"], "win32")).toEqual(["yt-dlp", "deno"]);
+  it("checks ffmpeg on Windows too, as its own winget package", () => {
+    expect(toolsToCheck(["yt-dlp", "ffmpeg", "ffprobe", "deno"])).toEqual(["yt-dlp", "ffmpeg", "deno"]);
+    expect(packageFor("ffmpeg", "win32")).toBe("yt-dlp.FFmpeg");
   });
 
   it("ignores names that are not tools", () => {
-    expect(toolsToCheck(["brew", "gallery-dl"], "darwin")).toEqual(["gallery-dl"]);
+    expect(toolsToCheck(["brew", "gallery-dl"])).toEqual(["gallery-dl"]);
   });
 
   it("names the package each platform upgrades", () => {
@@ -223,6 +225,21 @@ describe("serializeLatest / readCachedLatest", () => {
     expect(readCachedLatest(undefined, NOW)).toBeUndefined();
     expect(readCachedLatest("{not json", NOW)).toBeUndefined();
     expect(readCachedLatest(JSON.stringify({ checkedAt: NOW }), NOW)).toBeUndefined();
+  });
+});
+
+describe("withTimeout", () => {
+  it("passes a result through when it arrives in time", async () => {
+    expect(await withTimeout(Promise.resolve("done"), 1000, "late")).toBe("done");
+  });
+
+  it("gives up with the fallback when the work takes too long", async () => {
+    const never = new Promise<string>(() => undefined);
+    expect(await withTimeout(never, 10, "late")).toBe("late");
+  });
+
+  it("uses the fallback when the work fails", async () => {
+    expect(await withTimeout(Promise.reject(new Error("boom")), 1000, "failed")).toBe("failed");
   });
 });
 

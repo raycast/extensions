@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatBytes, formatClock, formatSpeed, plural, progressMessage, wrapText } from "../src/lib/format";
+import { formatBytes, formatClock, formatSpeed, plural, progressMessage, wrapText, escapeMarkdown } from "../src/lib/format";
 
 describe("formatBytes", () => {
   it("uses decimal units with sensible precision", () => {
@@ -50,5 +50,20 @@ describe("progressMessage", () => {
     expect(progressMessage({ percent: 42.9, speed: 5_200_000, eta: 12 })).toBe("42% · 5.20 MB/s · 0:12 left");
     expect(progressMessage({ percent: 10 })).toBe("10%");
     expect(progressMessage({})).toBe("");
+  });
+});
+
+describe("escapeMarkdown", () => {
+  it("turns link and image syntax in a title into plain text", () => {
+    expect(escapeMarkdown("[Click](https://evil.example)")).toBe("\\[Click\\]\\(https://evil\\.example\\)");
+    expect(escapeMarkdown("![x](y)")).toBe("\\!\\[x\\]\\(y\\)");
+  });
+
+  it("escapes emphasis, code and HTML markers, and backslashes themselves", () => {
+    expect(escapeMarkdown("*a* _b_ `c` <d> \\")).toBe("\\*a\\* \\_b\\_ \\`c\\` \\<d\\> \\\\");
+  });
+
+  it("leaves ordinary words alone", () => {
+    expect(escapeMarkdown("I Got Coached By Faker")).toBe("I Got Coached By Faker");
   });
 });

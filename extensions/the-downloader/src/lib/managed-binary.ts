@@ -47,6 +47,20 @@ export function isRosettaInstalled(): boolean {
 }
 
 /** Friendly error thrown when spotDL can't run because Rosetta 2 is missing on Apple Silicon. */
+/**
+ * True when running `binaryPath` needs Rosetta that isn't there: only the
+ * extension's own x86_64 spotDL download (inside `managedDir`) on an Apple
+ * Silicon Mac without Rosetta. A native spotDL, e.g. Homebrew's, runs as is.
+ */
+export function needsRosetta(
+  binaryPath: string,
+  managedDir: string,
+  mac: { appleSilicon: boolean; rosetta: boolean } = { appleSilicon: isAppleSilicon(), rosetta: isRosettaInstalled() },
+): boolean {
+  const managed = path.resolve(binaryPath).startsWith(path.resolve(managedDir) + path.sep);
+  return managed && mac.appleSilicon && !mac.rosetta;
+}
+
 export class RosettaRequiredError extends Error {
   constructor() {
     super(
@@ -140,17 +154,21 @@ export async function downloadSpotdl(supportDir: string): Promise<string> {
     throw error;
   }
 
-  // Verify the bytes against the SHA-256 GitHub publishes for the asset, when
-  // present. This catches a corrupted/truncated download before the binary is
-  // made executable. It defends against transmission corruption and a wrong
-  // host — NOT against a compromised upstream release (the digest comes from
-  // the same API), which is an accepted limit of the auto-download model.
-  if (asset.digest?.startsWith("sha256:")) {
-    const expected = asset.digest.slice("sha256:".length).toLowerCase();
-    const actual = crypto.createHash("sha256").update(bytes).digest("hex");
-    if (actual !== expected) {
-      throw new Error("spotDL download failed its integrity check (SHA-256 mismatch). Please try again.");
-    }
+  // Verify the bytes against the SHA-256 GitHub publishes for the asset. This
+  // catches a corrupted/truncated download before the binary is made
+  // executable. It defends against transmission corruption and a wrong host —
+  // NOT against a compromised upstream release (the digest comes from the same
+  // API), which is an accepted limit of the auto-download model. No digest, no
+  // install: an unverifiable executable is never written.
+  if (!asset.digest?.startsWith("sha256:")) {
+    throw new Error(
+      "Couldn't verify the spotDL download: GitHub published no SHA-256 checksum for it. Install spotDL with Homebrew instead.",
+    );
+  }
+  const expected = asset.digest.slice("sha256:".length).toLowerCase();
+  const actual = crypto.createHash("sha256").update(bytes).digest("hex");
+  if (actual !== expected) {
+    throw new Error("spotDL download failed its integrity check (SHA-256 mismatch). Please try again.");
   }
 
   const finalPath = path.join(supportDir, isWindows ? "spotdl.exe" : "spotdl");
