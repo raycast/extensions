@@ -68,6 +68,33 @@
       "description": "The URL to use when searching. The text \"%query%\" will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
+    },
+    {
+      "name": "popToRootAfterOpen",
+      "title": "After Opening",
+      "label": "Return to Raycast root search",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "After a profile action completes, go back to Raycast's root search instead of reopening on the profile view."
+    },
+    {
+      "name": "directSwitch",
+      "title": "Enter Key",
+      "label": "Bring profile to front on Enter",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Selecting a profile brings it to front immediately. Show Bookmarks moves to ⌘↵."
+    },
+    {
+      "name": "focusWithoutNewWindow",
+      "title": "Bring to Front",
+      "label": "Never open a new window",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "If the profile can't be selected from Chrome's Profiles menu, show the error instead of opening a new window."
     }
   ],
   "dependencies": {

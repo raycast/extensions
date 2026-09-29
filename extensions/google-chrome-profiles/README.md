@@ -56,4 +56,10 @@ I highly recommend that you map the default Google Chrome profile shortcut (`⌘
 
 If needed, set the URL for the new tab (default is `about:blank`) and your search engine in the extension setting (default is `google.com`).
 
+Optional switching behavior (all off by default):
+
+- **Return to Raycast root search**: after opening a profile, the next Raycast launch starts at root search instead of the profile view.
+- **Bring profile to front on Enter**: selecting a profile focuses it in one step; Show Bookmarks moves to ⌘↵.
+- **Never open a new window**: if Bring to Front cannot select the profile from Chrome's Profiles menu (for example, two profiles share a name), show the error instead of opening a new window.
+
 ![extension setting](https://user-images.githubusercontent.com/2499356/182661111-b53372fa-ff38-4134-934d-c2cb65fc367e.jpg)

@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { BrowserConfig, Profile } from "./types";
 import { extractProfiles, profileLabels, readChromeLocalState } from "./profiles";
 
@@ -103,7 +103,9 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
   return `${profileMenuScript(browser)}
     on selectProfileWindow()
     with timeout of 10 seconds
-    if (count ${candidates}) is 0 then error "Profile names are ambiguous. Give each Chrome profile a unique name."
+    if (count ${candidates}) is 0 then error ${appleScriptString(
+      `More than one Chrome profile is named "${profile.name}". Rename one in Chrome to switch to it.`,
+    )}
     tell application ${appleScriptString(browser.appName)} to activate
     set profileMenu to my findProfileMenu()
     tell application "System Events"
@@ -174,9 +176,15 @@ export async function openGoogleChrome(
           end if
           try
             set targetWindow to my selectProfileWindow()
-          on error
-            do shell script ${launchCommand(false)}
-            return
+          on error errorMessage
+            ${
+              // Relaunching a running Chrome with --profile-directory always opens a new window,
+              // so optionally surface the Bring to Front failure instead of piling up windows.
+              target.action === "focus" && getPreferenceValues<ExtensionPreferences>().focusWithoutNewWindow
+                ? "error errorMessage"
+                : `do shell script ${launchCommand(false)}
+            return`
+            }
           end try
           tell application ${appleScriptString(browser.appName)}
             tell window id targetWindow

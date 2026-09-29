@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, PopToRootType, showHUD } from "@raycast/api";
 
 export type GoogleChromeLocalState = {
   profile: {
@@ -130,4 +130,12 @@ export const BROWSERS: Record<string, BrowserConfig> = {
 export function getSelectedBrowser(): BrowserConfig {
   const { browser } = getPreferenceValues<ExtensionPreferences>();
   return BROWSERS[browser] ?? BROWSERS["chrome"];
+}
+
+// Raycast otherwise reopens on the pushed profile view after its window closes.
+export function showDoneHUD(title: string) {
+  const { popToRootAfterOpen } = getPreferenceValues<ExtensionPreferences>();
+  return showHUD(title, {
+    popToRootType: popToRootAfterOpen ? PopToRootType.Immediate : PopToRootType.Default,
+  });
 }
