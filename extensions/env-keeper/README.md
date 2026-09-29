@@ -2,7 +2,7 @@
 
 Manage every project's `.env` files and your global shell config from Raycast. **Local-only, free, keyboard-first.**
 
-> The name comes from "butler": your `.env` files belong to you. The extension fetches, registers and guards them — it never keeps a copy of its own.
+> The name comes from "butler": your `.env` files belong to you. The extension fetches, registers and guards them. Your project `.env` files stay the source of truth; Env Keeper only keeps local plaintext history copies (snapshots and presets) on your machine — see [Security boundaries](#security-boundaries-please-read).
 
 ## What it solves
 
@@ -24,7 +24,9 @@ Manage every project's `.env` files and your global shell config from Raycast. *
 
 ## Core design: files are the source of truth
 
-The extension **stores no environment data**. Project environments are edited directly in the `.env` files under the project directory — there is no second copy, so it coexists naturally with git, teammates, Vite and Docker.
+Project environments are edited directly in the `.env` files under the project directory. The live values are never moved elsewhere, so the extension coexists naturally with git, teammates, Vite and Docker.
+
+Alongside that, Env Keeper keeps **local history copies** for rollback and reuse (details in [Security boundaries](#security-boundaries-please-read)): automatic snapshots of each `.env` file, and presets you save. These are extra copies of your environment content, not a replacement for the files.
 
 The file's fingerprint is recorded on open and checked again before save: if something else changed the file in between, you get to decide instead of a silent overwrite.
 
@@ -33,17 +35,23 @@ Everything the extension owns lives in `~/.env-keeper/`, fully transparent:
 ```
 ~/.env-keeper/
 ├── registry.json       # registered projects
+├── presets.json        # saved presets (full env content, plaintext)
 ├── shell.json          # shell snippets
 ├── shell.sh            # generated from shell.json, sourced by .zshrc
-├── snapshots/          # history of each project's .env files
-├── config-history/     # history of the two config files above
+├── snapshots/          # history of each project's .env files (full contents, plaintext)
+├── config-history/     # history of the config files above, including presets.json
 └── backups/            # backups taken before touching .zshrc
 ```
 
-**Moving to a new machine = copying this directory.**
+**Moving to a new machine = copying this directory.** Note that it holds plaintext secrets (see below), so transfer it over a channel you trust.
 
 ## Security boundaries (please read)
 
+- **Local plaintext copies of your environment content.** Your project `.env` files remain the source of truth, but Env Keeper also stores copies for history and reuse:
+  - each automatic snapshot contains the full previous contents of a `.env` file;
+  - each preset stores full environment content in `~/.env-keeper/presets.json`, and earlier versions of that file are kept in `config-history/`.
+
+  These copies are plain text and may contain secrets, **including values that have since been removed or rotated in the original file**. If you no longer want old values retained, delete the snapshot history and the presets (and their history) from inside the extension, or delete the matching files under `~/.env-keeper/`. Keep the directory out of git, cloud sync and backups you don't trust.
 - Masking **affects display only**. `.env` and `shell.sh` must stay in plain text or your programs and shell can't read them. It protects against someone glancing at your screen, not against the file being read.
 - The extension **does not encrypt**. For encryption use [dotenvx](https://dotenvx.com); Env Keeper recognizes the `encrypted:` prefix and stops you from editing those values by accident.
 - The extension **never reads or modifies `.envrc`**. If one is present, it only tells you that direnv is in play.
