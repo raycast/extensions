@@ -1,6 +1,6 @@
 # MarkdownOS Changelog
 
-## [Search Notes Fixes] - {PR_MERGE_DATE}
+## [Search Notes Fixes] - 2026-09-29
 
 - Search Notes no longer lists notes that have nothing written in them.
 - The preview no longer marks matching words, which knocked them out of line (most visibly in the
