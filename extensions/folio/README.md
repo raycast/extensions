@@ -46,7 +46,7 @@ Folio is read-only and keeps your data on your Mac. Details:
 - Tokens are stored through `OAuth.PKCEClient.setTokens`. Sign out revokes the refresh token through the worker (one retry) and then removes both tokens. If SnapTrade can't be reached, you're told the session was only removed locally.
 - On a 401 the extension refreshes once and retries once. If that fails it clears the session and asks you to sign in again.
 - The `id_token` (if `openid` was granted) is only decoded locally to show your email on the sign-in screen. It is never sent anywhere.
-- Portfolio data goes directly from Raycast to SnapTrade. The only server component, the open-source auth worker, sees your one-time sign-in code and tokens in transit and stores nothing.
+- Sign-in goes through a small auth worker run by Folio's author (source: [`auth-worker/`](https://github.com/ShayanAbedi/folio/tree/main/auth-worker)). It exists only because SnapTrade OAuth apps need a client secret that can't ship inside an extension. It sees your one-time sign-in code and tokens in transit, stores nothing, and never sees portfolio data, which goes directly from Raycast to SnapTrade.
 - Responses are cached on disk by Raycast for fast reopening; sign-out clears that cache.
 
 Source, threat model and how to report a problem: https://github.com/ShayanAbedi/folio
