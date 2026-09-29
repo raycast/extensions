@@ -215,7 +215,21 @@
     {
       "name": "set-resend-wallpaper",
       "title": "Set Resend Wallpaper",
-      "description": "Set a Resend wallpaper by its exact name from Get Resend Wallpapers."
+      "description": "Set a Resend wallpaper by its exact name on the monitors selected in tool preferences.",
+      "preferences": [
+        {
+          "name": "applyTo",
+          "type": "dropdown",
+          "title": "Apply Wallpaper To",
+          "description": "Choose which monitors the AI tool changes.",
+          "default": "current",
+          "required": true,
+          "data": [
+            { "title": "Current Monitor", "value": "current" },
+            { "title": "All Monitors", "value": "every" }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
