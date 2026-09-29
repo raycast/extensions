@@ -1,5 +1,9 @@
 # Google Chrome Profiles Changelog
 
+## [Faster Profile Switching] - 2026-09-29
+
+- Find Chrome's Profiles menu at its usual position first, so switching profiles no longer slows down with every open tab. The full menu scan remains the fallback, so other menu orders and languages keep working.
+
 ## [Opt-in Switching Preferences] - 2026-09-29
 
 - Add "Return to Raycast root search" preference: after a profile action, reopen Raycast on root search instead of the profile view.
