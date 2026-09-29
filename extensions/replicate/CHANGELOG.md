@@ -1,6 +1,6 @@
 # Replicate Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-09-29
 
 - Runs on Raycast for Windows as well as macOS
 
