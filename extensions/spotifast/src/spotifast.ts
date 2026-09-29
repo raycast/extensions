@@ -43,7 +43,9 @@ export type Device = {
   active: boolean;
 };
 
-const BUNDLE_ID = "me.paolino.fastpotify";
+// Current builds; `me.paolino.fastpotify` is the bundle ID from before the
+// app's rename, kept for installs that predate it.
+const BUNDLE_IDS = ["rocks.spotifast.Spotifast", "me.paolino.fastpotify"];
 const SEEK_EDGE_MS = 1500;
 
 function isExecutable(path: string): boolean {
@@ -55,14 +57,17 @@ function isExecutable(path: string): boolean {
   }
 }
 
-// Spotifast.app still ships its executable as `fastpotify`, and installs
-// updated from before the rename keep the Fastpotify.app bundle path. Raycast
-// does not inherit the login shell's PATH, so the usual command locations are
-// listed outright.
+// The bundle and the executable were renamed at different times, so three
+// layouts are in the wild: Fastpotify.app/fastpotify, Spotifast.app/fastpotify,
+// and today's Spotifast.app/Spotifast. Hence the cross product below rather
+// than two paired candidates. Raycast does not inherit the login shell's PATH,
+// so the usual command locations are listed outright.
 function binaryCandidates(): string[] {
   const home = homedir();
   const bundles = ["/Applications", join(home, "Applications")].flatMap((dir) =>
-    ["Spotifast.app", "Fastpotify.app"].map((app) => join(dir, app, "Contents/MacOS/fastpotify")),
+    ["Spotifast.app", "Fastpotify.app"].flatMap((app) =>
+      ["Spotifast", "fastpotify"].map((name) => join(dir, app, "Contents/MacOS", name)),
+    ),
   );
   const binDirs = ["/opt/homebrew/bin", "/usr/local/bin", join(home, ".cargo/bin"), join(home, ".nix-profile/bin")];
   const commands = binDirs.flatMap((dir) => ["spotifast", "fastpotify"].map((name) => join(dir, name)));
@@ -148,17 +153,31 @@ export async function runAndSettle(
   return after;
 }
 
+/** The `.app` an executable lives in, or null when it is a plain command. */
+function bundleOf(binary: string): string | null {
+  const marker = "/Contents/MacOS/";
+  const index = binary.indexOf(marker);
+  return index === -1 ? null : binary.slice(0, index);
+}
+
 /** Brings the window forward, launching the app when no instance answers. */
 export async function openSpotifast(): Promise<void> {
   try {
     await run("show");
   } catch (error) {
     if (error instanceof SpotifastNotInstalledError) throw error;
-    await new Promise<void>((resolve, reject) =>
-      execFile("open", ["-b", BUNDLE_ID], (openError) =>
-        openError ? reject(new SpotifastNotInstalledError()) : resolve(),
-      ),
-    );
+    // Launch the app the found binary belongs to. With both generations
+    // installed, a bundle ID would otherwise open one app while every later
+    // command keeps driving the other one's executable.
+    const bundle = bundleOf(findBinary());
+    const targets = bundle ? [["-a", bundle]] : BUNDLE_IDS.map((id) => ["-b", id]);
+    for (const args of targets) {
+      const opened = await new Promise<boolean>((resolve) =>
+        execFile("open", args, (openError) => resolve(!openError)),
+      );
+      if (opened) return;
+    }
+    throw new SpotifastNotInstalledError();
   }
 }
 

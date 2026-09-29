@@ -16,10 +16,10 @@
     {
       "name": "binaryPath",
       "title": "Spotifast Binary",
-      "description": "Path to the Spotifast command. Leave empty to find it in Spotifast.app or on the PATH.",
+      "description": "Path to the Spotifast command. Leave empty to find it in Spotifast.app or in the Homebrew, Cargo and Nix bin directories.",
       "type": "textfield",
       "required": false,
-      "placeholder": "/Applications/Spotifast.app/Contents/MacOS/fastpotify"
+      "placeholder": "/Applications/Spotifast.app/Contents/MacOS/Spotifast"
     }
   ],
   "commands": [
