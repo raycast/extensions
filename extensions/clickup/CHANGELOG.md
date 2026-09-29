@@ -1,6 +1,6 @@
 # ClickUp Changelog
 
-## [My Tasks Scope and Due Date Filter] - {PR_MERGE_DATE}
+## [My Tasks Scope and Due Date Filter] - 2026-09-29
 
 ### New Features
 - Add a scope dropdown to "My Tasks" to switch between the Default List and the entire Workspace
