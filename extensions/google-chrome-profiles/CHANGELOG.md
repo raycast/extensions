@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Opt-in Switching Preferences] - {PR_MERGE_DATE}
+## [Opt-in Switching Preferences] - 2026-09-29
 
 - Add "Return to Raycast root search" preference: after a profile action, reopen Raycast on root search instead of the profile view.
 - Add "Bring profile to front on Enter" preference: selecting a profile focuses it immediately; Show Bookmarks moves to ⌘↵.
