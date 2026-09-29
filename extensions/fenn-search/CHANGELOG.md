@@ -1,6 +1,6 @@
 # Fenn Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-29
 
 - Find text visible in videos, spoken words in audio, and content inside Sketch files and documents indexed by Fenn.
 - Switch between Discover, Semantic, Keyword, Hybrid, Exact, and Filename search.
