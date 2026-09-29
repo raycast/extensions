@@ -1,0 +1,20 @@
+[
+  {
+    "provider": "codex",
+    "name": "Codex",
+    "kind": "subscription",
+    "plan": "team",
+    "user": "ada@example.com",
+    "windows": [
+      { "name": "5 hours", "used": 0, "remaining": 100, "resetsAt": "2026-09-30T02:48:25+08:00" }
+    ],
+    "resets": { "count": 2, "until": "2026-10-04T22:30:02.754094Z" }
+  },
+  {
+    "provider": "deepseek",
+    "name": "DeepSeek",
+    "kind": "balance",
+    "windows": [],
+    "balance": "¥1363.67"
+  }
+]

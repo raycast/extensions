@@ -5,7 +5,10 @@ export type AgentExtra = { label: string; value: string };
 export type AgentRow = {
   id?: string;
   name: string;
+  /** Configured model, including a trailing context marker such as `[1m]`. */
   model: string;
+  /** Context window marker printed after the model id, without brackets. */
+  context?: string;
   extras: AgentExtra[];
   path?: string;
   hidden: boolean;
@@ -47,6 +50,9 @@ export type UsageReport =
       breakdown: string;
       agents: UsageRow[];
       models: UsageRow[];
+      sessions: UsageRow[];
+      /** Text after `sessions ·`, for example `top 10 of 18`. */
+      sessionNote?: string;
       path?: string;
     };
 
@@ -58,6 +64,8 @@ export type QuotaWindow = {
   display?: string;
 };
 
+export type ResetInfo = { count: number; until?: string };
+
 export type AccountRow = {
   agent: string;
   user: string;
@@ -65,34 +73,70 @@ export type AccountRow = {
   active: boolean;
   on: boolean;
   windows: QuotaWindow[];
+  resets?: ResetInfo;
   error?: string;
+};
+
+export type QuotaRow = {
+  provider: string;
+  name: string;
+  kind: string;
+  user?: string;
+  plan?: string;
+  balance?: string;
+  until?: string;
+  windows: QuotaWindow[];
+  resets?: ResetInfo;
+};
+
+export type SessionRow = {
+  agent: string;
+  id: string;
+  cwd?: string;
+  title?: string;
+  start?: string;
+  last?: string;
+  models: string[];
+  input: number;
+  output: number;
+  cacheRead: number;
+  cacheWrite: number;
+  cost: number;
+  unpriced: boolean;
+  resume?: string;
 };
 
 const EFFORT =
   /^(?:none|minimal|low|medium|high|xhigh|max|ultra)(?:\/(?:none|minimal|low|medium|high|xhigh|max|ultra))*$/;
 const LABELED = /^([a-z][a-z0-9-]*)\s+(\S.*)$/;
+const EMPTY = new Set(["—", "–", "-"]);
+const CONTEXT = /\[([^\]]+)\]$/;
 
 export function parseAgents(text: string): AgentRow[] {
   const rows: AgentRow[] = [];
   for (const line of text.split(/\r?\n/)) {
     if (!line.trim()) continue;
-    const pathMatch = line.match(/ {2}(~\/\S+|\/\S+)\s*$/);
-    if (!pathMatch || pathMatch.index === undefined) continue;
+    // The settings path is the last column. It can contain spaces
+    // (`~/Library/Application Support/...`), so the gap before it is what marks it.
+    const pathMatch = line.match(/^(.*\S) {2,}((?:~\/|\/).+)\s*$/);
+    if (!pathMatch) continue;
 
-    const left = line.slice(0, pathMatch.index).trimEnd().replace(/^ {2}/, "");
+    const left = pathMatch[1].trim();
     const gap = left.search(/\s{2,}/);
     const namePart = (gap === -1 ? left : left.slice(0, gap)).trim();
     const vals = gap === -1 ? "" : left.slice(gap).trim();
     const hidden = namePart.endsWith(" hidden");
     const name = hidden ? namePart.slice(0, -" hidden".length) : namePart;
     const fields = splitFields(vals);
+    const context = fields.model.match(CONTEXT)?.[1];
 
     rows.push({
       id: agentId(name),
       name,
       model: fields.model,
+      context,
       extras: fields.extras,
-      path: pathMatch[1],
+      path: pathMatch[2].trim(),
       hidden,
     });
   }
@@ -105,10 +149,15 @@ function splitFields(vals: string): { model: string; extras: AgentExtra[] } {
   if (!vals) return { model, extras };
 
   for (const part of vals.split("  ·  ")) {
-    if (!part || part === "—") continue;
+    if (!part || EMPTY.has(part)) continue;
     const labeled = part.match(LABELED);
-    if (labeled) {
-      extras.push({ label: labeled[1], value: labeled[2] });
+    // A real field is `effort medium` or `small deepseek/deepseek-flash`.
+    // Placeholder text such as `magpie cindy add  to add magpie` also starts
+    // with a lowercase word, but the wide gap keeps it a single model column.
+    if (labeled && !labeled[2].includes("  ")) {
+      if (!EMPTY.has(labeled[2])) {
+        extras.push({ label: labeled[1], value: labeled[2] });
+      }
     } else {
       model = part.trim();
     }
@@ -205,12 +254,20 @@ export function parseUsage(text: string): UsageReport {
   const breakdown = lines.find((line) => /^\s+in /.test(line))?.trim() ?? "";
   const agents: UsageRow[] = [];
   const models: UsageRow[] = [];
-  let section: "agents" | "models" | null = null;
+  const sessions: UsageRow[] = [];
+  let sessionNote: string | undefined;
+  let section: "agents" | "models" | "sessions" | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (trimmed === "agents" || trimmed === "models") {
       section = trimmed;
+      continue;
+    }
+    const sessionHeader = trimmed.match(/^sessions(?:\s+·\s+(\S.*))?$/);
+    if (sessionHeader) {
+      section = "sessions";
+      sessionNote = sessionHeader[1]?.trim();
       continue;
     }
     if (!section || !line.startsWith("  ")) continue;
@@ -223,7 +280,9 @@ export function parseUsage(text: string): UsageReport {
 
     const row = parseUsageRow(line);
     if (!row) return { ok: false, raw };
-    (section === "agents" ? agents : models).push(row);
+    const bucket =
+      section === "agents" ? agents : section === "models" ? models : sessions;
+    bucket.push(row);
   }
 
   return {
@@ -237,6 +296,8 @@ export function parseUsage(text: string): UsageReport {
     breakdown,
     agents,
     models,
+    sessions,
+    sessionNote,
     path: usagePath(lines),
   };
 }
@@ -277,20 +338,122 @@ export function parseAccounts(text: string): AccountRow[] {
       active: Boolean(row.active),
       on: Boolean(row.on),
       error: row.error ? String(row.error) : undefined,
-      windows: (row.windows ?? []).map((window) => ({
-        name: String(window.name ?? ""),
-        used: Number(window.used ?? 0),
-        remaining: Number(window.remaining ?? 0),
-        resetsAt: window.resetsAt ? String(window.resetsAt) : undefined,
-        display: window.display ? String(window.display) : undefined,
-      })),
+      resets: parseResets((entry as { resets?: unknown }).resets),
+      windows: (row.windows ?? []).map(parseWindow),
     };
   });
 }
 
-/** Gateway-routed models are stored as `magpie/<catalog id>`. */
+export function parseQuotas(text: string): QuotaRow[] {
+  const data: unknown = JSON.parse(text);
+  if (!Array.isArray(data))
+    throw new Error("magpie quota --json did not return an array");
+
+  return data.map((entry) => {
+    const row = entry as Partial<QuotaRow> & {
+      windows?: Partial<QuotaWindow>[];
+    };
+    return {
+      provider: String(row.provider ?? ""),
+      name: String(row.name ?? row.provider ?? ""),
+      kind: String(row.kind ?? ""),
+      user: row.user ? String(row.user) : undefined,
+      plan: row.plan ? String(row.plan) : undefined,
+      balance: row.balance ? String(row.balance) : undefined,
+      until: row.until ? String(row.until) : undefined,
+      resets: parseResets(row.resets),
+      windows: (row.windows ?? []).map(parseWindow),
+    };
+  });
+}
+
+export function parseSessions(text: string): SessionRow[] {
+  const data: unknown = JSON.parse(text);
+  if (!Array.isArray(data))
+    throw new Error("magpie sessions --json did not return an array");
+
+  return data.map((entry) => {
+    const row = entry as Record<string, unknown>;
+    const models = Array.isArray(row.models) ? row.models : [];
+    return {
+      agent: String(row.agent ?? ""),
+      id: String(row.id ?? ""),
+      cwd: row.cwd ? String(row.cwd) : undefined,
+      title: row.title ? String(row.title) : undefined,
+      start: row.start ? String(row.start) : undefined,
+      last: row.last ? String(row.last) : undefined,
+      models: models
+        .map((model) => {
+          if (model && typeof model === "object" && "model" in model) {
+            return String((model as { model?: unknown }).model ?? "");
+          }
+          return String(model ?? "");
+        })
+        .filter(Boolean),
+      input: num(row.input),
+      output: num(row.output),
+      cacheRead: num(row.cache_read),
+      cacheWrite: num(row.cache_write),
+      cost: num(row.cost),
+      unpriced: Boolean(row.unpriced),
+      resume: row.resume ? String(row.resume) : undefined,
+    };
+  });
+}
+
+function parseWindow(window: Partial<QuotaWindow>): QuotaWindow {
+  return {
+    name: String(window.name ?? ""),
+    used: Number(window.used ?? 0),
+    remaining: Number(window.remaining ?? 0),
+    resetsAt: window.resetsAt ? String(window.resetsAt) : undefined,
+    display: window.display ? String(window.display) : undefined,
+  };
+}
+
+function parseResets(value: unknown): ResetInfo | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const row = value as { count?: unknown; until?: unknown };
+  const count = Number(row.count);
+  if (!Number.isFinite(count)) return undefined;
+  return { count, until: row.until ? String(row.until) : undefined };
+}
+
+function num(value: unknown): number {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Model id as printed, without a trailing context marker such as `[1m]`. */
+export function modelLabel(model: string): string {
+  return model.replace(CONTEXT, "");
+}
+
+/**
+ * Gateway-routed models are stored as `magpie/<catalog id>`.
+ * Claude Code appends the context window, as in `provider/model[1m]`.
+ */
 export function sameModel(configured: string, catalogId: string): boolean {
-  return configured === catalogId || configured === `magpie/${catalogId}`;
+  const left = modelLabel(configured).replace(/^magpie\//, "");
+  const right = modelLabel(catalogId).replace(/^magpie\//, "");
+  return left.length > 0 && left === right;
+}
+
+/**
+ * Catalog id to mark as current. An exact id wins. A bare slug such as
+ * `grok-4.7` matches `grok/grok-4.7` only when no other catalog id shares it.
+ */
+export function matchingModelId(
+  configured: string,
+  catalogIds: string[],
+): string | undefined {
+  const label = modelLabel(configured).replace(/^magpie\//, "");
+  if (!label) return undefined;
+  const exact = catalogIds.find((id) => sameModel(label, id));
+  if (exact) return exact;
+  if (label.includes("/")) return undefined;
+  const tails = catalogIds.filter((id) => id.split("/").at(-1) === label);
+  return tails.length === 1 ? tails[0] : undefined;
 }
 
 export function parseConfirmation(stdout: string): {

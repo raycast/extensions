@@ -1,4 +1,7 @@
-/** Display name → CLI id for magpie 0.1.58. Names magpie adds later stay visible but cannot be switched. */
+/**
+ * Display name → CLI id, matched to `magpie agents` / the unknown-agent hint in 0.1.408.
+ * Names magpie adds later stay visible but cannot be switched until they are listed here.
+ */
 export const AGENTS: { name: string; id: string }[] = [
   { name: "Claude Code", id: "claude" },
   { name: "Codex", id: "codex" },
@@ -21,6 +24,13 @@ export const AGENTS: { name: string; id: string }[] = [
   { name: "Grok Build", id: "grok" },
   { name: "ZCode", id: "zcode" },
   { name: "Alma", id: "alma" },
+  { name: "Antigravity CLI", id: "agy" },
+  { name: "Claude Desktop", id: "claude-desktop" },
+  { name: "fx", id: "fx" },
+  { name: "Kimi Code", id: "kimi" },
+  { name: "WorkBuddy", id: "workbuddy" },
+  { name: "OpenHanako", id: "hanako" },
+  { name: "Cindy", id: "cindy" },
 ];
 
 const BY_NAME = new Map(AGENTS.map((agent) => [agent.name, agent.id]));

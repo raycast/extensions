@@ -1,10 +1,13 @@
 export type IconSpec = { file: string; mono: boolean };
 
+// File names and color/mono match magpie's own agent Icon fields.
+// Mono SVGs use currentColor and are tinted in the list.
 const AGENT_ICONS: Record<string, IconSpec> = {
   claude: { file: "agents/claudecode-color.svg", mono: false },
   codex: { file: "agents/codex-color.svg", mono: false },
   gemini: { file: "agents/geminicli-color.svg", mono: false },
   opencode: { file: "agents/opencode.svg", mono: true },
+  mimocode: { file: "agents/mimocode.svg", mono: true },
   pi: { file: "agents/pi.svg", mono: true },
   goose: { file: "agents/goose.svg", mono: true },
   cursor: { file: "agents/cursor.svg", mono: true },
@@ -12,10 +15,22 @@ const AGENT_ICONS: Record<string, IconSpec> = {
   crush: { file: "agents/crush.png", mono: false },
   dsh: { file: "agents/deepseek-color.svg", mono: false },
   commandcode: { file: "agents/commandcode.svg", mono: true },
+  fx: { file: "agents/fx.svg", mono: true },
   omp: { file: "agents/omp.svg", mono: true },
   devin: { file: "agents/devin.svg", mono: true },
   hermes: { file: "agents/hermes.svg", mono: true },
+  kimi: { file: "agents/kimi.svg", mono: true },
+  cline: { file: "agents/cline.svg", mono: true },
+  qoder: { file: "agents/qoder.svg", mono: true },
+  "qoder-cn": { file: "agents/qoder.svg", mono: true },
   grok: { file: "agents/xai.svg", mono: true },
+  zcode: { file: "agents/zcode.png", mono: false },
+  workbuddy: { file: "agents/workbuddy-color.svg", mono: false },
+  hanako: { file: "agents/hanako.png", mono: false },
+  alma: { file: "agents/alma.png", mono: false },
+  agy: { file: "agents/antigravity-color.svg", mono: false },
+  "claude-desktop": { file: "agents/claude-color.svg", mono: false },
+  cindy: { file: "agents/cindy.png", mono: false },
 };
 
 const PROVIDERS: Record<string, IconSpec> = {

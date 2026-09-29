@@ -3,11 +3,15 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import {
+  modelLabel,
   parseAccounts,
   parseAgents,
   parseConfirmation,
+  matchingModelId,
   parseModels,
   parseProfiles,
+  parseQuotas,
+  parseSessions,
   parseUsage,
   sameModel,
 } from "../src/lib/parse";
@@ -42,6 +46,37 @@ test("parseAgents reads installed agents from magpie ls", () => {
   assert.equal(byName.Pi.model, "deepseek/deepseek-flash");
   assert.deepEqual(byName.Pi.extras, [{ label: "thinking", value: "medium" }]);
   assert.equal(byName.Cursor.id, "cursor");
+});
+
+test("parseAgents reads magpie 0.1.408 columns", () => {
+  const agents = parseAgents(fixture("ls-0.1.408.txt"));
+  const byName = Object.fromEntries(agents.map((agent) => [agent.name, agent]));
+
+  assert.equal(agents.length, 10);
+  assert.equal(byName["Claude Code"].model, "autolink/claude-opus-5-5[1m]");
+  assert.equal(byName["Claude Code"].context, "1m");
+  assert.deepEqual(byName["Claude Code"].extras, []);
+  assert.equal(
+    modelLabel(byName["Claude Code"].model),
+    "autolink/claude-opus-5-5",
+  );
+
+  assert.equal(byName["Gemini CLI"].model, "gemini-3.8-flash");
+  assert.deepEqual(byName["Gemini CLI"].extras, []);
+  assert.equal(byName["Antigravity CLI"].id, "agy");
+  assert.equal(byName["Antigravity CLI"].model, "Gemini 3.8 Flash (High)");
+  assert.equal(byName["Grok Build"].id, "grok");
+  assert.equal(byName.Cursor.model, "auto");
+
+  assert.equal(byName["Claude Desktop"].id, "claude-desktop");
+  assert.equal(byName["Claude Desktop"].model, "");
+  assert.equal(
+    byName["Claude Desktop"].path,
+    "~/Library/Application Support/Claude/claude_desktop_config.json",
+  );
+  assert.equal(byName.Cindy.id, "cindy");
+  assert.equal(byName.Cindy.model, "magpie cindy add  to add magpie");
+  assert.equal(byName.Cindy.path, "~/Library/Application Support/Cindy");
 });
 
 test("parseAgents maps a hidden agent and leaves an unknown name unmapped", () => {
@@ -111,6 +146,29 @@ test("parseModels recognizes an empty catalog", () => {
   });
 });
 
+test("parseProfiles accepts the 0.1.408 empty hint", () => {
+  assert.equal(
+    parseProfiles("no profiles yet · magpie save <name>\n").empty,
+    true,
+  );
+});
+
+test("parseModels keeps none and ultra on the effort list", () => {
+  const catalog = parseModels(
+    "  AutoLink\n  autolink/gpt-6-sol  GPT-6 Sol  none/low/medium/high/xhigh/max/ultra\n",
+  );
+  assert.deepEqual(catalog.sections[0].models[0].efforts, [
+    "none",
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max",
+    "ultra",
+  ]);
+  assert.equal(catalog.sections[0].models[0].name, "GPT-6 Sol");
+});
+
 test("parseProfiles reads names and summaries", () => {
   const parsed = parseProfiles(fixture("profiles.txt"));
   assert.equal(parsed.empty, false);
@@ -144,6 +202,26 @@ test("parseUsage reads the 7 day report", () => {
   assert.equal(usage.agents[1].calls, "1");
   assert.equal(usage.models[1].name, "autolink/grok-4.7");
   assert.equal(usage.models[1].share, "3%");
+  assert.equal(usage.sessions.length, 0);
+  assert.equal(usage.path, "/Users/me/.config/magpie/usage.jsonl");
+});
+
+test("parseUsage keeps the sessions table out of the model rows", () => {
+  const usage = parseUsage(fixture("usage-0.1.408.txt"));
+  assert.equal(usage.ok, true);
+  if (!usage.ok || usage.empty) throw new Error("expected a usage report");
+  assert.equal(usage.tokens, "50M");
+  assert.equal(usage.calls, 1879);
+  assert.match(usage.breakdown, /212 errors$/);
+  assert.deepEqual(
+    usage.models.map((row) => row.name),
+    ["autolink/gpt-6-sol", "autolink/claude-opus-5-5"],
+  );
+  assert.equal(usage.sessionNote, "top 10 of 18");
+  assert.equal(usage.sessions.length, 2);
+  assert.equal(usage.sessions[0].name, "Pi  sess-pi-1");
+  assert.equal(usage.sessions[0].calls, "47");
+  assert.equal(usage.sessions[1].calls, "1");
   assert.equal(usage.path, "/Users/me/.config/magpie/usage.jsonl");
 });
 
@@ -178,6 +256,51 @@ test("parseAccounts reads the quota JSON", () => {
   assert.equal(accounts[0].windows[1].resetsAt, "2026-09-27T07:31:04+08:00");
   assert.equal(accounts[2].error, "quota unavailable");
   assert.deepEqual(accounts[2].windows, []);
+  assert.equal(accounts[0].resets, undefined);
+});
+
+test("parseAccounts keeps the reset counter added after 0.1.58", () => {
+  const accounts = parseAccounts(
+    JSON.stringify([
+      {
+        agent: "codex",
+        user: "ada@example.com",
+        active: true,
+        on: true,
+        windows: [],
+        resets: { count: 2, until: "2026-10-04T22:30:02Z" },
+      },
+    ]),
+  );
+  assert.deepEqual(accounts[0].resets, {
+    count: 2,
+    until: "2026-10-04T22:30:02Z",
+  });
+});
+
+test("parseQuotas reads subscription windows and key balances", () => {
+  const quotas = parseQuotas(fixture("quota.json"));
+  assert.equal(quotas[0].kind, "subscription");
+  assert.equal(quotas[0].windows[0].used, 0);
+  assert.deepEqual(quotas[0].resets, {
+    count: 2,
+    until: "2026-10-04T22:30:02.754094Z",
+  });
+  assert.equal(quotas[1].kind, "balance");
+  assert.equal(quotas[1].balance, "¥1363.67");
+  assert.deepEqual(quotas[1].windows, []);
+});
+
+test("parseSessions reads the session JSON", () => {
+  const sessions = parseSessions(fixture("sessions.json"));
+  assert.equal(sessions.length, 1);
+  assert.equal(sessions[0].agent, "pi");
+  assert.equal(sessions[0].id, "sess-pi-1");
+  assert.deepEqual(sessions[0].models, ["deepseek/deepseek-flash"]);
+  assert.equal(sessions[0].input, 1000);
+  assert.equal(sessions[0].cost, 0.01);
+  assert.equal(sessions[0].unpriced, false);
+  assert.match(sessions[0].resume ?? "", /pi --resume sess-pi-1$/);
 });
 
 test("sameModel treats the magpie gateway prefix as the catalog id", () => {
@@ -191,6 +314,45 @@ test("sameModel treats the magpie gateway prefix as the catalog id", () => {
   );
   assert.equal(sameModel("magpie/autolink/gpt-6-sol", "autolink/other"), false);
   assert.equal(sameModel("", "autolink/gpt-6-sol"), false);
+  assert.equal(
+    sameModel("autolink/claude-opus-5-5[1m]", "autolink/claude-opus-5-5"),
+    true,
+  );
+  assert.equal(
+    sameModel(
+      "magpie/autolink/claude-opus-5-5[1m]",
+      "autolink/claude-opus-5-5",
+    ),
+    true,
+  );
+  assert.equal(
+    sameModel("autolink/other[1m]", "autolink/claude-opus-5-5"),
+    false,
+  );
+});
+
+test("matchingModelId accepts a bare slug only when it is unique", () => {
+  assert.equal(
+    matchingModelId("grok-4.7", ["grok/grok-4.7", "grok/grok-4.6"]),
+    "grok/grok-4.7",
+  );
+  assert.equal(
+    matchingModelId("gpt-6-sol", ["autolink/gpt-6-sol", "openai/gpt-6-sol"]),
+    undefined,
+  );
+  assert.equal(
+    matchingModelId("autolink/claude-opus-5-5[1m]", [
+      "autolink/claude-opus-5-5",
+    ]),
+    "autolink/claude-opus-5-5",
+  );
+  assert.equal(
+    matchingModelId("magpie/autolink/gpt-6-sol", [
+      "autolink/gpt-6-sol",
+      "openai/gpt-6-sol",
+    ]),
+    "autolink/gpt-6-sol",
+  );
 });
 
 test("parseConfirmation keeps the restart notice", () => {

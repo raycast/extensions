@@ -40,7 +40,7 @@
       "name": "usage",
       "title": "Show Usage",
       "icon": "magpie.png",
-      "description": "Show magpie token usage by agent and model",
+      "description": "Show magpie token usage by agent, model, and session",
       "mode": "view",
       "keywords": [
         "magpie",
@@ -52,13 +52,25 @@
       "name": "subscriptions",
       "title": "Show Subscription Quotas",
       "icon": "magpie.png",
-      "description": "Show subscription allowance and reset times known to magpie",
+      "description": "Show subscription allowance, reset times, and provider key balances",
       "mode": "view",
       "keywords": [
         "magpie",
         "quota",
         "subscription",
         "account"
+      ]
+    },
+    {
+      "name": "sessions",
+      "title": "Show Recent Sessions",
+      "icon": "magpie.png",
+      "description": "Show recent agent sessions and what each one cost",
+      "mode": "view",
+      "keywords": [
+        "magpie",
+        "session",
+        "usage"
       ]
     }
   ],

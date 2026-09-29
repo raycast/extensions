@@ -109,6 +109,22 @@ function UsageSections({
           />
         ))}
       </List.Section>
+      {usage.sessions.length > 0 ? (
+        <List.Section
+          title={
+            usage.sessionNote ? `Sessions · ${usage.sessionNote}` : "Sessions"
+          }
+        >
+          {usage.sessions.map((row) => (
+            <UsageItem
+              key={`session-${row.name}`}
+              row={row}
+              detail={detail}
+              onReload={onReload}
+            />
+          ))}
+        </List.Section>
+      ) : null}
     </>
   );
 }

@@ -17,8 +17,9 @@ import type { AgentRow, ModelEntry } from "./lib/parse";
 import {
   parseAgents,
   parseConfirmation,
+  matchingModelId,
+  modelLabel,
   parseModels,
-  sameModel,
 } from "./lib/parse";
 import { reportMagpieError } from "./lib/report-error";
 import { magpie } from "./lib/exec";
@@ -54,7 +55,10 @@ export default function SwitchModel() {
                 .map((extra) => `${extra.label} ${extra.value}`)
                 .join(" · ") || agent.path
             }
-            accessories={[{ text: agent.model || "default" }]}
+            accessories={[
+              ...(agent.context ? [{ tag: agent.context }] : []),
+              { text: modelLabel(agent.model) || "default" },
+            ]}
             actions={
               <ActionPanel>
                 {agent.id ? (
@@ -144,37 +148,47 @@ function ModelList({
           actions={<ReloadAction onReload={revalidate} />}
         />
       ) : (
-        data?.sections.map((section) => (
-          <List.Section key={section.title} title={section.title}>
-            {section.models.map((model) => {
-              const current = sameModel(agent.model, model.id);
-              return (
-                <List.Item
-                  key={model.id}
-                  icon={image(modelIcon(model.id))}
-                  title={model.name || model.id}
-                  subtitle={model.name ? model.id : undefined}
-                  keywords={[model.id, ...(model.efforts ?? [])]}
-                  accessories={[
-                    ...(current ? [{ icon: Icon.CheckCircle }] : []),
-                    ...(model.efforts
-                      ? [{ text: model.efforts.join(" / ") }]
-                      : []),
-                  ]}
-                  actions={
-                    <ActionPanel>
-                      <Action
-                        title="Set Model"
-                        icon={Icon.Check}
-                        onAction={() => select(model)}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        ))
+        data?.sections.map((section) => {
+          const currentId = data
+            ? matchingModelId(
+                agent.model,
+                data.sections.flatMap((item) =>
+                  item.models.map((entry) => entry.id),
+                ),
+              )
+            : undefined;
+          return (
+            <List.Section key={section.title} title={section.title}>
+              {section.models.map((model) => {
+                const current = model.id === currentId;
+                return (
+                  <List.Item
+                    key={model.id}
+                    icon={image(modelIcon(model.id))}
+                    title={model.name || model.id}
+                    subtitle={model.name ? model.id : undefined}
+                    keywords={[model.id, ...(model.efforts ?? [])]}
+                    accessories={[
+                      ...(current ? [{ icon: Icon.CheckCircle }] : []),
+                      ...(model.efforts
+                        ? [{ text: model.efforts.join(" / ") }]
+                        : []),
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action
+                          title="Set Model"
+                          icon={Icon.Check}
+                          onAction={() => select(model)}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          );
+        })
       )}
     </List>
   );

@@ -1,0 +1,10 @@
+  Claude Code      autolink/claude-opus-5-5[1m]  ·  effort —                          ~/.claude/settings.json
+  Codex            autolink/gpt-6-sol  ·  effort medium                               ~/.codex/config.toml
+  Gemini CLI       auth —  ·  gemini-3.8-flash                                        ~/.gemini/settings.json
+  Antigravity CLI  Gemini 3.8 Flash (High)                                            ~/.gemini/antigravity-cli/settings.json
+  OpenCode         magpie/autolink/claude-opus-5-5  ·  small deepseek/deepseek-flash  ~/.config/opencode/opencode.jsonc
+  Pi               deepseek/deepseek-flash  ·  thinking medium                        ~/.pi/agent/settings.json
+  Cursor           auto                                                               ~/.cursor/cli-config.json
+  Grok Build       grok-4.7  ·  effort medium                                         ~/.grok/config.toml
+  Claude Desktop  provider —  ~/Library/Application Support/Claude/claude_desktop_config.json
+  Cindy  magpie cindy add  to add magpie  ~/Library/Application Support/Cindy
