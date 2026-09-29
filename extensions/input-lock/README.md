@@ -69,7 +69,7 @@ The guardian arms monitoring before input blocking starts. The worker sends main
 | Power button, lid close, system-reserved controls | macOS retains control | No complete input-blocking claim |
 | Visible content and brightness | No overlay, cursor hiding, or brightness changes | Short local session verified; 15-minute check pending |
 | Idle sleep | Display and system idle sleep assertions held during lock | Assertion creation and teardown verified |
-| Touch ID unlock | Triple Command tap opens Apple's biometric authentication policy | Previous hold gesture physically confirmed on 2026-09-28; new triple tap needs physical acceptance |
+| Touch ID unlock | Triple Command tap opens Apple's biometric authentication policy | User confirmed both-Command triple taps opened Touch ID and unlocked input on 2026-09-29 |
 | Recovery gesture | Both Command keys held for 8 seconds | Timing self-check passed; physical recovery check pending |
 | Duration selection | Six duration rows; Enter starts the selected session directly | Command check covers all six actions, invalid durations, and repeated launch prevention |
 | Automatic duration release | Guardian deadline starts at monotonic activation | Actual supervisor checked with a shortened test-only duration and delayed startup |
@@ -83,9 +83,9 @@ The bounded native harness covers duration validation, startup refusal, ordinary
 
 On 2026-09-28, build, lint, TypeScript, Command timing, universal architecture and signature checks passed. An independent source review of the new process and pipe boundary found two issues that were fixed and checked before packaging. A final launch through Raycast with development stopped created an enabled tap with keyboard and pointer filtering and no scroll-wheel interception. The worker was then frozen deliberately; its guardian released it and macOS removed its tap and sleep assertions. The installed helper and `dist/input-lock.rayext` contain the same signed native asset. Test timers and helper processes were stopped after validation.
 
-On 2026-09-29, a physical test showed that simultaneous taps of both Command keys were rejected. The detector now counts a tap when all pressed Command keys are released, supporting either key or both keys together. A regression check feeds the real modifier-event sequence through the chord and tap detectors. Physical acceptance of the correction remains pending.
+On 2026-09-29, a physical test showed that simultaneous taps of both Command keys were rejected. The detector now counts a tap when all pressed Command keys are released, supporting either key or both keys together. A regression check feeds the real modifier-event sequence through the chord and tap detectors. The user then confirmed the corrected both-Command triple tap opened Touch ID and unlocked input.
 
-On 2026-09-29, the form and confirmation were replaced with direct duration actions, and triple Command taps replaced the Touch ID hold trigger. The command harness, native gesture self-test, lint, TypeScript build, universal binary signature, and permission probe passed. The installed Raycast list was inspected; physical triple-tap and Touch ID acceptance remains pending.
+On 2026-09-29, the form and confirmation were replaced with direct duration actions, and triple Command taps replaced the Touch ID hold trigger. The command harness, native gesture self-test, lint, TypeScript build, universal binary signature, and permission probe passed. The installed Raycast list was inspected; physical acceptance of the corrected both-Command triple tap is recorded above.
 
 On 2026-09-28, a first-use gesture gate that prevented locking was removed. The user then confirmed typing and pointer actions were blocked and restored after Touch ID. The command check covers all duration actions, invalid input, repeated launch prevention, helper lifetime, final status feedback, signal diagnostics, recovery feedback and trailing status records.
 
