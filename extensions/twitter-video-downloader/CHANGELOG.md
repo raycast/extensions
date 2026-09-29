@@ -1,6 +1,6 @@
 # X/Twitter Video Downloader Changelog
 
-## [2.1.0] - {PR_MERGE_DATE}
+## [2.1.0] - 2026-09-29
 
 - Updated to `@raycast/api` 2.5 and `@raycast/utils` 2.3. Requires Raycast 2.
 - "Open Download Folder" shortcut now uses Ctrl+Shift+F on Windows.
