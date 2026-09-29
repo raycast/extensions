@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("./vendor/fonts/PlusJakartaSans.ttf") format("truetype");
+}
+
 :root {
   color-scheme: dark;
   --bg: #0b0b0f;
@@ -9,7 +17,7 @@
   --accent: #7c5cff;
   --accent-2: #9b87ff;
   --danger: #ff5874;
-  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Plus Jakarta Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -236,3 +244,8 @@ input[type="color"] { width: 100%; height: 34px; padding: 3px; border: 1px solid
   .frame-style { width: 104px; }
   .button { padding: 0 10px; }
 }
+
+.crop-controls { margin-top: 12px; }
+.crop-controls p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.crop-actions { display: flex; gap: 8px; }
+.crop-actions .button { flex: 1; padding: 0 8px; }

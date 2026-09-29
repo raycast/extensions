@@ -55,7 +55,13 @@
             <button class="tool" data-tool="circle" role="radio" aria-checked="false"><b>◯</b>Circle</button>
             <button class="tool" data-tool="freeform" role="radio" aria-checked="false"><b>⬠</b>Freeform</button>
             <button class="tool" data-tool="paint" role="radio" aria-checked="false"><b>✎</b>Paint</button>
+            <button id="cropTool" class="tool wide" data-tool="crop" role="radio" aria-checked="false"><b>⌗</b>Crop image</button>
             <button class="tool wide" data-tool="text" role="radio" aria-checked="false"><b>T</b>Select detected text</button>
+          </div>
+          <div id="cropControls" class="crop-controls" hidden>
+            <p id="cropSize">Drag to select the area to keep</p>
+            <div class="crop-actions"><button id="applyCropButton" class="button primary" disabled>Apply crop</button><button id="cancelCropButton" class="button secondary">Cancel</button></div>
+            <button id="resetCropButton" class="button secondary full" hidden>Restore full image</button>
           </div>
           <button id="detectTextButton" class="button secondary full">Detect Text</button>
           <div id="ocrProgress" class="progress" hidden>

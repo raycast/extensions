@@ -70,7 +70,7 @@
   }
 
   function newPage(source, details = {}) {
-    return { source, masks: [], redo: [], words: [], ...details };
+    return { source, masks: [], history: [], redo: [], crop: null, words: [], ...details };
   }
 
   function loadImage(url) {
@@ -156,6 +156,7 @@
 
   function configureForKind() {
     const isPdf = state.kind === "pdf";
+    $("#cropTool").hidden = isPdf;
     document.title = `${state.filename} — ${PRODUCT_NAME}`;
     $("#frameControls").hidden = isPdf;
     $("#copyButton").hidden = isPdf;
@@ -191,8 +192,8 @@
     if (state.pageIndex === index) setupCanvas();
   }
 
-  function setupCanvas() {
-    const { width, height } = currentPage().source;
+  function setupCanvas(fitView = true) {
+    const { width, height } = visibleBounds();
     for (const canvas of [imageCanvas, overlayCanvas]) {
       canvas.width = width;
       canvas.height = height;
@@ -200,7 +201,8 @@
     $("#dimensions").textContent = state.kind === "pdf" ? `Page ${state.pageIndex + 1} of ${state.pages.length}` : `${width} × ${height}px`;
     $("#loading").hidden = true;
     $("#framePreview").hidden = false;
-    fitCanvas();
+    if (fitView) fitCanvas();
+    else setZoom(state.zoom);
     render();
   }
 
@@ -212,7 +214,7 @@
     bindRange("#mosaicSize", "#mosaicValue", (value) => {
       state.mosaicSize = value;
       state.pages.forEach((page) => {
-        [...page.masks, ...page.redo].forEach((mask) => {
+        [...page.masks, ...page.history.flatMap((entry) => entry.masks), ...page.redo.flatMap((entry) => entry.masks)].forEach((mask) => {
           if (mask.effect === "mosaic") mask.mosaicSize = value;
         });
       });
@@ -226,7 +228,10 @@
     overlayCanvas.addEventListener("pointerdown", pointerDown);
     overlayCanvas.addEventListener("pointermove", pointerMove);
     overlayCanvas.addEventListener("pointerup", pointerUp);
-    overlayCanvas.addEventListener("pointercancel", pointerUp);
+    overlayCanvas.addEventListener("pointercancel", cancelSelection);
+    $("#applyCropButton").addEventListener("click", applyCrop);
+    $("#cancelCropButton").addEventListener("click", () => setTool("rectangle"));
+    $("#resetCropButton").addEventListener("click", resetCrop);
     $("#undoButton").addEventListener("click", undo);
     $("#redoButton").addEventListener("click", redo);
     $("#clearButton").addEventListener("click", clearAll);
@@ -264,6 +269,8 @@
   }
 
   function setTool(tool) {
+    if (tool === "crop" && state.kind !== "image") return;
+    cancelSelection();
     state.tool = tool;
     $$(".tool").forEach((button) => {
       const active = button.dataset.tool === tool;
@@ -271,6 +278,8 @@
       button.setAttribute("aria-checked", String(active));
     });
     $("#paintOptions").hidden = tool !== "paint";
+    $("#cropControls").hidden = tool !== "crop";
+    updateCropControls();
     drawOverlay();
   }
 
@@ -326,6 +335,7 @@
     } else {
       state.draft = makeMask("rect", { x: state.start.x, y: state.start.y, width: 0, height: 0, ellipse: state.tool === "circle", selection: state.tool === "text" });
     }
+    updateCropControls();
     drawOverlay();
   }
 
@@ -339,6 +349,7 @@
       state.draft.width = point.x - state.start.x;
       state.draft.height = point.y - state.start.y;
     }
+    updateCropControls();
     drawOverlay();
   }
 
@@ -347,6 +358,13 @@
     state.drawing = false;
     if (overlayCanvas.hasPointerCapture(event.pointerId)) overlayCanvas.releasePointerCapture(event.pointerId);
 
+    if (state.tool === "crop") {
+      state.draft = cropBounds(state.draft, visibleBounds());
+      state.start = null;
+      updateCropControls();
+      drawOverlay();
+      return;
+    }
     const { words } = currentPage();
     if (state.tool === "text") {
       const selection = normalizedRect(state.draft);
@@ -379,8 +397,8 @@
 
   function addMask(mask) {
     const page = currentPage();
+    rememberEdit(page);
     page.masks.push(mask);
-    page.redo = [];
     updateHistory();
   }
 
@@ -392,8 +410,8 @@
   function canvasPoint(event) {
     const rect = overlayCanvas.getBoundingClientRect();
     return {
-      x: clamp((event.clientX - rect.left) * (overlayCanvas.width / rect.width), 0, overlayCanvas.width),
-      y: clamp((event.clientY - rect.top) * (overlayCanvas.height / rect.height), 0, overlayCanvas.height)
+      x: visibleBounds().x + clamp((event.clientX - rect.left) * (overlayCanvas.width / rect.width), 0, overlayCanvas.width),
+      y: visibleBounds().y + clamp((event.clientY - rect.top) * (overlayCanvas.height / rect.height), 0, overlayCanvas.height)
     };
   }
 
@@ -424,8 +442,12 @@
     const page = currentPage();
     if (!page?.source) return;
     imageContext.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+    imageContext.save();
+    const bounds = visibleBounds();
+    imageContext.translate(-bounds.x, -bounds.y);
     imageContext.drawImage(page.source, 0, 0);
     page.masks.forEach((mask) => applyMask(imageContext, mask, page.source));
+    imageContext.restore();
     drawOverlay();
     updateHistory();
   }
@@ -499,6 +521,24 @@
     overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     const page = currentPage();
     if (!page) return;
+    overlayContext.save();
+    const bounds = visibleBounds();
+    overlayContext.translate(-bounds.x, -bounds.y);
+    if (state.tool === "crop") {
+      const crop = state.draft && cropBounds(state.draft, bounds);
+      overlayContext.fillStyle = "rgba(0, 0, 0, .55)";
+      overlayContext.beginPath();
+      overlayContext.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+      if (crop) overlayContext.rect(crop.x, crop.y, crop.width, crop.height);
+      overlayContext.fill("evenodd");
+      if (crop) {
+        overlayContext.strokeStyle = "#9b87ff";
+        overlayContext.lineWidth = 2 / state.zoom;
+        overlayContext.strokeRect(crop.x, crop.y, crop.width, crop.height);
+      }
+      overlayContext.restore();
+      return;
+    }
     if (state.tool === "text") {
       overlayContext.save();
       overlayContext.fillStyle = "rgba(124, 92, 255, .13)";
@@ -530,34 +570,99 @@
       }
       overlayContext.restore();
     });
+    overlayContext.restore();
+  }
+
+  function visibleBounds() {
+    const page = currentPage();
+    return page.crop || { x: 0, y: 0, width: page.source.width, height: page.source.height };
+  }
+
+  function cropBounds(selection, bounds) {
+    const rect = normalizedRect(selection);
+    const x = clamp(Math.floor(rect.x), bounds.x, bounds.x + bounds.width);
+    const y = clamp(Math.floor(rect.y), bounds.y, bounds.y + bounds.height);
+    const right = clamp(Math.ceil(rect.x + rect.width), x, bounds.x + bounds.width);
+    const bottom = clamp(Math.ceil(rect.y + rect.height), y, bounds.y + bounds.height);
+    return { x, y, width: right - x, height: bottom - y };
+  }
+
+  function cancelSelection() {
+    state.draft = null;
+    state.start = null;
+    state.drawing = false;
+    updateCropControls();
+    drawOverlay();
+  }
+
+  function updateCropControls() {
+    const crop = state.tool === "crop" && state.draft && cropBounds(state.draft, visibleBounds());
+    $("#applyCropButton").disabled = !crop || crop.width < 1 || crop.height < 1 || state.drawing;
+    $("#resetCropButton").hidden = !currentPage()?.crop;
+    $("#cropSize").textContent = crop && crop.width > 0 && crop.height > 0
+      ? `${crop.width} × ${crop.height}px` : "Drag to select the area to keep";
+  }
+
+  function snapshot(page) {
+    return { masks: [...page.masks], crop: page.crop && { ...page.crop } };
+  }
+
+  function rememberEdit(page) {
+    page.history.push(snapshot(page));
+    page.redo = [];
+  }
+
+  function applyCrop() {
+    if (state.tool !== "crop" || !state.draft || state.drawing) return;
+    const bounds = cropBounds(state.draft, visibleBounds());
+    if (bounds.width < 1 || bounds.height < 1) return;
+    const page = currentPage();
+    rememberEdit(page);
+    page.crop = bounds;
+    setTool("rectangle");
+    setupCanvas();
+    toast("Image cropped");
+  }
+
+  function resetCrop() {
+    const page = currentPage();
+    if (!page.crop) return;
+    rememberEdit(page);
+    page.crop = null;
+    cancelSelection();
+    setupCanvas();
   }
 
   function undo() {
     const page = currentPage();
-    const mask = page.masks.pop();
-    if (mask) page.redo.push(mask);
-    render();
+    if (!page.history.length) return;
+    page.redo.push(snapshot(page));
+    Object.assign(page, page.history.pop());
+    cancelSelection();
+    setupCanvas(false);
   }
 
   function redo() {
     const page = currentPage();
-    const mask = page.redo.pop();
-    if (mask) page.masks.push(mask);
-    render();
+    if (!page.redo.length) return;
+    page.history.push(snapshot(page));
+    Object.assign(page, page.redo.pop());
+    cancelSelection();
+    setupCanvas(false);
   }
 
   function clearAll() {
     const page = currentPage();
     const message = state.kind === "pdf" ? "Remove every redaction on this page?" : "Remove every redaction?";
     if (!page.masks.length || !confirm(message)) return;
-    page.redo.push(...page.masks.reverse());
+    rememberEdit(page);
     page.masks = [];
     render();
   }
 
   function updateHistory() {
     const page = currentPage();
-    $("#undoButton").disabled = !page.masks.length;
+    $("#undoButton").disabled = !page.history.length;
     $("#redoButton").disabled = !page.redo.length;
     $("#clearButton").disabled = !page.masks.length;
     const total = state.pages.reduce((sum, item) => sum + item.masks.length, 0);
@@ -566,6 +671,7 @@
       ? `${total} redaction${total === 1 ? "" : "s"} on ${pagesWithMasks} page${pagesWithMasks === 1 ? "" : "s"}`
       : `${total} redaction${total === 1 ? "" : "s"}`;
     updatePageCount(state.pageIndex);
+    updateCropControls();
   }
 
   async function detectText() {
@@ -976,10 +1082,13 @@
     } else if (state.kind === "pdf" && (event.key === "PageDown" || event.key === "PageUp")) {
       event.preventDefault();
       changePage(event.key === "PageDown" ? 1 : -1);
+    } else if (event.key === "Enter" && state.tool === "crop") {
+      event.preventDefault();
+      applyCrop();
+    } else if (event.key === "Escape" && state.tool === "crop") {
+      setTool("rectangle");
     } else if (event.key === "Escape" && state.draft) {
-      state.draft = null;
-      state.drawing = false;
-      drawOverlay();
+      cancelSelection();
     }
   }
 
