@@ -125,7 +125,9 @@ export default function Command(props: LaunchProps<{ launchContext?: { durationS
   useEffect(() => {
     const seconds = props.launchContext?.durationSeconds;
     if (seconds === undefined || autoLockStarted.current) return;
-    const duration = durations.find((item) => (item.seconds ?? 0) === seconds);
+    const duration =
+      durations.find((item) => (item.seconds ?? 0) === seconds) ??
+      (Number.isInteger(seconds) && seconds > 0 ? { display: `${seconds} seconds`, seconds, icon: "🧼" } : undefined);
     if (duration) {
       autoLockStarted.current = true;
       lockAction(duration).catch((error) => {

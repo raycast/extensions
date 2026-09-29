@@ -3,6 +3,7 @@
 ## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
 
 - Added an Ask AI tool that locks the keyboard for a requested duration
+- Allowed custom durations through Ask AI
 - Added AI instructions and evals in `ai.yaml`
 
 ## [Fix Forever Duration] - 2026-08-29

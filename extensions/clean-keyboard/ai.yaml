@@ -1,6 +1,7 @@
 instructions: |
   Use the lock-keyboard tool when the user asks to lock the keyboard for cleaning.
   If no duration is given, use the 30-second default. Use 0 seconds only when the user asks for forever.
+  Convert requested durations to whole seconds before calling the tool.
   For questions about how to unlock the keyboard, answer without locking it. Press Ctrl+U to unlock at any time.
 evals:
   - input: "@clean-keyboard Lock my keyboard for 30 seconds so I can clean it."
@@ -25,3 +26,11 @@ evals:
           name: lock-keyboard
           arguments:
             durationSeconds: 0
+  - input: "@clean-keyboard Lock my keyboard for 10 minutes so I can clean it."
+    mocks:
+      lock-keyboard: "Launched the keyboard lock command for 600 seconds. Press Ctrl+U to unlock at any time."
+    expected:
+      - callsTool:
+          name: lock-keyboard
+          arguments:
+            durationSeconds: 600

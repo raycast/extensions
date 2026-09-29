@@ -1,15 +1,15 @@
 import { launchCommand, LaunchType, Tool } from "@raycast/api";
 
 type Input = {
-  /** Lock duration in seconds: 15, 30, 60, 120, 300, 3600, or 86400. Use 0 for forever. Defaults to 30 seconds. */
+  /** Lock duration in whole seconds. Use 0 for forever. Defaults to 30 seconds. */
   durationSeconds?: number;
 };
 
-const validDurations = [0, 15, 30, 60, 120, 300, 3600, 86400];
+const MAX_DURATION_SECONDS = 2_147_483_647;
 
 function validateDuration(durationSeconds: number) {
-  if (!validDurations.includes(durationSeconds)) {
-    throw new Error("Choose 15, 30, 60, 120, 300, 3600, or 86400 seconds, or 0 for forever.");
+  if (!Number.isInteger(durationSeconds) || durationSeconds < 0 || durationSeconds > MAX_DURATION_SECONDS) {
+    throw new Error(`Choose a whole number of seconds from 1 to ${MAX_DURATION_SECONDS}, or 0 for forever.`);
   }
 }
 
