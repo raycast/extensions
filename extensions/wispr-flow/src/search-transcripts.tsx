@@ -239,9 +239,12 @@ export default function Command() {
 
   const { data: uniqueAppsData } = useCachedPromise(
     (archived: boolean) => {
+      // Naming `isArchived` in the outer WHERE forces a table scan, and `app`
+      // sits behind the audio blob in every row. As a subquery, each half is
+      // answered from an index alone.
       const archiveCondition = archived
         ? ""
-        : "AND (isArchived = 0 OR isArchived IS NULL)";
+        : "AND rowid NOT IN (SELECT rowid FROM History WHERE isArchived != 0)";
       return executeSQL<{ app: string }>(
         dbPath,
         `SELECT DISTINCT app FROM History WHERE app IS NOT NULL AND app != '' ${archiveCondition} ORDER BY app`,
