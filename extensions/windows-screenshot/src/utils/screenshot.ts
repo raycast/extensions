@@ -13,8 +13,7 @@ let cachedExePath: string | null = null;
 let cachedDllPath: string | null = null;
 
 /**
- * Safely removes the old test folder C:\Users\musht\Pictures\Screenshots if it is empty and
- * the official Windows shell Screenshots folder (e.g. Screenshots 1) is present.
+ * Restores window focus to the Raycast window if running.
  */
 export function restoreRaycastFocus(): void {
   const exePath = getExePath();
@@ -102,19 +101,13 @@ export function getExePath(): string | null {
     return candidate2;
   }
 
-  const absoluteFallback = "c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\bin\\capture.exe";
-  if (fs.existsSync(absoluteFallback)) {
-    cachedExePath = absoluteFallback;
-    return absoluteFallback;
-  }
-
   return null;
 }
 
 /**
  * Fallback DLL path if exe is not found.
  */
-export function getDllPath(): string {
+export function getDllPath(): string | null {
   if (cachedDllPath && fs.existsSync(cachedDllPath)) {
     return cachedDllPath;
   }
@@ -145,9 +138,7 @@ export function getDllPath(): string {
     return candidate2;
   }
 
-  const absoluteFallback = "c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\bin\\CaptureEngine.dll";
-  cachedDllPath = absoluteFallback;
-  return absoluteFallback;
+  return null;
 }
 
 export interface CaptureOptions {

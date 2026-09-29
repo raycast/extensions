@@ -91,7 +91,32 @@ npm run lint
 
 # Build production bundle
 npm run build
+
+# Recompile native binaries from C# sources (Windows)
+npm run build:binaries
 ```
+
+---
+
+## Native Binaries & Build Provenance
+
+This extension bundles two native helper binaries in `assets/bin/` to provide sub-20ms instant capture and local OCR without runtime compilation overhead:
+
+- `CaptureEngine.dll`: Compiled from [`assets/scripts/capture.cs`](assets/scripts/capture.cs) (Win32/GDI32/WinForms capture engine).
+- `ocr.exe`: Compiled from [`assets/scripts/ocr.cs`](assets/scripts/ocr.cs) (Windows WinRT OCR CLI).
+
+### Reproducible Builds
+
+Both binaries are compiled deterministically using standard Microsoft .NET Framework C# compiler (`csc.exe`) built into Windows. You can inspect the source code and rebuild them at any time:
+
+```bash
+npm run build:binaries
+# or: powershell -NoProfile -ExecutionPolicy Bypass -File assets/scripts/build.ps1
+```
+
+For complete compiler flags, referenced assemblies, and SHA-256 checksums, see [`assets/bin/README.md`](assets/bin/README.md).
+
+> **Graceful Fallback**: If the binaries are absent or removed, the extension automatically falls back to executing the C# sources dynamically via PowerShell (`capture.ps1` and `ocr.ps1`).
 
 ---
 

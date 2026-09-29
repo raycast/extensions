@@ -47,12 +47,6 @@ export function getOcrExePath(): string | null {
     return candidate2;
   }
 
-  const absoluteFallback = "c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\bin\\ocr.exe";
-  if (fs.existsSync(absoluteFallback)) {
-    cachedOcrExePath = absoluteFallback;
-    return absoluteFallback;
-  }
-
   return null;
 }
 
@@ -77,11 +71,6 @@ export function getOcrScriptPath(): string | null {
   const candidate2 = path.join(__dirname, "..", "..", "assets", "scripts", "ocr.ps1");
   if (fs.existsSync(candidate2)) {
     return candidate2;
-  }
-
-  const absoluteFallback = "c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\scripts\\ocr.ps1";
-  if (fs.existsSync(absoluteFallback)) {
-    return absoluteFallback;
   }
 
   return null;
