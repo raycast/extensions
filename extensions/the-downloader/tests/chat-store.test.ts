@@ -99,6 +99,30 @@ describe("concurrent writes from another command", () => {
     expect((await loadChats()).map((c) => c.key)).toEqual(["mine", "theirs"]);
   });
 
+  it("keeps a chat deleted while its save is still being checked", async () => {
+    vi.useFakeTimers();
+    await saveChat(chat("gone", Date.now()));
+    await vi.advanceTimersByTimeAsync(400);
+    await deleteChat("gone"); // e.g. from the start screen, in another command
+    await vi.advanceTimersByTimeAsync(200); // the save's check runs at 500 ms
+    expect(await findChat("gone")).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(1_500);
+    expect(await findChat("gone")).toBeUndefined();
+  });
+
+  it("keeps a chat started again right after it was deleted", async () => {
+    vi.useFakeTimers();
+    await saveChat(chat("again", Date.now()));
+    await deleteChat("again");
+    await vi.advanceTimersByTimeAsync(10);
+    await saveChat(chat("again", Date.now(), 2));
+    // The deletion's check (at 500 ms) runs before the new save's (at 510 ms) and must not remove it.
+    await vi.advanceTimersByTimeAsync(495);
+    expect((await findChat("again"))?.turns).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(1_500);
+    expect((await findChat("again"))?.turns).toHaveLength(2);
+  });
+
   it("leaves a newer save of the same chat alone", async () => {
     vi.useFakeTimers();
     await saveChat(chat("same", 100, 1));

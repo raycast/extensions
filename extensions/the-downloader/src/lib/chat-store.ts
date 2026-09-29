@@ -63,6 +63,29 @@ export function removeChat(list: StoredChat[], key: string): StoredChat[] {
 
 const store = jsonStore<StoredChat>("video-chats-v1", parseChats);
 
+// When the user deleted each chat, kept apart from the chats so a save's write
+// check (maybe in another command) doesn't bring a deleted chat back.
+type Deletion = { key: string; at: number };
+const DELETION_LIMIT = 100;
+
+export function parseDeletions(raw: string | undefined): Deletion[] {
+  try {
+    const parsed: unknown = JSON.parse(raw ?? "");
+    return Array.isArray(parsed)
+      ? parsed.filter((d): d is Deletion => typeof d?.key === "string" && typeof d?.at === "number")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+const deletions = jsonStore<Deletion>("video-chats-deleted-v1", parseDeletions);
+
+/** True when the user deleted the chat after `savedAt`. */
+async function deletedSince(key: string, savedAt: number): Promise<boolean> {
+  return (await deletions.load()).some((d) => d.key === key && d.at >= savedAt);
+}
+
 export function loadChats(): Promise<StoredChat[]> {
   return store.load();
 }
@@ -76,16 +99,24 @@ export async function saveChat(chat: StoredChat): Promise<void> {
   try {
     await store.mutate(
       (list) => upsertChat(list, chat),
-      (list) => list.some((c) => c.key === chat.key && c.updatedAt >= chat.updatedAt),
+      async (list) =>
+        list.some((c) => c.key === chat.key && c.updatedAt >= chat.updatedAt) ||
+        (await deletedSince(chat.key, chat.updatedAt)),
     );
   } catch (error) {
     console.error("Could not save the chat", error);
   }
 }
 
-export function deleteChat(key: string): Promise<StoredChat[]> {
+export async function deleteChat(key: string): Promise<StoredChat[]> {
+  const at = Date.now();
+  await deletions
+    .mutate((list) => [...list.filter((d) => d.key !== key), { key, at }].slice(-DELETION_LIMIT))
+    .catch((error) => console.error("Could not note a chat deletion", error));
+  // A save made after the deletion (the chat was started again) stays.
+  const deleted = (c: StoredChat) => c.key === key && c.updatedAt <= at;
   return store.mutate(
-    (list) => removeChat(list, key),
-    (list) => !list.some((c) => c.key === key),
+    (list) => list.filter((c) => !deleted(c)),
+    (list) => !list.some(deleted),
   );
 }

@@ -21,7 +21,7 @@ export function jsonStore<T>(key: string, parse: (raw: string | undefined) => T[
 
   function mutate(
     change: (list: T[]) => T[],
-    applied?: (list: T[]) => boolean,
+    applied?: (list: T[]) => boolean | Promise<boolean>,
     attempts = VERIFY_ATTEMPTS,
   ): Promise<T[]> {
     const written = chain.then(async () => {
@@ -35,7 +35,7 @@ export function jsonStore<T>(key: string, parse: (raw: string | undefined) => T[
       void written
         .then(() => new Promise((resolve) => setTimeout(resolve, VERIFY_DELAY_MS)))
         .then(async () => {
-          if (!applied(await load())) await mutate(change, applied, attempts - 1);
+          if (!(await applied(await load()))) await mutate(change, applied, attempts - 1);
         })
         .catch(() => undefined);
     }
