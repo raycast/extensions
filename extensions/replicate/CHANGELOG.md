@@ -1,5 +1,9 @@
 # Replicate Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Runs on Raycast for Windows as well as macOS
+
 ## [Replicate models in Raycast AI] - 2026-09-27
 
 - Replicate models can be picked in Raycast AI's model picker (requires Raycast Pro). Image models reply with the image, editing models change an attached image or the last one in the chat, and text models stream their answer. A status section shows progress while a model runs

@@ -553,6 +553,7 @@
     "typecheck": "tsc --noEmit"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
