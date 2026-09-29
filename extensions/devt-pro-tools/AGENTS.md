@@ -85,7 +85,7 @@ The app must continue to handle those links through its deep-link router on both
 
 1. Confirm `npm run lint` and `npm run build` pass with the latest `@raycast/api` (`npm install @raycast/api@latest`). `ray lint` also checks the manifest against the Store, including the `author` handle.
 2. Keep `author` set to the Raycast handle (`devtpro`). Only add `owner` if the extension moves to a Raycast organization, and use that organization's handle.
-3. Add 3 to 6 screenshots to `metadata/` as 2000×1250 PNGs named `developer-tools-pro-1.png`, `developer-tools-pro-2.png`, and so on. Use Raycast's window capture during `npm run dev`, and use the same background and theme throughout.
+3. Add 3 to 6 screenshots to `metadata/` as 2000×1250 PNGs named `devt-pro-tools-1.png`, `devt-pro-tools-2.png`, and so on. Use Raycast's window capture during `npm run dev`, and use the same background and theme throughout.
 4. Make sure the newest `CHANGELOG.md` entry uses the `## [Title] - {PR_MERGE_DATE}` heading.
 5. Run `npm run publish`. This runs `ray publish`, which signs you in with Raycast and opens the pull request against `raycast/extensions`.
 6. Address any review feedback in that pull request. Pull reviewer commits back with `npx ray pull-contributions` before you publish again.

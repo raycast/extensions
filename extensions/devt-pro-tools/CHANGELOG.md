@@ -1,4 +1,4 @@
-# DevT Pro Changelog
+# DevT Pro Tools Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

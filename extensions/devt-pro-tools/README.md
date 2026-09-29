@@ -1,4 +1,4 @@
-# DevT Pro for Raycast
+# DevT Pro Tools
 
 Search, pin, and launch DevT Pro tools from Raycast on macOS and Windows. This extension connects Raycast to the DevT Pro app. The app and its source code are not included here.
 
