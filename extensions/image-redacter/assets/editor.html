@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cloakshot</title>
+    <link rel="stylesheet" href="./editor.css" />
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+    <script src="./editor.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <defs><linearGradient id="markGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7048e8" /><stop offset="1" stop-color="#f03e6f" /></linearGradient></defs>
+          <rect width="24" height="24" rx="6" fill="url(#markGradient)" />
+          <rect x="5" y="6" width="14" height="2.5" rx="1.25" fill="#fff" />
+          <rect x="5" y="10.25" width="14" height="3.5" rx="1" fill="#0b0b0f" />
+          <rect x="5" y="15.5" width="10" height="2.5" rx="1.25" fill="#fff" />
+        </svg>
+        <div>
+          <h1>Cloakshot</h1>
+          <p id="filename">Loading…</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="privacy"><span></span> Stays on this computer</span>
+        <button id="planBadge" class="plan-badge" type="button"></button>
+        <label id="searchableToggle" class="frame-toggle" title="Adds an invisible text layer to redacted pages. Text touching a redaction is never included." hidden><input id="searchableOutput" type="checkbox" /> Searchable</label>
+        <div id="frameControls" class="frame-controls">
+        <label class="frame-toggle"><input id="framedOutput" type="checkbox" /> Frame</label>
+        <select id="frameStyle" class="frame-style" aria-label="Frame background" hidden>
+          <option value="violet">Violet dusk</option>
+          <option value="sunset">Sunset</option>
+          <option value="ocean">Ocean</option>
+          <option value="graphite">Graphite</option>
+          <option value="paper">Paper</option>
+        </select>
+        </div>
+        <button id="copyButton" class="button secondary">Copy PNG</button>
+        <button id="saveButton" class="button primary">Save PNG</button>
+      </div>
+    </header>
+
+    <main>
+      <aside aria-label="Redaction controls">
+        <section id="pagesSection" hidden>
+          <h2>Pages</h2>
+          <ol id="pageList" class="page-list"></ol>
+        </section>
+        <section>
+          <h2>Selection</h2>
+          <div class="tool-grid" role="radiogroup" aria-label="Selection tool">
+            <button class="tool active" data-tool="rectangle" role="radio" aria-checked="true"><b>▭</b>Rectangle</button>
+            <button class="tool" data-tool="circle" role="radio" aria-checked="false"><b>◯</b>Circle</button>
+            <button class="tool" data-tool="freeform" role="radio" aria-checked="false"><b>⬠</b>Freeform</button>
+            <button class="tool" data-tool="paint" role="radio" aria-checked="false"><b>✎</b>Paint</button>
+            <button class="tool wide" data-tool="text" role="radio" aria-checked="false"><b>T</b>Select detected text</button>
+          </div>
+          <button id="detectTextButton" class="button secondary full">Detect Text</button>
+          <div id="ocrProgress" class="progress" hidden>
+            <div><span id="ocrProgressBar"></span></div>
+            <p id="ocrStatus">Preparing text detection…</p>
+          </div>
+        </section>
+
+        <section>
+          <h2>Redaction</h2>
+          <label for="effect">Effect</label>
+          <select id="effect">
+            <option value="mosaic" selected>Mosaic</option>
+            <option value="blur">Blur</option>
+            <option value="solid">Solid color</option>
+          </select>
+          <div id="mosaicOptions" class="option-row">
+            <label for="mosaicSize">Block size <output id="mosaicValue">14 px</output></label>
+            <input id="mosaicSize" type="range" min="4" max="48" value="14" />
+          </div>
+          <div id="blurOptions" class="option-row" hidden>
+            <label for="blurSize">Blur strength <output id="blurValue">18 px</output></label>
+            <input id="blurSize" type="range" min="4" max="40" value="18" />
+          </div>
+          <div id="solidOptions" class="option-row" hidden>
+            <label for="solidColor">Color</label>
+            <input id="solidColor" type="color" value="#111827" />
+          </div>
+          <div id="paintOptions" class="option-row" hidden>
+            <label for="brushSize">Brush size <output id="brushValue">36 px</output></label>
+            <input id="brushSize" type="range" min="8" max="160" value="36" />
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-label="Image canvas">
+        <div class="canvas-toolbar">
+          <div class="history">
+            <button id="undoButton" disabled title="Undo (⌘/Ctrl Z)">↶ <span>Undo</span></button>
+            <button id="redoButton" disabled title="Redo (⌘/Ctrl Shift Z)">↷ <span>Redo</span></button>
+            <button id="clearButton" disabled>Clear all</button>
+          </div>
+          <div id="pageNav" class="pager" hidden>
+            <button id="prevPage" aria-label="Previous page" title="Previous page (Page Up)">‹</button>
+            <output id="pageValue">1 / 1</output>
+            <button id="nextPage" aria-label="Next page" title="Next page (Page Down)">›</button>
+          </div>
+          <div class="zoom">
+            <button id="zoomOut" aria-label="Zoom out">−</button>
+            <output id="zoomValue">100%</output>
+            <button id="zoomIn" aria-label="Zoom in">+</button>
+            <button id="fitButton">Fit</button>
+          </div>
+        </div>
+        <div id="canvasViewport" class="canvas-viewport">
+          <div id="loading" class="loading"><span></span><b id="loadingLabel">Loading original…</b></div>
+          <div id="framePreview" class="frame-preview" hidden>
+            <div id="canvasStack" class="canvas-stack">
+              <canvas id="imageCanvas"></canvas>
+              <canvas id="overlayCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <span id="dimensions"></span>
+          <span id="maskCount">0 redactions</span>
+          <span>Original is read-only</span>
+        </footer>
+      </section>
+    </main>
+
+    <dialog id="upgradeDialog" class="upgrade-dialog" aria-labelledby="upgradeTitle">
+      <form method="dialog">
+        <svg class="dialog-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <defs><linearGradient id="dialogMarkGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7048e8" /><stop offset="1" stop-color="#f03e6f" /></linearGradient></defs>
+          <rect width="24" height="24" rx="6" fill="url(#dialogMarkGradient)" />
+          <rect x="5" y="6" width="14" height="2.5" rx="1.25" fill="#fff" />
+          <rect x="5" y="10.25" width="14" height="3.5" rx="1" fill="#0b0b0f" />
+          <rect x="5" y="15.5" width="10" height="2.5" rx="1.25" fill="#fff" />
+        </svg>
+        <h2 id="upgradeTitle">Upgrade to Cloakshot Pro</h2>
+        <p id="upgradeReason"></p>
+        <ul>
+          <li>Unlimited image and PDF redactions</li>
+          <li>No watermark</li>
+          <li>PDFs of any length, with searchable text</li>
+        </ul>
+        <p class="dialog-note">After upgrading, open the file again from Raycast.</p>
+        <div class="dialog-actions">
+          <button class="button secondary" value="close">Not now</button>
+          <a id="upgradeLink" class="button primary" href="#">Upgrade in Raycast · <span id="upgradePrice"></span></a>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
