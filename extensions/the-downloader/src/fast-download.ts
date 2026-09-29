@@ -17,10 +17,11 @@ import { detectSource } from "./lib/detect.js";
 import { getConfig } from "./lib/config.js";
 import { composeVideoFormat } from "./lib/video-format.js";
 import { runVideoDownload } from "./lib/ytdlp.js";
+import { ensureFreshTools, hintOutdatedTool } from "./lib/tool-updates.js";
 import { isLoginRequiredError, runGalleryDownload } from "./lib/gallerydl.js";
 import { resolveBrowser } from "./lib/browsers.js";
 import { AbortError } from "./lib/run.js";
-import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "./lib/managed-binary.js";
+import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "./lib/monolith.js";
 import { progressMessage } from "./lib/format.js";
@@ -70,10 +71,10 @@ function isAbort(error: unknown): boolean {
   return error instanceof AbortError;
 }
 
-/** Wire a Stop action to the toast and return the AbortSignal the runner consumes. */
+/** Make Stop the toast's first action and return the AbortSignal the runner consumes. */
 function attachStop(toast: Toast): { signal: AbortSignal } {
   const controller = new AbortController();
-  toast.secondaryAction = { title: "Stop", onAction: () => controller.abort() };
+  toast.primaryAction = { title: "Stop Download", onAction: () => controller.abort() };
   return { signal: controller.signal };
 }
 
@@ -124,6 +125,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
   if (type === "gallery") {
     const galleryDlPath = getGalleryDlPath();
     if (!fs.existsSync(galleryDlPath)) return handOff("gallery-dl", url);
+    await ensureFreshTools(["gallery-dl"]);
 
     const browser = resolveBrowser(cookiesFromBrowser, cookiesFromBrowserCustom);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Gallery", message: "0 files" });
@@ -185,6 +187,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.message = errorMessage(error);
         toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
         toast.secondaryAction = undefined;
+        await hintOutdatedTool(toast, "gallery-dl");
       }
     }
     await settle(session, toast, outcome);
@@ -196,6 +199,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     const ffmpegPath = getffmpegPath();
     if (!fs.existsSync(spotdlPath)) return handOff("spotdl", url);
     if (!fs.existsSync(ffmpegPath)) return handOff("ffmpeg", url);
+    await ensureFreshTools(["spotdl", "ffmpeg"]);
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -224,7 +228,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     try {
       // Surface the friendly Rosetta hint for an already-present x86_64 binary
       // on an Apple Silicon Mac without Rosetta, instead of a raw "Bad CPU type".
-      if (isAppleSilicon() && !isRosettaInstalled()) throw new RosettaRequiredError();
+      if (needsRosetta(spotdlPath)) throw new RosettaRequiredError();
       const { tracks } = await runSpotdlDownload(
         spotdlPath,
         {
@@ -244,10 +248,18 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
           session.count(p.tracks);
         },
       );
-      toast.style = Toast.Style.Success;
-      toast.title = "Downloaded";
-      toast.message = `${tracks} tracks`;
-      toast.primaryAction = { title: "Open Folder", onAction: () => open(downloadPath) };
+      if (tracks === 0) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Nothing downloaded";
+        toast.message =
+          "spotDL saved no tracks. The playlist may be private or empty; for private playlists, turn on Spotify: User Authentication.";
+        toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = "Downloaded";
+        toast.message = `${tracks} tracks`;
+        toast.primaryAction = { title: "Open Folder", onAction: () => open(downloadPath) };
+      }
       toast.secondaryAction = undefined;
     } catch (error) {
       outcome = { error };
@@ -282,6 +294,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.message = errorMessage(error);
         toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
         toast.secondaryAction = undefined;
+        await hintOutdatedTool(toast, "spotdl");
       }
     }
     await settle(session, toast, outcome);
@@ -291,6 +304,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
   if (type === "webpage") {
     const monolithPath = getMonolithPath();
     if (!fs.existsSync(monolithPath)) return handOff("monolith", url);
+    await ensureFreshTools(["monolith"]);
 
     const outputPath = path.join(downloadPath, webpageFilename(url));
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
@@ -325,6 +339,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         toast.message = errorMessage(error);
         toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
         toast.secondaryAction = undefined;
+        await hintOutdatedTool(toast, "monolith");
       }
     }
     await settle(session, toast, outcome);
@@ -342,6 +357,11 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
   if (!fs.existsSync(ytdlPath)) return handOff("yt-dlp", url);
   if (!fs.existsSync(ffmpegPath)) return handOff("ffmpeg", url);
   if (!fs.existsSync(ffprobePath)) return handOff("ffprobe", url);
+
+  // Outdated tools are the usual cause of failed downloads (yt-dlp's HTTP 403s):
+  // offer to update before starting. Declining (or a failed update) just carries
+  // on with the download — the same check guards the other routes above.
+  await ensureFreshTools(["yt-dlp", "ffmpeg", "ffprobe", "deno"]);
 
   const config = getConfig();
   const format = composeVideoFormat({
@@ -369,7 +389,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       () => undefined,
       (event) => {
         session.ytdlp(event);
-        if (event.type === "progress") toast.message = progressMessage(event.progress) || toast.message;
+        if (event.type === "progress") toast.message = progressMessage(session.getSnapshot()) || toast.message;
       },
     );
     outcome = { filePath };
@@ -395,6 +415,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.message = errorMessage(error);
       toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
       toast.secondaryAction = undefined;
+      await hintOutdatedTool(toast, "yt-dlp");
     }
   }
   await settle(session, toast, outcome);

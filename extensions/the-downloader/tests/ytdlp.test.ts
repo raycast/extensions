@@ -88,6 +88,11 @@ describe("buildVideoDownloadArgs", () => {
     ]);
   });
 
+  it("lets a WebM download fall back to mkv when the streams can't go into WebM", () => {
+    const args = buildVideoDownloadArgs({ ...base, format: "bestvideo+bestaudio/best#webm" });
+    expect(args[args.indexOf("--merge-output-format") + 1]).toBe("webm/mkv");
+  });
+
   it("passes --no-playlist so a watch?v=…&list=… URL downloads only the inspected video", () => {
     // fetchVideoInfo probes with --no-playlist; without it here, the form
     // showed one video's title and then downloaded the entire playlist.

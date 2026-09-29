@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { DownloadSession, stagesFor } from "../src/lib/download-session";
+import { DownloadSession, SPEED_SMOOTHING_MS, stagesFor } from "../src/lib/download-session";
 
 const init = { kind: "video" as const, url: "https://example.com/v", folder: "/out" };
 const progress = (downloadedBytes: number, totalBytes: number, speed: number) => ({
@@ -46,6 +46,48 @@ describe("DownloadSession", () => {
     session.ytdlp(progress(2, 10, 200), 1100);
     session.ytdlp(progress(3, 10, 300), 1300);
     expect(session.getSnapshot().speedSamples).toEqual([100, 300]);
+  });
+
+  it("smooths the shown speed instead of jumping to every reading", () => {
+    expect(SPEED_SMOOTHING_MS).toBe(5000);
+    const session = new DownloadSession(init, 0);
+    session.ytdlp(progress(100, 10_000, 10), 0);
+    expect(session.getSnapshot().speed).toBe(10);
+
+    // A momentary dip 250 ms later barely moves it…
+    session.ytdlp(progress(200, 10_000, 2), 250);
+    const alpha = 1 - Math.exp(-250 / SPEED_SMOOTHING_MS);
+    expect(session.getSnapshot().speed).toBeCloseTo(10 + alpha * (2 - 10));
+    expect(session.getSnapshot().speed).toBeGreaterThan(9);
+
+    // …while a sustained change is followed within a few seconds.
+    for (let t = 500; t <= 30_000; t += 250) session.ytdlp(progress(300, 10_000, 4), t);
+    expect(session.getSnapshot().speed).toBeCloseTo(4, 1);
+  });
+
+  it("keeps the raw readings for the chart", () => {
+    const session = new DownloadSession(init, 0);
+    session.ytdlp(progress(1, 100, 10), 1000);
+    session.ytdlp(progress(2, 100, 2), 1250);
+    expect(session.getSnapshot().speedSamples).toEqual([10, 2]);
+  });
+
+  it("derives time left from the remaining bytes and the smoothed speed", () => {
+    const session = new DownloadSession(init, 0);
+    session.ytdlp(progress(400, 1000, 100), 0);
+    expect(session.getSnapshot().eta).toBe(6);
+
+    // yt-dlp would now say 0.5 s (500 bytes at 1000 B/s); a speed spike shouldn't collapse the estimate.
+    session.ytdlp(progress(500, 1000, 1000), 1000);
+    const { speed, eta } = session.getSnapshot();
+    expect(eta).toBeCloseTo(500 / speed!);
+    expect(eta).toBeGreaterThan(1);
+  });
+
+  it("falls back to yt-dlp's ETA when the size is unknown", () => {
+    const session = new DownloadSession(init, 0);
+    session.ytdlp({ type: "progress", progress: { downloadedBytes: 100, speed: 50, eta: 42 } }, 0);
+    expect(session.getSnapshot().eta).toBe(42);
   });
 
   it("keeps long charts bounded", () => {

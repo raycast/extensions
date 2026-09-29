@@ -202,6 +202,15 @@
       "required": false
     },
     {
+      "name": "checkToolUpdates",
+      "title": "Check for Tool Updates",
+      "description": "Before a download, check whether the tools it uses (yt-dlp, gallery-dl, ffmpeg…) are outdated and offer to update them.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "cookiesFromBrowser",
       "title": "Gallery: Cookies from Browser",
       "description": "Browser to read cookies from for login-gated galleries.",
@@ -275,14 +284,14 @@
     },
     {
       "name": "ffmpegPath",
-      "title": "ffmpeg Path",
+      "title": "FFmpeg Path",
       "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "ffprobePath",
-      "title": "ffprobe Path",
+      "title": "FFprobe Path",
       "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
       "type": "textfield",
       "required": false
@@ -310,7 +319,7 @@
     },
     {
       "name": "monolithPath",
-      "title": "monolith Path",
+      "title": "Monolith Path",
       "description": "Path to the monolith executable. Run `which monolith` to find it.",
       "type": "textfield",
       "required": false

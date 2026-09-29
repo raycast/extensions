@@ -4,6 +4,7 @@ import * as crypto from "node:crypto";
 import { execa } from "execa";
 import { isMac, isWindows } from "./binary.js";
 import { ROSETTA_RUNTIME_PATH } from "./platform-paths.js";
+import { isIntelOnlyExecutable, readExecutableHeader } from "./macho.js";
 
 const RELEASE_API = "https://api.github.com/repos/spotDL/spotify-downloader/releases/latest";
 const USER_AGENT = "the-downloader-raycast";
@@ -47,6 +48,20 @@ export function isRosettaInstalled(): boolean {
 }
 
 /** Friendly error thrown when spotDL can't run because Rosetta 2 is missing on Apple Silicon. */
+/**
+ * True when running `binaryPath` needs Rosetta that isn't there: an Intel-only
+ * Mach-O (like spotDL's prebuilt binary) on an Apple Silicon Mac without
+ * Rosetta. Decided from the binary's own header, so a native or universal
+ * build — or Homebrew's Python-script spotDL — runs as is, wherever it lives.
+ */
+export function needsRosetta(
+  binaryPath: string,
+  mac: { appleSilicon: boolean; rosetta: boolean } = { appleSilicon: isAppleSilicon(), rosetta: isRosettaInstalled() },
+  header: () => Buffer | undefined = () => readExecutableHeader(binaryPath),
+): boolean {
+  return mac.appleSilicon && !mac.rosetta && isIntelOnlyExecutable(header());
+}
+
 export class RosettaRequiredError extends Error {
   constructor() {
     super(
@@ -140,17 +155,21 @@ export async function downloadSpotdl(supportDir: string): Promise<string> {
     throw error;
   }
 
-  // Verify the bytes against the SHA-256 GitHub publishes for the asset, when
-  // present. This catches a corrupted/truncated download before the binary is
-  // made executable. It defends against transmission corruption and a wrong
-  // host — NOT against a compromised upstream release (the digest comes from
-  // the same API), which is an accepted limit of the auto-download model.
-  if (asset.digest?.startsWith("sha256:")) {
-    const expected = asset.digest.slice("sha256:".length).toLowerCase();
-    const actual = crypto.createHash("sha256").update(bytes).digest("hex");
-    if (actual !== expected) {
-      throw new Error("spotDL download failed its integrity check (SHA-256 mismatch). Please try again.");
-    }
+  // Verify the bytes against the SHA-256 GitHub publishes for the asset. This
+  // catches a corrupted/truncated download before the binary is made
+  // executable. It defends against transmission corruption and a wrong host —
+  // NOT against a compromised upstream release (the digest comes from the same
+  // API), which is an accepted limit of the auto-download model. No digest, no
+  // install: an unverifiable executable is never written.
+  if (!asset.digest?.startsWith("sha256:")) {
+    throw new Error(
+      "Couldn't verify the spotDL download: GitHub published no SHA-256 checksum for it. Install spotDL with Homebrew instead.",
+    );
+  }
+  const expected = asset.digest.slice("sha256:".length).toLowerCase();
+  const actual = crypto.createHash("sha256").update(bytes).digest("hex");
+  if (actual !== expected) {
+    throw new Error("spotDL download failed its integrity check (SHA-256 mismatch). Please try again.");
   }
 
   const finalPath = path.join(supportDir, isWindows ? "spotdl.exe" : "spotdl");

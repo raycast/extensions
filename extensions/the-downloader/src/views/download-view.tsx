@@ -125,8 +125,7 @@ export function DownloadView({ session }: { session: DownloadSession }) {
         <ActionPanel>
           {running && (
             <ActionPanel.Section>
-              {/* Enter must never stop a download by accident, so Stop is not the primary action. */}
-              <Action title="Open Folder" icon={Icon.Folder} onAction={() => open(s.folder)} />
+              {/* Stop comes first (↵) so it's one key away and shown in the action bar; Esc goes back without stopping. */}
               {session.canStop && (
                 <Action
                   title="Stop Download"
@@ -136,6 +135,7 @@ export function DownloadView({ session }: { session: DownloadSession }) {
                   onAction={() => session.stop()}
                 />
               )}
+              <Action title="Open Folder" icon={Icon.Folder} onAction={() => open(s.folder)} />
             </ActionPanel.Section>
           )}
           {s.status === "done" && (

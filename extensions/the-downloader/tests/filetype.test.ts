@@ -3,6 +3,7 @@ import {
   clampFiletype,
   defaultFiletype,
   filetypeGuidance,
+  installedAlternatives,
   requiredTools,
   resolveTool,
   supportedFiletypes,
@@ -51,11 +52,19 @@ describe("resolveTool", () => {
 });
 
 describe("requiredTools", () => {
-  it("video needs the full yt-dlp toolchain", () => {
-    expect(requiredTools("video", "video")).toEqual(["yt-dlp", "ffmpeg", "ffprobe", "deno"]);
+  it("video needs the yt-dlp toolchain", () => {
+    expect(requiredTools("video", "video", "https://vimeo.com/1")).toEqual(["yt-dlp", "ffmpeg", "ffprobe"]);
   });
-  it("audio on a video site needs the full yt-dlp toolchain", () => {
-    expect(requiredTools("video", "audio")).toEqual(["yt-dlp", "ffmpeg", "ffprobe", "deno"]);
+  it("audio on a video site needs the yt-dlp toolchain", () => {
+    expect(requiredTools("video", "audio", "https://twitch.tv/x")).toEqual(["yt-dlp", "ffmpeg", "ffprobe"]);
+  });
+  it("adds Deno only for YouTube, whose extractor needs a JavaScript runtime", () => {
+    const withDeno = ["yt-dlp", "ffmpeg", "ffprobe", "deno"];
+    expect(requiredTools("video", "video", "https://www.youtube.com/watch?v=abc")).toEqual(withDeno);
+    expect(requiredTools("video", "audio", "https://music.youtube.com/watch?v=abc")).toEqual(withDeno);
+    expect(requiredTools("video", "video", "youtu.be/abc")).toEqual(withDeno);
+    expect(requiredTools("video", "video", "https://notyoutube.com/v")).not.toContain("deno");
+    expect(requiredTools("video", "transcript", "https://youtu.be/abc")).toEqual(["yt-dlp", "ffmpeg"]);
   });
   it("audio on a Spotify source needs spotdl + ffmpeg", () => {
     expect(requiredTools("spotify", "audio")).toEqual(["spotdl", "ffmpeg"]);
@@ -81,8 +90,12 @@ describe("supportedFiletypes", () => {
   it("a spotify source supports only audio", () => {
     expect(supportedFiletypes("spotify")).toEqual(["audio"]);
   });
-  it("a webpage source supports only website", () => {
-    expect(supportedFiletypes("webpage")).toEqual(["website"]);
+  it("an unknown site offers Video and Audio (yt-dlp may support it) besides Website", () => {
+    expect(supportedFiletypes("webpage")).toEqual(["video", "audio", "website"]);
+    expect(defaultFiletype("webpage", true)).toBe("website");
+    expect(clampFiletype("webpage", "video", false)).toBe("video");
+    expect(resolveTool("webpage", "video")).toBe("yt-dlp");
+    expect(requiredTools("webpage", "video", "https://rumble.com/v1")).toEqual(["yt-dlp", "ffmpeg", "ffprobe"]);
   });
   it("a video source supports video, audio, image (thumbnail) and transcript, but not website", () => {
     expect(supportedFiletypes("video")).toEqual(["video", "audio", "image", "transcript"]);
@@ -126,5 +139,22 @@ describe("filetypeGuidance", () => {
   });
   it("explains the gallery restriction (mentions image or gallery)", () => {
     expect(filetypeGuidance("gallery").toLowerCase()).toMatch(/image|gallery/);
+  });
+});
+
+describe("installedAlternatives", () => {
+  const installed = (...tools: string[]) => (tool: string) => tools.includes(tool);
+
+  it("offers the source's other filetypes whose tools are all installed", () => {
+    const ytdlpOnly = installed("yt-dlp", "ffmpeg", "ffprobe");
+    expect(installedAlternatives("webpage", "website", "https://rumble.com/v1", ytdlpOnly)).toEqual(["video", "audio"]);
+  });
+
+  it("offers nothing when the other filetypes are missing tools too", () => {
+    expect(installedAlternatives("webpage", "website", "https://rumble.com/v1", installed())).toEqual([]);
+  });
+
+  it("never offers the current filetype or ones the source doesn't support", () => {
+    expect(installedAlternatives("gallery", "image", "https://reddit.com/r/x", installed("gallery-dl"))).toEqual([]);
   });
 });

@@ -70,6 +70,18 @@ export function selectFormats(video: Video, quality: QualityValue, container: st
       single(pick(formats, progressive, best))
     );
   }
+  if (container === "webm") {
+    const webm = (f: Format) => f.ext === "webm";
+    return (
+      merged(
+        pick(formats, (f) => videoOnly(f) && webm(f), best),
+        pick(formats, (f) => audioOnly(f) && webm(f), best),
+      ) ??
+      single(pick(formats, (f) => progressive(f) && webm(f), best)) ??
+      merged(pick(formats, videoOnly, best), pick(formats, audioOnly, best)) ??
+      single(pick(formats, progressive, best))
+    );
+  }
   return (
     merged(pick(formats, videoOnly, best), pick(formats, audioOnly, best)) ?? single(pick(formats, progressive, best))
   );

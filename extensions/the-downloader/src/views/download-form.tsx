@@ -25,16 +25,19 @@ import {
   clampFiletype,
   defaultFiletype,
   filetypeGuidance,
+  installedAlternatives,
   requiredTools,
   resolveTool,
   supportedFiletypes,
 } from "../lib/filetype.js";
 import { composeVideoFormat } from "../lib/video-format.js";
 import { fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
+import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
+import { uniqueFilePath } from "../lib/unique-path.js";
 import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
 import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
-import { isAppleSilicon, isRosettaInstalled, RosettaRequiredError } from "../lib/managed-binary.js";
+import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
 import { runMonolithSave, webpageFilename } from "../lib/monolith.js";
 import { DownloadInit, DownloadSession } from "../lib/download-session.js";
@@ -131,24 +134,29 @@ function failSession(session: DownloadSession, toast: Toast, error?: unknown) {
   void recordDownload(entryFromSnapshot(session.getSnapshot()));
 }
 
-/** Turn a rejected runner into a red, copyable failure toast — or a neutral "Cancelled" toast when the user pressed Stop. */
-function failToast(toast: Toast, error: unknown) {
+/**
+ * Turn a rejected runner into a red, copyable failure toast — or a neutral
+ * "Cancelled" toast when the user pressed Stop. Returns true for a plain tool
+ * failure (not a cancel or a specially handled error), where an outdated-tool
+ * hint makes sense.
+ */
+function failToast(toast: Toast, error: unknown): boolean {
   // Clear the in-flight "Stop" action up front — every failure path below
-  // either sets its own secondary action or wants none, and a dead Stop
-  // button left over from startAbortable would do nothing.
+  // either sets its own actions or wants none, and a dead Stop button left
+  // over from startAbortable would do nothing.
+  toast.primaryAction = undefined;
   toast.secondaryAction = undefined;
   if (error instanceof AbortError) {
     toast.style = Toast.Style.Failure;
     toast.title = "Cancelled";
     toast.message = undefined;
-    toast.primaryAction = undefined;
-    return;
+    return false;
   }
   if (error instanceof RosettaRequiredError) {
     toast.style = Toast.Style.Failure;
     toast.title = "spotDL needs Rosetta 2";
     toast.message = error.message;
-    return;
+    return false;
   }
   if (error instanceof SpotdlDownloadError) {
     const partial =
@@ -162,13 +170,14 @@ function failToast(toast: Toast, error: unknown) {
     } else if (error.summary.action === "open-setup-guide") {
       toast.secondaryAction = { title: "Open Setup Guide", onAction: () => open(SPOTDL_SETUP_GUIDE_URL) };
     }
-    return;
+    return false;
   }
   const message = error instanceof Error ? error.message : "Unknown error";
   toast.style = Toast.Style.Failure;
   toast.title = "Download Failed";
   toast.message = message;
   toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(message) };
+  return true;
 }
 
 type DownloadFormProps = { initialUrl: string };
@@ -207,14 +216,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   /**
    * Wire an AbortController to a toast: returns the signal for the runner
-   * options and a `done()` to call on completion. The toast gains a "Stop"
-   * secondary action that aborts the in-flight child, and the controller is
-   * tracked so unmount cleanup can kill anything still running.
+   * options and a `done()` to call on completion. The toast's first action
+   * becomes "Stop Download", which aborts the in-flight child, and the
+   * controller is tracked so unmount cleanup can kill anything still running.
    */
   function startAbortable(toast: Toast, session?: DownloadSession): { signal: AbortSignal; done: () => void } {
     const controller = new AbortController();
     activeAbort.current = controller;
-    toast.secondaryAction = { title: "Stop", onAction: () => controller.abort() };
+    toast.primaryAction = { title: "Stop Download", onAction: () => controller.abort() };
     session?.onStop(() => controller.abort());
     return {
       signal: controller.signal,
@@ -242,13 +251,19 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   // The required tools must all exist; otherwise the form is replaced by the Installer.
   const missingTool = useMemo(
-    () => (validUrl ? requiredTools(source, filetype).find((name) => !fs.existsSync(TOOL_PATH[name]())) : undefined),
-    [source, filetype, validUrl, refresh],
+    () =>
+      validUrl ? requiredTools(source, filetype, url).find((name) => !fs.existsSync(TOOL_PATH[name]())) : undefined,
+    [source, filetype, url, validUrl, refresh],
   );
 
   // yt-dlp metadata — fetched only for a yt-dlp-bound selection with its tools present.
   const shouldFetchMeta = ytdlpBound && validUrl && !missingTool;
-  const { data: video, isLoading: metaLoading } = usePromise(
+
+  const {
+    data: video,
+    isLoading: metaLoading,
+    revalidate: refetchMeta,
+  } = usePromise(
     async (u: string, fetchIt: boolean) => {
       if (!fetchIt) return undefined;
       const denoPath = getDenoPath();
@@ -267,6 +282,21 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     [url, shouldFetchMeta],
     { onError: () => undefined, abortable: metaAbortable },
   );
+  // Outdated tools are the usual cause of failed downloads (yt-dlp's HTTP 403s,
+  // gallery-dl's broken extractors), so the first time the form needs a set of
+  // tools, check them, offer to update, and re-fetch the metadata once an update
+  // lands. The metadata fetch itself doesn't wait for the answer.
+  const checkedTools = useRef(new Set<string>());
+  useEffect(() => {
+    if (!validUrl || missingTool) return;
+    const tools = requiredTools(source, filetype, url);
+    const key = tools.join(",");
+    if (checkedTools.current.has(key)) return;
+    checkedTools.current.add(key);
+    void ensureFreshTools(tools).then((outcome) => {
+      if (outcome === "updated") refetchMeta();
+    });
+  }, [validUrl, missingTool, source, filetype, url, refetchMeta]);
 
   const liveStream = !!video && isLiveStream(video);
 
@@ -291,7 +321,30 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   }
 
   if (missingTool) {
-    return <Installer executable={missingTool} onRefresh={() => setRefresh((r) => r + 1)} />;
+    // Other types that work with what's installed, so a missing tool doesn't trap
+    // the user — e.g. an unknown site defaults to Website, but Video may work.
+    const alternatives = installedAlternatives(source, filetype, url, (tool) => fs.existsSync(TOOL_PATH[tool]()));
+    return (
+      <Installer
+        executable={missingTool}
+        onRefresh={() => setRefresh((r) => r + 1)}
+        alternatives={
+          alternatives.length > 0
+            ? alternatives.map((ft) => (
+                <Action
+                  key={ft}
+                  title={`Download as ${FILETYPE_TITLE[ft]} Instead`}
+                  icon={FILETYPE_ICON[ft]}
+                  onAction={() => {
+                    setFiletypeTouched(true);
+                    setFiletype(ft);
+                  }}
+                />
+              ))
+            : undefined
+        }
+      />
+    );
   }
 
   // The adaptive status line, plus a details line once yt-dlp metadata is in.
@@ -407,7 +460,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = { title: "Open File", onAction: () => open(filePath) };
         succeedSession(session, toast, filePath);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "monolith");
         failSession(session, toast, error);
       } finally {
         done();
@@ -422,7 +475,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       session.working();
       try {
         const { transcript, title } = await extractTranscript(submitUrl, "en", signal);
-        const filePath = path.join(folder, `${title}.txt`);
+        const filePath = uniqueFilePath(folder, title, "txt");
         // Defense in depth: sanitizeVideoTitle already strips separators, but
         // assert the resolved path stays inside the chosen folder before writing
         // so a pathological title can never escape it.
@@ -432,12 +485,12 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         fs.writeFileSync(filePath, transcript, "utf-8");
         toast.style = Toast.Style.Success;
         toast.title = "Transcript Saved";
-        toast.message = `${title}.txt`;
+        toast.message = path.basename(filePath);
         toast.primaryAction = { title: "Open", onAction: () => open(filePath) };
         toast.secondaryAction = { title: "Copy Transcript", onAction: () => Clipboard.copy(transcript) };
         succeedSession(session, toast, filePath);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "yt-dlp");
         failSession(session, toast, error);
       } finally {
         done();
@@ -501,7 +554,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
           toast.secondaryAction = undefined;
         } else {
-          failToast(toast, error);
+          if (failToast(toast, error)) await hintOutdatedTool(toast, "gallery-dl");
         }
         failSession(session, toast, error);
       } finally {
@@ -536,7 +589,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         }
         succeedSession(session, toast, filePath);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "yt-dlp");
         failSession(session, toast, error);
       } finally {
         done();
@@ -577,10 +630,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       );
       const { signal, done } = startAbortable(toast, session);
       try {
-        // A managed spotDL binary that already exists (e.g. installed before the
-        // Rosetta guard, or copied from another machine) would otherwise fail
-        // with a cryptic "Bad CPU type". Surface the friendly hint instead.
-        if (isAppleSilicon() && !isRosettaInstalled()) throw new RosettaRequiredError();
+        // An Intel-only spotDL (the prebuilt download) on an Apple Silicon Mac
+        // without Rosetta would otherwise fail with a cryptic "Bad CPU type".
+        // Surface the friendly hint instead.
+        if (needsRosetta(getSpotdlPath())) throw new RosettaRequiredError();
         const { tracks } = await runSpotdlDownload(
           getSpotdlPath(),
           {
@@ -603,6 +656,18 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             session.count(p.tracks);
           },
         );
+        if (tracks === 0) {
+          // A private or empty playlist can exit cleanly with nothing saved —
+          // say so instead of a green "0 tracks".
+          toast.style = Toast.Style.Failure;
+          toast.title = "Nothing downloaded";
+          toast.message =
+            "spotDL saved no tracks. The playlist may be private or empty; for private playlists, turn on Spotify: User Authentication.";
+          toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
+          toast.secondaryAction = undefined;
+          failSession(session, toast);
+          return;
+        }
         toast.style = Toast.Style.Success;
         toast.title = "Download Complete";
         toast.message = `${tracks} tracks`;
@@ -610,7 +675,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.secondaryAction = undefined;
         succeedSession(session, toast);
       } catch (error) {
-        failToast(toast, error);
+        if (failToast(toast, error)) await hintOutdatedTool(toast, "spotdl");
         failSession(session, toast, error);
       } finally {
         done();
@@ -668,7 +733,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         () => undefined,
         (event) => {
           session.ytdlp(event);
-          if (event.type === "progress") toast.message = progressMessage(event.progress) || toast.message;
+          if (event.type === "progress") toast.message = progressMessage(session.getSnapshot()) || toast.message;
         },
       );
       toast.style = Toast.Style.Success;
@@ -691,7 +756,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       }
       succeedSession(session, toast, filePath);
     } catch (error) {
-      failToast(toast, error);
+      if (failToast(toast, error)) await hintOutdatedTool(toast, "yt-dlp");
       failSession(session, toast, error);
     } finally {
       done();

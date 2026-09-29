@@ -63,3 +63,11 @@ export function progressMessage(p: { percent?: number; speed?: number; eta?: num
   if (p.eta !== undefined) parts.push(`${formatClock(p.eta)} left`);
   return parts.join(" · ");
 }
+
+/**
+ * Backslash-escape Markdown syntax so text from a site (a video title, say)
+ * renders as plain text — a `[title](url)` can't become a link.
+ */
+export function escapeMarkdown(text: string): string {
+  return text.replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, "\\$&");
+}
