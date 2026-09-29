@@ -162,11 +162,24 @@ test("Bring to Front falls back to a new window unless focusWithoutNewWindow is 
   assert.doesNotMatch(await fallback({ focusWithoutNewWindow: true }), /do shell script/);
 });
 
-test("Profiles menu lookup tries Chrome's usual slot before walking every menu", () => {
-  const { chrome } = setup();
-  const lookup = chrome.profileMenuScript(browser).split("on findProfileMenu()")[1].split("end findProfileMenu")[0];
-  assert.match(lookup, /set end of menuOrder to 8[\s\S]*repeat with menuIndex in menuOrder/);
-});
+test(
+  "Profiles menu lookup tries Chrome's usual slot, then every other menu from the right",
+  { skip: process.platform !== "darwin" },
+  () => {
+    const { chrome } = setup();
+    const script = chrome.profileMenuScript(browser);
+    const order = script.slice(
+      script.indexOf("set menuOrder to {}"),
+      script.indexOf("repeat with menuIndex in menuOrder"),
+    );
+    const menuOrder = (barCount) =>
+      execFileSync("/usr/bin/osascript", ["-e", `set barCount to ${barCount}\n${order}\nreturn menuOrder`], {
+        encoding: "utf8",
+      }).trim();
+    assert.equal(menuOrder(11), "8, 11, 10, 9, 7, 6, 5, 4, 3, 2, 1");
+    assert.equal(menuOrder(5), "5, 4, 3, 2, 1");
+  },
+);
 
 test("last-used sort puts the most recently active profile first, unknown times last", () => {
   const { profiles } = setup();
