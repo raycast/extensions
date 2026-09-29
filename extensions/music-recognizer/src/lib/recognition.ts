@@ -6,7 +6,7 @@ export interface RecognitionProvider {
   /** Display name, used in user-facing messages. */
   name: string;
   /** Resolves to null when the provider has no match for the recording. */
-  recognize(wavPath: string, apiToken: string): Promise<RecognizedTrack | null>;
+  recognize(wavPath: string, apiToken: string, signal?: AbortSignal): Promise<RecognizedTrack | null>;
 }
 
 /**
@@ -19,11 +19,11 @@ export const provider: RecognitionProvider = {
 };
 
 /** Recognizes the recording written by the loopback recorder. */
-export async function recognizeWavFile(wavPath: string): Promise<RecognizedTrack | null> {
+export async function recognizeWavFile(wavPath: string, signal?: AbortSignal): Promise<RecognizedTrack | null> {
   const { apiToken } = getPreferenceValues<Preferences>();
   const token = apiToken?.trim();
   if (!token) {
     throw new Error(`Add your ${provider.name} API token in the extension preferences to identify songs.`);
   }
-  return provider.recognize(wavPath, token);
+  return provider.recognize(wavPath, token, signal);
 }

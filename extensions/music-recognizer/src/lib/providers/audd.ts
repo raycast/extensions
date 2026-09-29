@@ -59,54 +59,77 @@ function describeError(error: AudDResponse["error"]): string {
  * Sends the recording to AudD's music recognition API and maps the response
  * onto our track model. Returns null when AudD has no match.
  */
-export async function recognizeWithAudd(wavPath: string, apiToken: string): Promise<RecognizedTrack | null> {
+export async function recognizeWithAudd(
+  wavPath: string,
+  apiToken: string,
+  signal?: AbortSignal,
+): Promise<RecognizedTrack | null> {
   const form = new FormData();
   form.append("api_token", apiToken);
   form.append("return", "apple_music,spotify");
   form.append("file", new Blob([fs.readFileSync(wavPath)], { type: "audio/wav" }), "capture.wav");
 
-  let response: Response;
+  // Two things have to be able to end this request: the timeout above, and the
+  // caller's signal, which fires when the user closes the command while AudD is
+  // still answering.
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const timer = setTimeout(cancel, REQUEST_TIMEOUT_MS);
+  signal?.addEventListener("abort", cancel, { once: true });
+
   try {
-    response = await fetch(ENDPOINT, { method: "POST", body: form, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
-  } catch {
-    throw new Error("Could not reach AudD. Check your internet connection and try again.");
-  }
-  if (!response.ok) {
-    throw new Error(`AudD responded with HTTP ${response.status}.`);
-  }
+    let response: Response;
+    try {
+      response = await fetch(ENDPOINT, { method: "POST", body: form, signal: controller.signal });
+    } catch (error) {
+      // The caller aborted deliberately and ignores its own run's failures;
+      // rewriting this into a network error would only mislead.
+      if (signal?.aborted) throw error;
+      if (controller.signal.aborted) {
+        throw new Error("AudD did not respond in time. Try again.");
+      }
+      throw new Error("Could not reach AudD. Check your internet connection and try again.");
+    }
+    if (!response.ok) {
+      throw new Error(`AudD responded with HTTP ${response.status}.`);
+    }
 
-  let payload: AudDResponse;
-  try {
-    payload = (await response.json()) as AudDResponse;
-  } catch {
-    throw new Error("AudD returned a response that could not be read.");
+    let payload: AudDResponse;
+    try {
+      payload = (await response.json()) as AudDResponse;
+    } catch {
+      throw new Error("AudD returned a response that could not be read.");
+    }
+    if (payload.status !== "success") {
+      throw new Error(describeError(payload.error));
+    }
+
+    const result = payload.result;
+    if (!result?.title) return null;
+
+    const title = result.title;
+    const artist = result.artist ?? "Unknown Artist";
+    const spotifyImages = result.spotify?.album?.images ?? [];
+    const largestSpotifyImage = spotifyImages.reduce<{ url?: string; width?: number } | undefined>(
+      (best, image) => ((image.width ?? 0) > (best?.width ?? 0) ? image : best),
+      undefined,
+    );
+
+    return {
+      id: `${artist}-${title}-${Date.now()}`,
+      title,
+      artist,
+      album: result.album,
+      year: result.release_date?.slice(0, 4),
+      coverUrl: largestSpotifyImage?.url ?? appleArtwork(result.apple_music?.artwork?.url),
+      songUrl: result.song_link,
+      spotifyUrl: result.spotify?.external_urls?.spotify,
+      // AudD doesn't return a YouTube Music link; the actions fall back to search.
+      appleMusicUrl: stripQuery(result.apple_music?.url),
+      recognizedAt: Date.now(),
+    };
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", cancel);
   }
-  if (payload.status !== "success") {
-    throw new Error(describeError(payload.error));
-  }
-
-  const result = payload.result;
-  if (!result?.title) return null;
-
-  const title = result.title;
-  const artist = result.artist ?? "Unknown Artist";
-  const spotifyImages = result.spotify?.album?.images ?? [];
-  const largestSpotifyImage = spotifyImages.reduce<{ url?: string; width?: number } | undefined>(
-    (best, image) => ((image.width ?? 0) > (best?.width ?? 0) ? image : best),
-    undefined,
-  );
-
-  return {
-    id: `${artist}-${title}-${Date.now()}`,
-    title,
-    artist,
-    album: result.album,
-    year: result.release_date?.slice(0, 4),
-    coverUrl: largestSpotifyImage?.url ?? appleArtwork(result.apple_music?.artwork?.url),
-    songUrl: result.song_link,
-    spotifyUrl: result.spotify?.external_urls?.spotify,
-    // AudD doesn't return a YouTube Music link; the actions fall back to search.
-    appleMusicUrl: stripQuery(result.apple_music?.url),
-    recognizedAt: Date.now(),
-  };
 }

@@ -39,7 +39,10 @@ export default function RecognizeCommand() {
       }
 
       setStage({ kind: "recognizing" });
-      const track = await recognizeWavFile(wavPath);
+      const track = await recognizeWavFile(wavPath, controller.signal);
+      // The window can close while the provider is still answering. A match
+      // nobody got to see must not silently land in history either.
+      if (controller.signal.aborted) return;
 
       if (!track) {
         setStage({ kind: "no-match", silent: false });

@@ -23,45 +23,49 @@ using System.Threading;
 
 namespace MusicRecognizer
 {
+    // Every WASAPI method below is declared [PreserveSig] so that its HRESULT
+    // arrives as the return value and Check() can report it. Without it the CLR
+    // treats the HRESULT as its own business, throws for a failure and never lets
+    // the callee write the declared int - so the checks would inspect nothing.
     [ComImport, Guid("BCDE0395-E52F-467C-8E3D-C4579291692E")]
     internal class MMDeviceEnumeratorComObject { }
 
     [ComImport, Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IMMDeviceEnumerator
     {
-        int EnumAudioEndpoints_NotImpl();
-        int GetDefaultAudioEndpoint(int dataFlow, int role, out IMMDevice endpoint);
+        [PreserveSig] int EnumAudioEndpoints_NotImpl();
+        [PreserveSig] int GetDefaultAudioEndpoint(int dataFlow, int role, out IMMDevice endpoint);
     }
 
     [ComImport, Guid("D666063F-1587-4E43-81F1-B948E807363F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IMMDevice
     {
-        int Activate(ref Guid iid, int clsCtx, IntPtr activationParams, [MarshalAs(UnmanagedType.IUnknown)] out object iface);
+        [PreserveSig] int Activate(ref Guid iid, int clsCtx, IntPtr activationParams, [MarshalAs(UnmanagedType.IUnknown)] out object iface);
     }
 
     [ComImport, Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAudioClient
     {
-        int Initialize(int shareMode, int streamFlags, long bufferDuration, long periodicity, IntPtr format, IntPtr audioSessionGuid);
-        int GetBufferSize(out int bufferFrameCount);
-        int GetStreamLatency_NotImpl();
-        int GetCurrentPadding(out int padding);
-        int IsFormatSupported_NotImpl();
-        int GetMixFormat(out IntPtr format);
-        int GetDevicePeriod_NotImpl();
-        int Start();
-        int Stop();
-        int Reset_NotImpl();
-        int SetEventHandle_NotImpl();
-        int GetService(ref Guid iid, [MarshalAs(UnmanagedType.IUnknown)] out object service);
+        [PreserveSig] int Initialize(int shareMode, int streamFlags, long bufferDuration, long periodicity, IntPtr format, IntPtr audioSessionGuid);
+        [PreserveSig] int GetBufferSize(out int bufferFrameCount);
+        [PreserveSig] int GetStreamLatency_NotImpl();
+        [PreserveSig] int GetCurrentPadding(out int padding);
+        [PreserveSig] int IsFormatSupported_NotImpl();
+        [PreserveSig] int GetMixFormat(out IntPtr format);
+        [PreserveSig] int GetDevicePeriod_NotImpl();
+        [PreserveSig] int Start();
+        [PreserveSig] int Stop();
+        [PreserveSig] int Reset_NotImpl();
+        [PreserveSig] int SetEventHandle_NotImpl();
+        [PreserveSig] int GetService(ref Guid iid, [MarshalAs(UnmanagedType.IUnknown)] out object service);
     }
 
     [ComImport, Guid("C8ADBD64-E71E-48a0-A4DE-185C395CD317"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAudioCaptureClient
     {
-        int GetBuffer(out IntPtr dataPtr, out int numFrames, out int flags, out long devicePosition, out long qpcPosition);
-        int ReleaseBuffer(int numFramesRead);
-        int GetNextPacketSize(out int numFramesInNextPacket);
+        [PreserveSig] int GetBuffer(out IntPtr dataPtr, out int numFrames, out int flags, out long devicePosition, out long qpcPosition);
+        [PreserveSig] int ReleaseBuffer(int numFramesRead);
+        [PreserveSig] int GetNextPacketSize(out int numFramesInNextPacket);
     }
 
     public static class LoopbackRecorder
@@ -83,6 +87,23 @@ namespace MusicRecognizer
         {
             b[off] = (byte)(v & 0xFF);
             b[off + 1] = (byte)((v >> 8) & 0xFF);
+        }
+
+        // One little-endian integer PCM sample scaled to -1..1. A container holds
+        // its sample left-justified, so 24 valid bits inside a 32-bit container
+        // scale exactly like a full 32-bit one.
+        private static float IntegerSample(byte[] buf, int offset, int sampleBytes)
+        {
+            if (sampleBytes == 2)
+                return (short)(buf[offset] | (buf[offset + 1] << 8)) / 32768f;
+            if (sampleBytes == 3)
+            {
+                int packed = buf[offset] | (buf[offset + 1] << 8) | (buf[offset + 2] << 16);
+                if ((packed & 0x800000) != 0) packed -= 0x1000000;
+                return packed / 8388608f;
+            }
+            int wide = buf[offset] | (buf[offset + 1] << 8) | (buf[offset + 2] << 16) | (buf[offset + 3] << 24);
+            return wide / 2147483648f;
         }
 
         public static string Record(string outPath, int seconds, int targetRate)
@@ -109,7 +130,11 @@ namespace MusicRecognizer
                 Marshal.Copy(new IntPtr(fmt.ToInt64() + 24), sub, 0, 16);
                 isFloat = new Guid(sub) == new Guid("00000003-0000-0010-8000-00aa00389b71");
             }
-            if (!(isFloat && bits == 32) && !(!isFloat && bits == 16))
+            // 32-bit float is what the Windows audio engine mixes in on nearly every
+            // machine, but some interfaces report integer PCM in a 16, 24 or 32-bit
+            // container instead; all of them convert to our 16-bit mono WAV.
+            bool supported = isFloat ? bits == 32 : (bits == 16 || bits == 24 || bits == 32);
+            if (!supported)
                 throw new NotSupportedException("Unsupported mix format: tag=" + formatTag + " bits=" + bits);
 
             // Shared mode + AUDCLNT_STREAMFLAGS_LOOPBACK, 1 s internal buffer
@@ -148,12 +173,14 @@ namespace MusicRecognizer
                 }
                 else
                 {
-                    var buf = new short[frames * channels];
+                    int sampleBytes = bits / 8;
+                    var buf = new byte[frames * channels * sampleBytes];
                     Marshal.Copy(data, buf, 0, buf.Length);
                     for (int i = 0; i < frames; i++)
                     {
                         float sum = 0f;
-                        for (int c = 0; c < channels; c++) sum += buf[i * channels + c] / 32768f;
+                        for (int c = 0; c < channels; c++)
+                            sum += IntegerSample(buf, (i * channels + c) * sampleBytes, sampleBytes);
                         mono.Add(sum / channels);
                     }
                 }
