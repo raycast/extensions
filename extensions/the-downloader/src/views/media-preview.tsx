@@ -4,6 +4,7 @@ import { formatClock } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { formatCount, formatRows, formatUploadDate, qualityName } from "../lib/media-info.js";
 import { Format, Video } from "../types.js";
+import { CHAT_SHORTCUT, VideoChat } from "./video-chat.js";
 
 function escapeMarkdown(text: string): string {
   return text.replace(/([\\`*_[\]<>#|])/g, "\\$1");
@@ -90,6 +91,12 @@ export function MediaPreview({ video, url }: { video: Video; url: string }) {
       actions={
         <ActionPanel>
           <Action title="Back to Download" icon={Icon.Download} onAction={pop} />
+          <Action.Push
+            title="Chat About Video"
+            icon={Icon.SpeechBubbleActive}
+            shortcut={CHAT_SHORTCUT}
+            target={<VideoChat url={url} />}
+          />
           <Action.OpenInBrowser title="Open Original" url={url} shortcut={Keyboard.Shortcut.Common.Open} />
           <Action.CopyToClipboard title="Copy Title" content={video.title} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action.CopyToClipboard title="Copy URL" content={url} />

@@ -61,3 +61,8 @@ export function safeImageUrl(url: string | undefined): string | undefined {
     return undefined;
   }
 }
+
+/** Downloads made with yt-dlp from a video page, which Chat About Video can open. */
+export function canChat(kind: DownloadKind): boolean {
+  return kind === "video" || kind === "audio" || kind === "transcript" || kind === "thumbnail";
+}

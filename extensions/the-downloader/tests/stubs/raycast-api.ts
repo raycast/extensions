@@ -41,3 +41,30 @@ export const LocalStorage = {
 const names = new Proxy({}, { get: (_target, key) => String(key) }) as Record<string, string>;
 export const Color = names;
 export const Icon = names;
+
+// In-memory Cache, one map per namespace like the real on-disk cache.
+const caches = new Map<string, Map<string, string>>();
+
+export class Cache {
+  private readonly store: Map<string, string>;
+  constructor(options: { namespace?: string } = {}) {
+    const ns = options.namespace ?? "";
+    if (!caches.has(ns)) caches.set(ns, new Map());
+    this.store = caches.get(ns) as Map<string, string>;
+  }
+  get(key: string): string | undefined {
+    return this.store.get(key);
+  }
+  set(key: string, value: string): void {
+    this.store.set(key, value);
+  }
+  has(key: string): boolean {
+    return this.store.has(key);
+  }
+  remove(key: string): boolean {
+    return this.store.delete(key);
+  }
+  clear(): void {
+    this.store.clear();
+  }
+}

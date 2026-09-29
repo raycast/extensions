@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hostOf, itemNoun, safeImageUrl } from "../src/lib/kinds";
+import { canChat, hostOf, itemNoun, safeImageUrl } from "../src/lib/kinds";
 
 describe("safeImageUrl", () => {
   it("keeps https URLs and escapes parentheses for Markdown", () => {
@@ -20,5 +20,12 @@ describe("hostOf / itemNoun", () => {
     expect(hostOf("https://www.youtube.com/watch?v=1")).toBe("youtube.com");
     expect(itemNoun("spotify")).toBe("track");
     expect(itemNoun("gallery")).toBe("file");
+  });
+});
+
+describe("canChat", () => {
+  it("offers chat for downloads made from a video page", () => {
+    expect(["video", "audio", "transcript", "thumbnail"].every((k) => canChat(k as never))).toBe(true);
+    expect(["gallery", "spotify", "website"].some((k) => canChat(k as never))).toBe(false);
   });
 });

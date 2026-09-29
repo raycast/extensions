@@ -31,8 +31,9 @@ import {
   matchesFilter,
   removeFromHistory,
 } from "../lib/history.js";
-import { KIND_COLOR, KIND_ICON, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
+import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
 import { markdownImage } from "../lib/svg.js";
+import { CHAT_SHORTCUT, VideoChat } from "./video-chat.js";
 
 const FILTERS: { value: HistoryFilter; title: string; icon: Icon }[] = [
   { value: "all", title: "All Downloads", icon: Icon.Download },
@@ -292,6 +293,14 @@ export function DownloadHistory() {
                         }}
                         onAction={() => downloadAgain(e.url)}
                       />
+                      {canChat(e.kind) && (
+                        <Action.Push
+                          title="Chat About Video"
+                          icon={Icon.SpeechBubbleActive}
+                          shortcut={CHAT_SHORTCUT}
+                          target={<VideoChat url={e.url} />}
+                        />
+                      )}
                       <Action
                         title={showingDetail ? "Hide Details" : "Show Details"}
                         icon={showingDetail ? Icon.EyeDisabled : Icon.Eye}

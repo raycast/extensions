@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
-import { LocalStorage } from "@raycast/api";
 import { DownloadKind, DownloadSnapshot, knownTotalBytes } from "./download-session.js";
+import { jsonStore } from "./json-store.js";
 
 /** One finished (or failed) download, as shown in the Download History command. */
 export type HistoryEntry = {
@@ -134,26 +134,11 @@ export function groupByDay(entries: HistoryEntry[], now = Date.now()): { title: 
   }));
 }
 
-// ---------------------------------------------------------------------------
-// Storage. Writes are chained so two downloads finishing together can't drop
-// each other's entry in a read-modify-write race.
-// ---------------------------------------------------------------------------
+// Storage (see jsonStore: writes are serialized).
+const store = jsonStore<HistoryEntry>(STORAGE_KEY, parseHistory);
 
-let writeChain: Promise<unknown> = Promise.resolve();
-
-function mutate(change: (list: HistoryEntry[]) => HistoryEntry[]): Promise<HistoryEntry[]> {
-  const next = writeChain.then(async () => {
-    const list = change(parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY)));
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    return list;
-  });
-  writeChain = next.catch(() => undefined);
-  return next;
-}
-
-export async function loadHistory(): Promise<HistoryEntry[]> {
-  await writeChain;
-  return parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY));
+export function loadHistory(): Promise<HistoryEntry[]> {
+  return store.load();
 }
 
 /** Record a finished download. Never throws: history is a convenience, not part of the download. */
@@ -165,16 +150,16 @@ export async function recordDownload(entry: HistoryEntry | undefined): Promise<v
       if (stat?.isFile()) entry = { ...entry, bytes: stat.size };
     }
     const recorded = entry;
-    await mutate((list) => addEntry(list, recorded));
+    await store.mutate((list) => addEntry(list, recorded));
   } catch (error) {
     console.error("Could not record download history", error);
   }
 }
 
 export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
-  return mutate((list) => removeEntry(list, id));
+  return store.mutate((list) => removeEntry(list, id));
 }
 
 export function clearHistory(): Promise<HistoryEntry[]> {
-  return mutate(() => []);
+  return store.mutate(() => []);
 }

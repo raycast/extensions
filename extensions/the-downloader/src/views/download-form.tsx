@@ -63,6 +63,7 @@ import {
 } from "../utils.js";
 import { DownloadView } from "./download-view.js";
 import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
+import { CHAT_SHORTCUT, VideoChat } from "./video-chat.js";
 import { MediaPreview } from "./media-preview.js";
 import Installer from "./installer.js";
 import Updater from "./updater.js";
@@ -710,6 +711,14 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
                 title="Preview Media"
                 shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                 target={<MediaPreview video={video} url={normalizeUrl(url)} />}
+              />
+            )}
+            {validUrl && ytdlpBound && (
+              <Action.Push
+                icon={Icon.SpeechBubbleActive}
+                title="Chat About Video"
+                shortcut={CHAT_SHORTCUT}
+                target={<VideoChat url={normalizeUrl(url)} />}
               />
             )}
             <Action.Push

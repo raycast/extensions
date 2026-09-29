@@ -7,6 +7,7 @@ import { forceIpv4, getDenoPath, getffmpegPath, getIdleTimeoutMs, getytdlPath, s
 import { fetchVideoInfo, isLiveStream } from "./lib/ytdlp.js";
 import { runWithWatchdog } from "./lib/run.js";
 import SRTParser from "srt-parser-2";
+import { Video } from "./types.js";
 
 /**
  * Pick a scratch directory for the subtitle download. Prefer Raycast's support
@@ -24,7 +25,87 @@ function transcriptScratchRoot(): string {
   return os.tmpdir();
 }
 
-export default async function extractTranscript(url: string, language: string = "en", signal?: AbortSignal) {
+/** No usable captions. Carries the metadata fetched on the way, so callers can still show what they know. */
+export class NoTranscriptError extends Error {
+  constructor(
+    message: string,
+    readonly video: Video,
+  ) {
+    super(message);
+    this.name = "NoTranscriptError";
+  }
+}
+
+/** Languages to try, most wanted first. `auto` means the video's own language, then English. */
+export function subtitleLanguages(requested: string, videoLanguage?: string | null): string[] {
+  const wanted = requested === "auto" ? [videoLanguage ?? "", "en"] : [requested];
+  return [...new Set(wanted.map((l) => l.trim()).filter(Boolean))];
+}
+
+/**
+ * The `--sub-langs` value. yt-dlp matches sub langs by an anchored regex, so a
+ * bare `en` misses en-US / en-GB / en-orig; the `<lang>.*` form catches them,
+ * and listing the exact form first keeps priority obvious.
+ */
+export function subLangsArg(languages: string[]): string {
+  return languages.flatMap((l) => [l, `${l}.*`]).join(",");
+}
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** The subtitle file for the most wanted language: `<id>.<lang>.srt` first, then a variant such as `<id>.<lang>-US.srt`. */
+export function pickSubtitleFile(files: string[], languages: string[]): string | undefined {
+  const srt = files.filter((f) => f.endsWith(".srt"));
+  for (const lang of languages) {
+    const exact = srt.find((f) => f.endsWith(`.${lang}.srt`));
+    if (exact) return exact;
+    const variant = srt.find((f) => new RegExp(`\\.${escapeRegExp(lang)}[-_][^.]*\\.srt$`).test(f));
+    if (variant) return variant;
+  }
+  return srt[0];
+}
+
+/**
+ * The one caption track to fetch, from the tracks the metadata lists: uploaded
+ * captions in the most wanted language (or a regional variant such as en-US),
+ * then the site's transcription of the spoken language (YouTube's `<lang>-orig`),
+ * then any automatic track in that language. Asking for one track instead of a
+ * pattern keeps YouTube from rate-limiting the extra caption requests. With
+ * `anyLanguage`, a video with none of those falls back to whatever it has.
+ */
+export function pickSubtitleTrack(
+  video: Video,
+  languages: string[],
+  { anyLanguage = false }: { anyLanguage?: boolean } = {},
+): string | undefined {
+  const uploaded = Object.keys(video.subtitles ?? {}).filter((l) => l !== "live_chat");
+  const automatic = Object.keys(video.automatic_captions ?? {});
+  for (const lang of languages) {
+    const track =
+      uploaded.find((l) => l === lang) ??
+      uploaded.find((l) => l.startsWith(`${lang}-`)) ??
+      automatic.find((l) => l === `${lang}-orig`) ??
+      automatic.find((l) => l === lang) ??
+      automatic.find((l) => l.startsWith(`${lang}-`));
+    if (track) return track;
+  }
+  return anyLanguage ? (uploaded[0] ?? automatic.find((l) => l.endsWith("-orig"))) : undefined;
+}
+
+/** The language code in a `<id>.<lang>.srt` file name. */
+function languageOf(file: string): string {
+  return file.slice(0, -".srt".length).split(".").pop() ?? "";
+}
+
+/**
+ * Fetch a video's metadata and the raw SRT of its best matching subtitle track
+ * (uploaded or automatic). `requested` is a language code or `auto`.
+ */
+export async function fetchSubtitles(
+  url: string,
+  requested: string,
+  signal?: AbortSignal,
+): Promise<{ video: Video; srt: string; language: string }> {
   const ytdlPath = getytdlPath();
   const ffmpegPath = getffmpegPath();
 
@@ -53,6 +134,16 @@ export default async function extractTranscript(url: string, language: string = 
     throw new Error("Live streams are not supported");
   }
 
+  const wanted = subtitleLanguages(requested, video.language);
+  const listed = Object.keys(video.subtitles ?? {}).length + Object.keys(video.automatic_captions ?? {}).length > 0;
+  // `auto` means "whatever is spoken", so any track beats none (a model can read other languages).
+  const track = pickSubtitleTrack(video, wanted, { anyLanguage: requested === "auto" });
+  if (listed && !track) {
+    throw new NoTranscriptError(`No ${wanted.join("/")} subtitles found for this video`, video);
+  }
+  // Sites that don't list their tracks up front get the pattern instead.
+  const languages = track ? [track] : wanted;
+
   // Per-call scratch directory under the support path. A fresh subdir per
   // invocation avoids two concurrent transcript extractions (e.g. from the
   // Download form and the extract-transcript tool at the same time) clobbering
@@ -69,11 +160,8 @@ export default async function extractTranscript(url: string, language: string = 
       "--write-auto-sub", // Write automatically generated subtitles
       "--skip-download", // Don't download the video
       "--no-playlist", // A watch?v=…&list=… URL must not fetch the whole playlist's subs
-      // Match regional / auto-caption variants: yt-dlp matches sub langs by an
-      // anchored regex, so a bare `en` misses en-US / en-GB / en-orig. The
-      // `<lang>.*` form catches them; the exact form keeps priority obvious.
       "--sub-langs",
-      `${language},${language}.*`,
+      track ? escapeRegExp(track) : subLangsArg(languages),
       "--convert-subs", // Convert subtitles to srt format
       "srt",
       "--ffmpeg-location",
@@ -84,39 +172,71 @@ export default async function extractTranscript(url: string, language: string = 
       url,
     ];
     const { code, stderr } = await runWithWatchdog(ytdlPath, args, { idleMs: getIdleTimeoutMs(), abortSignal: signal });
-    if (code !== 0) {
-      throw new Error(stderr.trim() || "Failed to download subtitles");
-    }
 
-    // Find the downloaded subtitle file
-    const files = fs.readdirSync(tmpDir);
-    const subtitleFile = files.find((f) => f.endsWith(".srt"));
+    // Find the downloaded subtitle file. yt-dlp can exit non-zero after saving
+    // one track and failing another; a saved track is still good.
+    const subtitleFile = pickSubtitleFile(fs.readdirSync(tmpDir), languages);
 
     if (!subtitleFile) {
-      throw new Error(`No ${language} subtitles found for this video`);
-    }
-
-    // Read and parse the subtitle file
-    const subtitleContent = fs.readFileSync(path.join(tmpDir, subtitleFile), "utf-8");
-
-    // Convert SRT to markdown
-    const transcript = cleanUpSrt(subtitleContent);
-
-    // A subtitle track made up entirely of music cues / bracketed sound effects
-    // cleans up to an empty string. Treat that as a failure rather than writing
-    // a 0-byte file under a green "Saved" toast or returning "" to the AI tool.
-    if (!transcript.trim()) {
-      throw new Error("No usable transcript text found for this video.");
+      const message = stderr.trim() || "Failed to download subtitles";
+      if (code !== 0 && !/subtitle/i.test(message)) throw new Error(message);
+      // The metadata is already here, so a caption failure (none in this
+      // language, or e.g. HTTP 429 on the caption file) keeps the video usable.
+      const lastError = message
+        .split("\n")
+        .filter((line) => line.startsWith("ERROR:"))
+        .pop()
+        ?.replace(/^ERROR:\s*/, "");
+      throw new NoTranscriptError(
+        code !== 0 ? (lastError ?? message) : `No ${languages.join("/")} subtitles found for this video`,
+        video,
+      );
     }
 
     return {
-      transcript,
-      title: sanitizeVideoTitle(video.title),
+      video,
+      srt: fs.readFileSync(path.join(tmpDir, subtitleFile), "utf-8"),
+      language: languageOf(subtitleFile),
     };
   } finally {
     // Always clean up — success or error — so a partial scratch never leaks.
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
+}
+
+export default async function extractTranscript(url: string, language: string = "en", signal?: AbortSignal) {
+  const { video, srt } = await fetchSubtitles(url, language, signal);
+
+  // Convert SRT to markdown
+  const transcript = cleanUpSrt(srt);
+
+  // A subtitle track made up entirely of music cues / bracketed sound effects
+  // cleans up to an empty string. Treat that as a failure rather than writing
+  // a 0-byte file under a green "Saved" toast or returning "" to the AI tool.
+  if (!transcript.trim()) {
+    throw new Error("No usable transcript text found for this video.");
+  }
+
+  return {
+    transcript,
+    title: sanitizeVideoTitle(video.title),
+  };
+}
+
+/** A stretch of speech that starts `start` seconds into the video. */
+export type TranscriptSegment = { start: number; text: string };
+
+/**
+ * The transcript as timestamped segments, plus the metadata fetched on the way.
+ * `language` defaults to the video's own language, falling back to English.
+ */
+export async function fetchTranscriptSegments(url: string, language = "auto", signal?: AbortSignal) {
+  const { video, srt, language: found } = await fetchSubtitles(url, language, signal);
+  const segments = srtToSegments(srt);
+  if (segments.length === 0) {
+    throw new NoTranscriptError("No usable transcript text found for this video.", video);
+  }
+  return { video, segments, language: found };
 }
 
 export function cleanUpSrt(srtContent: string): string {
@@ -164,4 +284,58 @@ export function cleanUpSrt(srtContent: string): string {
     .replace(/\([^)]*\)/g, "") // Remove parentheses content
     .replace(/♪/g, "") // Remove music symbols
     .trim();
+}
+
+/** Caption markup and sound cues that never belong in a transcript. */
+function cleanCaptionText(text: string): string {
+  return text
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .replace(/<[^>]+>/g, "") // Remove HTML tags
+    .replace(/\{[^}]+\}/g, "") // Remove curly brace formatting
+    .replace(/\[.*?\]/g, "") // Remove square bracket content
+    .replace(/\([^)]*\)/g, "") // Remove parentheses content
+    .replace(/♪/g, "") // Remove music symbols
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * The transcript as segments of about `windowSeconds` each, keeping when each
+ * one starts. Uses the same rolling-caption handling as `cleanUpSrt`, so the
+ * joined text matches the plain transcript apart from spacing.
+ */
+export function srtToSegments(srtContent: string, windowSeconds = 30): TranscriptSegment[] {
+  const parser = new SRTParser();
+  const segments: TranscriptSegment[] = [];
+  let current: { start: number; parts: string[] } | undefined;
+  let previousText = "";
+
+  const flush = () => {
+    if (!current) return;
+    const text = current.parts.join(" ");
+    if (text) segments.push({ start: current.start, text });
+    current = undefined;
+  };
+
+  for (const cue of parser.fromSrt(srtContent)) {
+    const currentText = cue.text.trim();
+    if (!currentText || currentText === previousText) continue;
+
+    let piece = "";
+    if (previousText !== "" && currentText.startsWith(previousText)) {
+      piece = currentText.substring(previousText.length).trim();
+    } else if (!previousText.includes(currentText)) {
+      piece = currentText;
+    }
+    previousText = currentText;
+    // Clean per cue, so a segment starts at its first spoken line, not at a dropped "[Music]".
+    const spoken = cleanCaptionText(piece);
+    if (!spoken) continue;
+
+    if (current && cue.startSeconds - current.start >= windowSeconds) flush();
+    if (!current) current = { start: Math.max(0, cue.startSeconds), parts: [] };
+    current.parts.push(spoken);
+  }
+  flush();
+  return segments;
 }

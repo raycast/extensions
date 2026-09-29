@@ -16,10 +16,11 @@ import {
 } from "@raycast/api";
 import { HERO_W, downloadHeroSvg, heroFrameKey } from "../lib/charts.js";
 import { DownloadSession, DownloadSnapshot, knownTotalBytes, useDownloadSession } from "../lib/download-session.js";
-import { KIND_COLOR, KIND_ICON, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
+import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
 import { formatBytes, formatClock, plural } from "../lib/format.js";
 import { markdownImage } from "../lib/svg.js";
 import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
+import { CHAT_SHORTCUT, VideoChat } from "./video-chat.js";
 
 function statusLabel(s: DownloadSnapshot): { text: string; icon: { source: Icon; tintColor: Color } } {
   switch (s.status) {
@@ -191,6 +192,14 @@ export function DownloadView({ session }: { session: DownloadSession }) {
               shortcut={HISTORY_SHORTCUT}
               target={<DownloadHistory />}
             />
+            {canChat(s.kind) && (
+              <Action.Push
+                title="Chat About Video"
+                icon={Icon.SpeechBubbleActive}
+                shortcut={CHAT_SHORTCUT}
+                target={<VideoChat url={s.url} />}
+              />
+            )}
             <Action.OpenInBrowser title="Open Original" url={s.url} shortcut={Keyboard.Shortcut.Common.Open} />
             <Action.CopyToClipboard title="Copy Original URL" content={s.url} />
           </ActionPanel.Section>

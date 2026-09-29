@@ -47,6 +47,17 @@
       "description": "Browse, open and re-download everything you've downloaded with The Downloader.",
       "mode": "view",
       "keywords": ["recent", "downloads", "library"]
+    },
+    {
+      "name": "chat-video",
+      "title": "Chat About Video",
+      "subtitle": "The Downloader",
+      "description": "Paste a video link and ask anything about it. Loads the transcript, details and statistics, and answers with Raycast AI, Apple Intelligence or Ollama.",
+      "mode": "view",
+      "keywords": ["ai", "summarize", "summary", "youtube", "transcript", "ask", "questions"],
+      "arguments": [
+        { "name": "url", "type": "text", "placeholder": "Video URL", "required": false }
+      ]
     }
   ],
   "tools": [
@@ -58,7 +69,12 @@
     {
       "name": "extract-transcript",
       "title": "Extract Video Transcript",
-      "description": "Extracts the transcript/subtitles from a video URL as Markdown"
+      "description": "Gets a video's details and its transcript with [m:ss] timestamps, for summarizing or answering questions about what is said"
+    },
+    {
+      "name": "get-video-info",
+      "title": "Get Video Info",
+      "description": "Gets a video's details and statistics without downloading it: title, channel, duration, views, likes, comments, engagement rates, chapters, tags, description and caption languages"
     }
   ],
   "preferences": [
@@ -309,6 +325,70 @@
       "required": false
     },
     {
+      "name": "aiEngine",
+      "title": "Chat: AI Engine",
+      "description": "Which model answers in Chat About Video. Automatic uses Raycast AI when you have access, then Apple Intelligence on macOS 27, then a running Ollama.",
+      "type": "dropdown",
+      "default": "auto",
+      "required": false,
+      "data": [
+        { "title": "Automatic", "value": "auto" },
+        { "title": "Raycast AI", "value": "raycast" },
+        { "title": "Apple Intelligence (On-Device)", "value": "apple" },
+        { "title": "Apple Intelligence (Private Cloud)", "value": "apple-pcc" },
+        { "title": "Ollama (Local)", "value": "ollama" }
+      ]
+    },
+    {
+      "name": "raycastModel",
+      "title": "Chat: Raycast AI Model",
+      "description": "Model for Raycast AI answers. Default follows Raycast's own choice.",
+      "type": "dropdown",
+      "default": "",
+      "required": false,
+      "data": [
+        { "title": "Raycast Default", "value": "" },
+        { "title": "Claude Sonnet 5", "value": "anthropic-claude-sonnet-5" },
+        { "title": "Claude Haiku 4.5", "value": "anthropic-claude-4-5-haiku" },
+        { "title": "GPT-5.6 Terra", "value": "openai-gpt-5.6-terra" },
+        { "title": "GPT-5 mini", "value": "openai-gpt-5-mini" },
+        { "title": "Gemini 3.8 Flash", "value": "google-gemini-3.8-flash" },
+        { "title": "Gemini 3.1 Pro", "value": "google-gemini-3.1-pro" }
+      ]
+    },
+    {
+      "name": "ollamaUrl",
+      "title": "Chat: Ollama URL",
+      "description": "Address of your Ollama server.",
+      "type": "textfield",
+      "default": "http://127.0.0.1:11434",
+      "required": false
+    },
+    {
+      "name": "ollamaModel",
+      "title": "Chat: Ollama Model",
+      "description": "Model name, e.g. `llama3.2` or `qwen3:8b`. Leave blank to use the first installed model.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "ollamaContext",
+      "title": "Chat: Ollama Context Size",
+      "description": "Context window (num_ctx) in tokens. Larger fits more of the transcript but needs more memory. Integer; default 8192.",
+      "type": "textfield",
+      "default": "8192",
+      "required": false
+    },
+    {
+      "name": "transcriptLanguage",
+      "title": "Chat: Transcript Language",
+      "description": "Caption language to load, as a code like `en` or `de`. Auto uses the video's own language, then English.",
+      "type": "textfield",
+      "default": "auto",
+      "required": false
+    },
+    {
       "name": "networkIdleTimeoutSec",
       "title": "Network: Idle Timeout",
       "description": "Seconds of silence from a download before the extension assumes it is wedged and kills the child process. Real downloads emit progress every second, so 120 is plenty for fast networks; raise it on very slow links. Integer; default 120.",
@@ -318,7 +398,12 @@
     }
   ],
   "ai": {
-    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it.",
+    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. When answering from a transcript, point to moments with their timestamp as a link, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows, and only state what the transcript and video details support. Reply in the user's language.",
+    "skills": [
+      { "name": "summarize-video", "title": "Summarize Video" },
+      { "name": "video-study-notes", "title": "Video Study Notes" },
+      { "name": "video-performance", "title": "Video Performance" }
+    ],
     "evals": [
       {
         "input": "@the-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
@@ -350,7 +435,7 @@
       {
         "input": "@the-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
         "mocks": {
-          "extract-transcript": "Nvidia earnings are the Super Bowl of business..."
+          "extract-transcript": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
         },
         "expected": [
           {
@@ -360,6 +445,67 @@
               },
               "name": "extract-transcript"
             }
+          },
+          {
+            "includes": "2:31"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader how is this video doing? https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "get-video-info": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Statistics\n- Views: 48.2K\n- Likes: 1.1K\n- Comments: 64\n- Channel subscribers: 61K\n- Uploaded: Jan 16, 2024\n- Age: 987 days\n- Views per day: 49\n- Likes per 100 views: 2.28\n- Comments per 1,000 views: 1.33\n\n## Captions\n- Automatic captions: en-orig"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "get-video-info"
+            }
+          },
+          {
+            "includes": "48"
+          },
+          {
+            "not": {
+              "callsTool": "download-video"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader summarize https://www.youtube.com/watch?v=ykaj0pS4A1A in 3 bullet points",
+        "mocks": {
+          "extract-transcript": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Transcript\n[0:00] Focus helps you block distracting apps and websites.\n[0:20] Start a session from Raycast and pick what to block.\n[0:40] Take breaks and review your sessions.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=ykaj0pS4A1A&t=245s)."
+        },
+        "expected": [
+          {
+            "callsTool": "extract-transcript"
+          },
+          {
+            "meetsCriteria": "Summarizes the video in about three bullet points about blocking distractions with Focus, and links at least one timestamp"
+          },
+          {
+            "not": {
+              "callsTool": "download-video"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader was hat er über Elon Musk gesagt? https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "usedAsExample": false,
+        "mocks": {
+          "extract-transcript": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
+        },
+        "expected": [
+          {
+            "callsTool": "extract-transcript"
+          },
+          {
+            "meetsCriteria": "Answers in German that Elon Musk said xAI will keep buying Nvidia chips, and points to 2:31"
           }
         ]
       }
