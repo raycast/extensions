@@ -1,21 +1,30 @@
-import { Action, ActionPanel, List, Icon, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { Project } from "../types";
 import { TaskList } from "../../tasks/components/TaskList";
 import { ActivityList } from "../../activities/components/ActivityList";
-import { setStatus, removeStatus, getStatus, StatusType } from "../../utils/storage";
+import { StatusType } from "../../../utils/storage";
 
 interface Props {
-  index: number;
   project: Project;
-  updateProject: (index: number, newValue: Project) => void;
+  status?: StatusType;
+  showHidden: boolean;
+  onStatusChange: (project: Project, status: StatusType | undefined) => void;
+  onToggleShowHidden: () => void;
 }
 
-export const ProjectListItem: React.FC<Props> = ({ index, project, updateProject }) => {
+export const ProjectListItem: React.FC<Props> = ({
+  project,
+  status,
+  showHidden,
+  onStatusChange,
+  onToggleShowHidden,
+}) => {
   return (
     <List.Item
       key={project.id}
       title={project.name}
-      subtitle={project.customer!.name}
+      icon={status === StatusType.favorite ? Icon.Star : undefined}
+      subtitle={project.customer?.name}
       actions={
         <ActionPanel>
           <Action.Push title={`Select Task`} target={<TaskList project={project} />} />
@@ -24,18 +33,36 @@ export const ProjectListItem: React.FC<Props> = ({ index, project, updateProject
             target={<ActivityList projectID={project.id} />}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
           />
+          {status === StatusType.favorite ? (
+            <Action
+              title="Remove Project from Favorites"
+              onAction={() => onStatusChange(project, undefined)}
+              icon={Icon.StarDisabled}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+            />
+          ) : (
+            <Action
+              title="Add Project to Favorites"
+              onAction={() => onStatusChange(project, StatusType.favorite)}
+              icon={Icon.Star}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+            />
+          )}
+          {status === StatusType.hidden ? (
+            <Action title="Unhide Project" onAction={() => onStatusChange(project, undefined)} icon={Icon.Eye} />
+          ) : (
+            <Action
+              title="Hide Project"
+              onAction={() => onStatusChange(project, StatusType.hidden)}
+              icon={Icon.XMarkCircle}
+            />
+          )}
           <Action
-            title="Add Project to Favorites"
-            onAction={() => setStatus(project, StatusType.favorite).then(() => console.log(LocalStorage.allItems()))}
-            icon={Icon.Star}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            title={showHidden ? "Hide Hidden Projects" : "Show Hidden Projects"}
+            onAction={onToggleShowHidden}
+            icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
           />
-          <Action
-            title="Remove Project from Favorites"
-            onAction={() => removeStatus(project)}
-            icon={Icon.StarDisabled}
-          />
-          <Action title="Hide Project" onAction={() => setStatus(project, StatusType.hidden)} icon={Icon.XMarkCircle} />
           <Action.CopyToClipboard
             title="Copy Project Name"
             content={project.name}

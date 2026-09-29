@@ -2,7 +2,7 @@ import { Customer } from "../customers/types";
 import { Project } from "../projects/types";
 import { Task } from "../tasks/types";
 import { User } from "../user/types";
-import { StatusType } from "../utils/storage";
+import { StatusType } from "../../utils/storage";
 
 export type Activity = {
   id: number;
