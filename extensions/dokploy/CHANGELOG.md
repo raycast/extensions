@@ -1,5 +1,10 @@
 # Dokploy Changelog
 
+## [Stop Builds and Cancel Queued Deployments] - 2026-09-29
+
+- Add `Stop Running Builds` and `Cancel Queued Deployments` to a service's deployment history, each with a confirmation. Stopping builds affects every build on that service's server, and the confirmation says so.
+- Fix `Cancel` showing on running Application and Compose deployments, where it always failed with "Deployment is not running". Dokploy can only cancel schedule runs that way, so it now only shows when it can work.
+
 ## [Enable or Disable a Domain] - 2026-09-28
 
 - Add `Enable Domain` / `Disable Domain` to a service's domains (Dokploy v0.30.0+). Disabling asks for confirmation first. On a Compose stack, the change applies on the next redeploy.
