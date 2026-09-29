@@ -200,22 +200,25 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
                   target={<DockerConfig container={container} instance={instance} />}
                   onPush={() => visitItem(container)}
                 />
-                {/* `docker exec` underneath, so only a running container can be browsed. */}
-                {container.state === "running" && (
-                  <Action.Push
-                    icon={Icon.Folder}
-                    title="Browse Files"
-                    target={<DockerFiles container={container} instance={instance} />}
-                    onPush={() => visitItem(container)}
-                  />
-                )}
                 <ActionPanel.Section>
                   {isUp && containerAction(container, "restart")}
                   {isDown && containerAction(container, "start")}
                   {isUp && containerAction(container, "stop")}
                   {isUp && containerAction(container, "kill")}
                 </ActionPanel.Section>
-                <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
+                <ActionPanel.Section>
+                  {refreshAction}
+                  {/* Appended after the existing actions, but kept above Remove so the destructive
+                   * action stays last. `docker exec` underneath, so only a running container. */}
+                  {container.state === "running" && (
+                    <Action.Push
+                      icon={Icon.Folder}
+                      title="Browse Files"
+                      target={<DockerFiles container={container} instance={instance} />}
+                      onPush={() => visitItem(container)}
+                    />
+                  )}
+                </ActionPanel.Section>
                 <ActionPanel.Section>{containerAction(container, "remove")}</ActionPanel.Section>
               </ActionPanel>
             }
