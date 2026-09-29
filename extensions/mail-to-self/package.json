@@ -112,7 +112,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.0",
-    "nodemailer": "^7.0.10"
+    "nodemailer": "^10.0.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

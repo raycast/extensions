@@ -94,9 +94,9 @@
     "@raycast/utils": "^2.2.5",
     "html-to-text": "^10.0.0",
     "imapflow": "^1.3.3",
-    "mailparser": "^3.9.8",
+    "mailparser": "^3.9.31",
     "marked": "^18.0.4",
-    "nodemailer": "^8.0.7"
+    "nodemailer": "^10.0.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
