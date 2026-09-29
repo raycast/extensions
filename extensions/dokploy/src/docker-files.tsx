@@ -115,7 +115,7 @@ export default function DockerFiles({
 
 function DockerFile({ container, instance, path }: { container: DockerContainer; instance: Instance; path: string }) {
   const { url, headers } = tokenForInstance(instance);
-  const { isLoading, data, error } = useFetch<ContainerFileContent>(
+  const { isLoading, data, error, revalidate } = useFetch<ContainerFileContent>(
     trpcQueryUrl(url, "docker.readContainerFile", { containerId: container.containerId, path }),
     {
       headers,
@@ -149,6 +149,12 @@ function DockerFile({ container, instance, path }: { container: DockerContainer;
         <ActionPanel>
           {text !== undefined && <Action.CopyToClipboard title="Copy Content" content={text} />}
           <Action.CopyToClipboard title="Copy Path" content={path} shortcut={Keyboard.Shortcut.Common.CopyPath} />
+          <Action
+            icon={Icon.ArrowClockwise}
+            title="Refresh"
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={() => revalidate()}
+          />
         </ActionPanel>
       }
     />
