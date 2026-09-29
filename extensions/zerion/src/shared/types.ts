@@ -1,195 +1,109 @@
-type WalletMetaNFT = {
-  chain: string;
-  contractAddress: string;
-  tokenId: string;
-  metadata: {
-    name: string | null;
-    content: {
-      imagePreviewUrl?: string;
-      imageUrl?: string | null;
-      audioUrl?: string | null;
-      videoUrl?: string | null;
-      type: "video" | "image" | "audio";
-    } | null;
-  } | null;
-};
-
-export type PremiumPlan = "Single" | "Bundle" | "Restricted" | "Bundle (Child)";
-interface MigrationToken {
-  generation: "Zero" | "G1" | "OnePointO";
+export interface ChainInfo {
   id: string;
-  premium: {
-    expirationTime: string;
-    features: {
-      feeWaiver: boolean;
-      csv: boolean;
-      pnl: boolean;
-      perks: boolean;
-      earlyAccess: boolean;
-    };
-    plan: PremiumPlan;
-  } | null;
+  name: string;
+  iconUrl: string | null;
+  /** Explorer transaction URL with a `{HASH}` placeholder. */
+  txUrlFormat: string | null;
 }
-
-export type ParentToken = MigrationToken & {
-  owner: string;
-};
-
-interface WalletMetaMembership {
-  parentTokens: ParentToken[] | null;
-  premium: MigrationToken["premium"] | null;
-  tokens: MigrationToken[] | null;
-}
-
-export interface Identity {
-  provider: "ens" | "lens" | "ud" | "unspecified";
-  address: string;
-  handle: string;
-}
-
-export type WalletMetadata = {
-  address: string;
-  nft: WalletMetaNFT | null;
-  nftMetaInformation: {
-    onboarded: boolean;
-  } | null;
-  identities: Identity[];
-  membership: WalletMetaMembership & {
-    level: number;
-    levelProgressPercentage: number;
-    levelFarmingLimit: number; // Limit for Active XP to reach at the current level
-    levelFarmingIndex: number; // Active XP earned during the last level
-    levelUpTime: string;
-    referralCode: string;
-    levelCapacity: number;
-    referralLink: string;
-    referred: number;
-    referrer: {
-      referralCode: string;
-      address: string;
-      handle: string;
-      nft: WalletMetaNFT | null;
-    };
-    retro: unknown | null;
-    xp: {
-      earned: number;
-      locked: number;
-      referred: number;
-      claimable: number;
-    };
-    newRewards: number;
-  };
-};
 
 export interface AddressPortfolio {
-  positionsTypesDistribution: {
-    assets: number;
-    deposited: number;
-    borrowed: number;
-    locked: number;
-    staked: number;
-  };
-  positionsChainsDistribution: Record<string, number>;
-  nfts: {
-    lastPrice: number;
-    floorPrice: number;
-  };
+  totalValue: number;
   change24h: {
     absolute: number;
     relative: number;
   };
-  totalValue: number;
-  chains: Record<string, ChainInfo>;
+  positionsChainsDistribution: Record<string, number>;
 }
 
-type PositionType = "asset" | "deposit" | "loan" | "reward" | "staked" | "locked";
+export type PositionType = "wallet" | "deposit" | "loan" | "locked" | "staked" | "reward" | "investment";
 
-interface Price {
-  value: number;
-  relativeChange24h: number;
-  changedAt: number;
-}
-
-interface Asset {
+export interface PositionAsset {
   id: string;
-  iconUrl: string | null;
   name: string;
-  price: Price | null;
   symbol: string;
-  isDisplayable: boolean;
-  isVerified: boolean;
-  implementations?: {
-    [key: string]: {
-      address: string | null;
-      decimals: number;
-    };
-  };
-}
-
-interface AddressPositionDappInfo {
-  id: string;
-  name: string | null;
-  url: string | null;
   iconUrl: string | null;
-}
-
-export interface ChainInfo {
-  id: string;
-  name: string;
-  testnet: boolean;
-  iconUrl: string;
+  verified: boolean;
+  /** Where the token lives per chain; native coins have an empty address. */
+  implementations: { chainId: string; address: string }[];
 }
 
 export interface Position {
-  apy: string | null;
-  asset: Asset;
-  chain: ChainInfo;
   id: string;
-  includedInChart: boolean;
   name: string;
-  parentId: string | null;
-  protocol: string | null;
-  quantity: string | null;
   type: PositionType;
-  value: string | null;
-  isDisplayable: boolean;
-  dapp: AddressPositionDappInfo | null;
+  value: number | null;
+  quantity: number;
+  price: number | null;
+  relativeChange24h: number;
+  chainId: string;
+  dappId: string | null;
+  asset: PositionAsset;
 }
 
 export type AggregatedPosition = Position & {
-  chains: Position["chain"][];
-  normalizedQuantity: string;
+  chainIds: string[];
 };
 
-export type SearchAsset = {
+export interface SearchAsset {
   id: string;
   name: string;
   symbol: string;
-  iconUrl: string;
-  meta: {
-    price: number;
-    marketCap: number;
-    relativeChange1d: number;
-    relativeChange30d: number;
-    relativeChange90d: number;
-  };
-};
+  iconUrl: string | null;
+  price: number | null;
+  relativeChange1d: number | null;
+  marketCap: number | null;
+}
 
-export type SearchWallet = {
-  name: string;
-  iconUrl: string;
+export interface SearchWallet {
   address: string;
-  premium: boolean;
-};
+  name: string | null;
+  iconUrl: string | null;
+}
 
-type SearchDapp = {
+export type OperationType = import("./api").ApiOperationType;
+
+export type TransactionStatus = "confirmed" | "failed" | "pending";
+
+export type TransferDirection = "in" | "out" | "self";
+
+export interface TransactionAsset {
+  /** Fungible symbol or NFT contract + token id; transfers of the same asset share it. */
+  id: string;
   name: string;
-  iconUrl: string;
-  url: string;
-};
+  symbol: string;
+  iconUrl: string | null;
+  isNft: boolean;
+}
 
-export type SearchResult = {
-  dapps: SearchDapp[];
-  fungibles: SearchAsset[];
-  wallets: SearchWallet[];
-};
+export interface TransactionTransfer {
+  asset: TransactionAsset;
+  direction: TransferDirection;
+  quantity: number;
+  value: number | null;
+  sender: string;
+  recipient: string;
+}
+
+export interface TransactionApproval {
+  asset: TransactionAsset;
+  quantity: number;
+  unlimited: boolean;
+}
+
+export interface Transaction {
+  id: string;
+  hash: string;
+  operationType: OperationType;
+  status: TransactionStatus;
+  chainId: string;
+  /** ISO 8601; kept as a string so cached pages survive JSON serialization. */
+  minedAt: string;
+  block: number;
+  nonce: number;
+  sentFrom: string;
+  sentTo: string;
+  fee: { asset: TransactionAsset | null; quantity: number; value: number | null } | null;
+  transfers: TransactionTransfer[];
+  approvals: TransactionApproval[];
+  dapp: { name: string; iconUrl: string | null; method: string | null } | null;
+}

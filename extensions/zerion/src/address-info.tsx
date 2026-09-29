@@ -1,12 +1,14 @@
 import { Icon, List, Toast, showToast } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 import { AddressView } from "./components/AddressView";
-import { useWalletMetadata } from "./shared/useWalletMetadata";
+import { useWalletIdentity } from "./shared/useWalletIdentity";
+import { zerionOAuth } from "./shared/oauth";
 import { useState } from "react";
 
-export default function Command(props: LaunchProps) {
+function Command(props: LaunchProps) {
   const [account] = useState(props.arguments.account);
-  const { isLoading, address } = useWalletMetadata(account);
+  const { isLoading, address } = useWalletIdentity(account);
   if (isLoading) {
     return <List isLoading={true} filtering={false} />;
   }
@@ -20,3 +22,5 @@ export default function Command(props: LaunchProps) {
   }
   return <AddressView addressOrDomain={account} />;
 }
+
+export default withAccessToken(zerionOAuth)(Command);

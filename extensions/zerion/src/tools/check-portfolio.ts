@@ -1,72 +1,50 @@
-import { getZpiHeaders, ZPI_URL } from "../shared/api";
-import { normalizeAddress } from "../shared/NormalizedAddress";
-import { AddressPortfolio, Position } from "../shared/types";
-import { handleError } from "../shared/utils";
+import { withAccessToken } from "@raycast/utils";
+import { apiFetch, type ApiPortfolioAttributes, type ApiPosition } from "../shared/api";
+import { resolveIdentity } from "../shared/useWalletIdentity";
+import { getPositionsFilter } from "../shared/useWalletPositions";
+import { zerionOAuth } from "../shared/oauth";
 
 type Input = {
   /**
-   * Ethereum address or ENS domain to look up
+   * Wallet address (EVM or Solana) or ENS domain to look up
    */
   addressOrDomain: string;
 };
 
-export default async function (input: Input): Promise<{ portfolio?: AddressPortfolio; positions?: Position[] }> {
-  let address: string | null = null;
-
-  try {
-    const response = await fetch(`${ZPI_URL}wallet/get-meta/v1?identifiers=${input.addressOrDomain}`, {
-      headers: getZpiHeaders(),
-    });
-    const result = await response.json();
-    address = normalizeAddress(result.data[0]?.address);
-  } catch (error) {
-    handleError({ title: "Failed to fetch wallet", error });
-    return {};
+/**
+ * Returns the portfolio overview and all fungible positions of a wallet.
+ * Values are in USD.
+ */
+async function tool(input: Input) {
+  const identity = await resolveIdentity(input.addressOrDomain);
+  if (!identity) {
+    throw new Error(`Could not resolve "${input.addressOrDomain}" to a valid wallet address.`);
   }
+  const address = identity.address;
 
-  let portfolio: { data: AddressPortfolio } | null = null;
+  const [portfolio, positions] = await Promise.all([
+    apiFetch<{ data: { attributes: ApiPortfolioAttributes } }>(
+      `wallets/${address}/portfolio?currency=usd&filter[positions]=no_filter`,
+    ),
+    apiFetch<{ data: ApiPosition[] }>(
+      `wallets/${address}/positions/?currency=usd${getPositionsFilter(address)}&sort=-value`,
+    ),
+  ]);
 
-  try {
-    const portfolioResponse = await fetch(`${ZPI_URL}wallet/get-portfolio/v1`, {
-      method: "POST",
-      headers: getZpiHeaders({ "Zerion-Wallet-Provider": "Watch Address" }),
-      body: JSON.stringify({
-        addresses: [address],
-        currency: "usd",
-        nftPriceType: "not_included",
-      }),
-    });
-    portfolio = await portfolioResponse.json();
-  } catch (error) {
-    handleError({ title: "Failed to fetch wallet portfolio", error });
-    return {};
-  }
-
-  let cleanedPositions: Position[] = [];
-  try {
-    const positionsResponse = await fetch(`${ZPI_URL}wallet/get-positions/v1`, {
-      method: "POST",
-      headers: getZpiHeaders({ "Zerion-Wallet-Provider": "Watch Address" }),
-      body: JSON.stringify({
-        addresses: [address],
-        currency: "usd",
-      }),
-    });
-    const positions = await positionsResponse.json();
-    cleanedPositions = positions.data.map((position: Position) => {
-      return {
-        value: position.value,
-        chain: position.chain,
-        name: position.asset.name,
-        symbol: position.asset.symbol,
-        id: position.asset.id,
-      };
-    });
-  } catch (error) {
-    handleError({ title: "Failed to fetch wallet positions", error });
-  }
   return {
-    portfolio: portfolio?.data,
-    positions: cleanedPositions,
+    address,
+    ens: identity.ens,
+    portfolio: portfolio.data.attributes,
+    positions: positions.data.map((position) => ({
+      name: position.attributes.fungible_info.name,
+      symbol: position.attributes.fungible_info.symbol,
+      fungible_id: position.relationships.fungible.data.id,
+      chain: position.relationships.chain.data.id,
+      position_type: position.attributes.position_type,
+      quantity: position.attributes.quantity.float,
+      value: position.attributes.value,
+    })),
   };
 }
+
+export default withAccessToken(zerionOAuth)(tool);
