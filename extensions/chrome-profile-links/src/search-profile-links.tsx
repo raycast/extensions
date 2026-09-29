@@ -36,27 +36,39 @@ export default function Command({ launchContext, fallbackText }: LaunchProps<{ l
 
 function OpenFromQuicklink({ linkId }: { linkId: string }) {
   const [needsPicker, setNeedsPicker] = useState<ProfileLink>();
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     (async () => {
-      const [link, profiles] = await Promise.all([
-        isBookmarkId(linkId) ? getChromeBookmark(linkId) : getProfileLink(linkId),
-        getChromeProfiles(),
-      ]);
-      if (!link) {
-        await showToast({ style: Toast.Style.Failure, title: "This link no longer exists" });
-        return;
-      }
-      if (link.profileDirectory && profiles.some((p) => p.directory === link.profileDirectory)) {
-        await openLink(link.url, link.profileDirectory);
-      } else {
-        setNeedsPicker(link);
+      try {
+        const [link, profiles] = await Promise.all([
+          isBookmarkId(linkId) ? getChromeBookmark(linkId) : getProfileLink(linkId),
+          getChromeProfiles(),
+        ]);
+        if (!link) {
+          setError("This link no longer exists. It may have been deleted, or the bookmark was removed in Chrome.");
+          return;
+        }
+        if (link.profileDirectory && profiles.some((p) => p.directory === link.profileDirectory)) {
+          if (!(await openLink(link.url, link.profileDirectory))) setError("Google Chrome could not open the link.");
+        } else {
+          setNeedsPicker(link);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
       }
     })();
   }, [linkId]);
 
   if (needsPicker) {
     return <ProfilePicker url={needsPicker.url} title={needsPicker.title} />;
+  }
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.Warning} title="Cannot Open Link" description={error} />
+      </List>
+    );
   }
   return <List isLoading />;
 }
@@ -216,7 +228,7 @@ interface ItemProps {
   profile?: ChromeProfile;
   profilesLoaded: boolean;
   onChange: () => void;
-  onOpen: () => void;
+  onOpen: () => Promise<void>;
 }
 
 function ProfileLinkItem({ link, profile, profilesLoaded, onChange, onOpen }: ItemProps) {
@@ -251,10 +263,7 @@ function ProfileLinkItem({ link, profile, profilesLoaded, onChange, onOpen }: It
               <Action
                 title={`Open in ${profile.name}`}
                 icon={Icon.Globe}
-                onAction={async () => {
-                  onOpen();
-                  await openLink(link.url, profile.directory);
-                }}
+                onAction={() => openLink(link.url, profile.directory, onOpen)}
               />
             ) : (
               <Action.Push

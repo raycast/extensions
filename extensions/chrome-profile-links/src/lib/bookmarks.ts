@@ -29,6 +29,7 @@ export function isBookmarkId(id: string): boolean {
 }
 
 function collect(node: BookmarkNode, folders: string[], profileDirectory: string, out: BookmarkLink[]) {
+  if (!node || typeof node !== "object") return;
   if (node.type === "url") {
     if (node.url && /^(https?|file):/.test(node.url)) {
       out.push({
@@ -43,22 +44,24 @@ function collect(node: BookmarkNode, folders: string[], profileDirectory: string
     }
     return;
   }
-  for (const child of node.children ?? []) {
+  for (const child of Array.isArray(node.children) ? node.children : []) {
     collect(child, [...folders, node.name], profileDirectory, out);
   }
 }
 
 async function readBookmarkFile(profileDirectory: string, file: string): Promise<BookmarkLink[]> {
-  let raw: string;
+  let data: BookmarkFile;
   try {
-    raw = await readFile(join(CHROME_DATA_DIR, profileDirectory, file), "utf8");
+    const raw = await readFile(join(CHROME_DATA_DIR, profileDirectory, file), "utf8");
+    data = JSON.parse(raw) as BookmarkFile;
   } catch {
-    return []; // The profile has no bookmarks of this kind.
+    // Missing, or damaged / being written by Chrome: skip it so other profiles still load.
+    return [];
   }
   const out: BookmarkLink[] = [];
-  for (const root of Object.values((JSON.parse(raw) as BookmarkFile).roots)) {
+  for (const root of Object.values(data?.roots ?? {})) {
     // Root folders ("Bookmarks bar", "Other bookmarks"…) are not useful as tags, so start below them.
-    for (const child of root?.children ?? []) {
+    for (const child of Array.isArray(root?.children) ? root.children : []) {
       collect(child, [], profileDirectory, out);
     }
   }

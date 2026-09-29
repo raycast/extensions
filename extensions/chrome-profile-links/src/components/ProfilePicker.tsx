@@ -6,8 +6,8 @@ import { openLink } from "../lib/open";
 interface Props {
   url: string;
   title: string;
-  /** Called right before opening, e.g. to record the visit for frecency sorting. */
-  onOpen?: () => void;
+  /** Called after Chrome opened the link, e.g. to record the visit for frecency sorting. */
+  onOpen?: () => void | Promise<void>;
 }
 
 export function ProfilePicker({ url, title, onOpen }: Props) {
@@ -28,10 +28,7 @@ export function ProfilePicker({ url, title, onOpen }: Props) {
                 <Action
                   title={`Open in ${profile.name}`}
                   icon={Icon.Globe}
-                  onAction={async () => {
-                    onOpen?.();
-                    await openLink(url, profile.directory);
-                  }}
+                  onAction={() => openLink(url, profile.directory, onOpen)}
                 />
               </ActionPanel>
             }
