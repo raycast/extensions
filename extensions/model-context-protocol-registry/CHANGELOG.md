@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Better Design MCP Server] - {PR_MERGE_DATE}
+
+- Add Better Design to the official registry: design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server at https://better-design.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key.
+
 ## [Add apMZoomAI Dongdaemun Wholesale MCP Server] - 2026-09-27
 
 - Add apMZoomAI · Dongdaemun Wholesale to the official registry: search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, and find stalls by building, floor and stall number, with links to each item or stall on apMZoomAI, in eight languages. Read-only; no prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in, no API key.

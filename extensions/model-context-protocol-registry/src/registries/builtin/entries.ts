@@ -87,6 +87,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "better-design",
+    title: "Better Design",
+    description:
+      "Design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key to paste.",
+    icon: "https://better-design.com/icon",
+    homepage: "https://better-design.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://better-design.com/api/mcp"],
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
