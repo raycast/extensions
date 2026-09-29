@@ -277,6 +277,29 @@
             "meetsCriteria": "shows USD Coin (Fantom) or USDC formatted in some way"
           }
         ]
+      },
+      {
+        "input": "@zerion Which wallets do I have saved?",
+        "mocks": {
+          "look-wallets": [
+            {
+              "address": "0x24a6f8ac52a92d3ca11b1e1b5c1c0b3cf8e4b3d1",
+              "ens": "test.zerion.eth"
+            },
+            {
+              "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+              "ens": "vitalik.eth"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "look-wallets"
+          },
+          {
+            "meetsCriteria": "lists test.zerion.eth and vitalik.eth"
+          }
+        ]
       }
     ]
   },
