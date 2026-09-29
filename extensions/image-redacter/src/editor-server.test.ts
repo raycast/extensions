@@ -60,7 +60,22 @@ test("serves only the token-bound local session and preserves source bytes", asy
       const response = await fetch(new URL(resource, session.url));
       assert.equal(response.status, 200);
       assert.equal(response.headers.get("cache-control"), "no-store");
+      assert.match(
+        response.headers.get("content-security-policy") ?? "",
+        /connect-src 'self'; worker-src 'self'/,
+      );
     }
+    let ready = false;
+    session.loaded.then(() => {
+      ready = true;
+    });
+    await new Promise(setImmediate);
+    assert.equal(ready, false, "serving bytes does not prove browser decoding");
+    assert.equal((await fetch(new URL("ready", session.url))).status, 405);
+    assert.equal(
+      (await fetch(new URL("ready", session.url), { method: "POST" })).status,
+      200,
+    );
     await session.loaded;
     assert.equal((await fetch(new URL("ping", session.url))).status, 204);
     assert.equal(
@@ -71,6 +86,71 @@ test("serves only the token-bound local session and preserves source bytes", asy
     await session.close();
     await rm(directory, { recursive: true });
   }
+});
+
+test("browser decode failure rejects loading and closes session-owned source", async () => {
+  const directory = await fixture();
+  let cleanups = 0;
+  const session = await startEditorSession(
+    join(directory, "source.png"),
+    "image/png",
+    {},
+    {
+      assetsPath: directory,
+      onClose: async () => {
+        cleanups++;
+      },
+    },
+  );
+  const failure = assert.rejects(session.loaded, /could not decode/);
+  await fetch(new URL("failed", session.url), { method: "POST" });
+  await failure;
+  await session.close();
+  await session.close();
+  assert.equal(cleanups, 1);
+  await rm(directory, { recursive: true });
+});
+
+test("ready claims once, returns updated entitlement, and preserves reload source until close", async () => {
+  const directory = await fixture();
+  let claims = 0;
+  const session = await startEditorSession(
+    join(directory, "source.png"),
+    "image/png",
+    {},
+    {
+      assetsPath: directory,
+      onReady: async () => {
+        claims++;
+        return { entitlement: { plan: "pro" } };
+      },
+      onClose: async () => rm(directory, { recursive: true }),
+    },
+  );
+  try {
+    const responses = await Promise.all(
+      [1, 2].map(() =>
+        fetch(new URL("ready", session.url), { method: "POST" }),
+      ),
+    );
+    await session.loaded;
+    assert.equal(claims, 1);
+    const config = (await responses[0].json()) as {
+      entitlement: { plan: string };
+    };
+    assert.deepEqual(config.entitlement, { plan: "pro" });
+    assert.equal(
+      await (await fetch(new URL("source", session.url))).text(),
+      "source.png",
+    );
+    assert.equal(
+      await (await fetch(new URL("source", session.url))).text(),
+      "source.png",
+    );
+  } finally {
+    await session.close();
+  }
+  await assert.rejects(readFile(join(directory, "source.png")), /ENOENT/);
 });
 
 test("an editor that never loads rejects instead of reporting success", async () => {

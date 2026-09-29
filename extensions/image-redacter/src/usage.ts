@@ -1,3 +1,7 @@
+import { mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+import { lock } from "proper-lockfile";
+
 export type UsageRecord = { day: string; files: string[] };
 
 export type UsageClaim = {
@@ -52,4 +56,27 @@ export function claimRedaction(
 
 function filesForDay(record: UsageRecord | undefined, day: string): string[] {
   return record?.day === day ? record.files : [];
+}
+
+/** Serializes storage claims across separate Raycast command processes. */
+export async function withUsageLock<T>(
+  lockPath: string,
+  action: () => Promise<T>,
+): Promise<T> {
+  await mkdir(dirname(lockPath), { recursive: true });
+  const release = await lock(lockPath, {
+    realpath: false,
+    stale: 30_000,
+    update: 10_000,
+    retries: { retries: 40, factor: 1, minTimeout: 100, maxTimeout: 100 },
+  }).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ELOCKED")
+      throw new Error("Another file is opening. Please try again in a moment.");
+    throw error;
+  });
+  try {
+    return await action();
+  } finally {
+    await release();
+  }
 }

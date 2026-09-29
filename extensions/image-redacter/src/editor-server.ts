@@ -3,7 +3,6 @@ import { readFile, stat } from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
 import { extname, join, resolve, sep } from "node:path";
 import { randomBytes } from "node:crypto";
-import { PDF_MIME_TYPE } from "./source-file";
 
 type EditorSession = {
   url: string;
@@ -11,17 +10,21 @@ type EditorSession = {
   close: () => Promise<void>;
 };
 
+export type EditorLifecycle = {
+  onReady?: () => Promise<Record<string, unknown> | void>;
+  onClose?: () => Promise<void>;
+  onUpgrade?: () => Promise<void>;
+};
+
 const LOAD_TIMEOUT_MS = 60_000;
 // PDF pages request fonts, character maps and decoders lazily as the user moves
 // between pages, so the server stays up until the editor has been quiet a while.
 const IDLE_SHUTDOWN_MS = 5 * 60_000;
 
-const BASE_RESOURCES = ["page", "css", "js", "config", "source"];
-const PDF_RESOURCES = ["pdf.min.mjs", "pdf.worker.min.mjs", "pdf-lib.min.js"];
-
 const CONTENT_TYPES: Record<string, string> = {
   ".bcmap": "application/octet-stream",
   ".icc": "application/octet-stream",
+  ".gz": "application/gzip",
   ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
   ".pfb": "application/octet-stream",
@@ -33,7 +36,7 @@ export async function startEditorSession(
   sourcePath: string,
   mimeType: string,
   config: Record<string, unknown>,
-  options: {
+  options: EditorLifecycle & {
     assetsPath?: string;
     loadTimeoutMs?: number;
     idleTimeoutMs?: number;
@@ -44,12 +47,7 @@ export async function startEditorSession(
     options.assetsPath ?? (await import("@raycast/api")).environment.assetsPath;
   const vendor = resolve(assets, "vendor");
   const sourceStat = await stat(sourcePath);
-  const isPdf = mimeType === PDF_MIME_TYPE;
-  const required = new Set([
-    ...BASE_RESOURCES,
-    ...(isPdf ? PDF_RESOURCES : []),
-  ]);
-  const served = new Set<string>();
+  let readyResult: Promise<Record<string, unknown>> | undefined;
   let resolveLoaded!: () => void;
   let rejectLoaded!: (error: Error) => void;
   let settled = false;
@@ -59,20 +57,11 @@ export async function startEditorSession(
     rejectLoaded = reject;
   });
 
-  function markServed(resource: string) {
-    served.add(resource);
-    if (!settled && [...required].every((name) => served.has(name))) {
-      settled = true;
-      resolveLoaded();
-      resetIdleTimer();
-    }
-  }
-
   function resetIdleTimer() {
     if (!settled) return;
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(
-      () => void close(),
+      () => void close().catch(() => undefined),
       options.idleTimeoutMs ?? IDLE_SHUTDOWN_MS,
     );
     idleTimer.unref();
@@ -90,21 +79,83 @@ export async function startEditorSession(
       response.writeHead(403).end("Forbidden");
       return;
     }
-    if (request.method !== "GET") {
-      response.writeHead(405, { Allow: "GET" }).end("Method not allowed");
-      return;
-    }
     const requestUrl = new URL(request.url ?? "/", "http://127.0.0.1");
     const route = requestUrl.pathname;
     const prefix = `/${token}`;
+
+    const lifecycleRoute = ["ready", "failed", "upgrade"].some(
+      (name) => route === `${prefix}/${name}`,
+    );
+    if (request.method !== (lifecycleRoute ? "POST" : "GET")) {
+      response
+        .writeHead(405, { Allow: lifecycleRoute ? "POST" : "GET" })
+        .end("Method not allowed");
+      return;
+    }
 
     response.setHeader("Cache-Control", "no-store");
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("X-Frame-Options", "DENY");
+    response.setHeader(
+      "Content-Security-Policy",
+      [
+        "default-src 'none'",
+        "script-src 'self' 'wasm-unsafe-eval'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' blob: data:",
+        "font-src 'self'",
+        "connect-src 'self'",
+        "worker-src 'self'",
+        "object-src 'none'",
+        "base-uri 'none'",
+        "form-action 'none'",
+        "frame-ancestors 'none'",
+      ].join("; "),
+    );
 
     try {
-      if (route === `${prefix}/ping`) {
+      if (route === `${prefix}/ready`) {
+        // Decoding completed; the bounded entitlement commit now owns readiness.
+        clearTimeout(timeout);
+        readyResult ??= Promise.resolve().then(async () => {
+          Object.assign(config, await options.onReady?.());
+          return config;
+        });
+        try {
+          const readyConfig = await readyResult;
+          response.setHeader("Content-Type", "application/json; charset=utf-8");
+          response.end(JSON.stringify(readyConfig));
+          if (!settled) {
+            settled = true;
+            resolveLoaded();
+          }
+          resetIdleTimer();
+        } catch {
+          response.writeHead(500).end("Unable to prepare the editor");
+          if (!settled) {
+            settled = true;
+            rejectLoaded(
+              new Error("Could not prepare the editor. Open the file again."),
+            );
+          }
+          void close().catch(() => undefined);
+        }
+      } else if (route === `${prefix}/failed`) {
+        response.writeHead(204).end();
+        if (!settled) {
+          settled = true;
+          rejectLoaded(
+            new Error(
+              "The editor could not decode the file. Choose a valid image or PDF.",
+            ),
+          );
+        }
+        void close().catch(() => undefined);
+      } else if (route === `${prefix}/upgrade`) {
+        await options.onUpgrade?.();
+        response.writeHead(204).end();
+      } else if (route === `${prefix}/ping`) {
         resetIdleTimer();
         response.writeHead(204).end();
       } else if (route === prefix || route === `${prefix}/`) {
@@ -114,32 +165,27 @@ export async function startEditorSession(
           join(assets, "editor.html"),
           "text/html; charset=utf-8",
         );
-        markServed("page");
       } else if (route === `${prefix}/editor.css`) {
         await sendAsset(
           response,
           join(assets, "editor.css"),
           "text/css; charset=utf-8",
         );
-        markServed("css");
       } else if (route === `${prefix}/editor.js`) {
         await sendAsset(
           response,
           join(assets, "editor.js"),
           "text/javascript; charset=utf-8",
         );
-        markServed("js");
       } else if (route === `${prefix}/config`) {
         response.setHeader("Content-Type", "application/json; charset=utf-8");
         response.end(JSON.stringify(config));
-        markServed("config");
       } else if (route === `${prefix}/source`) {
         response.statusCode = 200;
         response.setHeader("Content-Type", mimeType);
         response.setHeader("Content-Length", sourceStat.size);
         const stream = createReadStream(sourcePath);
         stream.on("error", () => response.destroy());
-        stream.on("end", () => markServed("source"));
         stream.pipe(response);
       } else if (route.startsWith(`${prefix}/vendor/`)) {
         const relativePath = decodeURIComponent(
@@ -152,7 +198,12 @@ export async function startEditorSession(
           return;
         }
         await sendAsset(response, path, contentType);
-        markServed(relativePath);
+      } else if (route === `${prefix}/fonts/PlusJakartaSans.ttf`) {
+        await sendAsset(
+          response,
+          join(assets, "fonts", "PlusJakartaSans.ttf"),
+          "font/ttf",
+        );
       } else {
         sendNotFound(response);
       }
@@ -177,10 +228,21 @@ export async function startEditorSession(
     throw new Error("Could not start the private editor.");
   }
 
-  const close = async () => {
+  let closing: Promise<void> | undefined;
+  const close = (): Promise<void> => {
+    if (closing) return closing;
     if (idleTimer) clearTimeout(idleTimer);
-    if (!server.listening) return;
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    closing = (async () => {
+      if (!settled) {
+        settled = true;
+        rejectLoaded(new Error("The editor closed before loading the file."));
+      }
+      if (server.listening) {
+        await new Promise<void>((resolve) => server.close(() => resolve()));
+      }
+      await options.onClose?.();
+    })();
+    return closing;
   };
 
   const timeout = setTimeout(() => {
@@ -189,7 +251,7 @@ export async function startEditorSession(
       rejectLoaded(
         new Error("The editor did not finish loading. Open the file again."),
       );
-      void close();
+      void close().catch(() => undefined);
     }
   }, options.loadTimeoutMs ?? LOAD_TIMEOUT_MS);
   timeout.unref();
@@ -202,8 +264,14 @@ export async function openEditor(
   sourcePath: string,
   mimeType: string,
   config: Record<string, unknown>,
+  options: EditorLifecycle = {},
 ): Promise<void> {
-  const session = await startEditorSession(sourcePath, mimeType, config);
+  const session = await startEditorSession(
+    sourcePath,
+    mimeType,
+    config,
+    options,
+  );
   try {
     const { open } = await import("@raycast/api");
     await open(session.url);

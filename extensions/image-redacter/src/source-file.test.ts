@@ -38,6 +38,16 @@ test("rejects unsupported and missing files", async () => {
   await assert.rejects(() => validateSource("missing.png"), /no longer exists/);
 });
 
+test("rejects HEIC and TIFF before browser opening with conversion guidance", async () => {
+  for (const extension of ["heic", "heif", "tif", "tiff"]) {
+    assert.equal(sourceMimeType(`photo.${extension}`), undefined);
+    await assert.rejects(
+      () => validateSource(`photo.${extension}`),
+      /Convert HEIC or TIFF/,
+    );
+  }
+});
+
 test("fingerprints files by contents rather than name", async () => {
   const first = await temporaryFile("a.png", Buffer.from("same bytes"));
   const renamed = await temporaryFile("b.png", Buffer.from("same bytes"));

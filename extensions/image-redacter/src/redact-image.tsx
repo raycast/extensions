@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -14,16 +14,12 @@ import { basename } from "node:path";
 import { readClipboardImage } from "./clipboard-image";
 import {
   claimEntitlement,
+  previewEntitlement,
   getPlanSummary,
   type PlanSummary,
 } from "./entitlement";
 import { getSelectedFilePath } from "./file-selection";
-import {
-  FREE_DAILY_REDACTIONS,
-  MANAGE_LICENSE_DEEPLINK,
-  PRODUCT_NAME,
-  PRO_PRICE,
-} from "./plan";
+import { FREE_DAILY_REDACTIONS, PRODUCT_NAME, PRO_PRICE } from "./plan";
 import {
   PDF_MIME_TYPE,
   countPdfPages,
@@ -36,9 +32,17 @@ type FormValues = { image: string[] };
 
 export default function RedactImage() {
   const [isOpening, setIsOpening] = useState(false);
+  const selectionChanged = useRef(false);
   const { data: plan, revalidate: refreshPlan } = usePromise(getPlanSummary);
 
   async function openSource(sourcePath: string, cleanup?: () => Promise<void>) {
+    let sessionReady = false;
+    let cleanedUp = false;
+    const cleanupSource = async () => {
+      if (cleanedUp || !cleanup) return;
+      cleanedUp = true;
+      await cleanup();
+    };
     setIsOpening(true);
     try {
       const mimeType = await validateSource(sourcePath);
@@ -46,21 +50,32 @@ export default function RedactImage() {
         mimeType === PDF_MIME_TYPE
           ? await countPdfPages(sourcePath)
           : undefined;
-      const entitlement = await claimEntitlement(
-        await fingerprintFile(sourcePath),
-        pageCount,
-      );
+      const fileId = await fingerprintFile(sourcePath);
+      let entitlement = await previewEntitlement(fileId, pageCount);
       await showToast({
         style: Toast.Style.Animated,
         title: "Opening private editor…",
       });
-      await openEditor(sourcePath, mimeType, {
-        filename: basename(sourcePath),
-        kind: mimeType === PDF_MIME_TYPE ? "pdf" : "image",
-        entitlement,
-        upgradeUrl: MANAGE_LICENSE_DEEPLINK,
-        priceLabel: PRO_PRICE.label,
-      });
+      await openEditor(
+        sourcePath,
+        mimeType,
+        {
+          filename: basename(sourcePath),
+          kind: mimeType === PDF_MIME_TYPE ? "pdf" : "image",
+          entitlement,
+          upgradeUrl: "./upgrade",
+          priceLabel: PRO_PRICE.label,
+        },
+        {
+          onClose: cleanupSource,
+          onReady: async () => {
+            entitlement = await claimEntitlement(fileId, pageCount);
+            return { entitlement };
+          },
+          onUpgrade: openManageLicense,
+        },
+      );
+      sessionReady = true;
       refreshPlan();
 
       if (entitlement.plan === "free" && !entitlement.canExport) {
@@ -78,13 +93,13 @@ export default function RedactImage() {
         });
       }
     } catch (error) {
+      if (!sessionReady) await cleanupSource().catch(() => undefined);
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not open file",
         message: error instanceof Error ? error.message : String(error),
       });
     } finally {
-      if (cleanup) await cleanup().catch(() => undefined);
       setIsOpening(false);
     }
   }
@@ -116,9 +131,12 @@ export default function RedactImage() {
 
   useEffect(() => {
     let active = true;
-    void getSelectedFilePath().then((path) => {
-      if (active && path) setValue("image", [path]);
-    });
+    void getSelectedFilePath()
+      .then((path) => {
+        if (active && path && !selectionChanged.current)
+          setValue("image", [path]);
+      })
+      .catch(() => undefined);
     return () => {
       active = false;
     };
@@ -159,6 +177,10 @@ export default function RedactImage() {
       <Form.Description text="Choose an image or PDF, or press ⌘/Ctrl+V to use a clipboard image. Export creates a new file and never overwrites the source." />
       <Form.FilePicker
         {...itemProps.image}
+        onChange={(value) => {
+          selectionChanged.current = true;
+          itemProps.image.onChange?.(value);
+        }}
         title="Image or PDF"
         allowMultipleSelection={false}
         canChooseDirectories={false}

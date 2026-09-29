@@ -11,14 +11,10 @@ const MIME_TYPES: Record<string, string> = {
   ".avif": "image/avif",
   ".bmp": "image/bmp",
   ".gif": "image/gif",
-  ".heic": "image/heic",
-  ".heif": "image/heif",
   ".jpeg": "image/jpeg",
   ".jpg": "image/jpeg",
   ".pdf": PDF_MIME_TYPE,
   ".png": "image/png",
-  ".tif": "image/tiff",
-  ".tiff": "image/tiff",
   ".webp": "image/webp",
 };
 
@@ -36,7 +32,7 @@ export async function validateSource(path: string): Promise<string> {
   const mimeType = sourceMimeType(path);
   if (!mimeType) {
     throw new Error(
-      "Choose a PDF or a PNG, JPEG, WebP, GIF, TIFF, BMP, AVIF, HEIC, or HEIF image.",
+      "Choose a PDF or a PNG, JPEG, WebP, GIF, BMP, or AVIF image. Convert HEIC or TIFF images to PNG or JPEG first.",
     );
   }
 

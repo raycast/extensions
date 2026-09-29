@@ -10,7 +10,7 @@ Redact sensitive information from screenshots, photos and PDFs without modifying
 4. Keep the default effect (Mosaic for images, solid black for PDFs), or switch to Blur or Solid.
 5. Save a redacted PNG or PDF, copy an image, or export an image with a presentation-ready frame.
 
-Text detection runs locally in the browser with Tesseract.js. On its first use, the browser downloads the OCR engine and English language model from the jsDelivr CDN; the selected file is not uploaded.
+Text detection runs locally in the browser with bundled Tesseract.js, its worker, WebAssembly engine and English language model. No CDN connection or language download is required. The editor blocks off-device network requests.
 
 ## Plans
 
@@ -54,6 +54,7 @@ npm run dev
 
 Install [Raycast](https://www.raycast.com/) first. Clone this repository, run the commands above, then search for **Redact Image or PDF** in Raycast. Raycast Pro is not required.
 
+The site lives in `website/` in this same repository. Run `npm --prefix website ci --include=optional`, then `npm run site:dev` or `npm run site:build`. It shares the product's release lifecycle without adding a workspace framework.
 
 The extension is MIT licensed. You may build it locally, modify it, or fork it. Its usage allowance is local product behavior, not a DRM or security boundary.
 

@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 200 800;
   font-display: swap;
-  src: url("./vendor/fonts/PlusJakartaSans.ttf") format("truetype");
+  src: url("./fonts/PlusJakartaSans.ttf") format("truetype");
 }
 
 :root {

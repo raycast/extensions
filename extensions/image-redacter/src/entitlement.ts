@@ -1,10 +1,12 @@
-import { LocalStorage } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
+import { join } from "node:path";
 import { parseLicenseKey, type License } from "./license";
 import { FREE_DAILY_REDACTIONS, FREE_PDF_PAGE_LIMIT } from "./plan";
 import {
   claimRedaction,
   localDay,
   remainingRedactions,
+  withUsageLock,
   type UsageRecord,
 } from "./usage";
 
@@ -53,7 +55,9 @@ export async function removeLicense(): Promise<void> {
 }
 
 export async function resetUsage(): Promise<void> {
-  await LocalStorage.removeItem(USAGE_STORAGE);
+  await withUsageLock(join(environment.supportPath, "usage"), () =>
+    LocalStorage.removeItem(USAGE_STORAGE),
+  );
 }
 
 /**
@@ -64,6 +68,24 @@ export async function resetUsage(): Promise<void> {
 export async function claimEntitlement(
   fileId: string,
   pdfPageCount?: number,
+): Promise<Entitlement> {
+  return withUsageLock(join(environment.supportPath, "usage"), () =>
+    entitlementForFile(fileId, pdfPageCount, true),
+  );
+}
+
+/** Previewing a file never consumes an allowance; claim only after decode. */
+export async function previewEntitlement(
+  fileId: string,
+  pdfPageCount?: number,
+): Promise<Entitlement> {
+  return entitlementForFile(fileId, pdfPageCount, false);
+}
+
+async function entitlementForFile(
+  fileId: string,
+  pdfPageCount: number | undefined,
+  commit: boolean,
 ): Promise<Entitlement> {
   const { license } = await getPlanSummary();
   if (license) return { plan: "pro" };
@@ -91,7 +113,8 @@ export async function claimEntitlement(
     );
   }
 
-  await LocalStorage.setItem(USAGE_STORAGE, JSON.stringify(claim.record));
+  if (commit)
+    await LocalStorage.setItem(USAGE_STORAGE, JSON.stringify(claim.record));
   return {
     plan: "free",
     canExport: true,
@@ -105,7 +128,9 @@ async function readUsage(): Promise<UsageRecord | undefined> {
   if (!stored) return undefined;
   try {
     const record = JSON.parse(stored) as UsageRecord;
-    return typeof record.day === "string" && Array.isArray(record.files)
+    return typeof record.day === "string" &&
+      Array.isArray(record.files) &&
+      record.files.every((file) => typeof file === "string")
       ? record
       : undefined;
   } catch {

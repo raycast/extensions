@@ -40,16 +40,22 @@
   "dependencies": {
     "@raycast/api": "^2.0.5",
     "@raycast/utils": "^2.3.0",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "1.0.9",
     "@raycast/eslint-config": "^2.2.0",
+    "@tesseract.js-data/eng": "1.0.0",
     "@types/node": "^24.3.0",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "^19.1.11",
     "eslint": "^9.34.0",
     "pdfjs-dist": "^6.3.289",
     "prettier": "^3.6.2",
     "react": "^19.1.1",
+    "tesseract.js": "5.1.1",
+    "tesseract.js-core": "5.1.1",
     "tsx": "^4.20.5",
     "typescript": "^6.0.3"
   }

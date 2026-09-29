@@ -19,6 +19,9 @@
   const imageContext = imageCanvas.getContext("2d");
   const overlayContext = overlayCanvas.getContext("2d");
   const mosaicCache = new WeakMap();
+  const PDF_SOURCE_CACHE_LIMIT = 2;
+  const pdfSourceCache = new Map();
+  let pdfRenderQueue = Promise.resolve();
 
   const state = {
     filename: "image.png",
@@ -46,6 +49,7 @@
   const hasWatermark = () => state.entitlement.plan !== "pro";
 
   start().catch((error) => {
+    fetch("./failed", { method: "POST" }).catch(() => undefined);
     $("#loading").textContent = `Could not load ${state.kind === "pdf" ? "PDF" : "image"}: ${error.message || error}`;
   });
 
@@ -64,9 +68,18 @@
     else state.pages = [newPage(imageToCanvas(await loadImage("./source")))];
 
     configureForKind();
-    bindControls();
     updatePlanBadge();
     await showPage(0);
+    if (!currentPage()?.source) throw new Error("The file could not be rendered.");
+    const ready = await fetch("./ready", { method: "POST" });
+    if (!ready.ok) throw new Error("The editor could not confirm that the file is ready.");
+    const readyConfig = await ready.json();
+    if (readyConfig.entitlement) {
+      state.entitlement = readyConfig.entitlement;
+      updatePlanBadge();
+      updateExportControls();
+    }
+    bindControls();
   }
 
   function newPage(source, details = {}) {
@@ -140,17 +153,42 @@
     const canvas = document.createElement("canvas");
     canvas.width = Math.ceil(viewport.width);
     canvas.height = Math.ceil(viewport.height);
-    await page.render({ canvas, viewport, background: "#ffffff" }).promise;
-    return canvas;
+    try {
+      await page.render({ canvas, viewport, background: "#ffffff" }).promise;
+      return canvas;
+    } finally {
+      page.cleanup();
+    }
+  }
+
+  function retainPdfSource(index, canvas) {
+    const page = state.pages[index];
+    page.source = canvas;
+    pdfSourceCache.delete(index);
+    pdfSourceCache.set(index, true);
+    for (const cachedIndex of pdfSourceCache.keys()) {
+      if (pdfSourceCache.size <= PDF_SOURCE_CACHE_LIMIT) break;
+      if (cachedIndex === state.pageIndex || cachedIndex === index) continue;
+      state.pages[cachedIndex].source = null;
+      pdfSourceCache.delete(cachedIndex);
+    }
   }
 
   function pageSource(index) {
     const page = state.pages[index];
-    if (page.source) return Promise.resolve(page.source);
-    page.sourcePromise ??= renderPdfPage(index).then((canvas) => {
-      page.source = canvas;
-      return canvas;
-    });
+    if (page.source) {
+      if (state.kind === "pdf") retainPdfSource(index, page.source);
+      return Promise.resolve(page.source);
+    }
+    if (!page.sourcePromise) {
+      // Only one full-resolution render runs at a time, even when a user rapidly
+      // switches pages. Settled promises must not retain evicted canvases.
+      page.sourcePromise = pdfRenderQueue.then(() => renderPdfPage(index)).then((canvas) => {
+        retainPdfSource(index, canvas);
+        return canvas;
+      }).finally(() => { page.sourcePromise = null; });
+      pdfRenderQueue = page.sourcePromise.then(() => undefined, () => undefined);
+    }
     return page.sourcePromise;
   }
 
@@ -247,6 +285,15 @@
     $("#prevPage").addEventListener("click", () => changePage(-1));
     $("#nextPage").addEventListener("click", () => changePage(1));
     $("#planBadge").addEventListener("click", () => openUpgradeDialog());
+    $("#upgradeLink").addEventListener("click", async (event) => {
+      event.preventDefault();
+      try {
+        const response = await fetch("./upgrade", { method: "POST" });
+        if (!response.ok) throw new Error("Could not open the license command. Open Manage License in Raycast.");
+      } catch (error) {
+        toast(error.message || String(error));
+      }
+    });
     window.addEventListener("resize", () => { if (state.zoom < 1) fitCanvas(); });
     window.addEventListener("keydown", keyboardShortcuts);
     window.addEventListener("paste", pasteImage);
@@ -396,6 +443,8 @@
     } else if (validDraft(state.draft)) {
       if (state.draft.type === "rect") Object.assign(state.draft, normalizedRect(state.draft));
       addMask(state.draft);
+    } else if (state.tool === "freeform") {
+      toast("Draw a freeform selection with an area, then try again");
     }
     state.draft = null;
     state.start = null;
@@ -415,13 +464,36 @@
 
   function addMask(mask) {
     const page = currentPage();
+    if (!validDraft(mask)) return false;
     rememberEdit(page);
     page.masks.push(mask);
     updateHistory();
+    return true;
   }
 
   function validDraft(mask) {
-    if (mask.type === "path") return mask.points.length > 1;
+    if (mask.type === "path") {
+      if (!mask.closed) return mask.points.some((point) => Math.hypot(point.x - mask.points[0].x, point.y - mask.points[0].y) > 3);
+      if (mask.points.length < 3) return false;
+      const bounds = maskBounds(mask);
+      if (bounds.width <= 0 || bounds.height <= 0) return false;
+      // Canvas uses nonzero winding: a self-crossing polygon can have filled
+      // lobes even when its signed area cancels. Test the same fill operation.
+      const scale = Math.min(1, 256 / Math.max(bounds.width, bounds.height));
+      const coverage = document.createElement("canvas");
+      coverage.width = Math.ceil(bounds.width * scale) + 2;
+      coverage.height = Math.ceil(bounds.height * scale) + 2;
+      const context = coverage.getContext("2d");
+      context.translate(1 - bounds.x * scale, 1 - bounds.y * scale);
+      context.scale(scale, scale);
+      maskPath(context, mask);
+      context.fill();
+      const pixels = context.getImageData(0, 0, coverage.width, coverage.height).data;
+      for (let index = 3; index < pixels.length; index += 4) {
+        if (pixels[index] > 0) return true;
+      }
+      return false;
+    }
     return Math.abs(mask.width) > 3 && Math.abs(mask.height) > 3;
   }
 
@@ -538,7 +610,7 @@
   function drawOverlay() {
     overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     const page = currentPage();
-    if (!page) return;
+    if (!page?.source) return;
     overlayContext.save();
     const bounds = visibleBounds();
     overlayContext.translate(-bounds.x, -bounds.y);
@@ -653,6 +725,7 @@
 
   function undo() {
     const page = currentPage();
+    if (!page?.source) return;
     if (!page.history.length) return;
     page.redo.push(snapshot(page));
     Object.assign(page, page.history.pop());
@@ -662,6 +735,7 @@
 
   function redo() {
     const page = currentPage();
+    if (!page?.source) return;
     if (!page.redo.length) return;
     page.history.push(snapshot(page));
     Object.assign(page, page.redo.pop());
@@ -697,24 +771,25 @@
     const progress = $("#ocrProgress");
     const page = currentPage();
     if (!window.Tesseract) {
-      toast("Text detector could not load. Check your internet connection.");
+      toast("The local text detector could not load. Reopen Cloakshot and try again.");
       return;
     }
     button.disabled = true;
     progress.hidden = false;
+    let worker;
     try {
-      const result = await window.Tesseract.recognize(page.source, "eng", {
-        logger(message) {
+      worker = await createOcrWorker((message) => {
           if (typeof message.progress === "number") $("#ocrProgressBar").style.width = `${Math.round(message.progress * 100)}%`;
           $("#ocrStatus").textContent = sentenceCase(message.status || "Detecting text…");
-        }
       });
+      const result = await worker.recognize(page.source);
       page.words = (result.data.words || []).filter((word) => word.confidence > OCR_MIN_CONFIDENCE).map(wordBox);
       if (page === currentPage()) setTool("text");
       toast(`Detected ${page.words.length} text region${page.words.length === 1 ? "" : "s"}`);
     } catch (error) {
       toast(`Text detection failed: ${error.message || error}`);
     } finally {
+      await worker?.terminate();
       button.disabled = false;
       progress.hidden = true;
       $("#ocrProgressBar").style.width = "0";
@@ -843,16 +918,23 @@
   }
 
   async function flattenPage(page, index) {
-    const source = page.source ?? await renderPdfPage(index);
+    const source = await pageSource(index);
     const flattened = cloneCanvas(source);
     const context = flattened.getContext("2d");
     page.masks.forEach((mask) => applyMask(context, mask, source));
     return flattened;
   }
 
-  async function createOcrWorker() {
+  async function createOcrWorker(logger) {
     if (!window.Tesseract) throw new Error("Searchable text needs the text detector, which could not load. Turn off Searchable and try again.");
-    return window.Tesseract.createWorker("eng");
+    return window.Tesseract.createWorker("eng", 1, {
+      workerPath: vendorUrl("tesseract-worker.min.js"),
+      corePath: vendorUrl("ocr-core/"),
+      langPath: vendorUrl("ocr-lang"),
+      workerBlobURL: false,
+      cacheMethod: "none",
+      logger,
+    });
   }
 
   async function addSearchableText(target, canvas, page, font, worker) {

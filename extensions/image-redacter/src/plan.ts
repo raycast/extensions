@@ -7,5 +7,3 @@ export const PRO_PRICE = {
   label: "$19 once-off",
 };
 export const WEBSITE_URL = "https://cloakshot.app";
-export const MANAGE_LICENSE_DEEPLINK =
-  "raycast://extensions/byronrode/image-redacter/manage-license";
