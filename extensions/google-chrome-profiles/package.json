@@ -75,7 +75,7 @@
       "type": "dropdown",
       "required": false,
       "default": "name",
-      "description": "Order of the profile list.",
+      "description": "Order of profiles in Switch Profiles and Move Current Tab.",
       "data": [
         {
           "title": "Name",

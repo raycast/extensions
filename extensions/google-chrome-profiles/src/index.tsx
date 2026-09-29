@@ -38,7 +38,7 @@ import {
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
-import { extractProfiles, filterProfiles, sortByLastUsed } from "./util/profiles";
+import { extractProfiles, filterProfiles } from "./util/profiles";
 import { getFavicon } from "@raycast/utils";
 
 const ProfileItem = (props: {
@@ -146,9 +146,7 @@ export default function Command() {
   }
 
   const infoCache = localState?.profile.info_cache;
-  const byName = infoCache && extractProfiles(infoCache);
-  const profiles =
-    byName && getPreferenceValues<ExtensionPreferences>().sortProfiles === "lastUsed" ? sortByLastUsed(byName) : byName;
+  const profiles = infoCache && extractProfiles(infoCache);
 
   const deleteProfile = async (profile: Profile) => {
     if (

@@ -174,3 +174,16 @@ test("last-used sort puts the most recently active profile first, unknown times 
     ["c", "a", "b"],
   );
 });
+
+test("Last Used preference orders extracted profiles for every command", () => {
+  const { profiles } = setup({ prefs: { sortProfiles: "lastUsed" } });
+  const infoCache = { a: { name: "A", active_time: 1 }, b: { name: "B", active_time: 2 } };
+  assert.deepEqual(
+    profiles.extractProfiles(infoCache).map((p) => p.name),
+    ["B", "A"],
+  );
+  assert.deepEqual(
+    setup().profiles.extractProfiles(infoCache).map((p) => p.name),
+    ["A", "B"],
+  );
+});

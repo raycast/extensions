@@ -63,4 +63,4 @@ Optional behavior (defaults keep the original behavior):
 - **Bring profile to front on Enter**: selecting a profile focuses it in one step; Show Bookmarks moves to ⌘↵.
 - **Don't open a new window if one is already open**: Bring to Front reuses the profile's open window. If Chrome can't switch to it (for example, two profiles share a name), show an error instead of opening a duplicate window. A profile with no open window still gets one.
 
-![extension setting](https://user-images.githubusercontent.com/2499356/182661111-b53372fa-ff38-4134-934d-c2cb65fc367e.jpg)
+<img src="media/preferences.png" alt="Extension preferences" width="400">

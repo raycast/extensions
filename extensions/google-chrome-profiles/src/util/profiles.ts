@@ -1,10 +1,11 @@
+import { getPreferenceValues } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { BrowserConfig, GoogleChromeLocalState, GoogleChromeInfoCache, Profile } from "./types";
 
 export function extractProfiles(infoCache: GoogleChromeInfoCache): Profile[] {
-  return Object.entries(infoCache)
+  const byName = Object.entries(infoCache)
     .map(
       ([directory, profile]): Profile => ({
         directory,
@@ -21,6 +22,7 @@ export function extractProfiles(infoCache: GoogleChromeInfoCache): Profile[] {
       }),
     )
     .sort((a, b) => a.name.localeCompare(b.name));
+  return getPreferenceValues<ExtensionPreferences>().sortProfiles === "lastUsed" ? sortByLastUsed(byName) : byName;
 }
 
 export function profileLabels(profile: Profile): string[] {
