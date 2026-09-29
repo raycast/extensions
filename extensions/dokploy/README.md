@@ -47,8 +47,10 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - View Docker (Containers, sorted by frecency)
         - View Docker Config
         - Restart / Start / Stop / Kill Container
+        - Browse Files (running containers, read-only)
         - Remove Container
         - Docker Cleanup (disk usage, clean stopped containers/unused images/unused volumes/build cache, full prune)
+        - Docker Events (recent events on the server, 5 minutes to 24 hours)
     - View S3 Destinations
         - Delete S3 Destination
     - View Users

@@ -3,6 +3,8 @@ import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { DockerContainer, ErrorResult } from "./interfaces";
 import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
 import DockerCleanup from "./docker-cleanup";
+import DockerEvents from "./docker-events";
+import DockerFiles from "./docker-files";
 
 type ContainerAction = "restart" | "start" | "stop" | "kill" | "remove";
 
@@ -168,6 +170,18 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
           </ActionPanel>
         }
       />
+      {/* Same reasoning as Docker Cleanup: the event stream covers the whole host. */}
+      <List.Item
+        icon={Icon.Clock}
+        title="Docker Events"
+        subtitle="Recent container, image, volume & network events on this server"
+        actions={
+          <ActionPanel>
+            <Action.Push icon={Icon.Clock} title="Docker Events" target={<DockerEvents instance={instance} />} />
+            {refreshAction}
+          </ActionPanel>
+        }
+      />
       {sortedContainers.map((container) => {
         // `docker ps` states: created, running, paused, restarting, removing, exited, dead.
         const isUp = container.state === "running" || container.state === "restarting";
@@ -192,7 +206,19 @@ export default function Docker({ instance: initial }: { instance: Instance }) {
                   {isUp && containerAction(container, "stop")}
                   {isUp && containerAction(container, "kill")}
                 </ActionPanel.Section>
-                <ActionPanel.Section>{refreshAction}</ActionPanel.Section>
+                <ActionPanel.Section>
+                  {refreshAction}
+                  {/* Appended after the existing actions, but kept above Remove so the destructive
+                   * action stays last. `docker exec` underneath, so only a running container. */}
+                  {container.state === "running" && (
+                    <Action.Push
+                      icon={Icon.Folder}
+                      title="Browse Files"
+                      target={<DockerFiles container={container} instance={instance} />}
+                      onPush={() => visitItem(container)}
+                    />
+                  )}
+                </ActionPanel.Section>
                 <ActionPanel.Section>{containerAction(container, "remove")}</ActionPanel.Section>
               </ActionPanel>
             }
