@@ -694,7 +694,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         () => undefined,
         (event) => {
           session.ytdlp(event);
-          if (event.type === "progress") toast.message = progressMessage(event.progress) || toast.message;
+          if (event.type === "progress") toast.message = progressMessage(session.getSnapshot()) || toast.message;
         },
       );
       toast.style = Toast.Style.Success;

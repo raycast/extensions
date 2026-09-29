@@ -64,6 +64,20 @@ const SAMPLE_INTERVAL_MS = 250;
 const RENDER_INTERVAL_MS = 150;
 /** Charts get halved in resolution past this many samples, so a long download stays cheap to draw. */
 const MAX_SAMPLES = 240;
+/**
+ * Time constant of the shown speed's moving average. yt-dlp's readings swing
+ * wildly from one update to the next; this rides those out while still
+ * following a real change within a few seconds.
+ */
+export const SPEED_SMOOTHING_MS = 5000;
+
+/** Seconds left at `speed`: from the bytes still to fetch when the size is known, else yt-dlp's own estimate. */
+function timeLeft(p: { downloadedBytes?: number; totalBytes?: number; eta?: number }, speed?: number) {
+  if (p.totalBytes !== undefined && p.downloadedBytes !== undefined && speed !== undefined && speed > 0) {
+    return Math.max(0, p.totalBytes - p.downloadedBytes) / speed;
+  }
+  return p.eta;
+}
 
 function pushSample(samples: number[], value: number): number[] {
   const next = [...samples, value];
@@ -119,6 +133,8 @@ export class DownloadSession {
   private listeners = new Set<() => void>();
   private stopHandler?: () => void;
   private lastSampleAt = 0;
+  private smoothedSpeed?: number;
+  private lastSpeedAt = 0;
   private renderTimer?: ReturnType<typeof setTimeout>;
 
   constructor(init: DownloadInit, now = Date.now()) {
@@ -177,7 +193,9 @@ export class DownloadSession {
         return;
       case "progress": {
         const p = event.progress;
-        const patch: Partial<DownloadSnapshot> = { ...p, lastProgressAt: now };
+        // Speed and time left are shown smoothed; the chart keeps the raw readings.
+        const speed = this.smoothSpeed(p.speed, now);
+        const patch: Partial<DownloadSnapshot> = { ...p, speed, eta: timeLeft(p, speed), lastProgressAt: now };
         if (s.firstProgressAt === undefined) patch.firstProgressAt = now;
         // Progress before any Destination line (e.g. single-file extractors) still means downloading.
         if (s.stage === "prepare") patch.stage = this.streamStage(Math.max(1, s.streamIndex));
@@ -242,6 +260,19 @@ export class DownloadSession {
       },
       true,
     );
+  }
+
+  /** Fold a speed reading into a time-weighted moving average. A missing reading keeps the last average. */
+  private smoothSpeed(raw: number | undefined, now: number): number | undefined {
+    if (raw === undefined) return this.smoothedSpeed;
+    if (this.smoothedSpeed === undefined) {
+      this.smoothedSpeed = raw;
+    } else {
+      const alpha = 1 - Math.exp(-Math.max(0, now - this.lastSpeedAt) / SPEED_SMOOTHING_MS);
+      this.smoothedSpeed += alpha * (raw - this.smoothedSpeed);
+    }
+    this.lastSpeedAt = now;
+    return this.smoothedSpeed;
   }
 
   private streamStage(streamIndex: number): StageKey {
