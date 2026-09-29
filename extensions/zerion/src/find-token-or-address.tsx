@@ -7,7 +7,7 @@ import { middleTruncate } from "./shared/utils";
 import { AddressView } from "./components/AddressView";
 import { SafeAddressActions } from "./components/AddressLine";
 import { withAccessToken } from "@raycast/utils";
-import { ApiErrorGate } from "./components/ApiKeyGate";
+import { useApiErrorGate } from "./components/ApiKeyGate";
 import { normalizeAddress } from "./shared/NormalizedAddress";
 import { zerionOAuth } from "./shared/oauth";
 import { TokenDetail } from "./components/TokenDetail";
@@ -101,7 +101,7 @@ function Command(props: LaunchProps) {
 
   const { tokens, wallets, isLoading, error } = useSearch(query);
 
-  const errorGate = ApiErrorGate({ error });
+  const errorGate = useApiErrorGate(error);
   if (errorGate) {
     return errorGate;
   }

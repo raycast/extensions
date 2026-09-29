@@ -73,6 +73,8 @@ export interface TransactionAsset {
   symbol: string;
   iconUrl: string | null;
   isNft: boolean;
+  /** A whole NFT collection, the subject of a collection Approval */
+  isCollection?: boolean;
 }
 
 export interface TransactionTransfer {
@@ -84,10 +86,17 @@ export interface TransactionTransfer {
   recipient: string;
 }
 
+/**
+ * An Approval's subject is one asset (token or NFT) or a whole NFT collection;
+ * a collection Approval has no quantity and names its spender.
+ */
 export interface TransactionApproval {
   asset: TransactionAsset;
-  quantity: number;
+  /** Null for a collection Approval */
+  quantity: number | null;
   unlimited: boolean;
+  revoked: boolean;
+  spender: string | null;
 }
 
 export interface Transaction {
@@ -96,9 +105,9 @@ export interface Transaction {
   operationType: OperationType;
   status: TransactionStatus;
   chainId: string;
-  /** ISO 8601; kept as a string so cached pages survive JSON serialization. */
-  minedAt: string;
-  block: number;
+  /** ISO 8601, kept as a string so cached pages survive JSON serialization; null while pending. */
+  minedAt: string | null;
+  block: number | null;
   nonce: number;
   sentFrom: string;
   sentTo: string;

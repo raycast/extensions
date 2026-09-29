@@ -60,9 +60,12 @@ export function formatFiat(value: number) {
 export interface Flow {
   asset: TransactionAsset;
   direction: "in" | "out" | "self" | "approval";
-  quantity: number;
+  /** Null for a collection Approval, which has no amount */
+  quantity: number | null;
   value: number | null;
   unlimited?: boolean;
+  /** Set for collection Approvals, which name who received the permission */
+  spender?: string | null;
 }
 
 function aggregateTransfers(transfers: TransactionTransfer[]): Flow[] {
@@ -70,7 +73,7 @@ function aggregateTransfers(transfers: TransactionTransfer[]): Flow[] {
   for (const transfer of transfers) {
     const existing = byAsset.get(transfer.asset.id);
     if (existing) {
-      existing.quantity += transfer.quantity;
+      existing.quantity = (existing.quantity ?? 0) + transfer.quantity;
       existing.value =
         existing.value == null && transfer.value == null ? null : (existing.value ?? 0) + (transfer.value ?? 0);
     } else {
@@ -91,25 +94,36 @@ export function getFlowSign(flow: Flow) {
 
 export function formatFlow(flow: Flow) {
   if (flow.direction === "approval") {
+    if (flow.asset.isCollection) {
+      return `All ${flow.asset.name}`;
+    }
+    // A revoked allowance is an approval for 0; the amount adds nothing
+    if (!flow.quantity) {
+      return flow.asset.symbol;
+    }
     return `${flow.unlimited ? "Unlimited" : formatQuantity(flow.quantity)} ${flow.asset.symbol}`;
   }
-  const amount = flow.asset.isNft && flow.quantity === 1 ? "" : `${formatQuantity(flow.quantity)} `;
+  const quantity = flow.quantity ?? 0;
+  const amount = flow.asset.isNft && quantity === 1 ? "" : `${formatQuantity(quantity)} `;
   return `${getFlowSign(flow)}${amount}${flow.asset.symbol}`;
 }
 
-/** Transfers split by direction, each aggregated per asset. */
+/** Transfers split by direction, each aggregated per asset; Approvals split into granted and revoked. */
 export function getTransactionFlows(transaction: Transaction) {
   const incoming = aggregateTransfers(transaction.transfers.filter(({ direction }) => direction === "in"));
   const outgoing = aggregateTransfers(transaction.transfers.filter(({ direction }) => direction === "out"));
   const self = aggregateTransfers(transaction.transfers.filter(({ direction }) => direction === "self"));
-  const approvals: Flow[] = transaction.approvals.map((approval) => ({
+  const toFlow = (approval: Transaction["approvals"][number]): Flow => ({
     asset: approval.asset,
     direction: "approval",
     quantity: approval.quantity,
     value: null,
     unlimited: approval.unlimited,
-  }));
-  return { incoming, outgoing, self, approvals };
+    spender: approval.spender,
+  });
+  const approvals = transaction.approvals.filter((approval) => !approval.revoked).map(toFlow);
+  const revocations = transaction.approvals.filter((approval) => approval.revoked).map(toFlow);
+  return { incoming, outgoing, self, approvals, revocations };
 }
 
 /**
@@ -117,12 +131,20 @@ export function getTransactionFlows(transaction: Transaction) {
  * the trailing side is secondary only when both exist; approvals are the fallback when nothing moved.
  */
 export function getPrimaryAndSecondaryFlows(transaction: Transaction): { primary: Flow[]; secondary: Flow[] } {
-  const { incoming, outgoing, self, approvals } = getTransactionFlows(transaction);
+  const { incoming, outgoing, self, approvals, revocations } = getTransactionFlows(transaction);
   const [leading, trailing] = transaction.operationType === "deposit" ? [outgoing, incoming] : [incoming, outgoing];
   if (leading.length && trailing.length) {
     return { primary: leading, secondary: trailing };
   }
-  const primary = leading.length ? leading : trailing.length ? trailing : self.length ? self : approvals;
+  const primary = leading.length
+    ? leading
+    : trailing.length
+      ? trailing
+      : self.length
+        ? self
+        : approvals.length
+          ? approvals
+          : revocations;
   return { primary, secondary: [] };
 }
 
@@ -174,9 +196,9 @@ export function getTransactionKeywords(transaction: Transaction) {
   ].filter(Boolean) as string[];
 }
 
-export function getDaySectionTitle(minedAt: string, now = new Date()) {
-  const date = new Date(minedAt);
-  if (Number.isNaN(date.getTime())) {
+export function getDaySectionTitle(minedAt: string | null, now = new Date()) {
+  const date = minedAt ? new Date(minedAt) : null;
+  if (!date || Number.isNaN(date.getTime())) {
     return "Pending";
   }
   const startOfDay = (value: Date) => new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();

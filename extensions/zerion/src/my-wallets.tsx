@@ -4,7 +4,7 @@ import { getAddresses } from "./shared/utils";
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { AddressView } from "./components/AddressView";
 import { zerionOAuth } from "./shared/oauth";
-import { ApiErrorGate } from "./components/ApiKeyGate";
+import { useApiErrorGate } from "./components/ApiKeyGate";
 import { useState } from "react";
 
 function Command() {
@@ -12,7 +12,7 @@ function Command() {
   const { push } = useNavigation();
   const [apiError, setApiError] = useState<unknown>();
 
-  const errorGate = ApiErrorGate({ error: apiError });
+  const errorGate = useApiErrorGate(apiError);
   if (errorGate) {
     return errorGate;
   }

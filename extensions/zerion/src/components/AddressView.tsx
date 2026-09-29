@@ -18,7 +18,7 @@ import { ChainsSelector } from "../components/NetworkSelect";
 import { AddressLine } from "../components/AddressLine";
 import { useWalletPositions } from "../shared/useWalletPositions";
 import { useWalletPortfolio } from "../shared/useWalletPortfolio";
-import { ApiErrorGate } from "./ApiKeyGate";
+import { useApiErrorGate } from "./ApiKeyGate";
 import { useRecentTransactions } from "../shared/useWalletTransactions";
 import { TransactionItem } from "./TransactionItem";
 import { HistoryView } from "./HistoryView";
@@ -122,14 +122,12 @@ function PositionsGroup({
             }
             actions={
               <ActionPanel title="Actions">
-                {/* Enter reveals the drawer first; once it is open, Enter goes to the web app */}
-                {isShowingDetail ? null : detailAction}
                 <Action.OpenInBrowser
                   url={`https://app.zerion.io/tokens/${item.asset.id}?address=${address}`}
                   title="Open in Zerion Web App"
                   icon={Icon.Globe}
                 />
-                {isShowingDetail ? detailAction : null}
+                {detailAction}
               </ActionPanel>
             }
           />
@@ -230,7 +228,7 @@ export function AddressView({ addressOrDomain }: { addressOrDomain: string }) {
 
   const sortedDappFrames = useMemo(() => sortPositionGroupsByTotalValue(groupedPositions), [groupedPositions]);
 
-  const errorGate = ApiErrorGate({ error: portfolioError || positionsError || chainsError });
+  const errorGate = useApiErrorGate(portfolioError || positionsError || chainsError);
   if (errorGate) {
     return errorGate;
   }

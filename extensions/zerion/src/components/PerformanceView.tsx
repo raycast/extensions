@@ -5,7 +5,7 @@ import { useWalletChart } from "../shared/useWalletChart";
 import { useWalletPortfolio } from "../shared/useWalletPortfolio";
 import { formatUsd, getChartChange, renderPerformanceCard, type Change } from "../shared/performanceChart";
 import { middleTruncate } from "../shared/utils";
-import { ApiErrorGate } from "./ApiKeyGate";
+import { useApiErrorGate } from "./ApiKeyGate";
 
 export function PerformanceView({ address, name }: { address: string; name?: string | null }) {
   const [periodIndex, setPeriodIndex] = useState(PERIODS.indexOf(DEFAULT_PERIOD));
@@ -31,11 +31,12 @@ export function PerformanceView({ address, name }: { address: string; name?: str
       change,
       period,
       points: chart?.points,
+      isLoading: chartIsLoading,
     });
     return `![Performance](${image})`;
-  }, [portfolio, chart, change, period]);
+  }, [portfolio, chart, chartIsLoading, change, period]);
 
-  const errorGate = ApiErrorGate({ error: portfolioError || chartError });
+  const errorGate = useApiErrorGate(portfolioError || chartError);
   if (errorGate) {
     return errorGate;
   }

@@ -6,7 +6,7 @@ import { useWalletTransactions } from "../shared/useWalletTransactions";
 import { getDaySectionTitle } from "../shared/transactionDisplay";
 import { ChainsSelector } from "./NetworkSelect";
 import { TransactionItem } from "./TransactionItem";
-import { ApiErrorGate } from "./ApiKeyGate";
+import { useApiErrorGate } from "./ApiKeyGate";
 
 function groupByDay(transactions: Transaction[]) {
   const sections: { title: string; transactions: Transaction[] }[] = [];
@@ -43,7 +43,7 @@ export function HistoryView({
 
   const sections = useMemo(() => groupByDay(transactions ?? []), [transactions]);
 
-  const errorGate = ApiErrorGate({ error: error || chainsError });
+  const errorGate = useApiErrorGate(error || chainsError);
   if (errorGate) {
     return errorGate;
   }

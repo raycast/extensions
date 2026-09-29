@@ -1,5 +1,6 @@
 import { getAccessToken } from "@raycast/utils";
 import { DASHBOARD_URL, clearStoredApiKey } from "./oauth";
+import { markSessionRevoked } from "./session";
 
 export const API_URL = "https://api.zerion.io/v1/";
 export { DASHBOARD_URL };
@@ -40,8 +41,11 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
     let detail = `Zerion API request failed with status ${response.status}`;
     if (response.status === 401) {
       // The stored key was revoked or disabled — sign the user out so the
-      // next command launch (or tool call) re-triggers the OAuth flow.
+      // next command launch (or tool call) re-triggers the OAuth flow, and
+      // flag the session so the current command's gate can offer re-sign-in
+      // whichever request hit the 401.
       await clearStoredApiKey();
+      markSessionRevoked();
       detail =
         "The Zerion API key is no longer valid, so you have been signed out. Run any Zerion command to sign in again.";
     } else if (response.status === 429) {
@@ -259,8 +263,9 @@ export interface ApiTransaction {
   attributes: {
     operation_type: ApiOperationType;
     hash: string;
-    mined_at_block: number;
-    mined_at: string;
+    mined_at_block: number | null;
+    /** Null while the transaction is pending */
+    mined_at: string | null;
     sent_from: string;
     sent_to: string;
     status: "confirmed" | "failed" | "pending";

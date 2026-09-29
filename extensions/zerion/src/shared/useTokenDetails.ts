@@ -151,8 +151,8 @@ function fetchTokenPnl(path: string, breakdownKey: string) {
  *
  * The API refuses `filter[fungible_ids]` combined with `filter[chain_ids]`
  * (503), so a selected chain is expressed through that chain's implementation
- * (`chain:address`) instead. Without a matching implementation the PnL falls
- * back to every chain.
+ * (`chain:address`) instead. Without a matching implementation the PnL is
+ * `unavailable` rather than silently widened to every chain.
  */
 export function useTokenPnl({
   address,
@@ -167,18 +167,20 @@ export function useTokenPnl({
   chain?: string;
   execute: boolean;
 }) {
-  const implementation =
-    chain && chain !== ALL_CHAINS ? implementations.find((item) => item.chainId === chain) : undefined;
+  const chainSelected = Boolean(chain && chain !== ALL_CHAINS);
+  const implementation = chainSelected ? implementations.find((item) => item.chainId === chain) : undefined;
+  const unavailable = chainSelected && !implementation;
   const breakdownKey = implementation ? `${implementation.chainId}:${implementation.address}` : fungibleId;
   const filter = implementation
     ? `filter[fungible_implementations]=${encodeURIComponent(breakdownKey)}`
     : `filter[fungible_ids]=${encodeURIComponent(fungibleId)}`;
   const path = `wallets/${address}/pnl?currency=usd&${filter}`;
+  const shouldFetch = execute && !unavailable;
   const { data, isLoading, error } = usePromise(fetchTokenPnl, [path, breakdownKey], {
-    execute,
+    execute: shouldFetch,
     onError: (error: Error) => {
       console.error(error);
     },
   });
-  return { pnl: data, isLoading: execute && isLoading, error };
+  return { pnl: unavailable ? undefined : data, isLoading: shouldFetch && isLoading, error, unavailable };
 }

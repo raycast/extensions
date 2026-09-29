@@ -43,6 +43,17 @@ function mapAsset({
   };
 }
 
+function mapCollection(collection?: { id: string; name: string; icon_url: string }): TransactionAsset {
+  return {
+    id: `collection:${collection?.id ?? "unknown"}`,
+    name: collection?.name ?? "Unknown Collection",
+    symbol: collection?.name ?? "",
+    iconUrl: collection?.icon_url ?? null,
+    isNft: true,
+    isCollection: true,
+  };
+}
+
 export function mapTransaction(transaction: ApiTransaction): Transaction {
   const { attributes, relationships } = transaction;
   const dapp = attributes.application_metadata;
@@ -72,11 +83,23 @@ export function mapTransaction(transaction: ApiTransaction): Transaction {
       sender: transfer.sender,
       recipient: transfer.recipient,
     })),
-    approvals: attributes.approvals.map((approval) => ({
-      asset: mapAsset(approval),
-      quantity: approval.quantity.float,
-      unlimited: approval.quantity.float >= UNLIMITED_APPROVAL_THRESHOLD,
-    })),
+    approvals: [
+      ...attributes.approvals.map((approval) => ({
+        asset: mapAsset(approval),
+        quantity: approval.quantity.float,
+        unlimited: approval.quantity.float >= UNLIMITED_APPROVAL_THRESHOLD,
+        // A token approval for 0 is how an allowance gets revoked
+        revoked: approval.quantity.float === 0,
+        spender: null,
+      })),
+      ...(attributes.collection_approvals ?? []).map((approval) => ({
+        asset: mapCollection(approval.collection_info),
+        quantity: null,
+        unlimited: !approval.cancelled,
+        revoked: approval.cancelled,
+        spender: approval.spender,
+      })),
+    ],
     dapp: dapp?.name ? { name: dapp.name, iconUrl: dapp.icon?.url ?? null, method: dapp.method?.name ?? null } : null,
   };
 }
@@ -130,7 +153,6 @@ export function useWalletTransactions({ address, chain }: { address?: string; ch
         cursor: result.links.next,
       }),
       execute: Boolean(address),
-      keepPreviousData: true,
       onError: (error: Error) => {
         console.error(error);
       },

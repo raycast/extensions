@@ -11,7 +11,6 @@ const PALETTE = {
     pillText: "#71727d",
     pillSelected: "#f0f0f2",
     guide: "#e1e1e1",
-    empty: "#f5f5f7",
     changePositive: "#01a643",
     changeNegative: "#ff4a4a",
     linePositive: "#1fc260",
@@ -23,7 +22,6 @@ const PALETTE = {
     pillText: "#9da0a6",
     pillSelected: "#29292c",
     guide: "#4b4b4d",
-    empty: "#1d1d21",
     changePositive: "#4fbf67",
     changeNegative: "#ff5c5c",
     linePositive: "#31b566",
@@ -169,6 +167,31 @@ function toDataUri(svg: string) {
  * start/end dates below. Renders an empty placeholder when there is nothing
  * to draw.
  */
+/**
+ * Placeholder in the plot area while the chart loads or when there is nothing
+ * to draw: a faint dashed baseline where the line will go, and a muted caption.
+ * No filled background — it would read as a blank card on light themes.
+ */
+function drawChartPlaceholder({
+  colors,
+  plot,
+  width,
+  caption,
+}: {
+  colors: (typeof PALETTE)[Theme];
+  plot: { left: number; right: number; top: number; bottom: number };
+  width: number;
+  caption: string;
+}) {
+  const y = round((plot.top + plot.bottom) / 2);
+  return (
+    `<line x1="${plot.left}" y1="${y}" x2="${plot.right}" y2="${y}" stroke="${colors.guide}" stroke-width="1" ` +
+    `stroke-dasharray="1 4" stroke-linecap="round"/>` +
+    `<text x="${width / 2}" y="${y - 10}" font-size="13" font-weight="500" ` +
+    `text-anchor="middle" fill="${colors.muted}">${escapeXml(caption)}</text>`
+  );
+}
+
 function drawLineChart({
   colors,
   points,
@@ -176,6 +199,7 @@ function drawLineChart({
   width,
   height,
   period,
+  isLoading = false,
 }: {
   colors: (typeof PALETTE)[Theme];
   points: [number, number][] | undefined;
@@ -184,14 +208,17 @@ function drawLineChart({
   height: number;
   /** Omit to draw the chart without date labels */
   period?: Period;
+  /** True while the points are still being fetched */
+  isLoading?: boolean;
 }) {
   const chartPoints = points ? uniqueByTime(points) : [];
   if (chartPoints.length < 2) {
-    return (
-      `<rect x="0" y="${plot.top}" width="${width}" height="${plot.bottom - plot.top}" rx="12" fill="${colors.empty}"/>` +
-      `<text x="${width / 2}" y="${(plot.top + plot.bottom) / 2 + 5}" font-size="14" font-weight="500" ` +
-      `text-anchor="middle" fill="${colors.muted}">No chart data</text>`
-    );
+    return drawChartPlaceholder({
+      colors,
+      plot,
+      width,
+      caption: isLoading ? "Loading chart…" : "No chart data",
+    });
   }
   const parts: string[] = [];
   const values = chartPoints.map(([, value]) => value);
@@ -248,12 +275,14 @@ export function renderPerformanceCard({
   change,
   period,
   points,
+  isLoading = false,
 }: {
   theme: Theme;
   totalValue: number | undefined;
   change: Change | null;
   period: Period;
   points: [number, number][] | undefined;
+  isLoading?: boolean;
 }) {
   const colors = PALETTE[theme];
   const parts: string[] = [];
@@ -290,7 +319,7 @@ export function renderPerformanceCard({
     );
   });
 
-  parts.push(drawLineChart({ colors, points, plot: PLOT, width: WIDTH, height: HEIGHT, period }));
+  parts.push(drawLineChart({ colors, points, plot: PLOT, width: WIDTH, height: HEIGHT, period, isLoading }));
 
   return toDataUri(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" ` +
@@ -335,11 +364,13 @@ export function renderTokenCard({
   price,
   change,
   points,
+  isLoading = false,
 }: {
   theme: Theme;
   price: number | null | undefined;
   change: Change | null;
   points: [number, number][] | undefined;
+  isLoading?: boolean;
 }) {
   const colors = PALETTE[theme];
   const parts: string[] = [];
@@ -367,6 +398,7 @@ export function renderTokenCard({
       plot: TOKEN_PLOT,
       width: TOKEN_WIDTH,
       height: TOKEN_HEIGHT,
+      isLoading,
     }),
   );
 

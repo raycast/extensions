@@ -34,7 +34,8 @@ One logical step inside a Transaction (e.g. an approve and a trade in the same t
 A movement of an asset (token or NFT) into or out of the wallet within an Act, with a direction: in, out, or self.
 
 **Approval**:
-A spending permission granted (or revoked) for an asset within an Act.
+A spending permission granted or revoked within an Act. Its subject is either one asset (a token or an NFT) or a whole NFT collection; it names the spender that received the permission. A collection Approval carries no quantity.
+_Avoid_: Collection approval (as a separate concept), allowance
 
 **Token Details**:
 The side panel for one token, opened with ⌘D from a position on the Wallet Overview or a token in Search Web3. Shows the token's 1D price chart, its Market Data, the position it was opened from and, on the Wallet Overview, the wallet's Token PnL.

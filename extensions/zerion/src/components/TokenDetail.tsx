@@ -76,7 +76,21 @@ function MarketSection({ marketData }: { marketData: MarketData }) {
   );
 }
 
-function PnlSection({ pnl, isLoading, error }: { pnl?: TokenPnl; isLoading: boolean; error?: Error }) {
+function PnlSection({
+  pnl,
+  isLoading,
+  error,
+  unavailable,
+}: {
+  pnl?: TokenPnl;
+  isLoading: boolean;
+  error?: Error;
+  /** The token has no implementation on the selected chain, so no chain-scoped PnL exists */
+  unavailable: boolean;
+}) {
+  if (unavailable) {
+    return <List.Item.Detail.Metadata.Label title="PnL" text="Unavailable for this chain" icon={Icon.Info} />;
+  }
   if (error) {
     return <List.Item.Detail.Metadata.Label title="PnL" text="PnL unavailable" icon={Icon.Warning} />;
   }
@@ -147,6 +161,7 @@ export function TokenDetail({
     pnl,
     isLoading: pnlIsLoading,
     error: pnlError,
+    unavailable: pnlUnavailable,
   } = useTokenPnl({
     address: wallet?.address ?? "",
     fungibleId: token.id,
@@ -163,9 +178,15 @@ export function TokenDetail({
       price != null && relativeChange != null
         ? { absolute: price - price / (1 + relativeChange / 100), relative: relativeChange }
         : null;
-    const image = renderTokenCard({ theme: environment.appearance, price, change, points: chart?.points });
+    const image = renderTokenCard({
+      theme: environment.appearance,
+      price,
+      change,
+      points: chart?.points,
+      isLoading: chartIsLoading,
+    });
     return `![${token.symbol}](${image})`;
-  }, [price, relativeChange, chart, token.symbol]);
+  }, [price, relativeChange, chart, chartIsLoading, token.symbol]);
 
   return (
     <List.Item.Detail
@@ -200,7 +221,7 @@ export function TokenDetail({
           {pnlEnabled ? (
             <>
               <List.Item.Detail.Metadata.Separator />
-              <PnlSection pnl={pnl} isLoading={pnlIsLoading} error={pnlError} />
+              <PnlSection pnl={pnl} isLoading={pnlIsLoading} error={pnlError} unavailable={pnlUnavailable} />
             </>
           ) : null}
           {marketData?.links.length ? (

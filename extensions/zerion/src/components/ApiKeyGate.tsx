@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon, LaunchType, LocalStorage, environmen
 import { useEffect, useState } from "react";
 import { DASHBOARD_URL, isApiErrorWithStatus } from "../shared/api";
 import { zerionOAuth } from "../shared/oauth";
+import { markSessionRestored, useSessionRevoked } from "../shared/session";
 
 const RATE_LIMITED_MARKDOWN = `
 # Zerion API Rate Limit Reached
@@ -65,6 +66,7 @@ export function SignInAgainView() {
     setState("authorizing");
     try {
       await zerionOAuth.authorize();
+      markSessionRestored();
     } catch {
       setState("failed");
       return;
@@ -110,11 +112,16 @@ export function SignInAgainView() {
 }
 
 /**
- * Renders the right gate view for auth/quota API errors, or null for
- * anything else (including no error).
+ * The gate view to render instead of the screen for auth/quota API errors, or
+ * null for anything else (including no error).
+ *
+ * A revoked key is caught two ways: through the screen's own request errors,
+ * and through the session flag the api layer raises on any 401 — so a 401 on
+ * a nested request (Token Details, Recent Activity) reaches the gate too.
  */
-export function ApiErrorGate({ error }: { error?: unknown }) {
-  if (isApiErrorWithStatus(error, 401)) {
+export function useApiErrorGate(error?: unknown) {
+  const sessionRevoked = useSessionRevoked();
+  if (sessionRevoked || isApiErrorWithStatus(error, 401)) {
     return <SignInAgainView />;
   }
   if (isApiErrorWithStatus(error, 429)) {

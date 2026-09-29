@@ -25,10 +25,17 @@ function getAssetIcon(flow: Flow): Image.ImageLike {
   };
 }
 
+/** What follows the amount: the fiat value, or for a collection Approval its spender. */
+function getFlowDetail(flow: Flow) {
+  if (flow.direction === "approval") {
+    return flow.spender ? `spender ${truncateAddress(flow.spender)}` : null;
+  }
+  return flow.value != null ? formatFiat(flow.value) : null;
+}
+
 function getFlowLine(flow: Flow) {
-  return flow.value != null && flow.direction !== "approval"
-    ? `${formatFlow(flow)} (${formatFiat(flow.value)})`
-    : formatFlow(flow);
+  const detail = getFlowDetail(flow);
+  return detail ? `${formatFlow(flow)} (${detail})` : formatFlow(flow);
 }
 
 function getFlowColor(flow: Flow, dimmed: boolean) {
@@ -57,9 +64,16 @@ function getFlowAccessory(flows: Flow[], dimmed: boolean): List.Item.Accessory |
   };
 }
 
-function formatDateTime(minedAt: string) {
+function parseMinedAt(minedAt: string | null): Date | null {
+  if (!minedAt) {
+    return null;
+  }
   const date = new Date(minedAt);
-  return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateTime(minedAt: string | null) {
+  return parseMinedAt(minedAt)?.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) ?? "";
 }
 
 function getAccessories({
@@ -92,9 +106,9 @@ function getAccessories({
       ? { text: { value: formatFiat(singleFlow.value), color: Color.SecondaryText } }
       : null;
 
-  const date = new Date(transaction.minedAt);
+  const date = parseMinedAt(transaction.minedAt);
   const dateAccessory: List.Item.Accessory | null =
-    transaction.status === "pending" || Number.isNaN(date.getTime())
+    transaction.status === "pending" || !date
       ? null
       : dateStyle === "relative"
         ? { date, tooltip: formatDateTime(transaction.minedAt) }
@@ -118,11 +132,7 @@ function renderFlowsMetadata(title: string, flows: Flow[]) {
       key={`${title}-${flow.asset.id}`}
       title={index === 0 ? title : ""}
       icon={getAssetIcon(flow)}
-      text={
-        flow.value != null && flow.direction !== "approval"
-          ? `${formatFlow(flow)} · ${formatFiat(flow.value)}`
-          : formatFlow(flow)
-      }
+      text={getFlowDetail(flow) ? `${formatFlow(flow)} · ${getFlowDetail(flow)}` : formatFlow(flow)}
     />
   ));
 }
@@ -145,8 +155,8 @@ function TransactionDetail({
   explorerUrl: string;
 }) {
   const display = getOperationDisplay(transaction.operationType);
-  const { incoming, outgoing, self, approvals } = getTransactionFlows(transaction);
-  const hasFlows = incoming.length + outgoing.length + self.length + approvals.length > 0;
+  const { incoming, outgoing, self, approvals, revocations } = getTransactionFlows(transaction);
+  const hasFlows = incoming.length + outgoing.length + self.length + approvals.length + revocations.length > 0;
   const { fee } = transaction;
 
   return (
@@ -170,6 +180,7 @@ function TransactionDetail({
           {renderFlowsMetadata("Sent", outgoing)}
           {renderFlowsMetadata("Moved", self)}
           {renderFlowsMetadata("Approved", approvals)}
+          {renderFlowsMetadata("Revoked", revocations)}
           <List.Item.Detail.Metadata.Separator />
           {transaction.dapp ? (
             <List.Item.Detail.Metadata.Label
@@ -204,7 +215,10 @@ function TransactionDetail({
           ) : null}
           <List.Item.Detail.Metadata.Label title="From" text={truncateAddress(transaction.sentFrom)} />
           <List.Item.Detail.Metadata.Label title="To" text={truncateAddress(transaction.sentTo)} />
-          <List.Item.Detail.Metadata.Label title="Date" text={formatDateTime(transaction.minedAt)} />
+          <List.Item.Detail.Metadata.Label
+            title="Date"
+            text={transaction.status === "pending" ? "Pending" : formatDateTime(transaction.minedAt) || "Unknown"}
+          />
           {transaction.block ? (
             <List.Item.Detail.Metadata.Label title="Block" text={String(transaction.block)} />
           ) : null}
@@ -262,14 +276,12 @@ export function TransactionItem({
       }
       actions={
         <ActionPanel title={display.title}>
-          {/* Enter reveals the drawer first; once it is open, Enter goes to the explorer */}
-          {isShowingDetail ? null : detailAction}
           <Action.OpenInBrowser
             url={explorerUrl}
             title={chain.txUrlFormat ? "Open in Explorer" : "Open in Zerion Web App"}
             icon={Icon.Globe}
           />
-          {isShowingDetail ? detailAction : null}
+          {detailAction}
           <Action.CopyToClipboard
             title="Copy Transaction Hash"
             content={transaction.hash}

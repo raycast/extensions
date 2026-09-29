@@ -23,8 +23,6 @@ export function useWalletChart({ address, period }: { address?: string; period: 
         headers: getApiHeaders(),
         parseResponse: parseWalletChart,
         execute: Boolean(address),
-        // Keep the previous Period's chart on screen while the next one loads
-        keepPreviousData: true,
         onError: (error: Error) => {
           console.error(error);
         },
