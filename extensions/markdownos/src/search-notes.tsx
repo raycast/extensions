@@ -35,7 +35,10 @@ export default function Command() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
 
-  const results = useMemo(() => searchNotes(notes ?? [], searchText), [notes, searchText]);
+  // Notes with nothing written in them yet (an untitled note just created, say) are left out:
+  // there's nothing to find in them and nothing for the preview to show.
+  const notesWithContent = useMemo(() => (notes ?? []).filter((note) => note.body.trim() !== ""), [notes]);
+  const results = useMemo(() => searchNotes(notesWithContent, searchText), [notesWithContent, searchText]);
   const selectedNote = results.find((note) => note.relativePath === selectedPath) ?? null;
 
   // Built synchronously from the body already held on the note. Nothing is fetched when the
