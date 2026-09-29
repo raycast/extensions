@@ -106,8 +106,21 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
     if (count ${candidates}) is 0 then error ${appleScriptString(
       `More than one Chrome profile is named "${profile.name}". Rename one in Chrome to switch to it.`,
     )}
-    tell application ${appleScriptString(browser.appName)} to activate
     set profileMenu to my findProfileMenu()
+    -- Switch while Chrome is still in the background: activating first raises the last-used
+    -- window, which on another desktop flashes the wrong profile before the switch lands.
+    set selectedWindow to my switchProfile(profileMenu, 5)
+    if selectedWindow is missing value then
+      tell application ${appleScriptString(browser.appName)} to activate
+      set selectedWindow to my switchProfile(profileMenu, 30)
+    end if
+    if selectedWindow is missing value then error "Chrome did not switch to the selected profile"
+    tell application ${appleScriptString(browser.appName)} to activate
+    return selectedWindow
+    end timeout
+    end selectProfileWindow
+
+    on switchProfile(profileMenu, attempts)
     tell application "System Events"
       repeat with candidateName in ${candidates}
         if exists menu item (contents of candidateName) of profileMenu then
@@ -117,7 +130,7 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
       end repeat
     end tell
     delay 0.3
-    repeat 30 times
+    repeat attempts times
       if (my checkedProfileLabel(profileMenu)) is in ${candidates} then
         tell application ${appleScriptString(browser.appName)}
           if (count windows) > 0 then
@@ -128,9 +141,8 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
       end if
       delay 0.1
     end repeat
-    error "Chrome did not switch to the selected profile"
-    end timeout
-    end selectProfileWindow
+    return missing value
+    end switchProfile
   `;
 }
 

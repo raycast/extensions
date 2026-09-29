@@ -161,3 +161,16 @@ test("Bring to Front falls back to a new window unless focusWithoutNewWindow is 
   assert.match(await fallback({}), /do shell script/);
   assert.doesNotMatch(await fallback({ focusWithoutNewWindow: true }), /do shell script/);
 });
+
+test("last-used sort puts the most recently active profile first, unknown times last", () => {
+  const { profiles } = setup();
+  const sorted = profiles.sortByLastUsed([
+    { directory: "a", name: "A", activeTime: 10 },
+    { directory: "b", name: "B" },
+    { directory: "c", name: "C", activeTime: 30 },
+  ]);
+  assert.deepEqual(
+    sorted.map((p) => p.directory),
+    ["c", "a", "b"],
+  );
+});

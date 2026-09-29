@@ -38,6 +38,10 @@ export type GoogleChromeInfoCacheProfile = {
    * The email of the user Google account, eg: `steve.jobs@gmail.com`.
    */
   user_name?: string;
+  /**
+   * When the profile was last active, in seconds since the epoch.
+   */
+  active_time?: number;
 };
 
 export type Profile = {
@@ -45,6 +49,10 @@ export type Profile = {
    * The profile name given in Google Chrome.
    */
   name: string;
+  /**
+   * When the profile was last active, in seconds since the epoch.
+   */
+  activeTime?: number;
   /**
    * The folder name where the Chrome profile is stored.
    */

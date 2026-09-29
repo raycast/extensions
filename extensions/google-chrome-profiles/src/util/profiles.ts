@@ -10,6 +10,7 @@ export function extractProfiles(infoCache: GoogleChromeInfoCache): Profile[] {
         directory,
         name: profile.name,
         givenName: profile.gaia_given_name,
+        activeTime: profile.active_time,
         ...(profile.user_name && {
           ga: {
             name: profile.gaia_name || profile.gaia_given_name || profile.name,
@@ -39,3 +40,7 @@ export const readChromeLocalState = async (browser: BrowserConfig) => {
   const text = await readFile(path, "utf8");
   return { path, text, state: JSON.parse(text) as GoogleChromeLocalState };
 };
+
+export function sortByLastUsed(profiles: Profile[]): Profile[] {
+  return [...profiles].sort((a, b) => (b.activeTime ?? 0) - (a.activeTime ?? 0));
+}

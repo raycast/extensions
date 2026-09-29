@@ -70,6 +70,24 @@
       "placeholder": "cannot be empty"
     },
     {
+      "name": "sortProfiles",
+      "title": "Sort Profiles",
+      "type": "dropdown",
+      "required": false,
+      "default": "name",
+      "description": "Order of the profile list.",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Last Used",
+          "value": "lastUsed"
+        }
+      ]
+    },
+    {
       "name": "popToRootAfterOpen",
       "title": "After Opening",
       "label": "Return to Raycast root search",
@@ -90,11 +108,11 @@
     {
       "name": "focusWithoutNewWindow",
       "title": "Bring to Front",
-      "label": "Never open a new window",
+      "label": "Don't open a new window if one is already open",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "description": "If the profile can't be selected from Chrome's Profiles menu, show the error instead of opening a new window."
+      "description": "Bring to Front reuses the profile's open window. If Chrome can't switch to it, show an error instead of opening a duplicate window. A profile with no open window still gets one."
     }
   ],
   "dependencies": {
