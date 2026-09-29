@@ -161,8 +161,9 @@ export function ago(iso: string | null | undefined): string {
 // Chat text goes into Detail markdown. A visitor could type an image link,
 // and Raycast would fetch it when the owner reads the chat. So every "![" and
 // every "<" is escaped: the text still reads the same, but nothing loads.
+// Backslashes go first, or a visitor's own "\![" would cancel the escape.
 export function safeMarkdown(text: string): string {
-  return text.replace(/!\[/g, "\\![").replace(/</g, "\\<");
+  return text.replace(/\\/g, "\\\\").replace(/!\[/g, "\\![").replace(/</g, "\\<");
 }
 
 export function dashboardUrl(sessionId: string): string {
