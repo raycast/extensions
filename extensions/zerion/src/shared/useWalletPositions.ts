@@ -47,18 +47,31 @@ export function mapPosition(position: ApiPosition): Position {
   };
 }
 
+/** Upper bound on continuation pages, so a misbehaving `links.next` can't keep us fetching forever. */
+const MAX_POSITION_PAGES = 50;
+
 /**
  * Collects every position of a wallet, following `links.next` should the API
  * split them across pages. Today it returns even thousands of positions in a
  * single response, so this normally completes with the first page alone.
+ * Stops with an error when a cursor repeats or the page cap is hit, rather
+ * than looping on a bad response.
  */
 export async function collectAllPositions(
   firstPage: ApiPositionsResponse,
   apiKey: string | undefined = getApiKey(),
 ): Promise<ApiPosition[]> {
   const positions = [...firstPage.data];
+  const seenUrls = new Set(firstPage.links?.self ? [firstPage.links.self] : []);
   let next = firstPage.links?.next;
-  while (next) {
+  for (let pageNumber = 1; next; pageNumber += 1) {
+    if (seenUrls.has(next)) {
+      throw new Error(`Positions pagination repeated the page ${next}`);
+    }
+    if (pageNumber > MAX_POSITION_PAGES) {
+      throw new Error(`Positions pagination exceeded ${MAX_POSITION_PAGES} pages`);
+    }
+    seenUrls.add(next);
     const response = await fetch(next, { headers: getApiHeaders(apiKey) });
     const page = await parseApiResponse<ApiPositionsResponse>(response, apiKey);
     positions.push(...page.data);
