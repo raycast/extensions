@@ -37,37 +37,23 @@
     },
     {
       "name": "start_timer",
-      "title": "Start Timer",
+      "title": "Start New Timer",
       "subtitle": "MOCO",
       "description": "Start a timer with a description",
       "mode": "view"
     },
     {
       "name": "edit_timer",
-      "title": "Edit Timer",
+      "title": "Edit Current / Last Active Timer",
       "subtitle": "MOCO",
       "description": "Edit description and time of the running or last timer",
       "mode": "view"
     },
     {
-      "name": "menu_actions",
-      "title": "Menu Bar Actions",
+      "name": "menu_bar_tools",
+      "title": "Menu Bar Tools",
       "subtitle": "MOCO",
-      "description": "Actions for a task, opened by right-clicking it in the menu bar",
-      "mode": "view"
-    },
-    {
-      "name": "menu_bar_settings",
-      "title": "Menu Bar Settings",
-      "subtitle": "MOCO",
-      "description": "Choose per customer whether the menu bar shows it inline, as a submenu, or not at all",
-      "mode": "view"
-    },
-    {
-      "name": "favorites",
-      "title": "Favorites",
-      "subtitle": "MOCO",
-      "description": "Start a favorite task or change the order of the favorites in the menu bar",
+      "description": "Windows opened from the MOCO menu bar: task and project actions, favorites, settings",
       "mode": "view"
     }
   ],

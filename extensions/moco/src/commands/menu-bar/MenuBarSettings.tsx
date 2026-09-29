@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
-import { fetchProjects } from "./commands/projects/api";
-import { Customer } from "./commands/customers/types";
-import { CustomerLayout, getCustomerLayouts, storeCustomerLayouts } from "./utils/storage";
-import { finishMenuBarForm } from "./utils/refresh";
+import { fetchProjects } from "../projects/api";
+import { Customer } from "../customers/types";
+import { CustomerLayout, getCustomerLayouts, storeCustomerLayouts } from "../../utils/storage";
+import { finishMenuBarForm } from "../../utils/refresh";
 
 // Settings for the menu bar: show each customer inline (own section), as a submenu, or hide it.
-export default function Command() {
+export const MenuBarSettings = () => {
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(fetchProjects, [], {
     keepPreviousData: true,
   });
@@ -66,4 +66,4 @@ export default function Command() {
         : null}
     </Form>
   );
-}
+};

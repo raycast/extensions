@@ -9,6 +9,7 @@ import { Task } from "./commands/tasks/types";
 import { Preferences } from "./types";
 import { refreshCache, refreshTodaysActivities } from "./utils/refresh";
 import { useStatuses } from "./utils/useStatuses";
+import { openMenuBarTool } from "./commands/menu-bar/tools";
 import {
   CustomerLayout,
   getCustomerLayouts,
@@ -132,14 +133,10 @@ export default function Command() {
       tooltip="Click: start timer · Right-click: more actions"
       onAction={async (event: MenuBarExtra.ActionEvent) => {
         if (event.type === "right-click") {
-          await launchCommand({
-            name: "menu_actions",
-            type: LaunchType.UserInitiated,
-            context: {
-              kind: "task",
-              task: { ...task, projectID: project.id, projectName: project.name },
-              isFavorite: taskStatuses.get(task.id) === StatusType.favorite,
-            },
+          await openMenuBarTool({
+            view: "task-actions",
+            task: { ...task, projectID: project.id, projectName: project.name },
+            isFavorite: taskStatuses.get(task.id) === StatusType.favorite,
           });
           return;
         }
@@ -165,13 +162,7 @@ export default function Command() {
           icon={Icon.Gear}
           title={project.name}
           tooltip="Click: project actions"
-          onAction={() =>
-            launchCommand({
-              name: "menu_actions",
-              type: LaunchType.UserInitiated,
-              context: { kind: "project", project: { id: project.id, name: project.name } },
-            })
-          }
+          onAction={() => openMenuBarTool({ view: "project-actions", project: { id: project.id, name: project.name } })}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
@@ -381,15 +372,15 @@ export default function Command() {
         {favoriteTasks.length > 0 ? (
           <MenuBarExtra.Item
             icon={Icon.Star}
-            title="Favorites…"
+            title="Manage Favorites…"
             tooltip="Start a favorite or change their order"
-            onAction={() => launchCommand({ name: "favorites", type: LaunchType.UserInitiated })}
+            onAction={() => openMenuBarTool({ view: "favorites" })}
           />
         ) : null}
         <MenuBarExtra.Item
           icon={Icon.Gear}
           title="Menu Bar Settings…"
-          onAction={() => launchCommand({ name: "menu_bar_settings", type: LaunchType.UserInitiated })}
+          onAction={() => openMenuBarTool({ view: "settings" })}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

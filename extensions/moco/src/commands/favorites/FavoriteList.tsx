@@ -91,7 +91,7 @@ export const FavoriteList = () => {
   return (
     <List
       isLoading={isLoadingProjects || isLoadingStatuses || isLoadingOrder}
-      navigationTitle="Favorites"
+      navigationTitle="Manage Favorites"
       searchBarPlaceholder="Filter favorites..."
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}

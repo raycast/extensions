@@ -1,48 +1,12 @@
-import { Action, ActionPanel, Detail, environment, Icon, List } from "@raycast/api";
-import { startActivity } from "./commands/activities/api";
-import { ActivityStart } from "./commands/activities/components/ActivityStart";
-import { Project } from "./commands/projects/types";
-import { Task } from "./commands/tasks/types";
-import { finishMenuBarForm } from "./utils/refresh";
-import { removeStatus, setStatus, StatusType } from "./utils/storage";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { startActivity } from "../activities/api";
+import { ActivityStart } from "../activities/components/ActivityStart";
+import { Task } from "../tasks/types";
+import { finishMenuBarForm } from "../../utils/refresh";
+import { removeStatus, setStatus, StatusType } from "../../utils/storage";
 
-// "Context menu" for a menu bar row, opened via launchCommand with { kind: "task", task } or { kind: "project", project }.
-export default function Command() {
-  const context = environment.launchContext;
-  if (context?.kind === "project" && context.project) {
-    return <ProjectActions project={context.project as Pick<Project, "id" | "name">} />;
-  }
-
-  const task = context?.task as Task | undefined;
-  if (task === undefined) {
-    return <Detail markdown="Right-click a task in the MOCO menu bar to see its actions here." />;
-  }
-  return <TaskActions task={task} isFavorite={context?.isFavorite === true} />;
-}
-
-const ProjectActions = ({ project }: { project: Pick<Project, "id" | "name"> }) => {
-  const hide = async () => {
-    await setStatus("project", project.id, StatusType.hidden);
-    await finishMenuBarForm();
-  };
-
-  return (
-    <List navigationTitle={project.name} searchBarPlaceholder="Filter actions...">
-      <List.Item
-        icon={Icon.EyeDisabled}
-        title="Hide Project"
-        subtitle="Unhide via Hidden Projects in the menu bar or the project list"
-        actions={
-          <ActionPanel>
-            <Action title="Hide Project" icon={Icon.EyeDisabled} onAction={hide} />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
-};
-
-const TaskActions = ({ task, isFavorite }: { task: Task; isFavorite: boolean }) => {
+// Actions for a task, opened by a right-click on a task row in the menu bar.
+export const TaskActions = ({ task, isFavorite }: { task: Task; isFavorite: boolean }) => {
   const start = async () => {
     const today = new Date().toISOString().split("T")[0];
     const success = await startActivity({
