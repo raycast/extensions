@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { BrowserConfig, Profile } from "./types";
 import { extractProfiles, profileLabels, readChromeLocalState } from "./profiles";
 
@@ -103,9 +103,24 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
   return `${profileMenuScript(browser)}
     on selectProfileWindow()
     with timeout of 10 seconds
-    if (count ${candidates}) is 0 then error "Profile names are ambiguous. Give each Chrome profile a unique name."
-    tell application ${appleScriptString(browser.appName)} to activate
+    if (count ${candidates}) is 0 then error ${appleScriptString(
+      `More than one Chrome profile is named "${profile.name}". Rename one in Chrome to switch to it.`,
+    )}
     set profileMenu to my findProfileMenu()
+    -- Switch while Chrome is still in the background: activating first raises the last-used
+    -- window, which on another desktop flashes the wrong profile before the switch lands.
+    set selectedWindow to my switchProfile(profileMenu, 5)
+    if selectedWindow is missing value then
+      tell application ${appleScriptString(browser.appName)} to activate
+      set selectedWindow to my switchProfile(profileMenu, 30)
+    end if
+    if selectedWindow is missing value then error "Chrome did not switch to the selected profile"
+    tell application ${appleScriptString(browser.appName)} to activate
+    return selectedWindow
+    end timeout
+    end selectProfileWindow
+
+    on switchProfile(profileMenu, attempts)
     tell application "System Events"
       repeat with candidateName in ${candidates}
         if exists menu item (contents of candidateName) of profileMenu then
@@ -115,7 +130,7 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
       end repeat
     end tell
     delay 0.3
-    repeat 30 times
+    repeat attempts times
       if (my checkedProfileLabel(profileMenu)) is in ${candidates} then
         tell application ${appleScriptString(browser.appName)}
           if (count windows) > 0 then
@@ -126,9 +141,8 @@ function selectProfileScript(profile: Profile, browser: BrowserConfig, profiles:
       end if
       delay 0.1
     end repeat
-    error "Chrome did not switch to the selected profile"
-    end timeout
-    end selectProfileWindow
+    return missing value
+    end switchProfile
   `;
 }
 
@@ -174,9 +188,15 @@ export async function openGoogleChrome(
           end if
           try
             set targetWindow to my selectProfileWindow()
-          on error
-            do shell script ${launchCommand(false)}
-            return
+          on error errorMessage
+            ${
+              // Relaunching a running Chrome with --profile-directory always opens a new window,
+              // so optionally surface the Bring to Front failure instead of piling up windows.
+              target.action === "focus" && getPreferenceValues<ExtensionPreferences>().focusWithoutNewWindow
+                ? "error errorMessage"
+                : `do shell script ${launchCommand(false)}
+            return`
+            }
           end try
           tell application ${appleScriptString(browser.appName)}
             tell window id targetWindow

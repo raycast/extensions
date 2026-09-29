@@ -1,5 +1,15 @@
 # Google Chrome Profiles Changelog
 
+## [Opt-in Switching Preferences] - 2026-09-29
+
+- Add "Return to Raycast root search" preference: after a profile action, reopen Raycast on root search instead of the profile view.
+- Add "Bring profile to front on Enter" preference: selecting a profile focuses it immediately; Show Bookmarks moves to ⌘↵.
+- Add "Don't open a new window if one is already open" preference: when Bring to Front cannot switch to the profile's open window, show an error instead of opening a duplicate window.
+- Add "Sort Profiles" preference: sort the list by name (default) or by when each profile was last used in Chrome.
+- Stop Bring to Front from briefly showing another profile's window on a different desktop: switch profiles before activating Chrome.
+- Name the profile in the error shown when two profiles share a name.
+- All new preferences default to the previous behavior.
+
 ## [Profile Search, Switching, and Tab Moves] - 2026-09-25
 
 - Search profiles by profile name, Google account name, or email, including accounts without an avatar.

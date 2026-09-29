@@ -12,12 +12,12 @@ const localState = {
   profile: { info_cache: { "Profile 1": { name: "Work", gaia_given_name: "Alex" }, Default: { name: "Personal" } } },
 };
 
-function setup({ output = "", error, spawnError } = {}) {
+function setup({ output = "", error, spawnError, prefs = {} } = {}) {
   const events = [];
   const commands = [];
   const mocks = {
     "@raycast/api": {
-      getPreferenceValues: () => ({}),
+      getPreferenceValues: () => prefs,
       Toast: { Style: { Failure: "failure" } },
       showToast: async () => events.push("failure"),
     },
@@ -151,3 +151,39 @@ test(
     assert.equal(output, `${input}\n`);
   },
 );
+
+test("Bring to Front falls back to a new window unless focusWithoutNewWindow is on", async () => {
+  const fallback = async (prefs) => {
+    const { chrome, commands } = setup({ prefs });
+    await chrome.openGoogleChrome(profile, { action: "focus" }, async () => {}, browser);
+    return commands[0].args[1].split("on error errorMessage")[1].split("end try")[0];
+  };
+  assert.match(await fallback({}), /do shell script/);
+  assert.doesNotMatch(await fallback({ focusWithoutNewWindow: true }), /do shell script/);
+});
+
+test("last-used sort puts the most recently active profile first, unknown times last", () => {
+  const { profiles } = setup();
+  const sorted = profiles.sortByLastUsed([
+    { directory: "a", name: "A", activeTime: 10 },
+    { directory: "b", name: "B" },
+    { directory: "c", name: "C", activeTime: 30 },
+  ]);
+  assert.deepEqual(
+    sorted.map((p) => p.directory),
+    ["c", "a", "b"],
+  );
+});
+
+test("Last Used preference orders extracted profiles for every command", () => {
+  const { profiles } = setup({ prefs: { sortProfiles: "lastUsed" } });
+  const infoCache = { a: { name: "A", active_time: 1 }, b: { name: "B", active_time: 2 } };
+  assert.deepEqual(
+    profiles.extractProfiles(infoCache).map((p) => p.name),
+    ["B", "A"],
+  );
+  assert.deepEqual(
+    setup().profiles.extractProfiles(infoCache).map((p) => p.name),
+    ["A", "B"],
+  );
+});
