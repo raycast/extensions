@@ -80,11 +80,11 @@ If `CaptureEngine.dll` or `ocr.exe` are missing, blocked by policy, or deleted, 
 
 ## Checksums
 
-Reference SHA-256 checksums of the compiled binaries produced by `assets/scripts/build.ps1`:
+Reference SHA-256 checksums of the checked-in native binaries:
 
-| Binary | Relative Path | Target Size |
-| :--- | :--- | :--- |
-| `CaptureEngine.dll` | `assets/bin/CaptureEngine.dll` | ~25 KB |
-| `ocr.exe` | `assets/bin/ocr.exe` | ~6 KB |
+| Binary | Relative Path | Target Size | SHA-256 Checksum |
+| :--- | :--- | :--- | :--- |
+| `CaptureEngine.dll` | `assets/bin/CaptureEngine.dll` | ~25 KB | `82DC0ACF07E7B53CDE309AE5245D4831F107C066D0792A505FCE92541B952834` |
+| `ocr.exe` | `assets/bin/ocr.exe` | ~6 KB | `0EE0C3FC93B44A28882F01F05064A49F8553E004960E8B87782D6F529D8C2C3A` |
 
 *(Note: In standard .NET Framework compilers, minor timestamp differences in the PE header may result in differing hash values between distinct builds, but the IL instructions and functional behavior remain byte-equivalent).*
