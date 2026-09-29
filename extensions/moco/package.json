@@ -57,6 +57,13 @@
       "mode": "view"
     },
     {
+      "name": "menu_bar_settings",
+      "title": "Menu Bar Settings",
+      "subtitle": "MOCO",
+      "description": "Choose per customer whether the menu bar shows it inline, as a submenu, or not at all",
+      "mode": "view"
+    },
+    {
       "name": "background_refresher",
       "title": "Background Refresher",
       "description": "Refreshes in the background",

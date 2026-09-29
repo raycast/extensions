@@ -9,13 +9,14 @@ import { Task } from "./commands/tasks/types";
 import { Preferences } from "./types";
 import { refreshTodaysActivities } from "./utils/refresh";
 import { useStatuses } from "./utils/useStatuses";
-import { getProjects, getTodaysActivities, StatusType } from "./utils/storage";
+import { CustomerLayout, getCustomerLayouts, getProjects, getTodaysActivities, StatusType } from "./utils/storage";
 
 export default function Command() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [customerLayouts, setCustomerLayouts] = useState<Record<number, CustomerLayout>>({});
   const projectStatusState = useStatuses("project");
   const taskStatusState = useStatuses("task");
   const projectStatuses = projectStatusState.statuses ?? new Map<number, StatusType>();
@@ -59,11 +60,14 @@ export default function Command() {
   useEffect(() => {
     // Load everything first and set the state in one go. Raycast keeps showing the previous menu while
     // isLoading is true, so a partial state (activities without projects) would render as a flicker.
-    Promise.all([getTodaysActivities(), getProjects()]).then(([activities, projects]) => {
-      setActivities(activities);
-      setProjects(projects.filter((project) => project.contract?.active !== false));
-      setIsLoading(false);
-    });
+    Promise.all([getTodaysActivities(), getProjects(), getCustomerLayouts()]).then(
+      ([activities, projects, layouts]) => {
+        setCustomerLayouts(layouts);
+        setActivities(activities);
+        setProjects(projects.filter((project) => project.contract?.active !== false));
+        setIsLoading(false);
+      },
+    );
   }, []);
 
   // Hidden projects (project list) and hidden or inactive tasks stay out of the menu.
@@ -120,6 +124,43 @@ export default function Command() {
         await refreshItems();
       }}
     />
+  );
+
+  // A project submenu: project actions row, then its tasks and hidden tasks.
+  const renderProject = (project: Project) => (
+    <MenuBarExtra.Submenu key={`project-${project.id}`} title={project.name}>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          key={`project-actions-${project.id}`}
+          icon={Icon.Gear}
+          title={project.name}
+          tooltip="Click: project actions"
+          onAction={() =>
+            launchCommand({
+              name: "menu_actions",
+              type: LaunchType.UserInitiated,
+              context: { kind: "project", project: { id: project.id, name: project.name } },
+            })
+          }
+        />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        {project.tasks.map((task) => renderTaskRow(project, task))}
+        {hiddenTasksOf(project.id).length > 0 ? (
+          <MenuBarExtra.Submenu key={`hidden-${project.id}`} icon={Icon.EyeDisabled} title="Hidden">
+            {hiddenTasksOf(project.id).map((task) => (
+              <MenuBarExtra.Item
+                key={`hidden-task-${task.id}`}
+                icon={Icon.Eye}
+                title={task.name}
+                tooltip="Click to unhide"
+                onAction={() => changeTaskStatus(task.id, undefined)}
+              />
+            ))}
+          </MenuBarExtra.Submenu>
+        ) : null}
+      </MenuBarExtra.Section>
+    </MenuBarExtra.Submenu>
   );
 
   const runningActivity = activities.find((activity) => activity.timer_started_at !== null);
@@ -233,55 +274,39 @@ export default function Command() {
         </MenuBarExtra.Section>
       ) : null}
 
-      {/* One section per customer, the customer name as section title. */}
+      {/* Customers set to "Inline" in the settings: one section each, the customer name as section title. */}
       {Array.from(customerMap.entries()).map(([customerId, customer]) => {
         const projects = customerProjectsMap.get(customerId) ?? [];
         if (projects.length === 0) {
           return null;
         }
         const customerKey = customerId ?? 0;
+        // Default is "inline". Submenu customers render below, hidden customers not at all.
+        if ((customerLayouts[customerKey] ?? CustomerLayout.inline) !== CustomerLayout.inline) {
+          return null;
+        }
         return (
           <MenuBarExtra.Section key={`customer-${customerKey}`} title={customer?.name ?? "Other"}>
-            {projects.map((project) => {
-              return (
-                <MenuBarExtra.Submenu key={`project-${project.id}`} title={project.name}>
-                  <MenuBarExtra.Section>
-                    <MenuBarExtra.Item
-                      key={`project-actions-${project.id}`}
-                      icon={Icon.Gear}
-                      title={project.name}
-                      tooltip="Click: project actions"
-                      onAction={() =>
-                        launchCommand({
-                          name: "menu_actions",
-                          type: LaunchType.UserInitiated,
-                          context: { kind: "project", project: { id: project.id, name: project.name } },
-                        })
-                      }
-                    />
-                  </MenuBarExtra.Section>
-                  <MenuBarExtra.Section>
-                    {project.tasks.map((task) => renderTaskRow(project, task))}
-                    {hiddenTasksOf(project.id).length > 0 ? (
-                      <MenuBarExtra.Submenu key={`hidden-${project.id}`} icon={Icon.EyeDisabled} title="Hidden">
-                        {hiddenTasksOf(project.id).map((task) => (
-                          <MenuBarExtra.Item
-                            key={`hidden-task-${task.id}`}
-                            icon={Icon.Eye}
-                            title={task.name}
-                            tooltip="Click to unhide"
-                            onAction={() => changeTaskStatus(task.id, undefined)}
-                          />
-                        ))}
-                      </MenuBarExtra.Submenu>
-                    ) : null}
-                  </MenuBarExtra.Section>
-                </MenuBarExtra.Submenu>
-              );
-            })}
+            {projects.map(renderProject)}
           </MenuBarExtra.Section>
         );
       })}
+
+      {/* Customers set to "Submenu" in the settings: one row each, projects inside. */}
+      <MenuBarExtra.Section>
+        {Array.from(customerMap.entries()).map(([customerId, customer]) => {
+          const projects = customerProjectsMap.get(customerId) ?? [];
+          const customerKey = customerId ?? 0;
+          if (projects.length === 0 || customerLayouts[customerKey] !== CustomerLayout.submenu) {
+            return null;
+          }
+          return (
+            <MenuBarExtra.Submenu key={`customer-submenu-${customerKey}`} title={customer?.name ?? "Other"}>
+              {projects.map(renderProject)}
+            </MenuBarExtra.Submenu>
+          );
+        })}
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
         {hiddenProjects.length > 0 ? (
@@ -323,6 +348,11 @@ export default function Command() {
             ))}
           </MenuBarExtra.Submenu>
         ) : null}
+        <MenuBarExtra.Item
+          icon={Icon.Gear}
+          title="Menu Bar Settings…"
+          onAction={() => launchCommand({ name: "menu_bar_settings", type: LaunchType.UserInitiated })}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

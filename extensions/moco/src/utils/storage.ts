@@ -93,3 +93,22 @@ export const removeLegacyStatusKeys = async (): Promise<void> => {
   await Promise.all(legacyKeys.map((key) => LocalStorage.removeItem(key)));
   await LocalStorage.setItem(LEGACY_CLEANUP_KEY, true);
 };
+
+// How the menu bar shows a customer: inline (own section), as a submenu, or not at all.
+// Key: customer ID, 0 = "Other".
+export enum CustomerLayout {
+  inline = "inline",
+  submenu = "submenu",
+  hidden = "hidden",
+}
+
+const CUSTOMER_LAYOUTS_KEY = "menu-bar:customer-layouts";
+
+export const getCustomerLayouts = async (): Promise<Record<number, CustomerLayout>> => {
+  const layouts = await LocalStorage.getItem<string>(CUSTOMER_LAYOUTS_KEY);
+  return layouts === undefined ? {} : JSON.parse(layouts);
+};
+
+export const storeCustomerLayouts = async (layouts: Record<number, CustomerLayout>): Promise<void> => {
+  await LocalStorage.setItem(CUSTOMER_LAYOUTS_KEY, JSON.stringify(layouts));
+};
