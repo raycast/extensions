@@ -192,7 +192,7 @@ describe("runSpotdlDownload", () => {
 
     const onProgress = vi.fn();
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       { url: "https://open.spotify.com/playlist/x", destination: "/tmp", format: "mp3", ffmpegPath: "/ff" },
       onProgress,
     );
@@ -209,7 +209,7 @@ describe("runSpotdlDownload", () => {
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       { url: "https://open.spotify.com/track/bad", destination: "/tmp", format: "mp3", ffmpegPath: "/ff" },
       vi.fn(),
     );
@@ -225,7 +225,7 @@ describe("runSpotdlDownload", () => {
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       { url: "https://open.spotify.com/playlist/x", destination: "/tmp", format: "mp3", ffmpegPath: "/ff" },
       vi.fn(),
     );
@@ -255,7 +255,7 @@ describe("runSpotdlDownload", () => {
       (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
       const promise = runSpotdlDownload(
-        "/support/spotdl",
+        "/usr/local/bin/spotdl",
         { url: "https://open.spotify.com/track/x", destination: "/tmp", format: "mp3", ffmpegPath: "/ff" },
         vi.fn(),
       );
@@ -280,7 +280,7 @@ describe("runSpotdlDownload", () => {
     vi.mocked(invalidateSpotipyCacheIfStale).mockClear();
 
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       {
         url: "https://open.spotify.com/track/x",
         destination: "/tmp",
@@ -294,7 +294,7 @@ describe("runSpotdlDownload", () => {
       vi.fn(),
     );
 
-    expect(invalidateSpotipyCacheIfStale).toHaveBeenCalledWith("/support", "id", "secret", true);
+    expect(invalidateSpotipyCacheIfStale).toHaveBeenCalledWith("/support", "id", "secret", true, undefined);
 
     child.emit("close", 0);
     await promise;
@@ -306,7 +306,7 @@ describe("runSpotdlDownload", () => {
     vi.mocked(invalidateSpotipyCacheIfStale).mockClear();
 
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       { url: "https://open.spotify.com/track/x", destination: "/tmp", format: "mp3", ffmpegPath: "/ff" },
       vi.fn(),
     );
@@ -325,7 +325,7 @@ describe("runSpotdlDownload", () => {
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       { url: "https://open.spotify.com/track/bad", destination: "/tmp", format: "mp3", ffmpegPath: "/ff" },
       vi.fn(),
     );
@@ -341,7 +341,7 @@ describe("runSpotdlDownload", () => {
     controller.abort();
     await expect(
       runSpotdlDownload(
-        "/support/spotdl",
+        "/usr/local/bin/spotdl",
         {
           url: "https://open.spotify.com/track/x",
           destination: "/tmp",
@@ -360,7 +360,7 @@ describe("runSpotdlDownload", () => {
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
     const promise = runSpotdlDownload(
-      "/support/spotdl",
+      "/usr/local/bin/spotdl",
       {
         url: "https://open.spotify.com/playlist/x",
         destination: "/tmp",

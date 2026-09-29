@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { DEFAULT_IDLE_MS, runWithWatchdog } from "./run.js";
 import { invalidateSpotipyCacheIfStale } from "./spotdl-cache.js";
 
@@ -48,8 +50,12 @@ const PLAYLIST_URL = /(?:\/|:)playlist(?:\/|:)/i;
  * librespot for track-hash checks (`_get_auth_vars` → "Could not get session
  * auth tokens"), which depends on a third-party host (`code.thetadev.de`) for
  * current secrets and outdated bundled fallbacks — both broken in practice.
+ *
+ * With `privateHome` (see `usesPrivateHome`), the credentials are in the
+ * config file `writeSpotdlConfig` wrote and `--config` loads it, so the secret
+ * never appears in the process table.
  */
-export function buildSpotdlArgs(o: SpotdlDownloadOptions): string[] {
+export function buildSpotdlArgs(o: SpotdlDownloadOptions, privateHome = false): string[] {
   const isPlaylist = PLAYLIST_URL.test(o.url);
   const template = isPlaylist ? "{list-name}/{artists} - {title}.{output-ext}" : "{artists} - {title}.{output-ext}";
   // Join with a forward slash, not path.join: on Windows path.join would
@@ -62,21 +68,66 @@ export function buildSpotdlArgs(o: SpotdlDownloadOptions): string[] {
   const id = o.clientId?.trim();
   const secret = o.clientSecret?.trim();
   if (id && secret) {
-    // Credentials are passed on argv rather than via SPOTIPY_CLIENT_ID/SECRET
-    // env vars on purpose: spotDL's --client-id/--client-secret options default
-    // to its bundled public app and are always handed to spotipy explicitly, so
-    // spotipy never consults those env vars — omitting the flags would silently
-    // fall back to spotDL's default credentials (the unreliable "Could not get
-    // session auth tokens" path this preference exists to avoid). The residual
-    // exposure (the secret is visible in the process table for the lifetime of
-    // the spotDL run) is bounded to same-user local processes on a single-user
-    // desktop, and the value is a low-sensitivity OAuth *client* secret.
-    args.push("--client-id", id, "--client-secret", secret, "--use-official-api");
+    // spotDL ignores the SPOTIPY_CLIENT_ID/SECRET env vars (it always hands its
+    // own --client-id/--client-secret, defaulting to its bundled app, to
+    // spotipy), so the credentials go in its config file or on argv. argv is
+    // only the fallback for spotDL installs that can't get a private home; there
+    // the secret is visible to same-user processes while spotDL runs.
+    if (privateHome) args.push("--config");
+    else args.push("--client-id", id, "--client-secret", secret);
+    args.push("--use-official-api");
     if (o.userAuth) {
       args.push("--user-auth");
     }
   }
   return args;
+}
+
+/**
+ * The home folder spotDL runs with when it has a private one: its config
+ * (with the credentials) and token caches live here, apart from the user's own
+ * ~/.spotdl — so the extension never reads or clears another spotDL setup's
+ * files.
+ */
+export function spotdlHome(supportDir: string): string {
+  return path.join(supportDir, "spotdl-home");
+}
+
+/**
+ * True when spotDL can run with a private home (`spotdlHome`): the extension's
+ * own download and Homebrew's formula. Other installs keep the real home — a
+ * `pip install --user` spotDL finds its own packages through HOME.
+ */
+export function usesPrivateHome(realBinaryPath: string, supportDir: string, platform = process.platform): boolean {
+  const managed = path.resolve(realBinaryPath).startsWith(path.resolve(supportDir) + path.sep);
+  return managed || (platform === "darwin" && realBinaryPath.includes("/Cellar/"));
+}
+
+/**
+ * Write spotDL's config with the Spotify credentials (readable only by the
+ * user) into `home`, or remove it when there are none — spotDL would otherwise
+ * keep using stale credentials from the last run.
+ */
+export function writeSpotdlConfig(home: string, clientId?: string, clientSecret?: string): void {
+  const dir = path.join(home, ".spotdl");
+  const file = path.join(dir, "config.json");
+  const id = clientId?.trim();
+  const secret = clientSecret?.trim();
+  if (!id || !secret) {
+    fs.rmSync(file, { force: true });
+    return;
+  }
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  fs.writeFileSync(file, JSON.stringify({ client_id: id, client_secret: secret }), { mode: 0o600 });
+  fs.chmodSync(file, 0o600); // writeFileSync's mode only applies when it creates the file
+}
+
+function realPathOf(p: string): string {
+  try {
+    return fs.realpathSync(p);
+  } catch {
+    return p;
+  }
 }
 
 export type SpotdlProgress = { tracks: number };
@@ -196,12 +247,27 @@ export async function runSpotdlDownload(
   options: SpotdlDownloadOptions,
   onProgress: (p: SpotdlProgress) => void,
 ): Promise<SpotdlProgress> {
+  let privateHome =
+    options.supportDir && usesPrivateHome(realPathOf(binaryPath), realPathOf(options.supportDir))
+      ? spotdlHome(options.supportDir)
+      : undefined;
+  if (privateHome) {
+    try {
+      writeSpotdlConfig(privateHome, options.clientId, options.clientSecret);
+    } catch {
+      privateHome = undefined; // can't prepare it — run spotDL the old way rather than fail the download
+    }
+  }
   if (options.supportDir) {
+    // Clear a token cached for other credentials (spotDL #2606) — in the private
+    // home when there is one, which also keeps its own fingerprint, so the
+    // user's real ~/.spotdl is never touched.
     invalidateSpotipyCacheIfStale(
-      options.supportDir,
+      privateHome ?? options.supportDir,
       options.clientId,
       options.clientSecret,
       Boolean(options.userAuth),
+      privateHome,
     );
   }
   const idleMs = options.idleMs ?? DEFAULT_IDLE_MS;
@@ -215,8 +281,10 @@ export async function runSpotdlDownload(
       onProgress({ tracks });
     }
   };
-  const { code, stdout, stderr } = await runWithWatchdog(binaryPath, buildSpotdlArgs(options), {
+  const { code, stdout, stderr } = await runWithWatchdog(binaryPath, buildSpotdlArgs(options, !!privateHome), {
     idleMs,
+    // spotDL finds its folder through the home directory (USERPROFILE on Windows).
+    env: privateHome ? { ...process.env, HOME: privateHome, USERPROFILE: privateHome } : undefined,
     onStdoutLine: handleStdoutLine,
     abortSignal: options.abortSignal,
     idleKillMessage: `spotdl produced no output for ${Math.round(
