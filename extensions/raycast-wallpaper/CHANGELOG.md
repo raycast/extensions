@@ -4,6 +4,7 @@
 
 - Add Ask AI support to list official Raycast wallpapers and set a wallpaper by name on all monitors or the current monitor.
 - Add AI instructions and YAML evals for listing, setting, and unavailable wallpapers.
+- Return an error on Windows when the current monitor cannot be identified or matched, instead of reporting wallpaper-setting success.
 
 ## [Update default setting] - 2025-06-24
 
