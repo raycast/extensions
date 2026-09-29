@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Project Tags] - {PR_MERGE_DATE}
+## [Project Tags] - 2026-09-29
 
 - Show each project's tags in `Projects`, in the tag's own color. Typing a tag name in the search bar finds the projects that carry it.
 - Add `Filter by Tag` to `Projects` to show only the projects with one tag. The choice is remembered per instance, and `Show All Projects` clears it.
