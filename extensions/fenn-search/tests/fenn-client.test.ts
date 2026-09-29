@@ -1,3 +1,4 @@
+import fs from "node:fs/promises";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { FennError, responseError, searchFenn, searchPayload, SearchRequest } from "../src/fenn-client";
@@ -82,4 +83,21 @@ test("connection failure, malformed JSON, and empty searches have distinct behav
   fetch.mock.mockImplementation(async () => new Response("not JSON"));
   await assert.rejects(searchFenn(request, "token", new AbortController().signal), /unreadable response/);
   assert.deepEqual(searchPayload({ ...request, fileTypes: [] }).file_types, []);
+});
+
+test("search returns matches without waiting for stalled preview file checks", async (context) => {
+  const stat = context.mock.method(fs, "stat", () => new Promise(() => {}));
+  context.mock.method(
+    globalThis,
+    "fetch",
+    async () =>
+      new Response(
+        JSON.stringify({
+          results: [{ original_file: "/tmp/a.pdf", filename: "a.pdf", generated_file: "/stalled/preview.png" }],
+        }),
+      ),
+  );
+  const sections = await searchFenn(request, "token", new AbortController().signal);
+  assert.equal(sections[0].results[0].filename, "a.pdf");
+  assert.equal(stat.mock.callCount(), 0);
 });

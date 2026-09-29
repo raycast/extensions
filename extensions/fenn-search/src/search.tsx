@@ -327,7 +327,7 @@ export default function SearchFennCommand() {
                   icon={visual.icon}
                   detail={
                     <List.Item.Detail
-                      markdown={resultMarkdown(result, result === selectedResult ? roundedPreview : undefined)}
+                      markdown={resultMarkdown(result, result === selectedResult ? roundedPreview : null)}
                       metadata={
                         showMetadata ? (
                           <List.Item.Detail.Metadata>

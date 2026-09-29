@@ -81,5 +81,3 @@ This version searches Fenn's file index. Screen memory is not included. Each sea
 The image is the file's single returned preview; the extension does not request a separate image for every matching page or timestamp. Opening a file does not jump to a matching page or timestamp.
 
 The extension connects to Fenn on your Mac. It does not upload files, send analytics, or use Raycast AI. Indexing and processing follow your Fenn configuration. The connection is authenticated automatically using Fenn's local token, and normal Fenn license checks apply.
-
-For local development and validation, see [DEVELOPMENT.md](DEVELOPMENT.md).

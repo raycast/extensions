@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { access } from "node:fs/promises";
+import { fallbackFennPath } from "./fenn-installation";
 import { useEffect, useState } from "react";
 import { FENN_BUNDLE_ID, FENN_DOWNLOAD_URL, FENN_MIN_VERSION } from "./fenn-config";
 
@@ -19,16 +19,8 @@ async function findFenn(): Promise<Application | null> {
   const app = apps.find((item) => item.bundleId === FENN_BUNDLE_ID);
   if (app) return app;
   // Newly installed apps may not be registered with macOS yet.
-  try {
-    await access("/Applications/Fenn.app");
-    return {
-      name: "Fenn",
-      path: "/Applications/Fenn.app",
-      bundleId: FENN_BUNDLE_ID,
-    };
-  } catch {
-    return null;
-  }
+  const path = await fallbackFennPath();
+  return path ? { name: "Fenn", path, bundleId: FENN_BUNDLE_ID } : null;
 }
 
 export function useFennInstallation(revision: number) {

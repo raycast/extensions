@@ -1,9 +1,8 @@
-import { access, readFile, stat } from "node:fs/promises";
-import { constants } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { FENN_MIN_VERSION } from "./fenn-config";
-import { fileTypeFilters, generatedImageUrl, parseSearchResponse, SearchMode } from "./search-model";
+import { fileTypeFilters, parseSearchResponse, SearchMode } from "./search-model";
 
 const ORIGIN = "http://127.0.0.1:5001";
 const TOKEN_PATH = join(homedir(), ".fenn", "user_preferences", "mcp_token");
@@ -126,25 +125,7 @@ export async function searchFenn(request: SearchRequest, tokenOverride: string |
     throw new Error("Fenn returned an unreadable response. Update or restart Fenn and retry.");
   }
   if (!response.ok) throw responseError(response.status, payload ?? {}, request.mode);
-  const sections = parseSearchResponse(payload);
-  // Missing previews (e.g. an offline drive or cleared image cache) should
-  // not leave broken image placeholders or prevent showing search details.
-  const previews = new Map<string, Promise<boolean>>();
-  await Promise.all(
-    sections.flatMap((section) =>
-      section.results.map(async (result) => {
-        if (!generatedImageUrl(result)) return;
-        const imagePath = result.generated_file!;
-        let readable = previews.get(imagePath);
-        if (!readable) {
-          readable = Promise.all([stat(imagePath), access(imagePath, constants.R_OK)])
-            .then(([info]) => info.isFile())
-            .catch(() => false);
-          previews.set(imagePath, readable);
-        }
-        if (!(await readable)) result.generated_file = null;
-      }),
-    ),
-  );
-  return sections;
+  signal.throwIfAborted();
+  // Optional preview I/O runs only after selection, outside the search request.
+  return parseSearchResponse(payload);
 }

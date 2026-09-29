@@ -213,9 +213,9 @@ export function generatedImageUrl(result: SearchResult): string | undefined {
   return url.href;
 }
 
-export function resultMarkdown(result: SearchResult, previewUrl?: string): string {
+export function resultMarkdown(result: SearchResult, previewUrl?: string | null): string {
   const matches = resultMatches(result);
-  const preview = previewUrl ?? generatedImageUrl(result);
+  const preview = previewUrl === undefined ? generatedImageUrl(result) : previewUrl;
   return (
     `# ${escapeMarkdown(resultTitle(result))}\n\n` +
     (preview ? `![File preview](<${preview}>)\n\n` : "") +
