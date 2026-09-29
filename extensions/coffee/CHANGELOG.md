@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-29
 
 - Use cache API to prevent menu bar icon flicker on background update cycles.
 - Keep menu bar item visible until caffeination cache is initialized on startup to avoid flicker.
