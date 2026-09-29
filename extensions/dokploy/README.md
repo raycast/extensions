@@ -6,7 +6,7 @@
 
 This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each **instance** you can:
 
-- View Projects (sorted by frecency)
+- View Projects (sorted by frecency, with each project's tags; search by tag name or Filter by Tag)
     - View Services (sorted by frecency)
         - Create Application
         - Create Database
@@ -44,6 +44,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Delete Schedule
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
+    - Edit Tags (add or remove a project's tags, Create Tag)
     - View Docker (Containers, sorted by frecency)
         - View Docker Config
         - Restart / Start / Stop / Kill Container
