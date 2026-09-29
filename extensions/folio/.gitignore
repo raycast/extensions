@@ -1,5 +1,0 @@
-node_modules/
-dist/
-raycast-env.d.ts
-.test-build/
-.DS_Store
