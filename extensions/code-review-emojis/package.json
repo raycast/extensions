@@ -4,7 +4,7 @@
   "title": "Code Review Emoji Guide",
   "description": "A simple emoji legend to help convey intention and added meaning in code review comments.",
   "icon": "command-icon.png",
-  "author": "rus64",
+  "author": "pernielsentikaer",
   "categories": [
     "Documentation",
     "Developer Tools"

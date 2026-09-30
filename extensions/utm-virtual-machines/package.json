@@ -4,7 +4,7 @@
   "title": "UTM Virtual Machines",
   "description": "Launch and control virtual machines in UTM.",
   "icon": "command-icon.png",
-  "author": "alaidriel",
+  "author": "pernielsentikaer",
   "categories": [
     "Developer Tools",
     "Productivity"
