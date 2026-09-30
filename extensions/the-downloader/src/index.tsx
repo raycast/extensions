@@ -4,7 +4,7 @@ import { isValidUrl } from "./utils.js";
 import { DownloadForm } from "./views/download-form.js";
 
 const { autoLoadUrlFromClipboard, autoLoadUrlFromSelectedText, enableBrowserExtensionSupport } =
-  getPreferenceValues<ExtensionPreferences>();
+  getPreferenceValues<Preferences.Index>();
 
 export default function Command(props: LaunchProps) {
   const [loadedUrl, setLoadedUrl] = useState("");

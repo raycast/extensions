@@ -71,7 +71,8 @@ import { MediaPreview } from "./media-preview.js";
 import Installer from "./installer.js";
 import Updater from "./updater.js";
 
-const prefs = getPreferenceValues<ExtensionPreferences>();
+// Rendered only by the Download command, so it also sees that command's own settings (Exact Format Selection).
+const prefs = getPreferenceValues<Preferences.Index>();
 
 /** Required-tool name → its filesystem-path resolver. */
 const TOOL_PATH: Record<string, () => string> = {

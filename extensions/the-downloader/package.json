@@ -27,7 +27,27 @@
       "title": "Download",
       "subtitle": "The Downloader",
       "description": "Download video, audio, galleries, webpages, or transcripts",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoLoadUrlFromSelectedText",
+          "title": "Auto Load URL from Selected Text",
+          "description": "When you open Download, fill in a link from the text selected in the frontmost app.",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "exactFormatSelection",
+          "title": "Exact Format Selection",
+          "description": "Show an Exact Format field in the Download form for video downloads — every concrete yt-dlp format with its file size. Leave off for simple Quality + Container choices.",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "fast-download",
@@ -245,15 +265,6 @@
       "required": false
     },
     {
-      "name": "autoLoadUrlFromSelectedText",
-      "title": "Auto Load URL from Selected Text",
-      "description": "When you open Download, fill in a link from the text selected in the frontmost app.",
-      "type": "checkbox",
-      "label": "Enable",
-      "default": false,
-      "required": false
-    },
-    {
       "name": "enableBrowserExtensionSupport",
       "title": "Browser Extension Support",
       "description": "Offer the current browser tab's link. Needs the Raycast browser extension.",
@@ -362,15 +373,6 @@
           "value": "opus"
         }
       ]
-    },
-    {
-      "name": "exactFormatSelection",
-      "title": "Video: Exact Format Selection",
-      "description": "Show an Exact Format field in the Download form for video downloads — every concrete yt-dlp format with its file size. Leave off for simple Quality + Container choices.",
-      "type": "checkbox",
-      "label": "Enable",
-      "default": false,
-      "required": false
     },
     {
       "name": "cookiesFromBrowser",

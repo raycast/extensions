@@ -20,7 +20,6 @@ const prefs = getPreferenceValues<ExtensionPreferences>();
 export const {
   homebrewPath: homebrewPathPreference,
   autoLoadUrlFromClipboard,
-  autoLoadUrlFromSelectedText,
   enableBrowserExtensionSupport,
   forceIpv4,
   networkIdleTimeoutSec,
