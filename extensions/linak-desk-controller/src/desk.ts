@@ -1,7 +1,7 @@
 import { getPreferenceValues, LocalStorage, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { discoverDesks, getDeskStatus, moveDesk, nudgeDesk, stopDesk } from "swift:../swift";
 
-export type DeskStatus = { id: string; name: string; heightCm: number };
+export type DeskStatus = { id: string; name: string; heightCm: number; cancelled: boolean };
 export type DiscoveredDesk = { id: string; name: string; rssi?: number; connected: boolean };
 
 export { discoverDesks };
@@ -49,6 +49,13 @@ async function runDeskCommand(title: string, command: (deskId: string) => Promis
     const status = await command(deskId);
     // Remember an automatically found desk so the next command doesn't have to scan for it.
     if (!deskId) await selectDesk(status.id);
+    if (status.cancelled) {
+      // A newer command took over before the desk reached its target, so this isn't a success.
+      toast.style = Toast.Style.Failure;
+      toast.title = "Move cancelled";
+      toast.message = `A newer command took over at ${status.heightCm.toFixed(1)} cm`;
+      return `${toast.title}: ${toast.message}`;
+    }
     toast.style = Toast.Style.Success;
     toast.title = `Desk at ${status.heightCm.toFixed(1)} cm`;
     return toast.title;

@@ -20,6 +20,7 @@ enum DeskError: LocalizedError, CustomStringConvertible {
   case bluetoothUnavailable
   case invalidDeskId(String)
   case noDeskFound
+  case multipleDesksFound
   case deskNotFound
   case connectionTimedOut
   case connectionFailed(String?)
@@ -28,7 +29,13 @@ enum DeskError: LocalizedError, CustomStringConvertible {
   case communicationFailed(String)
   case invalidTarget(Double)
   case movementTimedOut
+  case requestUnavailable(String)
   case obstructed(heightCm: Double, targetCm: Double)
+
+  var isNotALinakDesk: Bool {
+    if case .notALinakDesk = self { return true }
+    return false
+  }
 
   // The Raycast bridge reports errors with `String(describing:)`.
   var description: String { errorDescription ?? "Unknown error" }
@@ -45,6 +52,8 @@ enum DeskError: LocalizedError, CustomStringConvertible {
       "\"\(id)\" isn't a valid desk identifier. Clear the preference to discover your desk automatically."
     case .noDeskFound:
       "No desk found nearby. Hold the Bluetooth button on the desk controller until the light blinks, then try again."
+    case .multipleDesksFound:
+      "More than one desk found nearby. Run Select Desk to choose which one to control."
     case .deskNotFound:
       "Couldn't find your desk. Make sure it's powered on and nearby, or run Select Desk to pick it again."
     case .connectionTimedOut:
@@ -61,6 +70,8 @@ enum DeskError: LocalizedError, CustomStringConvertible {
       "\(format(height)) cm is outside the range this desk can reach."
     case .movementTimedOut:
       "The desk took too long to move and was stopped."
+    case let .requestUnavailable(reason):
+      "Couldn't coordinate with other desk commands: \(reason)"
     case let .obstructed(height, target):
       "The desk stopped at \(format(height)) cm before reaching \(format(target)) cm. Check for obstructions."
     }
@@ -108,6 +119,7 @@ final class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @unch
 
   private var poweredOn: [Pending<Void>] = []
   private var connection: Pending<Void>?
+  private var connectingPeripheral: UUID?
   private var characteristicsDiscovery: Pending<Void>?
   private var pendingServices = 0
   private var reads: [CBUUID: Pending<Data>] = [:]
@@ -248,6 +260,7 @@ final class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @unch
           return
         }
         self.connection = pending
+        self.connectingPeripheral = peripheral.identifier
         debug("connecting \(peripheral.identifier) state \(peripheral.state.rawValue)")
         self.central.connect(peripheral, options: nil)
       }
@@ -268,12 +281,15 @@ final class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @unch
 
   func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
     debug("connected \(peripheral.identifier)")
+    // Ignore late callbacks from a candidate we already gave up on.
+    guard peripheral.identifier == connectingPeripheral else { return }
     connection?.succeed(())
     connection = nil
   }
 
   func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
     debug("failed to connect: \(String(describing: error))")
+    guard peripheral.identifier == connectingPeripheral else { return }
     connection?.fail(DeskError.connectionFailed(error?.localizedDescription))
     connection = nil
   }

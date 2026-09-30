@@ -223,7 +223,7 @@
             "callsTool": {
               "name": "move-desk",
               "arguments": {
-                "height": "100"
+                "height": 100
               }
             }
           }
