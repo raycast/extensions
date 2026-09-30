@@ -36,7 +36,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "ray build && tsc --noEmit"
   },
   "dependencies": {
     "@raycast/api": "^1.104.0",

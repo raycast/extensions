@@ -108,6 +108,7 @@ export default function Command() {
   const [revision, setRevision] = useState(0);
   const currentRequest = useRef(0);
   const canLoadMore = useRef(false);
+  const currentQuery = useRef("");
 
   const refresh = useCallback(() => {
     canLoadMore.current = false;
@@ -180,6 +181,8 @@ export default function Command() {
       isLoading={loading}
       filtering={false}
       onSearchTextChange={(text) => {
+        if (text === currentQuery.current) return;
+        currentQuery.current = text;
         currentRequest.current += 1;
         canLoadMore.current = false;
         setQuery(text);

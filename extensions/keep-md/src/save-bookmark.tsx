@@ -17,6 +17,7 @@ export default function Command() {
   const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
   const urlEdited = useRef(false);
+  const savedId = useRef<string | null>(null);
 
   useEffect(() => {
     Clipboard.readText()
@@ -57,7 +58,10 @@ export default function Command() {
     };
     setSaving(true);
     try {
-      const saved = await saveBookmark(parsed.toString());
+      const saved = savedId.current
+        ? { id: savedId.current }
+        : await saveBookmark(parsed.toString());
+      savedId.current = saved.id;
       if (Object.keys(metadata).length > 0) {
         try {
           await updateBookmark(saved.id, metadata);
@@ -102,6 +106,7 @@ export default function Command() {
         value={url}
         onChange={(value) => {
           urlEdited.current = true;
+          savedId.current = null;
           setUrl(value);
         }}
       />
