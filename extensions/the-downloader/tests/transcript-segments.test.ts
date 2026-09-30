@@ -54,7 +54,13 @@ describe("subtitle language helpers", () => {
     expect(subtitleLanguages("auto", "cs")).toEqual(["cs", "en"]);
     expect(subtitleLanguages("auto", "en")).toEqual(["en"]);
     expect(subtitleLanguages("auto", undefined)).toEqual(["en"]);
-    expect(subtitleLanguages("de", "cs")).toEqual(["de"]);
+  });
+
+  it("falls back from a chosen language to the one the video is spoken in", () => {
+    expect(subtitleLanguages("de", "cs")).toEqual(["de", "cs"]);
+    expect(subtitleLanguages("en", "en-US")).toEqual(["en"]);
+    expect(subtitleLanguages("es", undefined)).toEqual(["es"]);
+    expect(subtitleLanguages("en", null)).toEqual(["en"]);
   });
 
   it("builds yt-dlp's --sub-langs value", () => {
@@ -67,6 +73,10 @@ describe("subtitle language helpers", () => {
     expect(pickSubtitleFile(["abc.en-US.srt", "abc.cs.srt"], ["en", "cs"])).toBe("abc.en-US.srt");
     expect(pickSubtitleFile(["abc.cs.srt"], ["en", "cs"])).toBe("abc.cs.srt");
     expect(pickSubtitleFile([], ["en"])).toBeUndefined();
+  });
+
+  it("ignores other files and unrelated languages", () => {
+    expect(pickSubtitleFile(["id.fr.srt", "id.info.json", "id.enx.srt"], ["en"])).toBeUndefined();
   });
 });
 

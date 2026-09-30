@@ -388,6 +388,15 @@ describe("summarizeSpotdlError", () => {
     expect(s.action).toBe("open-setup-guide");
   });
 
+  it("only calls Spotify API errors a 403 or 404, not any 'forbidden' or 'not found' in the output", () => {
+    // spotDL downloads audio from YouTube with yt-dlp, and reports missing tools;
+    // neither is about the playlist's visibility.
+    expect(summarizeSpotdlError("ERROR: unable to download video data: HTTP Error 403: Forbidden").title).not.toMatch(
+      /Spotify: 403/,
+    );
+    expect(summarizeSpotdlError("FFmpegError: ffmpeg not found at /usr/bin/ffmpeg").title).not.toMatch(/Spotify: 404/);
+  });
+
   it("maps 404 Not Found to an enable-user-auth hint", () => {
     const s = summarizeSpotdlError("HTTP Error for GET /v1/playlists/x/items returned 404");
     expect(s.title.toLowerCase()).toMatch(/not found|404/);

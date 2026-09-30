@@ -1,14 +1,10 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, useNavigation } from "@raycast/api";
 import { maxHeight } from "../lib/estimate.js";
-import { formatClock } from "../lib/format.js";
+import { escapeMarkdown, formatClock } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { formatCount, formatRows, formatUploadDate, qualityName } from "../lib/media-info.js";
 import { Format, Video } from "../types.js";
 import { CHAT_SHORTCUT, VideoChat } from "./video-chat.js";
-
-function escapeMarkdown(text: string): string {
-  return text.replace(/([\\`*_[\]<>#|])/g, "\\$1");
-}
 
 function descriptionExcerpt(description: string, max = 700): string {
   const trimmed = description.trim();

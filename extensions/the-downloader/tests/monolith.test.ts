@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
 import { spawn } from "node:child_process";
-import { buildMonolithArgs, webpageFilename, runMonolithSave } from "../src/lib/monolith";
+import { buildMonolithArgs, webpageFilename, runMonolithSave, webpageOutputPath } from "../src/lib/monolith";
 
 function fakeChild() {
   const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
@@ -141,5 +141,15 @@ describe("runMonolithSave", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe("webpageOutputPath", () => {
+  it("names the file after the page, numbered instead of overwriting an earlier save", () => {
+    const taken = new Set(["/out/example.com-news.html"]);
+    expect(webpageOutputPath("/out", "https://example.com/news", () => false)).toBe("/out/example.com-news.html");
+    expect(webpageOutputPath("/out", "https://example.com/news", (p) => taken.has(p))).toBe(
+      "/out/example.com-news (2).html",
+    );
   });
 });

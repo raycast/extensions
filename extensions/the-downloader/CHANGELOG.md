@@ -27,7 +27,11 @@
   - Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
   - When a download type's tool isn't installed, the setup screen also offers the types that already work (e.g. Download as Video Instead), so a missing tool never blocks the form.
   - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
-  - Transcripts never overwrite an existing file with the same title (a number is added).
+  - Transcripts never overwrite an existing file with the same title (a number is added), and saving a webpage again numbers the new copy instead of replacing the old one.
+  - Transcripts use a video's uploaded captions before YouTube's automatic ones, fall back to the language the video is spoken in when there are no English captions, keep going when one caption track fails to download (e.g. rate limiting), and no longer contain stray `\h` codes.
+  - Update Libraries and the update prompt only update the spotDL The Downloader installed itself; a spotDL from Homebrew or pip is left to its own package manager instead of being replaced.
+  - The Download Video AI tool accepts only real http(s) links, tries sites The Downloader doesn't recognize (like the form's Video option), and downloads with the same settings as the form, including the WebM-to-MKV fallback.
+  - Spotify errors are only reported as a private or unreachable playlist when Spotify's API actually said so.
   - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
   - The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
   - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.

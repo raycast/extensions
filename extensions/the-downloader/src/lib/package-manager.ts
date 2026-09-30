@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { environment } from "@raycast/api";
 import { execa } from "execa";
 import { getHomebrewPath, getSpotdlPath, getWingetPath, isMac, isWindows } from "../utils.js";
-import { downloadSpotdl, getInstalledVersion, getLatestRelease } from "./managed-binary.js";
+import { downloadSpotdl, getInstalledVersion, getLatestRelease, isManagedBinary } from "./managed-binary.js";
 import { HOMEBREW_FORMULAE, isWingetUpdateNotApplicable, WINGET_PACKAGES } from "./tools.js";
 import { resetWingetPackagesCache } from "./binary.js";
 import { PackageIssue } from "./tool-status.js";
@@ -124,8 +124,12 @@ export async function checkOutdated(): Promise<{ outdated: Record<string, string
     }
   }
   try {
+    // Only the extension's own spotDL download is compared with GitHub and
+    // replaced by `upgrade`: a Homebrew or pip spotDL lags GitHub's release and
+    // is updated by its own package manager, and downloading ours next to it
+    // would silently take its place.
     const spotdlPath = getSpotdlPath();
-    if (fs.existsSync(spotdlPath)) {
+    if (fs.existsSync(spotdlPath) && isManagedBinary(spotdlPath, environment.supportPath)) {
       const installed = extractSemver(await getInstalledVersion(spotdlPath));
       const latest = extractSemver((await getLatestRelease()).version);
       if (installed && latest && installed !== latest) {

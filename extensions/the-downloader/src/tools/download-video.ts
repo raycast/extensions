@@ -13,9 +13,11 @@ import {
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { fetchVideoInfo, isLiveStream } from "../lib/ytdlp.js";
-import { runWithWatchdog } from "../lib/run.js";
+import { fetchVideoInfo, isLiveStream, runVideoDownload } from "../lib/ytdlp.js";
+import { getConfig } from "../lib/config.js";
+import { composeVideoFormat } from "../lib/video-format.js";
 import { detectSource } from "../lib/detect.js";
+import { isValidUrl, normalizeUrl } from "../lib/url.js";
 import { filetypeGuidance } from "../lib/filetype.js";
 import { recordDownload } from "../lib/history.js";
 
@@ -27,13 +29,21 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
-  // This tool only does video (yt-dlp). Pointing it at an image gallery, a
-  // Spotify link, or an arbitrary page would otherwise hand the URL to yt-dlp
-  // and fail with a raw "No video formats found" dump. Bail early with the same
-  // guidance the Download command shows, and route the user to the right tool.
+  // This tool only does video (yt-dlp). A gallery or a Spotify link would hand
+  // yt-dlp a URL it can't use and fail with a raw "No video formats found"
+  // dump, so point to the Download command instead. Sites it doesn't recognize
+  // are tried, like the Download form's Video option: yt-dlp supports far more
+  // than the known list.
+  // The model supplies this value, so check it like the commands do: only a
+  // real http(s) URL may reach yt-dlp, never something it would read as an
+  // option (a prompt-injected "--batch-file=…").
+  if (!isValidUrl(input.url)) {
+    throw new Error("Invalid URL — provide an http(s) video URL.");
+  }
+  const url = normalizeUrl(input.url);
   const startedAt = Date.now();
-  const source = detectSource(input.url);
-  if (source !== "video") {
+  const source = detectSource(url);
+  if (source === "gallery" || source === "spotify") {
     throw new Error(`${filetypeGuidance(source)} Use the “Download” command to fetch this URL.`);
   }
 
@@ -56,58 +66,46 @@ export default async function tool(input: Input) {
 
   // Get video info and available formats. Cap the metadata fetch so a wedged
   // extractor can't hang the agent turn indefinitely.
-  const video = await fetchVideoInfo(ytdlPath, input.url, forceIpv4, deno, { timeoutMs: getIdleTimeoutMs() });
+  const video = await fetchVideoInfo(ytdlPath, url, forceIpv4, deno, { timeoutMs: getIdleTimeoutMs() });
 
   // Check if it's a live stream
   if (isLiveStream(video)) {
     throw new Error("Live streams are not supported");
   }
 
-  // Set up download options. `--no-playlist` keeps the download phase in
-  // lock-step with fetchVideoInfo, which is also called with --no-playlist
-  // (see src/lib/ytdlp.ts): without it, pasting a playlist URL would dump
-  // every video in the playlist into the user's download folder, even
-  // though our live-stream and format checks only inspected the first one.
-  const options: string[] = ["-P", downloadPath, "--no-playlist"];
-  if (deno) options.push("--js-runtimes", `deno:${deno}`);
+  // The best video stream (best-first), plus the best audio when it has none,
+  // in its own container — or the saved defaults when the site lists no video
+  // formats. The shared runner (like the Download form) keeps `--no-playlist`
+  // in step with the metadata fetch, remuxes instead of re-encoding, falls back
+  // to mkv when WebM can't hold the streams, and reports the saved file.
+  const bestFormat = getVideoFormats(video)[0];
+  const config = getConfig();
+  const format = bestFormat
+    ? getFormatValue(bestFormat)
+    : composeVideoFormat({
+        mediaType: "video",
+        quality: config.videoQuality,
+        container: config.videoContainer,
+        audioFormat: config.audioFormat,
+      });
 
-  // Get the best video+audio format
-  const bestFormat = getVideoFormats(video)[0]; // Best-first, so the first entry is best quality
-  if (bestFormat) {
-    const formatValue = getFormatValue(bestFormat);
-    const [downloadFormat, container] = formatValue.split("#");
-    options.push("--ffmpeg-location", ffmpegPath);
-    options.push("--format", downloadFormat);
-    // Remux into the container (lossless stream copy) rather than --recode-video,
-    // which forces a slow full re-encode. Mirrors buildVideoDownloadArgs.
-    options.push("--merge-output-format", container);
+  let filePath: string;
+  try {
+    ({ filePath } = await runVideoDownload(
+      ytdlPath,
+      {
+        url,
+        format,
+        outputTemplate: path.join(downloadPath, "%(title)s (%(id)s).%(ext)s"),
+        ffmpegPath,
+        denoPath: deno,
+        idleMs: getIdleTimeoutMs(),
+      },
+      () => undefined,
+    ));
+  } catch (error) {
+    throw new Error(`Failed to download video: ${error instanceof Error ? error.message : String(error)}`);
   }
-
-  // Sentinel-tag the after_move filepath so it can be picked out of yt-dlp's
-  // mixed stdout deterministically — without it the old `startsWith("/")`
-  // filter failed on Windows (paths start with a drive letter, not a slash).
-  const FILEPATH_TAG = "THE-DOWNLOADER-FILEPATH:";
-  options.push("--print", `after_move:${FILEPATH_TAG}%(filepath)s`);
-
-  // Execute the download through the shared watchdog: stdin is closed so
-  // yt-dlp can't block on an interactive auth prompt, and the IDLE timeout
-  // kills a stalled child while leaving a healthy long download alone. The
-  // previous execa `timeout` here was a TOTAL-runtime cap — it killed every
-  // download that simply took longer than the idle window (2 minutes by
-  // default), even while bytes were flowing.
-  const { code, stdout, stderr } = await runWithWatchdog(ytdlPath, [...options, input.url], {
-    idleMs: getIdleTimeoutMs(),
-    env: { ...process.env, PYTHONUNBUFFERED: "1" },
-  });
-  if (code !== 0) {
-    throw new Error(`Failed to download video: ${stderr.trim() || `yt-dlp exited with code ${code}`}`);
-  }
-
-  const taggedLine = stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .find((line) => line.startsWith(FILEPATH_TAG));
-  const filePath = taggedLine?.slice(FILEPATH_TAG.length).trim();
 
   if (!filePath) {
     throw new Error("Could not determine downloaded file path");
@@ -116,7 +114,7 @@ export default async function tool(input: Input) {
   // Show AI downloads in the Download History too.
   await recordDownload({
     id: randomUUID(),
-    url: input.url,
+    url,
     kind: "video",
     status: "done",
     title: sanitizeVideoTitle(video.title),

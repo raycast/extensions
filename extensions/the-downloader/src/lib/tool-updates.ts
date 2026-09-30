@@ -11,6 +11,7 @@ import {
 import { getDenoPath, getGalleryDlPath, getMonolithPath, getSpotdlPath, getffmpegPath, getytdlPath } from "../utils.js";
 import { TOOL_INFO, ToolId, toolInfoFor } from "./tools.js";
 import { checkOutdated, errorMessageOf, upgrade } from "./package-manager.js";
+import { isManagedBinary } from "./managed-binary.js";
 import {
   CHECK_BUDGET_MS,
   PendingUpdate,
@@ -60,7 +61,7 @@ function realPathOf(binaryPath: string): string {
 /** True when the extension can upgrade the binary it runs: a Homebrew/winget install, or its own spotDL download. */
 function isUpgradable(tool: ToolId): boolean {
   const binary = TOOL_PATH[tool]();
-  if (tool === "spotdl") return binary.startsWith(environment.supportPath);
+  if (tool === "spotdl") return isManagedBinary(binary, environment.supportPath);
   return isPackageManagerInstall(realPathOf(binary), process.platform);
 }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanUpSrt, noCaptionsMessage } from "../src/transcript";
+import { buildTranscriptArgs, captionDownloadError, cleanUpSrt, noCaptionsMessage } from "../src/transcript";
 
 /** Build a valid multi-cue SRT document from cue texts (1s apart). */
 function srt(...texts: string[]): string {
@@ -83,5 +83,75 @@ describe("noCaptionsMessage", () => {
     expect(noCaptionsMessage({ requested: "auto", languages: ["en"], listed: true, error: "Something odd" })).toBe(
       "Couldn't get the captions: Something odd",
     );
+  });
+});
+
+describe("captionDownloadError", () => {
+  it("finds the failed caption download that --ignore-errors turns into a warning", () => {
+    const stderr =
+      "WARNING: [youtube] abc: Unable to download video subtitles for 'en': HTTP Error 429: Too Many Requests\n";
+    expect(captionDownloadError(stderr)).toBe(
+      "Unable to download video subtitles for 'en': HTTP Error 429: Too Many Requests",
+    );
+    expect(
+      noCaptionsMessage({ requested: "auto", languages: ["en"], listed: true, error: captionDownloadError(stderr) }),
+    ).toMatch(/limiting caption downloads.*few minutes/);
+  });
+
+  it("is undefined when no caption download failed", () => {
+    expect(captionDownloadError("ERROR: [youtube] abc: Video unavailable\n")).toBeUndefined();
+    expect(captionDownloadError("")).toBeUndefined();
+  });
+});
+
+describe("buildTranscriptArgs", () => {
+  const args = buildTranscriptArgs({
+    url: "https://www.youtube.com/watch?v=abc",
+    languages: ["en", "de"],
+    ffmpegPath: "/ff",
+    outputTemplate: "/tmp/x/%(id)s.%(ext)s",
+  });
+
+  it("fetches captions only, in every wanted language and variant", () => {
+    expect(args).toEqual(
+      expect.arrayContaining(["--skip-download", "--no-playlist", "--write-sub", "--write-auto-sub"]),
+    );
+    expect(args[args.indexOf("--sub-langs") + 1]).toBe("en,en.*,de,de.*");
+    expect(args.at(-1)).toBe("https://www.youtube.com/watch?v=abc");
+  });
+
+  it("asks for exactly the listed track when there is one", () => {
+    const one = buildTranscriptArgs({
+      url: "u",
+      languages: ["en"],
+      track: "en-orig",
+      ffmpegPath: "/ff",
+      outputTemplate: "o",
+    });
+    expect(one[one.indexOf("--sub-langs") + 1]).toBe("en-orig");
+  });
+
+  it("keeps going when one caption track fails (e.g. HTTP 429), so the others can still be saved", () => {
+    // Without it yt-dlp raises on the first failed track and never tries the rest.
+    expect(args).toContain("--ignore-errors");
+  });
+
+  it("passes the JavaScript runtime only when there is one", () => {
+    expect(args).not.toContain("--js-runtimes");
+    const withDeno = buildTranscriptArgs({
+      url: "u",
+      languages: ["en"],
+      ffmpegPath: "/ff",
+      outputTemplate: "o",
+      denoPath: "/deno",
+    });
+    expect(withDeno[withDeno.indexOf("--js-runtimes") + 1]).toBe("deno:/deno");
+  });
+});
+
+describe("cleanUpSrt hard spaces", () => {
+  it("turns the \\h hard-space code YouTube's captions carry into a plain space", () => {
+    const srt = "1\n00:00:00,000 --> 00:00:02,000\nHat es einen\\h Rand?\n";
+    expect(cleanUpSrt(srt)).toBe("Hat es einen Rand?");
   });
 });
