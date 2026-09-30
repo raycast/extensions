@@ -74,6 +74,24 @@ describe("Apple fm", () => {
     expect((spawn as ReturnType<typeof vi.fn>).mock.calls[0][0]).toBe(FM_PATH);
   });
 
+  it("says it's getting ready while the first words take a while, then clears it", async () => {
+    vi.useFakeTimers();
+    try {
+      const child = fakeChild();
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+      const statuses: (string | undefined)[] = [];
+      const promise = appleEngine().complete("i", "p", { onStatus: (s) => statuses.push(s) });
+      await vi.advanceTimersByTimeAsync(6_000);
+      expect(statuses.at(-1)).toMatch(/Apple Intelligence is getting ready/);
+      child.stdout.emit("data", Buffer.from("Hi"));
+      expect(statuses.at(-1)).toBeUndefined();
+      child.emit("close", 0);
+      await expect(promise).resolves.toBe("Hi");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("explains the one-time fm terms (exit 69) instead of showing the raw notice", async () => {
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
@@ -94,6 +112,10 @@ describe("Apple fm", () => {
     );
     expect(friendlyFmError("System model unavailable: deviceNotEligible", 1)).toMatch(/doesn't support/);
     expect(friendlyFmError("Error: exceeded context window size", 1)).toMatch(/too long/);
+    // fm's real wording on macOS 27.
+    expect(friendlyFmError("Error: The session's transcript exceeded the model's context size.\n", 1)).toMatch(
+      /too long/,
+    );
     expect(friendlyFmError("Error: exceeded context window size", 1)).not.toMatch(/Private Cloud/);
     expect(friendlyFmError("Error: rate limited", 1)).toMatch(/busy/);
     expect(friendlyFmError("Error: guardrail violation", 1)).toMatch(/declined/);

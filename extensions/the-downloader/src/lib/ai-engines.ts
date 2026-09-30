@@ -52,6 +52,25 @@ export interface Engine {
   complete(instructions: string, prompt: string, options?: CompleteOptions): Promise<string>;
 }
 
+/**
+ * Shows `message` through `onStatus` when an engine has said nothing for
+ * `afterMs` (a model loading, or reading a long prompt), so the chat doesn't
+ * look stuck. Call the returned function when words arrive or the request ends.
+ */
+function slowStartNotice(onStatus: CompleteOptions["onStatus"], message: string, afterMs: number): () => void {
+  if (!onStatus) return () => undefined;
+  let shown = false;
+  const timer = setTimeout(() => {
+    shown = true;
+    onStatus(message);
+  }, afterMs);
+  return () => {
+    clearTimeout(timer);
+    if (shown) onStatus(undefined);
+    shown = false;
+  };
+}
+
 /** macOS 27's command-line front end to Apple's Foundation Models. */
 export const FM_PATH = "/usr/bin/fm";
 
@@ -111,6 +130,9 @@ export function stripAnsi(text: string): string {
   return text.replace(ANSI, "");
 }
 
+/** How long fm may stay silent before the chat says the model is getting ready. */
+const APPLE_NOTICE_MS = 5_000;
+
 /** fm's exit code when its one-time Legal Notice & Terms haven't been accepted. */
 const FM_EXIT_TERMS = 69;
 
@@ -145,20 +167,34 @@ export function appleEngine(): Engine {
   return {
     id: "apple",
     title: ENGINE_TITLES.apple,
+    // The on-device model's window is 8,192 tokens for the prompt and the
+    // answer together (measured with fm on macOS 27); this leaves ~3,000 to answer.
     contextBudget: 4_500,
     async complete(instructions, prompt, options = {}) {
       let text = "";
-      const { code, stderr } = await runWithWatchdog(FM_PATH, buildFmArgs(instructions, prompt), {
-        idleMs: 120_000,
-        abortSignal: options.signal,
-        onStdoutChunk: (chunk) => {
-          text += stripAnsi(chunk);
-          options.onData?.(text.trimStart());
-        },
-        idleKillMessage: "Apple's model stopped responding. Try again, or pick another AI engine.",
-      });
-      if (code !== 0) throw new Error(friendlyFmError(stderr, code));
-      return text.trim();
+      // Warm, the first words take 2–4 s; loading the model after a break, or
+      // reading a long prompt, can take 40 s or more.
+      const clearNotice = slowStartNotice(
+        options.onStatus,
+        "Apple Intelligence is getting ready… The first answer after a break, or on a long video, can take up to a minute.",
+        APPLE_NOTICE_MS,
+      );
+      try {
+        const { code, stderr } = await runWithWatchdog(FM_PATH, buildFmArgs(instructions, prompt), {
+          idleMs: 120_000,
+          abortSignal: options.signal,
+          onStdoutChunk: (chunk) => {
+            clearNotice();
+            text += stripAnsi(chunk);
+            options.onData?.(text.trimStart());
+          },
+          idleKillMessage: "Apple's model stopped responding. Try again, or pick another AI engine.",
+        });
+        if (code !== 0) throw new Error(friendlyFmError(stderr, code));
+        return text.trim();
+      } finally {
+        clearNotice();
+      }
     },
   };
 }
@@ -233,22 +269,14 @@ export function ollamaEngine(settings: EngineSettings): Engine {
       // The first request after a while makes Ollama load the model into memory,
       // which can take many seconds before the first word: say so instead of
       // looking stuck.
-      let loadingShown = false;
-      let loadingTimer: ReturnType<typeof setTimeout> | undefined;
-      const clearLoading = () => {
-        if (loadingTimer) clearTimeout(loadingTimer);
-        loadingTimer = undefined;
-        if (loadingShown) options.onStatus?.(undefined);
-        loadingShown = false;
-      };
+      let clearLoading: () => void = () => undefined;
       try {
         const model = settings.ollamaModel?.trim() || (await firstOllamaModel(settings.ollamaUrl, options.signal));
-        if (options.onStatus) {
-          loadingTimer = setTimeout(() => {
-            loadingShown = true;
-            options.onStatus?.(`Loading ${model} in Ollama… The first answer after a break takes a moment.`);
-          }, LOADING_NOTICE_MS);
-        }
+        clearLoading = slowStartNotice(
+          options.onStatus,
+          `Loading ${model} in Ollama… The first answer after a break takes a moment.`,
+          LOADING_NOTICE_MS,
+        );
         res = await fetch(`${base(settings.ollamaUrl)}/api/chat`, {
           method: "POST",
           headers: { "content-type": "application/json" },
