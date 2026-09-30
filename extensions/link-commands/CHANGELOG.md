@@ -1,5 +1,11 @@
 # Link Commands Changelog
 
+## [Raycast 2 Deeplink Fix] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Run** and **Copy Deeplink** now work on Raycast 2. The extension detects `environment.raycastVersion` and emits the correct deeplink format: `raycast://script-commands/<filename>` on v1, `raycast://extensions/raycast/script-commands/<title-slug>` on v2. Title slugs are derived from `@raycast.title` using the official slug algorithm and disambiguated when duplicates exist.
+
 ## [Suggested Titles] - 2026-09-28
 
 ### Added
