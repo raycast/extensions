@@ -216,18 +216,15 @@ export const getTokens = async (options: TokenOptions = {}) => {
 };
 
 export const getWorkspaceUrl = async (): Promise<string> => {
-  let url = await LocalStorage.getItem<string>("URL");
-  if (url) return url;
-
   if (!(await getTokens())) {
     throw new Error("Please sign in to your awork workspace and try again.");
   }
 
+  let url = await LocalStorage.getItem<string>("URL");
+  if (url) return url;
+
+  await getUserData();
   url = await LocalStorage.getItem<string>("URL");
-  if (!url) {
-    await getUserData();
-    url = await LocalStorage.getItem<string>("URL");
-  }
 
   if (!url) {
     throw new Error("Couldn't determine your awork workspace URL. Please try again.");
