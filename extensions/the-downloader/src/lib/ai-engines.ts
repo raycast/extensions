@@ -181,6 +181,12 @@ export function friendlyFmError(stderr: string, code: number | null): string {
   if (/guardrail|unsafe/i.test(text)) {
     return "Apple's model declined to answer this. Try rephrasing, or pick another AI engine.";
   }
+  // A framework error with no words of its own, e.g. the safety classifier
+  // failing on every request while `fm available` still says ready.
+  const internal = /couldn.t be completed\.\s*\(([^)]+)\)/i.exec(text);
+  if (internal) {
+    return `Apple Intelligence couldn't answer just now (${internal[1].trim().replace(/\.$/, "")}). This usually clears up on its own — try again in a few minutes, or pick another AI engine.`;
+  }
   return text || `fm exited with code ${code ?? "unknown"}`;
 }
 

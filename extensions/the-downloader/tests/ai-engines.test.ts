@@ -148,6 +148,14 @@ describe("Apple fm", () => {
     expect(friendlyFmError("Error: rate limited", 1)).toMatch(/busy/);
     expect(friendlyFmError("Error: guardrail violation", 1)).toMatch(/declined/);
     expect(friendlyFmError("", 3)).toBe("fm exited with code 3");
+    // Seen on macOS 27 while `fm available` still said ready: every request, even "hi", failed.
+    for (const raw of [
+      "Error: The operation couldn’t be completed. (com.apple.SensitiveContentAnalysisML error 15.)",
+      "Error: The operation couldn’t be completed. (FoundationModels.LanguageModelError error -1.)",
+    ]) {
+      expect(friendlyFmError(raw, 1)).toMatch(/^Apple Intelligence couldn't answer just now \(/);
+      expect(friendlyFmError(raw, 1)).toMatch(/try again in a few minutes, or pick another AI engine\.$/);
+    }
     expect(stripAnsi("\u001b[31mred\u001b[0m")).toBe("red");
   });
 
