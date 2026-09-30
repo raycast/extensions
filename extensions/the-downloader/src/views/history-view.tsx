@@ -127,6 +127,8 @@ async function downloadAgain(url: string) {
   }
 }
 
+const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
 /**
  * Everything downloaded with The Downloader, newest first and grouped by day.
  * Also opened from the Download form and the live download view.
@@ -182,8 +184,12 @@ export function DownloadHistory() {
 
   async function remove(entry: HistoryEntry) {
     localChanges.current++;
-    setEntries(await removeFromHistory(entry.id));
-    await showToast({ style: Toast.Style.Success, title: "Removed from History" });
+    try {
+      setEntries(await removeFromHistory(entry.id));
+      await showToast({ style: Toast.Style.Success, title: "Removed from History" });
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't remove from History", message: errorText(error) });
+    }
   }
 
   async function clearAll() {
@@ -193,9 +199,12 @@ export function DownloadHistory() {
       icon: Icon.Trash,
       primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
     });
-    if (confirmed) {
-      localChanges.current++;
+    if (!confirmed) return;
+    localChanges.current++;
+    try {
       setEntries(await clearHistory());
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't clear the History", message: errorText(error) });
     }
   }
 

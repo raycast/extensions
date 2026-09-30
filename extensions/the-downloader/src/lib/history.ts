@@ -174,14 +174,10 @@ export function wasDeleted(deletions: HistoryDeletions, id: string, recordedAt: 
   return deletions.removed.includes(id) || deletions.clearedAt >= recordedAt;
 }
 
-/** Note a deletion before making it, in the same queue as the writes. Never rejects. */
-function noteDeletion(change: (d: HistoryDeletions) => HistoryDeletions): Promise<void> {
-  const next = writeChain.then(async () => {
-    const d = change(parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY)));
-    await LocalStorage.setItem(DELETIONS_KEY, JSON.stringify({ ...d, removed: d.removed.slice(-REMOVED_LIMIT) }));
-  });
-  writeChain = next.catch(() => undefined);
-  return next.catch((error) => console.error("Could not note a history deletion", error));
+/** Save a deletion marker. Throws when it can't be saved. */
+async function saveDeletion(change: (d: HistoryDeletions) => HistoryDeletions): Promise<void> {
+  const d = change(parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY)));
+  await LocalStorage.setItem(DELETIONS_KEY, JSON.stringify({ ...d, removed: d.removed.slice(-REMOVED_LIMIT) }));
 }
 
 /** How long after a write to check that another command's concurrent write didn't undo it. */
@@ -193,13 +189,19 @@ const VERIFY_ATTEMPTS = 2;
  * `verified` settles after `applied` has been checked a moment later (and the
  * change re-applied if another command's write undid it). `verified` never
  * rejects.
+ *
+ * `before` runs in the same queue step, just ahead of the change: a deletion
+ * saves its marker there, so no other write can land in between, and a marker
+ * that can't be saved rejects `written` with the list untouched.
  */
 function mutate(
   change: (list: HistoryEntry[]) => HistoryEntry[],
   applied?: (list: HistoryEntry[]) => boolean | Promise<boolean>,
   attempts = VERIFY_ATTEMPTS,
+  before?: () => Promise<void>,
 ): { written: Promise<HistoryEntry[]>; verified: Promise<void> } {
   const written = writeChain.then(async () => {
+    await before?.();
     const list = change(parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY)));
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     return list;
@@ -251,17 +253,27 @@ export async function recordDownload(entry: HistoryEntry | undefined): Promise<v
   }
 }
 
+/**
+ * Remove one entry. Rejects, leaving it in place, when the deletion can't be
+ * saved — otherwise a download's pending check could bring it back.
+ */
 export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
-  void noteDeletion((d) => ({ ...d, removed: [...d.removed.filter((r) => r !== id), id] }));
   // The check runs in the background, so the History list updates right away.
   return mutate(
     (list) => removeEntry(list, id),
     (list) => !list.some((e) => e.id === id),
+    VERIFY_ATTEMPTS,
+    () => saveDeletion((d) => ({ ...d, removed: [...d.removed.filter((r) => r !== id), id] })),
   ).written;
 }
 
+/** Clear the history. Rejects, leaving it as it was, when the clear can't be saved. */
 export function clearHistory(): Promise<HistoryEntry[]> {
   // Everything recorded before now is covered by `clearedAt`.
-  void noteDeletion(() => ({ clearedAt: Date.now(), removed: [] }));
-  return mutate(() => []).written;
+  return mutate(
+    () => [],
+    undefined,
+    VERIFY_ATTEMPTS,
+    () => saveDeletion(() => ({ clearedAt: Date.now(), removed: [] })),
+  ).written;
 }

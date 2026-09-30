@@ -198,6 +198,49 @@ describe("storage", () => {
     expect(await ids()).toEqual(["later", "theirs"]);
   });
 
+  // A deletion only happens once its marker is saved: without the marker, a
+  // download's pending check couldn't tell the removal from a lost write and
+  // would bring the entry back.
+  const failDeletionMarker = () => {
+    const real = LocalStorage.setItem.bind(LocalStorage);
+    return vi.spyOn(LocalStorage, "setItem").mockImplementation(async (key: string, value: string) => {
+      if (key === "download-history-deletions-v1") throw new Error("disk full");
+      return real(key, value);
+    });
+  };
+
+  it("keeps an entry, and fails the removal, when its deletion can't be saved", async () => {
+    await recordDownload(entry("a"));
+    const spy = failDeletionMarker();
+    try {
+      await expect(removeFromHistory("a")).rejects.toThrow(/disk full/);
+      expect(await ids()).toEqual(["a"]);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("keeps the history, and fails the clear, when it can't be saved", async () => {
+    await recordDownload(entry("a"));
+    const spy = failDeletionMarker();
+    try {
+      await expect(clearHistory()).rejects.toThrow(/disk full/);
+      expect(await ids()).toEqual(["a"]);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("keeps working after a deletion couldn't be saved", async () => {
+    await recordDownload(entry("a"));
+    const spy = failDeletionMarker();
+    await removeFromHistory("a").catch(() => undefined);
+    spy.mockRestore();
+    await recordDownload(entry("b"));
+    await removeFromHistory("a");
+    expect(await ids()).toEqual(["b"]);
+  });
+
   it("ignores an undefined entry", async () => {
     await recordDownload(undefined);
     expect(await loadHistory()).toEqual([]);
