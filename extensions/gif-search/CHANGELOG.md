@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Fix search pagination with invalid preferences] - {PR_MERGE_DATE}
+## [Fix search pagination with invalid preferences] - 2026-09-30
 
 - Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.
 
