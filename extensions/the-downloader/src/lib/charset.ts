@@ -32,15 +32,16 @@ export function charsetOf(contentType: string | undefined, head: Buffer): string
   return (fromBom(head) ?? fromContentType(contentType) ?? fromMeta(head) ?? "utf-8").toLowerCase();
 }
 
+function textDecoder(label: string) {
+  try {
+    return new TextDecoder(label);
+  } catch {
+    return new TextDecoder("utf-8");
+  }
+}
+
 /** The page as text, decoded with its declared charset (UTF-8 when the label is unknown). */
 export function decodeHtml(body: Buffer, contentType?: string): string {
-  const label = charsetOf(contentType, body);
-  let decoder: TextDecoder;
-  try {
-    decoder = new TextDecoder(label);
-  } catch {
-    decoder = new TextDecoder("utf-8");
-  }
   // TextDecoder drops a matching BOM itself.
-  return decoder.decode(body);
+  return textDecoder(charsetOf(contentType, body)).decode(body);
 }
