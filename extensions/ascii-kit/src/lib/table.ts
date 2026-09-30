@@ -46,26 +46,76 @@ export function parseTable(input: string): string[][] {
 
 // CommonMark: a backslash before ASCII punctuation escapes it; before anything else it's literal.
 const PUNCT = /[!-/:-@[-`{-~]/;
-const ESCAPED = /\\([!-/:-@[-`{-~])/g;
 
+/**
+ * A code span opening at `start` (a run of n backticks, closed by the next run of exactly n):
+ * where it ends, or -1 if it isn't closed. Inside a code span backslashes are literal.
+ */
+function codeSpanEnd(text: string, start: number): number {
+  const run = (at: number) => {
+    let end = at;
+    while (text[end] === "`") end++;
+    return end - at;
+  };
+  const n = run(start);
+  for (let i = start + n; i < text.length;) {
+    if (text[i] !== "`") {
+      i++;
+      continue;
+    }
+    const m = run(i);
+    if (m === n) return i + m;
+    i += m;
+  }
+  return -1;
+}
+
+/**
+ * Walks a cell, handing code spans to `code` and everything else, one character at a time, to
+ * `text`, which returns what to emit and how many characters it used.
+ */
+function mapCell(cell: string, text: (i: number) => [string, number], code: (span: string) => string): string {
+  let out = "";
+  for (let i = 0; i < cell.length;) {
+    if (cell[i] === "`") {
+      const end = codeSpanEnd(cell, i);
+      let run = 0;
+      while (cell[i + run] === "`") run++;
+      out += end > 0 ? code(cell.slice(i, end)) : cell.slice(i, i + run);
+      i = end > 0 ? end : i + run;
+      continue;
+    }
+    const [emit, used] = text(i);
+    out += emit;
+    i += used;
+  }
+  return out;
+}
+
+/** Markdown source → the text people see. In a code span only `\|` is an escape (GitHub tables). */
 function unescapeMarkdown(cell: string): string {
-  return cell.replace(ESCAPED, "$1");
+  return mapCell(
+    cell,
+    (i) => (cell[i] === "\\" && PUNCT.test(cell[i + 1] ?? "") ? [cell[i + 1], 2] : [cell[i], 1]),
+    (span) => span.replace(/\\\|/g, "|"),
+  );
 }
 
 /**
  * The inverse, for text going into a markdown cell: escape a backslash that would otherwise escape
  * the next character, and escape pipes, which would start a new column. `\\server` → `\\\server`,
- * `C:\|tail` → `C:\\\|tail`, and `C:\path` stays as it is.
+ * `C:\|tail` → `C:\\\|tail`, and `C:\path` stays as it is. In a code span only pipes are escaped.
  */
 function escapeMarkdownCell(cell: string): string {
-  let out = "";
-  for (let i = 0; i < cell.length; i++) {
-    const ch = cell[i];
-    if (ch === "|") out += "\\|";
-    else if (ch === "\\" && PUNCT.test(cell[i + 1] ?? "")) out += "\\\\";
-    else out += ch;
-  }
-  return out;
+  return mapCell(
+    cell,
+    (i) => {
+      if (cell[i] === "|") return ["\\|", 1];
+      if (cell[i] === "\\" && PUNCT.test(cell[i + 1] ?? "")) return ["\\\\", 1];
+      return [cell[i], 1];
+    },
+    (span) => span.replace(/\|/g, "\\|"),
+  );
 }
 
 /**

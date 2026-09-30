@@ -59,6 +59,12 @@ describe("timeline", () => {
     expect(looksLikeTimeline("09:00 Standup\n10:30 Review")).toBe(true);
   });
 
+  it("reads compact date:label rows", () => {
+    expect(renderTimelineVertical("Jan:Kickoff\nFeb:Launch")).toBe(
+      ["Jan  ● Kickoff", "     │", "Feb  ● Launch", "     ▼"].join("\n"),
+    );
+  });
+
   it("stacks vertically with dates in a column", () => {
     expect(renderTimelineVertical(input)).toBe(
       ["Jan  ● Kickoff", "     │", "Mar  ● Public beta", "     │", "Jun  ● Launch", "     ▼"].join("\n"),

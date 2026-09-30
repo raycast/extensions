@@ -81,15 +81,15 @@ export interface Milestone {
 }
 
 /**
- * `date: label`, `date<tab>label`, or `date label` where the date is the first word. The colon
- * needs a space after it, so a time (`09:00 Standup`) stays whole.
+ * `date: label`, `date:label`, `date<tab>label`, or `date label` where the date is the first word.
+ * A colon between two-digit numbers is a time (`09:00 Standup`), not the separator.
  */
 export function parseTimeline(input: string): Milestone[] {
   return splitLines(input)
     .map((l) => l.trim())
     .filter(Boolean)
     .map((l) => {
-      const m = l.match(/^([^\t]{1,20}?)\s*(?::\s+|\t)\s*(.+)$/) ?? l.match(/^(\S+)\s+(.+)$/);
+      const m = l.match(/^([^\t]{1,20}?)\s*(?::(?!\d{2}\b)|\t)\s*(.+)$/) ?? l.match(/^(\S+)\s+(.+)$/);
       return m ? { when: m[1].trim(), what: m[2].trim() } : { when: "", what: l };
     });
 }

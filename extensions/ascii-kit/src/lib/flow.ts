@@ -4,19 +4,16 @@ import { stack } from "./layout";
 import { displayWidth, padCenter, splitLines } from "./width";
 
 // ► and ▼ rather than ▶: ▶ has an emoji form that some renderers draw 2 columns wide.
-const ARROW = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*/u;
-// A bare > only between spaces, so `x >= 5` and `<div>` stay whole.
-const ARROW_OR_GT = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*|\s+>\s+/u;
+// A bare > only between spaces, and not before a number: `x >= 5`, `<div>` and `count > 0` stay
+// whole, `Draft > Review` and `Setup > 2FA` split.
+const SEPARATOR = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*|\s+>\s+(?![-+]?[$€£]?\.?\d[\d,.]*%?(?![\p{L}\d]))/u;
 
-/**
- * Steps come from `A > B -> C → D` on one line, or one step per line. With one step per line, a
- * bare > is part of the step (`count > 0`); only arrows split it further.
- */
+/** Steps come from `A > B -> C → D` on one line, or one step per line (which can chain too). */
 export function parseFlow(input: string): string[] {
   const lines = splitLines(input)
     .map((l) => l.trim())
     .filter(Boolean);
-  const parts = lines.length === 1 ? lines[0].split(ARROW_OR_GT) : lines.flatMap((l) => l.split(ARROW));
+  const parts = lines.flatMap((l) => l.split(SEPARATOR));
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 

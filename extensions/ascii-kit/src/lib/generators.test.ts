@@ -213,6 +213,18 @@ describe("table", () => {
     expect(renderTable(input, "light").split("\n")[3]).toBe("│ *kept* │ C:\\ │");
   });
 
+  it("leaves backslashes in code spans alone, both ways", () => {
+    expect(parseTable("| a | b |\n| --- | --- |\n| `C:\\*` | `a\\|b` \\*x\\* |")[1]).toEqual(["`C:\\*`", "`a|b` *x*"]);
+    const cells = [
+      ["Code", "Note"],
+      ["`C:\\*`", "`a|b`"],
+      ["\\`not code", "``tick ` in``"],
+    ];
+    const markdown = renderTable(cells.map((r) => r.join("\t")).join("\n"), "markdown");
+    expect(markdown.split("\n")[2]).toBe("| `C:\\*`      | `a\\|b`        |");
+    expect(parseTable(markdown)).toEqual(cells);
+  });
+
   it("escapes pipes inside cells in markdown output", () => {
     expect(renderTable('Name,Notes\napples,"a|b"', "markdown").split("\n")[2]).toBe("| apples | a\\|b  |");
     expect(renderTable("| a | b |\n| --- | --- |\n| x \\| y | z |", "markdown").split("\n")[2]).toBe(
@@ -263,6 +275,10 @@ describe("flow", () => {
   it("keeps a > that isn't an arrow inside its step", () => {
     expect(parseFlow("Check count > 0\nRetry if x >= 5\nShip")).toEqual(["Check count > 0", "Retry if x >= 5", "Ship"]);
     expect(parseFlow("Render <div> > Done")).toEqual(["Render <div>", "Done"]);
+  });
+  it("splits a > between words on any line, one step per line or not", () => {
+    expect(parseFlow("Draft > Review\nApproved")).toEqual(["Draft", "Review", "Approved"]);
+    expect(parseFlow("Setup > 2FA > Done\nBudget > $5")).toEqual(["Setup", "2FA", "Done", "Budget > $5"]);
   });
   it("renders inline, across and down", () => {
     expect(renderFlowInline("Draft > Review > Merged")).toBe("Draft → Review → Merged");
