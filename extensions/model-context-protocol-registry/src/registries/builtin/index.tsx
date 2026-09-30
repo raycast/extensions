@@ -4,6 +4,7 @@ import { SUPPORTED_CLIENTS } from "../../shared/mcp";
 import { RegistryProps } from "../types";
 import { COMMUNITY_ENTRIES, OFFICIAL_ENTRIES } from "./entries";
 import { getAccessories } from "./utils";
+import { getRaycastServer, getSetupMarkdown } from "./configuration";
 import { InstallServerToClientAction } from "./actions";
 import { RegistryEntry } from "./types";
 import { useApplications } from "../../shared/application";
@@ -39,7 +40,7 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
             accessories={getAccessories(entry)}
             detail={
               <List.Item.Detail
-                markdown={`# ${entry.title}\n\n${entry.description}`}
+                markdown={`# ${entry.title}\n\n${entry.description ?? ""}\n\n${getSetupMarkdown(entry)}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     {entry.homepage && (
@@ -49,19 +50,20 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
                         target={entry.homepage}
                       />
                     )}
-                    <List.Item.Detail.Metadata.Label
-                      title="Type"
-                      text={"command" in entry.configuration ? "stdio" : "SSE"}
-                    />
-                    <List.Item.Detail.Metadata.Label title="Command" text={entry.configuration.command} />
-                    {entry.configuration.args && (
+                    <List.Item.Detail.Metadata.Label title="Type" text={entry.remoteUrl ? "HTTP" : "stdio"} />
+                    {entry.remoteUrl ? (
+                      <List.Item.Detail.Metadata.Link title="URL" text={entry.remoteUrl} target={entry.remoteUrl} />
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Command" text={entry.configuration.command} />
+                    )}
+                    {!entry.remoteUrl && entry.configuration.args && (
                       <List.Item.Detail.Metadata.TagList title="Arguments">
                         {entry.configuration.args.map((arg) => (
                           <List.Item.Detail.Metadata.TagList.Item key={arg} text={arg} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
                     )}
-                    {entry.configuration.env && (
+                    {!entry.remoteUrl && entry.configuration.env && (
                       <List.Item.Detail.Metadata.TagList title="Environment">
                         {Object.entries(entry.configuration.env).map(([key]) => (
                           <List.Item.Detail.Metadata.TagList.Item key={key} text={key} />
@@ -85,16 +87,11 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
                       }}
                       title="Raycast"
                       server={{
-                        transport: "stdio",
+                        ...getRaycastServer(entry),
                         icon:
                           typeof entry.icon === "string" && Object.values(Icon).includes(entry.icon as Icon)
                             ? (entry.icon as Icon)
                             : undefined,
-                        name: entry.title,
-                        description: entry.description,
-                        command: entry.configuration.command,
-                        args: entry.configuration.args,
-                        env: entry.configuration.env,
                       }}
                     />
                     <ActionPanel.Section>

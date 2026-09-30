@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Fix Linear Installation and Clarify Runtime Setup] - {PR_MERGE_DATE}
+
+- Connect Linear directly in Raycast without requiring Node.js or the npm proxy, and update its endpoint for other clients.
+- Show Node.js and uv setup requirements in server details and document how to resolve missing executable errors.
+
 ## [Add Better Design MCP Server] - 2026-09-30
 
 - Add Better Design to the official registry: design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server at https://better-design.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key.
