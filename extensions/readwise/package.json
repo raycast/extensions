@@ -5,6 +5,9 @@
   "description": "Search and browse your Readwise library, and ask AI about your saved highlights and notes.",
   "icon": "icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "alexi.build"
+  ],
   "categories": [
     "Productivity"
   ],
