@@ -244,7 +244,11 @@ export default function Command() {
     const startOfToday =
       new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() /
       1000;
-    const endOfToday = startOfToday + 86400;
+    // The next local midnight, not start + 86400: on a DST change the day is
+    // 23 or 25 hours long.
+    const endOfToday =
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() /
+      1000;
 
     const todayTxns = allTxns.filter((t) => {
       const ts = t.transacted_at ?? t.posted;

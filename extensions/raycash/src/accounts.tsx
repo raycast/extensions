@@ -170,6 +170,43 @@ function AccountSettingsForm({
   );
 }
 
+/**
+ * Swaps `id` with its neighbour in `siblings`, the list as displayed, and
+ * returns the stored order with that swap applied.
+ *
+ * The neighbour has to come from what is on screen. The stored order spans
+ * every institution and lacks anything linked since it was saved, so stepping
+ * through it swapped with whatever sat next door there, often in another
+ * institution, and nothing visible moved.
+ */
+function reorder(
+  stored: string | undefined,
+  displayed: string[],
+  siblings: string[],
+  id: string,
+  direction: 1 | -1,
+): string[] | undefined {
+  const at = siblings.indexOf(id);
+  const neighbour = at === -1 ? undefined : siblings[at + direction];
+  if (neighbour === undefined) return undefined;
+
+  let order: string[] = [];
+  try {
+    const parsed = stored ? JSON.parse(stored) : [];
+    if (Array.isArray(parsed)) order = parsed;
+  } catch {
+    // ignore invalid JSON
+  }
+  // Unsaved entries sort after saved ones, in display order, which is exactly
+  // where appending them puts them, so only the swap below changes anything.
+  order = [...order, ...displayed.filter((d) => !order.includes(d))];
+
+  const i = order.indexOf(id);
+  const j = order.indexOf(neighbour);
+  [order[i], order[j]] = [order[j], order[i]];
+  return order;
+}
+
 export default function Command() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const prefs = getPrefs();
@@ -187,47 +224,35 @@ export default function Command() {
   const orgEntries = sortAccountsAndOrgs(accounts, settings);
 
   const moveAccount = async (accountId: string, direction: 1 | -1) => {
-    let order: string[] = [];
-    try {
-      if (settings["accountOrder"])
-        order = JSON.parse(settings["accountOrder"]);
-    } catch {
-      // ignore invalid JSON
-    }
+    // Accounts only move within their own institution.
+    const siblings = orgEntries
+      .find((e) => e.orgAccounts.some((a) => a.id === accountId))
+      ?.orgAccounts.map((a) => a.id);
+    const order = reorder(
+      settings["accountOrder"],
+      orgEntries.flatMap((e) => e.orgAccounts.map((a) => a.id)),
+      siblings ?? [],
+      accountId,
+      direction,
+    );
+    if (!order) return;
 
-    if (order.length === 0) {
-      order = accounts.map((a) => a.id);
-    }
-
-    const idx = order.indexOf(accountId);
-    if (idx === -1) return;
-    const newIdx = idx + direction;
-    if (newIdx < 0 || newIdx >= order.length) return;
-
-    [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
     const newOrderStr = JSON.stringify(order);
     await LocalStorage.setItem("accountOrder", newOrderStr);
     setSettings({ ...settings, accountOrder: newOrderStr });
   };
 
   const moveOrg = async (orgKey: string, direction: 1 | -1) => {
-    let order: string[] = [];
-    try {
-      if (settings["orgOrder"]) order = JSON.parse(settings["orgOrder"]);
-    } catch {
-      // ignore invalid JSON
-    }
+    const orgKeys = orgEntries.map((e) => e.orgKey);
+    const order = reorder(
+      settings["orgOrder"],
+      orgKeys,
+      orgKeys,
+      orgKey,
+      direction,
+    );
+    if (!order) return;
 
-    if (order.length === 0) {
-      order = orgEntries.map((e) => e.orgKey);
-    }
-
-    const idx = order.indexOf(orgKey);
-    if (idx === -1) return;
-    const newIdx = idx + direction;
-    if (newIdx < 0 || newIdx >= order.length) return;
-
-    [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
     const newOrderStr = JSON.stringify(order);
     await LocalStorage.setItem("orgOrder", newOrderStr);
     setSettings({ ...settings, orgOrder: newOrderStr });

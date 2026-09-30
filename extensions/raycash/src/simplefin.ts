@@ -53,6 +53,12 @@ export interface SimpleFinAccount {
   transactions?: SimpleFinTransaction[];
 }
 
+export interface RefreshFailure {
+  /** Epoch millis of the failed attempt. */
+  at: number;
+  message: string;
+}
+
 export interface AccountSet {
   errors: string[];
   accounts: SimpleFinAccount[];
@@ -60,6 +66,12 @@ export interface AccountSet {
   fetchedAt: number;
   /** True when this came from cache rather than a fresh request. */
   fromCache: boolean;
+  /**
+   * The latest refresh attempt, when it failed after this data was fetched.
+   * A failed refresh serves the cache, so without this the menu went on
+   * showing old balances with nothing to say a refresh had been tried.
+   */
+  failure?: RefreshFailure;
 }
 
 const cache = new Cache({ namespace: "simplefin" });
@@ -71,8 +83,24 @@ const KEY_COUNTER = "counter";
 const KEY_ACCESS_HASH = "accessUrlHash";
 /** Older builds cached the Access URL itself, in plain text. */
 const LEGACY_KEY_ACCESS_URL = "accessUrl";
+/** The last failed refresh, cleared by the next successful one. */
+const KEY_LAST_FAILURE = "lastFailure";
+/** How the latest launch of the menu bar command went, whoever started it. */
+const KEY_LAST_RUN = "lastRun";
+/** A request still out after this long was cut off, not merely slow. */
+const STALLED_MS = 5 * 60000;
+/**
+ * How long a request may take before it counts as failed. Without a limit a
+ * request that never answers keeps the menu bar command running until Raycast
+ * kills it, and a killed run leaves the command in a state from which the
+ * next scheduled launch may not come.
+ */
+export const REQUEST_TIMEOUT_MS = 45000;
 
-/** Absolute ceiling on network requests per calendar day, below SimpleFIN's ~24. */
+/**
+ * Absolute ceiling on network requests per calendar day, below SimpleFIN's
+ * ~24. Forced refreshes count against it like any other request.
+ */
 export const MAX_REQUESTS_PER_DAY = 18;
 /** Even a forced refresh will not fire more often than this. */
 const FORCE_FLOOR_MINUTES = 20;
@@ -125,6 +153,101 @@ function bumpCounter(): void {
   cache.set(KEY_COUNTER, JSON.stringify({ day: c.day, count: c.count + 1 }));
 }
 
+/**
+ * Failures raised before a connection exists: no network yet after wake, DNS
+ * down, nothing listening. The request never left the Mac, so SimpleFIN never
+ * counted it, and neither should the daily cap.
+ */
+const NEVER_SENT = new Set([
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ECONNREFUSED",
+  "ENETDOWN",
+  "ENETUNREACH",
+  "EHOSTUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+function refundCounter(): void {
+  const c = readCounter();
+  cache.set(
+    KEY_COUNTER,
+    JSON.stringify({ day: c.day, count: Math.max(0, c.count - 1) }),
+  );
+}
+
+function recordFailure(message: string): RefreshFailure {
+  const failure = { at: Date.now(), message };
+  cache.set(KEY_LAST_FAILURE, JSON.stringify(failure));
+  return failure;
+}
+
+/** What a launch of the menu bar command did about the data. */
+export type RunOutcome =
+  /** Its request is still out. */
+  | "fetching"
+  /** It fetched and the cache holds the result. */
+  | "refreshed"
+  /** The cache was fresh enough, so no request went out. */
+  | "cached"
+  /** The request went out and did not deliver. */
+  | "failed"
+  /** The daily request limit refused it. */
+  | "capped";
+
+export interface MenuRun {
+  /** Epoch millis of the run. */
+  at: number;
+  outcome: RunOutcome;
+  /** Why it did not refresh, when it did not. */
+  problem?: string;
+}
+
+function noteRun(outcome: RunOutcome, problem?: string): void {
+  cache.set(KEY_LAST_RUN, JSON.stringify({ at: Date.now(), outcome, problem }));
+}
+
+/**
+ * How the latest launch of the menu bar command went.
+ *
+ * Every launch is recorded, whether Raycast scheduled it or the user opened
+ * the menu, because Raycast's launch labels have not told the two apart: a
+ * scheduled run once arrived labelled user-initiated. The record answers
+ * "when did the command last run, and did it refresh?" without trusting a
+ * label. Kept apart from the failure record because opening the menu fetches
+ * for itself, and when that works it clears the failure.
+ */
+export function lastRun(): MenuRun | undefined {
+  const raw = cache.get(KEY_LAST_RUN);
+  if (!raw) return undefined;
+  try {
+    const run = JSON.parse(raw) as MenuRun;
+    // A run stopped mid-fetch never gets to write how it ended.
+    if (run.outcome === "fetching" && Date.now() - run.at > STALLED_MS) {
+      return {
+        ...run,
+        outcome: "failed",
+        problem: "stopped before SimpleFIN answered",
+      };
+    }
+    return run;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The last failed refresh, if it came after the data fetched at `since`. */
+function readFailure(since: number): RefreshFailure | undefined {
+  const raw = cache.get(KEY_LAST_FAILURE);
+  if (!raw) return undefined;
+  try {
+    const failure = JSON.parse(raw) as RefreshFailure;
+    return failure.at > since ? failure : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function resetCounter(): void {
   cache.set(KEY_COUNTER, JSON.stringify({ day: today(), count: 0 }));
 }
@@ -133,18 +256,36 @@ export function requestsToday(): number {
   return readCounter().count;
 }
 
+/** Parses `value` as a URL, returning it only when it is HTTPS. */
+function httpsUrl(value: string): URL | undefined {
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Splits the Access URL into an endpoint and an Authorization header.
  *
  * The Access URL arrives as https://user:pass@host/simplefin. Node's fetch
  * does not reliably forward userinfo embedded in a URL, so the credentials are
  * extracted and sent as an explicit Basic auth header instead.
+ *
+ * Those credentials read every linked account, so anything but HTTPS is
+ * refused before they are extracted, let alone sent.
  */
 function buildRequest(
   accessUrl: string,
   days: number,
 ): { url: string; headers: Record<string, string> } {
-  const parsed = new URL(accessUrl.trim());
+  const parsed = httpsUrl(accessUrl);
+  if (!parsed) {
+    throw new Error(
+      "The SimpleFIN Access URL must be an https:// URL. Paste the one Set Up SimpleFIN gave you.",
+    );
+  }
   const username = decodeURIComponent(parsed.username);
   const password = decodeURIComponent(parsed.password);
   parsed.username = "";
@@ -192,7 +333,8 @@ function readCache():
 function shouldFetch(force: boolean, minIntervalMinutes: number): boolean {
   // The cap comes first. Checked after the cache, a fresh install whose
   // requests keep failing would retry on every launch with no ceiling at all.
-  if (requestsToday() >= (force ? 24 : MAX_REQUESTS_PER_DAY)) return false;
+  // Forcing only shortens the interval; it never buys requests past the cap.
+  if (requestsToday() >= MAX_REQUESTS_PER_DAY) return false;
 
   const cached = readCache();
   if (!cached) return true;
@@ -204,10 +346,47 @@ function shouldFetch(force: boolean, minIntervalMinutes: number): boolean {
 }
 
 /**
+ * Whether the next getAccountSet would go to the network right now, decided
+ * the same way it decides. The menu bar reads this synchronously during its
+ * first render, before usePromise has started, to show a syncing icon only
+ * when a real fetch is underway rather than on every launch.
+ */
+export function refreshPending(): boolean {
+  const prefs = getPrefs();
+  if (!prefs.accessUrl?.trim()) return false;
+  return shouldFetch(false, numberPref(prefs.minIntervalMinutes, 90));
+}
+
+/** The menu bar title as last rendered, so a launch does not blank it. */
+const KEY_LAST_TITLE = "lastTitle";
+
+export function rememberTitle(title: string | undefined): void {
+  if (title === undefined) cache.remove(KEY_LAST_TITLE);
+  else cache.set(KEY_LAST_TITLE, title);
+}
+
+export function lastTitle(): string | undefined {
+  return cache.get(KEY_LAST_TITLE);
+}
+
+/**
  * Returns the current account set, hitting the network only when the cache is
  * stale enough and the daily quota allows it.
  */
-export async function getAccountSet(force = false): Promise<AccountSet> {
+export async function getAccountSet(
+  force = false,
+  {
+    launch = false,
+  }: {
+    /**
+     * A launch of the menu bar command, scheduled or not, whose outcome is
+     * kept for the menu. Launches never force: whether Raycast labels one
+     * background or user-initiated, it fetches only once the cache is older
+     * than the minimum interval, so a short schedule cannot spend the quota.
+     */
+    launch?: boolean;
+  } = {},
+): Promise<AccountSet> {
   const prefs = getPrefs();
   const minInterval = numberPref(prefs.minIntervalMinutes, 90);
 
@@ -230,6 +409,7 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
     cache.remove(KEY_PAYLOAD);
     cache.remove(KEY_FETCHED_AT);
     cache.remove(KEY_COUNTER);
+    cache.remove(KEY_LAST_FAILURE);
     if (accessHash) {
       cache.set(KEY_ACCESS_HASH, accessHash);
     } else {
@@ -253,9 +433,32 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
     }
   }
 
-  if (!shouldFetch(force, minInterval)) {
+  // Another launch may already have a request out: the auto-refresh worker
+  // while the menu is opened, or the second mount development gives each
+  // launch. One request at a time; the other serves the cache and leaves the
+  // record to the run that is fetching. A run that died mid-fetch stops
+  // counting as in flight after STALLED_MS, and with nothing cached to serve
+  // there is nothing to wait for.
+  const inFlight =
+    launch && !!cachedForFetch && lastRun()?.outcome === "fetching";
+
+  if (inFlight || !shouldFetch(force, minInterval)) {
+    if (launch && !inFlight) {
+      if (requestsToday() >= MAX_REQUESTS_PER_DAY) {
+        noteRun(
+          "capped",
+          `skipped, daily limit of ${MAX_REQUESTS_PER_DAY} requests reached`,
+        );
+      } else {
+        noteRun("cached");
+      }
+    }
     if (cachedForFetch) {
-      return { ...cachedForFetch, fromCache: true };
+      return {
+        ...cachedForFetch,
+        fromCache: true,
+        failure: readFailure(cachedForFetch.fetchedAt),
+      };
     }
     // With nothing cached, only the daily cap refuses a fetch.
     throw new Error(
@@ -263,7 +466,7 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
     );
   }
 
-  if (!accessUrl || !accessUrl.includes("://")) {
+  if (!accessUrl) {
     throw new Error(
       "No SimpleFIN Access URL configured. Add it in extension preferences.",
     );
@@ -271,34 +474,70 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
 
   const { url, headers } = buildRequest(accessUrl, daysToFetch);
 
+  const fail = (message: string): RefreshFailure => {
+    if (launch) noteRun("failed", message);
+    return recordFailure(message);
+  };
+
+  // Marked before the request so a run killed mid-fetch still leaves a trace.
+  if (launch) noteRun("fetching");
+
   let response: Response;
   try {
     bumpCounter();
-    response = await fetch(url, { headers });
+    response = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
   } catch (err) {
+    // The timeout is the signal's own error; fetch's says only "fetch failed"
+    // and keeps the reason on its cause.
+    if ((err as Error).name === "TimeoutError") {
+      const failure = fail(
+        `SimpleFIN did not answer within ${REQUEST_TIMEOUT_MS / 1000} seconds`,
+      );
+      const cached = readCache();
+      if (cached) return { ...cached, fromCache: true, failure };
+      throw new Error(failure.message);
+    }
+    const cause = (err as { cause?: { code?: string; message?: string } })
+      .cause;
+    if (cause?.code && NEVER_SENT.has(cause.code)) refundCounter();
+    const failure = fail(
+      `Could not reach SimpleFIN: ${cause?.message ?? (err as Error).message}`,
+    );
     const cached = readCache();
-    if (cached) return { ...cached, fromCache: true };
-    throw new Error(`Could not reach SimpleFIN: ${(err as Error).message}`);
+    if (cached) return { ...cached, fromCache: true, failure };
+    throw new Error(failure.message);
   }
 
   if (response.status === 403) {
-    throw new Error(
+    const failure = fail(
       "SimpleFIN rejected the credentials (403). The Access URL may have been revoked.",
     );
+    throw new Error(failure.message);
   }
   if (!response.ok) {
-    const cached = readCache();
-    if (cached) return { ...cached, fromCache: true };
     const detail = await response.text().catch(() => "");
-    throw new Error(
+    const failure = fail(
       `SimpleFIN returned ${response.status}.${detail ? ` ${detail.slice(0, 300)}` : ""}`,
     );
+    const cached = readCache();
+    if (cached) return { ...cached, fromCache: true, failure };
+    throw new Error(failure.message);
   }
 
-  const body = (await response.json()) as {
-    accounts?: SimpleFinAccount[];
-    errors?: string[];
-  };
+  let body: { accounts?: SimpleFinAccount[]; errors?: string[] };
+  try {
+    body = await response.json();
+  } catch (err) {
+    const failure = fail(
+      `SimpleFIN sent an unreadable response: ${(err as Error).message}`,
+    );
+    const cached = readCache();
+    if (cached) return { ...cached, fromCache: true, failure };
+    throw new Error(failure.message);
+  }
   const accounts = body.accounts ?? [];
   const errors = body.errors ?? [];
   const fetchedAt = Date.now();
@@ -369,6 +608,8 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
 
   cache.set(KEY_PAYLOAD, JSON.stringify({ accounts, errors }));
   cache.set(KEY_FETCHED_AT, String(fetchedAt));
+  cache.remove(KEY_LAST_FAILURE);
+  if (launch) noteRun("refreshed");
 
   return { accounts, errors, fetchedAt, fromCache: false };
 }
@@ -377,10 +618,10 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
  * Repaints the menu bar extra after data changes underneath it.
  *
  * The menu bar holds whatever the menubar command last rendered, and nothing
- * re-runs that command when another command writes the cache. Refresh Balances
- * would fetch, stamp its own subtitle with the new time, and leave the menu
- * showing the previous fetch until the 2h interval came round -- two surfaces
- * reading one cache and disagreeing about it.
+ * re-runs that command when another command writes the cache. Refresh
+ * Balances or the auto-refresh worker would fetch and leave the menu showing
+ * the previous balances until the user next opened it -- two surfaces reading
+ * one cache and disagreeing about it.
  *
  * A background launch re-renders the menu without stealing focus. The user can
  * disable the Menu Bar command, and launchCommand throws when they have, so a
@@ -838,6 +1079,25 @@ export function totalsByCurrency(
   );
 }
 
+const HOST_LABEL = "[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?";
+/** Dot-separated labels ending in a TLD that starts with a letter, so no IPs. */
+const HOSTNAME = new RegExp(
+  `^(?:${HOST_LABEL}\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])$`,
+);
+
+/**
+ * The value as a bare hostname, or undefined when it is anything else.
+ *
+ * An institution's domain arrives from the bridge and becomes a URL the
+ * browser opens. Spliced in unchecked, "bank.example@evil.example" is a login
+ * to evil.example, so only plain hostnames are accepted: no userinfo, port,
+ * path or IP address.
+ */
+export function validHostname(value?: string): string | undefined {
+  const host = (value ?? "").trim().toLowerCase();
+  return host.length <= 253 && HOSTNAME.test(host) ? host : undefined;
+}
+
 export function relativeTime(epochMillis: number): string {
   const minutes = Math.round((Date.now() - epochMillis) / 60000);
   if (minutes < 1) return "just now";
@@ -930,8 +1190,9 @@ export function formatRefreshTime(
   const format =
     (customDateFormat ?? getPrefs().prefDateFormat)?.trim() ||
     DEFAULT_DATE_FORMAT;
-  // A format carrying its own hour field already reads as a time.
-  if (format.includes("h") || format.includes("H")) {
+  // A format carrying its own hour field already reads as a time. Quoted
+  // spans are literal text to formatDate, so an 'h' inside one is no hour.
+  if (/[hH]/.test(format.replace(/'[^']*'/g, ""))) {
     return formatDate(epochSeconds, format);
   }
 
@@ -1235,32 +1496,47 @@ export function searchScore(
   return best;
 }
 
+/** Setup tokens are only ever claimed against SimpleFIN Bridge. */
+const BRIDGE_DOMAIN = "simplefin.org";
+
+function isBridgeHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === BRIDGE_DOMAIN || host.endsWith(`.${BRIDGE_DOMAIN}`);
+}
+
 /**
  * Claims a SimpleFIN setup token and returns the Access URL.
  *
  * The token is a base64-encoded claim URL; POSTing to it once returns the
  * permanent Access URL. Tokens are single-use, so a second attempt with the
  * same token fails — that is the bridge working as intended, not a bug.
+ *
+ * Whoever hands over a token picks where that POST goes, so the destination
+ * is checked first: HTTPS to SimpleFIN Bridge, never an arbitrary host or a
+ * local address.
  */
 export async function claimSetupToken(token: string): Promise<string> {
   const trimmed = token.trim();
   if (!trimmed) throw new Error("Paste your setup token first.");
 
-  let claimUrl: string;
+  const decoded = Buffer.from(trimmed, "base64").toString("utf8").trim();
+  let claimUrl: URL;
   try {
-    claimUrl = Buffer.from(trimmed, "base64").toString("utf8").trim();
+    claimUrl = new URL(decoded);
   } catch {
-    throw new Error("That does not decode as a setup token.");
-  }
-  if (!/^https?:\/\//i.test(claimUrl)) {
     throw new Error(
       "Decoded token is not a URL. Copy the whole token, with no line breaks.",
+    );
+  }
+  if (claimUrl.protocol !== "https:" || !isBridgeHost(claimUrl.hostname)) {
+    throw new Error(
+      "This token does not point at SimpleFIN Bridge. Create a new one on the bridge.",
     );
   }
 
   let response: Response;
   try {
-    response = await fetch(claimUrl, { method: "POST" });
+    response = await fetch(claimUrl.href, { method: "POST" });
   } catch (err) {
     throw new Error(`Could not reach the bridge: ${(err as Error).message}`);
   }
@@ -1274,8 +1550,9 @@ export async function claimSetupToken(token: string): Promise<string> {
   }
 
   const accessUrl = (await response.text()).trim();
-  if (!accessUrl.includes("://")) {
-    throw new Error("The bridge did not return an Access URL.");
+  // Checked here too, so a URL every fetch would refuse is never handed out.
+  if (!httpsUrl(accessUrl)) {
+    throw new Error("The bridge did not return an HTTPS Access URL.");
   }
   return accessUrl;
 }
