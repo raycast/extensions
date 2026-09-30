@@ -19,6 +19,8 @@ const PROCESS_LIST_COMMAND = "/bin/ps";
 const PROFILE_HOME = join(homedir(), ".codex-profiles");
 const LOCK_PATH = join(PROFILE_HOME, ".launch-lock");
 const LOCK_WAIT_TIMEOUT_MS = 15_000;
+const PROCESS_RECHECK_DELAY_MS = 200;
+const PROFILE_RECOVERY_ATTEMPTS = 3;
 
 async function getProfilePIDs(profile: CodexProfile): Promise<number[]> {
   const { stdout } = await execFileAsync(PROCESS_LIST_COMMAND, ["-ww", "-axo", "pid=,command="]);
@@ -129,11 +131,41 @@ async function restoreRunningProfileWindow(profile: CodexProfile, pid: number): 
   }
 }
 
-async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
-  const existingPIDs = await getProfilePIDs(profile);
-  if (existingPIDs.length > 0) {
-    if (await restoreRunningProfileWindow(profile, existingPIDs[0])) return;
+async function recoverExistingProfile(profile: CodexProfile): Promise<boolean> {
+  let sawRunningProcess = false;
+
+  for (let attempt = 0; attempt < PROFILE_RECOVERY_ATTEMPTS; attempt += 1) {
+    let pids = await getProfilePIDs(profile);
+    if (pids.length === 0) {
+      if (!sawRunningProcess) return false;
+
+      // A replacement process may appear just after the old PID exits.
+      await new Promise((resolve) => setTimeout(resolve, PROCESS_RECHECK_DELAY_MS));
+      pids = await getProfilePIDs(profile);
+      if (pids.length === 0) return false;
+    }
+
+    sawRunningProcess = true;
+    for (const pid of pids) {
+      if (await restoreRunningProfileWindow(profile, pid)) return true;
+    }
   }
+
+  // The profile kept changing PIDs while recovery ran. Do not start another
+  // instance while any matching process remains alive.
+  if ((await getProfilePIDs(profile)).length > 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `${profile.name} is restarting`,
+      message: "Left the running process alone to avoid opening a competing profile.",
+    });
+    return true;
+  }
+  return false;
+}
+
+async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
+  if (await recoverExistingProfile(profile)) return;
 
   // The required Work folder may not exist on a first launch; create it so
   // the default profile can initialize just like a named profile.
@@ -165,6 +197,11 @@ async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
   }
 
   if (profile.required) args.push("-b", CHATGPT_BUNDLE_ID);
+
+  // Check again immediately before `open -n`: ChatGPT may have restarted
+  // while the profile directories and arguments were being prepared.
+  if (await recoverExistingProfile(profile)) return;
+
   await execFileAsync("/usr/bin/open", args);
 
   await waitForProfileToStart(profile);
