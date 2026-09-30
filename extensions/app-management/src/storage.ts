@@ -51,11 +51,14 @@ const writeSelection = serialQueue();
 const writeListState = serialQueue();
 const write = serialQueue();
 
-/** The list writes its selection and open/closed state so the hotkey commands can act on the selected row. */
+/**
+ * The list writes its selection and open/closed state so the hotkey commands can act on the selected row. Both stamp
+ * `at` when called, not when the queued write runs: the hotkey compares the two stamps, so they must keep the order in
+ * which the selection and the close happened, even if a write finishes late.
+ */
 export async function saveSelection(selection: Omit<StoredSelection, "at">): Promise<void> {
-  await writeSelection(() =>
-    LocalStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify({ ...selection, at: Date.now() })),
-  );
+  const value = JSON.stringify({ ...selection, at: Date.now() });
+  await writeSelection(() => LocalStorage.setItem(SELECTION_STORAGE_KEY, value));
 }
 
 /** A selected Trash or status row is not an app: the hotkey quit commands must refuse rather than act on the app that
@@ -66,12 +69,13 @@ export async function clearSelection(): Promise<void> {
 
 /** A mount writes "open"; its unmount writes "closed" only if no newer mount has written since. */
 export async function saveListState(open: boolean, id: string): Promise<void> {
+  const at = Date.now();
   await writeListState(async () => {
     if (!open) {
       const current = parseListState(await LocalStorage.getItem(LIST_STATE_STORAGE_KEY));
       if (current?.id && current.id !== id) return;
     }
-    await LocalStorage.setItem(LIST_STATE_STORAGE_KEY, JSON.stringify({ open, at: Date.now(), id }));
+    await LocalStorage.setItem(LIST_STATE_STORAGE_KEY, JSON.stringify({ open, at, id }));
   });
 }
 
