@@ -59,6 +59,9 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
   );
 }
 
+// Bounds the rows scanned, serialized, and rendered for each search or browse.
+const LIST_LIMIT = 500;
+
 const LIST_COLUMNS =
   "Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, ContentRID, RootRevGenCount, LastModifiedTime, RecentTime, PinTime, Color, Title, EnterpriseIdentity, substr(Content, 1, 1000) AS Content";
 
@@ -136,13 +139,13 @@ export function Directory(props: { elt?: OneNoteItem }) {
       } else {
         const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE ParentGOID = '${quoteSql(
           props.elt.GOID
-        )}' ORDER BY RecentTime DESC;`;
+        )}' ORDER BY RecentTime DESC LIMIT ${LIST_LIMIT};`;
         return getListItems(query, props.elt);
       }
     }
   }
-  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC;`;
-  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC;`;
+  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC LIMIT ${LIST_LIMIT};`;
+  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC LIMIT ${LIST_LIMIT};`;
   return getListItems(query);
 }
 

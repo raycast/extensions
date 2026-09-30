@@ -1,12 +1,14 @@
 import { environment, LocalStorage, Cache } from "@raycast/api";
 import { statSync, writeFileSync } from "fs";
-import { findSearchIndexes } from "./search";
+import { DEDUPE_ENTITIES_SQL, findSearchIndexes, indexSignature, normalizeSearchText, IndexFile } from "./search";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
 
 let SQL: SqlJsStatic;
+
+const SIGNATURE_KEY = "onenote-db-signature";
 
 export const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenote-data.db");
 
@@ -15,28 +17,28 @@ export const create_or_update_db = async (force_update = false) => {
     SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
   }
 
-  let lastOneNoteModification = (await LocalStorage.getItem<number>("onenote-db-time")) as number;
-  if (lastOneNoteModification == undefined) lastOneNoteModification = 0;
+  const lastSignature = await LocalStorage.getItem<string>(SIGNATURE_KEY);
   let NEEDUPDATE = force_update;
 
-  const ALL_DB_PATHS: string[] = [];
   const ALL_DB: Database[] = [];
   const ALL_DB_NAMES: string[] = [];
 
   // Search for OneNote databases:
-  let mostRecent = 0;
+  const indexFiles: IndexFile[] = [];
   const indexPaths = await findSearchIndexes(homedir());
   for (const indexPath of indexPaths) {
     const db_files = await readdir(indexPath);
     for (const file of db_files) {
       if (file.endsWith(".db")) {
         const filepath = resolve(indexPath, file);
-        ALL_DB_PATHS.push(filepath);
-        const mtime = statSync(filepath).mtimeMs;
-        if (mtime > mostRecent) mostRecent = mtime;
+        indexFiles.push({ path: filepath, mtimeMs: statSync(filepath).mtimeMs });
       }
     }
   }
+  // Oldest first, so that later copies of a note come from more recently updated indexes.
+  indexFiles.sort((a, b) => a.mtimeMs - b.mtimeMs || a.path.localeCompare(b.path));
+  const ALL_DB_PATHS = indexFiles.map((file) => file.path);
+  const signature = indexSignature(indexFiles);
 
   if (ALL_DB_PATHS.length === 0) {
     throw new Error(
@@ -44,7 +46,7 @@ export const create_or_update_db = async (force_update = false) => {
     );
   }
 
-  if (mostRecent > lastOneNoteModification) {
+  if (signature !== lastSignature) {
     NEEDUPDATE = true;
   }
 
@@ -70,6 +72,7 @@ export const create_or_update_db = async (force_update = false) => {
   // Create main database:
   const db = new SQL.Database();
   db.exec(CREATE_TABLE_SQL);
+  db.create_function("normalize_search_text", (text: unknown) => normalizeSearchText(String(text ?? "")));
 
   // Attach "official" OneNote databases:
   for (const index in ALL_DB_NAMES) {
@@ -96,6 +99,22 @@ export const create_or_update_db = async (force_update = false) => {
     );
   }
 
+  // Needed by the de-duplication below and by note lookups.
+  db.run("CREATE INDEX Entities_GOID ON Entities (GOID)");
+
+  // The same note can exist in several indexes (e.g. old and current versions): keep the most recently
+  // modified copy, preferring the one from the most recently updated index on ties.
+  db.run(DEDUPE_ENTITIES_SQL);
+
+  // Pre-normalized title + content, so searches need a single case- and accent-safe substring scan.
+  db.run(
+    "UPDATE Entities SET SearchText = normalize_search_text(coalesce(Title, '') || char(10) || coalesce(Content, ''))"
+  );
+  db.exec(
+    "CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
+     CREATE INDEX Entities_RecentTime ON Entities (RecentTime DESC);"
+  );
+
   // CACHING PARENTS' TITLE :
   const results = db.exec("SELECT DISTINCT GOID, Title FROM Entities WHERE Type > 1");
   const cache = new Cache();
@@ -108,7 +127,7 @@ export const create_or_update_db = async (force_update = false) => {
   const buffer = Buffer.from(db.export());
 
   writeFileSync(ONENOTE_MERGED_DB, buffer);
-  await LocalStorage.setItem("onenote-db-time", mostRecent);
+  await LocalStorage.setItem(SIGNATURE_KEY, signature);
 
   // CLOSE DBs
   for (const _db of ALL_DB) {
@@ -135,5 +154,6 @@ const CREATE_TABLE_SQL =
   "Color               INTEGER, " +
   "Title               TEXT, " +
   "EnterpriseIdentity  TEXT," +
-  "Content             TEXT" +
+  "Content             TEXT, " +
+  "SearchText          TEXT" +
   "); ";
