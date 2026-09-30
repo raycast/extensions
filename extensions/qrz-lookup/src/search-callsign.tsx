@@ -33,7 +33,7 @@ export default function Command() {
         <List.Item
           title={result.call}
           subtitle={fullName(result)}
-          detail={<CallsignDetail callsign={result} />}
+          detail={<CallsignDetail callsign={result} error={error} />}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open on QRZ.com" url={`https://www.qrz.com/db/${result.call}`} />
@@ -49,7 +49,7 @@ export default function Command() {
   );
 }
 
-function CallsignDetail({ callsign: c }: { callsign: Callsign }) {
+function CallsignDetail({ callsign: c, error }: { callsign: Callsign; error?: Error }) {
   const qsl = [c.lotw === "1" && "LoTW", c.eqsl === "1" && "eQSL", c.mqsl === "1" && "Paper"].filter(Boolean);
   const fields: [string, string | undefined][] = [
     ["Name", fullName(c)],
@@ -68,6 +68,12 @@ function CallsignDetail({ callsign: c }: { callsign: Callsign }) {
       markdown={c.image ? `![${c.call}](${c.image})` : undefined}
       metadata={
         <List.Item.Detail.Metadata>
+          {error && (
+            <>
+              <List.Item.Detail.Metadata.Label title="Refresh Failed" text={error.message} icon={Icon.Warning} />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
           {fields
             .filter(([, text]) => text)
             .map(([title, text]) => (
