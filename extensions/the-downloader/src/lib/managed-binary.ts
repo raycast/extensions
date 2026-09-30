@@ -47,7 +47,6 @@ export function isRosettaInstalled(): boolean {
   return fs.existsSync(ROSETTA_RUNTIME_PATH);
 }
 
-/** Friendly error thrown when spotDL can't run because Rosetta 2 is missing on Apple Silicon. */
 /**
  * True when running `binaryPath` needs Rosetta that isn't there: an Intel-only
  * Mach-O (like spotDL's prebuilt binary) on an Apple Silicon Mac without
@@ -62,6 +61,7 @@ export function needsRosetta(
   return mac.appleSilicon && !mac.rosetta && isIntelOnlyExecutable(header());
 }
 
+/** Friendly error thrown when spotDL can't run because Rosetta 2 is missing on Apple Silicon. */
 export class RosettaRequiredError extends Error {
   constructor() {
     super(
@@ -198,9 +198,21 @@ export async function downloadSpotdl(supportDir: string): Promise<string> {
   return finalPath;
 }
 
+/**
+ * True when `binaryPath` is the extension's own download, inside `supportDir`
+ * — the only spotDL it may update or replace. A Homebrew or pip spotDL is left
+ * to its own package manager.
+ */
+export function isManagedBinary(binaryPath: string, supportDir: string): boolean {
+  return path.resolve(binaryPath).startsWith(path.resolve(supportDir) + path.sep);
+}
+
+/** How long `spotdl --version` may take; the first run of the bundled binary unpacks itself. */
+const VERSION_TIMEOUT_MS = 30_000;
+
 /** Read the installed spotDL version, e.g. "4.5.0". */
 export async function getInstalledVersion(spotdlPath: string): Promise<string> {
-  const { stdout } = await execa(spotdlPath, ["--version"]);
+  const { stdout } = await execa(spotdlPath, ["--version"], { timeout: VERSION_TIMEOUT_MS });
   const match = stdout.match(/\d+\.\d+\.\d+/);
   return match ? match[0] : stdout.trim();
 }

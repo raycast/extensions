@@ -100,7 +100,10 @@ export type SpotdlErrorSummary = {
  * full text via the Copy action.
  */
 export function summarizeSpotdlError(rawOutput: string): SpotdlErrorSummary {
-  if (/returned\s+403|\bForbidden\b/i.test(rawOutput)) {
+  // Spotify API errors come from spotipy as "HTTP Error for GET … returned 403
+  // due to …". A bare "Forbidden" or "not found" elsewhere (yt-dlp fetching the
+  // audio from YouTube, a missing ffmpeg) is not about the playlist.
+  if (/returned\s+403\b/i.test(rawOutput)) {
     return {
       title: "Spotify: 403 Forbidden",
       message:
@@ -108,7 +111,7 @@ export function summarizeSpotdlError(rawOutput: string): SpotdlErrorSummary {
       action: "open-setup-guide",
     };
   }
-  if (/returned\s+404|\bNot Found\b/i.test(rawOutput)) {
+  if (/returned\s+404\b/i.test(rawOutput)) {
     return {
       title: "Spotify: 404 Not Found",
       message:

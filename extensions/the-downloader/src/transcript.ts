@@ -24,6 +24,68 @@ function transcriptScratchRoot(): string {
   return os.tmpdir();
 }
 
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Languages to fetch: the requested one, then the video's own spoken language when it differs. */
+export function transcriptLanguages(requested: string, videoLanguage?: string | null): string[] {
+  const spoken = videoLanguage?.split(/[-_]/)[0]?.toLowerCase();
+  return spoken && spoken !== requested.split(/[-_]/)[0].toLowerCase() ? [requested, spoken] : [requested];
+}
+
+/**
+ * The `--sub-langs` value. yt-dlp matches sub langs by an anchored regex, so a
+ * bare `en` misses en-US / en-GB / YouTube's auto `en-orig`; the `<lang>.*`
+ * form catches them.
+ */
+export function subLangsArg(languages: string[]): string {
+  return languages.flatMap((l) => [l, `${l}.*`]).join(",");
+}
+
+/**
+ * The subtitle file to use, most wanted first: for each language, the exact
+ * track (`<id>.<lang>.srt`, uploaded captions when there are any), then a
+ * regional or automatic variant (`<id>.<lang>-US.srt`, `<id>.<lang>-orig.srt`).
+ */
+export function pickSubtitleFile(files: string[], languages: string[]): string | undefined {
+  const srt = files.filter((f) => f.endsWith(".srt"));
+  for (const lang of languages) {
+    const exact = srt.find((f) => f.endsWith(`.${lang}.srt`));
+    if (exact) return exact;
+    const variant = srt.find((f) => new RegExp(`\\.${escapeRegExp(lang)}[-_][^.]*\\.srt$`).test(f));
+    if (variant) return variant;
+  }
+  return undefined;
+}
+
+/** yt-dlp arguments that save a video's captions (no media) as .srt files. */
+export function buildTranscriptArgs(o: {
+  url: string;
+  languages: string[];
+  ffmpegPath: string;
+  outputTemplate: string;
+  denoPath?: string;
+}): string[] {
+  return [
+    "--write-sub", // Uploaded captions
+    "--write-auto-sub", // Automatic captions
+    "--skip-download", // Captions only, no media
+    "--no-playlist", // A watch?v=…&list=… URL must not fetch the whole playlist's subs
+    // yt-dlp otherwise raises on the first caption track that fails (e.g. HTTP
+    // 429 on an automatic variant) and never tries the others.
+    "--ignore-errors",
+    "--sub-langs",
+    subLangsArg(o.languages),
+    "--convert-subs",
+    "srt",
+    "--ffmpeg-location",
+    o.ffmpegPath,
+    ...(o.denoPath ? ["--js-runtimes", `deno:${o.denoPath}`] : []),
+    "-o",
+    o.outputTemplate,
+    o.url,
+  ];
+}
+
 export default async function extractTranscript(url: string, language: string = "en", signal?: AbortSignal) {
   const ytdlPath = getytdlPath();
   const ffmpegPath = getffmpegPath();
@@ -57,6 +119,9 @@ export default async function extractTranscript(url: string, language: string = 
   // invocation avoids two concurrent transcript extractions (e.g. from the
   // Download form and the extract-transcript tool at the same time) clobbering
   // each other's files and rm-ing the directory under each other's feet.
+  // The requested language first, then the video's own: a video without the
+  // requested captions still gets a transcript in the language it's spoken in.
+  const languages = transcriptLanguages(language, video.language);
   const tmpDir = path.join(transcriptScratchRoot(), `transcript-${crypto.randomUUID()}`);
   fs.mkdirSync(tmpDir, { recursive: true });
 
@@ -64,36 +129,22 @@ export default async function extractTranscript(url: string, language: string = 
     // Download subtitles using yt-dlp, through the shared watchdog (closes stdin
     // so yt-dlp can't hang on an auth prompt, idle-kills a stall, and is
     // abortable via `signal`).
-    const args = [
-      "--write-sub", // Write subtitle file
-      "--write-auto-sub", // Write automatically generated subtitles
-      "--skip-download", // Don't download the video
-      "--no-playlist", // A watch?v=…&list=… URL must not fetch the whole playlist's subs
-      // Match regional / auto-caption variants: yt-dlp matches sub langs by an
-      // anchored regex, so a bare `en` misses en-US / en-GB / en-orig. The
-      // `<lang>.*` form catches them; the exact form keeps priority obvious.
-      "--sub-langs",
-      `${language},${language}.*`,
-      "--convert-subs", // Convert subtitles to srt format
-      "srt",
-      "--ffmpeg-location",
-      ffmpegPath,
-      ...(deno ? ["--js-runtimes", `deno:${deno}`] : []),
-      "-o", // Output template
-      path.join(tmpDir, "%(id)s.%(ext)s"),
+    const args = buildTranscriptArgs({
       url,
-    ];
+      languages,
+      ffmpegPath,
+      denoPath: deno,
+      outputTemplate: path.join(tmpDir, "%(id)s.%(ext)s"),
+    });
     const { code, stderr } = await runWithWatchdog(ytdlPath, args, { idleMs: getIdleTimeoutMs(), abortSignal: signal });
-    if (code !== 0) {
-      throw new Error(stderr.trim() || "Failed to download subtitles");
-    }
 
-    // Find the downloaded subtitle file
-    const files = fs.readdirSync(tmpDir);
-    const subtitleFile = files.find((f) => f.endsWith(".srt"));
-
+    // Look for a saved track before judging the exit code: yt-dlp can save one
+    // track and then fail another (e.g. HTTP 429 on an automatic variant), and
+    // the saved one is still good.
+    const subtitleFile = pickSubtitleFile(fs.readdirSync(tmpDir), languages);
     if (!subtitleFile) {
-      throw new Error(`No ${language} subtitles found for this video`);
+      if (code !== 0) throw new Error(stderr.trim() || "Failed to download subtitles");
+      throw new Error(`No ${languages.join(" or ")} subtitles found for this video`);
     }
 
     // Read and parse the subtitle file
@@ -157,6 +208,7 @@ export function cleanUpSrt(srtContent: string): string {
   }
 
   return cleanedText
+    .replace(/\\[hN]/g, " ") // ASS hard space / line break codes left over from caption conversion
     .replace(/\s+/g, " ") // Normalize whitespace
     .replace(/<[^>]+>/g, "") // Remove HTML tags
     .replace(/\{[^}]+\}/g, "") // Remove curly brace formatting

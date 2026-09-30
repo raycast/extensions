@@ -14,12 +14,17 @@ vi.mock("execa", () => ({ execa: vi.fn(async () => ({ stdout: "" })) }));
 
 import * as fs from "node:fs";
 import * as crypto from "node:crypto";
+import { execa } from "execa";
 import {
   downloadSpotdl,
+  getInstalledVersion,
   isAppleSilicon,
+  isManagedBinary,
   isRosettaInstalled,
   resolveSpotdlAsset,
-  RosettaRequiredError, needsRosetta } from "../src/lib/managed-binary";
+  RosettaRequiredError,
+  needsRosetta,
+} from "../src/lib/managed-binary";
 
 const assets = [
   { name: "spotDL", url: "u0" },
@@ -217,5 +222,24 @@ describe("needsRosetta", () => {
   it("is false when Rosetta is installed or the Mac is Intel", () => {
     expect(needsRosetta("/x/spotdl", { appleSilicon: true, rosetta: true }, intel)).toBe(false);
     expect(needsRosetta("/x/spotdl", { appleSilicon: false, rosetta: false }, intel)).toBe(false);
+  });
+});
+
+describe("isManagedBinary", () => {
+  const support = "/Users/me/Library/Application Support/com.raycast.macos/extensions/the-downloader";
+
+  it("is true only for a binary inside the extension's support folder", () => {
+    expect(isManagedBinary(`${support}/spotdl`, support)).toBe(true);
+    expect(isManagedBinary("/opt/homebrew/bin/spotdl", support)).toBe(false);
+    // A sibling folder that merely shares the prefix isn't the support folder.
+    expect(isManagedBinary(`${support}-other/spotdl`, support)).toBe(false);
+  });
+});
+
+describe("getInstalledVersion", () => {
+  it("bounds `spotdl --version` with a timeout so a stuck binary can't hang the check", async () => {
+    vi.mocked(execa).mockResolvedValueOnce({ stdout: "4.5.2" } as never);
+    await expect(getInstalledVersion("/x/spotdl")).resolves.toBe("4.5.2");
+    expect(vi.mocked(execa).mock.calls.at(-1)?.[2]).toMatchObject({ timeout: expect.any(Number) });
   });
 });

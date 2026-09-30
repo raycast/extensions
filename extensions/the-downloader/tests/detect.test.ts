@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { detectSource } from "../src/lib/detect";
+import { detectSource, hostnameOf } from "../src/lib/detect";
 
 describe("detectSource", () => {
   it("routes known video domains to video", () => {
@@ -46,5 +46,14 @@ describe("detectSource", () => {
 
   it("routes an unparseable URL to webpage", () => {
     expect(detectSource("not a url")).toBe("webpage");
+  });
+});
+
+describe("hostnameOf", () => {
+  it("reads the host with or without a scheme, even when the host itself starts with 'http'", () => {
+    expect(hostnameOf("https://www.youtube.com/watch?v=abc")).toBe("youtube.com");
+    expect(hostnameOf("youtu.be/abc")).toBe("youtu.be");
+    expect(hostnameOf("httpbin.org/get")).toBe("httpbin.org");
+    expect(hostnameOf("not a url")).toBe("");
   });
 });

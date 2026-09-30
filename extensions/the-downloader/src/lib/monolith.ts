@@ -1,4 +1,6 @@
+import * as fs from "node:fs";
 import { DEFAULT_IDLE_MS, runWithWatchdog } from "./run.js";
+import { uniqueFilePath } from "./unique-path.js";
 
 export type MonolithSaveOptions = {
   url: string;
@@ -42,6 +44,14 @@ export function webpageFilename(url: string): string {
     safe = safe.slice(0, 150).replace(/[-.]+$/g, "");
   }
   return `${safe || "webpage"}.html`;
+}
+
+/**
+ * Where to save `url` in `folder`: its `webpageFilename`, numbered (`… (2).html`)
+ * when that name is taken, so saving a page again never overwrites the earlier copy.
+ */
+export function webpageOutputPath(folder: string, url: string, exists: (p: string) => boolean = fs.existsSync): string {
+  return uniqueFilePath(folder, webpageFilename(url).replace(/\.html$/, ""), "html", exists);
 }
 
 export type MonolithResult = { filePath: string };

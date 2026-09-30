@@ -37,4 +37,6 @@ export type Video = {
   upload_date?: string | null;
   webpage_url?: string | null;
   channel_follower_count?: number | null;
+  /** The spoken language yt-dlp detected, e.g. `en` or `de`. */
+  language?: string | null;
 };
