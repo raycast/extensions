@@ -165,7 +165,7 @@ type Turn = ChatTurn & {
   finishedAt?: number;
 };
 
-type LoadError = { message: string; fix?: "preferences" };
+type LoadError = { message: string; fix?: "preferences" | "archive" };
 
 async function saveFile(name: string, content: string, ext: string) {
   const target = uniqueFilePath(downloadPath, sanitizeVideoTitle(name), ext);
@@ -202,7 +202,8 @@ function bodySummary(ctx: LinkContext): string {
     const note = (ctx.note ?? "Nothing to read.").replace(/[_*`]/g, "");
     const from =
       ctx.kind === "video" ? "the title, description, chapters and statistics" : "the title, description and details";
-    return `_${note} Answers come from ${from}. Reload to try again._`;
+    const archive = ctx.noteReason === "unreadable" && !ctx.archive ? ", or read the Internet Archive's copy (⌘K)" : "";
+    return `_${note} Answers come from ${from}. Reload to try again${archive}._`;
   }
   const tokens = formatCount(estimateTokens(bodyText(ctx.body)));
   if (ctx.body.type === "segments") {
@@ -231,6 +232,11 @@ function overviewMarkdown(ctx: LinkContext): string {
         "### Chapters",
         ...ctx.chapters.map((c) => linkifyTimestamps(`- [${formatTimestamp(c.start_time)}] ${c.title}`, link)),
       ].join("\n"),
+    );
+  }
+  if (ctx.archive) {
+    parts.push(
+      `_Read from the [Internet Archive's copy](${ctx.archive.viewUrl}) saved ${formatDate(ctx.archive.savedOn)}, not the live page._`,
     );
   }
   parts.push(bodySummary(ctx));
@@ -344,6 +350,8 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
   const [refresh, setRefresh] = useState(0);
   const [ctx, setCtx] = useState<LinkContext>();
   const [loadError, setLoadError] = useState<LoadError>();
+  // Reading the Internet Archive's saved copy instead of the live page.
+  const [archived, setArchived] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [searchText, setSearchText] = useState("");
   const [engine, setEngine] = useState<EnginePreference>((prefs.aiEngine as EnginePreference) || "auto");
@@ -399,7 +407,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
     });
   }, [turns, ctx]);
 
-  async function load(force = false) {
+  async function load(force = false, fromArchive = archived) {
     loadAbort.current?.abort();
     const controller = new AbortController();
     loadAbort.current = controller;
@@ -409,6 +417,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
         signal: controller.signal,
         language: prefs.transcriptLanguage,
         force,
+        archived: fromArchive,
       });
       setCtx(context);
       const stored = await findChat(chatKey(context));
@@ -538,6 +547,13 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
     }
   }
 
+  /** Switch between the live page and the Internet Archive's copy. */
+  function readFromArchive(on: boolean) {
+    setArchived(on);
+    setCtx(undefined);
+    void load(false, on);
+  }
+
   async function clearChat() {
     if (!ctx) return;
     const confirmed = await confirmAlert({
@@ -616,6 +632,15 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
             void load(true);
           }}
         />
+        {ctx.kind === "page" && !ctx.archive && (
+          <Action title="Read Archived Copy" icon={Icon.Clock} onAction={() => readFromArchive(true)} />
+        )}
+        {ctx.archive && (
+          <>
+            <Action title="Read Live Page" icon={Icon.Globe} onAction={() => readFromArchive(false)} />
+            <Action.OpenInBrowser title="Open Archived Copy" url={ctx.archive.viewUrl} />
+          </>
+        )}
         {turns.length > 0 && (
           <Action
             title="Clear Chat"
@@ -633,7 +658,11 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
   const loadErrorTitle = `Couldn't load this ${words.noun}`;
   const loadErrorActions = loadError ? (
     <ActionPanel>
+      {loadError.fix === "archive" && !archived && (
+        <Action title="Read Archived Copy" icon={Icon.Clock} onAction={() => readFromArchive(true)} />
+      )}
       <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => load(true)} />
+      {archived && <Action title="Read Live Page" icon={Icon.Globe} onAction={() => readFromArchive(false)} />}
       {loadError.fix === "preferences" && (
         <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       )}
@@ -814,6 +843,9 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
                     title="Copy Statistics"
                     content={[ctx.title, ...ctx.stats.map((s) => `${s.label}: ${s.value}`)].join("\n")}
                   />
+                )}
+                {!hasBody(ctx) && ctx.noteReason === "unreadable" && !ctx.archive && (
+                  <Action title="Read Archived Copy" icon={Icon.Clock} onAction={() => readFromArchive(true)} />
                 )}
                 {!hasBody(ctx) && ctx.noteReason === "language" && (
                   <Action title="Open Chat Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />

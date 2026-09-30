@@ -189,7 +189,14 @@ export async function loadPageLink(url: string, options: { signal?: AbortSignal 
   } catch (error) {
     if (error instanceof HttpError && [401, 402, 403, 429, 451].includes(error.status)) {
       throw new LinkLoadError(
-        `${error.host} didn't let The Downloader read this page (HTTP ${error.status}). It may need a login or block apps — open it in your browser instead.`,
+        `${error.host} didn't let The Downloader read this page (HTTP ${error.status}). It may need a login or block apps — try the Internet Archive's copy, or open it in your browser.`,
+        "archive",
+      );
+    }
+    if (error instanceof HttpError && [404, 410].includes(error.status)) {
+      throw new LinkLoadError(
+        `This page is gone (HTTP ${error.status} from ${error.host}). The Internet Archive may have a saved copy.`,
+        "archive",
       );
     }
     throw error;

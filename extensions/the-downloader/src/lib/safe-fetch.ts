@@ -128,6 +128,8 @@ export type SafeFetchOptions = {
   maxRedirects?: number;
   /** Content types to accept, e.g. `text/html` or `image/` (a prefix). Anything when omitted. */
   accept?: string[];
+  /** Send this User-Agent instead of a browser's (some sites throttle a browser name over HTTP/1.1). */
+  userAgent?: string;
   /** For tests: how names resolve. Defaults to the system resolver. */
   resolve?: Resolver;
   /** For tests: which resolved addresses may be reached. Defaults to anything `isBlockedAddress` allows. */
@@ -191,7 +193,12 @@ function decoder(encoding: string | undefined): Transform | undefined {
 
 type Hop = { status: number; location?: string; contentType: string; response: http.IncomingMessage };
 
-function request(url: URL, target: { address: string; family: 4 | 6 }, accept: string, signal: AbortSignal) {
+function request(
+  url: URL,
+  target: { address: string; family: 4 | 6 },
+  headers: { accept: string; userAgent: string },
+  signal: AbortSignal,
+) {
   const client = url.protocol === "https:" ? https : http;
   return new Promise<Hop>((resolve, reject) => {
     const req = client.request(
@@ -202,8 +209,8 @@ function request(url: URL, target: { address: string; family: 4 | 6 }, accept: s
         path: `${url.pathname}${url.search}`,
         method: "GET",
         headers: {
-          "user-agent": USER_AGENT,
-          accept,
+          "user-agent": headers.userAgent,
+          accept: headers.accept,
           "accept-encoding": "gzip, deflate, br",
           "accept-language": "en;q=0.9, *;q=0.5",
         },
@@ -278,7 +285,12 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
       const host = current.hostname.replace(/^\[|\]$/g, "");
       const target = await checkedAddress(host, resolve, allow);
       if (controller.signal.aborted) throw abortError();
-      const hop = await request(current, target, acceptHeader, controller.signal);
+      const hop = await request(
+        current,
+        target,
+        { accept: acceptHeader, userAgent: options.userAgent ?? USER_AGENT },
+        controller.signal,
+      );
 
       if (hop.status >= 300 && hop.status < 400 && hop.location) {
         hop.response.resume();

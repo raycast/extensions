@@ -47,6 +47,8 @@ export type LinkContext = {
   noteReason?: LinkNoteReason;
   /** Slim yt-dlp metadata, for videos: timestamps, formats, Media Preview. */
   video?: Video;
+  /** Set when the text came from the Internet Archive's saved copy rather than the live page. */
+  archive?: { viewUrl: string; savedOn: string };
   fetchedAt: number;
 };
 
@@ -122,11 +124,14 @@ export function truncateToTokens(text: string, tokens: number): string {
   return `${text.slice(0, Math.floor((text.length * tokens) / estimate))}…`;
 }
 
-/** A link that couldn't be loaded; `fix` names what the user can change to get past it. */
+/**
+ * A link that couldn't be loaded; `fix` names what can get past it: a setting
+ * to change, or the Internet Archive's saved copy of the page.
+ */
 export class LinkLoadError extends Error {
   constructor(
     message: string,
-    readonly fix?: "preferences",
+    readonly fix?: "preferences" | "archive",
   ) {
     super(message);
     this.name = "LinkLoadError";

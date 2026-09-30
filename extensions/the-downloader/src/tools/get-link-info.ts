@@ -24,7 +24,7 @@ export default async function tool(input: Input) {
   const raw = input.url?.trim() ?? "";
   if (!raw || !isValidUrl(raw)) throw new Error("Invalid URL — provide an http(s) link.");
   const url = normalizeUrl(raw);
-  if (linkKindOf(url) !== "video") return linkInfoForAI(await loadLinkContext(url));
+  if (linkKindOf(url) !== "video") return linkInfoForAI(await loadLinkContext(url, { archiveFallback: true }));
 
   // Videos: metadata only — no need to wait for the captions.
   const ytdlPath = getytdlPath();

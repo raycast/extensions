@@ -4,10 +4,13 @@ import { LinkContext } from "../src/lib/link-context";
 vi.mock("../src/lib/sources/video", () => ({ loadVideoLink: vi.fn() }));
 vi.mock("../src/lib/sources/post", () => ({ loadPostLink: vi.fn() }));
 vi.mock("../src/lib/sources/page", () => ({ loadPageLink: vi.fn() }));
+vi.mock("../src/lib/sources/archive", () => ({ loadArchivedPage: vi.fn() }));
 
 import { loadVideoLink } from "../src/lib/sources/video";
 import { loadPostLink } from "../src/lib/sources/post";
 import { loadPageLink } from "../src/lib/sources/page";
+import { loadArchivedPage } from "../src/lib/sources/archive";
+import { LinkLoadError } from "../src/lib/link-context";
 import { linkKindOf, loadLinkContext } from "../src/lib/link-loader";
 
 const ctx = (kind: LinkContext["kind"], withBody = true): LinkContext => ({
@@ -26,6 +29,12 @@ beforeEach(() => {
   vi.mocked(loadVideoLink).mockReset().mockResolvedValue(ctx("video"));
   vi.mocked(loadPostLink).mockReset().mockResolvedValue(ctx("post"));
   vi.mocked(loadPageLink).mockReset().mockResolvedValue(ctx("page"));
+  vi.mocked(loadArchivedPage)
+    .mockReset()
+    .mockResolvedValue({
+      ...ctx("page"),
+      archive: { viewUrl: "https://web.archive.org/web/1/u", savedOn: "2026-09-29" },
+    });
 });
 
 describe("linkKindOf", () => {
@@ -88,5 +97,45 @@ describe("loadLinkContext", () => {
     await loadLinkContext("https://example.com/empty");
     await loadLinkContext("https://example.com/empty");
     expect(loadPageLink).toHaveBeenCalledTimes(2);
+  });
+
+  it("reads the Internet Archive's copy when asked, and caches it apart from the live page", async () => {
+    const archived = await loadLinkContext("https://example.com/archived", { archived: true });
+    expect(archived.archive?.savedOn).toBe("2026-09-29");
+    expect(loadPageLink).not.toHaveBeenCalled();
+    await loadLinkContext("https://example.com/archived", { archived: true });
+    expect(loadArchivedPage).toHaveBeenCalledTimes(1);
+    await loadLinkContext("https://example.com/archived");
+    expect(loadPageLink).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back to the archived copy for the AI tools when a page refuses or has no text", async () => {
+    vi.mocked(loadPageLink).mockRejectedValueOnce(new LinkLoadError("blocked", "archive"));
+    expect((await loadLinkContext("https://example.com/f1", { archiveFallback: true })).archive).toBeDefined();
+    vi.mocked(loadPageLink).mockResolvedValueOnce(ctx("page", false));
+    expect((await loadLinkContext("https://example.com/f2", { archiveFallback: true })).archive).toBeDefined();
+
+    // The chat, reading the live page, doesn't get the tools' archived copy from the cache.
+    vi.mocked(loadPageLink).mockResolvedValueOnce(ctx("page"));
+    expect((await loadLinkContext("https://example.com/f1")).archive).toBeUndefined();
+  });
+
+  it("keeps the live page's own answer when the archive has nothing either", async () => {
+    vi.mocked(loadArchivedPage).mockRejectedValue(
+      new LinkLoadError("The Internet Archive has no saved copy of this page."),
+    );
+    vi.mocked(loadPageLink).mockRejectedValueOnce(new LinkLoadError("blocked", "archive"));
+    await expect(loadLinkContext("https://example.com/f3", { archiveFallback: true })).rejects.toThrow("blocked");
+    vi.mocked(loadPageLink).mockResolvedValueOnce(ctx("page", false));
+    const unreadable = await loadLinkContext("https://example.com/f4", { archiveFallback: true });
+    expect(unreadable.archive).toBeUndefined();
+  });
+
+  it("never falls back for a refusal of a local address", async () => {
+    vi.mocked(loadPageLink).mockRejectedValueOnce(
+      new Error("Won't read router.local: it's a local or private network address."),
+    );
+    await expect(loadLinkContext("https://example.com/f5", { archiveFallback: true })).rejects.toThrow("local");
+    expect(loadArchivedPage).not.toHaveBeenCalled();
   });
 });

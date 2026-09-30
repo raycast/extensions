@@ -100,15 +100,27 @@ describe("loadPageLink", () => {
     });
   });
 
-  it("explains a site that won't let apps read it", async () => {
+  it("explains a site that won't let apps read it, and offers the archived copy", async () => {
     vi.mocked(safeFetch).mockRejectedValueOnce(new HttpError(403, "www.ft.com"));
-    await expect(loadPageLink("https://www.ft.com/content/x", {})).rejects.toThrow(LinkLoadError);
+    const error = await loadPageLink("https://www.ft.com/content/x", {}).catch((e) => e);
+    expect(error).toBeInstanceOf(LinkLoadError);
+    expect(error).toMatchObject({
+      fix: "archive",
+      message:
+        "www.ft.com didn't let The Downloader read this page (HTTP 403). It may need a login or block apps — try the Internet Archive's copy, or open it in your browser.",
+    });
   });
 
-  it("words the refusal for people", async () => {
-    vi.mocked(safeFetch).mockRejectedValueOnce(new HttpError(403, "www.ft.com"));
-    await expect(loadPageLink("https://www.ft.com/content/x", {})).rejects.toThrow(
-      "www.ft.com didn't let The Downloader read this page (HTTP 403). It may need a login or block apps — open it in your browser instead.",
-    );
+  it("offers the archived copy of a page that's gone", async () => {
+    vi.mocked(safeFetch).mockRejectedValueOnce(new HttpError(404, "example.com"));
+    await expect(loadPageLink("https://example.com/old", {})).rejects.toMatchObject({
+      fix: "archive",
+      message: "This page is gone (HTTP 404 from example.com). The Internet Archive may have a saved copy.",
+    });
+  });
+
+  it("passes other failures on as they are", async () => {
+    vi.mocked(safeFetch).mockRejectedValueOnce(new HttpError(500, "example.com"));
+    await expect(loadPageLink("https://example.com/x", {})).rejects.toThrow("HTTP 500 from example.com");
   });
 });

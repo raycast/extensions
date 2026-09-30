@@ -139,6 +139,13 @@ describe("safeFetch", () => {
     expect(response.body.toString()).toBe(`pinned.test:${port}`);
   });
 
+  it("can name itself instead of looking like a browser", async () => {
+    routes["/ua"] = (res, req) => res.writeHead(200, { "content-type": "text/plain" }).end(req.headers["user-agent"]);
+    const named = await safeFetch(`http://s.test:${port}/ua`, { ...onlyLoopback, userAgent: "TheDownloader (test)" });
+    expect(named.body.toString()).toBe("TheDownloader (test)");
+    expect((await safeFetch(`http://s.test:${port}/ua`, onlyLoopback)).body.toString()).toMatch(/Safari/);
+  });
+
   it("only reads http and https", async () => {
     await expect(safeFetch("file:///etc/hosts")).rejects.toThrow(/http/);
     await expect(safeFetch("ftp://example.com/")).rejects.toThrow(/http/);

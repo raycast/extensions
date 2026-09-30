@@ -25,5 +25,6 @@ const LANGUAGE_RE = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/;
 export default async function tool(input: Input) {
   const language = input.language && LANGUAGE_RE.test(input.language) ? input.language : "auto";
   // loadLinkContext rejects anything that isn't an http(s) link before a tool runs.
-  return linkTextForAI(await loadLinkContext(input.url, { language }));
+  // Pages that refuse apps or have no text fall back to the Internet Archive's copy, labelled as such.
+  return linkTextForAI(await loadLinkContext(input.url, { language, archiveFallback: true }));
 }

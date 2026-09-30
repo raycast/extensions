@@ -60,13 +60,19 @@ describe("read-link tool", () => {
       videoToLink("https://youtu.be/abc", video, { segments: [{ start: 65, text: "liftoff" }] }),
     );
     const text = await readLink({ url: "https://youtu.be/abc" });
-    expect(loadLinkContext).toHaveBeenCalledWith("https://youtu.be/abc", { language: "auto" });
+    expect(loadLinkContext).toHaveBeenCalledWith("https://youtu.be/abc", { language: "auto", archiveFallback: true });
     expect(text).toContain("## Transcript\n[1:05] liftoff");
     expect(text).toContain("[4:05](https://www.youtube.com/watch?v=abc&t=245s)");
     await readLink({ url: "https://youtu.be/abc", language: "pt-BR" });
-    expect(loadLinkContext).toHaveBeenLastCalledWith("https://youtu.be/abc", { language: "pt-BR" });
+    expect(loadLinkContext).toHaveBeenLastCalledWith("https://youtu.be/abc", {
+      language: "pt-BR",
+      archiveFallback: true,
+    });
     await readLink({ url: "https://youtu.be/abc", language: "../../etc" });
-    expect(loadLinkContext).toHaveBeenLastCalledWith("https://youtu.be/abc", { language: "auto" });
+    expect(loadLinkContext).toHaveBeenLastCalledWith("https://youtu.be/abc", {
+      language: "auto",
+      archiveFallback: true,
+    });
   });
 
   it("reads an article without moment links", async () => {
@@ -104,7 +110,7 @@ describe("get-link-info tool", () => {
   it("describes a page without its text", async () => {
     loadLinkContext.mockResolvedValue(article);
     const text = await getLinkInfo({ url: "example.com/news/bridges" });
-    expect(loadLinkContext).toHaveBeenCalledWith("https://example.com/news/bridges");
+    expect(loadLinkContext).toHaveBeenCalledWith("https://example.com/news/bridges", { archiveFallback: true });
     expect(text).toContain("A web page on Example News.");
     expect(text).not.toContain("steel cables");
   });

@@ -112,6 +112,19 @@ address."
 in the first 4 KB, else UTF-8 (also when the label is unknown). Tested with a
 windows-1250 Czech article and ISO-8859-2 text.
 
+## 2b. The Internet Archive's copy (added 2026-10-01)
+
+When a page refuses the reader (HTTP 401/402/403/429/451 — bot walls, logins),
+is gone (404/410) or has no readable text, the chat offers **Read Archived
+Copy**: the Wayback Machine's latest snapshot saved with HTTP 200, fetched raw
+(`id_`, no toolbar) through `safeFetch`, read like the live page and labelled
+"Read from the Internet Archive's copy saved <date>" (also in the prompt).
+**Read Live Page** switches back; the chat key stays the page's own. The AI
+tools fall back to the copy automatically, labelled the same way. Paywall-
+removal services (archive.is, removepaywall.com, Freedium) are deliberately
+not used: they serve paid articles without the publisher's consent, while the
+Wayback Machine honours publishers' opt-outs.
+
 Loading and errors in the chat keep today's pattern: **Retry**, **Open Link**,
 and **Open Extension Preferences** where it helps.
 

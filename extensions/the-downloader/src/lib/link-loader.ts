@@ -1,7 +1,8 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { resolveBrowser } from "./browsers.js";
 import { detectSource } from "./detect.js";
-import { LinkContext, LinkKind, hasBody } from "./link-context.js";
+import { LinkContext, LinkKind, LinkLoadError, hasBody } from "./link-context.js";
+import { loadArchivedPage } from "./sources/archive.js";
 import { loadPageLink } from "./sources/page.js";
 import { loadPostLink } from "./sources/post.js";
 import { loadVideoLink } from "./sources/video.js";
@@ -34,13 +35,40 @@ function cookiesFromBrowser(): string | undefined {
 }
 
 /**
+ * The live page, or — with `fallback`, when it refuses (a bot wall, a login,
+ * a dead link) or has no readable text — the Internet Archive's copy. A
+ * refused local address never falls back: it isn't a LinkLoadError.
+ */
+async function readPage(url: string, signal: AbortSignal | undefined, fallback: boolean): Promise<LinkContext> {
+  let live: LinkContext;
+  try {
+    live = await loadPageLink(url, { signal });
+  } catch (error) {
+    if (!fallback || !(error instanceof LinkLoadError) || error.fix !== "archive") throw error;
+    return loadArchivedPage(url, { signal }).catch(() => {
+      throw error;
+    });
+  }
+  if (!fallback || hasBody(live)) return live;
+  return loadArchivedPage(url, { signal }).catch(() => live);
+}
+
+/**
  * Everything the chat can know about `url`. Rejects anything that isn't an
  * http(s) link before a tool or a request sees it, so a value such as
  * `--batch-file=…` can never reach yt-dlp or gallery-dl as an option.
  */
 export async function loadLinkContext(
   raw: string,
-  options: { signal?: AbortSignal; language?: string; force?: boolean } = {},
+  options: {
+    signal?: AbortSignal;
+    language?: string;
+    force?: boolean;
+    /** Pages: read the Internet Archive's saved copy instead of the live page. */
+    archived?: boolean;
+    /** Pages: when the live page refuses or has no text, try the Internet Archive's copy (for the AI tools). */
+    archiveFallback?: boolean;
+  } = {},
 ): Promise<LinkContext> {
   const trimmed = raw.trim();
   if (!trimmed || !isValidUrl(trimmed)) throw new Error("Invalid URL — provide an http(s) link.");
@@ -48,7 +76,8 @@ export async function loadLinkContext(
   const kind = linkKindOf(url);
   if (kind === "spotify") throw new Error("Spotify links aren't supported in chat yet.");
 
-  const language = kind === "video" ? options.language?.trim() || "auto" : "-";
+  const archived = kind === "page" && !!options.archived;
+  const language = kind === "video" ? options.language?.trim() || "auto" : archived ? "archive" : "-";
   const key = `${kind}|${language}|${url}`;
   if (!options.force) {
     const raw = cache.get(key);
@@ -67,12 +96,15 @@ export async function loadLinkContext(
       ? await loadVideoLink(url, { signal: options.signal, language })
       : kind === "post"
         ? await loadPostLink(url, { signal: options.signal, cookiesFromBrowser: cookiesFromBrowser() })
-        : await loadPageLink(url, { signal: options.signal });
+        : archived
+          ? await loadArchivedPage(url, { signal: options.signal })
+          : await readPage(url, options.signal, !!options.archiveFallback);
 
   // Without a body, read again next time: captions may have been rate-limited, or a login added since.
   if (hasBody(ctx)) {
     try {
-      cache.set(key, JSON.stringify(ctx));
+      // An archived copy the tools fell back to is kept apart from the live page.
+      cache.set(ctx.archive ? `${kind}|archive|${url}` : key, JSON.stringify(ctx));
     } catch {
       /* cache full or unavailable — not worth failing over */
     }
