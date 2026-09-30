@@ -45,7 +45,7 @@ See the [usage and parsing guide](docs/usage-and-parsing-guide.md) for the compl
 - Calendar events and Reminder items cannot be mixed in one submission.
 - A comma is treated as a batch separator only when the following clause begins with a date or time cue.
 - If a selected Calendar or Reminder list no longer exists, creation stops instead of falling back to another list.
-- If the native helper times out, its outcome is marked unconfirmed and the same retry requires an explicit check first.
+- If the native helper times out, its outcome is marked unconfirmed and retrying the same item requires an explicit check first, even after reopening the command.
 - Recurring schedules currently support Apple Calendar only.
 - A manual location overrides parsed locations for every item in the current submission.
 

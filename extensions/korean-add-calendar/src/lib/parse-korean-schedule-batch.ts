@@ -94,6 +94,44 @@ export function parseKoreanScheduleBatch(input: string, options: ParseOptions = 
   };
 }
 
+export function parseKoreanScheduleBatchWithRetrySnapshot(
+  input: string,
+  retrySnapshot: BatchRetrySnapshot | undefined,
+  options: ParseOptions = {},
+): ParseBatchResult {
+  const parsed = parseKoreanScheduleBatch(input, options);
+  if (!retrySnapshot || parsed.items.length === 0) {
+    return parsed;
+  }
+
+  const snapshotItemsByInput = new Map<string, ParsedBatchItem[]>();
+  for (const item of retrySnapshot.batch.items) {
+    const key = normalizeRetryInput(item.input);
+    const matches = snapshotItemsByInput.get(key) ?? [];
+    matches.push(item);
+    snapshotItemsByInput.set(key, matches);
+  }
+
+  return {
+    ...parsed,
+    items: parsed.items.map((item) => {
+      const key = normalizeRetryInput(item.input);
+      const snapshotItem = snapshotItemsByInput.get(key)?.shift();
+      if (!snapshotItem) {
+        return item;
+      }
+      return {
+        ...snapshotItem,
+        input: item.input,
+        value: {
+          ...snapshotItem.value,
+          source: item.input,
+        },
+      };
+    }),
+  };
+}
+
 function splitIntoParts(input: string): string[] {
   const parts: string[] = [];
   let cursor = 0;
@@ -195,4 +233,8 @@ export function buildBatchRetrySnapshot(items: ParsedBatchItem[]): BatchRetrySna
 
 function buildTimeCue(date: Date): string {
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function normalizeRetryInput(input: string): string {
+  return input.trim().replace(/\s+/gu, " ");
 }

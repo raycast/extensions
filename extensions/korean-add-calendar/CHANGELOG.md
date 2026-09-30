@@ -38,6 +38,9 @@
 - Keep resolved dates stable when retrying failed batch items
 - Require duplicate-risk confirmation even after editing other failed items
 - Preserve EventKit error domain and code when a save fails
+- Keep unresolved creation warnings tied to affected items across command launches
+- Keep unchanged recurring retry clauses anchored when another clause is edited
+- Prevent overlapping form submissions from creating duplicate items
 
 ## [Initial Version] - 2026-03-16
 

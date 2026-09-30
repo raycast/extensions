@@ -10,7 +10,7 @@ import {
   showToast,
   type LaunchProps,
 } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   createAppleCalendarEvent,
@@ -36,11 +36,17 @@ import {
   buildBatchRetrySnapshot,
   firstBatchParseResult,
   MAX_BATCH_ITEMS,
-  parseKoreanScheduleBatch,
+  parseKoreanScheduleBatchWithRetrySnapshot,
   ParsedBatchError,
   ParsedBatchItem,
 } from "./lib/parse-korean-schedule-batch";
 import { ParsedRecurrence, ParsedSchedule } from "./lib/parse-korean-schedule";
+import {
+  buildCreationOutcomeKey,
+  partitionUnconfirmedCreationKeys,
+  parseStoredUnconfirmedCreationKeys,
+  UNKNOWN_CREATION_OUTCOME_KEY,
+} from "./lib/creation-outcome-guard";
 
 type SubmitTarget = "calendar" | "reminder";
 
@@ -61,6 +67,7 @@ const TARGET_TYPE_STORAGE_KEY = "selectedSubmitTarget";
 const RECURRENCE_END_TYPE_STORAGE_KEY = "recurrenceEndType";
 const RECURRENCE_COUNT_STORAGE_KEY = "recurrenceCount";
 const RECURRENCE_UNTIL_STORAGE_KEY = "recurrenceUntilIso";
+const UNCONFIRMED_CREATION_KEYS_STORAGE_KEY = "unconfirmedCreationKeys";
 const KOREAN_INPUT_EXAMPLE = "다음주 화요일 오후 3시 반에 강남에서 팀 미팅";
 
 function persistPreference(key: string, value?: string): void {
@@ -72,6 +79,23 @@ function persistPreference(key: string, value?: string): void {
       message: error instanceof Error ? error.message : String(error),
     }),
   );
+}
+
+async function persistUnconfirmedCreationKeys(keys: string[]): Promise<void> {
+  const operation = keys.length
+    ? LocalStorage.setItem(UNCONFIRMED_CREATION_KEYS_STORAGE_KEY, JSON.stringify(keys))
+    : LocalStorage.removeItem(UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
+  try {
+    await operation;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to save duplicate-risk warning",
+      message: `Keep this command open and check Calendar or Reminders before retrying. ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    });
+  }
 }
 
 export default function Command(props: LaunchProps<{ arguments: { sentence?: string } }>) {
@@ -95,13 +119,11 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
   const [recurrenceCount, setRecurrenceCount] = useState("10");
   const [recurrenceUntil, setRecurrenceUntil] = useState<Date | null>(defaultRecurrenceUntil());
   const [retrySnapshot, setRetrySnapshot] = useState<BatchRetrySnapshot | undefined>();
-  const [unconfirmedItemCount, setUnconfirmedItemCount] = useState(0);
+  const [unconfirmedCreationKeys, setUnconfirmedCreationKeys] = useState<string[]>([]);
+  const submissionInProgress = useRef(false);
 
   const parsedBatch = useMemo(() => {
-    const normalizedSentence = sentence.trim();
-    return retrySnapshot?.sentence === normalizedSentence
-      ? retrySnapshot.batch
-      : parseKoreanScheduleBatch(normalizedSentence);
+    return parseKoreanScheduleBatchWithRetrySnapshot(sentence, retrySnapshot);
   }, [retrySnapshot, sentence]);
   const parseResult = useMemo(() => firstBatchParseResult(parsedBatch), [parsedBatch]);
   const batchIntent = useMemo(() => summarizeBatchIntent(parsedBatch.items), [parsedBatch.items]);
@@ -277,10 +299,27 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
     }
   }, []);
 
+  const loadUnconfirmedCreationKeys = useCallback(async () => {
+    try {
+      const cachedValue = await LocalStorage.getItem<string>(UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
+      setUnconfirmedCreationKeys(parseStoredUnconfirmedCreationKeys(cachedValue));
+    } catch (error) {
+      setUnconfirmedCreationKeys([UNKNOWN_CREATION_OUTCOME_KEY]);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not verify the previous creation outcome",
+        message: `Check Calendar or Reminders before creating items. ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      });
+    }
+  }, []);
+
   useEffect(() => {
     let isActive = true;
     void (async () => {
       try {
+        await loadUnconfirmedCreationKeys();
         await loadPreferences();
       } catch (error) {
         await showToast({
@@ -298,7 +337,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
     return () => {
       isActive = false;
     };
-  }, [loadPreferences]);
+  }, [loadPreferences, loadUnconfirmedCreationKeys]);
 
   useEffect(() => {
     if (!hasLoadedPreferences) {
@@ -350,6 +389,19 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
   }, [recurrenceMaxTime, recurrenceMinTime, recurrenceUntil, persistRecurrenceUntil]);
 
   async function handleSubmit(values: FormValues, options: { openCalendarAfterCreate: boolean }) {
+    if (submissionInProgress.current) {
+      return;
+    }
+
+    submissionInProgress.current = true;
+    try {
+      await submitValues(values, options);
+    } finally {
+      submissionInProgress.current = false;
+    }
+  }
+
+  async function submitValues(values: FormValues, options: { openCalendarAfterCreate: boolean }) {
     if (values.targetType === "calendar" && !values.calendarId) {
       await showToast({
         style: Toast.Style.Failure,
@@ -368,11 +420,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       return;
     }
 
-    const normalizedSentence = values.sentence.trim();
-    const submitBatch =
-      retrySnapshot?.sentence === normalizedSentence
-        ? retrySnapshot.batch
-        : parseKoreanScheduleBatch(normalizedSentence);
+    const submitBatch = parseKoreanScheduleBatchWithRetrySnapshot(values.sentence, retrySnapshot);
     if (submitBatch.tooManyItems) {
       await showToast({
         style: Toast.Style.Failure,
@@ -445,11 +493,29 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       return;
     }
 
-    if (unconfirmedItemCount > 0) {
+    const submissions = preparedItems.map((prepared) => ({
+      ...prepared,
+      creationOutcomeKey: buildCreationOutcomeKey({
+        targetType: values.targetType,
+        parsed: prepared.parsed,
+        recurrence: prepared.recurrence,
+      }),
+    }));
+    const unconfirmedKeyPartition = partitionUnconfirmedCreationKeys(
+      unconfirmedCreationKeys,
+      submissions.map((submission) => submission.creationOutcomeKey),
+    );
+    const matchingUnconfirmedKeys = unconfirmedKeyPartition.matching;
+    const remainingUnconfirmedKeys = unconfirmedKeyPartition.remaining;
+
+    if (matchingUnconfirmedKeys.length > 0) {
+      const matchingItemCount = matchingUnconfirmedKeys.includes(UNKNOWN_CREATION_OUTCOME_KEY)
+        ? 1
+        : matchingUnconfirmedKeys.length;
       const shouldRetry = await confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Previous creation outcome is unknown",
-        message: `${unconfirmedItemCount} previous item${unconfirmedItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.`,
+        message: `${matchingItemCount} matching item${matchingItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.`,
         primaryAction: {
           title: "Retry After Checking",
           style: Alert.ActionStyle.Default,
@@ -462,18 +528,19 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       if (!shouldRetry) {
         return;
       }
-      setUnconfirmedItemCount(0);
+      setUnconfirmedCreationKeys(remainingUnconfirmedKeys);
+      await persistUnconfirmedCreationKeys(remainingUnconfirmedKeys);
     }
 
     setIsSubmitting(true);
     try {
-      const failures: Array<{ item: ParsedBatchItem; message: string }> = [];
-      const unknownOutcomes: Array<{ item: ParsedBatchItem; message: string }> = [];
-      const retryableOutcomes: Array<{ item: ParsedBatchItem; message: string }> = [];
+      const failures: Array<{ item: ParsedBatchItem; message: string; creationOutcomeKey: string }> = [];
+      const unknownOutcomes: Array<{ item: ParsedBatchItem; message: string; creationOutcomeKey: string }> = [];
+      const retryableOutcomes: Array<{ item: ParsedBatchItem; message: string; creationOutcomeKey: string }> = [];
       let successCount = 0;
       let lastCreatedCalendarStart: Date | undefined;
 
-      for (const { item, parsed, recurrence } of preparedItems) {
+      for (const { item, parsed, recurrence, creationOutcomeKey } of submissions) {
         try {
           if (values.targetType === "reminder") {
             await createAppleReminder(parsed, {
@@ -494,6 +561,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           const prefix = submitBatch.isBatch ? `[${item.input}] ` : "";
           const outcome = {
             item,
+            creationOutcomeKey,
             message: `${prefix}${error instanceof Error ? error.message : String(error)}`,
           };
           retryableOutcomes.push(outcome);
@@ -523,7 +591,11 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
         setRetrySnapshot(nextRetrySnapshot);
         setSentence(nextRetrySnapshot.sentence);
-        setUnconfirmedItemCount(unknownOutcomes.length);
+        const nextUnconfirmedKeys = [
+          ...new Set([...remainingUnconfirmedKeys, ...unknownOutcomes.map((outcome) => outcome.creationOutcomeKey)]),
+        ];
+        setUnconfirmedCreationKeys(nextUnconfirmedKeys);
+        await persistUnconfirmedCreationKeys(nextUnconfirmedKeys);
         await showToast({
           style: Toast.Style.Failure,
           title:
@@ -802,7 +874,7 @@ function buildParseStatusText({
   parseResult,
 }: {
   sentence: string;
-  parsedBatch: ReturnType<typeof parseKoreanScheduleBatch>;
+  parsedBatch: ReturnType<typeof parseKoreanScheduleBatchWithRetrySnapshot>;
   parseResult: ReturnType<typeof firstBatchParseResult>;
 }): string {
   if (!sentence.trim()) {

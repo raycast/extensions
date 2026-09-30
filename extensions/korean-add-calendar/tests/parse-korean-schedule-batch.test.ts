@@ -5,6 +5,7 @@ import {
   buildBatchRetrySnapshot,
   MAX_BATCH_ITEMS,
   parseKoreanScheduleBatch,
+  parseKoreanScheduleBatchWithRetrySnapshot,
 } from "../src/lib/parse-korean-schedule-batch";
 
 describe("parseKoreanScheduleBatch", () => {
@@ -163,5 +164,19 @@ describe("parseKoreanScheduleBatch", () => {
       location: "사무실",
     });
     expect(reparsed.items[0]?.value.start).toEqual(new Date(2026, 1, 20, 0, 0, 0, 0));
+  });
+
+  it("keeps an unchanged recurring retry item fixed when another clause is edited", () => {
+    const initial = parseKoreanScheduleBatch("매일 오후 3시 점검, 모레 오후 5시 통화", { now: baseNow });
+    const snapshot = buildBatchRetrySnapshot(initial.items);
+    const editedSentence = snapshot.sentence.replace("통화", "고객 통화");
+
+    const reparsed = parseKoreanScheduleBatchWithRetrySnapshot(editedSentence, snapshot, {
+      now: new Date(2026, 1, 18, 16, 0, 0, 0),
+    });
+
+    expect(reparsed.items[0]?.value.start).toEqual(initial.items[0]?.value.start);
+    expect(reparsed.items[0]?.value.recurrence).toEqual({ frequency: "daily" });
+    expect(reparsed.items[1]?.value.title).toBe("고객 통화");
   });
 });

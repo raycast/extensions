@@ -143,6 +143,8 @@ Reminders store the parsed due date. All-day reminders use date components only;
 
 If a previously selected Calendar or Reminder list no longer exists, the selection is cleared and the user must explicitly choose another list. A transient list-loading failure does not erase the saved selection. The extension never silently writes to another target.
 
+If native creation times out, the extension keeps an item-specific unconfirmed-outcome warning across command launches. Retrying the same item requires confirmation after checking Calendar or Reminders for a possible duplicate; creating a different item does not clear that warning.
+
 ## Current Limitations
 
 - Recurring Reminders are not yet supported.
