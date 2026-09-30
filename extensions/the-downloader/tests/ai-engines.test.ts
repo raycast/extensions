@@ -47,12 +47,16 @@ describe("Apple fm", () => {
   const NOT_AGREED =
     "\u001b[38;2;255;107;128mYOU HAVE NOT AGREED TO THE APPLE FOUNDATION MODELS CLI LEGAL NOTICE & TERMS.\nAgreeing to the Apple Foundation Models CLI Legal Notice & Terms applies to every user on the machine, so it must be run as a privileged user (e.g. 'sudo fm license').\n\u001b[0m";
 
-  it("builds `fm respond` arguments: instructions, streaming, then the prompt", () => {
+  it("builds `fm respond` arguments: instructions, streaming, guardrails for provided text, then the prompt", () => {
+    // Summarizing a transcript is a content transformation; the default level
+    // refused an ordinary Japanese history video mid-answer (macOS 27).
     expect(buildFmArgs("be brief", "Question: hi")).toEqual([
       "respond",
       "--instructions",
       "be brief",
       "--stream",
+      "--guardrails",
+      "permissive-content-transformations",
       "Question: hi",
     ]);
   });

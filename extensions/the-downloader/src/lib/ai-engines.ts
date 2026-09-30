@@ -114,6 +114,14 @@ export function raycastAvailable(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
+ * Apple's guardrail level for transforming text the user provides (summarizing,
+ * extracting, answering from it) — what every chat request is. The default
+ * level refused ordinary videos: taking notes on a Japanese history video
+ * stopped mid-answer with "The model's safety guardrails were triggered."
+ */
+const FM_GUARDRAILS = "permissive-content-transformations";
+
+/**
  * `fm respond` arguments. `--stream` is fm's default but is spelled out so the
  * text keeps arriving as it's generated. fm has one model, the on-device
  * `system` one (`--model` accepts nothing else on macOS 27), so there's no
@@ -121,7 +129,7 @@ export function raycastAvailable(): boolean {
  * with text, never a dash.
  */
 export function buildFmArgs(instructions: string, prompt: string): string[] {
-  return ["respond", "--instructions", instructions, "--stream", prompt];
+  return ["respond", "--instructions", instructions, "--stream", "--guardrails", FM_GUARDRAILS, prompt];
 }
 
 const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, "g");
