@@ -1,13 +1,18 @@
 import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { useState } from "react";
+import { searchCondition } from "./search";
 import { OneNoteItem, PAGE, types } from "./types";
 import { ONENOTE_MERGED_DB } from "./database";
 import { getAncestorsStr, getIcon, getParentTitle, newNote, openNote, parseDatetime } from "./utils";
 
 export function getListItems(query: string, elt: OneNoteItem | undefined = undefined) {
   const [sort, setSort] = useState(0);
-  const { data, isLoading, permissionView } = useSQL<OneNoteItem>(ONENOTE_MERGED_DB, query);
+  const [searchText, setSearchText] = useState("");
+  const { data, isLoading, permissionView } = useSQL<OneNoteItem>(
+    ONENOTE_MERGED_DB,
+    query.replace("ORDER BY", `${searchCondition(searchText)} ORDER BY`)
+  );
   const results = data;
 
   if (permissionView) {
@@ -23,6 +28,9 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
 
   return (
     <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      throttle={true}
       navigationTitle={context}
       isLoading={isLoading}
       searchBarPlaceholder={placeholderStr}
@@ -58,7 +66,7 @@ function quoteSql(value: string) {
   return value.replaceAll("'", "''");
 }
 
-function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined }): JSX.Element {
+function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined }) {
   return (
     <>
       {props.items.map((item) => {
@@ -134,7 +142,7 @@ export function Directory(props: { elt?: OneNoteItem }) {
     }
   }
   // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC;`;
-  const query = `SELECT ${LIST_COLUMNS} FROM Entities ORDER BY RecentTime DESC;`;
+  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC;`;
   return getListItems(query);
 }
 

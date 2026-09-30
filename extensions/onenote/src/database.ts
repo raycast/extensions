@@ -1,5 +1,6 @@
 import { environment, LocalStorage, Cache } from "@raycast/api";
 import { statSync, writeFileSync } from "fs";
+import { findSearchIndexes } from "./search";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -7,27 +8,13 @@ import initSqlJs, { Database, SqlJsStatic } from "sql.js";
 
 let SQL: SqlJsStatic;
 
-const ONENOTE_FULL_SEARCH_PATH = resolve(
-  homedir(),
-  "Library/Containers/com.microsoft.onenote.mac/Data/Library/Application Support/Microsoft User Data/OneNote/15.0/FullTextSearchIndex"
-);
 export const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenote-data.db");
 
-let last_update_time = 0;
-
 export const create_or_update_db = async (force_update = false) => {
-  const now = Date.now();
-
   if (!SQL) {
     SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
   }
 
-  // to cope with successive calls
-  if (now - last_update_time < 300) {
-    return true;
-  }
-
-  last_update_time = Date.now();
   let lastOneNoteModification = (await LocalStorage.getItem<number>("onenote-db-time")) as number;
   if (lastOneNoteModification == undefined) lastOneNoteModification = 0;
   let NEEDUPDATE = force_update;
@@ -38,19 +25,27 @@ export const create_or_update_db = async (force_update = false) => {
 
   // Search for OneNote databases:
   let mostRecent = 0;
-  const db_files = await readdir(ONENOTE_FULL_SEARCH_PATH);
-  for (const file of db_files) {
-    if (file.indexOf(".db") != -1 && file.indexOf("journal") == -1) {
-      const filepath = resolve(ONENOTE_FULL_SEARCH_PATH, file);
-      ALL_DB_PATHS.push(filepath);
-      const mtime = statSync(filepath).mtimeMs;
-      if (mtime > mostRecent) mostRecent = mtime;
+  const indexPaths = await findSearchIndexes(homedir());
+  for (const indexPath of indexPaths) {
+    const db_files = await readdir(indexPath);
+    for (const file of db_files) {
+      if (file.endsWith(".db")) {
+        const filepath = resolve(indexPath, file);
+        ALL_DB_PATHS.push(filepath);
+        const mtime = statSync(filepath).mtimeMs;
+        if (mtime > mostRecent) mostRecent = mtime;
+      }
     }
+  }
+
+  if (ALL_DB_PATHS.length === 0) {
+    throw new Error(
+      "OneNote has no local search databases. Open OneNote, sign in, and sync your notebooks, then retry."
+    );
   }
 
   if (mostRecent > lastOneNoteModification) {
     NEEDUPDATE = true;
-    await LocalStorage.setItem("onenote-db-time", mostRecent);
   }
 
   try {
@@ -105,7 +100,7 @@ export const create_or_update_db = async (force_update = false) => {
   const results = db.exec("SELECT DISTINCT GOID, Title FROM Entities WHERE Type > 1");
   const cache = new Cache();
   cache.clear();
-  for (const result of results[0].values) {
+  for (const result of results[0]?.values ?? []) {
     cache.set(result[0] as string, result[1] as string);
   }
 
@@ -113,6 +108,7 @@ export const create_or_update_db = async (force_update = false) => {
   const buffer = Buffer.from(db.export());
 
   writeFileSync(ONENOTE_MERGED_DB, buffer);
+  await LocalStorage.setItem("onenote-db-time", mostRecent);
 
   // CLOSE DBs
   for (const _db of ALL_DB) {
