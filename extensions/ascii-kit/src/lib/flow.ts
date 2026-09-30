@@ -4,9 +4,11 @@ import { stack } from "./layout";
 import { displayWidth, padCenter, splitLines } from "./width";
 
 // ► and ▼ rather than ▶: ▶ has an emoji form that some renderers draw 2 columns wide.
-// A bare > only between spaces, and not before a number: `x >= 5`, `<div>` and `count > 0` stay
-// whole, `Draft > Review` and `Setup > 2FA` split.
-const SEPARATOR = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*|\s+>\s+(?![-+]?[$€£]?\.?\d[\d,.]*%?(?![\p{L}\d]))/u;
+// A bare > only between spaces, and not before a number or a number with a unit: `x >= 5`, `<div>`,
+// `count > 0` and `Storage > 5GB` stay whole, `Draft > Review` and `Setup > 2FA` split. It's a guess:
+// an arrow in a flow and a comparison in a step look the same.
+const QUANTITY = String.raw`[-+]?[$€£]?\.?\d[\d,.]*\s?(?:%|[kKMGTP]i?B|[kKMG]|ms|s|sec|min|h|hrs?|d|days?|px|x)?`;
+const SEPARATOR = new RegExp(String.raw`\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*|\s+>\s+(?!${QUANTITY}(?![\p{L}\d]))`, "u");
 
 /** Steps come from `A > B -> C → D` on one line, or one step per line (which can chain too). */
 export function parseFlow(input: string): string[] {

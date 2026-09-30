@@ -279,6 +279,11 @@ describe("flow", () => {
   it("splits a > between words on any line, one step per line or not", () => {
     expect(parseFlow("Draft > Review\nApproved")).toEqual(["Draft", "Review", "Approved"]);
     expect(parseFlow("Setup > 2FA > Done\nBudget > $5")).toEqual(["Setup", "2FA", "Done", "Budget > $5"]);
+    expect(parseFlow("Check Storage > 5GB\nLatency > 200 ms\nAlert")).toEqual([
+      "Check Storage > 5GB",
+      "Latency > 200 ms",
+      "Alert",
+    ]);
   });
   it("renders inline, across and down", () => {
     expect(renderFlowInline("Draft > Review > Merged")).toBe("Draft → Review → Merged");

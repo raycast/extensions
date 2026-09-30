@@ -3,6 +3,7 @@ import { FORMATS, detectKinds, formatUnusable } from "./formats";
 import {
   looksLikeTimeline,
   parseGantt,
+  parseTimeline,
   renderGantt,
   renderKanban,
   renderTimelineHorizontal,
@@ -57,6 +58,13 @@ describe("timeline", () => {
       ["09:00  ● Standup", "       │", "10:30  ● Review", "       ▼"].join("\n"),
     );
     expect(looksLikeTimeline("09:00 Standup\n10:30 Review")).toBe(true);
+  });
+
+  it("keeps a number at the start of a compact label in the label", () => {
+    expect(parseTimeline("Jan:20 tasks\nFeb:5 hires")).toEqual([
+      { when: "Jan", what: "20 tasks" },
+      { when: "Feb", what: "5 hires" },
+    ]);
   });
 
   it("reads compact date:label rows", () => {
