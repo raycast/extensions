@@ -87,6 +87,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "better-design",
+    title: "Better Design",
+    description:
+      "Design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key to paste.",
+    icon: "https://better-design.com/icon",
+    homepage: "https://better-design.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://better-design.com/api/mcp"],
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
@@ -184,6 +196,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "uvx",
       args: ["mcp-server-git"],
+    },
+  },
+  {
+    name: "gitdiagram",
+    title: "GitDiagram",
+    description:
+      "Architecture diagrams of public GitHub repositories: a written explanation of how a codebase is organized, its main components with their source paths, how they connect, and Mermaid source, plus a search of GitDiagram's existing diagrams and explainer-video transcripts. Read-only remote Streamable HTTP server at https://gitdiagram.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/ahmedkhaleel2004/gitdiagram/main/plugins/gitdiagram/assets/logo.png",
+    homepage: "https://gitdiagram.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://gitdiagram.com/mcp"],
     },
   },
   {
@@ -1185,6 +1209,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.smart-me.com/mcp"],
     },
   },
+  {
+    name: "audiopod",
+    title: "AudioPod AI",
+    description:
+      "Audio AI as tools: text-to-speech in 200+ languages, voice cloning, voice conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server reached through an `mcp-remote` bridge and authenticated with an AudioPod API key.",
+    icon: "https://audiopod.ai/logo/logo.png",
+    homepage: "https://docs.audiopod.ai/sdks/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.audiopod.ai", "--header", "X-API-Key:${AUDIOPOD_API_KEY}"],
+      env: {
+        AUDIOPOD_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -1512,6 +1551,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "opus-growth",
+    title: "Opus Growth",
+    description:
+      "Manage ads from chat across Google, Meta, Microsoft, TikTok and LinkedIn: create and optimize campaigns, ad groups, creatives, audiences, bidding, keywords and extensions, plus reporting and SEO with Search Console, GA4, GTM, Google Business Profile and YouTube. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/opusgrowth/Opus-Growth-The-MCP-Connector-for-Ad-Platforms/main/assets/opus-growth-icon-orange-400.png",
+    homepage: "https://opus-growth.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.opus-growth.com/mcp"],
+    },
+  },
+  {
     name: "paperless-ngx",
     title: "Paperless-NGX",
     description:
@@ -1525,6 +1576,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "recordist",
+    title: "Recordist",
+    description:
+      "Search and read the meetings recorded by Recordist on your own computer: transcripts, action items and notes. Talks only to the app's loopback API or its local database; nothing leaves the machine.",
+    icon: "https://recordist.app/brand/mark.svg",
+    homepage: "https://github.com/recordist-app/gateway",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@recordist/gateway"],
     },
   },
   {

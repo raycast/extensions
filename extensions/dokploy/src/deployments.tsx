@@ -19,6 +19,7 @@ import DeploymentHistory, {
 } from "./deployment-history";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction } from "./service-actions";
 import ServiceLogs from "./service-logs";
+import { OpenWebsiteAction } from "./open-website";
 import { parseTrpcJsonResponse, trpcQueryUrl } from "./trpc";
 
 type DeploymentState =
@@ -335,6 +336,11 @@ export default function Deployments() {
                       }
                     />
                     <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
+                    <OpenWebsiteAction
+                      service={{ id: candidate.id, type: deployType, name: candidate.name }}
+                      url={candidate.url}
+                      headers={candidate.headers}
+                    />
                   </ActionPanel>
                 }
               />

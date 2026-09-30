@@ -1653,6 +1653,7 @@
 /extensions/memory                                                  @EvanZhouDev
 /extensions/memos                                                   @JakeLaoyu @LittleQuartZ @0xdhrv
 /extensions/mempool                                                 @dillionverma @xmok
+/extensions/memradar                                                @malcolm15
 /extensions/menubar-calendar                                        @koinzhang
 /extensions/menubar-weather                                         @koinzhang @koinzhang @fuksman @xilopaint
 /extensions/menucloak                                               @dans-huang
@@ -2527,7 +2528,7 @@
 /extensions/search-oeis                                             @omennia
 /extensions/search-private-npm-packages                             @HsiuCL
 /extensions/search-regexp                                           @musienkoyuriy @pernielsentikaer
-/extensions/search-router                                           @franzwilhelm @lacherogwu @raeperd @ahetzm @XeynQ4 @ridemountainpig @janosorcsik
+/extensions/search-router                                           @franzwilhelm @lacherogwu @raeperd @ahetzm @XeynQ4 @ridemountainpig @janosorcsik @okuuva
 /extensions/search-rubygems                                         @aleks @pernielsentikaer
 /extensions/search-shopify-liquid-documentation                     @maximedaraize
 /extensions/searchcaster                                            @gskril @pernielsentikaer

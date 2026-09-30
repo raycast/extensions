@@ -4,11 +4,14 @@ import { listDestinations } from "../api/client";
 import { destinationIcon } from "../lib/format";
 import { onlyFiles, uploadPaths } from "../lib/upload";
 import { showAktarFailure } from "../lib/errors";
+import { DELETE_AFTER_OPTIONS, parseExpiry, preferredExpiry } from "../lib/expiry";
 
 type Values = {
   files: string[];
   destinationId: string;
   folder: string;
+  /** Days as a string, "0" meaning never. */
+  deleteAfter: string;
 };
 
 type Props = {
@@ -29,9 +32,14 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
   });
   const defaultDestination = destinationId ?? destinations?.find((destination) => destination.isDefault)?.id;
 
-  const { handleSubmit, itemProps } = useForm<Values>({
-    // "/" is the bucket root with files keeping their names; empty means the path template.
-    initialValues: { files: initialFiles ?? [], folder: prefix === undefined ? "" : prefix || "/" },
+  const { handleSubmit, itemProps, setValidationError } = useForm<Values>({
+    initialValues: {
+      files: initialFiles ?? [],
+      // "/" is the bucket root with files keeping their names; empty means the path template.
+      folder: prefix === undefined ? "" : prefix || "/",
+      // Aktar can't auto-delete into a chosen folder, so a preset folder starts at Never.
+      deleteAfter: String(prefix === undefined ? preferredExpiry() : 0),
+    },
     validation: {
       files: (value) => (value && value.length > 0 ? undefined : "Pick at least one file"),
     },
@@ -42,10 +50,17 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         return false;
       }
       const folder = values.folder.trim();
+      const expires = parseExpiry(values.deleteAfter);
+      if (folder && expires) {
+        setValidationError("deleteAfter", "Not available with a folder. Clear Folder or pick Never.");
+        return false;
+      }
+      setValidationError("deleteAfter", undefined);
       const uploads = await uploadPaths(files, {
         destinationId: values.destinationId || undefined,
         // An empty folder means "use the destination's path template".
         prefix: folder ? folder : undefined,
+        expires,
       });
       if (uploads.length === 0) return false;
       if (onUploaded) {
@@ -87,9 +102,18 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       <Form.TextField
         title="Folder"
         placeholder="Optional, e.g. screenshots/2026"
-        info="Leave empty to name files with the destination's path template, like a drop on the menu bar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken."
+        info="Leave empty to name files with the destination's path template, like a drop on the menu bar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken. Can't be combined with Delete After."
         {...itemProps.folder}
       />
+      <Form.Dropdown
+        title="Delete After"
+        info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 or later with auto-delete set up for the destination (Delete after in Aktar's menu bar)."
+        {...itemProps.deleteAfter}
+      >
+        {DELETE_AFTER_OPTIONS.map((option) => (
+          <Form.Dropdown.Item key={option.days} value={String(option.days)} title={option.title} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }
