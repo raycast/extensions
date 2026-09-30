@@ -1,7 +1,7 @@
 import { open } from "@raycast/api";
 import { handleError } from "../shared/utils";
 
-interface Input {
+type Input = {
   /**
    * Chain ID of the network
    * example: ethereum, polygon, zero
@@ -25,7 +25,7 @@ interface Input {
    * example: 100
    */
   spendAmount?: number;
-}
+};
 
 /**
  * at least one of sellTokenId or buyTokenId should be provided

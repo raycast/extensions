@@ -1,14 +1,14 @@
 import { getZpiHeaders, ZPI_URL } from "../shared/api";
 import { handleError } from "../shared/utils";
 
-interface Input {
+type Input = {
   /**
    * token address on Ethereum
    * required parameter
    * example: 0x6b175474e89094c44da98b954eedeac495271d0f
    */
   tokenId: string;
-}
+};
 
 interface Asset {
   id: string;

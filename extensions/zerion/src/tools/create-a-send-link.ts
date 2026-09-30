@@ -1,7 +1,7 @@
 import { open } from "@raycast/api";
 import { handleError } from "../shared/utils";
 
-interface Input {
+type Input = {
   /**
    * Chain ID of the network
    * example: ethereum, polygon, zero
@@ -22,7 +22,7 @@ interface Input {
    * Ethereum address or ens domain to receive the token
    */
   recipient?: string;
-}
+};
 
 /**
  * Generate and open a link to send some tokens to a recepient on Zerion

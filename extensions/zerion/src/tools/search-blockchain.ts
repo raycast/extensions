@@ -2,14 +2,14 @@ import { getZpiHeaders, ZPI_URL } from "../shared/api";
 import { SearchResult } from "../shared/types";
 import { handleError } from "../shared/utils";
 
-interface Input {
+type Input = {
   /**
    * Ethereum address, ENS domain, token name, or token symbol
    * the search query from the user's request
    * required parameter
    */
   query: string;
-}
+};
 
 export default async function (input: Input): Promise<SearchResult> {
   let result: { data: SearchResult } | null = null;

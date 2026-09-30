@@ -1,7 +1,7 @@
 import { getZpiHeaders, ZPI_URL } from "../shared/api";
 import { handleError } from "../shared/utils";
 
-interface Input {
+type Input = {
   /**
    * Ethereum address of the token
    * required parameter
@@ -14,7 +14,7 @@ interface Input {
    * check the last year price by default
    */
   period?: "1h" | "1d" | "1w" | "1m" | "1y" | "max";
-}
+};
 
 /**
  * this tool returns the historical price of a token as an array of pair [timestamp, price]
