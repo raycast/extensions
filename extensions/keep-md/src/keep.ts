@@ -3,8 +3,6 @@ import { getPreferenceValues } from "@raycast/api";
 const BASE_URL = "https://keep.md/api";
 const API_VERSION = "2026-08-24";
 
-type Preferences = { apiKey: string };
-
 export type Bookmark = {
   id: string;
   url?: string | null;
@@ -106,13 +104,13 @@ export function listBookmarks(
 
 export function saveBookmark(
   url: string,
-): Promise<{ id: string; url: string }> {
+): Promise<{ id: string; url: string; ok: boolean }> {
   return request("/ingest", { method: "POST", body: JSON.stringify({ url }) });
 }
 
 export function updateBookmark(
   id: string,
-  fields: { title: string; tags: string[] },
+  fields: { title?: string; tags?: string[] },
 ): Promise<Bookmark> {
   return request(`/items/${encodeURIComponent(id)}`, {
     method: "POST",

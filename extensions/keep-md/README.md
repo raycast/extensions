@@ -3,13 +3,12 @@
 Search and manage saved Keep.md items from Raycast. The extension provides two commands:
 
 - **Search Bookmarks:** Browse recent items, search by title, URL, notes, and tags, open or copy a URL, edit title/tags, and archive an item.
-- **Save Bookmark:** Save an HTTP or HTTPS URL. A URL on the clipboard fills the form automatically.
+- **Save Bookmark:** Save an HTTP or HTTPS URL with optional title and tags. A URL on the clipboard fills the form automatically.
 
 ## Set up
 
 1. Create a personal or connected-client API key in Keep Settings → Connections → API and agents. See [Keep's API key guide](https://keep.md/docs/api-keys). The key needs item read and write access.
-2. Run `npm install` in this folder, then `npm run dev`.
-3. Open either Keep.md command in Raycast and paste the key into the **Keep API Key** preference when prompted.
+2. Open either Keep.md command in Raycast and paste the key into the **Keep API Key** preference when prompted.
 
 Raycast uses the password preference type for the key. The extension sends it only to `https://keep.md/api` using a Bearer header.
 
@@ -20,6 +19,6 @@ Raycast uses the password preference type for the key. The extension sends it on
 
 ## Development
 
-Run `npm run typecheck`, `npm run lint`, and `npm run build` to check the extension.
+Run `npm install` and `npm run dev` to develop the extension. Run `npm run typecheck`, `npm run lint`, and `npm run build` to check it.
 
 API references: [Keep REST API](https://keep.md/docs/api) · [Raycast extension docs](https://developers.raycast.com/)

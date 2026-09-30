@@ -107,8 +107,12 @@ export default function Command() {
   const [hasMore, setHasMore] = useState(false);
   const [revision, setRevision] = useState(0);
   const currentRequest = useRef(0);
+  const canLoadMore = useRef(false);
 
   const refresh = useCallback(() => {
+    canLoadMore.current = false;
+    setHasMore(false);
+    setLoading(true);
     setOffset(0);
     setRevision((value) => value + 1);
   }, []);
@@ -120,16 +124,21 @@ export default function Command() {
       async () => {
         setLoading(true);
         setError(undefined);
+        canLoadMore.current = false;
         try {
           const page = await listBookmarks(query, offset, controller.signal);
           if (requestId !== currentRequest.current) return;
           setItems((previous) =>
             offset === 0 ? page.items : [...previous, ...page.items],
           );
-          setHasMore(page.count === page.limit);
+          const more = page.count === page.limit;
+          canLoadMore.current = more;
+          setHasMore(more);
         } catch (cause) {
           if (controller.signal.aborted || requestId !== currentRequest.current)
             return;
+          canLoadMore.current = false;
+          setHasMore(false);
           setError(cause instanceof Error ? cause.message : String(cause));
         } finally {
           if (requestId === currentRequest.current) setLoading(false);
@@ -171,14 +180,23 @@ export default function Command() {
       isLoading={loading}
       filtering={false}
       onSearchTextChange={(text) => {
+        currentRequest.current += 1;
+        canLoadMore.current = false;
         setQuery(text);
         setOffset(0);
         setItems([]);
+        setHasMore(false);
+        setLoading(true);
       }}
       searchBarPlaceholder="Search Keep.md bookmarks"
       pagination={{
-        onLoadMore: () => setOffset((value) => value + 50),
-        hasMore,
+        onLoadMore: () => {
+          if (loading || !canLoadMore.current) return;
+          canLoadMore.current = false;
+          setHasMore(false);
+          setOffset((value) => value + 50);
+        },
+        hasMore: hasMore && !loading,
         pageSize: 50,
       }}
     >
