@@ -66,10 +66,27 @@ export interface BacklogOp {
   kind?: EventKind; // omitted = "blocking"
 }
 
-// The POST /backlog op union. `capture` is `BacklogOp`.
+/**
+ * One AI Inbox capture. The server splits `text` into 1 to 10 items. Each set
+ * field applies to every item and wins over the AI, so set a field only when the
+ * user chose it. The row result is `{ created: BacklogItem[], source }`.
+ */
+export interface CaptureTextOp {
+  op: "capture_text";
+  text: string;
+  notes?: string;
+  durationMinutes?: number;
+  kind?: EventKind;
+  areaId?: string;
+  activityTypeId?: string;
+  plannedDate?: string;
+}
+
+// The POST /backlog op union. `capture` is `BacklogOp`; `capture_text` is the AI capture.
 // `schedule` places a parked item into the day; `remove` deletes it (undoable).
 export type BacklogManageOp =
   | BacklogOp
+  | CaptureTextOp
   | {
       op: "update";
       id: string;
@@ -367,7 +384,8 @@ export function undo(tokens: string[]): Promise<ApiResult<Record<string, unknown
   return request<Record<string, unknown>>("POST", PATHS.actionsUndo, { tokens });
 }
 
-export function backlogCapture(op: BacklogOp): Promise<ApiResult<BatchReceipt>> {
+/** Send one AI Inbox capture. One undoToken covers all the created items. */
+export function backlogCaptureText(op: CaptureTextOp): Promise<ApiResult<BatchReceipt>> {
   return request<BatchReceipt>("POST", PATHS.backlog, { ops: [op] });
 }
 

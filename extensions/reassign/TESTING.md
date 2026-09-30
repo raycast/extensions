@@ -42,6 +42,10 @@ Use a test account and remove or undo any blocks created during testing.
   in the form and in Reassign. Repeat with `work tomorrow 11pm-1am`.
 - Schedule a flexible block, such as `writing tomorrow for 90m`. Verify
   proposal selection, calendar assignment, and Undo.
+- Save `buy milk and call mom tomorrow` to Inbox. Confirm two items, their
+  names in the toast, and one Undo for both. Select two lines of text, open
+  Add Block with no argument, and save to Inbox: both lines must reach the AI.
+  Needs the server `capture_text` op (reassign#1309) in prod.
 - Save a bare idea, schedule it from Inbox, then undo/remove it. Verify that an
   Inbox with over 50 items shows later items too.
 - Edit and move a block. Force a failed request (for example, disconnect the

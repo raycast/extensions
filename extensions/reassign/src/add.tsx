@@ -20,13 +20,14 @@ import { randomUUID } from "node:crypto";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   type ApiError,
-  backlogCapture,
+  backlogCaptureText,
   confirmSchedule,
   getSchedule,
   planSchedule,
   PlanRequest,
   writeEvents,
 } from "./lib/api";
+import { captureText, captureTextOp, captureToast } from "./lib/capture-text";
 import { batchFailure, needsSignIn } from "./lib/envelope";
 import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
 import {
@@ -99,10 +100,16 @@ function timingFieldsOf(values: Pick<FormValues, "start" | "end" | "duration">) 
   };
 }
 
-/** Check the name, notes and times of a submit. A failure shows a toast and gives null. */
-async function prepareSubmit(values: FormValues): Promise<{ finalName: string; timing: BlockTiming } | null> {
+/**
+ * Check the name, notes and times of a submit. A failure shows a toast and gives null.
+ * The Inbox sends the name as AI text (up to 2000 characters), so it skips the name limit.
+ */
+async function prepareSubmit(
+  values: FormValues,
+  opts: { checkName: boolean } = { checkName: true },
+): Promise<{ finalName: string; timing: BlockTiming } | null> {
   const finalName = values.name.trim() || "(untitled)";
-  const tooLong = textLimitError(finalName, values.notes);
+  const tooLong = textLimitError(opts.checkName ? finalName : "", values.notes);
   if (tooLong) {
     await showToast({ style: Toast.Style.Failure, title: "The text is too long", message: tooLong });
     return null;
@@ -142,14 +149,20 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const activityTypes = taxonomy?.ok ? (taxonomy.data.activityTypes ?? []) : [];
   const { writable: calendars, defaultId: defaultCalendarId } = useCalendars();
   const [name, setName] = useState(ctx?.name ?? (parsed?.name && parsed.name !== "(untitled)" ? parsed.name : initial));
+  // The raw text for the AI Inbox capture, and the name it seeded. A changed name wins.
+  const captureSeed = useRef({ name: name.trim(), text: ctx?.name ?? argText });
 
-  // U5: nothing seeded the name, so offer the current selection.
+  // U5: nothing seeded the name, so offer the current selection. The Name field
+  // shows the first line; the Inbox capture sends every line to the AI.
   useEffect(() => {
     if (argText || ctx?.name) return;
     getSelectedText()
       .then((text) => {
-        const first = text.split("\n")[0].trim();
-        if (first) setName((current) => current || first);
+        const lines = captureText(text);
+        const first = lines.split("\n")[0];
+        if (!first) return;
+        captureSeed.current = { name: first, text: lines };
+        setName((current) => current || first);
       })
       .catch(() => undefined);
     // Seed once on mount.
@@ -178,6 +191,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const submitting = useRef(false);
   const saved = useRef(false);
   const timingEdited = useRef(false);
+  const durationEdited = useRef(false);
 
   // The first parse uses the device clock. The account timezone can put the capture
   // on another day, so parse again on the account clock, unless the user edited first.
@@ -196,9 +210,14 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
   const showDuration = !(hasStartTime && hasEndTime);
   const primaryIsInbox = !hasStartTime && !hasEndTime && (aiDestination === "inbox" || !duration.trim());
   const timingFields = timingFieldsOf({ start, end, duration });
+  // A day from the text parse only is not sent: the Inbox AI reads it from the text.
+  // A changed name replaces that text, so then the form day is sent.
+  const dateChosen = timingEdited.current || Boolean(ctxDate) || name.trim() !== captureSeed.current.name;
   let timingPreview = primaryIsInbox
     ? hasNamedDate && planningDate
-      ? `Inbox — planned for ${planningDate}, no time set`
+      ? dateChosen
+        ? `Inbox — planned for ${planningDate}, no time set`
+        : "Inbox — Reassign AI reads the day from the text"
       : "Inbox — save now, schedule later"
     : "Add a time or duration";
   let timingError: string | undefined;
@@ -231,6 +250,11 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     keepRangeAsDuration();
     setEnd(value);
   }
+  function changeDuration(value: string) {
+    // A cleared field is not a choice: the 30-minute default must not go to the AI.
+    durationEdited.current = Boolean(value.trim());
+    setDuration(value);
+  }
 
   function fillDraft(draft: BlockDraft) {
     timingEdited.current = true;
@@ -239,6 +263,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     const minutes = parseDuration(draft.duration)?.minutes;
     setEnd(draft.start && minutes ? shiftWallMinutes(draft.start, minutes) : null);
     setDuration(draft.duration);
+    durationEdited.current = Boolean(draft.duration);
     setAiDestination(draft.destination);
     // Keep the originally captured named day when parking in the Inbox (start=null).
     setPlanningDate((current) => (draft.start ? todayISO(draft.start) : current));
@@ -320,26 +345,47 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     });
   }
 
+  /**
+   * The AI Inbox capture. The server splits the text into items. Each field sent
+   * wins over the AI for every item, so send only what the user chose: a timing
+   * the user edited (or the launcher set), and a detail that is not the default.
+   */
   async function handleInbox(values: FormValues) {
-    const prepared = await prepareSubmit(values);
+    const prepared = await prepareSubmit(values, { checkName: false });
     if (!prepared) return;
-    const { finalName, timing } = prepared;
-    const durationMinutes = timing.kind === "inbox" ? ctx?.durationMinutes : timing.minutes;
-    // Keep a chosen or named day as the planned date; do not tag with today by default.
-    const plannedDate =
-      timing.kind === "exact" ? todayISO(timing.start) : (timing.date ?? (hasNamedDate ? planningDate : undefined));
+    const { timing } = prepared;
+    const nameChanged = values.name.trim() !== captureSeed.current.name;
+    const text = captureText(nameChanged ? values.name : captureSeed.current.text || values.name) || "(untitled)";
+    // A length the user gave: a typed or AI duration, a chosen end time, or the
+    // launcher's. A start alone gets the 30-minute default; the AI estimates it instead.
+    // A changed name drops the parsed text, so then the parsed end and length are sent.
+    const endChosen =
+      (timingEdited.current || nameChanged) && Boolean(values.end && !Form.DatePicker.isFullDay(values.end));
+    const lengthChosen =
+      durationEdited.current ||
+      endChosen ||
+      Boolean(ctx?.durationMinutes) ||
+      (nameChanged && Boolean(parsed?.durationMinutes));
+    const durationMinutes = lengthChosen && timing.kind !== "inbox" ? timing.minutes : undefined;
+    // Keep a chosen day as the planned date; do not tag with today by default.
+    const plannedDate = !(timingEdited.current || ctxDate || nameChanged)
+      ? undefined
+      : timing.kind === "exact"
+        ? todayISO(timing.start)
+        : (timing.date ?? (hasNamedDate ? planningDate : undefined));
     const { notes, areaId, activityTypeId, kind } = optionalFields(values);
-    const result = await runMutation("Saving…", `Saved “${finalName}” to Inbox`, () =>
-      backlogCapture({
-        op: "capture",
-        name: finalName,
-        durationMinutes,
-        plannedDate,
-        notes,
-        areaId,
-        activityTypeId,
-        kind,
-      }),
+    const result = await runMutation("Saving…", captureToast, () =>
+      backlogCaptureText(
+        captureTextOp(text, {
+          durationMinutes,
+          plannedDate,
+          notes,
+          areaId,
+          activityTypeId,
+          // "blocking" is the form default, not a choice. Leave it to the AI.
+          kind: kind === "blocking" ? undefined : kind,
+        }),
+      ),
     );
     if (result.ok) await onSaved();
   }
@@ -447,7 +493,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
           title="Duration"
           placeholder="90m, 1h30, or 2 hours"
           value={duration}
-          onChange={setDuration}
+          onChange={changeDuration}
           info="With one time, calculates the other (30 minutes by default). Without times, finds a slot to confirm."
         />
       )}

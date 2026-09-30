@@ -121,11 +121,12 @@ export function applyUndoToast(
 /**
  * Run a mutating call, show progress, then a success toast with an Undo button
  * when the result carries an undo token. Returns success and the optional undo token.
- * `getUndoToken` defaults to the `undoToken` field on a batch receipt.
+ * `getUndoToken` defaults to the `undoToken` field on a batch receipt. A function
+ * `successTitle` reads the title (and an optional message) from the receipt.
  */
 export async function runMutation<T>(
   loadingTitle: string,
-  successTitle: string,
+  successTitle: string | ((data: T) => { title: string; message?: string }),
   call: () => Promise<ApiResult<T>>,
   getUndoToken: (data: T) => string | null = defaultUndoToken,
   opts?: { onUndone?: () => void | Promise<unknown> },
@@ -148,8 +149,10 @@ export async function runMutation<T>(
     return { ok: false, undoToken: null };
   }
   const token = getUndoToken(result.data);
+  const success = typeof successTitle === "function" ? successTitle(result.data) : { title: successTitle };
   toast.style = Toast.Style.Success;
-  toast.title = successTitle;
+  toast.title = success.title;
+  if (success.message) toast.message = success.message;
   if (failed) toast.message = "Refresh to see the change.";
   if (token) applyUndoToast(toast, token, opts);
   return { ok: true, undoToken: token };

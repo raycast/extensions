@@ -64,7 +64,7 @@ vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
 vi.mock("../src/lib/api", () => ({
   getSchedule: vi.fn(),
   writeEvents: (ops: unknown[]) => mock.create(ops[0]),
-  backlogCapture: mock.capture,
+  backlogCaptureText: mock.capture,
   planSchedule: mock.plan,
   confirmSchedule: mock.confirm,
 }));
@@ -124,7 +124,10 @@ beforeEach(() => {
   mock.fullDays = new WeakSet();
   mock.calendar = {};
   for (const fn of [mock.capture, mock.create, mock.root, mock.plan, mock.confirm, mock.push]) fn.mockReset();
-  mock.capture.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  mock.capture.mockResolvedValue({
+    ok: true,
+    data: { results: [{ index: 0, status: "ok", result: { created: [{ id: "b1", name: "idea" }], source: "ai" } }] },
+  });
   mock.create.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
 });
 it("blank Add Block opens with Save to Inbox as primary", () => {
@@ -275,14 +278,107 @@ it("native full-day picker input stays in Inbox, not an event at midnight", asyn
   const action = render().find((n) => n.type === "SubmitForm")!;
   expect(action.props.title).toBe("Save to Inbox");
   await action.props.onSubmit({ ...values, start: date });
-  expect(mock.capture).toHaveBeenCalledWith(expect.objectContaining({ plannedDate: "2026-09-22" }));
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "idea", plannedDate: "2026-09-22" });
   expect(mock.create).not.toHaveBeenCalled();
 });
-it("date-only launch text keeps its planned date without a scheduled event", async () => {
+it("date-only launch text goes to the Inbox AI as raw text, without a parsed planned date", async () => {
   const tree = render("read tomorrow");
-  await tree.find((n) => n.type === "SubmitForm")!.props.onSubmit(values);
-  expect(mock.capture.mock.calls[0][0].plannedDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  const name = tree.find((n) => n.props.id === "name")!.props.value as string;
+  await tree.find((n) => n.type === "SubmitForm")!.props.onSubmit({ ...values, name });
+  // The AI reads the day from the text. A parsed day is not a user choice.
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "read tomorrow" });
   expect(mock.create).not.toHaveBeenCalled();
+});
+it("sends the whole launch text and no default field to the Inbox AI", async () => {
+  const text = "buy milk and call mom tomorrow 30m";
+  const tree = render(text);
+  await tree
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({
+      ...values,
+      name: tree.find((n) => n.props.id === "name")!.props.value as string,
+      duration: tree.find((n) => n.props.id === "duration")!.props.value as string,
+    });
+  // A parsed duration, a parsed day and the default type stay with the AI.
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text });
+});
+it("a start time alone sends its day, but not the default 30-minute length", async () => {
+  const start = new Date(2026, 8, 22, 9);
+  render()
+    .find((n) => n.props.id === "start")!
+    .props.onChange(start);
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, start });
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "idea", plannedDate: "2026-09-22" });
+});
+it("a chosen end time sends the range length", async () => {
+  const start = new Date(2026, 8, 22, 9);
+  const end = new Date(2026, 8, 22, 11);
+  const tree = render();
+  tree.find((n) => n.props.id === "start")!.props.onChange(start);
+  render()
+    .find((n) => n.props.id === "end")!
+    .props.onChange(end);
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, start, end });
+  expect(mock.capture).toHaveBeenCalledWith({
+    op: "capture_text",
+    text: "idea",
+    plannedDate: "2026-09-22",
+    durationMinutes: 120,
+  });
+});
+it("an edited name replaces the launch text", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 8, 22, 12));
+  await render("read tomorrow")
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "  Read the paper  " });
+  // The new text lost "tomorrow", so the parsed day goes as a field.
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "Read the paper", plannedDate: "2026-09-23" });
+});
+it("a cleared duration does not send the 30-minute default", async () => {
+  const start = new Date(2026, 8, 22, 9);
+  render()
+    .find((n) => n.props.id === "start")!
+    .props.onChange(start);
+  render()
+    .find((n) => n.props.id === "duration")!
+    .props.onChange("1h");
+  render()
+    .find((n) => n.props.id === "duration")!
+    .props.onChange("");
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, start });
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "idea", plannedDate: "2026-09-22" });
+});
+it("sends a duration that the user typed", async () => {
+  render()
+    .find((n) => n.props.id === "duration")!
+    .props.onChange("45m");
+  const tree = render();
+  // A duration alone makes Find a Time the primary action; Save to Inbox stays.
+  await tree.find((n) => n.props.title === "Save to Inbox")!.props.onSubmit({ ...values, duration: "45m" });
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "idea", durationMinutes: 45 });
+});
+it("sends a multi-line name as one capture and closes the form", async () => {
+  mock.capture.mockResolvedValueOnce({
+    ok: true,
+    data: {
+      undoToken: "undo",
+      results: [
+        { index: 0, status: "ok", result: { created: [{ name: "Buy milk" }, { name: "Call mom" }], source: "ai" } },
+      ],
+    },
+  });
+  await render()
+    .find((n) => n.props.title === "Save to Inbox")!
+    .props.onSubmit({ ...values, name: "Buy milk\nCall mom" });
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "Buy milk\nCall mom" });
+  expect(mock.root).toHaveBeenCalledTimes(1);
 });
 it("does not schedule full-day input without a duration", async () => {
   const date = new Date(2026, 8, 22);
@@ -413,11 +509,18 @@ it("moves a window that has passed today to the same window tomorrow", () => {
     nextDay: false,
   });
 });
-it("refuses a name over the server limit before it sends anything", async () => {
+it("refuses a scheduled name over the server limit before it sends anything", async () => {
   await render()
-    .find((n) => n.props.title === "Save to Inbox")!
-    .props.onSubmit({ ...values, name: "x".repeat(201) });
+    .find((n) => n.props.title === "Schedule Block")!
+    .props.onSubmit({ ...values, name: "x".repeat(201), end: new Date(2026, 8, 22, 11), duration: "90m" });
+  expect(mock.create).not.toHaveBeenCalled();
+});
+it("the Inbox sends a long name as AI text, and refuses notes over the limit", async () => {
+  const action = render().find((n) => n.props.title === "Save to Inbox")!;
+  await action.props.onSubmit({ ...values, name: "x".repeat(201), notes: "n".repeat(2001) });
   expect(mock.capture).not.toHaveBeenCalled();
+  await action.props.onSubmit({ ...values, name: "x".repeat(201) });
+  expect(mock.capture).toHaveBeenCalledWith({ op: "capture_text", text: "x".repeat(201) });
 });
 
 it("routes a recurring capture to the web and sends no write", () => {

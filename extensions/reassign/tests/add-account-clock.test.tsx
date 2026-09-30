@@ -59,7 +59,7 @@ vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
 vi.mock("../src/lib/api", () => ({
   getSchedule: vi.fn(),
   writeEvents: (ops: unknown[]) => mock.create(ops[0]),
-  backlogCapture: vi.fn(),
+  backlogCaptureText: vi.fn(),
   planSchedule: mock.plan,
   confirmSchedule: vi.fn(),
 }));

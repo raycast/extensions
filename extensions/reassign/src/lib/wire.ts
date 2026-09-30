@@ -39,6 +39,8 @@ export type ErrorCode =
 // Server text limits (characters). A longer value is a 422, so check first.
 export const MAX_NAME_LENGTH = 200;
 export const MAX_NOTES_LENGTH = 2000;
+// The raw text of one AI Inbox capture (`capture_text`).
+export const MAX_CAPTURE_TEXT_LENGTH = 2000;
 export const MAX_FEEDBACK_LENGTH = 4000;
 
 // Span limits (minutes). A stored span is 5 min to 168 h. A duration (Inbox, a

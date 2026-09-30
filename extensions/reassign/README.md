@@ -32,9 +32,13 @@ you already use: glance at your dial day, capture blocks, and check them off.
   A date without a time is an Inbox
   idea with a planned date; a duration without a time offers **Find a Time** and
   concrete slots to choose from. Successful saves return to Raycast.
+  **Save to Inbox** sends the text to Reassign AI, which splits it into one or
+  more Inbox items. With no argument, the command uses every line of the
+  selected text. A field you set in the form applies to every item. If the AI
+  does not answer, the first line becomes the name and the other lines the notes.
   **Fill with AI** (`⌘⇧A`) uses Reassign AI to suggest one new block. Review the
-  preview, choose **Use Suggested Block**, edit any fields, then save. AI is optional
-  and never saves automatically; manual entry needs no AI call.
+  preview, choose **Use Suggested Block**, edit any fields, then save. A scheduled
+  block needs no AI call.
   With a connected calendar, pick the calendar the block publishes to (or keep
   it in Reassign only) and the calendars that get a one-way mirror copy.
 - **Inbox** — your saved ideas with no time yet; schedule or remove them.

@@ -3,6 +3,10 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - First release.
+- Save to Inbox sends the text to Reassign AI. The AI splits it into one or more
+  Inbox items with a name, notes, a length and a day. A selection keeps every
+  line. The form sends a field only when you choose it, and the toast names
+  each new item.
 - Pick the calendar a new block publishes to, or keep it in Reassign only, and
   choose the calendars that receive a one-way mirror copy. Edit the calendar
   home and mirrors on an existing block. The detail pane shows both.

@@ -2,9 +2,11 @@ import { beforeEach, expect, it, vi } from "vitest";
 
 const mock = vi.hoisted(() => ({
   undo: vi.fn<(tokens: string[]) => Promise<ApiResult<unknown>>>(),
+  toast: {} as Record<string, unknown>,
 }));
 
 vi.mock("@raycast/api", () => ({
+  showToast: async (options: Record<string, unknown>) => Object.assign(mock.toast, options),
   Toast: { Style: { Failure: "failure", Success: "success", Animated: "animated" } },
 }));
 
@@ -14,7 +16,7 @@ vi.mock("../src/lib/api", () => ({
 
 import type { Toast } from "@raycast/api";
 import type { ApiResult } from "../src/lib/api";
-import { applyUndoToast, describeError } from "../src/lib/feedback";
+import { applyUndoToast, describeError, runMutation } from "../src/lib/feedback";
 
 type ToastState = {
   style?: string;
@@ -139,4 +141,16 @@ it("rate_limited shows the server message and falls back for a bare 429", () => 
   expect(capped).toEqual({ title: "Too many requests", message: "Try again in an hour." });
   const bare = describeError({ ok: false, code: "rate_limited", message: "Request failed (429).", status: 429 });
   expect(bare).toEqual({ title: "Too many requests", message: "Wait a moment, then try again." });
+});
+
+it("runMutation reads the success title and message from the receipt", async () => {
+  mock.toast = {};
+  const receipt = { results: [{ index: 0, status: "ok" as const }], undoToken: "tok" };
+  const result = await runMutation(
+    "Saving…",
+    (data: typeof receipt) => ({ title: `Added ${data.results.length}`, message: "a · b" }),
+    async () => ({ ok: true, data: receipt }),
+  );
+  expect(result).toEqual({ ok: true, undoToken: "tok" });
+  expect(mock.toast).toMatchObject({ style: "success", title: "Added 1", message: "a · b" });
 });
