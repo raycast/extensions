@@ -1,0 +1,158 @@
+{
+  "id": "arj7oStGLkU",
+  "title": "Inside the Mind of a Master Procrastinator | Tim Urban | TED",
+  "duration": 844,
+  "extractor_key": "Youtube",
+  "uploader": "TED",
+  "channel": "TED",
+  "channel_url": "https://www.youtube.com/channel/UCAuUUnT6oDeKwE6v1NGQxug",
+  "channel_is_verified": true,
+  "view_count": 61963782,
+  "like_count": 2054328,
+  "comment_count": 79000,
+  "channel_follower_count": 27900000,
+  "upload_date": "20160406",
+  "timestamp": 1459961975,
+  "chapters": [
+    {
+      "start_time": 0,
+      "title": "My procrastination journey",
+      "end_time": 176
+    },
+    {
+      "start_time": 176,
+      "title": "The procrastinator's brain",
+      "end_time": 249
+    },
+    {
+      "start_time": 249,
+      "title": "The monkey and the playground",
+      "end_time": 436
+    },
+    {
+      "start_time": 436,
+      "title": "The role of the panic monster",
+      "end_time": 599
+    },
+    {
+      "start_time": 599,
+      "title": "Two types of procrastination",
+      "end_time": 756
+    },
+    {
+      "start_time": 756,
+      "title": "The life calendar",
+      "end_time": 844
+    }
+  ],
+  "tags": [
+    "TED Talk",
+    "TED Talks",
+    "Tim Urban",
+    "procrastination",
+    "work",
+    "writing",
+    "productivity",
+    "Tim Urban TED",
+    "Tim Urban TED talk",
+    "tim urban procrastination",
+    "tim urban procrastination ted talk",
+    "ted talk procrastination",
+    "ted talks motivation"
+  ],
+  "categories": [
+    "People & Blogs"
+  ],
+  "description": "Tim Urban knows that procrastination doesn't make sense, but he's never been able to shake his habit of waiting until the last minute to get things done. In this hilarious and insightful talk, Urban takes us on a journey through YouTube binges, Wikipedia rabbit holes and bouts of staring out the window -- and encourages us to think harder about what we're really procrastinating on, before we run out of time.\n\nFor more from Tim Urban, visit Wait But Why: http://www.waitbutwhy.com/\n\nVisit http://TED.com to get our entire library of TED Talks, transcripts, translations, personalized talk recommendations and more.\n\nThe TED Talks channel features the best talks and performances from the TED Conference, where the world's leading thinkers and doers give the talk of their lives in 18 minutes (or less). Look for talks on Technology, Entertainment and Design -- plus science, business, global issues, the arts and more. You're welcome to link to or embed these videos, forward them to others and share these ideas with people you know. \n\nFollow TED on Twitter: http://twitter.com/TEDTalks\nLike TED on Facebook: http://facebook.com/TED\nSubscribe to our channel: http://youtube.com/TED\n\nTED's videos may be used for non-commercial purposes under a Creative Commons License, Attribution–Non Commercial–No Derivatives (or the CC BY – NC – ND 4.0 International) and in accordance with our TED Talks Usage Policy https://www.ted.com/about/our-organization/our-policies-terms/ted-talks-usage-policy. For more information on using TED for commercial purposes (e.g. employee learning, in a film or online course), please submit a Media Request at https://media-requests.ted.com",
+  "language": "en",
+  "webpage_url": "https://www.youtube.com/watch?v=arj7oStGLkU",
+  "thumbnail": "https://i.ytimg.com/vi_webp/arj7oStGLkU/maxresdefault.webp",
+  "age_limit": 0,
+  "was_live": false,
+  "live_status": "not_live",
+  "formats": [
+    {
+      "format_id": "140",
+      "vcodec": "none",
+      "acodec": "mp4a.40.2",
+      "ext": "m4a",
+      "video_ext": "none",
+      "protocol": "https",
+      "resolution": "audio only",
+      "tbr": 129.479,
+      "height": null,
+      "fps": null
+    },
+    {
+      "format_id": "251",
+      "vcodec": "none",
+      "acodec": "opus",
+      "ext": "webm",
+      "video_ext": "none",
+      "protocol": "https",
+      "resolution": "audio only",
+      "tbr": 123.454,
+      "height": null,
+      "fps": null
+    }
+  ],
+  "subtitles": {
+    "ar": [],
+    "hy": [],
+    "bg": [],
+    "my": [],
+    "ca": [],
+    "ckb": [],
+    "zh-CN": [],
+    "zh-TW": [],
+    "hr": [],
+    "cs": [],
+    "da": [],
+    "nl": [],
+    "en": [],
+    "et": [],
+    "fi": [],
+    "fr": [],
+    "fr-CA": [],
+    "gl": [],
+    "de": [],
+    "el": [],
+    "iw": [],
+    "hi": [],
+    "hu": [],
+    "id": [],
+    "it": [],
+    "ja": [],
+    "ko": [],
+    "ku": [],
+    "lv": [],
+    "lt": [],
+    "mr": [],
+    "mn": [],
+    "ne": [],
+    "fa": [],
+    "pl": [],
+    "pt-BR": [],
+    "pt-PT": [],
+    "ro": [],
+    "ru": [],
+    "sr": [],
+    "sl": [],
+    "es": [],
+    "sv": [],
+    "th": [],
+    "tr": [],
+    "uk": [],
+    "ur": [],
+    "uz": [],
+    "vi": []
+  },
+  "automatic_captions": {
+    "ar": [],
+    "hy": [],
+    "bg": [],
+    "my": [],
+    "ca": [],
+    "ckb": []
+  }
+}
