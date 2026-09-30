@@ -38,7 +38,7 @@ export default function Command() {
         <List.Item
           key={row.endpoint.baseUrl}
           title={row.endpoint.label}
-          subtitle={row.info?.model ?? row.endpoint.model}
+          subtitle={row.info?.model || row.endpoint.model || "server default"}
           icon={
             row.up
               ? { source: Icon.CircleFilled, tintColor: Color.Green }

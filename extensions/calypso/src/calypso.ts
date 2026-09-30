@@ -53,6 +53,7 @@ export const INSTRUCT: Sampling = {
 
 export interface Endpoint {
   baseUrl: string;
+  /** Empty means "whatever the server has loaded" — resolved from /models at request time. */
   model: string;
   label: string;
   sampling: Sampling;
@@ -120,13 +121,15 @@ const CLOUD: Record<string, { base: string; label: string; model: string }> = {
 
 export function calypso2(p: Preferences): Endpoint {
   // The primary endpoint is assumed to be the reasoning-capable one.
-  return { baseUrl: trimSlash(p.baseUrl), model: p.model || "calypso-2", label: "Primary", sampling: THINKING };
+  // A blank Model preference must not become a Calypso-specific id: a stock Ollama or
+  // LM Studio server has no model by that name. See `resolveModel`.
+  return { baseUrl: trimSlash(p.baseUrl), model: (p.model || "").trim(), label: "Primary", sampling: THINKING };
 }
 
 export function calypso1(p: Preferences): Endpoint {
   return {
     baseUrl: trimSlash(p.fallbackBaseUrl),
-    model: p.fallbackModel || "calypso-1",
+    model: (p.fallbackModel || "").trim(),
     label: "Fallback",
     // The fallback is assumed to be an instruct model, so no think block is expected.
     sampling: INSTRUCT,
@@ -208,6 +211,15 @@ function resolveMaxTokens(p: Preferences): number {
   return Math.max(n, 1500);
 }
 
+/**
+ * Whether an endpoint is worth sending a chat request to.
+ *
+ * `/health` is llama.cpp-specific; Ollama, LM Studio and most OpenAI-compatible servers
+ * 404 it. So a non-ok or failed `/health` falls through to the same `/models` check
+ * Calypso Status uses, keeping Status and Chat/Ask in agreement about what is "up".
+ * A timeout is the one exception: a host that hangs on `/health` is asleep or
+ * unreachable, and probing it a second time would only double the wait.
+ */
 export async function health(ep: Endpoint, p: Preferences, timeoutMs = 8000): Promise<boolean> {
   // Cloud providers serve no /health; probing one would 404 and wrongly mark it down.
   // Treat a configured cloud endpoint as available and let the request itself surface errors.
@@ -215,6 +227,15 @@ export async function health(ep: Endpoint, p: Preferences, timeoutMs = 8000): Pr
   const root = ep.baseUrl.replace(/\/v1$/, "");
   try {
     const res = await withTimeout((signal) => fetch(`${root}/health`, { headers: headers(p, ep), signal }), timeoutMs);
+    if (res.ok) return true;
+  } catch (e) {
+    if ((e as Error).name === "AbortError") return false;
+  }
+  try {
+    const res = await withTimeout(
+      (signal) => fetch(`${ep.baseUrl}/models`, { headers: headers(p, ep), signal }),
+      timeoutMs,
+    );
     return res.ok;
   } catch {
     return false;
@@ -251,6 +272,19 @@ export async function props(ep: Endpoint, p: Preferences, timeoutMs = 10000): Pr
   } catch {
     return null;
   }
+}
+
+/** Model ids discovered from `/models`, keyed by base URL, so a tool loop asks once. */
+const discoveredModel = new Map<string, string | undefined>();
+
+/**
+ * The model id to send: the configured one, else the first id the server lists at
+ * `/models`, else none — the field is then omitted and the server uses its default.
+ */
+async function resolveModel(ep: Endpoint, p: Preferences): Promise<string | undefined> {
+  if (ep.model) return ep.model;
+  if (!discoveredModel.has(ep.baseUrl)) discoveredModel.set(ep.baseUrl, (await props(ep, p))?.model);
+  return discoveredModel.get(ep.baseUrl);
 }
 
 function withTimeout<T>(fn: (signal: AbortSignal) => Promise<T>, ms: number): Promise<T> {
@@ -306,13 +340,14 @@ async function* streamOnce(
   signal: AbortSignal,
 ): AsyncGenerator<StreamEvent> {
   const temperature = Number.parseFloat(p.temperature);
+  const model = await resolveModel(ep, p);
 
   const res = await fetch(`${ep.baseUrl}/chat/completions`, {
     method: "POST",
     headers: headers(p, ep),
     signal,
     body: JSON.stringify({
-      model: ep.model,
+      ...(model ? { model } : {}),
       messages,
       max_tokens: resolveMaxTokens(p),
       // Per-endpoint Qwen official sampling; the Temperature preference overrides it if set.

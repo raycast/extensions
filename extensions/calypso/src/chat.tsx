@@ -24,6 +24,11 @@ import {
  * already said AND against whatever web_search / rag_search returned earlier.
  */
 
+// Mirrors the per-platform shortcuts declared on the actions below.
+const IS_WINDOWS = process.platform === "win32";
+const HISTORY_KEYS = IS_WINDOWS ? "Ctrl+Y" : "⌘Y";
+const NEW_KEYS = IS_WINDOWS ? "Ctrl+Shift+N" : "⌘⇧N";
+
 interface TurnWithTimings extends Turn {
   timings?: Timings;
 }
@@ -92,7 +97,9 @@ export default function Command() {
       history.current.push({ role: "user", content: q });
 
       let chosen: Endpoint | null = null;
-      for (const ep of endpoints(p, p.preferredEndpoint || "auto")) {
+      // "auto" honours Preferred Endpoint as an ordering, not a pin — the same as Ask
+      // Calypso — so an unreachable preferred rig still falls through to the other one.
+      for (const ep of endpoints(p, "auto")) {
         if (await health(ep, p)) {
           chosen = ep;
           break;
@@ -100,7 +107,8 @@ export default function Command() {
       }
       if (!chosen) {
         throw new Error(
-          "No endpoint responded. Check Tailscale, that a rig is awake, or set a Cloud Fallback Provider in preferences.",
+          "No endpoint responded. Check that the machine hosting your model is reachable (VPN or LAN up) and " +
+            "its server is running, or set a Cloud Fallback Provider in preferences.",
         );
       }
       update({ endpoint: chosen.label ?? chosen.model });
@@ -222,7 +230,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Message}
           title="Ask CALYPSO anything"
-          description="Follow-ups keep the thread. ⌘Y for past chats, ⌘⇧N to start fresh."
+          description={`Follow-ups keep the thread. ${HISTORY_KEYS} for past chats, ${NEW_KEYS} to start fresh.`}
         />
       ) : (
         [...turns].reverse().map((t, ri) => {

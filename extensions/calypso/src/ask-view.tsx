@@ -106,7 +106,7 @@ export function AskView({ prompt, target, title }: { prompt: string; target: str
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Endpoint" text={endpoint?.label ?? "resolving…"} />
-          <Detail.Metadata.Label title="Model" text={endpoint?.model ?? "—"} />
+          <Detail.Metadata.Label title="Model" text={endpoint ? endpoint.model || "server default" : "—"} />
           {fellBack && <Detail.Metadata.Label title="Note" text="local rig down — cloud fallback" />}
           <Detail.Metadata.Label title="Speed" text={timings ? formatTimings(timings) : loading ? "streaming…" : "—"} />
           <Detail.Metadata.Label title="Tools" text={tools.filter((t) => t.startsWith("→")).length.toString()} />
