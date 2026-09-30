@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { buildTranscriptArgs, captionDownloadError, cleanUpSrt, noCaptionsMessage } from "../src/transcript";
+import {
+  buildTranscriptArgs,
+  captionDownloadError,
+  cleanUpSrt,
+  noCaptionsMessage,
+  noCaptionsReason,
+} from "../src/transcript";
 
 /** Build a valid multi-cue SRT document from cue texts (1s apart). */
 function srt(...texts: string[]): string {
@@ -62,10 +68,12 @@ describe("noCaptionsMessage", () => {
     );
   });
 
-  it("names a missing chosen language and points to Automatic", () => {
+  it("names a missing chosen language without pointing to a chat setting", () => {
+    // The Download form and the AI tools also land here, and the chat's
+    // Transcript Language preference doesn't apply to them.
     const message = noCaptionsMessage({ requested: "de", languages: ["de", "en"], listed: true });
-    expect(message).toMatch(/no German captions/);
-    expect(message).toMatch(/Transcript Language to Automatic/);
+    expect(message).toBe("This video has no German captions.");
+    expect(message).not.toMatch(/preferences|Transcript Language/);
   });
 
   it("explains YouTube's caption rate limit", () => {
@@ -83,6 +91,15 @@ describe("noCaptionsMessage", () => {
     expect(noCaptionsMessage({ requested: "auto", languages: ["en"], listed: true, error: "Something odd" })).toBe(
       "Couldn't get the captions: Something odd",
     );
+  });
+});
+
+describe("noCaptionsReason", () => {
+  it("tells a missing language apart from no captions and a failed download", () => {
+    expect(noCaptionsReason({ requested: "de", listed: true })).toBe("language");
+    expect(noCaptionsReason({ requested: "auto", listed: true })).toBe("none");
+    expect(noCaptionsReason({ requested: "de", listed: false })).toBe("none");
+    expect(noCaptionsReason({ requested: "de", listed: true, error: "HTTP Error 429" })).toBe("failed");
   });
 });
 

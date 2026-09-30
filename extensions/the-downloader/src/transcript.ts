@@ -25,11 +25,15 @@ function transcriptScratchRoot(): string {
   return os.tmpdir();
 }
 
+/** Why there's no transcript: no captions at all, none in the chosen language, or the caption download failed. */
+export type NoTranscriptReason = "none" | "language" | "failed";
+
 /** No usable captions. Carries the metadata fetched on the way, so callers can still show what they know. */
 export class NoTranscriptError extends Error {
   constructor(
     message: string,
     readonly video: Video,
+    readonly reason: NoTranscriptReason = "none",
   ) {
     super(message);
     this.name = "NoTranscriptError";
@@ -59,7 +63,15 @@ export function noCaptionsMessage(o: {
   }
   if (o.error) return `Couldn't get the captions: ${o.error}`;
   if (o.requested === "auto" || !o.listed) return "This video has no captions.";
-  return `This video has no ${languageName(o.requested)} captions. Set Transcript Language to Automatic in preferences to use the language it has.`;
+  // No settings hint here: the Download form and the AI tools pick their own
+  // language, so only the chat (which has a preference for it) adds one.
+  return `This video has no ${languageName(o.requested)} captions.`;
+}
+
+/** Which case of `noCaptionsMessage` applies. */
+export function noCaptionsReason(o: { requested: string; listed: boolean; error?: string }): NoTranscriptReason {
+  if (o.error) return "failed";
+  return o.requested === "auto" || !o.listed ? "none" : "language";
 }
 
 /**
@@ -223,7 +235,8 @@ export async function fetchSubtitles(
   // `auto` means "whatever is spoken", so any track beats none (a model can read other languages).
   const track = pickSubtitleTrack(video, wanted, { anyLanguage: requested === "auto" });
   if (listed && !track) {
-    throw new NoTranscriptError(noCaptionsMessage({ requested, languages: wanted, listed }), video);
+    const missing = { requested, languages: wanted, listed };
+    throw new NoTranscriptError(noCaptionsMessage(missing), video, noCaptionsReason(missing));
   }
   // Sites that don't list their tracks up front get the pattern instead.
   const languages = track ? [track] : wanted;
@@ -259,7 +272,8 @@ export async function fetchSubtitles(
       if (!failed && code !== 0) throw new Error(stderr.trim() || "Failed to download subtitles");
       // The metadata is already here, so a caption failure (none in this
       // language, or e.g. HTTP 429 on the caption file) keeps the video usable.
-      throw new NoTranscriptError(noCaptionsMessage({ requested, languages: wanted, listed, error: failed }), video);
+      const missing = { requested, languages: wanted, listed, error: failed };
+      throw new NoTranscriptError(noCaptionsMessage(missing), video, noCaptionsReason(missing));
     }
 
     return {

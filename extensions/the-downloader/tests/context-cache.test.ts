@@ -67,9 +67,19 @@ describe("loadVideoContext", () => {
     expect(ctx.segments).toEqual([]);
     expect(ctx.video.title).toBe("A video");
     expect(ctx.transcriptNote).toBe("No subtitles");
+    expect(ctx.transcriptReason).toBe("none");
     // Not cached, so captions added (or a rate limit lifted) show up next time.
     await loadVideoContext("https://youtu.be/no-subs");
     expect(fetchTranscriptSegments).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps why there's no transcript, so the chat can point to the language setting", async () => {
+    fetchTranscriptSegments.mockRejectedValue(
+      new NoTranscriptError("This video has no German captions.", video, "language"),
+    );
+    const ctx = await loadVideoContext("https://youtu.be/no-german", { language: "de" });
+    expect(ctx.transcriptReason).toBe("language");
+    expect(ctx.transcriptNote).toBe("This video has no German captions.");
   });
 
   it("passes other errors through", async () => {

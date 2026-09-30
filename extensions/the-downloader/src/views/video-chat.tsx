@@ -16,6 +16,7 @@ import {
   getPreferenceValues,
   launchCommand,
   open,
+  openExtensionPreferences,
   showInFinder,
   showToast,
 } from "@raycast/api";
@@ -151,7 +152,18 @@ function overviewMarkdown(ctx: VideoContext): string {
       ? `_Transcript loaded: ${ctx.segments.length} segments, about ${formatCount(estimateTokens(transcriptText(ctx.segments)))} tokens${ctx.language ? ` (${ctx.language})` : ""}._`
       : `_${ctx.transcriptNote ? ctx.transcriptNote.replace(/[_*`]/g, "") : "No transcript."} Answers come from the title, description, chapters and statistics. Reload to try again._`,
   );
+  if (ctx.segments.length === 0 && ctx.transcriptReason === "language") {
+    parts.push(
+      "To use the captions in the video's own language, set **Chat: Transcript Language** to `auto` in preferences.",
+    );
+  }
   return parts.join("\n\n");
+}
+
+/** Show text as-is in Markdown, e.g. an error from yt-dlp. */
+function codeBlock(text: string): string {
+  const fence = "```";
+  return `${fence}\n${text.split(fence).join("'''")}\n${fence}`;
 }
 
 function turnMarkdown(turn: Turn, ctx: VideoContext | undefined): string {
@@ -368,6 +380,15 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
   const stats = ctx ? videoStats(ctx.video) : undefined;
   const best = ctx ? qualityName(maxHeight(ctx.video)) : undefined;
 
+  const engineNoticeShown = !!engineStatus && !engineStatus.ready;
+  const loadErrorActions = loadError ? (
+    <ActionPanel>
+      <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => load(true)} />
+      <Action.CopyToClipboard title="Copy Error" content={loadError} />
+      <Action.OpenInBrowser title="Open Video" url={url} />
+    </ActionPanel>
+  ) : null;
+
   const askTyped = typed ? <Action title="Ask" icon={Icon.Message} onAction={() => ask(typed)} /> : null;
 
   const commonActions = ctx ? (
@@ -469,28 +490,52 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
         </List.Dropdown>
       }
     >
+      {/* Raycast shows an EmptyView only when the list has no items, so while the
+          engine notice is up, the video's loading or error state is an item too. */}
+      {engineNoticeShown && !ctx && (
+        <List.Section title="Video">
+          {loadError ? (
+            <List.Item
+              id="load-error"
+              title="Couldn't load this video"
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+              detail={<List.Item.Detail markdown={`## Couldn't load this video\n\n${codeBlock(loadError)}`} />}
+              actions={loadErrorActions}
+            />
+          ) : (
+            <List.Item
+              id="loading"
+              title="Fetching video details and transcript…"
+              subtitle={hostOf(url)}
+              icon={Icon.Download}
+              detail={
+                <List.Item.Detail markdown={`Fetching the video's details and transcript from ${hostOf(url)}…`} />
+              }
+            />
+          )}
+        </List.Section>
+      )}
       <EngineNotice
         status={engineStatus}
         statuses={engineStatuses}
         onRetry={recheckEngines}
         onSwitch={(id) => setEngine(id)}
       />
-      {loadError ? (
-        <List.EmptyView
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-          title="Couldn't load this video"
-          description={loadError}
-          actions={
-            <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => load(true)} />
-              <Action.CopyToClipboard title="Copy Error" content={loadError} />
-              <Action.OpenInBrowser title="Open Video" url={url} />
-            </ActionPanel>
-          }
-        />
-      ) : !ctx ? (
-        <List.EmptyView icon={Icon.Download} title="Fetching video details and transcript…" description={hostOf(url)} />
-      ) : null}
+      {!engineNoticeShown &&
+        (loadError ? (
+          <List.EmptyView
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+            title="Couldn't load this video"
+            description={loadError}
+            actions={loadErrorActions}
+          />
+        ) : !ctx ? (
+          <List.EmptyView
+            icon={Icon.Download}
+            title="Fetching video details and transcript…"
+            description={hostOf(url)}
+          />
+        ) : null)}
 
       {ctx && turns.length > 0 && (
         <List.Section title="Conversation" subtitle={String(turns.length)}>
@@ -652,6 +697,9 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
             actions={
               <ActionPanel>
                 {askTyped}
+                {ctx.segments.length === 0 && ctx.transcriptReason === "language" && (
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                )}
                 <Action.OpenInBrowser title="Open Video" url={url} />
                 <Action.CopyToClipboard
                   title="Copy Statistics"

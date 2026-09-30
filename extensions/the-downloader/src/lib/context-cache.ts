@@ -68,7 +68,14 @@ export async function loadVideoContext(
     ctx = { url, video: slimVideo(video), segments, language: found, fetchedAt: Date.now() };
   } catch (error) {
     if (!(error instanceof NoTranscriptError)) throw error;
-    ctx = { url, video: slimVideo(error.video), segments: [], transcriptNote: error.message, fetchedAt: Date.now() };
+    ctx = {
+      url,
+      video: slimVideo(error.video),
+      segments: [],
+      transcriptNote: error.message,
+      transcriptReason: error.reason,
+      fetchedAt: Date.now(),
+    };
   }
   // Without a transcript, fetch again next time: captions may have been rate-limited or added since.
   if (ctx.segments.length > 0) {

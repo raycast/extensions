@@ -1,4 +1,4 @@
-import { TranscriptSegment } from "../transcript.js";
+import { NoTranscriptReason, TranscriptSegment } from "../transcript.js";
 import { Video } from "../types.js";
 import { formatClock } from "./format.js";
 import { formatCount, formatUploadDate } from "./media-info.js";
@@ -16,6 +16,8 @@ export type VideoContext = {
   language?: string;
   /** Why there is no transcript, when `segments` is empty. */
   transcriptNote?: string;
+  /** The kind of reason, e.g. `language` when captions exist but not in the chosen language. */
+  transcriptReason?: NoTranscriptReason;
   fetchedAt: number;
 };
 
