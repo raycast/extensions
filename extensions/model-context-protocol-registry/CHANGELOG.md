@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Recordist] - {PR_MERGE_DATE}
+## [Add Recordist] - 2026-09-30
 
 - Add Recordist community entry (`@recordist/gateway`): search and read the meetings recorded on your own computer.
 
