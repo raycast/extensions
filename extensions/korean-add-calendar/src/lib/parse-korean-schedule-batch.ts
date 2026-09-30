@@ -18,6 +18,11 @@ export interface ParseBatchResult {
   tooManyItems: boolean;
 }
 
+export interface BatchRetrySnapshot {
+  sentence: string;
+  batch: ParseBatchResult;
+}
+
 export const MAX_BATCH_ITEMS = 3;
 const BATCH_TOKEN_PATTERN = /\s*(,|;|그리고|하고)\s*/gu;
 const DATE_TIME_CUE_AT_START_PATTERN =
@@ -145,10 +150,49 @@ export function firstBatchParseResult(batch: ParseBatchResult): ParseResult | nu
 }
 
 export function buildBatchRetryInput(item: ParsedBatchItem): string {
-  if (!item.inheritedDate) {
+  if (item.value.recurrence) {
+    // The retry snapshot retains the resolved first occurrence while keeping recurrence text editable.
     return item.input;
   }
 
-  const date = item.value.start;
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${item.input}`;
+  const { value } = item;
+  const date = buildDateCue(value.start);
+  const location = value.location ? ` 장소: ${value.location}` : "";
+
+  if (value.allDay) {
+    const deadlineSuffix = value.intent === "deadline" ? "까지" : "";
+    return `${date}${deadlineSuffix} ${value.title}${location}`;
+  }
+
+  const startTime = buildTimeCue(value.start);
+  const timeCue = value.intent === "deadline" ? `${startTime}까지` : `${startTime}부터 ${buildTimeCue(value.end)}까지`;
+  return `${date} ${timeCue} ${value.title}${location}`;
+}
+
+export function buildBatchRetrySnapshot(items: ParsedBatchItem[]): BatchRetrySnapshot {
+  const retryItems = items.map((item) => {
+    const input = buildBatchRetryInput(item);
+    return {
+      input,
+      value: {
+        ...item.value,
+        source: input,
+      },
+      inheritedDate: false,
+    };
+  });
+
+  return {
+    sentence: retryItems.map((item) => item.input).join(", "),
+    batch: {
+      items: retryItems,
+      errors: [],
+      isBatch: retryItems.length > 1,
+      tooManyItems: false,
+    },
+  };
+}
+
+function buildTimeCue(date: Date): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }

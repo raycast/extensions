@@ -32,7 +32,8 @@ import {
 import { resolveDestinationSelection } from "./lib/destination-selection";
 import { resolveInitialSentence } from "./lib/launch-input";
 import {
-  buildBatchRetryInput,
+  BatchRetrySnapshot,
+  buildBatchRetrySnapshot,
   firstBatchParseResult,
   MAX_BATCH_ITEMS,
   parseKoreanScheduleBatch,
@@ -93,9 +94,15 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
   const [recurrenceEndType, setRecurrenceEndType] = useState<RecurrenceEndType>("count");
   const [recurrenceCount, setRecurrenceCount] = useState("10");
   const [recurrenceUntil, setRecurrenceUntil] = useState<Date | null>(defaultRecurrenceUntil());
-  const [unknownRetryFingerprint, setUnknownRetryFingerprint] = useState<string | undefined>();
+  const [retrySnapshot, setRetrySnapshot] = useState<BatchRetrySnapshot | undefined>();
+  const [unconfirmedItemCount, setUnconfirmedItemCount] = useState(0);
 
-  const parsedBatch = useMemo(() => parseKoreanScheduleBatch(sentence), [sentence]);
+  const parsedBatch = useMemo(() => {
+    const normalizedSentence = sentence.trim();
+    return retrySnapshot?.sentence === normalizedSentence
+      ? retrySnapshot.batch
+      : parseKoreanScheduleBatch(normalizedSentence);
+  }, [retrySnapshot, sentence]);
   const parseResult = useMemo(() => firstBatchParseResult(parsedBatch), [parsedBatch]);
   const batchIntent = useMemo(() => summarizeBatchIntent(parsedBatch.items), [parsedBatch.items]);
   const hasRecurringItems = useMemo(
@@ -361,7 +368,11 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       return;
     }
 
-    const submitBatch = parseKoreanScheduleBatch(values.sentence);
+    const normalizedSentence = values.sentence.trim();
+    const submitBatch =
+      retrySnapshot?.sentence === normalizedSentence
+        ? retrySnapshot.batch
+        : parseKoreanScheduleBatch(normalizedSentence);
     if (submitBatch.tooManyItems) {
       await showToast({
         style: Toast.Style.Failure,
@@ -434,14 +445,11 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       return;
     }
 
-    const fingerprintValues = { ...values, ...recurrenceValues };
-    const submissionFingerprint = buildUnknownOutcomeFingerprint(fingerprintValues);
-    if (submissionFingerprint === unknownRetryFingerprint) {
+    if (unconfirmedItemCount > 0) {
       const shouldRetry = await confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Previous creation outcome is unknown",
-        message:
-          "The native helper timed out after submission may have started. Check Calendar or Reminders first to avoid creating duplicates.",
+        message: `${unconfirmedItemCount} previous item${unconfirmedItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.`,
         primaryAction: {
           title: "Retry After Checking",
           style: Alert.ActionStyle.Default,
@@ -454,14 +462,14 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       if (!shouldRetry) {
         return;
       }
-      setUnknownRetryFingerprint(undefined);
+      setUnconfirmedItemCount(0);
     }
 
     setIsSubmitting(true);
     try {
-      const failures: Array<{ input: string; message: string }> = [];
-      const unknownOutcomes: Array<{ input: string; message: string }> = [];
-      const retryableOutcomes: Array<{ input: string; message: string }> = [];
+      const failures: Array<{ item: ParsedBatchItem; message: string }> = [];
+      const unknownOutcomes: Array<{ item: ParsedBatchItem; message: string }> = [];
+      const retryableOutcomes: Array<{ item: ParsedBatchItem; message: string }> = [];
       let successCount = 0;
       let lastCreatedCalendarStart: Date | undefined;
 
@@ -485,7 +493,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         } catch (error) {
           const prefix = submitBatch.isBatch ? `[${item.input}] ` : "";
           const outcome = {
-            input: buildBatchRetryInput(item),
+            item,
             message: `${prefix}${error instanceof Error ? error.message : String(error)}`,
           };
           retryableOutcomes.push(outcome);
@@ -512,9 +520,10 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       }
 
       if (unknownOutcomes.length > 0) {
-        const retrySentence = retryableOutcomes.map((outcome) => outcome.input).join(", ");
-        setSentence(retrySentence);
-        setUnknownRetryFingerprint(buildUnknownOutcomeFingerprint({ ...fingerprintValues, sentence: retrySentence }));
+        const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
+        setUnconfirmedItemCount(unknownOutcomes.length);
         await showToast({
           style: Toast.Style.Failure,
           title:
@@ -529,6 +538,9 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       }
 
       if (successCount === 0) {
+        const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
         await showToast({
           style: Toast.Style.Failure,
           title: values.targetType === "reminder" ? "Reminder creation failed" : "Event creation failed",
@@ -543,7 +555,9 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           title: `Partial success (${successCount} succeeded, ${failures.length} failed)`,
           message: failures[0].message,
         });
-        setSentence(failures.map((failure) => failure.input).join(", "));
+        const nextRetrySnapshot = buildBatchRetrySnapshot(failures.map((failure) => failure.item));
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
       } else {
         const baseTitle =
           values.targetType === "reminder" ? `Reminder created (${successCount})` : `Event created (${successCount})`;
@@ -555,6 +569,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       }
 
       if (failures.length === 0) {
+        setRetrySnapshot(undefined);
         setSentence("");
         setLocation("");
         setIsTargetManuallyOverridden(false);
@@ -891,21 +906,4 @@ function formatDate(value: Date, allDay: boolean): string {
 
 function dateOnlyTimestamp(value: Date): number {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
-}
-
-function buildUnknownOutcomeFingerprint(values: FormValues): string {
-  const destinationId = values.targetType === "calendar" ? values.calendarId : values.reminderListId;
-  return JSON.stringify([
-    values.targetType,
-    destinationId,
-    values.sentence.trim(),
-    values.location?.trim() ?? "",
-    values.recurrenceEndType,
-    values.recurrenceCount?.trim() ?? "",
-    formatFingerprintDate(values.recurrenceUntil),
-  ]);
-}
-
-function formatFingerprintDate(value: Date | null | undefined): string {
-  return value && !Number.isNaN(value.getTime()) ? value.toISOString() : "";
 }

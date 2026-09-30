@@ -134,7 +134,7 @@ func createCalendarEvent(payloadBase64: String) async throws -> String {
   do {
     try store.save(event, span: .thisEvent, commit: true)
   } catch {
-    throw BridgeFailure(message: "Failed to save event")
+    throw BridgeFailure(message: saveFailureMessage(item: "event", error: error))
   }
 
   return calendar.title
@@ -165,7 +165,7 @@ func createReminder(payloadBase64: String) async throws -> String {
   do {
     try store.save(reminder, commit: true)
   } catch {
-    throw BridgeFailure(message: "Failed to save reminder")
+    throw BridgeFailure(message: saveFailureMessage(item: "reminder", error: error))
   }
 
   return list.title
@@ -277,6 +277,11 @@ private func encodeJSON<T: Encodable>(_ value: T, failureMessage: String) throws
   } catch {
     throw BridgeFailure(message: failureMessage)
   }
+}
+
+private func saveFailureMessage(item: String, error: Error) -> String {
+  let nsError = error as NSError
+  return "Failed to save \(item) (\(nsError.domain), code \(nsError.code))"
 }
 
 private func compareCalendars(_ lhs: EKCalendar, _ rhs: EKCalendar) -> Bool {

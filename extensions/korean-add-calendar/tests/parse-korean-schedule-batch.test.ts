@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { MAX_BATCH_ITEMS, parseKoreanScheduleBatch } from "../src/lib/parse-korean-schedule-batch";
+import {
+  buildBatchRetryInput,
+  buildBatchRetrySnapshot,
+  MAX_BATCH_ITEMS,
+  parseKoreanScheduleBatch,
+} from "../src/lib/parse-korean-schedule-batch";
 
 describe("parseKoreanScheduleBatch", () => {
   const baseNow = new Date(2026, 1, 17, 9, 0, 0, 0);
@@ -39,7 +44,9 @@ describe("parseKoreanScheduleBatch", () => {
   });
 
   it("keeps explicit location marker per split clause", () => {
-    const result = parseKoreanScheduleBatch("내일 3시 회의 장소: A회의실, 오후 5시 코드리뷰 장소: B회의실", { now: baseNow });
+    const result = parseKoreanScheduleBatch("내일 3시 회의 장소: A회의실, 오후 5시 코드리뷰 장소: B회의실", {
+      now: baseNow,
+    });
     expect(result.items).toHaveLength(2);
     expect(result.errors).toHaveLength(0);
     expect(result.items[0]?.value.location).toBe("A회의실");
@@ -88,14 +95,14 @@ describe("parseKoreanScheduleBatch", () => {
     expect(result.items[1]?.value.start.getDate()).toBe(3);
   });
 
-  it.each([
-    "내일 오후 3시 회의, 다음 주 화요일 오후 4시 통화",
-    "내일 오후 3시 회의, 20일 오후 4시 통화",
-  ])("splits other parser-supported date cues: %s", (sentence) => {
-    const result = parseKoreanScheduleBatch(sentence, { now: baseNow });
-    expect(result.items).toHaveLength(2);
-    expect(result.errors).toHaveLength(0);
-  });
+  it.each(["내일 오후 3시 회의, 다음 주 화요일 오후 4시 통화", "내일 오후 3시 회의, 20일 오후 4시 통화"])(
+    "splits other parser-supported date cues: %s",
+    (sentence) => {
+      const result = parseKoreanScheduleBatch(sentence, { now: baseNow });
+      expect(result.items).toHaveLength(2);
+      expect(result.errors).toHaveLength(0);
+    },
+  );
 
   it("retains distinct intents so mixed batches can be rejected before submission", () => {
     const result = parseKoreanScheduleBatch("내일 오후 3시 회의, 3일 안에 보고서 제출", { now: baseNow });
@@ -110,5 +117,51 @@ describe("parseKoreanScheduleBatch", () => {
     expect(result.items).toHaveLength(2);
     expect(result.items[0]?.value.recurrence).toBeUndefined();
     expect(result.items[1]?.value.recurrence).toEqual({ frequency: "weekly", weekday: 2 });
+  });
+
+  it("pins a resolved retry date across midnight", () => {
+    const initial = parseKoreanScheduleBatch("내일 오후 3시 회의, 모레 오후 5시 통화", { now: baseNow });
+    const failedItem = initial.items[1];
+    expect(failedItem).toBeDefined();
+    if (!failedItem) {
+      throw new Error("Expected the second batch item");
+    }
+
+    const retryInput = buildBatchRetryInput(failedItem);
+    expect(retryInput).toBe("2026년 2월 19일 17:00부터 18:00까지 통화");
+
+    const reparsed = parseKoreanScheduleBatch(retryInput, { now: new Date(2026, 1, 18, 0, 1, 0, 0) });
+    expect(reparsed.items[0]?.value.start).toEqual(new Date(2026, 1, 19, 17, 0, 0, 0));
+    expect(reparsed.items[0]?.value.title).toBe("통화");
+  });
+
+  it("keeps the original parsed values in a retry snapshot", () => {
+    const initial = parseKoreanScheduleBatch("매일 오후 3시 점검, 모레 오후 5시 통화", { now: baseNow });
+    const snapshot = buildBatchRetrySnapshot(initial.items);
+
+    expect(snapshot.batch.items.map((item) => item.value.start)).toEqual(initial.items.map((item) => item.value.start));
+    expect(snapshot.batch.items[0]?.value.recurrence).toEqual({ frequency: "daily" });
+    expect(snapshot.sentence).toContain("2026년 2월 19일 17:00부터 18:00까지 통화");
+  });
+
+  it("preserves deadline intent and location in a retry input", () => {
+    const initial = parseKoreanScheduleBatch("3일 안에 보고서 제출 장소: 사무실", { now: baseNow });
+    const failedItem = initial.items[0];
+    expect(failedItem).toBeDefined();
+    if (!failedItem) {
+      throw new Error("Expected a parsed deadline item");
+    }
+
+    const retryInput = buildBatchRetryInput(failedItem);
+    expect(retryInput).toBe("2026년 2월 20일까지 보고서 제출 장소: 사무실");
+
+    const reparsed = parseKoreanScheduleBatch(retryInput, { now: new Date(2026, 1, 18, 0, 1, 0, 0) });
+    expect(reparsed.items[0]?.value).toMatchObject({
+      intent: "deadline",
+      allDay: true,
+      title: "보고서 제출",
+      location: "사무실",
+    });
+    expect(reparsed.items[0]?.value.start).toEqual(new Date(2026, 1, 20, 0, 0, 0, 0));
   });
 });

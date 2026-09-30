@@ -35,6 +35,9 @@
 - Preserve token-like phrases inside titles and locations
 - Split later batch clauses that start with spaced, standalone-day, next-year, or explicit-year date cues
 - Avoid a submission crash when recurrence-only form values are omitted for non-recurring items
+- Keep resolved dates stable when retrying failed batch items
+- Require duplicate-risk confirmation even after editing other failed items
+- Preserve EventKit error domain and code when a save fails
 
 ## [Initial Version] - 2026-03-16
 
