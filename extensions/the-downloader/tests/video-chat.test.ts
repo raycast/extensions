@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { Engine } from "../src/lib/ai-engines";
+import { CompleteOptions, Engine } from "../src/lib/ai-engines";
 import {
   CHAT_INSTRUCTIONS,
+  NOTE_CHAR_LIMIT,
+  answerFromNotes,
   answerQuestion,
   buildPrompt,
   contextForExport,
@@ -85,6 +87,49 @@ describe("answerQuestion", () => {
     await answerQuestion(engine, ctxWith(200), "What are the landing legs made of?", []);
     expect(engine.calls).toHaveLength(1);
     expect(engine.calls[0].prompt).toContain("## Transcript excerpts");
+  });
+});
+
+describe("answerFromNotes", () => {
+  // Apple's small model sometimes repeats itself instead of stopping; a note
+  // that runs on would take minutes and overflow the 8,192-token window.
+  function loopingEngine(): Engine & { longest: number; parts: number } {
+    const engine = {
+      id: "apple" as const,
+      title: "Looping",
+      contextBudget: 800,
+      parts: 0,
+      longest: 0,
+      async complete(instructions: string, prompt: string, options: CompleteOptions = {}) {
+        if (prompt.includes("## Notes on the transcript")) return "the summary";
+        engine.parts++;
+        let text = "";
+        for (let i = 0; i < 5_000; i++) {
+          if (options.signal?.aborted) throw Object.assign(new Error("aborted"), { name: "AbortError" });
+          text += `- [0:${String(i % 60).padStart(2, "0")}] and again\n`;
+          engine.longest = Math.max(engine.longest, text.length);
+          options.onData?.(text);
+          await Promise.resolve();
+        }
+        return text;
+      },
+    };
+    return engine;
+  }
+
+  it("cuts a runaway part note and still writes the answer", async () => {
+    const engine = loopingEngine();
+    await expect(answerFromNotes(engine, ctxWith(200), "Summarize the video")).resolves.toBe("the summary");
+    expect(engine.parts).toBeGreaterThan(1);
+    expect(engine.longest).toBeLessThanOrEqual(NOTE_CHAR_LIMIT + 50);
+  });
+
+  it("still stops when the user stops", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      answerFromNotes(loopingEngine(), ctxWith(200), "Summarize the video", { signal: controller.signal }),
+    ).rejects.toMatchObject({ name: "AbortError" });
   });
 });
 

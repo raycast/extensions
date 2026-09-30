@@ -120,6 +120,38 @@ function shortDossier(ctx: VideoContext, now?: number): string {
 }
 
 /**
+ * Longest note kept for one part. 4–8 bullets fit easily; a small model that
+ * repeats itself instead of stopping would otherwise write for minutes, until
+ * the context window overflows and the whole summary fails.
+ */
+export const NOTE_CHAR_LIMIT = 2_500;
+
+/** One part's notes, cut off at `NOTE_CHAR_LIMIT`. Stopping the answer (`signal`) still stops it. */
+async function takeNote(engine: Engine, prompt: string, signal?: AbortSignal): Promise<string> {
+  const part = new AbortController();
+  const stop = () => part.abort();
+  if (signal?.aborted) part.abort();
+  signal?.addEventListener("abort", stop);
+  let text = "";
+  try {
+    const note = await engine.complete(PART_INSTRUCTIONS, prompt, {
+      signal: part.signal,
+      onData: (sofar) => {
+        text = sofar;
+        if (sofar.length > NOTE_CHAR_LIMIT) part.abort();
+      },
+    });
+    return note.slice(0, NOTE_CHAR_LIMIT);
+  } catch (error) {
+    // Cut off for running on, not stopped by the user: keep what it wrote.
+    if (part.signal.aborted && !signal?.aborted) return text.slice(0, NOTE_CHAR_LIMIT);
+    throw error;
+  } finally {
+    signal?.removeEventListener("abort", stop);
+  }
+}
+
+/**
  * Map-reduce for overview questions on small context windows: take notes on
  * each part of the transcript, then answer from the notes.
  */
@@ -136,10 +168,10 @@ export async function answerFromNotes(
   for (const [i, part] of parts.entries()) {
     options.onStatus?.(`Reading part ${i + 1} of ${parts.length}…`);
     const range = `${formatTimestamp(part.start)}–${formatTimestamp(part.end)}`;
-    const note = await engine.complete(
-      PART_INSTRUCTIONS,
+    const note = await takeNote(
+      engine,
       `${facts}\n\n## Transcript part ${i + 1} of ${parts.length} (${range})\n${part.text}`,
-      { signal: options.signal },
+      options.signal,
     );
     notes.push(`### Part ${i + 1} (${range})\n${note.trim()}`);
   }
