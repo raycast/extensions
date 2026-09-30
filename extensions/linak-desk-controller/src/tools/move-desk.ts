@@ -1,4 +1,4 @@
-import moveToCustom from "../move-to-custom";
+import { moveTo } from "../desk";
 
 type Input = {
   /* The height to move the desk to in cm */
@@ -6,5 +6,5 @@ type Input = {
 };
 
 export default async function moveDesk({ height }: Input) {
-  return await moveToCustom({ arguments: { height: height.toString() } });
+  return await moveTo(height);
 }
