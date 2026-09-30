@@ -9,9 +9,8 @@ import {
   environment,
   getPreferenceValues,
   open,
-  showToast,
-  Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -105,11 +104,7 @@ export default function Command() {
       if (!response.ok)
         throw new Error(response.error ?? "Could not open the menu bar icon.");
     } catch (cause) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Open Menu Bar Icon",
-        message: cause instanceof Error ? cause.message : String(cause),
-      });
+      await showFailureToast(cause, { title: "Could Not Open Menu Bar Icon" });
     }
   }
 
