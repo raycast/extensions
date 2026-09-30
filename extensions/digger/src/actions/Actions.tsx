@@ -19,12 +19,14 @@ interface ActionsProps {
    * It is wrong for Well-Known and Theme, whose URLs mostly redirect to the
    * site's homepage, so ⏎ appeared to do nothing useful.
    *
-   * An automated review flagged this against a "new actions should be appended"
-   * rule and it was reverted once. Restored deliberately by the extension owner:
-   * the rule protects a user's muscle memory for an EXISTING default, and both
-   * sections that set this shipped in the same release as the flag — there was
-   * no prior default to unlearn. If the finding returns, answer it with that;
-   * do not silently revert again.
+   * An automated review flags this against a "new actions should be appended"
+   * rule. It was reverted once to clear that finding, and restored deliberately
+   * by the extension owner. The rule protects a user's habit for a USEFUL existing
+   * default; the one replaced here was Open in Browser on `data.url` — the site the
+   * user had just dug, already known to them — so on these two sections Enter did
+   * nothing specific to the section and there is no habit worth keeping. Open in
+   * Browser stays in the panel, and the CHANGELOG announces the change. If the
+   * finding returns, answer it with that; do not silently revert again.
    */
   sectionActionsFirst?: boolean;
 }

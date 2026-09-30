@@ -54,6 +54,8 @@ export interface SvgScan {
   /** Every occurrence counted, before the cap — external sprite uses included. */
   total: number;
   truncated: boolean;
+  /** The borrowed-definition budget ran out: some exports lack definitions they reference. */
+  incomplete: boolean;
   externalSprites: ExternalSprite[];
 }
 
@@ -91,8 +93,15 @@ const RESOURCE_HREF_ELEMENTS = new Set(["image", "use", "feimage"]);
 /** Class tokens that name nothing in particular. */
 const GENERIC_NAMES = new Set(["icon", "svg", "image", "img", "logo-svg", "styles", "style", "index", "module"]);
 
-/** Past this many borrowed definitions the reference graph is pathological, not a sprite. */
+/** Past this many borrowed definitions for ONE export, the reference graph is pathological, not a sprite. */
 const MAX_BORROWED = 2000;
+
+/**
+ * Borrowed definitions copied across a whole scan. The seven sites measured on
+ * 2026-09-30 (linear.app the largest) stay far below it; a hostile page's chain
+ * of symbols cannot push the work past it.
+ */
+export const DEFAULT_BORROW_BUDGET = 20000;
 
 /** A parsed document plus what every lookup needs, built once per document. */
 interface Doc {
@@ -103,6 +112,14 @@ interface Doc {
   ids: Map<string, Element>;
   /** Namespace declarations on the document root, for prefixes a copied fragment still uses. */
   namespaces: Record<string, string>;
+  /**
+   * Definitions left to copy across the WHOLE scan, shared by every export. A chain
+   * of symbols makes each one's standalone copy contain the rest of the chain, so
+   * the work grows with the square of its length: 10,000 chained symbols took 68s
+   * and 30,000 exhausted the heap. Past the budget, copies are made without their
+   * remaining borrowed definitions and the scan reports itself incomplete.
+   */
+  budget: { remaining: number; exhausted: boolean };
 }
 
 export function isSvgUrl(value: string | undefined): boolean {
@@ -473,10 +490,20 @@ function selfContained(doc: Doc, root: Element, outer: string): string {
     seen.add(id);
     const target = doc.ids.get(id);
     if (!target || target === root || isInside(target, new Set([root]))) continue;
+    if (doc.budget.remaining <= 0) {
+      doc.budget.exhausted = true;
+      break;
+    }
+    doc.budget.remaining--;
     borrowed.push(target);
     for (const next of localReferences($, target)) if (!seen.has(next)) queue.push(next);
   }
 
+  // Stopped at the per-export cap with references still unresolved: this copy is
+  // missing definitions, and the scan must say so like any other exhaustion.
+  if (borrowed.length >= MAX_BORROWED && queue.some((id) => !seen.has(id) && !inside.has(id))) {
+    doc.budget.exhausted = true;
+  }
   const set = new Set(borrowed);
   const outermost = borrowed.filter((el) => !isInside(el, set));
   if (outermost.length === 0) return outer;
@@ -713,6 +740,64 @@ function indexIds($: cheerio.CheerioAPI): Map<string, Element> {
 }
 
 /**
+ * Strongly connected components of a directed graph (Tarjan), iteratively, so
+ * a graph of any depth fits in constant stack. Components come out sinks first:
+ * for every edge u → v across components, v's component precedes u's.
+ */
+function stronglyConnected(nodes: string[], edges: Map<string, string[]>): string[][] {
+  const index = new Map<string, number>();
+  const low = new Map<string, number>();
+  const onStack = new Set<string>();
+  const stack: string[] = [];
+  const out: string[][] = [];
+  let next = 0;
+  const open = (v: string) => {
+    index.set(v, next);
+    low.set(v, next);
+    next++;
+    stack.push(v);
+    onStack.add(v);
+  };
+  for (const start of nodes) {
+    if (index.has(start)) continue;
+    open(start);
+    const work: Array<[string, number]> = [[start, 0]];
+    while (work.length > 0) {
+      const frame = work[work.length - 1];
+      const [v, i] = frame;
+      const children = edges.get(v) ?? [];
+      if (i < children.length) {
+        frame[1] = i + 1;
+        const w = children[i];
+        if (!index.has(w)) {
+          open(w);
+          work.push([w, 0]);
+        } else if (onStack.has(w)) {
+          low.set(v, Math.min(low.get(v)!, index.get(w)!));
+        }
+        continue;
+      }
+      work.pop();
+      if (work.length > 0) {
+        const parent = work[work.length - 1][0];
+        low.set(parent, Math.min(low.get(parent)!, low.get(v)!));
+      }
+      if (low.get(v) === index.get(v)) {
+        const group: string[] = [];
+        let w: string;
+        do {
+          w = stack.pop()!;
+          onStack.delete(w);
+          group.push(w);
+        } while (w !== v);
+        out.push(group);
+      }
+    }
+  }
+  return out;
+}
+
+/**
  * The definition an element sits in: the nearest enclosing `<symbol>`'s id,
  * `null` for a bare `<defs>` (or a symbol without an id), undefined when it is
  * not inside a definition at all.
@@ -747,6 +832,7 @@ function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, Exter
   const symbolIds = new Set(($("symbol[id]").get() as Element[]).map((el) => el.attribs["id"]));
   const direct = new Map<string, number>();
   const usedBy = new Map<string, string[]>(); // symbol → the symbols whose bodies use it, once per use
+  const uses = new Map<string, string[]>(); // symbol → the symbols its body uses
   ($("use").get() as Element[]).forEach((use) => {
     const href = hrefOf(use);
     if (!href?.startsWith("#")) return;
@@ -754,31 +840,27 @@ function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, Exter
     if (!symbolIds.has(id)) return;
     const owner = enclosingDefinition(use);
     if (owner === undefined) direct.set(id, (direct.get(id) ?? 0) + 1);
-    else if (owner !== null) usedBy.set(id, [...(usedBy.get(id) ?? []), owner]);
+    else if (owner !== null) {
+      if (!usedBy.has(id)) usedBy.set(id, []);
+      usedBy.get(id)!.push(owner);
+      if (!uses.has(owner)) uses.set(owner, []);
+      uses.get(owner)!.push(id);
+    }
   });
+  // Symbols that reference each other form one group, drawn as often as the
+  // uses entering the group from outside — independent of declaration order.
+  // Groups are counted owners-first; no recursion, so no chain can exhaust
+  // the stack.
   const symbolUses = new Map<string, number>();
-  const effective = (id: string, visiting: Set<string>): number => {
-    const known = symbolUses.get(id);
-    if (known !== undefined) return known;
-    if (visiting.has(id)) return 0; // a cycle draws nothing more
-    visiting.add(id);
-    const total =
-      (direct.get(id) ?? 0) + (usedBy.get(id) ?? []).reduce((n, owner) => n + effective(owner, visiting), 0);
-    visiting.delete(id);
-    symbolUses.set(id, total);
-    return total;
-  };
-  symbolIds.forEach((id) => effective(id, new Set()));
-
-  $("symbol[id]").each((_, node) => {
-    const el = node as Element;
-    const id = el.attribs["id"];
-    const markup = symbolToSvg(doc, el);
-    collector.add(
-      { key: "m:" + normalizeMarkup(markup), source: "sprite", markup, bytes: utf8Bytes(markup), name: id },
-      symbolUses.get(id) ?? 0,
-    );
-  });
+  for (const group of stronglyConnected([...symbolIds], uses).reverse()) {
+    const members = new Set(group);
+    let drawn = 0;
+    for (const id of group) {
+      drawn += direct.get(id) ?? 0;
+      for (const owner of usedBy.get(id) ?? []) if (!members.has(owner)) drawn += symbolUses.get(owner) ?? 0;
+    }
+    for (const id of group) symbolUses.set(id, drawn);
+  }
 
   $("svg").each((_, node) => {
     const el = node as Element;
@@ -830,6 +912,26 @@ function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, Exter
     const markup = standalone(selfContained(doc, el, $.xml(el)), doc.namespaces);
     collector.addMarkup("inline", markup, inferElementName($, el));
   });
+
+  // Symbols after the inline SVGs, and used ones before unused ones: the borrow
+  // budget is shared, and a pathological unused chain must not spend it before
+  // the SVGs a page actually shows get their definitions.
+  const symbols = ($("symbol[id]").get() as Element[])
+    .map((el, order) => ({ el, order, uses: symbolUses.get(el.attribs["id"]) ?? 0 }))
+    .sort((a, b) => Number(b.uses > 0) - Number(a.uses > 0) || a.order - b.order);
+  for (const { el, uses } of symbols) {
+    const markup = symbolToSvg(doc, el);
+    collector.add(
+      {
+        key: "m:" + normalizeMarkup(markup),
+        source: "sprite",
+        markup,
+        bytes: utf8Bytes(markup),
+        name: el.attribs["id"],
+      },
+      uses,
+    );
+  }
 
   $("img").each((_, node) => {
     const el = node as Element;
@@ -894,7 +996,7 @@ function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, Exter
 export function extractSvgs(
   html: string,
   pageUrl: string,
-  options: { maxAssets: number; known?: readonly KnownSvg[] },
+  options: { maxAssets: number; known?: readonly KnownSvg[]; borrowBudget?: number },
 ): SvgScan {
   const collector = new Collector();
   const sprites = new Map<string, ExternalSprite>();
@@ -905,7 +1007,8 @@ export function extractSvgs(
   const baseHref = $("base[href]").first().attr("href");
   const base = (baseHref && resolve(baseHref, pageUrl)) || pageUrl;
   prepareTree($, base);
-  scanDocument({ $, base, ids: indexIds($), namespaces: {} }, collector, sprites);
+  const budget = { remaining: options.borrowBudget ?? DEFAULT_BORROW_BUDGET, exhausted: false };
+  scanDocument({ $, base, ids: indexIds($), namespaces: {}, budget }, collector, sprites);
 
   // SVGs the dig already found in places this scan does not read (Open Graph,
   // JSON-LD, the manifest). Without them the grid could report "none" beside a
@@ -926,6 +1029,7 @@ export function extractSvgs(
     assets: all.slice(0, options.maxAssets),
     total: collector.total,
     truncated: all.length > options.maxAssets,
+    incomplete: budget.exhausted,
     externalSprites: [...sprites.values()],
   };
 }
@@ -934,11 +1038,23 @@ export function extractSvgs(
  * Rebuilds the symbols a page used from an external sprite file. Ids the file
  * does not define are left out; the caller decides what that means.
  */
-export function rebuildSpriteSymbols(fileText: string, fileUrl: string, uses: Record<string, number>): SvgAsset[] {
+export function rebuildSpriteSymbols(
+  fileText: string,
+  fileUrl: string,
+  uses: Record<string, number>,
+  /** Shared with the caller, which reads `exhausted` afterward to report an incomplete rebuild. */
+  budget: { remaining: number; exhausted: boolean } = { remaining: DEFAULT_BORROW_BUDGET, exhausted: false },
+): SvgAsset[] {
   const $ = cheerio.load(fileText, { xml: true });
   absolutizeResources($, fileUrl);
   const root = rootElement($);
-  const doc: Doc = { $, base: fileUrl, ids: indexIds($), namespaces: root ? namespacesOf(root) : {} };
+  const doc: Doc = {
+    $,
+    base: fileUrl,
+    ids: indexIds($),
+    namespaces: root ? namespacesOf(root) : {},
+    budget,
+  };
   // A `<g>` or `<path>` drawn in the sprite file's coordinates needs that file's
   // viewBox and size, or it lands on the 300×150 default canvas.
   const rootBox = ["viewBox", "width", "height", "preserveAspectRatio"]

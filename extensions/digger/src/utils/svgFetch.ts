@@ -2,7 +2,7 @@ import { LIMITS, TIMEOUTS } from "./config";
 import { forEachWithConcurrency, readCappedText } from "./fetcher";
 import { getLogger } from "./logger";
 import { fetchPageSuppliedUrl } from "./networkGuard";
-import { ExternalSprite, parseSvgDocument, rebuildSpriteSymbols, SvgAsset } from "./svgUtils";
+import { DEFAULT_BORROW_BUDGET, ExternalSprite, parseSvgDocument, rebuildSpriteSymbols, SvgAsset } from "./svgUtils";
 import { redactUrlForLog, redactUrlsInText } from "./urlUtils";
 
 const log = getLogger("svg");
@@ -52,7 +52,13 @@ function warnUnreadable(event: string, url: string, error: unknown) {
 }
 
 /** A sprite load that read nothing and failed nothing — no files, or a canceled load. */
-export const EMPTY_SPRITES: ExternalSpriteResult = { assets: [], unchecked: 0, skipped: 0, missing: 0 };
+export const EMPTY_SPRITES: ExternalSpriteResult = {
+  assets: [],
+  unchecked: 0,
+  skipped: 0,
+  missing: 0,
+  incomplete: false,
+};
 
 export interface ExternalSpriteResult {
   assets: SvgAsset[];
@@ -62,6 +68,8 @@ export interface ExternalSpriteResult {
   skipped: number;
   /** Symbol ids a file was read for but does not define. */
   missing: number;
+  /** A file's borrowed-definition budget ran out: some rebuilt symbols lack definitions they reference. */
+  incomplete: boolean;
 }
 
 /**
@@ -82,6 +90,7 @@ export async function loadExternalSprites(
   const assets: SvgAsset[] = [];
   let unchecked = 0;
   let missing = 0;
+  let incomplete = false;
   // Leaving the view aborts these requests. That is not a sprite failing, and
   // the result is about to be discarded, so neither count nor log it.
   if (signal?.aborted) return EMPTY_SPRITES;
@@ -94,12 +103,14 @@ export async function loadExternalSprites(
       return;
     }
     // Relative references inside the file resolve against where it was actually served from.
-    const rebuilt = rebuildSpriteSymbols(result.value.markup, result.value.finalUrl, sprite.uses);
+    const budget = { remaining: DEFAULT_BORROW_BUDGET, exhausted: false };
+    const rebuilt = rebuildSpriteSymbols(result.value.markup, result.value.finalUrl, sprite.uses, budget);
+    incomplete ||= budget.exhausted;
     missing += sprite.ids.length - rebuilt.length;
     assets.push(...rebuilt);
   });
 
-  return { assets, unchecked, skipped: sprites.length - targets.length, missing };
+  return { assets, unchecked, skipped: sprites.length - targets.length, missing, incomplete };
 }
 
 /** What a file-backed SVG's thumbnail can show: its markup, or why there is none. */

@@ -231,6 +231,11 @@ export function SvgGridView({ pageUrl, known }: SvgGridViewProps) {
   if (state.phase === "ready") {
     if (state.pageTruncated) caveats.push(`page over ${formatBytes(LIMITS.MAX_PAGE_BYTES)}, start scanned`);
     if (merged.truncated) caveats.push(`list capped at ${LIMITS.MAX_SVG_ASSETS}`);
+    // The page's references ran past the scan's copy budget (see Doc.budget in
+    // svgUtils): some exports are missing definitions they point at.
+    if (state.scan.incomplete || state.sprites?.incomplete) {
+      caveats.push("page too complex, some SVGs lack shared definitions");
+    }
     const s = state.sprites;
     if (s === undefined) {
       const n = state.scan.externalSprites.length;

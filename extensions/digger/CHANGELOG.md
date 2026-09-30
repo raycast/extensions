@@ -19,9 +19,8 @@
   their own icon — image, text, swatch, code — green when the dig found some and red
   when it found none.
 - Pressing Enter on the Well-Known and Theme sections now opens their file and
-  token lists, instead of opening the site in a browser. Those URLs mostly
-  redirect to the homepage, so Enter appeared to do nothing. Open in Browser is
-  still in the action panel.
+  token lists, instead of reopening the site you just dug in a browser, which did
+  nothing specific to either section. Open in Browser is still in the action panel.
 
 ## [Well-Known files, Theme colors, and resource exports] - 2026-09-11
 

@@ -998,3 +998,77 @@ test("G2-2: a symbol cycle terminates", () => {
   );
   assert.ok(s.assets.length >= 2);
 });
+
+// ---- Greptile round 3 on #31769 ----
+test("G3-1: a 20,000-symbol chain is counted in bounded time and reports itself incomplete", () => {
+  const n = 20000;
+  const symbols = Array.from({ length: n }, (_, i) =>
+    i < n - 1
+      ? `<symbol id="s${i}"><use href="#s${i + 1}"/></symbol>`
+      : `<symbol id="s${i}"><use href="deep.svg#tip"/></symbol>`,
+  ).join("");
+  const t0 = performance.now();
+  const s = extractSvgs(doc(`<svg style="display:none">${symbols}</svg><svg><use href="#s0"/></svg>`), PAGE, {
+    maxAssets: 100000,
+  });
+  const ms = performance.now() - t0;
+  assert.ok(ms < 5000, `took ${ms.toFixed(0)}ms`);
+  assert.equal(s.externalSprites[0].uses["tip"], 1, "the part at the end of the chain is drawn once");
+  assert.equal(s.assets.find((a) => a.name === `s${n - 1}`)!.occurrences, 1);
+  assert.equal(s.incomplete, true, "the borrowed-definition budget ran out, and the scan says so");
+});
+
+test("G3-1: an ordinary sprite stays well inside the borrow budget", () => {
+  const s = X(
+    `<svg style="display:none"><symbol id="a"><use href="#b"/></symbol><symbol id="b"><path d="M0 0"/></symbol></svg><svg><use href="#a"/></svg>`,
+  );
+  assert.equal(s.incomplete, false);
+});
+
+test("G3-2: symbols in a cycle get the uses entering it, whatever the declaration order", () => {
+  for (const defs of [
+    `<symbol id="a"><use href="#b"/></symbol><symbol id="b"><use href="#a"/><use href="x.svg#part"/></symbol>`,
+    `<symbol id="b"><use href="#a"/><use href="x.svg#part"/></symbol><symbol id="a"><use href="#b"/></symbol>`,
+  ]) {
+    const s = X(`<svg style="display:none">${defs}</svg><svg><use href="#a"/></svg>`);
+    assert.equal(s.assets.find((a) => a.name === "a")!.occurrences, 1, defs);
+    assert.equal(s.assets.find((a) => a.name === "b")!.occurrences, 1, `b is reached through a: ${defs}`);
+    assert.equal(s.externalSprites[0].uses["part"], 1, defs);
+  }
+});
+
+// ---- Codex (gpt-5.5, high) on the round-3 budget ----
+test("C1: hitting the per-export borrow cap also marks the scan incomplete", () => {
+  const chain = Array.from({ length: 2002 }, (_, i) => `<linearGradient id="g${i}" href="#g${i + 1}"/>`).join("");
+  const s = X(`<svg style="display:none"><defs>${chain}</defs></svg><svg><rect fill="url(#g0)"/></svg>`);
+  assert.equal(s.incomplete, true);
+});
+
+test("C2: an external sprite rebuild that runs out of budget says so", () => {
+  const defs = Array.from({ length: 30 }, (_, i) => `<linearGradient id="g${i}"/>`).join("");
+  const symbols = Array.from({ length: 30 }, (_, i) => `<symbol id="s${i}"><rect fill="url(#g${i})"/></symbol>`).join(
+    "",
+  );
+  const file = `<svg xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${symbols}</svg>`;
+  const uses = Object.fromEntries(Array.from({ length: 30 }, (_, i) => [`s${i}`, 1]));
+  const budget = { remaining: 10, exhausted: false };
+  rebuildSpriteSymbols(file, "https://e.com/s.svg", uses, budget);
+  assert.equal(budget.exhausted, true);
+  const roomy = { remaining: 1000, exhausted: false };
+  rebuildSpriteSymbols(file, "https://e.com/s.svg", uses, roomy);
+  assert.equal(roomy.exhausted, false);
+});
+
+test("C3: an unused pathological chain cannot starve a visible SVG of its definitions", () => {
+  const n = 500;
+  const chain = Array.from({ length: n }, (_, i) => `<symbol id="c${i}"><use href="#c${i + 1}"/></symbol>`).join("");
+  const s = extractSvgs(
+    doc(
+      `<svg style="display:none">${chain}<defs><linearGradient id="g"/></defs></svg><svg><rect fill="url(#g)"/></svg>`,
+    ),
+    PAGE,
+    { maxAssets: 100000, borrowBudget: 200 },
+  );
+  const visible = s.assets.find((a) => a.source === "inline")!;
+  assert.match(visible.markup!, /<linearGradient id="g"/, "the visible SVG still got its gradient");
+});
