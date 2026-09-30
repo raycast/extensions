@@ -187,6 +187,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "gitdiagram",
+    title: "GitDiagram",
+    description:
+      "Architecture diagrams of public GitHub repositories: a written explanation of how a codebase is organized, its main components with their source paths, how they connect, and Mermaid source, plus a search of GitDiagram's existing diagrams and explainer-video transcripts. Read-only remote Streamable HTTP server at https://gitdiagram.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/ahmedkhaleel2004/gitdiagram/main/plugins/gitdiagram/assets/logo.png",
+    homepage: "https://gitdiagram.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://gitdiagram.com/mcp"],
+    },
+  },
+  {
     name: "github",
     title: "GitHub",
     description:
