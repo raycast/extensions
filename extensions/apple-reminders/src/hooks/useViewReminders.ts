@@ -235,7 +235,10 @@ export type Section = {
   reminders: Reminder[];
 };
 
-export default function useViewReminders(listId: string, { data, searchText }: { data?: Data; searchText?: string }) {
+export default function useViewReminders(
+  listId: string,
+  { data, searchText, execute = true }: { data?: Data; searchText?: string; execute?: boolean },
+) {
   const [showCompletedReminders, setShowCompletedReminders] = useCachedState(
     `show-completed-reminders-${listId}`,
     false,
@@ -245,8 +248,9 @@ export default function useViewReminders(listId: string, { data, searchText }: {
     data: completedRemindersData,
     mutate: mutateCompletedReminders,
     isLoading: isLoadingCompletedReminders,
+    error: completedRemindersError,
   } = useCachedPromise((listId, searchText) => getCompletedReminders(listId, searchText), [listId, searchText], {
-    execute: showCompletedReminders,
+    execute: showCompletedReminders && execute,
   });
 
   const viewDefault = listId === "today" || listId === "scheduled" || listId === "overdue" ? "dueDate" : "default";
@@ -271,8 +275,10 @@ export default function useViewReminders(listId: string, { data, searchText }: {
   }, [listId, data?.reminders]);
 
   const completedReminders = useMemo(() => {
-    return completedRemindersData?.filter(filterRemindersByListId(listId)) ?? [];
-  }, [listId, completedRemindersData]);
+    return execute && !completedRemindersError
+      ? (completedRemindersData?.filter(filterRemindersByListId(listId)) ?? [])
+      : [];
+  }, [listId, completedRemindersData, execute, completedRemindersError]);
 
   const { sortByProp, sortedReminders, orderByProp } = useMemo(() => {
     const sortedReminders = [...reminders];

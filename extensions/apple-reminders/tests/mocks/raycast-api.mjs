@@ -60,7 +60,32 @@ export const Clipboard = {
   readText: async () => "",
   copy: async () => {},
 };
-export const Cache = class {};
+const caches = new Set();
+export const Cache = class {
+  values = new Map();
+  listeners = new Set();
+  constructor() {
+    caches.add(this);
+  }
+  get(key) {
+    return this.values.get(key);
+  }
+  set(key, value) {
+    this.values.set(key, value);
+    this.listeners.forEach((listener) => listener());
+  }
+  clear() {
+    this.values.clear();
+    this.listeners.forEach((listener) => listener());
+  }
+  subscribe = (listener) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+};
+export function clearMockCache() {
+  caches.forEach((cache) => cache.clear());
+}
 export const MenuBarExtra = () => null;
 export const List = () => null;
 export const ActionPanel = () => null;
@@ -74,5 +99,3 @@ export const LocalStorage = {
 export const getFrontmostApplication = async () => ({ name: "Safari" });
 export const showHUD = async () => {};
 export const OAuth = {};
-
-

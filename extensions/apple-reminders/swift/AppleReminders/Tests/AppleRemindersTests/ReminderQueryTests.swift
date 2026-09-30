@@ -17,6 +17,34 @@ final class ReminderQueryTests: XCTestCase {
     return reminder
   }
 
+  func testMissingListIsAnErrorRatherThanAnEmptyResult() {
+    XCTAssertThrowsError(try calendarsForReminderQuery(listId: "deleted-list", calendars: [])) { error in
+      guard case RemindersError.noListFound = error else {
+        return XCTFail("Expected noListFound, got \(error)")
+      }
+      XCTAssertTrue(error.localizedDescription.contains("no longer exists"))
+    }
+  }
+
+  func testAnExistingEmptyListAndSmartViewsAreValid() throws {
+    let list = EKCalendar(for: .reminder, eventStore: store)
+    list.title = "Empty list"
+    let selected = try calendarsForReminderQuery(listId: list.calendarIdentifier, calendars: [list])
+    XCTAssertEqual(selected?.map(\.calendarIdentifier), [list.calendarIdentifier])
+    for listId: String? in [nil, "all", "today", "overdue", "scheduled"] {
+      XCTAssertNil(try calendarsForReminderQuery(listId: listId, calendars: []))
+    }
+  }
+
+  func testSearchMatchesEnglishMonthNamesUsedByTheReminderRow() {
+    let item = reminder("Due date", day: 30)
+    XCTAssertEqual(remindersMatchingQuery([item], listId: "all", searchText: "September").count, 1)
+    let completed = reminder("Completed date")
+    completed.isCompleted = true
+    completed.completionDate = now
+    XCTAssertEqual(remindersMatchingQuery([completed], listId: "all", searchText: "September").count, 1)
+  }
+
   func testTodayIsFilteredBeforeTheResultLimit() {
     let unrelated = (0..<1100).map { reminder("Undated \($0)") }
     let dueToday = (0..<22).map { reminder("Today \($0)", day: 30) }

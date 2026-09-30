@@ -5,6 +5,10 @@ export let titleAndNotesUpdates = [];
 export let moveToListUpdates = [];
 export let reminderQueries = [];
 export let completedReminderQueries = [];
+let queryHandler;
+export function setQueryHandler(handler) {
+  queryHandler = handler;
+}
 
 export function resetMockState() {
   createdReminders = [];
@@ -14,6 +18,7 @@ export function resetMockState() {
   moveToListUpdates = [];
   reminderQueries = [];
   completedReminderQueries = [];
+  queryHandler = undefined;
 }
 
 function getReminderNotes(payload) {
@@ -89,9 +94,11 @@ export async function setDueDate() {}
 export async function deleteReminder() {}
 export async function getData(listId, searchText) {
   reminderQueries.push({ listId, searchText });
+  if (queryHandler) return queryHandler({ listId, searchText, completed: false });
   return { reminders: [], lists: [] };
 }
 export async function getCompletedReminders(listId, searchText) {
   completedReminderQueries.push({ listId, searchText });
+  if (queryHandler) return queryHandler({ listId, searchText, completed: true });
   return [];
 }

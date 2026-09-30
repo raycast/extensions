@@ -39,13 +39,22 @@ struct RemindersData: Codable {
   let hasMoreReminders: Bool
 }
 
-enum RemindersError: Error {
+enum RemindersError: Error, LocalizedError {
   case accessDenied
   case noRemindersFound
   case noReminderFound
   case noListFound
   case unableToSaveReminder
   case other
+
+  var errorDescription: String? {
+    switch self {
+    case .noListFound:
+      return "The selected reminders list no longer exists. Choose another list."
+    default:
+      return nil
+    }
+  }
 }
 
 @raycast func getData(listId: String?, searchText: String?) async throws -> RemindersData {
@@ -61,10 +70,12 @@ enum RemindersError: Error {
     throw RemindersError.accessDenied
   }
 
+  let calendars = eventStore.calendars(for: .reminder)
+  let selectedCalendars = try calendarsForReminderQuery(listId: listId, calendars: calendars)
   let predicate = eventStore.predicateForIncompleteReminders(
     withDueDateStarting: nil,
     ending: nil,
-    calendars: nil
+    calendars: selectedCalendars
   )
   guard let reminders = await eventStore.fetchReminders(matching: predicate) else {
     throw RemindersError.noRemindersFound
@@ -73,7 +84,6 @@ enum RemindersError: Error {
   let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
   let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
 
-  let calendars = eventStore.calendars(for: .reminder)
   let defaultList = eventStore.defaultCalendarForNewReminders()
 
   let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
@@ -96,15 +106,7 @@ enum RemindersError: Error {
     throw RemindersError.accessDenied
   }
 
-  let calendars: [EKCalendar]?
-  if let listId, !["all", "today", "overdue", "scheduled"].contains(listId) {
-    guard let calendar = eventStore.calendar(withIdentifier: listId) else {
-      throw RemindersError.noListFound
-    }
-    calendars = [calendar]
-  } else {
-    calendars = nil
-  }
+  let calendars = try calendarsForReminderQuery(listId: listId, calendars: eventStore.calendars(for: .reminder))
 
   let predicate = eventStore.predicateForCompletedReminders(
     withCompletionDateStarting: nil,

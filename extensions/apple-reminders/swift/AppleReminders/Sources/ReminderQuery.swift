@@ -3,6 +3,16 @@ import Foundation
 
 let reminderResultLimit = 1000
 
+func calendarsForReminderQuery(listId: String?, calendars: [EKCalendar]) throws -> [EKCalendar]? {
+  guard let listId, !["all", "today", "overdue", "scheduled"].contains(listId) else {
+    return nil
+  }
+  guard let calendar = calendars.first(where: { $0.calendarIdentifier == listId }) else {
+    throw RemindersError.noListFound
+  }
+  return [calendar]
+}
+
 // Filter before serializing and limiting results so unrelated reminders cannot
 // crowd a selected list or search out of the response. Keep one extra to detect truncation.
 func remindersMatchingQuery(
@@ -13,6 +23,9 @@ func remindersMatchingQuery(
   let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
   let terms = (searchText ?? "").split(whereSeparator: { $0.isWhitespace }).map(String.init)
   let dateFormatter = DateFormatter()
+  // ReminderListItem uses date-fns' default English month names and Gregorian dates.
+  dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+  dateFormatter.calendar = Calendar(identifier: .gregorian)
   dateFormatter.dateFormat = "dd MMMM"
 
   return Array(reminders.lazy.filter { reminder in

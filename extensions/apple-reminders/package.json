@@ -922,6 +922,7 @@
     "@types/react": "19.2.18",
     "eslint": "^10.8.1",
     "prettier": "^3.9.6",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -930,6 +931,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --experimental-strip-types --import ./tests/register-mocks.mjs --test tests/**/*.test.ts"
+    "test": "npm run test:node && npm run test:swift",
+    "test:node": "node --experimental-strip-types --import ./tests/register-mocks.mjs --test tests/**/*.test.ts",
+    "test:swift": "swift test --package-path swift/AppleReminders"
   }
 }
