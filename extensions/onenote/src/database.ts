@@ -1,6 +1,13 @@
 import { environment, LocalStorage, Cache } from "@raycast/api";
 import { statSync, writeFileSync } from "fs";
-import { DEDUPE_ENTITIES_SQL, findSearchIndexes, indexSignature, normalizeSearchText, IndexFile } from "./search";
+import {
+  DEDUPE_ENTITIES_SQL,
+  findSearchIndexes,
+  indexSignature,
+  normalizeSearchText,
+  tokenizeSearchText,
+  IndexFile,
+} from "./search";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -106,12 +113,25 @@ export const create_or_update_db = async (force_update = false) => {
   // modified copy, preferring the one from the most recently updated index on ties.
   db.run(DEDUPE_ENTITIES_SQL);
 
-  // Pre-normalized title + content, so searches need a single case- and accent-safe substring scan.
-  db.run(
-    "UPDATE Entities SET SearchText = normalize_search_text(coalesce(Title, '') || char(10) || coalesce(Content, ''))"
+  // Pre-normalized titles (substring search) and a word index of titles and content (indexed search).
+  db.run("UPDATE Entities SET TitleSearch = normalize_search_text(coalesce(Title, ''))");
+  db.run("BEGIN");
+  const insertWord = db.prepare("INSERT INTO SearchWords (word, EntityRowId) VALUES (?, ?)");
+  const readContent = db.prepare(
+    "SELECT rowid, coalesce(Title, '') || char(10) || coalesce(Content, '') FROM Entities"
   );
+  while (readContent.step()) {
+    const [rowid, text] = readContent.get() as [number, string];
+    for (const word of new Set(tokenizeSearchText(text))) {
+      insertWord.run([word, rowid]);
+    }
+  }
+  readContent.free();
+  insertWord.free();
+  db.run("COMMIT");
   db.exec(
-    "CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
+    "CREATE INDEX SearchWords_word ON SearchWords (word, EntityRowId);\
+     CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
      CREATE INDEX Entities_RecentTime ON Entities (RecentTime DESC);"
   );
 
@@ -155,5 +175,7 @@ const CREATE_TABLE_SQL =
   "Title               TEXT, " +
   "EnterpriseIdentity  TEXT," +
   "Content             TEXT, " +
-  "SearchText          TEXT" +
-  "); ";
+  "TitleSearch         TEXT" +
+  "); \n" +
+  "DROP TABLE IF EXISTS SearchWords;\n" +
+  "CREATE TABLE SearchWords (word TEXT NOT NULL, EntityRowId INTEGER NOT NULL);";

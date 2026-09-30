@@ -16,27 +16,51 @@ compiled._compile(
   }),
   sourcePath
 );
-const { searchCondition, findSearchIndexes, normalizeSearchText, indexSignature, DEDUPE_ENTITIES_SQL } =
-  compiled.exports;
+const {
+  searchCondition,
+  findSearchIndexes,
+  normalizeSearchText,
+  tokenizeSearchText,
+  indexSignature,
+  DEDUPE_ENTITIES_SQL,
+} = compiled.exports;
+
+// Mirrors the tables create_or_update_db builds.
+function createSearchDb(SQL, notes) {
+  const db = new SQL.Database();
+  db.run("CREATE TABLE Entities (Title TEXT, Content TEXT, ParentGOID TEXT, TitleSearch TEXT)");
+  db.run("CREATE TABLE SearchWords (word TEXT NOT NULL, EntityRowId INTEGER NOT NULL)");
+  db.run("CREATE INDEX SearchWords_word ON SearchWords (word, EntityRowId)");
+  notes.forEach(([title, content, parent], index) => {
+    const rowid = index + 1;
+    db.run("INSERT INTO Entities VALUES (?, ?, ?, ?)", [
+      title,
+      content,
+      parent ?? "parent",
+      normalizeSearchText(title),
+    ]);
+    for (const word of new Set(tokenizeSearchText(`${title}\n${content}`))) {
+      db.run("INSERT INTO SearchWords VALUES (?, ?)", [word, rowid]);
+    }
+  });
+  return db;
+}
+
+const countMatches = (db, text) =>
+  db.exec(`SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition(text)}`)[0]?.values.length ?? 0;
 
 test("searches full content, combines terms, and treats SQL characters literally", async () => {
   const SQL = await require("sql.js")();
-  const db = new SQL.Database();
+  const db = createSearchDb(SQL, [
+    ["Other title", "x".repeat(1200) + " Needle O'Brien 100%", "parent"],
+    ["Needle", "unrelated", "other"],
+  ]);
   try {
-    db.run("CREATE TABLE Entities (Title TEXT, Content TEXT, ParentGOID TEXT, SearchText TEXT)");
-    const insert = (title, content, parent) =>
-      db.run("INSERT INTO Entities VALUES (?, ?, ?, ?)", [
-        title,
-        content,
-        parent,
-        normalizeSearchText(`${title}\n${content}`),
-      ]);
-    insert("Other title", "x".repeat(1200) + " Needle O'Brien 100%", "parent");
-    insert("Needle", "unrelated", "other");
     const query = (text) =>
       db.exec(`SELECT substr(Content, 1, 1000) FROM Entities WHERE ParentGOID = 'parent' ${searchCondition(text)}`);
     assert.equal(query("needle O'Brien")[0].values.length, 1);
     assert.equal(query("100%")[0].values.length, 1);
+    assert.equal(query("need")[0].values.length, 1);
     assert.equal(query("absent").length, 0);
     assert.equal(query("' OR 1=1 --").length, 0);
     assert.equal(query("   ")[0].values.length, 1);
@@ -47,21 +71,29 @@ test("searches full content, combines terms, and treats SQL characters literally
 
 test("matches differently cased accented letters in titles and content", async () => {
   const SQL = await require("sql.js")();
-  const db = new SQL.Database();
+  const db = createSearchDb(SQL, [
+    ["\u00c9cole", "plain"],
+    ["plain", "Caf\u00c9 au lait"],
+    ["Cafe\u0301 decomposed", "plain"],
+  ]);
   try {
-    db.run("CREATE TABLE Entities (Title TEXT, Content TEXT, SearchText TEXT)");
-    for (const [title, content] of [
-      ["\u00c9cole", "plain"],
-      ["plain", "Caf\u00c9 au lait"],
-      ["Cafe\u0301 decomposed", "plain"],
-    ]) {
-      db.run("INSERT INTO Entities VALUES (?, ?, ?)", [title, content, normalizeSearchText(`${title}\n${content}`)]);
-    }
-    const count = (text) =>
-      db.exec(`SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition(text)}`)[0]?.values.length ?? 0;
-    assert.equal(count("\u00e9cole"), 1);
-    assert.equal(count("\u00c9COLE"), 1);
-    assert.equal(count("caf\u00e9"), 2);
+    assert.equal(countMatches(db, "\u00e9cole"), 1);
+    assert.equal(countMatches(db, "\u00c9COLE"), 1);
+    assert.equal(countMatches(db, "caf\u00e9"), 2);
+  } finally {
+    db.close();
+  }
+});
+
+test("content search uses the word index instead of scanning note text", async () => {
+  const SQL = await require("sql.js")();
+  const db = createSearchDb(SQL, [["Title", "alpha beta"]]);
+  try {
+    const plan = db
+      .exec(`EXPLAIN QUERY PLAN SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition("alpha")}`)[0]
+      .values.map((row) => row[3])
+      .join("\n");
+    assert.match(plan, /SEARCH SearchWords USING (COVERING )?INDEX SearchWords_word/);
   } finally {
     db.close();
   }

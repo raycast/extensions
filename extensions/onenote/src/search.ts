@@ -2,17 +2,40 @@ import { readdir } from "fs/promises";
 import { resolve } from "path";
 
 // Bump when the merged database layout or search normalization changes so existing databases are rebuilt.
-export const DATABASE_SCHEMA_VERSION = 2;
+export const DATABASE_SCHEMA_VERSION = 3;
 
 // SQLite's lower() only folds ASCII in some builds, so text is normalized in JavaScript instead.
 export function normalizeSearchText(text: string) {
   return text.normalize("NFC").toLowerCase();
 }
 
-// Search the complete stored content (pre-normalized into SearchText) before the list query truncates previews.
+// Splits text into the lowercase words stored in the SearchWords index.
+export function tokenizeSearchText(text: string) {
+  return normalizeSearchText(text)
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
+    .filter(Boolean);
+}
+
+function sqlLiteral(text: string) {
+  return `'${text.replaceAll("'", "''")}'`;
+}
+
+// Content is searched through the SearchWords index (words starting with each typed word) and titles by substring,
+// so a search never scans the full text of every note.
 export function searchCondition(searchText: string) {
   const terms = normalizeSearchText(searchText).trim().split(/\s+/).filter(Boolean);
-  return terms.map((term) => `AND instr(SearchText, '${term.replaceAll("'", "''")}') > 0`).join(" ");
+  return terms
+    .map((term) => {
+      const inTitle = `instr(TitleSearch, ${sqlLiteral(term)}) > 0`;
+      const inContent = tokenizeSearchText(term).map(
+        (word) =>
+          `rowid IN (SELECT EntityRowId FROM SearchWords WHERE word >= ${sqlLiteral(word)} AND word < ${sqlLiteral(
+            word
+          )} || char(1114111))`
+      );
+      return inContent.length === 0 ? `AND ${inTitle}` : `AND (${inTitle} OR (${inContent.join(" AND ")}))`;
+    })
+    .join(" ");
 }
 
 // Keeps one row per GOID: the most recently modified, with the highest rowid (the newest index) winning ties.

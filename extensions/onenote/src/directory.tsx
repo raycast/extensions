@@ -6,12 +6,16 @@ import { OneNoteItem, PAGE, types } from "./types";
 import { ONENOTE_MERGED_DB } from "./database";
 import { getAncestorsStr, getIcon, getParentTitle, newNote, openNote, parseDatetime } from "./utils";
 
+// Rows loaded at a time; more are loaded as the user scrolls, which bounds each query's work and payload.
+const PAGE_SIZE = 100;
+
 export function getListItems(query: string, elt: OneNoteItem | undefined = undefined) {
   const [sort, setSort] = useState(0);
   const [searchText, setSearchText] = useState("");
+  const [limit, setLimit] = useState(PAGE_SIZE);
   const { data, isLoading, permissionView } = useSQL<OneNoteItem>(
     ONENOTE_MERGED_DB,
-    query.replace("ORDER BY", `${searchCondition(searchText)} ORDER BY`)
+    `${query.replace("ORDER BY", `${searchCondition(searchText)} ORDER BY`)} LIMIT ${limit};`
   );
   const results = data;
 
@@ -29,7 +33,15 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
   return (
     <List
       filtering={false}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        setLimit(PAGE_SIZE);
+      }}
+      pagination={{
+        pageSize: PAGE_SIZE,
+        hasMore: (results?.length ?? 0) >= limit,
+        onLoadMore: () => setLimit((current) => current + PAGE_SIZE),
+      }}
       throttle={true}
       navigationTitle={context}
       isLoading={isLoading}
@@ -58,9 +70,6 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
     </List>
   );
 }
-
-// Bounds the rows scanned, serialized, and rendered for each search or browse.
-const LIST_LIMIT = 500;
 
 const LIST_COLUMNS =
   "Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, ContentRID, RootRevGenCount, LastModifiedTime, RecentTime, PinTime, Color, Title, EnterpriseIdentity, substr(Content, 1, 1000) AS Content";
@@ -139,13 +148,13 @@ export function Directory(props: { elt?: OneNoteItem }) {
       } else {
         const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE ParentGOID = '${quoteSql(
           props.elt.GOID
-        )}' ORDER BY RecentTime DESC LIMIT ${LIST_LIMIT};`;
+        )}' ORDER BY RecentTime DESC`;
         return getListItems(query, props.elt);
       }
     }
   }
-  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC LIMIT ${LIST_LIMIT};`;
-  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC LIMIT ${LIST_LIMIT};`;
+  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC`;
+  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC`;
   return getListItems(query);
 }
 
