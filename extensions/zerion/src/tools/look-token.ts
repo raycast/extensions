@@ -1,66 +1,36 @@
-import { getZpiHeaders, ZPI_URL } from "../shared/api";
-import { handleError } from "../shared/utils";
+import { withAccessToken } from "@raycast/utils";
+import { apiFetch, type ApiFungible } from "../shared/api";
+import { zerionOAuth } from "../shared/oauth";
 
-type Input = {
+interface Input {
   /**
-   * token address on Ethereum
+   * Fungible asset id from the Zerion API
+   * (returned by the search-blockchain tool, e.g. "eth" or a token id)
    * required parameter
-   * example: 0x6b175474e89094c44da98b954eedeac495271d0f
    */
   tokenId: string;
-};
+}
 
-interface Asset {
-  id: string;
-  iconUrl: string | null;
-  name: string;
-  new: boolean;
-  symbol: string;
-  verified: boolean;
-  implementations: Record<string, { address: string | null; decimals: number }>;
-  meta: {
-    circulatingSupply: number | null;
-    fullyDilutedValuation: number | null;
-    marketCap: number | null;
-    price: number | null;
-    relativeChange1d: number | null;
-    relativeChange30d: number | null;
-    relativeChange90d: number | null;
-    relativeChange365d: number | null;
-    totalSupply: number | null;
+/**
+ * Fetches full info of a fungible asset: name, symbol, description, price,
+ * market data, and its implementations (addresses and decimals) across chains.
+ * Prices and market caps are in USD.
+ */
+async function tool(input: Input) {
+  const result = await apiFetch<{ data: ApiFungible }>(`fungibles/${encodeURIComponent(input.tokenId)}?currency=usd`);
+  const { attributes } = result.data;
+
+  return {
+    id: result.data.id,
+    name: attributes.name,
+    symbol: attributes.symbol,
+    description: attributes.description,
+    verified: attributes.flags.verified,
+    icon_url: attributes.icon?.url ?? null,
+    market_data: attributes.market_data,
+    implementations: attributes.implementations,
+    external_links: attributes.external_links ?? [],
   };
 }
 
-interface AssetResource {
-  name: string;
-  url: string;
-  iconUrl: string;
-  displayableName: string;
-}
-
-interface AssetFullInfo {
-  extra: {
-    createdAt: string;
-    description: string | null;
-    holders: null;
-    liquidity: null;
-    top10: null;
-    volume24h: null;
-    relevantResources: AssetResource[];
-    mainChain: string;
-  };
-  fungible: Asset;
-}
-
-export default async function (input: Input): Promise<AssetFullInfo | null> {
-  try {
-    const response = await fetch(`${ZPI_URL}asset/get-fungible-full-info/v1?fungibleId=${input.tokenId}&currency=usd`, {
-      headers: getZpiHeaders(),
-    });
-    const result = await response.json();
-    return result.data;
-  } catch (error) {
-    handleError({ title: "Failed to fetch token info", error });
-    return null;
-  }
-}
+export default withAccessToken(zerionOAuth)(tool);

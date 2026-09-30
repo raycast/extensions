@@ -37,21 +37,9 @@ async function setWallpaperWindows(path: string, applyTo: string) {
 export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
 
-  const fixedPathName = buildCachePath(wallpaper);
-
   try {
-    const actualPath = fixedPathName;
-
-    if (!existsSync(actualPath)) {
-      await cachePicture(wallpaper);
-    }
-
-    const result = await (process.platform === "win32"
-      ? setWallpaperWindows(actualPath, applyTo)
-      : setWallpaperMacOS(actualPath, applyTo));
-
-    if (result !== "ok") throw new Error("Error setting wallpaper.");
-    else if (toast) {
+    await applyWallpaper(wallpaper, applyTo);
+    if (toast) {
       toast.style = Toast.Style.Success;
       toast.title = "Set wallpaper successfully!";
     }
@@ -67,24 +55,29 @@ export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
 };
 
 export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
-  const fixedPathName = buildCachePath(wallpaper);
-
   try {
-    const actualPath = fixedPathName;
-
-    if (!existsSync(actualPath)) {
-      await cachePicture(wallpaper);
-    }
-
-    const result = await (process.platform === "win32"
-      ? setWallpaperWindows(actualPath, applyTo)
-      : setWallpaperMacOS(actualPath, applyTo));
-
-    if (result !== "ok") throw new Error("Error setting wallpaper.");
+    await applyWallpaper(wallpaper, applyTo);
   } catch (err) {
     console.error(err);
   }
 };
+
+export async function applyWallpaper(wallpaper: RaycastWallpaper, monitor: string) {
+  if (monitor !== "current" && monitor !== "every") {
+    throw new Error("Invalid monitor. Use current or every.");
+  }
+
+  const path = buildCachePath(wallpaper);
+  if (!existsSync(path)) {
+    await cachePicture(wallpaper);
+  }
+
+  const result = await (process.platform === "win32"
+    ? setWallpaperWindows(path, monitor)
+    : setWallpaperMacOS(path, monitor));
+
+  if (result !== "ok") throw new Error("Error setting wallpaper.");
+}
 
 const scriptSystemAppearanceMacOS = `tell application "System Events" to tell appearance preferences to get dark mode`;
 const scriptSystemAppearanceWindows = `

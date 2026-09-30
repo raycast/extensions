@@ -1,43 +1,33 @@
-import { getZpiHeaders, ZPI_URL } from "../shared/api";
-import { handleError } from "../shared/utils";
+import { withAccessToken } from "@raycast/utils";
+import { apiFetch, type ApiChartAttributes, type ApiChartPeriod } from "../shared/api";
+import { zerionOAuth } from "../shared/oauth";
 
-type Input = {
+interface Input {
   /**
-   * Ethereum address of the token
+   * Fungible asset id from the Zerion API
+   * (returned by the search-blockchain tool, e.g. "eth" or a token id)
    * required parameter
-   * example: 0x6b175474e89094c44da98b954eedeac495271d0f
    */
   tokenId: string;
   /**
-   * Time period until now that we want to check the price points
-   * optional parameter
-   * check the last year price by default
+   * Time period until now for the price chart
+   * optional parameter, defaults to "year"
    */
-  period?: "1h" | "1d" | "1w" | "1m" | "1y" | "max";
-};
+  period?: ApiChartPeriod;
+}
 
 /**
- * this tool returns the historical price of a token as an array of pair [timestamp, price]
+ * Returns historical price data of a token: chart stats (first, min, avg, max,
+ * last) and points as [timestamp, price] tuples. Prices are in USD.
  */
-export default async function (input: Input): Promise<[string, number][]> {
-  try {
-    const response = await fetch(`${ZPI_URL}asset/get-fungible-chart/v1`, {
-      method: "POST",
-      headers: getZpiHeaders(),
-      body: JSON.stringify({
-        fungibleId: input.tokenId,
-        currency: "usd",
-        addresses: [],
-        period: input.period,
-      }),
-    });
-    const chartPointsRaw = await response.json();
-    return chartPointsRaw.data.points.map((item: { timestamp: string; value: number; extra: null }) => [
-      item.timestamp,
-      item.value,
-    ]);
-  } catch (error) {
-    handleError({ title: "Failed to fetch token price chart", error });
-    return [];
-  }
+async function tool(input: Input) {
+  const period: ApiChartPeriod = input.period ?? "year";
+  const result = await apiFetch<{ data: { attributes: ApiChartAttributes } }>(
+    `fungibles/${encodeURIComponent(input.tokenId)}/charts/${period}?currency=usd`,
+  );
+  const { begin_at, end_at, stats, points } = result.data.attributes;
+
+  return { period, begin_at, end_at, stats, points };
 }
+
+export default withAccessToken(zerionOAuth)(tool);

@@ -1,29 +1,35 @@
-import { getZpiHeaders, ZPI_URL } from "../shared/api";
-import { SearchResult } from "../shared/types";
-import { handleError } from "../shared/utils";
+import { withAccessToken } from "@raycast/utils";
+import { apiFetch, type ApiFungible } from "../shared/api";
+import { zerionOAuth } from "../shared/oauth";
 
-type Input = {
+interface Input {
   /**
-   * Ethereum address, ENS domain, token name, or token symbol
-   * the search query from the user's request
+   * Token name, symbol or contract address to search for
    * required parameter
    */
   query: string;
-};
-
-export default async function (input: Input): Promise<SearchResult> {
-  let result: { data: SearchResult } | null = null;
-  try {
-    const response = await fetch(
-      `${ZPI_URL}search/query/v1?query=${encodeURIComponent(input.query.trim())}&currency=usd&limit=6`,
-      {
-        headers: getZpiHeaders(),
-      },
-    );
-    result = await response.json();
-    return result?.data || { dapps: [], fungibles: [], wallets: [] };
-  } catch (error) {
-    handleError({ title: "Failed to fetch search results", error });
-    return { dapps: [], fungibles: [], wallets: [] };
-  }
 }
+
+/**
+ * Searches fungible assets by name, symbol or address and returns the best
+ * matches sorted by market cap. It is usually better to use the first item
+ * from the list. Prices are in USD.
+ */
+async function tool(input: Input) {
+  const result = await apiFetch<{ data: ApiFungible[] }>(
+    `fungibles/?currency=usd&filter[search_query]=${encodeURIComponent(input.query.trim())}&sort=-market_data.market_cap&page[size]=6`,
+  );
+
+  return result.data.map((fungible) => ({
+    id: fungible.id,
+    name: fungible.attributes.name,
+    symbol: fungible.attributes.symbol,
+    price: fungible.attributes.market_data?.price ?? null,
+    market_cap: fungible.attributes.market_data?.market_cap ?? null,
+    changes: {
+      percent_1d: fungible.attributes.market_data?.changes?.percent_1d ?? null,
+    },
+  }));
+}
+
+export default withAccessToken(zerionOAuth)(tool);

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wu-editor",
+  "title": "Wu",
+  "description": "Open recent projects, files, and settings in Wu.",
+  "icon": "icon.png",
+  "author": "farshed",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open-recent-project",
+      "title": "Open Recent Project",
+      "subtitle": "Wu",
+      "description": "Search the projects you recently opened in Wu and open one.",
+      "mode": "view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Wu",
+      "description": "Open an empty Wu window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-with-wu",
+      "title": "Open with Wu",
+      "subtitle": "Wu",
+      "description": "Open the files or folders selected in Finder, or the front Finder window's folder, in Wu.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Wu",
+      "description": "Open Wu's settings.json.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-keymap",
+      "title": "Open Keymap",
+      "subtitle": "Wu",
+      "description": "Open Wu's keymap.json.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-installed-extensions",
+      "title": "Show Installed Extensions",
+      "subtitle": "Wu",
+      "description": "List the extensions installed in Wu.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "databasePath",
+      "title": "Wu Database",
+      "description": "Path to Wu's db.sqlite file. Only change this if you moved Wu's data directory.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Library/Application Support/Wu/db/0-stable/db.sqlite"
+    },
+    {
+      "name": "cliPath",
+      "title": "Wu CLI",
+      "description": "Path to the wu command line tool. When missing, the copy bundled inside Wu.app is used.",
+      "type": "textfield",
+      "required": false,
+      "default": "/usr/local/bin/wu"
+    },
+    {
+      "name": "configDir",
+      "title": "Wu Config Directory",
+      "description": "Folder holding Wu's settings.json and keymap.json.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.config/wu"
+    },
+    {
+      "name": "extensionsDir",
+      "title": "Wu Extensions Directory",
+      "description": "Folder where Wu installs extensions.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Library/Application Support/Wu/extensions/installed"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1",
+    "smol-toml": "^1.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
