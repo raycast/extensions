@@ -208,14 +208,20 @@ export default function Command() {
                     <Action
                       title={selected ? "Deselect" : "Select"}
                       icon={selected ? Icon.Circle : Icon.CheckCircle}
-                      shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "s" },
+                        Windows: { modifiers: ["ctrl"], key: "s" },
+                      }}
                       onAction={() => toggleSelected(book)}
                     />
                     {selectedBooks.size > 0 ? (
                       <Action
                         title={`Download Selected (${selectedBooks.size})`}
                         icon={Icon.Tray}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                        }}
                         onAction={handleDownloadSelected}
                       />
                     ) : null}
@@ -228,7 +234,10 @@ export default function Command() {
                           ? { source: Icon.Bookmark, tintColor: Color.Blue }
                           : Icon.Bookmark
                       }
-                      shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "b" },
+                        Windows: { modifiers: ["ctrl"], key: "b" },
+                      }}
                       onAction={() => toggleQueued(book)}
                     />
                   </ActionPanel.Section>

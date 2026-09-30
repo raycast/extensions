@@ -1,5 +1,21 @@
 # Orion Changelog
 
+## [Command Bar] - 2026-09-27
+
+- Fix the Open Address row rendering above Top Hit when both match the same typed text, while Top Hit still held the actual selection - the highlighted row was not the one on top, so pressing Enter opened something other than what the list visually suggested. Open Address now renders after Top Hit, matching the selection priority it already had.
+
+## [Command Bar] - 2026-09-26
+
+- Focus the tab currently visible in Orion when the Command Bar opens with an empty query, and keep following it if you switch tabs directly in Orion while the Command Bar stays open, instead of leaving selection to Raycast's own default. When Top Hit ranks two open tabs with the same URL as an equal match, prefer the one currently visible in Orion over an arbitrary duplicate.
+
+## [Command Bar] - 2026-09-26
+
+- Fix Top Hit (and the typed-address row) occasionally not receiving focus when it resolves after Raycast has already rendered the rest of the results, most noticeably when the winning candidate needs a History lookup. Raycast's List can retain a stale native selection instead of applying the updated `selectedItemId` when the full result set changes at the same time, so pressing Enter could trigger the wrong action (e.g. "Search the Web" instead of the intended result) without any visible sign something was off. Render only the Top Hit/address row until Raycast acknowledges the selection, then restore the rest of the sections.
+
+## [Command Bar] - 2026-09-25
+
+- Stop the Command Bar's loading indicator from flickering on every keystroke. History and search-suggestion lookups re-run as you type and briefly report loading, but by the time either can be true, tabs/bookmarks/profiles have already resolved, so there was no genuine "nothing to show yet" state being reflected - just a distracting flash.
+
 ## [Command Bar] - 2026-09-24
 
 - Always return to Raycast's root search immediately after opening a Tab, Bookmark, Reading List item, History entry, or address from the Command Bar, regardless of the "Pop to Root Search" preference. Previously, a delayed preference could leave the Command Bar's background process lingering instead of resetting, so reopening it soon after could show a tab list that had not picked up a change made directly in Orion in the meantime.

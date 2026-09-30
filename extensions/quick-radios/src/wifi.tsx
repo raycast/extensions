@@ -20,6 +20,8 @@ import {
   getWifiNetworks,
   getWifiPassword,
   getWifiStatus,
+  isLocationPermissionError,
+  openLocationSettings,
   openWifiSettings,
   toggleWifi,
 } from "./services/wifiService";
@@ -43,6 +45,7 @@ export default function WifiCommand() {
   const [networks, setNetworks] = useState<WifiNetwork[]>([]);
   const [savedPassword, setSavedPassword] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+  const [isLocationBlocked, setIsLocationBlocked] = useState(false);
 
   const isMountedRef = useRef(true);
   const isScanningRef = useRef(false);
@@ -119,6 +122,7 @@ export default function WifiCommand() {
         if (!isMountedRef.current || currentSeq !== actionSeqRef.current)
           return;
 
+        setIsLocationBlocked(false);
         setStatus((prev) => {
           const mergedStatus: WifiStatus = {
             ...currentStatus,
@@ -189,6 +193,11 @@ export default function WifiCommand() {
       } catch (error) {
         if (!isMountedRef.current || currentSeq !== actionSeqRef.current)
           return;
+        if (isLocationPermissionError(error)) {
+          // Shown as an empty view; background ticks recover once access is granted
+          setIsLocationBlocked(true);
+          return;
+        }
         if (!isBackground) {
           await showToast({
             style: Toast.Style.Failure,
@@ -425,7 +434,28 @@ export default function WifiCommand() {
       isShowingDetail
       searchBarPlaceholder="Filter Wi-Fi networks by name or status..."
     >
-      {!status.isOn ? (
+      {isLocationBlocked ? (
+        <List.EmptyView
+          icon={{ source: Icon.Geopin, tintColor: Color.Orange }}
+          title="Location Access Required"
+          description="Windows only shares nearby Wi-Fi networks with apps that have Location access. Turn on Location services and 'Let desktop apps access your location' in Settings > Privacy & security > Location."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Location Settings"
+                icon={Icon.Gear}
+                onAction={openLocationSettings}
+              />
+              <Action
+                title="Refresh List"
+                icon={Icon.ArrowClockwise}
+                onAction={() => refresh(true)}
+                shortcut={SHORTCUTS.refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : !status.isOn ? (
         <List.EmptyView
           icon={{ source: Icon.Power, tintColor: Color.Red }}
           title="Wi-Fi is Turned Off"

@@ -52,6 +52,16 @@ Quick Radios is scoped to Raycast for Windows and does not run on macOS. It is b
 
 - **Windows 10 / 11** only. No administrator privileges required.
 
+### Location access (Windows 11 24H2 and later)
+
+Windows treats nearby Wi-Fi networks and the connected network name as location data. With Location access off, `netsh wlan` refuses to list networks or report the current connection, so **Manage Wi-Fi** shows a *Location Access Required* screen instead of the network list. To enable it:
+
+1. Open **Settings → Privacy & security → Location** (or press Enter on *Open Location Settings* in the extension).
+2. Turn on **Location services**.
+3. Turn on **Let desktop apps access your location**.
+
+The list reloads on its own within a few seconds. **Toggle Wi-Fi** does not need Location access.
+
 The bundled `assets/quick-radios-helper.exe` is compiled from [`assets/quick-radios-helper.cs`](assets/quick-radios-helper.cs). It only triggers WLAN scans and reads or sets the Wi-Fi radio state. If the helper is unavailable, the extension falls back to equivalent PowerShell WinRT calls.
 
 ---

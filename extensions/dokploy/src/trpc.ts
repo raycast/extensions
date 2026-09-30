@@ -30,6 +30,19 @@ export async function parseTrpcJsonResponse<T>(response: Response): Promise<T> {
   return (await parseTrpcResponse<T>(response)) as T;
 }
 
+/**
+ * `parseTrpcJsonResponse` for a procedure newer Dokploy versions added: an older instance answers
+ * an unknown procedure with 404, so that error also says which version is needed.
+ */
+export async function parseTrpcJsonResponseSince<T>(response: Response, version: string): Promise<T> {
+  try {
+    return await parseTrpcJsonResponse<T>(response);
+  } catch (error) {
+    if (response.status === 404) throw new Error(`${(error as Error).message} (needs Dokploy ${version} or later)`);
+    throw error;
+  }
+}
+
 /** Posts a raw tRPC mutation (superjson-wrapped body) and unwraps its result the same way. */
 export async function trpcMutate<T = void>(
   baseUrl: string,

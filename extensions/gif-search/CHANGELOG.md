@@ -1,5 +1,14 @@
 # GIF Search Changelog
 
+## [Fix search pagination with invalid preferences] - 2026-09-30
+
+- Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.
+
+## [Add Ask AI Raycast Command] - 2026-09-27
+
+- Add Ask AI search for GIFs and GIPHY Clips with direct media links.
+- Add YAML evals for GIF and clip requests.
+
 ## [Separate GIF copy and paste] - 2026-09-18
 
 - Paste GIF and Paste GIF Square now resolve the file and call paste directly, without copying first or closing the window before paste.

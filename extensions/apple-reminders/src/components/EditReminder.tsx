@@ -1,8 +1,14 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
-import { setTitleAndNotes, moveToList, setPriorityStatus } from "swift:../../swift/AppleReminders";
+import { format } from "date-fns";
+import {
+  setTitleAndNotes,
+  moveToList,
+  setPriorityStatus,
+  setDueDate as setReminderDueDate,
+} from "swift:../../swift/AppleReminders";
 
-import { applyTagsToNotes, extractTagsFromNotes, formatTags, getPriorityIcon } from "../helpers";
+import { applyTagsToNotes, extractTagsFromNotes, formatTags, getPriorityIcon, parseReminderDueDate } from "../helpers";
 import { List, Priority, Reminder, useData } from "../hooks/useData";
 
 type EditReminderProps = {
@@ -16,9 +22,11 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
   const lists = data?.lists || [];
 
   const initialNotesData = extractTagsFromNotes(reminder.notes);
+  const initialDueDate = parseReminderDueDate(reminder.dueDate);
 
   const { itemProps, handleSubmit } = useForm<{
     title: string;
+    dueDate: Date | null;
     notes: string;
     priority: string;
     tags: string;
@@ -31,6 +39,14 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
         const priorityChanged = values.priority !== (reminder.priority || "");
         const listChanged = values.listId !== (reminder.list?.id || "");
 
+        let newDueDate: string | null = null;
+        if (values.dueDate) {
+          newDueDate = Form.DatePicker.isFullDay(values.dueDate)
+            ? format(values.dueDate, "yyyy-MM-dd")
+            : values.dueDate.toISOString();
+        }
+        const dueDateChanged = newDueDate !== (reminder.dueDate ?? null);
+
         if (titleOrNotesChanged) {
           await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: newNotes }), {
             optimisticUpdate(data) {
@@ -41,6 +57,23 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                 reminders: data.reminders.map((r) => {
                   if (reminder.id === r.id) {
                     return { ...r, title: values.title, notes: newNotes };
+                  }
+                  return r;
+                }),
+              };
+            },
+          });
+        }
+        if (dueDateChanged) {
+          await mutate(setReminderDueDate({ reminderId: reminder.id, dueDate: newDueDate }), {
+            optimisticUpdate(data) {
+              if (!data) return;
+
+              return {
+                ...data,
+                reminders: data.reminders.map((r) => {
+                  if (reminder.id === r.id) {
+                    return { ...r, dueDate: newDueDate };
                   }
                   return r;
                 }),
@@ -100,6 +133,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
     },
     initialValues: {
       title: reminder.title,
+      dueDate: initialDueDate,
       notes: initialNotesData.notes,
       priority: reminder.priority || "",
       tags: formatTags(initialNotesData.tags),
@@ -119,6 +153,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
       }
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="New Reminder" />
+      <Form.DatePicker {...itemProps.dueDate} title="Due Date" type={Form.DatePicker.Type.DateTime} />
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
       <Form.Dropdown {...itemProps.priority} title="Priority">
         <Form.Dropdown.Item title="None" value="" />

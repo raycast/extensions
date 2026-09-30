@@ -1,5 +1,15 @@
 # Notion Changelog
 
+## [Fix Links, Search Results, and Connection Recovery] - 2026-09-25
+
+- Fix Copy Formatted URL pasting only the title into plain-text apps. It now includes a Markdown link while preserving the rich-text link.
+- Show complete page and database titles, including titles with mixed formatting, and prevent matching search results from being hidden by a second filter.
+- Load remaining results in database lists and page pickers instead of stopping at the first batch.
+- Add Refresh Results and Manage Notion Connection actions to search, including when no results are found.
+- Add a Manage Notion Connection command to test access, reconnect after revocation, and find page-access settings. Invalid-token errors now offer a recovery action.
+- Ignore blank integration secrets and trim whitespace from pasted secrets.
+- Keep Add Text to Page open when adding content fails instead of reporting success.
+
 ## [Knowledge Capture Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

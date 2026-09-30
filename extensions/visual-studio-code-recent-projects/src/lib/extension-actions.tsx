@@ -1,7 +1,7 @@
 import { Action, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { Shortcut } from "./shortcuts";
-import { getBuildNamePreference, getBuildScheme, getVSCodeCLI } from "./vscode";
+import { getBuildNamePreference, getBuildScheme, getExtensionsGalleryItemUrl, getVSCodeCLI } from "./vscode";
 import { getErrorMessage } from "./utils";
 import { getEditorApplication } from "../utils/editor";
 
@@ -73,6 +73,6 @@ export function OpenExtensionByIDInVSCodeAction(props: { extensionID: string; on
 }
 
 export function OpenExtensionByIDInBrowserAction(props: { extensionID: string }) {
-  const url = `https://marketplace.visualstudio.com/items?itemName=${props.extensionID}`;
+  const url = getExtensionsGalleryItemUrl(props.extensionID);
   return <Action.OpenInBrowser title="Open in Browser" url={url} shortcut={Shortcut.OpenInBrowser} />;
 }

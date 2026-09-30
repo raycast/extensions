@@ -10,8 +10,8 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { useFetch, useForm, FormValidation } from "@raycast/utils";
-import { useToken } from "./instances";
+import { useFetch, useForm, FormValidation, useFrecencySorting } from "@raycast/utils";
+import { type Instance, useToken, tokenForInstance, instanceId } from "./instances";
 import { Server, Service, ErrorResult, DatabaseKind, Project } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
@@ -19,6 +19,7 @@ import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
 import ServiceSchedules from "./service-schedules";
+import { OpenWebsiteAction } from "./open-website";
 import Templates from "./templates";
 import { DatabaseActions } from "./database-actions";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
@@ -32,6 +33,7 @@ const BACKUPABLE_KINDS: BackupableKind[] = ["mariadb", "mongo", "mysql", "postgr
 export default function Services({
   environment,
   revalidate,
+  instance,
 }: {
   environment: ServiceScope;
   /**
@@ -40,8 +42,11 @@ export default function Services({
    * own rows - see the `project.one` fetch below - so it's optional and only wired for that.
    */
   revalidate?: () => void;
+  /** The instance this screen was opened for, when a caller (e.g. Projects' own instance dropdown) knows it explicitly - falls back to the shared active token otherwise, same as `useToken()` alone did before. */
+  instance?: Instance;
 }) {
-  const { url, headers } = useToken();
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
 
   // `environment` is a snapshot from whenever this screen was pushed - the parent's own
   // `revalidate` refetches its own list, but that refetch never reaches an already-pushed Services
@@ -86,8 +91,14 @@ export default function Services({
     ...scope.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
     ...scope.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
     ...scope.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
+    ...(scope.libsql ?? []).map((l) => ({ ...l, type: "libsql", id: l.libsqlId, status: l.applicationStatus })),
     ...scope.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
   ];
+
+  const { data: sortedServices, visitItem } = useFrecencySorting(services, {
+    namespace: instance ? instanceId(instance) : "shared",
+    key: (service) => `${service.type}-${service.id}`,
+  });
 
   async function deleteService({ id, name, type }: GroupedService) {
     const options: Alert.Options = {
@@ -111,6 +122,10 @@ export default function Services({
           body = { mariadbId: id };
           endpoint = "mariadb.remove";
           break;
+        case "mongo":
+          body = { mongoId: id };
+          endpoint = "mongo.remove";
+          break;
         case "mysql":
           body = { mysqlId: id };
           endpoint = "mysql.remove";
@@ -118,6 +133,10 @@ export default function Services({
         case "postgres":
           body = { postgresId: id };
           endpoint = "postgres.remove";
+          break;
+        case "libsql":
+          body = { libsqlId: id };
+          endpoint = "libsql.remove";
           break;
         case "redis":
           body = { redisId: id };
@@ -161,6 +180,7 @@ export default function Services({
     mysql: "mysql.svg",
     postgres: "postgres.svg",
     redis: "redis.svg",
+    libsql: "libsql.svg",
   };
 
   const totalServices = getTotalServices(scope);
@@ -177,13 +197,13 @@ export default function Services({
                 <Action.Push
                   icon="folder-input.svg"
                   title="Application"
-                  target={<CreateApplication environment={scope} />}
+                  target={<CreateApplication environment={scope} instance={instance} />}
                   onPop={() => refresh()}
                 />
                 <Action.Push
                   icon="database.svg"
                   title="Database"
-                  target={<CreateDatabase environment={scope} />}
+                  target={<CreateDatabase environment={scope} instance={instance} />}
                   onPop={() => refresh()}
                 />
                 {scope.environmentId && (
@@ -199,7 +219,7 @@ export default function Services({
           }
         />
       ) : (
-        services.map((service) => (
+        sortedServices.map((service) => (
           <List.Item
             key={service.id}
             icon={SERVICE_ICONS[service.type]}
@@ -228,13 +248,13 @@ export default function Services({
                   <Action.Push
                     icon="folder-input.svg"
                     title="Application"
-                    target={<CreateApplication environment={scope} />}
+                    target={<CreateApplication environment={scope} instance={instance} />}
                     onPop={() => refresh()}
                   />
                   <Action.Push
                     icon="database.svg"
                     title="Database"
-                    target={<CreateDatabase environment={scope} />}
+                    target={<CreateDatabase environment={scope} instance={instance} />}
                     onPop={() => refresh()}
                   />
                   {scope.environmentId && (
@@ -253,10 +273,18 @@ export default function Services({
                       icon={ACTION_ICONS[action]}
                       title={ACTION_LABELS[action]}
                       style={action === "stop" ? Action.Style.Destructive : undefined}
-                      onAction={() => runServiceAction(url, headers, service, action, refresh)}
+                      onAction={() => {
+                        void visitItem(service);
+                        void runServiceAction(url, headers, service, action, refresh);
+                      }}
                     />
                   ))}
-                  <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
+                  <Action.Push
+                    icon={Icon.Terminal}
+                    title="View Logs"
+                    target={<ServiceLogs service={service} />}
+                    onPush={() => visitItem(service)}
+                  />
                   {(service.type === "application" || service.type === "compose") && (
                     <Action.Push
                       icon={Icon.List}
@@ -290,6 +318,14 @@ export default function Services({
                       target={<ServiceSchedules service={{ ...service, type: service.type }} />}
                     />
                   )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <OpenWebsiteAction
+                      service={{ id: service.id, type: service.type, name: service.name }}
+                      url={url}
+                      headers={headers}
+                      onOpen={() => void visitItem(service)}
+                    />
+                  )}
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
@@ -309,8 +345,9 @@ export default function Services({
   );
 }
 
-function CreateApplication({ environment }: { environment: ServiceScope }) {
-  const { url, headers } = useToken();
+function CreateApplication({ environment, instance }: { environment: ServiceScope; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
   const { pop } = useNavigation();
 
   interface FormValues {
@@ -387,8 +424,9 @@ function CreateApplication({ environment }: { environment: ServiceScope }) {
   );
 }
 
-function CreateDatabase({ environment }: { environment: ServiceScope }) {
-  const { url, headers } = useToken();
+function CreateDatabase({ environment, instance }: { environment: ServiceScope; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
   const { pop } = useNavigation();
   interface FormValues {
     dbType: string;

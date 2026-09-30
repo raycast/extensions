@@ -191,7 +191,7 @@ export default function Command() {
         {/* Updating installed extensions is Raycast's own command; this one only
             reports what changed upstream. */}
         <MenuBarExtra.Item
-          title="Check for Extension Updates"
+          title="Update Installed Extensions"
           icon={Icon.Download}
           onAction={checkForExtensionUpdates}
         />

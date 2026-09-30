@@ -1,7 +1,33 @@
 import * as assert from "node:assert";
 import { describe, it } from "node:test";
 
-import { formatReminderTime, isDayFirst, parseChronoDate, truncate } from "../src/helpers";
+import { formatReminderTime, isDayFirst, parseChronoDate, parseReminderDueDate, truncate } from "../src/helpers";
+
+describe("parseReminderDueDate", () => {
+  it("parses all-day date string (YYYY-MM-DD) as local date without UTC offset shifting", () => {
+    const parsed = parseReminderDueDate("2026-09-25");
+    assert.ok(parsed instanceof Date);
+    assert.strictEqual(parsed.getFullYear(), 2026);
+    assert.strictEqual(parsed.getMonth(), 8); // 0-indexed September
+    assert.strictEqual(parsed.getDate(), 25);
+  });
+
+  it("parses full ISO date string", () => {
+    const parsed = parseReminderDueDate("2026-09-25T14:30:00.000Z");
+    assert.ok(parsed instanceof Date);
+    assert.strictEqual(parsed.getTime(), new Date("2026-09-25T14:30:00.000Z").getTime());
+  });
+
+  it("returns null for null, undefined, or empty string", () => {
+    assert.strictEqual(parseReminderDueDate(null), null);
+    assert.strictEqual(parseReminderDueDate(undefined), null);
+    assert.strictEqual(parseReminderDueDate(""), null);
+  });
+
+  it("returns null for invalid date string", () => {
+    assert.strictEqual(parseReminderDueDate("invalid-date"), null);
+  });
+});
 
 describe("formatReminderTime", () => {
   it("returns empty string for all-day dates (YYYY-MM-DD)", () => {

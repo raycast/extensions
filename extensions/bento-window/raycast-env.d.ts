@@ -33,3 +33,13 @@ declare namespace Arguments {
   export type TileAll = {}
 }
 
+declare module "swift:*/swift" {
+  export function listState(): Promise<any>;
+  export function probeTileable(items: any[]): Promise<any>;
+  export function moveWindows(moves: any[]): Promise<any>;
+
+  export class SwiftError extends Error {
+    stderr: string;
+    stdout: string;
+  }
+}

@@ -7,6 +7,15 @@ export interface DockerContainer {
   status: string;
 }
 
+export interface DockerDiskUsageItem {
+  type: string;
+  totalCount: number;
+  active: number;
+  size: string;
+  reclaimable: string;
+  sizeBytes: number;
+}
+
 export type ProjectId = string;
 
 export interface Service {
@@ -39,6 +48,10 @@ export interface Redis extends Service {
   redisId: string;
   applicationStatus: "idle";
 }
+export interface Libsql extends Service {
+  libsqlId: string;
+  applicationStatus: "idle";
+}
 export interface Compose extends Service {
   composeId: string;
   composeStatus: "idle" | "done";
@@ -52,6 +65,8 @@ export interface ServiceCollections {
   postgres: Postgres[];
   redis: Redis[];
   compose: Compose[];
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  libsql?: Libsql[];
 }
 
 export interface Environment extends ServiceCollections {
@@ -63,6 +78,13 @@ export interface Environment extends ServiceCollections {
   projectId: ProjectId;
 }
 
+export interface Tag {
+  tagId: string;
+  name: string;
+  /** A hex color like `#3b82f6`, or unset. */
+  color?: string | null;
+}
+
 export interface ProjectBase {
   projectId: ProjectId;
   name: string;
@@ -70,6 +92,8 @@ export interface ProjectBase {
   createdAt: string;
   organizationId: string;
   env: string;
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  projectTags?: { tag: Tag }[];
 }
 
 export interface ModernProject extends ProjectBase {

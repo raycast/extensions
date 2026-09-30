@@ -1,5 +1,27 @@
 # Vesslo Changelog
 
+## [App Review and Verified Homebrew Requests] - 2026-09-26
+
+### Added
+
+- Add Review Apps with independent finding-category and update-candidate filters.
+- Add Deleted Apps to search retained records without restoring or launching removed apps.
+- Add Homebrew Requests with per-target results, compact summaries, and separate technical details.
+
+### Improved
+
+- Search app names, Bundle IDs, developers, tags, and memos with field selection and matching context.
+- Filter and sort update candidates while keeping source, version, and completed-check information visible.
+- Select up to 16 exact Homebrew installations for confirmation in a compatible Vesslo app, with request-specific receipts.
+- Use compact list accessories and smaller receipt headings.
+
+### Fixed
+
+- Remove direct Homebrew, mas, and Terminal execution from the extension.
+- Revalidate identities, paths, versions, source evidence, and data freshness before handing off actions.
+- Prevent update actions when export data is missing, stale, unsupported, or inconsistent.
+- Preserve current update visibility when only an older target version was skipped.
+
 ## [Show Vesslo Review Warnings] - 2026-07-14
 
 - Show Vesslo audit warnings as clear Security, Source Check, or Review badges in the updates list

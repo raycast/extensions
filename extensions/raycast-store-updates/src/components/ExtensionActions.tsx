@@ -119,7 +119,7 @@ export function ExtensionActions({
 
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open in Raycast Store"
+              title="View Extension in Store"
               url={storeDeeplink}
               icon={Icon.RaycastLogoNeg}
               // Mirrors the Raycast Store's own "View Developer" (⌥⇧⌘O). Custom on purpose: no
@@ -157,7 +157,7 @@ export function ExtensionActions({
             Common constant binds it, and the panel's hand-written combos use
             o/c/l/r/m/w/f/a/z. */}
         <Action
-          title="Check for Extension Updates"
+          title="Update Installed Extensions"
           icon={Icon.Download}
           onAction={checkForExtensionUpdates}
           shortcut={{

@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Fix Quicklink search filtering] - 2026-09-25
+
+- Fix "Save as Quicklink" opening entity list commands (including Cameras and Zones) without applying the entity filter, requiring an extra keystroke before the intended entity showed up
+
 ## [Entity Customization] - 2026-08-29
 
 - Add local rename, hide, and favorite actions for entities in list commands

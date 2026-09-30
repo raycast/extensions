@@ -6,10 +6,10 @@ Reviewed on September 24, 2026, beginning with the requested [makenotion/skills]
 
 Pinned revision: `10e976aa591995fd60c75ef13beba1a8aa827fcc`. Its README, both complete skill files, and license notices were read.
 
-| Official skill | Scope | Fit for this extension |
-| --- | --- | --- |
-| [notion-cli](https://github.com/makenotion/skills/blob/10e976aa591995fd60c75ef13beba1a8aa827fcc/skills/notion-cli/SKILL.md) | Installs and uses `ntn` for API discovery, page operations, workers, and file uploads. | No CLI, API passthrough, worker, or upload tool is registered here. Not copied or installed. Existing Raycast tools and authentication remain the interface. |
-| [notion-apps](https://github.com/makenotion/skills/blob/10e976aa591995fd60c75ef13beba1a8aa827fcc/skills/notion-apps/SKILL.md) | Confirms Apps alpha access, installs the CLI, scaffolds an SDK project, and follows its generated guidance. | Developer app creation is outside knowledge capture and cannot run through these tools. No alpha-access question, scaffolding, or deployment is introduced. |
+| Official skill                                                                                                                | Scope                                                                                                       | Fit for this extension                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [notion-cli](https://github.com/makenotion/skills/blob/10e976aa591995fd60c75ef13beba1a8aa827fcc/skills/notion-cli/SKILL.md)   | Installs and uses `ntn` for API discovery, page operations, workers, and file uploads.                      | No CLI, API passthrough, worker, or upload tool is registered here. Not copied or installed. Existing Raycast tools and authentication remain the interface. |
+| [notion-apps](https://github.com/makenotion/skills/blob/10e976aa591995fd60c75ef13beba1a8aa827fcc/skills/notion-apps/SKILL.md) | Confirms Apps alpha access, installs the CLI, scaffolds an SDK project, and follows its generated guidance. | Developer app creation is outside knowledge capture and cannot run through these tools. No alpha-access question, scaffolding, or deployment is introduced.  |
 
 Both have MIT coverage in the repository. They are useful primary sources for those separate developer workflows, but neither provides a directly portable knowledge-capture workflow for this extension. No code or instructions from them are bundled.
 

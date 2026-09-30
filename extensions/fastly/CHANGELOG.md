@@ -1,5 +1,16 @@
 # Fastly Changelog
 
+## [AI Extension] - 2026-09-26
+
+The extension can now be used with Raycast AI: mention `@fastly` in AI chat or Quick AI to work with your account conversationally. Fourteen tools cover the main capability areas:
+
+- **Services & traffic**: list services, get details (domains, versions), and 24-hour stats including cache hit ratio and bandwidth
+- **Purging**: purge a URL, surrogate keys, or a whole service — every purge asks for confirmation, and soft purge is preferred by default
+- **Security**: Bot Management and DDoS Protection status with 24-hour activity, recent DDoS attack events, and switching DDoS Protection between log and block modes (with confirmation)
+- **TLS**: certificates and subscriptions with days-until-expiry, so the AI can flag certs expiring soon
+- **Alerts & audit**: alert definitions and firing history, plus audit log queries ("what changed on my account yesterday?")
+- **AI Runtime Control**: usage metrics by provider/model and virtual key listings (metadata only — access tokens are never returned)
+
 ## [AI Runtime Control, Bot Management + DDoS Protection] - 2026-09-22
 
 New operational commands:

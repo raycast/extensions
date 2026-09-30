@@ -1,5 +1,32 @@
 # Link Commands Changelog
 
+## [Suggested Titles] - 2026-09-28
+
+### Added
+
+- **Title** on the create form is filled in from the target as you type it: `Netflix` for a plain link, `Search Netflix` for a `{query}` URL, `Open Downloads` for a folder and `Open Linear` for a surface router, re-suggested when **Desktop App** changes. The brand is the one **Package** would use, so a host the collection has already filed under `Jira` is titled `Jira` rather than `Atlassian`.
+- A suggestion never overwrites your own words. Once you type a title of your own the field is left alone; empty it and the suggestion comes back when you leave the field, or is used as-is if you create the command straight away.
+
+## [Move Environment to Subtitle] - 2026-09-27
+
+### Added
+
+- **Move Environment to Subtitle** in the Search view, offered only on commands that still lead their title with `@work · `. It rewrites that one file from `@work · Sprint Board` / `Linear · #dev` to `Sprint Board` / `Linear · @work · #dev`, the form new commands are written in, after a confirmation that shows both lines before and after. Only the title and subtitle lines change; the filename, and so the command's deeplink, stays as it is. Raycast may address a command by its title, so a hotkey, alias or deeplink pointing at it might need re-assigning afterwards, which is why this is never done in bulk.
+
+## [Plain Names in the Create Form] - 2026-09-27
+
+### Fixed
+
+- The Environment and Category dropdowns in the Create Link Command form listed existing values in their raw sigil form — `@work`, `#media` — instead of the plain name shown everywhere else in the extension. They now read `Work` and `Media`, matching the Search view's filter dropdown and detail pane. Nothing written to disk changes: a command's subtitle still reads ` · @work` / ` · #media`, so existing collections and the older sigil-anchored form are unaffected.
+
+## [Scope on the Subtitle] - 2026-09-25
+
+### Changed
+
+- A new command's environment is written on the subtitle, beside the package and category — `Sprint Board` / `Linear · @work · #dev` — rather than as a prefix on the title. Raycast renders the title bold and in full, so `@work · ` led every work command in the launcher with the same five characters and separated none of them; the subtitle is searched too, so typing `@work` still finds them. The filename is unchanged (`work.linear.sprint-board.sh`).
+- Commands written in the older form, `@work · Sprint Board` / `Linear`, are read exactly as before: the list still groups and filters them by environment, and the title-anchored sigil wins if a command somehow carries both. Nothing on disk is rewritten — a collection moves over one command at a time as commands are recreated.
+- One shape reads differently: any subtitle field that is wholly an `@` handle is now taken as an environment rather than as part of the brand. A package that is itself a bare handle, such as `@kud`, becomes the environment `kud`; a scoped brand written `@acme · Matrix` becomes the environment `acme` with the brand `Matrix`. If a package of yours starts with a handle, drop the `@` or fold it into the name to keep it a brand. `Chat @ Mozilla`, `@types/node` and other uses where the handle is not a whole field of letters, digits, `-` and `_` are unaffected.
+
 ## [Readable Rows] - 2026-09-12
 
 ### Changed
@@ -36,6 +63,6 @@
 - **Search Link Commands** — browse the link commands in your script directories, ordered by package so everything belonging to one service sits together. The detail pane shows the target, the application it opens in and the argument it prompts for.
 - Sections by environment, and filters for environment, category and package.
 - The create form offers the environments and categories already present in your own commands, with a _New…_ escape, so it teaches your vocabulary rather than imposing one.
-- Package names are learned from the commands you already have: once a link to `theorchard.atlassian.net` is filed under `Jira`, the next one suggests `Jira` rather than `Atlassian`.
+- Package names are learned from the commands you already have: once a link to `acme.atlassian.net` is filed under `Jira`, the next one suggests `Jira` rather than `Atlassian`.
 - Actions to run a command through its Raycast deeplink, run it in a terminal to see its output, open it in an editor, reveal it in Finder, open or copy its containing folder, duplicate it, and move it to the Trash.
 - Non-executable scripts are flagged, since Raycast silently ignores them, with a Make Executable action to fix them in place.

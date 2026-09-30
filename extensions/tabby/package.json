@@ -42,7 +42,7 @@
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.18.1",
-    "js-yaml": "^4.3.1"
+    "js-yaml": "^4.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -67,6 +67,6 @@
   ],
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml": "^4.3.1"
+    "js-yaml": "^4.3.2"
   }
 }

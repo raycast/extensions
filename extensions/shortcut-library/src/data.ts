@@ -4,6 +4,7 @@ import type { Shortcut } from "./types";
 import { normalizeShortcut } from "./schema";
 
 export {
+  categoryExists,
   generateId,
   normalizeShortcut,
   validateShortcut,
@@ -11,6 +12,7 @@ export {
   distinctCategories,
   mergeShortcuts,
   isDuplicate,
+  resolveCategory,
 } from "./schema";
 
 const CORRUPT_KEY = `${STORAGE_KEY}.corrupt`;

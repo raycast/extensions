@@ -16,6 +16,7 @@ import { Priority, Reminder, List as TList } from "../hooks/useData";
 import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
+import CreateCalendarEvent from "./CreateCalendarEvent";
 import EditReminder from "./EditReminder";
 import LocationForm from "./LocationForm";
 
@@ -460,6 +461,15 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
           title="Copy Reminder URL"
           content={reminder.openUrl}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.Push
+          icon={Icon.Calendar}
+          title="Create Calendar Event"
+          target={<CreateCalendarEvent reminder={reminder} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
         />
       </ActionPanel.Section>
 

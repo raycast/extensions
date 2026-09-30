@@ -82,13 +82,55 @@ async function runPowerShell(command: string): Promise<string> {
 }
 
 /**
+ * Thrown when Windows blocks WLAN queries because Location access is off
+ * (Windows 11 24H2+ treats nearby-network and SSID data as location data).
+ */
+export class WifiLocationPermissionError extends Error {
+  constructor() {
+    super(
+      "Windows Location access is off. Turn on Location services and let desktop apps access your location to scan Wi-Fi networks.",
+    );
+    this.name = "WifiLocationPermissionError";
+  }
+}
+
+/**
+ * Detects netsh's location-permission notice. Matches the settings URI rather
+ * than the prose so it works on localized Windows builds.
+ */
+export function isLocationPermissionOutput(
+  output: string | undefined,
+): boolean {
+  return Boolean(output && /ms-settings:privacy-location/i.test(output));
+}
+
+export function isLocationPermissionError(error: unknown): boolean {
+  for (let e = error; e; e = (e as { cause?: unknown }).cause) {
+    if (e instanceof WifiLocationPermissionError) return true;
+    if (!(e instanceof Error)) break;
+  }
+  return false;
+}
+
+/**
  * Runs netsh directly via execFile without cmd.exe shell overhead.
  */
 async function runNetsh(args: string[]): Promise<string> {
-  const { stdout } = await execFileAsync("netsh", args, {
-    windowsHide: true,
-    maxBuffer: 10 * 1024 * 1024,
-  });
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("netsh", args, {
+      windowsHide: true,
+      maxBuffer: 10 * 1024 * 1024,
+    }));
+  } catch (error) {
+    if (isLocationPermissionOutput((error as { stdout?: string }).stdout)) {
+      throw new WifiLocationPermissionError();
+    }
+    throw error;
+  }
+  if (isLocationPermissionOutput(stdout)) {
+    throw new WifiLocationPermissionError();
+  }
   return stdout.trim();
 }
 
@@ -1017,4 +1059,11 @@ export async function getWindowsWifiPassword(
  */
 export async function openWindowsWifiSettings(): Promise<void> {
   await runCmd("start ms-settings:network-wifi");
+}
+
+/**
+ * Opens Settings > Privacy & security > Location.
+ */
+export async function openWindowsLocationSettings(): Promise<void> {
+  await runCmd("start ms-settings:privacy-location");
 }
