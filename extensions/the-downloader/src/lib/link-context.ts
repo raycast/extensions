@@ -114,6 +114,17 @@ export function truncateToTokens(text: string, tokens: number): string {
   return `${text.slice(0, Math.floor((text.length * tokens) / estimate))}…`;
 }
 
+/** A link that couldn't be loaded; `fix` names what the user can change to get past it. */
+export class LinkLoadError extends Error {
+  constructor(
+    message: string,
+    readonly fix?: "preferences",
+  ) {
+    super(message);
+    this.name = "LinkLoadError";
+  }
+}
+
 /** True when there is a transcript, caption or article text to send. */
 export function hasBody(ctx: Pick<LinkContext, "body">): boolean {
   return ctx.body.type === "segments" ? ctx.body.segments.length > 0 : ctx.body.paragraphs.length > 0;
