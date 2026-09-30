@@ -21,6 +21,8 @@ Chat About Link works with the model you pick in its own preferences (**AI Engin
 - **Apple Intelligence** — free, on macOS 27 with Apple Intelligence turned on, through the built-in `fm` tool, on-device. Accept its terms once with `sudo fm license` in Terminal.
 - **Ollama** — free and local. Set the model and context size in preferences.
 
+Chat About Link's settings also set the **Answer Style** (Balanced, Short with a TL;DR first, or Detailed), the **Answer Language** (the question's own, or a fixed language) and **Custom Instructions** added to every answer.
+
 **Automatic** uses Raycast AI when you have it, then Apple Intelligence, then a running Ollama. You can also switch engines from the dropdown in the chat. When a transcript or article is longer than the model's context, Chat About Link sends the passages that match the question, and reads summaries part by part so nothing is skipped.
 
 In Raycast AI Chat, mention **@the-downloader** to download videos, read any link (`read-link`: a video's timestamped transcript, a post's caption or an article) or get its details and statistics (`get-link-info`). The extension also includes three Skills: **Summarize Link**, **Study Notes** and **Performance Check**.

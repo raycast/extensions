@@ -93,6 +93,47 @@ describe("chatInstructions", () => {
   });
 });
 
+describe("answer preferences", () => {
+  it("adds nothing by default", () => {
+    expect(chatInstructions("page", {})).toBe(chatInstructions("page"));
+    expect(chatInstructions("page", { style: "balanced", language: "", custom: "  " })).toBe(chatInstructions("page"));
+  });
+
+  it("makes Short answers start with a TL;DR and stay brief", () => {
+    const short = chatInstructions("video", { style: "short" });
+    expect(short).toContain("start with a one-line **TL;DR**");
+    expect(short).toContain("at most five short bullet points");
+    expect(chatInstructions("page", { style: "detailed" })).toMatch(/thorough/);
+  });
+
+  it("answers in a chosen language instead of the question's", () => {
+    const spanish = chatInstructions("post", { language: "Spanish" });
+    expect(spanish).toContain(
+      "Always reply in Spanish, whatever language the question or the source is in — every word, including headings and the TL;DR.",
+    );
+    expect(spanish).not.toContain("Reply in the language of the question.");
+  });
+
+  it("adds the user's own instructions last, capped, without letting them invent facts", () => {
+    const custom = chatInstructions("page", { custom: `Explain like I'm new to the topic. ${"x".repeat(900)}` });
+    expect(custom).toContain("The user's own instructions for every answer");
+    expect(custom).toContain("Explain like I'm new to the topic.");
+    expect(custom).toMatch(/never state facts the source doesn't support/);
+    expect(custom.length).toBeLessThan(chatInstructions("page").length + 700);
+  });
+
+  it("applies them to the answer, and to the final answer of a part-by-part summary only", async () => {
+    const answer = { style: "short" as const };
+    const direct = fakeEngine(10_000);
+    await answerQuestion(direct, pageWith(3), "q", [], { answer });
+    expect(direct.calls[0].instructions).toContain("TL;DR");
+    const parts = fakeEngine(900);
+    await answerQuestion(parts, pageWith(300), "Summarize the page", [], { answer });
+    expect(parts.calls.slice(0, -1).every((c) => !c.instructions.includes("TL;DR"))).toBe(true);
+    expect(parts.calls.at(-1)?.instructions).toContain("TL;DR");
+  });
+});
+
 describe("buildPrompt", () => {
   it("sends the whole transcript when it fits", () => {
     const plan = buildPrompt(videoWith(5), "What happens?", [], 10_000);

@@ -520,6 +520,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
         onData: (text) => streamText(id, text),
         onStatus: (status) => update(id, { progress: status }),
         images,
+        answer: { style: prefs.answerStyle, language: prefs.answerLanguage, custom: prefs.customInstructions },
       });
       if (flushTimer.current) clearTimeout(flushTimer.current);
       flushTimer.current = undefined;

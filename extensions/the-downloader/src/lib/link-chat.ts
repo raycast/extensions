@@ -48,9 +48,41 @@ const INSTRUCTIONS: Record<LinkKind, string> = {
   ].join(" "),
 };
 
-/** The system instructions for chatting about one kind of link. */
-export function chatInstructions(kind: LinkKind): string {
-  return INSTRUCTIONS[kind];
+/** The user's answer settings from Chat About Link's preferences. */
+export type AnswerPrefs = {
+  /** `balanced` (default), `short` or `detailed`. */
+  style?: string;
+  /** A language name such as `Spanish`; empty means the question's language. */
+  language?: string;
+  custom?: string;
+};
+
+/** Longest Custom Instructions kept: they share the small on-device models' context window. */
+export const CUSTOM_INSTRUCTIONS_LIMIT = 500;
+
+const STYLES: Record<string, string> = {
+  short:
+    "Keep answers short: start with a one-line **TL;DR**, then at most five short bullet points. No long paragraphs.",
+  detailed: "Give thorough, well-structured answers: cover every relevant point and quote the source where it helps.",
+};
+
+/** The system instructions for chatting about one kind of link, with the user's answer settings. */
+export function chatInstructions(kind: LinkKind, prefs: AnswerPrefs = {}): string {
+  let text = INSTRUCTIONS[kind];
+  const language = prefs.language?.trim();
+  if (language) {
+    text = text.replace(
+      "Reply in the language of the question.",
+      `Always reply in ${language}, whatever language the question or the source is in — every word, including headings and the TL;DR.`,
+    );
+  }
+  const style = STYLES[prefs.style ?? ""];
+  if (style) text = `${text} ${style}`;
+  const custom = prefs.custom?.trim().slice(0, CUSTOM_INSTRUCTIONS_LIMIT);
+  if (custom) {
+    text = `${text} The user's own instructions for every answer — follow them; they come before the formatting and language rules above, but never state facts the source doesn't support: ${custom}`;
+  }
+  return text;
 }
 
 /** What the body is called in prompts and exports. */
@@ -131,6 +163,8 @@ export type AnswerOptions = {
   onStatus?: (status: string | undefined) => void;
   /** Local image files for engines that can look at them; they go with the final request only. */
   images?: string[];
+  /** Answer Style, Answer Language and Custom Instructions; for answers, not for the notes taken on the way. */
+  answer?: AnswerPrefs;
 };
 
 /** The prompt budget left once the images sent along have their room. */
@@ -150,7 +184,7 @@ export async function answerQuestion(
   if (plan.mode === "excerpts" && isOverviewRequest(question)) {
     return answerFromNotes(engine, ctx, question, options, history);
   }
-  return engine.complete(chatInstructions(ctx.kind), plan.prompt, {
+  return engine.complete(chatInstructions(ctx.kind, options.answer), plan.prompt, {
     signal: options.signal,
     onData: options.onData,
     onStatus: options.onStatus,
@@ -220,12 +254,16 @@ export async function answerFromNotes(
   const parts = chunkBody(ctx.body, partBudget);
 
   if (parts.length === 1) {
-    return engine.complete(chatInstructions(ctx.kind), `${facts}\n\n## ${names.full}\n${parts[0].text}\n\n${tail}`, {
-      signal: options.signal,
-      onData: options.onData,
-      onStatus: options.onStatus,
-      images: options.images,
-    });
+    return engine.complete(
+      chatInstructions(ctx.kind, options.answer),
+      `${facts}\n\n## ${names.full}\n${parts[0].text}\n\n${tail}`,
+      {
+        signal: options.signal,
+        onData: options.onData,
+        onStatus: options.onStatus,
+        images: options.images,
+      },
+    );
   }
 
   const notes: string[] = [];
@@ -248,7 +286,7 @@ export async function answerFromNotes(
 
   options.onStatus?.("Writing the answer…");
   const answer = await engine.complete(
-    chatInstructions(ctx.kind),
+    chatInstructions(ctx.kind, options.answer),
     `${facts}\n\n## Notes on the ${names.notes}, part by part\n${fitted}\n\n${tail}`,
     { signal: options.signal, onData: options.onData, images: options.images },
   );

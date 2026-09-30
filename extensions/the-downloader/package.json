@@ -173,36 +173,125 @@
           ]
         },
         {
-          "name": "ollamaUrl",
-          "title": "Ollama URL",
-          "description": "Address of your Ollama server.",
-          "type": "textfield",
-          "default": "http://127.0.0.1:11434",
-          "required": false
+          "name": "answerStyle",
+          "title": "Answer Style",
+          "description": "How answers are written. Short starts with a one-line TL;DR and a few bullets, and is faster on Apple Intelligence and Ollama.",
+          "type": "dropdown",
+          "default": "balanced",
+          "required": false,
+          "data": [
+            {
+              "title": "Balanced",
+              "value": "balanced"
+            },
+            {
+              "title": "Short (TL;DR First)",
+              "value": "short"
+            },
+            {
+              "title": "Detailed",
+              "value": "detailed"
+            }
+          ]
         },
         {
-          "name": "ollamaModel",
-          "title": "Ollama Model",
-          "description": "Model name, e.g. `llama3.2` or `qwen3:8b`. Leave blank to use the first installed model.",
+          "name": "answerLanguage",
+          "title": "Answer Language",
+          "description": "The language answers are written in. Same as the Question follows what you type; pick one to get it even for the suggested questions.",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Same as the Question",
+              "value": ""
+            },
+            {
+              "title": "English",
+              "value": "English"
+            },
+            {
+              "title": "Spanish",
+              "value": "Spanish"
+            },
+            {
+              "title": "German",
+              "value": "German"
+            },
+            {
+              "title": "French",
+              "value": "French"
+            },
+            {
+              "title": "Italian",
+              "value": "Italian"
+            },
+            {
+              "title": "Portuguese",
+              "value": "Portuguese"
+            },
+            {
+              "title": "Dutch",
+              "value": "Dutch"
+            },
+            {
+              "title": "Polish",
+              "value": "Polish"
+            },
+            {
+              "title": "Czech",
+              "value": "Czech"
+            },
+            {
+              "title": "Slovak",
+              "value": "Slovak"
+            },
+            {
+              "title": "Ukrainian",
+              "value": "Ukrainian"
+            },
+            {
+              "title": "Russian",
+              "value": "Russian"
+            },
+            {
+              "title": "Turkish",
+              "value": "Turkish"
+            },
+            {
+              "title": "Swedish",
+              "value": "Swedish"
+            },
+            {
+              "title": "Japanese",
+              "value": "Japanese"
+            },
+            {
+              "title": "Chinese",
+              "value": "Chinese"
+            },
+            {
+              "title": "Korean",
+              "value": "Korean"
+            },
+            {
+              "title": "Hindi",
+              "value": "Hindi"
+            },
+            {
+              "title": "Arabic",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "name": "customInstructions",
+          "title": "Custom Instructions",
+          "description": "Added to every answer, e.g. \"Explain like I'm new to the topic\" or \"Keep technical terms in English\". Up to 500 characters.",
           "type": "textfield",
           "default": "",
-          "required": false
-        },
-        {
-          "name": "ollamaContext",
-          "title": "Ollama Context Size",
-          "description": "Context window (num_ctx) in tokens. Larger fits more of the transcript but needs more memory. Integer; default 8192.",
-          "type": "textfield",
-          "default": "8192",
-          "required": false
-        },
-        {
-          "name": "transcriptLanguage",
-          "title": "Transcript Language",
-          "description": "Caption language to load, as a code like `en` or `de`. Auto uses the video's own language, then English.",
-          "type": "textfield",
-          "default": "auto",
-          "required": false
+          "required": false,
+          "placeholder": "e.g. Explain like I'm new to the topic"
         },
         {
           "name": "chatImages",
@@ -225,6 +314,38 @@
               "value": "never"
             }
           ]
+        },
+        {
+          "name": "transcriptLanguage",
+          "title": "Transcript Language",
+          "description": "Caption language to load, as a code like `en` or `de`. Auto uses the video's own language, then English.",
+          "type": "textfield",
+          "default": "auto",
+          "required": false
+        },
+        {
+          "name": "ollamaUrl",
+          "title": "Ollama URL",
+          "description": "Address of your Ollama server.",
+          "type": "textfield",
+          "default": "http://127.0.0.1:11434",
+          "required": false
+        },
+        {
+          "name": "ollamaModel",
+          "title": "Ollama Model",
+          "description": "Model name, e.g. `llama3.2` or `qwen3:8b`. Leave blank to use the first installed model.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "ollamaContext",
+          "title": "Ollama Context Size",
+          "description": "Context window (num_ctx) in tokens. Larger fits more of the transcript but needs more memory. Integer; default 8192.",
+          "type": "textfield",
+          "default": "8192",
+          "required": false
         }
       ]
     }
