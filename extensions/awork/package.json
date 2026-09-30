@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "awork",
   "title": "awork",
-  "description": "Search projects and tasks, create tasks, and log time in awork.",
+  "description": "Search projects and tasks, create and edit tasks, log time, and start new awork AI threads.",
   "icon": "icon.png",
   "access": "public",
   "owner": "hypercode",
@@ -48,6 +48,21 @@
       "subtitle": "awork",
       "description": "Create a project or private task",
       "mode": "view"
+    },
+    {
+      "name": "newAiThread",
+      "title": "New AI Thread",
+      "subtitle": "awork",
+      "description": "Open your workspace's awork AI page in the browser with an optional prefilled prompt",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Prompt (optional)",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
