@@ -1,17 +1,13 @@
-import fetch, { Response } from "node-fetch";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchReadwise } from "../src/api";
 
 vi.mock("@raycast/api", () => ({
   getPreferenceValues: () => ({ token: "test-token", pageSize: 500 }),
 }));
 
-vi.mock("node-fetch", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("node-fetch")>()),
-  default: vi.fn(),
-}));
-
-const mockedFetch = vi.mocked(fetch);
+const mockedFetch = vi.fn<typeof fetch>();
+beforeEach(() => vi.stubGlobal("fetch", mockedFetch));
+afterEach(() => vi.unstubAllGlobals());
 
 describe("fetchReadwise", () => {
   it("sends an authenticated request with pagination and returns the parsed response", async () => {

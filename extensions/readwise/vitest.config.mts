@@ -9,7 +9,7 @@ export default defineConfig({
     mockReset: true,
     coverage: {
       provider: "v8",
-      include: ["src/utils.ts", "src/api/fetcher.ts", "src/dailyreview.ts", "src/library.ts"],
+      include: ["src/utils.ts", "src/api/fetcher.ts", "src/api/useApi.ts", "src/dailyreview.ts", "src/library.ts"],
       reporter: ["text", "html"],
     },
   },
