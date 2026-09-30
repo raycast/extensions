@@ -1,6 +1,6 @@
 # Linak Controller Changelog
 
-## [Built-in Bluetooth] - {PR_MERGE_DATE}
+## [Built-in Bluetooth] - 2026-09-30
 
 - Talks to the desk directly over Bluetooth, so linak-controller, Python and server mode are no longer needed
 - Finds your desk automatically, with a new Select Desk command for picking one
