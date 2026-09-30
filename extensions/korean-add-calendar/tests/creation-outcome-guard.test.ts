@@ -19,11 +19,16 @@ const parsed: ParsedSchedule = {
 };
 
 describe("buildCreationOutcomeKey", () => {
-  it("keeps the key stable when only the source sentence changes", () => {
+  it("keeps the key stable when retry-only fields change", () => {
     const first = buildCreationOutcomeKey({ targetType: "calendar", parsed });
     const retry = buildCreationOutcomeKey({
       targetType: "calendar",
-      parsed: { ...parsed, source: "2026년 2월 18일 15:00부터 16:00까지 팀 회의" },
+      parsed: {
+        ...parsed,
+        source: "2026년 2월 18일 15:00부터 16:00까지 팀 회의 장소: Meeting Room B",
+        location: "Meeting Room B",
+        recurrence: { frequency: "daily" },
+      },
     });
 
     expect(retry).toBe(first);

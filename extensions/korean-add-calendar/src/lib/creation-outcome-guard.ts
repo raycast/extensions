@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 
-import type { CalendarRecurrence } from "./apple-calendar";
 import type { ParsedSchedule } from "./parse-korean-schedule";
 
 export type CreationTarget = "calendar" | "reminder";
@@ -11,18 +10,16 @@ const CREATION_OUTCOME_KEY_PATTERN = /^[a-f0-9]{64}$/u;
 export function buildCreationOutcomeKey({
   targetType,
   parsed,
-  recurrence,
 }: {
   targetType: CreationTarget;
   parsed: ParsedSchedule;
-  recurrence?: CalendarRecurrence;
 }): string {
+  // Retry-only settings must not let the same uncertain item bypass its duplicate warning.
   const common = {
     targetType,
     title: parsed.title.trim(),
     startEpochMs: parsed.start.getTime(),
     allDay: parsed.allDay,
-    location: parsed.location?.trim() ?? "",
   };
 
   if (targetType === "reminder") {
@@ -32,18 +29,6 @@ export function buildCreationOutcomeKey({
   return hashCreationIdentity({
     ...common,
     endEpochMs: parsed.end.getTime(),
-    recurrence: recurrence
-      ? {
-          frequency: recurrence.frequency,
-          interval: recurrence.interval ?? 1,
-          weekday: recurrence.weekday ?? null,
-          dayOfMonth: recurrence.dayOfMonth ?? null,
-          end:
-            recurrence.end.type === "count"
-              ? { type: recurrence.end.type, count: recurrence.end.count }
-              : { type: recurrence.end.type, untilEpochMs: recurrence.end.untilEpochMs },
-        }
-      : null,
   });
 }
 

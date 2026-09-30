@@ -498,7 +498,6 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       creationOutcomeKey: buildCreationOutcomeKey({
         targetType: values.targetType,
         parsed: prepared.parsed,
-        recurrence: prepared.recurrence,
       }),
     }));
     const unconfirmedKeyPartition = partitionUnconfirmedCreationKeys(
