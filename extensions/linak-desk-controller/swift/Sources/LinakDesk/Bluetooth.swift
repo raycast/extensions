@@ -119,7 +119,7 @@ final class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @unch
 
   private var poweredOn: [Pending<Void>] = []
   private var connection: Pending<Void>?
-  private var connectingPeripheral: UUID?
+  private var activePeripheral: UUID?
   private var characteristicsDiscovery: Pending<Void>?
   private var pendingServices = 0
   private var reads: [CBUUID: Pending<Data>] = [:]
@@ -255,12 +255,12 @@ final class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @unch
     do {
       try await run(timeout: 10, onTimeout: DeskError.connectionTimedOut) { (pending: Pending<Void>) in
         peripheral.delegate = self
+        self.activePeripheral = peripheral.identifier
         if peripheral.state == .connected {
           pending.succeed(())
           return
         }
         self.connection = pending
-        self.connectingPeripheral = peripheral.identifier
         debug("connecting \(peripheral.identifier) state \(peripheral.state.rawValue)")
         self.central.connect(peripheral, options: nil)
       }
@@ -282,20 +282,22 @@ final class BLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, @unch
   func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
     debug("connected \(peripheral.identifier)")
     // Ignore late callbacks from a candidate we already gave up on.
-    guard peripheral.identifier == connectingPeripheral else { return }
+    guard peripheral.identifier == activePeripheral else { return }
     connection?.succeed(())
     connection = nil
   }
 
   func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
     debug("failed to connect: \(String(describing: error))")
-    guard peripheral.identifier == connectingPeripheral else { return }
+    guard peripheral.identifier == activePeripheral else { return }
     connection?.fail(DeskError.connectionFailed(error?.localizedDescription))
     connection = nil
   }
 
   func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
     debug("disconnected: \(String(describing: error))")
+    // A rejected candidate may disconnect after the next one has started connecting.
+    guard peripheral.identifier == activePeripheral else { return }
     let error = DeskError.communicationFailed("the desk disconnected")
     connection?.fail(error)
     characteristicsDiscovery?.fail(error)

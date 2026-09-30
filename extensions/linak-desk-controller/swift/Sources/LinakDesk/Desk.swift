@@ -154,6 +154,11 @@ final class DeskSession {
     try await ble.write(Self.stop, to: controlCharacteristicUUID, on: peripheral)
   }
 
+  /// Stops the desk unless a newer command has taken over, so a slow move never interrupts its replacement.
+  private func stopIfCurrent(_ request: Request, _ requestId: String) async throws {
+    _ = try await request.perform(ifCurrent: requestId) { try await sendStop() }
+  }
+
   /// Moves to `targetCm` by repeatedly writing the target to the reference input, like the desk's own app does.
   /// When `stopAtLimit` is set, reaching a physical limit counts as done rather than an obstruction.
   /// Returns a cancelled result, without stopping the desk, when a newer command for it takes over.
@@ -169,7 +174,7 @@ final class DeskSession {
     if abs(reading.heightCm - targetCm) <= Self.tolerance { return MoveResult(reading: reading, cancelled: false) }
 
     try await ble.write(Self.wake, to: controlCharacteristicUUID, on: peripheral)
-    try await sendStop()
+    try await stopIfCurrent(request, requestId)
     try await Task.sleep(nanoseconds: 200_000_000)
 
     let startedAt = Date()
@@ -178,7 +183,7 @@ final class DeskSession {
 
     while true {
       if Date().timeIntervalSince(startedAt) > Self.movementTimeout {
-        try? await sendStop()
+        try? await stopIfCurrent(request, requestId)
         throw DeskError.movementTimedOut
       }
 
@@ -196,14 +201,14 @@ final class DeskSession {
 
       stationaryReadings = isStationary && Date().timeIntervalSince(startedAt) > 2 ? stationaryReadings + 1 : 0
       if stationaryReadings >= 4 {
-        try? await sendStop()
+        try? await stopIfCurrent(request, requestId)
         if stopAtLimit { return MoveResult(reading: reading, cancelled: false) }
         throw DeskError.obstructed(heightCm: reading.heightCm, targetCm: targetCm)
       }
       previous = reading
     }
 
-    try await sendStop()
+    try await stopIfCurrent(request, requestId)
     return MoveResult(reading: reading, cancelled: false)
   }
 }

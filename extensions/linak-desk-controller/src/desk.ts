@@ -36,6 +36,11 @@ export async function selectDesk(id: string | undefined) {
   }
 }
 
+/** Keeps an automatically found desk, unless the user picked one while the command was still running. */
+async function rememberDiscoveredDesk(id: string) {
+  if (!(await getDeskId())) await selectDesk(id);
+}
+
 export async function getStatus(): Promise<DeskStatus> {
   return getDeskStatus(await getDeskId(), getBaseHeight());
 }
@@ -48,7 +53,7 @@ async function runDeskCommand(title: string, command: (deskId: string) => Promis
     if (!deskId) toast.message = "Looking for your desk…";
     const status = await command(deskId);
     // Remember an automatically found desk so the next command doesn't have to scan for it.
-    if (!deskId) await selectDesk(status.id);
+    if (!deskId) await rememberDiscoveredDesk(status.id);
     if (status.cancelled) {
       // A newer command took over before the desk reached its target, so this isn't a success.
       toast.style = Toast.Style.Failure;

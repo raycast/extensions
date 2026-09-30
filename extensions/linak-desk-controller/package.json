@@ -56,7 +56,7 @@
   "commands": [
     {
       "name": "move-to-stand",
-      "title": "Stand Up",
+      "title": "Stand up",
       "subtitle": "Linak Desk Controller",
       "description": "Move your desk to your standing height",
       "mode": "no-view",
