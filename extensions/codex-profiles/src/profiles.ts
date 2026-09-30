@@ -10,6 +10,8 @@ const DEFAULT_PATH = join(HOME, ".codex");
 const PROFILES_HOME = join(HOME, ".codex-profiles");
 const LEGACY_PERSONAL_ID = "personal-c48474c6";
 const REGISTRY_LOCK_PATH = join(PROFILES_HOME, ".registry-mutation-lock");
+const REGISTRY_LOCK_TIMEOUT_MS = 10_000;
+const STALE_REGISTRY_LOCK_MS = 30_000;
 
 export interface CodexProfile {
   id: string;
@@ -110,8 +112,10 @@ async function writeRegistry(registry: ProfileRegistry): Promise<void> {
 async function withRegistryLock<T>(operation: () => Promise<T>): Promise<T> {
   await mkdir(PROFILES_HOME, { recursive: true });
   return withDirectoryLock(REGISTRY_LOCK_PATH, operation, {
-    waitTimeoutMs: 10_000,
+    waitTimeoutMs: REGISTRY_LOCK_TIMEOUT_MS,
     retryDelayMs: 50,
+    timeoutMessage: "Another profile change is still in progress. Try again.",
+    emptyLockGraceMs: STALE_REGISTRY_LOCK_MS,
   });
 }
 
