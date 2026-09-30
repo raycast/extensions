@@ -45,16 +45,21 @@ describe("buildCreationOutcomeKey", () => {
 
 describe("parseStoredUnconfirmedCreationKeys", () => {
   it("loads valid keys and removes duplicates", () => {
-    expect(parseStoredUnconfirmedCreationKeys(JSON.stringify(["a", "a", "b"]))).toEqual(["a", "b"]);
+    const first = "a".repeat(64);
+    const second = "b".repeat(64);
+    expect(parseStoredUnconfirmedCreationKeys(JSON.stringify([first, first, second]))).toEqual([first, second]);
   });
 
   it.each([undefined, null, ""])("treats %j as empty storage", (value) => {
     expect(parseStoredUnconfirmedCreationKeys(value)).toEqual([]);
   });
 
-  it.each(["invalid", "{}", '["", "a"]', 1])("fails closed for malformed storage: %j", (value) => {
-    expect(parseStoredUnconfirmedCreationKeys(value)).toEqual([UNKNOWN_CREATION_OUTCOME_KEY]);
-  });
+  it.each(["invalid", "{}", '["", "a"]', '["not-a-hash"]', 1])(
+    "fails closed for malformed storage: %j",
+    (value) => {
+      expect(parseStoredUnconfirmedCreationKeys(value)).toEqual([UNKNOWN_CREATION_OUTCOME_KEY]);
+    },
+  );
 });
 
 describe("partitionUnconfirmedCreationKeys", () => {

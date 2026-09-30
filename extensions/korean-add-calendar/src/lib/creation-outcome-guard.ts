@@ -6,6 +6,7 @@ import type { ParsedSchedule } from "./parse-korean-schedule";
 export type CreationTarget = "calendar" | "reminder";
 
 export const UNKNOWN_CREATION_OUTCOME_KEY = "__unknown_creation_outcome__";
+const CREATION_OUTCOME_KEY_PATTERN = /^[a-f0-9]{64}$/u;
 
 export function buildCreationOutcomeKey({
   targetType,
@@ -79,7 +80,14 @@ export function parseStoredUnconfirmedCreationKeys(value: unknown): string[] {
 
   try {
     const parsed = JSON.parse(value) as unknown;
-    if (!Array.isArray(parsed) || parsed.some((item) => typeof item !== "string" || item.length === 0)) {
+    if (
+      !Array.isArray(parsed) ||
+      parsed.some(
+        (item) =>
+          typeof item !== "string" ||
+          (item !== UNKNOWN_CREATION_OUTCOME_KEY && !CREATION_OUTCOME_KEY_PATTERN.test(item)),
+      )
+    ) {
       return [UNKNOWN_CREATION_OUTCOME_KEY];
     }
     return [...new Set(parsed)];
