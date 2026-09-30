@@ -10,12 +10,17 @@
   ],
   "license": "MIT",
   "categories": [
+    "Communication",
     "Web"
   ],
   "keywords": [
     "ham radio",
     "amateur radio",
-    "callsign"
+    "callsign",
+    "qrz",
+    "qsl",
+    "grid locator",
+    "maidenhead"
   ],
   "commands": [
     {
@@ -55,7 +60,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

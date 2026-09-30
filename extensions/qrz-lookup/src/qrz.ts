@@ -1,11 +1,10 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { XMLParser } from "fast-xml-parser";
 
 // Spec: https://www.qrz.com/docs/xml/current_spec.html
 const API_URL = "https://xmldata.qrz.com/xml/current/";
 const AGENT = "raycast-qrz-lookup-1.0";
 
-const cache = new Cache();
 const parser = new XMLParser({ parseTagValue: false });
 
 export interface Callsign {
@@ -40,17 +39,19 @@ async function request(params: Record<string, string>): Promise<Response> {
   return parser.parse(await response.text()).QRZDatabase;
 }
 
-async function login(): Promise<string> {
-  const { username, password } = getPreferenceValues<Preferences>();
+async function login({ username, password }: Preferences): Promise<string> {
   const { Session } = await request({ username, password, agent: AGENT });
   if (!Session.Key) throw new Error(Session.Error ?? "Login failed");
-  cache.set("sessionKey", Session.Key);
+  await LocalStorage.setItem(`sessionKey:${username}`, Session.Key);
   return Session.Key;
 }
 
 export async function lookupCallsign(callsign: string): Promise<Callsign | undefined> {
-  let result = await request({ s: cache.get("sessionKey") ?? (await login()), callsign });
-  if (!result.Session.Key) result = await request({ s: await login(), callsign });
+  const preferences = getPreferenceValues<Preferences>();
+  const sessionKey =
+    (await LocalStorage.getItem<string>(`sessionKey:${preferences.username}`)) ?? (await login(preferences));
+  let result = await request({ s: sessionKey, callsign });
+  if (!result.Session.Key) result = await request({ s: await login(preferences), callsign });
 
   const error = result.Session.Error;
   if (error?.startsWith("Not found")) return undefined;

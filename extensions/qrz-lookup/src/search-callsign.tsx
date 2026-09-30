@@ -10,8 +10,16 @@ export default function Command() {
   const callsign = searchText.trim().toUpperCase();
   const canSearch = callsign.length >= MIN_LENGTH;
 
-  const { data, isLoading } = useCachedPromise(lookupCallsign, [callsign], { execute: canSearch });
+  const { data, error, isLoading } = useCachedPromise(lookupCallsign, [callsign], { execute: canSearch });
   const result = canSearch ? data : undefined;
+
+  const emptyView = !canSearch
+    ? { title: "Enter a Callsign" }
+    : isLoading
+      ? { title: "Searching…" }
+      : error
+        ? { title: "Lookup Failed", description: error.message, icon: Icon.Warning }
+        : { title: `${callsign} Not Found` };
 
   return (
     <List
@@ -35,10 +43,7 @@ export default function Command() {
           }
         />
       ) : (
-        <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title={!canSearch ? "Enter a Callsign" : isLoading ? "Searching…" : `${callsign} Not Found`}
-        />
+        <List.EmptyView icon={Icon.MagnifyingGlass} {...emptyView} />
       )}
     </List>
   );
