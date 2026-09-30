@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Fix Preferred Team in Create Issue for Myself] - 2026-09-28
+
+- Fix **Create Issue for Myself** ignoring the Preferred Team in workspaces with more than 50 teams. The team is now looked up by key directly instead of searching the first page of teams, and the key is matched case-insensitively.
+- When no Preferred Team is set (or it isn't found), fall back to the first team you are a member of.
+
 ## [Plan and Review Work Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

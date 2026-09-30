@@ -1,7 +1,13 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { AddInstance } from "./instances";
-import { Candidate, FailedInstance, loadCandidates } from "./candidates";
+import { AddInstance, Instance, instanceId, tokenForInstance } from "./instances";
+import {
+  Candidate,
+  FailedInstance,
+  iconForDeployType,
+  loadConfiguredInstances,
+  loadInstanceCandidates,
+} from "./candidates";
 import { mapWithConcurrency } from "./concurrency";
 import DeploymentHistory, {
   DeployableKind,
@@ -9,6 +15,7 @@ import DeploymentHistory, {
   ENDPOINTS,
   ID_FIELDS,
   STATUS_COLORS,
+  sortDeploymentsByRecency,
 } from "./deployment-history";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction } from "./service-actions";
 import ServiceLogs from "./service-logs";
@@ -40,6 +47,63 @@ async function fetchLatestDeployment(candidate: Candidate): Promise<DeploymentSt
   } catch (error) {
     return { kind: "error", message: `${error}` };
   }
+}
+
+interface CentralizedService {
+  name: string;
+  appName: string;
+  environment: { name: string; project: { name: string } };
+}
+
+interface CentralizedDeployment extends Deployment {
+  application: (CentralizedService & { applicationId: string }) | null;
+  compose: (CentralizedService & { composeId: string }) | null;
+}
+
+/**
+ * One request for the whole instance: `deployment.allCentralized` (Dokploy v0.29.0+) returns every
+ * application/compose deployment in the organization, each with its service, environment, and
+ * project. Only services with at least one deployment appear. Returns `undefined` when the
+ * instance is too old to have the route (404) or the key's role isn't allowed to use it (401/403),
+ * so the caller can fall back to per-service requests.
+ */
+async function loadCentralizedEntries(instance: Instance): Promise<Entry[] | undefined> {
+  const { url, headers } = tokenForInstance(instance);
+  const response = await fetch(trpcQueryUrl(url, "deployment.allCentralized", {}), { headers });
+  if ([401, 403, 404].includes(response.status)) return undefined;
+  const rows = await parseTrpcJsonResponse<CentralizedDeployment[]>(response);
+
+  const latest = new Map<string, Entry>();
+  for (const row of sortDeploymentsByRecency(rows ?? []) as CentralizedDeployment[]) {
+    const service = row.application ?? row.compose;
+    if (!service) continue;
+    const deployType = row.application ? "application" : "compose";
+    const id = row.application ? row.application.applicationId : row.compose!.composeId;
+    if (latest.has(id)) continue;
+    latest.set(id, {
+      candidate: {
+        id,
+        idField: ID_FIELDS[deployType],
+        deployType,
+        icon: iconForDeployType(deployType),
+        name: service.name || service.appName || id,
+        appName: service.appName ?? "",
+        status: "",
+        instanceKey: instanceId(instance),
+        instanceName: instance.name,
+        projectName: service.environment.project.name,
+        environmentName: service.environment.name,
+        url,
+        headers,
+      },
+      state: { kind: "loaded", deployment: row },
+    });
+  }
+  return [...latest.values()];
+}
+
+function isDeployable(candidate: Candidate) {
+  return candidate.deployType === "application" || candidate.deployType === "compose";
 }
 
 function sortEntries(entries: Entry[]): Entry[] {
@@ -84,12 +148,11 @@ function accessoriesForState(state: DeploymentState): List.Item.Accessory[] {
  * routes with deployment history) never apply to them - matching how `services.tsx`'s own "View
  * Deployments" action is already gated to just these two kinds.
  *
- * Reuses `loadCandidates()` (the same instance fan-out `Deploy Service` already built and got
- * reviewed), then queues one deployment-history fetch per service through `mapWithConcurrency` -
- * a self-hosted Dokploy instance isn't built to take hundreds of simultaneous requests, so every
- * service is covered, just not all at once. Rows fill in as their own fetch settles; the whole
- * list is sorted by most recent deployment only once every fetch has settled, so rows don't jump
- * around mid-load.
+ * Each instance is read with a single `deployment.allCentralized` request. Instances older than
+ * Dokploy v0.29.0 fall back to `loadInstanceCandidates()` plus one deployment-history fetch per
+ * service, queued through `mapWithConcurrency` - those rows fill in as their own fetch settles.
+ * The whole list is sorted by most recent deployment only once everything has settled, so rows
+ * don't jump around mid-load.
  */
 export default function Deployments() {
   const [isLoading, setIsLoading] = useState(true);
@@ -113,24 +176,40 @@ export default function Deployments() {
     setIsLoading(true);
     setError(undefined);
     try {
-      const result = await loadCandidates();
+      const instances = await loadConfiguredInstances();
       if (!isCurrent()) return;
-      setHasInstances(result.hasInstances);
+      setHasInstances(instances.length > 0);
+
+      const results = await Promise.allSettled(
+        instances.map(async (instance) => {
+          const centralized = await loadCentralizedEntries(instance);
+          if (centralized) return { entries: centralized, pending: [] as Candidate[] };
+          const pending = (await loadInstanceCandidates(instance)).filter(isDeployable);
+          return { entries: pending.map((candidate): Entry => ({ candidate, state: { kind: "loading" } })), pending };
+        }),
+      );
+      if (!isCurrent()) return;
       // A rejected instance shouldn't just quietly disappear from the results - the user needs to
       // know this feed wasn't actually complete, not read the shorter list as "that's everything."
-      setFailedInstances(result.failedInstances);
-
-      const filtered = result.candidates.filter(
-        (candidate) => candidate.deployType === "application" || candidate.deployType === "compose",
+      setFailedInstances(
+        results.flatMap((result, index) =>
+          result.status === "rejected" ? [{ name: instances[index].name, error: `${result.reason}` }] : [],
+        ),
       );
-      setEntries(filtered.map((candidate) => ({ candidate, state: { kind: "loading" } })));
-      if (filtered.length === 0) return;
+      const loaded = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+      setEntries(loaded.flatMap((result) => result.entries));
 
-      await mapWithConcurrency(filtered, 5, async (candidate) => {
-        const state = await fetchLatestDeployment(candidate);
-        if (!isCurrent()) return;
-        setEntries((current) => current.map((entry) => (entry.candidate === candidate ? { ...entry, state } : entry)));
-      });
+      await mapWithConcurrency(
+        loaded.flatMap((result) => result.pending),
+        5,
+        async (candidate) => {
+          const state = await fetchLatestDeployment(candidate);
+          if (!isCurrent()) return;
+          setEntries((current) =>
+            current.map((entry) => (entry.candidate === candidate ? { ...entry, state } : entry)),
+          );
+        },
+      );
 
       if (!isCurrent()) return;
       setEntries((current) => sortEntries(current));
@@ -169,8 +248,8 @@ export default function Deployments() {
       ) : !isLoading && entries.length === 0 && failedInstances.length === 0 ? (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="No Deployable Services"
-          description="No Applications or Compose stacks were found across your configured instances."
+          title="No Deployments"
+          description="No Application or Compose stack has been deployed yet across your configured instances."
           actions={
             <ActionPanel>
               <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />

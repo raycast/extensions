@@ -36,4 +36,17 @@ export const cacheConfig = {
   revalidateIfStale: true,
 };
 
+// Used only by the two pull-request scan commands (Search All / Search My Open Pull
+// Requests), not repository search. The scan already retries transient 429/5xx
+// per-request (see withRetry in queries/index.ts) and surfaces a toast on failure.
+// Without this, a hard failure (e.g. the repo-listing call itself exhausting retries
+// under sustained rate limiting) has SWR silently re-run the *entire* scan from
+// scratch in the background, compounding with our own retries into what looks like
+// it never stops. Repository search has no such retry of its own, so it keeps SWR's
+// default automatic retry-on-error.
+export const scanCacheConfig = {
+  ...cacheConfig,
+  shouldRetryOnError: false,
+};
+
 export const REPOSITORIES_CACHE_KEY = "repositories";

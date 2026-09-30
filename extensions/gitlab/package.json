@@ -365,6 +365,15 @@
       "placeholder": "~/Downloads"
     },
     {
+      "name": "showRepositoryGroupName",
+      "type": "checkbox",
+      "label": "Show Group Name in Project Dropdowns",
+      "required": false,
+      "default": true,
+      "title": "Project Dropdowns",
+      "description": "Show the top-level group in project names, e.g. \"group / subgroup / project\" instead of \"subgroup / project\""
+    },
+    {
       "name": "primaryaction",
       "type": "dropdown",
       "title": "Preferred Primary Action",

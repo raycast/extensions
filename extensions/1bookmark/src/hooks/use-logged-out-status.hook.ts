@@ -10,8 +10,6 @@ import {
   CACHED_KEY_ME,
   CACHED_KEY_MY_BOOKMARKS,
   CACHED_KEY_MY_TAGS,
-  CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL,
-  CACHED_KEY_SPACE_AUTH_CODE_SENT,
 } from "../utils/constants.util";
 
 export const useLoggedOutStatus = () => {
@@ -20,12 +18,6 @@ export const useLoggedOutStatus = () => {
   const [, setMe] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
   const [, setBookmarks] = useCachedState<CachedMyBookmarks | null>(CACHED_KEY_MY_BOOKMARKS, null);
   const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>(CACHED_KEY_MY_TAGS, null);
-  // Transient state of the short-lived auth flow — clear immediately on logout.
-  const [, setSpaceVerifyingAuthEmail] = useCachedState<string | undefined>(
-    CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL,
-    undefined,
-  );
-  const [, setSpaceAuthCodeSent] = useCachedState<boolean>(CACHED_KEY_SPACE_AUTH_CODE_SENT, false);
   // Local-only user preferences — left untouched on logout so they survive re-login with the same ID;
   // they are reset only when a different user logs in (use-user-cache-reset.hook).
   const [after1Sec, setAfter1Sec] = useState(sessionToken ? true : false);
@@ -54,15 +46,13 @@ export const useLoggedOutStatus = () => {
       setMe(null);
       setBookmarks(null);
       setTags(null);
-      setSpaceVerifyingAuthEmail(undefined);
-      setSpaceAuthCodeSent(false);
       // disabledSpaceIds / rankingEntries / recentSelectedSpace / recentSelectedTags are
       // intentionally not cleared here so they survive re-login with the same ID.
       // CACHED_KEY_LAST_LOGGED_IN_EMAIL is kept for comparison on the next login.
 
       // The React Query in-memory cache is a singleton that lives for the whole process, so resetting
       // only some queries would let the previous user's data in the remaining queries (tag.list,
-      // space.get, spaceAuth.*, etc.) be reused on re-login. Reset the entire server-data cache instead.
+      // space.get, etc.) be reused on re-login. Reset the entire server-data cache instead.
       // At this point the session token is empty, so queries are disabled/unmounted and no refetch occurs.
       queryClient.resetQueries();
       cleared.current = true;

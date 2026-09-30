@@ -442,7 +442,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
-    "@faker-js/faker": "^7.6.0",
+    "@faker-js/faker": "^10.6.0",
     "@types/jest": "^29.5.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",

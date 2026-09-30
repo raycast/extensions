@@ -1,5 +1,12 @@
 # Threads Changelog
 
+## [Analytics and Giveaway] - 2026-09-28
+
+- Add an **Analytics** command showing account and post metrics for the last 7, 14, 30, or 90 days.
+- Add an **Analytics Menu Bar** command that keeps a metric of your choice in the menu bar.
+- Add a **Giveaway** command that filters the replies to a post and draws random winners.
+- Add a **Threads Access Token** preference, required by the three commands above.
+
 ## [Fix Media Downloads and Support Share Links] - 2026-09-10
 
 - Fix `Download Threads Media`, which had stopped working for every post. Both third-party

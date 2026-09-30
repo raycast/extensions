@@ -1,5 +1,10 @@
 # Obsidian Bookmarks Changelog
 
+## [Fixed bookmark deletion] - 2026-09-29
+
+- Close the bookmark list after successful deletion and show a confirmation
+- Show an error message when deletion fails
+
 ## [1.0.5] - 2024-11-26
 
 - Search for bookmarks in subfolders below the configured Bookmarks subfolder. This option is configurable via a new preferences checkbox; default is true (enabled subfolder search).

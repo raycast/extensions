@@ -12,6 +12,7 @@ const ID_FIELDS: Record<string, string> = {
   mysql: "mysqlId",
   postgres: "postgresId",
   redis: "redisId",
+  libsql: "libsqlId",
   compose: "composeId",
 };
 

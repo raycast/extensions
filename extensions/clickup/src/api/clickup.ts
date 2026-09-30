@@ -219,13 +219,27 @@ class ClickUpClient {
    * Get all tasks from a list with pagination support
    */
   async getAllTasksFromList(listId: string, params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
+    return this.getAllTaskPages(`/list/${listId}/task`, params);
+  }
+
+  /**
+   * Get all tasks across a workspace with pagination support (Get Filtered Team Tasks)
+   */
+  async getAllTasksFromWorkspace(workspaceId: string, params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
+    return this.getAllTaskPages(`/team/${workspaceId}/task`, params);
+  }
+
+  /**
+   * Fetch every page of a task endpoint (ClickUp returns at most 100 tasks per page)
+   */
+  private async getAllTaskPages(endpoint: string, params?: Omit<GetTasksParams, "page">): Promise<ClickUpTask[]> {
     const allTasks: ClickUpTask[] = [];
     let page = 0;
     let hasMore = true;
 
     while (hasMore) {
       const queryParams = this.buildTaskQueryParams({ ...params, page });
-      const response = await this.request<GetTasksResponse>(`/list/${listId}/task?${queryParams.toString()}`);
+      const response = await this.request<GetTasksResponse>(`${endpoint}?${queryParams.toString()}`);
 
       allTasks.push(...response.tasks);
 

@@ -1,4 +1,4 @@
-import faker from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 import { allBankTypes } from "../../src/api/bank";
 
 export default () => ({
@@ -10,8 +10,8 @@ export default () => ({
         ReturnCount: 20,
         BankName: faker.finance.accountName(),
         BankType: faker.helpers.arrayElement(allBankTypes),
-        AccountNo: faker.finance.account(),
-        SortCode: faker.finance.account(),
+        AccountNo: faker.finance.accountNumber(),
+        SortCode: faker.finance.accountNumber(),
         Currency: faker.helpers.arrayElement(["GBP", "EUR", "USD"]),
         CurrentBalance: (Math.random() - 0.5) * Math.pow(10, Math.floor(Math.random() * 10)),
       },
@@ -20,11 +20,11 @@ export default () => ({
           TransactionDate: faker.date.past().toISOString(),
           Reference: faker.helpers.arrayElement([
             `Purchase of ${faker.commerce.productAdjective().toLowerCase()} ${faker.commerce.product().toLowerCase()}`,
-            `Payment to ${faker.company.companyName()}`,
+            `Payment to ${faker.company.name()}`,
           ]),
           Amount: faker.finance.amount(),
           TagStatus: faker.helpers.arrayElement(["tagged", "untagged"]),
-          TransactionId: faker.random.numeric(42),
+          TransactionId: faker.string.numeric(42),
         })),
       },
     },

@@ -25,3 +25,5 @@ export interface CustomProfileData {
   browserId?: string;
   userDataDir?: string;
 }
+
+export type SortMode = "alphabetical" | "reverse-alphabetical" | "frequently-used" | "custom";

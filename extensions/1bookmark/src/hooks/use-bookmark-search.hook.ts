@@ -6,8 +6,21 @@ import { PreparedBookmark } from "./use-prepare-bookmark-search.hook";
 // Maximum number of search results
 const MAX_SEARCH_RESULTS = 30;
 
+// Discard name/url matches with score below this
+const FIELD_SCORE_THRESHOLD = 0.25;
+
 // Weight for ranking entry influence (configurable)
 const RANKING_ENTRY_WEIGHT = 0.08;
+
+// Tag-name matching (#464): a miss-prevention net, not a ranking bonus.
+// Tags are short, so scattered-letter fuzzy matches (e.g. "cat" → "raycast", 0.34) are noisy;
+// only prefix/substring-level matches (score >= 0.5) count. Only bookmarks with no name/URL
+// match are included, scored as `tag score * TAG_ONLY_WEIGHT`. The maximum (1.0 * 0.2) stays
+// below FIELD_SCORE_THRESHOLD (0.25), so tag-only matches always rank below every name/URL match.
+const TAG_SCORE_THRESHOLD = 0.5;
+const TAG_ONLY_WEIGHT = 0.2;
+
+type ScoredBookmark = { item: Bookmark; score: number };
 
 /**
  * Function to calculate ranking score boost for a bookmark
@@ -38,17 +51,17 @@ function calculateRankingScoreBoost(params: {
  */
 function searchByField(params: {
   keyword: string;
-  key: "name" | "url";
+  key: "preparedName" | "preparedUrl";
   preparedBookmarks: PreparedBookmark[];
   bookmarks: Bookmark[];
-}) {
+}): ScoredBookmark[] {
   const { keyword, key, preparedBookmarks, bookmarks } = params;
 
   // Execute search
   const results = fuzzysort.go(keyword, preparedBookmarks, {
     key,
     limit: MAX_SEARCH_RESULTS,
-    threshold: 0.25,
+    threshold: FIELD_SCORE_THRESHOLD,
   });
 
   // Find original bookmarks from search results
@@ -62,41 +75,79 @@ function searchByField(params: {
 }
 
 /**
+ * Function to search by tag names.
+ * Each bookmark gets the score of its best-matching tag.
+ */
+function searchByTags(params: {
+  keyword: string;
+  preparedBookmarks: PreparedBookmark[];
+  bookmarks: Bookmark[];
+}): ScoredBookmark[] {
+  const { keyword, preparedBookmarks, bookmarks } = params;
+
+  const tagEntries = preparedBookmarks.flatMap((bookmark) =>
+    bookmark.preparedTags.map((tag) => ({ tag, originalIndex: bookmark.originalIndex })),
+  );
+  if (tagEntries.length === 0) return [];
+
+  const results = fuzzysort.go(keyword, tagEntries, {
+    key: "tag",
+    threshold: TAG_SCORE_THRESHOLD,
+  });
+
+  // Keep the best tag score per bookmark
+  const bestByIndex = new Map<number, number>();
+  for (const result of results) {
+    const { originalIndex } = result.obj;
+    const existing = bestByIndex.get(originalIndex);
+    if (existing === undefined || result.score > existing) {
+      bestByIndex.set(originalIndex, result.score);
+    }
+  }
+
+  return Array.from(bestByIndex.entries()).map(([originalIndex, score]) => ({
+    item: bookmarks[originalIndex],
+    score,
+  }));
+}
+
+/**
  * Function to combine search results from multiple fields and remove duplicates
- * Designed to be easily extensible when new fields are added
+ * - name/url: the highest score among fields is used as the base score
+ * - tags: bookmarks matched only by tag are included with a low score (miss prevention, not a bonus)
+ * - ranking entries: added as a bonus based on the user's past selections
  */
 function combineSearchResults(params: {
-  searchResults: Array<Array<{ item: Bookmark; score: number }>>;
+  fieldResults: ScoredBookmark[][];
+  tagResults: ScoredBookmark[];
   keyword: string;
   rankingEntries: RankingEntries;
 }) {
-  const { searchResults, keyword, rankingEntries } = params;
+  const { fieldResults, tagResults, keyword, rankingEntries } = params;
 
-  // Combine all search results into a single array
-  const allMatches = searchResults.flat();
+  const uniqueMatches = new Map<string, ScoredBookmark>();
 
   // Remove duplicates and keep the highest score
-  const uniqueMatches = new Map<string, { item: Bookmark; score: number }>();
-
-  for (const match of allMatches) {
+  for (const match of fieldResults.flat()) {
     const id = match.item.id;
     const existingMatch = uniqueMatches.get(id);
-
-    let rankingBoost = 0;
-
-    if (keyword.length > 1) {
-      // Calculate ranking score boost
-      rankingBoost = calculateRankingScoreBoost({
-        bookmark: match.item,
-        keyword,
-        rankingEntries,
-      });
+    if (!existingMatch || match.score > existingMatch.score) {
+      uniqueMatches.set(id, { item: match.item, score: match.score });
     }
+  }
 
-    const totalScore = match.score + rankingBoost;
+  // Tag matches only prevent misses: bookmarks already matched by name/URL get no extra
+  // points, and tag-only matches are appended below every name/URL match.
+  for (const match of tagResults) {
+    const id = match.item.id;
+    if (uniqueMatches.has(id)) continue;
+    uniqueMatches.set(id, { item: match.item, score: match.score * TAG_ONLY_WEIGHT });
+  }
 
-    if (!existingMatch || totalScore > existingMatch.score) {
-      uniqueMatches.set(id, { item: match.item, score: totalScore });
+  // Add ranking boost
+  if (keyword.length > 1) {
+    for (const match of uniqueMatches.values()) {
+      match.score += calculateRankingScoreBoost({ bookmark: match.item, keyword, rankingEntries });
     }
   }
 
@@ -108,7 +159,7 @@ function combineSearchResults(params: {
 
 /**
  * Helper function to process search results
- * Performs searches for name and URL separately and combines the results
+ * Performs searches for name, URL and tags separately and combines the results
  */
 function processSearchResults(params: {
   keyword: string;
@@ -118,16 +169,14 @@ function processSearchResults(params: {
 }) {
   const { keyword, preparedBookmarks, bookmarks, rankingEntries } = params;
 
-  const nameMatches = searchByField({ keyword, key: "name", preparedBookmarks, bookmarks });
-  const urlMatches = searchByField({ keyword, key: "url", preparedBookmarks, bookmarks });
-
-  // Discard results with score below 0.25
-  const filteredNameMatches = nameMatches.filter((match) => match.score >= 0.25);
-  const filteredUrlMatches = urlMatches.filter((match) => match.score >= 0.25);
+  const nameMatches = searchByField({ keyword, key: "preparedName", preparedBookmarks, bookmarks });
+  const urlMatches = searchByField({ keyword, key: "preparedUrl", preparedBookmarks, bookmarks });
+  const tagMatches = searchByTags({ keyword, preparedBookmarks, bookmarks });
 
   // Combine and sort search results (add new fields here when needed)
   return combineSearchResults({
-    searchResults: [filteredNameMatches, filteredUrlMatches],
+    fieldResults: [nameMatches, urlMatches],
+    tagResults: tagMatches,
     keyword,
     rankingEntries,
   });
@@ -140,48 +189,32 @@ function processSearchResults(params: {
  */
 export const useBookmarkSearch = (params: {
   keyword: string;
-  taggedPrepare: PreparedBookmark[];
-  untaggedPrepare: PreparedBookmark[];
-  taggedBookmarks: Bookmark[];
-  untaggedBookmarks: Bookmark[];
+  prepared: PreparedBookmark[];
+  bookmarks: Bookmark[];
   rankingEntries: RankingEntries;
 }): {
-  searchedTaggedList: Bookmark[];
-  searchedUntaggedList: Bookmark[];
+  searchedList: Bookmark[];
   hasSearch: boolean;
 } => {
-  const { keyword, taggedPrepare, untaggedPrepare, taggedBookmarks, untaggedBookmarks, rankingEntries } = params;
+  const { keyword, prepared, bookmarks, rankingEntries } = params;
 
   return useMemo(() => {
     // Return all bookmarks if no search keyword is provided
     if (keyword === "") {
       return {
-        searchedTaggedList: taggedPrepare.map((r) => taggedBookmarks[r.originalIndex]),
-        searchedUntaggedList: untaggedPrepare.map((r) => untaggedBookmarks[r.originalIndex]),
+        searchedList: prepared.map((r) => bookmarks[r.originalIndex]),
         hasSearch: false,
       };
     }
 
-    // Process tagged bookmarks if available
-    const taggedResults = processSearchResults({
-      keyword,
-      preparedBookmarks: taggedPrepare,
-      bookmarks: taggedBookmarks,
-      rankingEntries,
-    });
-
-    // Process untagged bookmarks if available
-    const untaggedResults = processSearchResults({
-      keyword,
-      preparedBookmarks: untaggedPrepare,
-      bookmarks: untaggedBookmarks,
-      rankingEntries,
-    });
-
     return {
-      searchedTaggedList: taggedResults,
-      searchedUntaggedList: untaggedResults,
+      searchedList: processSearchResults({
+        keyword,
+        preparedBookmarks: prepared,
+        bookmarks,
+        rankingEntries,
+      }),
       hasSearch: true,
     };
-  }, [keyword, taggedBookmarks, untaggedBookmarks, taggedPrepare, untaggedPrepare, rankingEntries]);
+  }, [keyword, bookmarks, prepared, rankingEntries]);
 };

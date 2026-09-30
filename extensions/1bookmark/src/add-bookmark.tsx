@@ -1,3 +1,4 @@
+import { macBrowserTabScript } from "@/vendor/browser-macos";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionPanel,
@@ -28,118 +29,16 @@ import { CACHED_KEY_RECENT_SELECTED_TAGS, CACHED_KEY_RECENT_SELECTED_SPACE } fro
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 import { fetchPageTitle } from "./utils/page-title.util";
 
-interface ScriptsPerBrowser {
-  getURL: () => Promise<string>;
-  getTitle: () => Promise<string>;
-
-  // Set current page url.
-  setUrl: (url: string) => Promise<void>;
-}
-
-type Browser = "chrome" | "safari" | "arc";
-
-const actions: Record<Browser, ScriptsPerBrowser> = {
-  chrome: {
-    async getURL() {
-      const result = await runAppleScript(`
-        tell application "Google Chrome"
-          get URL of active tab of first window
-        end tell
-      `);
-      return result;
-    },
-    async getTitle() {
-      const result = await runAppleScript(`
-        tell application "Google Chrome"
-          get title of active tab of first window
-        end tell
-      `);
-      return result;
-    },
-    async setUrl(url: string) {
-      await runAppleScript(`
-        tell application "Google Chrome"
-          set URL of active tab of window 1 to "${url}"
-        end tell
-      `);
-    },
-  },
-
-  safari: {
-    async getURL() {
-      const result = await runAppleScript(`
-        tell application "Safari" to get URL of front document
-      `);
-      return result;
-    },
-    async getTitle() {
-      const result = await runAppleScript(`
-        tell application "Safari"
-          get title of active tab of first window
-        end tell
-      `);
-      return result;
-    },
-    async setUrl(url: string) {
-      await runAppleScript(`
-        tell application "Safari"
-          set URL of current tab of front window to "${url}"
-        end tell
-      `);
-    },
-  },
-
-  arc: {
-    async getURL() {
-      const result = await runAppleScript(`
-        tell application "Arc"
-          get URL of active tab of first window
-        end tell
-      `);
-      return result;
-    },
-    async getTitle() {
-      const result = await runAppleScript(`
-        tell application "Arc"
-          get title of active tab of first window
-        end tell
-      `);
-      return result;
-    },
-    async setUrl(url: string) {
-      await runAppleScript(`
-        tell application "Arc"
-          set URL of active tab of front window to "${url}"
-        end tell
-      `);
-    },
-  },
-};
-
-const actionsByBrowserName: { [key: string]: ScriptsPerBrowser } = {
-  "Google Chrome": actions.chrome,
-  Safari: actions.safari,
-  Arc: actions.arc,
-};
-
 async function getCurrentBrowserPageInfo() {
   try {
     const frontmostApp = await getFrontmostApplication();
-    const action = actionsByBrowserName[frontmostApp.name] || null;
-
-    if (!action) {
-      return;
-    }
-
-    const currentBrowserUrl = await action.getURL();
-    const currentBrowserTitle = await action.getTitle();
-
-    return {
-      browser: action !== null ? frontmostApp.name : null,
-      title: currentBrowserTitle,
-      url: currentBrowserUrl,
-    };
-  } catch (e) {
+    if (!frontmostApp.bundleId) return undefined;
+    const result = await runAppleScript(macBrowserTabScript(frontmostApp.bundleId), {
+      language: "JavaScript",
+      timeout: 2_000,
+    });
+    return JSON.parse(result) as { browser: string; title: string; url: string } | null;
+  } catch {
     return undefined;
   }
 }
