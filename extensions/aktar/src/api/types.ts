@@ -30,6 +30,8 @@ export type Upload = {
   mimeType: string;
   size: number;
   createdAt: string;
+  /** When Aktar's lifecycle rule deletes the file. Null keeps it forever; missing before Aktar 0.5.0. */
+  expiresAt?: string | null;
   formats: Record<OutputFormat, string>;
 };
 
