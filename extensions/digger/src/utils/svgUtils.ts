@@ -684,8 +684,21 @@ function prepareTree($: cheerio.CheerioAPI, base: string): void {
  * there is no base URL left to resolve them against.
  */
 function absolutizeResources($: cheerio.CheerioAPI, base: string): void {
+  // CSS references too: `url(./paint.svg#g)` in a style, a `<style>` or a
+  // presentation attribute would otherwise resolve against wherever the file
+  // is saved, not the page it came from.
+  const cssUrls = (css: string) =>
+    css.replace(/url\(\s*(["']?)([^)"']*)\1\s*\)/gi, (call: string, quote: string, ref: string) => {
+      if (!ref || ref.startsWith("#") || /^data:/i.test(ref)) return call;
+      const abs = resolve(ref, base);
+      return abs ? `url(${quote}${abs}${quote})` : call;
+    });
   $("svg, svg *").each((_, node) => {
     const el = node as Element;
+    if (localName(el.name) === "style") $(el).text(cssUrls($(el).text()));
+    for (const [name, value] of Object.entries(el.attribs)) {
+      if (!NON_CSS_ATTR.test(name) && /url\(/i.test(value)) el.attribs[name] = cssUrls(value);
+    }
     if (!RESOURCE_HREF_ELEMENTS.has(el.name.toLowerCase())) return;
     for (const name of ["href", "xlink:href"]) {
       const value = el.attribs[name];
@@ -704,6 +717,20 @@ function indexIds($: cheerio.CheerioAPI): Map<string, Element> {
     if (!ids.has(id)) ids.set(id, el);
   });
   return ids;
+}
+
+/**
+ * How many times an element is actually drawn: once outside any definition, as
+ * often as its enclosing `<symbol>` is used, and never inside a bare `<defs>`.
+ */
+function definitionUses(el: Element, symbolUses: Map<string, number>): number {
+  for (let p = el.parent; p; p = p.parent) {
+    if (p.type !== "tag") continue;
+    const name = (p as Element).name.toLowerCase();
+    if (name === "symbol") return symbolUses.get((p as Element).attribs["id"] ?? "") ?? 0;
+    if (name === "defs") return 0;
+  }
+  return 1;
 }
 
 function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, ExternalSprite>): void {
@@ -753,10 +780,13 @@ function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, Exter
         collector.addRef("object", url);
         continue;
       }
-      collector.total += 1;
+      // Inside a definition, a use is only as used as the definition is: a part
+      // of an unused symbol is still fetched (so it can be rebuilt) but counts 0.
+      const count = definitionUses(u, symbolUses);
+      collector.total += count;
       const entry = sprites.get(url) ?? { url, ids: [], uses: Object.create(null) as Record<string, number> };
       if (!entry.ids.includes(id)) entry.ids.push(id);
-      entry.uses[id] = (entry.uses[id] ?? 0) + 1;
+      entry.uses[id] = (entry.uses[id] ?? 0) + count;
       sprites.set(url, entry);
     }
 
@@ -888,6 +918,12 @@ export function rebuildSpriteSymbols(fileText: string, fileUrl: string, uses: Re
   absolutizeResources($, fileUrl);
   const root = rootElement($);
   const doc: Doc = { $, base: fileUrl, ids: indexIds($), namespaces: root ? namespacesOf(root) : {} };
+  // A `<g>` or `<path>` drawn in the sprite file's coordinates needs that file's
+  // viewBox and size, or it lands on the 300×150 default canvas.
+  const rootBox = ["viewBox", "width", "height", "preserveAspectRatio"]
+    .filter((name) => root?.attribs[name] !== undefined)
+    .map((name) => ` ${name}="${escapeAttr(root!.attribs[name])}"`)
+    .join("");
   const out: SvgAsset[] = [];
   for (const [id, count] of Object.entries(uses)) {
     const symbol = doc.ids.get(id);
@@ -895,7 +931,10 @@ export function rebuildSpriteSymbols(fileText: string, fileUrl: string, uses: Re
     const markup =
       symbol.name.toLowerCase() === "symbol"
         ? symbolToSvg(doc, symbol)
-        : standalone(selfContained(doc, symbol, `<svg xmlns="${SVG_NS}">${$.xml(symbol)}</svg>`), doc.namespaces);
+        : standalone(
+            selfContained(doc, symbol, `<svg xmlns="${SVG_NS}"${rootBox}>${$.xml(symbol)}</svg>`),
+            doc.namespaces,
+          );
     out.push({
       key: "m:" + normalizeMarkup(markup),
       source: "sprite",
@@ -1198,9 +1237,12 @@ function safeCss(css: string, depth: number): string {
       // URI, which has just been rewritten, is re-quoted.
       return safe === ref ? _call : `url("${safe}")`;
     })
-    .replace(/(["'])\s*(?:[a-z][\w+.-]*:|\/\/)[^"']*\1/gi, (str: string) =>
-      /^["']\s*data:image\//i.test(str) ? str : '""',
-    );
+    .replace(/(["'])\s*((?:[a-z][\w+.-]*:|\/\/)[^"']*)\1/gi, (_str: string, quote: string, ref: string) => {
+      // Same rule as url(): a quoted SVG data URI (`image-set("data:image/svg+xml,…")`)
+      // is sanitized like any other nested SVG, a raster one kept, the rest dropped.
+      const safe = safeReference(ref, depth);
+      return safe !== undefined && !safe.startsWith("#") ? `${quote}${safe}${quote}` : '""';
+    });
 }
 
 /**

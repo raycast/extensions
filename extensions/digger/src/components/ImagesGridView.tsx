@@ -123,8 +123,11 @@ export function ImagesGridView({ images, siteUrl }: ImagesGridViewProps) {
         const filename = urlWithoutQuery.split("/").pop() || img.src;
         const result = loaded.get(absoluteUrl);
         const failed = result !== undefined && "error" in result;
-        const subtitle =
-          getTypeLabel(img.type) + (img.sizes ? ` • ${img.sizes}` : "") + (failed ? " • couldn't load" : "");
+        // Past LIMITS.MAX_GUARDED_IMAGES an image is never downloaded; once loading
+        // is over, a missing result means that, not a failure — and it says so.
+        const skipped = !isLoading && result === undefined && !absoluteUrl.startsWith("data:");
+        const status = failed ? " • couldn't load" : skipped ? " • preview not loaded" : "";
+        const subtitle = getTypeLabel(img.type) + (img.sizes ? ` • ${img.sizes}` : "") + status;
 
         return (
           <Grid.Item

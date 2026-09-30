@@ -63,7 +63,8 @@ function subtitleFor(asset: SvgAsset, remote: Map<string, RemoteSvg> | undefined
   let size: string;
   if (asset.markup !== undefined) size = formatBytes(asset.bytes);
   else if (remote === undefined) size = "File · loading…";
-  else size = remote.get(asset.key) ? "File · couldn't load" : "File";
+  // No entry once loading is over: past LIMITS.MAX_REMOTE_SVGS, never downloaded.
+  else size = remote.get(asset.key) ? "File · couldn't load" : "File · preview not loaded";
   if (asset.occurrences === 0) return `${size} · unused`;
   return asset.occurrences > 1 ? `${size} · ×${asset.occurrences}` : size;
 }
@@ -199,20 +200,20 @@ export function SvgGridView({ pageUrl, known }: SvgGridViewProps) {
   // Quick Look for the highlighted tile only, as Central Icons does. Raycast
   // reports no selection until the user moves, so the first tile stands in.
   const selected = assets.find((a) => tiles.get(a.key)?.id === selectedId) ?? assets[0];
+  // The effect depends on the PATH, not the asset object: the path carries the
+  // appearance, so a light/dark switch while the grid is open writes a file in
+  // the other ink instead of leaving the tile without Quick Look.
+  const selectedPath = selected?.markup ? quickLookPath(assetId(selected.key), selected.markup) : undefined;
   useEffect(() => {
-    if (!selected?.markup) return;
-    const id = assetId(selected.key);
-    // Keyed by path, which carries the appearance: after a light/dark switch
-    // the tile needs a file drawn in the other ink.
-    if (quickLookReady.has(quickLookPath(id, selected.markup))) return;
+    if (!selected?.markup || !selectedPath || quickLookReady.has(selectedPath)) return;
     let canceled = false;
-    ensureQuickLook(id, selected.markup).then((path) => {
+    ensureQuickLook(assetId(selected.key), selected.markup).then((path) => {
       if (!canceled && path) setQuickLookReady((prev) => new Set(prev).add(path));
     });
     return () => {
       canceled = true;
     };
-  }, [selected, quickLookReady]);
+  }, [selectedPath, quickLookReady]);
   const available = SECTIONS.filter((s) => assets.some((a) => a.source === s.source));
   // A remembered or earlier choice whose source is gone from this result falls
   // back to All, rather than hiding everything behind a filter that no longer

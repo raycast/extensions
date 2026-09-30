@@ -211,6 +211,7 @@ npm run dev      # ray develop
 npm run build    # ray build
 npm run lint     # ray lint   (npm run fix-lint applies Prettier)
 npx tsc --noEmit # NOT covered by build — esbuild strips types
+npm test         # tests/: the SVG extractor and displaySafe() (node:test; needs macOS xmllint)
 ```
 
 `npx tsc --noEmit` is a separate gate. `ray build` and `ray lint` pass on code that does

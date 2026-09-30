@@ -113,7 +113,7 @@ export function ResourcesAssets({ data, onRefresh, progress }: ResourcesAssetsPr
                   target={
                     <SvgGridView
                       pageUrl={data.networking?.finalUrl ?? data.url}
-                      known={knownSvgs(data).map((img) => ({ url: resolveUrl(img.src, data.url) }))}
+                      known={knownSvgs(data).map((img) => ({ url: resolveUrl(img.src, pageBase(data)) }))}
                     />
                   }
                 />
@@ -322,6 +322,11 @@ function ResourcesAssetsDetail({
  * "in <head>". The grid receives these too, because its own scan reads HTML and
  * would otherwise miss the metadata and manifest ones.
  */
+/** The page's own URL after redirects: what a relative reference on it resolves against. */
+function pageBase(data: DiggerResult): string {
+  return data.networking?.finalUrl ?? data.url;
+}
+
 function knownSvgs(data: DiggerResult) {
   const seen = new Set<string>();
   return (data.resources?.images ?? []).filter((img) => {
@@ -370,7 +375,7 @@ function SvgSummary({
             icon={{ source: Icon.EditShape, tintColor: Color.SecondaryText }}
           />
           {headSvgs.slice(0, 3).map((img) => {
-            const absoluteUrl = resolveUrl(img.src, data.url);
+            const absoluteUrl = resolveUrl(img.src, pageBase(data));
             const filename = absoluteUrl.startsWith("data:")
               ? "(inline data)"
               : absoluteUrl.split("?")[0].split("/").pop() || absoluteUrl;
