@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "xmok",
   "contributors": [
-    "zeekrey"
+    "zeekrey",
+    "merttopuz"
   ],
   "license": "MIT",
   "commands": [
@@ -15,8 +16,281 @@
       "title": "Instances",
       "description": "Manage Instances and their Projects, Services and more",
       "mode": "view"
+    },
+    {
+      "name": "deploy-service",
+      "title": "Deploy Service",
+      "description": "Search for a service by name across all configured instances and deploy the one you pick",
+      "mode": "view"
+    },
+    {
+      "name": "deployments",
+      "title": "Deployments",
+      "description": "See the most recent deployment for every application and Compose stack across every configured instance, and act on it",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Server Health",
+      "description": "Menu bar server health/disk status across every configured instance",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "diskThreshold",
+          "title": "Disk Warning Threshold",
+          "description": "Tint the menu bar icon when any instance's disk usage is at or above this percentage.",
+          "type": "textfield",
+          "default": "90",
+          "required": false
+        },
+        {
+          "name": "showIcon",
+          "title": "Show Menu Bar Icon",
+          "description": "Uncheck to hide the Server Health icon from the menu bar.",
+          "label": "Show icon",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "list-instances",
+      "title": "List Instances",
+      "description": "List the Dokploy instances configured in this extension."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List every project across the configured Dokploy instance(s), with each project's environments and how many services each holds."
+    },
+    {
+      "name": "list-services",
+      "title": "List Services",
+      "description": "List every application, database, and Compose stack across the configured Dokploy instance(s), optionally filtered by instance, project, or kind."
+    },
+    {
+      "name": "get-service",
+      "title": "Get Service",
+      "description": "Get the details of one Dokploy service: what it builds from, its domains, and its current status."
+    },
+    {
+      "name": "get-service-logs",
+      "title": "Get Service Logs",
+      "description": "Read the runtime log of a Dokploy service - what the container is currently printing."
+    },
+    {
+      "name": "list-deployments",
+      "title": "List Deployments",
+      "description": "List the build history of a Dokploy application or Compose stack: what was deployed, when, and whether it failed."
+    },
+    {
+      "name": "get-deployment-logs",
+      "title": "Get Deployment Logs",
+      "description": "Read the build log of a Dokploy deployment - the log to check when a deploy failed."
+    },
+    {
+      "name": "deploy-service",
+      "title": "Deploy Service",
+      "description": "Deploy a Dokploy service after you confirm: rebuild an application or Compose stack from its latest source, or restart a database from its image with its data kept."
+    },
+    {
+      "name": "control-service",
+      "title": "Control Service",
+      "description": "Start, stop, or reload (restart) a Dokploy service after you confirm."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@dokploy What instances do I have connected?",
+        "mocks": {
+          "list-instances": {
+            "instances": [
+              {
+                "name": "Staging",
+                "url": "https://staging.example.com"
+              },
+              {
+                "name": "Production",
+                "url": "https://prod.example.com"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-instances"
+          }
+        ]
+      },
+      {
+        "input": "@dokploy What's running on staging?",
+        "mocks": {
+          "list-services": {
+            "count": 1,
+            "services": [
+              {
+                "name": "api",
+                "kind": "application",
+                "status": "idle",
+                "instance": "Staging",
+                "project": "Main",
+                "environment": "production"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-services",
+              "arguments": {
+                "instance": {
+                  "includes": "staging"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Give me the details for the api service",
+        "mocks": {
+          "get-service": {
+            "name": "api",
+            "kind": "application",
+            "status": "idle",
+            "instance": "Staging",
+            "project": "Main",
+            "environment": "production",
+            "domains": [
+              {
+                "host": "api.example.com",
+                "url": "https://api.example.com",
+                "enabled": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-service",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Show me the logs for the api service",
+        "mocks": {
+          "get-service-logs": {
+            "service": "api",
+            "status": "idle",
+            "logs": "Server listening on port 3000"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-service-logs",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Why did the api deploy fail?",
+        "mocks": {
+          "get-deployment-logs": {
+            "service": "api",
+            "deploymentId": "dep_123",
+            "status": "error",
+            "errorMessage": "Build failed: missing DATABASE_URL",
+            "logs": "Error: missing DATABASE_URL"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-deployment-logs",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Deploy the api service in staging",
+        "mocks": {
+          "deploy-service": {
+            "service": "api",
+            "kind": "application",
+            "instance": "Staging",
+            "project": "Main",
+            "environment": "staging",
+            "message": "Deployment queued for api. The build runs on the server - use list-deployments or get-deployment-logs to see how it went."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "deploy-service",
+              "arguments": {
+                "service": {
+                  "includes": "api"
+                },
+                "environment": {
+                  "includes": "staging"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dokploy Stop the worker service",
+        "mocks": {
+          "control-service": {
+            "service": "worker",
+            "kind": "application",
+            "action": "stop",
+            "instance": "Production",
+            "project": "Main",
+            "environment": "production"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "control-service",
+              "arguments": {
+                "service": {
+                  "includes": "worker"
+                },
+                "action": "stop"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^2.2.0"

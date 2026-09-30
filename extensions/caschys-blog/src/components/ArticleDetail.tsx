@@ -1,5 +1,5 @@
 import { Detail, ActionPanel, Action } from "@raycast/api";
-import { Article, formatDate } from "../utils";
+import { Article, formatDate, htmlToMarkdown } from "../utils";
 import React from "react";
 
 interface ArticleDetailProps {
@@ -15,7 +15,7 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
 
 ${article.categories && article.categories.length > 0 ? `**Categories:** ${article.categories.join(", ")}\n\n` : ""}
 
-${article.content || article.description || "No content available"}
+${htmlToMarkdown(article.content || article.description || "No content available")}
   `;
 
   return (

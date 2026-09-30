@@ -1,18 +1,13 @@
 import { Application, getApplications, getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { mkdir } from "fs/promises";
-import {
-  FALLBACK_TERMINAL_BUNDLE,
-  defaultParentDir,
-  defaultTerminalBundleId,
-  formatDate,
-  resolveInside,
-  tildify,
-} from "./lib";
+import { defaultParentDir, formatDate, resolveInside, tildify } from "./lib";
+import { FALLBACK_TERMINAL_BUNDLE, defaultTerminalBundleId } from "./macos";
+import { openInWindowsTerminal } from "./windows";
 
 const DEFAULT_FORMAT = "yyyy-MM-dd";
 
-async function openTerminal(target: string, app?: Application): Promise<string> {
+async function openInMacTerminal(target: string, app?: Application): Promise<string> {
   if (app) {
     await open(target, app);
     return app.name;
@@ -25,6 +20,11 @@ async function openTerminal(target: string, app?: Application): Promise<string> 
   await open(target, installed ?? FALLBACK_TERMINAL_BUNDLE);
   return installed?.name ?? "Terminal";
 }
+
+// On Windows the folder cannot simply be handed to the app: terminals take a positional argument
+// as a command to run, not as a directory to start in, so each one is launched with its working
+// directory set instead (Windows Terminal additionally gets `-d`).
+const openTerminal = process.platform === "win32" ? openInWindowsTerminal : openInMacTerminal;
 
 export default async function command() {
   try {

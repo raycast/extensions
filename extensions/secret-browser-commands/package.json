@@ -10,11 +10,23 @@
   "keywords": [
     "browsers",
     "urls",
-    "chromium"
+    "chromium",
+    "chrome",
+    "edge",
+    "brave",
+    "opera",
+    "vivaldi",
+    "arc",
+    "dia",
+    "comet"
   ],
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
   ],
   "commands": [
     {
@@ -30,38 +42,49 @@
       "name": "hideDebugUrls",
       "type": "checkbox",
       "required": false,
-      "title": "Hide Debug URLs",
-      "label": "Hide debug/crash commands",
-      "description": "Hide potentially dangerous debug commands that can crash or hang the browser. These are intended for developers testing crash reporting and browser stability.",
+      "title": "Hide Crash Commands",
+      "label": "Hide commands that crash or hang the browser",
+      "description": "Hide the Command URLs for Debug — chrome://crash, chrome://hang, chrome://gpucrash and the rest. They deliberately crash, hang, or terminate the browser and will lose unsaved work. Internal debugging pages, which are harmless, are not affected by this.",
       "default": true
     },
     {
       "name": "hideUntrustedUrls",
       "type": "checkbox",
       "required": false,
-      "title": "Hide Untrusted URLs",
-      "label": "Hide chrome-untrusted:// URLs",
-      "description": "Hide chrome-untrusted:// URLs which run in isolated security contexts. These are advanced features that may cause unexpected behavior if you don't understand their purpose.",
+      "title": "Hide Untrusted Commands",
+      "label": "Hide chrome-untrusted:// commands",
+      "description": "Hide chrome-untrusted:// commands, which run in isolated security contexts. These are advanced features that may behave unexpectedly if you don't understand their purpose.",
+      "default": true
+    },
+    {
+      "name": "hideDeprecatedUrls",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Removed Commands",
+      "label": "Hide commands removed from every browser",
+      "description": "Hide commands that no longer exist in any supported browser. Turn this off to keep them searchable, with a note about when they were removed and what replaced them.",
       "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1"
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.2",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "npm run check-paths && ray build",
+    "check-paths": "node src/utils/check-paths.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
+    "lint": "ray lint && npm run check-paths",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

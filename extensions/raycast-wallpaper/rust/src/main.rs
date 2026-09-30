@@ -51,10 +51,11 @@ fn set_wallpaper(image_path: String, mode: String) -> Result<String, String> {
     let image_pcwstr = PCWSTR(widestr.as_ptr());
 
     // Determine target device based on mode
-    let target_device_id = if mode == "current" {
-        get_device_id_under_cursor()
-    } else {
-        None // For "every" mode, set on all monitors
+    let target_device_id = match mode.as_str() {
+        "current" => Some(get_device_id_under_cursor()
+            .ok_or_else(|| "Could not identify the monitor under the cursor.".to_string())?),
+        "every" => None, // For "every" mode, set on all monitors
+        _ => return Err("Invalid monitor mode. Use current or every.".to_string()),
     };
 
     unsafe {
@@ -68,6 +69,7 @@ fn set_wallpaper(image_path: String, mode: String) -> Result<String, String> {
             // For "every" mode, use SetWallpaper with None to set on all monitors
             wallpaper.SetWallpaper(PCWSTR::null(), image_pcwstr)
                 .map_err(|e| e.to_string())?;
+            return Ok("ok".to_string());
         } else if mode == "current" {
             // For "current" mode, set only on the monitor under cursor
             if let Some(target_id) = target_device_id {
@@ -84,12 +86,12 @@ fn set_wallpaper(image_path: String, mode: String) -> Result<String, String> {
                     if id_str == target_id {
                         wallpaper.SetWallpaper(PCWSTR(monitor_id.0), image_pcwstr)
                             .map_err(|e| e.to_string())?;
-                        break;
+                        return Ok("ok".to_string());
                     }
                 }
             }
         }
     }
 
-    Ok("ok".to_string())
+    Err("No matching monitor found. Wallpaper was not changed.".to_string())
 }

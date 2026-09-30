@@ -7,19 +7,57 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
+// Resolved branches per directory, so remounts (scrolling, filtering) reuse
+// them instead of spawning `git` again. In-flight requests are shared too,
+// so items pointing at the same folder don't duplicate work. Entries expire
+// after a short TTL so a checkout while the list is open is picked up on the
+// next effect run instead of serving the first value forever.
+const BRANCH_CACHE_TTL_MS = 30_000;
+
+type BranchCacheEntry = { value: string | null; expiresAt: number };
+
+const branchCache = new Map<string, BranchCacheEntry>();
+const branchInflight = new Map<string, Promise<string | null>>();
+
 export async function getGitBranch(directoryPath: string): Promise<string | null> {
+  let dir = directoryPath;
+  if (dir.startsWith("file://")) {
+    dir = fileURLToPath(dir);
+  }
+
   try {
-    // If it's a file URL, convert it to a file path
-    if (directoryPath.startsWith("file://")) {
-      directoryPath = fileURLToPath(directoryPath);
-    }
-
-    // If it's a file path, get its directory
-    const stats = await fs.promises.stat(directoryPath);
+    const stats = await fs.promises.stat(dir);
     if (!stats.isDirectory()) {
-      directoryPath = path.dirname(directoryPath);
+      dir = path.dirname(dir);
     }
+  } catch {
+    return null;
+  }
 
+  if (branchCache.has(dir)) {
+    const cached = branchCache.get(dir);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+    branchCache.delete(dir);
+  }
+  const pending = branchInflight.get(dir);
+  if (pending) {
+    return pending;
+  }
+  // resolveGitBranch never rejects (unexpected errors resolve to null), so
+  // sharing the promise cannot produce unhandled rejections.
+  const promise = resolveGitBranch(dir).then((branch) => {
+    branchCache.set(dir, { value: branch, expiresAt: Date.now() + BRANCH_CACHE_TTL_MS });
+    branchInflight.delete(dir);
+    return branch;
+  });
+  branchInflight.set(dir, promise);
+  return promise;
+}
+
+async function resolveGitBranch(directoryPath: string): Promise<string | null> {
+  try {
     // Check if .git directory exists
     const gitDir = path.join(directoryPath, ".git");
     const isGitRepo = await fs.promises

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  elapsedSeconds,
   formatDuration,
   formatElapsed,
   parseDuration,
@@ -69,5 +70,17 @@ describe("parseSubtasks", () => {
 
   it("returns nothing for blank input", () => {
     expect(parseSubtasks("   \n\n")).toEqual([]);
+  });
+});
+
+describe("elapsedSeconds", () => {
+  const now = Date.parse("2026-09-21T10:00:30Z");
+  it("counts whole seconds since the start", () => {
+    expect(elapsedSeconds("2026-09-21T10:00:00Z", now)).toBe(30);
+  });
+  it("is 0 without a start, for an unparsable start, or a future start", () => {
+    expect(elapsedSeconds(undefined, now)).toBe(0);
+    expect(elapsedSeconds("nope", now)).toBe(0);
+    expect(elapsedSeconds("2026-09-21T10:01:00Z", now)).toBe(0);
   });
 });

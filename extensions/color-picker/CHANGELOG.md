@@ -1,5 +1,16 @@
 # Color Picker Changelog
 
+## [Enable Ask AI Raycast Command] - 2026-09-27
+
+- Register the seven existing color tools with Raycast AI
+- Enable the Ask Color Picker entry in Raycast search
+
+## [Fix Color Picking and Conversion] - 2026-09-25
+
+- Stop showing an error after picking a color when the optional menu bar command is disabled or unavailable
+- Allow typing or pasting colors directly into Convert Color, with inline feedback for invalid input
+- Fix showing color names after picking when using formats such as P3, OKLCH, or HEX No Prefix
+
 ## [Fix] - 2026-09-10
 
 - Fix color swatches rendering as a grey square when the color format preference is set to a format that is not a valid CSS color, such as `HEX No Prefix`

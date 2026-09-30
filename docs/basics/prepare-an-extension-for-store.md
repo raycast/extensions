@@ -80,7 +80,7 @@ We made a new icon generator tool to ease the process of creating icons for your
 - Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 - For instructions shown directly beside the required preferences form, add an optional [`help.md` file](../api-reference/preferences.md#help-for-required-preferences) at the root of your extension. Use it to explain setup steps such as obtaining an API token. When help content is provided, the form displays it in place of the "About this Extension" link.
 
-![Onboarding button linking to the README file](../.gitbook/assets/required-preference.webp)
+![Onboarding button linking to the README file](../.gitbook/assets/required-preferences-2.webp)
 
 ## Categories
 

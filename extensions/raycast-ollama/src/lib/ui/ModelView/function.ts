@@ -1,8 +1,23 @@
 import * as Types from "./types";
 import { DeleteOllamaServers, GetOllamaServers } from "../../settings/settings";
 import { Ollama } from "../../ollama/ollama";
-import { showToast, Toast } from "@raycast/api";
+import { AI, showToast, Toast } from "@raycast/api";
 import { GetServerClass } from "../function";
+
+type AIWithModelProvider = {
+  refreshModels?: () => Promise<void>;
+};
+
+export async function RefreshRaycastModelRegistration(): Promise<void> {
+  const refreshModels = (AI as unknown as AIWithModelProvider).refreshModels;
+  if (!refreshModels) {
+    return;
+  }
+
+  await refreshModels().catch((error: Error) => {
+    console.error(`Failed to refresh Raycast model registration: ${error.message}`);
+  });
+}
 
 /**
  * Get Ollama Server Class.
@@ -25,12 +40,10 @@ export async function DeleteServer(
 ): Promise<void> {
   await DeleteOllamaServers(name)
     .then(async () => {
-      setSelectedServer("Local");
+      await setSelectedServer("Local");
       revalidate();
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Ollama Server '${name}' Deleted`,
-      });
+      await RefreshRaycastModelRegistration();
+      await showToast({ style: Toast.Style.Success, title: `Ollama Server '${name}' Deleted` });
     })
     .catch(async (e) => {
       await showToast({
@@ -157,6 +170,7 @@ export async function DeleteModel(model: Types.UiModel, revalidate: CallableFunc
         title: `Model '${model.detail.name}' Deleted on '${model.server.name}' Server`,
       });
       revalidate();
+      await RefreshRaycastModelRegistration();
     })
     .catch(
       async (e) =>
@@ -217,10 +231,8 @@ export async function PullModel(
         return [...n];
       });
       revalidate();
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Model '${model}' Downloaded on '${server}' Server.`,
-      });
+      await RefreshRaycastModelRegistration();
+      await showToast({ style: Toast.Style.Success, title: `Model '${model}' Downloaded on '${server}' Server.` });
     });
     e.on("error", async (data) => {
       setDownload((prev) => {

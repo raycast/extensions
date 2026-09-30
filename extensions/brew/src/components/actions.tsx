@@ -12,7 +12,15 @@ import {
   brewUninstall,
   brewUnpin,
   brewUpgradeAll,
+  brewCheckForUpdate,
+  brewInstalledVersion,
+  brewAvailableVersion,
+  brewIsOutdated,
   brewUpgradeSingleWithProgress,
+  brewCaskLinkPreview,
+  type CaskLinkVerb,
+  confirmAndRun,
+  formatCount,
   type Cask,
   ensureError,
   isPinnedRefusal,
@@ -24,6 +32,7 @@ import {
   preferences,
   showActionToast,
   showBrewFailureToast,
+  copyLogsAction,
 } from "../utils";
 
 /**
@@ -46,11 +55,20 @@ async function readPins(operation: string): Promise<{ formulae: Set<string>; cas
   }
 }
 
-export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
+export function FormulaInstallAction(props: {
+  formula: Cask | Formula;
+  /**
+   * Overrides the bare "Install". A panel whose selection is NOT what gets
+   * installed — the install preview, where the cursor sits on a dependency row
+   * — passes "Install <name>" so the scope is not left to the cursor.
+   */
+  title?: string;
+  onAction: (result: boolean) => void;
+}) {
   // TD: Support installing other versions?
   return (
     <Action
-      title={"Install"}
+      title={props.title ?? "Install"}
       icon={Icon.Plus}
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       onAction={async () => {
@@ -123,44 +141,28 @@ export function FormulaUpgradeAction(props: {
       icon={unpinAndUpgrade ? Icon.TackDisabled : Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
-        // The title above is drawn from the payload, which is fine for display.
-        // The DECISION reads Homebrew's own pin directory: a package pinned in
-        // another command or outside Raycast is pinned whatever this snapshot
-        // says, and brew errors rather than warns when we name it. ~20µs.
-        const pins = await readPins("Upgrade");
-        if (!pins) {
-          return;
-        }
-        // Identity, not display name: `brewName` gives a cask its title.
-        const reallyPinned = isPinnedPackage(pins, brewIdentifier(props.formula), cask);
-
-        if (reallyPinned) {
-          if (!unpinAndUpgrade) {
-            props.onSkip?.();
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Skipping Pinned Upgrades",
-              message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
-            });
+        const result = await upgradeChecked(props.formula, {
+          allowUnpin: unpinAndUpgrade,
+          onStart: props.onStart,
+        });
+        if (result.outcome === "skipped") {
+          if (props.onSkip) {
+            // Brew or a pin declined rather than failed. A view that tracks
+            // per-package status owns the row's verdict, and its `onAction`
+            // reads `false` as "failed" — so the refresh must NOT be sent here
+            // or a skip would paint the row red.
+            props.onSkip();
             return;
           }
-          // The pin is the only thing standing in the way, and the user just
-          // asked for the upgrade — so lift it, then proceed.
-          if (!(await unpin(props.formula as Pinnable, cask ? "cask" : "formula"))) {
-            return;
-          }
-        }
-
-        props.onStart?.();
-        const result = await upgrade(props.formula);
-        if (result === DECLINED) {
-          // Brew declined rather than failed. Report it the way the batch run
-          // does — and the way the pinned branch above does — instead of
-          // painting the row red for something that is not an error.
-          props.onSkip?.();
+          // Nothing upgraded, but the pin on disk moved or never matched the
+          // row. The remaining callers ignore the boolean and just revalidate.
+          if (result.refresh) props.onAction(false);
           return;
         }
-        props.onAction(result);
+        if (result.outcome === "aborted") {
+          return;
+        }
+        props.onAction(result.ok);
       }}
     />
   );
@@ -193,6 +195,90 @@ export function FormulaUpgradeAllAction(props: {
   );
 }
 
+/**
+ * Re-check this one package against a freshly updated Homebrew.
+ *
+ * The list's `outdated` flag is only ever as fresh as the last `brew update`,
+ * so an installed package can sit at "up to date" while a release waits in a
+ * tap nobody has pulled. Show Installed and Search both offer this; the answer
+ * lands in the toast AND in the row, because `onAction` revalidates.
+ */
+export function CheckForUpdatesAction(props: { item: Cask | Formula; onAction: (result: boolean) => void }) {
+  const name = brewName(props.item);
+
+  return (
+    <Action
+      title="Check for Updates"
+      icon={Icon.RotateClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={async () => {
+        // Before the await, not after: `brew update` can run for tens of
+        // seconds, and an unannounced one reads as a dead keypress.
+        const handle = showActionToast({
+          title: `Checking ${name} for Updates`,
+          message: "Updating Homebrew…",
+          cancelable: true,
+        });
+        try {
+          const fresh = await brewCheckForUpdate(props.item, handle.abort?.signal);
+          if (!fresh) {
+            // Not "no longer exists": the fetchers swallow read failures and
+            // malformed JSON into the same undefined, so deletion is a guess.
+            const diagnostic = `Could not read ${name} from Homebrew\n\nHomebrew updated, but the package details could not be read (empty or malformed \`brew info --json=v2 ${name}\`).`;
+            await showToast({
+              style: Toast.Style.Failure,
+              title: `Could not read ${name} from Homebrew`,
+              message: "Homebrew updated, but the package details could not be read.",
+              primaryAction: copyLogsAction(diagnostic, { hideToast: true }),
+            });
+            props.onAction(false);
+            return;
+          }
+          // Settle by REPLACING the animated toast rather than mutating it, so
+          // its Cancel action cannot outlive the operation (see utils/toast.ts).
+          // Deliberately not showSuccessHUD: that honours Close After Action and
+          // would shut the window on a read-only check, hiding the refreshed row.
+          if (brewIsOutdated(fresh)) {
+            // Finding the update is only half the errand. Without the action
+            // here the answer is a dead end: the row does not gain an Upgrade
+            // until the revalidation lands, and the user has to hunt for it.
+            await showToast({
+              style: Toast.Style.Success,
+              title: `Update available for ${name}`,
+              message: `${brewInstalledVersion(fresh) ?? "installed"} → ${brewAvailableVersion(fresh) ?? "newer"}`,
+              primaryAction: {
+                title: "Upgrade",
+                onAction: async (toast) => {
+                  await toast.hide();
+                  // `fresh`, not props.item: the record just read from brew is
+                  // the one whose pin state and version this decision was made
+                  // on. DECLINED means brew refused (pinned, disabled) and has
+                  // already said so in its own toast — not a failure to report.
+                  const result = await upgradeChecked(fresh, { allowUnpin: true });
+                  if (result.outcome === "upgraded") {
+                    props.onAction(result.ok);
+                  }
+                },
+              },
+            });
+          } else {
+            await showToast({ style: Toast.Style.Success, title: `${name} is up to date` });
+          }
+          props.onAction(true);
+        } catch (err) {
+          // No handle.hide() first: hide/update act on whichever toast is
+          // VISIBLE, not on ours (see utils/toast.ts), so hiding could dismiss
+          // another operation's toast. showBrewFailureToast replaces instead.
+          // On cancellation it deliberately shows nothing, and the Cancel
+          // action has already hidden the animated toast itself.
+          await showBrewFailureToast("Check for updates failed", ensureError(err));
+          props.onAction(false);
+        }
+      }}
+    />
+  );
+}
+
 export function PinAction(props: { item: Pinnable; kind: PinKind; onAction: (result: boolean) => void }) {
   const pinned = props.item.pinned;
   const noun = props.kind === "cask" ? "Cask" : "Formula";
@@ -207,6 +293,47 @@ export function PinAction(props: { item: Pinnable; kind: PinKind; onAction: (res
         } else {
           props.onAction(await pin(props.item, props.kind));
         }
+      }}
+    />
+  );
+}
+
+/**
+ * Link or unlink an installed cask's symlinks, previewed with `--dry-run`.
+ *
+ * Homebrew exposes no link STATE (no field in `brew info --json=v2`, none in
+ * the install receipt), so both verbs are always offered and the dry-run is
+ * the state check: an empty plan means there is nothing to do, and says so
+ * without a confirmation sheet.
+ *
+ * `onBusy` lets the panel drop both actions while one is in flight — brew
+ * takes no cask lock on these paths, so two overlapping runs would race.
+ */
+export function CaskLinkAction(props: {
+  cask: Cask;
+  action: CaskLinkVerb;
+  onBusy: (busy: boolean) => void;
+  onAction: (result: boolean) => void;
+}) {
+  const verb = props.action === "link" ? "Link" : "Unlink";
+  return (
+    <Action
+      title={`${verb} Cask`}
+      icon={props.action === "link" ? Icon.Link : Icon.XMarkCircle}
+      shortcut={props.action === "link" ? { modifiers: ["cmd"], key: "l" } : { modifiers: ["cmd", "shift"], key: "l" }}
+      onAction={async () => {
+        props.onBusy(true);
+        let ran = false;
+        try {
+          ran = await linkCask(props.cask, props.action);
+        } finally {
+          // Before onAction: that may pop the Details view, and the busy flag
+          // has to be clear by the time the panel behind it re-renders.
+          props.onBusy(false);
+        }
+        // Only a command that actually ran is worth reporting: the
+        // "already linked" no-op must not pop the Details view.
+        if (ran) props.onAction(true);
       }}
     />
   );
@@ -366,7 +493,12 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLI
     const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, brewIdentifier(formula));
     if (declined) {
       await handle.hide();
-      await showToast({ style: Toast.Style.Failure, title: `Did not upgrade ${name}`, message: declined });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Did not upgrade ${name}`,
+        message: declined,
+        primaryAction: copyLogsAction(`Did not upgrade ${name}\n\n${declined}`, { hideToast: true }),
+      });
       return DECLINED;
     }
 
@@ -378,6 +510,85 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLI
     showBrewFailureToast("Upgrade failed", error);
     return false;
   }
+}
+
+/**
+ * What happened to a single-package upgrade attempt.
+ *
+ * `skipped` and `aborted` are deliberately distinct. `skipped` means the
+ * package was reachable and something declined it — a pin, or brew warning that
+ * it is disabled or already current — which a status-tracking view should mark
+ * as skipped. `aborted` means we could not get far enough to decide (the pin
+ * directory would not read, an unpin failed); that is already reported, and the
+ * caller must not restate it as a per-package verdict.
+ */
+type UpgradeOutcome =
+  | { outcome: "upgraded"; ok: boolean }
+  /**
+   * `refresh` means the caller's payload no longer matches disk, so it must
+   * revalidate even though nothing was upgraded: either a pin was lifted before
+   * brew declined, or the row was rendered from a snapshot that disagrees with
+   * the pin directory. Without it the row keeps showing the stale pin and the
+   * action keeps declining with a label that does not match what would happen.
+   */
+  | { outcome: "skipped"; refresh?: boolean }
+  | { outcome: "aborted" };
+
+/**
+ * Upgrade one package, having first asked Homebrew — not the payload — whether
+ * it is pinned.
+ *
+ * `brew upgrade` refuses a pinned package outright ("Error: Not upgrading 1
+ * pinned package"), so the attempt is never made blind. The payload's own
+ * `pinned` is a snapshot that another command, or the CLI, may have invalidated;
+ * the decision reads brew's pin directory instead. ~20µs.
+ *
+ * `allowUnpin` splits the two callers. A view that tracks per-package status
+ * says false: a row reporting "skipped" must not quietly unpin itself. Search
+ * and Show Installed say true, where the only sensible reading of pressing
+ * Upgrade on a pinned row is "do the thing".
+ */
+async function upgradeChecked(
+  item: Cask | Nameable,
+  opts?: { allowUnpin?: boolean; onStart?: () => void },
+): Promise<UpgradeOutcome> {
+  const cask = isCask(item);
+
+  const pins = await readPins("Upgrade");
+  if (!pins) {
+    return { outcome: "aborted" };
+  }
+
+  // Identity, not display name: `brewName` gives a cask its title.
+  const pinnedOnDisk = isPinnedPackage(pins, brewIdentifier(item), cask);
+  // The payload is a snapshot; another command or the CLI may have moved the
+  // pin since the fetch. EITHER direction leaves the row lying about it.
+  const stalePin = pinnedOnDisk !== isPinned(item);
+  let unpinned = false;
+  if (pinnedOnDisk) {
+    if (!opts?.allowUnpin) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Skipping Pinned Upgrades",
+        message: `${brewName(item)} is pinned. Unpin it (⌘ .) to upgrade.`,
+      });
+      return { outcome: "skipped", refresh: stalePin };
+    }
+    // The pin is the only thing in the way and the user just asked for the
+    // upgrade — so lift it, then proceed.
+    if (!(await unpin(item as Pinnable, cask ? "cask" : "formula"))) {
+      return { outcome: "aborted" };
+    }
+    unpinned = true;
+  }
+
+  opts?.onStart?.();
+  const result = await upgrade(item);
+  // A decline still leaves the lifted pin behind: brew can exit 0 and refuse
+  // (already current, disabled, unavailable), so this is not the failure path.
+  return result === DECLINED
+    ? { outcome: "skipped", refresh: unpinned || stalePin }
+    : { outcome: "upgraded", ok: result };
 }
 
 async function upgradeAll(): Promise<boolean> {
@@ -434,6 +645,72 @@ export async function unpin(item: Pinnable, kind: PinKind): Promise<boolean> {
     showBrewFailureToast(`Unpin ${kind} failed`, ensureError(err));
     return false;
   }
+}
+
+/** How many of a long symlink plan to show before summarising the rest. */
+const LINK_PREVIEW_LIMIT = 12;
+
+/**
+ * Preview `brew {link,unlink} --cask` and, when it would change something,
+ * confirm and run it. Returns true only when a command actually ran.
+ */
+async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
+  const verb = action === "link" ? "Link" : "Unlink";
+  const name = brewName(cask);
+  // Before the await: the dry-run takes about half a second, and an
+  // unannounced keypress reads as a dead one.
+  const handle = showActionToast({
+    title: `Checking what ${verb} would change`,
+    message: name,
+    cancelable: true,
+  });
+
+  let preview: { paths: string[]; warnings: string[] };
+  try {
+    preview = await brewCaskLinkPreview(cask, action, handle.abort?.signal);
+  } catch (err) {
+    // No handle.hide() first: hide acts on whichever toast is VISIBLE, not on
+    // ours, so this replaces rather than dismisses. On cancellation
+    // showBrewFailureToast deliberately shows nothing.
+    await showBrewFailureToast(`${verb} preview failed`, ensureError(err));
+    return false;
+  }
+
+  if (preview.paths.length === 0) {
+    // Nothing to link or unlink. The warning, when there is one, is the only
+    // explanation brew gives ("already a Binary at … from formula code-cli").
+    await showToast({
+      style: Toast.Style.Success,
+      title: `${name} is already ${action === "link" ? "linked" : "unlinked"}`,
+      message: preview.warnings[0],
+    });
+    return false;
+  }
+
+  const shown = preview.paths.slice(0, LINK_PREVIEW_LIMIT);
+  const remaining = preview.paths.length - shown.length;
+  const message = [
+    `${formatCount(preview.paths.length, "symlink")} will be ${action === "link" ? "created" : "removed"}:`,
+    ...shown,
+    remaining > 0 ? `…and ${remaining} more` : undefined,
+    // A partial plan is the case that most needs explaining: brew skipped an
+    // artifact and said why on stderr and nowhere else.
+    preview.warnings[0],
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  // The animated toast has no follow-up on the dismiss path — confirmAndRun
+  // returns false without showing anything — so hide it here rather than leave
+  // a spinner claiming work is still happening. The modal in between means
+  // there is no race with the toasts confirmAndRun shows after a confirm.
+  handle.hide();
+  // The display form, not brewExecutable(): confirmAndRun appends the commands
+  // to the sheet verbatim and resolves `brew` off the configured install.
+  return await confirmAndRun([`brew ${action} --cask ${brewIdentifier(cask)}`], {
+    title: `${verb} ${name}?`,
+    message,
+  });
 }
 
 function toggleExcludeDeps(exclude: boolean, setExclude: (val: boolean) => void) {

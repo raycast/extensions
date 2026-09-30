@@ -6,7 +6,7 @@ import { GetFilePathsHelper } from "./file.types";
 const logger = new Logger("File");
 
 export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]> {
-  const { path, excludedFolders = [], includedFileExtensions } = params;
+  const { path: vaultPath, excludedFolders = [], includedFileExtensions } = params;
   const defaultExcludedDirs = [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"];
 
   const cleanedExcludes = [...defaultExcludedDirs, ...excludedFolders].filter((dir) => !!dir && dir.trim() !== "");
@@ -21,16 +21,17 @@ export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]
     : "**/*";
 
   const options = {
-    cwd: path,
+    cwd: vaultPath,
     ignore: ignorePatterns,
     onlyFiles: true,
-    absolute: true,
+    // With `absolute: true`, fast-glob converts every `\` to `/`, which breaks file names containing a backslash (#31666)
+    absolute: false,
     dot: false,
   };
 
   logger.info(`Globbing files with option ${JSON.stringify(options)}`);
 
-  const files = await glob(extensionPattern, options);
+  const files = (await glob(extensionPattern, options)).map((file) => path.join(vaultPath, file));
   logger.success(`Globbed ${files.length} file paths.`);
   return files;
 }

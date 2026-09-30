@@ -23,7 +23,9 @@
     "0xdhrv",
     "pernielsentikaer",
     "haneul486",
-    "just_me"
+    "just_me",
+    "mguellsegarra",
+    "teziovsky"
   ],
   "pastContributors": [
     "danulqua"
@@ -48,6 +50,32 @@
       "description": "When enabled, the extension will open the browser from which the bookmark originated, instead of your default browser.",
       "default": true,
       "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Replace Current Browser Tab (macOS Only)",
+      "name": "replaceCurrentTab",
+      "description": "When enabled with Open Bookmark's Browser, pressing Enter replaces the active tab in supported macOS browsers. If no browser window exists, a new one is created.",
+      "default": false,
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "title": "Copy Link Shortcut",
+      "name": "copyLinkShortcut",
+      "description": "The keyboard shortcut used to copy the bookmark's link.",
+      "default": "cmd-c",
+      "required": false,
+      "data": [
+        {
+          "title": "⌘ C (Ctrl+C on Windows)",
+          "value": "cmd-c"
+        },
+        {
+          "title": "⌘ ⌥ C (Ctrl+Alt+C on Windows)",
+          "value": "cmd-opt-c"
+        }
+      ]
     }
   ],
   "commands": [
@@ -83,7 +111,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-strip-types tests/*.test.mts"
   },
   "platforms": [
     "macOS",

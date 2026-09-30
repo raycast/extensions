@@ -15,6 +15,7 @@ import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
+import type { AccountsProvider } from "./accounts/types.ts";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp, withCredentialStatus } from "./agents/format.ts";
@@ -29,7 +30,7 @@ import {
   useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
-  useClaudeUsage,
+  useClaudeAccounts,
   useClinePassAccounts,
   useCodexAccounts,
   useCopilotAccounts,
@@ -103,7 +104,7 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 }
 
 /** Providers rendered from account rows — they have no single-usage hook. */
-type MultiAccountAgentId = "clinepass" | "codex" | "copilot" | "kimi" | "synthetic" | "zai";
+type MultiAccountAgentId = "claude" | "clinepass" | "codex" | "copilot" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
   aihubmix: AihubmixUsage;
@@ -186,12 +187,12 @@ interface AccountedAgentView {
   formatUsageText: () => string;
   /** The account id, for use in the manage-accounts form */
   accountId: string;
-  /** The provider key, for use in the manage-accounts form */
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
+  /** The provider key for the manage-accounts form; absent for providers with no manual accounts */
+  provider?: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
   /** Whether this provider is supported (always true for accounted views) */
   isSupported: boolean;
-  /** The API token for this account (for copying) */
-  token: string;
+  /** The API token for this account (for copying); absent for providers with no manual key flow */
+  token?: string;
   /** Whether this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
   lastFetchedAt?: number;
@@ -229,7 +230,6 @@ const AGENT_REGISTRY: AgentRegistry = {
     description: "Anthropic Claude Code",
     isSupported: true,
     settingsUrl: "https://claude.ai/settings/billing",
-    useUsage: useClaudeUsage,
     renderDetail: renderClaudeDetail,
     getAccessory: getClaudeAccessory,
     formatUsageText: formatClaudeUsageText,
@@ -455,7 +455,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   providerName: string,
   icon: string,
   settingsUrl: string | undefined,
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic",
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic" | undefined,
   isVisible: boolean,
   accountStates: AccountUsageState<TUsage, TError>[],
   renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode,
@@ -480,7 +480,10 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
     accountId: state.accountId,
     provider,
     isSupported: true,
-    token: state.token,
+    // Only a provider with a manual key flow has a copyable key. Claude's token is a
+    // short-lived OAuth access token, so offering it as an "API Key" hands out a secret
+    // that expires and fails wherever an Anthropic key is expected.
+    token: provider ? state.token : undefined,
     isOpenCodeActive: state.isOpenCodeActive,
   }));
 }
@@ -491,6 +494,7 @@ function getAccountedTitle(providerName: string, label: string): string {
 }
 
 function getProviderName(agentId: MultiAccountAgentId): string {
+  if (agentId === "claude") return "Claude";
   if (agentId === "clinepass") return "ClinePass";
   if (agentId === "codex") return "Codex";
   if (agentId === "copilot") return "Copilot";
@@ -506,7 +510,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   // Hooks must be called unconditionally at top level (React rules)
   const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
-  const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
@@ -519,6 +522,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const openrouterState = AGENT_REGISTRY.openrouter.useUsage(Boolean(prefs.showOpenRouter));
 
   // Multi-account providers
+  const claudeState = useClaudeAccounts(Boolean(prefs.showClaude));
   const clinePassState = useClinePassAccounts(Boolean(prefs.showClinePass));
   const codexState = useCodexAccounts(Boolean(prefs.showCodex));
   const copilotState = useCopilotAccounts(Boolean(prefs.showCopilot));
@@ -529,7 +533,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
     aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
-    claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
@@ -592,6 +595,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     renderZaiDetail,
     getZaiAccessory,
     formatZaiUsageText,
+  );
+
+  const claudeAccountedViews = createAccountedViews(
+    "claude",
+    "Claude",
+    AGENT_REGISTRY.claude.icon,
+    AGENT_REGISTRY.claude.settingsUrl,
+    undefined,
+    Boolean(prefs.showClaude),
+    claudeState.accounts,
+    renderClaudeDetail,
+    getClaudeAccessory,
+    formatClaudeUsageText,
   );
 
   const codexAccountedViews = createAccountedViews(
@@ -660,6 +676,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const allRows = useMemo<ListRow[]>(
     () =>
       agentOrder.flatMap((agentId): ListRow[] => {
+        if (agentId === "claude") {
+          return claudeAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
         if (agentId === "clinepass") {
           return clinePassAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
@@ -687,6 +706,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
       }),
     [
       agentOrder,
+      claudeAccountedViews,
       clinePassAccountedViews,
       codexAccountedViews,
       copilotAccountedViews,
@@ -724,7 +744,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const isLoading =
     allRows.some((row) => row.view.isLoading) ||
-    [clinePassState, codexState, copilotState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
+    [claudeState, clinePassState, codexState, copilotState, kimiState, syntheticState, zaiState].some(
+      (state) => state.isLoading,
+    );
 
   const hasPromptedGeminiReauth = useRef(false);
 
@@ -927,20 +949,22 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         shortcut={Keyboard.Shortcut.Common.Copy}
                       />
                     )}
-                    <Action
-                      title="Manage Accounts"
-                      icon={Icon.Person}
-                      shortcut={Keyboard.Shortcut.Common.Edit}
-                      onAction={() =>
-                        push(
-                          <ManageAccountsForm
-                            provider={view.provider}
-                            providerName={getProviderName(view.agentId as MultiAccountAgentId)}
-                            onSave={handleRefresh}
-                          />,
-                        )
-                      }
-                    />
+                    {view.provider && (
+                      <Action
+                        title="Manage Accounts"
+                        icon={Icon.Person}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
+                        onAction={() =>
+                          push(
+                            <ManageAccountsForm
+                              provider={view.provider as AccountsProvider}
+                              providerName={getProviderName(view.agentId as MultiAccountAgentId)}
+                              onSave={handleRefresh}
+                            />,
+                          )
+                        }
+                      />
+                    )}
                     {view.settingsUrl && (
                       <Action.OpenInBrowser
                         title={`Open ${getProviderName(view.agentId as MultiAccountAgentId)} Settings`}

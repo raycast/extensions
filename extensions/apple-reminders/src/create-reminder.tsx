@@ -19,22 +19,24 @@ import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
 import CustomizeCreateReminderForm from "./customize-create-reminder-form";
-import { getIntervalValidationError, getPriorityIcon } from "./helpers";
+import { getIntervalValidationError, getPriorityIcon, parseTags } from "./helpers";
 import useCreateReminderFormLayout from "./hooks/useCreateReminderFormLayout";
-import { List, Reminder, useData } from "./hooks/useData";
+import { Frequency, List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import ManageCreateActions from "./manage-create-actions";
-import { ParsedDueDate, parseDueDate } from "./parse-due-date";
+import type { ParsedDueDate } from "./parse-due-date";
+import { resolveDueDateFromNlp } from "./parse-recurrence";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
-export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+export type { Frequency };
 export type NewReminder = {
   title: string;
   listId?: string;
   notes?: string;
   dueDate?: string;
   priority?: string;
+  tags?: string[];
   recurrence?: {
     frequency: Frequency;
     interval: number;
@@ -43,6 +45,7 @@ export type NewReminder = {
   address?: string;
   proximity?: string;
   radius?: number;
+  url?: string;
 };
 
 type CreateReminderValues = {
@@ -50,6 +53,7 @@ type CreateReminderValues = {
   notes: string;
   dueDate: Date | null;
   priority: string;
+  tags: string;
   listId: string;
   isRecurring: boolean;
   frequency: string;
@@ -60,8 +64,12 @@ type CreateReminderValues = {
   radius: string;
 };
 
+export type CreateReminderDraftValues = Partial<CreateReminderValues> & {
+  url?: string;
+};
+
 type CreateReminderFormProps = {
-  draftValues?: Partial<CreateReminderValues>;
+  draftValues?: CreateReminderDraftValues;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
@@ -78,7 +86,9 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   const { locations, addLocation } = useLocations();
   const [dateText, setDateText] = useState("");
+  const [draftUrl, setDraftUrl] = useState(draftValues?.url ?? "");
   const nlpParseRef = useRef<ParsedDueDate | null>(null);
+  const recurrenceSetByNlpRef = useRef<boolean>(false);
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
@@ -108,8 +118,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         listId: values.listId,
       };
 
-      if (values.notes) {
-        payload.notes = values.notes;
+      if (draftUrl.trim()) {
+        payload.url = draftUrl.trim();
+      }
+
+      if (values.notes?.trim()) {
+        payload.notes = values.notes.trim();
       }
 
       if (values.dueDate) {
@@ -127,6 +141,13 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
       if (values.priority) {
         payload.priority = values.priority;
+      }
+
+      if (values.tags) {
+        const parsedTags = parseTags(values.tags);
+        if (parsedTags.length > 0) {
+          payload.tags = parsedTags;
+        }
       }
 
       if (values.location === "custom" || values.address) {
@@ -176,10 +197,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
       setValue("title", "");
       setValue("notes", "");
+      setValue("tags", "");
       setValue("location", "");
       setValue("address", "");
       setValue("radius", "");
       setDateText("");
+      setDraftUrl("");
       nlpParseRef.current = null;
       setValue("dueDate", selectTodayAsDefault ? addMilliseconds(startOfToday(), 1) : null);
 
@@ -202,6 +225,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       notes: draftValues?.notes ?? "",
       dueDate: initialDueDate,
       priority: draftValues?.priority,
+      tags: draftValues?.tags ?? "",
       listId: initialListId,
       isRecurring: draftValues?.isRecurring ?? false,
       frequency: draftValues?.frequency,
@@ -233,18 +257,27 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     if (!value.trim()) {
       nlpParseRef.current = null;
       setValue("dueDate", null);
+      if (recurrenceSetByNlpRef.current) {
+        setValue("isRecurring", false);
+        recurrenceSetByNlpRef.current = false;
+      }
       return;
     }
 
-    const parsed = parseDueDate(value);
-    if (parsed) {
-      nlpParseRef.current = parsed;
-      setValue("dueDate", parsed.date);
-      return;
+    const { dueDate, parsedDueDate, recurrence } = resolveDueDateFromNlp(value);
+
+    if (recurrence) {
+      setValue("isRecurring", true);
+      setValue("frequency", recurrence.frequency);
+      setValue("interval", recurrence.interval.toString());
+      recurrenceSetByNlpRef.current = true;
+    } else if (recurrenceSetByNlpRef.current) {
+      setValue("isRecurring", false);
+      recurrenceSetByNlpRef.current = false;
     }
 
-    nlpParseRef.current = null;
-    setValue("dueDate", null);
+    nlpParseRef.current = parsedDueDate;
+    setValue("dueDate", dueDate);
   }
 
   async function submitWithOptions(values: CreateReminderValues, options?: SubmitOptions) {
@@ -323,10 +356,10 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             key="dueDateText"
             id="dueDateText"
             title="Date"
-            placeholder="1h, in 10 minutes, tomorrow 3:45pm"
+            placeholder="tomorrow 3:45pm, every Friday 10am, daily 9am, every 2 weeks"
             value={dateText}
             onChange={handleDueDateTextChange}
-            info="Supports 1h, 3 hours, 30 minutes, 3 days, 1 year, and times like 3:45pm. The h shortcut means hours."
+            info="Supports natural language dates (e.g. 'tomorrow 3:45pm', 'in 2 hours') and recurrence (e.g. 'every day', 'every Friday 10am', 'every 2 weeks', 'weekdays')."
           />,
           <Form.DatePicker
             key="dueDate"
@@ -345,10 +378,26 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         }
 
         return [
-          <Form.Checkbox key="isRecurring" {...itemProps.isRecurring} label="Is Recurring" />,
+          <Form.Checkbox
+            key="isRecurring"
+            {...itemProps.isRecurring}
+            label="Is Recurring"
+            onChange={(checked) => {
+              recurrenceSetByNlpRef.current = false;
+              itemProps.isRecurring.onChange?.(checked);
+            }}
+          />,
           ...(values.isRecurring
             ? [
-                <Form.Dropdown key="frequency" {...itemProps.frequency} title="Frequency">
+                <Form.Dropdown
+                  key="frequency"
+                  {...itemProps.frequency}
+                  title="Frequency"
+                  onChange={(val) => {
+                    recurrenceSetByNlpRef.current = false;
+                    itemProps.frequency.onChange?.(val);
+                  }}
+                >
                   <Form.Dropdown.Item title="Daily" value="daily" />
                   <Form.Dropdown.Item title="Weekdays" value="weekdays" />
                   <Form.Dropdown.Item title="Weekends" value="weekends" />
@@ -356,7 +405,16 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
                   <Form.Dropdown.Item title="Monthly" value="monthly" />
                   <Form.Dropdown.Item title="Yearly" value="yearly" />
                 </Form.Dropdown>,
-                <Form.TextField key="interval" {...itemProps.interval} title="Interval" placeholder="1" />,
+                <Form.TextField
+                  key="interval"
+                  {...itemProps.interval}
+                  title="Interval"
+                  placeholder="1"
+                  onChange={(val) => {
+                    recurrenceSetByNlpRef.current = false;
+                    itemProps.interval.onChange?.(val);
+                  }}
+                />,
                 <Form.Description key="recurrenceDescription" text={recurrenceDescription} />,
               ]
             : []),
@@ -369,6 +427,16 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
             <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
           </Form.Dropdown>,
+        ];
+      case "tags":
+        return [
+          <Form.TextField
+            key="tags"
+            {...itemProps.tags}
+            title="Tags"
+            placeholder="work, urgent or #work #urgent"
+            info="Supports comma- or space-separated tags with or without #. Stored in Apple Reminders native tag format."
+          />,
         ];
       case "location":
         return [
@@ -486,6 +554,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   );
 }
 
-export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderValues }>) {
+export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderDraftValues }>) {
   return <CreateReminderForm draftValues={draftValues} />;
 }

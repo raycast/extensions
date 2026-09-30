@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.raycast/
+*.log
+.DS_Store
+coverage/
+.env
+.env.local
+raycast-env.d.ts
+
+# Local deny-list for the leak gate, machine-specific by design
+.check-no-secrets-denylist
+
+# Screenshots taken but not shipped
+.screenshots-unused/

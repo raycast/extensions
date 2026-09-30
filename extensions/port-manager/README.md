@@ -22,4 +22,6 @@ Find processes that are listening on TCP ports, name frequently used ports, and 
 
 On macOS, the **Kill Signal** preference controls whether to ask for `SIGTERM` or `SIGKILL`, or always use one. Windows does not support Unix signals, so every kill uses `taskkill /F`.
 
+A kill is only reported as successful once the process has actually exited. A process that ignores the signal is reported as still running, with a one-key **Force Kill** to follow up with `SIGKILL`.
+
 Some system-owned processes and executable paths are protected by the operating system. The extension will show the command error in Raycast when the current user lacks permission; use an elevated terminal only when you understand the process you are stopping.

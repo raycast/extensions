@@ -1,5 +1,17 @@
 # Zotero Changelog
 
+## [Open Secondary PDF] - 2026-09-22
+
+- Added an "Open Secondary PDF" action (`⌘⇧↵`) for references with more than one pdf, e.g. supplementary material saved under the same entry. With exactly two pdfs it opens the secondary one directly (with Open in System Viewer and Show in Finder below it); with more it shows a list of the remaining pdfs, each with Open PDF, Open in System Viewer, and Show in Finder
+
+## [Order Empty Results by Last Opened] - 2026-09-21
+
+- Added an "Order by Last Opened" preference. When it is on and the search is empty, entries you opened most recently are shown first and the rest follow by date added. Tracking covers opening a PDF, the Zotero entry, or the original link, and survives a cache rebuild
+
+## [Show PDF in Finder] - 2026-09-14
+
+- Added a "Show PDF in Finder" action on references with a PDF, so you can reveal the file on disk in Finder without copying the path
+
 ## [Docs] - 2026-09-10
 
 - Updated the README to document fuzzy search, the "Search by BibTeX Citation Key" preference, group libraries, the collection filter, and the 100-result limit

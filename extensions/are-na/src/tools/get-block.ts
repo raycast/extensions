@@ -1,9 +1,10 @@
+import { arenaReference } from "../utils/references";
 import { getAuthenticatedArena } from "./arenaAuth";
 import { blockDetail } from "./summarize";
 
 type Input = {
   /**
-   * Numeric Are.na block id (string of digits).
+   * Numeric Are.na block ID or canonical Are.na block URL.
    */
   blockId: string;
 };
@@ -14,10 +15,7 @@ type Input = {
 export default async function tool(input: Input) {
   try {
     const arena = await getAuthenticatedArena();
-    const id = input.blockId.trim();
-    if (!/^\d+$/.test(id)) {
-      return { error: "blockId must be a numeric id." };
-    }
+    const id = arenaReference(input.blockId, "block");
     const block = await arena.block(Number(id)).get();
     return { block: blockDetail(block) };
   } catch (e) {

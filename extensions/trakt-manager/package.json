@@ -71,6 +71,128 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "description": "Search for movies on Trakt by title and optional year to get details and traktId"
+    },
+    {
+      "name": "search-shows",
+      "title": "Search TV Shows",
+      "description": "Search for TV shows on Trakt by title and optional year to get details and traktId"
+    },
+    {
+      "name": "get-watchlist",
+      "title": "Get Watchlist",
+      "description": "Retrieve items from your Trakt watchlist or search if a specific title is in your watchlist using query"
+    },
+    {
+      "name": "get-up-next",
+      "title": "Get up Next Episodes",
+      "description": "Get the next unwatched episodes for TV series you are currently watching on Trakt"
+    },
+    {
+      "name": "get-show-progress",
+      "title": "Get Show Progress",
+      "description": "Get watching progress, completed episode counts, and season details for a TV show on Trakt"
+    },
+    {
+      "name": "add-to-watchlist",
+      "title": "Add to Watchlist",
+      "description": "Add a movie or TV show to your Trakt watchlist"
+    },
+    {
+      "name": "remove-from-watchlist",
+      "title": "Remove from Watchlist",
+      "description": "Remove a movie or TV show from your Trakt watchlist"
+    },
+    {
+      "name": "mark-movie-watched",
+      "title": "Mark Movie as Watched",
+      "description": "Mark a movie as watched in your Trakt history"
+    },
+    {
+      "name": "mark-episode-watched",
+      "title": "Mark Episode as Watched",
+      "description": "Mark a specific TV show episode as watched in your Trakt history"
+    },
+    {
+      "name": "mark-show-watched",
+      "title": "Mark Show as Watched",
+      "description": "Mark an entire TV show (all seasons and episodes) as watched in your Trakt history"
+    },
+    {
+      "name": "rate-media",
+      "title": "Rate Media",
+      "description": "Rate a movie, TV show, or episode on Trakt with a score from 1 to 10"
+    },
+    {
+      "name": "get-history",
+      "title": "Get Watch History",
+      "description": "Definitively check whether and when a movie or show was watched, or browse recent Trakt watch history"
+    },
+    {
+      "name": "remove-from-history",
+      "title": "Remove from History",
+      "description": "Remove a movie, TV show, or episode from your Trakt watch history"
+    },
+    {
+      "name": "get-recommendations",
+      "title": "Get Recommendations",
+      "description": "Get personalized movie and TV show recommendations based on your Trakt habits"
+    },
+    {
+      "name": "get-ratings",
+      "title": "Get Ratings",
+      "description": "Get your ratings for movies, TV shows, and episodes or search your rating for a specific title"
+    },
+    {
+      "name": "remove-rating",
+      "title": "Remove Rating",
+      "description": "Remove your rating for a movie, TV show, or episode on Trakt"
+    },
+    {
+      "name": "get-season-episodes",
+      "title": "Get Season Episodes",
+      "description": "Get all episodes for a specific TV show season with titles, air dates, and overviews"
+    },
+    {
+      "name": "get-user-stats",
+      "title": "Get User Stats",
+      "description": "Get your lifetime Trakt viewing statistics including watch times, movies, shows, and ratings counts"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Personal Lists",
+      "description": "Get your Trakt personal lists, read a list's items, or check whether a title is on a list"
+    },
+    {
+      "name": "create-list",
+      "title": "Create Personal List",
+      "description": "Create a new personal list on your Trakt account, with optional privacy, numbering and sorting"
+    },
+    {
+      "name": "update-list",
+      "title": "Update Personal List",
+      "description": "Rename a Trakt personal list or change its description, privacy, numbering or sorting"
+    },
+    {
+      "name": "delete-list",
+      "title": "Delete Personal List",
+      "description": "Permanently delete a Trakt personal list and every item on it"
+    },
+    {
+      "name": "add-to-list",
+      "title": "Add to Personal List",
+      "description": "Add movies, TV shows, seasons and episodes to a Trakt personal list in a single batch"
+    },
+    {
+      "name": "remove-from-list",
+      "title": "Remove from Personal List",
+      "description": "Remove movies, TV shows, seasons and episodes from a Trakt personal list"
+    }
+  ],
   "contributors": [
     "vishalbalaji3",
     "Berenger",
@@ -106,7 +228,8 @@
     "fmt": "prettier '**/*' -wu && syncpack-format",
     "lint": "ray lint",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "npx --yes tsx --test src/tools/*.test.ts"
   },
   "title": "Trakt Manager"
 }

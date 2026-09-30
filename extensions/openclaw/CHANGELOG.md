@@ -1,5 +1,17 @@
 # OpenClaw Changelog
 
+## [Gateway-Native Control Center] - 2026-09-17
+
+- Added a native Control Center for Gateway health, tasks, sessions, agents, nodes, channels, and usage
+- Replaced the optional HTTP integration with OpenClaw's native Gateway WebSocket protocol
+- Connected Raycast conversations to real OpenClaw sessions with streaming responses, session history, and owner-aware continuation
+- Added persistent Ed25519 device identity, pairing guidance, and Gateway-scoped device tokens
+- Added first-run connection choices for OpenClaw configuration, local, LAN, Tailscale, and Cloudflare Access
+- Added Cloudflare Access browser sign-in through GitHub, Google, or another configured identity provider, plus service-token support
+- Added password authentication, JSON5 configuration discovery, secure URL validation, and credential scoping by Gateway
+- Rebuilt Gateway Status around the authenticated handshake, protocol and server versions, health, and presence
+- Updated the extension to Raycast API 2
+
 ## [Remote gateway / nodes] - 2026-08-20
 
 - Read `gateway.remote.token` / `gateway.remote.url` from `~/.openclaw/openclaw.json` when Raycast prefs still have an empty token or the localhost default

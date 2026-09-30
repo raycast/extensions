@@ -40,6 +40,12 @@
       "mode": "view"
     },
     {
+      "name": "stopTimeEntry",
+      "title": "Quickstop Timer",
+      "description": "Stop the running time entry without opening a window.",
+      "mode": "no-view"
+    },
+    {
       "name": "updateTimeEntry",
       "title": "Update Time Entry",
       "description": "Update the description, project, tags of recent time entries.",

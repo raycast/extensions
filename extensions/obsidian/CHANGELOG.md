@@ -1,5 +1,13 @@
 # Obsidian Changelog
 
+## [Fix notes not loading when a file name contains a backslash] - 2026-09-28
+
+- Fix Search Note and Bookmarked Notes showing no notes for a vault when any note's file name contains a backslash
+
+## [Fix Search Media crash when opened via hotkey] - 2026-09-24
+
+- Fix a crash in Search Media when the command is launched without a search argument, e.g. via a hotkey
+
 ## [Added contributor] - 2026-09-07
 
 ## [Fix Misleading Required Plugin Message] - 2026-09-06

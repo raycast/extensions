@@ -3,9 +3,11 @@ import { ProviderResult, UIComponent, UILibrary } from "../types";
 import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
- * Fetch Angular Material components by scraping the categories page.
+ * material.angular.dev is client-rendered with no component links in its HTML,
+ * so the component list is read from the docs `documentation-items.ts` registry
+ * on GitHub instead.
  *
- * Fallback: on any network error, non-OK response, or unparseable markup,
+ * Fallback: on any network error, non-OK response, or unparseable data,
  * the bundled static list is used and the result is marked as fallback.
  */
 function fetchComponents(): Promise<ProviderResult> {
@@ -13,23 +15,21 @@ function fetchComponents(): Promise<ProviderResult> {
 }
 
 async function scrape(): Promise<UIComponent[]> {
-  const res = await fetch(LIBRARY_URLS.material.components);
+  const res = await fetch(LIBRARY_URLS.material.docItems);
   if (!res.ok) {
     throw new Error(`Failed to fetch Angular Material: ${res.statusText}`);
   }
-  const html = await res.text();
+  const source = await res.text();
 
-  // Angular Material site embeds component data. Look for links to /components/{slug}
-  const linkRegex = /\/components\/([a-z][a-z0-9-]*)/g;
+  // The registry groups items by section; only the [COMPONENTS] array holds
+  // real components (the [CDK] section that follows is excluded).
+  const componentsBlock = extractComponentsBlock(source);
+
+  const idRegex = /id:\s*'([a-z][a-z0-9-]*)'/g;
   const slugs = new Set<string>();
   let match;
-
-  while ((match = linkRegex.exec(html)) !== null) {
-    const slug = match[1];
-    // Filter out non-component paths like "categories", "overview", "api", "examples"
-    if (!NON_COMPONENT_SLUGS.has(slug)) {
-      slugs.add(slug);
-    }
+  while ((match = idRegex.exec(componentsBlock)) !== null) {
+    slugs.add(match[1]);
   }
 
   if (slugs.size <= 10) {
@@ -46,6 +46,14 @@ async function scrape(): Promise<UIComponent[]> {
     }));
 }
 
+/** Slice out the `[COMPONENTS]: [ ... ]` array, stopping at the next section. */
+function extractComponentsBlock(source: string): string {
+  const start = source.indexOf("[COMPONENTS]: [");
+  if (start === -1) return "";
+  const end = source.indexOf("[CDK]:", start);
+  return end === -1 ? source.slice(start) : source.slice(start, end);
+}
+
 function buildFallback(): UIComponent[] {
   return MATERIAL_COMPONENTS.map((slug) => ({
     name: toDisplayName(slug),
@@ -54,9 +62,6 @@ function buildFallback(): UIComponent[] {
     library: "material" as const,
   }));
 }
-
-/** Paths under /components/ that are NOT actual components */
-const NON_COMPONENT_SLUGS = new Set(["categories", "overview", "api", "examples", "styling"]);
 
 /** Comprehensive static list of Angular Material component slugs */
 const MATERIAL_COMPONENTS = [

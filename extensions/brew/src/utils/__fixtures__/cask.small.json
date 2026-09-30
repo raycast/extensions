@@ -1,0 +1,285 @@
+[
+  {
+    "token": "0-ad",
+    "full_token": "0-ad",
+    "old_tokens": [],
+    "tap": "homebrew/cask",
+    "name": ["0 A.D."],
+    "desc": "Real-time strategy game",
+    "homepage": "https://play0ad.com/",
+    "version": "0.28.0",
+    "autobump": true,
+    "no_autobump_message": null,
+    "skip_livecheck": false,
+    "installed": null,
+    "installed_time": null,
+    "bundle_version": null,
+    "bundle_short_version": null,
+    "pinned": false,
+    "pinned_version": null,
+    "outdated": false,
+    "artifacts": [
+      {
+        "app": ["0 A.D..app"],
+        "target": "/Applications/0 A.D..app"
+      },
+      {
+        "zap": [
+          {
+            "trash": "~/Library/Saved Application State/com.wildfiregames.0ad.savedState"
+          }
+        ]
+      }
+    ],
+    "caveats": null,
+    "caveats_rosetta": null,
+    "depends_on": {
+      "macos": {}
+    },
+    "conflicts_with": null,
+    "container": null,
+    "rename": [],
+    "auto_updates": null,
+    "deprecated": false,
+    "deprecation_date": null,
+    "deprecation_reason": null,
+    "deprecation_replacement_formula": null,
+    "deprecation_replacement_cask": null,
+    "deprecate_args": null,
+    "disabled": false,
+    "disable_date": null,
+    "disable_reason": null,
+    "disable_replacement_formula": null,
+    "disable_replacement_cask": null,
+    "disable_args": null,
+    "tap_git_head": "7cb180869c4ff9cd6a822a92d8267a1579ef30de",
+    "languages": [],
+    "supported_platforms": [
+      "golden_gate",
+      "arm64_golden_gate",
+      "tahoe",
+      "arm64_tahoe",
+      "sequoia",
+      "arm64_sequoia",
+      "sonoma",
+      "arm64_sonoma",
+      "ventura",
+      "arm64_ventura",
+      "monterey",
+      "arm64_monterey",
+      "big_sur",
+      "arm64_big_sur"
+    ]
+  },
+  {
+    "token": "1password-cli",
+    "full_token": "1password-cli",
+    "old_tokens": [],
+    "tap": "homebrew/cask",
+    "name": ["1Password CLI"],
+    "desc": "Command-line interface for 1Password",
+    "homepage": "https://developer.1password.com/docs/cli",
+    "version": "2.39.0",
+    "autobump": true,
+    "no_autobump_message": null,
+    "skip_livecheck": false,
+    "installed": null,
+    "installed_time": null,
+    "bundle_version": null,
+    "bundle_short_version": null,
+    "pinned": false,
+    "pinned_version": null,
+    "outdated": false,
+    "artifacts": [
+      {
+        "binary": ["op"],
+        "target": "$HOMEBREW_PREFIX/bin/op"
+      },
+      {
+        "generate_completions_from_executable": [
+          "op",
+          "completion",
+          {
+            "base_name": null,
+            "shell_parameter_format": null,
+            "shells": ["bash", "zsh", "fish"]
+          }
+        ]
+      },
+      {
+        "zap": [
+          {
+            "trash": "~/.config/op"
+          }
+        ]
+      }
+    ],
+    "caveats": null,
+    "caveats_rosetta": null,
+    "depends_on": {},
+    "conflicts_with": {
+      "cask": ["1password-cli@1", "1password-cli@beta"]
+    },
+    "container": null,
+    "rename": [],
+    "auto_updates": null,
+    "deprecated": false,
+    "deprecation_date": null,
+    "deprecation_reason": null,
+    "deprecation_replacement_formula": null,
+    "deprecation_replacement_cask": null,
+    "deprecate_args": null,
+    "disabled": false,
+    "disable_date": null,
+    "disable_reason": null,
+    "disable_replacement_formula": null,
+    "disable_replacement_cask": null,
+    "disable_args": null,
+    "tap_git_head": "7cb180869c4ff9cd6a822a92d8267a1579ef30de",
+    "languages": [],
+    "supported_platforms": [
+      "golden_gate",
+      "arm64_golden_gate",
+      "tahoe",
+      "arm64_tahoe",
+      "sequoia",
+      "arm64_sequoia",
+      "sonoma",
+      "arm64_sonoma",
+      "ventura",
+      "arm64_ventura",
+      "monterey",
+      "arm64_monterey",
+      "big_sur",
+      "arm64_big_sur",
+      "x86_64_linux",
+      "arm64_linux"
+    ]
+  },
+  {
+    "token": "battle-net",
+    "full_token": "battle-net",
+    "old_tokens": [],
+    "tap": "homebrew/cask",
+    "name": ["Blizzard Battle.net"],
+    "desc": "Online gaming platform",
+    "homepage": "https://www.battle.net/",
+    "version": "1.19.3.3219",
+    "autobump": false,
+    "no_autobump_message": "extract_plist",
+    "skip_livecheck": false,
+    "installed": null,
+    "installed_time": null,
+    "bundle_version": null,
+    "bundle_short_version": null,
+    "pinned": false,
+    "pinned_version": null,
+    "outdated": false,
+    "artifacts": [
+      {
+        "preflight_steps": [
+          {
+            "steps": [
+              {
+                "paths": [
+                  {
+                    "base": "staged_path",
+                    "path": "Battle.net-Setup.app"
+                  }
+                ],
+                "permissions": "a+x",
+                "type": "set_permissions"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "uninstall": [
+          {
+            "delete": "/Applications/Battle.net.app"
+          }
+        ]
+      },
+      {
+        "installer": [
+          {
+            "manual": "Battle.net-Setup.app"
+          }
+        ]
+      },
+      {
+        "zap": [
+          {
+            "trash": [
+              "/Users/Shared/Battle.net",
+              "/Users/Shared/Blizzard",
+              "~/Library/Application Support/Battle.net",
+              "~/Library/Caches/net.battle.bootstrapper",
+              "~/Library/Preferences/net.battle.app.helper.plist",
+              "~/Library/Preferences/net.battle.Authenticator.prefs",
+              "~/Library/Preferences/net.battle.Identity.prefs",
+              "~/Library/Preferences/net.battle.net.app.plist",
+              "~/Library/Preferences/net.battle.plist",
+              "~/Library/Preferences/net.battnet.battle.plist",
+              "~/Library/Saved Application State/net.battle.app.savedState"
+            ],
+            "rmdir": "~/Blizzard"
+          }
+        ]
+      }
+    ],
+    "caveats": "If your installation directory is not /Applications, you will need to\nuninstall this cask manually.\n",
+    "caveats_rosetta": true,
+    "depends_on": {
+      "macos": {}
+    },
+    "conflicts_with": null,
+    "container": null,
+    "rename": [],
+    "auto_updates": true,
+    "deprecated": false,
+    "deprecation_date": null,
+    "deprecation_reason": null,
+    "deprecation_replacement_formula": null,
+    "deprecation_replacement_cask": null,
+    "deprecate_args": null,
+    "disabled": false,
+    "disable_date": null,
+    "disable_reason": null,
+    "disable_replacement_formula": null,
+    "disable_replacement_cask": null,
+    "disable_args": null,
+    "tap_git_head": "7cb180869c4ff9cd6a822a92d8267a1579ef30de",
+    "languages": ["en", "zh", "CN"],
+    "language_variations": [
+      {
+        "languages": ["en"],
+        "default": true,
+        "value": "en-US"
+      },
+      {
+        "languages": ["zh", "CN"],
+        "default": false,
+        "value": "zh-CN",
+        "url": "https://www.battle.net/download/getInstallerForGame?os=mac&installer=Battle.net-Setup-zhCN.zip"
+      }
+    ],
+    "supported_platforms": [
+      "golden_gate",
+      "arm64_golden_gate",
+      "tahoe",
+      "arm64_tahoe",
+      "sequoia",
+      "arm64_sequoia",
+      "sonoma",
+      "arm64_sonoma",
+      "ventura",
+      "arm64_ventura",
+      "monterey",
+      "arm64_monterey",
+      "big_sur",
+      "arm64_big_sur"
+    ]
+  }
+]

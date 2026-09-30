@@ -104,6 +104,25 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
 }
 
 /**
+ * House style: every failure toast carries its diagnostic text out with it.
+ *
+ * `hideToast` exists because the two detail-view sites dismiss the toast once
+ * the text is on the clipboard, while the failure toast below stays up so its
+ * Retry action remains reachable.
+ */
+export function copyLogsAction(text: string, opts?: { hideToast?: boolean }): Toast.ActionOptions {
+  return {
+    title: "Copy Logs",
+    onAction: async (toast) => {
+      await Clipboard.copy(text);
+      if (opts?.hideToast) {
+        await toast.hide();
+      }
+    },
+  };
+}
+
+/**
  * Show a Brew-specific failure toast with error details and optional retry action.
  *
  * Unlike the standard `showFailureToast` from `@raycast/utils`, this function:
@@ -119,7 +138,16 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
 export async function showBrewFailureToast(
   title: string,
   error: Error,
-  options?: { retryAction?: () => Promise<void> },
+  options?: {
+    retryAction?: () => Promise<void>;
+    /**
+     * A run that collected several failures. A Raycast toast message is one
+     * line, so `headline` is what it shows; `lines` (the full per-command
+     * breakdown) goes into Copy Logs, which is otherwise reduced to the last
+     * line of `error.message` by `getErrorMessage`.
+     */
+    summary?: { headline: string; lines: string[] };
+  },
 ): Promise<void> {
   if (error.name === "AbortError") {
     uiLogger.log("Operation aborted by user");
@@ -127,7 +155,8 @@ export async function showBrewFailureToast(
   }
 
   const execError = error as ExecError;
-  const errorMessage = getErrorMessage(error);
+  const summary = options?.summary;
+  const errorMessage = summary?.headline ?? getErrorMessage(error);
   const isLockError = isBrewLockError(error);
 
   uiLogger.error(title, {
@@ -146,7 +175,8 @@ export async function showBrewFailureToast(
     `${toastTitle}`,
     `Error type: ${error.name}`,
     execError.code !== undefined ? `Exit code: ${execError.code}` : undefined,
-    hasStructuredOutput ? undefined : `Message: ${error.message}`,
+    summary ? `Failures:\n${summary.lines.join("\n")}` : undefined,
+    hasStructuredOutput || summary ? undefined : `Message: ${error.message}`,
     execError.stderr ? `stderr:\n${execError.stderr}` : undefined,
     execError.stdout ? `stdout:\n${execError.stdout}` : undefined,
     isLockError
@@ -160,12 +190,7 @@ export async function showBrewFailureToast(
     style: Toast.Style.Failure,
     title: toastTitle,
     message: errorMessage,
-    primaryAction: {
-      title: "Copy Logs",
-      onAction: () => {
-        Clipboard.copy(rawLogOutput);
-      },
-    },
+    primaryAction: copyLogsAction(rawLogOutput),
   };
 
   // Add retry action for recoverable errors (including lock errors)
@@ -185,6 +210,16 @@ export async function showBrewFailureToast(
           toast.style = Toast.Style.Failure;
           toast.title = isBrewLockError(retryError) ? "Brew is Busy" : title;
           toast.message = getErrorMessage(retryError);
+          // Repoint Copy Logs at the RETRY's error. Without this it keeps
+          // closing over `rawLogOutput` from the first failure, so the user
+          // copies diagnostics for an error that is no longer on screen.
+          toast.primaryAction = copyLogsAction(
+            [
+              toast.title,
+              `Error type: ${retryError instanceof Error ? retryError.name : typeof retryError}`,
+              `Message: ${getErrorMessage(retryError)}`,
+            ].join("\n\n"),
+          );
         }
       },
     };

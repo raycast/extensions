@@ -4,6 +4,8 @@ import { SEARCH_ENGINE } from "../constants";
 import { Preferences, Shortcut } from "../interfaces";
 import { getNewTabShortcut } from "../util";
 
+export * from "./powershell";
+
 /**
  * Activates Zen browser and waits for it to become frontmost.
  * Returns the AppleScript code for the activation and wait logic.

@@ -9,7 +9,8 @@
     "samuelkraft",
     "pernielsentikaer",
     "xilopaint",
-    "stelo"
+    "stelo",
+    "alexi.build"
   ],
   "categories": [
     "Media",
@@ -212,6 +213,18 @@
           ]
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-wallpapers",
+      "title": "List Raycast Wallpapers",
+      "description": "List available official Raycast wallpapers with their exact titles and image URLs. Use this before setting a wallpaper."
+    },
+    {
+      "name": "set-wallpaper",
+      "title": "Set Raycast Wallpaper",
+      "description": "Set an official Raycast wallpaper by its exact title from List Raycast Wallpapers. Applies to all monitors by default, or the current monitor when requested."
     }
   ],
   "dependencies": {

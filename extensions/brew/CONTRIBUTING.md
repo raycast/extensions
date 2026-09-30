@@ -6,8 +6,13 @@ mostly the things review keeps catching here.
 
 ## Requirements
 
-- **Homebrew 6.0 or later.** The extension targets 6.x exclusively; see the compatibility
-  section in [README.md](README.md).
+- **Homebrew 6.0 or later.** 7.x is supported. Two whole commands need it and are wrapped in
+  `HomebrewGate`, which renders an explanation instead of the command on an older brew: Show
+  Vulnerabilities (`brew vulns`) and Run Doctor (`brew doctor --json`). One action is gated
+  inline on the same version instead — cask link/unlink in `src/components/actionPanels.tsx`. The
+  dry-run previews are **not** gated: `--dry-run` predates 7, so they run anywhere. See
+  `HOMEBREW_7` in `src/utils/brew/version.ts`, `src/components/requiresHomebrew.tsx`, and the
+  compatibility section in [README.md](README.md).
 - Node.js — `@raycast/api` declares `>=22.22.2`.
 - Raycast.
 
@@ -20,8 +25,10 @@ npm run dev      # reloads in Raycast as you edit
 
 ## Before you open a PR
 
-All four must be green. `ray build` and `ray lint` do **not** typecheck, so `tsc` is separate
-and non-negotiable:
+All four must be green. `ray lint` does not typecheck at all, and a plain `ray build` does not
+either — this repo's `build` script is `ray build -e dist`, which does (it prints
+`checked TypeScript`). Run `tsc --noEmit` anyway: it is the gate reviewers run, and it does not
+depend on which build environment the script happens to pass.
 
 ```bash
 npx tsc --noEmit    # exit 0
@@ -37,7 +44,7 @@ It fails offline; that is not a reason to remove the network calls.
 ## Tests
 
 Pure logic lives under `src/utils/` and is tested with vitest. `@raycast/api` has no
-resolvable entry outside the Raycast runtime, so `vitest.config.ts` aliases it to
+resolvable entry outside the Raycast runtime, so `vitest.config.mts` aliases it to
 `src/utils/__mocks__/raycast-api.ts`. That stub returns the **declared preference defaults**
 from `package.json` — if you add a preference with a default, tests see it.
 
@@ -71,22 +78,37 @@ A pin is a lock, and Homebrew enforces it:
   warns on a bare `brew upgrade`. The extension names every package, so pinned ones must be
   filtered out before the run — otherwise a deliberate skip is reported as a failure.
 - `brew uninstall` refuses a pinned package of **either** kind without `--force`.
-- Therefore: never offer a pinned row an upgrade action, or a copy/terminal command it cannot
-  run. Formulae and casks are both pinnable and behave identically here.
+- Therefore: never offer a pinned row a bare upgrade, or a copy/terminal command it cannot run.
+  An action may lift a pin only when it **names the unpin in its own title** — `PinAction`
+  ("Unpin Formula") and `FormulaUpgradeAction` ("Unpin Formula and Upgrade *name*") are the two
+  that do. `FormulaUninstallAction` takes the same consent through a confirmation instead, whose
+  primary button reads "Unpin Formula and Force Uninstall".
+  Decide from brew's pin directory, not the payload: it is a snapshot, and another command or the
+  CLI may have moved the pin since the fetch — in either direction.
+  Formulae and casks are both pinnable and behave identically here.
 
 ## What reviewers have asked for
 
 - **Don't reorder existing action panels.** Adding an action at the top pushes Upgrade, Pin and
   the copy actions down and changes muscle memory. Add to the end of the relevant section, or
-  say why the new order is better.
+  say why the new order is better. The test that matters is **what ↩ does**: an addition that
+  leaves the first action alone is safe whatever else moves, and one that takes the first slot
+  changes what every existing muscle-memory ↩ runs. A section shipping for the first time in
+  your PR has no prior default and is not covered by this at all.
 - **A failure must not read as success.** A failed `brew outdated` that shows a success toast,
   or an empty list that reads as "nothing to upgrade", is the single most repeated finding on
   this extension. If a fetch fails, say so on screen.
 - **Long operations need an indicator before the work starts**, not after.
 - **Every `Toast.Style.Failure` needs a Copy Error / Copy Logs action** so a user can report
   what actually happened.
-- **Match the icon vocabulary** in `src/components/packageIcons.ts` — green up to date, blue in
-  progress, red failed, yellow update available. Check that table before introducing a colour.
+- **Match the icon vocabulary** in `src/components/palette.ts` — `STATUS_COLOR` names meanings, not
+  colours: green up to date, blue in progress or informational, orange needs attention (update
+  available, deprecated), red brew refused or failed, secondary-text muted. `SEVERITY_COLOR` maps
+  advisory severity on top of it, and is the only place yellow appears (LOW). Pick a meaning from
+  those tables rather than a `Color.*` literal. `Color` may still be named outside `palette.ts`
+  where it is structural rather than semantic — as a type (`Color`, `Color.ColorLike`), or for the
+  menu-bar icon's `Color.PrimaryText` tint, which is a platform requirement for a template icon
+  and not a status.
 
 ## Homebrew is the source of truth
 

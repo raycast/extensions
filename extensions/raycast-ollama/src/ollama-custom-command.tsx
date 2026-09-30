@@ -22,6 +22,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ollama
     creativity?: number;
     thinking?: string;
     keep_alive?: string;
+    auto_replace?: boolean;
   };
   try {
     const modelIndex = props.arguments.model.indexOf(":");
@@ -45,6 +46,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ollama
       creativity={Number(parameters.creativity)}
       thinking={parameters.thinking !== "false" ? (parameters.thinking as ThinkingEffort) : undefined}
       keep_alive={parameters.keep_alive}
+      autoReplace={parameters.auto_replace === true}
     />
   );
 }

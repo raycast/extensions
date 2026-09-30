@@ -1,5 +1,10 @@
 # Zen Changelog
 
+## [Fix] - 2026-09-19
+
+- Fixed the **New Tab** command always searching with Google regardless of Zen's configured default search engine. Added a **Browser Default** search engine preference (now the default): queries are handed to Zen itself, which resolves them with its own default search engine.
+- Hardened the Windows search commands so the search query is passed to PowerShell as a literal, preventing queries containing quotes or `$(...)` expressions from being interpreted as PowerShell code.
+
 ## [Fix Open Workspace Command for Recent Zen Versions] - 2026-06-05
 
 - Fixed the **Open Workspace** command crashing with `no such table: zen_workspaces`. Zen Browser migrated workspace storage from the `zen_workspaces` SQLite table in `places.sqlite` to a dedicated `zen-sessions.jsonlz4` file (see [zen-browser/desktop#6469](https://github.com/zen-browser/desktop/pull/6469)). The extension now reads workspace data directly from `zen-sessions.jsonlz4` using a pure-TypeScript mozLz40/LZ4 decompressor — no new runtime dependencies required.

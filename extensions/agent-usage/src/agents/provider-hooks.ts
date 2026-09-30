@@ -11,7 +11,7 @@ import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
 import type { AntigravityError, AntigravityUsage } from "../antigravity/types.ts";
-import { fetchClaudeUsage, readClaudeCredentials } from "../claude/fetcher.ts";
+import { fetchClaudeUsage, listClaudeOAuthAccounts, dedupeClaudeAccounts } from "../claude/fetcher.ts";
 import type { ClaudeError, ClaudeUsage } from "../claude/types.ts";
 import { buildClinePassAccountCandidates } from "../clinepass/accounts.ts";
 import { readClineCredentials } from "../clinepass/auth.ts";
@@ -19,7 +19,8 @@ import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
 import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
 import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
-import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
+import { listCodexOAuthAccounts } from "../codex/auth.ts";
+import { parseAdditionalHomes } from "./home-dirs.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
 import { buildCopilotAccountCandidates } from "../copilot/accounts.ts";
@@ -69,6 +70,7 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
+  additionalClaudeHomes?: string;
   additionalCodexHomes?: string;
   aihubmixApiKey?: string;
   copilotAuthToken?: string;
@@ -124,13 +126,31 @@ export const useAntigravityUsage = createUsageHook<AntigravityUsage, Antigravity
   fetcher: () => fetchAntigravityUsage(),
 });
 
-export const useClaudeUsage = createUsageHook<ClaudeUsage, ClaudeError>({
+export const useClaudeAccounts = createAccountsHook<
+  ClaudeUsage,
+  ClaudeError,
+  ReturnType<typeof listClaudeOAuthAccounts>[number]
+>({
   agentId: "claude",
-  resolveAuthKey: async () => readClaudeCredentials().credentials?.accessToken ?? "",
-  fetcher: async () => {
-    const { credentials, error } = readClaudeCredentials();
-    if (!credentials) return { usage: null, error };
-    return fetchClaudeUsage(credentials);
+  getAccounts: async () => {
+    const defaultAccounts = listClaudeOAuthAccounts();
+    const additionalAccounts = parseAdditionalHomes(prefValue("additionalClaudeHomes")).flatMap(
+      (configDir, homeIndex) =>
+        listClaudeOAuthAccounts({ configDir }).map((account) => ({
+          ...account,
+          id: `claude-home-${homeIndex}-${account.id}`,
+        })),
+    );
+
+    return dedupeClaudeAccounts([...defaultAccounts, ...additionalAccounts]);
+  },
+  fetcher: async (account) => {
+    if (account.scopeError) return { usage: null, error: account.scopeError };
+    return fetchClaudeUsage(account.credentials, account.identity);
+  },
+  noAccountsError: {
+    type: "not_configured",
+    message: "Claude CLI not configured. Run 'claude' to authenticate.",
   },
 });
 
@@ -307,12 +327,11 @@ export const useCodexAccounts = createAccountsHook<
   agentId: "codex",
   getAccounts: async () => {
     const defaultAccounts = listCodexOAuthAccounts();
-    const additionalAccounts = parseAdditionalCodexHomes(prefValue("additionalCodexHomes")).flatMap(
-      (codexHome, homeIndex) =>
-        listCodexOAuthAccounts({ codexHome }).map((account) => ({
-          ...account,
-          id: `codex-home-${homeIndex}-${account.id}`,
-        })),
+    const additionalAccounts = parseAdditionalHomes(prefValue("additionalCodexHomes")).flatMap((codexHome, homeIndex) =>
+      listCodexOAuthAccounts({ codexHome }).map((account) => ({
+        ...account,
+        id: `codex-home-${homeIndex}-${account.id}`,
+      })),
     );
 
     return buildCodexAccountCandidates([...defaultAccounts, ...additionalAccounts], await loadAccounts("codex"));

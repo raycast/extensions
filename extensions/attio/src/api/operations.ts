@@ -32,6 +32,10 @@ export const OPERATIONS = {
     path: "/v2/objects/{object}/records/{record}",
     scopes: ["record_permission:read", "object_configuration:read"],
   },
+  createRecord: {
+    path: "/v2/objects/{object}/records",
+    scopes: ["record_permission:read-write", "object_configuration:read"],
+  },
   updateRecord: {
     path: "/v2/objects/{object}/records/{record}",
     scopes: ["record_permission:read-write", "object_configuration:read"],

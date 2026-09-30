@@ -1,5 +1,17 @@
 # Fathom for Raycast
 
+<div align="center">
+  <a href="https://github.com/chrismessina">
+    <img src="https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social" alt="Follow @chrismessina">
+  </a>
+  <a href="https://github.com/chrismessina/raycast-fathom/stargazers">
+    <img src="https://img.shields.io/github/stars/chrismessina/raycast-fathom?style=social" alt="Stars">
+  </a>
+  <a href="https://www.raycast.com/chrismessina/fathom">
+    <img src="https://img.shields.io/badge/Raycast-Store-red.svg" alt="Fathom on Raycast store.">
+  </a>
+</div>
+
 Search, manage, and review your [Fathom](https://fathom.ai/) meetings and recordings. Use the `@fathom` AI extension to ask questions about your meetings, or trigger other AI tasks, for example:
 > summarize my last meeting in @fathom and create tasks in @todoist
 
@@ -31,7 +43,21 @@ To use this extension, you'll need a Fathom API key:
 - **Advanced Filtering** - Filter meetings by participants, date ranges, topics, and meeting types
 - **Action Items** - View and manage action items from your meetings
 - **Export Options** - Export meeting summaries and transcripts as Markdown
+- **Download Recordings** - Save the recording itself to disk (⌘⇧D), or copy a direct link (⌘⇧L)
 - **Cross-platform Support** - Works on both macOS and Windows
+
+### Downloading recordings
+
+Recordings are large — typically 250–650 MB for a 30–60 minute meeting — and Fathom needs about half a minute to prepare one before the transfer can start.
+
+Because of that, downloads run in a **background process that keeps going after you dismiss Raycast**. Start a download, press Escape, and it continues; reopen Search Meetings to see the progress. If a transfer is interrupted it resumes from where it stopped rather than starting over, and cancelling leaves no half-written file behind.
+
+Files land in the **Export Directory** set in extension preferences (`~/Downloads` by default), named after the meeting and its date.
+
+Two things worth knowing:
+
+- **Download links expire within 24 hours.** "Copy Download Link" gives you a signed URL that stops working after that; request it again if you need a fresh one.
+- **Permissions apply.** Only the recording's owner, teammates who can view it, and people it was shared with at standard or admin level can download it. Limited-access shares will report that access was denied.
 
 ## Privacy
 

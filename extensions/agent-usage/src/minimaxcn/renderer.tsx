@@ -1,12 +1,14 @@
 import { List } from "@raycast/api";
 
 import { formatDuration } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
@@ -18,6 +20,7 @@ export function formatMinimaxCNUsageText(usage: MinimaxCNUsage | null, error: Mi
   if (fallback !== null) return fallback;
   const u = usage as MinimaxCNUsage;
 
+  const mode = getPercentageDisplayMode();
   let text = "MinimaxCN Usage";
 
   const codingModel = getCodingModelRemain(u.modelRemains);
@@ -30,8 +33,8 @@ export function formatMinimaxCNUsageText(usage: MinimaxCNUsage | null, error: Mi
     if (intervalPercent !== null || codingModel.remains_time > 0) {
       const shown = intervalPercent ?? 0;
       text += `\n\n5h Limit (${formatDuration(codingModel.remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(shown)}`;
-      text += `\n${shown}% remaining`;
+      text += `\n${generateAsciiBar(toDisplayPercent(shown, mode))}`;
+      text += `\n${formatPercentDisplay(shown, mode)}`;
       text += `\nResets In: ${formatDuration(codingModel.remains_time / 1000)}`;
     }
 
@@ -39,8 +42,8 @@ export function formatMinimaxCNUsageText(usage: MinimaxCNUsage | null, error: Mi
     if (weeklyPercent !== null || codingModel.weekly_remains_time > 0) {
       const shown = weeklyPercent ?? 0;
       text += `\n\nWeekly Limit (${formatDuration(codingModel.weekly_remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(shown)}`;
-      text += `\n${shown}% remaining`;
+      text += `\n${generateAsciiBar(toDisplayPercent(shown, mode))}`;
+      text += `\n${formatPercentDisplay(shown, mode)}`;
       text += `\nResets In: ${formatDuration(codingModel.weekly_remains_time / 1000)}`;
     }
   }
@@ -54,6 +57,7 @@ export function renderMinimaxCNDetail(usage: MinimaxCNUsage | null, error: Minim
   const u = usage as MinimaxCNUsage;
 
   const codingModel = getCodingModelRemain(u.modelRemains);
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -73,7 +77,7 @@ export function renderMinimaxCNDetail(usage: MinimaxCNUsage | null, error: Minim
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="5h Limit"
-                  text={`${generateAsciiBar(shown)} ${shown}% remaining`}
+                  text={`${generateAsciiBar(toDisplayPercent(shown, mode))} ${formatPercentDisplay(shown, mode)}`}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Resets In"
@@ -94,7 +98,7 @@ export function renderMinimaxCNDetail(usage: MinimaxCNUsage | null, error: Minim
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="Weekly Limit"
-                  text={`${generateAsciiBar(shown)} ${shown}% remaining`}
+                  text={`${generateAsciiBar(toDisplayPercent(shown, mode))} ${formatPercentDisplay(shown, mode)}`}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Resets In"
@@ -150,14 +154,15 @@ export function getMinimaxCNAccessory(
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
   const percent = shownIntervalPercent ?? shownWeeklyPercent ?? 0;
   const parts: string[] = [];
-  if (shownIntervalPercent !== null) parts.push(`5h: ${shownIntervalPercent}%`);
-  if (shownWeeklyPercent !== null) parts.push(`Weekly: ${shownWeeklyPercent}%`);
+  if (shownIntervalPercent !== null) parts.push(`5h: ${toDisplayPercent(shownIntervalPercent, mode)}%`);
+  if (shownWeeklyPercent !== null) parts.push(`Weekly: ${toDisplayPercent(shownWeeklyPercent, mode)}%`);
 
   return {
     icon: generatePieIcon(percent),
-    text: `${percent}%`,
+    text: `${toDisplayPercent(percent, mode)}%`,
     tooltip: parts.join(" | "),
   };
 }

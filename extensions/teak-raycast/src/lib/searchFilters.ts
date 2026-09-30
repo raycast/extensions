@@ -39,9 +39,8 @@ const normalizeType = (value?: string): RaycastCardType | undefined => {
   return value as RaycastCardType;
 };
 
-const normalizeSort = (value?: string): RaycastSort => {
-  return value === "oldest" ? "oldest" : "newest";
-};
+const normalizeSort = (value?: string): RaycastSort =>
+  value === "oldest" ? "oldest" : "newest";
 
 const normalizeFavorited = (value?: string): boolean | undefined => {
   if (!value) {

@@ -29,8 +29,8 @@ interface ListDisplayItemBase {
   copyText: string;
   tooltip?: string;
   detailsMarkdown?: string;
-  showMoreDetailsMarkdown?: string;
   accessoryItem?: ListAccessoryItem;
+  fromCache?: boolean;
 }
 
 export type ListDisplayItem = ListDisplayItemBase &

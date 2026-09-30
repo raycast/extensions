@@ -9,8 +9,7 @@ import {
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "@/core/language/utils";
-import type { ListDisplayItem } from "@/types/display";
-import type { QueryResult, TranslationResult } from "@/types/query";
+import type { QueryResult } from "@/types/query";
 import { logTrace } from "@/utils/logger";
 
 /**
@@ -90,63 +89,6 @@ export function getFromToLanguageTitle(from: string, to: string, onlyEmoji = fal
   const fromToEmoji = `${fromLanguageItem.emoji} --> ${toLanguageItem.emoji}`;
   const fromToLanguageNameAndEmoji = `${fromLanguageItem.langEnglishName}${fromLanguageItem.emoji} --> ${toLanguageItem.langEnglishName}${toLanguageItem.emoji}`;
   return onlyEmoji ? fromToEmoji : fromToLanguageNameAndEmoji;
-}
-
-export function getTranslationShowMoreDetailsMarkdown(displayItem: ListDisplayItem): string {
-  const { queryType, serviceLabel, copyText } = displayItem;
-  const { word, fromLanguage, toLanguage } = displayItem.queryWordInfo;
-
-  const type = serviceLabel ?? queryType.toString();
-  const fromToLang = getFromToLanguageTitle(fromLanguage, toLanguage);
-  const fromToTitle = `${type}  (${fromToLang})`;
-
-  let markdown = "";
-  markdown += `## ${fromToTitle} \n`;
-  // * Note: word may contain wrap character, so we need to handle it.
-  word.split("\n").forEach((line) => {
-    markdown += `### ${line} \n`;
-  });
-  markdown += `----\n`;
-  copyText.split("\n").forEach((line) => {
-    markdown += `${line} \n\n`;
-  });
-  return markdown;
-}
-
-export function getDictionaryShowMoreDetailsMarkdown(displayItem: ListDisplayItem): string {
-  const { queryType, serviceLabel, title, detailsMarkdown } = displayItem;
-  const { word, fromLanguage, toLanguage } = displayItem.queryWordInfo;
-  const fromToLang = getFromToLanguageTitle(fromLanguage, toLanguage);
-  const fromToTitle = `${serviceLabel ?? queryType}  (${fromToLang})`;
-  const explanation = detailsMarkdown || title;
-
-  return `
-## ${fromToTitle} 
-### ${word}
-----
-${explanation}
-`;
-}
-
-/**
- * Get translation markdown.
- */
-export function getTranslationMarkdown(queryResult: TranslationResult, label = queryResult.type.toString()) {
-  const { translations, queryWordInfo: wordInfo } = queryResult;
-  const oneLineTranslation = translations.join("\n");
-  if (oneLineTranslation.trim().length === 0) {
-    return "";
-  }
-
-  const text = oneLineTranslation.replace(/\n/g, "\n\n");
-  const fromTo = getFromToLanguageTitle(wordInfo.fromLanguage, wordInfo.toLanguage, true);
-
-  const markdown = `
-## ${label}   (${fromTo})
-----  
-${text}
-`;
-  return markdown;
 }
 
 /**

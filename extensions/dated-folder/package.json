@@ -7,7 +7,7 @@
   "author": "fhf1121",
   "categories": ["Productivity", "Developer Tools"],
   "keywords": ["folder", "date", "today", "terminal", "scratch", "workspace"],
-  "platforms": ["macOS"],
+  "platforms": ["macOS", "Windows"],
   "license": "MIT",
   "commands": [
     {
@@ -29,7 +29,7 @@
     {
       "name": "terminal",
       "title": "Terminal",
-      "description": "App used to open the new folder. Follows the system default terminal when left empty.",
+      "description": "App used to open the new folder. When left empty, follows the system default terminal: the shell handler on macOS, the Default Terminal Application setting on Windows.",
       "type": "appPicker",
       "required": false
     },
@@ -45,8 +45,8 @@
     {
       "name": "revealInFinder",
       "title": "Reveal",
-      "description": "Also reveal the new folder in Finder after opening it in the terminal.",
-      "label": "Reveal the folder in Finder",
+      "description": "Also reveal the new folder in Finder or File Explorer after opening it in the terminal.",
+      "label": "Reveal the folder in Finder / File Explorer",
       "type": "checkbox",
       "default": false,
       "required": false

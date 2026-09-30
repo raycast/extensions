@@ -1,5 +1,5 @@
 import { Icon, Image, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { MutatePromise, useCachedPromise, useCachedState } from "@raycast/utils";
 import { compareAsc, format, isBefore, parseISO, startOfDay, add as addDate } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
@@ -218,7 +218,11 @@ export type ViewProps = {
   groupBy?: ViewProp<GroupByOption, GroupByOptions>;
   sortBy: ViewProp<SortByOption, SortByOptions>;
   orderBy?: ViewProp<OrderByOption, OrderByOptions>;
-  completed: { value: boolean; toggle: () => void };
+  completed: {
+    value: boolean;
+    toggle: () => void;
+    mutate?: MutatePromise<Reminder[] | undefined>;
+  };
 };
 
 export type Section = {
@@ -233,7 +237,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     false,
   );
 
-  const { data: completedRemindersData } = useCachedPromise(
+  const { data: completedRemindersData, mutate: mutateCompletedReminders } = useCachedPromise(
     (listId) => getCompletedReminders(listId === "all" ? undefined : listId),
     [listId],
     { execute: showCompletedReminders },
@@ -387,6 +391,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     completed: {
       value: showCompletedReminders,
       toggle: () => setShowCompletedReminders((prev) => !prev),
+      mutate: mutateCompletedReminders,
     },
   };
 

@@ -30,6 +30,7 @@ Preferences related to these features are:
   A default of 10 minutes is Used.
 
 - **Whether to use Better BibTex Citation**: If you use the [Better BibTex zotero extension](https://retorque.re/zotero-better-bibtex/), you can enable this flag to copy Better BibTex citation keys for any reference.
+- **Order by Last Opened**: When this flag is on and the search is empty, entries you opened most recently are shown first and the rest follow by date added. It tracks when you open a PDF, the Zotero entry, the original link, or reveal a PDF in Finder, and remembers that even after the cache is rebuilt.
 - **Search by BibTeX Citation Key**: If you use the Better BibTex zotero extension, you can enable this flag to search references by citation key. With it on, typing a citation key like `smith2020quantum` returns that reference. It only needs the Better BibTex plugin, so you can use it without setting up the CSL JSON file for copy and paste.
 - **Better Bibtex CSL JSON File**: Path where you save your auto-updating CSL JSON file. **PLEASE
   NOTE THAT THIS IS MUST IF YOU WANT TO USE THESE FEATURES**. Please see the following screencast
@@ -131,6 +132,8 @@ This extension support a few sub commands.
 
 - link to the reference in your zotero app (default)
 - link to the PDF of your reference in zotero app or default PDF Reader
+- open a secondary pdf of your reference, e.g. supplementary material saved under the same entry
+- show the PDF file of your reference in Finder
 - copy the PDF file path of your reference to the clipboard
 - open original link to open URL in default browser
 - Copy BibTex citation key to the clipboard
@@ -140,7 +143,9 @@ This extension support a few sub commands.
 - paste bibtex entry for the paper to the frontmost application
 
 Please note that in case a reference has multiple PDF files associated with it, the primary (oldest)
-PDF file will be opened, matching Zotero's native behavior.
+PDF file will be opened, matching Zotero's native behavior. The remaining pdfs open through the
+"Open Secondary PDF" action (`⌘⇧↵`): with exactly two pdfs it opens the secondary one directly,
+with more it shows a list of them.
 
 ## Group libraries
 

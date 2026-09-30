@@ -256,6 +256,7 @@ export const source_languages = {
   KO: "Korean",
   NB: "Norwegian (Bokmål)",
   TR: "Turkish",
+  TH: "Thai",
 };
 export type SourceLanguage = keyof typeof source_languages;
 
@@ -292,6 +293,7 @@ export const target_languages = {
   KO: "Korean",
   NB: "Norwegian (Bokmål)",
   TR: "Turkish",
+  TH: "Thai",
 };
 export type TargetLanguage = keyof typeof target_languages;
 

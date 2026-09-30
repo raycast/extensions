@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Server } from "./api/Server";
 import { Site } from "./api/Site";
 import { ISite, SitesList } from "./Site";
-import { useIsMounted } from "./helpers";
+import { useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 import { usePromise } from "@raycast/utils";
+import { OpenSshAction, sshCommandLabel } from "./SshAction";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
@@ -44,7 +45,11 @@ export const ServersList = () => {
       });
   }, []);
 
-  const { isLoading: isLoadingPromise, pagination } = usePromise(
+  const {
+    isLoading: isLoadingPromise,
+    data: fetchedServers,
+    pagination,
+  } = usePromise(
     () => async (options: { page: number }) => {
       const result = await Server.getAll(options.page + 1);
       return {
@@ -53,16 +58,16 @@ export const ServersList = () => {
       };
     },
     [],
-    {
-      execute,
-      async onData(servers) {
-        if (!isMounted.current) return;
-        // Add the server list to storage to avoid content flash
-        servers && setServers(servers);
-        await LocalStorage.setItem("ploi-servers", JSON.stringify(servers));
-      },
-    },
+    { execute },
   );
+
+  // onData only receives the latest page, so use the accumulated data instead
+  useEffect(() => {
+    if (!fetchedServers || !isMounted.current) return;
+    setServers(fetchedServers);
+    // Add the server list to storage to avoid content flash
+    LocalStorage.setItem("ploi-servers", JSON.stringify(fetchedServers));
+  }, [fetchedServers]);
 
   const isLoading = isLoadingLocal || isLoadingPromise;
 
@@ -71,7 +76,9 @@ export const ServersList = () => {
       isLoading={isLoading}
       searchBarPlaceholder="Search Servers..."
       onSelectionChange={(serverId) => serverId && fetchAndCacheSites(serverId)}
-      pagination={pagination}
+      // Hold off pagination until the first page has loaded, otherwise the cached list can trigger
+      // onLoadMore mid-request, which discards the first page and leaves only the (empty) next one
+      pagination={fetchedServers ? pagination : undefined}
     >
       {!servers?.length && !isLoading && (
         <List.EmptyView
@@ -131,15 +138,30 @@ const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) 
   );
 };
 
-const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
+const SingleServerView = ({ server, sites: cachedSites }: { server: IServer; sites: ISite[] }) => {
   interface Preferences {
     ploi_api_key: string;
     ploi_ssh_user: string;
   }
 
   const preferences = getPreferenceValues<Preferences>();
+  const [sites, setSites] = useState<ISite[]>();
+  const isMounted = useIsMounted();
+
+  usePolling(() =>
+    Site.getAll(server).then(async (fetchedSites) => {
+      if (!isMounted.current) return;
+      // Fall back to the cached sites if the first request fails, so the view doesn't stay loading
+      setSites((current) => fetchedSites ?? current ?? cachedSites);
+      if (fetchedSites) await LocalStorage.setItem(`ploi-sites-${server.id}`, JSON.stringify(fetchedSites));
+    }),
+  );
 
   const sshUser = preferences.ploi_ssh_user ?? "ploi";
+
+  // Render nothing until the sites have loaded, so the items don't shift under the cursor
+  if (!sites) return <List isLoading searchBarPlaceholder="Search Sites..." />;
+
   return (
     <List searchBarPlaceholder="Search Sites...">
       <List.Section title={`Sites on server ${server.name} · ${sites.length} site(s)`}>
@@ -151,10 +173,10 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           key="open-in-ssh"
           title={`Open SSH Connection (${sshUser})`}
           icon={Icon.Terminal}
-          accessories={[{ text: `ssh://${sshUser}@${server.ipAddress}` }]}
+          accessories={[{ text: sshCommandLabel(sshUser, server) }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title={`SSH In As User ${sshUser}`} url={`ssh://${sshUser}@${server.ipAddress}`} />
+              <OpenSshAction title={`Open SSH Connection (${sshUser})`} user={sshUser} server={server} />
             </ActionPanel>
           }
         />
@@ -166,7 +188,10 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           accessories={[{ text: `sftp://${sshUser}@${server.ipAddress}` }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title={`SFTP As User ${sshUser}`} url={`sftp://${sshUser}@${server.ipAddress}`} />
+              <Action.OpenInBrowser
+                title={`Open SFTP Connection (${sshUser})`}
+                url={`sftp://${sshUser}@${server.ipAddress}`}
+              />
             </ActionPanel>
           }
         />
@@ -281,14 +306,10 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
 };
 
 export const ServerCommands = ({ server }: { server: IServer }) => {
-  const sshUser = getPreferenceValues()?.ploi_ssh_user?.value ?? "ploi";
+  const sshUser = getPreferenceValues<Preferences>().ploi_ssh_user ?? "ploi";
   return (
     <>
-      <Action.OpenInBrowser
-        icon={Icon.Terminal}
-        title={`SSH As User ${sshUser}`}
-        url={`ssh://${sshUser}@${server.ipAddress}:${server.sshPort}`}
-      />
+      <OpenSshAction title={`Open SSH Connection (${sshUser})`} user={sshUser} server={server} />
       <ActionPanel.Item
         icon={Icon.ArrowClockwise}
         title="Reboot Server"

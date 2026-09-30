@@ -15,6 +15,7 @@ Control [Herdr](https://herdr.dev/) workspaces and coding agents from Raycast.
 - Start, prompt, inspect, rename, interrupt, and focus agents.
 - Save reusable Start Agent configurations as Quicklinks.
 - Create workspaces, tabs, splits, and Git worktrees.
+- Select the session every command controls, attach it in a new window, or switch sessions in place.
 - Manage sessions, plugins, and agent integrations.
 - Monitor agent status from the menu bar.
 - Open the selected resource in your preferred terminal.
@@ -37,13 +38,13 @@ The extension finds Herdr in `PATH`, `~/.local/bin`, `/opt/homebrew/bin`, and `/
 
 | Command                       | Purpose                                        |
 | ----------------------------- | ---------------------------------------------- |
-| Dashboard                     | Browse and control the current Herdr session   |
+| Dashboard                     | Browse and control the selected Herdr session  |
 | Manage Agents                 | Control live coding agents                     |
 | Prompt Agent                  | Send a prompt to an agent                      |
 | Start Agent                   | Launch an agent or create a reusable Quicklink |
 | Create Workspace              | Create a project workspace                     |
 | Create Git Worktree           | Create a worktree-backed workspace             |
-| Manage Sessions               | Attach to and manage named sessions            |
+| Manage Sessions               | Select, attach, switch, and manage sessions    |
 | Manage Git Worktrees          | Focus and manage Herdr worktrees               |
 | Manage Plugins                | Install and control Herdr plugins              |
 | Manage Agent Integrations     | Manage official detection integrations         |
@@ -56,6 +57,14 @@ Pane navigation, splitting, zoom, and tab creation are available as disabled-by-
 Agent Status in Menu Bar refreshes in the background every minute once Background Refresh is enabled for it. It turns on the first time you open the command, and the toggle lives in Raycast Settings → Extensions → Herdr → Agent Status in Menu Bar.
 
 Start Agent Quicklinks preserve the form configuration except environment variables.
+
+## Sessions
+
+Every command controls one session. Manage Sessions selects it: Select Session changes only what Raycast controls, while Attach in Terminal, Attach in New Window, and Switch to Session also open the session in your terminal. Until you select one, the Default Session preference decides.
+
+Switch to Session detaches the selected session's clients in the terminal and attaches the new session in their place; the previous session keeps running. Detaching works in Terminal, iTerm2, and WezTerm, and only WezTerm can reuse the old client's window. The Attaching a Session preference chooses whether Enter attaches alongside or switches.
+
+A stopped selected session is shown as stopped rather than replaced by another session. Attach to start it, or choose another session.
 
 ## Terminal support
 

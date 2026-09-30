@@ -1,6 +1,6 @@
-import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { ChromeTarget, openGoogleChrome } from "./util/util";
-import { getSelectedBrowser, Profile } from "./util/types";
+import { getSelectedBrowser, showDoneHUD, Profile } from "./util/types";
 
 export default async function Command(props: LaunchProps) {
   const browser = getSelectedBrowser();
@@ -53,7 +53,7 @@ export default async function Command(props: LaunchProps) {
     profile,
     target,
     async () => {
-      await showHUD(processName);
+      await showDoneHUD(processName);
     },
     browser,
   );

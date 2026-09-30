@@ -290,7 +290,7 @@ export function TweetSendThreadFormV2({
     const nt = [...tweets, { text: "" }];
     setTweets(nt);
   };
-  const submitText = tweets && tweets.length > 1 ? "Send Thread" : "Send Post";
+  const submitText = tweets.length > 1 ? "Send Thread" : "Send Post";
   const removeTweet = async () => {
     if (tweets.length > 1) {
       const lt = tweets[tweets.length - 1];

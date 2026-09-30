@@ -28,26 +28,32 @@ single library's docs.
 
 ## How the component lists are sourced
 
-**For future maintainers:** component lists are fetched **live** from each library's public
-documentation site at runtime, parsed, then cached locally for 24 hours
-([`src/utils/cache.ts`](src/utils/cache.ts)). Seven providers also ship a **static fallback
+**For future maintainers:** component lists are fetched **live** at runtime — most from each
+library's public documentation site, but three (PrimeNG, Angular Material, and Taiga UI) from
+source files in the library's GitHub repository, because their docs sites no longer expose a
+parseable component list (see the table below). Each list is parsed, then cached locally for
+24 hours ([`src/utils/cache.ts`](src/utils/cache.ts)). Seven providers also ship a **static fallback
 list** used only when the live fetch fails (see [Failure handling](#failure-handling) below);
 that fallback is never the primary source. Every library has its own provider under
 [`src/providers/`](src/providers/), the shared fetch/cache/fallback flow lives in
 [`src/providers/provider-helpers.ts`](src/providers/provider-helpers.ts), and all source URLs
 live in [`src/constants.ts`](src/constants.ts).
 
-If a library stops returning results, the docs site's markup almost certainly changed. Start
-by opening that library's source URL below and comparing it against the parsing logic in the
-corresponding provider file.
+If a library stops returning results, its source almost certainly changed. Start by opening
+that library's source URL below and comparing it against the parsing logic in the corresponding
+provider file. For the three GitHub-sourced libraries (PrimeNG, Angular Material, Taiga UI),
+note that the URLs are pinned to the repositories' moving `master`/`main` branches: an upstream
+refactor that moves or renames those files will make the fetch fail and drop the library to its
+static fallback — the visible `(fallback)` state (see [Failure handling](#failure-handling))
+makes that easy to spot.
 
 | Library          | Provider file                              | Source & parsing strategy                                                                                                       |
 | ---------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | shadcn/ui        | `src/providers/shadcn-provider.ts`         | Scrapes `href` links off the [components docs page](https://ui.shadcn.com/docs/components)                                      |
-| PrimeNG          | `src/providers/primeng-provider.ts`        | Scrapes links off the [PrimeNG site](https://primeng.org), with a static fallback list                                          |
-| Angular Material | `src/providers/material-provider.ts`       | Scrapes the [component categories page](https://material.angular.dev/components/categories), with a static fallback list        |
+| PrimeNG          | `src/providers/primeng-provider.ts`        | Parses the showcase sidebar menu data from [`menu.json`](https://raw.githubusercontent.com/primefaces/primeng/master/apps/showcase/assets/data/menu.json) on GitHub (primeng.dev is client-rendered), with a static fallback list |
+| Angular Material | `src/providers/material-provider.ts`       | Reads the docs [`documentation-items.ts`](https://raw.githubusercontent.com/angular/components/main/docs/src/app/shared/documentation-items/documentation-items.ts) registry on GitHub (material.angular.dev exposes no component links in its HTML), with a static fallback list |
 | spartan/ui       | `src/providers/spartan-provider.ts`        | Scrapes the [components page](https://spartan.ng/components), with a static fallback list                                       |
-| Taiga UI         | `src/providers/taiga-provider.ts`          | Parses [`sitemap.xml`](https://taiga-ui.dev/sitemap.xml) for `/components/{slug}` URLs, with a static fallback list             |
+| Taiga UI         | `src/providers/taiga-provider.ts`          | Parses the demo app route registry [`demo-routes.ts`](https://raw.githubusercontent.com/taiga-family/taiga-ui/main/projects/demo/src/pages/app/demo-routes.ts) on GitHub for `/components/{slug}` routes (taiga-ui.dev no longer serves a usable sitemap), with a static fallback list |
 | Mantine          | `src/providers/mantine-provider.ts`        | Parses [`sitemap.xml`](https://mantine.dev/sitemap.xml) for `/core/{slug}` URLs, with a static fallback list                    |
 | React Spectrum   | `src/providers/react-spectrum-provider.ts` | Scrapes a [component page](https://react-spectrum.adobe.com) sidebar, with a static fallback list                               |
 | Chakra UI        | `src/providers/chakra-provider.ts`         | Scrapes the [components overview](https://chakra-ui.com/docs/components/concepts/overview) sidebar, with a static fallback list |

@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import {
   buildCardsSearchParams,
   DEFAULT_LIMIT,
@@ -9,7 +8,7 @@ import {
 import {
   type CardsResponse,
   getPayloadCode,
-  parseCardsResponse,
+  parseCardsPageResponse,
   parseQuickSaveResponse,
   parseRaycastCard,
   parseTagsResponse,
@@ -33,9 +32,7 @@ export {
   RaycastApiError,
   type RaycastApiErrorCode,
 } from "./apiErrors";
-
-export type { RaycastCard } from "./apiParsers";
-export type { TagSummary, TagsResponse } from "./apiParsers";
+export type { RaycastCard, TagSummary, TagsResponse } from "./apiParsers";
 
 export interface CardSearchInput {
   createdAfter?: number;
@@ -49,6 +46,7 @@ export interface CardSearchInput {
 }
 
 export interface CreateCardInput {
+  cardType?: RaycastCardType;
   content?: string;
   notes?: string | null;
   source?: string;
@@ -80,30 +78,6 @@ const getErrorCodeFromResponse = (
   }
 
   return toErrorCode(payloadCode, "REQUEST_FAILED");
-};
-
-const isMissingDevApiGatewayResponse = (
-  response: Response,
-  payload: unknown,
-  requestUrl: string,
-): boolean => {
-  if (!environment.isDevelopment || response.status !== 404 || payload) {
-    return false;
-  }
-
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(requestUrl);
-  } catch {
-    return false;
-  }
-
-  return (
-    parsedUrl.hostname === "api.teak.localhost" &&
-    response.headers.get("x-portless") === "1" &&
-    !response.headers.get("content-type")?.includes("application/json")
-  );
 };
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
@@ -140,9 +114,8 @@ const withLoopbackFallback = (url: string): string => {
   return parsedUrl.toString();
 };
 
-const parseJson = (response: Response): Promise<unknown> => {
-  return response.json().catch(() => null);
-};
+const parseJson = (response: Response): Promise<unknown> =>
+  response.json().catch(() => null);
 
 const buildHeaders = (apiKey: string, initHeaders?: HeadersInit): Headers => {
   const headers = new Headers(initHeaders);
@@ -297,9 +270,7 @@ export const request = async <T>(
 
   const payload = await parseJson(response);
   const payloadCode = getPayloadCode(payload);
-  const code = isMissingDevApiGatewayResponse(response, payload, requestUrl)
-    ? "DEV_API_UNAVAILABLE"
-    : getErrorCodeFromResponse(payloadCode, response.status);
+  const code = getErrorCodeFromResponse(payloadCode, response.status);
 
   logApiRequestFailure({
     code,
@@ -311,7 +282,6 @@ export const request = async <T>(
     status: response.status,
     statusText: response.statusText,
     url: response.url || requestUrl,
-    xPortless: response.headers.get("x-portless"),
   });
 
   throw new RaycastApiError(code, response.status);
@@ -320,8 +290,8 @@ export const request = async <T>(
 export const createCard = (
   input: CreateCardInput,
   options?: RequestAuthOptions,
-): Promise<QuickSaveResponse> => {
-  return request<QuickSaveResponse>(
+): Promise<QuickSaveResponse> =>
+  request<QuickSaveResponse>(
     "/cards",
     parseQuickSaveResponse,
     {
@@ -330,51 +300,50 @@ export const createCard = (
     },
     options,
   );
-};
 
 export const quickSaveCard = (
   input: string | CreateCardInput,
-): Promise<QuickSaveResponse> => {
-  return createCard(
+): Promise<QuickSaveResponse> =>
+  createCard(
     typeof input === "string"
       ? {
           content: input,
         }
       : input,
   );
-};
 
 export const searchCards = (
   input: CardSearchInput = {},
   options?: RequestAuthOptions,
-): Promise<CardsResponse> => {
-  return request<CardsResponse>(
-    `/cards/search?${buildCardsSearchParams({
+): Promise<CardsResponse> =>
+  request<CardsResponse>(
+    `/cards?${buildCardsSearchParams({
       ...input,
+      include: "content,metadata",
       limit: input.limit ?? DEFAULT_LIMIT,
     })}`,
-    parseCardsResponse,
+    parseCardsPageResponse,
     {
       method: "GET",
     },
     options,
   );
-};
 
 export const getFavoriteCards = (
   input: CardSearchInput = {},
-): Promise<CardsResponse> => {
-  return request<CardsResponse>(
-    `/cards/favorites?${buildCardsSearchParams({
+): Promise<CardsResponse> =>
+  request<CardsResponse>(
+    `/cards?${buildCardsSearchParams({
       ...input,
+      favorited: true,
+      include: "content,metadata",
       limit: input.limit ?? DEFAULT_LIMIT,
     })}`,
-    parseCardsResponse,
+    parseCardsPageResponse,
     {
       method: "GET",
     },
   );
-};
 
 export const getCardById = (
   cardId: string,
@@ -450,10 +419,8 @@ export const softDeleteCard = async (cardId: string): Promise<void> => {
   );
 };
 
-export const listTags = (
-  options?: RequestAuthOptions,
-): Promise<TagsResponse> => {
-  return request<TagsResponse>(
+export const listTags = (options?: RequestAuthOptions): Promise<TagsResponse> =>
+  request<TagsResponse>(
     "/tags",
     parseTagsResponse,
     {
@@ -461,4 +428,3 @@ export const listTags = (
     },
     options,
   );
-};

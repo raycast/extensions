@@ -10,6 +10,7 @@ import { showToast, Toast } from "@raycast/api";
 import {
   actionsLogger,
   brewUpgradeOutdated,
+  copyLogsAction,
   ensureError,
   formatCount,
   markOutdatedSnapshotDirty,
@@ -150,10 +151,15 @@ export function useBrewUpgrade(): BrewUpgrade {
         } else if (summary.failed.length > 0) {
           // Keep the window open so the failed packages remain visible
           toast.hide();
+          const failedNames = summary.failed.map((pkg) => pkg.name).join(", ");
           await showToast({
             style: Toast.Style.Failure,
             title: `Failed to upgrade ${formatCount(summary.failed.length, "package")}`,
-            message: summary.failed.map((pkg) => pkg.name).join(", "),
+            message: failedNames,
+            primaryAction: copyLogsAction(
+              `Failed to upgrade ${formatCount(summary.failed.length, "package")}\n\n${failedNames}`,
+              { hideToast: true },
+            ),
           });
         } else if (summary.upgraded.length === 0) {
           await toast.showSuccessHUD("Nothing to upgrade");

@@ -49,6 +49,11 @@ Today's tasks in Sunsama's own order. From here you can start and stop timers,
 mark things complete, edit a task, set planned time, snooze to another day, move
 tasks around, open the linked item, manage subtasks, and delete.
 
+Turn on **Show task details** in the command's preferences to open a side pane
+with the selected task's notes, subtasks, channel, planned and tracked time,
+calendar slots, the linked item (Trello, Google Tasks, ...), and
+where a calendar event came from.
+
 Timers work on subtasks too. If a subtask timer is running — even one you started
 in the Sunsama web app — hitting Stop Timer on the parent task stops the right
 one.

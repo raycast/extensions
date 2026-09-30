@@ -1,5 +1,22 @@
 # Bitbucket Changelog
 
+## [Update] - 2026-09-28
+
+- Cache the repository list and start fetching pull requests as repo pages arrive instead of waiting for the full workspace scan to finish
+- Fix "Search My Open Pull Requests": Bitbucket removed the workspace-wide "PRs for a user" endpoint it relied on, causing a 404; it now reuses the same per-repo scan as Search All Open Pull Requests, filtered to PRs you authored or are a requested reviewer on
+- Add an optional "Max Repository Age (Days)" preference (per command, 0 = no limit) to skip long-dormant repositories for large workspaces
+
+## [Update] - 2026-09-19
+
+- Add Approve / Decline / Request Changes actions for pull requests
+- Open pull request details on Enter, open in browser on Cmd+Enter (or Enter again from the detail view), with a hint icon on each row
+- Fix "Search My Open Pull Requests" failing to load pull requests missing `destination.repository.slug`
+- Fix reviewer status staying stale on the list row after approving or requesting changes from the detail view
+
+## [Update] - 2026-09-16
+
+- Speed up "Search All Open Pull Requests" cold start: cross-session cache, slimmer API payload, progressive results as repos finish loading
+
 ## [Update] - 2026-08-22
 
 - Added Search All Open Pull Requests command to browse open PRs across the workspace

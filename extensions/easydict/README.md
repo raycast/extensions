@@ -60,6 +60,7 @@ npm install && npm run dev
 
 ## Features
 
+- [x] 🆕 Supports [optional local query caching](#query-cache), off by default.
 - [x] 🆕 Support Raycast for Windows (most features are adapted).
 - [x] 🆕 Supports using LLMs from Raycast AI or custom OpenAI-compatible endpoints for translation and word lookup.
 - [x] Works out of the box for easily looking up words or translating text.
@@ -219,6 +220,20 @@ By default, the extension will automatically select the preferred language as th
 </p>
 
 </details>
+
+### Query Cache
+
+Open **Preferences** from a query result's action menu to configure caching. **Query Cache** controls completed dictionary and machine translation results; **AI Query Cache** controls completed AI translations and dictionary entries. Both default to **Off**. Choose **Words Only** to cache input recognized as a word or term, or **All Text** to also cache sentences and longer text.
+
+Built-in dictionary results are retained for up to **7 days**; machine translations and AI results for up to **24 hours**. Confirmed language-detection results are also cached for up to 24 hours when either setting permits caching the input. There is no separate language-detection cache setting; it is disabled when both settings are Off.
+
+Cached results show a clock indicator. Use these actions to manage them:
+
+- **Requery All Services**: Query the enabled services again with fresh language detection, bypassing the cache.
+- **Regenerate AI Result**: Generate a fresh result from the selected AI provider, leaving other providers' results in place. This also works when AI caching is Off.
+- **Clear Query Cache**: Remove cached dictionary, translation, AI, and language-detection results.
+
+Fresh results from requerying or regeneration replace the cached result when the corresponding cache mode allows caching that input.
 
 ### 🍎 Apple Translate
 

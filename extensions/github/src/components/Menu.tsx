@@ -12,8 +12,7 @@ import {
 import type { JSX } from "react";
 import React, { ReactNode } from "react";
 
-function clipText(text: string) {
-  const maxLength = 100;
+export function clipText(text: string, maxLength = 100) {
   if (text.length > maxLength) {
     return text.slice(0, maxLength) + " ...";
   }

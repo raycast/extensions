@@ -11,9 +11,8 @@ const IMAGE_EXTENSIONS = new Set([
   ".svg",
 ]);
 
-const normalizeWhitespace = (value: string): string => {
-  return value.replace(/\s+/g, " ").trim();
-};
+const normalizeWhitespace = (value: string): string =>
+  value.replace(/\s+/g, " ").trim();
 
 const firstMeaningfulLine = (value: string): string | null => {
   for (const line of value.split("\n")) {
@@ -34,9 +33,8 @@ const withMaxLength = (value: string, maxLength: number): string => {
   return `${value.slice(0, Math.max(1, maxLength - 1)).trimEnd()}…`;
 };
 
-const fallbackTitle = (card: RaycastCard): string => {
-  return `${card.type.toUpperCase()} Card`;
-};
+const fallbackTitle = (card: RaycastCard): string =>
+  `${card.type.toUpperCase()} Card`;
 
 export const getCardTitle = (card: RaycastCard, maxLength = 88): string => {
   const metadataTitle = normalizeWhitespace(card.metadataTitle ?? "");
@@ -65,9 +63,8 @@ export const isHttpUrl = (value: string | null | undefined): boolean => {
   }
 };
 
-export const getOpenableUrl = (card: RaycastCard): string | null => {
-  return isHttpUrl(card.url) ? card.url : null;
-};
+export const getOpenableUrl = (card: RaycastCard): string | null =>
+  isHttpUrl(card.url) ? card.url : null;
 
 export const getCardDomain = (card: RaycastCard): string | null => {
   const url = getOpenableUrl(card);
@@ -82,9 +79,8 @@ export const getCardDomain = (card: RaycastCard): string | null => {
   }
 };
 
-export const getTeakUrl = (card: RaycastCard): string => {
-  return card.appUrl ?? getTeakCardUrl(card.id);
-};
+export const getTeakUrl = (card: RaycastCard): string =>
+  card.appUrl ?? getTeakCardUrl(card.id);
 
 const isRenderableImageUrl = (value: string | null | undefined): boolean => {
   if (!(value && isHttpUrl(value))) {
@@ -124,23 +120,21 @@ export interface DetailStatusChip {
   text: string;
 }
 
-export const getDetailStatusChips = (card: RaycastCard): DetailStatusChip[] => {
-  return [
-    {
-      kind: "type",
-      text: card.type,
-    },
-    {
-      kind: "favorite",
-      text: card.isFavorited ? "Favorited" : "Not Favorited",
-    },
-    {
-      kind: "aiSummary",
-      text: card.aiSummary ? "Teak Summary" : "No Teak Summary",
-    },
-    {
-      kind: "aiTags",
-      text: card.aiTags.length > 0 ? "Teak Tags" : "No Teak Tags",
-    },
-  ];
-};
+export const getDetailStatusChips = (card: RaycastCard): DetailStatusChip[] => [
+  {
+    kind: "type",
+    text: card.type,
+  },
+  {
+    kind: "favorite",
+    text: card.isFavorited ? "Favorited" : "Not Favorited",
+  },
+  {
+    kind: "aiSummary",
+    text: card.aiSummary ? "Teak Summary" : "No Teak Summary",
+  },
+  {
+    kind: "aiTags",
+    text: card.aiTags.length > 0 ? "Teak Tags" : "No Teak Tags",
+  },
+];

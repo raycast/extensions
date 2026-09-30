@@ -101,3 +101,85 @@ export const Color = {
 };
 
 export const Icon = new Proxy({}, { get: (_target, key) => String(key) });
+
+/* ── Alerts and toasts ──────────────────────────────────────────────────────
+ * Enough of the UI surface for `confirmAndRun` and `utils/toast.ts` to run
+ * headless. Everything shown is recorded on `__raycast` so a test can assert on
+ * it; `__raycast.reset()` in a beforeEach keeps runs independent.
+ */
+
+export const __raycast = {
+  /** What `confirmAlert` returns next. */
+  confirmAlertResponse: true,
+  alerts: [] as { title: string; message?: string }[],
+  toasts: [] as MockToast[],
+  huds: [] as string[],
+  clipboard: [] as string[],
+  reset() {
+    __raycast.confirmAlertResponse = true;
+    __raycast.alerts.length = 0;
+    __raycast.toasts.length = 0;
+    __raycast.huds.length = 0;
+    __raycast.clipboard.length = 0;
+  },
+};
+
+export const Alert = {
+  ActionStyle: { Default: "default", Destructive: "destructive", Cancel: "cancel" },
+};
+
+export async function confirmAlert(options: { title: string; message?: string }): Promise<boolean> {
+  __raycast.alerts.push({ title: options.title, message: options.message });
+  return __raycast.confirmAlertResponse;
+}
+
+type ToastAction = { title: string; onAction: (toast: MockToast) => void | Promise<void> };
+
+/** A Toast that remembers every message it was given, so progress can be asserted. */
+class MockToast {
+  static Style = { Animated: "animated", Success: "success", Failure: "failure" };
+  style?: string;
+  title = "";
+  primaryAction?: ToastAction;
+  secondaryAction?: ToastAction;
+  /** Every message this toast has held, in order. */
+  readonly messages: string[] = [];
+  private current?: string;
+
+  constructor(options: Record<string, unknown> = {}) {
+    Object.assign(this, options);
+  }
+
+  get message(): string | undefined {
+    return this.current;
+  }
+
+  set message(value: string | undefined) {
+    this.current = value;
+    if (value !== undefined) this.messages.push(value);
+  }
+
+  async show(): Promise<void> {
+    __raycast.toasts.push(this);
+  }
+
+  async hide(): Promise<void> {}
+}
+
+export { MockToast as Toast };
+
+export async function showToast(options: Record<string, unknown>): Promise<MockToast> {
+  const toast = new MockToast(options);
+  await toast.show();
+  return toast;
+}
+
+export async function showHUD(message: string): Promise<void> {
+  __raycast.huds.push(message);
+}
+
+export const Clipboard = {
+  copy: async (content: unknown) => {
+    __raycast.clipboard.push(String(content));
+  },
+};

@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { htmlToMarkdown } from "./notes";
+import { escapeMarkdown, htmlToMarkdown } from "./notes";
+
+describe("escapeMarkdown", () => {
+  it("neutralizes styling and structure characters", () => {
+    expect(escapeMarkdown("Fix *flaky* test")).toBe("Fix \\*flaky\\* test");
+    expect(escapeMarkdown("#1 - [x] <br>")).toBe("\\#1 \\- \\[x\\] \\<br\\>");
+  });
+  it("leaves plain text alone", () => {
+    expect(escapeMarkdown("Pick up Jazmin & drop at school")).toBe(
+      "Pick up Jazmin & drop at school",
+    );
+  });
+});
 
 describe("htmlToMarkdown", () => {
   it("returns empty for empty/placeholder notes", () => {

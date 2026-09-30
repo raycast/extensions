@@ -1,7 +1,18 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
 import type { Image } from "@raycast/api";
-import { Action, ActionPanel, Color, Detail, Icon, Keyboard, open, openCommandPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  open,
+  openCommandPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import ReleaseNotesPage from "@/components/pages/ReleaseNotePage";
@@ -10,6 +21,8 @@ import { EASYDICT_VERSION, FEEDBACK_URL, getReleaseTagUrl, myPreferences } from 
 import { playQueryWordAudio, playTTS } from "@/core/audio";
 import { languageItemList } from "@/core/language/consts";
 import type { LanguageItem } from "@/core/language/types";
+import { clearQueryCache } from "@/core/query/cache";
+import { standaloneResultMarkdown } from "@/core/query/resultMarkdown";
 import { getStrokeOrderCharacters } from "@/core/stroke-order";
 import { dictionaryServices } from "@/providers/dictionary";
 import { translationServices } from "@/providers/translation";
@@ -19,6 +32,11 @@ import { logError, logTrace } from "@/utils/logger";
 
 import { getQueryTypeIcon } from "./Icons";
 
+// Action.Push mounts this component when navigating, so the full page is not built for every list row.
+function ResultDetails({ item, actions }: { item: ListDisplayItem; actions: Detail.Props["actions"] }) {
+  return <Detail markdown={standaloneResultMarkdown(item)} actions={actions} />;
+}
+
 interface ActionListPanelProps {
   displayItem: ListDisplayItem;
   isInstalledEudic: boolean;
@@ -27,6 +45,8 @@ interface ActionListPanelProps {
   onToggleFavorite: () => void;
   onHideReleasePrompt: () => void;
   onLanguageUpdate: (language: LanguageItem) => void;
+  onRequery: () => void;
+  onRegenerate?: () => void;
 }
 
 interface WebQueryItem {
@@ -102,6 +122,8 @@ function PrimaryActions({
   isFavorite,
   onToggleFavorite,
   onHideReleasePrompt,
+  onRequery,
+  onRegenerate,
 }: {
   displayItem: ListDisplayItem;
   isInstalledEudic: boolean;
@@ -109,6 +131,8 @@ function PrimaryActions({
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onHideReleasePrompt: () => void;
+  onRequery: () => void;
+  onRegenerate?: () => void;
 }) {
   const { queryWordInfo, queryType, copyText } = displayItem;
   const { fromLanguage, toLanguage, word } = queryWordInfo;
@@ -152,8 +176,8 @@ function PrimaryActions({
         icon={Icon.Eye}
         shortcut={shortcuts.showDetail}
         target={
-          <Detail
-            markdown={displayItem.showMoreDetailsMarkdown ?? displayItem.detailsMarkdown ?? displayItem.copyText}
+          <ResultDetails
+            item={displayItem}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
@@ -175,6 +199,13 @@ function PrimaryActions({
         />
       )}
       {currentWebQueryAction}
+      {onRegenerate && <Action icon={Icon.ArrowClockwise} title="Regenerate AI Result" onAction={onRegenerate} />}
+      <Action
+        icon={Icon.ArrowClockwise}
+        title="Requery All Services"
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRequery}
+      />
     </ActionPanel.Section>
   );
 }
@@ -215,7 +246,7 @@ function AudioActions({
         title="Read Result Text"
         icon={Icon.Play}
         shortcut={shortcuts.readResultText}
-        onAction={() => playTTS(copyText, toLanguage, { truncate: true })}
+        onAction={() => playTTS(copyText, toLanguage)}
       />
     </ActionPanel.Section>
   );
@@ -264,6 +295,14 @@ function SettingsActions({ isShowingReleasePrompt }: { isShowingReleasePrompt: b
       />
       <Action icon={Icon.Gear} title="Preferences" onAction={openCommandPreferences} />
       <Action.OpenInBrowser icon={Icon.QuestionMark} title="Feedback" url={FEEDBACK_URL} />
+      <Action
+        icon={Icon.Trash}
+        title="Clear Query Cache"
+        onAction={() => {
+          clearQueryCache();
+          showToast({ style: Toast.Style.Success, title: "Query Cache Cleared" });
+        }}
+      />
     </ActionPanel.Section>
   );
 }
@@ -277,6 +316,8 @@ export function ListActionPanel(props: ActionListPanelProps) {
     isFavorite,
     onToggleFavorite,
     onLanguageUpdate,
+    onRequery,
+    onRegenerate,
   } = props;
   const { queryWordInfo, queryType, copyText } = displayItem;
   const { fromLanguage, toLanguage } = queryWordInfo;
@@ -290,6 +331,8 @@ export function ListActionPanel(props: ActionListPanelProps) {
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         onHideReleasePrompt={onHideReleasePrompt}
+        onRequery={onRequery}
+        onRegenerate={onRegenerate}
       />
       <OtherWebQuerySection queryType={queryType} queryWordInfo={queryWordInfo} />
       <AudioActions queryWordInfo={queryWordInfo} copyText={copyText} toLanguage={toLanguage} />

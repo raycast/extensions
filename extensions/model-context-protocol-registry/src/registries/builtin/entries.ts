@@ -1,7 +1,71 @@
+import { homedir } from "os";
+import { join } from "path";
 import { Color, Icon } from "@raycast/api";
 import type { RegistryEntry } from "./types";
 
+const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
+
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
+  {
+    name: "blindpay",
+    title: "BlindPay",
+    description:
+      "Stablecoin API for global payments. Create receivers and virtual accounts, get FX quotes, run payouts and payins across bank rails and blockchains, and read balances and transaction history. Remote Streamable HTTP server with BlindPay OAuth 2.1 sign-in through `mcp-remote`; no API key needed.",
+    icon: "https://github.com/blindpaylabs.png",
+    homepage: "https://github.com/blindpaylabs/blindpay-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.blindpay.com/mcp"],
+    },
+  },
+  {
+    name: "60fps",
+    title: "60fps",
+    description:
+      "Real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one (trigger, timing, easing, spring) and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/60fps-Design/plugin/main/assets/logo.png",
+    homepage: "https://60fps.design/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.60fps.design/mcp"],
+    },
+  },
+  {
+    name: "aiapplyd",
+    title: "AI Applyd",
+    description:
+      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: AI Applyd rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system across 15 ATS platforms, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://aiapplyd.com/apple-touch-icon.png",
+    homepage: "https://aiapplyd.com/mcps?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.aiapplyd.com/mcp"],
+    },
+  },
+  {
+    name: "airport-lounge-list",
+    title: "Airport Lounge List",
+    description:
+      "Search 8,500+ airport lounges and check access by card, membership or status. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Airport-Lounge-List/mcp-server/HEAD/plugins/airport-lounge-list/assets/logo.png",
+    homepage: "https://airportloungelist.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.airportloungelist.com/mcp"],
+    },
+  },
+  {
+    name: "apmzoom",
+    title: "apMZoomAI · Dongdaemun Wholesale",
+    description:
+      "Search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, find stalls by building, floor and stall number, and open each item or stall on apMZoomAI, in eight languages. Read-only; never returns prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in and no API key.",
+    icon: "https://www.apmzoom.com/pwa-icon-192.png",
+    homepage: "https://github.com/apmleokeo-gif/apmzoom-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.apmzoom.com/mcp"],
+    },
+  },
   {
     name: "atono",
     title: "Atono",
@@ -20,6 +84,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         X_API_KEY: "<YOUR_API_KEY_HERE>",
       },
+    },
+  },
+  {
+    name: "award-travel-finder",
+    title: "Award Travel Finder",
+    description:
+      "Search award flight availability across 28 airlines and award-chart pricing for 23 loyalty programs. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/AwardTravelFinder/mcp/HEAD/logo.png",
+    homepage: "https://awardtravelfinder.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.awardtravelfinder.com/mcp"],
+    },
+  },
+  {
+    name: "better-design",
+    title: "Better Design",
+    description:
+      "Design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key to paste.",
+    icon: "https://better-design.com/icon",
+    homepage: "https://better-design.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://better-design.com/api/mcp"],
     },
   },
   {
@@ -72,6 +160,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "clera",
+    title: "Clera",
+    description:
+      "Hire from Raycast: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles, and request intros. Candidates search open startup jobs, read full listings and save the good ones. Hosted remote server with OAuth 2.1 sign-in (dynamic client registration), no API key to paste; free during the beta.",
+    icon: "https://www.getclera.com/images/icon-512x512.png",
+    homepage: "https://www.getclera.com/mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.getclera.com"],
+    },
+  },
+  {
+    name: "codex-reset",
+    title: "Codex Reset",
+    description:
+      "Ask whether OpenAI Codex usage limits are likely to reset: the reset probability for the next 24 and 48 hours, the dated record of verified resets with source links, and Codex service status to tell an outage from a usage limit. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://codex-reset.com/icon-512.png",
+    homepage: "https://codex-reset.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://codex-reset.com/mcp"],
+    },
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:
@@ -96,6 +208,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "uvx",
       args: ["mcp-server-git"],
+    },
+  },
+  {
+    name: "gitdiagram",
+    title: "GitDiagram",
+    description:
+      "Architecture diagrams of public GitHub repositories: a written explanation of how a codebase is organized, its main components with their source paths, how they connect, and Mermaid source, plus a search of GitDiagram's existing diagrams and explainer-video transcripts. Read-only remote Streamable HTTP server at https://gitdiagram.com/mcp through `mcp-remote`; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/ahmedkhaleel2004/gitdiagram/main/plugins/gitdiagram/assets/logo.png",
+    homepage: "https://gitdiagram.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://gitdiagram.com/mcp"],
     },
   },
   {
@@ -144,6 +268,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://glif.app/api/mcp"],
+    },
+  },
+  {
+    name: "gtd-brain",
+    title: "GTD Brain",
+    description:
+      "Getting Things Done board: capture to Inbox, next actions by context, projects, waiting-for and a weekly review, on the same board as the GTD Brain web, iOS and Android apps. Hosted remote server with OAuth 2.1 sign-in (email code), no API key to paste.",
+    icon: "https://gtdbrain.com/gtdbrain/icon-512.png",
+    homepage: "https://gtdbrain.com/connect?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp"],
     },
   },
   {
@@ -231,6 +367,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "quantral",
+    title: "Quantral",
+    description:
+      "Stock sentiment scores (0-100) per company from the retail investor and market commentator sources Quantral tracks, plus top signals, monthly recaps and the mentions behind each score. Hosted remote server with OAuth sign-in; Quantral subscription required.",
+    icon: "https://app.quantral.com/mcp-icon.png?v=2",
+    homepage: "https://quantral.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.quantral.com/api/mcp"],
+    },
+  },
+  {
     name: "kagimcp",
     title: "Kagi Search",
     description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
@@ -286,6 +434,45 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "flightqueue",
+    title: "FlightQueue",
+    description:
+      "Airport security wait times, FAA delays, EES border queues and baggage stats. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Flight-Queue/mcp/HEAD/assets/logo.png",
+    homepage: "https://flightqueue.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.flightqueue.com/mcp"],
+    },
+  },
+  {
+    name: "flightseatmap",
+    title: "FlightSeatMap",
+    description:
+      "Seat maps, seat ratings, traveller reviews and seat alerts for 117 airlines. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://avatars.githubusercontent.com/u/277431901?s=512",
+    homepage: "https://flightseatmap.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.flightseatmap.com/mcp"],
+    },
+  },
+  {
+    name: "mnemoverse",
+    title: "Mnemoverse",
+    description:
+      "Hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next. Shared rooms for multi-agent work. One key or OAuth across Claude Code, Cursor, VS Code and ChatGPT. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com, set as `MNEMOVERSE_API_KEY`.",
+    icon: "https://mnemoverse.com/apple-touch-icon.png",
+    homepage: "https://mnemoverse.com/docs/api/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@mnemoverse/mcp-memory-server@latest"],
+      env: {
+        MNEMOVERSE_API_KEY: "mk_live_YOUR_KEY",
+      },
+    },
+  },
+  {
     name: "paddle",
     title: "Paddle",
     description:
@@ -310,6 +497,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         PERPLEXITY_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "pixelesq",
+    title: "Pixelesq",
+    description:
+      "Build and manage your Pixelesq website from Raycast: create pages, edit sections, write content, fix SEO and read analytics, with every edit saved as a draft until you publish.",
+    icon: "https://mcp.pixelesq.app/icon.png",
+    homepage: "https://www.pixelesq.com/docs/integrations/claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pixelesq.app/mcp"],
     },
   },
   {
@@ -340,6 +539,43 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "quibbly",
+    title: "Quibbly",
+    description:
+      "Your LinkedIn inbox in your AI assistant: search synced LinkedIn conversations and connections, see who watched your videos, manage follow-ups, notes and tags, and draft replies that you send yourself. Works alongside any CRM connector. Requires a Quibbly account and the Quibbly Chrome extension with Inbox on. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://server.quibbly.co/icon-512.png",
+    homepage: "https://quibbly.co/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://server.quibbly.co/mcp"],
+    },
+  },
+  {
+    name: "quillhub",
+    title: "QuillHub",
+    description:
+      "Search your meeting transcripts, read who said what, pull decisions and action items, get quotes from one person across meetings, and transcribe new files or YouTube links. Hosted remote server with OAuth 2.1 sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Tim-nocode/quillhub-mcp/main/logo.png",
+    homepage:
+      "https://quillhub.ai/en/help/mcp-claude-cursor?utm_source=raycast&utm_medium=directory&utm_campaign=mcp-listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.quillhub.ai/mcp"],
+    },
+  },
+  {
+    name: "quotebill",
+    title: "QuoteBill",
+    description:
+      "Draft quotations and invoices: search 133 templates, look up the published tax rate for 195 countries with the official source, total line items with the same arithmetic as the QuoteBill editor, and get a link that opens the finished document on quotebill.com to export as Excel, Word or PDF. All tools are read-only. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free QuoteBill account, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/auto1225/quotebill-mcp/main/logo.png",
+    homepage: "https://quotebill.com/en/guides/connect-ai-assistants/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://quotebill.com/mcp"],
+    },
+  },
+  {
     name: "razuna",
     title: "Razuna",
     description:
@@ -355,6 +591,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
+    },
+  },
+  {
+    name: "removeduplicates",
+    title: "RemoveDuplicates.org",
+    description:
+      "Remove duplicate lines from a text list, or duplicate rows from CSV/TSV text such as rows copied from Excel or Google Sheets, and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in and no API key, and text is never stored.",
+    icon: "https://removeduplicates.org/icon-512.png",
+    homepage: "https://removeduplicates.org/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://removeduplicates.org/mcp"],
     },
   },
   {
@@ -396,6 +644,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "scout7",
+    title: "Scout7",
+    description:
+      "Run a week of organic marketing on loop from your AI agent. Scout7 plans your week from your brand, then writes SEO blogs, videos, LinkedIn carousels and social posts, schedules everything across your channels, and reports what moved — it even checks whether you're cited by ChatGPT and Claude. You approve before anything goes live. Hosted remote Streamable HTTP server with Scout7 OAuth 2.1 sign-in (dynamic client registration) through `mcp-remote`; no API key needed.",
+    icon: "https://scout7.ai/apple-touch-icon.png",
+    homepage:
+      "https://scout7.ai/mcp?utm_source=raycast-mcp-registry&utm_medium=listing&utm_campaign=mcp-directories&ref=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.scout7.ai/mcp"],
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
@@ -419,6 +680,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "sitelemetry",
+    title: "Sitelemetry",
+    description:
+      "Authorized website audits for the sites you own or maintain: security posture, technical SEO, AI visibility (GEO/AEO), analytics integrations, WCAG 2.2 accessibility and performance, returning evidence-backed findings with fixes in nine languages. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://sitelemetry.com/favicon.svg",
+    homepage: "https://sitelemetry.com/mcp-guide",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://sitelemetry.com/mcp"],
+    },
+  },
+  {
     name: "slack",
     title: "Slack",
     description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",
@@ -432,6 +705,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         SLACK_TEAM_ID: "T01234567",
         SLACK_CHANNEL_IDS: "C01234567, C76543210",
       },
+    },
+  },
+  {
+    name: "socialfaktory",
+    title: "SocialFaktory",
+    description:
+      "Write, generate, schedule and publish a brand's social content, in its own voice, on every channel: TikTok, Instagram, YouTube, X, LinkedIn, Facebook and Pinterest. Remote Streamable HTTP server with SocialFaktory OAuth 2.1 sign-in through `mcp-remote`; no API key needed.",
+    icon: "https://www.socialfaktory.com/connector-icon-512.png",
+    homepage: "https://www.socialfaktory.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.socialfaktory.com/mcp"],
+    },
+  },
+  {
+    name: "springbrand",
+    title: "SpringBrand",
+    description:
+      "Go-to-market capabilities for your AI agent behind one connector: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation. The agent searches for the capability it needs, runs it and gets the result back, billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://springbrand.ai/apple-touch-icon.png",
+    homepage: "https://springbrand.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://connector.springbrand.ai/mcp"],
     },
   },
   {
@@ -694,6 +991,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "zonefoundry",
+    title: "ZoneFoundry for Sonos",
+    description:
+      "Sonos MCP server. Control your Sonos speakers from Raycast: play songs, artists and playlists, set the volume, group rooms, move music to another room, switch to TV, and send spoken announcements and reminders. Works through the official Sonos cloud with no home bridge; needs the free ZoneFoundry iOS app signed in to your Sonos account. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://zonefoundry.dev/apple-touch-icon.png",
+    homepage: "https://zonefoundry.dev/guides/ai-agent-control/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://relay.zonefoundry.dev/mcp"],
+    },
+  },
+  {
     name: "grafana",
     title: "Grafana",
     description:
@@ -912,6 +1221,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.smart-me.com/mcp"],
     },
   },
+  {
+    name: "audiopod",
+    title: "AudioPod AI",
+    description:
+      "Audio AI as tools: text-to-speech in 200+ languages, voice cloning, voice conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server reached through an `mcp-remote` bridge and authenticated with an AudioPod API key.",
+    icon: "https://audiopod.ai/logo/logo.png",
+    homepage: "https://docs.audiopod.ai/sdks/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.audiopod.ai", "--header", "X-API-Key:${AUDIOPOD_API_KEY}"],
+      env: {
+        AUDIOPOD_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -925,6 +1249,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "bunx",
       args: ["cursor-talk-to-figma-mcp@latest"],
+    },
+  },
+  {
+    name: "agentmailkit",
+    title: "AgentMailKit",
+    description:
+      "Email job runner for agents. Tools: list_jobs, run_job, preview_job, list_plugins. Email sends are defined as named jobs, run_job renders a preview and defaults to dry_run true, and delivery happens only when dry_run is set false. SMTP credentials come from the environment.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/agentmailkit",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "agentmailkit[mcp]", "agentmailkit", "mcp"],
     },
   },
   {
@@ -978,6 +1314,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bandcamp",
+    title: "Bandcamp",
+    description:
+      "Dig Bandcamp without an account or API key: search artists, albums, labels and tracks, browse genre tags for new and top releases, read tracklists and prices. Unofficial; read-only, local stdio server.",
+    icon: "https://raw.githubusercontent.com/Venut-Technologies/bandcamp-mcp/main/assets/icon.png",
+    homepage: "https://github.com/Venut-Technologies/bandcamp-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "bandcamp-mcp"],
+    },
+  },
+  {
     name: "basic-memory",
     title: "Basic Memory",
     description:
@@ -1019,6 +1367,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "contracko",
+    title: "Contracko",
+    description:
+      "AI contract management. Review contracts for risks and obligations, extract dates, parties and values, search inside documents, and track renewal deadlines. Connects to the remote Contracko MCP server over OAuth 2.1.",
+    icon: "https://app.contracko.com/mcp/icon-512.png",
+    homepage: "https://contracko.com/docs/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.contracko.com/mcp"],
+    },
+  },
+  {
     name: "discord",
     title: "Discord",
     description:
@@ -1031,6 +1391,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         DISCORD_TOKEN: "YOUR_DISCORD_BOT_TOKEN",
       },
+    },
+  },
+  {
+    name: "engine-dj",
+    title: "Engine DJ",
+    description:
+      "Search, audit and build playlists in your Engine DJ (Denon) library: BPM and Camelot key search, duplicate and missing-file audits, cues and beatgrids, opt-in playlist and tag edits. Unofficial; local stdio server, macOS.",
+    icon: "https://raw.githubusercontent.com/Venut-Technologies/engine-dj-mcp/main/assets/icon.png",
+    homepage: "https://github.com/Venut-Technologies/engine-dj-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "engine-dj-mcp"],
     },
   },
   {
@@ -1123,6 +1495,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "metabrain",
+    title: "Metabrain",
+    description:
+      "Persistent memory for coding agents. Tools: learn, recall, verdict, hypotheses, start_brief, stats, capture_error. Lessons, failures and hypotheses are written to a local SQLite file and retrieved by keyword before the next task. No API key and no network call.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/metabrain",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "metabrain[mcp]", "metabrain-mcp", "--db", METABRAIN_DB_PATH],
+    },
+  },
+  {
     name: "monday",
     title: "Monday",
     description:
@@ -1135,6 +1519,22 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         MONDAY_API_KEY: "your-monday-api-key",
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
+      },
+    },
+  },
+  {
+    name: "neither",
+    title: "Neither",
+    description:
+      "Project context your AI can query through MCP. Use selected notes and documents in Cursor or Claude Desktop, retrieve related context, and inspect the source evidence. Local stdio · Node 20+.",
+    icon: Icon.MemoryStick,
+    homepage: "https://www.neither.online/start/?product=dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@neitherai/mcp-server@latest"],
+      env: {
+        NEITHER_API_KEY: "YOUR_WORKSPACE_KEY",
+        NEITHER_API_BASE: "https://api.neither.online",
       },
     },
   },
@@ -1163,6 +1563,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "opus-growth",
+    title: "Opus Growth",
+    description:
+      "Manage ads from chat across Google, Meta, Microsoft, TikTok and LinkedIn: create and optimize campaigns, ad groups, creatives, audiences, bidding, keywords and extensions, plus reporting and SEO with Search Console, GA4, GTM, Google Business Profile and YouTube. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/opusgrowth/Opus-Growth-The-MCP-Connector-for-Ad-Platforms/main/assets/opus-growth-icon-orange-400.png",
+    homepage: "https://opus-growth.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.opus-growth.com/mcp"],
+    },
+  },
+  {
     name: "paperless-ngx",
     title: "Paperless-NGX",
     description:
@@ -1176,6 +1588,42 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "recordist",
+    title: "Recordist",
+    description:
+      "Search and read the meetings recorded by Recordist on your own computer: transcripts, action items and notes. Talks only to the app's loopback API or its local database; nothing leaves the machine.",
+    icon: "https://recordist.app/brand/mark.svg",
+    homepage: "https://github.com/recordist-app/gateway",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@recordist/gateway"],
+    },
+  },
+  {
+    name: "serato-dj",
+    title: "Serato DJ",
+    description:
+      "Search and audit your Serato DJ library: harmonic BPM and Camelot key search, crates, duplicate and missing-file audits, and new crates built with a preview before anything is written. Unofficial; local stdio server, macOS.",
+    icon: "https://raw.githubusercontent.com/Venut-Technologies/serato-dj-mcp/main/assets/icon.png",
+    homepage: "https://github.com/Venut-Technologies/serato-dj-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "serato-dj-mcp"],
+    },
+  },
+  {
+    name: "site-spec",
+    title: "Site Spec",
+    description:
+      "Website audit and repair. Tools: audit_site, fix_issue, compile_spec, list_checks. 40 checks across SEO, accessibility, privacy, structured data and AI searchability, each finding returned with the file and the fix. No API key required.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/site-spec",
+    configuration: {
+      command: "npx",
+      args: ["-y", "site-spec-mcp"],
     },
   },
   {
@@ -1200,6 +1648,30 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@gitdealflow/mcp-signal@latest"],
+    },
+  },
+  {
+    name: "vibe-prospecting",
+    title: "Vibe Prospecting",
+    description:
+      "Power your chat with live B2B data to create lead lists, research companies, enrich contacts, personalize outreach, and inspect business signals, technology stacks, events, and website changes.",
+    icon: "https://raw.githubusercontent.com/explorium-ai/vibeprospecting-plugin/main/assets/icon.png",
+    homepage: "https://vibeprospecting.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://vibeprospecting.explorium.ai/mcp"],
+    },
+  },
+  {
+    name: "empiriolabs",
+    title: "EmpirioLabs AI",
+    description:
+      "Run 180+ AI models, image, video and speech generation, web search and research with citations, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server with OAuth 2.1 sign-in through mcp-remote; an EmpirioLabs API key works as a bearer token too.",
+    icon: "https://empiriolabs.ai/images/icon-dark-512.png",
+    homepage: "https://docs.empiriolabs.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.empiriolabs.ai/mcp"],
     },
   },
 ];

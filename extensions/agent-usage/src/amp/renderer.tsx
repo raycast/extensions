@@ -1,11 +1,13 @@
 import { List } from "@raycast/api";
 
+import { toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
@@ -16,17 +18,17 @@ function formatPercent(value: number): string {
   return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
 }
 
-function formatAmpFreeSummary(ampFree: AmpFreeUsage): string {
-  const base = `${formatPercent(ampFree.percentRemaining)} remaining`;
+function formatAmpFreeSummary(ampFree: AmpFreeUsage, mode: PercentageDisplayMode): string {
+  const base = `${formatPercent(toDisplayPercent(ampFree.percentRemaining, mode))} ${mode}`;
   return ampFree.resetNote ? `${base} (${ampFree.resetNote})` : base;
 }
 
-function formatSubscriptionPools(subscription: AmpSubscriptionUsage): string {
-  return `Other ${formatPercent(subscription.otherPercentRemaining)}  Orb ${formatPercent(subscription.orbPercentRemaining)}`;
+function formatSubscriptionPools(subscription: AmpSubscriptionUsage, mode: PercentageDisplayMode): string {
+  return `Other ${formatPercent(toDisplayPercent(subscription.otherPercentRemaining, mode))}  Orb ${formatPercent(toDisplayPercent(subscription.orbPercentRemaining, mode))}`;
 }
 
-function formatSubscriptionSummary(subscription: AmpSubscriptionUsage): string {
-  const base = `${formatSubscriptionPools(subscription)} remaining`;
+function formatSubscriptionSummary(subscription: AmpSubscriptionUsage, mode: PercentageDisplayMode): string {
+  const base = `${formatSubscriptionPools(subscription, mode)} ${mode}`;
   return subscription.resetNote ? `${base} (${subscription.resetNote})` : base;
 }
 
@@ -35,15 +37,16 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
+  const mode = getPercentageDisplayMode();
   let text = `Amp Usage`;
   if (u.ampFree) {
-    text += `\n\nAmp Free: ${formatAmpFreeSummary(u.ampFree)}`;
-    text += `\n${generateAsciiBar(u.ampFree.percentRemaining)}`;
+    text += `\n\nAmp Free: ${formatAmpFreeSummary(u.ampFree, mode)}`;
+    text += `\n${generateAsciiBar(toDisplayPercent(u.ampFree.percentRemaining, mode))}`;
   }
   if (u.subscription) {
-    text += `\n\n${u.subscription.plan}: ${formatSubscriptionSummary(u.subscription)}`;
-    text += `\nOther ${generateAsciiBar(u.subscription.otherPercentRemaining)}`;
-    text += `\nOrb ${generateAsciiBar(u.subscription.orbPercentRemaining)}`;
+    text += `\n\n${u.subscription.plan}: ${formatSubscriptionSummary(u.subscription, mode)}`;
+    text += `\nOther ${generateAsciiBar(toDisplayPercent(u.subscription.otherPercentRemaining, mode))}`;
+    text += `\nOrb ${generateAsciiBar(toDisplayPercent(u.subscription.orbPercentRemaining, mode))}`;
   }
   text += `\n\nIndividual Credits: ${u.individualCredits.unit}${u.individualCredits.remaining.toFixed(2)}`;
 
@@ -54,13 +57,14 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
       {u.ampFree && (
         <List.Item.Detail.Metadata.Label
           title="Amp Free"
-          text={`${generateAsciiBar(u.ampFree.percentRemaining)} ${formatAmpFreeSummary(u.ampFree)}`}
+          text={`${generateAsciiBar(toDisplayPercent(u.ampFree.percentRemaining, mode))} ${formatAmpFreeSummary(u.ampFree, mode)}`}
         />
       )}
 
@@ -69,11 +73,11 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
           {u.ampFree && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title={`${u.subscription.plan} Other Usage`}
-            text={`${generateAsciiBar(u.subscription.otherPercentRemaining)} ${formatPercent(u.subscription.otherPercentRemaining)} remaining`}
+            text={`${generateAsciiBar(toDisplayPercent(u.subscription.otherPercentRemaining, mode))} ${formatPercent(toDisplayPercent(u.subscription.otherPercentRemaining, mode))} ${mode}`}
           />
           <List.Item.Detail.Metadata.Label
             title={`${u.subscription.plan} Orb`}
-            text={`${generateAsciiBar(u.subscription.orbPercentRemaining)} ${formatPercent(u.subscription.orbPercentRemaining)} remaining`}
+            text={`${generateAsciiBar(toDisplayPercent(u.subscription.orbPercentRemaining, mode))} ${formatPercent(toDisplayPercent(u.subscription.orbPercentRemaining, mode))} ${mode}`}
           />
           {u.subscription.resetNote && (
             <List.Item.Detail.Metadata.Label title="Renews" text={u.subscription.resetNote} />
@@ -110,12 +114,13 @@ export function getAmpAccessory(usage: AmpUsage | null, error: AmpError | null, 
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
   const tooltipParts: string[] = [];
   if (usage.ampFree) {
-    tooltipParts.push(`Amp Free: ${formatAmpFreeSummary(usage.ampFree)}`);
+    tooltipParts.push(`Amp Free: ${formatAmpFreeSummary(usage.ampFree, mode)}`);
   }
   if (usage.subscription) {
-    tooltipParts.push(`${usage.subscription.plan}: ${formatSubscriptionSummary(usage.subscription)}`);
+    tooltipParts.push(`${usage.subscription.plan}: ${formatSubscriptionSummary(usage.subscription, mode)}`);
   }
   tooltipParts.push(`Credits: ${usage.individualCredits.unit}${usage.individualCredits.remaining.toFixed(2)}`);
 
@@ -126,7 +131,7 @@ export function getAmpAccessory(usage: AmpUsage | null, error: AmpError | null, 
 
   return {
     icon: generatePieIcon(percent),
-    text: formatPercent(percent),
+    text: formatPercent(toDisplayPercent(percent, mode)),
     tooltip: tooltipParts.join(" | "),
   };
 }

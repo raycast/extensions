@@ -38,9 +38,15 @@ still the current one.
 
 ## Result states
 
-**Resource status** — the reported outcome of a single auxiliary lookup, which is
-three-valued: the thing was found, the server answered that it does not exist, or the
-check could not be completed.
+**Resource status** — the reported outcome of a check, which is three-valued: the thing
+was found, the server answered that it does not exist, or the check could not be
+completed.
+
+It applies at whatever granularity the reader sees. A lookup built from several
+independent probes carries a status per probe as well as one for itself, because the
+probes disagree: answering for one record type says nothing about a second that never
+came back. A single verdict over independent probes hides every part that failed behind
+the parts that succeeded.
 
 The third state is the load-bearing one. *Absent* is an answer and *unavailable* is a
 reason to retry, and collapsing them into a boolean forces every failure to render as

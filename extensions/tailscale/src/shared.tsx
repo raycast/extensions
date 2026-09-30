@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { execSync } from "node:child_process";
+import { execSync, execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
 
@@ -12,6 +13,15 @@ export type Location = {
   Longitude: number;
   Priority: number;
 };
+
+export interface Service {
+  name: string;
+  addresses: string[];
+  hostname: string;
+  ports: string[];
+  displayName?: string;
+  type?: string;
+}
 
 export interface Device {
   self: boolean;
@@ -178,6 +188,29 @@ export function getStatus(peers = true) {
   return data;
 }
 
+type ServiceResponse = {
+  Name: string;
+  Addrs: string[];
+  Ports: string[];
+  Hostname: string;
+  DisplayName?: string;
+  Type?: string;
+};
+
+export function getServices(): Service[] {
+  const resp = tailscale("service list --json");
+  const services = JSON.parse(resp) as ServiceResponse[];
+
+  return services.map((service) => ({
+    name: service.Name.replace(/^svc:/, ""),
+    addresses: service.Addrs,
+    hostname: service.Hostname,
+    ports: service.Ports,
+    displayName: service.DisplayName,
+    type: service.Type?.toLowerCase(),
+  }));
+}
+
 export function getNetcheck() {
   const resp = tailscale("netcheck --format json");
   return JSON.parse(resp);
@@ -271,6 +304,40 @@ const execMaxBuffersBytes: number =
   prefs.tailscaleExecMaxBuffersMB && (prefs.tailscaleExecMaxBuffersMB as number)
     ? prefs.tailscaleExecMaxBuffersMB * 1024 * 1024
     : 10 * 1024 * 1024; // 10 megabytes
+
+const execFileAsync = promisify(execFile);
+
+const TAILSCALE_ASYNC_TIMEOUT_MS = 15_000;
+
+/**
+ * tailscaleAsync runs a command against the Tailscale CLI asynchronously,
+ * keeping stdout and stderr separate, with a finite timeout and the
+ * configurable max buffer size. Non-zero exits reject with the child process
+ * error (with `.stdout` and `.stderr` attached), so callers can distinguish
+ * CLI failures from successful runs.
+ */
+export async function tailscaleAsync(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  let result;
+  try {
+    result = await execFileAsync(tailscalePath, args, {
+      maxBuffer: execMaxBuffersBytes,
+      timeout: TAILSCALE_ASYNC_TIMEOUT_MS,
+      env: { ...process.env, TAILSCALE_BE_CLI: "1" },
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "ENOENT" || err.message.includes("No such file or directory")) {
+        throw new InvalidPathError();
+      } else if ((err as { stderr?: string }).stderr?.includes("is Tailscale running?")) {
+        throw new NotRunningError();
+      }
+    }
+    console.log(`throwing error: ${err}`);
+    throw err;
+  }
+  return { stdout: result.stdout, stderr: result.stderr };
+}
 
 /**
  * tailscale runs a command against the Tailscale CLI.

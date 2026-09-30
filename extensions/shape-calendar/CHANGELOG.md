@@ -1,5 +1,14 @@
 # Shape Calendar Changelog
 
+## [Sign In with Shape, Training Status] - 2026-09-21
+
+- Sign in with your Shape Calendar account instead of pasting an API token
+- New Training Status command with readiness, training load, and health metrics
+- Ask the AI about health metrics, readiness and training load, and recorded workout details (laps, zones, heart rate)
+- Update a single activity via AI
+- Added Tennis, Skiing, and Surf sport types
+- Search Activities opens on today's or the next planned workout
+
 ## [Pair and Unpair Activities] - 2026-05-10
 
 - Pair completed activities with their planned counterparts via AI

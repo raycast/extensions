@@ -1,5 +1,9 @@
 # Telegram Changelog
 
+## [Add Unit Tests] - 2026-09-16
+
+- Add a `vitest` suite covering message content parsing, sender attribution, media type detection, detail-pane markdown, and chat and date grouping, runnable with `npm test`
+
 ## [Support Rich Messages from Bots] - 2026-09-09
 
 - Show messages from bots that use rich text. Their content is carried in a field added in Telegram API layer 228, which the extension did not read, so these messages appeared as "Unknown" or were dropped from the list entirely

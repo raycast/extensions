@@ -1,5 +1,11 @@
 # System Information Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Add support for Windows platform
+- Show installed memory and physical disk info on Windows
+- Add Windows build number and kernel version
+
 ## [AI Tools] - 2025-04-29
 - Interact and perform the same functionality as the extension but simply with AI tools.
 - Reordered storage row to be at the top, so user wont have to scroll down to see it.

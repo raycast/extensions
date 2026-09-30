@@ -225,7 +225,7 @@ function Command() {
             {uniqueItems.map((block, index) => (
               <Grid.Item
                 key={block.id != null ? String(block.id) : `block-${index}`}
-                content={getIconSource(block)}
+                content={getIconSource(block, true)}
                 title={block.title?.trim() || block.generated_title || "Untitled"}
                 subtitle={[block.class, block.user?.full_name].filter(Boolean).join(" · ")}
                 actions={<BlockItemActions block={block} mode={mode} toggle={toggle} />}

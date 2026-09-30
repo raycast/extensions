@@ -1,8 +1,15 @@
 # Zed Recent Projects Changelog
 
+## [Open in New Window Preference] - 2026-09-25
+
+- Add an "Open in New Window" preference to the "Open with Zed" and "Search Recent Projects" commands that opens items in a new Zed window.
+- Change the "Move Up" and "Move Down" shortcuts for pinned entries to `⌘⌥↑` / `⌘⌥↓` to match Raycast 2.0.
+- Change the "Pin Entry" and "Unpin Entry" shortcut to `⌘.` to match Raycast 2.0.
+- Add Windows shortcuts for pinning, moving and removing entries, following Raycast's standard shortcuts.
+
 ## [Fix Missing PATH Entries from ~/.zshrc] - 2026-09-10
 
-- Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login *and* interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
+- Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login _and_ interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
 
 ## [Fix Project Launch in Raycast 2] - 2026-08-15
 

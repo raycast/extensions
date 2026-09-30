@@ -23,5 +23,6 @@ export function useMembers() {
   return {
     nameFor: (actorId: string) => data?.[actorId]?.name,
     avatarFor: (actorId: string) => data?.[actorId]?.avatar,
+    all: Object.entries(data ?? {}).map(([id, m]) => ({ id, name: m.name })),
   };
 }

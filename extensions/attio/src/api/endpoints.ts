@@ -53,6 +53,8 @@ export const searchRecords = (query: string, objects: string[]) =>
   });
 export const getRecord = (object: string, recordId: string) =>
   request<Envelope<AttioRecord>>(`/v2/objects/${object}/records/${recordId}`);
+export const createRecord = (object: string, body: RecordUpdateBody) =>
+  request<Envelope<AttioRecord>>(`/v2/objects/${object}/records`, { method: "POST", body: JSON.stringify(body) });
 /** PUT, not PATCH: PATCH appends to multiselects; PUT overwrites (types.ts). */
 export const updateRecord = (object: string, recordId: string, body: RecordUpdateBody) =>
   request<Envelope<AttioRecord>>(`/v2/objects/${object}/records/${recordId}`, {
