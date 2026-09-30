@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { access, lstat, mkdir, readdir } from "node:fs/promises";
+import { access, lstat, mkdir, readdir, rmdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { withDirectoryLock } from "./directory-lock";

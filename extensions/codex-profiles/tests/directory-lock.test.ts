@@ -68,7 +68,10 @@ test("does not expire an old lock owned by a live process", async () => {
 
   try {
     await mkdir(lockPath);
-    await writeFile(marker, String(process.pid));
+    await writeFile(
+      marker,
+      JSON.stringify({ pid: process.pid, startedAt: Date.now() - process.uptime() * 1_000 }),
+    );
     const old = new Date(Date.now() - 120_000);
     await utimes(marker, old, old);
 
@@ -76,7 +79,25 @@ test("does not expire an old lock owned by a live process", async () => {
       withDirectoryLock(lockPath, async () => undefined, { waitTimeoutMs: 20, retryDelayMs: 5 }),
       /Another profile operation is still in progress/,
     );
-    await assert.doesNotReject(() => writeFile(marker, String(process.pid)));
+    await assert.doesNotReject(() => writeFile(marker, JSON.stringify({ pid: process.pid })));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("reclaims a lock when its PID belongs to a later, unrelated process", async () => {
+  const root = await mkdtemp(join(tmpdir(), "codex-profile-lock-"));
+  const lockPath = join(root, "lock");
+  const marker = join(lockPath, `owner-${process.pid}-00000000-0000-0000-0000-000000000000`);
+
+  try {
+    await mkdir(lockPath);
+    await writeFile(marker, JSON.stringify({ pid: process.pid, startedAt: Date.now() - 60_000 }));
+    let ran = false;
+    await withDirectoryLock(lockPath, async () => {
+      ran = true;
+    });
+    assert.equal(ran, true);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

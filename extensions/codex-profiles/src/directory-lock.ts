@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readdir, rename, rmdir, stat, unlink, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, readFile, readdir, rename, rmdir, stat, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { promisify } from "node:util";
 
 const DEFAULT_WAIT_TIMEOUT_MS = 15_000;
 const EMPTY_LOCK_GRACE_MS = 30_000;
+const PROCESS_START_TOLERANCE_MS = 2_000;
+const execFileAsync = promisify(execFile);
 
 interface DirectoryLockOptions {
   waitTimeoutMs?: number;
@@ -11,12 +15,34 @@ interface DirectoryLockOptions {
   timeoutMessage?: string;
 }
 
-function processIsRunning(pid: number): boolean {
+async function processOwnsLock(pid: number, ownerFilePath: string): Promise<boolean> {
   try {
     process.kill(pid, 0);
-    return true;
   } catch (error) {
     return (error as NodeJS.ErrnoException).code !== "ESRCH";
+  }
+
+  let recordedStartTime: number | undefined;
+  try {
+    const marker = JSON.parse(await readFile(ownerFilePath, "utf8")) as { pid?: unknown; startedAt?: unknown };
+    if (marker.pid === pid && typeof marker.startedAt === "number" && Number.isFinite(marker.startedAt)) {
+      recordedStartTime = marker.startedAt;
+    }
+  } catch {
+    // Older lock markers contain only the PID. Keep them conservatively until
+    // their owner exits; new markers include a process start-time fingerprint.
+    return true;
+  }
+  if (recordedStartTime === undefined) return true;
+
+  try {
+    const { stdout } = await execFileAsync("/bin/ps", ["-p", String(pid), "-o", "lstart="]);
+    const runningStartTime = Date.parse(stdout.trim());
+    if (!Number.isFinite(runningStartTime)) return true;
+    return Math.abs(runningStartTime - recordedStartTime) <= PROCESS_START_TOLERANCE_MS;
+  } catch {
+    // If identity cannot be verified, do not risk stealing a live lock.
+    return true;
   }
 }
 
@@ -26,7 +52,7 @@ async function removeAbandonedLock(lockPath: string): Promise<boolean> {
 
   if (ownerFile) {
     const match = ownerFile.match(/^owner-(\d+)-/);
-    if (!match || processIsRunning(Number(match[1]))) return false;
+    if (!match || (await processOwnsLock(Number(match[1]), join(lockPath, ownerFile)))) return false;
 
     // Removing the exact observed marker, then only an empty directory, means
     // a late owner can never remove a lock subsequently acquired by someone else.
@@ -71,7 +97,11 @@ export async function withDirectoryLock<T>(
       // a just-created lock for an abandoned, empty one.
       await mkdir(pendingPath, { mode: 0o700 });
       try {
-        await writeFile(join(pendingPath, ownerName), String(process.pid), { flag: "wx", mode: 0o600 });
+        await writeFile(
+          join(pendingPath, ownerName),
+          JSON.stringify({ pid: process.pid, startedAt: Date.now() - process.uptime() * 1_000 }),
+          { flag: "wx", mode: 0o600 },
+        );
         await rename(pendingPath, lockPath);
       } catch (error) {
         await unlink(join(pendingPath, ownerName)).catch(() => undefined);
