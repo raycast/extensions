@@ -59,7 +59,7 @@ import {
 } from "./components/calendar-fields";
 import { ScheduleContext } from "./lib/launch-context";
 import { type ParsedCapture, parseCapture } from "./lib/nl-parse";
-import { isEventKind, MAX_DURATION_MINUTES, WEB_BASE, type EventKind } from "./lib/wire";
+import { isEventKind, MAX_CAPTURE_TEXT_LENGTH, MAX_DURATION_MINUTES, WEB_BASE, type EventKind } from "./lib/wire";
 
 interface FormValues extends CalendarFormValues {
   name: string;
@@ -356,6 +356,15 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     const { timing } = prepared;
     const nameChanged = values.name.trim() !== captureSeed.current.name;
     const text = captureText(nameChanged ? values.name : captureSeed.current.text || values.name) || "(untitled)";
+    // A cut text loses the later ideas, so refuse it and let the user shorten it.
+    if (text.length > MAX_CAPTURE_TEXT_LENGTH) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "The text is too long",
+        message: `The Inbox takes ${MAX_CAPTURE_TEXT_LENGTH} characters or less. This text has ${text.length}. Select less text, or edit the name.`,
+      });
+      return;
+    }
     // A length the user gave: a typed or AI duration, a chosen end time, or the
     // launcher's. A start alone gets the 30-minute default; the AI estimates it instead.
     // A changed name drops the parsed text, so then the parsed end and length are sent.

@@ -12,8 +12,8 @@ it("keeps every line of the text, trimmed, without blank lines", () => {
   expect(captureText(" \n ")).toBe("");
 });
 
-it("clamps the text to the server limit", () => {
-  expect(captureText("x".repeat(2500))).toHaveLength(2000);
+it("keeps a long text whole, so the caller can refuse it", () => {
+  expect(captureText("x".repeat(2500))).toHaveLength(2500);
 });
 
 it("builds the op with only the fields that have a value", () => {

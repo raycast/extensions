@@ -1,18 +1,16 @@
 import type { CaptureTextOp } from "./api";
 import type { BatchReceipt } from "./envelope";
-import { MAX_CAPTURE_TEXT_LENGTH } from "./wire";
 
 // Pure helpers for the AI Inbox capture (`capture_text`). They do not load the
 // fetch client, so a test can run them without @raycast/api.
 
-/** Trim each line, drop the blank lines, and clamp to the server limit. */
+/** Trim each line and drop the blank lines. The caller checks the server limit. */
 export function captureText(raw: string): string {
   return raw
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
-    .join("\n")
-    .slice(0, MAX_CAPTURE_TEXT_LENGTH);
+    .join("\n");
 }
 
 /** The op with only the fields that have a value. An unset field stays with the AI. */
