@@ -1,5 +1,9 @@
 # Val Town Changelog
 
+## [Fix AI tools] - {PR_MERGE_DATE}
+
+- AI tools, blobs and SQLite work again after Val Town changed how it returns their results
+
 ## [Windows support] - 2026-08-23
 
 - Runs on Raycast for Windows as well as macOS
