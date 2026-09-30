@@ -2,13 +2,14 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { startActivity } from "../activities/api";
 import { ActivityStart } from "../activities/components/ActivityStart";
 import { Task } from "../tasks/types";
+import { localDate } from "../activities/utils";
 import { finishMenuBarForm } from "../../utils/refresh";
 import { removeStatus, setStatus, StatusType } from "../../utils/storage";
 
 // Actions for a task, opened by a right-click on a task row in the menu bar.
 export const TaskActions = ({ task, isFavorite }: { task: Task; isFavorite: boolean }) => {
   const start = async () => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = localDate();
     const success = await startActivity({
       date: today,
       description: task.name,

@@ -2,7 +2,7 @@ import { environment, getPreferenceValues, Icon, launchCommand, LaunchType, Menu
 import { useState, useEffect } from "react";
 import { startActivity, toggleActivity } from "./commands/activities/api";
 import { Activity, StartActivityRequest } from "./commands/activities/types";
-import { timeDelta, secondsParser, currentActivity } from "./commands/activities/utils";
+import { timeDelta, secondsParser, currentActivity, localDate } from "./commands/activities/utils";
 import { Project } from "./commands/projects/types";
 import { Customer } from "./commands/customers/types";
 import { Task } from "./commands/tasks/types";
@@ -141,7 +141,7 @@ export default function Command() {
           return;
         }
         const values: StartActivityRequest = {
-          date: new Date().toISOString().split("T")[0],
+          date: localDate(),
           description: task.name,
           hours: "",
           projectID: project.id,

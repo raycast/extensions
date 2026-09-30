@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { api } from "../../utils/api";
+import { localDate } from "./utils";
 import { z } from "zod";
 import { Activity, EditActivityRequest, StartActivityRequest } from "./types";
 import { Project } from "../projects/types";
@@ -53,9 +54,11 @@ export const fetchActivities = async (
   lookbackDays: number,
   userID?: number,
 ): Promise<Activity[]> => {
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDate();
 
-  const from_date = new Date(new Date().getTime() - lookbackDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const from = new Date();
+  from.setDate(from.getDate() - lookbackDays);
+  const from_date = localDate(from);
 
   const { data } = await api.get(`/activities`, {
     params: {

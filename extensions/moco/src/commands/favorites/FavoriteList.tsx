@@ -9,6 +9,7 @@ import { ActivityStart } from "../activities/components/ActivityStart";
 import { getFavoriteOrder, sortByFavoriteOrder, StatusType, storeFavoriteOrder } from "../../utils/storage";
 import { useStatuses } from "../../utils/useStatuses";
 import { finishMenuBarForm } from "../../utils/refresh";
+import { localDate } from "../activities/utils";
 
 type UndoStep = { label: string; order: number[]; removedTaskID?: number };
 
@@ -67,7 +68,7 @@ export const FavoriteList = () => {
 
   const start = async (project: Project, task: Task) => {
     const success = await startActivity({
-      date: new Date().toISOString().split("T")[0],
+      date: localDate(),
       description: task.name,
       hours: "",
       projectID: project.id,

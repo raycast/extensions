@@ -53,6 +53,8 @@ views (lists, forms) → useCachedPromise → API, cached between runs
 ```
 
 - Always fetch activities with the current user's ID. Without `user_id`, MOCO returns the activities of all users.
+- MOCO dates are local calendar dates: use `localDate()` / `parseLocalDate()` from `commands/activities/utils.ts`,
+  never `toISOString().split("T")[0]` (UTC date: east of UTC the previous day shortly after midnight).
 - `/projects/assigned` already contains each project's tasks. No extra request per project.
 
 ## LocalStorage keys

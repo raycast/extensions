@@ -40,3 +40,15 @@ export function parseHours(time: string): number {
   const trimmed = time.trim();
   return trimmed.includes(":") ? toDecimalTime(trimmed) : Number(trimmed.replace(",", "."));
 }
+
+// MOCO works with calendar dates. toISOString() would give the UTC date, which east of UTC is the previous day
+// shortly after midnight (in Germany until 01:00 in winter, 02:00 in summer). So format and parse in local time.
+export function localDate(date: Date = new Date()): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function parseLocalDate(date: string): Date {
+  return new Date(`${date}T00:00:00`);
+}

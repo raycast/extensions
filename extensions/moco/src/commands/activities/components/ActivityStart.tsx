@@ -4,7 +4,7 @@ import { Task } from "../../tasks/types";
 import { startActivity } from "../api";
 import { fetchProjects } from "../../projects/api";
 import { Project } from "../../projects/types";
-import { parseHours, validateTime } from "../utils";
+import { localDate, parseHours, validateTime } from "../utils";
 
 interface ActivityStartProps {
   task?: Task;
@@ -41,7 +41,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
       const success = await startActivity({
         description: values.description,
         hours: values.hours.trim() === "" ? "" : parseHours(values.hours),
-        date: (values.date ?? new Date()).toISOString().split("T")[0],
+        date: localDate(values.date ?? new Date()),
         projectID: task ? task.projectID : values.projectDropdown ? Number(values.projectDropdown) : projectID,
         taskID: task ? task.id : Number(values.taskDropdown),
       });
