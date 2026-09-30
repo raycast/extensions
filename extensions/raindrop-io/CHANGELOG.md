@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Helium Support] - {PR_MERGE_DATE}
+## [Helium Support] - 2026-09-30
 
 - Add AppleScript fallback support for Helium browser in the Save Browser Tab command
 
