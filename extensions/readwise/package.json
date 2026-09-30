@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readwise",
   "title": "Readwise",
-  "description": "Search and browse your Readwise Library.",
+  "description": "Search and browse your Readwise library, and ask AI about your saved highlights and notes.",
   "icon": "icon.png",
   "author": "natterstefan",
   "categories": [
