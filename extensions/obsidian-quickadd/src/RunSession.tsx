@@ -91,7 +91,7 @@ export default function RunSession({ cli, vaultPath, vaultName, choice, relaunch
     unmounted.current = false;
     const stopped = () => !active || cancelled.current;
     (async () => {
-      const ready = await ensureVaultReady(choice.id, realVaultDeps(cli, vaultName, vaultPath));
+      const ready = await ensureVaultReady(choice.id, vaultPath, realVaultDeps(cli, vaultName));
       if (stopped()) return;
       if (!ready.ok) return fail(ready.reason, ready.message);
       if (ready.opened && !relaunched) {

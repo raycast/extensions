@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { createDeeplink, useFrecencySorting } from "@raycast/utils";
 import { basename } from "path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ChoiceForm from "./ChoiceForm";
 import { findCli, readRegistry } from "./cli";
 import {
@@ -82,6 +82,8 @@ function Choices({
   relaunched?: boolean;
 }) {
   const [checks, setChecks] = useState(0);
+  // Refs survive Raycast dev mode's double mount, so a quicklink never runs its choice twice.
+  const launched = useRef(false);
   const mode = useMemo(() => detectMode(findCli(cliPath || undefined), readRegistry()), [cliPath, checks]);
   const loaded = useMemo((): { choices: Choice[]; error?: string } => {
     if (isAmbiguousVault(vaultPath, registeredVaultPaths())) {
@@ -101,7 +103,8 @@ function Choices({
   const direct = choiceId ? loaded.choices.find((c) => c.id === choiceId) : undefined;
 
   useEffect(() => {
-    if (!choiceId || loaded.error) return;
+    if (!choiceId || loaded.error || launched.current) return;
+    launched.current = true;
     if (!direct) showToast({ style: Toast.Style.Failure, title: "Choice no longer exists" });
     else if (mode.mode === "basic" && direct.fields.length === 0) runChoice(name, direct, []);
   }, []);
