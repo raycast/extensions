@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Open Website] - 2026-09-30
+
+- Add `Open Website` (Cmd+O) to Applications and Compose stacks in `Services`, `Deploy Service` and `Deployments`, so a service's site opens without going through its domains first. With one domain it opens right away, with several you pick one, and disabled domains are skipped.
+
 ## [Project Tags] - 2026-09-29
 
 - Show each project's tags in `Projects`, in the tag's own color. Typing a tag name in the search bar finds the projects that carry it.
