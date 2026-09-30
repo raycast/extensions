@@ -35,9 +35,10 @@ function cookiesFromBrowser(): string | undefined {
 }
 
 /**
- * The live page, or — with `fallback`, when it refuses (a bot wall, a login,
- * a dead link) or has no readable text — the Internet Archive's copy. A
- * refused local address never falls back: it isn't a LinkLoadError.
+ * The live page, or — with `fallback`, when it refuses (a bot wall, a dead
+ * link) or has no readable text — the Internet Archive's copy. A login, a
+ * paywall or a legal block never falls back (page.ts offers no archive fix
+ * for them), and neither does a refused local address: it isn't a LinkLoadError.
  */
 async function readPage(url: string, signal: AbortSignal | undefined, fallback: boolean): Promise<LinkContext> {
   let live: LinkContext;
