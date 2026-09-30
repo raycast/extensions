@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   cancelScheduledPost,
   getProfiles,
-  getScheduledPosts,
+  getAllScheduledPosts,
   parseApiDate,
   platformName,
   ScheduledPost,
@@ -18,7 +18,7 @@ export default function Command() {
   const [profile, setProfile] = useState<string>("");
   const { data: profilesData } = useCachedPromise(getProfiles, []);
   const { data, isLoading, mutate, revalidate } = useCachedPromise(
-    (profileUsername: string) => getScheduledPosts({ profile: profileUsername || undefined }),
+    (profileUsername: string) => getAllScheduledPosts({ profile: profileUsername || undefined }),
     [profile],
     {
       onError: (error) => {

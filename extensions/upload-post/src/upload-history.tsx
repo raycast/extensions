@@ -18,8 +18,11 @@ export default function Command() {
         status: status === "all" ? undefined : status,
       });
       const items = response.history;
-      const total = response.total ?? 0;
-      return { data: items, hasMore: (options.page + 1) * PAGE_SIZE < total && items.length === PAGE_SIZE };
+      // A full page means there may be more; `total` (when present) lets us stop exactly on the last page.
+      const fullPage = items.length === PAGE_SIZE;
+      const hasMore =
+        typeof response.total === "number" ? fullPage && (options.page + 1) * PAGE_SIZE < response.total : fullPage;
+      return { data: items, hasMore };
     },
     [filter],
     {

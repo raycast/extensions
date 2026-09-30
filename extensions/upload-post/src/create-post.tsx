@@ -153,15 +153,18 @@ export default function Command() {
   const type = (values.type || "video") as PostType;
   const mediaSource = (values.mediaSource || "file") as MediaSource;
   const selectedProfile = profiles.find((p) => p.username === values.profile);
-  const available = useMemo(
-    () =>
-      selectedProfile
-        ? connectedAccounts(selectedProfile).filter(
-            (a) => !UNAVAILABLE_PLATFORMS.includes(a.platform) && PLATFORMS_BY_TYPE[type].includes(a.platform),
-          )
-        : [],
-    [selectedProfile, type],
-  );
+  const { available, needsReconnect } = useMemo(() => {
+    const accounts = selectedProfile
+      ? connectedAccounts(selectedProfile).filter(
+          (a) => !UNAVAILABLE_PLATFORMS.includes(a.platform) && PLATFORMS_BY_TYPE[type].includes(a.platform),
+        )
+      : [];
+    // Accounts that must be reconnected can't publish, so they are listed below the picker instead of in it.
+    return {
+      available: accounts.filter((a) => !a.reauthRequired),
+      needsReconnect: accounts.filter((a) => a.reauthRequired),
+    };
+  }, [selectedProfile, type]);
 
   // Pick the first profile once they load.
   useEffect(() => {
@@ -234,13 +237,17 @@ export default function Command() {
           <Form.TagPicker.Item
             key={a.platform}
             value={a.platform}
-            title={`${platformName(a.platform)}${accountLabel(a.account) ? ` (${accountLabel(a.account)})` : ""}${
-              a.reauthRequired ? " – reconnect needed" : ""
-            }`}
+            title={`${platformName(a.platform)}${accountLabel(a.account) ? ` (${accountLabel(a.account)})` : ""}`}
             icon={a.account?.social_images || Icon.Globe}
           />
         ))}
       </Form.TagPicker>
+      {needsReconnect.length > 0 && (
+        <Form.Description
+          title="Reconnect Needed"
+          text={`${needsReconnect.map((a) => platformName(a.platform)).join(", ")} must be reconnected before publishing: ${urls.manageProfiles}`}
+        />
+      )}
       {noAccounts && (
         <Form.Description
           title=""

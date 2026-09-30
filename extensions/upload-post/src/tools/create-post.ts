@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { createPost, parseList, platformName } from "../api";
+import { createPost, expandHome, isUrl, parseList, platformName, validatePost } from "../api";
 
 type Input = {
   /**
@@ -61,7 +61,14 @@ export default async function tool(input: Input) {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const media = parseList(input.media, /\n/);
+  try {
+    validatePost({ ...input, platforms: parseList(input.platforms), media: parseList(input.media, /\n/) });
+  } catch {
+    // Invalid posts are rejected by the tool itself before anything is sent, so there is nothing to confirm:
+    // the error goes back to the AI, which can fix the input and ask again.
+    return undefined;
+  }
+  const media = parseList(input.media, /\n/).map((m) => (isUrl(m) ? m : expandHome(m)));
   const when = input.addToQueue
     ? "Next queue slot"
     : input.scheduledDate

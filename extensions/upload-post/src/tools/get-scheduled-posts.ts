@@ -1,4 +1,4 @@
-import { getScheduledPosts, parseApiDate } from "../api";
+import { getAllScheduledPosts, parseApiDate } from "../api";
 
 type Input = {
   /**
@@ -16,7 +16,7 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
-  const { scheduled_posts, total } = await getScheduledPosts({ ...input, limit: 100 });
+  const { scheduled_posts, total } = await getAllScheduledPosts(input);
   return {
     total: total ?? scheduled_posts.length,
     scheduled_posts: scheduled_posts.map((post) => ({

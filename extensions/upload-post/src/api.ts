@@ -1,7 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { openAsBlob } from "node:fs";
 import { access } from "node:fs/promises";
-import { basename } from "node:path";
+import { homedir } from "node:os";
+import { basename, join } from "node:path";
 
 export const API_BASE_URL = "https://api.upload-post.com/api";
 export const APP_URL = "https://app.upload-post.com";
@@ -245,6 +246,10 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   if (!response.ok) {
     throw new UploadPostError(errorMessage(body, response.status), response.status);
   }
+  // Some endpoints report a rejection as HTTP 200 with `success: false`.
+  if (body && typeof body === "object" && (body as { success?: unknown }).success === false) {
+    throw new UploadPostError(errorMessage(body, response.status), response.status);
+  }
   return body as T;
 }
 
@@ -302,8 +307,28 @@ export async function getScheduledPosts(
     })}`,
   );
   // Older API versions returned a bare array.
+  // (Without `limit` the API returns every matching job; see getAllScheduledPosts for bounded pages.)
   if (Array.isArray(data)) return { scheduled_posts: data, total: data.length };
   return { ...data, scheduled_posts: data.scheduled_posts ?? [] };
+}
+
+const SCHEDULE_PAGE_SIZE = 100;
+
+/** Every scheduled job, fetched in pages of 100 with `offset` so long schedules are never cut short. */
+export async function getAllScheduledPosts(
+  params: { profile?: string; from?: string; to?: string } = {},
+): Promise<ScheduledPostsResponse> {
+  const all: ScheduledPost[] = [];
+  for (let offset = 0; ; offset += SCHEDULE_PAGE_SIZE) {
+    const page = await getScheduledPosts({ ...params, limit: SCHEDULE_PAGE_SIZE, offset });
+    all.push(...page.scheduled_posts);
+    const total = page.total;
+    const done =
+      page.scheduled_posts.length < SCHEDULE_PAGE_SIZE ||
+      (typeof total === "number" && all.length >= total) ||
+      page.limit === null; // the server ignored `limit` and already returned everything
+    if (done) return { scheduled_posts: all, total: total ?? all.length, offset: 0 };
+  }
 }
 
 export async function cancelScheduledPost(
@@ -381,12 +406,20 @@ export function isUrl(value: string): boolean {
   return /^https?:\/\//i.test(value.trim());
 }
 
+/** Expands a leading `~` to the home directory, which Node does not do on its own. */
+export function expandHome(path: string): string {
+  if (path === "~") return homedir();
+  if (path.startsWith("~/")) return join(homedir(), path.slice(2));
+  return path;
+}
+
 async function appendMedia(form: FormData, field: string, item: string) {
-  const value = item.trim();
+  let value = item.trim();
   if (isUrl(value)) {
     form.append(field, value);
     return;
   }
+  value = expandHome(value);
   try {
     await access(value);
   } catch {
@@ -401,9 +434,19 @@ const ENDPOINT_BY_TYPE: Record<PostType, string> = {
   video: "/upload",
 };
 
-export async function createPost(input: CreatePostInput): Promise<UploadResponse> {
-  const platforms = input.platforms.filter((p) => !UNAVAILABLE_PLATFORMS.includes(p));
+/**
+ * Checks a post before anything is sent. Throws instead of silently dropping or fixing a platform, so what the
+ * user confirmed is exactly what gets published. Shared by the form and the AI tool.
+ */
+export function validatePost(input: CreatePostInput): { platforms: string[]; media: string[] } {
+  const platforms = Array.from(new Set(input.platforms.map((p) => p.trim().toLowerCase()).filter(Boolean)));
   if (platforms.length === 0) throw new UploadPostError("Select at least one platform");
+  const unavailable = platforms.filter((p) => UNAVAILABLE_PLATFORMS.includes(p));
+  if (unavailable.length > 0) {
+    throw new UploadPostError(
+      `${unavailable.map(platformName).join(", ")} posting is currently unavailable. Remove it and try again.`,
+    );
+  }
   const unsupported = platforms.filter((p) => !PLATFORMS_BY_TYPE[input.type].includes(p));
   if (unsupported.length > 0) {
     throw new UploadPostError(
@@ -416,7 +459,13 @@ export async function createPost(input: CreatePostInput): Promise<UploadResponse
   const media = (input.media ?? []).map((m) => m.trim()).filter(Boolean);
   if (input.type === "video" && media.length !== 1) throw new UploadPostError("A video post needs exactly one video");
   if (input.type === "photo" && media.length === 0) throw new UploadPostError("A photo post needs at least one photo");
-  if (input.type === "text" && !input.title.trim()) throw new UploadPostError("A text post needs some text");
+  if (input.type === "text" && !(input.title ?? "").trim()) throw new UploadPostError("A text post needs some text");
+  if (platforms.includes("youtube") && !(input.title ?? "").trim()) throw new UploadPostError("YouTube needs a title");
+  return { platforms, media };
+}
+
+export async function createPost(input: CreatePostInput): Promise<UploadResponse> {
+  const { platforms, media } = validatePost(input);
 
   const form = new FormData();
   form.append("user", input.profile);
