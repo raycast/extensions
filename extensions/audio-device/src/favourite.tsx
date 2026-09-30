@@ -1,14 +1,14 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { getOutputDevices } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
-import { isSameDeviceName } from "./utils";
+import { findDeviceByName } from "./utils";
 
 export default async () => {
   const preferences = getPreferenceValues();
   if (preferences.favourite != null && preferences.favourite !== "") {
     try {
       const devices = await getOutputDevices();
-      const device = devices.find((d) => isSameDeviceName(d.name, preferences.favourite));
+      const device = findDeviceByName(devices, preferences.favourite);
       if (!device) {
         await showToast({
           style: Toast.Style.Failure,
