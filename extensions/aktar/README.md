@@ -20,10 +20,17 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 
 - **Upload Clipboard**: uploads the copied file or screenshot and copies its link.
 - **Upload Selected Files**: uploads the files selected in Finder to your default destination.
-- **Upload File**: pick files, a destination, and an optional folder.
-- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, and delete uploads.
+- **Upload File**: pick files, a destination, an optional folder, and when to delete them.
+- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, and delete uploads. Uploads set to auto-delete show the day they go away.
 - **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, rename, move, delete, create folders, and upload into any folder.
 - **Connect to Aktar**: pairs the extension with the app.
+
+## Auto-Delete
+
+Uploads can delete themselves after 1, 7, 14, or 30 days, handy for screenshots and files you only share once. Pick a time in the **Delete After** preference (used by Upload Clipboard and Upload Selected Files, and preselected in Upload File) or in the Upload File form.
+
+- It needs Aktar 0.5.0 or later, and auto-delete set up once for the destination: in Aktar's menu bar (**Delete after**) or the destination's settings. Until then, uploads with a Delete After time fail with a message saying so.
+- It can't be combined with a folder in Upload File. Files with a Delete After time are named with the destination's path template.
 
 ## Raycast AI
 
@@ -38,6 +45,7 @@ The AI tools only read. They never upload, move, or delete anything.
 ## Preferences
 
 - **Copy Format**: what the primary copy action and uploads put on your clipboard. By default it follows Aktar's own Output setting.
+- **Delete After**: when Aktar deletes new uploads. Never by default.
 - **API Token** and **Port**: only needed for the manual setup above.
 
 ## Troubleshooting
