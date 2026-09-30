@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-09-30
 
 - Fixed Shell Command actions printing `setlocale` warnings on macOS when Language & Region advanced settings produce an extended locale identifier; non-POSIX `LC_*`/`LANG` values are now stripped before the command runs
 
