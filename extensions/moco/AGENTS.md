@@ -21,25 +21,28 @@ npx prettier --write <files>
 
 - `@raycast/api` 1.43.2, `@raycast/utils` **pinned to 1.5.2**: the newest utils version for this API.
   - `^` would allow utils versions that need a newer API.
-  - Not available in 1.5.2: `useLocalStorage`, `showFailureToast`, `Icon.EllipsisVertical`.
+  - Not available in utils 1.5.2: `useLocalStorage`, `showFailureToast`. Not in API 1.43.2: `Icon.EllipsisVertical`,
+    `Keyboard.Shortcut.Common`.
 - The upgrade to API/utils 2.x (React 19 types, TypeScript 5, ESLint 9 flat config, Node 22 per root
   `.nvmrc`) is open. `tsc` and `ray build` passed on 2.x in a test without code changes.
 
 ## Structure
 
-| Command (`package.json`)    | Entry                    | Purpose                                                                                                    |
-| --------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `moco`                      | `src/moco.tsx`           | project list → tasks → start/log activity                                                                  |
-| `moco_today`                | `src/moco_today.tsx`     | today's activities                                                                                         |
-| `moco_menu_bar`             | `src/moco_menu_bar.tsx`  | menu bar, `interval: 30s`, refreshes the cache                                                             |
-| `start_timer`, `edit_timer` | `src/<name>.tsx`         | tools for direct access (search, hotkeys), also opened from the menu bar                                   |
-| `menu_bar_tools`            | `src/menu_bar_tools.tsx` | menu-bar-only windows via `launchContext.view` (actions, favorites, settings), only a hint without context |
+| Command (`package.json`) | Entry                    | Purpose                                                                                                    |
+| ------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `moco`                   | `src/moco.tsx`           | project list → tasks → start/log activity                                                                  |
+| `moco_today`             | `src/moco_today.tsx`     | today's activities                                                                                         |
+| `moco_menu_bar`          | `src/moco_menu_bar.tsx`  | menu bar, `interval: 30s`, refreshes the cache                                                             |
+| `start_timer`            | `src/start_timer.tsx`    | start form for direct access (search, hotkeys)                                                             |
+| `edit_timer`             | `src/edit_timer.tsx`     | edit form for direct access, also opened from the menu bar with `{ activity }`                             |
+| `menu_bar_tools`         | `src/menu_bar_tools.tsx` | menu-bar-only windows via `launchContext.view` (actions, favorites, settings), only a hint without context |
 
 - `src/commands/<domain>/`: `api.ts` (MOCO requests + zod schema), `types.ts`, `components/`.
 - `src/utils/api.ts`: the shared axios client (base URL, auth header). Always use it, never set headers per request.
 - `src/utils/storage.ts`: all `LocalStorage` access.
-- `src/utils/refresh.ts`: `refreshCache()` (background runs of the menu bar), `refreshTodaysActivities()`, and `finishMenuBarForm()` for windows opened from the
-  menu bar (refresh cache → re-render the menu bar → close the window).
+- `src/utils/refresh.ts`: `refreshCache()` (background runs of the menu bar), `refreshTodaysActivities()`, and
+  `finishMenuBarForm()` for windows opened from the menu bar (refresh cache → re-render the menu bar → close the
+  window).
 - `src/utils/useStatuses.ts`: favorite/hidden statuses with optimistic updates.
 - `src/commands/menu-bar/`: components of the menu bar windows. `tools.ts` has the typed `MenuBarToolsContext`
   and `openMenuBarTool()`. **A new menu bar window = a new `view` + component, not a new command.**
@@ -80,9 +83,11 @@ views (lists, forms)
 - Set all menu bar state in one step and keep `isLoading` until then, else partial menus flicker.
 - A `Submenu` has no `onAction`, `tooltip` or `subtitle`. Items without `onAction` show greyed out.
 - "Context menus": right-click (`event.type === "right-click"`) → `openMenuBarTool({ view: "task-actions", … })`.
-- In a `List`, the first action is ↵, the second ⌘↵. ⌘↑/⌘↓ do not reach extension actions, ⌘⇧↑/⌘⇧↓ and ⇧⌥↑/⇧⌥↓ do.
+- In a `List`, the first action is ↵, the second ⌘↵. ⌘↑/⌘↓ do not reach extension actions, ⌘⇧↑/⌘⇧↓ do.
+  ⇧⌥↑/⇧⌥↓ (Move to Top/Bottom) are in use but were not tested separately.
 - In a `Form`, the first action is ⌘↵.
-- After a write with a known result, use `mutate(..., { shouldRevalidateAfter: false })`. A reload only makes lists blink.
+- After a write with a known result, use `mutate(..., { shouldRevalidateAfter: false })`. A reload only makes lists
+  blink.
 
 ## Conventions
 
