@@ -42,23 +42,31 @@ import {
 } from "./lib/selection.ts";
 import { serialQueue } from "./lib/serial.ts";
 
-/** Every write below goes through one queue, so quick successive writes land in call order (see lib/serial.ts). */
+/**
+ * Writes go through queues so quick successive writes land in call order (see lib/serial.ts). The hotkey commands read
+ * the selection and list state from another process and cannot wait on these queues, so those two keys get queues of
+ * their own: a selection save never waits behind a settings or recency write.
+ */
+const writeSelection = serialQueue();
+const writeListState = serialQueue();
 const write = serialQueue();
 
 /** The list writes its selection and open/closed state so the hotkey commands can act on the selected row. */
 export async function saveSelection(selection: Omit<StoredSelection, "at">): Promise<void> {
-  await write(() => LocalStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify({ ...selection, at: Date.now() })));
+  await writeSelection(() =>
+    LocalStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify({ ...selection, at: Date.now() })),
+  );
 }
 
 /** A selected Trash or status row is not an app: the hotkey quit commands must refuse rather than act on the app that
  * was selected before it. */
 export async function clearSelection(): Promise<void> {
-  await write(() => LocalStorage.removeItem(SELECTION_STORAGE_KEY));
+  await writeSelection(() => LocalStorage.removeItem(SELECTION_STORAGE_KEY));
 }
 
 /** A mount writes "open"; its unmount writes "closed" only if no newer mount has written since. */
 export async function saveListState(open: boolean, id: string): Promise<void> {
-  await write(async () => {
+  await writeListState(async () => {
     if (!open) {
       const current = parseListState(await LocalStorage.getItem(LIST_STATE_STORAGE_KEY));
       if (current?.id && current.id !== id) return;

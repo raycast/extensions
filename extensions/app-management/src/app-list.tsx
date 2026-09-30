@@ -450,7 +450,11 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
       return;
     }
     const item = itemsRef.current.find((i) => i.id === id);
-    if (!item || item.kind === "status") return;
+    if (!item || item.kind === "status") {
+      // A row that is no longer listed: nothing to act on, so the hotkey quit refuses.
+      void clearSelection();
+      return;
+    }
     const { row } = item;
     void saveSelection({ key: row.key, name: row.name, bundleId: row.bundleId, pids: row.pids });
   }, []);
@@ -481,6 +485,12 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
       selectedRef.current = next;
       setSelectedItemId(next);
       persistSelection(next);
+    } else if (prev.some((i) => i.id === sel)) {
+      // The selected row was listed and no row survived (a search that matches nothing): clear the stored app even if
+      // Raycast reports no selection change, so a hotkey quit refuses instead of quitting the app selected before the
+      // search. Not while the first rows are still loading (nothing listed yet), which keeps a relaunch's selectId.
+      selectedRef.current = null;
+      persistSelection(null);
     }
   }, [items, persistSelection, trashShown]);
 
