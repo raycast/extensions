@@ -33,10 +33,11 @@ export type List = { id: string; title: string; color: string; isDefault: boolea
 export type Data = {
   reminders: Reminder[];
   lists: List[];
+  hasMoreReminders?: boolean;
 };
 
-export function useData() {
-  return useCachedPromise(() => {
-    return getData() as Promise<Data>;
+export function useData(listId?: string, searchText?: string) {
+  return useCachedPromise((listId, searchText) => getData(listId, searchText) as Promise<Data>, [listId, searchText], {
+    keepPreviousData: true,
   });
 }

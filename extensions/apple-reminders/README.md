@@ -6,6 +6,16 @@ Manage Apple Reminders from within Raycast:
 - Effortlessly create new reminders
 - Manage your reminders from the menu bar
 
+## Search reminders
+
+In My Reminders, choose a list or smart view, then search by title, notes, tags, or priority. In All, you can also search by list name. Search words can match across these fields and ignore case and accents.
+
+The extension searches the full collection before returning up to 1,000 matching incomplete reminders and 1,000 matching completed reminders. If you reach that limit, narrow the search or select a list. Today includes overdue reminders and reminders due today across all lists.
+
+Press `Cmd + R` to refresh, including when the view is empty. If completed reminders are visible, Refresh reloads those too.
+
+The Get Reminders and Get Completed Reminders AI tools also accept `listId` and `searchText` to narrow results before the limit is applied.
+
 ## Saved Locations
 
 Streamline location-based reminders by saving frequently used addresses. You can do so when creating a reminder through the "Add Saved Location" action. Then you can manage them anytime with the "Manage Locations" command. Adding, editing, and removing locations is just a few clicks away.

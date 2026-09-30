@@ -36,6 +36,7 @@ struct ReminderList: Codable {
 struct RemindersData: Codable {
   let reminders: [Reminder]
   let lists: [ReminderList]
+  let hasMoreReminders: Bool
 }
 
 enum RemindersError: Error {
@@ -47,7 +48,7 @@ enum RemindersError: Error {
   case other
 }
 
-@raycast func getData() async throws -> RemindersData {
+@raycast func getData(listId: String?, searchText: String?) async throws -> RemindersData {
   let eventStore = EKEventStore()
 
   let granted: Bool
@@ -69,17 +70,20 @@ enum RemindersError: Error {
     throw RemindersError.noRemindersFound
   }
 
-  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
+  let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
 
   let calendars = eventStore.calendars(for: .reminder)
   let defaultList = eventStore.defaultCalendarForNewReminders()
 
   let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
 
-  return RemindersData(reminders: remindersData, lists: listsData)
+  return RemindersData(
+    reminders: remindersData, lists: listsData, hasMoreReminders: matches.count > reminderResultLimit
+  )
 }
 
-@raycast func getCompletedReminders(listId: String?) async throws -> [Reminder] {
+@raycast func getCompletedReminders(listId: String?, searchText: String?) async throws -> [Reminder] {
   let eventStore = EKEventStore()
 
   let granted: Bool
@@ -93,8 +97,11 @@ enum RemindersError: Error {
   }
 
   let calendars: [EKCalendar]?
-  if let listId {
-    calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
+  if let listId, !["all", "today", "overdue", "scheduled"].contains(listId) {
+    guard let calendar = eventStore.calendar(withIdentifier: listId) else {
+      throw RemindersError.noListFound
+    }
+    calendars = [calendar]
   } else {
     calendars = nil
   }
@@ -109,7 +116,8 @@ enum RemindersError: Error {
     throw RemindersError.noRemindersFound
   }
 
-  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
+  let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
   return remindersData
 }
 

@@ -144,6 +144,30 @@ function AddShortcutList({
 export default function Command() {
   const { value: actions, setValue, isLoading } = usePostCreateActions();
 
+  const addShortcutAction = (
+    <Action.Push
+      title="Add Shortcut Action"
+      icon={Icon.Plus}
+      target={
+        <AddShortcutList
+          configuredActions={actions}
+          onAdd={async (shortcut) => {
+            await setValue([
+              ...actions,
+              {
+                id: shortcut.id,
+                shortcutIdentifier: shortcut.id,
+                shortcutName: shortcut.name,
+                enabled: true,
+                scope: "all",
+              },
+            ]);
+          }}
+        />
+      }
+    />
+  );
+
   return (
     <List
       isLoading={isLoading}
@@ -166,27 +190,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Add Shortcut Action"
-                  icon={Icon.Plus}
-                  target={
-                    <AddShortcutList
-                      configuredActions={actions}
-                      onAdd={async (shortcut) => {
-                        await setValue([
-                          ...actions,
-                          {
-                            id: shortcut.id,
-                            shortcutIdentifier: shortcut.id,
-                            shortcutName: shortcut.name,
-                            enabled: true,
-                            scope: "all",
-                          },
-                        ]);
-                      }}
-                    />
-                  }
-                />
+                {addShortcutAction}
                 <Action.Push
                   title="Edit Action"
                   icon={Icon.Pencil}
@@ -235,31 +239,7 @@ export default function Command() {
       <List.EmptyView
         title="No Create Actions"
         description="Add a Shortcut to run after reminders are created."
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Add Shortcut Action"
-              icon={Icon.Plus}
-              target={
-                <AddShortcutList
-                  configuredActions={actions}
-                  onAdd={async (shortcut) => {
-                    await setValue([
-                      ...actions,
-                      {
-                        id: shortcut.id,
-                        shortcutIdentifier: shortcut.id,
-                        shortcutName: shortcut.name,
-                        enabled: true,
-                        scope: "all",
-                      },
-                    ]);
-                  }}
-                />
-              }
-            />
-          </ActionPanel>
-        }
+        actions={<ActionPanel>{addShortcutAction}</ActionPanel>}
       />
     </List>
   );
