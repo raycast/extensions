@@ -50,20 +50,24 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
                         target={entry.homepage}
                       />
                     )}
-                    <List.Item.Detail.Metadata.Label title="Type" text={entry.remoteUrl ? "HTTP" : "stdio"} />
-                    {entry.remoteUrl ? (
-                      <List.Item.Detail.Metadata.Link title="URL" text={entry.remoteUrl} target={entry.remoteUrl} />
-                    ) : (
-                      <List.Item.Detail.Metadata.Label title="Command" text={entry.configuration.command} />
+                    {entry.remoteUrl && (
+                      <>
+                        <List.Item.Detail.Metadata.Label title="Raycast" text="HTTP" />
+                        <List.Item.Detail.Metadata.Link title="URL" text={entry.remoteUrl} target={entry.remoteUrl} />
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Other Clients" text="Local Proxy" />
+                      </>
                     )}
-                    {!entry.remoteUrl && entry.configuration.args && (
+                    <List.Item.Detail.Metadata.Label title="Type" text="stdio" />
+                    <List.Item.Detail.Metadata.Label title="Command" text={entry.configuration.command} />
+                    {entry.configuration.args && (
                       <List.Item.Detail.Metadata.TagList title="Arguments">
                         {entry.configuration.args.map((arg) => (
                           <List.Item.Detail.Metadata.TagList.Item key={arg} text={arg} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
                     )}
-                    {!entry.remoteUrl && entry.configuration.env && (
+                    {entry.configuration.env && (
                       <List.Item.Detail.Metadata.TagList title="Environment">
                         {Object.entries(entry.configuration.env).map(([key]) => (
                           <List.Item.Detail.Metadata.TagList.Item key={key} text={key} />

@@ -3,6 +3,7 @@
 ## [Fix Linear Installation and Clarify Runtime Setup] - {PR_MERGE_DATE}
 
 - Connect Linear directly in Raycast without requiring Node.js or the npm proxy, and update its endpoint for other clients.
+- Show the proxy command and Node.js requirement for other clients alongside Linear's direct Raycast setup.
 - Show Node.js and uv setup requirements in server details and document how to resolve missing executable errors.
 
 ## [Add Better Design MCP Server] - 2026-09-30

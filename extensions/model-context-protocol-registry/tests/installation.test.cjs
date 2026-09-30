@@ -17,7 +17,7 @@ function loadSource(relativePath) {
   return exports;
 }
 
-const { getRaycastServer } = loadSource("src/registries/builtin/configuration.ts");
+const { getRaycastServer, getSetupMarkdown } = loadSource("src/registries/builtin/configuration.ts");
 const { getAccessories } = loadSource("src/registries/builtin/utils.ts");
 const { OFFICIAL_ENTRIES } = loadSource("src/registries/builtin/entries.ts");
 const { writeMCPConfig } = loadSource("src/shared/mcp.ts");
@@ -45,6 +45,16 @@ test("local servers retain their command, arguments and credentials", () => {
     assert.deepEqual(server.env, entry.configuration.env);
     assert.ok(!("url" in server));
   }
+});
+
+test("Linear setup explains both the direct connection and the local proxy requirements", () => {
+  const markdown = getSetupMarkdown(linear);
+  const [raycastSetup, proxySetup] = markdown.split("## Other clients");
+  assert.match(raycastSetup, /Node\.js is not required in Raycast/);
+  assert.match(proxySetup, /Claude, Cursor, and Windsurf/);
+  assert.match(proxySetup, /local proxy command/);
+  assert.match(proxySetup, /Requires \[Node\.js with npm\]/);
+  assert.match(proxySetup, /spawn npx ENOENT/);
 });
 
 test("Linear keeps a proxy fallback with the current endpoint for other clients", () => {
