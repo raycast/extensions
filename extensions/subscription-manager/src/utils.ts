@@ -1,7 +1,7 @@
 import { Icon, getPreferenceValues } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { randomUUID } from "crypto";
-import { BillingCycle, Subscription } from "./types";
+import { BillingCycle, ServiceDefinition, Subscription } from "./types";
 
 export function generateId(): string {
   return randomUUID();
@@ -62,6 +62,15 @@ export function formatStartDate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+export function getBillingDayForMonth(sub: Subscription, month: number, year: number): number {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  return Math.min(sub.billingDay, daysInMonth);
+}
+
+export function getBillingDateForMonth(sub: Subscription, month: number, year: number): Date {
+  return new Date(year, month, getBillingDayForMonth(sub, month, year));
+}
+
 function isSubscriptionActiveInMonth(sub: Subscription, month: number, year: number): boolean {
   const start = new Date(sub.startDate + "T00:00:00");
   const lastDayOfMonth = new Date(year, month + 1, 0);
@@ -88,9 +97,48 @@ export function getMonthlyEquivalent(amount: number, cycle: BillingCycle): numbe
   }
 }
 
-// rates: from Frankfurter API fetched with primaryCurrency as base.
-// e.g. base=INR → rates = { USD: 0.012, EUR: 0.011, ... }
-// conversion: subAmount / rates[subCurrency] = amount in primaryCurrency
+function getActiveMonthSubscriptions(subscriptions: Subscription[], month: number, year: number): Subscription[] {
+  return subscriptions.filter((s) => s.status === "active").filter((s) => isSubscriptionActiveInMonth(s, month, year));
+}
+
+export function getMissingRateCurrencies(
+  subscriptions: Subscription[],
+  month: number,
+  year: number,
+  primaryCurrency?: string,
+  rates?: Record<string, number>,
+): string[] {
+  if (!primaryCurrency) return [];
+  const missing = new Set<string>();
+
+  for (const sub of getActiveMonthSubscriptions(subscriptions, month, year)) {
+    if (sub.currency !== primaryCurrency && !rates?.[sub.currency]) {
+      missing.add(sub.currency);
+    }
+  }
+
+  return [...missing].sort();
+}
+
+export function getMissingRateCurrenciesForSubscriptions(
+  subscriptions: Subscription[],
+  primaryCurrency?: string,
+  rates?: Record<string, number>,
+): string[] {
+  if (!primaryCurrency) return [];
+  const missing = new Set<string>();
+
+  for (const sub of subscriptions) {
+    if (sub.currency !== primaryCurrency && !rates?.[sub.currency]) {
+      missing.add(sub.currency);
+    }
+  }
+
+  return [...missing].sort();
+}
+
+// Rates are fetched with primaryCurrency as base. If a rate is unavailable,
+// skip that subscription and let the UI expose the missing currency.
 export function getMonthlyTotal(
   subscriptions: Subscription[],
   month: number,
@@ -98,16 +146,14 @@ export function getMonthlyTotal(
   primaryCurrency?: string,
   rates?: Record<string, number>,
 ): number {
-  return subscriptions
-    .filter((s) => s.status === "active")
-    .filter((s) => isSubscriptionActiveInMonth(s, month, year))
-    .reduce((sum, s) => {
-      const monthly = getMonthlyEquivalent(s.amount, s.billingCycle);
-      if (!primaryCurrency || !rates || s.currency === primaryCurrency) return sum + monthly;
-      const rate = rates[s.currency];
-      // rate = how many subCurrency per 1 primaryCurrency
-      return sum + (rate ? monthly / rate : monthly);
-    }, 0);
+  return getActiveMonthSubscriptions(subscriptions, month, year).reduce((sum, s) => {
+    const monthly = getMonthlyEquivalent(s.amount, s.billingCycle);
+    if (!primaryCurrency || s.currency === primaryCurrency) return sum + monthly;
+    if (!rates) return sum;
+    const rate = rates[s.currency];
+    if (!rate) return sum;
+    return sum + monthly / rate;
+  }, 0);
 }
 
 export function getNextBillingDate(sub: Subscription): Date | null {
@@ -131,15 +177,16 @@ export function getSubscriptionsForDay(
     const start = new Date(s.startDate + "T00:00:00");
     const subStart = new Date(year, month, day);
     if (subStart < new Date(start.getFullYear(), start.getMonth(), start.getDate())) return false;
+    const billingDay = getBillingDayForMonth(s, month, year);
     switch (s.billingCycle) {
       case "monthly":
-        return s.billingDay === day;
+        return billingDay === day;
       case "yearly":
-        return s.billingDay === day && start.getMonth() === month;
+        return billingDay === day && start.getMonth() === month;
       case "quarterly":
-        return s.billingDay === day && (month - start.getMonth() + 12) % 3 === 0;
+        return billingDay === day && (month - start.getMonth() + 12) % 3 === 0;
       case "half-yearly":
-        return s.billingDay === day && (month - start.getMonth() + 12) % 6 === 0;
+        return billingDay === day && (month - start.getMonth() + 12) % 6 === 0;
       case "weekly":
         return Math.round((subStart.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) % 7 === 0;
     }
@@ -147,10 +194,9 @@ export function getSubscriptionsForDay(
 }
 
 export function getMonthSubscriptions(month: number, year: number, subscriptions: Subscription[]): Subscription[] {
-  return subscriptions
-    .filter((s) => s.status === "active")
-    .filter((s) => isSubscriptionActiveInMonth(s, month, year))
-    .sort((a, b) => a.billingDay - b.billingDay);
+  return getActiveMonthSubscriptions(subscriptions, month, year).sort(
+    (a, b) => getBillingDayForMonth(a, month, year) - getBillingDayForMonth(b, month, year),
+  );
 }
 
 export function buildCalendarMarkdown(year: number, month: number, subscriptions: Subscription[]): string {
@@ -239,10 +285,14 @@ export const LISTS = ["Personal", "Work", "Family"];
 export const PRESET_PAYMENT_METHODS = [
   { value: "Credit Card", title: "Credit Card", icon: "💳" },
   { value: "Debit Card", title: "Debit Card", icon: "💳" },
+  { value: "PayPal", title: "PayPal", icon: "💵" },
+  { value: "Apple Pay", title: "Apple Pay", icon: "📱" },
+  { value: "Google Pay", title: "Google Pay", icon: "📱" },
+  { value: "Bank Transfer", title: "Bank Transfer", icon: "🏦" },
   { value: "UPI", title: "UPI", icon: "📱" },
 ];
 
-export const PRESET_SERVICES = [
+export const PRESET_SERVICES: ServiceDefinition[] = [
   { name: "Netflix", domain: "netflix.com", category: "Entertainment" },
   { name: "Spotify", domain: "spotify.com", category: "Entertainment" },
   { name: "YouTube", domain: "youtube.com", category: "Entertainment" },

@@ -5,6 +5,8 @@ import { Subscription } from "./types";
 import {
   formatCurrency,
   formatCycle,
+  getBillingDayForMonth,
+  getMissingRateCurrencies,
   getMonthSubscriptions,
   getMonthlyTotal,
   getSubscriptionsForDay,
@@ -29,7 +31,16 @@ export default function MenubarCommand() {
   );
 
   const monthlyTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, ratesData?.rates);
-  const totalStr = isLoading ? "" : formatCurrency(monthlyTotal, prefs.primaryCurrency);
+  const missingRateCurrencies = getMissingRateCurrencies(
+    subscriptions,
+    month,
+    year,
+    prefs.primaryCurrency,
+    ratesData?.rates,
+  );
+  const totalStr = isLoading
+    ? ""
+    : `${formatCurrency(monthlyTotal, prefs.primaryCurrency)}${missingRateCurrencies.length > 0 ? "*" : ""}`;
   const showInTitle = (prefs.showTotalIn ?? "dropdown") !== "dropdown";
 
   const todaySubs = getSubscriptionsForDay(today.getDate(), month, year, subscriptions);
@@ -55,6 +66,16 @@ export default function MenubarCommand() {
       {!showInTitle && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item title={`Monthly Total: ${totalStr}`} icon={Icon.BankNote} onAction={openCalendar} />
+        </MenuBarExtra.Section>
+      )}
+
+      {missingRateCurrencies.length > 0 && (
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title={`Partial total: missing ${missingRateCurrencies.join(", ")}`}
+            icon={Icon.ExclamationMark}
+            onAction={openCalendar}
+          />
         </MenuBarExtra.Section>
       )}
 
@@ -111,7 +132,7 @@ export default function MenubarCommand() {
             <MenuBarExtra.Item
               key={sub.id}
               title={sub.name}
-              subtitle={`${sub.billingDay} · ${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
+              subtitle={`${getBillingDayForMonth(sub, month, year)} · ${formatCurrency(sub.amount, sub.currency)} ${formatCycle(sub.billingCycle)}`}
               icon={getSubscriptionIcon(sub)}
               onAction={openCalendar}
             />

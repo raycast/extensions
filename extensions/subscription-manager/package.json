@@ -119,7 +119,7 @@
       "description": "Main currency for totals",
       "type": "dropdown",
       "required": false,
-      "default": "INR",
+      "default": "USD",
       "data": [
         {
           "title": "🇮🇳 Indian Rupee (INR)",
