@@ -1,7 +1,8 @@
 import { LocalStorage } from "@raycast/api";
-import { access, lstat, mkdir, readdir, rmdir, stat } from "node:fs/promises";
+import { access, lstat, mkdir, readdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { withDirectoryLock } from "./directory-lock";
 
 const STORAGE_KEY = "codex-profile-registry-v1";
 const HOME = homedir();
@@ -9,8 +10,6 @@ const DEFAULT_PATH = join(HOME, ".codex");
 const PROFILES_HOME = join(HOME, ".codex-profiles");
 const LEGACY_PERSONAL_ID = "personal-c48474c6";
 const REGISTRY_LOCK_PATH = join(PROFILES_HOME, ".registry-mutation-lock");
-const REGISTRY_LOCK_TIMEOUT_MS = 10_000;
-const STALE_REGISTRY_LOCK_MS = 30_000;
 
 export interface CodexProfile {
   id: string;
@@ -110,28 +109,10 @@ async function writeRegistry(registry: ProfileRegistry): Promise<void> {
 
 async function withRegistryLock<T>(operation: () => Promise<T>): Promise<T> {
   await mkdir(PROFILES_HOME, { recursive: true });
-  const deadline = Date.now() + REGISTRY_LOCK_TIMEOUT_MS;
-  while (true) {
-    try {
-      await mkdir(REGISTRY_LOCK_PATH, { mode: 0o700 });
-      break;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      const lockInfo = await stat(REGISTRY_LOCK_PATH).catch(() => undefined);
-      if (lockInfo && Date.now() - lockInfo.mtimeMs > STALE_REGISTRY_LOCK_MS) {
-        await rmdir(REGISTRY_LOCK_PATH).catch(() => undefined);
-        continue;
-      }
-      if (Date.now() >= deadline) throw new Error("Another profile change is still in progress. Try again.");
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-  }
-
-  try {
-    return await operation();
-  } finally {
-    await rmdir(REGISTRY_LOCK_PATH).catch(() => undefined);
-  }
+  return withDirectoryLock(REGISTRY_LOCK_PATH, operation, {
+    waitTimeoutMs: 10_000,
+    retryDelayMs: 50,
+  });
 }
 
 function profilesFromRegistry(registry: ProfileRegistry): CodexProfile[] {

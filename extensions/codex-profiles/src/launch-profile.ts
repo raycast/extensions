@@ -1,9 +1,10 @@
 import { Toast, showToast } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { chmod, mkdir, rmdir, stat } from "node:fs/promises";
+import { chmod, mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import { withDirectoryLock } from "./directory-lock";
 import { coalesceProfileLaunch, findProfileProcessIDs, recoveryActionForWindowCount } from "./launch-profile-utils";
 import type { CodexProfile } from "./profiles";
 
@@ -12,8 +13,6 @@ const CHATGPT_BUNDLE_ID = "com.openai.codex";
 const PROCESS_LIST_COMMAND = "/bin/ps";
 const APPLESCRIPT_COMMAND = "/usr/bin/osascript";
 const LOCK_ROOT = join(homedir(), ".codex-profiles", ".launch-locks");
-const LOCK_WAIT_TIMEOUT_MS = 15_000;
-const STALE_LAUNCH_LOCK_MS = 60_000;
 
 async function getSecondaryProfilePIDs(userDataPath: string): Promise<number[]> {
   const { stdout } = await execFileAsync(PROCESS_LIST_COMMAND, ["-ww", "-axo", "pid=,command="]);
@@ -46,8 +45,8 @@ end run`;
     const action = recoveryActionForWindowCount(windowCount);
     return action === "activate" ? "active" : action === "restart" ? "windowless" : "unavailable";
   } catch {
-    // macOS may deny Raycast access to System Events. Don't block the switch;
-    // the caller will still submit a fresh launch request for this profile.
+    // A fresh process would reuse this profile's data directory while the
+    // existing process is alive, so the caller must not launch another one.
     return "unavailable";
   }
 }
@@ -82,29 +81,11 @@ async function terminateWindowlessProfile(pid: number, userDataPath: string): Pr
 async function withLaunchLock<T>(profileID: string, operation: () => Promise<T>): Promise<T> {
   await mkdir(LOCK_ROOT, { recursive: true, mode: 0o700 });
   const lockPath = join(LOCK_ROOT, profileID);
-  const deadline = Date.now() + LOCK_WAIT_TIMEOUT_MS;
-
-  while (true) {
-    try {
-      await mkdir(lockPath, { mode: 0o700 });
-      break;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      const lockInfo = await stat(lockPath).catch(() => undefined);
-      if (lockInfo && Date.now() - lockInfo.mtimeMs > STALE_LAUNCH_LOCK_MS) {
-        await rmdir(lockPath).catch(() => undefined);
-        continue;
-      }
-      if (Date.now() >= deadline) throw new Error("This profile is already being opened. Try again shortly.");
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-  }
-
-  try {
-    return await operation();
-  } finally {
-    await rmdir(lockPath).catch(() => undefined);
-  }
+  return withDirectoryLock(lockPath, operation, {
+    waitTimeoutMs: 15_000,
+    retryDelayMs: 100,
+    timeoutMessage: "This profile is already being opened. Try again shortly.",
+  });
 }
 
 async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
@@ -113,7 +94,6 @@ async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
   await mkdir(profile.path, { recursive: true, mode: 0o700 });
 
   let restartedWindowlessInstance = false;
-  let automationFallback = false;
   const args = [
     "-n",
     "--env",
@@ -141,8 +121,12 @@ async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
         return;
       }
       if (state === "unavailable") {
-        automationFallback = true;
-        break;
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Can't inspect the ${profile.name} window`,
+          message: "Allow Raycast to control System Events in System Settings, then try again. The existing ChatGPT process was left untouched.",
+        });
+        return;
       }
 
       await terminateWindowlessProfile(pid, electronUserData);
@@ -172,9 +156,7 @@ async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
   await showToast({
     style: Toast.Style.Success,
     title: `Opened ${profile.name} window`,
-    message: automationFallback
-      ? "ChatGPT received a fresh launch request. Allow Raycast to control System Events to reuse an existing window."
-      : profile.required
+    message: profile.required
         ? "Opened the default Work ChatGPT window. Other profiles can stay open beside it."
         : restartedWindowlessInstance
           ? "Restarted its windowless ChatGPT process and reopened the profile."
