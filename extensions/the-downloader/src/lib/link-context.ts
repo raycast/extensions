@@ -62,12 +62,20 @@ export function parseTimestamp(text: string): number | undefined {
   return parts.reduce((total, p) => total * 60 + p, 0);
 }
 
-/** Turn bare `[12:34]` / `[1:02:03]` in an answer into links to that moment (links already present are left alone). */
+const STAMP = String.raw`\d{1,2}(?::\d{2}){1,2}`;
+/** `[12:34]`, `[1:02:03]`, or a range such as `[4:25–6:02]`, not already a link. */
+const BARE_STAMP = new RegExp(String.raw`\[(${STAMP})(\s*[–—-]\s*${STAMP})?\](?!\()`, "g");
+
+/**
+ * Turn bare `[12:34]` / `[1:02:03]` in an answer into links to that moment,
+ * and a range like `[4:25–6:02]` into a link to where it starts (links
+ * already present are left alone).
+ */
 export function linkifyTimestamps(markdown: string, link: (seconds: number) => string | undefined): string {
-  return markdown.replace(/\[(\d{1,2}(?::\d{2}){1,2})\](?!\()/g, (match, stamp: string) => {
+  return markdown.replace(BARE_STAMP, (match, stamp: string, range: string | undefined) => {
     const seconds = parseTimestamp(stamp);
     const url = seconds === undefined ? undefined : link(seconds);
-    return url ? `[${stamp}](${url})` : match;
+    return url ? `[${stamp}${range ?? ""}](${url})` : match;
   });
 }
 

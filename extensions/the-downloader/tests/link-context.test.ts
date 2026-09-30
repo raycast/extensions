@@ -136,6 +136,14 @@ describe("isOverviewRequest", () => {
 });
 
 describe("timestamps", () => {
+  it("links a time range to where it starts, as models often cite them", () => {
+    const link = (s: number) => `https://y/${s}`;
+    expect(linkifyTimestamps("See [4:25–6:02] and [12:42 - 13:45].", link)).toBe(
+      "See [4:25–6:02](https://y/265) and [12:42 - 13:45](https://y/762).",
+    );
+    expect(linkifyTimestamps("Kept: [1:00–2:00](https://keep.me)", link)).toBe("Kept: [1:00–2:00](https://keep.me)");
+  });
+
   it("parses and links bare timestamps only", () => {
     expect(parseTimestamp("1:35")).toBe(95);
     expect(parseTimestamp("1:02:05")).toBe(3725);
