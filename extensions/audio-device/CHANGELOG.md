@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-30
 
 - Find devices whose names contain an apostrophe in Use Combo, Favourite and Toggle Favourites, whether the name uses a straight (') or typographic (’) apostrophe.
 
