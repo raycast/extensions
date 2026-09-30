@@ -2,26 +2,39 @@
 
 [![](https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square)](https://github.com/LitoMore/raycast-cross-extension-conventions)
 
-Search and view information about any game on steam, as well as games you own.
+Search Steam games and users, browse your library, and ask Raycast AI for recommendations.
 
-Get an API token here (optional): https://steamcommunity.com/dev/apikey
+## Setup
 
-Search is powered by this public repo: https://github.com/KevinBatdorf/steam-api
+Both are optional, set in the extension preferences. A future version will require the key.
 
-Source repo: https://github.com/KevinBatdorf/steam-raycast
-
-Notes:
-
-- While rare, you may hit the Steam API rate limit. If that's the case, just wait a few moments and try again.
-- Sometimes the Steam API sends a random language. There doesn't seem to be any logic to this. Just press escape and try again.
-- Sometimes games are removed from Steam yet still show in the API. To avoid extra network costs, the extension will just provide feedback that the game no longer exists.
-- Icons will only show if you own the game. Steam doesn't send the icons via the public api.
+- **Web API Key** ([get one](https://steamcommunity.com/dev/apikey)): fast local search, Search Users, and your library.
+- **Steam ID**: your games. Accepts your Steam ID, profile URL, or custom URL name.
 
 ## Features
 
-- Search all games on Steam
-- Search only your games
-- View details about a game
-- Filter your search
-- Browse SteamGridDB images (requires [SteamGridDB](https://raycast.com/litomore/steamgriddb) extension)
-- Browse ProtonDB scores (requires [ProtonDB](https://raycast.com/litomore/protondb) extension)
+- Search every Steam game
+- Recently added, viewed, and played games
+- Sort your library by name, playtime, last played, date added, or never played
+- Similar games for any game
+- Game news and patch notes
+- HowLongToBeat, YouTube, and SteamDB links
+- SteamGridDB images and ProtonDB scores (needs their Raycast extensions)
+- Launch or install games in Steam
+- Hide software, DLC, videos, or hardware
+
+## AI Tools
+
+- **Search Steam Games**: find a game by title
+- **Get Steam Game Details**: price, release date, and store info
+- **Search Steam Users**: look up a profile
+- **Get Owned Games**: your library and playtime
+- **Get Recently Played Games**: the last two weeks
+- **Find Similar Games**: games like one game
+- **Recommend Games**: games to buy, based on games you like
+- **Recommend Owned Games**: games from your library, based on games you like
+- **Get Game News**: announcements and patch notes
+- **Query Game List**: what's new or updated on Steam
+- **Refresh Game List**: download the game list again (asks first)
+- **Launch Game**: start a game (asks first)
+- **Install Game**: open Steam's install dialog (asks first)

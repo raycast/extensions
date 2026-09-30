@@ -1,36 +1,17 @@
-import { formatDuration, addMinutes, intervalToDuration } from "date-fns";
-import { GameDataSimple, GameSimple } from "../types";
+// Item ids are "<context>:<appid>:<search text>"; the search text makes every search's ids new,
+// so Raycast drops the old selection instead of keeping the cursor on a game that is still listed
+export const itemId = (context: string, appid?: number, search = "") => `${context}:${appid ?? 0}:${search}`;
+export const appidFromItemId = (id?: string | null) => Number(id?.split(":")[1] ?? 0);
 
-export const humanTime = (time: number) => {
-  const now = new Date();
-  const end = addMinutes(now, time);
-  const duration = intervalToDuration({ start: now, end });
-  return formatDuration(duration);
+const relativeDay = (seconds: number) => {
+  const days = Math.floor((Date.now() / 1000 - seconds) / 86_400);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 31) return `${days} days ago`;
+  return new Date(seconds * 1000).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 };
 
-// .reverse() is causing content flash
-export const reverse = (array: GameDataSimple[]) => {
-  const output = [];
-  for (let i = array.length - 1; i >= 0; i--) {
-    output.push(array[i]);
-  }
-  return output;
-};
-
-export const tryJsonGameFromAi = (input: string): GameSimple[] | undefined => {
-  try {
-    const response = JSON.parse(input);
-    // make sure it's an array, and has { name: string }
-    if (!Array.isArray(response)) return undefined;
-    const games = response.filter((game) => game?.name);
-    // If empty, then return undefined
-    return games.length ? games : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-export const randomFromArray = <T>(array: T[] | undefined) => {
-  if (!array) return undefined;
-  return array[Math.floor(Math.random() * array.length)] as T;
-};
+export const addedText = (seconds?: number) => (seconds ? `Added ${relativeDay(seconds)}` : "");
+export const playedText = (seconds?: number) => (seconds ? `Played ${relativeDay(seconds)}` : "Not played");
+export const playtimeText = (minutes: number) =>
+  minutes >= 60 ? `${Math.round(minutes / 60).toLocaleString()}h` : minutes > 0 ? `${minutes}m` : "Not played";
