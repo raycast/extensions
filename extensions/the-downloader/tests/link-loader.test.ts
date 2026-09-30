@@ -131,6 +131,14 @@ describe("loadLinkContext", () => {
     expect(unreadable.archive).toBeUndefined();
   });
 
+  it("never falls back for a login, a paywall or a legal block", async () => {
+    vi.mocked(loadPageLink).mockRejectedValueOnce(
+      new LinkLoadError("example.com asks for payment to read this page (HTTP 402). Open it in your browser."),
+    );
+    await expect(loadLinkContext("https://example.com/f6", { archiveFallback: true })).rejects.toThrow("HTTP 402");
+    expect(loadArchivedPage).not.toHaveBeenCalled();
+  });
+
   it("never falls back for a refusal of a local address", async () => {
     vi.mocked(loadPageLink).mockRejectedValueOnce(
       new Error("Won't read router.local: it's a local or private network address."),

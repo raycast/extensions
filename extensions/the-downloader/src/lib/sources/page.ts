@@ -187,9 +187,21 @@ export async function loadPageLink(url: string, options: { signal?: AbortSignal 
       timeoutMs: TIMEOUT_MS,
     });
   } catch (error) {
-    if (error instanceof HttpError && [401, 402, 403, 429, 451].includes(error.status)) {
+    // A login, a paywall or a legal block is the site's own decision: no archived copy is offered around it.
+    if (error instanceof HttpError && error.status === 401) {
       throw new LinkLoadError(
-        `${error.host} didn't let The Downloader read this page (HTTP ${error.status}). It may need a login or block apps — try the Internet Archive's copy, or open it in your browser.`,
+        `${error.host} needs you to log in to read this page (HTTP 401). Open it in your browser.`,
+      );
+    }
+    if (error instanceof HttpError && error.status === 402) {
+      throw new LinkLoadError(`${error.host} asks for payment to read this page (HTTP 402). Open it in your browser.`);
+    }
+    if (error instanceof HttpError && error.status === 451) {
+      throw new LinkLoadError(`${error.host} can't show this page where you are, for legal reasons (HTTP 451).`);
+    }
+    if (error instanceof HttpError && [403, 429].includes(error.status)) {
+      throw new LinkLoadError(
+        `${error.host} didn't let The Downloader read this page (HTTP ${error.status}). It may block apps — try the Internet Archive's copy, or open it in your browser.`,
         "archive",
       );
     }

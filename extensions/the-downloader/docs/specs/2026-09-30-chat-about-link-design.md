@@ -114,10 +114,12 @@ windows-1250 Czech article and ISO-8859-2 text.
 
 ## 2b. The Internet Archive's copy (added 2026-10-01)
 
-When a page refuses the reader (HTTP 401/402/403/429/451 — bot walls, logins),
-is gone (404/410) or has no readable text, the chat offers **Read Archived
-Copy**: the Wayback Machine's latest snapshot saved with HTTP 200, fetched raw
-(`id_`, no toolbar) through `safeFetch`, read like the live page and labelled
+When a page refuses the reader (HTTP 403/429 — bot walls), is gone
+(404/410) or has no readable text, the chat offers **Read Archived Copy**. A
+login (401), a paywall (402) or a legal block (451) gets its own message and
+no archived copy, in the chat and the AI tools alike. The copy is the
+Wayback Machine's latest snapshot saved with HTTP 200, fetched raw (`id_`, no
+toolbar) through `safeFetch`, read like the live page and labelled
 "Read from the Internet Archive's copy saved <date>" (also in the prompt).
 **Read Live Page** switches back; the chat key stays the page's own. The AI
 tools fall back to the copy automatically, labelled the same way. Paywall-

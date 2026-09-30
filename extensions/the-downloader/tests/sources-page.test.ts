@@ -107,7 +107,7 @@ describe("loadPageLink", () => {
     expect(error).toMatchObject({
       fix: "archive",
       message:
-        "www.ft.com didn't let The Downloader read this page (HTTP 403). It may need a login or block apps — try the Internet Archive's copy, or open it in your browser.",
+        "www.ft.com didn't let The Downloader read this page (HTTP 403). It may block apps — try the Internet Archive's copy, or open it in your browser.",
     });
   });
 
@@ -117,6 +117,18 @@ describe("loadPageLink", () => {
       fix: "archive",
       message: "This page is gone (HTTP 404 from example.com). The Internet Archive may have a saved copy.",
     });
+  });
+
+  it.each([
+    [401, "www.example.com needs you to log in to read this page (HTTP 401). Open it in your browser."],
+    [402, "www.example.com asks for payment to read this page (HTTP 402). Open it in your browser."],
+    [451, "www.example.com can't show this page where you are, for legal reasons (HTTP 451)."],
+  ])("doesn't offer an archived copy around a login, a paywall or a legal block (HTTP %i)", async (status, message) => {
+    vi.mocked(safeFetch).mockRejectedValueOnce(new HttpError(status, "www.example.com"));
+    const error = await loadPageLink("https://www.example.com/x", {}).catch((e) => e);
+    expect(error).toBeInstanceOf(LinkLoadError);
+    expect(error.message).toBe(message);
+    expect(error.fix).toBeUndefined();
   });
 
   it("passes other failures on as they are", async () => {
