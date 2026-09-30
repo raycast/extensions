@@ -11,11 +11,12 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { ErrorView } from "./thread-list";
 import {
   createWorktree,
   defaultBaseBranch,
+  errorMessage,
   focusThread,
   getShell,
   inheritedSettings,
@@ -23,7 +24,6 @@ import {
   liveProjects,
   modelChoices,
   modelKey,
-  paletteThreads,
   parseModelKey,
   removeWorktree,
   RUNTIME_MODES,
@@ -129,6 +129,7 @@ export default function Command() {
     }
 
     setSubmitting(true);
+    let threadId: string;
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Starting session",
@@ -161,7 +162,7 @@ export default function Command() {
 
       toast.title = "Sending prompt";
       try {
-        await startSession({
+        threadId = await startSession({
           projectId: project.id,
           prompt,
           modelSelection,
@@ -193,25 +194,23 @@ export default function Command() {
     // not read as a failure to start it.
     await toast.hide();
     await closeMainWindow();
-    const created = {
-      title: threadTitle(prompt),
-      projectTitle: project.title,
-      branch: envMode === "worktree" ? branch : null,
-    };
     try {
-      const exact = await focusThread(created, [
-        ...paletteThreads(data.snapshot),
-        created,
-      ]);
+      const exact = await focusThread({
+        id: threadId,
+        title: threadTitle(prompt),
+        projectTitle: project.title,
+        branch: envMode === "worktree" ? branch : null,
+      });
       if (!exact) {
         await showHUD(
           "Session started - several threads match, pick it in the T3 Code palette",
         );
       }
     } catch (focusError) {
-      await showFailureToast(focusError, {
-        title: "Session started, but couldn't open T3 Code",
-      });
+      // The Raycast window is already closed, so a toast would go unseen.
+      await showHUD(
+        `Session started, but couldn't open T3 Code: ${errorMessage(focusError)}`,
+      );
     } finally {
       setSubmitting(false);
     }

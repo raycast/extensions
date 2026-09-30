@@ -87,6 +87,9 @@ export class T3Error extends Error {
   }
 }
 
+export const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
 export const RUNTIME_DIR = join(homedir(), ".t3", "userdata");
 export const WORKTREES_DIR = join(homedir(), ".t3", "worktrees");
 
@@ -375,6 +378,7 @@ const escapeForAppleScript = (value: string) =>
 
 /** What the T3 command palette knows about a thread. */
 export type PaletteThread = {
+  id: string;
   title: string;
   projectTitle: string | undefined;
   branch: string | null;
@@ -415,6 +419,7 @@ export function paletteThreads(snapshot: ShellSnapshot): PaletteThread[] {
     snapshot.projects.map((project) => [project.id, project.title]),
   );
   return liveThreads(snapshot).map((thread) => ({
+    id: thread.id,
     title: thread.title,
     projectTitle: projectTitles.get(thread.projectId),
     branch: thread.branch,
@@ -423,33 +428,41 @@ export function paletteThreads(snapshot: ShellSnapshot): PaletteThread[] {
 
 /** The desktop app registers t3code:// for Clerk callbacks only: an external URL
  * reveals the window but never navigates. So focus the app and drive its own
- * command palette with the thread's title, project and branch. Enter is pressed
- * only when that query lists exactly one thread; otherwise the palette stays open
- * on the narrowed list and returns false so the caller can say so. */
-export async function focusThread(
-  target: PaletteThread,
-  candidates: PaletteThread[],
-): Promise<boolean> {
+ * command palette with the thread's title, project and branch. The query is typed
+ * first, then matches are counted against a shell snapshot fetched at that moment,
+ * so a thread created since the list loaded still counts. Enter is pressed only
+ * when exactly one thread matches; otherwise the palette stays open on the
+ * narrowed list and this returns false so the caller can say so. */
+export async function focusThread(target: PaletteThread): Promise<boolean> {
   const query = paletteQuery(target);
-  const exact = paletteMatchCount(candidates, query) === 1;
   const name = appName();
   await run("/usr/bin/open", ["-a", name]);
-  const script = `
+  await run("/usr/bin/osascript", [
+    "-e",
+    `
 tell application "${escapeForAppleScript(name)}" to activate
 delay 0.35
 tell application "System Events"
   keystroke "k" using command down
   delay 0.35
-  keystroke "${escapeForAppleScript(query)}"${
-    exact
-      ? `
-  delay 0.45
-  key code 36`
-      : ""
+  keystroke "${escapeForAppleScript(query)}"
+end tell`,
+  ]);
+  const live = paletteThreads(await getShell());
+  // A thread that was just created can lag behind the shell projection.
+  const candidates = live.some((thread) => thread.id === target.id)
+    ? live
+    : [...live, target];
+  if (paletteMatchCount(candidates, query) !== 1) {
+    return false;
   }
-end tell`;
-  await run("/usr/bin/osascript", ["-e", script]);
-  return exact;
+  await run("/usr/bin/osascript", [
+    "-e",
+    `
+delay 0.3
+tell application "System Events" to key code 36`,
+  ]);
+  return true;
 }
 
 export async function launchApp(): Promise<void> {

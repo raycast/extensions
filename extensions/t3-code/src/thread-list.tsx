@@ -9,13 +9,13 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import {
+  errorMessage,
   focusThread,
   getShell,
   launchApp,
   liveProjects,
-  paletteThreads,
   T3Error,
   Thread,
   threadTimestamp,
@@ -113,23 +113,23 @@ export default function ThreadList({
                 onAction={async () => {
                   await closeMainWindow();
                   try {
-                    const exact = await focusThread(
-                      {
-                        title: thread.title,
-                        projectTitle: projectTitles.get(thread.projectId),
-                        branch: thread.branch,
-                      },
-                      snapshot ? paletteThreads(snapshot) : [],
-                    );
+                    const exact = await focusThread({
+                      id: thread.id,
+                      title: thread.title,
+                      projectTitle: projectTitles.get(thread.projectId),
+                      branch: thread.branch,
+                    });
                     if (!exact) {
                       await showHUD(
                         "Several threads match - pick one in the T3 Code palette",
                       );
                     }
                   } catch (focusError) {
-                    await showFailureToast(focusError, {
-                      title: "Could not open T3 Code",
-                    });
+                    // The Raycast window is already closed, so a toast would go
+                    // unseen.
+                    await showHUD(
+                      `Could not open T3 Code: ${errorMessage(focusError)}`,
+                    );
                   }
                 }}
               />
