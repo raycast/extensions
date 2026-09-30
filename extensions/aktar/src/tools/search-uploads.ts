@@ -35,6 +35,8 @@ export default async function tool(input: Input) {
       destination: upload.destinationName,
       size: formatBytes(upload.size),
       uploadedAt: upload.createdAt,
+      /** When Aktar auto-deletes the file, or null if it's kept forever. */
+      expiresAt: upload.expiresAt ?? null,
     })),
   };
 }

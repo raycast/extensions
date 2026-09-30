@@ -44,7 +44,7 @@
       "name": "upload-file",
       "title": "Upload File",
       "subtitle": "Aktar",
-      "description": "Pick files, a destination, and an optional folder, then upload them and copy their links.",
+      "description": "Pick files, a destination, and an optional folder or auto-delete time, then upload them and copy their links.",
       "mode": "view"
     },
     {
@@ -93,6 +93,36 @@
         {
           "title": "HTML",
           "value": "html"
+        }
+      ]
+    },
+    {
+      "name": "deleteAfter",
+      "title": "Delete After",
+      "description": "Default for Upload Clipboard, Upload Selected Files, and the Upload File form. Aktar deletes the uploaded file from your bucket after this many days. Needs Aktar 0.5.0 or later.",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "data": [
+        {
+          "title": "Never",
+          "value": "0"
+        },
+        {
+          "title": "1 Day",
+          "value": "1"
+        },
+        {
+          "title": "7 Days",
+          "value": "7"
+        },
+        {
+          "title": "14 Days",
+          "value": "14"
+        },
+        {
+          "title": "30 Days",
+          "value": "30"
         }
       ]
     },

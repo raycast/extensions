@@ -188,20 +188,36 @@ export async function deleteUpload(id: string) {
  * Uploads one file. Without a `prefix`, Aktar names it with the
  * destination's path template, same as a drop on the menu bar. With one,
  * the file keeps its name inside that folder (numbered if it's taken).
+ * `expires` (days) asks Aktar to auto-delete the file; it can't be combined
+ * with a `prefix`, and 0 or undefined keeps it forever.
  */
 export async function uploadFile(
   filePath: string,
-  options: { destinationId?: string; prefix?: string; onProgress?: (fraction: number) => void } = {},
+  options: {
+    destinationId?: string;
+    prefix?: string;
+    expires?: number;
+    onProgress?: (fraction: number) => void;
+  } = {},
 ) {
   const response = await request<{ upload: Upload }>("POST", "uploads", {
-    query: { filename: path.basename(filePath), destinationId: options.destinationId, prefix: options.prefix },
+    query: {
+      filename: path.basename(filePath),
+      destinationId: options.destinationId,
+      prefix: options.prefix,
+      // Left out when keeping forever, so Aktar versions without auto-delete keep working.
+      expires: options.expires || undefined,
+    },
     file: { path: filePath, onProgress: options.onProgress },
   });
   return response.upload;
 }
 
-export async function uploadClipboard(destinationId?: string) {
-  return (await request<{ upload: Upload }>("POST", "uploads/clipboard", { query: { destinationId } })).upload;
+export async function uploadClipboard(options: { destinationId?: string; expires?: number } = {}) {
+  const response = await request<{ upload: Upload }>("POST", "uploads/clipboard", {
+    query: { destinationId: options.destinationId, expires: options.expires || undefined },
+  });
+  return response.upload;
 }
 
 function bucketRoute(destinationId: string, rest: string) {
