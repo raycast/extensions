@@ -36,7 +36,8 @@ export function parseTable(input: string): string[][] {
 
 /**
  * One markdown table row, split the way GitHub does: `\` escapes the next character, so `\|` is a
- * literal pipe and `\\|` is a backslash, then a cell break. Other escapes are kept as written.
+ * literal pipe and `\\|` is a backslash, then a cell break. Those two are unescaped, so cells hold
+ * the text people see; other escapes (`\*`) are kept as written.
  */
 function splitMarkdownRow(line: string): string[] {
   const text = line.trim();
@@ -47,7 +48,8 @@ function splitMarkdownRow(line: string): string[] {
     const ch = text[i];
     endsWithBreak = false;
     if (ch === "\\" && i + 1 < text.length) {
-      cell += text[i + 1] === "|" ? "|" : ch + text[i + 1];
+      const next = text[i + 1];
+      cell += next === "|" || next === "\\" ? next : ch + next;
       i++;
     } else if (ch === "|") {
       cells.push(cell);
@@ -87,11 +89,18 @@ function splitCsv(line: string): string[] {
   return cells;
 }
 
+/**
+ * A pipe inside a markdown cell has to be escaped, or it starts a new column, and so do backslashes
+ * right before it: `C:\|tail` → `C:\\\|tail`. Other backslashes are literal and stay readable.
+ */
+function escapeMarkdownCell(cell: string): string {
+  return cell.replace(/(\\*)\|/g, (_, slashes: string) => `${slashes}${slashes}\\|`);
+}
+
 /** First row is the header. Columns whose body cells are all numbers are right-aligned. */
 export function renderTable(input: string, style: TableStyle = "light"): string {
   const parsed = parseTable(input);
-  // A pipe inside a markdown cell has to be escaped, or it starts a new column.
-  const rows = style === "markdown" ? parsed.map((r) => r.map((c) => c.replace(/\|/g, "\\|"))) : parsed;
+  const rows = style === "markdown" ? parsed.map((r) => r.map(escapeMarkdownCell)) : parsed;
   if (!rows.length) return "";
   const { widths, numeric, cell } = measureColumns(rows, 3);
   const body = rows.slice(1);

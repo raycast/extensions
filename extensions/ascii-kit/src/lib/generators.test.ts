@@ -167,9 +167,21 @@ describe("table", () => {
 | a | C:\\|`),
     ).toEqual([
       ["path", "note"],
-      [String.raw`C:\\`, "root"],
-      ["a", String.raw`C:\\`],
+      ["C:\\", "root"],
+      ["a", "C:\\"],
     ]);
+  });
+
+  it("round-trips cells with pipes and backslashes through markdown output", () => {
+    const cells = [
+      ["Path", "Note"],
+      ["C:\\|tail", "a|b"],
+      ["x\\\\|y", "end\\"],
+      ["C:\\path", "\\*kept\\*"],
+    ];
+    const markdown = renderTable(cells.map((r) => r.join("\t")).join("\n"), "markdown");
+    expect(markdown.split("\n")[2]).toBe("| C:\\\\\\|tail | a\\|b     |");
+    expect(parseTable(markdown)).toEqual(cells);
   });
 
   it("escapes pipes inside cells in markdown output", () => {
