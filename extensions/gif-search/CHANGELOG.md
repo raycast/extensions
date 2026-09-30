@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Fix search pagination with invalid preferences] - {PR_MERGE_DATE}
+
+- Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.
+
 ## [Add Ask AI Raycast Command] - 2026-09-27
 
 - Add Ask AI search for GIFs and GIPHY Clips with direct media links.
