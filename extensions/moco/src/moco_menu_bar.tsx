@@ -71,6 +71,14 @@ export default function Command() {
     // Load everything first and set the state in one go. Raycast keeps showing the previous menu while
     // isLoading is true, so a partial state (activities without projects) would render as a flicker.
     const load = async () => {
+      // try/finally: a failing cache read must not leave the menu in the loading state.
+      try {
+        await loadMenu();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    const loadMenu = async () => {
       const [cachedActivities, cachedProjects, layouts, order] = await Promise.all([
         getTodaysActivities(),
         getProjects(),
@@ -80,8 +88,10 @@ export default function Command() {
       let activities = cachedActivities;
       let projects = cachedProjects;
       // Background runs (every 30s, menu closed) refresh the cache from the API. A click only reads the cache,
-      // so the menu opens without waiting for the API. An empty cache (first run) is filled on a click too.
-      if (environment.launchType === LaunchType.Background || cachedProjects.length === 0) {
+      // so the menu opens without waiting for the API. A click fetches too when the cache is empty (first run)
+      // or holds activities of another day (after midnight or sleep, before the next background run).
+      const isStale = cachedActivities.some((activity) => activity.date !== localDate());
+      if (environment.launchType === LaunchType.Background || cachedProjects.length === 0 || isStale) {
         try {
           ({ activities, projects } = await refreshCache());
         } catch (error) {
@@ -92,9 +102,8 @@ export default function Command() {
       setFavoriteOrder(order);
       setActivities(activities);
       setProjects(projects.filter((project) => project.contract?.active !== false));
-      setIsLoading(false);
     };
-    load();
+    load().catch((error) => console.error("Error loading the MOCO menu bar", error));
   }, []);
 
   // Hidden projects (project list) and hidden or inactive tasks stay out of the menu.

@@ -47,9 +47,13 @@ npx prettier --write <files>
 ## Data flow
 
 ```
-moco_menu_bar, background run (30s) → refreshCache() → MOCO API → LocalStorage cache (user, todays_activities, projects)
-moco_menu_bar, click → reads the cache (fast, no API wait) → after a timer action: refreshTodaysActivities()
-views (lists, forms) → useCachedPromise → API, cached between runs
+moco_menu_bar, background run (30s)
+  → refreshCache() → MOCO API → LocalStorage cache (user, todays_activities, projects)
+moco_menu_bar, click
+  → reads the cache (fast, no API wait), fetches only if the cache is empty or from another day
+  → after a timer action: refreshTodaysActivities()
+views (lists, forms)
+  → useCachedPromise → API, cached between runs
 ```
 
 - Always fetch activities with the current user's ID. Without `user_id`, MOCO returns the activities of all users.
