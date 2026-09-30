@@ -36,6 +36,15 @@ test("preserves the macOS Terminal LC_CTYPE=UTF-8 convention", () => {
   assert.equal(env.LC_CTYPE, "UTF-8");
 });
 
+test("leaves non-locale LC_* variables untouched", () => {
+  const env = sanitizeShellEnvironment({
+    LC_TERMINAL: "iTerm2",
+    LC_TERMINAL_PROGRAM: "/Applications/iTerm.app",
+  });
+  assert.equal(env.LC_TERMINAL, "iTerm2");
+  assert.equal(env.LC_TERMINAL_PROGRAM, "/Applications/iTerm.app");
+});
+
 test("leaves non-locale environment variables untouched", () => {
   const env = sanitizeShellEnvironment({
     PATH: "/usr/bin:/bin",
