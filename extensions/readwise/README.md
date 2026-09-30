@@ -1,6 +1,6 @@
 # Readwise
 
-Raycast extension to search and browser your [Readwise library](https://readwise.io/).
+Raycast extension to search and browse your [Readwise library](https://readwise.io/).
 
 ## Features
 
