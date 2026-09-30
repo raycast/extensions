@@ -1,6 +1,6 @@
 # Chat About Link — design
 
-Status: approved in conversation on 2026-09-30, pending review of this document.
+Status: approved on 2026-09-30, with the safety and decoding requirements in §2a added before building.
 Branch: `claude/the-downloader-ai` (never `ext/the-downloader` until the AI work ships).
 
 ## Goal
@@ -59,21 +59,58 @@ timestamps, and keeps Recent Chats and saved conversations.
 and stats; the note reads "This video has no captions, so answers come from its
 details." (replaces "No en subtitles found for this video").
 
-**Post** — `gallery-dl -j <url>` (metadata only, no download) through
-`runWithWatchdog`, with `--cookies-from-browser` when the Gallery: Cookies from
-Browser preference is set. Maps caption/text, author and co-authors, date,
-likes/score, comment count, hashtags, image count and image URLs. Verified: a
-public Instagram post returns caption, co-authors, date and count without login.
+**Post** — `gallery-dl -j --range 1-20 [--cookies-from-browser <browser>] -- <url>`
+(metadata only, no download) through `runWithWatchdog`, with cookies when the
+Gallery: Cookies from Browser preference is set. Maps caption/text, author and
+co-authors, date, likes/score, comment count, hashtags, image count and image
+URLs. Without login, Instagram returns this for profile listings but, since the
+evening of 2026-09-30, redirects single posts to its login page (see Findings).
 A gallery-dl error record (`[-1, {error, message}]`) becomes a note with an
 action; e.g. Reddit's "You've been blocked by network security" → "Reddit blocks
 anonymous access. Set Gallery: Cookies from Browser in preferences." with **Open
-Extension Preferences**.
+Extension Preferences**, and the same for Instagram's login redirect.
 
-**Page** — `fetch` with a 15 s timeout, `text/html` only, 5 MB cap. Title, site
+**Page** — `safeFetch` (§2a) with a 15 s timeout, `text/html` only, 5 MB cap. Title, site
 name, author and date from OpenGraph / JSON-LD / `<title>`; main text from
 Mozilla Readability on a `linkedom` document (two new pure-JS dependencies).
 Under ~200 characters of text → note "Couldn't read this page's text (it may
 need a login or JavaScript)." and chat from title/description only.
+
+## 2a. Safety and decoding (required before building)
+
+**Every URL is validated and normalized first.** `loadLinkContext`, `read-link`
+and `get-link-info` reject anything that isn't an http(s) URL (`isValidUrl`) and
+add a missing scheme (`normalizeUrl`) before any tool or fetch sees it, the way
+the `download-video` tool does, so a value like `--batch-file=/etc/hosts` never
+reaches a tool. The new gallery-dl call also puts `--` before the URL; yt-dlp's
+calls are shared with the download pipeline and stay as they are, guarded by
+the validation.
+
+**The page reader never reads local addresses.** `read-link` and `get-link-info`
+can be called by Raycast AI, so a malicious page or prompt could otherwise make
+them read a router or a local service back into the chat. The reader
+(`src/lib/safe-fetch.ts`) therefore:
+
+- refuses the hosts `localhost`, `*.localhost`, `*.local`, `*.internal` and
+  `*.home.arpa`, and IP literals in the ranges below, before any request;
+- resolves every other hostname itself and refuses it when **any** resolved
+  address is loopback (`127.0.0.0/8`, `::1`), private (`10/8`, `172.16/12`,
+  `192.168/16`, `fc00::/7`), link-local (`169.254/16`, `fe80::/10`), CGNAT
+  (`100.64/10`), unspecified (`0.0.0.0/8`, `::`), multicast or reserved;
+  IPv4-mapped (`::ffff:a.b.c.d`) and NAT64 (`64:ff9b::/96`) addresses are
+  judged by the IPv4 address inside them;
+- connects to the address it checked (the request's `lookup` returns it), so a
+  DNS answer that changes between the check and the connection (rebinding)
+  can't redirect the socket;
+- follows redirects itself (at most 5), running the same checks on every hop.
+
+A refused link fails with "Won't read <host>: it's a local or private network
+address."
+
+**Pages are decoded with their own charset**: the BOM, else the `charset` in the
+`Content-Type` header, else `<meta charset>` or `<meta http-equiv="Content-Type">`
+in the first 4 KB, else UTF-8 (also when the label is unknown). Tested with a
+windows-1250 Czech article and ISO-8859-2 text.
 
 Loading and errors in the chat keep today's pattern: **Retry**, **Open Link**,
 and **Open Extension Preferences** where it helps.
@@ -95,8 +132,12 @@ and **Open Extension Preferences** where it helps.
 - **Images** — preference **Chat: Look at Images** (dropdown): **Ask Each Time**
   (default), Always, Never. Applies only to a post with images and an engine that
   can see images:
-  - Apple on-device: `fm respond --image <file>` (images saved to a temp folder
-    first; flag to be verified once the model is available)
+  - Apple on-device: `fm respond --image <file> --text <prompt>` (images saved
+    to a temp folder first). Verified on macOS 27: one image answers in ~10 s.
+    Images share the model's 8,192-token window with the prompt and the answer,
+    and `fm count-tokens --image` fails there (ModelManagerError 1001), so the
+    per-image cost is measured once during implementation and reserved from
+    the text budget.
   - Ollama: only when `/api/show` lists `vision` in the model's capabilities
   - Raycast AI: never (the extension AI API takes text only)
     With Ask Each Time, the first question in such a chat asks "Let the AI look at
@@ -146,3 +187,10 @@ build`, `npx tsc --noEmit`, `npx eslint src tests`, `npx prettier --check` on
   took 8 parts and ~8.5 min on a MacBook Air.
 - Transcripts: English, German (`de`), Czech (`cs-orig`, ignoring the
   `live_chat` pseudo-track) and no-caption videos all load.
+- Apple on-device model: 8,192 tokens for prompt and answer together; first
+  words in 2–4 s warm, ~45 s after a break. Apple's tokenizer counts about 4
+  ASCII characters, 3 other-alphabet characters or 1.4 CJK characters per token.
+- Instagram (evening of 2026-09-30): a single post (`/p/<id>/`) now redirects
+  anonymous gallery-dl to the login page; profile listings still load. In
+  practice posts need Gallery: Cookies from Browser, so the login-redirect
+  error gets the same Open Extension Preferences fix as Reddit's block.
