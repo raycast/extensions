@@ -4,12 +4,14 @@ import {
   ActionPanel,
   Form,
   Icon,
+  List,
   LocalStorage,
   Toast,
   closeMainWindow,
+  showHUD,
   showToast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { ErrorView } from "./thread-list";
 import {
   createWorktree,
@@ -17,9 +19,11 @@ import {
   focusThread,
   getShell,
   inheritedSettings,
+  launchApp,
   liveProjects,
   modelChoices,
   modelKey,
+  paletteThreads,
   parseModelKey,
   removeWorktree,
   RUNTIME_MODES,
@@ -174,9 +178,6 @@ export default function Command() {
       }
 
       await LocalStorage.setItem(LAST_PROJECT_KEY, project.id);
-      await toast.hide();
-      await closeMainWindow();
-      await focusThread(threadTitle(prompt));
     } catch (submitError) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not start the session";
@@ -184,9 +185,62 @@ export default function Command() {
         submitError instanceof Error
           ? submitError.message
           : String(submitError);
+      setSubmitting(false);
+      return;
+    }
+
+    // The session exists from here on, so a failure to bring T3 Code forward must
+    // not read as a failure to start it.
+    await toast.hide();
+    await closeMainWindow();
+    const created = {
+      title: threadTitle(prompt),
+      projectTitle: project.title,
+      branch: envMode === "worktree" ? branch : null,
+    };
+    try {
+      const exact = await focusThread(created, [
+        ...paletteThreads(data.snapshot),
+        created,
+      ]);
+      if (!exact) {
+        await showHUD(
+          "Session started - several threads match, pick it in the T3 Code palette",
+        );
+      }
+    } catch (focusError) {
+      await showFailureToast(focusError, {
+        title: "Session started, but couldn't open T3 Code",
+      });
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (data && projects.length === 0) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Folder}
+          title="No projects in T3 Code"
+          description="Add a project in T3 Code first, then come back to start a session."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open T3 Code"
+                icon={Icon.AppWindow}
+                onAction={launchApp}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   return (

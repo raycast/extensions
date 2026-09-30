@@ -26,11 +26,13 @@ Everything runs against the T3 Code server on this machine, over loopback:
 
 - `GET /api/orchestration/shell` for projects and threads.
 - `POST /api/orchestration/dispatch` for `thread.create` and `thread.turn.start`.
-- `GET /.well-known/t3/environment` to identify the environment.
 
 Opening a thread activates T3 Code and drives its command palette, because the
 desktop app registers `t3code://` for its own auth callbacks and an external URL
-only reveals the window. macOS asks for Accessibility permission the first time.
+only reveals the window. The extension types the thread's title, project and
+branch, and presses Enter only when that query matches exactly one thread;
+otherwise the palette stays open on the narrowed list for you to pick from.
+macOS asks for Accessibility permission the first time.
 
 Worktrees are created by the extension with `git worktree add`, since the HTTP
 dispatch handler passes commands straight to the engine and never runs the

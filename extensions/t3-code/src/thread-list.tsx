@@ -9,12 +9,13 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   focusThread,
   getShell,
   launchApp,
   liveProjects,
+  paletteThreads,
   T3Error,
   Thread,
   threadTimestamp,
@@ -110,18 +111,25 @@ export default function ThreadList({
                 title="Open in T3 Code"
                 icon={Icon.ArrowRight}
                 onAction={async () => {
-                  // T3 is driven through its command palette, which matches on
-                  // title, so identical titles cannot be told apart from here.
-                  const ambiguous =
-                    threads.filter(
-                      (candidate) => candidate.title === thread.title,
-                    ).length > 1;
                   await closeMainWindow();
-                  await focusThread(thread.title);
-                  if (ambiguous) {
-                    await showHUD(
-                      "Several threads share this title - check you landed on the right one",
+                  try {
+                    const exact = await focusThread(
+                      {
+                        title: thread.title,
+                        projectTitle: projectTitles.get(thread.projectId),
+                        branch: thread.branch,
+                      },
+                      snapshot ? paletteThreads(snapshot) : [],
                     );
+                    if (!exact) {
+                      await showHUD(
+                        "Several threads match - pick one in the T3 Code palette",
+                      );
+                    }
+                  } catch (focusError) {
+                    await showFailureToast(focusError, {
+                      title: "Could not open T3 Code",
+                    });
                   }
                 }}
               />

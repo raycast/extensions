@@ -76,12 +76,6 @@ export type ShellSnapshot = {
   updatedAt: string;
 };
 
-export type EnvironmentDescriptor = {
-  environmentId: string;
-  label: string;
-  serverVersion: string;
-};
-
 /** The server is unreachable, the token is rejected, or the request failed. Commands
  * branch on `kind` to decide whether offering "Launch T3 Code" makes sense. */
 export class T3Error extends Error {
@@ -189,9 +183,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const getShell = () =>
   request<ShellSnapshot>("/api/orchestration/shell");
-
-export const getDescriptor = () =>
-  request<EnvironmentDescriptor>("/.well-known/t3/environment");
 
 export const dispatch = (command: Record<string, unknown>) =>
   request<{ sequence: number }>("/api/orchestration/dispatch", {
@@ -377,34 +368,92 @@ export function threadTitle(prompt: string): string {
   return firstLine.trim().slice(0, 60);
 }
 
-export const deepLink = (environmentId: string, threadId: string) =>
-  `t3code://app/${environmentId}/${threadId}`;
+const appName = () => preferences().appName?.trim() || "T3 Code";
 
 const escapeForAppleScript = (value: string) =>
   value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
+/** What the T3 command palette knows about a thread. */
+export type PaletteThread = {
+  title: string;
+  projectTitle: string | undefined;
+  branch: string | null;
+};
+
+// Mirrors normalizeSearchText in T3's CommandPalette.logic.ts, so a match counted
+// here is a match the palette will list.
+const normalizeSearchText = (value: string) =>
+  value
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+export const paletteQuery = (thread: PaletteThread) =>
+  [thread.title, thread.projectTitle, thread.branch]
+    .filter((part): part is string => Boolean(part))
+    .join(" ");
+
+/** The palette lists a thread when every query token appears somewhere in its
+ * title, project title or branch. */
+export function paletteMatchCount(
+  threads: PaletteThread[],
+  query: string,
+): number {
+  const tokens = normalizeSearchText(query).split(" ");
+  return threads.filter((thread) => {
+    const haystack = normalizeSearchText(
+      [thread.title, thread.projectTitle ?? "", thread.branch ?? ""].join(" "),
+    );
+    return tokens.every((token) => haystack.includes(token));
+  }).length;
+}
+
+export function paletteThreads(snapshot: ShellSnapshot): PaletteThread[] {
+  const projectTitles = new Map(
+    snapshot.projects.map((project) => [project.id, project.title]),
+  );
+  return liveThreads(snapshot).map((thread) => ({
+    title: thread.title,
+    projectTitle: projectTitles.get(thread.projectId),
+    branch: thread.branch,
+  }));
+}
+
 /** The desktop app registers t3code:// for Clerk callbacks only: an external URL
  * reveals the window but never navigates. So focus the app and drive its own
- * command palette, which searches threads by title, project and branch. */
-export async function focusThread(title: string): Promise<void> {
-  const appName = preferences().appName?.trim() || "T3 Code (Nightly)";
-  await run("/usr/bin/open", ["-a", appName]);
+ * command palette with the thread's title, project and branch. Enter is pressed
+ * only when that query lists exactly one thread; otherwise the palette stays open
+ * on the narrowed list and returns false so the caller can say so. */
+export async function focusThread(
+  target: PaletteThread,
+  candidates: PaletteThread[],
+): Promise<boolean> {
+  const query = paletteQuery(target);
+  const exact = paletteMatchCount(candidates, query) === 1;
+  const name = appName();
+  await run("/usr/bin/open", ["-a", name]);
   const script = `
-tell application "${escapeForAppleScript(appName)}" to activate
+tell application "${escapeForAppleScript(name)}" to activate
 delay 0.35
 tell application "System Events"
   keystroke "k" using command down
   delay 0.35
-  keystroke "${escapeForAppleScript(title)}"
+  keystroke "${escapeForAppleScript(query)}"${
+    exact
+      ? `
   delay 0.45
-  key code 36
+  key code 36`
+      : ""
+  }
 end tell`;
   await run("/usr/bin/osascript", ["-e", script]);
+  return exact;
 }
 
 export async function launchApp(): Promise<void> {
-  const appName = preferences().appName?.trim() || "T3 Code (Nightly)";
-  await run("/usr/bin/open", ["-a", appName]);
+  await run("/usr/bin/open", ["-a", appName()]);
 }
 
 export function worktreePathFor(workspaceRoot: string, branch: string): string {
@@ -412,8 +461,6 @@ export function worktreePathFor(workspaceRoot: string, branch: string): string {
   return join(WORKTREES_DIR, repoName, branch.replace(/\//g, "-"));
 }
 
-/** T3 prepares worktrees on its WebSocket path only, so the extension does the same
- * two steps itself: fetch the base, then add the worktree where T3 would have put it. */
 /** The default branch of a repository is whatever origin/HEAD points at, not
  * necessarily `main`. Falls back to the checked-out branch when there is no
  * remote to ask. */
