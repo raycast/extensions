@@ -1,0 +1,60 @@
+import { BOX, BoxStyle } from "./box";
+import { alignRows, measureColumns } from "./columns";
+import { splitLines } from "./width";
+
+export type TableStyle = BoxStyle | "markdown" | "plain";
+
+const MD_SEPARATOR = /^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+
+/**
+ * Splits rows into cells. Delimiter, in order of preference: tab (pasted from a spreadsheet),
+ * pipe (a markdown table), two or more spaces (aligned columns), comma.
+ */
+export function parseTable(input: string): string[][] {
+  const lines = splitLines(input).filter((l) => l.trim() && !MD_SEPARATOR.test(l));
+  if (!lines.length) return [];
+
+  let split: (l: string) => string[];
+  if (lines.some((l) => l.includes("\t"))) {
+    split = (l) => l.split("\t");
+  } else if (lines.every((l) => l.includes("|"))) {
+    split = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|");
+  } else if (lines.some((l) => /\S {2,}\S/.test(l))) {
+    split = (l) => l.trim().split(/ {2,}/);
+  } else if (lines.every((l) => l.includes(","))) {
+    split = (l) => l.split(",");
+  } else {
+    split = (l) => [l];
+  }
+
+  const rows = lines.map((l) => split(l).map((c) => c.trim()));
+  const cols = Math.max(...rows.map((r) => r.length));
+  return rows.map((r) => [...r, ...Array(cols - r.length).fill("")]);
+}
+
+/** First row is the header. Columns whose body cells are all numbers are right-aligned. */
+export function renderTable(input: string, style: TableStyle = "light"): string {
+  const rows = parseTable(input);
+  if (!rows.length) return "";
+  const { widths, numeric, cell } = measureColumns(rows, 3);
+  const body = rows.slice(1);
+
+  if (style === "plain") {
+    const [header, ...rest] = alignRows(rows);
+    return [header, widths.map((w) => "─".repeat(w)).join("  "), ...rest].join("\n");
+  }
+
+  if (style === "markdown") {
+    const line = (r: string[]) => `| ${r.map(cell).join(" | ")} |`;
+    const sep = widths.map((w, i) => (numeric[i] ? "-".repeat(w - 1) + ":" : "-".repeat(w)));
+    return [line(rows[0]), `| ${sep.join(" | ")} |`, ...body.map(line)].join("\n");
+  }
+
+  const c = BOX[style];
+  const rule = (l: string, j: string, r: string) => l + widths.map((w) => c.h.repeat(w + 2)).join(j) + r;
+  const line = (r: string[]) => `${c.v} ${r.map(cell).join(` ${c.v} `)} ${c.v}`;
+  const out = [rule(c.tl, c.tj, c.tr), line(rows[0])];
+  if (body.length) out.push(rule(c.ml, c.x, c.mr), ...body.map(line));
+  out.push(rule(c.bl, c.bj, c.br));
+  return out.join("\n");
+}
