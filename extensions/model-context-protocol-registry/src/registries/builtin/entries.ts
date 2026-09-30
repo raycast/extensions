@@ -19,6 +19,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "60fps",
+    title: "60fps",
+    description:
+      "Real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one (trigger, timing, easing, spring) and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/60fps-Design/plugin/main/assets/logo.png",
+    homepage: "https://60fps.design/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.60fps.design/mcp"],
+    },
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
