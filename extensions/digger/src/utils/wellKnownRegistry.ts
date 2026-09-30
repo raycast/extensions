@@ -13,7 +13,7 @@ const log = getLogger("wellknown-registry");
  * exactly as before. What a refresh buys is the handful of paths registered
  * since the release.
  *
- * IANA serves `Last-Modified` and honours `If-Modified-Since` with a 304
+ * IANA serves `Last-Modified` and honors `If-Modified-Since` with a 304
  * (verified 2026-09-08), so the steady state is a conditional request that
  * transfers no body at all. The registry changes a few times a year; the check
  * interval is set accordingly.

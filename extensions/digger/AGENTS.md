@@ -2,7 +2,7 @@
 
 > Instructions for AI coding assistants working on this codebase.
 
-Digger analyses a URL and reports what it found: metadata, discoverability files,
+Digger analyzes a URL and reports what it found: metadata, discoverability files,
 resources, headers, DNS and certificates, archive history, host metadata. One command,
 one detail pane per section.
 
@@ -66,7 +66,7 @@ Specific traps, all of which have bitten:
 matching bump of the cache key. It was forgotten all three times, and each time produced
 the same failure: an entry cached under the old shape has no such field, the section
 renders the missing field as an established absence — "None published", "No theme
-declared", a swatch with no colour — and serves that for the whole 48h TTL. All three
+declared", a swatch with no color — and serves that for the whole 48h TTL. All three
 passed `tsc`, `ray build` and `ray lint`, because a missing optional field is valid.
 
 Adding a checklist item would have been the fourth chance to forget. The fix is that
@@ -142,6 +142,55 @@ reserved for two cases: the main fetch failing, which ends the dig, and the loss
 auxiliary subsystem — DNS, the certificate, Wayback, host metadata. A single unreachable file inside a section stays in that section: the reader
 reviews sections one at a time, and a toast that fires for details is one they learn to
 dismiss. The toast reads `lookups`; discoverability statuses deliberately do not feed it.
+
+## A page-chosen URL never reaches a renderer unguarded
+
+`fetchPageSuppliedUrl` in `src/utils/networkGuard.ts` is the only way this extension
+requests a URL that came from page content: it re-checks every redirect hop and refuses
+private addresses. Two ways around it look harmless and are not:
+
+- **A page URL as a Raycast image source.** `content`, `icon` and `source` are fetched by
+  Raycast itself, outside the guard, redirects and all, so an `og:image` or a declared
+  favicon pointing at `http://169.254.169.254/` is a request from the user's machine.
+  Download it first and hand Raycast the local file: `useGuardedImages` /
+  `fetchImageToFile` in `src/utils/imageFetch.ts`, or for the SVG grid,
+  `loadRemoteSvgs` in `src/utils/svgFetch.ts`. `getFavicon(data.url)` is fine: that is
+  the URL the user typed, looked up through Raycast's own service.
+- **An SVG that is rendered.** The guard checks the request for the SVG, not what the
+  SVG then asks for: an `<image href>`, a CSS `url()`, an `@import`. Every SVG that is
+  DISPLAYED goes through `displaySafe()` in `src/utils/svgUtils.ts` first: grid
+  thumbnails, backdrops, Quick Look files, Copy as PNG, guarded image files and SVG
+  data URIs. Copy as SVG and Export as SVG hand over the original, the file the user asked for.
+
+This was missed in four places in one release: the images grid, Overview's favicon, the
+SVG grid's file-backed tiles, and the Copy as PNG input. Each looked like displaying an
+image.
+
+## Copy as PNG renders with AppKit, and AppKit has limits
+
+`src/utils/svgRaster.ts` rasterizes an SVG by running JXA through `osascript`:
+`NSImage` reads the SVG and draws it into a transparent bitmap, and the PNG and TIFF
+data go on the pasteboard. It is macOS-only (`canCopySvgAsPng`), adds no dependency, and
+replaced `qlmanage -t`, which makes thumbnails — always square, always on opaque white.
+
+Two things AppKit's SVG renderer does differently from Raycast's, both found on
+stripe.com's logos:
+
+- **It draws nothing for `var()`.** Stripe paints with
+  `fill="var(--caseStudyLogoColor, #000)"`, a variable the page's stylesheet defines.
+  Raycast fell back to `#000`; AppKit drew an empty image. `resolvePageVariables()` in
+  `src/utils/svgUtils.ts` now rewrites every `var()` the SVG does not declare itself to
+  its fallback, on every export path. A `var()` with no fallback is left alone — nothing
+  says what it should be — and draws black.
+- **It renders filter effects at the SVG's native size, then scales them.** Lovable's
+  heart is built from `feGaussianBlur` filters in a 100×60 viewBox, so in a 1024px PNG
+  the heart is pixelated while the wordmark beside it is sharp. Three workarounds changed
+  nothing: sizing the `NSImage` before drawing, enlarging the root `width`/`height`, and
+  scaling the coordinate system 10×. Accepted as a known limit (2026-09-29): filter-heavy
+  SVGs are uncommon, and Copy as SVG and Export as SVG keep full vector quality. If it
+  needs fixing, the options are a WebKit snapshot (browser-quality, but an offscreen web
+  view and its run loop inside JXA) or `@resvg/resvg-js` (correct filters on both
+  platforms, but a native binary per platform).
 
 ## Layout
 

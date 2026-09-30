@@ -98,14 +98,20 @@ export function exportFilename(name: string, format: ExportFormat): string {
  * the way the Finder does. Returns the path actually written.
  */
 export async function downloadToFile(resource: Exportable, format: ExportFormat): Promise<string> {
-  const contents = toFormat(resource, format);
-  const filename = exportFilename(resource.name, format);
+  return writeToDownloads(exportFilename(resource.name, format), toFormat(resource, format));
+}
+
+/**
+ * The write behind every download: into ~/Downloads, never overwriting. Returns
+ * the path actually written, which differs from `filename` after a collision.
+ */
+export async function writeToDownloads(filename: string, contents: string): Promise<string> {
   const directory = join(homedir(), "Downloads");
   // A machine without ~/Downloads otherwise fails every download with ENOENT.
   await mkdir(directory, { recursive: true });
   const dot = filename.lastIndexOf(".");
-  const stem = filename.slice(0, dot);
-  const ext = filename.slice(dot);
+  const stem = dot > 0 ? filename.slice(0, dot) : filename;
+  const ext = dot > 0 ? filename.slice(dot) : "";
 
   for (let n = 1; n < 100; n++) {
     const candidate = join(directory, n === 1 ? filename : `${stem} ${n}${ext}`);
@@ -119,6 +125,30 @@ export async function downloadToFile(resource: Exportable, format: ExportFormat)
     }
   }
   throw new Error(`Could not find an unused filename for ${filename} in ~/Downloads`);
+}
+
+/** Names Windows reserves for devices. `CON.txt` is reserved too: only the part before the first dot counts. */
+const WINDOWS_RESERVED = /^(?:con|prn|aux|nul|com[0-9¹²³]|lpt[0-9¹²³])(?:\.|$)/i;
+
+/**
+ * A safe `.svg` filename from an SVG's display name, which the page chose.
+ *
+ * Path separators and the characters Windows forbids become `-`, so a name can
+ * never leave ~/Downloads. Leading dots are dropped (a hidden file on macOS),
+ * trailing dots and spaces too (Windows strips them, so `a.` and `a` collide),
+ * and a device name like `CON` or `CON.txt` gets a prefix — an extension does not save it.
+ */
+export function svgFilename(name: string): string {
+  // Control characters dropped by code point: a regex range over them trips no-control-regex.
+  const printable = [...name].filter((ch) => ch.charCodeAt(0) >= 0x20).join("");
+  let safe = printable
+    .replace(/[/\\:*?"<>|]/g, "-")
+    .replace(/\s+/g, " ")
+    .slice(0, 80)
+    .replace(/^[\s.]+/, "")
+    .replace(/[\s.]+$/, "");
+  if (WINDOWS_RESERVED.test(safe)) safe = `_${safe}`;
+  return `${safe || "image"}.svg`;
 }
 
 /**

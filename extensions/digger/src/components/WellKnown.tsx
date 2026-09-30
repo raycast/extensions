@@ -58,6 +58,7 @@ export function WellKnown({ data, onRefresh, progress }: WellKnownProps) {
           data={data}
           url={data.url}
           onRefresh={onRefresh}
+          sectionActionsFirst
           sectionActions={
             wellKnown && (
               <Action.Push
@@ -102,10 +103,7 @@ function WellKnownDetail({ wellKnown, status, isLoading }: WellKnownDetailProps)
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="Well-Known Files" text={label} icon={icon} />
             {status === "unavailable" && !isLoading && (
-              <List.Item.Detail.Metadata.Label
-                title=""
-                text="The sweep did not complete, so nothing about this host's /.well-known/ has been established."
-              />
+              <List.Item.Detail.Metadata.Label title="" text="Sweep incomplete. No Well-Known sources established." />
             )}
           </List.Item.Detail.Metadata>
         }
@@ -130,7 +128,7 @@ function WellKnownDetail({ wellKnown, status, isLoading }: WellKnownDetailProps)
             />
             <List.Item.Detail.Metadata.Label
               title=""
-              text={`This host returns a file for every path under /.well-known/, including one nothing publishes. All ${probed} answers are that same catch-all.`}
+              text={`Catch-all host. All ${probed} paths return the same file.`}
             />
           </List.Item.Detail.Metadata>
         }
@@ -154,7 +152,7 @@ function WellKnownDetail({ wellKnown, status, isLoading }: WellKnownDetailProps)
           {wellKnown.controlUnchecked && (
             <List.Item.Detail.Metadata.Label
               title="Confidence"
-              text="The control probe failed, so whether this host answers every path is unknown"
+              text="Control probe failed. Catch-all behavior unknown."
               icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
             />
           )}

@@ -201,7 +201,7 @@ export async function fetchHeadOnlyWithFallback(
   try {
     return await fetchHeadOnly(url, timeout, signal);
   } catch (httpsError) {
-    // A CANCELLED request is not a failed one — bail before warning or retrying.
+    // A CANCELED request is not a failed one — bail before warning or retrying.
     //
     // `fetchHeadOnly` throws a plain Error("Fetch aborted") when the caller's
     // signal fires, which arrives here indistinguishably from a genuine TLS or
@@ -240,6 +240,103 @@ export async function fetchHeadOnlyWithFallback(
       throw httpsError;
     }
   }
+}
+
+/**
+ * Reads at most `maxBytes` of a body, then cancels the stream.
+ *
+ * `await response.text()` buffers the WHOLE body before any cap can be applied,
+ * so slicing afterward limits what is parsed and not what is downloaded.
+ * Reading chunk by chunk and canceling bounds the memory, not just the parse.
+ */
+export async function readCappedBytes(
+  response: Response,
+  maxBytes: number,
+): Promise<{ bytes: Buffer; truncated: boolean }> {
+  const reader = response.body?.getReader();
+  if (!reader) return { bytes: Buffer.alloc(0), truncated: false };
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (total < maxBytes) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      const slice = value.byteLength > maxBytes - total ? value.subarray(0, maxBytes - total) : value;
+      chunks.push(slice);
+      total += slice.byteLength;
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+  }
+  // Reaching the cap counts as truncated without reading on to prove it. One
+  // more read would stall on a server that pauses there, turning a body that
+  // was fully read into a timeout; a body exactly at the cap is rare, and
+  // calling it truncated only adds a caveat.
+  return { bytes: Buffer.concat(chunks), truncated: total >= maxBytes };
+}
+
+/** readCappedBytes, decoded as UTF-8 — a BOM is dropped and a character split at the cap becomes U+FFFD. */
+export async function readCappedText(
+  response: Response,
+  maxBytes: number,
+): Promise<{ text: string; truncated: boolean }> {
+  const { bytes, truncated } = await readCappedBytes(response, maxBytes);
+  return { text: new TextDecoder("utf-8", { fatal: false }).decode(bytes), truncated };
+}
+
+/** Runs `fn` over `items`, at most `limit` at a time, taking no new item once `signal` aborts. */
+export async function forEachWithConcurrency<T>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<void>,
+  signal?: AbortSignal,
+): Promise<void> {
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length && !signal?.aborted) await fn(items[next++]);
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+}
+
+export interface FullPageResult {
+  html: string;
+  finalUrl: string;
+  status: number;
+  headers: Record<string, string>;
+  /** The page exceeded LIMITS.MAX_PAGE_BYTES and only its start was read. */
+  truncated: boolean;
+}
+
+/**
+ * The whole document, for on-demand scans that need the body — the dig reads
+ * only `<head>` (see fetchHeadOnly).
+ *
+ * This is the URL the user asked about, not a page-supplied one, so it takes no
+ * network guard, the same as the dig itself.
+ *
+ * Throws on a non-2xx. `fetch` resolves a 429 or a 500, and scanning the error
+ * page it carries would report that page's SVGs — usually none — as the site's.
+ */
+export async function fetchFullPage(url: string, signal?: AbortSignal): Promise<FullPageResult> {
+  const timeout = AbortSignal.timeout(TIMEOUTS.FULL_PAGE);
+  const response = await fetch(url, {
+    redirect: "follow",
+    headers: FETCH_HEADERS,
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+  });
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new Error(`The page returned HTTP ${response.status}`);
+  }
+  const { text, truncated } = await readCappedText(response, LIMITS.MAX_PAGE_BYTES);
+  return {
+    html: text,
+    finalUrl: response.url || url,
+    status: response.status,
+    headers: extractHeaders(response),
+    truncated,
+  };
 }
 
 /**
