@@ -11,6 +11,7 @@ import {
   selectChunks,
   timestampUrl,
   transcriptText,
+  truncateToTokens,
   videoStats,
 } from "../src/lib/video-context";
 import { Video } from "../src/types";
@@ -100,6 +101,64 @@ describe("dossierMarkdown", () => {
     expect(md).toContain("- [1:35] Engines");
     expect(md).toContain("rocket, diy");
     expect(md).toContain("We build a rocket.");
+  });
+});
+
+describe("estimateTokens", () => {
+  // Real counts from `fm count-tokens` (macOS 27) for each sentence repeated 30 times.
+  const measured: [string, string, number][] = [
+    [
+      "en",
+      "So today we are going to talk about how the starter works and why you should feed it every day, because the yeast needs fresh flour to keep going.",
+      931,
+    ],
+    [
+      "cs",
+      "Dnes si povíme, jak funguje kvásek a proč byste ho měli krmit každý den, protože kvasinky potřebují čerstvou mouku, aby mohly pokračovat.",
+      1261,
+    ],
+    [
+      "ru",
+      "Сегодня мы поговорим о том, как работает закваска и почему её нужно кормить каждый день, ведь дрожжам нужна свежая мука.",
+      961,
+    ],
+    [
+      "ja",
+      "今日はサワー種がどのように働くのか、そしてなぜ毎日餌をあげる必要があるのかについて話します。酵母は新鮮な小麦粉を必要とします。",
+      1050,
+    ],
+    ["zh", "今天我们来聊聊酸面种是如何工作的，以及为什么你应该每天喂养它，因为酵母需要新鲜的面粉才能继续发酵。", 931],
+    [
+      "ko",
+      "오늘은 사워도우 스타터가 어떻게 작동하는지, 그리고 왜 매일 먹이를 줘야 하는지에 대해 이야기하겠습니다.",
+      811,
+    ],
+    [
+      "ar",
+      "اليوم سنتحدث عن كيفية عمل الخميرة ولماذا يجب إطعامها كل يوم، لأن الخميرة تحتاج إلى دقيق طازج للاستمرار.",
+      992,
+    ],
+  ];
+
+  it.each(measured)("stays close to the real count for %s, so a transcript fits the model", (_, sentence, real) => {
+    const estimate = estimateTokens(Array(30).fill(sentence).join(" "));
+    // Under-counting overflows Apple's 8,192-token window; over-counting wastes it.
+    expect(real / estimate).toBeLessThanOrEqual(1.25);
+    expect(real / estimate).toBeGreaterThanOrEqual(0.75);
+  });
+});
+
+describe("truncateToTokens", () => {
+  it("leaves text that fits alone", () => {
+    expect(truncateToTokens("short note", 100)).toBe("short note");
+  });
+
+  it("cuts to about the budget in any script", () => {
+    const english = truncateToTokens("word ".repeat(400), 50);
+    expect(estimateTokens(english)).toBeLessThanOrEqual(51);
+    expect(english.endsWith("…")).toBe(true);
+    const chinese = truncateToTokens("酵母需要新鲜的面粉".repeat(50), 50);
+    expect(estimateTokens(chinese)).toBeLessThanOrEqual(51);
   });
 });
 

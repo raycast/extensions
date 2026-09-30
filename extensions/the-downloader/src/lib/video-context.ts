@@ -94,9 +94,42 @@ export function transcriptText(segments: TranscriptSegment[]): string {
   return segments.map((s) => `[${formatTimestamp(s.start)}] ${s.text}`).join("\n");
 }
 
-/** Rough token count for budgeting prompts (English averages ~4 characters per token). */
+/** Chinese, Japanese and Korean characters (Hangul jamo, kana, CJK ideographs, Hangul syllables, full-width forms). */
+function isDenseScript(code: number): boolean {
+  return (
+    (code >= 0x1100 && code <= 0x11ff) ||
+    (code >= 0x3000 && code <= 0x30ff) ||
+    (code >= 0x3130 && code <= 0x318f) ||
+    (code >= 0x3400 && code <= 0x4dbf) ||
+    (code >= 0x4e00 && code <= 0x9fff) ||
+    (code >= 0xac00 && code <= 0xd7af) ||
+    (code >= 0xf900 && code <= 0xfaff) ||
+    (code >= 0xff00 && code <= 0xffef)
+  );
+}
+
+/**
+ * Rough token count for budgeting prompts, fitted to Apple's tokenizer
+ * (`fm count-tokens`): about 4 ASCII characters per token, 3 for other
+ * alphabets (accented Latin, Cyrillic, Arabic…) and 1.4 for Chinese, Japanese
+ * and Korean — counting those at 4 would overflow the model's window.
+ */
 export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
+  let ascii = 0;
+  let dense = 0;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code < 0x80) ascii++;
+    else if (isDenseScript(code)) dense++;
+  }
+  return Math.ceil(ascii / 4 + (text.length - ascii - dense) / 3 + dense * 0.7);
+}
+
+/** `text` cut to about `tokens`, ending in an ellipsis when cut. */
+export function truncateToTokens(text: string, tokens: number): string {
+  const estimate = estimateTokens(text);
+  if (estimate <= tokens) return text;
+  return `${text.slice(0, Math.floor((text.length * tokens) / estimate))}…`;
 }
 
 function statsLines(video: Video, now: number): string[] {

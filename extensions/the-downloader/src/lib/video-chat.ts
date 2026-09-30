@@ -10,6 +10,7 @@ import {
   selectChunks,
   timestampUrl,
   transcriptText,
+  truncateToTokens,
 } from "./video-context.js";
 
 // How a question about a video becomes one or more model requests. The whole
@@ -145,8 +146,8 @@ export async function answerFromNotes(
 
   // Keep the notes inside the budget for the final request.
   const noteBudget = Math.max(600, engine.contextBudget - estimateTokens(facts) - estimateTokens(question) - 300);
-  const perNote = Math.floor((noteBudget * 4) / Math.max(notes.length, 1));
-  const fitted = notes.map((n) => (n.length > perNote ? `${n.slice(0, perNote)}…` : n)).join("\n\n");
+  const perNote = Math.floor(noteBudget / Math.max(notes.length, 1));
+  const fitted = notes.map((n) => truncateToTokens(n, perNote)).join("\n\n");
 
   options.onStatus?.("Writing the answer…");
   const answer = await engine.complete(
