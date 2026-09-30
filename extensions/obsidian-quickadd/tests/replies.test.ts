@@ -232,7 +232,11 @@ describe("helpers", () => {
     expect(
       dropdownDefault({ id: "a", label: "a", kind: "dropdown", options: opts, defaultValue: "z", optional: false }),
     ).toBe("x");
-    expect(dateDefault("@date:2026-09-30")?.getTime()).toBe(Date.parse("2026-09-30"));
+    // Date-only values are local calendar days (not UTC midnight, which is the previous day west of UTC).
+    const day = dateDefault("@date:2026-09-30");
+    expect([day?.getFullYear(), day?.getMonth(), day?.getDate(), day?.getHours()]).toEqual([2026, 8, 30, 0]);
+    expect(dateDefault("2026-01-05")?.getDate()).toBe(5);
+    expect(dateDefault("@date:2026-09-30T14:30:00Z")?.getTime()).toBe(Date.parse("2026-09-30T14:30:00Z"));
     expect(dateDefault("not a date")).toBeUndefined();
     expect(dateDefault(undefined)).toBeUndefined();
   });

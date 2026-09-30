@@ -31,3 +31,9 @@ export function buildOpenUri(vaultName: string, file?: string): string {
   if (file) params.push(`file=${encodeURIComponent(file)}`);
   return `obsidian://open?${params.join("&")}`;
 }
+
+/** Basic mode runs choices by name; one whose name another choice shares can't be run safely. */
+export function basicRunBlocked(choice: Choice): string | undefined {
+  if (!choice.sharedName) return undefined;
+  return `Another QuickAdd choice is also named "${choice.name}", and basic mode runs choices by name. Rename one of them in QuickAdd, or turn on Obsidian's command-line interface (full mode runs choices by id).`;
+}

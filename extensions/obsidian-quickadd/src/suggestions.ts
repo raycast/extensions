@@ -42,7 +42,15 @@ export async function loadLinkTargets(vault: VaultRef): Promise<LinkTarget[]> {
       );
     }
   }
-  return notesToTargets(listNotes(vault.vaultPath));
+  const settings = fileSettings(vault.vaultPath);
+  const notes = listNotes(vault.vaultPath);
+  const kept = new Set(
+    linkableFiles(
+      notes.map((note) => note.path),
+      settings,
+    ),
+  );
+  return notesToTargets(notes.filter((note) => kept.has(note.path)));
 }
 
 /** The vault's "Files and links" settings that decide what `[[` offers. */

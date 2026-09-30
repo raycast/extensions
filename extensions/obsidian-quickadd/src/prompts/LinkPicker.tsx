@@ -20,9 +20,13 @@ export default function LinkPicker({
 
   useEffect(() => {
     let active = true;
-    loadLinkTargets(vault).then((loaded) => {
-      if (active) setTargets(loaded);
-    });
+    loadLinkTargets(vault)
+      .then((loaded) => {
+        if (active) setTargets(loaded);
+      })
+      .catch(() => {
+        if (active) setTargets([]);
+      });
     return () => {
       active = false;
       onClose();

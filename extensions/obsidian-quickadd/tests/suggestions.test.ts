@@ -74,3 +74,15 @@ describe("loadLinkTargets with Obsidian's file settings", () => {
     ]);
   });
 });
+
+describe("loadLinkTargets without the CLI", () => {
+  it("applies Obsidian's excluded files to the vault scan", async () => {
+    const root = vault({ "Keep.md": 1000 });
+    const { mkdirSync } = await import("fs");
+    mkdirSync(join(root, "Archive"));
+    writeFileSync(join(root, "Archive/Old.md"), "");
+    mkdirSync(join(root, ".obsidian"));
+    writeFileSync(join(root, ".obsidian/app.json"), JSON.stringify({ userIgnoreFilters: ["Archive/"] }));
+    expect((await loadLinkTargets({ vaultPath: root, vaultName: "v" })).map((t) => t.link)).toEqual(["Keep"]);
+  });
+});

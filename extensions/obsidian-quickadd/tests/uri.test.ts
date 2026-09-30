@@ -51,7 +51,7 @@ describe("collectVars", () => {
   });
 });
 
-import { buildOpenUri, runsInBackground } from "../src/uri";
+import { basicRunBlocked, buildOpenUri, runsInBackground } from "../src/uri";
 import { Choice } from "../src/types";
 
 const choice = (over: Partial<Choice>): Choice => ({
@@ -63,6 +63,7 @@ const choice = (over: Partial<Choice>): Choice => ({
   notes: [],
   openFile: false,
   promptsInObsidian: false,
+  sharedName: false,
   ...over,
 });
 
@@ -78,5 +79,14 @@ describe("buildOpenUri", () => {
   it("opens a vault, or a file in it", () => {
     expect(buildOpenUri("my vault")).toBe("obsidian://open?vault=my%20vault");
     expect(buildOpenUri("v", "People/A & B.md")).toBe("obsidian://open?vault=v&file=People%2FA%20%26%20B.md");
+  });
+});
+
+describe("basicRunBlocked", () => {
+  it("blocks basic-mode runs of choices whose name is shared", () => {
+    expect(basicRunBlocked(choice({}))).toBeUndefined();
+    expect(basicRunBlocked(choice({ name: "Log", sharedName: true }))).toMatch(
+      /Another QuickAdd choice is also named "Log"/,
+    );
   });
 });

@@ -235,7 +235,11 @@ export function dropdownDefault(spec: FieldSpec): string | undefined {
 
 export function dateDefault(value: unknown): Date | undefined {
   if (typeof value !== "string" || value === "") return undefined;
-  const time = Date.parse(value.replace(/^@date:/, ""));
+  const text = value.replace(/^@date:/, "");
+  // A date-only value is a local calendar day; Date.parse would read it as UTC midnight.
+  const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  if (day) return new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
+  const time = Date.parse(text);
   return Number.isNaN(time) ? undefined : new Date(time);
 }
 

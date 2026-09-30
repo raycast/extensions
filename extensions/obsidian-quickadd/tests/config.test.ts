@@ -190,9 +190,12 @@ describe("loadChoices structure", () => {
     expect(choices[1].notes).toContain(OBSIDIAN_PROMPTS_NOTE);
   });
 
-  it("warns on duplicate names", () => {
-    const choices = loadChoices(makeVault([capture({ id: "a" }), capture({ id: "b" })]));
-    for (const c of choices) expect(c.notes.join(" ")).toMatch(/Another choice is also named "Thought"/);
+  it("flags choices that share a name, which basic mode can't tell apart", () => {
+    const choices = loadChoices(
+      makeVault([capture({ id: "a" }), capture({ id: "b" }), capture({ id: "c", name: "Other" })]),
+    );
+    expect(choices.map((c) => c.sharedName)).toEqual([true, true, false]);
+    for (const c of choices.slice(0, 2)) expect(c.notes.join(" ")).toMatch(/Another choice is also named "Thought"/);
   });
 });
 

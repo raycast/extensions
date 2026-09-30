@@ -104,6 +104,7 @@ function flatten(raws: unknown[], parentTitle: string | undefined, vaultPath: st
         notes: [`Could not read this choice's settings: ${(error as Error).message}`, OBSIDIAN_PROMPTS_NOTE],
         openFile: false,
         promptsInObsidian: true,
+        sharedName: false,
       });
     }
   }
@@ -172,6 +173,7 @@ function buildChoice(raw: RawChoice & { id: string; name: string }, title: strin
     notes,
     openFile: raw.openFile === true,
     promptsInObsidian,
+    sharedName: false,
   };
 }
 
@@ -212,8 +214,9 @@ function noteDuplicateNames(choices: Choice[]) {
   for (const choice of choices) counts.set(choice.name, (counts.get(choice.name) ?? 0) + 1);
   for (const choice of choices) {
     if ((counts.get(choice.name) ?? 0) > 1) {
+      choice.sharedName = true;
       choice.notes.push(
-        `Another choice is also named "${choice.name}". QuickAdd runs choices by name, so it may run the other one.`,
+        `Another choice is also named "${choice.name}". Full mode runs it by id; basic mode can't run it until one of them is renamed in QuickAdd.`,
       );
     }
   }

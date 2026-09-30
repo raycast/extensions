@@ -24,4 +24,6 @@ export interface Choice {
   openFile: boolean;
   /** Basic mode: QuickAdd will still ask something inside Obsidian. */
   promptsInObsidian: boolean;
+  /** Another choice has the same name, so basic mode (which runs choices by name) can't tell them apart. */
+  sharedName: boolean;
 }

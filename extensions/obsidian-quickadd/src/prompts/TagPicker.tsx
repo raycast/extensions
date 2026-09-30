@@ -18,9 +18,13 @@ export default function TagPicker({
 
   useEffect(() => {
     let active = true;
-    loadTags(vault).then((loaded) => {
-      if (active) setTags(loaded);
-    });
+    loadTags(vault)
+      .then((loaded) => {
+        if (active) setTags(loaded);
+      })
+      .catch(() => {
+        if (active) setTags([]);
+      });
     return () => {
       active = false;
       onClose();

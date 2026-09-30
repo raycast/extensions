@@ -45,7 +45,11 @@ export function listNotes(vaultPath: string): Note[] {
       const path = relative ? `${relative}/${entry.name}` : entry.name;
       if (entry.isDirectory()) walk(path);
       else if (entry.isFile() && entry.name.endsWith(".md")) {
-        found.push({ path, mtime: statSync(join(vaultPath, path)).mtimeMs });
+        try {
+          found.push({ path, mtime: statSync(join(vaultPath, path)).mtimeMs });
+        } catch {
+          // Removed or unreadable since the directory was read (e.g. during a sync): skip it.
+        }
       }
     }
   };

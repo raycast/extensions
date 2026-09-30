@@ -64,6 +64,17 @@ describe("listNotes", () => {
     expect(listNotes(root).map((note) => note.link)).toEqual(["Ideas", "Archive/Ideas", "Solo"]);
   });
 
+  it("skips files it can't read instead of failing (e.g. removed during a sync)", async () => {
+    const { chmodSync } = await import("fs");
+    const root = vault({ "Ok.md": 1000, "Locked/Gone.md": 2000 });
+    chmodSync(join(root, "Locked"), 0o644); // listable, but its files can't be stat'ed
+    try {
+      expect(listNotes(root).map((note) => note.link)).toEqual(["Ok"]);
+    } finally {
+      chmodSync(join(root, "Locked"), 0o755);
+    }
+  });
+
   it("returns nothing for a missing vault", () => {
     expect(listNotes("/nonexistent/vault")).toEqual([]);
   });
