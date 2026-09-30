@@ -1,9 +1,21 @@
-import { Application, closeMainWindow, getApplications, open, showHUD } from "@raycast/api";
+import { Application, LaunchType, closeMainWindow, getApplications, launchCommand, open, showHUD } from "@raycast/api";
+import { execFile } from "node:child_process";
+import { join } from "node:path";
+import { promisify } from "node:util";
+import { isOlderThan } from "./version";
+
+const execFileAsync = promisify(execFile);
 
 /** Bundle identifier of the CueNow app, used to detect whether it is installed. */
 const BUNDLE_ID = "com.cuenow.app";
 
-const DOWNLOAD_URL = "https://github.com/sworup-kumar/cuenow-releases/releases";
+/** The first CueNow release that answers `cuenow://` links, which every command here relies on. */
+export const MINIMUM_VERSION = "1.5.1";
+
+export const DOWNLOAD_URL = "https://github.com/sworup-kumar/cuenow-releases/releases";
+
+/** What is on this Mac, as far as these commands are concerned. */
+export type CueNowStatus = { state: "missing" } | { state: "outdated" } | { state: "ready"; app: Application };
 
 /**
  * The installed copy of CueNow, or `undefined` if there is none.
@@ -18,6 +30,50 @@ async function findCueNow(): Promise<Application | undefined> {
 }
 
 /**
+ * The version of an installed app, read from its Info.plist, or `undefined` if it can't be read.
+ *
+ * Raycast's `Application` carries no version, so the plist is asked directly. `plutil`
+ * reads both the XML and the binary plist formats.
+ */
+async function installedVersion(app: Application): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync("/usr/bin/plutil", [
+      "-extract",
+      "CFBundleShortVersionString",
+      "raw",
+      "-o",
+      "-",
+      join(app.path, "Contents", "Info.plist"),
+    ]);
+    return stdout.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Whether CueNow is missing, too old for these commands, or ready to use.
+ *
+ * A version that can't be read counts as ready: turning someone away on a guess would be
+ * worse than letting the command try.
+ */
+export async function checkCueNow(): Promise<CueNowStatus> {
+  const app = await findCueNow();
+
+  if (!app) {
+    return { state: "missing" };
+  }
+
+  const version = await installedVersion(app);
+
+  if (version && isOlderThan(version, MINIMUM_VERSION)) {
+    return { state: "outdated" };
+  }
+
+  return { state: "ready", app };
+}
+
+/**
  * Hands a `cuenow://` URL to the app.
  *
  * The URL is addressed to a specific bundle rather than left to LaunchServices to
@@ -27,20 +83,30 @@ async function findCueNow(): Promise<Application | undefined> {
  * appears in a window the user never opened. Naming the bundle sends the URL to the copy
  * that is already running, or launches that one if it is not.
  *
- * The installed check is not redundant: opening a URL whose scheme no app claims fails
- * with an opaque LaunchServices error, which reads as a broken command rather than a
- * missing app. CueNow registered the scheme in 1.5.1, so an older copy also lands here —
- * hence the version wording in the message.
+ * The status check is not redundant. With no CueNow, opening the URL fails with an opaque
+ * LaunchServices error that reads as a broken command. With a CueNow older than
+ * `MINIMUM_VERSION` it is worse: macOS reports success and the old app quietly ignores the
+ * link, so nothing happens and nothing says why. Both cases hand over to Search Notes, whose
+ * screen explains what is wrong and offers the download — a no-view command can't draw one.
  */
 export async function runCueNowCommand(
   command: string,
   { params, closeWindow = true }: RunOptions = {},
 ): Promise<boolean> {
-  const cueNow = await findCueNow();
+  const status = await checkCueNow();
 
-  if (!cueNow) {
-    await showHUD("CueNow is not installed");
-    await open(DOWNLOAD_URL);
+  if (status.state !== "ready") {
+    try {
+      await launchCommand({ name: "search-notes", type: LaunchType.UserInitiated });
+    } catch {
+      // `launchCommand` throws if the user has disabled Search Notes. Say it in words instead.
+      await showHUD(
+        status.state === "missing"
+          ? "CueNow is not installed"
+          : "Update CueNow to the latest version to use this command",
+      );
+      await open(DOWNLOAD_URL);
+    }
     return false;
   }
 
@@ -49,10 +115,11 @@ export async function runCueNowCommand(
   }
 
   try {
-    await open(buildURL(command, params), cueNow);
+    await open(buildURL(command, params), status.app);
     return true;
   } catch {
-    await showHUD("Could not reach CueNow — update to version 1.5.1 or later");
+    // Only reachable when the version could not be read, since that is what lets an old copy through.
+    await showHUD(`Could not reach CueNow — update to version ${MINIMUM_VERSION} or later`);
     return false;
   }
 }

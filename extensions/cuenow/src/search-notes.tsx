@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
-import { runCueNowCommand } from "./cuenow";
+import { CueNowStatus, DOWNLOAD_URL, MINIMUM_VERSION, checkCueNow, runCueNowCommand } from "./cuenow";
 import { Note, displayTitle, loadNotes, matchesSearch } from "./notes-file";
 
 /**
@@ -23,7 +23,16 @@ import { Note, displayTitle, loadNotes, matchesSearch } from "./notes-file";
 const AUTOSAVE_SETTLE_MS = 800;
 
 export default function SearchNotes() {
-  const { data: notes, isLoading, revalidate, mutate } = usePromise(loadNotes, []);
+  // Without a usable CueNow there is nothing to act on, and an absent notes file would
+  // otherwise read as "No notes yet" — so check for the app first, the same way the other
+  // commands do. A CueNow that is too old still has notes, but ignores every action here.
+  const { data: cueNow, isLoading: isCheckingForApp } = usePromise(checkCueNow, []);
+  const {
+    data: notes,
+    isLoading,
+    revalidate,
+    mutate,
+  } = usePromise(loadNotes, [], { execute: cueNow?.state === "ready" });
   const [searchText, setSearchText] = useState("");
 
   /**
@@ -97,6 +106,10 @@ export default function SearchNotes() {
     await showToast({ style: Toast.Style.Success, title: "Copied note content" });
   }, []);
 
+  if (cueNow && cueNow.state !== "ready") {
+    return <CueNowUnavailable status={cueNow} />;
+  }
+
   const matching = (notes ?? []).filter((note) => matchesSearch(note, searchText));
   const active = matching.filter((note) => note.visibilityState === "visible");
   const hidden = matching.filter((note) => note.visibilityState === "minimized");
@@ -115,7 +128,7 @@ export default function SearchNotes() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isCheckingForApp || isLoading}
       // Title-only matching is Raycast's default; searching bodies too needs our own pass.
       filtering={false}
       onSearchTextChange={setSearchText}
@@ -134,6 +147,31 @@ export default function SearchNotes() {
       <List.Section title="Hidden" subtitle={hidden.length ? `${hidden.length}` : undefined}>
         {hidden.map(row)}
       </List.Section>
+    </List>
+  );
+}
+
+/**
+ * Shown instead of the list when CueNow is missing or too old — both mean "go and download it".
+ *
+ * The other commands land here too (see `runCueNowCommand`), so the wording covers all of
+ * them rather than Search Notes alone.
+ */
+function CueNowUnavailable({ status }: { status: Exclude<CueNowStatus, { state: "ready" }> }) {
+  const isMissing = status.state === "missing";
+
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Download}
+        title={isMissing ? "CueNow isn't installed" : "CueNow needs an update"}
+        description={`${isMissing ? "Install CueNow" : "Update to"} ${MINIMUM_VERSION} or later to search and manage your notes.\nPress ↵ to download the latest version.`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title={isMissing ? "Download CueNow" : "Download Latest CueNow"} url={DOWNLOAD_URL} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
@@ -157,7 +195,9 @@ function NoteRow({
 
   return (
     <List.Item
-      icon={{ source: "command-icon.png" }}
+      // Unlike the manifest icons, an icon drawn in code doesn't pick up its `@dark`
+      // sibling by itself (checked in Raycast), so both files are named.
+      icon={{ source: { light: "command-icon.png", dark: "command-icon@dark.png" } }}
       // No subtitle: a content preview on every row crowds the list. Search still
       // matches note bodies, it just doesn't show them.
       title={displayTitle(note)}
