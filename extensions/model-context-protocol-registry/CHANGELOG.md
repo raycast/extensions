@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add GitDiagram MCP Server] - {PR_MERGE_DATE}
+## [Add GitDiagram MCP Server] - 2026-09-30
 
 - Add GitDiagram to the official registry: architecture diagrams of public GitHub repositories, with a written explanation of how a codebase is organized, its main components with their source paths, how they connect, and Mermaid source, plus a search of GitDiagram's existing diagrams and explainer-video transcripts. Read-only remote Streamable HTTP server at https://gitdiagram.com/mcp through `mcp-remote`; no sign-in, no API key.
 
