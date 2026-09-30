@@ -538,13 +538,6 @@ function isBareSymbolUse(svg: Element, use: Element): boolean {
   return neutralRoot && neutralUse;
 }
 
-function hasAncestorNamed(el: Element, names: Set<string>): boolean {
-  for (let p = el.parent; p; p = p.parent) {
-    if (p.type === "tag" && names.has((p as Element).name.toLowerCase())) return true;
-  }
-  return false;
-}
-
 class Collector {
   private byKey = new Map<string, SvgAsset>();
   private fallbackCount = 0;
@@ -720,34 +713,62 @@ function indexIds($: cheerio.CheerioAPI): Map<string, Element> {
 }
 
 /**
+ * The definition an element sits in: the nearest enclosing `<symbol>`'s id,
+ * `null` for a bare `<defs>` (or a symbol without an id), undefined when it is
+ * not inside a definition at all.
+ */
+function enclosingDefinition(el: Element): string | null | undefined {
+  for (let p = el.parent; p; p = p.parent) {
+    if (p.type !== "tag") continue;
+    const name = (p as Element).name.toLowerCase();
+    if (name === "symbol") return (p as Element).attribs["id"] ?? null;
+    if (name === "defs") return null;
+  }
+  return undefined;
+}
+
+/**
  * How many times an element is actually drawn: once outside any definition, as
  * often as its enclosing `<symbol>` is used, and never inside a bare `<defs>`.
  */
 function definitionUses(el: Element, symbolUses: Map<string, number>): number {
-  for (let p = el.parent; p; p = p.parent) {
-    if (p.type !== "tag") continue;
-    const name = (p as Element).name.toLowerCase();
-    if (name === "symbol") return symbolUses.get((p as Element).attribs["id"] ?? "") ?? 0;
-    if (name === "defs") return 0;
-  }
-  return 1;
+  const owner = enclosingDefinition(el);
+  if (owner === undefined) return 1;
+  return owner === null ? 0 : (symbolUses.get(owner) ?? 0);
 }
 
 function scanDocument(doc: Doc, collector: Collector, sprites: Map<string, ExternalSprite>): void {
   const { $, base } = doc;
 
-  // Every instantiated use of a local symbol, wherever it sits — inside a group,
-  // beside other shapes, or bare. A use inside a `<symbol>` or `<defs>` is part
-  // of a definition, not a use.
+  // How many times each local symbol is actually drawn. A use outside any
+  // definition draws it once. A use inside another symbol draws it as often as
+  // THAT symbol is drawn, so a symbol reached only through another one is not
+  // "unused". A use inside a bare `<defs>` draws nothing on its own.
   const symbolIds = new Set(($("symbol[id]").get() as Element[]).map((el) => el.attribs["id"]));
-  const symbolUses = new Map<string, number>();
-  const definitionScopes = new Set(["symbol", "defs"]);
+  const direct = new Map<string, number>();
+  const usedBy = new Map<string, string[]>(); // symbol → the symbols whose bodies use it, once per use
   ($("use").get() as Element[]).forEach((use) => {
     const href = hrefOf(use);
-    if (!href?.startsWith("#") || hasAncestorNamed(use, definitionScopes)) return;
+    if (!href?.startsWith("#")) return;
     const id = safeDecode(href.slice(1));
-    if (symbolIds.has(id)) symbolUses.set(id, (symbolUses.get(id) ?? 0) + 1);
+    if (!symbolIds.has(id)) return;
+    const owner = enclosingDefinition(use);
+    if (owner === undefined) direct.set(id, (direct.get(id) ?? 0) + 1);
+    else if (owner !== null) usedBy.set(id, [...(usedBy.get(id) ?? []), owner]);
   });
+  const symbolUses = new Map<string, number>();
+  const effective = (id: string, visiting: Set<string>): number => {
+    const known = symbolUses.get(id);
+    if (known !== undefined) return known;
+    if (visiting.has(id)) return 0; // a cycle draws nothing more
+    visiting.add(id);
+    const total =
+      (direct.get(id) ?? 0) + (usedBy.get(id) ?? []).reduce((n, owner) => n + effective(owner, visiting), 0);
+    visiting.delete(id);
+    symbolUses.set(id, total);
+    return total;
+  };
+  symbolIds.forEach((id) => effective(id, new Set()));
 
   $("symbol[id]").each((_, node) => {
     const el = node as Element;

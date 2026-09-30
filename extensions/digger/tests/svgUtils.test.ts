@@ -338,10 +338,24 @@ test("a root style is part of the artwork: color variants stay separate", () => 
   assert.equal(scan.assets.length, 2);
 });
 
+/**
+ * Strict XML check through libxml2's `xmllint`, found on the PATH: it ships with
+ * macOS, most Linux distributions, and libxml2 builds for Windows. Where it is not
+ * installed, the well-formedness half of a test is skipped with one note rather
+ * than failing, and every other assertion in the test still runs.
+ */
+let xmllintMissing = false;
 function assertWellFormedXml(markup: string) {
+  if (xmllintMissing) return;
   const f = join(mkdtempSync(join(tmpdir(), "svgxml-")), "a.svg");
   writeFileSync(f, markup);
-  execFileSync("/usr/bin/xmllint", ["--noout", f], { stdio: "pipe" }); // throws on any XML error
+  try {
+    execFileSync("xmllint", ["--noout", f], { stdio: "pipe" }); // throws on any XML error
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    xmllintMissing = true;
+    console.warn("xmllint not found on PATH: XML well-formedness assertions skipped (install libxml2 to run them)");
+  }
 }
 
 test("every export path yields well-formed XML (HTML entities, void-ish elements, borrowed defs)", () => {
@@ -964,4 +978,23 @@ test("G8: an external part used inside a symbol is counted by that symbol's uses
     `<svg style="display:none"><symbol id="s"><use href="other.svg#part"/></symbol></svg><svg><use href="#s"/></svg><svg><use href="#s"/></svg>`,
   );
   assert.equal(used.externalSprites[0].uses["part"], 2, "used as often as its symbol is");
+});
+
+// ---- Greptile round 2 on #31769 ----
+test("G2-2: uses count through a symbol chain, for local symbols and their external parts", () => {
+  const s = X(
+    `<svg style="display:none"><symbol id="inner"><use href="other.svg#part"/></symbol>` +
+      `<symbol id="outer"><use href="#inner"/></symbol></svg>` +
+      `<svg><use href="#outer"/></svg><svg><use href="#outer"/></svg>`,
+  );
+  assert.equal(s.externalSprites[0].uses["part"], 2, "drawn twice, through outer → inner");
+  const inner = s.assets.find((a) => a.name === "inner")!;
+  assert.equal(inner.occurrences, 2, "a symbol used only by another symbol is not 'unused'");
+});
+
+test("G2-2: a symbol cycle terminates", () => {
+  const s = X(
+    `<svg style="display:none"><symbol id="a"><use href="#b"/></symbol><symbol id="b"><use href="#a"/></symbol></svg><svg><use href="#a"/></svg>`,
+  );
+  assert.ok(s.assets.length >= 2);
 });
