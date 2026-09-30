@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanUpSrt } from "../src/transcript";
+import { cleanUpSrt, noCaptionsMessage } from "../src/transcript";
 
 /** Build a valid multi-cue SRT document from cue texts (1s apart). */
 function srt(...texts: string[]): string {
@@ -52,5 +52,36 @@ describe("cleanUpSrt", () => {
 
   it("returns an empty string for empty input", () => {
     expect(cleanUpSrt("")).toBe("");
+  });
+});
+
+describe("noCaptionsMessage", () => {
+  it("says a video simply has no captions when none are listed", () => {
+    expect(noCaptionsMessage({ requested: "auto", languages: ["en"], listed: false })).toBe(
+      "This video has no captions.",
+    );
+  });
+
+  it("names a missing chosen language and points to Automatic", () => {
+    const message = noCaptionsMessage({ requested: "de", languages: ["de", "en"], listed: true });
+    expect(message).toMatch(/no German captions/);
+    expect(message).toMatch(/Transcript Language to Automatic/);
+  });
+
+  it("explains YouTube's caption rate limit", () => {
+    expect(
+      noCaptionsMessage({
+        requested: "auto",
+        languages: ["en"],
+        listed: true,
+        error: "Unable to download video subtitles for 'en': HTTP Error 429: Too Many Requests",
+      }),
+    ).toMatch(/limiting caption downloads.*few minutes/);
+  });
+
+  it("keeps any other yt-dlp error", () => {
+    expect(noCaptionsMessage({ requested: "auto", languages: ["en"], listed: true, error: "Something odd" })).toBe(
+      "Couldn't get the captions: Something odd",
+    );
   });
 });

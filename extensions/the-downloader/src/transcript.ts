@@ -36,6 +36,32 @@ export class NoTranscriptError extends Error {
   }
 }
 
+function languageName(code: string): string {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+/**
+ * Why there's no transcript, in plain words: no captions at all, none in the
+ * chosen language, YouTube rate-limiting caption downloads, or yt-dlp's own error.
+ */
+export function noCaptionsMessage(o: {
+  requested: string;
+  languages: string[];
+  listed: boolean;
+  error?: string;
+}): string {
+  if (o.error && /\b429\b|too many requests/i.test(o.error)) {
+    return "YouTube is limiting caption downloads right now. Reload in a few minutes.";
+  }
+  if (o.error) return `Couldn't get the captions: ${o.error}`;
+  if (o.requested === "auto" || !o.listed) return "This video has no captions.";
+  return `This video has no ${languageName(o.requested)} captions. Set Transcript Language to Automatic in preferences to use the language it has.`;
+}
+
 /** Languages to try, most wanted first. `auto` means the video's own language, then English. */
 export function subtitleLanguages(requested: string, videoLanguage?: string | null): string[] {
   const wanted = requested === "auto" ? [videoLanguage ?? "", "en"] : [requested];
@@ -139,7 +165,7 @@ export async function fetchSubtitles(
   // `auto` means "whatever is spoken", so any track beats none (a model can read other languages).
   const track = pickSubtitleTrack(video, wanted, { anyLanguage: requested === "auto" });
   if (listed && !track) {
-    throw new NoTranscriptError(`No ${wanted.join("/")} subtitles found for this video`, video);
+    throw new NoTranscriptError(noCaptionsMessage({ requested, languages: wanted, listed }), video);
   }
   // Sites that don't list their tracks up front get the pattern instead.
   const languages = track ? [track] : wanted;
@@ -188,7 +214,7 @@ export async function fetchSubtitles(
         .pop()
         ?.replace(/^ERROR:\s*/, "");
       throw new NoTranscriptError(
-        code !== 0 ? (lastError ?? message) : `No ${languages.join("/")} subtitles found for this video`,
+        noCaptionsMessage({ requested, languages, listed, error: code !== 0 ? (lastError ?? message) : undefined }),
         video,
       );
     }
@@ -234,7 +260,7 @@ export async function fetchTranscriptSegments(url: string, language = "auto", si
   const { video, srt, language: found } = await fetchSubtitles(url, language, signal);
   const segments = srtToSegments(srt);
   if (segments.length === 0) {
-    throw new NoTranscriptError("No usable transcript text found for this video.", video);
+    throw new NoTranscriptError("This video's captions have no usable text.", video);
   }
   return { video, segments, language: found };
 }

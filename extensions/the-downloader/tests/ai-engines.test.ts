@@ -138,6 +138,37 @@ describe("Apple fm", () => {
 describe("Ollama", () => {
   const settings = { ollamaUrl: "http://127.0.0.1:11434/", ollamaContext: 8192 };
 
+  it("says it's loading the model while the first words take a while, then clears it", async () => {
+    vi.useFakeTimers();
+    try {
+      let push: (text: string) => void = () => undefined;
+      let finish: () => void = () => undefined;
+      const encoder = new TextEncoder();
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          push = (text) => controller.enqueue(encoder.encode(text));
+          finish = () => controller.close();
+        },
+      });
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => new Response(body)),
+      );
+      const statuses: (string | undefined)[] = [];
+      const promise = ollamaEngine({ ...settings, ollamaModel: "llama3.2" }).complete("s", "u", {
+        onStatus: (s) => statuses.push(s),
+      });
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(statuses.at(-1)).toMatch(/Loading llama3\.2 in Ollama/);
+      push(`${JSON.stringify({ message: { content: "Hi" } })}\n`);
+      finish();
+      await expect(promise).resolves.toBe("Hi");
+      expect(statuses.at(-1)).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("reads NDJSON split across chunks", async () => {
     const lines: unknown[] = [];
     await readNdjson(streamOf('{"a":1}\n{"b"', ':2}\n{"c":3}'), (v) => lines.push(v));

@@ -13,10 +13,12 @@ import {
   confirmAlert,
   getPreferenceValues,
 } from "@raycast/api";
+import { EnginePreference, engineSettings } from "../lib/ai-engines.js";
 import { StoredChat, deleteChat, loadChats } from "../lib/chat-store.js";
 import { plural } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { isValidUrl } from "../utils.js";
+import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { VideoChat } from "./video-chat.js";
 
 type Candidate = { url: string; title: string; icon: Icon };
@@ -54,6 +56,10 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
   const [searchText, setSearchText] = useState(initialText);
   const [chats, setChats] = useState<StoredChat[]>();
   const [found, setFound] = useState<Candidate[]>([]);
+  const prefs = useMemo(() => getPreferenceValues<ExtensionPreferences>(), []);
+  const settings = useMemo(() => engineSettings(prefs), [prefs]);
+  // Tell about an engine that isn't ready before a link is pasted, not after the first question.
+  const engine = useEngineStatus((prefs.aiEngine as EnginePreference) || "auto", settings);
 
   useEffect(() => {
     refresh();
@@ -116,7 +122,7 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Paste a video link, or search your chats…"
-      isShowingDetail={shown.length > 0 || starts.length > 0}
+      isShowingDetail={shown.length > 0 || starts.length > 0 || (!!engine.status && !engine.status.ready)}
     >
       <List.EmptyView
         icon={{ source: Icon.SpeechBubbleActive, tintColor: Color.Purple }}
@@ -163,6 +169,8 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
           ))}
         </List.Section>
       )}
+      {/* After Start a Chat, so ↵ on a pasted link starts the chat rather than a fix. */}
+      <EngineNotice status={engine.status} statuses={engine.statuses} onRetry={engine.recheck} />
       {shown.length > 0 && (
         <List.Section title="Recent Chats" subtitle={String(shown.length)}>
           {shown.map((chat) => (

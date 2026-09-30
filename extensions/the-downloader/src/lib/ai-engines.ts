@@ -25,10 +25,23 @@ export type EngineSettings = {
   ollamaContext: number;
 };
 
+/** Engine settings from the extension's preferences. */
+export function engineSettings(prefs: ExtensionPreferences): EngineSettings {
+  const context = Number.parseInt(prefs.ollamaContext ?? "", 10);
+  return {
+    raycastModel: prefs.raycastModel || undefined,
+    ollamaUrl: prefs.ollamaUrl?.trim() || "http://127.0.0.1:11434",
+    ollamaModel: prefs.ollamaModel?.trim() || undefined,
+    ollamaContext: Number.isFinite(context) && context >= 2048 ? context : 8192,
+  };
+}
+
 export type CompleteOptions = {
   signal?: AbortSignal;
   /** Called with the full text so far each time more arrives. */
   onData?: (text: string) => void;
+  /** A short note while the engine is busy before its first words (e.g. loading a model); undefined clears it. */
+  onStatus?: (status: string | undefined) => void;
 };
 
 export interface Engine {
@@ -179,6 +192,9 @@ export async function appleAvailable(): Promise<boolean> {
 // Ollama
 // ---------------------------------------------------------------------------
 
+/** How long Ollama may stay silent before the chat says it's loading the model. */
+const LOADING_NOTICE_MS = 1_500;
+
 function base(url: string): string {
   return url.replace(/\/+$/, "");
 }
@@ -214,8 +230,25 @@ export function ollamaEngine(settings: EngineSettings): Engine {
     contextBudget: Math.max(2_000, Math.floor(settings.ollamaContext * 0.6)),
     async complete(instructions, prompt, options = {}) {
       let res: Response;
+      // The first request after a while makes Ollama load the model into memory,
+      // which can take many seconds before the first word: say so instead of
+      // looking stuck.
+      let loadingShown = false;
+      let loadingTimer: ReturnType<typeof setTimeout> | undefined;
+      const clearLoading = () => {
+        if (loadingTimer) clearTimeout(loadingTimer);
+        loadingTimer = undefined;
+        if (loadingShown) options.onStatus?.(undefined);
+        loadingShown = false;
+      };
       try {
         const model = settings.ollamaModel?.trim() || (await firstOllamaModel(settings.ollamaUrl, options.signal));
+        if (options.onStatus) {
+          loadingTimer = setTimeout(() => {
+            loadingShown = true;
+            options.onStatus?.(`Loading ${model} in Ollama… The first answer after a break takes a moment.`);
+          }, LOADING_NOTICE_MS);
+        }
         res = await fetch(`${base(settings.ollamaUrl)}/api/chat`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -231,18 +264,28 @@ export function ollamaEngine(settings: EngineSettings): Engine {
           }),
         });
       } catch (error) {
+        clearLoading();
         if (error instanceof Error && error.name === "AbortError") throw error;
         if (error instanceof Error && /no models installed/.test(error.message)) throw error;
         throw new Error(`Couldn't reach Ollama at ${settings.ollamaUrl}. Is it running? (${String(error)})`);
       }
-      if (!res.ok || !res.body) throw new Error(`Ollama returned ${res.status}: ${await res.text().catch(() => "")}`);
+      if (!res.ok || !res.body) {
+        clearLoading();
+        throw new Error(`Ollama returned ${res.status}: ${await res.text().catch(() => "")}`);
+      }
       let text = "";
-      await readNdjson(res.body, (value) => {
-        const part = value as { error?: string; message?: { content?: string } };
-        if (part.error) throw new Error(`Ollama: ${part.error}`);
-        text += part.message?.content ?? "";
-        options.onData?.(text);
-      });
+      try {
+        await readNdjson(res.body, (value) => {
+          const part = value as { error?: string; message?: { content?: string } };
+          if (part.error) throw new Error(`Ollama: ${part.error}`);
+          const content = part.message?.content ?? "";
+          if (content) clearLoading();
+          text += content;
+          options.onData?.(text);
+        });
+      } finally {
+        clearLoading();
+      }
       return text.trim();
     },
   };

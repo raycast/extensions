@@ -19,7 +19,9 @@ import {
   showInFinder,
   showToast,
 } from "@raycast/api";
-import { ENGINE_TITLES, EnginePreference, EngineSettings, resolveEngine } from "../lib/ai-engines.js";
+import { ENGINE_TITLES, EngineId, EnginePreference, engineSettings, resolveEngine } from "../lib/ai-engines.js";
+import { checkEngine } from "../lib/engine-status.js";
+import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { chatKey, deleteChat, findChat, saveChat } from "../lib/chat-store.js";
 import { loadVideoContext } from "../lib/context-cache.js";
 import { maxHeight } from "../lib/estimate.js";
@@ -102,16 +104,6 @@ type Turn = ChatTurn & {
 
 const TOOL_PATHS: Record<string, () => string> = { "yt-dlp": getytdlPath, ffmpeg: getffmpegPath };
 
-function engineSettings(prefs: ExtensionPreferences): EngineSettings {
-  const context = Number.parseInt(prefs.ollamaContext ?? "", 10);
-  return {
-    raycastModel: prefs.raycastModel || undefined,
-    ollamaUrl: prefs.ollamaUrl?.trim() || "http://127.0.0.1:11434",
-    ollamaModel: prefs.ollamaModel?.trim() || undefined,
-    ollamaContext: Number.isFinite(context) && context >= 2048 ? context : 8192,
-  };
-}
-
 async function saveMarkdown(name: string, content: string, ext = "md") {
   const target = uniqueFilePath(downloadPath, sanitizeVideoTitle(name), ext);
   try {
@@ -157,7 +149,7 @@ function overviewMarkdown(ctx: VideoContext): string {
   parts.push(
     ctx.segments.length > 0
       ? `_Transcript loaded: ${ctx.segments.length} segments, about ${formatCount(estimateTokens(transcriptText(ctx.segments)))} tokens${ctx.language ? ` (${ctx.language})` : ""}._`
-      : `_No transcript${ctx.transcriptNote ? ` (${ctx.transcriptNote.replace(/[_*`]/g, "")})` : ""}, so answers come from the title, description, chapters and statistics. Reload to try again._`,
+      : `_${ctx.transcriptNote ? ctx.transcriptNote.replace(/[_*`]/g, "") : "No transcript."} Answers come from the title, description, chapters and statistics. Reload to try again._`,
   );
   return parts.join("\n\n");
 }
@@ -210,6 +202,7 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
   const [turns, setTurns] = useState<Turn[]>([]);
   const [searchText, setSearchText] = useState("");
   const [engine, setEngine] = useState<EnginePreference>((prefs.aiEngine as EnginePreference) || "auto");
+  const { status: engineStatus, statuses: engineStatuses, recheck: recheckEngines } = useEngineStatus(engine, settings);
   const [selectedId, setSelectedId] = useState<string>();
   const abortRef = useRef<AbortController | null>(null);
   const loadAbort = useRef<AbortController | null>(null);
@@ -315,8 +308,10 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
     setTurns((prev) => [{ id, question, answer: "", status: "streaming", askedAt: Date.now() }, ...prev]);
     setSelectedId(id);
     setSearchText("");
+    let chosenId: EngineId | undefined;
     try {
       const chosen = await resolveEngine(engine, settings);
+      chosenId = chosen.id;
       update(id, { engineTitle: chosen.title });
       const answer = await answerQuestion(chosen, context, question, history, {
         signal: controller.signal,
@@ -330,10 +325,18 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
       update(id, { answer, status: "done", progress: undefined, finishedAt: Date.now() });
     } catch (error) {
       const stopped = controller.signal.aborted;
+      let message = error instanceof Error ? error.message : String(error);
+      if (!stopped && chosenId) {
+        // Say why in the same words as the notice (Ollama stopped, Apple's model
+        // still downloading…) rather than the engine's raw error.
+        const fresh = await checkEngine(chosenId, settings);
+        if (!fresh.ready) message = `${fresh.title}. ${fresh.message}`;
+        recheckEngines();
+      }
       update(id, {
         status: stopped ? "stopped" : "error",
         progress: undefined,
-        error: stopped ? undefined : error instanceof Error ? error.message : String(error),
+        error: stopped ? undefined : message,
       });
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
@@ -444,7 +447,7 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
   return (
     <List
       isLoading={(!ctx && !loadError) || busy}
-      isShowingDetail={!!ctx}
+      isShowingDetail={!!ctx || (!!engineStatus && !engineStatus.ready)}
       filtering={false}
       searchText={searchText}
       onSearchTextChange={(text) => {
@@ -466,6 +469,12 @@ export function VideoChat({ url, initialQuestion }: { url: string; initialQuesti
         </List.Dropdown>
       }
     >
+      <EngineNotice
+        status={engineStatus}
+        statuses={engineStatuses}
+        onRetry={recheckEngines}
+        onSwitch={(id) => setEngine(id)}
+      />
       {loadError ? (
         <List.EmptyView
           icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}

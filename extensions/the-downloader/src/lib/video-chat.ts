@@ -106,7 +106,11 @@ export async function answerQuestion(
   if (plan.mode === "excerpts" && isOverviewRequest(question)) {
     return answerFromNotes(engine, ctx, question, options);
   }
-  return engine.complete(CHAT_INSTRUCTIONS, plan.prompt, { signal: options.signal, onData: options.onData });
+  return engine.complete(CHAT_INSTRUCTIONS, plan.prompt, {
+    signal: options.signal,
+    onData: options.onData,
+    onStatus: options.onStatus,
+  });
 }
 
 /** Facts without the long description, for the part-by-part pass. */
