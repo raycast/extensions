@@ -27,6 +27,14 @@ export async function confirmAndRun(
   commands: string[],
   opts: {
     title: string;
+    /** The confirm button. Default "Run", right for Doctor's shell remediations; a routine action names itself. */
+    confirmTitle?: string;
+    /**
+     * List the commands under the prose. Default true: Doctor's remediations
+     * are arbitrary shell lines, and the exact line IS the information. False
+     * for a routine action whose prose already says what will happen.
+     */
+    showCommands?: boolean;
     toastTitle?: string;
     message?: string;
     cancel?: AbortSignal;
@@ -62,14 +70,22 @@ export async function confirmAndRun(
   const hidden = commands.length - MAX_LISTED_COMMANDS;
   const confirmed = await confirmAlert({
     title: opts.title,
+    // A blank line between the prose and the commands: run together, the
+    // commands read as the end of the last sentence.
     message: [
       opts.message,
-      ...commands.slice(0, MAX_LISTED_COMMANDS), // exact commands listed; the page has the full list
-      hidden > 0 ? `…and ${hidden} more` : undefined,
+      opts.showCommands === false
+        ? undefined
+        : [
+            ...commands.slice(0, MAX_LISTED_COMMANDS), // exact commands listed; the page has the full list
+            hidden > 0 ? `…and ${hidden} more` : undefined,
+          ]
+            .filter(Boolean)
+            .join("\n"),
     ]
       .filter(Boolean)
-      .join("\n"),
-    primaryAction: { title: "Run", style: Alert.ActionStyle.Default },
+      .join("\n\n"),
+    primaryAction: { title: opts.confirmTitle ?? "Run", style: Alert.ActionStyle.Default },
     dismissAction: { title: "Cancel" },
   });
   // Every run is logged, because this runs arbitrary shell strings — Doctor's

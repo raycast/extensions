@@ -409,11 +409,16 @@ export function CaskActionPanel(props: {
               onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
             />
           )}
-          <Action.CopyToClipboard
-            title="Copy Adopt Command"
-            content={brewAdoptCommand(cask)}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-          />
+          {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
+              package this Mac cannot install. Copy Install stays: it is for
+              another machine, where the package may install fine. */}
+          {!blocked && (
+            <Action.CopyToClipboard
+              title="Copy Adopt Command"
+              content={brewAdoptCommand(cask)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+          )}
           {!blocked && (
             <Action
               title={`Run Adopt in ${terminalName}`}
@@ -630,11 +635,16 @@ export function FormulaActionPanel(props: {
               onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
             />
           )}
-          <Action.CopyToClipboard
-            title="Copy Adopt Command"
-            content={brewAdoptCommand(formula)}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-          />
+          {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
+              package this Mac cannot install. Copy Install stays: it is for
+              another machine, where the package may install fine. */}
+          {!blocked && (
+            <Action.CopyToClipboard
+              title="Copy Adopt Command"
+              content={brewAdoptCommand(formula)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+          )}
           {!blocked && (
             <Action
               title={`Run Adopt in ${terminalName}`}

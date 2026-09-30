@@ -3,10 +3,12 @@
 ## [Adopt Apps] - {PR_MERGE_DATE}
 
 - New **Adopt Apps** command: finds apps already on your Mac that Homebrew has a cask for, and hands them to Homebrew so they upgrade with everything else
-- Matches are grouped by what vouches for them — **Ready to Adopt**, **Likely Adoptable**, **Unlikely Adoptions** — and anything not ready goes through **Preview Adoption** (⌘⇧I) first
+- Matches are grouped by what vouches for them — **Ready to Adopt**, **Likely Adoptable**, **Unlikely Adoptions** — and anything not ready goes through **Preview Adoption** (⌘⇧I) first. An app Homebrew would refuse to adopt as it stands (missing files the cask links, or a conflicting cask already installed) is listed under **Can't Adopt**, with the reason in its tooltip
 - Adoption shows Homebrew's progress as it runs, and warns before it will ask for your administrator password
 - Ignore a wrong match with ⌘⇧H; the filter above the list shows ignored apps and puts them back
 - Never offers Mac App Store or macOS system apps, and refuses an adoption that could delete your only copy of an app
+- The Adopt, Link Cask, Unlink Cask and Update Homebrew confirmations say what will happen and name the action on their button, instead of listing the raw `brew` command; Adopt names the folder it acts on
+- Copy Adopt Command no longer appears on a package this Mac can't install
 - Fixed: packages from third-party taps no longer show three "Unavailable" install-count rows
 
 ## [Fix Services menu bar background refresh] - 2026-09-24

@@ -213,11 +213,25 @@ function AdoptList() {
               ))}
             </List.Section>
           )
-        : SECTIONS.map(({ tier, title, subtitle }) => {
-            const inSection = apps.filter((app) => app.candidates[0].tier === tier);
+        : [
+            ...SECTIONS.map(({ tier, title, subtitle }) => ({
+              key: tier,
+              title,
+              subtitle,
+              // A blocked app is not Ready to Adopt however strong its match:
+              // it gets its own section below the three tiers.
+              inSection: apps.filter((app) => app.candidates[0].tier === tier && !blockerText(app.candidates[0])),
+            })),
+            {
+              key: "blocked",
+              title: "Can't Adopt",
+              subtitle: "Homebrew would refuse these as they are",
+              inSection: apps.filter((app) => blockerText(app.candidates[0])),
+            },
+          ].map(({ key, title, subtitle, inSection }) => {
             if (inSection.length === 0) return null;
             return (
-              <List.Section key={tier} title={title} subtitle={subtitle}>
+              <List.Section key={key} title={title} subtitle={subtitle}>
                 {inSection.map((app) => (
                   <AdoptRow
                     key={app.path}
@@ -366,9 +380,12 @@ function AdoptRow(props: {
         onRefresh();
         return false;
       },
-      // confirmAndRun appends the exact command itself, so this is prose only.
+      confirmTitle: "Adopt",
+      // No command list: the folder was the one thing only `--appdir=` said,
+      // and the prose names it now.
+      showCommands: false,
       message: [
-        `Homebrew will record this app as installed by ${candidate.token}.`,
+        `Homebrew will record ${app.name} in ${path.dirname(app.path)} as installed by ${candidate.token}.`,
         unchecked ? "Nothing has verified that they are the same software." : undefined,
         // "Will probably": ownership is only the likely cause. An ACL can make a
         // root-owned bundle writable, and sudo may still hold credentials.
@@ -455,7 +472,13 @@ function AdoptRow(props: {
   if (isAdopting) {
     accessories.push({ tag: { value: "Adopting…", color: STATUS_COLOR.inProgress }, icon: IN_PROGRESS_ICON });
   } else if (blocked) {
-    accessories.push({ tag: { value: blocked, color: STATUS_COLOR.error }, icon: UNINSTALLABLE_ICON });
+    // The reason can list several files, and at full length it pushed the cask
+    // version off the row. The tag says what it means; the tooltip says why.
+    accessories.push({
+      tag: { value: "Can't Adopt", color: STATUS_COLOR.error },
+      icon: UNINSTALLABLE_ICON,
+      tooltip: blocked,
+    });
   } else if (unchecked) {
     // Icon only: a filled "Unverified" tag on every row of a section whose
     // heading already says so shouted louder than the risk warrants.

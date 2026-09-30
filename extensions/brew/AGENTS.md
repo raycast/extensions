@@ -246,7 +246,10 @@ strings verbatim** — not `brew …` — because Doctor's remediations include
 askpass, and prepends the configured brew `bin` to `PATH` so a bare `brew` in a
 remediation resolves off `customBrewPath` rather than whatever was inherited. It
 appends the command list to the alert body itself, so **callers pass prose
-only** — never re-list the commands in `message`. `toastTitle` exists because
+only** — never re-list the commands in `message`. `showCommands: false` drops
+that list where the prose already says everything (Adopt, Link/Unlink Cask,
+Update Homebrew): the exact line is information for a `sudo chown`
+remediation, and noise for `brew update`. `toastTitle` exists because
 the alert title can be a full sentence and a toast cannot; `labels` replaces the
 raw command in the toasts for a routine action, where the command is noise.
 
@@ -289,6 +292,11 @@ confidence score:
   SAME version as the installed app. Nothing checks, so adoption goes through
   the preview.
 - **Unlikely Adoptions** — everything else, preview only.
+- **Can't Adopt** — whatever its tier, a candidate with a blocker: the app
+  lacks a file the cask links (`missingLinkedComponents`), or another installed
+  cask already places it. It used to stay in its tier's section, so a blocked
+  app sat under Ready to Adopt with a red tag long enough to push the cask
+  version off the row. The tag is now "Can't Adopt"; the reason is its tooltip.
 
 The order in `adoptClassification` is load-bearing, and three real cases fix it:
 
