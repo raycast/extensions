@@ -8,3 +8,9 @@ export const createDeepLink = function <T>(command: string, context?: T) {
 
   return deeplink;
 };
+
+// macOS names Bluetooth devices with a typographic apostrophe ("Jane’s AirPods"), while names typed
+// into preferences often use a straight one (or the reverse), so treat both as the same character.
+const normalizeDeviceName = (name: string) => name.replace(/[‘’ʼ]/g, "'");
+
+export const isSameDeviceName = (a: string, b: string) => normalizeDeviceName(a) === normalizeDeviceName(b);

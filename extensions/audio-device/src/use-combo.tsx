@@ -7,6 +7,7 @@ import {
   setDefaultOutputDevice,
   setDefaultSystemDevice,
 } from "./audio-device";
+import { isSameDeviceName } from "./utils";
 
 interface ComboPreferences {
   input: string;
@@ -25,8 +26,8 @@ export default async function Combo() {
     const inputDevices = await getInputDevices();
     const outputDevices = await getOutputDevices();
 
-    const inputDevice = inputDevices.find((d) => d.name === inputName);
-    const outputDevice = outputDevices.find((d) => d.name === outputName);
+    const inputDevice = inputDevices.find((d) => isSameDeviceName(d.name, inputName));
+    const outputDevice = outputDevices.find((d) => isSameDeviceName(d.name, outputName));
 
     if (!inputDevice) {
       showFailureToast(new Error(`Input device "${inputName}" not found`));

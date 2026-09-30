@@ -1,9 +1,10 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { AudioDevice, getDefaultOutputDevice, getOutputDevices } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
+import { isSameDeviceName } from "./utils";
 
 const getId = (devices: AudioDevice[], deviceName: string): string => {
-  return devices.filter((device) => String(device.name) === String(deviceName))[0].id;
+  return devices.filter((device) => isSameDeviceName(String(device.name), String(deviceName)))[0].id;
 };
 
 export default async () => {
@@ -16,7 +17,7 @@ export default async () => {
       let selectedDeviceId;
       let selectedDeviceName;
       // Switch to favorite2 if already in favourite
-      if (favourite2 != null && favourite2 !== "" && String(current.name) === String(favourite)) {
+      if (favourite2 != null && favourite2 !== "" && isSameDeviceName(String(current.name), String(favourite))) {
         selectedDeviceId = getId(devices, favourite2);
         selectedDeviceName = favourite2;
       }
