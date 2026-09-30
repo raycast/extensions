@@ -681,7 +681,9 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
         if (text.trim() && !searchText.trim()) setSelectedId("typed");
         setSearchText(text);
       }}
-      searchBarPlaceholder={ctx ? `Ask anything about this ${words.noun}…` : `${words.loading}…`}
+      searchBarPlaceholder={
+        ctx ? `Ask anything about this ${words.noun}…` : loadError ? loadErrorTitle : `${words.loading}…`
+      }
       navigationTitle={ctx?.title ?? "Chat About Link"}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
