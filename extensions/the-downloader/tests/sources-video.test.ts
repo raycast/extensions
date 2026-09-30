@@ -52,6 +52,7 @@ describe("videoToLink", () => {
         { label: "Spoken language", value: "en" },
         { label: "Transcript language", value: "en" },
         { label: "Categories", value: "People & Blogs" },
+        { label: "Uploaded captions", value: expect.stringContaining("en") },
       ]),
     );
     const stats = Object.fromEntries(ctx.stats.map((s) => [s.label, s.value]));

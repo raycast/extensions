@@ -251,6 +251,14 @@ describe("exports and tool output", () => {
     expect(linkInfoForAI(pageWith(2))).toContain("Use the read-link tool to read the article.");
     expect(linkInfoForAI(pageWith(2))).not.toContain("Paragraph 0");
     expect(linkInfoForAI(post)).toContain("2 images.");
+    const withCaptions = videoToLink(
+      "https://youtu.be/abc",
+      { id: "abc", title: "R", duration: 1, formats: [], extractor_key: "Youtube", subtitles: { de: [] } },
+      { segments: [] },
+    );
+    expect(linkInfoForAI(withCaptions)).toContain("- Uploaded captions: de");
+    expect(linkInfoForAI(withCaptions)).toContain("Use the read-link tool to read what is said.");
+    expect(linkInfoForAI(videoWith(1))).toContain("None listed");
     expect(linkTextForAI(videoWith(2))).toContain(
       "Link to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=abc&t=245s).",
     );

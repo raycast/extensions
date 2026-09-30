@@ -12,7 +12,7 @@ import {
   selectChunks,
   truncateToTokens,
 } from "./link-context.js";
-import { captionLanguages, timestampUrl } from "./sources/video.js";
+import { timestampUrl } from "./sources/video.js";
 
 // How a question about a link becomes one or more model requests. The whole
 // body (transcript, caption or article) goes along when it fits; otherwise
@@ -273,16 +273,10 @@ export function linkInfoForAI(ctx: LinkContext): string {
   const dossier = dossierMarkdown(ctx, 3_000);
   const kind = `## Kind\nA ${ctx.kind === "page" ? "web page" : ctx.kind} on ${ctx.site}.`;
   let more: string;
-  if (ctx.kind === "video" && ctx.video) {
-    const langs = captionLanguages(ctx.video);
-    const captions = [
-      langs.uploaded.length ? `- Uploaded captions: ${langs.uploaded.join(", ")}` : "",
-      langs.automatic.length
-        ? `- Automatic captions: ${langs.automatic.slice(0, 12).join(", ")}${langs.automatic.length > 12 ? ", …" : ""}`
-        : "",
-    ].filter(Boolean);
-    more = captions.length
-      ? `## Captions\n${captions.join("\n")}\nUse the read-link tool to read what is said.`
+  if (ctx.kind === "video") {
+    const listed = ctx.facts.some((f) => /captions$/.test(f.label));
+    more = listed
+      ? "## Captions\nUse the read-link tool to read what is said."
       : "## Captions\nNone listed, so the transcript may be unavailable.";
   } else if (ctx.kind === "post") {
     more = `## Content\n${ctx.images?.length ? `${ctx.images.length} images. ` : ""}Use the read-link tool to read the caption.`;

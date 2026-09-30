@@ -135,6 +135,11 @@ function factsOf(video: Video, language?: string): LinkFact[] {
   add("Duration", video.duration ? formatTimestamp(video.duration) : undefined);
   add("Spoken language", video.language);
   add("Transcript language", language);
+  // Listed here because the cached, slimmed video drops the caption tracks.
+  const captions = captionLanguages(video);
+  const list = (langs: string[]) => (langs.length > 12 ? `${langs.slice(0, 12).join(", ")}, …` : langs.join(", "));
+  add("Uploaded captions", list(captions.uploaded));
+  add("Automatic captions", list(captions.automatic));
   add("Categories", video.categories?.join(", "));
   add("Age limit", video.age_limit ? `${video.age_limit}+` : undefined);
   add("", video.was_live && "Originally a live stream");
