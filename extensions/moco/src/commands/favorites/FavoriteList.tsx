@@ -36,8 +36,14 @@ export const FavoriteList = () => {
   );
 
   // The stored value is known, so no reload after the write: a reload only makes the list blink.
-  const saveOrder = (taskIDs: number[]) =>
-    mutateOrder(storeFavoriteOrder(taskIDs), { optimisticUpdate: () => taskIDs, shouldRevalidateAfter: false });
+  // Stored IDs that are not in the list right now (e.g. an inactive task) keep their place after the visible ones.
+  const saveOrder = (taskIDs: number[]) => {
+    const fullOrder = [...taskIDs, ...order.filter((id) => !taskIDs.includes(id))];
+    return mutateOrder(storeFavoriteOrder(fullOrder), {
+      optimisticUpdate: () => fullOrder,
+      shouldRevalidateAfter: false,
+    });
+  };
 
   const remember = (label: string, removedTaskID?: number) => {
     const orderBefore = favorites.map(({ task }) => task.id);

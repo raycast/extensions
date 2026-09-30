@@ -21,11 +21,14 @@ export const MenuBarSettings = () => {
   const sortedCustomers = [...customers.values()].sort((a, b) => a.name.localeCompare(b.name));
 
   const submit = async (values: Record<string, string>) => {
-    const updated: Record<number, CustomerLayout> = {};
+    // Start from the stored layouts: customers not shown right now (no assigned project) keep theirs.
+    const updated: Record<number, CustomerLayout> = { ...layouts };
     sortedCustomers.forEach((customer) => {
       // Only store what differs from the default "inline".
       const layout = values[`customer-${customer.id}`] as CustomerLayout;
-      if (layout !== CustomerLayout.inline) {
+      if (layout === CustomerLayout.inline) {
+        delete updated[customer.id];
+      } else {
         updated[customer.id] = layout;
       }
     });
