@@ -1,10 +1,11 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
-import { writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+import { nativeAdjustBrightness, nativeGetBrightness, nativeSetBrightness } from "./brightness-native";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export interface MonitorResult {
   type: "wmi" | "ddc";
@@ -28,10 +29,18 @@ const BRIGHTNESS_PS1 = `param(
     [string]$Action,
 
     [Parameter(Mandatory=$false)]
-    [int]$Value = 0
+    [int]$Value = 0,
+
+    # Cache tag derived from the script source (passed by the caller).
+    # The DDC wrapper DLL filename includes it, so a future script change
+    # never reuses a DLL compiled from older sources.
+    [Parameter(Mandatory=$false)]
+    [string]$DllTag = "v1"
 )
 
-Add-Type @"
+# DDC/CI interop compiled on first use and cached as a DLL in $env:TEMP
+# (see the DDC block below) to avoid recompiling the C# on every call.
+$DdcControlCode = @"
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -139,6 +148,25 @@ try {
 
     # --- DDC/CI: external displays ---
     try {
+        # Loading a cached wrapper DLL (~50ms) is far cheaper than compiling
+        # the C# on every invocation (~1s). Best-effort: any failure falls
+        # back to compiling in-memory. The filename carries the caller-passed
+        # source tag, so a script update never loads a stale DLL.
+        $ddcDll = Join-Path $env:TEMP "brightness-control-ddc-$DllTag.dll"
+        $ddcLoaded = $false
+        try {
+            if (Test-Path $ddcDll) {
+                Add-Type -Path $ddcDll -ErrorAction Stop
+                $ddcLoaded = $true
+            }
+        } catch { }
+        if (-not $ddcLoaded) {
+            try {
+                Add-Type $DdcControlCode -OutputAssembly $ddcDll -OutputType Library -ErrorAction Stop
+            } catch {
+                Add-Type $DdcControlCode -ErrorAction Stop
+            }
+        }
         [DdcControl]::EnumerateMonitors()
 
         foreach ($hMonitor in [DdcControl]::MonitorHandles) {
@@ -207,23 +235,75 @@ function getScriptPath(): string {
 
 function ensureScript(): string {
   const path = getScriptPath();
+  try {
+    // The script is identical on every call — only write it once.
+    if (existsSync(path) && readFileSync(path, "utf-8") === BRIGHTNESS_PS1) {
+      return path;
+    }
+  } catch {
+    // Unreadable temp file: fall through and rewrite it.
+  }
   writeFileSync(path, BRIGHTNESS_PS1, "utf-8");
   return path;
 }
 
+function powershellCandidates(): string[] {
+  const systemRoot = process.env.SystemRoot || "C:\\Windows";
+  return ["powershell.exe", `${systemRoot}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`];
+}
+
+/**
+ * Short tag derived from the script source, passed as `-DllTag` so the
+ * cached DDC wrapper DLL filename changes whenever the script does.
+ * A stale DLL from an older release can never be reused.
+ */
+function scriptTag(): string {
+  let hash = 5381;
+  for (let i = 0; i < BRIGHTNESS_PS1.length; i++) {
+    hash = ((hash * 33) ^ BRIGHTNESS_PS1.charCodeAt(i)) >>> 0;
+  }
+  return hash.toString(36);
+}
+
 async function runBrightnessScript(action: "get" | "set" | "offset", value: number = 0): Promise<ScriptResult> {
   const scriptPath = ensureScript();
+  const args = [
+    "-ExecutionPolicy",
+    "Bypass",
+    "-NoProfile",
+    "-NonInteractive",
+    "-File",
+    scriptPath,
+    "-Action",
+    action,
+    "-Value",
+    String(value),
+    "-DllTag",
+    scriptTag(),
+  ];
 
-  let stdout: string;
-  try {
-    const result = await execAsync(
-      `powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${scriptPath}" -Action ${action} -Value ${value}`,
-      { timeout: 15000, encoding: "utf8" },
-    );
-    stdout = result.stdout;
-  } catch (err: unknown) {
-    const execErr = err as { stdout?: string; stderr?: string; message?: string };
-    const raw = (execErr.stdout || "").trim().replace(/^\uFEFF/, "");
+  let stdout: string | null = null;
+  let lastError: unknown = null;
+  for (const powershell of powershellCandidates()) {
+    try {
+      // execFile (no cmd.exe layer) is measurably faster than exec + string command.
+      const result = await execFileAsync(powershell, args, { timeout: 15000, encoding: "utf8" });
+      stdout = result.stdout;
+      lastError = null;
+      break;
+    } catch (err: unknown) {
+      lastError = err;
+      const code = (err as { code?: string }).code;
+      // Missing binary on PATH: try the absolute System32 path next.
+      if (code === "ENOENT") continue;
+      break;
+    }
+  }
+  if (stdout === null) {
+    // The script can exit non-zero while still printing JSON to stdout —
+    // recover that payload when possible before reporting failure.
+    const execErr = lastError as { stdout?: string; stderr?: string; message?: string } | null;
+    const raw = (execErr?.stdout || "").trim().replace(/^\uFEFF/, "");
     if (raw) {
       try {
         const parsed: ScriptResult = JSON.parse(raw);
@@ -235,7 +315,7 @@ async function runBrightnessScript(action: "get" | "set" | "offset", value: numb
         // not valid JSON, fall through
       }
     }
-    const detail = execErr.stderr || execErr.message || String(err);
+    const detail = execErr?.stderr || (lastError as Error)?.message || String(lastError);
     throw new Error(`Brightness script failed: ${detail}`);
   }
 
@@ -250,16 +330,22 @@ async function runBrightnessScript(action: "get" | "set" | "offset", value: numb
 }
 
 export async function getBrightness(): Promise<MonitorResult[]> {
+  const native = await nativeGetBrightness();
+  if (native) return native;
   const result = await runBrightnessScript("get");
   return result.monitors;
 }
 
 export async function setBrightness(level: number): Promise<MonitorResult[]> {
+  const native = await nativeSetBrightness(level);
+  if (native) return native;
   const result = await runBrightnessScript("set", level);
   return result.monitors;
 }
 
 export async function adjustBrightness(offset: number): Promise<MonitorResult[]> {
+  const native = await nativeAdjustBrightness(offset);
+  if (native) return native;
   const result = await runBrightnessScript("offset", offset);
   return result.monitors;
 }

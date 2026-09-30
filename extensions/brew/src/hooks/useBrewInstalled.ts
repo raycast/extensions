@@ -16,6 +16,7 @@ import {
   isBrewLockError,
   getErrorMessage,
   brewLogger,
+  copyLogsAction,
 } from "../utils";
 
 /**
@@ -62,6 +63,7 @@ export function useBrewInstalled() {
               result.revalidate();
             },
           },
+          secondaryAction: copyLogsAction(message, { hideToast: true }),
         });
       },
     },

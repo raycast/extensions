@@ -52,3 +52,7 @@ Focus Automation is read-only and local.
 
 - macOS with Raycast, including the Focus feature
 - A Google account
+
+## Feedback
+
+Found a bug or have an idea? Open **Set Up Focus Automation** and use **Send Feedback**, or email pierre.marie.mogenet@gmail.com.

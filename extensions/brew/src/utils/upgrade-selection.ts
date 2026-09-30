@@ -84,7 +84,7 @@ export function defaultSelectionState(packages: readonly SelectablePackage[]): M
  * Known asymmetry: a pin-forced `false` is indistinguishable from a manual
  * deselection, so a package pinned and later unpinned outside the review
  * stays deselected after both refreshes. That errs toward holding back — the
- * row is visibly deselected and one ↩ re-selects it.
+ * row is visibly deselected and one ⌘⇧X re-selects it.
  */
 export function mergeSelectionState(
   previous: SelectionState,

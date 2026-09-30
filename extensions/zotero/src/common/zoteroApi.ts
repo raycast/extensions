@@ -10,6 +10,7 @@ export { resolveHome };
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
 import { rankResults } from "./search";
+import { loadInteractions } from "./interactions";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
@@ -21,6 +22,7 @@ export interface Preferences {
   csl_style?: string;
   cache_period?: string;
   quote_pdf_path?: boolean;
+  order_by_opens?: boolean;
 }
 
 // citekey is populated (and thus searchable) when the user either exports
@@ -48,6 +50,9 @@ export interface RefData {
   tags?: string[];
   notes?: string[];
   attachment?: Attachment;
+  // All pdf attachments of the reference, primary (oldest) first. Absent in
+  // caches built before multi-attachment support.
+  attachments?: Attachment[];
   // Human-readable collection names (for display).
   collection?: string[];
   // Library-qualified collection ids (`collectionId(library, key)`), used for
@@ -197,7 +202,7 @@ WHERE itemNotes.parentItemID = :id
 `;
 
 const cachePath = utils.cachePath("zotero.json");
-const CACHE_VERSION = 7;
+const CACHE_VERSION = 8;
 
 // LocalStorage key holding the JSON array of group libraryIDs the user opted
 // into searching. The personal library is always searched; group libraries are
@@ -514,13 +519,18 @@ async function getDataImpl(): Promise<RefData[]> {
     const st4 = db.prepare(ATTACHMENTS_SQL);
     st4.bind({ ":id": row.id });
 
-    if (st4.step()) {
-      const at = st4.getAsObject();
+    const atts: Attachment[] = [];
+    while (st4.step()) {
+      const at = st4.getAsObject() as unknown as Attachment;
       if (at.key) {
-        row.attachment = at;
+        atts.push(at);
       }
     }
     st4.free();
+    if (atts.length > 0) {
+      row.attachment = atts[0];
+      row.attachments = atts;
+    }
 
     const stNotes = db.prepare(NOTES_SQL);
     stNotes.bind({ ":id": row.id });
@@ -720,5 +730,6 @@ export const searchResources = async (q: string, collection?: string): Promise<R
     collections,
     libraries: [...allowedLibraries],
     limit: MAX_RENDER_RESULTS,
+    interactions: preferences.order_by_opens ? await loadInteractions() : undefined,
   });
 };

@@ -18,30 +18,13 @@ import StrokeOrderPage from "@/components/pages/StrokeOrderPage";
 import { myPreferences } from "@/consts";
 import { playQueryWordAudio, playTTS } from "@/core/audio";
 import { getLanguageItem } from "@/core/language/utils";
+import { savedResultMarkdown } from "@/core/query/resultMarkdown";
 import { getStrokeOrderCharacters } from "@/core/stroke-order";
 import { useFavoriteWords } from "@/hooks";
 import { favoriteKeyOf, type FavoriteWord, resolveFavoriteTranslations } from "@/types/favorite";
 import type { QueryWordInfo } from "@/types/query";
 import { copyAllText } from "@/utils/copyFavorites";
 import { logError } from "@/utils/logger";
-
-/**
- * Render a favorite's saved display snapshot as offline markdown: each section
- * title followed by its items' details, preserving the original layout without
- * any network re-query.
- */
-function aggregateMarkdown(favorite: FavoriteWord): string {
-  return (
-    favorite.displaySections
-      .flatMap((section) =>
-        section.items.map(
-          (item) => item.showMoreDetailsMarkdown ?? item.detailsMarkdown ?? item.copyText ?? item.title,
-        ),
-      )
-      .join("\n")
-      .trim() || favorite.word
-  );
-}
 
 /**
  * Reconstruct a minimal QueryWordInfo from saved fields so audio helpers work
@@ -125,8 +108,7 @@ function FavoriteItem({
     sourceText: favorite.word,
     translatedText: translations?.join("\n") ?? "",
   });
-  // Respect the same "flags are not languages" preference as TargetLanguageSection.
-  const langIcon = (emoji: string) => (myPreferences.flagsAreNotLanguages ? Icon.Globe : { source: emoji });
+  const languageDirection = `${fromLanguageItem.googleLangCode.toUpperCase()} → ${toLanguageItem.googleLangCode.toUpperCase()}`;
 
   const openInEasydict = async () => {
     try {
@@ -147,12 +129,16 @@ function FavoriteItem({
       id={favoriteKeyOf(favorite)}
       title={favorite.word}
       subtitle={translation}
-      accessories={[
-        { icon: langIcon(fromLanguageItem.emoji) },
-        { icon: Icon.ArrowRight },
-        { icon: langIcon(toLanguageItem.emoji) },
-      ]}
-      detail={<List.Item.Detail markdown={aggregateMarkdown(favorite)} />}
+      accessories={
+        myPreferences.flagsAreNotLanguages
+          ? [{ text: languageDirection }]
+          : [
+              { icon: { source: fromLanguageItem.emoji } },
+              { icon: Icon.ArrowRight },
+              { icon: { source: toLanguageItem.emoji } },
+            ]
+      }
+      detail={<List.Item.Detail markdown={savedResultMarkdown(favorite, favorite.displaySections)} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -178,7 +164,7 @@ function FavoriteItem({
             <Action
               title="Read Translation"
               icon={Icon.Play}
-              onAction={() => translation && playTTS(translation, favorite.toLanguage, { truncate: true })}
+              onAction={() => translation && playTTS(translation, favorite.toLanguage)}
             />
           </ActionPanel.Section>
 

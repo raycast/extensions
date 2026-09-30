@@ -44,6 +44,21 @@ export function formatDuration(minutes: number): string {
   return rest ? `${hours}h ${rest}m` : `${hours}h`;
 }
 
+/**
+ * Seconds elapsed since an ISO timer start, or 0 when there is no start (or
+ * it doesn't parse) — a running timer with no known start has nothing to count.
+ */
+export function elapsedSeconds(
+  timerStart: string | undefined,
+  now: number,
+): number {
+  if (!timerStart) return 0;
+  const start = Date.parse(timerStart);
+  return Number.isNaN(start)
+    ? 0
+    : Math.max(0, Math.floor((now - start) / 1000));
+}
+
 /** Format elapsed seconds as "h:mm:ss". */
 export function formatElapsed(totalSeconds: number): string {
   const s = Math.max(0, totalSeconds);

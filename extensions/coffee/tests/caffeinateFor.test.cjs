@@ -140,10 +140,11 @@ for (const args of [
   });
 }
 
-test("starts caffeination and finishes background updates before showing the HUD", async () => {
+test("starts caffeination and launches background updates before showing the HUD", async () => {
   // Raycast 2 unloads a view command's process when the window closes, and
-  // showHUD closes the window. Everything the command still needs (spawn,
-  // reason persistence, menu-bar/status updates) must happen before the HUD.
+  // showHUD closes the window. Spawn and reason persistence must happen
+  // before the HUD; menu-bar/status launches are started first so the IPC
+  // is sent, but the HUD must not wait for those commands to finish.
   const { command, api, processes } = loadCommand();
   const events = [];
   api.launchCommand.mock.mockImplementation(async ({ name }) => events.push(name));
@@ -154,6 +155,49 @@ test("starts caffeination and finishes background updates before showing the HUD
   });
   await command({ arguments: { seconds: "30" } });
   assert.deepEqual(events, ["spawn", "unref", "index", "status", "HUD"]);
+  assert.equal(api.popToRoot.mock.callCount(), 1);
+});
+
+test("shows HUD without waiting for menu-bar/status commands to finish", async () => {
+  const { command, api, processes } = loadCommand();
+  const events = [];
+  let release;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  api.launchCommand.mock.mockImplementation(async ({ name }) => {
+    events.push(`launch:${name}`);
+    await gate;
+    events.push(`done:${name}`);
+  });
+  api.showHUD.mock.mockImplementation(async () => events.push("HUD"));
+  processes.spawn.mock.mockImplementation(() => {
+    events.push("spawn");
+    return { unref: () => events.push("unref") };
+  });
+
+  const finished = command({ arguments: { seconds: "30" } });
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error(`HUD not shown, events: ${events.join(",")}`)), 1000);
+    const tick = () => {
+      if (events.includes("HUD")) {
+        clearTimeout(timeout);
+        resolve();
+        return;
+      }
+      setImmediate(tick);
+    };
+    tick();
+  });
+
+  assert.ok(events.includes("spawn"));
+  assert.ok(events.includes("launch:index"));
+  assert.ok(events.includes("launch:status"));
+  assert.equal(events.includes("done:index"), false);
+  assert.equal(events.includes("done:status"), false);
+
+  release();
+  await finished;
   assert.equal(api.popToRoot.mock.callCount(), 1);
 });
 
@@ -171,7 +215,7 @@ test("reports startup failure and exits the invisible view", async () => {
 
 // --- stopCaffeinate HUD ordering ---
 
-test("stopCaffeinate finishes work before showing the HUD", async () => {
+test("stopCaffeinate shows HUD without waiting for refreshes to finish", async () => {
   const events = [];
   const storage = new Map();
   const api = {

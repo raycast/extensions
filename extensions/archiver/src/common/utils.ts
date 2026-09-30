@@ -63,7 +63,7 @@ export async function compressBy7za(items: string[], format: CompressFormat, pas
   return resPath;
 }
 
-async function getCompressSaveLocationAndName(
+export async function getCompressSaveLocationAndName(
   isSingle: boolean,
   filePath: string,
   format: CompressFormat,
@@ -73,20 +73,26 @@ async function getCompressSaveLocationAndName(
   if (!saveLoc.endsWith("/")) {
     saveLoc += "/";
   }
-  let name = "";
+  let baseName = "";
   if (isSingle && preferences.useOriginalNameWhenSingle) {
-    name = path.basename(filePath);
+    baseName = path.basename(filePath);
   }
   if (isSingle && !preferences.useOriginalNameWhenSingle) {
-    name = "Archive";
+    baseName = "Archive";
   }
   if (!isSingle && preferences.useParentFolderNameWhenMultiple) {
-    name = path.basename(path.dirname(filePath));
+    baseName = path.basename(path.dirname(filePath));
   }
   if (!isSingle && !preferences.useParentFolderNameWhenMultiple) {
-    name = "Archive";
+    baseName = "Archive";
   }
-  name += COMPRESS_FORMAT_METADATA.get(format)?.ext;
+  const ext = COMPRESS_FORMAT_METADATA.get(format)?.ext || "";
+  let name = `${baseName}${ext}`;
+  let counter = 2;
+  while (fs.existsSync(path.join(saveLoc, name))) {
+    name = `${baseName} ${counter}${ext}`;
+    counter++;
+  }
   await folderExists(saveLoc);
   return { location: saveLoc, name };
 }
@@ -121,7 +127,7 @@ export async function extractBy7za(file: string, format: ExtractFormat, password
   return location;
 }
 
-async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): Promise<string> {
+export async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): Promise<string> {
   const preferences: IExtractPreferences = getPreferenceValues();
   let saveLoc = preferences.locationSaveExtracted || path.dirname(zipPath);
   if (!saveLoc.endsWith("/")) {
@@ -131,9 +137,15 @@ async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): P
   if (format === ExtractFormat.GZIP) {
     zipName = zipName.substring(0, zipName.lastIndexOf("."));
   }
-  saveLoc += zipName.substring(0, zipName.lastIndexOf("."));
-  await folderExists(saveLoc);
-  return saveLoc;
+  const baseFolder = zipName.substring(0, zipName.lastIndexOf("."));
+  let targetLoc = path.join(saveLoc, baseFolder);
+  let counter = 2;
+  while (fs.existsSync(targetLoc)) {
+    targetLoc = path.join(saveLoc, `${baseFolder} ${counter}`);
+    counter++;
+  }
+  await folderExists(targetLoc);
+  return targetLoc;
 }
 
 async function folderExists(folder: string): Promise<boolean> {
@@ -167,17 +179,20 @@ function deleteFile(file: string) {
   fs.rmSync(file, { force: true, recursive: true });
 }
 
-export function isNeedPwdOnExtract(file: string, format: ExtractFormat): boolean {
+export async function isNeedPwdOnExtract(file: string, format: ExtractFormat): Promise<boolean> {
   let need = false;
   if (format !== ExtractFormat["7Z"] && format !== ExtractFormat.ZIP) {
     return need;
   }
   try {
-    execaSync(_7zaBinary, ["t", file]);
-  } catch (error) {
+    await execa(_7zaBinary, ["t", file, "-p", "-y"]);
+  } catch (error: unknown) {
+    const execaErr = error as { stdout?: string; stderr?: string } | undefined;
+    const errText = String((execaErr?.stdout || "") + " " + (execaErr?.stderr || "") + " " + String(error));
     if (
-      String(error).includes("ERROR: Wrong password") ||
-      String(error).includes("Enter password (will not be echoed):")
+      errText.includes("Wrong password") ||
+      errText.includes("Can not open encrypted archive") ||
+      errText.includes("Enter password")
     ) {
       need = true;
     }
@@ -185,15 +200,17 @@ export function isNeedPwdOnExtract(file: string, format: ExtractFormat): boolean
   return need;
 }
 
-export function checkPwdOnExtract(file: string, format: ExtractFormat, password: string): boolean {
+export async function checkPwdOnExtract(file: string, format: ExtractFormat, password: string): Promise<boolean> {
   let correct = true;
   if (format !== ExtractFormat["7Z"] && format !== ExtractFormat.ZIP) {
     return correct;
   }
   try {
-    execaSync(_7zaBinary, ["t", file, `-p${password}`]);
-  } catch (error) {
-    if (String(error).includes("Wrong password")) {
+    await execa(_7zaBinary, ["t", file, `-p${password}`, "-y"]);
+  } catch (error: unknown) {
+    const execaErr = error as { stdout?: string; stderr?: string } | undefined;
+    const errText = String((execaErr?.stdout || "") + " " + (execaErr?.stderr || "") + " " + String(error));
+    if (errText.includes("Wrong password") || errText.includes("Can not open encrypted archive")) {
       correct = false;
     }
   }

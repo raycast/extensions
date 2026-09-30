@@ -256,6 +256,23 @@ export function isNetworkError(error: unknown): error is NetworkError {
 }
 
 /**
+ * A cancelled operation, not a failure.
+ *
+ * Worth a named predicate because an abort is the one ending that raises NO
+ * toast of its own: `showBrewFailureToast` returns early on it, and
+ * `usePromise` suppresses `onError` for it. Anything holding an in-progress
+ * toast therefore has to clear that toast itself on an abort, or leave a
+ * spinner running after the user has walked away.
+ *
+ * Both shapes reaching us are `Error` instances: `child_process.exec` rejects
+ * with Node's `AbortError`, and `AbortController.abort()` produces a
+ * `DOMException` that also extends `Error`.
+ */
+export function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+/**
  * Check if an error is a BrewLockError.
  */
 export function isBrewLockError(error: unknown): error is BrewLockError {

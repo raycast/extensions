@@ -2,6 +2,7 @@ import { TraktMovieHistoryList, TraktShowHistoryList, withPagination } from "../
 import { CompactHistoryItem, toCompactMovieHistory, toCompactShowHistory } from "./compact-media";
 import { pickCandidates, uniqueYears, type CandidatePick, type HistoryCandidate } from "./history-candidates";
 import { isMatchableTitle, searchMovieCandidates, searchShowCandidates } from "./resolve-media";
+import { resolveLookupQuery } from "./title-text";
 import { executeToolCall, executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -20,6 +21,7 @@ type Input = {
   query?: string;
   /**
    * Optional release year to disambiguate titles that exist in several versions (e.g. Dune 1984 vs 2021).
+   * A year stuffed into `query` ("Dune 1989", "Dune (1989)") is parsed the same way.
    */
   year?: number;
   /**
@@ -134,8 +136,11 @@ async function resolveCandidates(
   let exactTruncated = false;
   let titleExists = false;
 
+  const lookup = resolveLookupQuery(query, year);
+  const searchText = lookup.text ?? query;
+
   if (type === "movies" || type === "all") {
-    const found = await searchMovieCandidates(query);
+    const found = await searchMovieCandidates(searchText);
     titleExists = titleExists || found.candidates.length > 0;
     const selection = pickCandidates(
       found.candidates.map((item) => ({ type: "movie" as const, ...item })),
@@ -150,7 +155,7 @@ async function resolveCandidates(
   }
 
   if (type === "shows" || type === "all") {
-    const found = await searchShowCandidates(query);
+    const found = await searchShowCandidates(searchText);
     titleExists = titleExists || found.candidates.length > 0;
     const selection = pickCandidates(
       found.candidates.map((item) => ({ type: "show" as const, ...item })),
@@ -379,6 +384,7 @@ export default async function tool(input: Input): Promise<Output> {
       yearHeldBy = selection.yearHeldBy;
     }
 
+    const lookup = resolveLookupQuery(query, year);
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
 
     if (!prechecked && candidates.length === 0 && yearHeldBy.length > 0) {
@@ -388,7 +394,7 @@ export default async function tool(input: Input): Promise<Output> {
         exhaustive: false,
         found: false,
         message:
-          `${target} has a ${year} release, but it is titled ${held}. ` +
+          `${target} has a ${lookup.year} release, but it is titled ${held}. ` +
           `Ask the user whether they mean that title. Do not report a watched or not-watched ` +
           `verdict for ${target}, because that exact title was not checked.`,
         checked: [],
@@ -397,7 +403,7 @@ export default async function tool(input: Input): Promise<Output> {
       };
     }
 
-    if (!prechecked && candidates.length === 0 && year !== undefined && titleExists) {
+    if (!prechecked && candidates.length === 0 && lookup.year !== undefined && titleExists) {
       const knownYears = missedYears.length > 0 ? ` Known year(s) for that title: ${missedYears.join(", ")}.` : "";
       return {
         mode: "lookup",
@@ -406,8 +412,8 @@ export default async function tool(input: Input): Promise<Output> {
         message:
           `${
             truncated
-              ? `No ${year} release of ${target} is reachable: that title has more releases than Trakt's search can return, so this is not proof that none exists.`
-              : `${target} has no ${year} release on Trakt.`
+              ? `No ${lookup.year} release of ${target} is reachable: that title has more releases than Trakt's search can return, so this is not proof that none exists.`
+              : `${target} has no ${lookup.year} release on Trakt.`
           }${knownYears} ` +
           `Ask the user which release they mean, or call again without a year. Do not report a watched or ` +
           `not-watched verdict, because none of the releases above was checked.`,
@@ -478,7 +484,7 @@ export default async function tool(input: Input): Promise<Output> {
         `No watch event exists for ${target} among the releases checked (${checkedLabels}), but that title has ` +
         `more identically named releases than Trakt's exact search can return, so some were never seen. ` +
         `This is NOT a definitive not-watched answer. ` +
-        (year !== undefined
+        (lookup.year !== undefined
           ? `The year is already set: resolve the release with \`search-movies\` / \`search-shows\` and call again with its \`traktId\` and \`type\`.`
           : `Ask the user which release they mean, or pass its \`year\`.`);
     } else {

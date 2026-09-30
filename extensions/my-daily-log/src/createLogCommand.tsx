@@ -1,50 +1,34 @@
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { Form, LaunchProps, popToRoot, showHUD } from "@raycast/api";
+import { useEffect, useRef } from "react";
+import { LogForm } from "./components/LogForm";
+import { showErrorToast } from "./components/errors";
+import { refreshReminder } from "./components/refreshReminder";
 import { NewDailyLog } from "./domain/dailyLog/NewDailyLog";
-import { createNewLogUseCaseFactory } from "./factories/createNewLogUseCaseFactory";
-import { randomPlaceholder } from "./shared/randomPlaceholder";
+import { createNewLogUseCaseFactory } from "./factories/useCases";
 
-interface CreateLogArguments {
-  title: string;
-}
+export default function Command(props: LaunchProps<{ arguments: Arguments.CreateLogCommand }>) {
+  const argumentTitle = props.arguments.title?.trim();
+  const didCreate = useRef(false);
 
-export default function Command(props: { arguments: CreateLogArguments }) {
-  const createLogAndExit = (title: string): void => {
-    createNewLogUseCaseFactory().execute(new NewDailyLog(title, new Date()));
-
-    popToRoot();
-    showToast(Toast.Style.Success, "Log added", title);
-  };
-
-  const { title: argumentTitle } = props.arguments;
-  if (argumentTitle) {
-    createLogAndExit(argumentTitle);
-  }
-
-  const { handleSubmit } = useForm<FormData>({
-    onSubmit: ({ title }) => createLogAndExit(title),
-    validation: {
-      title: (title) => {
-        if (title?.length === 0) {
-          return "Title is required";
-        }
-      },
-    },
-  });
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
-        </ActionPanel>
+  useEffect(() => {
+    if (!argumentTitle || didCreate.current) {
+      return;
+    }
+    didCreate.current = true;
+    (async () => {
+      try {
+        createNewLogUseCaseFactory().execute(new NewDailyLog(argumentTitle, new Date()));
+        await refreshReminder();
+        await showHUD(`Logged: ${argumentTitle}`);
+        await popToRoot({ clearSearchBar: true });
+      } catch (error) {
+        await showErrorToast("Could not save the log", error);
       }
-    >
-      <Form.TextField id="title" title="What did you do?" placeholder={randomPlaceholder()} />
-    </Form>
-  );
-}
+    })();
+  }, [argumentTitle]);
 
-interface FormData {
-  title: string;
+  if (argumentTitle) {
+    return <Form isLoading />;
+  }
+  return <LogForm />;
 }

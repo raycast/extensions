@@ -11,30 +11,20 @@ import {
   ReplyTweetAction,
   QuoteTweetAction,
   RetweetAction,
-  SetReplyHiddenAction,
-  ShowPostEngagementAction,
   ShowAuthorTweetsAction,
   UnlikeTweetAction,
+  engagementAndModerationSections,
 } from "./actions";
 
 function isRetweet(tweet: Tweet): boolean {
-  if (tweet.text && tweet.text.startsWith("RT @")) {
-    return true;
-  }
-  return false;
+  return tweet.text.startsWith("RT @");
 }
 
-function getCleanTweetText(tweet: Tweet): string | undefined {
-  if (tweet.text === undefined) {
-    return undefined;
-  }
-  if (isRetweet(tweet)) {
-    const i = tweet.text.indexOf(":");
-    if (i !== undefined && i > 0) {
-      return tweet.text.substring(i + 1).trimStart();
-    }
-  }
-  return tweet.text;
+function getCleanTweetText(tweet: Tweet): string {
+  if (!isRetweet(tweet)) return tweet.text;
+  const separator = tweet.text.indexOf(":");
+  if (separator <= 0) return tweet.text;
+  return tweet.text.substring(separator + 1).trimStart();
 }
 
 export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {
@@ -99,17 +89,7 @@ export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher; canModerat
             <BookmarkTweetAction tweet={t} fetcher={props.fetcher} />
             <BookmarkTweetAction tweet={t} remove fetcher={props.fetcher} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Engagement">
-            <ShowPostEngagementAction tweet={t} kind="likes" />
-            <ShowPostEngagementAction tweet={t} kind="reposts" />
-            <ShowPostEngagementAction tweet={t} kind="quotes" />
-          </ActionPanel.Section>
-          {props.canModerateReply && (
-            <ActionPanel.Section title="Moderation">
-              <SetReplyHiddenAction tweet={t} hidden />
-              <SetReplyHiddenAction tweet={t} hidden={false} />
-            </ActionPanel.Section>
-          )}
+          {engagementAndModerationSections(t, props.canModerateReply)}
           <ActionPanel.Section title="Author">
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />

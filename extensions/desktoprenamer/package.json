@@ -97,6 +97,29 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "communicationMethod",
+      "title": "Communication Method",
+      "label": "Choose how Raycast communicates with DesktopRenamer",
+      "description": "Automatic uses SpaceAPI first and falls back to AppleScript when needed.",
+      "type": "dropdown",
+      "required": false,
+      "default": "automatic",
+      "data": [
+        {
+          "title": "Automatic",
+          "value": "automatic"
+        },
+        {
+          "title": "SpaceAPI",
+          "value": "spaceapi"
+        },
+        {
+          "title": "AppleScript",
+          "value": "applescript"
+        }
+      ]
     }
   ],
   "dependencies": {

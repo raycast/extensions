@@ -1,11 +1,4 @@
-import { WebClient, WebClientEvent } from "@slack/web-api";
-
 export const slackRateLimitDocumentationUrl = "https://docs.slack.dev/apis/web-api/rate-limits/";
-
-export function observeSlackRateLimits(client: WebClient, onRateLimited: (retryAfter: number) => void): WebClient {
-  client.on(WebClientEvent.RATE_LIMITED, onRateLimited);
-  return client;
-}
 
 export function formatRetryAfter(retryAfterSeconds: number): string {
   const seconds = Math.max(1, Math.ceil(retryAfterSeconds));

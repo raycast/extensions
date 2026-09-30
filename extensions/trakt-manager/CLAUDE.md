@@ -27,3 +27,7 @@ Trakt Manager — Raycast extension for managing your Trakt (movie/TV tracking) 
 - Zod schemas compose via `.merge()` and `.extend()` — types inferred with `z.infer<typeof Schema>`
 - `withPagination<T>` extracts pagination metadata from response headers
 - File caching uses `environment.supportPath` for persistent storage
+
+## Before claiming ready / opening a PR
+
+Re-read the **exact Trakt path** the change will call (documented types, pagination headers, sync body). Do not infer from a sibling endpoint or from an existing helper. Gate: `.cursor/rules/trakt-api-before-ship.mdc`.

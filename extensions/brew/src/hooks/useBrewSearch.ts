@@ -8,6 +8,7 @@ import { useCachedPromise, MutatePromise } from "@raycast/utils";
 import {
   brewSearch,
   clearCache,
+  copyLogsAction,
   InstallableResults,
   InstalledMap,
   Cask,
@@ -27,6 +28,11 @@ import {
 interface UseBrewSearchOptions {
   searchText: string;
   limit?: number;
+  /**
+   * Where the result window starts. Paging moves this rather than growing
+   * `limit`, so the number of records held is constant — see `utils/paging.ts`.
+   */
+  offset?: number;
   installed?: InstalledMap;
   /** When given, results are ordered by install count instead of relevance. */
   ranks?: PopularityRanks;
@@ -133,7 +139,7 @@ const defaultFileProgress: FileDownloadProgress = {
  *    installed data changes, ensuring we always have the latest combination
  */
 export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResult {
-  const { searchText, limit = 100, installed, ranks, ranksVersion = 0, onCacheCleared } = options;
+  const { searchText, limit = 100, offset = 0, installed, ranks, ranksVersion = 0, onCacheCleared } = options;
 
   // Track if we've ever received data (for initial load detection)
   const hasEverLoadedRef = useRef(false);
@@ -182,9 +188,15 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     data: rawData,
     mutate,
   } = useCachedPromise(
-    async (query: string, ranksKey: number) => {
+    async (query: string, ranksKey: number, resultLimit: number, resultOffset: number) => {
       const useRanks = ranksKey > 0;
-      searchLogger.log("Starting search", { query, ranksKey, isInitialLoad: !hasEverLoadedRef.current });
+      searchLogger.log("Starting search", {
+        query,
+        ranksKey,
+        resultLimit,
+        resultOffset,
+        isInitialLoad: !hasEverLoadedRef.current,
+      });
 
       // Reset progress at start of search
       setDownloadProgress({ phase: "casks" });
@@ -194,7 +206,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
       // Always track progress - the UI decides whether to show it based on hasCacheFiles
       const result = await brewSearch(
         query,
-        limit,
+        resultLimit,
         abortable.current?.signal,
         (progress) => {
           try {
@@ -215,6 +227,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
           }
         },
         useRanks ? ranks : undefined,
+        resultOffset,
       );
 
       // brewSearch reports phase: "complete" with final totals via onProgress
@@ -224,7 +237,11 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     // exist: turning the sort on, its data arriving, and its data being
     // REPLACED all have to re-run the search. The Maps themselves are closed
     // over — they are not serializable into a cache key.
-    [searchText, ranks == undefined ? 0 : ranksVersion || 1],
+    // `limit` and `offset` belong in the key, not merely in the closure: paging
+    // asks for the same query at a different window, and a closed-over window
+    // left that request answered from the entry built for the previous one —
+    // the list simply never moved.
+    [searchText, ranks == undefined ? 0 : ranksVersion || 1, limit, offset],
     {
       abortable,
       keepPreviousData: true,
@@ -249,10 +266,16 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
         // on the next search, which is how users currently recover.
         const isCacheError = !isLock && isLikelyCacheError(error);
 
+        // The copy action follows the remedy when there is one, so Clear Cache
+        // & Retry keeps the primary slot; on the lock and generic branches
+        // there is no remedy, so copying the diagnostic text is the primary.
+        const copyAction = copyLogsAction(message, { hideToast: true });
+
         await showToast({
           style: Toast.Style.Failure,
           title: isLock ? "Brew is Busy" : "Search failed",
           message: isLock ? "Another brew process is running. Please wait and try again." : message,
+          secondaryAction: isCacheError ? copyAction : undefined,
           primaryAction: isCacheError
             ? {
                 title: "Clear Cache & Retry",
@@ -270,7 +293,7 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
                   await mutate();
                 },
               }
-            : undefined,
+            : copyAction,
         });
       },
     },
@@ -310,7 +333,9 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     formulae.totalLength = rawData.formulae.totalLength;
     casks.totalLength = rawData.casks.totalLength;
 
-    const results: InstallableResults = { formulae, casks };
+    // `totals` survives the JSON cache; the expandos above do not, so a result
+    // served from disk has only this to say how much was truncated away.
+    const results: InstallableResults = { formulae, casks, totals: rawData.totals };
 
     applyInstalledStatus(results, installed);
     return results;
@@ -401,10 +426,11 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     if (casksTotal !== undefined && formulaeTotal !== undefined && casksTotal > 0 && formulaeTotal > 0) {
       return { formulae: formulaeTotal, casks: casksTotal };
     }
-    // Fallback to rawData totalLength if available (for warm cache starts)
+    // Fallback for warm cache starts. `totals` first: it is the only one of the
+    // two that survives being persisted and read back.
     if (rawData) {
-      const formulaeLen = rawData.formulae.totalLength ?? rawData.formulae.length;
-      const casksLen = rawData.casks.totalLength ?? rawData.casks.length;
+      const formulaeLen = rawData.totals?.formulae ?? rawData.formulae.totalLength ?? rawData.formulae.length;
+      const casksLen = rawData.totals?.casks ?? rawData.casks.totalLength ?? rawData.casks.length;
       if (formulaeLen > 0 || casksLen > 0) {
         return { formulae: formulaeLen, casks: casksLen };
       }
@@ -439,6 +465,14 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
       formula.installed = info.installed;
       formula.outdated = info.outdated;
       formula.pinned = info.pinned;
+      // The search index strips `revision`, so without this a revision-bumped
+      // formula renders its available version as the one already installed.
+      // Only when the two records describe the SAME stable version: a cached
+      // index older than the local tap would otherwise stamp the installed
+      // revision onto a different version and invent a release that never shipped.
+      if (formula.versions?.stable === info.versions?.stable) {
+        formula.revision = info.revision;
+      }
     } else {
       formula.installed = [];
       formula.outdated = false;

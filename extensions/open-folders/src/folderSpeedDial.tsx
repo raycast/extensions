@@ -6,6 +6,7 @@ export default function Command() {
 
   return (
     <SpeedDialGrid
+      folders
       items={[
         prefs.dirOne,
         prefs.dirTwo,

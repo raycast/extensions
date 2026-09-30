@@ -1,5 +1,21 @@
 # Coffee Changelog
 
+## [Fix] - 2026-09-29
+
+- Use cache API to prevent menu bar icon flicker on background update cycles.
+- Keep menu bar item visible until caffeination cache is initialized on startup to avoid flicker.
+
+## [Fix, Enhancement] - 2026-09-26
+
+- Keep the empty pot icon visible in the menu bar for 5 seconds after decaffeinating before hiding, preserving the decaffeinated state across Raycast restarts.
+- Fix 1-frame blanking flicker when transitioning to decaffeinated state in the menu bar.
+- Fix menu bar command not displaying the item when launched from Raycast root search while decaffeinated.
+- Prevent a transient empty pot icon glitch in the menu bar when calling `decaffeinate` while already decaffeinated.
+
+## [Fix] - 2026-09-21
+
+- Close the `Caffeinate for ...` / `Caffeinate Until` window as soon as `caffeinate` is spawned, instead of holding an empty view open while the menu bar and status commands refresh.
+
 ## [Fix] - 2026-09-17
 
 - Fix `Caffeinate for ...` and `Caffeinate Until` showing the HUD without actually starting `caffeinate` — the work now runs before the HUD closes the view command.

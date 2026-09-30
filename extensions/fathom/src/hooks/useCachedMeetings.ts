@@ -165,8 +165,14 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       await cacheManager.loadMoreMeetings(filterRef.current);
       setHasMore(cacheManager.hasMore());
     } catch (error) {
+      // Deliberately NOT setError. A failed load-more says nothing about the
+      // meetings already cached, but setting the view-level error swapped the
+      // whole list for ErrorEmptyView — whose panel has no "Search Older
+      // Meetings" action, and which a successful Refresh does not clear. So a
+      // single 429 removed the only way to retry, while the empty state was
+      // still telling the user to press the shortcut that had just vanished.
+      // `cacheManager.loadMoreMeetings` already raises a contextual toast.
       logger.error("[useCachedMeetings] Error loading more meetings:", error);
-      setError(toError(error));
     } finally {
       isLoadingMoreRef.current = false;
     }

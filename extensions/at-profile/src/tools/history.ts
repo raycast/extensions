@@ -12,7 +12,7 @@ import { safeAsyncOperation } from "../utils/errors";
 /**
  * Arguments for the history tool
  */
-interface HistoryToolArgs {
+type HistoryToolArgs = {
   /** Action to perform: list history, star/unstar a pair, or list starred items */
   action?: "list" | "star" | "unstar" | "list_starred";
   /** Optional profile for star/unstar actions */
@@ -21,7 +21,7 @@ interface HistoryToolArgs {
   app?: string;
   /** Maximum number of history items to return (default: 10) */
   limit?: number;
-}
+};
 
 async function resolveAppValue(inputApp: string): Promise<{ value: string; name: string } | null> {
   const allApps = await getAllApps();

@@ -1,18 +1,31 @@
 import * as React from "react";
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Detail,
+  Icon,
+  PopToRootType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { convertAnswerToChat, GetModel, Run } from "./function";
 import { Shortcut } from "../shortcut";
+import { HasUnclosedThinkTag, StripThinkTags } from "../function";
 import { CommandAnswer } from "../../settings/enum";
 import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
-import { Creativity } from "../../enum";
+import { Creativity, PromptInputSource } from "../../enum";
 import { RaycastImage } from "../../types";
 import { OllamaApiModelCapability } from "../../ollama/enum";
+import { GetResolvedSettingsCommandAnswer } from "../../settings/settings";
 
 interface props {
   prompt: string;
   command?: CommandAnswer;
+  autoReplace?: boolean;
   server?: string;
   model?: string;
   capabilities?: OllamaApiModelCapability[];
@@ -44,6 +57,7 @@ export function AnswerView(props: props): React.JSX.Element {
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const query: React.MutableRefObject<undefined | string> = React.useRef(undefined);
   const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef(undefined);
+  const inputSource = React.useRef<PromptInputSource>(PromptInputSource.None);
   const [imageView, setImageView]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [thinking, setThinking]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
@@ -52,6 +66,30 @@ export function AnswerView(props: props): React.JSX.Element {
     React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   ] = React.useState({} as OllamaApiGenerateResponse);
   const [showAnswerMetadata, setShowAnswerMetadata] = React.useState(false);
+  const autoReplace = props.autoReplace === true;
+  const pasteFirst = autoReplace;
+  const pasted = React.useRef(false);
+
+  // Resolved settings for display (custom or global defaults)
+  const [resolvedSettings, setResolvedSettings] = React.useState<
+    { server: string; model: string; thinking: string; keepAlive: string } | undefined
+  >(undefined);
+  const [settingsVersion, setSettingsVersion] = React.useState(0);
+
+  React.useEffect(() => {
+    if (props.command) {
+      const loadResolved = async () => {
+        const settings = await GetResolvedSettingsCommandAnswer(props.command as CommandAnswer);
+        setResolvedSettings({
+          server: settings.server,
+          model: settings.model.main.tag,
+          thinking: settings.model.main.thinking === false ? "none" : String(settings.model.main.thinking || "none"),
+          keepAlive: settings.model.main.keep_alive || "5m",
+        });
+      };
+      loadResolved();
+    }
+  }, [props.command, settingsVersion]);
 
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
@@ -60,6 +98,7 @@ export function AnswerView(props: props): React.JSX.Element {
         props.prompt,
         query,
         images,
+        inputSource,
         setLoading,
         setImageView,
         setThinking,
@@ -82,21 +121,53 @@ export function AnswerView(props: props): React.JSX.Element {
   const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
 
+  const revalidate = React.useCallback(async () => {
+    await RevalidateModel();
+    setSettingsVersion((v) => v + 1);
+  }, [RevalidateModel]);
+
   React.useEffect(() => {
-    if (!showSelectModelForm) RevalidateModel();
-  }, [showSelectModelForm]);
+    if (!showSelectModelForm) revalidate();
+  }, [showSelectModelForm, revalidate]);
+
+  React.useEffect(() => {
+    if (!autoReplace || pasted.current) return;
+    if (loading || IsLoadingModel) return;
+    if (answerMetadata.done !== true) return;
+    pasted.current = true;
+    if (inputSource.current !== PromptInputSource.SelectedText) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Not auto-replacing",
+        message:
+          inputSource.current === PromptInputSource.Clipboard
+            ? "The prompt was filled from the clipboard, so there is no selection to replace."
+            : "The prompt did not use the {selection} token, so there is no selection to replace.",
+      });
+      return;
+    }
+    const text = StripThinkTags(answer);
+    if (text === "" || HasUnclosedThinkTag(answer)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Not auto-replacing",
+        message: "The answer did not complete cleanly.",
+      });
+      return;
+    }
+    (async () => {
+      await Clipboard.paste(text);
+      await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    })().catch((e) => showToast({ style: Toast.Style.Failure, title: "Paste failed", message: String(e) }));
+  }, [autoReplace, loading, IsLoadingModel, answerMetadata, answer]);
 
   if (showSelectModelForm && props.command)
     return (
       <EditModel
         command={props.command}
         setShow={setShowSelectModelForm}
-        revalidate={RevalidateModel}
+        revalidate={revalidate}
         capabilities={props.capabilities}
-        server={!IsLoadingModel && Model ? Model.server.name : undefined}
-        model={!IsLoadingModel && Model ? Model.tag.name : undefined}
-        thinking={!IsLoadingModel && Model ? Model.thinking : undefined}
-        keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
       />
     );
 
@@ -104,23 +175,21 @@ export function AnswerView(props: props): React.JSX.Element {
    * Answer Action Menu.
    */
   function AnswerAction(): React.JSX.Element {
+    const outputActions = [
+      <Action.CopyToClipboard key="copy" content={answer} />,
+      <Action.Paste key="paste" content={answer} />,
+    ];
+    if (pasteFirst) outputActions.reverse();
+
     return (
-      <ActionPanel title="Actions">
-        <Action.CopyToClipboard content={answer} />
+      <>
+        {outputActions[0]}
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
           icon={showAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
           shortcut={Shortcut.ToggleQuickLook}
           onAction={() => setShowAnswerMetadata((prevState) => !prevState)}
         />
-        {props.command && (
-          <Action
-            title="Change Model"
-            icon={Icon.Box}
-            onAction={() => setShowSelectModelForm(true)}
-            shortcut={Shortcut.ChangeModel}
-          />
-        )}
         {Model && !loading && answer && (
           <Action
             title="Continue as Chat"
@@ -140,8 +209,24 @@ export function AnswerView(props: props): React.JSX.Element {
             shortcut={Shortcut.New}
           />
         )}
-        <Action.Paste content={answer} />
-      </ActionPanel>
+        {outputActions[1]}
+        {props.command && (
+          <>
+            <Action
+              title="Change Model"
+              icon={Icon.Box}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={Shortcut.ChangeModel}
+            />
+            <Action
+              title="Change Reasoning"
+              icon={Icon.Glasses}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={Shortcut.ChangeReasoning}
+            />
+          </>
+        )}
+      </>
     );
   }
 
@@ -202,13 +287,17 @@ export function AnswerView(props: props): React.JSX.Element {
     );
   }
 
-  if (thinking === "" && answer === "")
+  function ModelSelector(): React.JSX.Element | null {
+    if (!props.command || !resolvedSettings) return null;
     return (
-      <List isLoading={loading || IsLoadingModel} actions={!loading && !IsLoadingModel && <AnswerAction />}>
-        {""}
-        <List.EmptyView icon={Icon.CircleProgress} title="Loading Model" />
-      </List>
+      <Action
+        title={`Model: ${resolvedSettings.model} (${resolvedSettings.server})`}
+        icon={Icon.Box}
+        onAction={() => setShowSelectModelForm(true)}
+        shortcut={Shortcut.ChangeModel}
+      />
     );
+  }
 
   return (
     <Detail
@@ -227,7 +316,15 @@ ${thinking}
 }
 ${answer}`}
       isLoading={loading || IsLoadingModel}
-      actions={!loading && !IsLoadingModel && <AnswerAction />}
+      actions={
+        !loading &&
+        !IsLoadingModel && (
+          <ActionPanel title="Actions">
+            <ModelSelector />
+            <AnswerAction />
+          </ActionPanel>
+        )
+      }
       metadata={
         !loading &&
         !IsLoadingModel &&

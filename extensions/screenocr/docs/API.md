@@ -53,7 +53,9 @@ type OCRResult = {
   error?: string;
 };
 
-export default function Command({ launchContext = {} }: LaunchProps<{ launchContext?: OCRResult }>) {
+export default function Command({
+  launchContext = {},
+}: LaunchProps<{ launchContext?: OCRResult }>) {
   const { text, error } = launchContext;
 
   if (error) {
@@ -66,3 +68,7 @@ export default function Command({ launchContext = {} }: LaunchProps<{ launchCont
   }
 }
 ```
+
+## Windows behavior
+
+The existing `recognize-text` command and `huzef44/screenocr` identity also work on Windows, using the same `text`/`error` callback fields. Windows returns `text: null` with a human-readable error for no text, cancellation or recognition failure. Callback delivery is attempted once and bypasses the Windows copy/paste preference. Ordinary Windows cancellation is silent. macOS callback behavior is unchanged.

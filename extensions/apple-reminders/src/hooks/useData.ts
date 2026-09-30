@@ -3,6 +3,8 @@ import { getData } from "swift:../../swift/AppleReminders";
 
 export type Priority = "low" | "medium" | "high" | null;
 
+export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+
 export type Location = {
   address: string;
   proximity: string;

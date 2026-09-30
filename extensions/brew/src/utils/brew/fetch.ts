@@ -33,8 +33,11 @@ import {
   CHUNKED_CACHE_VERSION,
 } from "../cache";
 import { brewPath, brewCachePrefix } from "./paths";
-import { normalizeOutdatedResults } from "./helpers";
-import { execBrew } from "./commands";
+import { isCask, normalizeOutdatedResults } from "./helpers";
+import { execBrew, execBrewJson } from "./commands";
+import { parseBrewVulns, VulnResults } from "./vulns";
+import { invalidateBrewMajorVersion } from "./brew-version";
+import { compactCaskArtifacts } from "./link";
 import { brewLogger, cacheLogger } from "../logger";
 
 /// Cache Paths
@@ -58,6 +61,7 @@ const caskRemote: ChunkedRemote<Cask> = {
   url: caskURL,
   cachePath: caskCachePath,
   chunkedConfig: getChunkedCacheConfig("cask"),
+  compact: compactCaskArtifacts,
 };
 
 /** Extract index entry from a Formula */
@@ -133,7 +137,7 @@ export async function brewFetchInstallableResults(
   cancel?: AbortSignal,
 ): Promise<InstallableResults | undefined> {
   async function installed(): Promise<string> {
-    return (await execBrew(`info --json=v2 --installed`, cancel ? { signal: cancel } : undefined)).stdout;
+    return (await execBrew(`info --json=v2 --installed`, { signal: cancel })).stdout;
   }
 
   if (!useCache) {
@@ -310,7 +314,7 @@ export async function brewFetchOutdated(
   if (!skipUpdate) {
     await brewUpdate(cancel);
   }
-  const output = await execBrew(cmd, cancel ? { signal: cancel } : undefined);
+  const output = await execBrew(cmd, { signal: cancel });
   const results = normalizeOutdatedResults(JSON.parse(output.stdout) as OutdatedResults);
   brewLogger.log("Outdated packages fetched", {
     formulaeCount: results.formulae.length,
@@ -321,12 +325,89 @@ export async function brewFetchOutdated(
 }
 
 /**
+ * Scan installed formulae for known OSV advisories (`brew vulns`, Homebrew 7).
+ *
+ * `brew vulns` exits 1 whenever it found an open advisory — the normal case —
+ * and it prints the JSON before setting that status, so a non-zero exit with
+ * JSON on stdout is a success. Only an exit with nothing on stdout (an unknown
+ * formula, a broken brew) is a real failure, and then brew's own `ExecError`
+ * is rethrown so its stderr reaches the failure toast. Warnings brew emits
+ * alongside a good scan (untrusted tap, missing SBOM) are logged, not surfaced.
+ */
+export async function brewFetchVulns(cancel?: AbortSignal): Promise<VulnResults> {
+  brewLogger.log("Scanning for vulnerabilities");
+
+  const parse = (stdout: string, stderr: string | undefined): VulnResults => {
+    if (stderr?.trim()) {
+      brewLogger.warn("brew vulns reported warnings", { stderr: stderr.trim() });
+    }
+    const results = parseBrewVulns(stdout);
+    brewLogger.log("Vulnerability scan complete", {
+      findingsCount: results.findings.length,
+      skippedCount: results.skipped.length,
+    });
+    return results;
+  };
+
+  const output = await execBrewJson("vulns --json", { signal: cancel });
+  try {
+    return parse(output.stdout, output.stderr);
+  } catch (err) {
+    throw output.exitError ?? err; // brew's stderr says more than our ParseError would
+  }
+}
+
+/**
  * Run brew update.
  */
 export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
   brewLogger.log("Running brew update");
-  await execBrew(`update`, cancel ? { signal: cancel } : undefined);
+  await execBrew(`update`, { signal: cancel });
+  // `brew update` can upgrade Homebrew itself, so the memoised major version is
+  // now a guess. Dropping it here covers every caller (background refresh,
+  // Check for Updates, the outdated fetch); the next mount re-reads.
+  invalidateBrewMajorVersion();
   brewLogger.log("Brew update completed");
+}
+
+/**
+ * Re-check ONE package for a newer version.
+ *
+ * Homebrew computes `outdated` against the tap checkouts on disk, so a package
+ * installed at the newest version brew currently KNOWS about reads as up to
+ * date however stale that checkout is — which is why a formula with a release
+ * waiting shows no update badge until something runs `brew update`.
+ *
+ * The refresh is unavoidably global: Homebrew has no per-tap, let alone
+ * per-formula, update. What is scoped is the re-read afterwards — one
+ * `brew info` for the package the user asked about, rather than the full
+ * `brew outdated` sweep the Check for Updates command runs.
+ *
+ * Returns the package's fresh record, or undefined if it could not be read.
+ *
+ * `undefined` is deliberately NOT reported as "brew no longer has this
+ * package". The single-package fetchers swallow every error, so undefined
+ * covers a genuine not-found AND a `brew info` that failed or returned
+ * unparseable JSON — a caller that names deletion would be guessing.
+ *
+ * Cancellation IS separated out and re-thrown, because that one is knowable:
+ * without it, a user who cancelled mid-`brew info` got the same undefined and
+ * an error toast for an operation they themselves stopped.
+ */
+export async function brewCheckForUpdate(
+  item: Cask | Formula,
+  cancel?: AbortSignal,
+): Promise<Cask | Formula | undefined> {
+  await brewUpdate(cancel);
+  const fresh = isCask(item)
+    ? await brewFetchCaskInfo(item.token, cancel)
+    : await brewFetchFormulaInfo(item.name, cancel);
+  if (fresh === undefined && cancel?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+  return fresh;
 }
 
 /// Chunked Cache Functions
@@ -570,15 +651,12 @@ async function ensureChunkedCache<T>(
     return;
   }
 
-  // Check if stale cache exists (for fallback on failure)
-  let hasStaleCacheIndex = false;
-  try {
-    await fs.stat(remote.chunkedConfig.indexPath);
-    await fs.stat(remote.chunkedConfig.metaPath);
-    hasStaleCacheIndex = true;
-  } catch {
-    // No stale cache available
-  }
+  // Check if a stale but USABLE cache exists (for fallback on failure). The
+  // files merely existing is not enough: after a schema-version bump the
+  // on-disk chunks are the previous shape, so falling back to them serves
+  // records missing whatever the bump added. Same acceptance as the warm-start
+  // path, so a fallback can only ever serve what `fetchIndex` would serve.
+  const hasStaleCacheIndex = (await tryLoadOnDiskIndex(remote.chunkedConfig)) !== undefined;
 
   try {
     brewLogger.log("Building chunked cache", { type: remote.chunkedConfig.type });
@@ -587,7 +665,15 @@ async function ensureChunkedCache<T>(
     await downloadRemoteToCache(remote.url, remote.cachePath, onProgress, signal);
 
     // Stream the downloaded file into chunks + index + meta.
-    await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress, signal);
+    await buildChunkedCache(
+      remote.cachePath,
+      remote.url,
+      remote.chunkedConfig,
+      extractIndex,
+      onProgress,
+      signal,
+      remote.compact,
+    );
     return;
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") throw err;
@@ -623,6 +709,30 @@ async function ensureChunkedCache<T>(
 
     throw err;
   }
+}
+
+/**
+ * The on-disk index for a type, if one is already there and usable — never a
+ * build, never a background refresh.
+ *
+ * For lookups that are only worth doing against a cache that already exists.
+ * `fetchIndex` cannot serve them: on a cold or schema-stale cache it downloads
+ * and rebuilds the whole chunked cache, and on a warm one it schedules a
+ * background rebuild — both of which spike memory for a caller that wanted one
+ * chunk read. This returns `undefined` in exactly those cases instead.
+ */
+async function cachedIndex<T>(state: IndexFetchState<T>): Promise<CacheIndex | undefined> {
+  return state.remote.index ?? (await tryLoadOnDiskIndex(state.remote.chunkedConfig));
+}
+
+/** The already-built formula index, or undefined. See {@link cachedIndex}. */
+export function cachedFormulaIndex(): Promise<CacheIndex | undefined> {
+  return cachedIndex(formulaIndexState);
+}
+
+/** The already-built cask index, or undefined. See {@link cachedIndex}. */
+export function cachedCaskIndex(): Promise<CacheIndex | undefined> {
+  return cachedIndex(caskIndexState);
 }
 
 /**
@@ -671,7 +781,7 @@ export async function brewFetchFormulaInfo(name: string, cancel?: AbortSignal): 
   brewLogger.log("Fetching formula info", { name });
 
   try {
-    const output = await execBrew(`info --json=v2 ${name}`, cancel ? { signal: cancel } : undefined);
+    const output = await execBrew(`info --json=v2 ${name}`, { signal: cancel });
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 
@@ -699,7 +809,7 @@ export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Pr
   try {
     // `--cask` is required, not decorative: without it brew's resolver prefers a
     // same-named FORMULA (cli/named_args.rb), returning an empty `casks` array.
-    const output = await execBrew(`info --json=v2 --cask ${token}`, cancel ? { signal: cancel } : undefined);
+    const output = await execBrew(`info --json=v2 --cask ${token}`, { signal: cancel });
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 

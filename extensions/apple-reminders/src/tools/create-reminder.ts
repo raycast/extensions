@@ -1,7 +1,8 @@
-import { Tool } from "@raycast/api";
+import type { Tool } from "@raycast/api";
 import { createReminder } from "swift:../../swift/AppleReminders";
 
-import { Frequency } from "../create-reminder";
+import type { Frequency, NewReminder } from "../create-reminder";
+import { parseTags } from "../helpers";
 
 type Input = {
   /**
@@ -19,7 +20,11 @@ type Input = {
   /**
    * Optional priority level. Only include this when the user explicitly asks for a priority or uses wording such as "urgent", "important", or an exclamation mark. Never default unspecified reminders to "low". Only pick the value from this list: "low", "medium", "high".
    */
-  priority?: string;
+  priority?: "low" | "medium" | "high";
+  /**
+   * Optional tags for the reminder. A comma-separated or space-separated list of tags (e.g. "work, urgent" or "#work #urgent").
+   */
+  tags?: string;
   /**
    * The list ID to add the reminder to. Note that the user can prepend the "#" or "@" symbols to list names, for example, "#work" or "@work".
    */
@@ -36,6 +41,10 @@ type Input = {
    * The radius around the location in meters.
    */
   radius?: number;
+  /**
+   * Optional URL / link attached to the reminder.
+   */
+  url?: string;
   /**
    * The recurrence settings.
    * Only include this when the user explicitly asks for a repeating reminder (for example: "every day", "weekly", "monthly", "yearly", "weekdays", or "weekends").
@@ -78,6 +87,11 @@ export default async function (input: Input) {
     input.dueDate = new Date(input.dueDate).toISOString();
   }
 
-  const reminder = await createReminder(input);
+  const payload: NewReminder = {
+    ...input,
+    tags: input.tags ? parseTags(input.tags) : undefined,
+  };
+
+  const reminder = await createReminder(payload);
   return reminder;
 }

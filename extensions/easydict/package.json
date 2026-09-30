@@ -77,6 +77,7 @@
     "@xsai/shared-chat": "^0.5.0",
     "@xsai/stream-text": "^0.5.0",
     "franc": "^6.2.0",
+    "google-translate-api-x": "10.7.3",
     "native-say": "^0.0.2",
     "node-html-parser": "^9.0.1",
     "ofetch": "^1.5.1",
@@ -602,6 +603,50 @@
       "required": false,
       "description": "If you need to select target language manually, turn on it.",
       "default": false
+    },
+    {
+      "title": "Query Cache",
+      "name": "queryCacheMode",
+      "type": "dropdown",
+      "required": true,
+      "default": "off",
+      "description": "Store completed dictionary and machine translation results locally. Cached words expire after up to 7 days; translations expire after 24 hours.",
+      "data": [
+        {
+          "title": "Off",
+          "value": "off"
+        },
+        {
+          "title": "Words Only",
+          "value": "words"
+        },
+        {
+          "title": "All Text",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "title": "AI Query Cache",
+      "name": "aiQueryCacheMode",
+      "type": "dropdown",
+      "required": true,
+      "default": "off",
+      "description": "Reuse completed AI translations and dictionary entries. Off by default because regenerating the same input can produce a different result.",
+      "data": [
+        {
+          "title": "Off",
+          "value": "off"
+        },
+        {
+          "title": "Words Only",
+          "value": "words"
+        },
+        {
+          "title": "All Text",
+          "value": "all"
+        }
+      ]
     },
     {
       "title": "Language Detection",

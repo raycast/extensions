@@ -1,28 +1,32 @@
-import { getPreferenceValues } from "@raycast/api";
 import {
   Activity,
   ActivityResponse,
   BatchDeleteResponse,
   CreateActivityInput,
   DeleteResponse,
+  HealthMetricsResponse,
   ListActivitiesParams,
   ListActivitiesResponse,
   PairResponse,
+  TrainingStatus,
   UnpairResponse,
 } from "./types";
+import { authorize, resetAuthorization } from "./oauth";
 
 const BASE_URL = "https://shapecalendar.com/api/v1";
+const REQUEST_TIMEOUT_MS = 30_000;
 
-function getToken(): string {
-  const { apiToken } = getPreferenceValues<Preferences>();
-  return apiToken;
-}
-
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+  retryOnUnauthorized = true,
+): Promise<T> {
+  const token = await authorize();
   const response = await fetch(`${BASE_URL}${path}`, {
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...options,
     headers: {
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       ...options.headers,
     },
@@ -30,9 +34,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error(
-        "Invalid API token. Check your Shape Calendar API token in extension preferences.",
-      );
+      // Token was revoked (e.g. from Shape settings) — sign in again.
+      await resetAuthorization(token);
+      if (retryOnUnauthorized) return request<T>(path, options, false);
+      throw new Error("Could not sign in to Shape Calendar. Please try again.");
     }
     if (response.status === 429) {
       throw new Error(
@@ -143,4 +148,64 @@ export async function unpairActivity(
     method: "POST",
     body: JSON.stringify({ activityId }),
   });
+}
+
+export type ActivityDetailsParams = {
+  channels?: string[];
+  points?: number;
+  includeLaps?: boolean;
+  includeZones?: boolean;
+};
+
+export async function getActivityDetails(
+  id: string,
+  params: ActivityDetailsParams = {},
+): Promise<Record<string, unknown>> {
+  const searchParams = new URLSearchParams();
+  if (params.channels?.length) {
+    searchParams.set("channels", params.channels.join(","));
+  }
+  if (params.points) searchParams.set("points", String(params.points));
+  if (params.includeLaps === false) searchParams.set("includeLaps", "false");
+  if (params.includeZones === false) searchParams.set("includeZones", "false");
+
+  const query = searchParams.toString();
+  return request<Record<string, unknown>>(
+    `/activities/${id}/details${query ? `?${query}` : ""}`,
+  );
+}
+
+export type HealthMetricsParams = {
+  from?: string;
+  to?: string;
+  source?: "garmin" | "apple";
+  metrics?: string[];
+};
+
+export async function getHealthMetrics(
+  params: HealthMetricsParams = {},
+): Promise<HealthMetricsResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.from) searchParams.set("from", params.from);
+  if (params.to) searchParams.set("to", params.to);
+  if (params.source) searchParams.set("source", params.source);
+  if (params.metrics?.length) {
+    searchParams.set("metrics", params.metrics.join(","));
+  }
+
+  const query = searchParams.toString();
+  return request<HealthMetricsResponse>(
+    `/health-metrics${query ? `?${query}` : ""}`,
+  );
+}
+
+export async function getTrainingStatus(
+  params: { from?: string; to?: string } = {},
+): Promise<TrainingStatus> {
+  const searchParams = new URLSearchParams();
+  if (params.from) searchParams.set("from", params.from);
+  if (params.to) searchParams.set("to", params.to);
+
+  const query = searchParams.toString();
+  return request<TrainingStatus>(`/training-status${query ? `?${query}` : ""}`);
 }

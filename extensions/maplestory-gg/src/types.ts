@@ -1,43 +1,34 @@
-export type GraphDataItem = {
-  AvatarURL: string;
-  ClassID: number;
-  ClassRankGroupID: number;
-  CurrentEXP: number;
-  DateLabel: string;
-  EXPDifference: number;
-  EXPToNextLevel: number;
-  ImportTime: number;
-  Level: number;
-  Name: string;
-  ServerID: number;
-  ServerMergeID: number;
-  TotalOverallEXP: number;
-};
-
 export type CharacterData = {
-  AchievementPoints: number;
-  AchievementRank: number;
   CharacterImageURL: string;
   Class: string;
-  ClassRank: number;
+  ClassRank?: number;
   EXP: number;
-  EXPPercent: number;
-  GlobalRanking: number;
-  GraphData: GraphDataItem[];
-  Guild: string;
-  LegionCoinsPerDay: number;
-  LegionLevel: number;
-  LegionPower: number;
-  LegionRank: number;
+  GlobalRanking?: number;
+  LegionLevel?: number;
+  LegionPower?: number;
+  LegionRank?: number;
   Level: number;
   Name: string;
   Server: string;
-  ServerClassRanking: number;
-  ServerRank: number;
-  ServerSlug: string;
+  ServerRank?: number;
   Region: string;
+  Source?: "nexon";
+  LegionUnavailable?: boolean;
 };
 
-export type CharacterResponse = {
-  CharacterData: CharacterData;
+export type RankingEntry = {
+  characterName: string;
+  characterImgURL: string;
+  jobName: string;
+  exp: number;
+  level: number;
+  rank: number;
+  worldID: number;
+  legionLevel: number;
+  raidPower: number;
+};
+
+export type RankingResponse = {
+  totalCount: number;
+  ranks: RankingEntry[];
 };

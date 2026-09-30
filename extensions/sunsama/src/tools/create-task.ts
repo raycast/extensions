@@ -21,8 +21,9 @@ type Input = {
   channel?: string;
   /** Planned time in whole minutes. */
   timeEstimate?: number;
-  /** Subtask titles, in order. */
-  subtasks?: string[];
+  /** Subtask titles, one per line, in order. */
+  // A string, not string[]: see add-subtasks.ts.
+  subtasks?: string;
   /**
    * A link to attach natively — Trello, GitHub, Todoist, ClickUp, Jira,
    * Linear, Asana, Notion, Gmail, Slack, or any web page.
@@ -49,7 +50,11 @@ export default async function tool(input: Input) {
     notes: input.notes,
     channel: input.channel,
     timeEstimate: input.timeEstimate,
-    subtasks: input.subtasks?.map((title) => ({ title })),
+    subtasks: input.subtasks
+      ?.split("\n")
+      .map((title) => title.trim())
+      .filter(Boolean)
+      .map((title) => ({ title })),
     url: input.url,
     position: input.position,
   });

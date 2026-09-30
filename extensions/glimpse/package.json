@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "garon",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity",
@@ -46,7 +47,7 @@
       "name": "transcribe-selection",
       "title": "Transcribe Selected File",
       "subtitle": "Glimpse",
-      "description": "Transcribe the file selected in Finder.",
+      "description": "Transcribe the file selected in Finder or File Explorer.",
       "mode": "no-view"
     },
     {
@@ -91,6 +92,57 @@
       "subtitle": "Glimpse",
       "description": "Add and remove dictionary words.",
       "mode": "view"
+    },
+    {
+      "name": "manage-replacements",
+      "title": "Manage Replacements",
+      "subtitle": "Glimpse",
+      "description": "Add, edit, and remove text replacements.",
+      "mode": "view"
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "Glimpse",
+      "description": "Start a recording with your last sources.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-recording-pause",
+      "title": "Pause or Resume Recording",
+      "subtitle": "Glimpse",
+      "description": "Pause or resume the current recording.",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-recording-bookmark",
+      "title": "Add Recording Bookmark",
+      "subtitle": "Glimpse",
+      "description": "Bookmark this moment in the current recording.",
+      "mode": "no-view"
+    },
+    {
+      "name": "finish-recording",
+      "title": "Finish Recording",
+      "subtitle": "Glimpse",
+      "description": "Save the current recording to your Library.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "recording-status",
+      "title": "Recording Status",
+      "subtitle": "Glimpse",
+      "description": "Show the recording timer in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "preferences": [

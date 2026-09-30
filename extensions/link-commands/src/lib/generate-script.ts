@@ -1,3 +1,5 @@
+import { joinPackage } from "./convention";
+
 const FALLBACK_LINK_ICON = "https://api.iconify.design/mingcute/link-line.svg";
 
 const FALLBACK_FOLDER_ICON = "https://api.iconify.design/mingcute/folder-line.svg";
@@ -19,7 +21,7 @@ const singleLine = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
 export type ScriptDraft = {
   title: string;
   target: string;
-  /** `work` becomes a `@work · ` prefix on the title and a `work.` prefix on the filename. */
+  /** `work` becomes ` · @work` on the subtitle and a `work.` prefix on the filename. Never on the title. */
   environment?: string;
   /** The brand — `YouTube`, `The Guardian`. Defaults to the target's domain, humanised. */
   packageName?: string;
@@ -163,7 +165,7 @@ const escapeForShell = (value: string) => value.replace(/([\\"`$])/g, "\\$1");
  * placeholder has nothing an app could stand in for. A non-URL target is excluded for the same kind of
  * reason — a folder has no web equivalent to fall back to.
  */
-const routerAppOf = (draft: ScriptDraft) =>
+export const routerAppOf = (draft: ScriptDraft) =>
   draft.desktopApplication && !findPlaceholder(draft.target) && /^https?:\/\//i.test(draft.target)
     ? draft.desktopApplication
     : undefined;
@@ -218,12 +220,11 @@ const buildBody = (draft: ScriptDraft) => {
 
 export const buildScript = (draft: ScriptDraft) => {
   const placeholder = findPlaceholder(draft.target);
-  const environment = draft.environment?.trim();
+  const environment = draft.environment?.trim().replace(/^@/, "");
   const category = draft.category?.trim().replace(/^#/, "");
   const brand = brandOf(draft);
 
-  const title = environment ? `@${environment} · ${draft.title}` : draft.title;
-  const subtitle = [brand, category ? `#${category}` : undefined].filter(Boolean).join(" · ");
+  const subtitle = joinPackage({ brand, environment, category });
   const icon = draft.iconReference ?? defaultIconFor(draft.target);
 
   const lines = [
@@ -231,7 +232,7 @@ export const buildScript = (draft: ScriptDraft) => {
     "",
     "# Required parameters:",
     "# @raycast.schemaVersion 1",
-    `# @raycast.title ${singleLine(title)}`,
+    `# @raycast.title ${singleLine(draft.title)}`,
     "# @raycast.mode silent",
     "",
     "# Optional parameters:",

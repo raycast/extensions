@@ -14,6 +14,13 @@ import {
 } from "../agents/ui.tsx";
 import type { ClaudeError, ClaudeUsage } from "./types.ts";
 
+function accountLines(usage: ClaudeUsage): { account: string | null; organization: string | null } {
+  return {
+    account: usage.identity?.email ?? usage.identity?.displayName ?? null,
+    organization: usage.identity?.organizationName ?? null,
+  };
+}
+
 function formatWindow(name: string, percent: number, resetsIn: string | null, mode: PercentageDisplayMode): string {
   let text = `\n\n${name}: ${generateAsciiBar(toDisplayPercent(percent, mode))} ${formatPercentDisplay(percent, mode)}`;
   if (resetsIn) {
@@ -32,7 +39,11 @@ export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeEr
   const u = usage as ClaudeUsage;
 
   const mode = getPercentageDisplayMode();
-  let text = `Claude Usage\nPlan: ${u.plan}`;
+  const { account, organization } = accountLines(u);
+  let text = "Claude Usage";
+  if (account) text += `\nAccount: ${account}`;
+  if (organization) text += `\nOrganization: ${organization}`;
+  text += `\nPlan: ${u.plan}`;
   text += formatWindow("5h Limit", u.fiveHour.percentageRemaining, u.fiveHour.resetsIn, mode);
 
   if (u.sevenDay) {
@@ -58,6 +69,12 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
 
   return (
     <List.Item.Detail.Metadata>
+      {accountLines(u).account && (
+        <List.Item.Detail.Metadata.Label title="Account" text={accountLines(u).account as string} />
+      )}
+      {accountLines(u).organization && (
+        <List.Item.Detail.Metadata.Label title="Organization" text={accountLines(u).organization as string} />
+      )}
       <List.Item.Detail.Metadata.Label title="Plan" text={u.plan} />
       <List.Item.Detail.Metadata.Separator />
 
@@ -132,7 +149,9 @@ export function getClaudeAccessory(
   }
 
   const mode = getPercentageDisplayMode();
-  const tooltipParts = [`5h Limit: ${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`];
+  const { account } = accountLines(usage);
+  const tooltipParts = account ? [account] : [];
+  tooltipParts.push(`5h Limit: ${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`);
   if (usage.sevenDay) {
     tooltipParts.push(`Weekly Limit: ${toDisplayPercent(usage.sevenDay.percentageRemaining, mode)}%`);
   }

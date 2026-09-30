@@ -12,6 +12,8 @@ import {
   OutdatedResults,
   isBrewLockError,
   brewLogger,
+  copyLogsAction,
+  getErrorMessage,
 } from "../utils";
 import { preferences, isOutdatedSnapshotDirty, clearOutdatedSnapshotDirty, outdatedFetchFailureCopy } from "../utils";
 
@@ -85,6 +87,7 @@ export function useBrewOutdated(options?: { backgroundRefresh?: boolean }) {
               result.revalidate();
             },
           },
+          secondaryAction: copyLogsAction(getErrorMessage(error), { hideToast: true }),
         });
       },
     },

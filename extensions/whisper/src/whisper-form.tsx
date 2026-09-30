@@ -1,8 +1,6 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
 import { Fragment, useState } from "react";
-import { createSecret, formatDuration, parseDuration } from "./shared";
-
-const DEFAULT_DURATION_SECONDS = 3600;
+import { copyConcealed, createSecret, DURATION_OPTIONS, formatDuration, getDefaults, parseDuration } from "./shared";
 
 interface KvRow {
   key: string;
@@ -64,6 +62,7 @@ export function buildMultiValuePayload(rows: KvRow[], sections: KvSection[]): { 
 }
 
 export default function Command() {
+  const defaults = getDefaults();
   const [mode, setMode] = useState<string>("freeform");
   const [rows, setRows] = useState<KvRow[]>([{ key: "", value: "" }]);
   const [sections, setSections] = useState<KvSection[]>([]);
@@ -103,14 +102,14 @@ export default function Command() {
       }
     }
 
-    const durationSeconds = parseDuration(values.duration) ?? DEFAULT_DURATION_SECONDS;
+    const durationSeconds = parseDuration(values.duration) ?? defaults.durationSeconds;
 
     await showToast({ style: Toast.Style.Animated, title: "Encrypting secret..." });
 
     try {
       const expirationTimestamp = Math.floor(Date.now() / 1000) + durationSeconds;
       const shareUrl = await createSecret(plaintext, expirationTimestamp, values.selfDestruct);
-      await Clipboard.copy(shareUrl);
+      await copyConcealed(shareUrl);
 
       const durationDisplay = formatDuration(durationSeconds);
       const destructNote = values.selfDestruct ? "Self-destructs after first view." : "Can be viewed multiple times.";
@@ -254,13 +253,17 @@ export default function Command() {
         </>
       )}
 
-      <Form.Dropdown id="duration" title="Expires in" defaultValue="1h">
-        <Form.Dropdown.Item value="30m" title="30 minutes" />
-        <Form.Dropdown.Item value="1h" title="1 hour" />
-        <Form.Dropdown.Item value="24h" title="24 hours" />
-        <Form.Dropdown.Item value="7d" title="7 days" />
+      <Form.Dropdown id="duration" title="Expires in" defaultValue={defaults.duration}>
+        {DURATION_OPTIONS.map((option) => (
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+        ))}
       </Form.Dropdown>
-      <Form.Checkbox id="selfDestruct" title="Self-destruct" label="Delete after first view" defaultValue={true} />
+      <Form.Checkbox
+        id="selfDestruct"
+        title="Self-destruct"
+        label="Delete after first view"
+        defaultValue={defaults.selfDestruct}
+      />
     </Form>
   );
 }

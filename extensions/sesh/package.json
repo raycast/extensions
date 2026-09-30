@@ -7,7 +7,8 @@
   "author": "joshmedeski",
   "contributors": [
     "sebastian_gunnarsson",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "tharropoulos"
   ],
   "categories": [
     "Developer Tools",
@@ -27,7 +28,33 @@
           "name": "openWithApp",
           "type": "appPicker",
           "required": true,
-          "title": "Open with (required)",
+          "title": "Open With (Required)",
+          "description": "Open with",
+          "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
+        }
+      ]
+    },
+    {
+      "name": "cmd-connect-window",
+      "title": "Connect to Window",
+      "subtitle": "Sesh",
+      "description": "Search every tmux window across your sessions and jump straight to it.",
+      "icon": "command-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openWithApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open With (Required)",
           "description": "Open with",
           "default": "Terminal"
         },
@@ -43,7 +70,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.0"
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

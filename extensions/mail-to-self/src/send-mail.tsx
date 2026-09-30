@@ -10,7 +10,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
-import nodemailer from "nodemailer";
+import nodemailer, { type TransportOptions } from "nodemailer";
 import { showFailureToast } from "@raycast/utils";
 
 type RecipientOption = {
@@ -170,7 +170,7 @@ async function sendMail({
     };
   }
 
-  const transporter = nodemailer.createTransport(transportOptions as nodemailer.TransportOptions);
+  const transporter = nodemailer.createTransport(transportOptions as TransportOptions);
 
   await transporter.sendMail({
     from: formatAddress(fromEmail, fromName),

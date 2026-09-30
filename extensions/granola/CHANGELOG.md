@@ -1,5 +1,11 @@
 # Granola Changelog
 
+## [Meeting Actions Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add a skill for extracting decisions, action items, and open questions from meeting notes or a weekly review.
+- Include source references, stated owners and deadlines, and clear gaps when notes or attribution are unavailable.
+
 ## [2.2.0 - OAuth Authentication] - 2026-09-07
 
 - Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.

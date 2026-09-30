@@ -7,7 +7,7 @@ Work with issues, pull requests, manage workflows, search repositories and stay 
 You can use a personal access token instead of logging in through OAuth to authenticate your GitHub account:
 
 The following link can be used as a shortcut to create your token:
-<https://github.com/settings/tokens/new?description=Raycast&scopes=repo,read:org,read:user,project,notifications>
+<https://github.com/settings/tokens/new?description=Raycast&scopes=repo,read:org,read:user,project,notifications,read:packages>
 
 Otherwise, you can manually create it:
 
@@ -21,6 +21,7 @@ Otherwise, you can manually create it:
 - `read:user`
 - `project`
 - `notifications`
+- `read:packages` (only needed for the _My Packages_ commands)
 
 5. Click "Generate token".
 6. Copy the token in the "GitHub Token" field in the extension's preferences.
@@ -44,11 +45,12 @@ The **Default Clone Path** preference applies only to these extension clone acti
 
 ## Menu Bar Commands
 
-This extension ships three independent Menu Bar Commands. They can be enabled together or in any combination depending on what you want at a glance from your menu bar.
+This extension ships four independent Menu Bar Commands. They can be enabled together or in any combination depending on what you want at a glance from your menu bar.
 
 - **My GitHub Stats Menu Bar** — A profile-centric overview: followers, stars received, organizations, API rate limit, plus a small _Activity_ drill-down with the **5 most recently updated** PRs and issues you authored or have open. Optionally surfaces a _What's New_ section when one of your repositories receives new stars. Designed for users who want a single icon in the menu bar that summarises everything about _you_.
 - **My Pull Requests Menu Bar** — An inbox-style command focused on Pull Requests: configurable sections for assigned / mentioned / reviewed / review-requested / drafts, repository filtering, sortable list, and CI status icons (draft, merge-queue, success, failure, pending). Use this if you want a dedicated PR triage surface.
 - **My Issues Menu Bar** — The Issue counterpart of _My Pull Requests Menu Bar_: dedicated sections for created / assigned / mentioned / recently closed, repository filtering, sortable. Use this if you want a dedicated Issue triage surface.
+- **My Packages Menu Bar** — Your published packages grouped by registry (Container, npm, Maven, Docker, NuGet, RubyGems), with a configurable number of packages per registry. The title can show either the package count or one package's name and download count.
 
 The activity drill-down in _My GitHub Stats Menu Bar_ is intentionally a thin convenience — it shows just the 5 most recently updated items per category, with no filters or sorting, so users who keep only that single command enabled still have one-click access to their latest work. For a richer, more configurable PR or Issue workflow, enable the dedicated _My Pull Requests Menu Bar_ or _My Issues Menu Bar_ alongside it.
 

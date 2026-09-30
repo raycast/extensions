@@ -81,12 +81,12 @@ function createSenseDisplayItem(
   const title = `${partOfSpeech}${meanings}`;
   const copyText = [title, sense.definition, ...sense.examples.map(formatExampleText)].filter(Boolean).join("\n");
   const detailsMarkdown = [
-    `### ${title}`,
+    `**${title}**`,
     sense.definition,
     sense.examples.length > 0
-      ? `**Examples**\n${sense.examples
-          .map((example) => `- ${example.sentence}${example.translation ? `\n  ${example.translation}` : ""}`)
-          .join("\n")}`
+      ? `${sense.examples
+          .map((example) => `- **${example.sentence}**${example.translation ? `  \n  ${example.translation}` : ""}`)
+          .join("\n\n")}`
       : undefined,
   ]
     .filter(Boolean)

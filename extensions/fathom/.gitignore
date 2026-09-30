@@ -12,20 +12,17 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
-
-# dependencies
-/node_modules
-
-# Raycast specific files
-raycast-env.d.ts
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
-compiled_raycast_rust
-
-# misc
-.DS_Store
 .vscode
-.agents/AGENTS.md
-.agents/WARP.md
 CLAUDE.md
+
+# Debug logs pasted from live sessions. Redaction masked the cursors and no
+# credentials survived, but these are session artifacts, not documentation.
+docs/*.log
+
+# Local working notes — API feedback, upstream discrepancies. Not for the Store PR.
+.claude/
+.github/docs/
+.github/private/
+
+# Local agent tooling; ray publish copies it otherwise, so it is stashed at publish time.
+.compound-engineering/
