@@ -14,7 +14,7 @@ This is a local workaround, not an official OpenAI feature. It relies on how the
 
 Removing a profile from the list does not delete its folder or data. You can re-add an unlinked profile folder later.
 
-If a secondary profile's window is closed but ChatGPT remains running without a window, opening that profile brings its window forward when possible. Otherwise, the extension closes and relaunches only that profile's ChatGPT instance. macOS may ask permission for the extension to control System Events for this recovery. Other profile instances are left alone.
+If a profile's window is closed but ChatGPT remains running without a window, opening that profile sends macOS's reopen event to that exact ChatGPT instance. If the app cannot restore a window, the extension leaves the process running and reports that it could not be recovered. macOS may ask permission for the extension to control ChatGPT and System Events.
 
 ## Compatibility
 

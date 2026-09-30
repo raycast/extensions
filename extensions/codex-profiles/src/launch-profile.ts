@@ -34,15 +34,105 @@ async function waitForProfileToStart(profile: CodexProfile): Promise<void> {
   }
 }
 
+async function getWindowCount(pid: number): Promise<number> {
+  const script = `tell application "System Events" to count windows of (first application process whose unix id is ${pid})`;
+  const { stdout } = await execFileAsync("/usr/bin/osascript", ["-e", script]);
+  const count = Number(stdout.trim());
+  if (!Number.isInteger(count) || count < 0) throw new Error("Could not read the ChatGPT window count.");
+  return count;
+}
+
+async function activateProfileProcess(pid: number): Promise<void> {
+  const script = `tell application "System Events" to set frontmost of (first application process whose unix id is ${pid}) to true`;
+  await execFileAsync("/usr/bin/osascript", ["-e", script]);
+}
+
+async function sendReopenEvent(pid: number): Promise<void> {
+  // Target the exact profile process. Addressing ChatGPT by bundle ID could
+  // select a different running profile because all instances share that ID.
+  const script = `
+    ObjC.import("Foundation");
+    const target = $.NSAppleEventDescriptor["descriptorWithProcessIdentifier:"](${pid});
+    const event = $.NSAppleEventDescriptor["appleEventWithEventClass:eventID:targetDescriptor:returnID:transactionID:"](
+      0x61657674, 0x72617070, target, -1, 0
+    );
+    const error = Ref();
+    event["sendEventWithOptions:timeout:error:"](1, 5, error);
+    if (error[0]) throw new Error(ObjC.unwrap(error[0].localizedDescription));
+  `;
+  await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", script]);
+}
+
+function errorMessage(error: unknown): string {
+  if (error && typeof error === "object" && "stderr" in error && typeof error.stderr === "string" && error.stderr.trim()) {
+    return error.stderr.trim();
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function waitForWindow(pid: number): Promise<boolean> {
+  const deadline = Date.now() + 2_000;
+  while (Date.now() < deadline) {
+    if ((await getWindowCount(pid)) > 0) return true;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return (await getWindowCount(pid)) > 0;
+}
+
+async function restoreRunningProfileWindow(profile: CodexProfile, pid: number): Promise<boolean> {
+  try {
+    if ((await getWindowCount(pid)) > 0) {
+      await activateProfileProcess(pid);
+    } else {
+      // A plain activation does not recreate a window after the red close
+      // button was used. Send macOS's standard reopen event to this exact PID.
+      let reopenError: unknown;
+      try {
+        await sendReopenEvent(pid);
+      } catch (error) {
+        // Some app handlers report an Apple Event error even after reopening.
+        // Verify the actual window state before treating the attempt as failed.
+        reopenError = error;
+      }
+      await activateProfileProcess(pid);
+      if (!(await waitForWindow(pid))) {
+        const stillRunning = (await getProfilePIDs(profile)).includes(pid);
+        if (!stillRunning) return false;
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `${profile.name} is running without a window`,
+          message: reopenError
+            ? `Tried to restore its window and left the process running. ${errorMessage(reopenError)}`
+            : "Tried to restore its window and left the process running.",
+        });
+        return true;
+      }
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Restored ${profile.name} window`,
+      message: "Brought the existing ChatGPT profile forward.",
+    });
+    return true;
+  } catch (error) {
+    // Never start a second instance when the existing process could not be
+    // inspected or activated; leave it alone and report the recovery failure.
+    if (!(await getProfilePIDs(profile)).includes(pid)) return false;
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Couldn't restore ${profile.name} window`,
+      message: errorMessage(error),
+    });
+    return true;
+  }
+}
+
 async function openProfileWindowLocked(profile: CodexProfile): Promise<void> {
   const existingPIDs = await getProfilePIDs(profile);
   if (existingPIDs.length > 0) {
-    await showToast({
-      style: Toast.Style.Success,
-      title: `${profile.name} is already running`,
-      message: "No new window was opened.",
-    });
-    return;
+    if (await restoreRunningProfileWindow(profile, existingPIDs[0])) return;
   }
 
   // The required Work folder may not exist on a first launch; create it so
