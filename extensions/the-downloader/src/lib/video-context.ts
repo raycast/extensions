@@ -1,6 +1,6 @@
 import { NoTranscriptReason, TranscriptSegment } from "../transcript.js";
 import { Video } from "../types.js";
-import { Chunk, chunkBody, estimateTokens, formatTimestamp, transcriptText } from "./link-context.js";
+import { Chunk, chunkBody, formatTimestamp } from "./link-context.js";
 import { formatCount, formatUploadDate } from "./media-info.js";
 
 export {
