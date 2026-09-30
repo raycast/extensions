@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Opus Growth MCP Server] - 2026-09-30
+
+- Add Opus Growth to the community registry: manage advertising from chat across Google, Meta, Microsoft, TikTok and LinkedIn (campaigns, ad groups, creatives, audiences, bidding, keywords and extensions), plus reporting and SEO with Search Console, GA4, GTM, Google Business Profile and YouTube. Hosted remote Streamable HTTP server at https://mcp.opus-growth.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
 ## [Add Recordist] - 2026-09-30
 
 - Add Recordist community entry (`@recordist/gateway`): search and read the meetings recorded on your own computer.
