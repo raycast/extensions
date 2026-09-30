@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Recordist] - 2026-09-30
+
+- Add Recordist community entry (`@recordist/gateway`): search and read the meetings recorded on your own computer.
+
 ## [Add AudioPod AI MCP Server] - 2026-09-30
 
 - Add AudioPod AI to the official registry: text-to-speech in 200+ languages, voice cloning and conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server at https://mcp.audiopod.ai through `mcp-remote`, authenticated with an AudioPod API key.
