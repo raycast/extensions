@@ -42,6 +42,8 @@ export type CompleteOptions = {
   onData?: (text: string) => void;
   /** A short note while the engine is busy before its first words (e.g. loading a model); undefined clears it. */
   onStatus?: (status: string | undefined) => void;
+  /** Local image files to look at, for engines that can (`seesImages`). */
+  images?: string[];
 };
 
 export interface Engine {
@@ -49,6 +51,10 @@ export interface Engine {
   title: string;
   /** How many prompt tokens one request may carry. */
   contextBudget: number;
+  /** Prompt tokens to keep free for each image sent along. */
+  imageTokens: number;
+  /** True when the engine (or its current model) can look at images. */
+  seesImages(): Promise<boolean>;
   complete(instructions: string, prompt: string, options?: CompleteOptions): Promise<string>;
 }
 
@@ -84,6 +90,9 @@ export function raycastEngine(model?: string): Engine {
     title: ENGINE_TITLES.raycast,
     // Raycast-hosted models have large windows; stay well inside the smaller ones.
     contextBudget: 90_000,
+    // The extension AI API takes text only.
+    imageTokens: 0,
+    seesImages: async () => false,
     async complete(instructions, prompt, options = {}) {
       const request = AI.ask(`${instructions}\n\n${prompt}`, {
         creativity: "low",
@@ -128,8 +137,12 @@ const FM_GUARDRAILS = "permissive-content-transformations";
  * Private Cloud option. The prompt is positional and last; ours always starts
  * with text, never a dash.
  */
-export function buildFmArgs(instructions: string, prompt: string): string[] {
-  return ["respond", "--instructions", instructions, "--stream", "--guardrails", FM_GUARDRAILS, prompt];
+export function buildFmArgs(instructions: string, prompt: string, images: string[] = []): string[] {
+  const base = ["respond", "--instructions", instructions, "--stream", "--guardrails", FM_GUARDRAILS];
+  // With images, fm takes the text as a --text segment next to each --image.
+  return images.length
+    ? [...base, ...images.flatMap((image) => ["--image", image]), "--text", prompt]
+    : [...base, prompt];
 }
 
 const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, "g");
@@ -178,6 +191,10 @@ export function appleEngine(): Engine {
     // The on-device model's window is 8,192 tokens for the prompt and the
     // answer together (measured with fm on macOS 27); this leaves ~3,000 to answer.
     contextBudget: 4_500,
+    // Measured on macOS 27: an image, from a 512 px icon to a 1440×1800 photo,
+    // takes well under 300 tokens of the window.
+    imageTokens: 300,
+    seesImages: async () => true,
     async complete(instructions, prompt, options = {}) {
       let text = "";
       // Warm, the first words take 2–4 s; loading the model after a break, or
@@ -188,7 +205,7 @@ export function appleEngine(): Engine {
         APPLE_NOTICE_MS,
       );
       try {
-        const { code, stderr } = await runWithWatchdog(FM_PATH, buildFmArgs(instructions, prompt), {
+        const { code, stderr } = await runWithWatchdog(FM_PATH, buildFmArgs(instructions, prompt, options.images), {
           idleMs: 120_000,
           abortSignal: options.signal,
           onStdoutChunk: (chunk) => {
@@ -272,6 +289,24 @@ export function ollamaEngine(settings: EngineSettings): Engine {
     id: "ollama",
     title: ENGINE_TITLES.ollama,
     contextBudget: Math.max(2_000, Math.floor(settings.ollamaContext * 0.6)),
+    // Vision models spend a few hundred to ~1,600 tokens per image; keep a middle amount free.
+    imageTokens: 800,
+    async seesImages() {
+      try {
+        const model = settings.ollamaModel?.trim() || (await firstOllamaModel(settings.ollamaUrl));
+        const res = await fetch(`${base(settings.ollamaUrl)}/api/show`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ model }),
+          signal: AbortSignal.timeout(3_000),
+        });
+        if (!res.ok) return false;
+        const info = (await res.json()) as { capabilities?: string[] };
+        return info.capabilities?.includes("vision") ?? false;
+      } catch {
+        return false;
+      }
+    },
     async complete(instructions, prompt, options = {}) {
       let res: Response;
       // The first request after a while makes Ollama load the model into memory,
@@ -294,7 +329,13 @@ export function ollamaEngine(settings: EngineSettings): Engine {
             stream: true,
             messages: [
               { role: "system", content: instructions },
-              { role: "user", content: prompt },
+              {
+                role: "user",
+                content: prompt,
+                ...(options.images?.length
+                  ? { images: options.images.map((file) => fs.readFileSync(file).toString("base64")) }
+                  : {}),
+              },
             ],
             options: { num_ctx: settings.ollamaContext, temperature: 0.2 },
           }),

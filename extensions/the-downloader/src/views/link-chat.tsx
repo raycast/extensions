@@ -13,6 +13,7 @@ import {
   List,
   Toast,
   confirmAlert,
+  environment,
   getPreferenceValues,
   launchCommand,
   open,
@@ -37,6 +38,7 @@ import {
   hasBody,
   linkifyTimestamps,
 } from "../lib/link-context.js";
+import { fetchImages, imageDecision, imageQuestion } from "../lib/link-images.js";
 import { linkKindOf, loadLinkContext } from "../lib/link-loader.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
 import { timestampUrl } from "../lib/sources/video.js";
@@ -285,7 +287,7 @@ function turnIcon(turn: Turn) {
   }
 }
 
-function AboutMetadata({ ctx }: { ctx: LinkContext }) {
+function AboutMetadata({ ctx, textOnly }: { ctx: LinkContext; textOnly: boolean }) {
   const best = ctx.video ? qualityName(maxHeight(ctx.video)) : undefined;
   const skip = new Set(["Uploaded captions", "Automatic captions", "Transcript language", "Spoken language"]);
   return (
@@ -312,7 +314,11 @@ function AboutMetadata({ ctx }: { ctx: LinkContext }) {
       {best && <List.Item.Detail.Metadata.Label title="Best Quality" text={best} />}
       {ctx.stats.length > 0 && <List.Item.Detail.Metadata.Separator />}
       {ctx.stats.map((s) => (
-        <List.Item.Detail.Metadata.Label key={s.label} title={s.label} text={s.value} />
+        <List.Item.Detail.Metadata.Label
+          key={s.label}
+          title={s.label}
+          text={s.label === "Images" && textOnly ? `${s.value} (this engine reads text only)` : s.value}
+        />
       ))}
       {ctx.tags?.length ? (
         <List.Item.Detail.Metadata.TagList title={ctx.kind === "post" ? "Hashtags" : "Tags"}>
@@ -348,6 +354,9 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
   const [engine, setEngine] = useState<EnginePreference>((prefs.aiEngine as EnginePreference) || "auto");
   const { status: engineStatus, statuses: engineStatuses, recheck: recheckEngines } = useEngineStatus(engine, settings);
   const [selectedId, setSelectedId] = useState<string>();
+  const [seesImages, setSeesImages] = useState<boolean>();
+  // Ask Each Time asks once per chat.
+  const imageChoice = useRef<"allow" | "text">(undefined);
   const abortRef = useRef<AbortController | null>(null);
   const loadAbort = useRef<AbortController | null>(null);
   // Set when a new answer completes, so the effect below saves the chat once.
@@ -427,6 +436,19 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
     }
   }
 
+  // Whether the chosen engine can look at a post's images, for the About item.
+  useEffect(() => {
+    if (!ctx?.images?.length) return;
+    let cancelled = false;
+    resolveEngine(engine, settings)
+      .then((e) => e.seesImages())
+      .then((sees) => !cancelled && setSeesImages(sees))
+      .catch(() => !cancelled && setSeesImages(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [engine, ctx?.images?.length]);
+
   useEffect(() => {
     if (missingTool) return;
     let cancelled = false;
@@ -462,14 +484,38 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
     setSelectedId(id);
     setSearchText("");
     let chosenId: EngineId | undefined;
+    let imageDir: string | undefined;
     try {
       const chosen = await resolveEngine(engine, settings);
       chosenId = chosen.id;
       update(id, { engineTitle: chosen.title });
+      let images: string[] | undefined;
+      const count = context.images?.length ?? 0;
+      if (count > 0) {
+        const decision = imageDecision(prefs.chatImages, await chosen.seesImages(), count);
+        if (decision === "ask" && !imageChoice.current) {
+          const allow = await confirmAlert({
+            title: imageQuestion(count),
+            message:
+              "It's slower. Your answer is kept for this chat; set the default in preferences (Chat: Look at Images).",
+            icon: Icon.Image,
+            primaryAction: { title: "Allow" },
+            dismissAction: { title: "Text Only" },
+          });
+          imageChoice.current = allow ? "allow" : "text";
+        }
+        if (decision === "use" || (decision === "ask" && imageChoice.current === "allow")) {
+          update(id, { progress: "Fetching the images…" });
+          imageDir = path.join(environment.supportPath, "chat-images", id);
+          images = await fetchImages(context.images ?? [], imageDir, { signal: controller.signal });
+          update(id, { progress: undefined });
+        }
+      }
       const answer = await answerQuestion(chosen, context, question, history, {
         signal: controller.signal,
         onData: (text) => streamText(id, text),
         onStatus: (status) => update(id, { progress: status }),
+        images,
       });
       if (flushTimer.current) clearTimeout(flushTimer.current);
       flushTimer.current = undefined;
@@ -493,6 +539,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
       });
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
+      if (imageDir) fs.rmSync(imageDir, { recursive: true, force: true });
     }
   }
 
@@ -757,7 +804,12 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
             id="about"
             title={words.about}
             icon={Icon.Info}
-            detail={<List.Item.Detail markdown={overviewMarkdown(ctx)} metadata={<AboutMetadata ctx={ctx} />} />}
+            detail={
+              <List.Item.Detail
+                markdown={overviewMarkdown(ctx)}
+                metadata={<AboutMetadata ctx={ctx} textOnly={seesImages === false} />}
+              />
+            }
             actions={
               <ActionPanel>
                 {askTyped}

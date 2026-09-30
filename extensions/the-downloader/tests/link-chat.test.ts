@@ -71,6 +71,8 @@ function fakeEngine(budget: number): Engine & { calls: { instructions: string; p
     id: "apple",
     title: "Fake",
     contextBudget: budget,
+    imageTokens: 0,
+    seesImages: async () => false,
     calls,
     async complete(instructions, prompt, options) {
       calls.push({ instructions, prompt });
@@ -184,6 +186,44 @@ describe("answerQuestion", () => {
   });
 });
 
+describe("images", () => {
+  function seeingEngine(budget: number): Engine & { calls: { prompt: string; images?: string[] }[] } {
+    const calls: { prompt: string; images?: string[] }[] = [];
+    return {
+      id: "apple",
+      title: "Seeing",
+      contextBudget: budget,
+      imageTokens: 300,
+      seesImages: async () => true,
+      calls,
+      async complete(_instructions, prompt, options) {
+        calls.push({ prompt, images: options?.images });
+        return "ok";
+      },
+    };
+  }
+
+  it("sends the images with the question and keeps room for them", async () => {
+    const engine = seeingEngine(10_000);
+    await answerQuestion(engine, post, "What's in the photos?", [], { images: ["/t/1.jpg", "/t/2.jpg"] });
+    expect(engine.calls).toEqual([expect.objectContaining({ images: ["/t/1.jpg", "/t/2.jpg"] })]);
+    // ~1,100 tokens of text fit a 1,600 budget alone, but not next to two 300-token images.
+    const text = pageWith(110);
+    const alone = buildPrompt(text, "q", [], 1_600);
+    expect(alone.mode).toBe("full");
+    const engine2 = seeingEngine(1_600);
+    await answerQuestion(engine2, text, "q", [], { images: ["/a", "/b"] });
+    expect(engine2.calls[0].prompt).toContain("## Article excerpts");
+  });
+
+  it("gives the images only to the final answer when reading part by part", async () => {
+    const engine = seeingEngine(900);
+    await answerQuestion(engine, pageWith(300), "Summarize the page", [], { images: ["/t/1.jpg"] });
+    expect(engine.calls.slice(0, -1).every((c) => !c.images)).toBe(true);
+    expect(engine.calls.at(-1)?.images).toEqual(["/t/1.jpg"]);
+  });
+});
+
 describe("answerFromNotes", () => {
   // Apple's small model sometimes repeats itself instead of stopping; a note
   // that runs on would take minutes and overflow the 8,192-token window.
@@ -192,6 +232,8 @@ describe("answerFromNotes", () => {
       id: "apple" as const,
       title: "Looping",
       contextBudget: 800,
+      imageTokens: 0,
+      seesImages: async () => false,
       parts: 0,
       longest: 0,
       async complete(instructions: string, prompt: string, options: CompleteOptions = {}) {

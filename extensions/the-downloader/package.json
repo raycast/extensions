@@ -558,6 +558,28 @@
       "required": false
     },
     {
+      "name": "chatImages",
+      "title": "Chat: Look at Images",
+      "description": "Whether Chat About Link lets the AI look at a post's images (up to 4). Only Apple Intelligence and Ollama vision models can; Raycast AI reads text only. Looking at images is slower.",
+      "type": "dropdown",
+      "default": "ask",
+      "required": false,
+      "data": [
+        {
+          "title": "Ask Each Time",
+          "value": "ask"
+        },
+        {
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "Never",
+          "value": "never"
+        }
+      ]
+    },
+    {
       "name": "networkIdleTimeoutSec",
       "title": "Network: Idle Timeout",
       "description": "Seconds of silence from a download before the extension assumes it is wedged and kills the child process. Real downloads emit progress every second, so 120 is plenty for fast networks; raise it on very slow links. Integer; default 120.",

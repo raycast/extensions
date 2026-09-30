@@ -129,7 +129,14 @@ export type AnswerOptions = {
   onData?: (text: string) => void;
   /** Progress for multi-step answers, e.g. "Reading part 2 of 5…". */
   onStatus?: (status: string | undefined) => void;
+  /** Local image files for engines that can look at them; they go with the final request only. */
+  images?: string[];
 };
+
+/** The prompt budget left once the images sent along have their room. */
+function budgetFor(engine: Engine, options: AnswerOptions): number {
+  return engine.contextBudget - engine.imageTokens * (options.images?.length ?? 0);
+}
 
 /** Answer `question` about the link with `engine`, streaming the text through `onData`. */
 export async function answerQuestion(
@@ -139,7 +146,7 @@ export async function answerQuestion(
   history: ChatTurn[],
   options: AnswerOptions = {},
 ): Promise<string> {
-  const plan = buildPrompt(ctx, question, history, engine.contextBudget);
+  const plan = buildPrompt(ctx, question, history, budgetFor(engine, options));
   if (plan.mode === "excerpts" && isOverviewRequest(question)) {
     return answerFromNotes(engine, ctx, question, options, history);
   }
@@ -147,6 +154,7 @@ export async function answerQuestion(
     signal: options.signal,
     onData: options.onData,
     onStatus: options.onStatus,
+    images: options.images,
   });
 }
 
@@ -207,7 +215,8 @@ export async function answerFromNotes(
   const facts = shortDossier(ctx);
   const names = BODY_NAMES[ctx.kind];
   const tail = questionTail(question, history);
-  const partBudget = Math.max(800, engine.contextBudget - estimateTokens(facts) - estimateTokens(tail) - 300);
+  const finalBudget = budgetFor(engine, options);
+  const partBudget = Math.max(800, finalBudget - estimateTokens(facts) - estimateTokens(tail) - 300);
   const parts = chunkBody(ctx.body, partBudget);
 
   if (parts.length === 1) {
@@ -215,6 +224,7 @@ export async function answerFromNotes(
       signal: options.signal,
       onData: options.onData,
       onStatus: options.onStatus,
+      images: options.images,
     });
   }
 
@@ -232,7 +242,7 @@ export async function answerFromNotes(
   }
 
   // Keep the notes inside the budget for the final request.
-  const noteBudget = Math.max(600, engine.contextBudget - estimateTokens(facts) - estimateTokens(tail) - 300);
+  const noteBudget = Math.max(600, finalBudget - estimateTokens(facts) - estimateTokens(tail) - 300);
   const perNote = Math.floor(noteBudget / Math.max(notes.length, 1));
   const fitted = notes.map((n) => truncateToTokens(n, perNote)).join("\n\n");
 
@@ -240,7 +250,7 @@ export async function answerFromNotes(
   const answer = await engine.complete(
     chatInstructions(ctx.kind),
     `${facts}\n\n## Notes on the ${names.notes}, part by part\n${fitted}\n\n${tail}`,
-    { signal: options.signal, onData: options.onData },
+    { signal: options.signal, onData: options.onData, images: options.images },
   );
   options.onStatus?.(undefined);
   return answer;

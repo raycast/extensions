@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { EventEmitter } from "node:events";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
@@ -59,6 +61,28 @@ describe("Apple fm", () => {
       "permissive-content-transformations",
       "Question: hi",
     ]);
+  });
+
+  it("sends images with --image and the prompt as --text", () => {
+    expect(buildFmArgs("i", "p", ["/t/a.jpg", "/t/b.png"])).toEqual([
+      "respond",
+      "--instructions",
+      "i",
+      "--stream",
+      "--guardrails",
+      "permissive-content-transformations",
+      "--image",
+      "/t/a.jpg",
+      "--image",
+      "/t/b.png",
+      "--text",
+      "p",
+    ]);
+  });
+
+  it("knows which engines can look at images", async () => {
+    expect(await appleEngine().seesImages()).toBe(true);
+    expect(appleEngine().imageTokens).toBeGreaterThan(0);
   });
 
   it("offers no Private Cloud engine: fm's only model is the on-device `system` one", () => {
@@ -192,6 +216,44 @@ describe("Ollama", () => {
       expect(statuses.at(-1)).toBeUndefined();
     } finally {
       vi.useRealTimers();
+    }
+  });
+
+  it("sees images only when the model lists vision", async () => {
+    const show = (capabilities: string[]) =>
+      vi.fn(async (url: string) =>
+        url.endsWith("/api/show")
+          ? new Response(JSON.stringify({ capabilities }))
+          : new Response(JSON.stringify({ models: [{ name: "m:latest" }] })),
+      );
+    vi.stubGlobal("fetch", show(["completion", "vision"]));
+    expect(await ollamaEngine({ ...settings, ollamaModel: "llava" }).seesImages()).toBe(true);
+    vi.stubGlobal("fetch", show(["completion", "tools"]));
+    expect(await ollamaEngine(settings).seesImages()).toBe(false);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("down");
+      }),
+    );
+    expect(await ollamaEngine(settings).seesImages()).toBe(false);
+  });
+
+  it("sends images to Ollama as base64", async () => {
+    const file = path.join(os.tmpdir(), `ollama-image-${process.pid}.png`);
+    fs.writeFileSync(file, "PNGDATA");
+    try {
+      const fetchMock = vi.fn(async () => new Response(streamOf('{"message":{"content":"a photo"}}\n')));
+      vi.stubGlobal("fetch", fetchMock);
+      await ollamaEngine({ ...settings, ollamaModel: "llava" }).complete("s", "u", { images: [file] });
+      const body = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
+      expect(body.messages[1]).toEqual({
+        role: "user",
+        content: "u",
+        images: [Buffer.from("PNGDATA").toString("base64")],
+      });
+    } finally {
+      fs.rmSync(file, { force: true });
     }
   });
 
