@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderBox } from "./box";
 import { Canvas } from "./canvas";
 import { parseFlow, renderFlowHorizontal, renderFlowInline, renderFlowVertical } from "./flow";
-import { detectKinds, unusable } from "./formats";
+import { Format, detectKinds, drawFormat, unusable } from "./formats";
 import { fence } from "./markdown";
 import { renderSequence } from "./sequence";
 import { parseTable, renderTable } from "./table";
@@ -41,6 +41,23 @@ describe("fence", () => {
   it("uses three backticks, or more than the longest run inside", () => {
     expect(fence("a")).toBe("```\na\n```");
     expect(fence("```js\nx\n```")).toBe("````\n```js\nx\n```\n````");
+  });
+  it("handles more backtick runs than a call takes arguments", () => {
+    expect(fence("`a".repeat(200_000)).startsWith("```\n")).toBe(true);
+  });
+});
+
+describe("drawFormat", () => {
+  it("turns a format that throws into a reason instead of crashing", () => {
+    const broken: Format = {
+      id: "broken",
+      kind: "box",
+      title: "Broken",
+      render: () => {
+        throw new Error("boom");
+      },
+    };
+    expect(drawFormat(broken, "a")).toEqual({ out: "", reason: "Couldn't draw this input: boom." });
   });
 });
 
@@ -132,6 +149,10 @@ describe("table", () => {
       ["Name", "Notes"],
       ["apples", "cheap, ripe"],
       ["pears", 'say "hi"'],
+    ]);
+    expect(parseTable('Name,Notes\napples,"cheap,  ripe"')).toEqual([
+      ["Name", "Notes"],
+      ["apples", "cheap,  ripe"],
     ]);
     expect(parseTable("| a | b |\n| --- | --- |\n| x \\| y | z |")).toEqual([
       ["a", "b"],

@@ -5,7 +5,8 @@ import { displayWidth, riskyGlyphs, splitLines } from "./width";
  * backtick run in the text, so a ``` line inside the diagram doesn't close it early.
  */
 export function fence(text: string, lang = ""): string {
-  const longest = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
+  // reduce, not Math.max(...runs): a huge selection has more runs than a call takes arguments.
+  const longest = (text.match(/`+/g) ?? []).reduce((max, run) => Math.max(max, run.length), 0);
   const ticks = "`".repeat(Math.max(3, longest + 1));
   return ticks + lang + "\n" + text + "\n" + ticks;
 }
@@ -13,7 +14,7 @@ export function fence(text: string, lang = ""): string {
 /** Detail-pane markdown: the diagram, then a note on anything that may not survive pasting. */
 export function preview(text: string, source?: string, caveat?: string): string {
   const lines = splitLines(text);
-  const width = Math.max(...lines.map(displayWidth));
+  const width = lines.reduce((max, line) => Math.max(max, displayWidth(line)), 0);
   const notes: string[] = caveat ? [caveat] : [];
   const risky = riskyGlyphs(text);
   if (risky.length) notes.push(`${risky.join(" ")} may render as emoji (2 columns) in some apps and break alignment.`);

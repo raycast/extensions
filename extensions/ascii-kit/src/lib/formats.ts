@@ -212,6 +212,19 @@ export function formatUnusable(f: Format, input: string): string | undefined {
   return unusable(f.kind, input) ?? f.unusable?.(input);
 }
 
+/**
+ * What a format draws for this input, or why it can't. A format that throws (a huge selection can
+ * overflow the stack) gets a reason instead, so one format can't take Compose down with it.
+ */
+export function drawFormat(f: Format, input: string): { out: string; reason?: string } {
+  try {
+    const reason = formatUnusable(f, input);
+    return reason ? { out: "", reason } : { out: f.render(input) };
+  } catch (e) {
+    return { out: "", reason: `Couldn't draw this input: ${e instanceof Error ? e.message : String(e)}.` };
+  }
+}
+
 /** Best guess at what the input is meant to become, most likely first. */
 export function detectKinds(input: string): Kind[] {
   const lines = splitLines(input).filter((l) => l.trim());

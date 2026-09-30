@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { EXPECTS, FORMATS, KIND_TITLES, Kind, detectKinds, formatUnusable, unusable } from "./lib/formats";
+import { EXPECTS, FORMATS, KIND_TITLES, Kind, detectKinds, drawFormat, unusable } from "./lib/formats";
 import { fence, preview } from "./lib/markdown";
 
 type Source = "selection" | "clipboard" | "typed";
@@ -35,6 +35,15 @@ async function readInput(): Promise<Input> {
   return undefined;
 }
 
+/** Like drawFormat for the kind checks: a crash in one shouldn't take down Compose. */
+function attempt<T>(fn: () => T, fallback: T): T {
+  try {
+    return fn();
+  } catch {
+    return fallback;
+  }
+}
+
 export default function Command() {
   const { data, isLoading } = usePromise(readInput);
   if (isLoading) return <List isLoading />;
@@ -45,21 +54,20 @@ export default function Command() {
 function Compose({ input, source }: { input: string; source: Source }) {
   const { push } = useNavigation();
   const kinds = useMemo(() => {
-    const detected = detectKinds(input);
-    const rank = (k: Kind) => (unusable(k, input) ? 100 : 0) + detected.indexOf(k);
+    const detected = attempt(() => detectKinds(input), []);
+    const rank = (k: Kind) => (attempt(() => unusable(k, input), "failed") ? 100 : 0) + detected.indexOf(k);
     return (Object.keys(KIND_TITLES) as Kind[]).sort((a, b) => rank(a) - rank(b));
   }, [input]);
   const firstLine = input.trim().split("\n")[0];
   const excerpt = firstLine.length > 60 ? firstLine.slice(0, 60) + "…" : firstLine;
-  const rendered = useMemo(() => new Map(FORMATS.map((f) => [f.id, f.render(input)])), [input]);
+  const drawn = useMemo(() => new Map(FORMATS.map((f) => [f.id, drawFormat(f, input)])), [input]);
 
   return (
     <List isShowingDetail navigationTitle={`Compose · from ${source}`} searchBarPlaceholder="Filter formats…">
       {kinds.map((kind, i) => (
         <List.Section key={kind} title={i === 0 ? `Suggested · ${KIND_TITLES[kind]}` : KIND_TITLES[kind]}>
           {FORMATS.filter((f) => f.kind === kind).map((f) => {
-            const reason = formatUnusable(f, input);
-            const out = reason ? "" : (rendered.get(f.id) ?? "");
+            const { out, reason } = drawn.get(f.id) ?? { out: "" };
             return (
               <List.Item
                 key={f.id}

@@ -14,10 +14,12 @@ export function parseTable(input: string): string[][] {
   const lines = splitLines(input).filter((l) => l.trim() && !MD_SEPARATOR.test(l));
   if (!lines.length) return [];
 
+  // Separators inside "quoted" CSV cells don't decide the delimiter.
+  const bare = lines.map((l) => l.replace(/"[^"]*"/g, '""'));
   let split: (l: string) => string[];
-  if (lines.some((l) => l.includes("\t"))) {
+  if (bare.some((l) => l.includes("\t"))) {
     split = (l) => l.split("\t");
-  } else if (lines.every((l) => l.includes("|"))) {
+  } else if (bare.every((l) => l.includes("|"))) {
     // `\|` is a literal pipe inside a markdown cell.
     split = (l) =>
       l
@@ -26,9 +28,9 @@ export function parseTable(input: string): string[][] {
         .replace(/(?<!\\)\|$/, "")
         .split(/(?<!\\)\|/)
         .map((c) => c.replace(/\\\|/g, "|"));
-  } else if (lines.some((l) => /\S {2,}\S/.test(l))) {
+  } else if (bare.some((l) => /\S {2,}\S/.test(l))) {
     split = (l) => l.trim().split(/ {2,}/);
-  } else if (lines.every((l) => l.includes(","))) {
+  } else if (bare.every((l) => l.includes(","))) {
     split = splitCsv;
   } else {
     split = (l) => [l];
