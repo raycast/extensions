@@ -25,12 +25,14 @@
     {
       "name": "recognize",
       "title": "Recognize",
+      "subtitle": "Music Recognizer",
       "description": "Listen to what's playing and identify the song.",
       "mode": "view"
     },
     {
       "name": "history",
       "title": "History",
+      "subtitle": "Music Recognizer",
       "description": "Browse previously recognized songs.",
       "mode": "view"
     }

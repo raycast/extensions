@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { clearHistory, getHistory, removeFromHistory } from "./lib/history";
 import { CopyActions, OpenActions } from "./lib/track-actions";
 import { TrackDetail } from "./lib/track-detail";
@@ -51,7 +51,13 @@ export default function HistoryCommand() {
                 title="Recognize"
                 icon={Icon.Microphone}
                 onAction={async () => {
-                  await launchCommand({ name: "recognize", type: LaunchType.UserInitiated });
+                  // Launching another command fails when the user has disabled
+                  // it, so the empty state must not crash on its own action.
+                  try {
+                    await launchCommand({ name: "recognize", type: LaunchType.UserInitiated });
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Could not open Recognize" });
+                  }
                 }}
               />
             </ActionPanel>
