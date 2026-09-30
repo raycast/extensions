@@ -52,6 +52,13 @@ describe("timeline", () => {
     expect(track.endsWith("►")).toBe(true);
   });
 
+  it("keeps times of day whole", () => {
+    expect(renderTimelineVertical("09:00 Standup\n10:30: Review")).toBe(
+      ["09:00  ● Standup", "       │", "10:30  ● Review", "       ▼"].join("\n"),
+    );
+    expect(looksLikeTimeline("09:00 Standup\n10:30 Review")).toBe(true);
+  });
+
   it("stacks vertically with dates in a column", () => {
     expect(renderTimelineVertical(input)).toBe(
       ["Jan  ● Kickoff", "     │", "Mar  ● Public beta", "     │", "Jun  ● Launch", "     ▼"].join("\n"),

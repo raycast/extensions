@@ -80,13 +80,16 @@ export interface Milestone {
   what: string;
 }
 
-/** `date: label`, `date<tab>label`, or `date label` where the date is the first word. */
+/**
+ * `date: label`, `date<tab>label`, or `date label` where the date is the first word. The colon
+ * needs a space after it, so a time (`09:00 Standup`) stays whole.
+ */
 export function parseTimeline(input: string): Milestone[] {
   return splitLines(input)
     .map((l) => l.trim())
     .filter(Boolean)
     .map((l) => {
-      const m = l.match(/^([^:\t]{1,20}?)\s*[:\t]\s*(.+)$/) ?? l.match(/^(\S+)\s+(.+)$/);
+      const m = l.match(/^([^\t]{1,20}?)\s*(?::\s+|\t)\s*(.+)$/) ?? l.match(/^(\S+)\s+(.+)$/);
       return m ? { when: m[1].trim(), what: m[2].trim() } : { when: "", what: l };
     });
 }
@@ -116,12 +119,12 @@ export function renderTimelineVertical(input: string): string {
   return out.join("\n");
 }
 
-/** Whether every first word looks like a date: 2026-03, Q1, W12, Jan, 12.3., Mar 12. */
+/** Whether every first word looks like a date: 2026-03, Q1, W12, Jan, 12.3., Mar 12, 09:30. */
 export function looksLikeTimeline(input: string): boolean {
   const ms = parseTimeline(input);
   const MONTH = "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?";
   const DATE = new RegExp(
-    `^(\\d{4}(-\\d{1,2}){0,2}|(?:Q[1-4]|H[12])( \\d{4})?|[WS]\\d{1,2}|${MONTH}( \\d{1,2})?( \\d{4})?|\\d{1,2}[./]\\d{1,2}\\.?(\\d{2,4})?)$`,
+    `^(\\d{4}(-\\d{1,2}){0,2}|(?:Q[1-4]|H[12])( \\d{4})?|[WS]\\d{1,2}|${MONTH}( \\d{1,2})?( \\d{4})?|\\d{1,2}[./]\\d{1,2}\\.?(\\d{2,4})?|\\d{1,2}:\\d{2})$`,
     "i",
   );
   return ms.length >= 2 && ms.every((m) => DATE.test(m.when));

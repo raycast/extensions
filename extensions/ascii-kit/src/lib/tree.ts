@@ -20,7 +20,8 @@ export interface TreeNode {
 // Characters that already-drawn trees use as prefix. Treating them as indentation lets you
 // re-render an existing tree in a different style.
 const TREE_PREFIX = /^(?:[ │├└─┃┣┗━╰]|\| {3}|\|-- |`-- )*/u;
-const BULLET = /^(?:[-*+•◦▪]|\d+[.)])\s+/u;
+// Only symbol bullets are markup; a number (`1. Setup`) is part of the label and is kept.
+const BULLET = /^[-*+•◦▪]\s+/u;
 // Leading whitespace is nesting; a tab or 2+ spaces after the label starts a note column.
 const NOTE_SEPARATOR = /\t+| {2,}/;
 

@@ -83,11 +83,20 @@ export function riskyGlyphs(text: string): string[] {
   return [...found];
 }
 
+/** Tab stops by display column, so a tab after CJK or emoji lands where an editor puts it. */
 export function expandTabs(line: string, tabSize = 4): string {
+  if (!line.includes("\t")) return line;
   let out = "";
-  for (const ch of line) {
-    if (ch === "\t") out += " ".repeat(tabSize - (out.length % tabSize));
-    else out += ch;
+  let col = 0;
+  for (const g of graphemes(line)) {
+    if (g === "\t") {
+      const n = tabSize - (col % tabSize);
+      out += " ".repeat(n);
+      col += n;
+    } else {
+      out += g;
+      col += graphemeWidth(g);
+    }
   }
   return out;
 }

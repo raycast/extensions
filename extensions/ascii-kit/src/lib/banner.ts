@@ -158,8 +158,9 @@ export interface BannerOptions {
 }
 
 const fontFor = (opts: BannerOptions) => (opts.size === "tall" ? TALL : SMALL);
+// NFC first, so a decomposed é is one character, reported as é rather than a stray accent.
 const caseFor = (line: string, opts: BannerOptions) =>
-  opts.size === "tall" && opts.mixedCase ? line : line.toUpperCase();
+  opts.size === "tall" && opts.mixedCase ? line.normalize("NFC") : line.normalize("NFC").toUpperCase();
 
 /** Characters the banner has no glyph for, de-duplicated, in input order. Whitespace is fine. */
 export function missingBannerChars(input: string, opts: BannerOptions = {}): string[] {

@@ -21,7 +21,7 @@ import { STYLE_CAVEAT, TextStyle, styleText } from "./textstyle";
 import { parseTable, renderTable } from "./table";
 import { TreeNode, parseTree, renderTree } from "./tree";
 import { parseFlow } from "./flow";
-import { splitLines } from "./width";
+import { splitLines, truncate } from "./width";
 
 export type Kind = "tree" | "box" | "table" | "flow" | "sequence" | "chart" | "plan" | "code" | "text";
 
@@ -192,8 +192,12 @@ export function unusable(kind: Kind, input: string): string | undefined {
       return (parseTable(input)[0]?.length ?? 0) < 2 ? "Only one column found." : undefined;
     case "flow":
       return parseFlow(input).length < 2 ? "Only one step found." : undefined;
-    case "sequence":
+    case "sequence": {
+      // Every line has to be a message: a line that isn't would otherwise just disappear.
+      const stray = splitLines(input).find((l) => l.trim() && !MESSAGE.test(l));
+      if (stray) return `“${truncate(stray.trim(), 40)}” isn't a message.`;
       return parseSequence(input).messages.length === 0 ? "No messages found." : undefined;
+    }
     case "box":
       return input.trim() ? undefined : "The input is empty.";
     case "chart":
@@ -223,6 +227,20 @@ export function drawFormat(f: Format, input: string): { out: string; reason?: st
   } catch (e) {
     return { out: "", reason: `Couldn't draw this input: ${e instanceof Error ? e.message : String(e)}.` };
   }
+}
+
+/** Compose draws every format as it opens, about 0.35 ms per line: past this it would freeze. */
+export const MAX_INPUT_LINES = 2000;
+export const MAX_INPUT_CHARS = 100_000;
+
+/** Why the input is too large to preview, or undefined. */
+export function inputTooLarge(input: string): string | undefined {
+  const n = (x: number) => x.toLocaleString("en-US");
+  const lines = splitLines(input).length;
+  if (lines > MAX_INPUT_LINES) return `It's ${n(lines)} lines; Compose previews up to ${n(MAX_INPUT_LINES)}.`;
+  if (input.length > MAX_INPUT_CHARS)
+    return `It's ${n(input.length)} characters; Compose previews up to ${n(MAX_INPUT_CHARS)}.`;
+  return undefined;
 }
 
 /** Best guess at what the input is meant to become, most likely first. */

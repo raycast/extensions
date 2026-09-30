@@ -11,8 +11,9 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { EXPECTS, FORMATS, KIND_TITLES, Kind, detectKinds, drawFormat, unusable } from "./lib/formats";
+import { EXPECTS, FORMATS, KIND_TITLES, Kind, detectKinds, drawFormat, inputTooLarge, unusable } from "./lib/formats";
 import { fence, preview } from "./lib/markdown";
+import { splitLines, truncate } from "./lib/width";
 
 type Source = "selection" | "clipboard" | "typed";
 
@@ -53,13 +54,37 @@ export default function Command() {
 
 function Compose({ input, source }: { input: string; source: Source }) {
   const { push } = useNavigation();
+  const tooLarge = inputTooLarge(input);
+  if (!tooLarge) return <Previews input={input} source={source} />;
+  return (
+    <List navigationTitle={`Compose · from ${source}`}>
+      <List.EmptyView
+        icon={Icon.Warning}
+        title="Too long to preview"
+        description={`${tooLarge} Select a smaller part, or ⌘E to edit the input.`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Edit Input"
+              icon={Icon.Pencil}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              onAction={() => push(<TypeInput initial={input} />)}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
+function Previews({ input, source }: { input: string; source: Source }) {
+  const { push } = useNavigation();
   const kinds = useMemo(() => {
     const detected = attempt(() => detectKinds(input), []);
     const rank = (k: Kind) => (attempt(() => unusable(k, input), "failed") ? 100 : 0) + detected.indexOf(k);
     return (Object.keys(KIND_TITLES) as Kind[]).sort((a, b) => rank(a) - rank(b));
   }, [input]);
-  const firstLine = input.trim().split("\n")[0];
-  const excerpt = firstLine.length > 60 ? firstLine.slice(0, 60) + "…" : firstLine;
+  const excerpt = truncate(splitLines(input.trim())[0], 60);
   const drawn = useMemo(() => new Map(FORMATS.map((f) => [f.id, drawFormat(f, input)])), [input]);
 
   return (

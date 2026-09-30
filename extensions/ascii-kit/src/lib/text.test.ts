@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BANNER_CHARS, TALL_CHARS, renderBanner } from "./banner";
+import { BANNER_CHARS, TALL_CHARS, missingBannerChars, renderBanner } from "./banner";
 import { parseCallouts, renderCallouts } from "./callouts";
 import { FORMATS, detectKinds, formatUnusable } from "./formats";
 import { styleText } from "./textstyle";
@@ -67,6 +67,10 @@ describe("text styles", () => {
     expect(displayWidth(styleText("abc", "underline"))).toBe(3);
   });
 
+  it("marks an emoji sequence as a whole, without breaking it apart", () => {
+    expect(styleText("a 👩‍💻", "strike")).toBe("a̶ 👩‍💻̶");
+  });
+
   it("is never the first suggestion, and carries a caveat", () => {
     expect(detectKinds("Hello")[0]).not.toBe("text");
     expect(
@@ -99,6 +103,8 @@ describe("banner", () => {
     const small = FORMATS.find((f) => f.id === "text-banner")!;
     expect(formatUnusable(small, "Café")).toMatch(/No banner glyph for É\./);
     expect(formatUnusable(small, "Cafe bar")).toBeUndefined();
+    // A decomposed é (e + combining accent) is reported as one character.
+    expect(missingBannerChars("Cafe\u0301")).toEqual(["É"]);
   });
 });
 

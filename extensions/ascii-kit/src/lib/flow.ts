@@ -4,14 +4,19 @@ import { stack } from "./layout";
 import { displayWidth, padCenter, splitLines } from "./width";
 
 // ► and ▼ rather than ▶: ▶ has an emoji form that some renderers draw 2 columns wide.
-const SEPARATOR = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶|>)\s*/u;
+const ARROW = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*/u;
+// A bare > only between spaces, so `x >= 5` and `<div>` stay whole.
+const ARROW_OR_GT = /\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*|\s+>\s+/u;
 
-/** Steps come from `A > B -> C → D` on one line, or one step per line. */
+/**
+ * Steps come from `A > B -> C → D` on one line, or one step per line. With one step per line, a
+ * bare > is part of the step (`count > 0`); only arrows split it further.
+ */
 export function parseFlow(input: string): string[] {
   const lines = splitLines(input)
     .map((l) => l.trim())
     .filter(Boolean);
-  const parts = lines.length === 1 ? lines[0].split(SEPARATOR) : lines.flatMap((l) => l.split(SEPARATOR));
+  const parts = lines.length === 1 ? lines[0].split(ARROW_OR_GT) : lines.flatMap((l) => l.split(ARROW));
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 

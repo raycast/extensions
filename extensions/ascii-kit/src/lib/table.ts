@@ -8,11 +8,12 @@ const MD_SEPARATOR = /^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)*\|?\s*$/;
 
 /**
  * Splits rows into cells. Delimiter, in order of preference: tab (pasted from a spreadsheet),
- * pipe (a markdown table), two or more spaces (aligned columns), comma.
+ * pipe (a markdown table), two or more spaces (aligned columns), comma. Cells of a markdown table
+ * stay as markdown source (`\|`, `\*`), so Table · markdown can keep them exactly as written.
  */
-export function parseTable(input: string): string[][] {
+function readTable(input: string): { rows: string[][]; markdown: boolean } {
   const lines = splitLines(input).filter((l) => l.trim() && !MD_SEPARATOR.test(l));
-  if (!lines.length) return [];
+  if (!lines.length) return { rows: [], markdown: false };
 
   // Separators inside "quoted" CSV cells don't decide the delimiter.
   const bare = lines.map((l) => l.replace(/"[^"]*"/g, '""'));
@@ -30,14 +31,46 @@ export function parseTable(input: string): string[][] {
   }
 
   const rows = lines.map((l) => split(l).map((c) => c.trim()));
-  const cols = Math.max(...rows.map((r) => r.length));
-  return rows.map((r) => [...r, ...Array(cols - r.length).fill("")]);
+  const cols = rows.reduce((max, r) => Math.max(max, r.length), 0);
+  return {
+    rows: rows.map((r) => [...r, ...Array(cols - r.length).fill("")]),
+    markdown: split === splitMarkdownRow,
+  };
+}
+
+/** Rows of cells, as the text people see: markdown escapes are resolved (`\|` → `|`). */
+export function parseTable(input: string): string[][] {
+  const { rows, markdown } = readTable(input);
+  return markdown ? rows.map((r) => r.map(unescapeMarkdown)) : rows;
+}
+
+// CommonMark: a backslash before ASCII punctuation escapes it; before anything else it's literal.
+const PUNCT = /[!-/:-@[-`{-~]/;
+const ESCAPED = /\\([!-/:-@[-`{-~])/g;
+
+function unescapeMarkdown(cell: string): string {
+  return cell.replace(ESCAPED, "$1");
+}
+
+/**
+ * The inverse, for text going into a markdown cell: escape a backslash that would otherwise escape
+ * the next character, and escape pipes, which would start a new column. `\\server` → `\\\server`,
+ * `C:\|tail` → `C:\\\|tail`, and `C:\path` stays as it is.
+ */
+function escapeMarkdownCell(cell: string): string {
+  let out = "";
+  for (let i = 0; i < cell.length; i++) {
+    const ch = cell[i];
+    if (ch === "|") out += "\\|";
+    else if (ch === "\\" && PUNCT.test(cell[i + 1] ?? "")) out += "\\\\";
+    else out += ch;
+  }
+  return out;
 }
 
 /**
  * One markdown table row, split the way GitHub does: `\` escapes the next character, so `\|` is a
- * literal pipe and `\\|` is a backslash, then a cell break. Those two are unescaped, so cells hold
- * the text people see; other escapes (`\*`) are kept as written.
+ * literal pipe and `\\|` is a backslash, then a cell break. Cells keep their escapes as written.
  */
 function splitMarkdownRow(line: string): string[] {
   const text = line.trim();
@@ -48,8 +81,7 @@ function splitMarkdownRow(line: string): string[] {
     const ch = text[i];
     endsWithBreak = false;
     if (ch === "\\" && i + 1 < text.length) {
-      const next = text[i + 1];
-      cell += next === "|" || next === "\\" ? next : ch + next;
+      cell += ch + text[i + 1];
       i++;
     } else if (ch === "|") {
       cells.push(cell);
@@ -89,18 +121,14 @@ function splitCsv(line: string): string[] {
   return cells;
 }
 
-/**
- * A pipe inside a markdown cell has to be escaped, or it starts a new column, and so do backslashes
- * right before it: `C:\|tail` → `C:\\\|tail`. Other backslashes are literal and stay readable.
- */
-function escapeMarkdownCell(cell: string): string {
-  return cell.replace(/(\\*)\|/g, (_, slashes: string) => `${slashes}${slashes}\\|`);
-}
-
 /** First row is the header. Columns whose body cells are all numbers are right-aligned. */
 export function renderTable(input: string, style: TableStyle = "light"): string {
-  const parsed = parseTable(input);
-  const rows = style === "markdown" ? parsed.map((r) => r.map(escapeMarkdownCell)) : parsed;
+  let rows: string[][];
+  if (style === "markdown") {
+    // A markdown table is only realigned; other input is escaped so GitHub shows it as written.
+    const read = readTable(input);
+    rows = read.markdown ? read.rows : read.rows.map((r) => r.map(escapeMarkdownCell));
+  } else rows = parseTable(input);
   if (!rows.length) return "";
   const { widths, numeric, cell } = measureColumns(rows, 3);
   const body = rows.slice(1);

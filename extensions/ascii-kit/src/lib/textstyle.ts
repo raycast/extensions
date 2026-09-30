@@ -2,6 +2,8 @@
 // marks for strike and underline. Useful where there is no formatting (LinkedIn, Slack titles,
 // commit messages), but screen readers and search handle them badly, so use them sparingly.
 
+import { graphemes } from "./width";
+
 export type TextStyle = "bold" | "italic" | "boldItalic" | "mono" | "strike" | "underline";
 
 // First code point of A, a and 0 in each alphabet; undefined when the block has no digits.
@@ -18,7 +20,10 @@ export const STYLE_CAVEAT =
 export function styleText(input: string, style: TextStyle): string {
   if (style === "strike" || style === "underline") {
     const mark = style === "strike" ? "̶" : "̲";
-    return [...input].map((ch) => (/\s/.test(ch) ? ch : ch + mark)).join("");
+    // After each grapheme, not each code point, so an emoji sequence (👩‍💻) stays in one piece.
+    return graphemes(input)
+      .map((g) => (/^\s+$/.test(g) ? g : g + mark))
+      .join("");
   }
   const [upper, lower, digit] = ALPHABETS[style];
   return [...input]

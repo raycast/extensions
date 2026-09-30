@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { renderBox } from "./box";
 import { Canvas } from "./canvas";
 import { parseFlow, renderFlowHorizontal, renderFlowInline, renderFlowVertical } from "./flow";
-import { Format, detectKinds, drawFormat, unusable } from "./formats";
+import { Format, MAX_INPUT_LINES, detectKinds, drawFormat, inputTooLarge, unusable } from "./formats";
 import { fence } from "./markdown";
 import { renderSequence } from "./sequence";
 import { parseTable, renderTable } from "./table";
 import { renderTree } from "./tree";
-import { displayWidth, riskyGlyphs, truncate } from "./width";
+import { displayWidth, expandTabs, riskyGlyphs, truncate } from "./width";
 
 const widths = (s: string) => new Set(s.split("\n").map(displayWidth));
 const rect = (s: string) => expect(widths(s).size, `ragged:\n${s}`).toBe(1);
@@ -22,6 +22,10 @@ describe("width", () => {
   });
   it("flags text-default emoji only", () => {
     expect(riskyGlyphs("⚠ ok ✓ ├── ▶ ☑ ✅")).toEqual(["⚠", "▶", "☑"]);
+  });
+  it("expands tabs to stops by display column", () => {
+    expect(expandTabs("ab\tx")).toBe("ab  x");
+    expect(expandTabs("名前\tx")).toBe("名前    x");
   });
   it("truncates by display width", () => {
     expect(truncate("東京東京東京", 8)).toBe("東京東…");
@@ -58,6 +62,12 @@ describe("drawFormat", () => {
       },
     };
     expect(drawFormat(broken, "a")).toEqual({ out: "", reason: "Couldn't draw this input: boom." });
+  });
+
+  it("flags input too large to preview", () => {
+    expect(inputTooLarge("x\n".repeat(MAX_INPUT_LINES))).toMatch(/2,001 lines/);
+    expect(inputTooLarge("x".repeat(200_000))).toMatch(/200,000 characters/);
+    expect(inputTooLarge("a\n  b")).toBeUndefined();
   });
 });
 
@@ -106,6 +116,12 @@ describe("tree", () => {
 
   it("draws several roots as siblings", () => {
     expect(renderTree("a\n  a1\nb")).toBe("├── a\n│   └── a1\n└── b");
+  });
+
+  it("keeps list numbers, which are part of the label, and drops symbol bullets", () => {
+    expect(renderTree("Plan\n  1. Setup\n    1.1 Install\n  - Build")).toBe(
+      ["Plan", "├── 1. Setup", "│   └── 1.1 Install", "└── Build"].join("\n"),
+    );
   });
 });
 
@@ -177,11 +193,24 @@ describe("table", () => {
       ["Path", "Note"],
       ["C:\\|tail", "a|b"],
       ["x\\\\|y", "end\\"],
-      ["C:\\path", "\\*kept\\*"],
+      ["C:\\path", "\\*lit\\*"],
+      ["\\\\server\\share", "a*b_c"],
     ];
-    const markdown = renderTable(cells.map((r) => r.join("\t")).join("\n"), "markdown");
-    expect(markdown.split("\n")[2]).toBe("| C:\\\\\\|tail | a\\|b     |");
-    expect(parseTable(markdown)).toEqual(cells);
+    const markdown = renderTable(cells.map((r) => r.join("\t")).join("\n"), "markdown").split("\n");
+    // Escaped only where GitHub would read a backslash as an escape; C:\path stays readable.
+    expect(markdown.slice(2).map((l) => l.split(" | ")[0])).toEqual([
+      "| C:\\\\\\|tail     ",
+      "| x\\\\\\\\\\|y       ",
+      "| C:\\path        ",
+      "| \\\\\\server\\share",
+    ]);
+    expect(parseTable(markdown.join("\n"))).toEqual(cells);
+  });
+
+  it("keeps a markdown table's escapes as written, and resolves them elsewhere", () => {
+    const input = "| a | b |\n| --- | --- |\n| \\*kept\\* | C:\\\\ |";
+    expect(renderTable(input, "markdown").split("\n")[2]).toBe("| \\*kept\\* | C:\\\\ |");
+    expect(renderTable(input, "light").split("\n")[3]).toBe("│ *kept* │ C:\\ │");
   });
 
   it("escapes pipes inside cells in markdown output", () => {
@@ -229,6 +258,11 @@ describe("column alignment", () => {
 describe("flow", () => {
   it.each(["A > B > C", "A -> B -> C", "A → B → C", "A => B ⇒ C", "A\nB\nC"])("splits %j", (input) => {
     expect(parseFlow(input)).toEqual(["A", "B", "C"]);
+  });
+
+  it("keeps a > that isn't an arrow inside its step", () => {
+    expect(parseFlow("Check count > 0\nRetry if x >= 5\nShip")).toEqual(["Check count > 0", "Retry if x >= 5", "Ship"]);
+    expect(parseFlow("Render <div> > Done")).toEqual(["Render <div>", "Done"]);
   });
   it("renders inline, across and down", () => {
     expect(renderFlowInline("Draft > Review > Merged")).toBe("Draft → Review → Merged");
@@ -288,5 +322,11 @@ describe("unusable", () => {
     expect(unusable("table", "a\tb")).toBeUndefined();
     expect(unusable("flow", "a > b")).toBeUndefined();
     expect(unusable("sequence", "a -> b: hi")).toBeUndefined();
+  });
+  it("names a sequence line that isn't a message instead of dropping it", () => {
+    expect(unusable("sequence", "A -> B: go\nNote: retry later\nB --> A: ok")).toBe(
+      "“Note: retry later” isn't a message.",
+    );
+    expect(unusable("sequence", "A -> B: go\n\nB --> A: ok")).toBeUndefined();
   });
 });
