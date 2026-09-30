@@ -13,6 +13,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { ZodError } from "zod";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { Store } from "./store";
 import SetupJev from "../setup-jev";
@@ -60,7 +61,7 @@ export function message(e: unknown) {
   return e instanceof Error ? e.message : String(e);
 }
 export async function report(e: unknown) {
-  await showToast({ style: Toast.Style.Failure, title: "Could not complete action", message: message(e) });
+  await showFailureToast(e, { title: "Could not complete action", message: message(e) });
 }
 export async function task(title: string, fn: () => Promise<void>) {
   const toast = await showToast({ style: Toast.Style.Animated, title });
@@ -69,9 +70,8 @@ export async function task(title: string, fn: () => Promise<void>) {
     toast.style = Toast.Style.Success;
     toast.title = "Done";
   } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Could not complete action";
-    toast.message = message(e);
+    await toast.hide();
+    await report(e);
   }
 }
 export function ErrorView({ error }: { error: string }) {
@@ -82,11 +82,23 @@ export function ErrorView({ error }: { error: string }) {
         <ActionPanel>
           <Action
             title="Recover from Backup"
-            onAction={() => launchCommand({ name: "backup-restore", type: LaunchType.UserInitiated })}
+            onAction={async () => {
+              try {
+                await launchCommand({ name: "backup-restore", type: LaunchType.UserInitiated });
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not open Backup and Restore" });
+              }
+            }}
           />
           <Action
             title="Try Again"
-            onAction={() => launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated })}
+            onAction={async () => {
+              try {
+                await launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not reopen command" });
+              }
+            }}
           />
           <Action title="Open Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
@@ -101,7 +113,13 @@ export function PreferencesAction() {
       <Action title="Open Jev Preferences" onAction={openExtensionPreferences} />
       <Action
         title="Backup and Restore"
-        onAction={() => launchCommand({ name: "backup-restore", type: LaunchType.UserInitiated })}
+        onAction={async () => {
+          try {
+            await launchCommand({ name: "backup-restore", type: LaunchType.UserInitiated });
+          } catch (error) {
+            await showFailureToast(error, { title: "Could not open Backup and Restore" });
+          }
+        }}
       />
     </>
   );

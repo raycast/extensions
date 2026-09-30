@@ -13,6 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import path from "node:path";
 import { type Destination } from "./lib/model";
 import { extractDocument } from "./lib/extract";
@@ -26,7 +27,7 @@ type Item = { path: string; destinationId: string; note: string; moved: boolean;
 function FolderPicker({ folders, onChoose }: { folders: Destination[]; onChoose: (id: string) => void }) {
   const { pop } = useNavigation();
   return (
-    <List navigationTitle="Choose Destination">
+    <List isLoading={false} navigationTitle="Choose Destination">
       {folders.map((d) => (
         <List.Item
           key={d.id}
@@ -161,9 +162,8 @@ export default function Command() {
       await toast.hide();
       await showResult();
     } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not suggest a folder";
-      toast.message = message(e);
+      await toast.hide();
+      await showFailureToast(e, { title: "Could not suggest a folder", message: message(e) });
     } finally {
       requesting.current = false;
     }
@@ -228,7 +228,7 @@ export default function Command() {
   );
   if (!loading && !folders.length)
     return (
-      <List>
+      <List isLoading={loading || busy}>
         <List.Item
           title="Add Your First Document Folder"
           subtitle="Choose an existing folder and describe what belongs there"

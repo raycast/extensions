@@ -11,6 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import ManageDestinations, { DestinationForm } from "./manage-destinations";
 import BookmarkSources from "./bookmark-sources";
 import { ErrorView, askJev, report, useData } from "./lib/ui";
@@ -22,7 +23,13 @@ export default function Command() {
   if (error) return <ErrorView error={error} />;
   const keyPresent = Boolean(getPreferenceValues<Preferences>().apiKey?.trim());
   const folders = data.destinations.filter((d) => d.kind === "folder");
-  const open = (name: string) => launchCommand({ name, type: LaunchType.UserInitiated });
+  const open = async (name: string, title: string) => {
+    try {
+      await launchCommand({ name, type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: `Could not open ${title}` });
+    }
+  };
   async function checkConnection() {
     if (checking) return;
     setChecking(true);
@@ -102,7 +109,7 @@ export default function Command() {
             icon={Icon.Play}
             actions={
               <ActionPanel>
-                <Action title="Open Command" onAction={() => open(name!)} />
+                <Action title="Open Command" onAction={() => open(name!, title!)} />
               </ActionPanel>
             }
           />
@@ -115,7 +122,7 @@ export default function Command() {
           icon={Icon.HardDrive}
           actions={
             <ActionPanel>
-              <Action title="Open Backup and Restore" onAction={() => open("backup-restore")} />
+              <Action title="Open Backup and Restore" onAction={() => open("backup-restore", "Backup and Restore")} />
             </ActionPanel>
           }
         />

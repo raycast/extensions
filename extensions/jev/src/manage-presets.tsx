@@ -72,7 +72,7 @@ function PresetEditor({ preset, onChange }: { preset: Preset; onChange: (p: Pres
     setP(next);
   };
   return (
-    <List navigationTitle={p.name}>
+    <List isLoading={false} navigationTitle={p.name}>
       <List.Section title="Questions">
         {p.questions.map((q) => (
           <List.Item
