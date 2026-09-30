@@ -26,16 +26,17 @@ export function ConfigureApps() {
   const [installed, setInstalled] = useState<InstalledApp[]>();
   const [pins, setPins] = useState<string[]>([]);
   const [utilityPins, setUtilityPins] = useState<UtilityId[]>([]);
+  /** Set when loading fails; nothing is editable then, so no save can overwrite the stored lists with empty ones. */
+  const [loadError, setLoadError] = useState<string>();
   const started = useRef(false);
   // Latest selection and pins, so quick successive actions each build on the previous one.
   const latest = useRef<SelectedApp[]>([]);
   const latestPins = useRef<string[]>([]);
   const latestUtilityPins = useRef<UtilityId[]>([]);
 
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    void (async () => {
+  async function load() {
+    setLoadError(undefined);
+    try {
       const [loaded, apps] = await Promise.all([loadAppsAndPins(), getApplications()]);
       latest.current = loaded.apps;
       latestPins.current = loaded.pins;
@@ -45,7 +46,15 @@ export function ConfigureApps() {
       setSelected(loaded.apps);
       setInstalled(apps);
       await showConfigNotices({ appsNotice: loaded.appsNotice });
-    })();
+    } catch (error) {
+      setLoadError(String(error));
+    }
+  }
+
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    void load();
   }, []);
 
   async function change(update: (apps: SelectedApp[]) => SelectedApp[]) {
@@ -144,6 +153,23 @@ export function ConfigureApps() {
       />
     );
   };
+
+  if (loadError && (selected === undefined || installed === undefined)) {
+    return (
+      <List navigationTitle="Manage Pinned Apps">
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="Could not load your apps and pins"
+          description={loadError}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void load()} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List

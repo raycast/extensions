@@ -40,25 +40,31 @@ import {
   SELECTION_STORAGE_KEY,
   type StoredSelection,
 } from "./lib/selection.ts";
+import { serialQueue } from "./lib/serial.ts";
+
+/** Every write below goes through one queue, so quick successive writes land in call order (see lib/serial.ts). */
+const write = serialQueue();
 
 /** The list writes its selection and open/closed state so the hotkey commands can act on the selected row. */
 export async function saveSelection(selection: Omit<StoredSelection, "at">): Promise<void> {
-  await LocalStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify({ ...selection, at: Date.now() }));
+  await write(() => LocalStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify({ ...selection, at: Date.now() })));
 }
 
 /** A selected Trash or status row is not an app: the hotkey quit commands must refuse rather than act on the app that
  * was selected before it. */
 export async function clearSelection(): Promise<void> {
-  await LocalStorage.removeItem(SELECTION_STORAGE_KEY);
+  await write(() => LocalStorage.removeItem(SELECTION_STORAGE_KEY));
 }
 
 /** A mount writes "open"; its unmount writes "closed" only if no newer mount has written since. */
 export async function saveListState(open: boolean, id: string): Promise<void> {
-  if (!open) {
-    const current = parseListState(await LocalStorage.getItem(LIST_STATE_STORAGE_KEY));
-    if (current?.id && current.id !== id) return;
-  }
-  await LocalStorage.setItem(LIST_STATE_STORAGE_KEY, JSON.stringify({ open, at: Date.now(), id }));
+  await write(async () => {
+    if (!open) {
+      const current = parseListState(await LocalStorage.getItem(LIST_STATE_STORAGE_KEY));
+      if (current?.id && current.id !== id) return;
+    }
+    await LocalStorage.setItem(LIST_STATE_STORAGE_KEY, JSON.stringify({ open, at: Date.now(), id }));
+  });
 }
 
 export async function readActionableSelection(): Promise<StoredSelection | undefined> {
@@ -124,35 +130,40 @@ export async function loadUtilityPins(): Promise<UtilityId[]> {
 }
 
 export async function saveUtilityPins(pins: UtilityId[]): Promise<void> {
-  await LocalStorage.setItem(UTILITY_PINS_STORAGE_KEY, serializeUtilityPins(pins));
+  await write(() => LocalStorage.setItem(UTILITY_PINS_STORAGE_KEY, serializeUtilityPins(pins)));
 }
 
 export async function saveApps(apps: SelectedApp[]): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEY, serializeSelection(apps));
+  await write(() => LocalStorage.setItem(STORAGE_KEY, serializeSelection(apps)));
 }
 
 export async function savePins(pins: string[]): Promise<void> {
-  await LocalStorage.setItem(PINS_STORAGE_KEY, serializePins(pins));
+  await write(() => LocalStorage.setItem(PINS_STORAGE_KEY, serializePins(pins)));
 }
 
 export async function saveFilter(filter: ListView): Promise<void> {
-  await LocalStorage.setItem(VIEW_STORAGE_KEY, filter);
+  await write(() => LocalStorage.setItem(VIEW_STORAGE_KEY, filter));
 }
 
 export async function saveSort(sort: SortMode): Promise<void> {
-  await LocalStorage.setItem(SORT_STORAGE_KEY, sort);
+  await write(() => LocalStorage.setItem(SORT_STORAGE_KEY, sort));
 }
 
-/** Read-modify-write of the recency map; the pure `stampRecent` prunes to 50 and ignores apps without a bundle ID. */
+/**
+ * Read-modify-write of the recency map, queued so a `frontAt` stamp after a scan and a `switchedAt` stamp from a switch
+ * never overwrite each other. The pure `stampRecent` prunes to 50 and ignores apps without a bundle ID.
+ */
 export async function recordRecent(
   bundleId: string | undefined,
   field: "switchedAt" | "frontAt",
   at: number,
 ): Promise<RecentMap> {
-  const current = parseRecent(await LocalStorage.getItem(RECENT_STORAGE_KEY));
-  const next = stampRecent(current, bundleId, field, at);
-  if (next !== current) await LocalStorage.setItem(RECENT_STORAGE_KEY, serializeRecent(next));
-  return next;
+  return write(async () => {
+    const current = parseRecent(await LocalStorage.getItem(RECENT_STORAGE_KEY));
+    const next = stampRecent(current, bundleId, field, at);
+    if (next !== current) await LocalStorage.setItem(RECENT_STORAGE_KEY, serializeRecent(next));
+    return next;
+  });
 }
 
 export async function showConfigNotices(loaded: { appsNotice?: AppsNotice; pinsNotice?: LoadedPins["notice"] }) {

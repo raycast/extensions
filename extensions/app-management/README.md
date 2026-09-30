@@ -73,7 +73,7 @@ order). The filter is remembered.
 **Trash** (a **Utilities** section below every app row, so it never changes the app order): pin it with ⌘. on the row
 or in Manage Pinned Apps to keep it at the end of All Apps and Pinned + Badged; unpinned, type `trash`, `empty`, or
 `bin` to find it in those two filters. Badged Only never shows it. Return opens the Trash in Finder. **Empty Trash…**
-(⌘K) always asks first; after you confirm, Raycast's own System Actions → Empty Trash does the erasing, so Raycast may
+(in the ⌘K actions panel) always asks first; after you confirm, Raycast's own System Actions → Empty Trash does the erasing, so Raycast may
 also ask: the first time, "Run Command / Always Run Command" (Raycast asks whenever an extension starts another
 extension's command), then its own warning if `Show Warning Before Emptying Trash` is on. This extension never deletes
 a file and needs no Finder permission. If Empty Trash is disabled in Raycast, a toast says so and nothing is erased.

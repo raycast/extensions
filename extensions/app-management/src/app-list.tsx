@@ -261,6 +261,8 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
   const expandByDefault = getPreferenceValues<Preferences>().expandByDefault !== false;
 
   const [config, setConfig] = useState<ListConfig>();
+  /** Set when the first settings read fails, so the list shows the reason and a Retry instead of spinning. */
+  const [configError, setConfigError] = useState<string>();
   const configRef = useRef<ListConfig | undefined>(undefined);
   // Utility pins (§9) live beside the app configuration, never in it, so nothing about app rows depends on them.
   const [utilityPins, setUtilityPins] = useState<UtilityId[]>();
@@ -341,6 +343,22 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
     await showConfigNotices({ appsNotice: loaded.appsNotice });
   }, [updateConfig]);
 
+  /** First settings read of this mount (and Retry after a failure). */
+  const loadInitialConfig = useCallback(async () => {
+    setConfigError(undefined);
+    try {
+      const loaded = await loadConfig();
+      if (!mounted.current) return;
+      dropdownShownAt.current = Date.now();
+      updateConfig(loaded.config);
+      utilityPinsRef.current = loaded.utilityPins;
+      setUtilityPins(loaded.utilityPins);
+      await showConfigNotices(loaded);
+    } catch (error) {
+      if (mounted.current) setConfigError(String(error));
+    }
+  }, [updateConfig]);
+
   const mountId = useRef(`${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
   const startup = useRef<StartupAction | undefined>(props.startup);
   // Read the previous list's selection before this mount's own first selection can overwrite it (observed: the new
@@ -386,15 +404,7 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
           mounted.current = false;
         };
       }
-      void (async () => {
-        const loaded = await loadConfig();
-        if (!mounted.current) return;
-        dropdownShownAt.current = Date.now();
-        updateConfig(loaded.config);
-        utilityPinsRef.current = loaded.utilityPins;
-        setUtilityPins(loaded.utilityPins);
-        await showConfigNotices(loaded);
-      })();
+      void loadInitialConfig();
       void refreshWindows();
       void refreshBadges();
     }
@@ -402,7 +412,7 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
       mounted.current = false;
       void saveListState(false, mountId.current);
     };
-  }, [refreshWindows, refreshBadges, updateConfig]);
+  }, [refreshWindows, refreshBadges, loadInitialConfig]);
 
   const rows = useMemo(
     () => (config ? buildRows(windows, badges, config, tier, existsSync) : []),
@@ -433,8 +443,9 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
   /** The hotkey commands (Quit Selected App, Quit Other Apps) act on this. */
   const persistSelection = useCallback((id: string | null) => {
     if (startup.current) return; // not until the startup action has consumed the stored selection
-    // Not an app (Trash, status rows): forget the previous app, so a hotkey quit refuses instead of quitting it.
-    if (id === TRASH_ITEM_ID || id?.startsWith("status:")) {
+    // No selection (a search that matches nothing) or not an app (Trash, status rows): forget the previous app, so a
+    // hotkey quit refuses instead of quitting an app that is no longer selected.
+    if (id === null || id === TRASH_ITEM_ID || id.startsWith("status:")) {
       void clearSelection();
       return;
     }
@@ -896,6 +907,20 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
   );
 
   function emptyView() {
+    if (!config && configError) {
+      return (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="Could not load your settings"
+          description={configError}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void loadInitialConfig()} />
+            </ActionPanel>
+          }
+        />
+      );
+    }
     switch (empty) {
       case undefined:
         return null;
@@ -1147,7 +1172,7 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
     <List
       navigationTitle="Apps"
       searchBarPlaceholder="Search apps and window titles"
-      isLoading={config === undefined || windowsRunning || badgesRunning}
+      isLoading={(config === undefined && !configError) || windowsRunning || badgesRunning}
       filtering={false}
       searchText={query}
       onSearchTextChange={setQuery}

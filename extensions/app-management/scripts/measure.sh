@@ -8,8 +8,8 @@
 # Usage: scripts/measure.sh [N] [window-helper path] [dock-badges path]
 set -u
 N=${1:-10}
-W=${2:-$HOME/.config/raycast/extensions/app-window-switcher/assets/window-helper}
-B=${3:-$HOME/.config/raycast/extensions/dock-badges/assets/dock-badges}
+W=${2:-$HOME/.config/raycast/extensions/app-management/assets/window-helper}
+B=${3:-$HOME/.config/raycast/extensions/app-management/assets/dock-badges}
 TMP=$(mktemp -d)
 now_ms() { python3 -c 'import time; print(int(time.time()*1000))'; }
 elapsed_of() { node -e 'try{const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(String(j.elapsedMs??""))}catch{process.stdout.write("")}' "$1"; }

@@ -1,5 +1,6 @@
 // Copied from raycast-window-switcher src/lib/run-helper.ts on 2026-09-30, unchanged except this header,
-// architectureFailure, and failureText wording for Store installs (no project folder to rebuild in)
+// architectureFailure, failureText wording for Store installs (no project folder to rebuild in), and a 5 s
+// FOCUS_TIMEOUT_MS
 // Runs the bundled helper once per call: no shell, fixed arguments, hard timeout (SPEC.md §7.4).
 // Takes the helper path as a parameter so tests can use fake helpers. Pure Node, no Raycast imports.
 import { execFile } from "node:child_process";
@@ -7,7 +8,9 @@ import { chmodSync, statSync } from "node:fs";
 import type { Failure } from "./protocol.ts";
 
 export const LIST_TIMEOUT_MS = 5000;
-export const FOCUS_TIMEOUT_MS = 3000;
+// The helper's own waits in its slowest focus path add up to about 3.5 s (unminimize 0.6, then public and private
+// activation at 0.5 + 0.8 each, plus a 0.25 s window scan), so the caller allows 5 s instead of cutting it off at 3 s.
+export const FOCUS_TIMEOUT_MS = 5000;
 
 export type RunResult = { ok: true; stdout: string } | { ok: false; failure: Failure };
 
