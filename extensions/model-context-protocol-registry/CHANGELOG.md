@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AudioPod AI MCP Server] - 2026-09-30
+
+- Add AudioPod AI to the official registry: text-to-speech in 200+ languages, voice cloning and conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server at https://mcp.audiopod.ai through `mcp-remote`, authenticated with an AudioPod API key.
+
 ## [Add apMZoomAI Dongdaemun Wholesale MCP Server] - 2026-09-27
 
 - Add apMZoomAI · Dongdaemun Wholesale to the official registry: search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, and find stalls by building, floor and stall number, with links to each item or stall on apMZoomAI, in eight languages. Read-only; no prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in, no API key.
