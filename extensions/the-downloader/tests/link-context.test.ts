@@ -7,8 +7,20 @@ import {
   estimateTokens,
   hasBody,
   isOverviewRequest,
+  linkifyTimestamps,
+  parseTimestamp,
+  scoreChunks,
   selectChunks,
+  transcriptText,
+  truncateToTokens,
 } from "../src/lib/link-context";
+
+const segments = [
+  { start: 0, text: "welcome to the channel" },
+  { start: 30, text: "we talk about engines and fuel" },
+  { start: 60, text: "the landing legs are made of aluminum" },
+  { start: 95, text: "engines need liquid oxygen" },
+];
 
 const page = (paragraphs: string[], extra: Partial<LinkContext> = {}): LinkContext => ({
   url: "https://example.com/a",
@@ -120,5 +132,114 @@ describe("isOverviewRequest", () => {
     expect(isOverviewRequest("what is the post about")).toBe(true);
     expect(isOverviewRequest("Summarize the page")).toBe(true);
     expect(isOverviewRequest("Who wrote this?")).toBe(false);
+  });
+});
+
+describe("timestamps", () => {
+  it("parses and links bare timestamps only", () => {
+    expect(parseTimestamp("1:35")).toBe(95);
+    expect(parseTimestamp("1:02:05")).toBe(3725);
+    expect(parseTimestamp("99")).toBeUndefined();
+    const out = linkifyTimestamps("At [1:35] and [0:30](https://keep.me) see [nope]", (s) => `https://y/${s}`);
+    expect(out).toBe("At [1:35](https://y/95) and [0:30](https://keep.me) see [nope]");
+  });
+
+  it("renders the transcript as timestamped lines", () => {
+    expect(transcriptText(segments.slice(0, 2))).toBe(
+      "[0:00] welcome to the channel\n[0:30] we talk about engines and fuel",
+    );
+  });
+});
+
+describe("estimateTokens", () => {
+  // Real counts from `fm count-tokens` (macOS 27) for each sentence repeated 30 times.
+  const measured: [string, string, number][] = [
+    [
+      "en",
+      "So today we are going to talk about how the starter works and why you should feed it every day, because the yeast needs fresh flour to keep going.",
+      931,
+    ],
+    [
+      "cs",
+      "Dnes si povíme, jak funguje kvásek a proč byste ho měli krmit každý den, protože kvasinky potřebují čerstvou mouku, aby mohly pokračovat.",
+      1261,
+    ],
+    [
+      "ru",
+      "Сегодня мы поговорим о том, как работает закваска и почему её нужно кормить каждый день, ведь дрожжам нужна свежая мука.",
+      961,
+    ],
+    [
+      "ja",
+      "今日はサワー種がどのように働くのか、そしてなぜ毎日餌をあげる必要があるのかについて話します。酵母は新鮮な小麦粉を必要とします。",
+      1050,
+    ],
+    ["zh", "今天我们来聊聊酸面种是如何工作的，以及为什么你应该每天喂养它，因为酵母需要新鲜的面粉才能继续发酵。", 931],
+    [
+      "ko",
+      "오늘은 사워도우 스타터가 어떻게 작동하는지, 그리고 왜 매일 먹이를 줘야 하는지에 대해 이야기하겠습니다.",
+      811,
+    ],
+    [
+      "ar",
+      "اليوم سنتحدث عن كيفية عمل الخميرة ولماذا يجب إطعامها كل يوم، لأن الخميرة تحتاج إلى دقيق طازج للاستمرار.",
+      992,
+    ],
+  ];
+
+  it.each(measured)("stays close to the real count for %s, so a transcript fits the model", (_, sentence, real) => {
+    const estimate = estimateTokens(Array(30).fill(sentence).join(" "));
+    // Under-counting overflows Apple's 8,192-token window; over-counting wastes it.
+    expect(real / estimate).toBeLessThanOrEqual(1.25);
+    expect(real / estimate).toBeGreaterThanOrEqual(0.75);
+  });
+});
+
+describe("truncateToTokens", () => {
+  it("leaves text that fits alone", () => {
+    expect(truncateToTokens("short note", 100)).toBe("short note");
+  });
+
+  it("cuts to about the budget in any script", () => {
+    const english = truncateToTokens("word ".repeat(400), 50);
+    expect(estimateTokens(english)).toBeLessThanOrEqual(51);
+    expect(english.endsWith("…")).toBe(true);
+    const chinese = truncateToTokens("酵母需要新鲜的面粉".repeat(50), 50);
+    expect(estimateTokens(chinese)).toBeLessThanOrEqual(51);
+  });
+});
+
+describe("chunking and retrieval", () => {
+  const chunks = chunkBody({ type: "segments", segments }, 12);
+
+  it("groups segments without splitting them and keeps time ranges", () => {
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks[0].start).toBe(0);
+    expect(chunks.map((c) => c.text).join("\n")).toBe(transcriptText(segments));
+  });
+
+  it("scores chunks that mention the question's terms", () => {
+    const scores = scoreChunks(chunks, "What are the landing legs made of?");
+    const best = chunks[scores.indexOf(Math.max(...scores))];
+    expect(best.text).toContain("aluminum");
+  });
+
+  it("picks relevant chunks within budget, in video order", () => {
+    const picked = selectChunks(chunks, "engines", estimateTokens(chunks[0].text) * 2);
+    expect(picked.every((c, i) => i === 0 || c.start >= picked[i - 1].start)).toBe(true);
+    expect(picked.some((c) => c.text.includes("engines"))).toBe(true);
+  });
+
+  it("samples across the video when nothing matches", () => {
+    const picked = selectChunks(chunks, "zzz", 10_000);
+    expect(picked.length).toBe(chunks.length);
+  });
+});
+
+describe("isOverviewRequest for videos", () => {
+  it("spots summary-style questions", () => {
+    expect(isOverviewRequest("Summarize the video")).toBe(true);
+    expect(isOverviewRequest("What are the key takeaways?")).toBe(true);
+    expect(isOverviewRequest("What is the landing gear made of?")).toBe(false);
   });
 });

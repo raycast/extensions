@@ -62,7 +62,7 @@ export function safeImageUrl(url: string | undefined): string | undefined {
   }
 }
 
-/** Downloads made with yt-dlp from a video page, which Chat About Video can open. */
+/** Downloads whose link Chat About Link can open: everything but Spotify, which it doesn't read yet. */
 export function canChat(kind: DownloadKind): boolean {
-  return kind === "video" || kind === "audio" || kind === "transcript" || kind === "thumbnail";
+  return kind !== "spotify";
 }

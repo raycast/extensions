@@ -15,19 +15,29 @@ import {
 } from "@raycast/api";
 import { EnginePreference, engineSettings } from "../lib/ai-engines.js";
 import { StoredChat, deleteChat, loadChats } from "../lib/chat-store.js";
+import { LinkKind } from "../lib/link-context.js";
 import { plural } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
+import { linkKindOf } from "../lib/link-loader.js";
 import { isValidUrl } from "../utils.js";
 import { EngineNotice, useEngineStatus } from "./engine-notice.js";
-import { VideoChat } from "./video-chat.js";
+import { LinkChat } from "./link-chat.js";
 
 type Candidate = { url: string; title: string; icon: Icon };
 
+const SUMMARIZE = {
+  video: "Summarize the video: a two-sentence overview, then the key points with timestamps.",
+  text: "Summarize this: a two-sentence overview, then the key points.",
+};
+
+const KIND_ICONS: Record<LinkKind, Icon> = { video: Icon.Video, post: Icon.Image, page: Icon.Document };
+
 function chatIcon(chat: StoredChat): Image.ImageLike {
+  const kindIcon = KIND_ICONS[chat.kind ?? "video"];
   const thumb = safeImageUrl(chat.thumbnail);
   return thumb
-    ? { source: thumb, mask: Image.Mask.RoundedRectangle, fallback: Icon.Video }
-    : { source: Icon.SpeechBubble, tintColor: Color.Purple };
+    ? { source: thumb, mask: Image.Mask.RoundedRectangle, fallback: kindIcon }
+    : { source: kindIcon, tintColor: Color.Purple };
 }
 
 function chatMarkdown(chat: StoredChat): string {
@@ -49,7 +59,7 @@ function chatMarkdown(chat: StoredChat): string {
 }
 
 /**
- * The start screen of Chat About Video: paste a link (or take one from the
+ * The start screen of Chat About Link: paste a link (or take one from the
  * clipboard or the browser), or pick up a previous conversation.
  */
 export function ChatHome({ initialText = "" }: { initialText?: string }) {
@@ -106,7 +116,7 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
   async function removeAll() {
     const confirmed = await confirmAlert({
       title: "Delete all chats?",
-      message: "Every saved conversation is removed. Videos and downloads are not affected.",
+      message: "Every saved conversation is removed. Downloads are not affected.",
       icon: Icon.Trash,
       primaryAction: { title: "Delete All", style: Alert.ActionStyle.Destructive },
     });
@@ -121,13 +131,13 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Paste a video link, or search your chats…"
+      searchBarPlaceholder="Paste a link, or search your chats…"
       isShowingDetail={shown.length > 0 || starts.length > 0 || (!!engine.status && !engine.status.ready)}
     >
       <List.EmptyView
         icon={{ source: Icon.SpeechBubbleActive, tintColor: Color.Purple }}
-        title={typed && !typedUrl ? "No matching chats" : "Paste a video link to start"}
-        description="YouTube, Vimeo and most sites yt-dlp supports. The transcript, details and statistics are loaded for you to ask about."
+        title={typed && !typedUrl ? "No matching chats" : "Paste a link to start"}
+        description="A video (YouTube, TikTok, X…), a post (Instagram, Reddit…) or any article. Its details and text — the transcript, caption or article — are loaded for you to ask about."
       />
       {starts.length > 0 && (
         <List.Section title="Start a Chat">
@@ -140,7 +150,7 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
               icon={{ source: c.icon, tintColor: Color.Purple }}
               detail={
                 <List.Item.Detail
-                  markdown={`## Chat about this video\n\n\`${c.url.replace(/`/g, "")}\`\n\nPress **↵** to load its transcript, details and statistics, then ask anything.`}
+                  markdown={`## Chat about this link\n\n\`${c.url.replace(/`/g, "")}\`\n\nPress **↵** to load its details and text (a video's transcript, a post's caption or an article), then ask anything.`}
                 />
               }
               actions={
@@ -148,21 +158,21 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
                   <Action.Push
                     title="Start Chat"
                     icon={Icon.SpeechBubbleActive}
-                    target={<VideoChat url={c.url} />}
+                    target={<LinkChat url={c.url} />}
                     onPop={refresh}
                   />
                   <Action.Push
                     title="Summarize"
                     icon={Icon.Text}
                     target={
-                      <VideoChat
+                      <LinkChat
                         url={c.url}
-                        initialQuestion="Summarize the video: a two-sentence overview, then the key points with timestamps."
+                        initialQuestion={SUMMARIZE[linkKindOf(c.url) === "video" ? "video" : "text"]}
                       />
                     }
                     onPop={refresh}
                   />
-                  <Action.OpenInBrowser title="Open Video" url={c.url} shortcut={Keyboard.Shortcut.Common.Open} />
+                  <Action.OpenInBrowser title="Open Link" url={c.url} shortcut={Keyboard.Shortcut.Common.Open} />
                 </ActionPanel>
               }
             />
@@ -189,12 +199,12 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
                   <Action.Push
                     title="Continue Chat"
                     icon={Icon.SpeechBubbleActive}
-                    target={<VideoChat url={chat.url} />}
+                    target={<LinkChat url={chat.url} />}
                     onPop={refresh}
                   />
-                  <Action.OpenInBrowser title="Open Video" url={chat.url} shortcut={Keyboard.Shortcut.Common.Open} />
+                  <Action.OpenInBrowser title="Open Link" url={chat.url} shortcut={Keyboard.Shortcut.Common.Open} />
                   <Action.CopyToClipboard
-                    title="Copy Video Link"
+                    title="Copy Link"
                     content={chat.url}
                     shortcut={Keyboard.Shortcut.Common.Copy}
                   />

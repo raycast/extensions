@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { AI, environment } from "@raycast/api";
 import { runWithWatchdog } from "./run.js";
 
-// The models Chat About Video can talk to. They share one small interface:
+// The models Chat About Link can talk to. They share one small interface:
 // send instructions + a prompt, stream the text back. Budgets are in estimated
 // prompt tokens (see `estimateTokens`) and leave room for the answer.
 

@@ -62,25 +62,28 @@
       ]
     },
     {
-      "name": "chat-video",
-      "title": "Chat About Video",
+      "name": "chat-link",
+      "title": "Chat About Link",
       "subtitle": "The Downloader",
-      "description": "Paste a video link and ask anything about it. Loads the transcript, details and statistics, and answers with Raycast AI, Apple Intelligence or Ollama.",
+      "description": "Paste a link — a video, a post or an article — and ask anything about it. Loads the details and the transcript, caption or article text, and answers with Raycast AI, Apple Intelligence or Ollama.",
       "mode": "view",
       "keywords": [
         "ai",
-        "summarize",
-        "summary",
+        "video",
+        "post",
+        "article",
         "youtube",
+        "instagram",
+        "tiktok",
+        "summarize",
         "transcript",
-        "ask",
-        "questions"
+        "ask"
       ],
       "arguments": [
         {
           "name": "url",
           "type": "text",
-          "placeholder": "Video URL",
+          "placeholder": "Link",
           "required": false
         }
       ]
@@ -93,14 +96,14 @@
       "description": "Downloads a video from a given URL"
     },
     {
-      "name": "extract-transcript",
-      "title": "Extract Video Transcript",
-      "description": "Gets a video's details and its transcript with [m:ss] timestamps, for summarizing or answering questions about what is said"
+      "name": "read-link",
+      "title": "Read Link",
+      "description": "Reads a link's details and its text — a video's transcript with [m:ss] timestamps, a social post's caption, or a web article — for summarizing or answering questions about what it says"
     },
     {
-      "name": "get-video-info",
-      "title": "Get Video Info",
-      "description": "Gets a video's details and statistics without downloading it: title, channel, duration, views, likes, comments, engagement rates, chapters, tags, description and caption languages"
+      "name": "get-link-info",
+      "title": "Get Link Info",
+      "description": "Gets a link's details and statistics without its text: title, author or channel, site, date, views, likes, comments, engagement rates, chapters, tags, description, and a video's caption languages"
     }
   ],
   "preferences": [
@@ -564,19 +567,19 @@
     }
   ],
   "ai": {
-    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. When answering from a transcript, point to moments with their timestamp as a link, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows, and only state what the transcript and video details support. Reply in the user's language.",
+    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. Use read-link to read what a link says (summaries, questions about the content) and get-link-info for how it is doing (views, likes, comments). When answering from a video's transcript, point to moments with their timestamp as a link, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows; for posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports. Reply in the user's language.",
     "skills": [
       {
-        "name": "summarize-video",
-        "title": "Summarize Video"
+        "name": "summarize-link",
+        "title": "Summarize Link"
       },
       {
-        "name": "video-study-notes",
-        "title": "Video Study Notes"
+        "name": "study-notes",
+        "title": "Study Notes"
       },
       {
-        "name": "video-performance",
-        "title": "Video Performance"
+        "name": "performance-check",
+        "title": "Performance Check"
       }
     ],
     "evals": [
@@ -610,7 +613,7 @@
       {
         "input": "@the-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
         "mocks": {
-          "extract-transcript": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
+          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
         },
         "expected": [
           {
@@ -618,7 +621,7 @@
               "arguments": {
                 "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
               },
-              "name": "extract-transcript"
+              "name": "read-link"
             }
           },
           {
@@ -629,7 +632,7 @@
       {
         "input": "@the-downloader how is this video doing? https://www.youtube.com/watch?v=ykaj0pS4A1A",
         "mocks": {
-          "get-video-info": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Statistics\n- Views: 48.2K\n- Likes: 1.1K\n- Comments: 64\n- Channel subscribers: 61K\n- Uploaded: Jan 16, 2024\n- Age: 987 days\n- Views per day: 49\n- Likes per 100 views: 2.28\n- Comments per 1,000 views: 1.33\n\n## Captions\n- Automatic captions: en-orig"
+          "get-link-info": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Statistics\n- Views: 48.2K\n- Likes: 1.1K\n- Comments: 64\n- Channel subscribers: 61K\n- Uploaded: Jan 16, 2024\n- Age: 987 days\n- Views per day: 49\n- Likes per 100 views: 2.28\n- Comments per 1,000 views: 1.33\n\n## Captions\n- Automatic captions: en-orig"
         },
         "expected": [
           {
@@ -637,7 +640,7 @@
               "arguments": {
                 "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
               },
-              "name": "get-video-info"
+              "name": "get-link-info"
             }
           },
           {
@@ -653,11 +656,11 @@
       {
         "input": "@the-downloader summarize https://www.youtube.com/watch?v=ykaj0pS4A1A in 3 bullet points",
         "mocks": {
-          "extract-transcript": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Transcript\n[0:00] Focus helps you block distracting apps and websites.\n[0:20] Start a session from Raycast and pick what to block.\n[0:40] Take breaks and review your sessions.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=ykaj0pS4A1A&t=245s)."
+          "read-link": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Transcript\n[0:00] Focus helps you block distracting apps and websites.\n[0:20] Start a session from Raycast and pick what to block.\n[0:40] Take breaks and review your sessions.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=ykaj0pS4A1A&t=245s)."
         },
         "expected": [
           {
-            "callsTool": "extract-transcript"
+            "callsTool": "read-link"
           },
           {
             "meetsCriteria": "Summarizes the video in about three bullet points about blocking distractions with Focus, and links at least one timestamp"
@@ -673,14 +676,55 @@
         "input": "@the-downloader was hat er über Elon Musk gesagt? https://www.youtube.com/watch?v=T_5zHExXN7o",
         "usedAsExample": false,
         "mocks": {
-          "extract-transcript": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
+          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
         },
         "expected": [
           {
-            "callsTool": "extract-transcript"
+            "callsTool": "read-link"
           },
           {
             "meetsCriteria": "Answers in German that Elon Musk said xAI will keep buying Nvidia chips, and points to 2:31"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader what is this post about? https://www.instagram.com/p/DdHyaYAifb6/",
+        "mocks": {
+          "read-link": "# Cementing their names in history.\n\n## Facts\n- Author: NASA (@nasa)\n- URL: https://www.instagram.com/p/DdHyaYAifb6/\n- Site: Instagram\n- Published: 2026-09-10\n- Co-authors: @nasakennedy, @nasaartemis\n\n## Statistics\n- Likes: 117.6K\n- Images: 4\n\n## Caption\nCementing their names in history.\n\nThe Artemis III crew is leaving their mark — literally. The astronauts recently signed their names on the hardware that will be inside their Orion spacecraft during their low Earth orbit mission, launching in 2027."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.instagram.com/p/DdHyaYAifb6/"
+              },
+              "name": "read-link"
+            }
+          },
+          {
+            "meetsCriteria": "Explains that the Artemis III astronauts signed hardware that will fly inside their Orion spacecraft, without inventing timestamps"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader summarize this article https://www.nasa.gov/news-release/nasa-awards-orbital-safety-analysis-support-services-contract/",
+        "mocks": {
+          "read-link": "# NASA Awards Orbital Safety Analysis Support Services Contract\n\n## Facts\n- Author: Rob Garner\n- URL: https://www.nasa.gov/news-release/nasa-awards-orbital-safety-analysis-support-services-contract/\n- Site: NASA\n- Reading time: 1 min\n\n## Article text\nNASA has awarded a contract to Omitron Inc. for the acquisition of orbital safety analysis services, which provide for critical protection of NASA's space assets.\n\nThis indefinite-delivery contract is valued at approximately $23.5 million over a five-year period of performance.\n\nThe work will take place at Omitron's location in Beltsville, Maryland, and at NASA's Goddard Space Flight Center in Greenbelt, Maryland."
+        },
+        "expected": [
+          {
+            "callsTool": "read-link"
+          },
+          {
+            "includes": "Omitron"
+          },
+          {
+            "meetsCriteria": "Summarizes the contract: Omitron, orbital safety analysis, about $23.5 million over five years; no video timestamps"
+          },
+          {
+            "not": {
+              "callsTool": "download-video"
+            }
           }
         ]
       }

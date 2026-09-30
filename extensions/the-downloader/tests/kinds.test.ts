@@ -24,8 +24,10 @@ describe("hostOf / itemNoun", () => {
 });
 
 describe("canChat", () => {
-  it("offers chat for downloads made from a video page", () => {
-    expect(["video", "audio", "transcript", "thumbnail"].every((k) => canChat(k as never))).toBe(true);
-    expect(["gallery", "spotify", "website"].some((k) => canChat(k as never))).toBe(false);
+  it("offers chat for any download but Spotify", () => {
+    expect(["video", "audio", "transcript", "thumbnail", "gallery", "website"].every((k) => canChat(k as never))).toBe(
+      true,
+    );
+    expect(canChat("spotify")).toBe(false);
   });
 });

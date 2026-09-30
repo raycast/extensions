@@ -14,6 +14,7 @@ import {
   upsertChat,
 } from "../src/lib/chat-store";
 import { Video } from "../src/types";
+import { videoToLink } from "../src/lib/sources/video";
 
 function chat(key: string, updatedAt: number, turns = 1): StoredChat {
   return {
@@ -26,14 +27,26 @@ function chat(key: string, updatedAt: number, turns = 1): StoredChat {
 }
 
 describe("chatKey", () => {
-  it("uses the site and video ID, so different URLs for one video share a chat", () => {
-    const video = { id: "abc", extractor_key: "Youtube", title: "T" } as Video;
-    expect(chatKey({ url: "https://youtu.be/abc", video })).toBe("youtube:abc");
-    expect(chatKey({ url: "https://www.youtube.com/watch?v=abc&t=5", video })).toBe("youtube:abc");
+  it("keeps the key chats about videos were saved under, so they still open", () => {
+    const video = { id: "abc", extractor_key: "Youtube", title: "T", duration: 1, formats: [] } as Video;
+    expect(chatKey(videoToLink("https://youtu.be/abc", video, { segments: [] }))).toBe("youtube:abc");
+    expect(chatKey(videoToLink("https://www.youtube.com/watch?v=abc&t=5", video, { segments: [] }))).toBe(
+      "youtube:abc",
+    );
   });
 
-  it("falls back to the URL", () => {
-    expect(chatKey({ url: "https://example.com/v", video: { title: "T" } as Video })).toBe("https://example.com/v");
+  it("uses whatever key the link's reader chose", () => {
+    expect(chatKey({ key: "instagram:DdHyaYAifb6" })).toBe("instagram:DdHyaYAifb6");
+    expect(chatKey({ key: "https://example.com/a" })).toBe("https://example.com/a");
+  });
+});
+
+describe("stored chats from before Chat About Link", () => {
+  it("still parse, and count as videos", () => {
+    const old = { key: "youtube:abc", url: "https://youtu.be/abc", title: "T", updatedAt: 1, turns: [] };
+    const [chat] = parseChats(JSON.stringify([old]));
+    expect(chat).toMatchObject(old);
+    expect(chat.kind ?? "video").toBe("video");
   });
 });
 

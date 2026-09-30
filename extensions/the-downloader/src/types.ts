@@ -37,7 +37,7 @@ export type Video = {
   upload_date?: string | null;
   webpage_url?: string | null;
   channel_follower_count?: number | null;
-  /** Fields used by Chat About Video and the get-video-info AI tool. */
+  /** Fields used by Chat About Link and the get-link-info AI tool. */
   id?: string | null;
   chapters?: Chapter[] | null;
   tags?: string[] | null;

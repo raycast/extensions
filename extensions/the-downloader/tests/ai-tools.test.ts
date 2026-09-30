@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Video } from "../src/types";
+import { LinkContext } from "../src/lib/link-context";
 
-const loadVideoContext = vi.fn();
+const loadLinkContext = vi.fn();
 const fetchVideoInfo = vi.fn();
 
-vi.mock("../src/lib/context-cache.js", () => ({
-  loadVideoContext: (...args: unknown[]) => loadVideoContext(...args),
+vi.mock("../src/lib/link-loader.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../src/lib/link-loader.js")>()),
+  loadLinkContext: (...args: unknown[]) => loadLinkContext(...args),
 }));
 vi.mock("../src/lib/ytdlp.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../src/lib/ytdlp.js")>()),
@@ -17,10 +19,9 @@ vi.mock("../src/utils.js", async (importOriginal) => ({
   getDenoPath: () => "/nonexistent/deno",
 }));
 
-const { default: extractTranscript } = await import("../src/tools/extract-transcript");
-const { default: getVideoInfo } = await import("../src/tools/get-video-info");
-const { captionLanguages } = await import("../src/lib/video-context");
-const { transcriptForAI, videoInfoForAI } = await import("../src/lib/video-chat");
+const { default: readLink } = await import("../src/tools/read-link");
+const { default: getLinkInfo } = await import("../src/tools/get-link-info");
+const { videoToLink } = await import("../src/lib/sources/video");
 
 const video = {
   id: "abc",
@@ -36,86 +37,82 @@ const video = {
   automatic_captions: { en: [], "en-orig": [], fr: [] },
 } as unknown as Video;
 
+const article: LinkContext = {
+  url: "https://example.com/news/bridges",
+  kind: "page",
+  key: "https://example.com/news/bridges",
+  site: "Example News",
+  title: "Bridges reopen",
+  facts: [{ label: "Reading time", value: "2 min" }],
+  stats: [],
+  body: { type: "paragraphs", paragraphs: ["The main bridge was rebuilt with steel cables."] },
+  fetchedAt: 0,
+};
+
 beforeEach(() => {
-  loadVideoContext.mockReset();
+  loadLinkContext.mockReset();
   fetchVideoInfo.mockReset();
 });
 
-describe("captionLanguages", () => {
-  it("lists uploaded tracks and only the spoken automatic track, not YouTube's translations", () => {
-    expect(captionLanguages(video)).toEqual({ uploaded: ["de"], automatic: ["en-orig"] });
-    expect(captionLanguages({ ...video, subtitles: null, automatic_captions: { en: [] } })).toEqual({
-      uploaded: [],
-      automatic: ["en"],
-    });
-  });
-});
-
-describe("AI tool output", () => {
-  const now = Date.UTC(2026, 0, 11);
-
-  it("gives the transcript with timestamps and how to link a moment", () => {
-    const text = transcriptForAI(
-      { url: "https://youtu.be/abc", video, segments: [{ start: 65, text: "liftoff" }], fetchedAt: 0 },
-      now,
+describe("read-link tool", () => {
+  it("reads a video's transcript in its own language by default", async () => {
+    loadLinkContext.mockResolvedValue(
+      videoToLink("https://youtu.be/abc", video, { segments: [{ start: 65, text: "liftoff" }] }),
     );
-    expect(text).toContain("# Rockets");
-    expect(text).toContain("- Views per day: 1.2K");
+    const text = await readLink({ url: "https://youtu.be/abc" });
+    expect(loadLinkContext).toHaveBeenCalledWith("https://youtu.be/abc", { language: "auto" });
     expect(text).toContain("## Transcript\n[1:05] liftoff");
     expect(text).toContain("[4:05](https://www.youtube.com/watch?v=abc&t=245s)");
+    await readLink({ url: "https://youtu.be/abc", language: "pt-BR" });
+    expect(loadLinkContext).toHaveBeenLastCalledWith("https://youtu.be/abc", { language: "pt-BR" });
+    await readLink({ url: "https://youtu.be/abc", language: "../../etc" });
+    expect(loadLinkContext).toHaveBeenLastCalledWith("https://youtu.be/abc", { language: "auto" });
   });
 
-  it("says why the transcript is missing", () => {
-    const text = transcriptForAI(
-      { url: "https://youtu.be/abc", video, segments: [], transcriptNote: "HTTP Error 429", fetchedAt: 0 },
-      now,
-    );
-    expect(text).toContain("Not available: HTTP Error 429");
-  });
-
-  it("gives video info with caption languages and no link hint for sites without one", () => {
-    const text = videoInfoForAI({ url: "https://example.com/v", video: { ...video, extractor_key: "Generic" } }, now);
-    expect(text).toContain("- Uploaded captions: de");
-    expect(text).toContain("- Automatic captions: en-orig");
+  it("reads an article without moment links", async () => {
+    loadLinkContext.mockResolvedValue(article);
+    const text = await readLink({ url: "https://example.com/news/bridges" });
+    expect(text).toContain("## Article text\nThe main bridge was rebuilt with steel cables.");
     expect(text).not.toContain("Link to a moment");
   });
-});
 
-describe("extract-transcript tool", () => {
-  it("loads the shared context in the video's own language by default", async () => {
-    loadVideoContext.mockResolvedValue({ url: "https://youtu.be/abc", video, segments: [], fetchedAt: 0 });
-    await extractTranscript({ url: "https://youtu.be/abc" });
-    expect(loadVideoContext).toHaveBeenCalledWith("https://youtu.be/abc", { language: "auto" });
-    await extractTranscript({ url: "https://youtu.be/abc", language: "pt-BR" });
-    expect(loadVideoContext).toHaveBeenLastCalledWith("https://youtu.be/abc", { language: "pt-BR" });
-    await extractTranscript({ url: "https://youtu.be/abc", language: "../../etc" });
-    expect(loadVideoContext).toHaveBeenLastCalledWith("https://youtu.be/abc", { language: "auto" });
-  });
-
-  it("rejects non-URLs before running anything", async () => {
-    await expect(extractTranscript({ url: "--exec=rm" })).rejects.toThrow("Invalid URL");
-    expect(loadVideoContext).not.toHaveBeenCalled();
+  it("leaves rejecting non-URLs to the loader, which runs nothing for them", async () => {
+    loadLinkContext.mockRejectedValue(new Error("Invalid URL — provide an http(s) link."));
+    await expect(readLink({ url: "--batch-file=/etc/hosts" })).rejects.toThrow("Invalid URL");
   });
 });
 
-describe("get-video-info tool", () => {
-  it("fetches metadata only and renders it", async () => {
+describe("get-link-info tool", () => {
+  it("reads only a video's metadata, with its caption languages", async () => {
     fetchVideoInfo.mockResolvedValue(video);
-    const text = await getVideoInfo({ url: "https://youtu.be/abc" });
+    const text = await getLinkInfo({ url: "https://youtu.be/abc" });
     expect(fetchVideoInfo).toHaveBeenCalledTimes(1);
     expect(fetchVideoInfo.mock.calls[0][1]).toBe("https://youtu.be/abc");
     expect(fetchVideoInfo.mock.calls[0][3]).toBeUndefined(); // no Deno installed
+    expect(loadLinkContext).not.toHaveBeenCalled();
     expect(text).toContain("# Rockets");
     expect(text).toContain("- Views: 12K");
+    expect(text).toContain("- Uploaded captions: de");
+    expect(text).toContain("- Automatic captions: en-orig");
   });
 
   it("notes live streams", async () => {
     fetchVideoInfo.mockResolvedValue({ ...video, live_status: "is_live" });
-    expect(await getVideoInfo({ url: "https://youtu.be/abc" })).toContain("live or upcoming stream");
+    expect(await getLinkInfo({ url: "https://youtu.be/abc" })).toContain("live or upcoming stream");
   });
 
-  it("rejects non-URLs", async () => {
-    await expect(getVideoInfo({ url: "file:///etc/passwd" })).rejects.toThrow("Invalid URL");
+  it("describes a page without its text", async () => {
+    loadLinkContext.mockResolvedValue(article);
+    const text = await getLinkInfo({ url: "example.com/news/bridges" });
+    expect(loadLinkContext).toHaveBeenCalledWith("https://example.com/news/bridges");
+    expect(text).toContain("A web page on Example News.");
+    expect(text).not.toContain("steel cables");
+  });
+
+  it("rejects non-URLs before running anything", async () => {
+    await expect(getLinkInfo({ url: "file:///etc/passwd" })).rejects.toThrow("Invalid URL");
+    await expect(getLinkInfo({ url: "--batch-file=/etc/hosts" })).rejects.toThrow("Invalid URL");
     expect(fetchVideoInfo).not.toHaveBeenCalled();
+    expect(loadLinkContext).not.toHaveBeenCalled();
   });
 });

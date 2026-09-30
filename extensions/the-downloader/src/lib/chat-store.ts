@@ -1,12 +1,15 @@
-import { ChatTurn } from "./video-chat.js";
-import { VideoContext } from "./video-context.js";
+import { ChatTurn } from "./link-chat.js";
+import { LinkContext, LinkKind } from "./link-context.js";
 import { jsonStore } from "./json-store.js";
 
-/** A conversation about one video, kept so it can be continued later. */
+/** A conversation about one link, kept so it can be continued later. */
 export type StoredChat = {
   key: string;
   url: string;
   title: string;
+  /** Missing on chats saved before Chat About Link, which were all about videos. */
+  kind?: LinkKind;
+  /** The channel or author. */
   channel?: string;
   thumbnail?: string;
   updatedAt: number;
@@ -17,10 +20,13 @@ export type StoredChat = {
 export const CHAT_LIMIT = 40;
 export const TURN_LIMIT = 60;
 
-/** One chat per video: keyed by site and video ID when known, otherwise by URL. */
-export function chatKey(ctx: Pick<VideoContext, "url" | "video">): string {
-  const { id, extractor_key } = ctx.video;
-  return id && extractor_key ? `${extractor_key.toLowerCase()}:${id}` : ctx.url;
+/**
+ * One chat per link, keyed by its reader: `<extractor>:<id>` for videos (the
+ * key Chat About Video used, so older chats still open), `<category>:<id>`
+ * for posts, the URL for pages.
+ */
+export function chatKey(ctx: Pick<LinkContext, "key">): string {
+  return ctx.key;
 }
 
 function isTurn(value: unknown): value is ChatTurn {
