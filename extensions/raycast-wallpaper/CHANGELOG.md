@@ -1,6 +1,6 @@
 # Raycast Wallpaper Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Support] - {PR_MERGE_DATE}
 
 - Add Ask AI support to list official Raycast wallpapers and set a wallpaper by name on all monitors or the current monitor.
 - Add AI instructions and YAML evals for listing, setting, and unavailable wallpapers.
