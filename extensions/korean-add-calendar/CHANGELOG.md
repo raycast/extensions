@@ -1,5 +1,41 @@
 # Extension Changelog
 
+## [Batch Parsing and Recurring Events] - {PR_MERGE_DATE}
+
+### Added
+
+- Create up to three Calendar events or Reminder items from one Korean sentence
+- Daily, weekly, and monthly recurring Apple Calendar events
+- Recurrence limits by occurrence count or inclusive end date
+- Explicit location markers using `장소:`, `장소=`, and `장소는`
+- Optional command argument and fallback text to prefill the review form
+- Build-time native Swift bridge for EventKit access without a user-installed Swift toolchain
+- Regression tests for parser, batch, recurrence, permission, and bridge behavior
+
+### Improved
+
+- Request Calendar or Reminders permission only when the corresponding target is selected
+- Preserve full dates when later batch clauses inherit the first clause date
+- Keep only failed or unconfirmed clauses in the input after partial EventKit results
+- Validate recurrence settings for the full batch before creating any item
+- Require confirmation before retrying a creation whose native helper timed out
+- Update to Raycast API 2.5.3
+- Use US English for all user-facing interface and error copy
+
+### Fixed
+
+- Prevent partially parsed batches from creating incomplete results
+- Prevent commas in titles or locations from creating unintended items
+- Prevent mixed Calendar and Reminder batches from using the wrong target
+- Preserve explicit short durations in recurring events
+- Include the selected recurrence end date at the event's scheduled time
+- Stop creation when a previously selected Calendar or Reminder list no longer exists
+- Infer the nearest AM/PM value for an unmarked time-range end
+- Preserve recurrence wall-clock times across daylight-saving transitions
+- Preserve token-like phrases inside titles and locations
+- Split later batch clauses that start with spaced, standalone-day, next-year, or explicit-year date cues
+- Avoid a submission crash when recurrence-only form values are omitted for non-recurring items
+
 ## [Initial Version] - 2026-03-16
 
 ### Added

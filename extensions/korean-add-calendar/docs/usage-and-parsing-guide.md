@@ -1,117 +1,152 @@
-# Korean Add Calendar: Usage and Parsing Guide
+# Korean Add Calendar Usage and Parsing Guide
 
-This document describes the current implementation behavior.
+This guide describes the behavior of the current implementation.
 
-## 1) First Run Checklist
+## First Launch
 
-1. Install the extension and run `Create Korean Schedule Item`.
-2. Allow macOS permissions when prompted:
-   - Calendar access
-   - Reminders access
-3. If destination lists are empty, run `Refresh Lists` from the action panel.
-4. Last selected target and destination are cached and restored automatically.
+1. Run `Create Korean Schedule Item` in Raycast.
+2. Optionally enter the Korean sentence as a command argument; it prefills the review form.
+3. Select `Apple Calendar Event` or `Reminder Item`.
+4. Grant the matching macOS permission when prompted.
+5. If the selected list changes outside Raycast, run `Refresh Lists` before creating another item.
 
-## 2) How to Use
+The extension requests access only for the currently selected target. Previously selected targets and lists are restored on the next launch.
 
-1. Enter a Korean sentence in `Schedule Sentence`.
-   - Parse status, parse summary, and recommended target update immediately.
-2. Optionally fill `Location (Optional)`.
-   - This value overrides the parsed location.
-3. Choose `Target`:
-   - `Apple Calendar Event`
-   - `Apple Reminder`
-   - Deadline intent defaults to `Apple Reminder` unless manually overridden.
-4. Select the destination:
-   - `Calendar` for events
-   - `Reminder List` for reminders
-5. Run one of the actions:
-   - `Create in Apple Calendar`
-   - `Create and Open Calendar`
-   - `Create in Reminders`
+## Basic Workflow
 
-## 3) Parsing Rules
+1. Enter Korean text in `Schedule Sentence`.
+2. Review `Parsing Status`, `Parsing Summary`, and `Recommended Target`.
+3. Optionally enter a manual location.
+4. Select a Calendar or Reminder list.
+5. Run the create action.
 
-### 3-1) Date Rules
+A manual location overrides every location parsed from the current submission.
 
-- Relative days: `오늘`, `내일`, `모레`
-- Relative month day: `이번달 25일`, `이달 20일`, `다음달 3일`, `담달 1일`
-- Absolute dates: `3월 12일`, `2026년 3월 2일`, `내년 1월 2일`
-- Week/weekday: `이번주 화요일`, `다음주 금요일`, `다다음주 수요일`, `월요일`
-- Relative day deadlines: `3일 안에`, `5일 이내`, `2일 내`
-- Relative hour deadlines: `3시간 안에`, `3시간 이내`, `2시간 내`
-- Day-level deadlines: `오늘 중`, `내일 중`, `모레 중`
-- Week-level deadlines: `이번주 내`, `다음주 내`, `다다음주 내`
-- Month-level deadlines: `이번달 내`, `이달 내`, `다음달 내`, `담달 내`
+## Date Expressions
 
-### 3-2) Time Rules
+- Relative dates: `오늘`, `내일`, `모레`
+- Relative months: `이번달 25일`, `이달 20일`, `다음달 3일`, `담달 1일`
+- Month and day: `3월 12일`
+- Explicit year: `2028년 3월 2일`
+- Next year: `내년 1월 2일`
+- Weekdays: `이번주 화요일`, `다음주 금요일`, `다다음주 수요일`, `월요일`
+- Relative deadlines: `3일 안에`, `5일 이내`, `2일 내`
+- Relative-hour deadlines: `3시간 안에`, `3시간 이내`, `2시간 내`
+- Day deadlines: `오늘 중`, `내일 중`, `모레 중`
+- Week deadlines: `이번주 내`, `다음주 내`, `다다음주 내`
+- Month deadlines: `이번달 내`, `이달 내`, `다음달 내`, `담달 내`
 
-- AM/PM tokens: `오전 9시`, `오후 3시 반`, `밤 12시`
-- 24-hour format: `14:30`
-- Time-only sentences are allowed: `6시 직장인 미팅`, `14시부터 16시까지 회의`
-  - If date is omitted, parser uses today.
-  - If the parsed time has already passed, it rolls to the next day.
-- If time is omitted, an all-day item is created.
-- Range format: `... 4시부터 6시까지 ...`
-  - If start has AM/PM and end omits it, end inherits start meridiem.
-  - If end time is earlier than start, end rolls to the next day.
-- Start-only emphasis: `... 4시부터 ...`
-  - Uses default duration (60 minutes).
+A weekday without a week modifier moves to the next week when its parsed time has already passed. A month/day without a year moves to the next year when necessary. Explicit years are never adjusted.
 
-### 3-3) Deadline Rules
+## Time Expressions
 
-Supported suffixes:
+- Korean periods: `오전 9시`, `오후 3시 반`, `밤 12시`
+- 24-hour time: `14:30`
+- No time: creates an all-day item
+- Start only: `내일 오후 4시부터 회의`
+- Explicit range: `내일 오후 4시부터 6시까지 회의`
+- Overnight range: `오늘 23:00부터 01:00까지 서버 점검`
 
-- `까지`, `까지는`, `전`, `전에`, `전까지`, `이전`, `이전까지`
+When the start has an explicit Korean AM/PM term and the end does not, the parser chooses the nearest positive end time. For example, `오후 11시부터 1시까지` ends at 1 AM the next day, while `오전 11시부터 1시까지` ends at 1 PM on the same day.
 
-Behavior:
+## Deadline Intent
 
-- Deadline tokens are consumed from time/date text and not kept in title.
-- Deadline input is treated as a due point, not a start-to-due duration block.
-- For Calendar target:
-  - due time -> starts at due time with default duration
-  - due date only -> all-day item
-- For Reminder target:
-  - parsed `start` is saved as due date
-  - all-day deadlines save date-only due components
+The following suffixes are treated as deadlines and removed from the title:
 
-### 3-4) Location Rules
+```text
+까지
+까지는
+전
+전에
+전까지
+이전
+이전까지
+```
 
-- `...에서` is parsed as location.
-- Manual location overrides parsed location.
+Examples:
 
-### 3-5) Title Rules
+```text
+내일 오후 6시까지 제출
+3일 안에 계약서 보내기
+3시간 이내 계약서 회신
+이번주 내 정산
+```
 
-- Remaining text after removing date/time/location tokens is used as title.
-- If empty, fallback title is `Untitled`.
+Deadline input represents a due point, not a block beginning at the current time. Deadline intent automatically recommends a Reminder. Calendar events and Reminders cannot be mixed in one batch.
 
-### 3-6) Past-Time Adjustments
+## Recurring Calendar Events
 
-- Weekday-only expressions without week modifier move to next week when already past.
-- Month/day without year moves to next year when already past.
+Supported forms:
 
-### 3-7) Conflict Priority
+```text
+매일 오후 4시 회의
+매주 화요일 오후 4시 코드리뷰
+매월 15일 오후 4시 정산
+```
 
-1. `부터 ~까지` range expressions
-2. Deadline expressions (`까지/전에/이내/내/중`)
-3. Standalone `부터` start-only expressions
+Recurring schedules currently support Apple Calendar only. Choose one of these end conditions:
 
-## 4) Calendar and Reminder Mapping
+- Occurrence count from 1 through 50
+- Inclusive end date on or after the first occurrence and within one year
 
-- Calendar:
-  - Saves `title/start/end/location/allDay` to EventKit event.
-- Reminder:
-  - Saves parsed `start` as due date.
-  - If location exists, stores `Location: ...` in reminder notes.
+An explicit time range preserves its wall-clock start and end times for every occurrence, including daylight-saving transitions. For example, a recurring `4시부터 4시 30분까지` event remains 4:00 PM to 4:30 PM.
 
-## 5) Runtime Performance
+## Batch Input
 
-- Swift bridge prefers `swiftc` compiled binary cache.
-- Falls back to interpreted `swift <script.swift>` if caching fails.
-- Cache can be disabled with:
-  - `RAYCAST_KOREAN_CALENDAR_DISABLE_SWIFT_BINARY_CACHE=1`
+Up to three items can be submitted together.
 
-## 6) Known Limits
+```text
+내일 오후 3시 회의, 모레 오후 5시 통화
+내일 오후 3시 회의 그리고 오후 5시 코드리뷰
+```
 
-- Standalone generic deadline keywords without date clues (`마감`, `기한`, `데드라인`)
-- Complex multi-deadline combinations (`오늘 중 3시간 이내`)
-- Sentences without any date/time clues (`회의 잡아줘`)
+Batch safety rules:
+
+- Every clause must parse successfully before creation starts.
+- Recurrence settings for all clauses are validated before creation starts.
+- All clauses must resolve to the same intent: Calendar events or Reminder items.
+- A comma, semicolon, `그리고`, or `하고` splits only when the following text starts with a date or time cue.
+- A trailing clause without a date inherits the complete year, month, and day from the first parsed clause.
+- If EventKit creation partially fails or times out, only failed or unconfirmed clauses remain in the input.
+- Retrying an unconfirmed timeout requires acknowledging that Calendar or Reminders was checked first.
+
+These rules prevent commas in titles or locations from creating unintended items.
+
+## Location Expressions
+
+Final location priority:
+
+1. The manual `Location (Optional)` field
+2. Explicit markers: `장소:`, `장소=`, `장소는`
+3. A trailing location: `내일 오후 5시 코드리뷰 회의실에서`
+4. A leading location: `회의실에서 내일 오후 3시 회의`
+5. The existing in-sentence `...에서` fallback
+
+Use an explicit marker for multi-word or punctuated locations:
+
+```text
+내일 오후 3시 회의 장소: B1 대회의실
+내일 오후 3시 회의 장소: 서울, 강남구
+```
+
+The trailing `...에서` fallback intentionally captures only the nearest token because title and location boundaries are otherwise ambiguous.
+
+## Title Rules
+
+The parser removes recognized date, time, deadline, recurrence, and location tokens. The remaining text becomes the title. If no title remains, it uses `Untitled`.
+
+## Calendar and Reminder Storage
+
+Calendar events store `title`, `start`, `end`, `location`, `allDay`, and optional recurrence rules through EventKit.
+
+Reminders store the parsed due date. All-day reminders use date components only; timed reminders include hour and minute. A parsed location is stored in notes as `Location: ...`.
+
+If a previously selected Calendar or Reminder list no longer exists, the selection is cleared and the user must explicitly choose another list. A transient list-loading failure does not erase the saved selection. The extension never silently writes to another target.
+
+## Current Limitations
+
+- Recurring Reminders are not yet supported.
+- Mixed Calendar and Reminder batches must be submitted separately.
+- A single manual location applies to every item in a batch.
+- Free-form duration phrases such as `30분간` or `2시간 동안` are not yet supported.
+- Actual Calendar conflicts and duplicate events are not checked before creation.

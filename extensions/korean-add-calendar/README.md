@@ -1,54 +1,72 @@
-# Korean Add Calendar (Raycast)
+# Korean Add Calendar
 
-Create Apple Calendar events or Apple Reminders from Korean schedule sentences.
-
-![raycast2x](https://github.com/user-attachments/assets/72f3dc0d-e1ec-42d8-809e-b297242b4639)
+Create Apple Calendar events or Apple Reminders from deterministic Korean natural-language input.
 
 ## Quick Start
 
 1. Run `Create Korean Schedule Item` in Raycast.
-2. Enter a Korean schedule sentence.
-3. Select the target (`Apple Calendar Event` or `Apple Reminder`) and destination list.
-4. Run one of the actions (`Create in Apple Calendar` / `Create in Reminders`).
+2. Enter a Korean schedule sentence in the form or as the optional command argument.
+3. Review the parsing summary and selected creation target.
+4. Choose a Calendar or Reminder list.
+5. Run the create action.
 
-For full behavior details and parsing rules, see:
+See the [usage and parsing guide](docs/usage-and-parsing-guide.md) for the complete syntax and behavior.
 
-- [Usage and Parsing Guide](docs/usage-and-parsing-guide.md)
+## Input Examples
 
-## Example Inputs
+```text
+내일 오후 3시에 회의
+다음주 화요일 오전 10시 반에 강남에서 팀 미팅
+내일 오후 4시부터 6시까지 회의
+3일 안에 계약서 보내기
+매주 화요일 오후 4시 코드리뷰
+내일 오후 3시 회의, 모레 오후 5시 통화
+내일 오후 3시 회의 장소: B1 대회의실
+```
 
-- `내일 오후 3시에 회의`
-- `다음주 화요일 오전 10시 반에 강남에서 팀 미팅`
-- `3월 12일 점심 12시 30분에 점심 약속`
-- `오늘 19:00에 운동`
-- `내일 오후 4시부터 6시까지 회의`
-- `내일 6시 전에 제출`
-- `3일 안에 계약서 보내기`
-- `이번주 내 정산`
-- `3시간 이내 계약서 회신`
-- `오늘 중 결재`
-- `이번달 내 정산`
+## Supported Behavior
 
-## Behavior
+- Relative, weekday, month/day, explicit-year, and next-year date expressions
+- Korean AM/PM terms and 24-hour time input
+- Explicit time ranges using `부터 ... 까지`
+- Deadline expressions such as `까지`, `전에`, `N일 안에`, and `N시간 이내`
+- Daily, weekly, and monthly recurring Calendar events
+- Up to three items in one compound sentence
+- Explicit locations using `장소:`, `장소=`, or `장소는`
+- Leading and trailing `...에서` location forms
+- Automatic Calendar or Reminder recommendation based on parsed intent
+- Persistent target, Calendar, Reminder list, and recurrence preferences
+- Optional command argument and, when configured, Raycast fallback text that prefill the review form
 
-- If no time is provided, the item is created as all-day.
-- If a parsed weekday-only expression is in the past (for example, `월요일 3시`), it moves to the next week.
-- Event creation uses EventKit through `assets/add_event.swift`.
-- Reminder creation uses EventKit through `assets/add_reminder.swift`.
-- You can select the destination calendar or reminder list from writable EventKit lists.
-- The last selected target and destination are restored automatically.
-- The optional location field overrides the parsed location when provided.
-- Parse status, summary, and recommended target are shown above destination fields.
-- If a sentence only contains time (for example, `6시 직장인 미팅`), date defaults to today. If that time has already passed, it rolls to the next day.
-- Time ranges in the form `부터 ~까지` are supported.
-- Deadline patterns such as `까지/전에/전까지/이전`, `N일 안에/이내/내`, `N시간 안에/이내/내`, `오늘/내일/모레 중`, and `이번주/다음주/이번달/다음달 내` are supported.
-- Deadline sentences are interpreted as due points (not duration blocks).
-- Deadline intent defaults to `Apple Reminder` unless manually overridden.
-- You can use `Create and Open Calendar` to jump to the created event time in Calendar.app.
-- macOS Calendar and Reminders permissions are required on first use.
+## Safety Rules
+
+- Every clause in a batch must parse successfully before any item is created.
+- Recurrence settings for every clause are validated before any item is created.
+- Calendar events and Reminder items cannot be mixed in one submission.
+- A comma is treated as a batch separator only when the following clause begins with a date or time cue.
+- If a selected Calendar or Reminder list no longer exists, creation stops instead of falling back to another list.
+- If the native helper times out, its outcome is marked unconfirmed and the same retry requires an explicit check first.
+- Recurring schedules currently support Apple Calendar only.
+- A manual location overrides parsed locations for every item in the current submission.
+
+## Permissions
+
+The extension requests Calendar or Reminders access only when the corresponding target is selected. If access is denied, enable Raycast under:
+
+```text
+System Settings > Privacy & Security > Calendars
+System Settings > Privacy & Security > Reminders
+```
+
+EventKit access uses a native executable bundled at build time. Extension users do not need Xcode or a Swift toolchain.
 
 ## Development
 
 ```bash
-npx ray develop
+npm ci
+npm test
+npm run lint
+npm run build
 ```
+
+Building the native bridge requires Xcode 16.3 or later. Runtime users do not need Xcode.

@@ -21,7 +21,7 @@ export interface ParseBatchResult {
 export const MAX_BATCH_ITEMS = 3;
 const BATCH_TOKEN_PATTERN = /\s*(,|;|그리고|하고)\s*/gu;
 const DATE_TIME_CUE_AT_START_PATTERN =
-  /^(?:오늘|내일|모레|이번주|다음주|담주|다담주|다다음주|이번달|이달|다음달|담달|매\s*(?:일|주|월)|[월화수목금토일](?:요일|욜)|[0-9]{1,2}월\s*[0-9]{1,2}일|[0-9]{1,2}일\s*(?:안에|이내|내)|[0-9]{1,2}시간\s*(?:안에|이내|내)|(?:새벽|아침|점심|오전|오후|저녁|밤)\s*[0-9]{1,2}시|[0-9]{1,2}시|[0-9]{1,2}:[0-9]{2}|마감|기한|데드라인)/u;
+  /^(?:오늘|내일|모레|이번\s*주|다음\s*주|담\s*주|다담\s*주|다다음\s*주|이번\s*달|이\s*달|다음\s*달|담\s*달|매\s*(?:일|주|월)|[월화수목금토일](?:요일|욜)|(?:(?:내년|[0-9]{4}년)\s*)?[0-9]{1,2}월\s*[0-9]{1,2}일|[0-9]{1,2}일(?:\s*(?:안에|이내|내))?(?=\s|$)|[0-9]{1,2}시간\s*(?:안에|이내|내)|(?:새벽|아침|점심|오전|오후|저녁|밤)\s*[0-9]{1,2}시|[0-9]{1,2}시|[0-9]{1,2}:[0-9]{2}|마감|기한|데드라인)/u;
 
 export function parseKoreanScheduleBatch(input: string, options: ParseOptions = {}): ParseBatchResult {
   const trimmed = input.trim();
@@ -121,11 +121,7 @@ function splitIntoParts(input: string): string[] {
 }
 
 function shouldSplitByToken(token: string, remainingText: string): boolean {
-  if (token === "," || token === ";") {
-    return true;
-  }
-
-  if (token !== "그리고" && token !== "하고") {
+  if (token !== "," && token !== ";" && token !== "그리고" && token !== "하고") {
     return false;
   }
 
@@ -133,7 +129,7 @@ function shouldSplitByToken(token: string, remainingText: string): boolean {
 }
 
 function buildDateCue(date: Date): string {
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
 export function firstBatchParseResult(batch: ParseBatchResult): ParseResult | null {
@@ -146,4 +142,13 @@ export function firstBatchParseResult(batch: ParseBatchResult): ParseResult | nu
     return { ok: false, error: firstError.error };
   }
   return null;
+}
+
+export function buildBatchRetryInput(item: ParsedBatchItem): string {
+  if (!item.inheritedDate) {
+    return item.input;
+  }
+
+  const date = item.value.start;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${item.input}`;
 }
