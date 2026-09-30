@@ -129,7 +129,7 @@ and **Open Extension Preferences** where it helps.
   Context for Any AI** (was Copy Video Context), **Save Text** (Save Transcript
   with Timestamps for videos), Reload, Clear Chat, Open Link. `[m:ss]` links
   only for videos.
-- **Images** — preference **Chat: Look at Images** (dropdown): **Ask Each Time**
+- **Images** — preference **Look at Images** on the Chat About Link command (dropdown): **Ask Each Time**
   (default), Always, Never. Applies only to a post with images and an engine that
   can see images:
   - Apple on-device: `fm respond --image <file> --text <prompt>` (images saved

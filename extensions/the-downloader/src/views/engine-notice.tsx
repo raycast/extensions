@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List, Toast, open, openExtensionPreferences, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, open, openCommandPreferences, showToast } from "@raycast/api";
 import { ENGINE_TITLES, EngineId, EnginePreference, EngineSettings } from "../lib/ai-engines.js";
 import { EngineStatus, automaticStatus, checkAllEngines, switchTarget } from "../lib/engine-status.js";
 
@@ -90,9 +90,7 @@ export function EngineNotice({
       case "copy":
         return <Action.CopyToClipboard key={i} title={fix.title} content={fix.text} />;
       case "preferences":
-        return (
-          <Action key={i} title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-        );
+        return <Action key={i} title="Open Chat Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />;
       case "retry":
         return <Action key={i} title="Check Again" icon={Icon.ArrowClockwise} onAction={onRetry} />;
       case "switch":
@@ -104,7 +102,7 @@ export function EngineNotice({
             key={i}
             title={`Choose ${ENGINE_TITLES[target]} in Preferences`}
             icon={Icon.Switch}
-            onAction={openExtensionPreferences}
+            onAction={openCommandPreferences}
           />
         );
     }

@@ -86,6 +86,126 @@
           "placeholder": "Link",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "aiEngine",
+          "title": "AI Engine",
+          "description": "Which model answers in Chat About Link. Automatic uses Raycast AI when you have access, then Apple Intelligence on macOS 27, then a running Ollama.",
+          "type": "dropdown",
+          "default": "auto",
+          "required": false,
+          "data": [
+            {
+              "title": "Automatic",
+              "value": "auto"
+            },
+            {
+              "title": "Raycast AI",
+              "value": "raycast"
+            },
+            {
+              "title": "Apple Intelligence (On-Device)",
+              "value": "apple"
+            },
+            {
+              "title": "Ollama (Local)",
+              "value": "ollama"
+            }
+          ]
+        },
+        {
+          "name": "raycastModel",
+          "title": "Raycast AI Model",
+          "description": "Model for Raycast AI answers. Default follows Raycast's own choice.",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Raycast Default",
+              "value": ""
+            },
+            {
+              "title": "Claude Sonnet 5",
+              "value": "anthropic-claude-sonnet-5"
+            },
+            {
+              "title": "Claude Haiku 4.5",
+              "value": "anthropic-claude-4-5-haiku"
+            },
+            {
+              "title": "GPT-5.6 Terra",
+              "value": "openai-gpt-5.6-terra"
+            },
+            {
+              "title": "GPT-5 mini",
+              "value": "openai-gpt-5-mini"
+            },
+            {
+              "title": "Gemini 3.8 Flash",
+              "value": "google-gemini-3.8-flash"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "google-gemini-3.1-pro"
+            }
+          ]
+        },
+        {
+          "name": "ollamaUrl",
+          "title": "Ollama URL",
+          "description": "Address of your Ollama server.",
+          "type": "textfield",
+          "default": "http://127.0.0.1:11434",
+          "required": false
+        },
+        {
+          "name": "ollamaModel",
+          "title": "Ollama Model",
+          "description": "Model name, e.g. `llama3.2` or `qwen3:8b`. Leave blank to use the first installed model.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "ollamaContext",
+          "title": "Ollama Context Size",
+          "description": "Context window (num_ctx) in tokens. Larger fits more of the transcript but needs more memory. Integer; default 8192.",
+          "type": "textfield",
+          "default": "8192",
+          "required": false
+        },
+        {
+          "name": "transcriptLanguage",
+          "title": "Transcript Language",
+          "description": "Caption language to load, as a code like `en` or `de`. Auto uses the video's own language, then English.",
+          "type": "textfield",
+          "default": "auto",
+          "required": false
+        },
+        {
+          "name": "chatImages",
+          "title": "Look at Images",
+          "description": "Whether Chat About Link lets the AI look at a post's images (up to 4). Only Apple Intelligence and Ollama vision models can; Raycast AI reads text only. Looking at images is slower.",
+          "type": "dropdown",
+          "default": "ask",
+          "required": false,
+          "data": [
+            {
+              "title": "Ask Each Time",
+              "value": "ask"
+            },
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        }
       ]
     }
   ],
@@ -110,10 +230,46 @@
     {
       "name": "downloadPath",
       "title": "Download Folder",
-      "description": "Path to download video",
+      "description": "Where downloads are saved.",
       "type": "directory",
       "default": "~/Downloads",
       "required": true
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "When you open Download or Chat About Link, fill in a link you've copied.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "When you open Download, fill in a link from the text selected in the frontmost app.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Browser Extension Support",
+      "description": "Offer the current browser tab's link. Needs the Raycast browser extension.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "checkToolUpdates",
+      "title": "Check for Tool Updates",
+      "description": "Before a download, check whether the tools it uses (yt-dlp, gallery-dl, ffmpeg…) are outdated and offer to update them.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
     },
     {
       "name": "videoMediaType",
@@ -217,89 +373,9 @@
       "required": false
     },
     {
-      "name": "spotifyAudioFormat",
-      "title": "Spotify: Audio Format",
-      "description": "Default audio format for Spotify downloads.",
-      "type": "dropdown",
-      "default": "mp3",
-      "required": false,
-      "data": [
-        {
-          "title": "MP3",
-          "value": "mp3"
-        },
-        {
-          "title": "M4A",
-          "value": "m4a"
-        },
-        {
-          "title": "Opus",
-          "value": "opus"
-        },
-        {
-          "title": "FLAC",
-          "value": "flac"
-        }
-      ]
-    },
-    {
-      "name": "webpageSaveMode",
-      "title": "Webpage: Save Mode",
-      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript.",
-      "type": "dropdown",
-      "default": "complete",
-      "required": false,
-      "data": [
-        {
-          "title": "Complete",
-          "value": "complete"
-        },
-        {
-          "title": "Lightweight (no JavaScript)",
-          "value": "lightweight"
-        }
-      ]
-    },
-    {
-      "name": "autoLoadUrlFromClipboard",
-      "title": "Auto Load URL from Clipboard",
-      "description": "Automatically load the URL from the clipboard when the command is executed",
-      "type": "checkbox",
-      "label": "Enable",
-      "default": false,
-      "required": false
-    },
-    {
-      "name": "autoLoadUrlFromSelectedText",
-      "title": "Auto Load URL from Selected Text",
-      "description": "Automatically load the URL from the selected text when the command is executed",
-      "type": "checkbox",
-      "label": "Enable",
-      "default": false,
-      "required": false
-    },
-    {
-      "name": "enableBrowserExtensionSupport",
-      "title": "Enable Browser Extension Support",
-      "description": "Enable browser extension support for reading video URLs from the browser",
-      "type": "checkbox",
-      "label": "Enable",
-      "default": false,
-      "required": false
-    },
-    {
-      "name": "checkToolUpdates",
-      "title": "Check for Tool Updates",
-      "description": "Before a download, check whether the tools it uses (yt-dlp, gallery-dl, ffmpeg…) are outdated and offer to update them.",
-      "type": "checkbox",
-      "label": "Enable",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "cookiesFromBrowser",
       "title": "Gallery: Cookies from Browser",
-      "description": "Browser to read cookies from for login-gated galleries.",
+      "description": "Use your login from this browser for galleries and posts that need one (Instagram, Reddit…), in Download and Chat About Link.",
       "type": "dropdown",
       "default": "",
       "required": false,
@@ -371,6 +447,32 @@
       "required": false
     },
     {
+      "name": "spotifyAudioFormat",
+      "title": "Spotify: Audio Format",
+      "description": "Default audio format for Spotify downloads.",
+      "type": "dropdown",
+      "default": "mp3",
+      "required": false,
+      "data": [
+        {
+          "title": "MP3",
+          "value": "mp3"
+        },
+        {
+          "title": "M4A",
+          "value": "m4a"
+        },
+        {
+          "title": "Opus",
+          "value": "opus"
+        },
+        {
+          "title": "FLAC",
+          "value": "flac"
+        }
+      ]
+    },
+    {
       "name": "spotifyClientId",
       "title": "Spotify: Client ID",
       "description": "Spotify Developer app Client ID. Required for reliable Spotify downloads — without it, spotDL's anonymous session frequently fails with 'Could not get session auth tokens'. See SPOTIFY.md for one-time setup.",
@@ -396,195 +498,95 @@
       "required": false
     },
     {
-      "name": "homebrewPath",
-      "title": "Homebrew Path",
-      "description": "macOS only — ignored on Windows. Path to the Homebrew executable. Run `which brew` in Terminal to find it.",
-      "type": "textfield",
-      "default": "/opt/homebrew/bin/brew",
-      "required": false
+      "name": "webpageSaveMode",
+      "title": "Webpage: Save Mode",
+      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript.",
+      "type": "dropdown",
+      "default": "complete",
+      "required": false,
+      "data": [
+        {
+          "title": "Complete",
+          "value": "complete"
+        },
+        {
+          "title": "Lightweight (no JavaScript)",
+          "value": "lightweight"
+        }
+      ]
     },
     {
-      "name": "ytdlPath",
-      "title": "yt-dlp Path",
-      "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
+      "name": "networkIdleTimeoutSec",
+      "title": "Advanced: Network Idle Timeout",
+      "description": "Seconds a download may stay silent before it's treated as stuck and stopped. Raise it only on very slow connections. Default 120.",
       "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "ffmpegPath",
-      "title": "FFmpeg Path",
-      "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "ffprobePath",
-      "title": "FFprobe Path",
-      "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "denoPath",
-      "title": "Deno Path",
-      "description": "Path to the Deno executable — the JavaScript runtime yt-dlp uses for YouTube. Run `which deno` to find it.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "galleryDlPath",
-      "title": "gallery-dl Path",
-      "description": "Path to the gallery-dl executable. Run `which gallery-dl` to find it.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "spotDlPath",
-      "title": "spotDL Path",
-      "description": "Path to the spotDL executable. Leave blank to use the copy this extension downloads automatically.",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "monolithPath",
-      "title": "Monolith Path",
-      "description": "Path to the monolith executable. Run `which monolith` to find it.",
-      "type": "textfield",
+      "default": "120",
       "required": false
     },
     {
       "name": "forceIpv4",
-      "title": "Force IPv4 (Experimental)",
-      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "title": "Advanced: Force IPv4",
+      "description": "Only if downloads fail on a network with broken IPv6: make yt-dlp use IPv4.",
       "type": "checkbox",
       "label": "Enable",
       "default": false,
       "required": false
     },
     {
-      "name": "aiEngine",
-      "title": "Chat: AI Engine",
-      "description": "Which model answers in Chat About Video. Automatic uses Raycast AI when you have access, then Apple Intelligence on macOS 27, then a running Ollama.",
-      "type": "dropdown",
-      "default": "auto",
-      "required": false,
-      "data": [
-        {
-          "title": "Automatic",
-          "value": "auto"
-        },
-        {
-          "title": "Raycast AI",
-          "value": "raycast"
-        },
-        {
-          "title": "Apple Intelligence (On-Device)",
-          "value": "apple"
-        },
-        {
-          "title": "Ollama (Local)",
-          "value": "ollama"
-        }
-      ]
-    },
-    {
-      "name": "raycastModel",
-      "title": "Chat: Raycast AI Model",
-      "description": "Model for Raycast AI answers. Default follows Raycast's own choice.",
-      "type": "dropdown",
-      "default": "",
-      "required": false,
-      "data": [
-        {
-          "title": "Raycast Default",
-          "value": ""
-        },
-        {
-          "title": "Claude Sonnet 5",
-          "value": "anthropic-claude-sonnet-5"
-        },
-        {
-          "title": "Claude Haiku 4.5",
-          "value": "anthropic-claude-4-5-haiku"
-        },
-        {
-          "title": "GPT-5.6 Terra",
-          "value": "openai-gpt-5.6-terra"
-        },
-        {
-          "title": "GPT-5 mini",
-          "value": "openai-gpt-5-mini"
-        },
-        {
-          "title": "Gemini 3.8 Flash",
-          "value": "google-gemini-3.8-flash"
-        },
-        {
-          "title": "Gemini 3.1 Pro",
-          "value": "google-gemini-3.1-pro"
-        }
-      ]
-    },
-    {
-      "name": "ollamaUrl",
-      "title": "Chat: Ollama URL",
-      "description": "Address of your Ollama server.",
+      "name": "homebrewPath",
+      "title": "Advanced: Homebrew Path",
+      "description": "macOS only. Leave empty unless Homebrew is somewhere unusual; `which brew` in Terminal shows where it is.",
       "type": "textfield",
-      "default": "http://127.0.0.1:11434",
+      "default": "/opt/homebrew/bin/brew",
       "required": false
     },
     {
-      "name": "ollamaModel",
-      "title": "Chat: Ollama Model",
-      "description": "Model name, e.g. `llama3.2` or `qwen3:8b`. Leave blank to use the first installed model.",
+      "name": "ytdlPath",
+      "title": "Advanced: yt-dlp Path",
+      "description": "Only to use a specific yt-dlp. Leave empty to use the one The Downloader finds or installs. `which yt-dlp` in Terminal shows where yours is.",
       "type": "textfield",
-      "default": "",
       "required": false
     },
     {
-      "name": "ollamaContext",
-      "title": "Chat: Ollama Context Size",
-      "description": "Context window (num_ctx) in tokens. Larger fits more of the transcript but needs more memory. Integer; default 8192.",
+      "name": "ffmpegPath",
+      "title": "Advanced: FFmpeg Path",
+      "description": "Only to use a specific FFmpeg. Leave empty to use the one The Downloader finds or installs. `which ffmpeg` in Terminal shows where yours is.",
       "type": "textfield",
-      "default": "8192",
       "required": false
     },
     {
-      "name": "transcriptLanguage",
-      "title": "Chat: Transcript Language",
-      "description": "Caption language to load, as a code like `en` or `de`. Auto uses the video's own language, then English.",
+      "name": "ffprobePath",
+      "title": "Advanced: FFprobe Path",
+      "description": "Only to use a specific FFprobe. Leave empty to use the one The Downloader finds or installs. `which ffprobe` in Terminal shows where yours is.",
       "type": "textfield",
-      "default": "auto",
       "required": false
     },
     {
-      "name": "chatImages",
-      "title": "Chat: Look at Images",
-      "description": "Whether Chat About Link lets the AI look at a post's images (up to 4). Only Apple Intelligence and Ollama vision models can; Raycast AI reads text only. Looking at images is slower.",
-      "type": "dropdown",
-      "default": "ask",
-      "required": false,
-      "data": [
-        {
-          "title": "Ask Each Time",
-          "value": "ask"
-        },
-        {
-          "title": "Always",
-          "value": "always"
-        },
-        {
-          "title": "Never",
-          "value": "never"
-        }
-      ]
+      "name": "denoPath",
+      "title": "Advanced: Deno Path",
+      "description": "Only to use a specific Deno. Leave empty to use the one The Downloader finds or installs. `which deno` in Terminal shows where yours is.",
+      "type": "textfield",
+      "required": false
     },
     {
-      "name": "networkIdleTimeoutSec",
-      "title": "Network: Idle Timeout",
-      "description": "Seconds of silence from a download before the extension assumes it is wedged and kills the child process. Real downloads emit progress every second, so 120 is plenty for fast networks; raise it on very slow links. Integer; default 120.",
+      "name": "galleryDlPath",
+      "title": "Advanced: gallery-dl Path",
+      "description": "Only to use a specific gallery-dl. Leave empty to use the one The Downloader finds or installs. `which gallery-dl` in Terminal shows where yours is.",
       "type": "textfield",
-      "default": "120",
+      "required": false
+    },
+    {
+      "name": "spotDlPath",
+      "title": "Advanced: spotDL Path",
+      "description": "Only to use a specific spotDL. Leave empty to use the copy The Downloader downloads. `which spotdl` in Terminal shows where yours is.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "monolithPath",
+      "title": "Advanced: Monolith Path",
+      "description": "Only to use a specific Monolith. Leave empty to use the one The Downloader finds or installs. `which monolith` in Terminal shows where yours is.",
+      "type": "textfield",
       "required": false
     }
   ],

@@ -66,7 +66,7 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
   const [searchText, setSearchText] = useState(initialText);
   const [chats, setChats] = useState<StoredChat[]>();
   const [found, setFound] = useState<Candidate[]>([]);
-  const prefs = useMemo(() => getPreferenceValues<ExtensionPreferences>(), []);
+  const prefs = useMemo(() => getPreferenceValues<Preferences.ChatLink>(), []);
   const settings = useMemo(() => engineSettings(prefs), [prefs]);
   // Tell about an engine that isn't ready before a link is pasted, not after the first question.
   const engine = useEngineStatus((prefs.aiEngine as EnginePreference) || "auto", settings);

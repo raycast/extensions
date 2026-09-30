@@ -25,8 +25,8 @@ export type EngineSettings = {
   ollamaContext: number;
 };
 
-/** Engine settings from the extension's preferences. */
-export function engineSettings(prefs: ExtensionPreferences): EngineSettings {
+/** Engine settings from Chat About Link's preferences. */
+export function engineSettings(prefs: Preferences.ChatLink): EngineSettings {
   const context = Number.parseInt(prefs.ollamaContext ?? "", 10);
   return {
     raycastModel: prefs.raycastModel || undefined,

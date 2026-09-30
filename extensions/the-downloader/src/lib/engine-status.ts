@@ -138,7 +138,7 @@ export type OllamaProbe = {
   /** `/api/tags` answered. */
   reachable: boolean;
   models: string[];
-  /** The Chat: Ollama Model preference, if set. */
+  /** The Ollama Model preference, if set. */
   wanted?: string;
 };
 
@@ -176,7 +176,7 @@ export function ollamaStatus(probe: OllamaProbe): EngineStatus {
       title: "Ollama isn't running",
       message: isLocal(probe.url)
         ? "Open the Ollama app, or run `ollama serve` in Terminal — then check again."
-        : `Couldn't reach Ollama at ${probe.url}. Make sure it's running there and reachable from this Mac, or change Chat: Ollama URL.`,
+        : `Couldn't reach Ollama at ${probe.url}. Make sure it's running there and reachable from this Mac, or change Ollama URL in Chat About Link's preferences.`,
       fixes: [
         ...(isLocal(probe.url) ? [copy("ollama serve")] : [{ type: "preferences" } as EngineFix]),
         retry,
@@ -200,7 +200,7 @@ export function ollamaStatus(probe: OllamaProbe): EngineStatus {
       ready: false,
       state: "model-missing",
       title: `Ollama doesn't have “${wanted}”`,
-      message: `Download it with \`ollama pull ${wanted}\`, or clear Chat: Ollama Model in preferences to use ${probe.models[0]}, which is installed.`,
+      message: `Download it with \`ollama pull ${wanted}\`, or clear Ollama Model in Chat About Link's preferences to use ${probe.models[0]}, which is installed.`,
       fixes: [copy(`ollama pull ${wanted}`), { type: "preferences" }, retry],
     };
   }

@@ -3,7 +3,7 @@ import path from "node:path";
 import { safeFetch } from "./safe-fetch.js";
 
 // A post's images, for engines that can look at them (Apple's on-device model,
-// Ollama vision models). The Chat: Look at Images preference decides: ask
+// Ollama vision models). Chat About Link's Look at Images preference decides: ask
 // once per chat (the default), always, or never.
 
 /** At most this many images go with one question: each one costs time and part of the context window. */

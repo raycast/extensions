@@ -15,9 +15,9 @@ Before downloading, the form shows what yt-dlp found — channel, duration, view
 
 ## AI
 
-Chat About Link works with the model you pick in the extension's preferences (**Chat: AI Engine**):
+Chat About Link works with the model you pick in its own preferences (**AI Engine**, under Chat About Link in Raycast Settings):
 
-- **Raycast AI** — needs Raycast Pro. Choose a model under **Chat: Raycast AI Model**.
+- **Raycast AI** — needs Raycast Pro. Choose a model under **Raycast AI Model**.
 - **Apple Intelligence** — free, on macOS 27 with Apple Intelligence turned on, through the built-in `fm` tool, on-device. Accept its terms once with `sudo fm license` in Terminal.
 - **Ollama** — free and local. Set the model and context size in preferences.
 

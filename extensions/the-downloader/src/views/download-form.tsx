@@ -66,7 +66,7 @@ import {
 } from "../utils.js";
 import { DownloadView } from "./download-view.js";
 import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
-import { CHAT_SHORTCUT, LinkChat } from "./link-chat.js";
+import { ChatAboutLinkAction } from "./chat-action.js";
 import { MediaPreview } from "./media-preview.js";
 import Installer from "./installer.js";
 import Updater from "./updater.js";
@@ -778,14 +778,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
                 target={<MediaPreview video={video} url={normalizeUrl(url)} />}
               />
             )}
-            {validUrl && source !== "spotify" && (
-              <Action.Push
-                icon={Icon.SpeechBubbleActive}
-                title="Chat About Link"
-                shortcut={CHAT_SHORTCUT}
-                target={<LinkChat url={normalizeUrl(url)} />}
-              />
-            )}
+            {validUrl && source !== "spotify" && <ChatAboutLinkAction url={normalizeUrl(url)} />}
             <Action.Push
               icon={Icon.Clock}
               title="Show Download History"

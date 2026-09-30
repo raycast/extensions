@@ -33,7 +33,7 @@ import {
 } from "../lib/history.js";
 import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
 import { markdownImage } from "../lib/svg.js";
-import { CHAT_SHORTCUT, LinkChat } from "./link-chat.js";
+import { ChatAboutLinkAction } from "./chat-action.js";
 
 const FILTERS: { value: HistoryFilter; title: string; icon: Icon }[] = [
   { value: "all", title: "All Downloads", icon: Icon.Download },
@@ -337,14 +337,7 @@ export function DownloadHistory() {
                         }}
                         onAction={() => downloadAgain(e.url)}
                       />
-                      {canChat(e.kind) && (
-                        <Action.Push
-                          title="Chat About Link"
-                          icon={Icon.SpeechBubbleActive}
-                          shortcut={CHAT_SHORTCUT}
-                          target={<LinkChat url={e.url} />}
-                        />
-                      )}
+                      {canChat(e.kind) && <ChatAboutLinkAction url={e.url} />}
                       <Action
                         title={showingDetail ? "Hide Details" : "Show Details"}
                         icon={showingDetail ? Icon.EyeDisabled : Icon.Eye}

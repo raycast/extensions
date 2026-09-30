@@ -20,7 +20,7 @@ import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageU
 import { formatBytes, formatClock, plural } from "../lib/format.js";
 import { markdownImage } from "../lib/svg.js";
 import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
-import { CHAT_SHORTCUT, LinkChat } from "./link-chat.js";
+import { ChatAboutLinkAction } from "./chat-action.js";
 
 function statusLabel(s: DownloadSnapshot): { text: string; icon: { source: Icon; tintColor: Color } } {
   switch (s.status) {
@@ -192,14 +192,7 @@ export function DownloadView({ session }: { session: DownloadSession }) {
               shortcut={HISTORY_SHORTCUT}
               target={<DownloadHistory />}
             />
-            {canChat(s.kind) && (
-              <Action.Push
-                title="Chat About Link"
-                icon={Icon.SpeechBubbleActive}
-                shortcut={CHAT_SHORTCUT}
-                target={<LinkChat url={s.url} />}
-              />
-            )}
+            {canChat(s.kind) && <ChatAboutLinkAction url={s.url} />}
             <Action.OpenInBrowser title="Open Original" url={s.url} shortcut={Keyboard.Shortcut.Common.Open} />
             <Action.CopyToClipboard title="Copy Original URL" content={s.url} />
           </ActionPanel.Section>

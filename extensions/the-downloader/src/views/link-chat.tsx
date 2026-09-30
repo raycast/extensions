@@ -17,6 +17,7 @@ import {
   getPreferenceValues,
   launchCommand,
   open,
+  openCommandPreferences,
   openExtensionPreferences,
   showInFinder,
   showToast,
@@ -45,12 +46,6 @@ import { timestampUrl } from "../lib/sources/video.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
 import { downloadPath, getGalleryDlPath, getffmpegPath, getytdlPath, sanitizeVideoTitle } from "../utils.js";
 import Installer from "./installer.js";
-
-/** Opens Chat About Link from the form, the preview, the live view and the history. */
-export const CHAT_SHORTCUT: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd", "shift"], key: "a" },
-  Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-};
 
 type Suggestion = { title: string; icon: Icon; prompt: string };
 
@@ -241,7 +236,7 @@ function overviewMarkdown(ctx: LinkContext): string {
   parts.push(bodySummary(ctx));
   if (!hasBody(ctx) && ctx.noteReason === "language") {
     parts.push(
-      "To use the captions in the video's own language, set **Chat: Transcript Language** to `auto` in preferences.",
+      "To use the captions in the video's own language, set **Transcript Language** to `auto` in Chat About Link's preferences.",
     );
   }
   return parts.join("\n\n");
@@ -340,7 +335,7 @@ function AboutMetadata({ ctx, textOnly }: { ctx: LinkContext; textOnly: boolean 
  * answers stream into the detail pane, with clickable timestamps for videos.
  */
 export function LinkChat({ url, initialQuestion }: { url: string; initialQuestion?: string }) {
-  const prefs = useMemo(() => getPreferenceValues<ExtensionPreferences>(), []);
+  const prefs = useMemo(() => getPreferenceValues<Preferences.ChatLink>(), []);
   const settings = useMemo(() => engineSettings(prefs), [prefs]);
   const expectedKind = useMemo(() => {
     const kind = linkKindOf(url);
@@ -497,7 +492,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
           const allow = await confirmAlert({
             title: imageQuestion(count),
             message:
-              "It's slower. Your answer is kept for this chat; set the default in preferences (Chat: Look at Images).",
+              "It's slower. Your answer is kept for this chat; set the default with Look at Images in Chat About Link's preferences.",
             icon: Icon.Image,
             primaryAction: { title: "Allow" },
             dismissAction: { title: "Text Only" },
@@ -820,7 +815,10 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
                     content={[ctx.title, ...ctx.stats.map((s) => `${s.label}: ${s.value}`)].join("\n")}
                   />
                 )}
-                {!hasBody(ctx) && (ctx.noteReason === "language" || ctx.noteReason === "blocked") && (
+                {!hasBody(ctx) && ctx.noteReason === "language" && (
+                  <Action title="Open Chat Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
+                )}
+                {!hasBody(ctx) && ctx.noteReason === "blocked" && (
                   <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                 )}
                 {commonActions}
