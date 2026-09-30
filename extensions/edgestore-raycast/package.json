@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "edgestore-raycast",
+  "title": "EdgeStore",
+  "description": "Upload files and manage your EdgeStore account.",
+  "icon": "edgestore-logo.png",
+  "author": "ravi_s",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "setup-bucket",
+      "title": "Setup Bucket",
+      "description": "Enter credentials and bucket name to setup a bucket",
+      "mode": "view"
+    },
+    {
+      "name": "upload-files",
+      "title": "Upload Files",
+      "description": "Choose bucket and upload selected files",
+      "mode": "view"
+    },
+    {
+      "name": "manage-buckets",
+      "title": "Manage Buckets",
+      "description": "List, set default, and remove configured buckets",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@edgestore/server": "0.5.4",
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0",
+    "file-type": "21.0.0",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

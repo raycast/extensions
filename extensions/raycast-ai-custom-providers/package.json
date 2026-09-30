@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-ai-custom-providers",
+  "title": "Raycast AI Custom Providers",
+  "description": "Manage custom Raycast AI provider through extension",
+  "icon": "extension-icon.png",
+  "author": "ernest0n",
+  "platforms": [
+    "macOS"
+  ],
+  "homepage": "https://manual.raycast.com/ai#Custom%20Providers%20(Bring%20Your%20Own%20Models)",
+  "keywords": [
+    "BYOK",
+    "Bring Your Own Key",
+    "Bring Your Own Models",
+    "Groq",
+    "Cerebras",
+    "TogetherAI",
+    "localhost",
+    "vLLM",
+    "ProxyLLM",
+    "Ollama",
+    "Perplexity",
+    "Azure"
+  ],
+  "categories": [
+    "Productivity",
+    "Data",
+    "Web",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-custom-providers",
+      "title": "Manage Custom Providers",
+      "description": "Manage custom AI providers and models for Chat AI",
+      "mode": "view",
+      "keywords": [
+        "Manage Custom Models"
+      ],
+      "preferences": [
+        {
+          "name": "createBackup",
+          "description": "Create a backup file when making changes to the YAML configuration file",
+          "type": "checkbox",
+          "label": "Create backup after changes",
+          "required": true,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

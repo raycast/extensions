@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ssh-image-drop",
+  "title": "SSH Image Drop",
+  "description": "Send files, folders, and clipboard images over SSH with a single hotkey, and pull them back — no path typing, the remote path lands on your clipboard. Handy for handing screenshots to remote Claude Code / CLI sessions that can't take an image paste. Passwords are stored in the system credential store (macOS Keychain / Windows DPAPI) by default; SSH key auth is optional.",
+  "icon": "extension-icon.png",
+  "author": "wjsong",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "claude code",
+    "codex",
+    "cursor",
+    "cline",
+    "opencode",
+    "aider",
+    "gemini",
+    "antigravity",
+    "agy",
+    "grok",
+    "llm",
+    "tmux"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "send-file-to-server",
+      "title": "Send File to Server",
+      "description": "Send files or folders to a server with a picker form (pre-filled from your Finder selection on macOS), or pick a server for clipboard and pull transfers",
+      "keywords": [
+        "upload",
+        "scp",
+        "transfer",
+        "folder",
+        "claude",
+        "codex"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "send-clipboard-image",
+      "title": "Send Clipboard Image",
+      "description": "Send the clipboard image over SSH and copy the remote path",
+      "keywords": [
+        "screenshot",
+        "paste",
+        "upload",
+        "scp",
+        "claude",
+        "codex",
+        "opencode"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "pull-file",
+      "title": "Pull File from Server",
+      "description": "Download the remote file or folder whose path is in the clipboard, reveal it in the file manager, and copy the local path",
+      "keywords": [
+        "download",
+        "fetch",
+        "sftp",
+        "remote"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "add-server",
+      "title": "Manage Servers",
+      "description": "Add, edit, or delete servers; passwords are stored in the system credential store by default (optional SSH key install)",
+      "keywords": [
+        "add",
+        "register",
+        "edit",
+        "delete",
+        "host",
+        "ssh config",
+        "keychain"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "remoteDir",
+      "title": "Remote Directory",
+      "description": "Directory on the server where uploaded files are stored (cleared on reboot when under /tmp)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/tmp/ssh-image-drop"
+    },
+    {
+      "name": "downloadDir",
+      "title": "Download Directory",
+      "description": "Local directory for pulled files",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Downloads"
+    },
+    {
+      "name": "hideConfigHosts",
+      "title": "Server List",
+      "label": "Hide ~/.ssh/config servers",
+      "description": "Show only managed and recently used servers (your ~/.ssh/config is not modified)",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "pasteTargetApp",
+      "title": "Auto-Paste",
+      "description": "App that receives the remote path after Send Clipboard Image — pasted only if that app is frontmost when the transfer finishes, into whichever field has focus there. Leave unset to only copy the path. File sends and pulls always copy only",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

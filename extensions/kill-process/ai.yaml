@@ -1,0 +1,52 @@
+instructions: |
+  When handling process termination requests:
+  1. For single process (e.g. 'kill Safari'):
+     - Use list-processes with searchTerm: ['Safari']
+     - Only kill the exact process name match (e.g., 'Safari' matches 'Safari' but not 'Safari Helper', or 'Notion' does not match 'Notion Helper' or 'Notion Calendar')
+     - DO NOT kill helper processes even if found in the search
+     - Call kill-process directly - DO NOT ask for confirmation as the tool handles it
+  2. For multiple processes (e.g. 'kill UpNote and Notion'):
+     - Use list-processes ONCE with all terms in the array (e.g., searchTerm: ['UpNote', 'Notion'])
+     - Only kill processes that exactly match the requested names
+     - DO NOT kill helper processes even if they contain the search terms
+     - Call kill-process directly for each process - DO NOT ask for confirmation
+     - Example: 'kill UpNote and Notion' should only kill 'UpNote' and 'Notion', NOT 'UpNote Helper' or 'Notion Helper' or 'Notion Calendar'
+  3. For process with related processes (e.g. 'kill Chrome with related processes'):
+     - Use list-processes with the app name (e.g., searchTerm: ['Chrome'])
+     - Kill main process first, then all related helper processes
+     - Include processes with matching name patterns (e.g. 'Chrome Helper')
+     - Only kill helpers when explicitly requested with phrases like 'with related processes' or 'and all its processes'
+     - Call kill-process directly for each process - DO NOT ask for confirmation
+  4. When searching for processes:
+     - Use list-processes tool which returns detailed process info
+     - For exact matches, compare the full processName
+     - DO NOT match partial names unless explicitly looking for helpers
+     - Results include: id (PID), cpu usage, memory usage, type (app/binary/prefPane on macOS, app/binary on Windows)
+  5. When killing processes:
+     - Always provide processName and id (PID) for kill-process
+     - Include the full path for better process identification
+     - Call kill-process directly - the tool will handle confirmation UI
+  6. Process types and special handling:
+     - 'app': Main application processes (.app on macOS, .exe in Program Files on Windows)
+     - 'binary': Helper processes and command line tools
+     - 'prefPane': System preference panes (macOS only)
+  7. Memory and CPU considerations:
+     - Can sort processes by memory (mem) or CPU usage
+     - Memory is in bytes, CPU in percentage
+  8. Error handling:
+     - Handle cases where process is not found
+     - Handle failed kill operations gracefully
+     - Provide clear feedback on success/failure
+  9. IMPORTANT: When killing multiple processes:
+     - Always use a single list-processes call with all search terms in the array
+     - DO NOT make separate list-processes calls for each process
+     - Only kill processes that exactly match the requested names
+     - DO NOT kill helper processes unless explicitly requested
+     - DO NOT ask for confirmation - the kill-process tool handles it
+     - Example: 'kill UpNote and Notion' should only kill processes named exactly 'UpNote' and 'Notion'
+  10. For PID-based termination (e.g. 'kill PID 12345, 23142, 32456'):
+      - When user specifies PIDs directly, bypass list-processes tool
+      - Call kill-process directly for each PID
+      - No need to search for process names or paths
+      - Handle multiple PIDs in a single request by calling kill-process for each PID
+      - Example: For 'kill PID 12345, 23142, 32456', make three separate kill-process calls with respective PIDs

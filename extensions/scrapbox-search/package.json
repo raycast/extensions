@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scrapbox-search",
+  "title": "Scrapbox Search",
+  "description": "Search Scrapbox pages and open quickly.",
+  "icon": "command-icon.png",
+  "author": "zett-8",
+  "categories": [
+    "Documentation",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Scrapbox",
+      "subtitle": "Scrapbox",
+      "description": "Search Scrapbox pages by keywords",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "projectName",
+          "title": "Project Name",
+          "description": "Your Scrapbox project name",
+          "type": "textfield",
+          "required": true
+        },
+        {
+          "name": "token",
+          "title": "Auth Token",
+          "description": "Your Scrapbox auth token",
+          "type": "textfield",
+          "required": true
+        },
+        {
+          "name": "defaultPage",
+          "title": "Default Page",
+          "description": "Default page title",
+          "type": "textfield",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "format": "prettier --write . ./**/*.{ts,tsx}"
+  }
+}

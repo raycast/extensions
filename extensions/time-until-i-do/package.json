@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "time-until-i-do",
+  "title": "Time Until I Do",
+  "description": "Time Until 'The Big Day' is a customizable Raycast extension that helps you keep track of the time left until your upcoming event. Whether you're counting down to a birthday, anniversary, vacation, or any other special occasion, this extension has you covered. Stay motivated and inspired with its daily quotes and focus points. Download now and start counting down to your big day!",
+  "icon": "icon.png",
+  "author": "MuhaddiMu",
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Big Day Date",
+      "name": "bigDayDate",
+      "description": "Enter the date the big day will happen",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "YYYY-MM-DD"
+    },
+    {
+      "title": "Big Day Name",
+      "name": "bigDayName",
+      "description": "Enter the name of the big day",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Give your big day a name"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "description": "Time Until I Do",
+      "title": "Big Day Countdown",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

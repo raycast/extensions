@@ -1,0 +1,10 @@
+pre-commit:
+  parallel: false
+  jobs:
+    - run: npm run fix-lint
+      glob: "*.{js,ts,jsx,tsx,yml,json,md}"
+      stage_fixed: true
+      interactive: true
+
+    - run: npm run build
+      glob: "*.{js,ts,jsx,tsx,yml,json}"

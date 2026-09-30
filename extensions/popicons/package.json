@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "popicons",
+  "title": "Popicons",
+  "description": "Browse and copy Popicons",
+  "icon": "command-icon.png",
+  "author": "lucaschultz",
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-popicons",
+      "title": "Browse Popicons",
+      "description": "Browse and copy Popicons",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0",
+    "@tanstack/query-async-storage-persister": "^5.38.0",
+    "@tanstack/react-query": "^5.39.0",
+    "@tanstack/react-query-persist-client": "^5.39.0",
+    "cross-fetch": "^4.0.0",
+    "pretty": "^2.0.0",
+    "svg-to-jsx": "^1.0.4",
+    "svgson": "^5.3.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "@types/node": "^20.12.12",
+    "@types/pretty": "^2.0.2",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "react": "^18.2.0",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "color",
+      "description": "Set the fill and stroke attribute of the copied icons. If left empty, the default colors will be used.",
+      "type": "textfield",
+      "required": false,
+      "title": "Color",
+      "default": "currentColor",
+      "placeholder": "currentColor"
+    },
+    {
+      "name": "iconPreviewSize",
+      "description": "Size of the icons in the grid",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "title": "Icon Preview Size",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
+    }
+  ]
+}

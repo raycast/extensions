@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translit",
+  "title": "Translit",
+  "version": "0.1.0",
+  "description": "Convert Latin characters to Cyrillic using phonetic transliteration",
+  "icon": "extension-icon.png",
+  "author": "tsibog",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Latin to Cyrillic",
+      "subtitle": "Translit",
+      "description": "Convert Latin characters to Cyrillic using phonetic transliteration rules",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Choose the primary action for the extension",
+      "required": false,
+      "type": "dropdown",
+      "default": "copyToClipboard",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "pasteToActiveApp"
+        }
+      ]
+    },
+    {
+      "name": "clearOnAction",
+      "title": "Clear Input on Action",
+      "label": "Clear Input",
+      "description": "Clear the input field after performing the action",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    }]
+  ,
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.18.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

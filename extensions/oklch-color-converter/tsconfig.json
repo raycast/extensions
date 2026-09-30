@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "lib": ["es2020"],
+    "module": "es2020",
+    "target": "es2020",
+    "strict": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["@raycast/api", "node", "react"]
+  }
+} 

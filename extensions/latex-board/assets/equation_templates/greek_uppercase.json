@@ -1,0 +1,26 @@
+{
+  "Greek Letters (Uppercase)": {
+    "Gamma 1": " \\Gamma ",
+    "Gamma 2": " \\varGamma ",
+    "Delta 1": " \\Delta ",
+    "Delta 2": " \\varDelta ",
+    "Theta 1": " \\Theta ",
+    "Theta 2": " \\varTheta ",
+    "Lambda 1": " \\Lambda ",
+    "Lambda 2": " \\varLambda ",
+    "Xi 1": " \\Xi ",
+    "Xi 2": " \\varXi ",
+    "Pi 1": " \\Pi ",
+    "Pi 2": " \\varPi ",
+    "Sigma 1": " \\Sigma ",
+    "Sigma 2": " \\varSigma ",
+    "Upsilon 1": " \\Upsilon ",
+    "Upsilon 2": " \\varUpsilon ",
+    "Phi 1": " \\Phi ",
+    "Phi 2": " \\varPhi ",
+    "Psi 1": " \\Psi ",
+    "Psi 2": " \\varPsi ",
+    "Omega 1": " \\Omega ",
+    "Omega 2": " \\varOmega "
+  }
+}

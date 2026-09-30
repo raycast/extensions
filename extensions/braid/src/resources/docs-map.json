@@ -1,0 +1,145 @@
+[
+  {
+    "section": "Resources",
+    "items": [
+      { "name": "Releases", "url": "https://seek-oss.github.io/braid-design-system/releases" },
+      { "name": "Gallery", "url": "https://seek-oss.github.io/braid-design-system/gallery" },
+      { "name": "Playroom", "url": "https://seek-oss.github.io/braid-design-system/playroom" },
+      { "name": "GitHub", "url": "https://github.com/seek-oss/braid-design-system" }
+    ]
+  },
+  {
+    "section": "Guides",
+    "items": [
+      { "name": "Design Workflows", "url": "https://seek-oss.github.io/braid-design-system/guides/design-workflow" },
+      {
+        "name": "Development Workflow",
+        "url": "https://seek-oss.github.io/braid-design-system/guides/development-workflow"
+      },
+      {
+        "name": "Playroom Prototyping",
+        "url": "https://seek-oss.github.io/braid-design-system/guides/playroom-prototyping"
+      },
+      { "name": "Contribution", "url": "https://seek-oss.github.io/braid-design-system/guides/contribution" },
+      { "name": "Testing Guide", "url": "https://seek-oss.github.io/braid-design-system/guides/testing-guide" }
+    ]
+  },
+  {
+    "section": "Foundations",
+    "items": [
+      { "name": "Layout", "url": "https://seek-oss.github.io/braid-design-system/foundations/layout" },
+      { "name": "Tones", "url": "https://seek-oss.github.io/braid-design-system/foundations/tones" },
+      { "name": "Iconography", "url": "https://seek-oss.github.io/braid-design-system/foundations/iconography" }
+    ]
+  },
+  {
+    "section": "Examples",
+    "items": [
+      { "name": "Job Summary", "url": "https://seek-oss.github.io/braid-design-system/examples/job-summary" },
+      { "name": "Basic Form", "url": "https://seek-oss.github.io/braid-design-system/examples/basic-form" },
+      { "name": "Marketing Banner", "url": "https://seek-oss.github.io/braid-design-system/examples/marketing-banner" }
+    ]
+  },
+  {
+    "section": "Components",
+    "items": [
+      { "name": "Accordion", "url": "https://seek-oss.github.io/braid-design-system/components/Accordion" },
+      { "name": "Actions", "url": "https://seek-oss.github.io/braid-design-system/components/Actions" },
+      { "name": "Alert", "url": "https://seek-oss.github.io/braid-design-system/components/Alert" },
+      { "name": "Autosuggest", "url": "https://seek-oss.github.io/braid-design-system/components/Autosuggest" },
+      { "name": "Badge", "url": "https://seek-oss.github.io/braid-design-system/components/Badge" },
+      { "name": "Bleed", "url": "https://seek-oss.github.io/braid-design-system/components/Bleed" },
+      { "name": "Box", "url": "https://seek-oss.github.io/braid-design-system/components/Box" },
+      { "name": "Button", "url": "https://seek-oss.github.io/braid-design-system/components/Button" },
+      { "name": "ButtonIcon", "url": "https://seek-oss.github.io/braid-design-system/components/ButtonIcon" },
+      { "name": "ButtonLink", "url": "https://seek-oss.github.io/braid-design-system/components/ButtonLink" },
+      { "name": "Card", "url": "https://seek-oss.github.io/braid-design-system/components/Card" },
+      { "name": "Checkbox", "url": "https://seek-oss.github.io/braid-design-system/components/Checkbox" },
+      { "name": "Columns", "url": "https://seek-oss.github.io/braid-design-system/components/Columns" },
+      { "name": "ContentBlock", "url": "https://seek-oss.github.io/braid-design-system/components/ContentBlock" },
+      { "name": "Dialog", "url": "https://seek-oss.github.io/braid-design-system/components/Dialog" },
+      { "name": "Disclosure", "url": "https://seek-oss.github.io/braid-design-system/components/Disclosure" },
+      { "name": "Divider", "url": "https://seek-oss.github.io/braid-design-system/components/Divider" },
+      { "name": "Drawer", "url": "https://seek-oss.github.io/braid-design-system/components/Drawer" },
+      { "name": "Dropdown", "url": "https://seek-oss.github.io/braid-design-system/components/Dropdown" },
+      { "name": "FieldLabel", "url": "https://seek-oss.github.io/braid-design-system/components/FieldLabel" },
+      { "name": "FieldMessage", "url": "https://seek-oss.github.io/braid-design-system/components/FieldMessage" },
+      { "name": "Heading", "url": "https://seek-oss.github.io/braid-design-system/components/Heading" },
+      { "name": "Hidden", "url": "https://seek-oss.github.io/braid-design-system/components/Hidden" },
+      { "name": "HiddenVisually", "url": "https://seek-oss.github.io/braid-design-system/components/HiddenVisually" },
+      { "name": "Inline", "url": "https://seek-oss.github.io/braid-design-system/components/Inline" },
+      { "name": "List", "url": "https://seek-oss.github.io/braid-design-system/components/List" },
+      { "name": "Loader", "url": "https://seek-oss.github.io/braid-design-system/components/Loader" },
+      { "name": "MenuItem", "url": "https://seek-oss.github.io/braid-design-system/components/MenuItem" },
+      {
+        "name": "MenuItemCheckbox",
+        "url": "https://seek-oss.github.io/braid-design-system/components/MenuItemCheckbox"
+      },
+      { "name": "MenuItemDivider", "url": "https://seek-oss.github.io/braid-design-system/components/MenuItemDivider" },
+      { "name": "MenuRenderer", "url": "https://seek-oss.github.io/braid-design-system/components/MenuRenderer" },
+      { "name": "MonthPicker", "url": "https://seek-oss.github.io/braid-design-system/components/MonthPicker" },
+      { "name": "Notice", "url": "https://seek-oss.github.io/braid-design-system/components/Notice" },
+      { "name": "OverflowMenu", "url": "https://seek-oss.github.io/braid-design-system/components/OverflowMenu" },
+      { "name": "Page", "url": "https://seek-oss.github.io/braid-design-system/components/Page" },
+      { "name": "PageBlock", "url": "https://seek-oss.github.io/braid-design-system/components/PageBlock" },
+      { "name": "Pagination", "url": "https://seek-oss.github.io/braid-design-system/components/Pagination" },
+      { "name": "PasswordField", "url": "https://seek-oss.github.io/braid-design-system/components/PasswordField" },
+      { "name": "Radio", "url": "https://seek-oss.github.io/braid-design-system/components/Radio" },
+      { "name": "RadioGroup", "url": "https://seek-oss.github.io/braid-design-system/components/RadioGroup" },
+      { "name": "Rating", "url": "https://seek-oss.github.io/braid-design-system/components/Rating" },
+      { "name": "Secondary", "url": "https://seek-oss.github.io/braid-design-system/components/Secondary" },
+      { "name": "Spread", "url": "https://seek-oss.github.io/braid-design-system/components/Spread" },
+      { "name": "Stack", "url": "https://seek-oss.github.io/braid-design-system/components/Stack" },
+      { "name": "Stepper", "url": "https://seek-oss.github.io/braid-design-system/components/Stepper" },
+      { "name": "Strong", "url": "https://seek-oss.github.io/braid-design-system/components/Strong" },
+      { "name": "Table", "url": "https://seek-oss.github.io/braid-design-system/components/Table" },
+      { "name": "Tabs", "url": "https://seek-oss.github.io/braid-design-system/components/Tabs" },
+      { "name": "Tag", "url": "https://seek-oss.github.io/braid-design-system/components/Tag" },
+      { "name": "Text", "url": "https://seek-oss.github.io/braid-design-system/components/Text" },
+      { "name": "TextDropdown", "url": "https://seek-oss.github.io/braid-design-system/components/TextDropdown" },
+      { "name": "TextField", "url": "https://seek-oss.github.io/braid-design-system/components/TextField" },
+      { "name": "TextLink", "url": "https://seek-oss.github.io/braid-design-system/components/TextLink" },
+      { "name": "TextLinkButton", "url": "https://seek-oss.github.io/braid-design-system/components/TextLinkButton" },
+      { "name": "Textarea", "url": "https://seek-oss.github.io/braid-design-system/components/Textarea" },
+      { "name": "Tiles", "url": "https://seek-oss.github.io/braid-design-system/components/Tiles" },
+      { "name": "Toggle", "url": "https://seek-oss.github.io/braid-design-system/components/Toggle" },
+      { "name": "TooltipRenderer", "url": "https://seek-oss.github.io/braid-design-system/components/TooltipRenderer" },
+      { "name": "useToast", "url": "https://seek-oss.github.io/braid-design-system/components/useToast" }
+    ]
+  },
+  {
+    "section": "CSS",
+    "items": [
+      { "name": "atoms", "url": "https://seek-oss.github.io/braid-design-system/css/atoms" },
+      { "name": "breakpoints", "url": "https://seek-oss.github.io/braid-design-system/css/breakpoints" },
+      { "name": "globalHeadingStyle", "url": "https://seek-oss.github.io/braid-design-system/css/globalHeadingStyle" },
+      { "name": "globalTextStyle", "url": "https://seek-oss.github.io/braid-design-system/css/globalTextStyle" },
+      { "name": "responsiveStyle", "url": "https://seek-oss.github.io/braid-design-system/css/responsiveStyle" },
+      { "name": "vars", "url": "https://seek-oss.github.io/braid-design-system/css/vars" }
+    ]
+  },
+  {
+    "section": "Logic",
+    "items": [
+      { "name": "BraidPortal", "url": "https://seek-oss.github.io/braid-design-system/components/BraidPortal" },
+      { "name": "BraidProvider", "url": "https://seek-oss.github.io/braid-design-system/components/BraidProvider" },
+      {
+        "name": "BraidTestProvider",
+        "url": "https://seek-oss.github.io/braid-design-system/components/BraidTestProvider"
+      },
+      { "name": "Link", "url": "https://seek-oss.github.io/braid-design-system/components/Link" },
+      {
+        "name": "ThemeNameConsumer",
+        "url": "https://seek-oss.github.io/braid-design-system/components/ThemeNameConsumer"
+      },
+      { "name": "useBreakpoint", "url": "https://seek-oss.github.io/braid-design-system/components/useBreakpoint" },
+      { "name": "useColor", "url": "https://seek-oss.github.io/braid-design-system/components/useColor" },
+      {
+        "name": "useResponsiveValue",
+        "url": "https://seek-oss.github.io/braid-design-system/components/useResponsiveValue"
+      },
+      { "name": "useSpace", "url": "https://seek-oss.github.io/braid-design-system/components/useSpace" },
+      { "name": "useThemeName", "url": "https://seek-oss.github.io/braid-design-system/components/useThemeName" }
+    ]
+  }
+]

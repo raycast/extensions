@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapocr-via-paddle",
+  "title": "SnapOCR Via Paddle",
+  "description": "Layout-aware multilingual OCR for complex documents, tables, and formulas with structured Markdown export via Baidu PaddleOCR",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-ocr",
+      "title": "Quick OCR",
+      "description": "Capture a screenshot and instantly copy structured OCR text",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview-ocr",
+      "title": "Preview OCR",
+      "description": "Capture a screenshot and review structured OCR output",
+      "mode": "view"
+    },
+    {
+      "name": "export-ocr",
+      "title": "Export OCR Markdown",
+      "description": "Choose a PDF or image and export Markdown with extracted images",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Baidu AIStudio Access Token. Get it from https://aistudio.baidu.com/paddleocr → click API → copy TOKEN value",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "Baidu AIStudio PaddleOCR API URL (without path). Get it from https://aistudio.baidu.com/paddleocr → click API → copy the base URL from API_URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://xxx.aistudio-app.com"
+    },
+    {
+      "name": "fastMode",
+      "title": "Fast Mode",
+      "label": "Prefer faster OCR for screenshots and images",
+      "description": "Resize large images before upload and skip slower enhancement passes. This is enabled by default for quicker results.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "useDocOrientationClassify",
+      "title": "Document Orientation Classify",
+      "label": "Enable document orientation classification",
+      "description": "Automatically detect and correct document orientation",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "useDocUnwarping",
+      "title": "Document Unwarping",
+      "label": "Enable document unwarping",
+      "description": "Correct perspective distortion in document images",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "useChartRecognition",
+      "title": "Chart Recognition",
+      "label": "Enable chart recognition",
+      "description": "Recognize and extract text from charts and tables",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "eslint": "^9.39.3",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

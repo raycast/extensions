@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phonetic-typing",
+  "title": "Phonetic Typing",
+  "description": "Type in English and transliterate to Hindi, Marathi, Tamil, and 25 languages — like Google Input Tools",
+  "icon": "extension-icon.png",
+  "author": "pgyogesh",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "phonetic-typing",
+      "title": "Phonetic Typing",
+      "description": "Type in English and get instant transliterations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": true,
+      "title": "Default Language",
+      "description": "Default target language for transliteration",
+      "default": "hi",
+      "data": [
+        {
+          "title": "Amharic — አማርኛ",
+          "value": "am"
+        },
+        {
+          "title": "Arabic — العربية",
+          "value": "ar"
+        },
+        {
+          "title": "Belarusian — Беларуская",
+          "value": "be"
+        },
+        {
+          "title": "Bengali — বাংলা",
+          "value": "bn"
+        },
+        {
+          "title": "Bulgarian — Български",
+          "value": "bg"
+        },
+        {
+          "title": "Greek — Ελληνικά",
+          "value": "el"
+        },
+        {
+          "title": "Gujarati — ગુજરાતી",
+          "value": "gu"
+        },
+        {
+          "title": "Hebrew — עברית",
+          "value": "he"
+        },
+        {
+          "title": "Hindi — हिन्दी",
+          "value": "hi"
+        },
+        {
+          "title": "Kannada — ಕನ್ನಡ",
+          "value": "kn"
+        },
+        {
+          "title": "Malayalam — മലയാളം",
+          "value": "ml"
+        },
+        {
+          "title": "Marathi — मराठी",
+          "value": "mr"
+        },
+        {
+          "title": "Nepali — नेपाली",
+          "value": "ne"
+        },
+        {
+          "title": "Odia — ଓଡ଼ିଆ",
+          "value": "or"
+        },
+        {
+          "title": "Persian — فارسی",
+          "value": "fa"
+        },
+        {
+          "title": "Punjabi — ਪੰਜਾਬੀ",
+          "value": "pa"
+        },
+        {
+          "title": "Russian — Русский",
+          "value": "ru"
+        },
+        {
+          "title": "Sanskrit — संस्कृतम्",
+          "value": "sa"
+        },
+        {
+          "title": "Serbian — Српски",
+          "value": "sr"
+        },
+        {
+          "title": "Sinhalese — සිංහල",
+          "value": "si"
+        },
+        {
+          "title": "Tamil — தமிழ்",
+          "value": "ta"
+        },
+        {
+          "title": "Telugu — తెలుగు",
+          "value": "te"
+        },
+        {
+          "title": "Tigrinya — ትግርኛ",
+          "value": "ti"
+        },
+        {
+          "title": "Ukrainian — Українська",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu — اردو",
+          "value": "ur"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

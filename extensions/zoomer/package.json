@@ -1,0 +1,195 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zoomer",
+  "title": "Zoomer",
+  "description": "Capture screenshots, control recordings, and open Zoomer from Raycast.",
+  "icon": "icon.png",
+  "author": "colindotfun",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "keywords": [
+    "screenshot",
+    "screen capture",
+    "recording",
+    "screen recorder"
+  ],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "description": "Capture a selected area with Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "snip",
+        "region",
+        "selection"
+      ],
+      "arguments": [
+        {
+          "name": "output",
+          "type": "dropdown",
+          "placeholder": "After Capture",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Zoomer Settings",
+              "value": "default"
+            },
+            {
+              "title": "Copy Image",
+              "value": "copy"
+            },
+            {
+              "title": "Save to Folder",
+              "value": "save"
+            },
+            {
+              "title": "Upload to Zoomer",
+              "value": "upload"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Full Screen",
+      "description": "Capture your current screen with Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "display"
+      ],
+      "arguments": [
+        {
+          "name": "output",
+          "type": "dropdown",
+          "placeholder": "After Capture",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Zoomer Settings",
+              "value": "default"
+            },
+            {
+              "title": "Copy Image",
+              "value": "copy"
+            },
+            {
+              "title": "Save to Folder",
+              "value": "save"
+            },
+            {
+              "title": "Upload to Zoomer",
+              "value": "upload"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "capture-history",
+      "title": "Capture History",
+      "description": "Open your recent captures in Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "recents",
+        "gallery",
+        "history"
+      ]
+    },
+    {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "description": "Start a screen recording with Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "video"
+      ]
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "description": "Stop the active screen recording.",
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "video"
+      ]
+    },
+    {
+      "name": "open-recordings",
+      "title": "Open Recordings",
+      "description": "Open your recent recordings in Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "video",
+        "gallery"
+      ]
+    },
+    {
+      "name": "open-screenshots",
+      "title": "Open Screenshots",
+      "description": "Open your recent screenshots in Zoomer.",
+      "mode": "no-view",
+      "keywords": [
+        "gallery",
+        "history"
+      ]
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "description": "Open a section of Zoomer settings.",
+      "mode": "no-view",
+      "keywords": [
+        "preferences"
+      ],
+      "arguments": [
+        {
+          "name": "section",
+          "type": "dropdown",
+          "placeholder": "Section",
+          "required": false,
+          "data": [
+            {
+              "title": "General",
+              "value": "app"
+            },
+            {
+              "title": "Recording",
+              "value": "recording"
+            },
+            {
+              "title": "Screenshots",
+              "value": "screenshot"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.10",
+    "eslint": "^10.8.0",
+    "typescript": "5.6.2"
+  }
+}

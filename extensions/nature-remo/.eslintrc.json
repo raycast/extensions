@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "env": {
+    "es2020": true,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
+  "rules": {
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "import", "next": "*" },
+      { "blankLine": "never", "prev": "import", "next": "import" },
+      { "blankLine": "always", "prev": "*", "next": "block-like" },
+
+      { "blankLine": "always", "prev": ["const", "let", "var"], "next": "*" },
+      { "blankLine": "any", "prev": ["const", "let", "var"], "next": ["const", "let", "var"] },
+
+      { "blankLine": "always", "prev": "*", "next": ["function", "export", "return"] }
+    ]
+  }
+}

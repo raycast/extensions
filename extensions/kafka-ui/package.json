@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kafka-ui",
+  "title": "Kafka UI",
+  "description": "Inspect Kafka consumer group lag, browse topics, and open Kafka UI dashboards. Powered by the Kafka UI open-source project.",
+  "icon": "command-icon.png",
+  "author": "nirrosh",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "search-consumer-groups",
+      "title": "Search Consumer Groups",
+      "subtitle": "Kafka UI",
+      "description": "Search consumer groups, inspect lag per topic and partition",
+      "mode": "view",
+      "keywords": [
+        "kafka",
+        "consumer",
+        "group",
+        "lag",
+        "search"
+      ]
+    },
+    {
+      "name": "search-topics",
+      "title": "Search Topics",
+      "subtitle": "Kafka UI",
+      "description": "Search and browse Kafka topics with partition and replication details",
+      "mode": "view",
+      "keywords": [
+        "kafka",
+        "topic",
+        "search",
+        "browse"
+      ]
+    },
+    {
+      "name": "manage-environments",
+      "title": "Configuration Manager",
+      "subtitle": "Kafka UI",
+      "description": "Add, edit, or remove Kafka UI environments and cluster connections",
+      "mode": "view",
+      "keywords": [
+        "kafka",
+        "environment",
+        "cluster",
+        "config",
+        "settings"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lagThresholdWarning",
+      "title": "Lag Warning Threshold",
+      "placeholder": "1000",
+      "type": "textfield",
+      "description": "Consumer lag above this value is highlighted as a warning",
+      "required": false,
+      "default": "1000"
+    },
+    {
+      "name": "lagThresholdCritical",
+      "title": "Lag Critical Threshold",
+      "placeholder": "10000",
+      "type": "textfield",
+      "description": "Consumer lag above this value is highlighted as critical",
+      "required": false,
+      "default": "10000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

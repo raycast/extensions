@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "url": "https://sample.proofgeist.com",
+    "org_id": 10249,
+    "name_friendly": "Proof+Geist Sample",
+    "connection_error": false,
+    "auth_error": false,
+    "ottomatic_status": "ready",
+    "fms_version": "20.3.0",
+    "otto_version": "4.3.5",
+    "location": "New Jersey",
+    "os": "windows",
+    "metadata": {
+      "ottoServerTag": null,
+      "ottoThemeColor": null
+    },
+    "isOttomatic": true
+  },
+  {
+    "id": 3,
+    "url": "https://filemaker.example.com",
+    "org_id": 10249,
+    "name_friendly": "Example",
+    "connection_error": false,
+    "auth_error": false,
+    "ottomatic_status": "ready",
+    "fms_version": "20.3.0",
+    "otto_version": "4.3.5",
+    "location": "New Jersey",
+    "os": "mac",
+    "metadata": {
+      "ottoServerTag": null,
+      "ottoThemeColor": "purple"
+    },
+    "isOttomatic": true
+  },
+  {
+    "id": 813,
+    "url": "https://dev-server.proofgeist.com",
+    "org_id": 10249,
+    "name_friendly": "Biscuit",
+    "connection_error": false,
+    "auth_error": false,
+    "ottomatic_status": "ready",
+    "fms_version": "20.3.0",
+    "otto_version": "4.3.4",
+    "location": "Dallas",
+    "os": "linux",
+    "metadata": {
+      "ottoServerTag": "dev",
+      "ottoThemeColor": "orange"
+    },
+    "isOttomatic": true
+  }
+]

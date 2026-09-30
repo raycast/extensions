@@ -1,0 +1,1 @@
+Conference and Journal icons are from Zotero-ios repo.

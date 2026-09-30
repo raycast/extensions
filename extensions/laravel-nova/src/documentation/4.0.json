@@ -1,0 +1,162 @@
+{
+  "Getting Started": [
+    {
+      "title": "Installation",
+      "url": "https://nova.laravel.com/docs/4.0/installation.html"
+    },
+    {
+      "title": "Release Notes",
+      "url": "https://nova.laravel.com/docs/4.0/releases.html"
+    },
+    {
+      "title": "Upgrade Guide",
+      "url": "https://nova.laravel.com/docs/4.0/upgrade.html"
+    },
+    {
+      "title": "Support & Bug Reports",
+      "url": "https://nova.laravel.com/docs/4.0/support.html"
+    },
+    {
+      "title": "Code Of Conduct",
+      "url": "https://nova.laravel.com/docs/4.0/code-of-conduct.html"
+    }
+  ],
+  "Resources": [
+    {
+      "title": "The Basics",
+      "url": "https://nova.laravel.com/docs/4.0/resources/"
+    },
+    {
+      "title": "Fields",
+      "url": "https://nova.laravel.com/docs/4.0/resources/fields.html"
+    },
+    {
+      "title": "Date Fields",
+      "url": "https://nova.laravel.com/docs/4.0/resources/date-fields.html"
+    },
+    {
+      "title": "File Fields",
+      "url": "https://nova.laravel.com/docs/4.0/resources/file-fields.html"
+    },
+    {
+      "title": "Relationships",
+      "url": "https://nova.laravel.com/docs/4.0/resources/relationships.html"
+    },
+    {
+      "title": "Validation",
+      "url": "https://nova.laravel.com/docs/4.0/resources/validation.html"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://nova.laravel.com/docs/4.0/resources/authorization.html"
+    }
+  ],
+  "Search": [
+    {
+      "title": "The Basics",
+      "url": "https://nova.laravel.com/docs/4.0/search/"
+    },
+    {
+      "title": "Global Search",
+      "url": "https://nova.laravel.com/docs/4.0/search/global-search.html"
+    },
+    {
+      "title": "Scout Integration",
+      "url": "https://nova.laravel.com/docs/4.0/search/scout-integration.html"
+    }
+  ],
+  "Filters": [
+    {
+      "title": "Defining Filters",
+      "url": "https://nova.laravel.com/docs/4.0/filters/defining-filters.html"
+    },
+    {
+      "title": "Registering Filters",
+      "url": "https://nova.laravel.com/docs/4.0/filters/registering-filters.html"
+    }
+  ],
+  "Lenses": [
+    {
+      "title": "Defining Lenses",
+      "url": "https://nova.laravel.com/docs/4.0/filters/defining-lenses.html"
+    },
+    {
+      "title": "Registering Lenses",
+      "url": "https://nova.laravel.com/docs/4.0/filters/registering-lenses.html"
+    }
+  ],
+  "Actions": [
+    {
+      "title": "Defining Actions",
+      "url": "https://nova.laravel.com/docs/4.0/filters/defining-actions.html"
+    },
+    {
+      "title": "Registering Actions",
+      "url": "https://nova.laravel.com/docs/4.0/filters/registering-actions.html"
+    }
+  ],
+  "Metrics": [
+    {
+      "title": "Defining Metrics",
+      "url": "https://nova.laravel.com/docs/4.0/filters/defining-metrics.html"
+    },
+    {
+      "title": "Registering Metrics",
+      "url": "https://nova.laravel.com/docs/4.0/filters/registering-metrics.html"
+    }
+  ],
+  "Digging Deeper": [
+    {
+      "title": "Dashboards",
+      "url": "https://nova.laravel.com/docs/4.0/customization/dashboards.html"
+    },
+    {
+      "title": "Menus",
+      "url": "https://nova.laravel.com/docs/4.0/customization/menus.html"
+    },
+    {
+      "title": "Notifications",
+      "url": "https://nova.laravel.com/docs/4.0/customization/notifications.html"
+    },
+    {
+      "title": "Impersonation",
+      "url": "https://nova.laravel.com/docs/4.0/customization/impersonation.html"
+    },
+    {
+      "title": "Tools",
+      "url": "https://nova.laravel.com/docs/4.0/customization/tools.html"
+    },
+    {
+      "title": "Resource Tools",
+      "url": "https://nova.laravel.com/docs/4.0/customization/resource-tools.html"
+    },
+    {
+      "title": "Cards",
+      "url": "https://nova.laravel.com/docs/4.0/customization/cards.html"
+    },
+    {
+      "title": "Fields",
+      "url": "https://nova.laravel.com/docs/4.0/customization/fields.html"
+    },
+    {
+      "title": "Filters",
+      "url": "https://nova.laravel.com/docs/4.0/customization/filters.html"
+    },
+    {
+      "title": "CSS / Javascript",
+      "url": "https://nova.laravel.com/docs/4.0/customization/frontend.html"
+    },
+    {
+      "title": "Assets",
+      "url": "https://nova.laravel.com/docs/4.0/customization/assets.html"
+    },
+    {
+      "title": "Localization",
+      "url": "https://nova.laravel.com/docs/4.0/customization/localization.html"
+    },
+    {
+      "title": "Stubs",
+      "url": "https://nova.laravel.com/docs/4.0/customization/stubs.html"
+    }
+  ]
+}

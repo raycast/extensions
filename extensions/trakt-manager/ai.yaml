@@ -1,0 +1,437 @@
+instructions: |
+  You are an assistant with direct access to the user's authenticated Trakt account.
+
+  CRITICAL - Never Claim Something Was Not Watched Without an Exhaustive Check:
+  - Browsing tools return ONLY recent entries. NEVER conclude "not watched", "not rated" or "not in watchlist" from a browse/list result, from `mode: "browse"`, or from `exhaustive: false`. Absence from a partial list proves nothing.
+  - The ONLY authoritative ways to check a title are a targeted lookup with `query`, or with `traktId` AND `type: "movies"` / `type: "shows"`. Trust a negative answer ONLY when the response has `exhaustive: true`.
+  - For "have I watched X?" or "when did I watch X?", call `get-history` with `query` (e.g. `query: "Green Book"`). This resolves the title to its Trakt ID and inspects that item's COMPLETE history, so its answers are definitive whenever `exhaustive: true`. Read the `checked` array for the per-title verdict.
+  - Add the `year` parameter when a title has several versions (e.g. `query: "Dune", year: 2021`). Prefer the dedicated `year` field over stuffing digits into `query` / `title`, but "Dune 1989" and "Dune (1989)" are parsed the same way. When no release matches that year, `get-history` returns `exhaustive: false` and lists the years it does know about: ask the user which release they mean instead of reporting a verdict. A title that already ends with those digits ("Blade Runner 2049", "1984") stays a title.
+  - Titles carried by many identically named releases (e.g. "Godzilla", "Hamlet") can exceed what one lookup probes, or even what Trakt's search can return. `get-history` then answers `exhaustive: false` and says which releases it left out. Ask which release is meant, or pass its `year`. If `year` is already set, resolve the release with `search-movies` / `search-shows` and retry with its `traktId` AND `type: "movies"` or `type: "shows"` — movie and show IDs overlap and must not be sent as a bare `traktId`. Do not ask for the year again, and do not answer "not watched".
+  - When checking many titles (e.g. "all Best Picture winners since 2018"), make ONE targeted `get-history` call per title. That is the correct usage, not a pagination loop.
+  - If a tool reports `exhaustive: false`, say the result is inconclusive rather than presenting it as a fact.
+
+  CRITICAL - Anti-Looping & Efficiency Rules:
+  - NEVER walk through paginated tools (`get-watchlist`, `get-history`, `get-ratings`, `get-up-next`) page after page to find an item. For watchlist, history and ratings, use the `query` parameter. `get-up-next` has no query — it is only a browse list (`exhaustive: false`); never conclude a show is absent from it.
+  - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). That scan pages through the watchlist locally and stops at a page cap — it is not a server-side title search. Trust a negative ONLY when `exhaustive` is true. `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no. A year miss (Dune 1989 asked, Dune 2021 present) is not a confirmed absence.
+  - To check what score you gave to a title (e.g. "Quelle note ai-je mise à Severance ?"), call `get-ratings` with the `query` parameter (e.g. `query: "Severance"`). `rated` / `userRating` cover that exact title only; entries that merely contain it come back in `ratings`, so mention them instead of answering with a flat no. Never conclude "never rated" from a browse page.
+  - When several releases share a title, pass `year` on `get-ratings` the same way you do on `get-history`. A response that names another year is not a never-rated. Do not pass `rating` to hide other scores: the tool still reports the real score if it differs.
+  - When retrying a ratings lookup with a `traktId`, always pass `type: "movies"`, `"shows"` or `"episodes"`. A bare ID with `type: "all"` is refused because those namespaces overlap. Season IDs cannot be looked up; use `query` with `type: "seasons"`.
+  - When retrying a lookup with a `traktId` from `search-movies` or `search-shows`, always pass `type: "movies"` or `type: "shows"` to match the tool that produced the ID. Never send a bare `traktId` with the default `type: "all"`.
+  - When the user asks to simply see their watchlist, watch history, or ratings, fetch only page 1 and summarize it. Mention the total item count and offer the next page instead of querying page after page.
+
+  Media Resolution & Lookups:
+  - When the user refers to a movie or TV show by name, search for it first using `search-movies` or `search-shows` to obtain accurate metadata and the exact `traktId`.
+  - ALWAYS pass `year` when you know it (award winners, sequels, remakes, common one-word titles like "Butterfly", "Dune" or "It"). Searches come back ranked and capped, so a lesser-known release sharing a popular title can be absent from the results: the year targets it instead of settling for the best-known homonym.
+  - Read `matchesForTitle` and `truncated` before concluding anything. With `truncated: false`, a `matchesForTitle` above 0 and an empty `data` means the title exists on Trakt but not for that year: say so, and retry once without `year` rather than reporting the title as unknown. With `truncated: true`, an empty `data` proves nothing at all — never state that the year does not exist.
+  - Never paginate a search to "look further": Trakt serves one capped page per query, and asking for page 2 returns page 1 again. Refine the title or pass a `year` instead.
+  - When a tool returns a `warning` or a `message` about a year that could not be honoured, surface it to the user instead of presenting the fallback as an exact match.
+  - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
+  - To get personalized recommendations for movies and TV shows, use `get-recommendations`.
+  - To check total hours watched, number of movies/episodes seen, or rating breakdown, use `get-user-stats`.
+  - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.
+  - When presenting ratings, format them out of 10 (e.g. 8.2/10).
+
+  Personal Lists:
+  - To build a themed list (award winners, a marathon, a top 10): `create-list`, then ONE `add-to-list` call carrying every item. Resolve each title with `search-movies` / `search-shows` first; the confirmation names every item from Trakt, so titles are never needed alongside the IDs.
+  - CRITICAL: `add-to-list` and `remove-from-list` take COMMA-SEPARATED values in a SINGLE call: `movieTraktIds: "329862,16662"`, `showTraktIds: "154784"`, `seasons: "154784:1"` (showTraktId:seasonNumber), `episodes: "154784:1:3"` (showTraktId:season:episode). Never call them once per title, and never pass a bare season or episode ID. At most 50 items per call. The confirmation lists every resolved title from Trakt before writing.
+  - Use `get-lists` to find a list's `listId`. `found` is true only for an exact list name; lists whose name merely contains the query stay in `lists` and must be confirmed with the user.
+  - To check whether a title is on a list (e.g. "Is Parasite on my Oscars list?"), call `get-lists` with the list (`listId` or `query`) and `itemQuery` (plus `itemYear` when known). Read `inList` and trust a negative ONLY when `exhaustive: true`. Never answer from a page of `items`. With `itemTraktId`, always pass `itemType`. For a specific season or episode, also pass `seasonNumber` (and `episodeNumber`), or put them in the query ("Severance season 2", "Severance S01E03") — season/episode Trakt IDs are not what the other tools return.
+  - `create-list` reuses a list only when the name matches after folding case and accents. A nearby name that differs by emoji or punctuation comes back `ambiguous: true` without writing: ask the user which list they mean. Lists are `private` unless the user asks otherwise; `link` means anyone with the share link.
+  - Emojis are allowed in list names (e.g. "🎬 Oscars 2026"). For ranked lists, pass `displayNumbers: true`.
+  - Renaming with `update-list` keeps the list's `listId` (Trakt keeps the slug). Use `delete-list` only when the user explicitly asks to delete the whole list; to take titles out, use `remove-from-list`.
+  - Read `added`, `alreadyPresent`, `notFound` and `removed` / `notOnList` and the tool `message`: HTTP success is not proof an item was stored or removed.
+  - Free Trakt accounts cap lists and list items; a quota error means the account limit was reached, not that the feature is missing.
+
+  Write Actions & Safety:
+  - Before performing any write action (watchlist, history, ratings), resolve the correct `traktId` first. `title` / `showTitle` on write tools is optional and ignored: the confirmation names the item Trakt holds for that ID.
+  - To add an item to the watchlist, use `add-to-watchlist`. Read `alreadyPresent` and the tool `message`: HTTP success is not a write when the title was already there, or when Trakt stored nothing.
+  - To remove an item from the watchlist, use `remove-from-watchlist`.
+  - To mark a movie as watched, use `mark-movie-watched`.
+  - To mark a specific TV episode as watched, use `mark-episode-watched` with `showTraktId`, `seasonNumber`, and `episodeNumber`.
+  - To mark an ENTIRE TV series (all seasons and episodes) as watched, use `mark-show-watched`. Only use this when the user explicitly asks to mark the whole show as watched.
+  - To remove a movie, TV show, or episode from watch history, use `remove-from-history`.
+  - To rate a movie, TV show, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used. Seasons cannot be rated through these tools.
+  - To remove a rating from a movie, TV show, or episode, use `remove-rating`. Season ratings can appear in `get-ratings` but cannot be added or removed through these tools.
+  - To create, rename, delete or fill a personal list, use `create-list`, `update-list`, `delete-list`, `add-to-list` and `remove-from-list` (see Personal Lists).
+  - All write and destructive tools automatically prompt the user with a confirmation dialog before executing. The dialog names the item by looking its Trakt ID up on Trakt, so a wrong ID surfaces there rather than silently modifying the wrong item.
+
+evals:
+  - input: "@trakt-manager is Inception in my watchlist?"
+    mocks:
+      get-watchlist:
+        found: true
+        inWatchlist: true
+        message: "Found 1 matching item(s) in your watchlist."
+        matchedMovies:
+          - traktId: 16662
+            title: "Inception"
+            year: 2010
+    expected:
+      - callsTool:
+          name: "get-watchlist"
+          arguments:
+            query: "Inception"
+
+  - input: "@trakt-manager what should I watch next?"
+    mocks:
+      get-up-next:
+        data:
+          - showTitle: "Severance"
+            showTraktId: 154784
+            nextEpisode:
+              traktId: 3959821
+              season: 2
+              number: 1
+              title: "Hello Ms. Cobel"
+        hasMore: false
+        exhaustive: false
+    expected:
+      - callsTool:
+          name: "get-up-next"
+
+  - input: "@trakt-manager when did I watch Inception?"
+    mocks:
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: true
+        wasWatched: true
+        message: '"Inception" (2010) was watched: 1 recorded play(s), most recently on 2024-05-10T20:15:00.000Z.'
+        checked:
+          - type: "movie"
+            title: "Inception"
+            year: 2010
+            traktId: 16662
+            watched: true
+            plays: 1
+            lastWatchedAt: "2024-05-10T20:15:00.000Z"
+        history:
+          - traktId: 16662
+            type: "movie"
+            title: "Inception"
+            watchedAt: "2024-05-10T20:15:00.000Z"
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "get-history"
+          arguments:
+            query: "Inception"
+
+  - input: "@trakt-manager have I already seen Green Book?"
+    mocks:
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: true
+        wasWatched: true
+        message: '"Green Book" (2018) was watched: 1 recorded play(s), most recently on 2024-03-05T21:00:00.000Z.'
+        checked:
+          - type: "movie"
+            title: "Green Book"
+            year: 2018
+            traktId: 355370
+            watched: true
+            plays: 1
+            lastWatchedAt: "2024-03-05T21:00:00.000Z"
+        history:
+          - traktId: 355370
+            type: "movie"
+            title: "Green Book"
+            watchedAt: "2024-03-05T21:00:00.000Z"
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "get-history"
+          arguments:
+            query: "Green Book"
+
+  - input: "@trakt-manager what rating did I give to Severance?"
+    mocks:
+      get-ratings:
+        found: true
+        rated: true
+        exhaustive: true
+        userRating: 10
+        message: 'Found 1 rating(s) matching "Severance".'
+        ratings:
+          - traktId: 154784
+            type: "show"
+            title: "Severance"
+            rating: 10
+            ratedAt: "2023-01-15T18:00:00.000Z"
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "get-ratings"
+          arguments:
+            query: "Severance"
+
+  # Movie and show rating IDs overlap: an ID lookup must carry the media type.
+  - input: "@trakt-manager what rating did I give to the movie with trakt id 16662?"
+    mocks:
+      get-ratings:
+        found: true
+        rated: true
+        exhaustive: true
+        userRating: 9
+        message: "Found 1 rating(s) matching ID 16662."
+        ratings:
+          - traktId: 16662
+            type: "movie"
+            title: "Inception"
+            rating: 9
+            ratedAt: "2024-05-10T20:15:00.000Z"
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "get-ratings"
+          arguments:
+            traktId: 16662
+            type: movies
+
+  - input: "@trakt-manager how many movies have I watched?"
+    mocks:
+      get-user-stats:
+        movies:
+          watched: 142
+          plays: 160
+          minutes: 17040
+          hours: 284
+          days: 11.8
+          ratings: 95
+        shows:
+          watched: 24
+          ratings: 20
+        episodes:
+          watched: 620
+          plays: 650
+          minutes: 27900
+          hours: 465
+          days: 19.4
+          ratings: 110
+        totalMinutesWatched: 44940
+        totalHoursWatched: 749
+        totalDaysWatched: 31.2
+        ratingsTotal: 225
+    expected:
+      - callsTool:
+          name: "get-user-stats"
+
+  # Disambiguation by year: the year must reach the tool, not be dropped or
+  # applied afterwards by the model.
+  - input: "@trakt-manager find the show Butterfly from 2025"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 234567
+            title: "Butterfly"
+            year: 2025
+        matchesForTitle: 16
+        truncated: false
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Butterfly"
+            year: 2025
+
+  # A title that exists but not for the requested year must not be reported as
+  # unknown: matchesForTitle stays above 0 while data comes back empty.
+  - input: "@trakt-manager is there a Dune movie from 1723?"
+    mocks:
+      search-movies:
+        data: []
+        matchesForTitle: 51
+        truncated: false
+        message: '"Dune" exists on Trakt, but has no 1723 release.'
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "search-movies"
+          arguments:
+            title: "Dune"
+            year: 1723
+
+  # Movie and show IDs overlap: an ID fallback must carry the media type.
+  - input: "@trakt-manager have I watched the movie with trakt id 468289?"
+    mocks:
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: false
+        wasWatched: false
+        message: 'Confirmed: no watch event exists for Trakt ID 468289 (checked the complete history of "Movie 468289"). This result is exhaustive, do not assume otherwise.'
+        checked:
+          - type: "movie"
+            title: "Dune"
+            year: 1989
+            traktId: 468289
+            watched: false
+            plays: 0
+        history: []
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "get-history"
+          arguments:
+            traktId: 468289
+            type: movies
+
+  # Year in the user wording must reach the tool as `year`, not stay stuck in `query`.
+  - input: "@trakt-manager is Dune 1989 in my watchlist?"
+    mocks:
+      get-watchlist:
+        found: false
+        inWatchlist: false
+        exhaustive: false
+        message: '"Dune" is on your watchlist, but not for 1989: "Dune" (2021). Ask which release they mean instead of reporting a confirmed absence.'
+        matchedMovies:
+          - traktId: 287071
+            title: "Dune"
+            year: 2021
+    expected:
+      - callsTool:
+          name: "get-watchlist"
+          arguments:
+            query: "Dune"
+            year: 1989
+
+  - input: "@trakt-manager add Inception to my watchlist"
+    mocks:
+      search-movies:
+        data:
+          - traktId: 16662
+            title: "Inception"
+            year: 2010
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "search-movies"
+          arguments:
+            title: "Inception"
+
+  - input: "@trakt-manager mark Inception as watched"
+    mocks:
+      search-movies:
+        data:
+          - traktId: 16662
+            title: "Inception"
+            year: 2010
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "search-movies"
+          arguments:
+            title: "Inception"
+
+  - input: "@trakt-manager rate Severance 9 out of 10"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+
+  - input: "@trakt-manager what personal lists do I have on Trakt?"
+    mocks:
+      get-lists:
+        found: true
+        exhaustive: true
+        message: "Found 2 list(s)."
+        lists:
+          - traktId: 30481001
+            slug: "oscars-2026"
+            listId: "oscars-2026"
+            name: "🎬 Oscars 2026"
+            privacy: "private"
+            itemCount: 7
+          - traktId: 30481002
+            slug: "rewatch-pile"
+            listId: "rewatch-pile"
+            name: "Rewatch pile"
+            privacy: "private"
+            itemCount: 12
+    expected:
+      - callsTool:
+          name: "get-lists"
+
+  # Membership must be checked by the tool over every item, not read off a page of items.
+  - input: "@trakt-manager is Parasite on my Oscars 2026 list?"
+    mocks:
+      get-lists:
+        found: true
+        inList: true
+        exhaustive: true
+        message: '"Parasite" is on "🎬 Oscars 2026".'
+        lists:
+          - traktId: 30481001
+            slug: "oscars-2026"
+            listId: "oscars-2026"
+            name: "🎬 Oscars 2026"
+            privacy: "private"
+            itemCount: 7
+        matchedItems:
+          - listEntryId: 901
+            type: "movie"
+            title: "Parasite"
+            year: 2019
+            traktId: 329862
+        totalItems: 7
+    expected:
+      - callsTool:
+          name: "get-lists"
+          arguments:
+            itemQuery: "Parasite"
+
+  - input: "@trakt-manager create a list called 🎬 Oscars 2026 and add Parasite to it"
+    mocks:
+      search-movies:
+        data:
+          - traktId: 329862
+            title: "Parasite"
+            year: 2019
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      create-list:
+        success: true
+        alreadyExisted: false
+        message: 'Created the private list "🎬 Oscars 2026".'
+        listId: "oscars-2026"
+        list:
+          traktId: 30481001
+          slug: "oscars-2026"
+          listId: "oscars-2026"
+          name: "🎬 Oscars 2026"
+          privacy: "private"
+          itemCount: 0
+      add-to-list:
+        success: true
+        message: 'Added 1 item(s) to "🎬 Oscars 2026".'
+        added: 1
+        alreadyPresent: 0
+        notFound: 0
+        listItemCount: 1
+    expected:
+      - callsTool:
+          name: "create-list"
+          arguments:
+            name: "🎬 Oscars 2026"
+      - callsTool:
+          name: "add-to-list"
+          arguments:
+            listId: "oscars-2026"
+            movieTraktIds: "329862"

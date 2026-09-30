@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "raycast-extension": {
+      "source": "maxchang3/skills",
+      "sourceType": "github",
+      "skillPath": "raycast-extension/SKILL.md",
+      "computedHash": "2bc1d3a64db7b2f36acb40131d340eea990df068dcf94d2d4d76583e138d77a5"
+    },
+    "review-pr": {
+      "source": "tisfeng/Easydict",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/review-pr/SKILL.md",
+      "computedHash": "2ed1dc6679f85039a3fd4cb1155e4cf5e24546e7a8ce76ba274e5807ca959eab"
+    }
+  }
+}

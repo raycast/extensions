@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jetbrains",
+  "title": "JetBrains Toolbox Recent Projects",
+  "description": "Search and open JetBrains Toolbox projects",
+  "icon": "jb.png",
+  "author": "gdsmith",
+  "contributors": [
+    "adrienbaron",
+    "dima-m711",
+    "dgrzedzielski",
+    "perasite",
+    "hemang_kinra",
+    "kubarom",
+    "muhammadrizo"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recent",
+      "title": "Search Recent Projects",
+      "subtitle": "JetBrains Toolbox",
+      "description": "Search and open JetBrains Toolbox projects",
+      "mode": "view"
+    },
+    {
+      "name": "recentMenu",
+      "title": "Open Recent Projects",
+      "subtitle": "JetBrains Toolbox",
+      "description": "Open JetBrains Toolbox projects",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bin",
+      "type": "textfield",
+      "required": false,
+      "title": "Shell scripts location",
+      "description": "Where are JetBrains Tools 'shell scripts' are installed (in Toolbox → Settings → Tools)",
+      "default": {
+        "macOS": "/usr/local/bin",
+        "Windows": "%LOCALAPPDATA%\\JetBrains\\Toolbox\\scripts"
+      },
+      "placeholder": "/usr/local/bin"
+    },
+    {
+      "name": "toolsInstall",
+      "type": "textfield",
+      "required": false,
+      "title": "Tools Install location",
+      "description": "What is the JetBrains Tools install Location? (in Toolbox → Settings → Tools)",
+      "default": {
+        "macOS": "/Applications/JetBrains Toolbox.app",
+        "Windows": "%LOCALAPPDATA%\\JetBrains\\Toolbox"
+      },
+      "placeholder": "/Applications/JetBrains Toolbox.app"
+    },
+    {
+      "name": "fallback",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use protocol urls if missing shell scripts",
+      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended)",
+      "default": false
+    },
+    {
+      "name": "frecencySorting",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Frecency sorting for projects",
+      "description": "Use Raycast's built in frecency sorting to order the list of projects",
+      "default": true
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Git Branch",
+      "description": "Show the current git branch next to projects that live in a git repository",
+      "default": true
+    }
+  ],
+  "keywords": [
+    "IntelliJ IDEA",
+    "PyCharm",
+    "WebStorm",
+    "PhpStorm",
+    "Rider",
+    "CLion",
+    "Datalore",
+    "DataSpell",
+    "DataGrip",
+    "RubyMine",
+    "AppCode",
+    "GoLand"
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "fast-glob": "^3.3.3",
+    "which": "^7.0.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/glob": "^9.0.0",
+    "@types/which": "^3.0.4",
+    "@types/xml2js": "^0.4.14",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "ray pull-contributions",
+    "migrate": "ray migrate"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "esbuild": true
+  }
+}

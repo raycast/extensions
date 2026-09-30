@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "node-version-manager",
+  "title": "Node Version Manager",
+  "description": "Control your node versions with ease",
+  "icon": "extension_icon.png",
+  "author": "andresmorelos",
+  "contributors": [
+    "pernielsentikaer",
+    "leondaz"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Search Installed Versions",
+      "subtitle": "Node Version Manager",
+      "description": "List Node.JS versions installed",
+      "mode": "view"
+    },
+    {
+      "name": "list-remote",
+      "title": "Search Remote Versions",
+      "subtitle": "Node Version Manager",
+      "description": "List Remote Node.JS versions",
+      "mode": "view"
+    },
+    {
+      "name": "install",
+      "title": "Install New Version",
+      "subtitle": "Node Version Manager",
+      "description": "Install a new Node.JS version",
+      "mode": "view"
+    },
+    {
+      "name": "default",
+      "title": "Make Default New NodeJS Version",
+      "subtitle": "Node Version Manager",
+      "description": "Make default a new Node.JS version",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "version",
+          "type": "text",
+          "placeholder": "NodeJS Version",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Node Version Manager",
+      "name": "versionManager",
+      "type": "dropdown",
+      "required": true,
+      "placeholder": "Node Version Manager",
+      "description": "Select the node version manager you use",
+      "data": [
+        {
+          "title": "NVM",
+          "value": "nvm"
+        },
+        {
+          "title": "FNM",
+          "value": "fnm"
+        },
+        {
+          "title": "Brew",
+          "value": "brew"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prettier:fix": "prettier --fix --write '**/*.{ts,tsx}'"
+  },
+  "version": "0.0.0"
+}

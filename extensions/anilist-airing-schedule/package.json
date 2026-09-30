@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anilist-airing-schedule",
+  "title": "Anilist Airing Schedule",
+  "description": "Get airing schedule of anime from Anilist.co",
+  "icon": "anilist-icon-512x512.png",
+  "author": "yeskunall",
+  "contributors": [
+    "taken"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Get Airing Schedule",
+      "description": "Get the airing schedule of anime from Anilist.co",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.103.9",
+    "@raycast/utils": "2.2.2",
+    "date-fns": "4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

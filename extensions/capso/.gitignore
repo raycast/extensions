@@ -1,0 +1,4 @@
+node_modules
+.raycast
+dev.log
+dist

@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-cloud-run",
+  "title": "Google Cloud Run",
+  "description": "Commands for Google Cloud Run",
+  "icon": "command-icon.png",
+  "author": "bhavya_muni",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Migrate Traffic",
+      "description": "Migrate traffic to a revision for all your services",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "title": "Google Cloud CLI Path",
+      "name": "gcloudPath",
+      "required": true,
+      "type": "textfield",
+      "description": "Path to the Google Cloud CLI",
+      "placeholder": "/opt/homebrew/bin/gcloud"
+    },
+    {
+      "title": "Google Cloud Run Region",
+      "name": "region",
+      "required": true,
+      "type": "dropdown",
+      "description": "Google Cloud Run Project Region",
+      "data": [
+        {
+          "value": "africa-south1",
+          "title": "africa-south1"
+        },
+        {
+          "value": "asia-east1",
+          "title": "asia-east1"
+        },
+        {
+          "value": "asia-east2",
+          "title": "asia-east2"
+        },
+        {
+          "value": "asia-northeast1",
+          "title": "asia-northeast1"
+        },
+        {
+          "value": "asia-northeast2",
+          "title": "asia-northeast2"
+        },
+        {
+          "value": "asia-northeast3",
+          "title": "asia-northeast3"
+        },
+        {
+          "value": "asia-south1",
+          "title": "asia-south1"
+        },
+        {
+          "value": "asia-south2",
+          "title": "asia-south2"
+        },
+        {
+          "value": "asia-southeast1",
+          "title": "asia-southeast1"
+        },
+        {
+          "value": "asia-southeast2",
+          "title": "asia-southeast2"
+        },
+        {
+          "value": "australia-southeast1",
+          "title": "australia-southeast1"
+        },
+        {
+          "value": "australia-southeast2",
+          "title": "australia-southeast2"
+        },
+        {
+          "value": "europe-central2",
+          "title": "europe-central2"
+        },
+        {
+          "value": "europe-north1",
+          "title": "europe-north1"
+        },
+        {
+          "value": "europe-southwest1",
+          "title": "europe-southwest1"
+        },
+        {
+          "value": "europe-west1",
+          "title": "europe-west1"
+        },
+        {
+          "value": "europe-west10",
+          "title": "europe-west10"
+        },
+        {
+          "value": "europe-west12",
+          "title": "europe-west12"
+        },
+        {
+          "value": "europe-west2",
+          "title": "europe-west2"
+        },
+        {
+          "value": "europe-west3",
+          "title": "europe-west3"
+        },
+        {
+          "value": "europe-west4",
+          "title": "europe-west4"
+        },
+        {
+          "value": "europe-west6",
+          "title": "europe-west6"
+        },
+        {
+          "value": "europe-west8",
+          "title": "europe-west8"
+        },
+        {
+          "value": "europe-west9",
+          "title": "europe-west9"
+        },
+        {
+          "value": "me-central1",
+          "title": "me-central1"
+        },
+        {
+          "value": "me-central2",
+          "title": "me-central2"
+        },
+        {
+          "value": "me-west1",
+          "title": "me-west1"
+        },
+        {
+          "value": "northamerica-northeast1",
+          "title": "northamerica-northeast1"
+        },
+        {
+          "value": "northamerica-northeast2",
+          "title": "northamerica-northeast2"
+        },
+        {
+          "value": "southamerica-east1",
+          "title": "southamerica-east1"
+        },
+        {
+          "value": "southamerica-west1",
+          "title": "southamerica-west1"
+        },
+        {
+          "value": "us-central1",
+          "title": "us-central1"
+        },
+        {
+          "value": "us-east1",
+          "title": "us-east1"
+        },
+        {
+          "value": "us-east4",
+          "title": "us-east4"
+        },
+        {
+          "value": "us-east5",
+          "title": "us-east5"
+        },
+        {
+          "value": "us-south1",
+          "title": "us-south1"
+        },
+        {
+          "value": "us-west1",
+          "title": "us-west1"
+        },
+        {
+          "value": "us-west2",
+          "title": "us-west2"
+        },
+        {
+          "value": "us-west3",
+          "title": "us-west3"
+        },
+        {
+          "value": "us-west4",
+          "title": "us-west4"
+        }
+      ]
+    }
+  ]
+}

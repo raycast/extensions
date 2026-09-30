@@ -1,0 +1,61 @@
+{
+  "Getting Started": [
+    { "url": "https://livewire.laravel.com/docs/quickstart", "title": "Quickstart" },
+    { "url": "https://livewire.laravel.com/docs/installation", "title": "Installation" },
+    { "url": "https://livewire.laravel.com/docs/upgrading", "title": "Upgrade Guide" }
+  ],
+  "Essentials": [
+    { "url": "https://livewire.laravel.com/docs/components", "title": "Components" },
+    { "url": "https://livewire.laravel.com/docs/properties", "title": "Properties" },
+    { "url": "https://livewire.laravel.com/docs/actions", "title": "Actions" },
+    { "url": "https://livewire.laravel.com/docs/forms", "title": "Forms" },
+    { "url": "https://livewire.laravel.com/docs/events", "title": "Events" },
+    { "url": "https://livewire.laravel.com/docs/lifecycle-hooks", "title": "Lifecycle Hooks" },
+    { "url": "https://livewire.laravel.com/docs/nesting", "title": "Nesting Components" },
+    { "url": "https://livewire.laravel.com/docs/testing", "title": "Testing" }
+  ],
+  "Features": [
+    { "url": "https://livewire.laravel.com/docs/alpine", "title": "Alpine" },
+    { "url": "https://livewire.laravel.com/docs/navigate", "title": "Navigate" },
+    { "url": "https://livewire.laravel.com/docs/lazy", "title": "Lazy Loading" },
+    { "url": "https://livewire.laravel.com/docs/validation", "title": "Validation" },
+    { "url": "https://livewire.laravel.com/docs/uploads", "title": "File Uploads" },
+    { "url": "https://livewire.laravel.com/docs/pagination", "title": "Pagination" },
+    { "url": "https://livewire.laravel.com/docs/url", "title": "URL Query Parameters" },
+    { "url": "https://livewire.laravel.com/docs/computed-properties", "title": "Computed Properties" },
+    { "url": "https://livewire.laravel.com/docs/session-properties", "title": "Session Properties" },
+    { "url": "https://livewire.laravel.com/docs/redirecting", "title": "Redirecting" },
+    { "url": "https://livewire.laravel.com/docs/downloads", "title": "File Downloads" },
+    { "url": "https://livewire.laravel.com/docs/locked", "title": "Locked Properties" },
+    { "url": "https://livewire.laravel.com/docs/bundling", "title": "Request Bundling" },
+    { "url": "https://livewire.laravel.com/docs/offline", "title": "Offline States" },
+    { "url": "https://livewire.laravel.com/docs/teleport", "title": "Teleport" }
+  ],
+  "Html Directives": [
+    { "url": "https://livewire.laravel.com/docs/wire-click", "title": "wire:click" },
+    { "url": "https://livewire.laravel.com/docs/wire-submit", "title": "wire:submit" },
+    { "url": "https://livewire.laravel.com/docs/wire-model", "title": "wire:model" },
+    { "url": "https://livewire.laravel.com/docs/wire-loading", "title": "wire:loading" },
+    { "url": "https://livewire.laravel.com/docs/wire-navigate", "title": "wire:navigate" },
+    { "url": "https://livewire.laravel.com/docs/wire-dirty", "title": "wire:dirty" },
+    { "url": "https://livewire.laravel.com/docs/wire-confirm", "title": "wire:confirm" },
+    { "url": "https://livewire.laravel.com/docs/wire-transition", "title": "wire:transition" },
+    { "url": "https://livewire.laravel.com/docs/wire-init", "title": "wire:init" },
+    { "url": "https://livewire.laravel.com/docs/wire-poll", "title": "wire:poll" },
+    { "url": "https://livewire.laravel.com/docs/wire-offline", "title": "wire:offline" },
+    { "url": "https://livewire.laravel.com/docs/wire-ignore", "title": "wire:ignore" },
+    { "url": "https://livewire.laravel.com/docs/wire-stream", "title": "wire:stream" }
+  ],
+  "Concepts": [
+    { "url": "https://livewire.laravel.com/docs/morphing", "title": "Morphing" },
+    { "url": "https://livewire.laravel.com/docs/hydration", "title": "Hydration" },
+    { "url": "https://livewire.laravel.com/docs/understanding-nesting", "title": "Nesting" }
+  ],
+  "Advanced": [
+    { "url": "https://livewire.laravel.com/docs/security", "title": "Security" },
+    { "url": "https://livewire.laravel.com/docs/javascript", "title": "Javascript" },
+    { "url": "https://livewire.laravel.com/docs/synthesizers", "title": "Synthesizers" },
+    { "url": "https://livewire.laravel.com/docs/contribution-guide", "title": "Contribution Guide" }
+  ],
+  "Packages": [{ "url": "https://livewire.laravel.com/docs/volt", "title": "Volt" }]
+}

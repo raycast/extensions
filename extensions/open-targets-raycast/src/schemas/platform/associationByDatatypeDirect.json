@@ -1,0 +1,20 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "diseaseId", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "targetId", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "datatypeId",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "score", "nullable": true, "type": "double" },
+    {
+      "metadata": {},
+      "name": "evidenceCount",
+      "nullable": true,
+      "type": "long"
+    }
+  ],
+  "type": "struct"
+}

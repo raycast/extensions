@@ -1,0 +1,29 @@
+instructions: |
+  When a user asks for a GIF, search for it and include a direct media link in the response.
+  Use GIPHY Clips only when the user asks for a clip or video.
+evals:
+  - input: "@gif-search Find a GIF of a cat waving hello"
+    mocks:
+      search-gifs:
+        - title: "Cat waving hello"
+          mediaUrl: "https://media.giphy.com/media/cat-wave/giphy.gif"
+          pageUrl: "https://giphy.com/gifs/cat-wave"
+    expected:
+      - callsTool:
+          name: search-gifs
+          arguments:
+            query:
+              includes: "cat"
+      - includes: "https://media.giphy.com/media/cat-wave/giphy.gif"
+  - input: "@gif-search Find a GIPHY clip of someone applauding"
+    mocks:
+      search-gifs:
+        - title: "Applause clip"
+          mediaUrl: "https://media.giphy.com/media/applause/720p.mp4"
+          pageUrl: "https://giphy.com/clips/applause"
+    expected:
+      - callsTool:
+          name: search-gifs
+          arguments:
+            service: giphy-clips
+      - includes: "https://media.giphy.com/media/applause/720p.mp4"

@@ -1,0 +1,204 @@
+import { RestEndpointMethodTypes } from "@octokit/rest";
+import { Color, Icon, Image, List } from "@raycast/api";
+import { uniqBy } from "lodash";
+
+import {
+  PullRequestDetailsFieldsFragment,
+  PullRequestFieldsFragment,
+  PullRequestMergeMethod,
+  PullRequestReviewDecision,
+  StatusState,
+} from "../generated/graphql";
+
+import { getCheckStatePresentation } from "./pull-request-checks";
+import { getGitHubUser } from "./users";
+
+export function getMergeMethodTitle(method: PullRequestMergeMethod): string {
+  switch (method) {
+    case PullRequestMergeMethod.Merge:
+      return "Create Merge Commit";
+    case PullRequestMergeMethod.Squash:
+      return "Squash and Merge";
+    case PullRequestMergeMethod.Rebase:
+      return "Rebase and Merge";
+    default: {
+      const _exhaustive: never = method;
+      throw new Error(`Unknown merge method: ${_exhaustive}`);
+    }
+  }
+}
+
+export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
+  if (pullRequest.merged) {
+    return {
+      icon: { source: "pull-request-merged.svg", tintColor: Color.Purple },
+      text: "Merged",
+      color: Color.Purple,
+    };
+  }
+
+  if (pullRequest.closed) {
+    return {
+      icon: { source: "pull-request-closed.svg", tintColor: Color.Red },
+      text: "Closed",
+      color: Color.Red,
+    };
+  }
+
+  if (pullRequest.isDraft) {
+    return {
+      icon: { source: "pull-request-draft.svg", tintColor: Color.SecondaryText },
+      text: "Draft",
+      color: Color.SecondaryText,
+    };
+  }
+
+  if (pullRequest.isInMergeQueue) {
+    return {
+      icon: { source: "pull-request-merge-queue.svg", tintColor: Color.Orange },
+      text: "In Merge Queue",
+      color: Color.Orange,
+    };
+  }
+
+  return {
+    icon: { source: "pull-request-open.svg", tintColor: Color.Green },
+    text: "Open",
+    color: Color.Green,
+  };
+}
+
+export function getPullRequestAuthor(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
+  return getGitHubUser(pullRequest.author);
+}
+
+export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFragment) {
+  const requests = pullRequest.reviewRequests?.nodes?.map((request) => {
+    const reviewer = request?.requestedReviewer;
+    if (reviewer) {
+      let name;
+      if ("userName" in reviewer) {
+        name = reviewer.userName;
+      }
+
+      if ("teamName" in reviewer) {
+        name = reviewer.teamName;
+      }
+
+      let login;
+      if ("githubUsername" in reviewer) {
+        login = reviewer.githubUsername;
+      }
+
+      let avatarUrl;
+      if ("userAvatarURL" in reviewer) {
+        avatarUrl = reviewer.userAvatarURL;
+      }
+
+      if ("teamAvatarURL" in reviewer) {
+        avatarUrl = reviewer.teamAvatarURL;
+      }
+
+      return { id: "id" in reviewer ? reviewer.id : "", ...getGitHubUser({ name, login, avatarUrl }) };
+    }
+  });
+
+  const reviews = uniqBy(
+    pullRequest.reviews?.nodes?.map((review) => {
+      return { id: review?.author?.id, ...getGitHubUser(review?.author) };
+    }),
+    "id",
+  );
+
+  return [...(requests ?? []), ...(reviews ?? [])];
+}
+
+export function getNumberOfComments(pullRequest: PullRequestFieldsFragment) {
+  const countInComments = pullRequest.comments.totalCount;
+
+  const countInReviews =
+    pullRequest.reviews?.nodes?.reduce((result, review) => {
+      return result + (review?.bodyText === "" ? 0 : 1);
+    }, 0) ?? 0;
+
+  const countInReviewThreads =
+    pullRequest.reviewThreads.nodes
+      ?.map((thread) => thread?.comments.totalCount ?? 0)
+      .reduce((result, count) => result + count, 0) ?? 0;
+
+  return countInComments + countInReviews + countInReviewThreads;
+}
+
+export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState): List.Item.Accessory | null {
+  const presentation = getCheckStatePresentation(commitStatusCheckRollupState);
+  if (!presentation) {
+    return null;
+  }
+
+  return { icon: Icon[presentation.icon], tooltip: `Checks: ${presentation.text}` };
+}
+
+export type PullRequestFile = RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"][0];
+
+export function getFileStatusAccessory(status: PullRequestFile["status"]): { icon: Image.ImageLike; tooltip: string } {
+  switch (status) {
+    case "added":
+      return { icon: { source: Icon.PlusCircle, tintColor: Color.Green }, tooltip: "Added" };
+    case "removed":
+      return { icon: { source: Icon.MinusCircle, tintColor: Color.Red }, tooltip: "Removed" };
+    case "renamed":
+      return { icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText }, tooltip: "Renamed" };
+    case "copied":
+      return { icon: { source: Icon.CopyClipboard, tintColor: Color.SecondaryText }, tooltip: "Copied" };
+    case "unchanged":
+      return { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Unchanged" };
+    case "changed":
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Changed" };
+    default:
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Modified" };
+  }
+}
+
+export const PATCH_LINE_LIMIT = 400;
+
+export function truncatePatch(patch: string): { patch: string; remainingLines: number } {
+  const lines = patch.split("\n");
+
+  if (lines.length <= PATCH_LINE_LIMIT) {
+    return { patch, remainingLines: 0 };
+  }
+
+  return { patch: lines.slice(0, PATCH_LINE_LIMIT).join("\n"), remainingLines: lines.length - PATCH_LINE_LIMIT };
+}
+
+export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
+  switch (reviewDecision) {
+    case "REVIEW_REQUIRED":
+      return { icon: { source: Icon.Eye, tintColor: Color.Yellow }, tooltip: "Review required" };
+    case "CHANGES_REQUESTED":
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Changes requested" };
+    case "APPROVED":
+      return { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Approved" };
+    default:
+      return null;
+  }
+}
+
+export const PR_SORT_TYPES_TO_QUERIES = [
+  { title: "Newest", value: "sort:created-desc" },
+  { title: "Oldest", value: "sort:created-asc" },
+  { title: "Most Commented", value: "sort:comments-desc" },
+  { title: "Least Commented", value: "sort:comments-asc" },
+  { title: "Recently Updated", value: "sort:updated-desc" },
+  { title: "Least Recently Updated", value: "sort:updated-asc" },
+  { title: "Best Match", value: "sort:relevance-desc" },
+  { title: "👍", value: "sort:reactions-+1-desc" },
+  { title: "👎", value: "sort:reactions--1-desc" },
+  { title: "😄", value: "sort:reactions-smile-desc" },
+  { title: "🎉", value: "sort:reactions-tada-desc" },
+  { title: "🙁", value: "sort:reactions-thinking_face-desc" },
+  { title: "❤️", value: "sort:reactions-heart-desc" },
+  { title: "🚀", value: "sort:reactions-rocket-desc" },
+  { title: "👀", value: "sort:reactions-eyes-desc" },
+];
+export const PR_DEFAULT_SORT_QUERY = "sort:updated-desc";

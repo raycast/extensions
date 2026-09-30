@@ -1,0 +1,559 @@
+{
+  "name": "replicate",
+  "title": "Replicate",
+  "description": "Run Replicate's AI models from Raycast, and use them in Raycast AI chats.",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "icon": "replicate.png",
+  "author": "KevinBatdorf",
+  "contributors": [
+    "bfirsh",
+    "charlieholtz"
+  ],
+  "categories": [
+    "Media",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "replicate",
+      "title": "Replicate",
+      "description": "Run Replicate models, view your predictions and manage the models Raycast AI offers.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-models",
+      "title": "List Image Models",
+      "description": "List the image models in the user's Raycast AI model picker, with what each one does, whether it edits images or needs one, and the user's default model. Use Search Models to look beyond these."
+    },
+    {
+      "name": "search-models",
+      "title": "Search Models",
+      "description": "Search all of Replicate for image models matching a query, with what each one does, whether it edits images, and whether it's already in the user's picker. Ask the user before running one that isn't."
+    },
+    {
+      "name": "describe-model",
+      "title": "Describe Model",
+      "description": "Get a Replicate model's inputs — names, types, allowed values, bounds and defaults — so Start Image Generation can set them."
+    },
+    {
+      "name": "start-generation",
+      "title": "Start Image Generation",
+      "description": "Run an image model on Replicate. Takes a prompt, optionally an image URL to edit and any of the model's other inputs. Waits up to five seconds and returns the finished image if it's ready, otherwise an id for Check Image Generation."
+    },
+    {
+      "name": "check-generation",
+      "title": "Check Image Generation",
+      "description": "Check on an image started with Start Image Generation. Waits up to ten seconds, then returns the finished image, or its progress if it's still running."
+    }
+  ],
+  "ai": {
+    "modelProvider": "provider",
+    "instructions": "To make or edit an image: unless the user names a model, call list-models and use its default, or when there's no default pick the model whose description best fits. To change an existing image, use a model from list-models that edits images; only search when it has none. For a new image, the listed models cover almost every request. Only call search-models when the user asks for a kind of model the list doesn't have, like one made for pixel art or 3D; then tell them which model you'd use and why, and wait for them to agree before running it. When the user asks for something beyond the prompt, like a seed, a style strength or a file format, call describe-model and pass those as `inputs`. Pass the image to change as `image`: an earlier result's URL or one the user pasted. These tools can't receive an image attached to the chat. If the user attached one and wants it used, say so, and ask them to paste its URL or pick an editing model like google/nano-banana in Raycast AI's model picker, which can use attachments. Then call start-generation. If its result has `markdown`, the image is done. Otherwise call check-generation with the id, again and again, until it's done or fails; each check waits up to ten seconds. Don't reply between these calls: a reply ends your turn and the image never arrives. When it's done, reply with the `markdown` field exactly as given: the user can't see the image any other way. Replicate models are written as owner/name; never invent one.",
+    "evals": [
+      {
+        "input": "@replicate generate an image of a cat riding a bicycle through Tokyo at night",
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "start-generation": {
+            "id": "abc123",
+            "status": "starting",
+            "model": "black-forest-labs/flux-schnell",
+            "instruction": "Still running. Call check-generation with this id now, before replying: a reply ends your turn and the image never arrives."
+          },
+          "check-generation": {
+            "status": "succeeded",
+            "markdown": "![a cat riding a bicycle through Tokyo at night](https://replicate.delivery/abc123/out-0.webp)",
+            "instruction": "Reply with the markdown field exactly as given. It is the only way the user sees the image.",
+            "predictionUrl": "https://replicate.com/p/abc123"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-generation",
+              "arguments": {
+                "prompt": {
+                  "includes": "cat"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "check-generation",
+              "arguments": {
+                "id": "abc123"
+              }
+            }
+          },
+          {
+            "includes": "https://replicate.delivery/abc123/out-0.webp"
+          }
+        ]
+      },
+      {
+        "input": "@replicate make me a 16:9 desktop wallpaper of a foggy pine forest",
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "start-generation": {
+            "id": "def456",
+            "status": "starting",
+            "model": "black-forest-labs/flux-schnell",
+            "instruction": "Still running. Call check-generation with this id now, before replying: a reply ends your turn and the image never arrives."
+          },
+          "check-generation": {
+            "status": "succeeded",
+            "markdown": "![a foggy pine forest](https://replicate.delivery/def456/out-0.webp)",
+            "instruction": "Reply with the markdown field exactly as given. It is the only way the user sees the image.",
+            "predictionUrl": "https://replicate.com/p/def456"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-generation",
+              "arguments": {
+                "aspectRatio": "16:9"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "check-generation",
+              "arguments": {
+                "id": "def456"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@replicate generate a watercolor fox with google/nano-banana",
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "start-generation": {
+            "id": "ghi789",
+            "status": "starting",
+            "model": "google/nano-banana",
+            "instruction": "Still running. Call check-generation with this id now, before replying: a reply ends your turn and the image never arrives."
+          },
+          "check-generation": {
+            "status": "succeeded",
+            "markdown": "![a watercolor fox](https://replicate.delivery/ghi789/out-0.png)",
+            "instruction": "Reply with the markdown field exactly as given. It is the only way the user sees the image.",
+            "predictionUrl": "https://replicate.com/p/ghi789"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-generation",
+              "arguments": {
+                "model": "google/nano-banana"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "check-generation",
+              "arguments": {
+                "id": "ghi789"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@replicate make a minimalist logo for a coffee shop called Bean There",
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              },
+              {
+                "id": "ideogram-ai/ideogram-v3-turbo",
+                "description": "Best for legible text in images: logos, posters and signs",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 9000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "start-generation": {
+            "model": "ideogram-ai/ideogram-v3-turbo",
+            "id": "logo1",
+            "status": "succeeded",
+            "markdown": "![a minimalist logo for a coffee shop called Bean There](https://replicate.delivery/logo1/out-0.png)",
+            "instruction": "Reply with the markdown field exactly as given. It is the only way the user sees the image.",
+            "predictionUrl": "https://replicate.com/p/logo1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-models"
+          },
+          {
+            "callsTool": {
+              "name": "start-generation",
+              "arguments": {
+                "model": "ideogram-ai/ideogram-v3-turbo"
+              }
+            }
+          },
+          {
+            "includes": "https://replicate.delivery/logo1/out-0.png"
+          }
+        ]
+      },
+      {
+        "input": "@replicate make a 16-bit pixel art sprite of a knight, using a model made for pixel art",
+        "usedAsExample": false,
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "search-models": {
+            "models": [
+              {
+                "id": "retro-diffusion/rd-plus",
+                "description": "Pixel art sprites, tiles and game assets",
+                "editsImages": false,
+                "needsImage": false,
+                "official": false,
+                "runs": 52000,
+                "inPicker": false
+              }
+            ],
+            "instruction": "Before running a model that isn't in the user's picker, tell them which one you'd use and why, and run it only after they agree."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-models"
+          },
+          {
+            "not": {
+              "callsTool": "start-generation"
+            }
+          },
+          {
+            "includes": "retro-diffusion/rd-plus"
+          }
+        ]
+      },
+      {
+        "input": "@replicate generate a lighthouse at dusk with black-forest-labs/flux-dev, seed 42, as a PNG",
+        "usedAsExample": false,
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "describe-model": {
+            "id": "black-forest-labs/flux-dev",
+            "description": "A 12 billion parameter rectified flow transformer",
+            "makesImages": true,
+            "editsImages": false,
+            "needsImage": false,
+            "inputs": [
+              {
+                "name": "seed",
+                "type": "integer",
+                "description": "Random seed for reproducible generation"
+              },
+              {
+                "name": "output_format",
+                "type": "string",
+                "options": [
+                  "webp",
+                  "jpg",
+                  "png"
+                ],
+                "default": "webp"
+              },
+              {
+                "name": "guidance",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "default": 3
+              }
+            ],
+            "instruction": "The prompt and image come from start-generation's own parameters. Put any other input in `inputs`, and only the ones the user asked for."
+          },
+          "start-generation": {
+            "model": "black-forest-labs/flux-dev",
+            "id": "lh1",
+            "status": "succeeded",
+            "markdown": "![a lighthouse at dusk](https://replicate.delivery/lh1/out-0.png)",
+            "instruction": "Reply with the markdown field exactly as given. It is the only way the user sees the image.",
+            "predictionUrl": "https://replicate.com/p/lh1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "describe-model"
+          },
+          {
+            "callsTool": {
+              "name": "start-generation",
+              "arguments": {
+                "model": "black-forest-labs/flux-dev",
+                "inputs": [
+                  {
+                    "includes": "42"
+                  },
+                  {
+                    "includes": "png"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@replicate make this photo look like a watercolor painting: https://example.com/photos/harbor.jpg",
+        "usedAsExample": false,
+        "mocks": {
+          "list-models": {
+            "default": null,
+            "models": [
+              {
+                "id": "black-forest-labs/flux-schnell",
+                "description": "The fastest image generation model for local development and personal use",
+                "editsImages": false,
+                "needsImage": false,
+                "official": true,
+                "runs": 695000000
+              },
+              {
+                "id": "google/nano-banana",
+                "description": "Google's image generation and editing model",
+                "editsImages": true,
+                "needsImage": false,
+                "official": true,
+                "runs": 120000000
+              }
+            ],
+            "instruction": "Pick the model whose description best fits the request. To change an existing image, pick one that edits images."
+          },
+          "start-generation": {
+            "model": "google/nano-banana",
+            "id": "wc1",
+            "status": "succeeded",
+            "markdown": "![the harbor as a watercolor painting](https://replicate.delivery/wc1/out-0.png)",
+            "instruction": "Reply with the markdown field exactly as given. It is the only way the user sees the image.",
+            "predictionUrl": "https://replicate.com/p/wc1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-generation",
+              "arguments": {
+                "model": "google/nano-banana",
+                "image": "https://example.com/photos/harbor.jpg"
+              }
+            }
+          },
+          {
+            "includes": "https://replicate.delivery/wc1/out-0.png"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "API Token",
+      "description": "Add your token from Replicate",
+      "placeholder": "Token",
+      "required": true
+    },
+    {
+      "name": "saveImages",
+      "type": "checkbox",
+      "title": "Image History",
+      "label": "Save generated images on this computer",
+      "description": "Replicate deletes a prediction's files about an hour after it runs. With this on, images the extension generates are copied to this computer so View Predictions can still show them. The copies don't sync to other devices.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "defaultModel",
+      "type": "textfield",
+      "title": "Default Model",
+      "description": "The model @replicate uses for images, written as owner/name. Leave it empty to let the AI pick from your Raycast AI models.",
+      "default": "",
+      "required": false,
+      "placeholder": "Auto"
+    },
+    {
+      "name": "confirmGenerations",
+      "type": "checkbox",
+      "title": "AI Tool",
+      "label": "Confirm before generating",
+      "description": "Ask for confirmation before the AI tool runs a model and bills your Replicate account.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "popularModels",
+      "type": "checkbox",
+      "title": "AI Models",
+      "label": "Offer popular models",
+      "description": "List Replicate's most-run image, editing and text models in Raycast AI's model picker, refreshed daily. Models you add or chat with stay either way.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.0",
+    "is-image": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix && tsc --noEmit",
+    "lint": "ray lint && tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

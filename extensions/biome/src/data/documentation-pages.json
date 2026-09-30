@@ -1,0 +1,194 @@
+[
+  {
+    "id": "getting-started",
+    "title": "Getting Started",
+    "description": "Installation and initial setup guide for Biome",
+    "url": "https://biomejs.dev/guides/getting-started/",
+    "category": "Guides",
+    "tags": ["installation", "setup", "introduction"]
+  },
+  {
+    "id": "editors-vscode",
+    "title": "VS Code Integration",
+    "description": "Setup Biome extension for VS Code editor",
+    "url": "https://biomejs.dev/guides/editors/first-party-extensions/",
+    "category": "Guides",
+    "tags": ["editor", "vscode", "integration"]
+  },
+  {
+    "id": "configure-biome",
+    "title": "Configure Biome",
+    "description": "Configuration guide for Biome settings",
+    "url": "https://biomejs.dev/guides/configure-biome/",
+    "category": "Guides",
+    "tags": ["configuration", "config", "setup"]
+  },
+  {
+    "id": "ide-support",
+    "title": "IDE Support",
+    "description": "Editor integration and IDE support options",
+    "url": "https://biomejs.dev/guides/ide-support/",
+    "category": "Guides",
+    "tags": ["editor", "ide", "integration"]
+  },
+  {
+    "id": "linter-accessibility",
+    "title": "Accessibility Rules",
+    "description": "Rules focused on preventing accessibility problems",
+    "url": "https://biomejs.dev/linter/rules/a11y/",
+    "category": "Linter Rules",
+    "tags": ["a11y", "accessibility", "wcag"]
+  },
+  {
+    "id": "linter-complexity",
+    "title": "Complexity Rules",
+    "description": "Rules that focus on inspecting complex code that could be simplified",
+    "url": "https://biomejs.dev/linter/rules/complexity/",
+    "category": "Linter Rules",
+    "tags": ["complexity", "code-quality", "simplification"]
+  },
+  {
+    "id": "linter-correctness",
+    "title": "Correctness Rules",
+    "description": "Rules that detect code that is guaranteed to be incorrect or useless",
+    "url": "https://biomejs.dev/linter/rules/correctness/",
+    "category": "Linter Rules",
+    "tags": ["correctness", "bugs", "errors"]
+  },
+  {
+    "id": "linter-nursery",
+    "title": "Nursery Rules",
+    "description": "Experimental rules still in development (require explicit opt-in)",
+    "url": "https://biomejs.dev/linter/rules/nursery/",
+    "category": "Linter Rules",
+    "tags": ["nursery", "experimental", "beta"]
+  },
+  {
+    "id": "linter-performance",
+    "title": "Performance Rules",
+    "description": "Rules catching ways your code could be written to run faster or be more efficient",
+    "url": "https://biomejs.dev/linter/rules/performance/",
+    "category": "Linter Rules",
+    "tags": ["performance", "optimization", "efficiency"]
+  },
+  {
+    "id": "linter-security",
+    "title": "Security Rules",
+    "description": "Rules that detect potential security flaws",
+    "url": "https://biomejs.dev/linter/rules/security/",
+    "category": "Linter Rules",
+    "tags": ["security", "vulnerabilities", "safety"]
+  },
+  {
+    "id": "linter-style",
+    "title": "Style Rules",
+    "description": "Rules enforcing a consistent and idiomatic way of writing code",
+    "url": "https://biomejs.dev/linter/rules/style/",
+    "category": "Linter Rules",
+    "tags": ["style", "formatting", "consistency"]
+  },
+  {
+    "id": "linter-suspicious",
+    "title": "Suspicious Rules",
+    "description": "Rules that detect code that is likely to be incorrect or useless",
+    "url": "https://biomejs.dev/linter/rules/suspicious/",
+    "category": "Linter Rules",
+    "tags": ["suspicious", "potential-bugs", "code-quality"]
+  },
+  {
+    "id": "rules-javascript",
+    "title": "JavaScript Rules",
+    "description": "Linter rules specific to JavaScript code",
+    "url": "https://biomejs.dev/linter/rules/javascript/",
+    "category": "Language Rules",
+    "tags": ["javascript", "js", "ecmascript"]
+  },
+  {
+    "id": "rules-typescript",
+    "title": "TypeScript Rules",
+    "description": "Linter rules specific to TypeScript code",
+    "url": "https://biomejs.dev/linter/rules/typescript/",
+    "category": "Language Rules",
+    "tags": ["typescript", "ts", "types"]
+  },
+  {
+    "id": "rules-jsx",
+    "title": "JSX Rules",
+    "description": "Linter rules for JSX and React code",
+    "url": "https://biomejs.dev/linter/rules/jsx-a11y/",
+    "category": "Language Rules",
+    "tags": ["jsx", "react", "jsx-a11y"]
+  },
+  {
+    "id": "rules-json",
+    "title": "JSON Rules",
+    "description": "Linter rules for JSON files",
+    "url": "https://biomejs.dev/linter/rules/json/",
+    "category": "Language Rules",
+    "tags": ["json", "data", "configuration"]
+  },
+  {
+    "id": "rules-css",
+    "title": "CSS Rules",
+    "description": "Linter rules for CSS stylesheets",
+    "url": "https://biomejs.dev/linter/rules/css/",
+    "category": "Language Rules",
+    "tags": ["css", "styling", "stylesheets"]
+  },
+  {
+    "id": "rules-graphql",
+    "title": "GraphQL Rules",
+    "description": "Linter rules for GraphQL queries and schemas",
+    "url": "https://biomejs.dev/linter/rules/graphql/",
+    "category": "Language Rules",
+    "tags": ["graphql", "gql", "api"]
+  },
+  {
+    "id": "rules-html",
+    "title": "HTML Rules",
+    "description": "Linter rules for HTML markup",
+    "url": "https://biomejs.dev/linter/rules/html/",
+    "category": "Language Rules",
+    "tags": ["html", "markup", "a11y"]
+  },
+  {
+    "id": "formatter",
+    "title": "Formatter",
+    "description": "Code formatting tool and configuration",
+    "url": "https://biomejs.dev/formatter/",
+    "category": "Tools",
+    "tags": ["formatter", "formatting", "code-style"]
+  },
+  {
+    "id": "linter-overview",
+    "title": "Linter Overview",
+    "description": "Complete linter documentation and reference",
+    "url": "https://biomejs.dev/linter/",
+    "category": "Tools",
+    "tags": ["linter", "rules", "checking"]
+  },
+  {
+    "id": "playground",
+    "title": "Playground",
+    "description": "Interactive playground to test Biome rules and formatting",
+    "url": "https://biomejs.dev/playground/",
+    "category": "Tools",
+    "tags": ["playground", "interactive", "testing"]
+  },
+  {
+    "id": "cli",
+    "title": "CLI Reference",
+    "description": "Command-line interface documentation",
+    "url": "https://biomejs.dev/reference/cli/",
+    "category": "Reference",
+    "tags": ["cli", "command-line", "commands"]
+  },
+  {
+    "id": "configuration-reference",
+    "title": "Configuration Reference",
+    "description": "Complete configuration file reference",
+    "url": "https://biomejs.dev/reference/configuration/",
+    "category": "Reference",
+    "tags": ["configuration", "biome.json", "settings"]
+  }
+]

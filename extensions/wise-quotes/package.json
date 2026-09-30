@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wise-quotes",
+  "title": "Wise Quotes",
+  "description": "Effortlessly calculate international money transfers between USD and any target currency using the Wise API. Instantly generate quotes, access exchange rates, and estimated delivery times.",
+  "icon": "command-icon.png",
+  "author": "hugoliconv",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-wise-quote",
+      "title": "Get Wise Quote",
+      "description": "Get the current quotes and exchange rate between USD and a target currency",
+      "mode": "view",
+      "keywords": [
+        "wise",
+        "currency",
+        "exchange",
+        "rate",
+        "quote"
+      ],
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "1.00 USD",
+          "type": "text"
+        },
+        {
+          "name": "targetCurrency",
+          "placeholder": "To MXN",
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultAmount",
+          "title": "Default amount",
+          "description": "The default amount to convert",
+          "type": "textfield",
+          "defaultValue": "1.00",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "current-rate",
+      "title": "Show Current Rate",
+      "mode": "menu-bar",
+      "description": "See the current exchange rate between USD and your target currency",
+      "keywords": [
+        "wise",
+        "currency",
+        "exchange",
+        "rate",
+        "quote"
+      ],
+      "interval": "30m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTargetCurrency",
+      "title": "Default target currency",
+      "description": "The default target currency to convert to",
+      "type": "textfield",
+      "placeholder": "A valid ISO-4217 currency code (like GBP, MXN or EUR)",
+      "defaultValue": "MXN",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "@raycast/utils": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

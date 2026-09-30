@@ -1,0 +1,290 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "horoscope",
+  "title": "Horoscope",
+  "description": "Get Daily, Weekly or Monthly Horoscope by Sign",
+  "icon": "horoscope.png",
+  "author": "xmok",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "default_sign",
+      "title": "Default Sign",
+      "placeholder": "DEFAULT_SIGN",
+      "description": "This sign will be used to get horoscope data by default",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Aries",
+          "value": "aries"
+        },
+        {
+          "title": "Taurus",
+          "value": "taurus"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Cancer",
+          "value": "cancer"
+        },
+        {
+          "title": "Leo",
+          "value": "leo"
+        },
+        {
+          "title": "Virgo",
+          "value": "virgo"
+        },
+        {
+          "title": "Libra",
+          "value": "libra"
+        },
+        {
+          "title": "Scorpio",
+          "value": "scorpio"
+        },
+        {
+          "title": "Sagittarius",
+          "value": "sagittarius"
+        },
+        {
+          "title": "Capricorn",
+          "value": "capricorn"
+        },
+        {
+          "title": "Aquarius",
+          "value": "aquarius"
+        },
+        {
+          "title": "Pisces",
+          "value": "pisces"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "daily-horoscope",
+      "title": "Daily Horoscope",
+      "description": "Get Daily Horoscope by Sign",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sign",
+          "type": "dropdown",
+          "placeholder": "Use default sign",
+          "required": false,
+          "data": [
+            {
+              "title": "Aries",
+              "value": "aries"
+            },
+            {
+              "title": "Taurus",
+              "value": "taurus"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Cancer",
+              "value": "cancer"
+            },
+            {
+              "title": "Leo",
+              "value": "leo"
+            },
+            {
+              "title": "Virgo",
+              "value": "virgo"
+            },
+            {
+              "title": "Libra",
+              "value": "libra"
+            },
+            {
+              "title": "Scorpio",
+              "value": "scorpio"
+            },
+            {
+              "title": "Sagittarius",
+              "value": "sagittarius"
+            },
+            {
+              "title": "Capricorn",
+              "value": "capricorn"
+            },
+            {
+              "title": "Aquarius",
+              "value": "aquarius"
+            },
+            {
+              "title": "Pisces",
+              "value": "pisces"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "weekly-horoscope",
+      "title": "Weekly Horoscope",
+      "description": "Get Weekly Horoscope by Sign",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sign",
+          "type": "dropdown",
+          "placeholder": "Use default sign",
+          "required": false,
+          "data": [
+            {
+              "title": "Aries",
+              "value": "aries"
+            },
+            {
+              "title": "Taurus",
+              "value": "taurus"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Cancer",
+              "value": "cancer"
+            },
+            {
+              "title": "Leo",
+              "value": "leo"
+            },
+            {
+              "title": "Virgo",
+              "value": "virgo"
+            },
+            {
+              "title": "Libra",
+              "value": "libra"
+            },
+            {
+              "title": "Scorpio",
+              "value": "scorpio"
+            },
+            {
+              "title": "Sagittarius",
+              "value": "sagittarius"
+            },
+            {
+              "title": "Capricorn",
+              "value": "capricorn"
+            },
+            {
+              "title": "Aquarius",
+              "value": "aquarius"
+            },
+            {
+              "title": "Pisces",
+              "value": "pisces"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "monthly-horoscope",
+      "title": "Monthly Horoscope",
+      "description": "Get Monthly Horoscope by Sign",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sign",
+          "type": "dropdown",
+          "placeholder": "Use default sign",
+          "required": false,
+          "data": [
+            {
+              "title": "Aries",
+              "value": "aries"
+            },
+            {
+              "title": "Taurus",
+              "value": "taurus"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Cancer",
+              "value": "cancer"
+            },
+            {
+              "title": "Leo",
+              "value": "leo"
+            },
+            {
+              "title": "Virgo",
+              "value": "virgo"
+            },
+            {
+              "title": "Libra",
+              "value": "libra"
+            },
+            {
+              "title": "Scorpio",
+              "value": "scorpio"
+            },
+            {
+              "title": "Sagittarius",
+              "value": "sagittarius"
+            },
+            {
+              "title": "Capricorn",
+              "value": "capricorn"
+            },
+            {
+              "title": "Aquarius",
+              "value": "aquarius"
+            },
+            {
+              "title": "Pisces",
+              "value": "pisces"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

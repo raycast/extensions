@@ -1,0 +1,17 @@
+---
+description: Describes what kind of project html-colors is and what technology it uses
+globs: *.ts, *.tsx, *.md
+alwaysApply: true
+---
+# HTML Colors
+
+- Raycast extension written in Typescript
+- uses standard Raycast APIs, use `Development` section for most important APIs
+
+## Development
+
+- API for Raycast extensions is specified in the documentation
+    - https://developers.raycast.com/information/terminology
+    - https://developers.raycast.com/information/file-structure (in context of this project replace `command.tsx` mentioned in this page with `src/html-color.tsx`)
+    - https://developers.raycast.com/information/developer-tools/cli how to launch the project and manage it via terminal
+    - https://developers.raycast.com/api-reference/user-interface how to build UI

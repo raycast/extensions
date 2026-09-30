@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "duck-duck-go-search",
+  "title": "DuckDuckGo Search",
+  "description": "DuckDuckGo search with suggestions.",
+  "icon": "command-icon.png",
+  "author": "tegola",
+  "contributors": [
+    "spacedog"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "DuckDuckGo Search",
+      "description": "Search DuckDuckGo with suggestions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rememberSearchHistory",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Remember Search History",
+      "description": "Enable to locally store DuckDuckGo search history."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2",
+    "@raycast/utils": "^1.5.2",
+    "nanoid": "^4.0.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

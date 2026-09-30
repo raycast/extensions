@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tasktick",
+  "title": "TaskTick",
+  "description": "Quick launcher for TaskTick scheduled tasks",
+  "icon": "extension-icon.png",
+  "author": "lifedever",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search and run TaskTick tasks",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "CLI Path",
+      "description": "Path to the tasktick CLI. Auto-detected if empty. For dev, point to /Applications/TaskTick Dev.app/Contents/MacOS/tasktick-dev.",
+      "placeholder": "/usr/local/bin/tasktick"
+    },
+    {
+      "name": "showCompletionToast",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show in-Raycast Toast",
+      "description": "Show an in-Raycast toast when you run, stop, or restart a task. Independent of TaskTick's system notifications.",
+      "label": "Show feedback toast on Run/Stop/Restart",
+      "default": true
+    },
+    {
+      "name": "logsFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Logs Display",
+      "description": "How the View Last Output detail renders logs.",
+      "default": "text",
+      "data": [
+        {
+          "title": "Plain text",
+          "value": "text"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

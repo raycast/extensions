@@ -1,0 +1,254 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chatgpt-quick-actions",
+  "title": "ChatGPT Quick Actions",
+  "description": "Performs one-shot actions with ChatGPT",
+  "icon": "openai-logo.png",
+  "author": "alanzchen",
+  "contributors": [
+    "kolacek.m",
+    "JonathanAquino",
+    "drewbabel"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_summarize",
+          "title": "Summarize Prompt",
+          "description": "The prompt for the summarize command",
+          "type": "textfield",
+          "default": "Summarize the following text as concise as possible: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "title": "Rewrite",
+      "description": "Rewrite selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_rewrite",
+          "title": "Rewrite Prompt",
+          "description": "The prompt for the rewrite command",
+          "type": "textfield",
+          "default": "Rewrite this using an academic tone: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_rewrite",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "refine",
+      "title": "Refine",
+      "description": "Refine the writing of selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_refine",
+          "title": "Refine Prompt",
+          "description": "The prompt for the refine command",
+          "type": "textfield",
+          "default": "Refine the writing and correct grammar mistakes: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_refine",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Ask ChatGPT based on a custom prompt",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Custom Prompt",
+          "description": "The prompt for the custom action command",
+          "type": "textfield",
+          "default": "Refine the writing and correct grammar mistakes: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "execute",
+      "title": "Execute",
+      "description": "Replace selected text with ChatGPT output",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "model_execute",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "preview",
+      "title": "Preview",
+      "description": "Use selected text as ChatGPT input and preview output",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model_preview",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "transform",
+      "title": "Transform",
+      "description": "Replace selected text with ChatGPT output, based on a prompt entered when the command is run",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "e.g. beautify JSON",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_transform",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    },
+    {
+      "name": "transform_preview",
+      "title": "Transform Preview",
+      "description": "Same as Transform, but shows the output in a preview window instead of replacing the selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "e.g. beautify JSON",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_transform_preview",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": {{COMMAND_MODELS_LIST}}
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@raycast/api": "^1.50.0",
+    "openai": "^4.53.2",
+    "run-applescript": "^6.1.0"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "Your OpenAI API Key",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key"
+    },
+    {
+      "name": "model",
+      "description": "OpenAI LLM to use for your commands",
+      "type": "dropdown",
+      "data": {{GLOBAL_MODELS_LIST}},
+      "required": true,
+      "title": "OpenAI Model"
+    },
+    {
+      "name": "sidenote",
+      "title": "SideNote Integration",
+      "description": "Enable SideNote integration (requires SideNote). Allows you to send the results to SideNote as a new note.",
+      "label": "Enabled",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-package": "node scripts/build-package.js",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

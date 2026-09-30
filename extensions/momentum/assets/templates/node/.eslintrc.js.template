@@ -1,0 +1,8 @@
+exports = { 
+  extends: [{{extends}}],
+  env: {
+   node: true
+ },
+ root: true
+};
+  

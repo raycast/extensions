@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "idonthavespotify",
+  "title": "I Don't Have Spotify",
+  "description": "Effortlessly convert music links between streaming services",
+  "version": "1.0.0",
+  "author": "sjdonado",
+  "contributors": [
+    "ridemountainpig",
+    "0xdhrv"
+  ],
+  "icon": "icon.png",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Convert Link to All Platforms",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Effortlessly convert music links between streaming services.",
+      "mode": "view"
+    },
+    {
+      "name": "toSpotify",
+      "title": "Convert Link to Spotify",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Spotify and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toYouTube",
+      "title": "Convert Link to YouTube Music",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to YouTube Music and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toAppleMusic",
+      "title": "Convert Link to Apple Music",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Apple Music and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toDeezer",
+      "title": "Convert Link to Deezer",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Deezer and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toSoundCloud",
+      "title": "Convert Link to SoundCloud",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to SoundCloud and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toTidal",
+      "title": "Convert Link to Tidal",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Tidal and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toQobuz",
+      "title": "Convert Link to Qobuz",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Qobuz and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toBandcamp",
+      "title": "Convert Link to Bandcamp",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Bandcamp and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toPandora",
+      "title": "Convert Link to Pandora",
+      "subtitle": "I Don't Have Spotify",
+      "description": "Convert a music link to Pandora and copy it to the clipboard.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "title": "Self-Hosted Instance URL",
+      "description": "Base URL of a self-hosted I Don't Have Spotify instance (e.g. https://idhs.example.com). Leave empty to use the default instance.",
+      "type": "textfield",
+      "placeholder": "https://idonthavespotify.sjdonado.com",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "play-sound": "^1.1.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/play-sound": "^1.1.2",
+    "@types/react": "19.2.17",
+    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@typescript-eslint/parser": "^8.64.0",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "typeless-companion",
+  "title": "Typeless Companion",
+  "description": "Browse and copy local Typeless transcripts.",
+  "icon": "typeless-icon.png",
+  "author": "arjan.flac",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "view-history",
+      "title": "Browse History",
+      "description": "Browse, filter, copy, and paste saved Typeless transcripts.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-last-transcript",
+      "title": "Copy Previous Transcript",
+      "description": "Copy the most recent saved Typeless transcript.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "quickMode",
+          "title": "Transcript Type",
+          "description": "Choose which saved Typeless transcript this command copies.",
+          "type": "dropdown",
+          "required": false,
+          "default": "latest",
+          "data": [
+            {
+              "title": "Latest Transcript",
+              "value": "latest"
+            },
+            {
+              "title": "Latest Dictation",
+              "value": "dictation"
+            },
+            {
+              "title": "Latest Ask Anything",
+              "value": "ask-anything"
+            },
+            {
+              "title": "Latest Translation",
+              "value": "translation"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "databasePath",
+      "title": "Database Path",
+      "description": "Override the local Typeless SQLite database path.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Library/Application Support/Typeless/typeless.db"
+    },
+    {
+      "name": "copyWindowBehavior",
+      "title": "Window Behavior On Copy",
+      "description": "What to do with the window when copying a transcript to the clipboard.",
+      "type": "dropdown",
+      "required": false,
+      "default": "close",
+      "data": [
+        {
+          "title": "Keep Open",
+          "value": "keep-open"
+        },
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Close and Exit Command",
+          "value": "close-and-exit-command"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.15.29",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}

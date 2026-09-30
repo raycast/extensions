@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-memo",
+  "title": "Simple Memo",
+  "description": "A lightweight local memo extension for Raycast.",
+  "development": false,
+  "icon": "icon.png",
+  "author": "hyokwonkim",
+  "categories": [
+    "Documentation",
+    "Productivity"
+  ],
+  "license": "MIT",
+"commands": [
+    {
+      "name": "create-memo",
+      "title": "Create Memo",
+      "subtitle": "Simple Memo",
+      "description": "Create and edit a new memo with full markdown formatting.",
+      "mode": "view"
+    },
+    {
+      "name": "search-memos",
+      "title": "Search Memos",
+      "subtitle": "Simple Memo",
+      "description": "Find memos by title, content.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-memo",
+      "title": "Quick Memo",
+      "subtitle": "Simple Memo",
+      "description": "Save text as memo without opening the editor.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Type your memo content",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

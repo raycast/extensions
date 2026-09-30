@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "guitar-chords",
+  "title": "Guitar Chords",
+  "description": "Lookup chord diagrams for guitar",
+  "icon": "guitar-chords.png",
+  "author": "GastroGeek",
+  "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Media",
+    "Other"
+  ],
+  "keywords": [
+    "chords",
+    "diagrams",
+    "fretboard",
+    "guitar",
+    "music"
+  ],
+  "commands": [
+    {
+      "name": "chords-quickfind",
+      "title": "Quickfind Chord",
+      "description": "Quick find a guitar chord",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "chordKey",
+          "placeholder": "key",
+          "required": true,
+          "type": "text"
+        },
+        {
+          "name": "chordSuffix",
+          "placeholder": "suffix",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "chords-search",
+      "title": "Search Chords",
+      "description": "Search guitar chords",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "@tombatossals/chords-db": "^0.5.1",
+    "chordbox": "^1.0.12"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

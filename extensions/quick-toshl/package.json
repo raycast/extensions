@@ -1,0 +1,273 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-toshl",
+  "title": "Quick Toshl",
+  "description": "Add expense and income to your Toshl account",
+  "version": "1.4.1",
+  "icon": "extension-icon.png",
+  "author": "hoando",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "expense",
+      "title": "Add Expense",
+      "description": "Add a new expense transaction to Toshl",
+      "mode": "view"
+    },
+    {
+      "name": "income",
+      "title": "Add Income",
+      "description": "Add a new income transaction to Toshl",
+      "mode": "view"
+    },
+    {
+      "name": "recent-transactions",
+      "title": "View Transactions",
+      "description": "View and manage recent Toshl transactions",
+      "mode": "view"
+    },
+    {
+      "name": "transfer",
+      "title": "Add Transfer",
+      "description": "Move money from one account to another",
+      "mode": "view"
+    },
+    {
+      "name": "budgets",
+      "title": "View Budgets",
+      "description": "View your budget progress and spending",
+      "mode": "view"
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "description": "Search and filter all entries by date range, category, tags, account, and more",
+      "mode": "view"
+    },
+    {
+      "name": "planning",
+      "title": "View Planning",
+      "description": "View your spending plan and predictions for this month or year (Pro feature)",
+      "mode": "view"
+    },
+    {
+      "name": "manage-categories",
+      "title": "Manage Categories",
+      "description": "Create, rename, or delete expense/income categories",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tags",
+      "title": "Manage Tags",
+      "description": "Create, edit, or delete tags",
+      "mode": "view"
+    },
+    {
+      "name": "manage-accounts",
+      "title": "Manage Accounts",
+      "description": "Create, edit, or delete accounts",
+      "mode": "view"
+    },
+    {
+      "name": "manage-budgets",
+      "title": "Manage Budgets",
+      "description": "Create, edit, or delete budgets (respects Toshl free/Pro limits)",
+      "mode": "view"
+    },
+    {
+      "name": "my-profile",
+      "title": "My Profile",
+      "description": "Show Toshl account profile, currency, locale, and API feature limits",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-expense",
+      "title": "Add Expense",
+      "description": "Add a new expense to Toshl. Requires amount and description. Optional: completed, extraJson, locationId, basic recurring (isRecurring + repeatFrequency + repeatInterval, optional repeatEndDate/repeatCount). IDs from list-categories-tags. Vietnamese amount shortcuts (50k, 3 triệu)."
+    },
+    {
+      "name": "add-income",
+      "title": "Add Income",
+      "description": "Add a new income to Toshl. Requires amount and description. Optional: completed, extraJson, locationId, basic recurring fields. IDs from list-categories-tags. Vietnamese amount shortcuts."
+    },
+    {
+      "name": "get-budgets",
+      "title": "Get Budgets",
+      "description": "Get current budget status from Toshl. Shows active budgets with their limits, spending, and remaining amounts. Use when the user asks about budget progress or spending limits."
+    },
+    {
+      "name": "list-categories-tags",
+      "title": "List Categories and Tags",
+      "description": "List the user's available categories, tags, and accounts from Toshl. Use this when the user asks 'what categories do I have?', 'show my tags', or 'list my accounts'. Can filter by type (categories/tags/accounts) and entry type (expense/income)."
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "description": "Advanced search for Toshl entries with filtering. Use `from` and `to` (YYYY-MM-DD) for an explicit range; if either is set, they override `dateRange`. Otherwise use `dateRange` presets (today, last_7_days, this_month, etc.). Supports entry type, category/tag/account names, description search. Returns entries with optional summary statistics."
+    },
+    {
+      "name": "get-planning",
+      "title": "Get Planning",
+      "description": "Get spending plan and predictions for this month or this year. Shows average expenses, incomes, balance, and period details with actual vs planned vs predicted values. Use when user asks about spending predictions, monthly plan, or financial outlook. Pro feature - free accounts will get 403."
+    },
+    {
+      "name": "update-entry",
+      "title": "Update Entry",
+      "description": "Update an expense or income entry by entryId. Not for transfers (use update-transfer). Supports amount, description, date, categoryId, accountId, tagIds, currencyCode, updateMode for repeats, completed, extraJson, locationId."
+    },
+    {
+      "name": "delete-entry",
+      "title": "Delete Entry",
+      "description": "Delete an entry by entryId. For repeating entries use deleteMode: one, tail, or all."
+    },
+    {
+      "name": "add-transfer",
+      "title": "Add Transfer",
+      "description": "Record a transfer between two accounts. Requires amount, fromAccountId, toAccountId (use list-categories-tags for IDs). Optional description, currency, date."
+    },
+    {
+      "name": "create-category",
+      "title": "Create Category",
+      "description": "Create a Toshl category with name and type expense|income."
+    },
+    {
+      "name": "update-category",
+      "title": "Update Category",
+      "description": "Rename or change type of a category by categoryId (from list-categories-tags). System categories cannot be updated."
+    },
+    {
+      "name": "create-tag",
+      "title": "Create Tag",
+      "description": "Create a tag with name, type expense|income, optional categoryId."
+    },
+    {
+      "name": "update-tag",
+      "title": "Update Tag",
+      "description": "Update a tag by tagId with name, type, optional categoryId."
+    },
+    {
+      "name": "create-account",
+      "title": "Create Account",
+      "description": "Create an account with name, optional currencyCode, initialBalance, type."
+    },
+    {
+      "name": "update-account",
+      "title": "Update Account",
+      "description": "Update account by accountId: name, optional currencyCode, order, limit, initialBalance."
+    },
+    {
+      "name": "create-budget",
+      "title": "Create Budget",
+      "description": "Create a monthly regular budget with name, limit, optional rollover and currencyCode. May fail with 403 on free Toshl limits."
+    },
+    {
+      "name": "update-budget",
+      "title": "Update Budget",
+      "description": "Update budget by budgetId (from get-budgets): name, limit, rollover, optional updateMode one|tail|all."
+    },
+    {
+      "name": "delete-budget",
+      "title": "Delete Budget",
+      "description": "Delete a budget by budgetId (from get-budgets). Irreversible on Toshl side."
+    },
+    {
+      "name": "delete-category",
+      "title": "Delete Category",
+      "description": "Delete a category by categoryId from list-categories-tags. May affect entries."
+    },
+    {
+      "name": "delete-tag",
+      "title": "Delete Tag",
+      "description": "Delete a tag by tagId from list-categories-tags."
+    },
+    {
+      "name": "delete-account",
+      "title": "Delete Account",
+      "description": "Delete an account by accountId. May fail if Toshl rejects (linked data)."
+    },
+    {
+      "name": "update-transfer",
+      "title": "Update Transfer",
+      "description": "Update a transfer entry by entryId (must be a transfer). Requires fromAccountId, toAccountId; optional amount, date, description, currencyCode, updateMode for repeating transfers."
+    },
+    {
+      "name": "get-me",
+      "title": "Get Profile",
+      "description": "Return current user profile from Toshl /me: currency, locale, timezone, pro status, limits."
+    },
+    {
+      "name": "get-tag-sums",
+      "title": "Get Tag Sums",
+      "description": "Aggregated sums per tag for a date range (GET /tags/sums). Requires currency (defaults to user main from /me). Optional type filter."
+    },
+    {
+      "name": "list-entry-locations",
+      "title": "List Entry Locations",
+      "description": "List saved entry locations for a date range (GET /entries/locations)."
+    }
+  ],
+  "ai": {
+    "instructions": "You are a financial assistant for Toshl expense tracking. Follow these rules strictly:\n\n**CRITICAL - USE IDs, NOT NAMES:**\n- User's categories/tags may have creative names (e.g., 'Có thực mới vực được đạo' for Food, emojis like '🍔 Eating')\n- ALWAYS call list-categories-tags FIRST to get the ID mappings\n- Use categoryId, tagIds, accountId parameters with exact IDs from the list\n- Never guess category/tag names - always look them up first\n\n**WORKFLOW:**\n1. User says 'add 50k cơm trưa'\n2. You call list-categories-tags to get {id: '123', name: '🍔 Có thực...'}\n3. You determine which category fits (food-related)\n4. You call add-expense with categoryId='123'\n\n**AMOUNT PARSING:**\n- 'k' or 'K' = 1,000 (e.g., '50k' = 50,000)\n- 'triệu' or 'tr' = 1,000,000 (e.g., '3 triệu' = 3,000,000)\n- Currency: Uses user's default from Toshl settings (auto-detected from /me API)\n\n**DATE PARSING:**\n- 'DD/MM', 'DD/MM/YYYY', 'yesterday', 'today' supported\n- Default to today if no date specified\n\n**LOANS & DEBTS:**\n- 'cho vay' (lend) = expense, 'vay' (borrow) = income\n- 'trả nợ' (repay) = expense, 'đòi nợ' (collect) = income\n\n**LANGUAGE:**\n- Respond in user's language (Vietnamese or English)\n- Use friendly, concise messages\n\n**UPDATE / DELETE ENTRIES:**\n- Use search-entries to obtain entryId\n- update-entry: expenses/incomes only; use update-transfer for transfers\n- delete-entry: repeating entries use deleteMode one | tail | all\n\n**TRANSFERS:**\n- add-transfer: fromAccountId, toAccountId\n- update-transfer: entryId + account IDs; optional updateMode for repeats\n\n**METADATA:**\n- create/update/delete category, tag, account, budget with IDs from list-categories-tags or get-budgets\n- delete-category, delete-tag, delete-account, delete-budget tools exist\n- get-me for profile; get-tag-sums and list-entry-locations for analytics/locations\n- Toshl may return 403 on free-plan limits\n\n**ENTRY EXTRAS:**\n- update-entry supports completed (boolean) and extraJson (JSON object) for Toshl private metadata\n\n**CONFLICTS:**\n- If the user hits a conflict error, suggest refreshing data (search-entries / list-categories-tags) and retrying\n\n**RATE LIMITS:**\n- On HTTP 429, suggest waiting and retrying later."
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Toshl API Key",
+      "description": "Your Toshl API Personal Token",
+      "placeholder": "Enter your Personal Token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "forceRefreshCache",
+      "title": "Force Refresh Cache",
+      "description": "Uses conditional requests on each load. If the API errors, the last successful metadata may be reused for up to 24 hours. Enable this, run any command once, then turn it off to clear the cache—e.g. after changes in the Toshl web app.",
+      "type": "checkbox",
+      "label": "Clear cache on next run",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "demoData",
+      "title": "Demo Data",
+      "description": "Use fake data for demonstration purposes (useful for screenshots).",
+      "type": "checkbox",
+      "label": "Enable Demo Data",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.6",
+    "date-fns": "^4.1.0",
+    "react": "^19.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.2",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

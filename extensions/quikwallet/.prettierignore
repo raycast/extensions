@@ -1,0 +1,4 @@
+/node_modules
+/assets
+.gitignore
+raycast-env.d.ts

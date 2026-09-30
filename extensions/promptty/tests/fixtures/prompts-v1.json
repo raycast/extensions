@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-26T12:00:00Z",
+  "appVersion": "1.4.0",
+  "prompts": [
+    {
+      "id": "10000000-0000-4000-8000-000000000000",
+      "title": "Review a Swift View",
+      "content": "Review the SwiftUI view below. Focus on state ownership, accessibility, and rendering performance. Return the highest-impact improvements first.",
+      "isFavorite": true,
+      "usageCount": 8,
+      "createdAt": "2026-06-10T09:00:00Z",
+      "updatedAt": "2026-07-25T15:20:00Z",
+      "lastUsedAt": "2026-07-26T08:30:00Z",
+      "category": {
+        "name": "Development",
+        "iconName": "hammer",
+        "colorHex": "#7C5CFC"
+      },
+      "tags": ["Swift", "Review"]
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000000",
+      "title": "Turn Notes into Actions",
+      "content": "Convert these meeting notes into a concise action list. Include an owner, deadline, and the next concrete step for each item.",
+      "isFavorite": true,
+      "usageCount": 5,
+      "createdAt": "2026-05-04T11:00:00Z",
+      "updatedAt": "2026-07-22T13:45:00Z",
+      "lastUsedAt": "2026-07-24T10:10:00Z",
+      "category": {
+        "name": "Work",
+        "iconName": "briefcase",
+        "colorHex": "#32ADE6"
+      },
+      "tags": ["Meetings", "Planning"]
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000000",
+      "title": "Polish Product Copy",
+      "content": "Rewrite the product copy in a clear, confident voice. Keep the meaning intact, remove filler, and provide one concise alternative.",
+      "isFavorite": false,
+      "usageCount": 3,
+      "createdAt": "2026-04-18T14:20:00Z",
+      "updatedAt": "2026-07-21T17:00:00Z",
+      "lastUsedAt": null,
+      "category": {
+        "name": "Writing",
+        "iconName": "text.quote",
+        "colorHex": "#FF9F0A"
+      },
+      "tags": ["Copywriting"]
+    }
+  ]
+}

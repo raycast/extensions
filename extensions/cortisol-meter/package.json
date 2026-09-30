@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cortisol-meter",
+  "title": "Cortisol Meter",
+  "description": "Manually track cortisol as low, medium, or high from Raycast and the macOS menu bar.",
+  "icon": "icon.png",
+  "author": "smexey",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "increase-cortisol",
+      "title": "Increase Cortisol",
+      "description": "Move the cortisol bucket up one level.",
+      "mode": "no-view"
+    },
+    {
+      "name": "lower-cortisol",
+      "title": "Lower Cortisol",
+      "description": "Move the cortisol bucket down one level.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cortisol-menu-bar",
+      "title": "Cortisol Menu Bar",
+      "description": "Show the current cortisol bucket in the macOS menu bar.",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "25.9.3",
+    "@types/react": "19.2.17",
+    "eslint": "10.5.0",
+    "prettier": "3.8.4",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "0.0.2"
+}

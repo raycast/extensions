@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alt-text-generator",
+  "title": "Alt-Text Generator",
+  "description": "This extension makes it easy to generate descriptive alt-text for images. Simply provide an image URL, and the extension will make a call to the openai api to create a concise and descriptive alt text. This extension is Bring-Your-Own-Key (support for OpenAI only at the moment). If you don't have an API key yet, you can sign up for one at [OpenAI - Api Keys](https://platform.openai.com/api-keys).",
+  "icon": "icon.png",
+  "author": "jack_casica",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "openai": "^4.40.2",
+    "parse-url": "^9.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "generateFromSelectionCMD",
+      "icon": "from-finder-selection-icon.png",
+      "title": "From Finder Selection",
+      "description": "This command will generate alt-text from a single file selection in Finder. Supported image types and file sizes are set by the OpenAI API. For more information, refer to the OpenAI API Vision documentation: https://platform.openai.com/docs/guides/vision",
+      "mode": "no-view"
+    },
+    {
+      "name": "generateFromURLCMD",
+      "icon": "from-url-icon.png",
+      "title": "From URL",
+      "description": "This command will generate alt-text from a hosted image URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "description": "The URL of the image",
+          "placeholder": "Image URL",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "generateFromClipboardCMD",
+      "icon": "from-clipboard-icon.png",
+      "title": "From Clipboard",
+      "description": "This command will generate alt-text from an image copied to the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API ke. If you don't have an API key yet, you can sign up for one at OpenAI - Api Keys: https://platform.openai.com/api-keys.",
+      "type": "password",
+      "defaultValue": "",
+      "required": true
+    },
+    {
+      "name": "prompt",
+      "title": "Prompt",
+      "description": "Customize the prompt message that is sent to openai for generating alt-text.",
+      "type": "textfield",
+      "default": "Generate brief alt text for this image under 60 characters",
+      "required": false
+    }
+  ]
+}

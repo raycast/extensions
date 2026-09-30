@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "protobuf2typescript",
+  "title": "Protobuf2TypeScript",
+  "description": "A script which help front-end devloper to convert *.protobuf file into *.d.ts file.",
+  "icon": "command-icon.png",
+  "author": "7gugu",
+  "keywords": ["protobuf", "protocol buffer", "typescript"],
+  "categories": [
+    "Developer Tools",
+    "Web",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert ProtoBuf to DTs",
+      "description": "Convert protobuf to d.ts",
+      "mode": "view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Convert ProtoBuf to DTs from clipboard",
+      "description": "Convert protobuf to d.ts",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

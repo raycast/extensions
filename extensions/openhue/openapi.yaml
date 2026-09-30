@@ -1,0 +1,4220 @@
+openapi: 3.0.3
+info:
+  title: Hue CLIP API
+  version: v2
+  description: See [openhue/openhue-api](https://github.com/openhue/openhue-api)
+  contact:
+    name: OpenHue
+    email: contact@openhue.io
+    url: https://www.openhue.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://{bridgeInternalIPAddress}
+    description: Your Home Bridge
+    variables:
+      bridgeInternalIPAddress:
+        default: 192.168.1.0
+        description: |
+          Use the broker server discover process by visiting https://discovery.meethue.com
+          to discover the IP address of the bridge on your network
+tags:
+  - name: Auth
+    description: Authentication operations.
+  - name: Resource
+    description: API to retrieve all API resources
+  - name: Device
+    description: API to manage devices. Devices have device level properties and offer services such as light. Bridge device cannot be deleted.
+  - name: Device Power
+    description: API to manage device power services. These are offered by battery powered devices. The update endpoint (e.g. `PUT`) was intentionally not implemented.
+  - name: Light
+    description: API to manage light services. These are offered by devices with lighting capabilities.
+  - name: LightLevel
+    description: API to manage light level services. These are offered by devices with light level sensing capabilities.
+  - name: Motion
+    description: API to manage motion services. These are offered by devices with motion sensing capabilities.
+  - name: GroupedLight
+    description: API to manage grouped light services. These are offered by rooms, zones, and homes.
+  - name: Bridge
+    description: API to manage the bridge
+  - name: Bridge Home
+    description: API to manage bridge homes. Homes group rooms as well as devices not assigned to a room.
+  - name: Scene
+    description: API to manage scenes. Scenes are used to store and recall settings for a group of lights.
+  - name: Smart Scene
+    description: API to manage smart scenes
+  - name: Room
+    description: API to manage rooms. Rooms group devices and each device can only be part of one room.
+  - name: Zone
+    description: API to manage zones. Zones group services and each service can be part of multiple zones.
+  - name: Temperature
+    description: API to manage temperature services. These are offered by devices with temperature sensing capabilities.
+paths:
+  /api:
+    post:
+      operationId: authenticate
+      summary: Authenticate
+      description: Authenticate to retrieve the HUE application key. Requires to go and press the button on the bridge
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                devicetype:
+                  type: string
+                  example: app_name#instance_name
+                generateclientkey:
+                  type: boolean
+      responses:
+        '200':
+          description: Authentication Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+              examples:
+                Success:
+                  value:
+                    - success:
+                        username: a4e08834-0893-4013-b646-738582ec15c9
+                        clientkey: 8c7f2f7e-efb5-4b89-9b54-aac797040ea4
+                Error:
+                  value:
+                    - error:
+                        type: 101
+                        address: ''
+                        description: link button not pressed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /clip/v2/resource:
+    get:
+      operationId: getResources
+      summary: List resources
+      description: API to retrieve all API resources
+      tags:
+        - Resource
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Resource Success Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Error'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResourceGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/device:
+    get:
+      operationId: getDevices
+      summary: List devices
+      description: List all available devices
+      tags:
+        - Device
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Device Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeviceGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/device/{deviceId}:
+    get:
+      operationId: getDevice
+      summary: Get device
+      description: Get details of a single device from its given `{deviceId}`.
+      tags:
+        - Device
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: deviceId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the device
+      responses:
+        '200':
+          description: Device Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeviceGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateDevice
+      summary: Update device
+      description: Update a single device from its given `{deviceId}`.
+      tags:
+        - Device
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: deviceId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the device
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Identify:
+                summary: Triggers the identification sequence
+                value:
+                  identify:
+                    action: identify
+            schema:
+              $ref: '#/components/schemas/DevicePut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    delete:
+      operationId: deleteDevice
+      summary: Delete Device
+      description: Delete a single Device from its given `{deviceId}`. The `bridge` device cannot be deleted.
+      tags:
+        - Device
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: deviceId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the Device
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/device_power:
+    get:
+      operationId: getDevicePowers
+      summary: List device powers
+      description: List all available device powers
+      tags:
+        - Device Power
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Device Power Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DevicePowerGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/device_power/{deviceId}:
+    get:
+      operationId: getDevicePower
+      summary: Get device power
+      description: Get power details of a single device from its given `{deviceId}`.
+      tags:
+        - Device Power
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: deviceId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the device
+      responses:
+        '200':
+          description: Device Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DevicePowerGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/light:
+    get:
+      operationId: getLights
+      summary: List lights.
+      description: List all available lights.
+      tags:
+        - Light
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Light Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LightGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/light/{lightId}:
+    get:
+      operationId: getLight
+      summary: Get light
+      description: Get details of a single light from its given `{lightId}`.
+      tags:
+        - Light
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: lightId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the light
+      responses:
+        '200':
+          description: Light Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LightGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateLight
+      summary: Update light
+      description: Update a single light from its given `{lightId}`.
+      tags:
+        - Light
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: lightId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the light
+      requestBody:
+        content:
+          application/json:
+            examples:
+              TurnOn:
+                summary: Turn the light on.
+                value:
+                  'on':
+                    'on': true
+            schema:
+              $ref: '#/components/schemas/LightPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/light_level:
+    get:
+      operationId: getLightLevels
+      summary: List light levels.
+      description: List all available light levels.
+      tags:
+        - LightLevel
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Light Level Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LightLevelGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/light_level/{lightId}:
+    get:
+      operationId: getLightLevel
+      summary: Get light
+      description: Get details of a single light from its given `{lightId}`.
+      tags:
+        - LightLevel
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: lightId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the light
+      responses:
+        '200':
+          description: Light Level Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LightLevelGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateLightLevel
+      summary: Update light
+      description: Update a single light from its given `{lightId}`.
+      tags:
+        - LightLevel
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: lightId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the light
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Enable:
+                summary: Enable light level.
+                value:
+                  enabled: true
+            schema:
+              $ref: '#/components/schemas/LightLevelPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/motion:
+    get:
+      operationId: getMotionSensors
+      summary: List motion sensors.
+      description: List all available motion sensors.
+      tags:
+        - Motion
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Motion Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MotionGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/motion/{motionId}:
+    get:
+      operationId: getMotionSensor
+      summary: Get motion sensor.
+      description: Get details of a single motion sensor from its given `{motionId}`.
+      tags:
+        - Motion
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: motionId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the motion sensor
+      responses:
+        '200':
+          description: Motion Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MotionGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateMotionSensor
+      summary: Update Motion Sensor
+      description: Update a single motion sensor from its given `{motionId}`.
+      tags:
+        - Motion
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: motionId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: Id of the motion sensor
+      requestBody:
+        content:
+          application/json:
+            examples:
+              TurnOn:
+                summary: Turn the motion sensor on.
+                value:
+                  enabled: true
+            schema:
+              $ref: '#/components/schemas/MotionPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/grouped_light:
+    get:
+      operationId: getGroupedLights
+      summary: List grouped lights
+      description: List all grouped lights
+      tags:
+        - GroupedLight
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Grouped Light Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GroupedLightGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/grouped_light/{groupedLightId}:
+    get:
+      operationId: getGroupedLight
+      summary: Get grouped light
+      description: Get details of a single grouped light from its given `{groupedLightId}`.
+      tags:
+        - GroupedLight
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: groupedLightId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the grouped light
+      responses:
+        '200':
+          description: Grouped Light Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GroupedLightGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateGroupedLight
+      summary: Update grouped light
+      description: Update a single grouped light from its given `{groupedLightId}`.
+      tags:
+        - GroupedLight
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: groupedLightId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the light
+      requestBody:
+        content:
+          application/json:
+            examples:
+              SetOn:
+                summary: Set light group on
+                value:
+                  'on':
+                    'on': true
+            schema:
+              $ref: '#/components/schemas/GroupedLightPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/bridge:
+    get:
+      operationId: getBridges
+      summary: List bridges
+      description: List all available bridges
+      tags:
+        - Bridge
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Bridge Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BridgeGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/bridge/{bridgeId}:
+    get:
+      operationId: getBridge
+      summary: Get bridge
+      description: Get details of a single bridge from its given `{bridgeId}`.
+      tags:
+        - Bridge
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: bridgeId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the bridge
+      responses:
+        '200':
+          description: Bridge Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BridgeGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateBridge
+      summary: Update bridge
+      description: Update a single bridge from its given `{bridgeId}`.
+      tags:
+        - Bridge
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: bridgeId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the bridge
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BridgePut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/bridge_home:
+    get:
+      operationId: getBridgeHomes
+      summary: List bridge homes.
+      description: List all available bridge homes.
+      tags:
+        - Bridge Home
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Bridge Home Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BridgeHomeGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/bridge_home/{bridgeHomeId}:
+    get:
+      operationId: getBridgeHome
+      summary: Get bridge home.
+      description: Get details of a single bridge home from its given `{bridgeHomeId}`.
+      tags:
+        - Bridge Home
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: bridgeHomeId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the bridge home.
+      responses:
+        '200':
+          description: Bridge Home Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BridgeHomeGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/scene:
+    get:
+      operationId: getScenes
+      summary: List scenes
+      description: List all available scenes
+      tags:
+        - Scene
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Scene Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SceneGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    post:
+      operationId: createScene
+      summary: Create a new scene
+      description: Creates a new scene
+      tags:
+        - Scene
+      security:
+        - HueApplicationKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenePost'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/scene/{sceneId}:
+    get:
+      operationId: getScene
+      summary: Get a scene
+      description: Get details of a single scene from its given `{sceneId}`
+      tags:
+        - Scene
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: sceneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the scene.
+      responses:
+        '200':
+          description: Scene Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SceneGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateScene
+      summary: Update a scene
+      description: Update a single scene from its given `{sceneId}`
+      tags:
+        - Scene
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: sceneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the scene.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenePut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    delete:
+      operationId: deleteScene
+      summary: Delete a scene
+      description: Delete a single scene from its given `{sceneId}`
+      tags:
+        - Scene
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: sceneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the scene.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/smart_scene:
+    get:
+      operationId: getSmartScenes
+      summary: List smart scenes
+      description: List all available smart scenes
+      tags:
+        - Smart Scene
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Smart Scene Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SmartSceneGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    post:
+      operationId: createSmartScene
+      summary: Create a new smart scene
+      description: Creates a new smart scene
+      tags:
+        - Smart Scene
+      security:
+        - HueApplicationKey: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartScenePost'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/smart_scene/{sceneId}:
+    get:
+      operationId: getSmartScene
+      summary: Get a smart scene
+      description: Get details of a single smart scene from its given `{sceneId}`
+      tags:
+        - Smart Scene
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: sceneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the smart scene.
+      responses:
+        '200':
+          description: Smart Scene Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SmartSceneGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateSmartScene
+      summary: Update a smart scene
+      description: Update a single smart scene from its given `{sceneId}`
+      tags:
+        - Smart Scene
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: sceneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the scene.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartScenePut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    delete:
+      operationId: deleteSmartScene
+      summary: Delete a smart scene
+      description: Delete a single smart scene from its given `{sceneId}`
+      tags:
+        - Smart Scene
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: sceneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the smart scene.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/room:
+    get:
+      operationId: getRooms
+      summary: List rooms
+      description: List all available rooms
+      tags:
+        - Room
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Room Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RoomGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    post:
+      operationId: createRoom
+      summary: Create room
+      description: Create a new room
+      tags:
+        - Room
+      security:
+        - HueApplicationKey: []
+      requestBody:
+        content:
+          application/json:
+            examples:
+              NewTvRoom:
+                summary: Create a new TV Room
+                value:
+                  children:
+                    - rid: 00afc7d2-bae5-4613-8cd8-5ba0d064a572
+                      rtype: light
+                  metadata:
+                    name: TV Room
+                    archetype: tv
+            schema:
+              $ref: '#/components/schemas/RoomPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/room/{roomId}:
+    get:
+      operationId: getRoom
+      summary: Get room.
+      description: Get details of a single room from its given `{roomId}`
+      tags:
+        - Room
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: roomId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the room
+      responses:
+        '200':
+          description: Room Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RoomGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateRoom
+      summary: Update room
+      description: Update a single room from its given `{roomId}`
+      tags:
+        - Room
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: roomId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the room
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    delete:
+      operationId: deleteRoom
+      summary: Delete room
+      description: Delete a single room from its given `{roomId}`
+      tags:
+        - Room
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: roomId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the room
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/zone:
+    get:
+      operationId: getZones
+      summary: List zones
+      description: List all available zones
+      tags:
+        - Zone
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Zone Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RoomGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    post:
+      operationId: createZone
+      summary: Create zone
+      description: Create a new zone
+      tags:
+        - Zone
+      security:
+        - HueApplicationKey: []
+      requestBody:
+        content:
+          application/json:
+            examples:
+              NewTvZone:
+                summary: Create a new TV Zone
+                value:
+                  children:
+                    - rid: 00afc7d2-bae5-4613-8cd8-5ba0d064a572
+                      rtype: light
+                  metadata:
+                    name: TV Zone
+                    archetype: tv
+            schema:
+              $ref: '#/components/schemas/RoomPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/zone/{zoneId}:
+    get:
+      operationId: getZone
+      summary: Get Zone.
+      description: Get details of a single Zone from its given `{zoneId}`
+      tags:
+        - Zone
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: zoneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the Zone
+      responses:
+        '200':
+          description: Zone Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RoomGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateZone
+      summary: Update Zone
+      description: Update a single Zone from its given `{zoneId}`
+      tags:
+        - Zone
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: zoneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the Zone
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomPut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    delete:
+      operationId: deleteZone
+      summary: Delete Zone
+      description: Delete a single Zone from its given `{zoneId}`
+      tags:
+        - Zone
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: zoneId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the Zone
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/temperature:
+    get:
+      operationId: getTemperatures
+      summary: List temperatures
+      description: List all temperatures
+      tags:
+        - Temperature
+      security:
+        - HueApplicationKey: []
+      responses:
+        '200':
+          description: Temperature Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TemperatureGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+  /clip/v2/resource/temperature/{temperatureId}:
+    get:
+      operationId: getTemperature
+      summary: Get temperature sensor information
+      description: Get details of a single temperature sensor from its given `{temperatureId}`.
+      tags:
+        - Temperature
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: temperatureId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the temperature sensor
+      responses:
+        '200':
+          description: Temperature Success Response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TemperatureGet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+    put:
+      operationId: updateTemperature
+      summary: Update temperature sensor
+      description: Update a temperature sensor from its given `{temperatureId}`.
+      tags:
+        - Temperature
+      security:
+        - HueApplicationKey: []
+      parameters:
+        - name: temperatureId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of the temperature sensor
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Enable:
+                summary: Enable temperature sensor
+                value:
+                  enabled: true
+              Disable:
+                summary: Disable temperature sensor
+                value:
+                  enabled: false
+            schema:
+              $ref: '#/components/schemas/TemperaturePut'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ResourceIdentifier'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/InsufficientStorage'
+components:
+  securitySchemes:
+    HueApplicationKey:
+      type: apiKey
+      in: header
+      name: hue-application-key
+  schemas:
+    response:
+      type: array
+      minItems: 1
+      maxItems: 1
+      items:
+        type: object
+        properties:
+          success:
+            type: object
+            properties:
+              username:
+                type: string
+              clientkey:
+                type: string
+          error:
+            type: object
+            properties:
+              type:
+                type: integer
+                example: 101
+              address:
+                type: string
+              description:
+                type: string
+                example: link button bot pressed
+    Error:
+      type: object
+      properties:
+        description:
+          type: string
+          description: a human-readable explanation specific to this occurrence of the problem.
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    Resource:
+      type: object
+      description: Common resource properties
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources
+          example: light
+        id:
+          type: string
+          description: Unique identifier representing a specific resource instance
+          pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$
+          example: 3883f8bf-30a3-445b-ac06-b047d50599df
+        id_v1:
+          type: string
+          description: Clip v1 resource identifier
+          pattern: ^(\/[a-z]{4,32}\/[0-9a-zA-Z-]{1,32})?$
+          example: /lights/8
+    ResourceIdentifier:
+      type: object
+      properties:
+        rid:
+          type: string
+          description: The unique id of the referenced resource
+          pattern: ^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$
+          example: 42edd1f5-9538-4180-9ced-2d9e07f26d0f
+        rtype:
+          type: string
+          description: The type of the referenced resource
+          enum:
+            - device
+            - bridge_home
+            - room
+            - zone
+            - light
+            - button
+            - relative_rotary
+            - temperature
+            - light_level
+            - motion
+            - camera_motion
+            - entertainment
+            - contact
+            - tamper
+            - grouped_light
+            - device_power
+            - zigbee_bridge_connectivity
+            - zigbee_connectivity
+            - zgp_connectivity
+            - bridge
+            - zigbee_device_discovery
+            - homekit
+            - matter
+            - matter_fabric
+            - scene
+            - entertainment_configuration
+            - public_image
+            - auth_v1
+            - behavior_script
+            - behavior_instance
+            - geofence
+            - geofence_client
+            - geolocation
+            - smart_scene
+    ResourceOwned:
+      type: object
+      description: Common resource properties including the owner
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - type: object
+          properties:
+            owner:
+              $ref: '#/components/schemas/ResourceIdentifier'
+    ResourceGet:
+      type: object
+      description: |
+        The API is actually returning the full resource description depending on the type, not just the fields that are
+        documented below.
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: Type of the supported resources
+              example: light
+              enum:
+                - device
+                - bridge_home
+                - room
+                - zone
+                - light
+                - button
+                - relative_rotary
+                - temperature
+                - light_level
+                - motion
+                - camera_motion
+                - entertainment
+                - contact
+                - tamper
+                - grouped_light
+                - device_power
+                - zigbee_bridge_connectivity
+                - zigbee_connectivity
+                - zgp_connectivity
+                - bridge
+                - zigbee_device_discovery
+                - homekit
+                - matter
+                - matter_fabric
+                - scene
+                - entertainment_configuration
+                - public_image
+                - auth_v1
+                - behavior_script
+                - behavior_instance
+                - geofence
+                - geofence_client
+                - geolocation
+                - smart_scene
+    ApiResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        data:
+          type: array
+          items:
+            type: object
+    ProductArchetype:
+      type: string
+      description: The default archetype given by manufacturer. Can be changed by user.
+      example: hue_go
+      enum:
+        - bridge_v2
+        - unknown_archetype
+        - classic_bulb
+        - sultan_bulb
+        - flood_bulb
+        - spot_bulb
+        - candle_bulb
+        - luster_bulb
+        - pendant_round
+        - pendant_long
+        - ceiling_round
+        - ceiling_square
+        - floor_shade
+        - floor_lantern
+        - table_shade
+        - recessed_ceiling
+        - recessed_floor
+        - single_spot
+        - double_spot
+        - table_wash
+        - wall_lantern
+        - wall_shade
+        - flexible_lamp
+        - ground_spot
+        - wall_spot
+        - plug
+        - hue_go
+        - hue_lightstrip
+        - hue_iris
+        - hue_bloom
+        - bollard
+        - wall_washer
+        - hue_play
+        - vintage_bulb
+        - vintage_candle_bulb
+        - ellipse_bulb
+        - triangle_bulb
+        - small_globe_bulb
+        - large_globe_bulb
+        - edison_bulb
+        - christmas_tree
+        - string_light
+        - hue_centris
+        - hue_lightstrip_tv
+        - hue_lightstrip_pc
+        - hue_tube
+        - hue_signe
+        - pendant_spot
+        - ceiling_horizontal
+        - ceiling_tube
+    ProductData:
+      type: object
+      properties:
+        model_id:
+          type: string
+          description: Unique identification of device model
+          example: 7602031P7
+        manufacturer_name:
+          type: string
+          description: Name of device manufacturer
+          example: Signify Netherlands B.V.
+        product_name:
+          type: string
+          description: Name of the product
+          example: Hue Go
+        product_archetype:
+          $ref: '#/components/schemas/ProductArchetype'
+        certified:
+          type: boolean
+          description: This device is Hue certified
+        software_version:
+          type: string
+          description: Software version of the product
+          pattern: \d+\.\d+\.\d+
+          example: 1.104.3
+        hardware_platform_type:
+          type: string
+          description: Hardware type; identified by Manufacturer code and ImageType
+          example: 100b-120
+    DeviceGet:
+      type: object
+      description: Definition of a device resource
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - device
+            product_data:
+              $ref: '#/components/schemas/ProductData'
+            metadata:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 32
+                  description: Human readable name of a resource
+                archetype:
+                  $ref: '#/components/schemas/ProductArchetype'
+            usertest:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - set
+                    - changing
+                usertest:
+                  type: boolean
+                  description: |
+                    Activates or extends user usertest mode of device for 120 seconds.
+                    `false` deactivates usertest mode.
+                    In usertest mode, devices report changes in state faster and indicate state changes on device LED (if applicable)
+            services:
+              type: array
+              description: References all services providing control and state of the device.
+              items:
+                $ref: '#/components/schemas/ResourceIdentifier'
+    DevicePut:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - device
+        metadata:
+          type: object
+          properties:
+            name:
+              type: string
+              minLength: 1
+              maxLength: 32
+              description: Human readable name of a resource
+            archetype:
+              $ref: '#/components/schemas/ProductArchetype'
+        identify:
+          type: object
+          properties:
+            action:
+              type: string
+              description: |
+                Triggers a visual identification sequence, current implemented as (which can change in the future):
+                Bridge performs Zigbee LED identification cycles for 5 seconds Lights perform one breathe cycle Sensors
+                perform LED identification cycles for 15 seconds
+              enum:
+                - identify
+        usertest:
+          type: object
+          properties:
+            usertest:
+              type: boolean
+              description: |
+                Activates or extends user usertest mode of device for 120 seconds.
+                `false` deactivates usertest mode. In usertest mode, devices report changes in state faster and indicate
+                state changes on device LED (if applicable)
+    DevicePowerGet:
+      type: object
+      description: Definition of a bridge power resource
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            power_state:
+              type: object
+              properties:
+                battery_state:
+                  type: string
+                  enum:
+                    - normal
+                    - low
+                    - critical
+                  description: |
+                    Status of the power source of a device, only for battery powered devices.
+
+                    - `normal` – battery level is sufficient
+                    - `low` – battery level low, some features (e.g. software update) might stop working, please change battery soon
+                    - `critical` – battery level critical, device can fail any moment
+                battery_level:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                  description: The current battery state in percent, only for battery powered devices.
+    LightArchetype:
+      type: string
+      description: Light archetype
+      example: classic_bulb
+      enum:
+        - unknown_archetype
+        - classic_bulb
+        - sultan_bulb
+        - flood_bulb
+        - spot_bulb
+        - candle_bulb
+        - luster_bulb
+        - pendant_round
+        - pendant_long
+        - ceiling_round
+        - ceiling_square
+        - floor_shade
+        - floor_lantern
+        - table_shade
+        - recessed_ceiling
+        - recessed_floor
+        - single_spot
+        - double_spot
+        - table_wash
+        - wall_lantern
+        - wall_shade
+        - flexible_lamp
+        - ground_spot
+        - wall_spot
+        - plug
+        - hue_go
+        - hue_lightstrip
+        - hue_iris
+        - hue_bloom
+        - bollard
+        - wall_washer
+        - hue_play
+        - vintage_bulb
+        - vintage_candle_bulb
+        - ellipse_bulb
+        - triangle_bulb
+        - small_globe_bulb
+        - large_globe_bulb
+        - edison_bulb
+        - christmas_tree
+        - string_light
+        - hue_centris
+        - hue_lightstrip_tv
+        - hue_lightstrip_pc
+        - hue_tube
+        - hue_signe
+        - pendant_spot
+        - ceiling_horizontal
+        - ceiling_tube
+    'On':
+      type: object
+      properties:
+        'on':
+          type: boolean
+          description: On/Off state of the light on=true, off=false
+    Brightness:
+      type: number
+      minimum: 0
+      maximum: 100
+      description: Brightness percentage. value cannot be 0, writing 0 changes it to lowest possible brightness
+    GamutPosition:
+      type: object
+      description: CIE XY gamut position
+      properties:
+        x:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: X position in color gamut
+        'y':
+          type: number
+          minimum: 0
+          maximum: 1
+          description: y position in color gamut
+    SupportedDynamicStatus:
+      type: string
+      description: Current status of the lamp with dynamics.
+      enum:
+        - dynamic_palette
+        - none
+    SupportedSignals:
+      type: string
+      description: Indicates which signal is currently active.
+      enum:
+        - no_signal
+        - on_off
+        - on_off_color
+        - alternating
+    Color:
+      type: object
+      properties:
+        xy:
+          $ref: '#/components/schemas/GamutPosition'
+    SupportedGradientMode:
+      type: string
+      description: Mode in which the points are currently being deployed. If not provided during PUT/POST it will be defaulted to interpolated_palette
+      enum:
+        - interpolated_palette
+        - interpolated_palette_mirrored
+        - random_pixelated
+    Gradient:
+      type: object
+      description: Basic feature containing gradient properties.
+      properties:
+        points:
+          type: array
+          description: Collection of gradients points. For control of the gradient points through a PUT a minimum of 2 points need to be provided.
+          items:
+            $ref: '#/components/schemas/Color'
+          maxItems: 5
+        mode:
+          $ref: '#/components/schemas/SupportedGradientMode'
+    SupportedEffects:
+      type: string
+      enum:
+        - prism
+        - opal
+        - glisten
+        - sparkle
+        - fire
+        - candle
+        - no_effect
+        - underwater
+        - cosmos
+        - sunbeam
+        - enchant
+    SupportedTimedEffects:
+      type: string
+      description: Current status values the light is in regarding timed effects
+      enum:
+        - sunrise
+        - sunset
+        - no_effect
+    Dimming:
+      type: object
+      properties:
+        brightness:
+          $ref: '#/components/schemas/Brightness'
+    Mirek:
+      type: integer
+      minimum: 153
+      maximum: 500
+      description: color temperature in mirek or null when the light color is not in the ct spectrum
+    LightGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            metadata:
+              type: object
+              description: Deprecated, use metadata on device level
+              properties:
+                name:
+                  type: string
+                  description: Human readable name of a resource
+                archetype:
+                  $ref: '#/components/schemas/LightArchetype'
+                fixed_mired:
+                  type: integer
+                  minimum: 153
+                  maximum: 500
+                  description: A fixed mired value of the white lamp
+            'on':
+              $ref: '#/components/schemas/On'
+            dimming:
+              type: object
+              properties:
+                brightness:
+                  $ref: '#/components/schemas/Brightness'
+                min_dim_level:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                  description: Percentage of the maximum lumen the device outputs on minimum brightness
+            color_temperature:
+              type: object
+              properties:
+                mirek:
+                  type: integer
+                  minimum: 153
+                  maximum: 500
+                  description: color temperature in mirek or null when the light color is not in the ct spectrum
+                mirek_valid:
+                  type: boolean
+                  description: Indication whether the value presented in mirek is valid
+                mirek_schema:
+                  type: object
+                  properties:
+                    mirek_minimum:
+                      type: integer
+                      minimum: 153
+                      maximum: 500
+                      description: minimum color temperature this light supports
+                    mirek_maximum:
+                      type: integer
+                      minimum: 153
+                      maximum: 500
+                      description: maximum color temperature this light supports
+            color:
+              type: object
+              properties:
+                xy:
+                  $ref: '#/components/schemas/GamutPosition'
+                gamut:
+                  type: object
+                  description: Color gamut of color bulb. Some bulbs do not properly return the Gamut information. In this case this is not present.
+                  properties:
+                    red:
+                      $ref: '#/components/schemas/GamutPosition'
+                    green:
+                      $ref: '#/components/schemas/GamutPosition'
+                    blue:
+                      $ref: '#/components/schemas/GamutPosition'
+                gamut_type:
+                  type: string
+                  description: The gammut types supported by hue – A Gamut of early Philips color-only products – B Limited gamut of first Hue color products – C Richer color gamut of Hue white and color ambiance products – other Color gamut of non-hue products with non-hue gamuts resp w/o gamut
+                  enum:
+                    - A
+                    - B
+                    - C
+                    - other
+            dynamics:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/SupportedDynamicStatus'
+                status_values:
+                  type: array
+                  description: Statuses in which a lamp could be when playing dynamics.
+                  items:
+                    $ref: '#/components/schemas/SupportedDynamicStatus'
+                speed:
+                  type: number
+                  minimum: 0
+                  maximum: 0
+                  description: speed of dynamic palette or effect. The speed is valid for the dynamic palette if the status is dynamic_palette or for the corresponding effect listed in status. In case of status none, the speed is not valid
+                speed_valid:
+                  type: boolean
+                  description: Indicates whether the value presented in speed is valid
+            alert:
+              type: object
+              description: TODO
+            signaling:
+              type: object
+              description: Feature containing signaling properties.
+              properties:
+                signal_values:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SupportedSignals'
+                estimated_end:
+                  type: integer
+                  description: Timestamp indicating when the active signal is expected to end. Value is not set if there is no_signal
+                colors:
+                  type: array
+                  description: Colors that were provided for the active effect.
+                  items:
+                    $ref: '#/components/schemas/Color'
+            mode:
+              type: string
+              enum:
+                - normal
+                - streaming
+            gradient:
+              type: object
+              allOf:
+                - $ref: '#/components/schemas/Gradient'
+                - type: object
+                  properties:
+                    points_capable:
+                      type: integer
+                      description: Number of color points that gradient lamp is capable of showing with gradience.
+                    mode_values:
+                      type: array
+                      description: Modes a gradient device can deploy the gradient palette of colors
+                      items:
+                        $ref: '#/components/schemas/SupportedGradientMode'
+                    pixel_count:
+                      type: integer
+                      description: Number of pixels in the device
+            effects:
+              type: object
+              description: Basic feature containing effect properties.
+              properties:
+                status:
+                  $ref: '#/components/schemas/SupportedEffects'
+                status_values:
+                  type: array
+                  description: Possible status values in which a light could be when playing an effect.
+                  items:
+                    $ref: '#/components/schemas/SupportedEffects'
+                effect:
+                  $ref: '#/components/schemas/SupportedEffects'
+                effect_values:
+                  type: array
+                  description: Possible status values in which a light could be when playing an effect.
+                  items:
+                    $ref: '#/components/schemas/SupportedEffects'
+            timed_effects:
+              type: object
+              description: Basic feature containing timed effect properties.
+              properties:
+                effect:
+                  $ref: '#/components/schemas/SupportedTimedEffects'
+                effect_values:
+                  type: array
+                  description: Possible timed effect values you can set in a light
+                  items:
+                    $ref: '#/components/schemas/SupportedTimedEffects'
+                status:
+                  $ref: '#/components/schemas/SupportedTimedEffects'
+                status_values:
+                  type: array
+                  description: Possible status values in which a light could be when playing a timed effect.
+                  items:
+                    $ref: '#/components/schemas/SupportedTimedEffects'
+                duration:
+                  type: integer
+                  description: Duration is mandatory when timed effect is set except for no_effect. Resolution decreases for a larger duration. e.g Effects with duration smaller than a minute will be rounded to a resolution of 1s, while effects with duration larger than an hour will be arounded up to a resolution of 300s. Duration has a max of 21600000 ms.
+            powerup:
+              type: object
+              description: Feature containing properties to configure powerup behaviour of a lightsource.
+              properties:
+                preset:
+                  type: string
+                  description: When setting the custom preset the additional properties can be set. For all other presets, no other properties can be included.
+                  enum:
+                    - safety
+                    - powerfail
+                    - last_on_state
+                    - custom
+                configured:
+                  type: boolean
+                  description: Indicates if the shown values have been configured in the lightsource.
+                'on':
+                  type: object
+                  properties:
+                    mode:
+                      type: string
+                      description: |
+                        State to activate after powerup.
+                        On will use the value specified in the “on” property.
+                        When setting mode “on”, the on property must be included.
+                        Toggle will alternate between on and off on each subsequent power toggle.
+                        Previous will return to the state it was in before powering off.
+                      enum:
+                        - 'on'
+                        - toggle
+                        - previous
+                    'on':
+                      $ref: '#/components/schemas/On'
+                dimming:
+                  type: object
+                  properties:
+                    mode:
+                      type: string
+                      description: |
+                        Dimming will set the brightness to the specified value after power up.
+                        When setting mode “dimming”, the dimming property must be included.
+                        Previous will set brightness to the state it was in before powering off.
+                      enum:
+                        - dimming
+                        - previous
+                    dimming:
+                      $ref: '#/components/schemas/Dimming'
+                    color:
+                      type: object
+                      properties:
+                        mode:
+                          type: string
+                          enum:
+                            - color_temperature
+                            - color
+                            - previous
+                          description: State to activate after powerup. Availability of “color_temperature” and “color” modes depend on the capabilities of the lamp. Colortemperature will set the colortemperature to the specified value after power up. When setting color_temperature, the color_temperature property must be included Color will set the color tot he specified value after power up. When setting color mode, the color property must be included Previous will set color to the state it was in before powering off.
+                        color_temperature:
+                          type: object
+                          properties:
+                            mirek:
+                              $ref: '#/components/schemas/Mirek'
+                            color:
+                              $ref: '#/components/schemas/Color'
+    DimmingDelta:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - up
+            - down
+            - stop
+        brightness_delta:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: |
+            Brightness percentage of full-scale increase delta to current dimlevel. Clip at Max-level or Min-level.
+    ColorTemperature:
+      type: object
+      properties:
+        mirek:
+          $ref: '#/components/schemas/Mirek'
+    ColorTemperatureDelta:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - up
+            - down
+            - stop
+        mirek_delta:
+          type: integer
+          minimum: 0
+          maximum: 347
+          description: Mirek delta to current mirek. Clip at mirek_minimum and mirek_maximum of mirek_schema.
+    LightDynamics:
+      type: object
+      properties:
+        duration:
+          type: integer
+          description: Duration of a light transition or timed effects in ms.
+        speed:
+          type: number
+          minimum: 0
+          maximum: 0
+          description: |
+            Speed of dynamic palette or effect.
+            The speed is valid for the dynamic palette if the status is `dynamic_palette` or for the corresponding effect listed in status.
+            In case of status `none`, the speed is not valid.
+    Alert:
+      type: object
+      description: Joined alert control
+      properties:
+        action:
+          type: string
+          example: breathe
+    Signaling:
+      type: object
+      description: Feature containing basic signaling properties.
+      properties:
+        signal:
+          type: string
+          description: |
+            - `no_signal`: No signal is active. Write “no_signal” to stop active signal.
+            - `on_off`: Toggles between max brightness and Off in fixed color.
+            - `on_off_color`: Toggles between off and max brightness with color provided.
+            - `alternating`: Alternates between 2 provided colors.
+          enum:
+            - no_signal
+            - on_off
+            - on_off_color
+            - alternating
+        duration:
+          type: integer
+          minimum: 0
+          maximum: 65534000
+          description: |
+            Duration has a max of 65534000 ms and a stepsize of 1 second.
+            Values inbetween steps will be rounded.
+            Duration is ignored for `no_signal`.
+        color:
+          type: array
+          minItems: 1
+          maxItems: 2
+          description: List of colors to apply to the signal (not supported by all signals)
+          items:
+            $ref: '#/components/schemas/Color'
+    Effects:
+      type: object
+      description: Basic feature containing effect properties.
+      properties:
+        effect:
+          $ref: '#/components/schemas/SupportedEffects'
+    Powerup:
+      type: object
+      description: Feature containing properties to configure powerup behaviour of a lightsource.
+      properties:
+        preset:
+          type: string
+          description: When setting the custom preset the additional properties can be set. For all other presets, no other properties can be included.
+          enum:
+            - safety
+            - powerfail
+            - last_on_state
+            - custom
+        configured:
+          type: boolean
+          description: Indicates if the shown values have been configured in the lightsource.
+        'on':
+          type: object
+          properties:
+            mode:
+              type: string
+              description: |
+                State to activate after powerup.
+                On will use the value specified in the “on” property.
+                When setting mode “on”, the on property must be included.
+                Toggle will alternate between on and off on each subsequent power toggle.
+                Previous will return to the state it was in before powering off.
+              enum:
+                - 'on'
+                - toggle
+                - previous
+            'on':
+              $ref: '#/components/schemas/On'
+        dimming:
+          type: object
+          properties:
+            mode:
+              type: string
+              description: |
+                Dimming will set the brightness to the specified value after power up.
+                When setting mode “dimming”, the dimming property must be included.
+                Previous will set brightness to the state it was in before powering off.
+              enum:
+                - dimming
+                - previous
+            dimming:
+              $ref: '#/components/schemas/Brightness'
+            color:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum:
+                    - color_temperature
+                    - color
+                    - previous
+                  description: State to activate after powerup. Availability of “color_temperature” and “color” modes depend on the capabilities of the lamp. Colortemperature will set the colortemperature to the specified value after power up. When setting color_temperature, the color_temperature property must be included Color will set the color tot he specified value after power up. When setting color mode, the color property must be included Previous will set color to the state it was in before powering off.
+                color_temperature:
+                  type: object
+                  properties:
+                    mirek:
+                      $ref: '#/components/schemas/Mirek'
+                    color:
+                      $ref: '#/components/schemas/Color'
+    LightPut:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources (always `light` here)
+        'on':
+          $ref: '#/components/schemas/On'
+        dimming:
+          $ref: '#/components/schemas/Dimming'
+        dimming_delta:
+          $ref: '#/components/schemas/DimmingDelta'
+        color_temperature:
+          $ref: '#/components/schemas/ColorTemperature'
+        color_temperature_delta:
+          $ref: '#/components/schemas/ColorTemperatureDelta'
+        color:
+          $ref: '#/components/schemas/Color'
+        dynamics:
+          $ref: '#/components/schemas/LightDynamics'
+        alert:
+          $ref: '#/components/schemas/Alert'
+        signaling:
+          $ref: '#/components/schemas/Signaling'
+        mode:
+          type: string
+          enum:
+            - normal
+            - streaming
+        gradient:
+          $ref: '#/components/schemas/Gradient'
+        effects:
+          $ref: '#/components/schemas/Effects'
+        timed_effects:
+          type: object
+          description: Basic feature containing timed effect properties.
+          properties:
+            effect:
+              $ref: '#/components/schemas/SupportedTimedEffects'
+            duration:
+              type: integer
+              description: Duration is mandatory when timed effect is set except for no_effect. Resolution decreases for a larger duration. e.g Effects with duration smaller than a minute will be rounded to a resolution of 1s, while effects with duration larger than an hour will be arounded up to a resolution of 300s. Duration has a max of 21600000 ms.
+        powerup:
+          $ref: '#/components/schemas/Powerup'
+    LightLevelGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            enabled:
+              type: boolean
+              description: true when sensor is activated, false when deactivated
+            light:
+              type: object
+              properties:
+                light_level:
+                  type: integer
+                  description: Deprecated. Moved to light_level_report/light_level
+                light_level_valid:
+                  type: boolean
+                  description: Deprecated. Indication whether the value presented in light_level is valid
+                light_level_report:
+                  type: object
+                  properties:
+                    changed:
+                      type: string
+                      format: date-time
+                      description: last time the value of this property is changed.
+                    light_level:
+                      type: integer
+                      description: |
+                        Light level in 10000*log10(lux) +1 measured by sensor.
+                        Logarithmic scale used because the human eye adjusts to light levels and small changes at low
+                        lux levels are more noticeable than at high lux levels.
+                        This allows use of linear scale configuration sliders.
+    LightLevelPut:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources (always `light_level` here)
+        enabled:
+          type: boolean
+          description: true when sensor is activated, false when deactivated
+    MotionGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            enabled:
+              type: boolean
+              description: ture when the sensor is activated, false when deactivated
+            motion:
+              type: object
+              properties:
+                motion:
+                  type: boolean
+                  description: Deprecated. Moved to motion_report/motion.
+                motion_valid:
+                  type: boolean
+                  description: Deprecated. Motion is valid when motion_report property is present, invalid when absent.
+                motion_report:
+                  type: object
+                  properties:
+                    changed:
+                      type: string
+                      description: last time the value of this property is changed
+                    motion:
+                      type: boolean
+                      description: true if motion is detected
+            sensitivity:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - set
+                    - changing
+                sensitivity:
+                  type: integer
+                  description: Sensitivity of the sensor. Value in the range 0 to sensitivity_max
+                sensitivity_max:
+                  type: integer
+                  description: Maximum value of the sensitivity configuration attribute.
+    MotionPut:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources (always `motion` here)
+        enabled:
+          type: boolean
+          description: true when the sensor is activated, false when deactivated
+        sensitivity:
+          type: object
+          properties:
+            sensitivity:
+              type: integer
+              description: Sensitivity of the sensor. Value in the range 0 to sensitivity_max.
+    GroupedLightGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            'on':
+              description: Joined on control & aggregated on state. “on” is true if any light in the group is on.
+              $ref: '#/components/schemas/On'
+            dimming:
+              description: Joined dimming control – “dimming.brightness” contains average brightness of group containing turned-on lights only.
+              $ref: '#/components/schemas/Dimming'
+            alert:
+              type: object
+              description: Joined alert control
+              properties:
+                action_values:
+                  type: array
+                  items:
+                    type: string
+                    example: breathe
+            signaling:
+              type: object
+              description: Feature containing basic signaling properties.
+              properties:
+                signal_values:
+                  type: array
+                  description: Signals that the light supports.
+                  items:
+                    $ref: '#/components/schemas/SupportedSignals'
+    Dynamics:
+      type: object
+      properties:
+        duration:
+          type: integer
+          minimum: 0
+          description: Duration of a light transition or timed effects in ms.
+    GroupedLightPut:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources (always `grouped_light` here)
+          enum:
+            - grouped_light
+        'on':
+          $ref: '#/components/schemas/On'
+        dimming:
+          $ref: '#/components/schemas/Dimming'
+        dimming_delta:
+          $ref: '#/components/schemas/DimmingDelta'
+        color_temperature:
+          $ref: '#/components/schemas/ColorTemperature'
+        color_temperature_delta:
+          $ref: '#/components/schemas/ColorTemperatureDelta'
+        color:
+          $ref: '#/components/schemas/Color'
+        alert:
+          $ref: '#/components/schemas/Alert'
+        signaling:
+          $ref: '#/components/schemas/Signaling'
+        dynamics:
+          $ref: '#/components/schemas/Dynamics'
+    BridgeGet:
+      type: object
+      description: Definition of a bridge resource
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - bridge
+            bridge_id:
+              type: string
+              description: Unique identifier of the bridge as printed on the device. Lower case (shouldn't it be upper case?)
+            time_zone:
+              type: object
+              properties:
+                time_zone:
+                  type: string
+                  description: Time zone where the user's home is located (as Olson ID).
+    BridgePut:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - bridge
+    BridgeHomeGet:
+      type: object
+      description: Definition of a bridge resource
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - bridge_home
+            children:
+              type: array
+              description: Child devices/services to group by the derived group.
+              items:
+                $ref: '#/components/schemas/ResourceIdentifier'
+            services:
+              type: array
+              description: |
+                References all services aggregating control and state of children in the group.
+                This includes all services grouped in the group hierarchy given by child relation.
+                This includes all services of a device grouped in the group hierarchy given by child relation.
+                Aggregation is per service type, ie every service type which can be grouped has a corresponding definition
+                of grouped type Supported types: – grouped_light
+              items:
+                $ref: '#/components/schemas/ResourceIdentifier'
+    ActionGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            target:
+              type: object
+              description: The identifier of the light to execute the action on
+              $ref: '#/components/schemas/ResourceIdentifier'
+            action:
+              type: object
+              description: The action to be executed on recall
+              properties:
+                'on':
+                  $ref: '#/components/schemas/On'
+                dimming:
+                  $ref: '#/components/schemas/Dimming'
+                color:
+                  $ref: '#/components/schemas/Color'
+                color_temperature:
+                  $ref: '#/components/schemas/ColorTemperature'
+                gradient:
+                  $ref: '#/components/schemas/Gradient'
+                effects:
+                  type: object
+                  description: Basic feature containing effect properties.
+                  properties:
+                    effect:
+                      $ref: '#/components/schemas/SupportedEffects'
+    SceneMetadata:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: Human readable name of a resource
+        image:
+          $ref: '#/components/schemas/ResourceIdentifier'
+        appdata:
+          type: string
+          minLength: 1
+          maxLength: 16
+          description: Application specific data. Free format string.
+    ColorPaletteGet:
+      type: object
+      properties:
+        color:
+          $ref: '#/components/schemas/Color'
+        dimming:
+          $ref: '#/components/schemas/Dimming'
+    ColorTemperaturePalettePost:
+      type: object
+      properties:
+        color_temperature:
+          type: object
+          properties:
+            mirek:
+              $ref: '#/components/schemas/Mirek'
+        dimming:
+          $ref: '#/components/schemas/Dimming'
+    ScenePalette:
+      type: object
+      description: Group of colors that describe the palette of colors to be used when playing dynamics
+      properties:
+        color:
+          type: array
+          minItems: 0
+          maxItems: 9
+          items:
+            $ref: '#/components/schemas/ColorPaletteGet'
+        dimming:
+          type: array
+          minItems: 0
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Dimming'
+        color_temperature:
+          type: array
+          minItems: 0
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/ColorTemperaturePalettePost'
+        effects:
+          type: array
+          minItems: 0
+          maxItems: 3
+          items:
+            type: object
+            properties:
+              effect:
+                $ref: '#/components/schemas/SupportedEffects'
+    SceneGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - scene
+            actions:
+              type: array
+              description: List of actions to be executed synchronously on recall
+              items:
+                $ref: '#/components/schemas/ActionGet'
+            metadata:
+              $ref: '#/components/schemas/SceneMetadata'
+            group:
+              $ref: '#/components/schemas/ResourceIdentifier'
+            palette:
+              $ref: '#/components/schemas/ScenePalette'
+            speed:
+              type: number
+              minimum: 0
+              maximum: 1
+              description: Speed of dynamic palette for this scene
+            auto_dynamic:
+              type: boolean
+              description: Indicates whether to automatically start the scene dynamically on active recall
+            status:
+              type: object
+              properties:
+                active:
+                  type: string
+                  enum:
+                    - inactive
+                    - static
+                    - dynamic_palette
+    ActionPost:
+      type: object
+      required:
+        - target
+        - action
+      properties:
+        target:
+          type: object
+          description: The identifier of the light to execute the action on
+          $ref: '#/components/schemas/ResourceIdentifier'
+        action:
+          type: object
+          description: The action to be executed on recall
+          properties:
+            'on':
+              $ref: '#/components/schemas/On'
+            dimming:
+              $ref: '#/components/schemas/Dimming'
+            color:
+              $ref: '#/components/schemas/Color'
+            color_temperature:
+              type: object
+              properties:
+                mirek:
+                  $ref: '#/components/schemas/Mirek'
+            gradient:
+              $ref: '#/components/schemas/Gradient'
+            effects:
+              type: object
+              description: Basic feature containing effect properties.
+              properties:
+                effect:
+                  $ref: '#/components/schemas/SupportedEffects'
+            dynamics:
+              $ref: '#/components/schemas/Dynamics'
+    ScenePost:
+      type: object
+      required:
+        - actions
+        - metadata
+        - group
+      properties:
+        type:
+          type: string
+          enum:
+            - scene
+        actions:
+          type: array
+          description: List of actions to be executed synchronously on recall
+          items:
+            $ref: '#/components/schemas/ActionPost'
+        metadata:
+          $ref: '#/components/schemas/SceneMetadata'
+        group:
+          $ref: '#/components/schemas/ResourceIdentifier'
+        palette:
+          $ref: '#/components/schemas/ScenePalette'
+        speed:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Speed of dynamic palette for this scene
+        auto_dynamic:
+          type: boolean
+          description: Indicates whether to automatically start the scene dynamically on active recall
+    SceneRecall:
+      type: object
+      properties:
+        action:
+          type: string
+          description: When writing active, the actions in the scene are executed on the target. dynamic_palette starts dynamic scene with colors in the Palette object.
+          enum:
+            - active
+            - dynamic_palette
+            - static
+        duration:
+          type: integer
+          description: Transition to the scene within the timeframe given by duration
+        dimming:
+          $ref: '#/components/schemas/Dimming'
+    ScenePut:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - scene
+        actions:
+          type: array
+          description: List of actions to be executed synchronously on recall
+          items:
+            $ref: '#/components/schemas/ActionPost'
+        recall:
+          $ref: '#/components/schemas/SceneRecall'
+        metadata:
+          $ref: '#/components/schemas/SceneMetadata'
+        palette:
+          $ref: '#/components/schemas/ScenePalette'
+        speed:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Speed of dynamic palette for this scene
+        auto_dynamic:
+          type: boolean
+          description: Indicates whether to automatically start the scene dynamically on active recall
+    SmartSceneMetadata:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: Human readable name of a resource
+        appdata:
+          type: string
+          minLength: 1
+          maxLength: 16
+          description: Application specific data. Free format string.
+    SmartSceneMetadataWithImage:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/SmartSceneMetadata'
+        - type: object
+          properties:
+            image:
+              $ref: '#/components/schemas/ResourceIdentifier'
+    SmartSceneTimeslotGet:
+      type: object
+      properties:
+        start_time:
+          type: object
+          properties:
+            kind:
+              type: string
+              enum:
+                - time
+                - sunset
+            time:
+              type: object
+              description: this property is only used when property “kind” is “time”
+              properties:
+                hour:
+                  type: integer
+                  minimum: 0
+                  maximum: 23
+                minute:
+                  type: integer
+                  minimum: 0
+                  maximum: 59
+                second:
+                  type: integer
+                  minimum: 0
+                  maximum: 59
+          required:
+            - kind
+        target:
+          $ref: '#/components/schemas/ResourceIdentifier'
+      required:
+        - start_time
+        - target
+    Weekday:
+      type: string
+      enum:
+        - monday
+        - tuesday
+        - wednesday
+        - thursday
+        - friday
+        - saturday
+        - sunday
+    DayTimeslotsGet:
+      type: object
+      properties:
+        timeslots:
+          type: array
+          items:
+            $ref: '#/components/schemas/SmartSceneTimeslotGet'
+        recurrence:
+          type: array
+          items:
+            $ref: '#/components/schemas/Weekday'
+      required:
+        - timeslots
+        - recurrence
+    SmartSceneGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - smart_scene
+            metadata:
+              $ref: '#/components/schemas/SmartSceneMetadataWithImage'
+            group:
+              $ref: '#/components/schemas/ResourceIdentifier'
+            week_timeslots:
+              description: information on what is the light state for every timeslot of the day
+              type: array
+              items:
+                $ref: '#/components/schemas/DayTimeslotsGet'
+            transition_duration:
+              description: duration of the transition from on one timeslot's scene to the other (defaults to 60000ms)
+              type: integer
+            active_timeslot:
+              description: the active time slot in execution
+              type: object
+              properties:
+                timeslot_id:
+                  type: integer
+                weekday:
+                  $ref: '#/components/schemas/Weekday'
+              required:
+                - timeslot_id
+                - weekday
+            state:
+              description: the current state of the smart scene. The default state is inactive if no recall is provided
+              type: string
+              enum:
+                - active
+                - inactive
+          required:
+            - metadata
+            - group
+            - week_timeslots
+            - transition_duration
+            - state
+    SmartSceneRecall:
+      type: object
+      properties:
+        action:
+          type: string
+          description: Activate will start the smart (24h) scene; deactivate will stop it
+          enum:
+            - activate
+            - deactivate
+      required:
+        - action
+    SmartScenePost:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - smart_scene
+        metadata:
+          $ref: '#/components/schemas/SmartSceneMetadataWithImage'
+        group:
+          $ref: '#/components/schemas/ResourceIdentifier'
+        week_timeslots:
+          description: information on what is the light state for every timeslot of the day
+          type: array
+          items:
+            $ref: '#/components/schemas/DayTimeslotsGet'
+        transition_duration:
+          description: duration of the transition from on one timeslot's scene to the other (defaults to 60000ms)
+          type: integer
+        recall:
+          $ref: '#/components/schemas/SmartSceneRecall'
+      required:
+        - metadata
+        - group
+        - week_timeslots
+    SmartSceneOptionalRecall:
+      type: object
+      properties:
+        action:
+          type: string
+          description: Activate will start the smart (24h) scene; deactivate will stop it
+          enum:
+            - activate
+            - deactivate
+    SmartScenePut:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - smart_scene
+        metadata:
+          $ref: '#/components/schemas/SmartSceneMetadata'
+        week_timeslots:
+          description: information on what is the light state for every timeslot of the day
+          type: array
+          items:
+            $ref: '#/components/schemas/DayTimeslotsGet'
+        transition_duration:
+          description: duration of the transition from on one timeslot's scene to the other (defaults to 60000ms)
+          type: integer
+        recall:
+          $ref: '#/components/schemas/SmartSceneOptionalRecall'
+    RoomArchetype:
+      type: string
+      description: Possible archetypes of a room
+      enum:
+        - living_room
+        - kitchen
+        - dining
+        - bedroom
+        - kids_bedroom
+        - bathroom
+        - nursery
+        - recreation
+        - office
+        - gym
+        - hallway
+        - toilet
+        - front_door
+        - garage
+        - terrace
+        - garden
+        - driveway
+        - carport
+        - home
+        - downstairs
+        - upstairs
+        - top_floor
+        - attic
+        - guest_room
+        - staircase
+        - lounge
+        - man_cave
+        - computer
+        - studio
+        - music
+        - tv
+        - reading
+        - closet
+        - storage
+        - laundry_room
+        - balcony
+        - porch
+        - barbecue
+        - pool
+        - other
+    RoomGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - type: object
+          properties:
+            children:
+              type: array
+              description: Child devices/services to group by the derived group
+              items:
+                $ref: '#/components/schemas/ResourceIdentifier'
+            services:
+              type: array
+              description: |
+                References all services aggregating control and state of children in the group.
+                This includes all services grouped in the group hierarchy given by child relation.
+                This includes all services of a device grouped in the group hierarchy given by child relation.
+                Aggregation is per service type, ie every service type which can be grouped has a corresponding definition of
+                grouped type.
+                Supported types: – grouped_light
+              items:
+                $ref: '#/components/schemas/ResourceIdentifier'
+            metadata:
+              type: object
+              description: configuration object for a room
+              properties:
+                name:
+                  type: string
+                  description: Human readable name of a resource
+                archetype:
+                  $ref: '#/components/schemas/RoomArchetype'
+    RoomPut:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources (always `room` here)
+        children:
+          type: array
+          description: Child devices/services to group by the derived group
+          items:
+            $ref: '#/components/schemas/ResourceIdentifier'
+        metadata:
+          type: object
+          description: configuration object for a room
+          properties:
+            name:
+              type: string
+              description: Human readable name of a resource
+            archetype:
+              $ref: '#/components/schemas/RoomArchetype'
+    TemperatureGet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceOwned'
+        - type: object
+          properties:
+            enabled:
+              type: boolean
+              description: |
+                `true` when sensor is activated, `false` when deactivated
+            temperature:
+              type: object
+              properties:
+                temperature:
+                  type: number
+                  description: Deprecated. Moved to Temperature_report/temperature
+                  example: 23
+                temperature_valid:
+                  type: boolean
+                  description: Deprecated. Indication whether the value presented in temperature is valid
+                temperature_report:
+                  type: object
+                  properties:
+                    changed:
+                      type: string
+                      format: date-time
+                      description: last time the value of this property is changed.
+                    temperature:
+                      type: number
+                      description: Temperature in 1.00 degrees Celsius
+                      example: 23
+    TemperaturePut:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the supported resources (always `temperature` here)
+          enum:
+            - temperature
+        enabled:
+          type: boolean
+          description: true when sensor is activated, false when deactivated
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    MethodNotAllowed:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotAcceptable:
+      description: Not Acceptable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InsufficientStorage:
+      description: Insufficient Storage
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

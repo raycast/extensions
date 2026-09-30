@@ -1,0 +1,163 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-browser",
+  "title": "Agent Browser",
+  "description": "Control the agent-browser CLI from Raycast and Raycast AI",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Open in Agent Browser",
+      "description": "Open a URL in a visible agent-browser session",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "https://example.com",
+          "required": true
+        },
+        {
+          "name": "session",
+          "type": "text",
+          "placeholder": "raycast",
+          "required": false
+        },
+        {
+          "name": "profile",
+          "type": "text",
+          "placeholder": "Browser profile",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "open-browser",
+      "title": "Open Browser",
+      "description": "Open a URL in an isolated session; Dia results report native inspection and interaction readiness"
+    },
+    {
+      "name": "inspect-page",
+      "title": "Inspect Page",
+      "description": "Read and inspect the active Chromium or Dia page, wait for page state, or navigate browser history"
+    },
+    {
+      "name": "interact-with-page",
+      "title": "Interact with Page",
+      "description": "Interact with Chromium or Dia page elements and text fields; use Type with Virtual Keyboard for on-screen keyboard input"
+    },
+    {
+      "name": "type-with-keyboard",
+      "title": "Type with Virtual Keyboard",
+      "description": "Type exact text with validated virtual-key refs, optionally submit, wait, and verify the settled page"
+    },
+    {
+      "name": "close-browser",
+      "title": "Close Browser",
+      "description": "Close a named agent-browser session and discard its transient browser state after confirmation"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "executablePath",
+      "title": "Agent Browser Executable",
+      "description": "Command name or full path to the agent-browser executable",
+      "type": "textfield",
+      "required": true,
+      "default": "agent-browser",
+      "placeholder": "/opt/homebrew/bin/agent-browser"
+    },
+    {
+      "name": "showBrowserWindow",
+      "title": "Browser Visibility",
+      "description": "Show the browser window when Raycast AI starts an Agent Browser session",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Open AI sessions in a visible browser window"
+    },
+    {
+      "name": "browserApplication",
+      "title": "Browser Application",
+      "description": "Optional browser for Agent Browser sessions, including Chrome, Brave, Edge, Vivaldi, Dia, and Safari",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "browserProfile",
+      "title": "Default Browser Profile or Dia Space",
+      "description": "Optional Chromium profile or Dia space name to use, such as Work, Personal, or BOT",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Work"
+    },
+    {
+      "name": "browserDataDirectory",
+      "title": "Browser Data Directory",
+      "description": "Optional Chromium user-data directory for browsers whose profiles cannot be located automatically; it must contain Local State",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "postInteractionDelayMs",
+      "title": "Post-Interaction Delay",
+      "description": "Default time to wait after each page interaction before Raycast AI continues",
+      "type": "dropdown",
+      "required": true,
+      "default": "500",
+      "data": [
+        {
+          "title": "No Delay",
+          "value": "0"
+        },
+        {
+          "title": "250 ms",
+          "value": "250"
+        },
+        {
+          "title": "500 ms (Recommended)",
+          "value": "500"
+        },
+        {
+          "title": "1 second",
+          "value": "1000"
+        },
+        {
+          "title": "1.5 seconds",
+          "value": "1500"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

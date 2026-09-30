@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "conventional-commits",
+  "title": "Conventional Commits",
+  "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window as well as example of how messages should be structured",
+  "icon": "command-icon.png",
+  "author": "niemtec",
+  "contributors": [
+    "lucria"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Insert Conventional Commit Prefix",
+      "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window",
+      "mode": "view"
+    },
+    {
+      "name": "commit-message-structure",
+      "title": "View Conventional Commit Message Structure",
+      "description": "Display details of how a conventional commit message is structured",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

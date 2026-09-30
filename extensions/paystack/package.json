@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paystack",
+  "title": "Paystack",
+  "description": "Manage your Paystack account effortlessly in Raycast—check balances, search transactions, generate links, issue refunds, and track revenue—all from your keyboard.",
+  "icon": "extension-icon.png",
+  "author": "dominuskelvin",
+  "categories": [
+    "Developer Tools",
+    "Finance",
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-balance",
+      "title": "Check Balance",
+      "subtitle": "Paystack",
+      "description": "Fetch your latest account balance in NGN or other currencies. Quickly copy the balance for sharing or record-keeping.",
+      "mode": "view"
+    },
+    {
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "subtitle": "Paystack",
+      "description": "Easily search your Paystack transaction history using an email, transaction reference, or status filter. Open details in the Paystack dashboard if needed.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-payment-link",
+      "title": "Generate Payment Link",
+      "subtitle": "Paystack",
+      "description": "Generate a new Paystack payment link instantly, copy it to your clipboard, and share it with customers—all from Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "issue-refund",
+      "title": "Issue Refund",
+      "subtitle": "Paystack",
+      "description": "Find a transaction and refund it directly through Raycast. A confirmation step ensures you don’t issue refunds by mistake.",
+      "mode": "view"
+    },
+    {
+      "name": "search-payouts",
+      "title": "Search Payouts",
+      "subtitle": "Paystack",
+      "description": "Search for payouts in your Paystack account by date or status. View details directly from Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "search-customers",
+      "title": "Search Customers",
+      "subtitle": "Paystack",
+      "description": "Quickly search for customers in your Paystack account using their email or ID. View customer details and transaction history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-plans",
+      "title": "Search Plans",
+      "subtitle": "Paystack",
+      "description": "Quickly search for subscription plans in your Paystack account using their name or ID. View plan details and pricing information.",
+      "mode": "view"
+    },
+    {
+      "name": "search-subscriptions",
+      "title": "Search Subscriptions",
+      "subtitle": "Paystack",
+      "description": "Quickly search for active or inactive subscriptions in your Paystack account using customer or plan ID. View subscription details and status.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "liveSecretKey",
+      "type": "password",
+      "title": "Live Secret Key",
+      "placeholder": "sk_live_1234567890",
+      "description": "Enter your Paystack live secret key to enable secure access to your account.",
+      "required": true
+    },
+    {
+      "name": "testSecretKey",
+      "type": "password",
+      "title": "Test Secret Key",
+      "placeholder": "sk_test_1234567890",
+      "description": "Enter your Paystack test secret key to enable secure access to your test environment.",
+      "required": true
+    },
+    {
+      "name": "mode",
+      "type": "dropdown",
+      "title": "Dashboard Mode",
+      "description": "Set paystack dashboard mode to either live or test.",
+      "default": "live",
+      "data": [
+        {
+          "value": "live",
+          "title": "Live"
+        },
+        {
+          "value": "test",
+          "title": "Test"
+        }
+      ],
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

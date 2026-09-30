@@ -1,0 +1,17 @@
+export enum CommandAnswer {
+  CASUAL = "casual",
+  CODE_EXPLAIN = "codeexplain",
+  CONFIDENT = "confident",
+  EXPLAIN = "explain",
+  FIX = "fix",
+  FRIENDLY = "friendly",
+  IMAGE_DESCRIBE = "imagedescribe",
+  IMAGE_TO_TEXT = "image-to-text",
+  IMPROVE = "improve",
+  LONGER = "longer",
+  PROFESSIONAL = "professional",
+  SHORTER = "shorter",
+  TRANSLATE = "translate",
+  TWEET = "tweet",
+  BROWSER_SUMMARIZE = "browser-summarize",
+}

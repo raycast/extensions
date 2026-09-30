@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dnb-book-lookup",
+  "title": "DNB Book Lookup",
+  "description": "Look up book contents from Deutsche Nationalbibliothek by ISBN with optional AI-generated Klappentext",
+  "icon": "extension-icon.png",
+  "author": "wdeu",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Documentation",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "dnb",
+    "nationalbibliothek",
+    "isbn",
+    "books",
+    "library",
+    "table of contents",
+    "klappentext"
+  ],
+  "commands": [
+    {
+      "name": "lookup-book",
+      "title": "Look up DNB Book",
+      "description": "Look up book contents in the Deutsche Nationalbibliothek by ISBN",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "isbn",
+          "placeholder": "ISBN-10 or ISBN-13",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "generateKlappentext",
+          "type": "checkbox",
+          "title": "Generate Klappentext",
+          "label": "Generate AI Klappentext from table of contents",
+          "description": "Generates a Klappentext (max. 150 words) and keywords. Requires Raycast Pro or BYOK.",
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

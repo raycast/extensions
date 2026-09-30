@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bootstrap-icons",
+  "title": "Bootstrap Icons",
+  "description": "Search for Bootstrap icons",
+  "icon": "extension-icon.png",
+  "author": "Rob",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-bootstrap-icons",
+      "title": "Search Bootstrap Icons",
+      "description": "Search and copy Bootstrap icons in various formats",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "preferredCopyMethod",
+          "type": "dropdown",
+          "title": "Preferred Copy Method",
+          "description": "Choose your preferred copy method (will be shown first in actions)",
+          "required": false,
+          "default": "iconName",
+          "data": [
+            {
+              "title": "Icon Name",
+              "value": "iconName"
+            },
+            {
+              "title": "Embedded SVG",
+              "value": "embeddedSvg"
+            },
+            {
+              "title": "Sprite",
+              "value": "sprite"
+            },
+            {
+              "title": "External Image",
+              "value": "externalImage"
+            },
+            {
+              "title": "Icon Font",
+              "value": "iconFont"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "find-the-perfect-bootstrap-icon",
+      "title": "Find the Perfect Bootstrap Icon",
+      "description": "Find the perfect Bootstrap icon based on your description or use case"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^1.17.0",
+    "bootstrap-icons": "^1.13.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "generate-icons": "node scripts/generate-icons.js",
+    "prebuild": "npm run generate-icons",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

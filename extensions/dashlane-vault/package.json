@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dashlane-vault",
+  "title": "Dashlane Vault",
+  "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
+  "icon": "dashlane-512.png",
+  "author": "tm.wrnr",
+  "contributors": [
+    "mushop"
+  ],
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "passwords",
+      "title": "Search Passwords",
+      "subtitle": "Dashlane",
+      "description": "Search all passwords in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Search Notes",
+      "subtitle": "Dashlane",
+      "description": "Search all notes in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Manage Devices",
+      "subtitle": "Dashlane",
+      "description": "List devices connected to your accunt",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync Vault",
+      "subtitle": "Dashlane",
+      "description": "Sync your Dashlane vault",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter the CLI binary path. On macOS, you can find the path by running `which dcli` in your terminal. On Windows, you can find the path by running `where dcli` in your terminal.",
+      "name": "cliPath",
+      "placeholder": "e.g.: /usr/local/bin/dcli (macOS) or C:\\Program Files\\Dashlane\\bin\\dcli.exe (Windows)",
+      "required": true,
+      "title": "Dashlane CLI path",
+      "type": "textfield"
+    },
+    {
+      "name": "masterPassword",
+      "title": "Master Password",
+      "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain on macOS or in the Windows Credential Manager on Windows.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "biometrics",
+      "title": "Biometrics",
+      "description": "Should be enabled, if you configured the Dashlane CLI to use biometrics.",
+      "type": "checkbox",
+      "label": "Use biometrics to unlock the vault",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0",
+    "execa": "^9.6.0",
+    "p-queue": "^9.0.1",
+    "valibot": "^1.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@total-typescript/ts-reset": "^0.6.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "3.7.4",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

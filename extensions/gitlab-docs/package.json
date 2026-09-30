@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitlab-docs",
+  "title": "GitLab Docs",
+  "description": "Raycast extension to search GitLab Docs, Handbook & Pajamas Design System.",
+  "icon": "gitlab-icon.png",
+  "author": "saschaeggi",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Handbook",
+      "description": "Search GitLab Handbook.",
+      "mode": "view",
+      "icon": "handbook-icon.png"
+    },
+    {
+      "name": "docs",
+      "title": "Search Documentation",
+      "description": "Search GitLab Docs.",
+      "mode": "view",
+      "icon": "docs-icon.png"
+    },
+    {
+      "name": "pajamas",
+      "title": "Search Design System",
+      "description": "Search Pajamas components.",
+      "mode": "view",
+      "icon": "pajamas-icon.png"
+    },
+    {
+      "name": "svgs",
+      "title": "Search Icons",
+      "description": "Search GitLab SVG icons.",
+      "mode": "view",
+      "icon": "pajamas-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@types/lodash.groupby": "^4.6.7",
+    "lodash.groupby": "^4.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^18.2.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

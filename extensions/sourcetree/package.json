@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sourcetree",
+  "title": "Sourcetree",
+  "description": "Search and open Sourcetree repositories",
+  "icon": "sourcetree_512x512x32.png",
+  "author": "i906",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Repositories",
+      "subtitle": "Sourcetree",
+      "description": "Search and open Sourcetree repositories",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bin",
+      "type": "textfield",
+      "required": false,
+      "title": "Sourcetree command line tools",
+      "description": "The place where the Sourcetree command line tools are installed",
+      "default": "/Applications/SourceTree.app/Contents/Resources/stree",
+      "placeholder": "/Applications/SourceTree.app/Contents/Resources/stree"
+    },
+    {
+      "name": "plist",
+      "type": "textfield",
+      "required": false,
+      "title": "Sourcetree plist file",
+      "description": "The place where Sourcetree plist is located",
+      "default": "~/Library/Application Support/SourceTree/browser.plist",
+      "placeholder": "~/Library/Application Support/SourceTree/browser.plist"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "bplist-parser": "^0.3.2"
+  },
+  "keywords": [
+    "Git",
+    "Sourcetree",
+    "Atlassian"
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/plist": "^3.0.2",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

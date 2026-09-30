@@ -1,0 +1,26 @@
+{
+  "Logical Symbols": {
+    "Implication 1": " \\to ",
+    "Implication 1 (Reverse)": " \\gets ",
+    "Implication 2": " \\Rightarrow ",
+    "Implication 2 (Reverse)": " \\Leftarrow ",
+    "Equivalence 1": " \\leftrightarrow ",
+    "Equivalence 2": " \\Leftrightarrow ",
+    "Equivalence 3": " \\iff ",
+    "Equivalence 4": " \\equiv ",
+    "Negation": " \\lnot ",
+    "Logical And": " \\land ",
+    "Logical Or": " \\lor ",
+    "Exclusive Or 1": " \\oplus ",
+    "Exclusive Or 2": " \\underline{\\lor} ",
+    "Tautology (True)": " \\top ",
+    "Contradiction (False)": " \\bot ",
+    "Universal Quantifier": " \\forall ",
+    "Existential Quantifier": " \\exists ",
+    "Does Not Exist": " \\not\\exists "
+  },
+  "Examples": {
+    "Convergence Example": " \\displaystyle \\lim_{x\\to a}f(x)=b ",
+    "Epsilon-Delta Definition": " \\begin{align} \\forall \\varepsilon > 0, \\exists\\delta > 0 \\ \\mathrm{s.t.} \\\\ \forall x \\in \\mathbb{R},\\ 0 < |x-a| < \\delta \\Rightarrow |f(x)-b| < \\varepsilon \\end{align}"
+  }
+}

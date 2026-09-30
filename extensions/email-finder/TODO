@@ -1,0 +1,58 @@
+ Pre-Publish Checklist                                                 
+                                                                        
+  Metadata (package.json)                                               
+  - author field uses your Raycast account username                     
+  - license set to MIT                                                  
+  - Latest Raycast API version                                          
+  - package-lock.json included (they use npm for CI)                    
+                                                                        
+  Build Verification                                                    
+  - Run npm run build - must complete without errors                    
+  - Run npm run lint - check code quality                               
+  - Test the built extension actually works in Raycast                  
+                                                                        
+  Required Assets                                                       
+                                                                        
+  Icon                                                                  
+  - 512x512 PNG                                                         
+  - Works in both light and dark themes                                 
+  - No default Raycast icons allowed                                    
+  - Use https://icon.ray.so to generate one                             
+                                                                        
+  Screenshots                                                           
+  - 2000x1250 PNG (16:10 ratio)                                         
+  - 3-6 screenshots recommended                                         
+  - Consistent background, no sensitive data                            
+                                                                        
+  Naming Guidelines                                                     
+                                                                        
+  - Use Title Case (Apple style)                                        
+  - Prefer nouns over verbs ("Emoji Search" not "Search Emoji")         
+  - Be specific about what it does                                      
+  - Commands: verb + noun structure                                     
+                                                                        
+  Code Quality                                                          
+                                                                        
+  - Use the Preferences API (not custom config commands)                
+  - Handle empty states with List.EmptyView/Grid.EmptyView              
+  - Use Navigation API for screen transitions                           
+  - No external analytics                                               
+  - US English spelling                                                 
+                                                                        
+  Documentation                                                         
+                                                                        
+  - Add a README if setup/configuration is required                     
+  - Include CHANGELOG.md for version history                            
+                                                                        
+  Publishing Process                                                    
+                                                                        
+  1. Run npm run publish                                                
+  2. Authenticates via GitHub and opens a PR to raycast/extensions      
+  3. Raycast team reviews and may request changes                       
+  4. Once merged, it goes live in the Store                             
+                                                                        
+  Any specific area you want me to look at in your extension?   
+
+
+  propeo remove
+  also dubbelcheck so no bussiness logic is in the code

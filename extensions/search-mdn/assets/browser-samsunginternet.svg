@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55.8 55.8">
+  <defs>
+    <style>
+      .st0 {
+        mask: url(#mask);
+      }
+      .st1 {
+        fill: url(#grad4);
+      }
+      .st1,
+      .st2,
+      .st3,
+      .st4 {
+        fill-rule: evenodd;
+      }
+      .st2 {
+        fill: url(#grad3);
+      }
+      .st3 {
+        fill: url(#grad2);
+      }
+      .st4,
+      .st5 {
+        fill: #fff;
+      }
+    </style>
+    <linearGradient
+      id="grad4"
+      x1="-783.3"
+      y1="565.5"
+      x2="-783.3"
+      y2="565.1"
+      gradientTransform="matrix(144 0 0 -144 112827 81425)"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0" stop-color="#7043ef" />
+      <stop offset="1" stop-color="#3e14d8" />
+    </linearGradient>
+    <mask id="mask" x="0" y=".2" width="55.8" height="55.8" maskUnits="userSpaceOnUse">
+      <g>
+        <path
+          class="st4"
+          d="M 49.2,6.4 C 44.1,1.2 36.4,0.2 27.8,0.2 19.2,0.2 11.6,1.2 6.4,6.4 2.4,10.5 0,17.2 0,28.1 0,39 2.5,45.7 6.5,49.8 11.6,55 19.3,56 27.9,56 36.5,56 44.1,55 49.3,49.8 53.4,45.7 55.8,39 55.8,28.1 55.8,17.2 53.3,10.5 49.3,6.4 Z"
+        />
+      </g>
+    </mask>
+    <linearGradient
+      id="grad2"
+      x1="-789.8"
+      y1="589.7"
+      x2="-790.2"
+      y2="589.7"
+      gradientTransform="matrix(-90.014693 90.014693 28.567114 28.567114 -87924.9 54283.1)"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0" stop-color="#8e99ff" />
+      <stop offset="1" stop-color="#72e3e3" />
+    </linearGradient>
+    <linearGradient
+      id="grad3"
+      x1="-789.8"
+      y1="589.7"
+      x2="-790.2"
+      y2="589.7"
+      gradientTransform="matrix(-90.014693 90.014693 28.567114 28.567114 -87924.9 54283.1)"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0" stop-color="#8e99ff" />
+      <stop offset="1" stop-color="#40efef" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(0 -.2)">
+    <path
+      class="st1"
+      d="M 49.2,6.4 C 44.1,1.2 36.4,0.2 27.8,0.2 19.2,0.2 11.6,1.2 6.4,6.4 2.4,10.5 0,17.2 0,28.1 0,39 2.5,45.7 6.5,49.8 11.6,55 19.3,56 27.9,56 36.5,56 44.1,55 49.3,49.8 53.4,45.7 55.8,39 55.8,28.1 55.8,17.2 53.3,10.5 49.3,6.4 Z"
+    />
+    <g class="st0" mask="url(#mask)">
+      <circle class="st5" cx="27.8" cy="28.1" r="16.4" />
+      <g>
+        <path
+          class="st3"
+          d="m 33.3,33.6 c -9.6,9.6 -19.9,15 -23,11.9 -3.1,-3.1 2.3,-13.3 11.9,-23 9.6,-9.7 19.9,-15 23,-11.9 3.1,3.1 -2.3,13.3 -11.9,23 z m -1,-1 c 7.2,-7.2 11.6,-14.4 10,-16.1 -1.6,-1.7 -8.9,2.8 -16.1,10 -7.2,7.2 -11.6,14.4 -10,16.1 1.6,1.7 8.9,-2.8 16.1,-10 z"
+        />
+        <path
+          class="st2"
+          d="m 33.3,33.6 c -9.6,9.6 -19.9,15 -23,11.9 -3.1,-3.1 2.3,-13.3 11.9,-23 9.6,-9.7 19.9,-15 23,-11.9 3.1,3.1 -2.3,13.3 -11.9,23 z m -1,-1 c 7.2,-7.2 11.6,-14.4 10,-16.1 -1.6,-1.7 -8.9,2.8 -16.1,10 -7.2,7.2 -11.6,14.4 -10,16.1 1.6,1.7 8.9,-2.8 16.1,-10 z"
+        />
+      </g>
+      <path
+        class="st4"
+        d="m 16.2,39.7 c 6.4,6.4 16.8,6.4 23.3,0 6.4,-6.4 6.4,-16.8 0,-23.3 -5.5,1.4 -21.1,17 -23.3,23.3 z"
+      />
+    </g>
+  </g>
+</svg>

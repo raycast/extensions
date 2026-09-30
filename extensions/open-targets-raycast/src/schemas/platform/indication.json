@@ -1,0 +1,80 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "id", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "indications",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "disease",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "efoName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "references",
+              "nullable": true,
+              "type": {
+                "containsNull": true,
+                "elementType": {
+                  "fields": [
+                    {
+                      "metadata": {},
+                      "name": "source",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "ids",
+                      "nullable": true,
+                      "type": {
+                        "containsNull": true,
+                        "elementType": "string",
+                        "type": "array"
+                      }
+                    }
+                  ],
+                  "type": "struct"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "metadata": {},
+              "name": "maxPhaseForIndication",
+              "nullable": true,
+              "type": "long"
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "approvedIndications",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "indicationCount",
+      "nullable": true,
+      "type": "integer"
+    }
+  ],
+  "type": "struct"
+}

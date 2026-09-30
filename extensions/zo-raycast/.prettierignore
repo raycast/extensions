@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+.npm-cache
+.claude
+.entire
+raycast-env.d.ts

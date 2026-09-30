@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nyc-train-tracker",
+  "title": "NYC Train Tracker - Realtime Train Departures",
+  "description": "Look up train departures and service alerts for MTA, LIRR and MNR.",
+  "icon": "icon.png",
+  "keywords": [
+    "subway",
+    "train",
+    "mta",
+    "lirr",
+    "metro north",
+    "nyc",
+    "new york",
+    "transit"
+  ],
+  "author": "kcole93",
+  "type": "module",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-departures",
+      "title": "Find Train Departures",
+      "subtitle": "NYC Train Tracker",
+      "description": "Search for NYC train departures from MTA, LIRR, and Metro-North stations.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultDepartureWindow",
+          "title": "Default Departure Window",
+          "description": "Select the default time window for showing departures.",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Next 10 Minutes",
+              "value": "10"
+            },
+            {
+              "title": "Next 30 Minutes",
+              "value": "30"
+            },
+            {
+              "title": "Next Hour",
+              "value": "60"
+            },
+            {
+              "title": "Next 2 Hours",
+              "value": "120"
+            },
+            {
+              "title": "All Day",
+              "value": "0"
+            }
+          ],
+          "defaultValue": "60"
+        },
+        {
+          "name": "showAccessibilityStatus",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Station Accessibility Status",
+          "description": "Show accessibility status for each station.",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.4",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

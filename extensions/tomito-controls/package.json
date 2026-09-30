@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tomito-controls",
+  "title": "Tomito Controls",
+  "description": "Control the Tomito app, a Pomodoro timer for macOS",
+  "icon": "tomito-icon.png",
+  "author": "elyse",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start/Pause/Resume",
+      "subtitle": "Tomito",
+      "description": "Start, pause, or resume current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart",
+      "subtitle": "Tomito",
+      "description": "Restart current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "finish",
+      "title": "Finish",
+      "description": "Finish current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-next",
+      "title": "Finish and Start Next",
+      "description": "Finish current interval and start next",
+      "mode": "no-view"
+    },
+    {
+      "name": "skip",
+      "title": "Skip",
+      "subtitle": "Tomito",
+      "description": "Skip current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide",
+      "title": "Hide Window",
+      "subtitle": "Tomito",
+      "description": "Hide timer window",
+      "mode": "no-view"
+    },
+    {
+      "name": "show",
+      "title": "Show Window",
+      "subtitle": "Tomito",
+      "description": "Show timer window",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-timer-widget",
+      "title": "Toggle Timer Widget",
+      "description": "Show or hide the timer widget",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

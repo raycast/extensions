@@ -1,0 +1,172 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quran-quick-insert",
+  "title": "Quran Quick Insert",
+  "description": "Search, copy, and insert Quran ayahs or ranges.",
+  "icon": "icon.png",
+  "author": "yshalsager",
+  "license": "MIT",
+  "packageManager": "npm@12.0.1",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "quran",
+    "ayah",
+    "islam",
+    "arabic",
+    "verse",
+    "copy",
+    "paste"
+  ],
+  "commands": [
+    {
+      "name": "search-quran",
+      "title": "Search Quran",
+      "description": "Search Quran text or enter an ayah range to copy or paste.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "text_style",
+      "title": "Text Style",
+      "description": "Quran text style used for copied output.",
+      "type": "dropdown",
+      "required": false,
+      "default": "uthmani",
+      "data": [
+        {
+          "title": "Uthmani",
+          "value": "uthmani"
+        },
+        {
+          "title": "Imlai",
+          "value": "imlai"
+        }
+      ]
+    },
+    {
+      "name": "reference_style",
+      "title": "Reference Style",
+      "description": "How ayah references are added to copied output.",
+      "type": "dropdown",
+      "required": false,
+      "default": "arabic",
+      "data": [
+        {
+          "title": "[البقرة: 255]",
+          "value": "arabic"
+        },
+        {
+          "title": "(2:255)",
+          "value": "paren"
+        },
+        {
+          "title": "Quran 2:255",
+          "value": "quran"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "prefix",
+      "title": "Text Prefix",
+      "description": "Optional text before copied ayahs.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "قال تعالى",
+          "value": "qaal"
+        },
+        {
+          "title": "الاستعاذة",
+          "value": "istiadhah"
+        },
+        {
+          "title": "البسملة",
+          "value": "basmalah"
+        }
+      ]
+    },
+    {
+      "name": "simplify_words",
+      "title": "Simplify Search Letters",
+      "label": "Simplify Search Letters",
+      "description": "Match common Arabic letter variants while searching, like ا/أ/إ/آ and و/ؤ.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "use_regex",
+      "title": "Regex Search",
+      "label": "Regex Search",
+      "description": "Treat search input as a regular expression.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "harakat",
+      "title": "Search Harakat",
+      "description": "How search handles Arabic diacritics.",
+      "type": "dropdown",
+      "required": false,
+      "default": "ignore",
+      "data": [
+        {
+          "title": "Ignore Harakat",
+          "value": "ignore"
+        },
+        {
+          "title": "Existing Only",
+          "value": "existing_only"
+        },
+        {
+          "title": "Exact",
+          "value": "exact"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "check": "tsc -p tsconfig.check.json --outDir .check && node .check/src/quran-check.js",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "eslint": "^10.8.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "jake": "12.10.1"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

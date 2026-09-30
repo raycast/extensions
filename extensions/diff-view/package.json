@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "diff-view",
+  "title": "Diff View",
+  "description": "Compare the last two entries of your clipboard, or two selected files, in VS Code, Cursor, or VSCodium",
+  "author": "kalaschnik",
+  "license": "MIT",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "diff-view",
+      "title": "Show Diff View",
+      "description": "Compare the last two entries of your clipboard in VS Code, Cursor, or VSCodium",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-with-editor",
+      "title": "Open with Editor",
+      "description": "Compare the two files selected in Finder in your preferred editor",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "editor",
+      "title": "Editor",
+      "description": "Select Your Preferred Editor",
+      "type": "dropdown",
+      "default": "code",
+      "data": [
+        {
+          "title": "VS Code",
+          "value": "code"
+        },
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        },
+        {
+          "title": "VSCodium",
+          "value": "codium"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "RAY_Target=x ray develop",
+    "dev:classic": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "splatoon",
+  "title": "Splatoon",
+  "description": "View Splatoon’s current schedules. Supports Splatoon 2 and Splatoon 3.",
+  "icon": "extension.png",
+  "author": "marcbouchenoire",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "splatoon-2-schedules",
+      "title": "View Schedules",
+      "subtitle": "Splatoon 2",
+      "description": "View Splatoon 2’s current schedules",
+      "icon": "commands/splatoon-2.png"
+    },
+    {
+      "mode": "view",
+      "name": "splatoon-3-schedules",
+      "title": "View Schedules",
+      "subtitle": "Splatoon 3",
+      "description": "View Splatoon 3’s current schedules",
+      "icon": "commands/splatoon-3.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clock24",
+      "description": "Display time in a 24-hour format",
+      "title": "Formatting",
+      "label": "24-hour format",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "date-fns": "^3.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.0",
+    "@types/react": "18.2.47",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "help": "ray help"
+  }
+}

@@ -1,0 +1,115 @@
+import { BrowserExtension, environment, showToast, Toast, open } from "@raycast/api";
+import { Tab } from "../types";
+import { listHeliumTabs } from "./browser-control";
+import { isWindows } from "./platform";
+import { browserExtensionTabsToTabs, mergeAppleScriptTabsWithFavicons } from "./tab-merge";
+
+/**
+ * Check if Browser Extension is available.
+ *
+ * Kept for other callers (e.g., `BrowserExtension.getContent`) that still
+ * depend on the extension. The tab list itself no longer goes through the
+ * BrowserExtension — see {@link getBrowserTabs}.
+ */
+export function isBrowserExtensionAvailable(): boolean {
+  return environment.canAccess(BrowserExtension);
+}
+
+/**
+ * Get all open tabs from Helium via AppleScript, enriched with favicons from
+ * the Browser Extension when available.
+ *
+ * AppleScript is the source of truth for tab identity — it sees every tab
+ * including ones Raycast's Browser Extension filters out (`file://` PDFs,
+ * `chrome://` pages, empty new-tab pages, etc.). The Browser Extension is
+ * called in parallel solely to pick up favicons (which AS doesn't expose);
+ * these are attached by URL match. Tabs BE never sees (local files,
+ * chrome://) simply have no favicon and the UI falls back to `Icon.Globe`.
+ *
+ * `Tab.id` is the stable Helium AppleScript `id`, used everywhere we need to
+ * refer to a specific tab (React keys, optimistic state, and tab actions).
+ *
+ * On Windows there is no AppleScript, so the Browser Extension is the only tab
+ * source and its own tab id becomes `Tab.id`. It is awaited without a timeout
+ * there, since it is the data itself rather than an enrichment.
+ *
+ * Known limitation on Windows: `BrowserExtension.Tab` carries no browser
+ * identity (only `id`, `url`, `title`, `favicon`, `active`), so tabs cannot be
+ * scoped to Helium. If the Raycast browser extension is also installed in
+ * another Chromium browser, its tabs appear here too, and opening one loads the
+ * URL in Helium. There is no API to filter them — the UI and README say so
+ * rather than pretending the list is Helium-only.
+ */
+export async function fetchBrowserTabs(): Promise<Tab[]> {
+  if (isWindows) {
+    if (!isBrowserExtensionAvailable()) return [];
+    return browserExtensionTabsToTabs(await BrowserExtension.getTabs());
+  }
+
+  const [asTabs, beTabs] = await Promise.all([
+    listHeliumTabs(),
+    isBrowserExtensionAvailable()
+      ? withTimeout(BrowserExtension.getTabs(), 250, []).catch(() => [])
+      : Promise.resolve([]),
+  ]);
+
+  return mergeAppleScriptTabsWithFavicons(asTabs, beTabs);
+}
+
+export async function getBrowserTabs(): Promise<Tab[]> {
+  try {
+    return await fetchBrowserTabs();
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to Get Tabs",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+    });
+    return [];
+  }
+}
+
+export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => {
+        timeout = setTimeout(() => resolve(fallback), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
+/**
+ * Get tabs filtered by browser (optional)
+ * You can filter for specific browsers if needed
+ */
+export async function getTabsByBrowser(browserName?: string): Promise<Tab[]> {
+  const allTabs = await getBrowserTabs();
+
+  if (!browserName) {
+    return allTabs;
+  }
+
+  // Filter tabs by browser if needed
+  // The Browser Extension API returns tabs from all supported browsers
+  return allTabs;
+}
+
+/**
+ * Open a URL in the default browser or specific application
+ */
+export async function openUrl(url: string, application?: string): Promise<void> {
+  try {
+    await open(url, application);
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to Open URL",
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+    });
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-blue-cloud",
+  "title": "The Blue Cloud",
+  "description": "List, Search and Download Files using the Raycast Extension for Dropbox.",
+  "icon": "the-blue-cloud.png",
+  "author": "chyroc",
+  "contributors": [
+    "xmok"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "dropbox_access_token",
+      "title": "Dropbox Access Token",
+      "description": "Dropbox Access Token",
+      "type": "password",
+      "placeholder": "xx.xxx...xxx",
+      "required": false
+    },
+    {
+      "name": "download_directory",
+      "title": "Download Directory",
+      "type": "directory",
+      "required": false,
+      "description": "Files will be downloaded here"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-dropbox-files",
+      "title": "Dropbox Files Search",
+      "description": "Search Files directly in Dropbox",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
+    "dropbox": "^10.34.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

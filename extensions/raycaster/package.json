@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycaster",
+  "title": "Raycaster",
+  "description": "Send casts to Farcaster from Raycast",
+  "icon": "command-icon.png",
+  "author": "stevedylandev",
+  "categories": [
+    "Web",
+    "Fun",
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "PINATA_JWT",
+      "description": "Your Pinata API key JWT which can be created at https://app.pinata.cloud/developers",
+      "type": "password",
+      "required": false,
+      "title": "Pinata API JWT"
+    },
+    {
+      "name": "GATEWAY",
+      "description": "Paste in your Dedicated Gateway or public gateway in the following format: gateway.pinata.cloud",
+      "type": "textfield",
+      "required": false,
+      "title": "IPFS Gateway",
+      "placeholder": "gateway.pinata.cloud"
+    }
+  ],
+  "commands": [
+    {
+      "name": "send-cast",
+      "title": "Send Cast",
+      "description": "Send a Cast to the Farcaster network. Requires a Signer Private Key and your FID",
+      "mode": "view"
+    },
+    {
+      "name": "authorize",
+      "title": "Authorize Raycaster",
+      "description": "In order to send a cast with Raycaster you first need to authorize it with this command",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@farcaster/core": "^0.14.12",
+    "@noble/hashes": "^1.4.0",
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0",
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.3.2",
+    "viem": "^2.10.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

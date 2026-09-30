@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "time-logger",
+  "title": "Google Calendar Epic Time Logger",
+  "description": "Helps you register your work to Google Calendar",
+  "icon": "command-icon.png",
+  "author": "aramikuto",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "templateEventUrl",
+      "title": "Template event",
+      "description": "Here’s how to create a Google Calendar event template:\n\n1. Start by opening Google Calendar on the web and create a new event.\n2. Fill in the necessary details like Availability or Label, and save the event.\n3. Once the event is saved, click on it, and then pick the three dots in the upper-right corner. Choose the \"Publish event\" option.\n4. Copy the link and paste it here.",
+      "type": "textfield",
+      "placeholder": "https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=IIIIII&tmsrc=email@gmail.com",
+      "required": false
+    },
+    {
+      "name": "epicSortMethod",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "addedTime",
+          "title": "Added time"
+        },
+        {
+          "value": "lastUsedTime",
+          "title": "Last used time"
+        },
+        {
+          "value": "nameAsc",
+          "title": "Name (ascending)"
+        },
+        {
+          "value": "nameDesc",
+          "title": "Name (descending)"
+        }
+      ],
+      "default": "addedTime",
+      "title": "Sort method",
+      "description": "Select the sort method for the epics list",
+      "required": false
+    },
+    {
+      "name": "bringActiveEpicToTop",
+      "label": "Active epic sorting",
+      "type": "checkbox",
+      "default": true,
+      "title": "Bring active epic to the top",
+      "description": "If enabled, the active epic will be displayed at the top of the list",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "gcalTimeLogger",
+      "title": "Log Your Work",
+      "description": "Manage your epics and log your work to Google Calendar",
+      "mode": "view",
+      "subtitle": "Google Calendar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

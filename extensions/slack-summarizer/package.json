@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slack-summarizer",
+  "title": "Slack Summarizer",
+  "description": "Summarize Slack channels, threads and messages using OpenAI",
+  "icon": "extension-icon.png",
+  "author": "hassan_ahmed",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarize-channel",
+      "title": "Summarize Slack Channel",
+      "subtitle": "Slack",
+      "description": "Summarize a Slack channel threads",
+      "mode": "view",
+      "arguments": [],
+      "preferences": [
+        {
+          "name": "openaiPrompt",
+          "type": "textfield",
+          "title": "OpenAI prompt",
+          "description": "Custom prompt used when summarizing a channel",
+          "placeholder": "Leave blank to use the built-in instructions",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize-thread",
+      "title": "Summarize Slack Thread",
+      "subtitle": "Slack",
+      "description": "Summarize replies of a Slack thread",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "thread",
+          "type": "text",
+          "placeholder": "Thread URL",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "openaiPrompt",
+          "type": "textfield",
+          "title": "OpenAI prompt",
+          "description": "Custom prompt used when summarising a thread",
+          "placeholder": "Leave blank to use the built-in instructions",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.97.0",
+    "@raycast/utils": "^1.17.0",
+    "@slack/bolt": "^4.2.1",
+    "openai": "^4.95.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "description": "OpenAI API Key",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key",
+      "placeholder": "sk-proj-HGZ..."
+    },
+    {
+      "name": "defaultOpenaiModel",
+      "type": "textfield",
+      "title": "OpenAI Model",
+      "description": "Model name passed to OpenAI API",
+      "placeholder": "gpt-4.1",
+      "default": "gpt-4.1",
+      "required": true
+    }
+  ]
+}

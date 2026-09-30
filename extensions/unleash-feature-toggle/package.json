@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unleash-feature-toggle",
+  "title": "Unleash Feature Toggle",
+  "description": "List all projects and feature toggles from Unleash",
+  "icon": "icon.png",
+  "author": "firhan_ramadhan",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "description": "List all projects in Unleash",
+      "mode": "view",
+      "subtitle": "Unleash"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api",
+      "title": "API",
+      "description": "Unleash API URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://<your-unleash-instance>/api"
+    },
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "Unleash Personal Access Token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.13.4",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

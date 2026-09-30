@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "backstage",
+  "title": "Backstage",
+  "description": "Shortcuts for Backstage",
+  "icon": "backstage-icon.png",
+  "author": "yukukotani",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-components",
+      "title": "Search Components",
+      "description": "Search components in your Backstage catalog",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "backstageUrl",
+      "title": "Backstage URL",
+      "description": "Backstage URL",
+      "required": true
+    },
+    {
+      "type": "password",
+      "name": "backstageStaticToken",
+      "title": "Static Backstage API token",
+      "description": "Static Backstage API token (for use in place of OAuth authentication)",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "backstageApiUrl",
+      "title": "Backstage API URL",
+      "description": "Backstage API URL, if different from Backstage URL",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "iapOAuthClientId",
+      "title": "Google OAuth Client ID for IAP",
+      "description": "Google Oauth Client ID for Cloud IAP (Web Application)",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "raycastOAuthClientId",
+      "title": "Google OAuth Client ID for Raycast",
+      "description": "Google OAuth Client ID for Raycast App (iOS)",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.11",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

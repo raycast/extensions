@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "extends": ["@raycast", "@labforward/eslint-config-react"],
+  "overrides": [
+    {
+      "files": ["**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          { "ignoreRestSiblings": true }
+        ]
+      }
+    },
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
+      }
+    }
+  ]
+}

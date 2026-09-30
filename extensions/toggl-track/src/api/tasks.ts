@@ -1,0 +1,35 @@
+import { getMeWithRelatedData } from "@/api/me";
+import { post } from "@/api/togglClient";
+import type { ToggleItem } from "@/api/types";
+import { cacheHelper } from "@/helpers/cache-helper";
+import { liteMode } from "@/helpers/preferences";
+
+export async function getMyTasks(): Promise<Task[]> {
+  const cached = cacheHelper.get<Task[]>("tasks");
+  if (cached) return cached;
+  if (liteMode) {
+    const stale = cacheHelper.getRaw<Task[]>("tasks");
+    if (stale) return stale;
+  }
+  const data = await getMeWithRelatedData();
+  return cacheHelper.get<Task[]>("tasks") || data.tasks || [];
+}
+
+export function createTask(workspaceId: number, projectId: number, name: string) {
+  return cacheHelper.upsert("tasks", () =>
+    post<Task>(`/workspaces/${workspaceId}/projects/${projectId}/tasks`, { name }),
+  );
+}
+
+/** @see {@link https://developers.track.toggl.com/docs/api/tasks#response Toggl Api} */
+export interface Task extends ToggleItem {
+  active: boolean;
+  estimated_seconds: number | null;
+  name: string;
+  project_id: number;
+  recurring: boolean;
+  tracked_seconds: number;
+  /** Task assignee */
+  user_id: number | null;
+  workspace_id: number;
+}

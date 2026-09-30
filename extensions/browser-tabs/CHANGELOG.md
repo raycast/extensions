@@ -1,0 +1,39 @@
+# Browser Tabs Changelog
+
+## [Fix Maximized Windows on Windows] - 2026-09-09
+
+- Fix switching to or closing a tab shrinking a maximized browser window on Windows: a window that is already on screen is no longer shown again, only brought to the front
+
+## [Windows Support] - 2026-08-12
+
+- Add Windows support: tabs are read from running browsers with UI Automation through a native helper, so no browser extension is needed
+- Firefox and Zen Browser are supported on Windows, where they expose their tabs like any other browser
+- Tab URLs are resolved best effort (exact for the tab you're looking at, matched from history for background tabs)
+- Site icons are read from the browser's own icon store instead of being fetched
+
+## [Add Dia Browser Support] - 2026-01-04
+
+- Add Dia Browser support
+
+## [New Icon Style] - 2025-07-07
+
+- Optimize extension icons for macOS Tahoe
+
+## [Fix Duplicated Tab Issue & Remove TeX Live Utility (Not Browser)] - 2025-06-11
+
+- Added a `bundleId` check when filtering open apps to exclude non-app-bundle processes (e.g., Edge aliases without a bundleId)
+- Added `TeX` to the `unsupportedBrowsers` list, as it's not a browser app (this list may expand over time)
+
+## [Remove Zen Browser] - 2024-10-29
+
+- Remove Zen Browser as it is not supported.
+
+## [Reverse Tabs Order] - 2024-07-10
+
+- Reverse the order of the tabs and the most recently opened tab will be at the top.
+- Add a new action to disable/enable browser.
+- Add a new action to open tab in other browsers.
+
+## [Initial Version] - 2024-07-03
+
+- Search all open browser tabs.

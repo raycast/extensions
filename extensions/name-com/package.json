@@ -1,0 +1,194 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "name-com",
+  "title": "Name.com",
+  "description": "View your Domains, DNS Records and Account Balance",
+  "icon": "extension-icon.png",
+  "author": "xmok",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "user",
+      "description": "Username from Name.com API Dashboard"
+    },
+    {
+      "name": "token",
+      "title": "Token",
+      "type": "password",
+      "required": true,
+      "placeholder": "XXxx...xx",
+      "description": "Production API Key from Name.com API Dashboard"
+    },
+    {
+      "name": "dev_token",
+      "title": "Dev/Test Token",
+      "type": "password",
+      "required": false,
+      "placeholder": "XXxx...xx",
+      "description": "Development API Key from Name.com API Dashboard"
+    },
+    {
+      "name": "use_prod",
+      "label": "Use Production Environment",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Use Production Environment and Production Token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-account-balance",
+      "title": "Check Account Balance",
+      "subtitle": "Name.com",
+      "description": "Check Account Balance in your Account",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "subtitle": "Name.com",
+      "description": "List Domains and Manage DNS Records",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "check-account-balance",
+      "title": "Check Account Balance",
+      "description": "Check Account Balance"
+    },
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "description": "List Domains"
+    },
+    {
+      "name": "list-dns-records",
+      "title": "List DNS Records",
+      "description": "List Domain DNS Records"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@name-com what's my account balance?",
+        "mocks" : {
+          "check-account-balance" : "100000"
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "name" : "check-account-balance"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@name-com what domains are in my account",
+        "mocks": {
+          "list-domains": {
+            "domains": [
+              {
+                "autorenewEnabled": true,
+                "createDate": "2025-04-28T22:05:59Z",
+                "domainName": "raycast.network",
+                "expireDate": "2026-04-28T22:05:59Z",
+                "locked": true,
+                "nameservers": [
+                  "ns1vwx.name.com",
+                  "ns2knz.name.com",
+                  "ns3ghw.name.com",
+                  "ns4bfy.name.com"
+                ],
+                "privacyEnabled": false,
+                "renewalPrice": 41.49
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-domains"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@name-com show dns records for raycast",
+        "mocks": {
+          "list-domains": [
+            {
+              "domainName": "raycast.network"
+            }
+          ],
+          "list-dns-records": [
+            {
+              "answer": "txt",
+              "domainName": "raycast.network",
+              "fqdn": "raycast.network.",
+              "host": "",
+              "id": 5060248,
+              "ttl": 300,
+              "type": "TXT"
+            },
+            {
+              "answer": "2",
+              "domainName": "raycast.network",
+              "fqdn": "t.raycast.network.",
+              "host": "t",
+              "id": 5060249,
+              "ttl": 300,
+              "type": "TXT"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-domains"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "domainName": {
+                  "includes": "raycast"
+                }
+              },
+              "name": "list-dns-records"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

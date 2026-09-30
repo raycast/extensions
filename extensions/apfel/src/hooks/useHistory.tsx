@@ -1,0 +1,60 @@
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Chat, HistoryHook } from "../type";
+
+export function useHistory(): HistoryHook {
+  const [data, setData] = useState<Chat[]>([]);
+  const [isLoading, setLoading] = useState<boolean>(true);
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    (async () => {
+      const storedHistory = await LocalStorage.getItem<string>("history");
+
+      if (storedHistory) {
+        setData((previous) => [...previous, ...JSON.parse(storedHistory)]);
+      }
+
+      setLoading(false);
+      hasLoadedRef.current = true;
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedRef.current) return;
+
+    LocalStorage.setItem("history", JSON.stringify(data));
+  }, [data]);
+
+  const add = useCallback(
+    async (chat: Chat) => {
+      setData((prev) => [...prev, chat]);
+    },
+    [setData],
+  );
+
+  const remove = useCallback(
+    async (answer: Chat) => {
+      const toast = await showToast({
+        title: "Removing answer...",
+        style: Toast.Style.Animated,
+      });
+      setData((prev) => prev.filter((item) => item.id !== answer.id));
+      toast.title = "Answer removed!";
+      toast.style = Toast.Style.Success;
+    },
+    [setData],
+  );
+
+  const clear = useCallback(async () => {
+    const toast = await showToast({
+      title: "Clearing history...",
+      style: Toast.Style.Animated,
+    });
+    setData([]);
+    toast.title = "History cleared!";
+    toast.style = Toast.Style.Success;
+  }, [setData]);
+
+  return useMemo(() => ({ data, isLoading, add, remove, clear }), [data, isLoading, add, remove, clear]);
+}
