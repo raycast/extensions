@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Open Website] - {PR_MERGE_DATE}
+## [Open Website] - 2026-09-30
 
 - Add `Open Website` (Cmd+O) to Applications and Compose stacks in `Services`, `Deploy Service` and `Deployments`, so a service's site opens without going through its domains first. With one domain it opens right away, with several you pick one, and disabled domains are skipped.
 
