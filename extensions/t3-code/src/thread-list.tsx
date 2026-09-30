@@ -113,15 +113,19 @@ export default function ThreadList({
                 onAction={async () => {
                   await closeMainWindow();
                   try {
-                    const exact = await focusThread({
+                    const outcome = await focusThread({
                       id: thread.id,
                       title: thread.title,
                       projectTitle: projectTitles.get(thread.projectId),
                       branch: thread.branch,
                     });
-                    if (!exact) {
+                    if (outcome === "ambiguous") {
                       await showHUD(
                         "Several threads match - pick one in the T3 Code palette",
+                      );
+                    } else if (outcome === "unfocused") {
+                      await showHUD(
+                        "T3 Code lost focus - pick the thread in its palette",
                       );
                     }
                   } catch (focusError) {

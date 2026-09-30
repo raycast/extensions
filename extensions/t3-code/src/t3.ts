@@ -431,9 +431,11 @@ export function paletteThreads(snapshot: ShellSnapshot): PaletteThread[] {
  * command palette with the thread's title, project and branch. The query is typed
  * first, then matches are counted against a shell snapshot fetched at that moment,
  * so a thread created since the list loaded still counts. Enter is pressed only
- * when exactly one thread matches; otherwise the palette stays open on the
- * narrowed list and this returns false so the caller can say so. */
-export async function focusThread(target: PaletteThread): Promise<boolean> {
+ * when exactly one thread matches and T3 Code is still frontmost; otherwise the
+ * palette is left as it is and the result says why, so the caller can tell the user. */
+export async function focusThread(
+  target: PaletteThread,
+): Promise<"opened" | "ambiguous" | "unfocused"> {
   const query = paletteQuery(target);
   const name = appName();
   await run("/usr/bin/open", ["-a", name]);
@@ -454,15 +456,22 @@ end tell`,
     ? live
     : [...live, target];
   if (paletteMatchCount(candidates, query) !== 1) {
-    return false;
+    return "ambiguous";
   }
-  await run("/usr/bin/osascript", [
+  // The user may have switched apps while the snapshot loaded. Bring T3 Code back
+  // and send Enter only if it really is in front, so the key never lands elsewhere.
+  const { stdout } = await run("/usr/bin/osascript", [
     "-e",
     `
+tell application "${escapeForAppleScript(name)}" to activate
 delay 0.3
-tell application "System Events" to key code 36`,
+if frontmost of application "${escapeForAppleScript(name)}" then
+  tell application "System Events" to key code 36
+  return "opened"
+end if
+return "unfocused"`,
   ]);
-  return true;
+  return stdout.trim() === "opened" ? "opened" : "unfocused";
 }
 
 export async function launchApp(): Promise<void> {

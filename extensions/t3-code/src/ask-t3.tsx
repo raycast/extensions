@@ -195,15 +195,19 @@ export default function Command() {
     await toast.hide();
     await closeMainWindow();
     try {
-      const exact = await focusThread({
+      const outcome = await focusThread({
         id: threadId,
         title: threadTitle(prompt),
         projectTitle: project.title,
         branch: envMode === "worktree" ? branch : null,
       });
-      if (!exact) {
+      if (outcome === "ambiguous") {
         await showHUD(
           "Session started - several threads match, pick it in the T3 Code palette",
+        );
+      } else if (outcome === "unfocused") {
+        await showHUD(
+          "Session started - T3 Code lost focus, pick it in its palette",
         );
       }
     } catch (focusError) {
