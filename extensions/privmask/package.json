@@ -11,11 +11,13 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "mask-text",
       "title": "Mask Text",
-      "subtitle": "Privacy Mask",
       "description": "Review the personal information found in your selection or clipboard, then copy the masked text.",
       "mode": "view"
     }
@@ -40,7 +42,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.2.0"
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

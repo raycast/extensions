@@ -11,6 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { detectFast, detectFull, maskText } from "swift:../swift/privmask-bridge";
 
 type Finding = {
@@ -32,7 +33,7 @@ type DetectResponse = {
 
 const KIND_LABELS: Record<string, string> = {
   personalName: "Name",
-  organizationName: "Organisation",
+  organizationName: "Organization",
   address: "Address",
   postalCode: "Postal code",
   phoneNumber: "Phone",
@@ -137,11 +138,7 @@ export default function Command() {
         // The deterministic findings are already on screen; keep them and say
         // what was lost rather than replacing the list with an error.
         if (!cancelled) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Name detection failed",
-            message: String(error),
-          });
+          await showFailureToast(error, { title: "Name detection failed" });
         }
       } finally {
         if (!cancelled) setWaitingForModel(false);
@@ -268,12 +265,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={input === null || waitingForModel}
-      isShowingDetail
-      navigationTitle={findings.length > 0 ? `${selected.length} of ${findings.length} will be masked` : "Privacy Mask"}
-      searchBarPlaceholder="Filter what was found"
-    >
+    <List isLoading={input === null || waitingForModel} isShowingDetail searchBarPlaceholder="Filter what was found">
       {notices.length > 0 && (
         <List.Section title="Worth knowing">
           {notices.map((notice, index) => (
@@ -290,7 +282,10 @@ export default function Command() {
         </List.Section>
       )}
 
-      <List.Section title="Found in this text" subtitle={findings.length > 0 ? `${findings.length}` : undefined}>
+      <List.Section
+        title="Found in this text"
+        subtitle={findings.length > 0 ? `${selected.length} of ${findings.length} will be masked` : undefined}
+      >
         {findings.map((finding) => {
           const isMasked = !deselected.has(finding.id);
           return (

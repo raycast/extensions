@@ -3,7 +3,7 @@
 Find personal information in text and mask it before you share it.
 
 Made for the moment just before you paste an incident report, a log, or a
-customer record into Slack or a GitHub issue — when you realise there is a name
+customer record into Slack or a GitHub issue — when you realize there is a name
 in it.
 
 ![Everything found in an incident report, with the masked text beside it](./metadata/privmask-1.png)

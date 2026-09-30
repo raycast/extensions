@@ -71,8 +71,8 @@ private struct TermList {
 ///
 /// The preference is typed by a person, so it arrives the way a person writes a
 /// path: `~/.config/privmask/terms.txt`, which is what the field suggests.
-/// `URL(fileURLWithPath:)` does not expand `~`, and would resolve that against
-/// the working directory instead.
+/// The `~` is expanded here, because `URL(fileURLWithPath:)` cannot be relied
+/// on to: on macOS 13 it would resolve the path against the working directory.
 private func loadTerms(_ path: String?) throws -> TermList {
   guard let path, !path.trimmingCharacters(in: .whitespaces).isEmpty else {
     return TermList(terms: try DictionaryFile.load(), notice: nil)
