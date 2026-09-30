@@ -1,7 +1,20 @@
 import { NoTranscriptReason, TranscriptSegment } from "../transcript.js";
 import { Video } from "../types.js";
-import { formatClock } from "./format.js";
+import { Chunk, chunkBody, estimateTokens, formatTimestamp, transcriptText } from "./link-context.js";
 import { formatCount, formatUploadDate } from "./media-info.js";
+
+export {
+  estimateTokens,
+  formatTimestamp,
+  isOverviewRequest,
+  linkifyTimestamps,
+  parseTimestamp,
+  scoreChunks,
+  selectChunks,
+  transcriptText,
+  truncateToTokens,
+} from "./link-context.js";
+export type { Chunk } from "./link-context.js";
 
 // Everything Chat About Video knows about one video — metadata, derived
 // statistics and the timestamped transcript — and the text-handling around it:
@@ -68,70 +81,6 @@ export function captionLanguages(video: Video): { uploaded: string[]; automatic:
   return { uploaded, automatic };
 }
 
-/** `75` → `1:15`, `3725` → `1:02:05`. Floors, so a timestamp never points past the moment. */
-export function formatTimestamp(seconds: number): string {
-  return formatClock(Math.floor(seconds));
-}
-
-/** Parse `1:15` or `1:02:05` back to seconds. */
-export function parseTimestamp(text: string): number | undefined {
-  const parts = text.split(":").map(Number);
-  if (parts.length < 2 || parts.length > 3 || parts.some((p) => !Number.isInteger(p) || p < 0)) return undefined;
-  return parts.reduce((total, p) => total * 60 + p, 0);
-}
-
-/** Turn bare `[12:34]` / `[1:02:03]` in an answer into links to that moment (links already present are left alone). */
-export function linkifyTimestamps(markdown: string, link: (seconds: number) => string | undefined): string {
-  return markdown.replace(/\[(\d{1,2}(?::\d{2}){1,2})\](?!\()/g, (match, stamp: string) => {
-    const seconds = parseTimestamp(stamp);
-    const url = seconds === undefined ? undefined : link(seconds);
-    return url ? `[${stamp}](${url})` : match;
-  });
-}
-
-/** One line per segment: `[1:15] …`. */
-export function transcriptText(segments: TranscriptSegment[]): string {
-  return segments.map((s) => `[${formatTimestamp(s.start)}] ${s.text}`).join("\n");
-}
-
-/** Chinese, Japanese and Korean characters (Hangul jamo, kana, CJK ideographs, Hangul syllables, full-width forms). */
-function isDenseScript(code: number): boolean {
-  return (
-    (code >= 0x1100 && code <= 0x11ff) ||
-    (code >= 0x3000 && code <= 0x30ff) ||
-    (code >= 0x3130 && code <= 0x318f) ||
-    (code >= 0x3400 && code <= 0x4dbf) ||
-    (code >= 0x4e00 && code <= 0x9fff) ||
-    (code >= 0xac00 && code <= 0xd7af) ||
-    (code >= 0xf900 && code <= 0xfaff) ||
-    (code >= 0xff00 && code <= 0xffef)
-  );
-}
-
-/**
- * Rough token count for budgeting prompts, fitted to Apple's tokenizer
- * (`fm count-tokens`): about 4 ASCII characters per token, 3 for other
- * alphabets (accented Latin, Cyrillic, Arabic…) and 1.4 for Chinese, Japanese
- * and Korean — counting those at 4 would overflow the model's window.
- */
-export function estimateTokens(text: string): number {
-  let ascii = 0;
-  let dense = 0;
-  for (let i = 0; i < text.length; i++) {
-    const code = text.charCodeAt(i);
-    if (code < 0x80) ascii++;
-    else if (isDenseScript(code)) dense++;
-  }
-  return Math.ceil(ascii / 4 + (text.length - ascii - dense) / 3 + dense * 0.7);
-}
-
-/** `text` cut to about `tokens`, ending in an ellipsis when cut. */
-export function truncateToTokens(text: string, tokens: number): string {
-  const estimate = estimateTokens(text);
-  if (estimate <= tokens) return text;
-  return `${text.slice(0, Math.floor((text.length * tokens) / estimate))}…`;
-}
-
 function statsLines(video: Video, now: number): string[] {
   const s = videoStats(video, now);
   const lines: string[] = [];
@@ -179,114 +128,7 @@ export function dossierMarkdown(ctx: VideoContext, now = Date.now(), description
   return parts.join("\n\n");
 }
 
-// ---------------------------------------------------------------------------
-// Chunking and retrieval, for models whose context can't hold the whole transcript.
-// ---------------------------------------------------------------------------
-
-export type Chunk = { start: number; end: number; text: string };
-
 /** Consecutive segments grouped into chunks of about `targetTokens`, each rendered as timestamped lines. */
 export function chunkSegments(segments: TranscriptSegment[], targetTokens: number): Chunk[] {
-  const chunks: Chunk[] = [];
-  let lines: string[] = [];
-  let start = 0;
-  let end = 0;
-  let tokens = 0;
-  for (const seg of segments) {
-    const line = `[${formatTimestamp(seg.start)}] ${seg.text}`;
-    const t = estimateTokens(line);
-    if (lines.length > 0 && tokens + t > targetTokens) {
-      chunks.push({ start, end, text: lines.join("\n") });
-      lines = [];
-      tokens = 0;
-    }
-    if (lines.length === 0) start = seg.start;
-    lines.push(line);
-    end = seg.start;
-    tokens += t;
-  }
-  if (lines.length > 0) chunks.push({ start, end, text: lines.join("\n") });
-  return chunks;
-}
-
-const STOPWORDS = new Set(
-  "a an and are as at be but by did do does for from had has have he her his how i if in into is it its me my of on or our she so that the their them then there these they this to was we were what when where which who why will with you your about can could would should video say says said talk talks".split(
-    " ",
-  ),
-);
-
-function terms(text: string): string[] {
-  return (text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []).filter((t) => t.length > 1 && !STOPWORDS.has(t));
-}
-
-/** BM25 score of every chunk against `query`, in chunk order. */
-export function scoreChunks(chunks: Chunk[], query: string): number[] {
-  const q = [...new Set(terms(query))];
-  if (q.length === 0 || chunks.length === 0) return chunks.map(() => 0);
-  const docs = chunks.map((c) => terms(c.text));
-  const avg = docs.reduce((a, d) => a + d.length, 0) / docs.length || 1;
-  const df = new Map(q.map((t) => [t, docs.filter((d) => d.includes(t)).length]));
-  const k1 = 1.2;
-  const b = 0.75;
-  return docs.map((doc) => {
-    let score = 0;
-    for (const t of q) {
-      const tf = doc.filter((w) => w === t).length;
-      if (tf === 0) continue;
-      const n = df.get(t) ?? 0;
-      const idf = Math.log(1 + (chunks.length - n + 0.5) / (n + 0.5));
-      score += idf * ((tf * (k1 + 1)) / (tf + k1 * (1 - b + (b * doc.length) / avg)));
-    }
-    return score;
-  });
-}
-
-/**
- * Chunks for `query` that fit in `budgetTokens`, back in video order: the ones
- * that match the question first, then chunks spread over the rest of the video
- * so a vague question still sees its start, middle and end.
- */
-export function selectChunks(chunks: Chunk[], query: string, budgetTokens: number): Chunk[] {
-  const scores = scoreChunks(chunks, query);
-  const matching = chunks
-    .map((chunk, i) => ({ chunk, score: scores[i], i }))
-    .filter((c) => c.score > 0)
-    .sort((a, b) => b.score - a.score || a.i - b.i)
-    .map((c) => c.chunk);
-  const rest = spread(chunks).filter((c) => !matching.includes(c));
-  const picked: Chunk[] = [];
-  let used = 0;
-  for (const c of [...matching, ...rest]) {
-    const t = estimateTokens(c.text);
-    if (used + t > budgetTokens) continue;
-    picked.push(c);
-    used += t;
-  }
-  return picked.sort((a, b) => a.start - b.start);
-}
-
-/** Chunks reordered so taking a prefix samples the whole video: first, last, middle, quarters… */
-function spread(chunks: Chunk[]): Chunk[] {
-  const out: Chunk[] = [];
-  const seen = new Set<number>();
-  const visit = (i: number) => {
-    if (i >= 0 && i < chunks.length && !seen.has(i)) {
-      seen.add(i);
-      out.push(chunks[i]);
-    }
-  };
-  visit(0);
-  visit(chunks.length - 1);
-  for (let parts = 2; out.length < chunks.length; parts *= 2) {
-    for (let k = 1; k < parts; k += 2) visit(Math.round(((chunks.length - 1) * k) / parts));
-    if (parts > chunks.length * 2) chunks.forEach((_, i) => visit(i));
-  }
-  return out;
-}
-
-/** Requests that need the whole video rather than a few relevant passages. */
-export function isOverviewRequest(question: string): boolean {
-  return /\b(summar\w*|overview|tl;?dr|recap|key (points|takeaways|ideas)|main (points|ideas|arguments)|takeaways|outline|chapters?|what is (this|the) video about|whole video|entire video|everything)\b/i.test(
-    question,
-  );
+  return chunkBody({ type: "segments", segments }, targetTokens);
 }
