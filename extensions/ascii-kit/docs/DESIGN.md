@@ -20,8 +20,8 @@ this file covers why it is the way it is, for anyone changing it.
 - **Heavy straight arrows are the default** in templates and generated flows. Outline
   (diagonal) and solid (block) arrows stay in the palette, with a caveat.
 - **The README's galleries are generated.** `npm run readme` renders them from the same
-  generators and data the extension uses, so the examples can't go stale. CI runs
-  `npm run readme -- --check`.
+  generators and data the extension uses, so the examples can't go stale. The source repo's CI
+  (`.github/workflows/ci.yml`) runs `npm run readme -- --check`.
 
 ## Learnings
 

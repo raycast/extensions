@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { renderBox } from "./box";
+import { Canvas } from "./canvas";
 import { parseFlow, renderFlowHorizontal, renderFlowInline, renderFlowVertical } from "./flow";
 import { detectKinds, unusable } from "./formats";
+import { fence } from "./markdown";
 import { renderSequence } from "./sequence";
 import { parseTable, renderTable } from "./table";
 import { renderTree } from "./tree";
-import { displayWidth, riskyGlyphs } from "./width";
+import { displayWidth, riskyGlyphs, truncate } from "./width";
 
 const widths = (s: string) => new Set(s.split("\n").map(displayWidth));
 const rect = (s: string) => expect(widths(s).size, `ragged:\n${s}`).toBe(1);
@@ -20,6 +22,25 @@ describe("width", () => {
   });
   it("flags text-default emoji only", () => {
     expect(riskyGlyphs("⚠ ok ✓ ├── ▶ ☑ ✅")).toEqual(["⚠", "▶", "☑"]);
+  });
+  it("truncates by display width", () => {
+    expect(truncate("東京東京東京", 8)).toBe("東京東…");
+    expect(truncate("Design", 8)).toBe("Design");
+    expect(truncate("Engineering", 8)).toBe("Enginee…");
+  });
+  it("keeps zero-width characters on the canvas without taking a column", () => {
+    const c = new Canvas();
+    c.put(0, 0, "a\u200bb|");
+    c.put(1, 0, "\u200bab|");
+    expect(c.toString()).toBe("a\u200bb|\n\u200bab|");
+    expect(c.toString().split("\n").map(displayWidth)).toEqual([3, 3]);
+  });
+});
+
+describe("fence", () => {
+  it("uses three backticks, or more than the longest run inside", () => {
+    expect(fence("a")).toBe("```\na\n```");
+    expect(fence("```js\nx\n```")).toBe("````\n```js\nx\n```\n````");
   });
 });
 
@@ -106,6 +127,18 @@ describe("table", () => {
     expect(parseTable(input)).toEqual(cells);
   });
 
+  it("keeps quoted commas and escaped pipes inside their cell", () => {
+    expect(parseTable('Name,Notes\napples,"cheap, ripe"\npears,"say ""hi"""')).toEqual([
+      ["Name", "Notes"],
+      ["apples", "cheap, ripe"],
+      ["pears", 'say "hi"'],
+    ]);
+    expect(parseTable("| a | b |\n| --- | --- |\n| x \\| y | z |")).toEqual([
+      ["a", "b"],
+      ["x | y", "z"],
+    ]);
+  });
+
   it("pads ragged rows and right-aligns numbers", () => {
     const out = renderTable("a\tb\tc\n1\t2\nx\t3\t4");
     rect(out);
@@ -170,6 +203,11 @@ describe("sequence", () => {
         " │            │            │",
       ].join("\n"),
     );
+  });
+
+  it("leaves room for a self-call on the last lane", () => {
+    expect(renderSequence("A -> A: retry").split("\n")[2]).toBe("│ ↻ retry");
+    expect(renderSequence("A -> B: go\nB -> B: retry").split("\n")[3]).toBe("│            │ ↻ retry");
   });
 });
 

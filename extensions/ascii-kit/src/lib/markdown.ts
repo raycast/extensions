@@ -1,8 +1,13 @@
 import { displayWidth, riskyGlyphs, splitLines } from "./width";
 
-/** Plain ``` fence: Slack, GitHub, Linear and Notion all render it monospace. */
+/**
+ * Plain ``` fence: Slack, GitHub, Linear and Notion all render it monospace. Longer than any
+ * backtick run in the text, so a ``` line inside the diagram doesn't close it early.
+ */
 export function fence(text: string, lang = ""): string {
-  return "```" + lang + "\n" + text + "\n```";
+  const longest = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
+  const ticks = "`".repeat(Math.max(3, longest + 1));
+  return ticks + lang + "\n" + text + "\n" + ticks;
 }
 
 /** Detail-pane markdown: the diagram, then a note on anything that may not survive pasting. */

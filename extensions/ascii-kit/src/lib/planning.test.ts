@@ -33,6 +33,13 @@ describe("gantt", () => {
   it("rejects rows without numbers", () => {
     expect(parseGantt("Design 1 2\nBuild soon")).toBeUndefined();
   });
+
+  it("won't draw a span too long to show, and says why", () => {
+    expect(renderGantt("Design 1 5000000")).toBe("");
+    const gantt = FORMATS.find((f) => f.id === "plan-gantt")!;
+    expect(formatUnusable(gantt, "Design 1 5000000")).toMatch(/Spans 5000000 units/);
+    expect(formatUnusable(gantt, "Design 1 52")).toBeUndefined();
+  });
 });
 
 describe("timeline", () => {

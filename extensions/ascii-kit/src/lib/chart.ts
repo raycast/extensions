@@ -1,6 +1,6 @@
 import { Canvas } from "./canvas";
 import { measureColumns } from "./columns";
-import { displayWidth, padCenter, padEnd, padStart, splitLines } from "./width";
+import { displayWidth, padCenter, padEnd, padStart, splitLines, truncate } from "./width";
 
 export interface Series {
   labels: string[];
@@ -87,7 +87,8 @@ export function renderColumns(input: string, height = 8): string {
   const s = parseSeries(input);
   if (!s) return "";
   const max = Math.max(...s.values, 0) || 1;
-  const colWidth = Math.min(8, Math.max(3, ...s.labels.map(displayWidth), ...s.texts.map(displayWidth)));
+  // Values are never shortened, so they set the minimum; long labels are cut to 8 columns.
+  const colWidth = Math.max(3, Math.min(8, Math.max(...s.labels.map(displayWidth))), ...s.texts.map(displayWidth));
   const canvas = new Canvas();
   const top = 1; // row 0 holds the tallest value's label
   s.values.forEach((v, i) => {
@@ -101,8 +102,7 @@ export function renderColumns(input: string, height = 8): string {
     const valueRow = top + height - Math.ceil(level / 8) - 1;
     canvas.put(Math.max(0, valueRow), x, padCenter(s.texts[i], colWidth));
     const label = s.labels[i];
-    const shown = displayWidth(label) > colWidth ? [...label].slice(0, colWidth - 1).join("") + "…" : label;
-    canvas.put(top + height + 1, x, padCenter(shown, colWidth));
+    canvas.put(top + height + 1, x, padCenter(truncate(label, colWidth), colWidth));
   });
   canvas.put(top + height, 0, "─".repeat(s.values.length * (colWidth + 1) - 1));
   return canvas.toString().replace(/^\n+/, "");

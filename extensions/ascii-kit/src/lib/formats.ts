@@ -1,4 +1,4 @@
-import { BannerOptions, renderBanner } from "./banner";
+import { BannerOptions, missingBannerChars, renderBanner } from "./banner";
 import { renderBox, renderTitledBox } from "./box";
 import { parseCallouts, renderCallouts } from "./callouts";
 import { parseSeries, renderBars, renderColumns, renderLineChart, renderSparkline } from "./chart";
@@ -6,6 +6,8 @@ import { renderFlowHorizontal, renderFlowInline, renderFlowVertical, renderFlowV
 import { renderNested } from "./nested";
 import { renderOrgChart } from "./orgchart";
 import {
+  MAX_GANTT_UNITS,
+  ganttSpan,
   looksLikeTimeline,
   parseGantt,
   parseTimeline,
@@ -39,8 +41,12 @@ const banner = (id: string, title: string, opts: BannerOptions): Format => ({
   kind: "text",
   title,
   render: (s) => renderBanner(s, opts),
-  unusable: (s) =>
-    renderBanner(s, opts).trim() ? undefined : "Only letters, digits and . , ! ? - : ' / + have banner glyphs.",
+  unusable: (s) => {
+    const missing = missingBannerChars(s, opts);
+    if (!missing.length && renderBanner(s, opts).trim()) return undefined;
+    const which = missing.length ? `No banner glyph for ${missing.join(" ")}. ` : "";
+    return `${which}Only letters, digits and . , ! ? - : ' / + have banner glyphs.`;
+  },
 });
 
 const styled = (id: string, title: string, style: TextStyle): Format => ({
@@ -56,8 +62,12 @@ const noNegatives = (s: string) =>
     ? "Bars start at zero, so negative values can't be drawn: use Line chart."
     : undefined;
 
-const needsGantt = (s: string) =>
-  parseGantt(s) ? undefined : "Needs `task start length` or `task 2-4` rows, all of them.";
+const needsGantt = (s: string) => {
+  const g = parseGantt(s);
+  if (!g) return "Needs `task start length` or `task 2-4` rows, all of them.";
+  const span = ganttSpan(g.tasks);
+  return span > MAX_GANTT_UNITS ? `Spans ${span} units: the Gantt chart fits up to ${MAX_GANTT_UNITS}.` : undefined;
+};
 const needsMilestones = (s: string) => (parseTimeline(s).length < 2 ? "Needs at least two milestones." : undefined);
 const needsCards = (s: string) =>
   splitLines(s.trim()).length < 2 ? "Needs a header row of column names and at least one row of cards." : undefined;

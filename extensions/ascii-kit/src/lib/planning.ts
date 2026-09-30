@@ -45,13 +45,22 @@ export function parseGantt(input: string): { unit: string; tasks: Task[] } | und
   return { unit, tasks };
 }
 
+/** A year of weeks. The chart grows with the numbers, so `Design 1 5000000` must not be drawn. */
+export const MAX_GANTT_UNITS = 52;
+
+/** How many units the chart spans: up to the end of the last task. */
+export function ganttSpan(tasks: Task[]): number {
+  return Math.ceil(Math.max(...tasks.map((t) => t.start - 1 + t.length)));
+}
+
 const EIGHTHS = ["", "▏", "▎", "▍", "▌", "▋", "▊", "▉"];
 
 /** Units as columns (W1 W2 …), each task a bar; part-units end in an eighth block. */
 export function renderGantt(input: string, unitWidth = 4): string {
   const g = parseGantt(input);
   if (!g) return "";
-  const units = Math.ceil(Math.max(...g.tasks.map((t) => t.start - 1 + t.length)));
+  const units = ganttSpan(g.tasks);
+  if (units > MAX_GANTT_UNITS) return "";
   const labelWidth = Math.max(...g.tasks.map((t) => displayWidth(t.label)));
   const header = Array.from({ length: units }, (_, i) => padEnd(`${g.unit}${i + 1}`, unitWidth)).join("");
   const rows = g.tasks.map((t) => {

@@ -18,11 +18,18 @@ export function parseTable(input: string): string[][] {
   if (lines.some((l) => l.includes("\t"))) {
     split = (l) => l.split("\t");
   } else if (lines.every((l) => l.includes("|"))) {
-    split = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|");
+    // `\|` is a literal pipe inside a markdown cell.
+    split = (l) =>
+      l
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/(?<!\\)\|$/, "")
+        .split(/(?<!\\)\|/)
+        .map((c) => c.replace(/\\\|/g, "|"));
   } else if (lines.some((l) => /\S {2,}\S/.test(l))) {
     split = (l) => l.trim().split(/ {2,}/);
   } else if (lines.every((l) => l.includes(","))) {
-    split = (l) => l.split(",");
+    split = splitCsv;
   } else {
     split = (l) => [l];
   }
@@ -30,6 +37,31 @@ export function parseTable(input: string): string[][] {
   const rows = lines.map((l) => split(l).map((c) => c.trim()));
   const cols = Math.max(...rows.map((r) => r.length));
   return rows.map((r) => [...r, ...Array(cols - r.length).fill("")]);
+}
+
+/** One CSV line: a quoted cell keeps its commas, and `""` inside quotes is a literal quote. */
+function splitCsv(line: string): string[] {
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"' && !cell.trim()) {
+      quoted = true;
+      cell = "";
+    } else if (ch === ",") {
+      cells.push(cell);
+      cell = "";
+    } else cell += ch;
+  }
+  cells.push(cell);
+  return cells;
 }
 
 /** First row is the header. Columns whose body cells are all numbers are right-aligned. */

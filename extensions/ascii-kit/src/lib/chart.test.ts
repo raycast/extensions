@@ -67,6 +67,14 @@ describe("columns", () => {
       "Q1  Q2",
     ]);
   });
+
+  it("widens columns for long values and cuts long labels by display width", () => {
+    const long = renderColumns("West 1234567890\nEast 1234567890", 2).split("\n");
+    expect(long[0]).toBe("1234567890 1234567890");
+    expect(long.at(-1)).toBe("   West       East");
+    const cjk = renderColumns("東京東京東京 5\n大阪大阪 3", 2).split("\n");
+    expect(cjk.at(-1)).toBe("東京東…  大阪大阪");
+  });
 });
 
 describe("sparkline", () => {

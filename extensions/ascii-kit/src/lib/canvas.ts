@@ -15,10 +15,20 @@ export class Canvas {
 
   put(row: number, col: number, text: string): void {
     let c = col;
+    let pending = "";
     for (const g of graphemes(text)) {
       const w = graphemeWidth(g);
-      this.cell(row, c + Math.max(0, w - 1));
-      this.rows[row][c] = g;
+      // A zero-width character (ZWSP, joiner) rides along with its neighbour instead of taking a cell.
+      if (w === 0) {
+        if (c > 0) {
+          this.cell(row, c - 1);
+          this.rows[row][c - 1] += g;
+        } else pending += g;
+        continue;
+      }
+      this.cell(row, c + w - 1);
+      this.rows[row][c] = pending + g;
+      pending = "";
       if (w === 2) this.rows[row][c + 1] = "";
       c += w;
     }

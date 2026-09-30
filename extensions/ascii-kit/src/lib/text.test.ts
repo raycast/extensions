@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BANNER_CHARS, TALL_CHARS, renderBanner } from "./banner";
 import { parseCallouts, renderCallouts } from "./callouts";
-import { FORMATS, detectKinds } from "./formats";
+import { FORMATS, detectKinds, formatUnusable } from "./formats";
 import { styleText } from "./textstyle";
 import { displayWidth } from "./width";
 
@@ -93,6 +93,12 @@ describe("banner", () => {
   it("puts each input line in its own banner, skipping unknown characters", () => {
     expect(renderBanner("A\nB").split("\n")).toHaveLength(5);
     expect(renderBanner("A€")).toBe(renderBanner("A"));
+  });
+
+  it("is unusable when a character has no glyph, naming it", () => {
+    const small = FORMATS.find((f) => f.id === "text-banner")!;
+    expect(formatUnusable(small, "Café")).toMatch(/No banner glyph for É\./);
+    expect(formatUnusable(small, "Cafe bar")).toBeUndefined();
   });
 });
 

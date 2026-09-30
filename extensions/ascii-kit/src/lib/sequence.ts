@@ -31,10 +31,18 @@ class Row {
   }
   put(col: number, text: string) {
     let c = col;
+    let pending = "";
     for (const g of graphemes(text)) {
       const w = graphemeWidth(g);
+      // A zero-width character (ZWSP, joiner) rides along with its neighbour instead of taking a cell.
+      if (w === 0) {
+        if (c > 0 && c <= this.cells.length) this.cells[c - 1] += g;
+        else pending += g;
+        continue;
+      }
       if (c < 0 || c + w > this.cells.length) break;
-      this.cells[c] = g;
+      this.cells[c] = pending + g;
+      pending = "";
       if (w === 2) this.cells[c + 1] = "";
       c += w;
     }
@@ -52,7 +60,8 @@ export function renderSequence(input: string): string {
   const gap = Math.max(12, nameW + 2, labelW + 8);
   const offset = Math.floor(displayWidth(lanes[0]) / 2);
   const cols = lanes.map((_, i) => offset + i * gap);
-  const width = cols[cols.length - 1] + nameW;
+  // Room right of the last lane for its name or a self-call (` ↻ label`, drawn from col + 1).
+  const width = cols[cols.length - 1] + Math.max(nameW, labelW + 4);
 
   const lifelines = () => {
     const r = new Row(width);

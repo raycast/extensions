@@ -43,6 +43,20 @@ export function displayWidth(text: string): number {
   return w;
 }
 
+/** Shortens `text` to at most `width` columns, ending in `…` when anything was cut. */
+export function truncate(text: string, width: number): string {
+  if (displayWidth(text) <= width) return text;
+  let out = "";
+  let w = 0;
+  for (const g of graphemes(text)) {
+    const gw = graphemeWidth(g);
+    if (w + gw > width - 1) break;
+    out += g;
+    w += gw;
+  }
+  return out + "…";
+}
+
 export function padEnd(text: string, width: number, fill = " "): string {
   return text + fill.repeat(Math.max(0, width - displayWidth(text)));
 }

@@ -157,16 +157,28 @@ export interface BannerOptions {
   mixedCase?: boolean;
 }
 
+const fontFor = (opts: BannerOptions) => (opts.size === "tall" ? TALL : SMALL);
+const caseFor = (line: string, opts: BannerOptions) =>
+  opts.size === "tall" && opts.mixedCase ? line : line.toUpperCase();
+
+/** Characters the banner has no glyph for, de-duplicated, in input order. Whitespace is fine. */
+export function missingBannerChars(input: string, opts: BannerOptions = {}): string[] {
+  const font = fontFor(opts);
+  const missing = new Set<string>();
+  for (const line of splitLines(input)) {
+    for (const ch of caseFor(line, opts)) if (!font[ch] && !/\s/.test(ch)) missing.add(ch);
+  }
+  return [...missing];
+}
+
 /** Big letters for headings in plain-text places. Unknown characters are skipped. */
 export function renderBanner(input: string, opts: BannerOptions = {}): string {
-  const tall = opts.size === "tall";
-  const font = tall ? TALL : SMALL;
-  const height = tall ? 3 : 2;
+  const font = fontFor(opts);
+  const height = opts.size === "tall" ? 3 : 2;
   return splitLines(input.trim())
     .filter((l) => l.trim())
     .map((line) => {
-      const text = tall && opts.mixedCase ? line : line.toUpperCase();
-      const glyphs = [...text].map((ch) => font[ch]).filter(Boolean);
+      const glyphs = [...caseFor(line, opts)].map((ch) => font[ch]).filter(Boolean);
       return Array.from({ length: height }, (_, r) =>
         glyphs
           .map((g) => g[r])

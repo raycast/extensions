@@ -16,22 +16,29 @@ import { fence, preview } from "./lib/markdown";
 
 type Source = "selection" | "clipboard" | "typed";
 
-async function readInput(): Promise<{ text: string; source: Source } | undefined> {
+type Input = { text: string; source: Source } | { error: string } | undefined;
+
+async function readInput(): Promise<Input> {
   try {
     const selected = await getSelectedText();
     if (selected.trim()) return { text: selected, source: "selection" };
   } catch {
     // No selection, or the frontmost app doesn't expose it: fall back to the clipboard.
   }
-  const copied = await Clipboard.readText();
-  if (copied?.trim()) return { text: copied, source: "clipboard" };
+  try {
+    const copied = await Clipboard.readText();
+    if (copied?.trim()) return { text: copied, source: "clipboard" };
+  } catch (e) {
+    // Say so on the form, so a failed read doesn't look like an empty clipboard.
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
   return undefined;
 }
 
 export default function Command() {
   const { data, isLoading } = usePromise(readInput);
   if (isLoading) return <List isLoading />;
-  if (!data) return <TypeInput />;
+  if (!data || "error" in data) return <TypeInput readError={data?.error} />;
   return <Compose input={data.text} source={data.source} />;
 }
 
@@ -108,7 +115,7 @@ function Compose({ input, source }: { input: string; source: Source }) {
   );
 }
 
-function TypeInput({ initial = "" }: { initial?: string }) {
+function TypeInput({ initial = "", readError }: { initial?: string; readError?: string }) {
   const { push } = useNavigation();
   // Opened with text when editing (⌘E), empty when there was nothing to read.
   const editing = initial.trim() !== "";
@@ -131,7 +138,9 @@ function TypeInput({ initial = "" }: { initial?: string }) {
         text={
           editing
             ? "Edit the input, then ⌘↵ to preview the formats again."
-            : "Nothing selected or copied. Type or paste what to draw, then ⌘↵."
+            : readError
+              ? `Couldn't read the clipboard (${readError}). Type or paste what to draw, then ⌘↵.`
+              : "Nothing selected or copied. Type or paste what to draw, then ⌘↵."
         }
       />
       <Form.TextArea id="input" title="Input" defaultValue={initial} enableMarkdown={false} autoFocus />

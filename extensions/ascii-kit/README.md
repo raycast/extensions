@@ -1917,7 +1917,7 @@ ascii-kit
 | Add a glyph           | Add it to `glyphs.ts`. Give it a `keyword` only if you'll type it daily      |
 | Regenerate snippets   | `npm run snippets`: rewrites `snippets/core.json` and fails on keyword prefix clashes. Re-import in Raycast |
 | Add a template        | Add it to `templates.ts`. Use a generator for anything boxy                  |
-| Regenerate the README gallery | `npm run readme`. `npm run readme -- --check` fails if it's stale (CI runs it) |
+| Regenerate the README gallery | `npm run readme`. `npm run readme -- --check` fails if it's stale (the source repo's CI runs it) |
 | Check                 | `npm test` (generator fixtures), `npm run lint`, `npm run build`             |
 | Compare fonts         | `npm run render-fonts -- in.txt out.png` draws a text file in Menlo, Monaco, SF Mono and Geist Mono at line heights 1.2 and 1.618, so you can judge a glyph design without pasting it anywhere |
 | Preview every format  | `npm run examples` prints them all in a terminal (`npm run examples tree` for one kind) |
