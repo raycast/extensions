@@ -21,7 +21,6 @@ vi.mock("@raycast/api", () => ({
     Sidebar: "sidebar",
     ArrowClockwise: "arrow-clockwise",
     Gear: "gear",
-    Warning: "warning",
   },
   Action: vi.fn(),
   ActionPanel: vi.fn(),
