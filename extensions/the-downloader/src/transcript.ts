@@ -57,6 +57,26 @@ export function pickSubtitleFile(files: string[], languages: string[]): string |
   return undefined;
 }
 
+/**
+ * Why no caption file was saved. With --ignore-errors a failed caption download
+ * is only a warning and yt-dlp can exit 0, so its "Unable to download video
+ * subtitles" line is the real reason — YouTube rate-limiting (HTTP 429) is the
+ * usual one — and "none found" is only true when nothing failed.
+ */
+export function subtitleFailureMessage(stderr: string, code: number | null, languages: string[]): string {
+  const failed = stderr
+    .split("\n")
+    .find((line) => /Unable to download video subtitles/i.test(line))
+    ?.replace(/^(WARNING|ERROR):\s*(\[[^\]]*\]\s*)?([^:]+:\s*)?(?=Unable)/i, "")
+    .trim();
+  if (failed && /\b429\b|too many requests/i.test(failed)) {
+    return "YouTube is limiting caption downloads right now. Try again in a few minutes.";
+  }
+  if (failed) return `Couldn't download the captions: ${failed}`;
+  if (code !== 0) return stderr.trim() || "Failed to download subtitles";
+  return `No ${languages.join(" or ")} subtitles found for this video`;
+}
+
 /** yt-dlp arguments that save a video's captions (no media) as .srt files. */
 export function buildTranscriptArgs(o: {
   url: string;
@@ -142,10 +162,7 @@ export default async function extractTranscript(url: string, language: string = 
     // track and then fail another (e.g. HTTP 429 on an automatic variant), and
     // the saved one is still good.
     const subtitleFile = pickSubtitleFile(fs.readdirSync(tmpDir), languages);
-    if (!subtitleFile) {
-      if (code !== 0) throw new Error(stderr.trim() || "Failed to download subtitles");
-      throw new Error(`No ${languages.join(" or ")} subtitles found for this video`);
-    }
+    if (!subtitleFile) throw new Error(subtitleFailureMessage(stderr, code, languages));
 
     // Read and parse the subtitle file
     const subtitleContent = fs.readFileSync(path.join(tmpDir, subtitleFile), "utf-8");

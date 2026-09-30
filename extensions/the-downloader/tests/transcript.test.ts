@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { buildTranscriptArgs, cleanUpSrt, pickSubtitleFile, subLangsArg, transcriptLanguages } from "../src/transcript";
+import {
+  buildTranscriptArgs,
+  cleanUpSrt,
+  pickSubtitleFile,
+  subLangsArg,
+  subtitleFailureMessage,
+  transcriptLanguages,
+} from "../src/transcript";
 
 /** Build a valid multi-cue SRT document from cue texts (1s apart). */
 function srt(...texts: string[]): string {
@@ -123,5 +130,28 @@ describe("cleanUpSrt hard spaces", () => {
   it("turns the \\h hard-space code YouTube's captions carry into a plain space", () => {
     const srt = "1\n00:00:00,000 --> 00:00:02,000\nHat es einen\\h Rand?\n";
     expect(cleanUpSrt(srt)).toBe("Hat es einen Rand?");
+  });
+});
+
+describe("subtitleFailureMessage", () => {
+  it("says YouTube is rate-limiting when every caption download got HTTP 429 (a warning with --ignore-errors)", () => {
+    const stderr =
+      "WARNING: [youtube] abc: Unable to download video subtitles for 'en': HTTP Error 429: Too Many Requests\n";
+    expect(subtitleFailureMessage(stderr, 0, ["en"])).toMatch(/limiting caption downloads.*few minutes/);
+  });
+
+  it("passes on other caption download failures instead of claiming there are none", () => {
+    const stderr =
+      "WARNING: [youtube] abc: Unable to download video subtitles for 'en': HTTP Error 500: Server Error\n";
+    expect(subtitleFailureMessage(stderr, 0, ["en"])).toBe(
+      "Couldn't download the captions: Unable to download video subtitles for 'en': HTTP Error 500: Server Error",
+    );
+  });
+
+  it("reports yt-dlp's error on a failed run, and 'none found' only when nothing failed", () => {
+    expect(subtitleFailureMessage("ERROR: [youtube] abc: Video unavailable\n", 1, ["en"])).toBe(
+      "ERROR: [youtube] abc: Video unavailable",
+    );
+    expect(subtitleFailureMessage("", 0, ["en", "de"])).toBe("No en or de subtitles found for this video");
   });
 });
