@@ -14,7 +14,8 @@ type Input = {
 };
 
 /**
- * Details and statistics about a link without its text: title, author or
+ * Only for how a link is doing or what it is — not for summaries or its
+ * content (read-link does those). Details and statistics without the text: title, author or
  * channel, site, date, views, likes, comments, engagement rates, chapters,
  * tags and description — and for videos, which caption languages exist.
  */

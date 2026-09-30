@@ -359,12 +359,12 @@
     {
       "name": "read-link",
       "title": "Read Link",
-      "description": "Reads a link's details and its text — a video's transcript with [m:ss] timestamps, a social post's caption, or a web article — for summarizing or answering questions about what it says"
+      "description": "Reads a link — a video's transcript with [m:ss] timestamps, a social post's caption, or a web article — together with its details and statistics. Use it to summarize, answer questions about, quote or take notes on what a link says; it already includes the details, so don't call get-link-info first"
     },
     {
       "name": "get-link-info",
       "title": "Get Link Info",
-      "description": "Gets a link's details and statistics without its text: title, author or channel, site, date, views, likes, comments, engagement rates, chapters, tags, description, and a video's caption languages"
+      "description": "Gets only a link's details and statistics, without its text: title, author or channel, site, date, views, likes, comments, engagement rates, chapters, tags, description and a video's caption languages. Use it only for questions about how a link is doing or what it is, not for summaries or its content (use read-link for those)"
     }
   ],
   "preferences": [
@@ -714,7 +714,7 @@
     }
   ],
   "ai": {
-    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. Use read-link to read what a link says (summaries, questions about the content) and get-link-info for how it is doing (views, likes, comments). When answering from a video's transcript, point to moments with their timestamp as a link, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows; for posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports. Reply in the user's language.",
+    "instructions": "Write every reply in the language of the user's message (German question → German answer), even though the tool output is in English. After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. To summarize a link or answer anything about what it says, call read-link once — it returns the details too, so don't also call get-link-info. Call get-link-info only for how a link is doing (views, likes, comments) or basic facts about it. When answering from a video's transcript, show when things are said: the timestamp itself is the link text, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows — never hide the link behind other words — and every point of a video summary gets its timestamp. For posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports.",
     "skills": [
       {
         "name": "summarize-link",
@@ -810,12 +810,15 @@
             "callsTool": "read-link"
           },
           {
-            "meetsCriteria": "Summarizes the video in about three bullet points about blocking distractions with Focus, and links at least one timestamp"
-          },
-          {
             "not": {
               "callsTool": "download-video"
             }
+          },
+          {
+            "includes": "Focus"
+          },
+          {
+            "matches": "\\b\\d{1,2}:\\d{2}\\b"
           }
         ]
       },
@@ -830,7 +833,10 @@
             "callsTool": "read-link"
           },
           {
-            "meetsCriteria": "Answers in German that Elon Musk said xAI will keep buying Nvidia chips, and points to 2:31"
+            "includes": "2:31"
+          },
+          {
+            "matches": "\\b([Dd]ass|[Hh]at|[Ww]ird|[Ss]agte|gesagt|werde)\\b"
           }
         ]
       },
@@ -849,7 +855,15 @@
             }
           },
           {
-            "meetsCriteria": "Explains that the Artemis III astronauts signed hardware that will fly inside their Orion spacecraft, without inventing timestamps"
+            "includes": "Artemis"
+          },
+          {
+            "matches": "[Ss]ign|[Nn]ames"
+          },
+          {
+            "not": {
+              "matches": "\\[\\d{1,2}:\\d{2}\\]"
+            }
           }
         ]
       },
@@ -866,11 +880,16 @@
             "includes": "Omitron"
           },
           {
-            "meetsCriteria": "Summarizes the contract: Omitron, orbital safety analysis, about $23.5 million over five years; no video timestamps"
+            "not": {
+              "callsTool": "download-video"
+            }
+          },
+          {
+            "matches": "23\\.5"
           },
           {
             "not": {
-              "callsTool": "download-video"
+              "matches": "\\[\\d{1,2}:\\d{2}\\]"
             }
           }
         ]
