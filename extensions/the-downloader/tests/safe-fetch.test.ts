@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import http from "node:http";
 import zlib from "node:zlib";
 import { AddressInfo } from "node:net";
-import { BlockedAddressError, isBlockedAddress, isBlockedHostname, safeFetch } from "../src/lib/safe-fetch";
+import { BlockedAddressError, HttpError, isBlockedAddress, isBlockedHostname, safeFetch } from "../src/lib/safe-fetch";
 
 describe("isBlockedAddress", () => {
   it.each([
@@ -157,6 +157,11 @@ describe("safeFetch", () => {
     ).rejects.toThrow("This link isn't a web page (application/pdf).");
     await expect(safeFetch(`http://s.test:${port}/loop`, onlyLoopback)).rejects.toThrow(/redirects/);
     await expect(safeFetch(`http://s.test:${port}/gone`, onlyLoopback)).rejects.toThrow("HTTP 404 from s.test");
+    await expect(safeFetch(`http://s.test:${port}/gone`, onlyLoopback)).rejects.toMatchObject({
+      name: "HttpError",
+      status: 404,
+    });
+    expect(new HttpError(403, "x.com")).toBeInstanceOf(Error);
   });
 
   it("gives up on a server that never answers", async () => {

@@ -22,6 +22,17 @@ export class BlockedAddressError extends Error {
   }
 }
 
+/** The server answered with an error status. */
+export class HttpError extends Error {
+  constructor(
+    readonly status: number,
+    readonly host: string,
+  ) {
+    super(`HTTP ${status} from ${host}`);
+    this.name = "HttpError";
+  }
+}
+
 const BLOCKED = new net.BlockList();
 for (const [address, prefix] of [
   ["0.0.0.0", 8], // "this network", unspecified
@@ -277,7 +288,7 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
       }
       if (hop.status >= 400 || hop.status < 200) {
         hop.response.resume();
-        throw new Error(`HTTP ${hop.status} from ${host}`);
+        throw new HttpError(hop.status, host);
       }
       const type = hop.contentType.split(";")[0].trim().toLowerCase();
       if (options.accept?.length && !options.accept.some((a) => (a.endsWith("/") ? type.startsWith(a) : type === a))) {
