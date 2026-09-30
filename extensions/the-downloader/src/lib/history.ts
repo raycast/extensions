@@ -144,6 +144,46 @@ export function groupByDay(entries: HistoryEntry[], now = Date.now()): { title: 
 
 let writeChain: Promise<unknown> = Promise.resolve();
 
+// What the user deleted (Remove, Clear History), stored apart from the list so
+// a write check in another command can tell a deliberate deletion from a
+// concurrent write that dropped its entry, and doesn't bring it back.
+const DELETIONS_KEY = "download-history-deletions-v1";
+const REMOVED_LIMIT = 200;
+
+export type HistoryDeletions = {
+  /** When the history was last cleared (ms). */
+  clearedAt: number;
+  /** IDs removed one by one since then, oldest first. */
+  removed: string[];
+};
+
+export function parseDeletions(raw: string | undefined): HistoryDeletions {
+  try {
+    const d = JSON.parse(raw ?? "") as Partial<HistoryDeletions> | null;
+    return {
+      clearedAt: typeof d?.clearedAt === "number" ? d.clearedAt : 0,
+      removed: Array.isArray(d?.removed) ? d.removed.filter((id): id is string => typeof id === "string") : [],
+    };
+  } catch {
+    return { clearedAt: 0, removed: [] };
+  }
+}
+
+/** True when the user removed the entry, or cleared the history after it was recorded at `recordedAt`. */
+export function wasDeleted(deletions: HistoryDeletions, id: string, recordedAt: number): boolean {
+  return deletions.removed.includes(id) || deletions.clearedAt >= recordedAt;
+}
+
+/** Note a deletion before making it, in the same queue as the writes. Never rejects. */
+function noteDeletion(change: (d: HistoryDeletions) => HistoryDeletions): Promise<void> {
+  const next = writeChain.then(async () => {
+    const d = change(parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY)));
+    await LocalStorage.setItem(DELETIONS_KEY, JSON.stringify({ ...d, removed: d.removed.slice(-REMOVED_LIMIT) }));
+  });
+  writeChain = next.catch(() => undefined);
+  return next.catch((error) => console.error("Could not note a history deletion", error));
+}
+
 /** How long after a write to check that another command's concurrent write didn't undo it. */
 const VERIFY_DELAY_MS = 500;
 const VERIFY_ATTEMPTS = 2;
@@ -156,7 +196,7 @@ const VERIFY_ATTEMPTS = 2;
  */
 function mutate(
   change: (list: HistoryEntry[]) => HistoryEntry[],
-  applied?: (list: HistoryEntry[]) => boolean,
+  applied?: (list: HistoryEntry[]) => boolean | Promise<boolean>,
   attempts = VERIFY_ATTEMPTS,
 ): { written: Promise<HistoryEntry[]>; verified: Promise<void> } {
   const written = writeChain.then(async () => {
@@ -170,7 +210,7 @@ function mutate(
       ? written
           .then(() => new Promise((resolve) => setTimeout(resolve, VERIFY_DELAY_MS)))
           .then(async () => {
-            if (!applied(await loadHistory())) await mutate(change, applied, attempts - 1).verified;
+            if (!(await applied(await loadHistory()))) await mutate(change, applied, attempts - 1).verified;
           })
           .catch(() => undefined)
       : written.then(
@@ -194,9 +234,14 @@ export async function recordDownload(entry: HistoryEntry | undefined): Promise<v
       if (stat?.isFile()) entry = { ...entry, bytes: stat.size };
     }
     const recorded = entry;
+    const recordedAt = Date.now();
     const { written, verified } = mutate(
       (list) => addEntry(list, recorded),
-      (list) => list.some((e) => e.id === recorded.id),
+      // Missing because the user removed it or cleared the history (maybe in
+      // the History command) is fine; only a concurrent write's loss is re-applied.
+      async (list) =>
+        list.some((e) => e.id === recorded.id) ||
+        wasDeleted(parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY)), recorded.id, recordedAt),
     );
     await written;
     // Wait for the check too: a no-view command (Fast Download) may end as soon as this returns.
@@ -207,6 +252,7 @@ export async function recordDownload(entry: HistoryEntry | undefined): Promise<v
 }
 
 export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
+  void noteDeletion((d) => ({ ...d, removed: [...d.removed.filter((r) => r !== id), id] }));
   // The check runs in the background, so the History list updates right away.
   return mutate(
     (list) => removeEntry(list, id),
@@ -215,5 +261,7 @@ export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
 }
 
 export function clearHistory(): Promise<HistoryEntry[]> {
+  // Everything recorded before now is covered by `clearedAt`.
+  void noteDeletion(() => ({ clearedAt: Date.now(), removed: [] }));
   return mutate(() => []).written;
 }

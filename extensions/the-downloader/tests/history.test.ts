@@ -9,9 +9,11 @@ import {
   groupByDay,
   loadHistory,
   matchesFilter,
+  parseDeletions,
   parseHistory,
   recordDownload,
   removeFromHistory,
+  wasDeleted,
 } from "../src/lib/history";
 
 function entry(id: string, patch: Partial<HistoryEntry> = {}): HistoryEntry {
@@ -119,6 +121,21 @@ describe("list helpers", () => {
   });
 });
 
+describe("deletions", () => {
+  it("parses stored deletions and tolerates garbage", () => {
+    expect(parseDeletions('{"clearedAt":5,"removed":["a",1,"b"]}')).toEqual({ clearedAt: 5, removed: ["a", "b"] });
+    expect(parseDeletions(undefined)).toEqual({ clearedAt: 0, removed: [] });
+    expect(parseDeletions("nope")).toEqual({ clearedAt: 0, removed: [] });
+  });
+
+  it("counts removed entries and anything recorded before the last clear", () => {
+    const d = { clearedAt: 100, removed: ["x"] };
+    expect(wasDeleted(d, "x", 500)).toBe(true);
+    expect(wasDeleted(d, "y", 50)).toBe(true);
+    expect(wasDeleted(d, "y", 500)).toBe(false);
+  });
+});
+
 describe("storage", () => {
   beforeEach(() => LocalStorage.clear());
 
@@ -151,6 +168,34 @@ describe("storage", () => {
     await removeFromHistory("a");
     await staleWrite(["a"]);
     await vi.waitFor(async () => expect(await ids()).toEqual([]), { timeout: 2000 });
+  });
+
+  // The History command's Remove / Clear History landing while a download's
+  // write is still being checked must stay done.
+  it("keeps a download cleared while its write is still being checked", async () => {
+    const recording = recordDownload(entry("fresh"));
+    await vi.waitFor(async () => expect(await ids()).toContain("fresh"));
+    await clearHistory();
+    await recording;
+    expect(await ids()).toEqual([]);
+  });
+
+  it("keeps a download removed while its write is still being checked", async () => {
+    const recording = recordDownload(entry("fresh"));
+    await vi.waitFor(async () => expect(await ids()).toContain("fresh"));
+    await removeFromHistory("fresh");
+    await recording;
+    expect(await ids()).toEqual([]);
+  });
+
+  it("still re-records a download made after the history was cleared", async () => {
+    await clearHistory();
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const recording = recordDownload(entry("later"));
+    await vi.waitFor(async () => expect(await ids()).toContain("later"));
+    await staleWrite(["theirs"]);
+    await recording;
+    expect(await ids()).toEqual(["later", "theirs"]);
   });
 
   it("ignores an undefined entry", async () => {
