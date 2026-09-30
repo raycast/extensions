@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Tab, TabKind } from "../../src/lib/tabs/model.ts";
-import { searchTabs } from "../../src/lib/tabs/search.ts";
+import { adjacentSection, searchTabs } from "../../src/lib/tabs/search.ts";
 import { app } from "../fake-platform.ts";
 
 const chrome = app("com.google.Chrome", "Google Chrome");
@@ -48,4 +48,16 @@ test("typos still find the tab, app first", () => {
 test("every query word must match some field", () => {
   assert.deepEqual(titles(searchTabs(tabs, "github pages")), ["cmux: github-pages"]);
   assert.deepEqual(searchTabs(tabs, "claude xyzzy"), []);
+});
+
+test("adjacent section: first row of the next / previous app, stays at the ends", () => {
+  const sections = [["claude-1", "claude-2"], [], ["chrome-1", "chrome-2"], ["cmux-1"]];
+  assert.equal(adjacentSection(sections, "claude-2", 1), "chrome-1");
+  assert.equal(adjacentSection(sections, "chrome-1", 1), "cmux-1");
+  assert.equal(adjacentSection(sections, "cmux-1", 1), "cmux-1");
+  assert.equal(adjacentSection(sections, "cmux-1", -1), "chrome-1");
+  assert.equal(adjacentSection(sections, "chrome-2", -1), "claude-1");
+  assert.equal(adjacentSection(sections, "claude-1", -1), "claude-1");
+  assert.equal(adjacentSection(sections, undefined, 1), "claude-1");
+  assert.equal(adjacentSection(sections, undefined, -1), undefined);
 });

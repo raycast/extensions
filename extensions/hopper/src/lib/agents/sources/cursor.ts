@@ -7,6 +7,7 @@
 // its agents don't run otherwise.
 
 import type { Agent, AgentContext, AgentSource, AgentStatus } from "../model";
+import { unknownStatuses } from "../status";
 
 const BUNDLE_ID = "com.todesktop.230313mzl4w4u92";
 const AGENT_LINK = "cursor://anysphere.cursor-deeplink/agent?id=";
@@ -28,6 +29,12 @@ const FIELDS = `json_extract(h, '$.composerId') as id,
 
 /** One header per row since Cursor 3.15 (subagents are their parent's, so left out). */
 const HEADERS = `select ${FIELDS} from (select value as h from composerHeaders where isSubagent = 0)`;
+
+/**
+ * Run statuses of Cursor 3.15-3.22: "none" for an agent that never ran (a draft, or never sent a message); "" is
+ * an agent without a record. Any other is reported (a new Cursor).
+ */
+const RUN_STATUSES = new Set(["generating", "completed", "aborted", "none", ""]);
 
 const statusQuery = (ids: string[]) =>
   `select substr(key, 14) as id, json_extract(value, '$.status') as status from cursorDiskKV
@@ -126,16 +133,29 @@ export const cursor: AgentSource = {
     const db = `${platform.homeDir()}/${DB}`;
     // Cursor before 3.15 has no composerHeaders table: the query fails and the source is reported unavailable.
     const rows = await platform.querySqlite(db, HEADERS);
-    const headers = parseHeaders(rows).filter((h) => !h.archived && !h.draft);
+    const parsed = parseHeaders(rows);
+    if (rows.length > 0 && parsed.length === 0) {
+      platform.reportError(new Error("Cursor's agent headers have no composerId"), "agents: cursor headers");
+    }
+    const headers = parsed.filter((h) => !h.archived && !h.draft);
     if (headers.length === 0) return [];
     const statuses = await platform.querySqlite(db, statusQuery(headers.map((h) => h.id)));
     const runStatus = new Map(statuses.map((r) => [String(r.id), String(r.status ?? "")]));
+    const unknown = unknownStatuses("Cursor run", runStatus.values(), RUN_STATUSES);
+    if (unknown) platform.reportError(unknown, "agents: cursor status");
     const home = platform.homeDir();
     await Promise.all(
       headers
         .filter((h) => runStatus.get(h.id) === "aborted" && h.folder && now - (h.updatedAt ?? 0) <= IDLE_WINDOW_MS)
         .map(async (h) => {
-          const tail = await platform.readTail(transcriptPath(home, h.folder!, h.id), TAIL_BYTES).catch(() => "");
+          // Unreadable: the turn reads as ended. Reported: the path is Hopper's guess at Cursor's layout, so a
+          // missing transcript most likely means a Cursor that moved it.
+          const tail = await platform
+            .readTail(transcriptPath(home, h.folder!, h.id), TAIL_BYTES)
+            .catch((error: unknown) => {
+              platform.reportError(error, "agents: cursor transcript");
+              return "";
+            });
           if (turnOpen(tail)) runStatus.set(h.id, "generating");
         }),
     );

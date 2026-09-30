@@ -1,7 +1,7 @@
 import { closeMainWindow, environment, PopToRootType, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { loadHistory } from "./load-history";
 import { activateApp } from "../platform/macos";
+import { showFailure } from "../platform/report";
 import { navigate, type Direction, type NavState } from "./navigation";
 import { readJson, writeJson } from "../platform/storage";
 
@@ -52,6 +52,6 @@ export async function runNavigation(direction: Direction): Promise<void> {
     lap("activated");
     await writeJson(STATE_KEY, result.state);
   } catch (error) {
-    await showFailureToast(error, { title: "Could not switch app" });
+    await showFailure(error, "Could not switch app", `navigation: ${direction}`);
   }
 }

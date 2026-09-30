@@ -153,13 +153,22 @@ export const notion: TabSource<Ref> = {
   id: TAB_BAR.id,
   bundleIds: [TAB_BAR.bundleId],
   list: async (app: App, platform: Platform) => {
-    // Page URLs and parents are extra: no page views, no cache, or a changed schema just means none.
-    const pagesRead = platform.webPages(app.bundleId).catch(() => [] as WebPage[]);
+    // Page URLs and parents are extra: no page views, no cache, or a changed schema just means none. Failures
+    // other than a missing cache are reported: a changed schema is worth knowing about.
+    const pagesRead = platform.webPages(app.bundleId).catch((error: unknown) => {
+      platform.reportError(error, "tabs: notion pages");
+      return [] as WebPage[];
+    });
     const [rows, all, pages, parents] = await Promise.all([
       platform.sidebarRows(app.bundleId, TAB_BAR),
       platform.windows([app.bundleId]),
       pagesRead,
-      pagesRead.then((pages) => readParents(pages, platform)).catch(() => new Map<string, string[]>()),
+      pagesRead
+        .then((pages) => readParents(pages, platform))
+        .catch((error: unknown) => {
+          platform.reportError(error, "tabs: notion parents");
+          return new Map<string, string[]>();
+        }),
     ]);
     const appWindows = all.find((w) => w.bundleId === app.bundleId)?.windows ?? [];
     // Tab bar not found (hidden, or Notion's UI changed): offer its windows instead.

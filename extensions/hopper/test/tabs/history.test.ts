@@ -1,12 +1,24 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { nextHistory, recordHistory, reopenClosed, reopenable, MAX_CLOSED } from "../../src/lib/tabs/history.ts";
+import { FIELD as F, RECORD as R } from "../../src/lib/tabs/applescript.ts";
+import {
+  jumpOrOpen,
+  nextHistory,
+  openTabFor,
+  recordHistory,
+  reopenClosed,
+  reopenable,
+  MAX_CLOSED,
+  type Reopenable,
+} from "../../src/lib/tabs/history.ts";
 import { fileReopenTarget, webReopenTarget } from "../../src/lib/tabs/reopen.ts";
+import * as chromium from "../../src/lib/tabs/sources/chromium.ts";
 import { fromWindows } from "../../src/lib/tabs/sources/windows.ts";
-import type { Tab } from "../../src/lib/tabs/model.ts";
+import type { App, Tab } from "../../src/lib/tabs/model.ts";
 import { app, fakePlatform } from "../fake-platform.ts";
 
 const chrome = app("com.google.Chrome", "Google Chrome");
+const brave = app("com.brave.Browser", "Brave Browser");
 const textEdit = app("com.apple.TextEdit", "TextEdit");
 const muse = app("com.meta.endo", "Muse");
 const page = (url: string, title = url): Tab => ({
@@ -64,6 +76,16 @@ test("closed = open last time, gone now; reopened entries leave the list", () =>
   assert.deepEqual(state.closed, [], "open again");
 });
 
+test("a page open again with or without a trailing slash isn't closed", () => {
+  const [a] = reopenable([page("https://a.com/x")]);
+  const [aSlash] = reopenable([page("https://a.com/x/")]);
+  let state = nextHistory({ open: [], closed: [] }, [a], everything, 1);
+  state = nextHistory(state, [aSlash], everything, 2);
+  assert.deepEqual(state.closed, [], "still open");
+  state = nextHistory(nextHistory(state, [], everything, 3), [a], everything, 4);
+  assert.deepEqual(state.closed, [], "closed, then open again");
+});
+
 test("apps outside the read (failed, other scope, no Accessibility) don't close anything", () => {
   const [a] = reopenable([page("https://a.com")]);
   const state = nextHistory(nextHistory({ open: [], closed: [] }, [a], everything, 1), [], () => false, 2);
@@ -104,7 +126,96 @@ test("recordHistory persists through the platform; reopen opens in the tab's app
   await recordHistory(platform, [page("https://a.com", "A")], everything, 1);
   const [entry] = await recordHistory(platform, [], everything, 2);
   assert.equal(entry.title, "A");
-  await reopenClosed(entry, platform);
+  await reopenClosed(entry, [], platform, async () => {});
   assert.deepEqual(opened, [["https://a.com", chrome.path]]);
   assert.deepEqual(await recordHistory(platform, [], everything, 3), []);
+});
+
+// Jump or open, shared by Recently Closed and Bookmarks.
+
+const tab = (browser: App, id: string, url: string, active = false): Tab =>
+  chromium.parse(browser, `${id}${F}${url}${F}${url}${F}${active}${R}`)[0];
+const entryFor = (t: Tab): Reopenable => reopenable([t])[0];
+
+/**
+ * Browsers whose AppleScript lists `open` (tabs by app) and selects any tab id in `selectable`; records what was
+ * opened and activated.
+ */
+function browsers(open: Tab[], selectable = open.map((t) => (t.ref as { tabId: string }).tabId)) {
+  const opened: [string, string | undefined][] = [];
+  const activated: string[] = [];
+  const platform = fakePlatform({
+    runAppleScript: async (script) => {
+      if (script.includes("set urls to URL of tabs")) {
+        const bundleId = /application id "([^"]+)"/.exec(script)![1];
+        return open
+          .filter((t) => t.app.bundleId === bundleId)
+          .map((t) => `${(t.ref as { tabId: string }).tabId}${F}${t.title}${F}${t.url}${F}${t.active}${R}`)
+          .join("");
+      }
+      return selectable.some((id) => script.includes(`is "${id}" then`)) ? "ok" : "missing";
+    },
+    openUrl: async (url, appPath) => void opened.push([url, appPath]),
+  });
+  const activate = async (a: App) => void activated.push(a.bundleId);
+  return { platform, activate, opened, activated };
+}
+
+test("openTabFor: the entry's app's tab first, then another app's active tab; trailing slash ignored", () => {
+  const entry = entryFor(tab(chrome, "1", "https://a.com/x"));
+  const inBrave = tab(brave, "7", "https://a.com/x/");
+  const activeInBrave = tab(brave, "8", "https://a.com/x", true);
+  const inChrome = tab(chrome, "2", "https://a.com/x");
+  assert.equal(openTabFor(entry, [inBrave, activeInBrave, inChrome]), inChrome);
+  assert.equal(openTabFor(entry, [inBrave, activeInBrave]), activeInBrave);
+  assert.equal(openTabFor(entry, [inBrave]), inBrave);
+  assert.equal(openTabFor(entry, [tab(chrome, "3", "https://a.com/y")]), undefined);
+});
+
+test("jumpOrOpen: jumps to a tab opened since the list was read (the entry's app is read again)", async () => {
+  const entry = entryFor(tab(chrome, "1", "https://a.com"));
+  const b = browsers([tab(chrome, "5", "https://a.com/")]);
+  await jumpOrOpen(entry, [], b.platform, b.activate);
+  assert.deepEqual(b.activated, [chrome.bundleId]);
+  assert.deepEqual(b.opened, []);
+});
+
+test("jumpOrOpen: another app's listed tab; else opens it in the entry's app", async () => {
+  const entry = entryFor(tab(chrome, "1", "https://a.com"));
+  const inBrave = tab(brave, "7", "https://a.com");
+  const b = browsers([inBrave]);
+  await jumpOrOpen(entry, [inBrave], b.platform, b.activate);
+  assert.deepEqual(b.activated, [brave.bundleId]);
+
+  const none = browsers([]);
+  await jumpOrOpen(entry, [], none.platform, none.activate);
+  assert.deepEqual(none.opened, [["https://a.com", chrome.path]]);
+  assert.deepEqual(none.activated, []);
+});
+
+test("jumpOrOpen: a listed tab that closed meanwhile opens the entry instead", async () => {
+  const entry = entryFor(tab(chrome, "1", "https://a.com"));
+  const inBrave = tab(brave, "7", "https://a.com");
+  const b = browsers([], []);
+  await jumpOrOpen(entry, [inBrave], b.platform, b.activate);
+  assert.deepEqual(b.opened, [["https://a.com", chrome.path]]);
+  assert.deepEqual(b.activated, []);
+});
+
+test("jumpOrOpen: the listed tabs of the entry's app are replaced by the fresh read", async () => {
+  const entry = entryFor(tab(chrome, "1", "https://a.com"));
+  const b = browsers([]);
+  await jumpOrOpen(entry, [tab(chrome, "1", "https://a.com")], b.platform, b.activate);
+  assert.deepEqual(b.opened, [["https://a.com", chrome.path]]);
+  assert.ok(!b.platform.scripts.some((s) => s.includes('is "1" then')), "no select of the stale tab");
+});
+
+test("reopenClosed: jumping to the open tab also takes the entry off Recently Closed", async () => {
+  const b = browsers([tab(chrome, "5", "https://a.com")]);
+  await recordHistory(b.platform, [page("https://a.com", "A")], everything, 1);
+  const [entry] = await recordHistory(b.platform, [], everything, 2);
+  await reopenClosed(entry, [], b.platform, b.activate);
+  assert.deepEqual(b.activated, [chrome.bundleId]);
+  assert.deepEqual(b.opened, []);
+  assert.deepEqual(await recordHistory(b.platform, [], everything, 3), []);
 });

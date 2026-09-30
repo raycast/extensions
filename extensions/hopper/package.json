@@ -79,7 +79,7 @@
       "name": "tabs",
       "title": "Search",
       "subtitle": "Hopper",
-      "description": "Search everything open on your Mac and jump to it: browser tabs, terminal tabs and panes, herdr workspaces, Claude and Muse sessions, Notion and Obsidian tabs, any app's windows, and AI agents with their status.",
+      "description": "Search everything open on your Mac and jump to it: browser tabs, terminal tabs and panes, herdr workspaces, Claude and Muse sessions, Notion and Obsidian tabs, any app's windows, and AI agents with their status. Bookmark pages to jump back to them.",
       "mode": "view",
       "keywords": [
         "tab switcher",

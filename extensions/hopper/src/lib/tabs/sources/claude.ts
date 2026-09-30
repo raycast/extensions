@@ -13,6 +13,8 @@ const BUNDLE_ID = "com.anthropic.claudefordesktop";
 /** <account>/<org>/local_<uuid>.json, one file per Code session. */
 export const SESSIONS_DIR = "Library/Application Support/Claude/claude-code-sessions";
 export const SESSION_FILE = /^local_[\w-]+\.json$/;
+/** What the tab list needs of a session file; the rest (mostly MCP config, ~400 KB) is dropped as each file is read. */
+const SESSION_FIELDS = ["sessionId", "isArchived", "cwd", "title", "lastFocusedAt"];
 
 /** Rows titled "<status> <name>" (status: Running, Idle, a PR badge...); the open session or chat is named by
  * a "<name>, rename session" button above the transcript, which is there even with the sidebar hidden. */
@@ -50,15 +52,9 @@ export interface CodeSession {
   lastFocusedAt: number;
 }
 
-/** A session file's fields, or undefined for archived, unreadable, or unexpected files. */
-export function parseSession(text: string): CodeSession | undefined {
-  let data: Record<string, unknown>;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    return undefined;
-  }
-  if (typeof data?.sessionId !== "string" || data.isArchived === true) return undefined;
+/** A session file's fields, or undefined for archived or unexpected files. */
+export function parseSession(data: Record<string, unknown>): CodeSession | undefined {
+  if (typeof data.sessionId !== "string" || data.isArchived === true) return undefined;
   const cwd = typeof data.cwd === "string" ? data.cwd : "";
   return {
     sessionId: data.sessionId,
@@ -112,8 +108,8 @@ function conversationTab(app: App, title: string, path: string, active: boolean)
 }
 
 async function readSessions(platform: Platform): Promise<CodeSession[]> {
-  const files = await platform.readFiles(`${platform.homeDir()}/${SESSIONS_DIR}`, SESSION_FILE, 3);
-  return files.flatMap((f) => parseSession(f.text) ?? []);
+  const files = await platform.readJsonFields(`${platform.homeDir()}/${SESSIONS_DIR}`, SESSION_FILE, 3, SESSION_FIELDS);
+  return files.flatMap((f) => parseSession(f.fields) ?? []);
 }
 
 export const claude: TabSource<Ref> = {

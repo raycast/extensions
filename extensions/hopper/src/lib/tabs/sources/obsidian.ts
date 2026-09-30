@@ -152,14 +152,17 @@ export const obsidian: TabSource<Ref> = {
   list: async (app, platform) => {
     const appList = await readText(`${platform.homeDir()}/${APP_DIR}`, /^obsidian\.json$/, platform);
     const vaults = parseVaults(appList ?? "");
-    const tabs = (
-      await Promise.all(
-        vaults.map(async (vault) => {
-          return fromWorkspace(app, vault, await workspaceText(vault.path, platform));
-        }),
-      )
-    ).flat();
+    const layouts = await Promise.all(vaults.map((vault) => workspaceText(vault.path, platform)));
+    const tabs = vaults.flatMap((vault, i) => fromWorkspace(app, vault, layouts[i]));
     if (tabs.length > 0) return tabs;
+    // Obsidian runs, so it has its app list, and each open vault its layout: without them, a new Obsidian moved them.
+    const drift =
+      appList === undefined
+        ? "Obsidian runs but has no obsidian.json"
+        : vaults.length > 0 && layouts.every((text) => !text)
+          ? "Obsidian's open vaults have no workspace.json"
+          : undefined;
+    if (drift) platform.reportError(new Error(drift), "tabs: obsidian layout");
     // No layout found (a new format): offer Obsidian's windows instead.
     const all = await platform.windows([app.bundleId]);
     return fromWindows(app, all.find((w) => w.bundleId === app.bundleId)?.windows ?? []) as Tab[] as Tab<Ref>[];

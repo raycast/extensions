@@ -5,6 +5,7 @@
 
 import type { App } from "../../platform/model";
 import type { Agent, AgentContext, AgentSource, AgentStatus } from "../model";
+import { unknownStatuses } from "../status";
 import {
   clientOf,
   herdrPlaceKey,
@@ -14,7 +15,7 @@ import {
   type Snapshot,
 } from "../../tabs/sources/herdr";
 
-const STATUSES = new Set<AgentStatus>(["blocked", "working", "done", "idle", "unknown"]);
+const STATUSES: ReadonlySet<string> = new Set<AgentStatus>(["blocked", "working", "done", "idle", "unknown"]);
 
 /** Agents in one session's snapshot; `app` runs the session's client (undefined: none in a known app). */
 export function fromSnapshot(snapshot: Snapshot, socket: string, app?: App): Agent[] {
@@ -55,8 +56,14 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const herdr: AgentSource = {
   id: "herdr",
-  list: async ({ platform, processes, apps }: AgentContext) =>
-    (await readSnapshots(platform)).flatMap(({ socket, snapshot }) =>
+  list: async ({ platform, processes, apps }: AgentContext) => {
+    const snapshots = await readSnapshots(platform);
+    // A status herdr added shows as "unknown": worth knowing about.
+    const statuses = snapshots.flatMap(({ snapshot }) => (snapshot.agents ?? []).map((a) => a.agent_status));
+    const unknown = unknownStatuses("herdr agent", statuses, STATUSES);
+    if (unknown) platform.reportError(unknown, "agents: herdr status");
+    return snapshots.flatMap(({ socket, snapshot }) =>
       fromSnapshot(snapshot, socket, clientOf(socket, processes, apps)?.app),
-    ),
+    );
+  },
 };

@@ -7,33 +7,32 @@ const claudeApp = app("com.anthropic.claudefordesktop", "Claude");
 const row = (title: string, text = "", selected = false) => ({ title, text, selected });
 const session = (sessionId: string, title: string, lastFocusedAt: number, extra: object = {}) => ({
   path: `/x/${sessionId}.json`,
-  text: JSON.stringify({
+  fields: {
     sessionId,
     title,
     cwd: "/Users/me/Projects/hopper",
     lastFocusedAt,
     isArchived: false,
     ...extra,
-  }),
+  } as Record<string, unknown>,
 });
 
-test("parses session files; skips archived and unreadable ones; untitled falls back to the folder", () => {
-  assert.deepEqual(parseSession(session("local_1", "tabs", 5).text), {
+test("parses session files; skips archived and unexpected ones; untitled falls back to the folder", () => {
+  assert.deepEqual(parseSession(session("local_1", "tabs", 5).fields), {
     sessionId: "local_1",
     title: "tabs",
     cwd: "/Users/me/Projects/hopper",
     lastFocusedAt: 5,
   });
-  assert.equal(parseSession(session("local_2", "old", 1, { isArchived: true }).text), undefined);
-  assert.equal(parseSession("{not json"), undefined);
-  assert.equal(parseSession("{}"), undefined);
-  assert.equal(parseSession(JSON.stringify({ sessionId: "local_3", cwd: "/a/b/proj" }))?.title, "proj");
+  assert.equal(parseSession(session("local_2", "old", 1, { isArchived: true }).fields), undefined);
+  assert.equal(parseSession({}), undefined);
+  assert.equal(parseSession({ sessionId: "local_3", cwd: "/a/b/proj" })?.title, "proj");
 });
 
 test("Code sessions come from the files, most recently focused first, with the sidebar hidden", async () => {
   let dir = "";
   const platform = fakePlatform({
-    readFiles: async (d) => {
+    readJsonFields: async (d) => {
       dir = d;
       return [session("local_a", "donate", 1), session("local_b", "tabs", 3), session("local_c", "main", 2)];
     },
@@ -54,7 +53,7 @@ test("Code sessions come from the files, most recently focused first, with the s
 
 test("sidebar rows the files don't have (Chat mode) are added; Code rows aren't repeated", async () => {
   const platform = fakePlatform({
-    readFiles: async () => [session("local_a", "tabs", 1)],
+    readJsonFields: async () => [session("local_a", "tabs", 1)],
     sidebarRows: async () => [row("Idle tabs", "tabs"), row("Idle Trip ideas", "Trip ideas")],
   });
   const tabs = await claude.list(claudeApp, platform);
@@ -71,7 +70,7 @@ test("selecting a Code session opens its deep link; a sidebar entry presses its 
   const urls: string[] = [];
   const pressed: string[] = [];
   const platform = fakePlatform({
-    readFiles: async () => [session("local_a", "tabs", 1)],
+    readJsonFields: async () => [session("local_a", "tabs", 1)],
     sidebarRows: async () => [row("Idle Trip ideas", "Trip ideas")],
     openUrl: async (url) => {
       urls.push(url);
@@ -152,7 +151,7 @@ test("a conversation's id is learned while open; its sidebar row then opens by d
 
 test("sidebar showing no conversations: known ones are listed, the open one active", async () => {
   const platform = fakePlatform({
-    readFiles: async () => [session("local_a", "tabs", 1)],
+    readJsonFields: async () => [session("local_a", "tabs", 1)],
     sidebarRows: async () => [row("Idle tabs", "tabs")],
     loadJson: async <T>() =>
       [

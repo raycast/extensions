@@ -9,6 +9,20 @@ import type { Agent, AgentStatus } from "./model";
 
 export const SEEN_KEY = "agents:seen";
 
+/**
+ * An error naming the statuses in `seen` that aren't in `known` (one a new version of the agent's app added), for
+ * the source to report; undefined if there are none.
+ */
+export function unknownStatuses(
+  product: string,
+  seen: Iterable<string | undefined>,
+  known: ReadonlySet<string>,
+): Error | undefined {
+  const unknown = [...new Set([...seen].filter((v): v is string => v !== undefined && !known.has(v)))];
+  if (unknown.length === 0) return undefined;
+  return new Error(`Unknown ${product} status: ${unknown.map((v) => JSON.stringify(v.slice(0, 40))).join(", ")}`);
+}
+
 /** Agent key → when Hopper last saw the user look at it (ms). */
 export type SeenMap = Record<string, number>;
 

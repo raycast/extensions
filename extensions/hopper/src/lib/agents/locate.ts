@@ -62,7 +62,8 @@ async function readNeeded(
     if (host.kind === "place" && !host.url && host.bundleId) needed.add(host.bundleId);
   }
   const hostApps = apps.filter((a) => needed.has(a.bundleId));
-  return hostApps.length > 0 ? await read(hostApps).catch(() => []) : [];
+  // The reader reports each app's failure itself (tabs/load.ts); anything else fails the whole load, reported there.
+  return hostApps.length > 0 ? await read(hostApps) : [];
 }
 
 function locationOf(agent: Agent, terminal: Terminal | undefined, tabs: Tab[], apps: App[]): Location | undefined {

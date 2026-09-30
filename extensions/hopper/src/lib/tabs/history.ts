@@ -1,10 +1,12 @@
 // PURE: Recently Closed. Each full read of the tab list is compared with the previous one: entries that were
 // open and aren't anymore are remembered as closed, and can be opened again. Only tabs whose source can reopen
 // them cleanly (a URL, a file) are tracked; see TabSource.reopenTarget. Private browsing never gets here: sources
-// leave it out of the list (ADR-018).
+// leave it out of the list (ADR-018). Reopening, here and for Bookmarks, jumps to a tab already showing the entry.
 
+import { selectTab } from "./load";
 import type { App, Platform, ReopenTarget, Tab, TabKind } from "./model";
-import { sourceById } from "./registry";
+import { TabGoneError } from "./model";
+import { sourceById, sourceFor } from "./registry";
 
 export interface ClosedTab {
   /** `<bundleId> <target>`: one entry per thing to reopen, whichever tab showed it. */
@@ -17,6 +19,9 @@ export interface ClosedTab {
   reopen: ReopenTarget;
   closedAt: number;
 }
+
+/** What can be opened again, in the app it was open in: a Recently Closed entry or a bookmark. */
+export type Reopenable = Pick<ClosedTab, "app" | "reopen">;
 
 /** Stored between reads: what was open last time, and what closed since. */
 export interface HistoryState {
@@ -51,16 +56,17 @@ export function nextHistory(
   covered: (bundleId: string) => boolean,
   now: number,
 ): HistoryState {
-  const openIds = new Set(open.map((o) => o.id));
+  // Compared by what they open, not id: a page reopened as `/x/` is `/x` open again.
+  const openKeys = new Set(open.map(sameAs));
   const newlyClosed = state.open
-    .filter((o) => covered(o.app.bundleId) && !openIds.has(o.id))
+    .filter((o) => covered(o.app.bundleId) && !openKeys.has(sameAs(o)))
     .map((o) => ({ ...o, closedAt: now }));
-  const closedIds = new Set(newlyClosed.map((c) => c.id));
-  const closed = [...newlyClosed, ...state.closed.filter((c) => !closedIds.has(c.id) && !openIds.has(c.id))]
+  const closedKeys = new Set(newlyClosed.map(sameAs));
+  const closed = [...newlyClosed, ...state.closed.filter((c) => !closedKeys.has(sameAs(c)) && !openKeys.has(sameAs(c)))]
     .filter((c) => now - c.closedAt < MAX_AGE_MS)
     .slice(0, MAX_CLOSED);
   // Apps not covered by this read keep their last known open entries.
-  const stillOpen = state.open.filter((o) => !covered(o.app.bundleId) && !openIds.has(o.id));
+  const stillOpen = state.open.filter((o) => !covered(o.app.bundleId) && !openKeys.has(sameAs(o)));
   return { open: [...stillOpen, ...open], closed };
 }
 
@@ -83,8 +89,72 @@ export async function forgetClosed(platform: Platform, id?: string): Promise<voi
   await platform.saveJson(KEY, { ...state, closed: id === undefined ? [] : state.closed.filter((c) => c.id !== id) });
 }
 
-/** Opens a closed entry again: a URL in its app, or a file with its app. */
-export async function reopenClosed(entry: ClosedTab, platform: Platform): Promise<void> {
-  await platform.openUrl(entry.reopen.target, entry.app.path);
+/** Opens a closed entry again (jumpOrOpen) and takes it off the list. */
+export async function reopenClosed(
+  entry: ClosedTab,
+  listed: Tab[],
+  platform: Platform,
+  activate: (app: App) => Promise<void>,
+): Promise<void> {
+  await jumpOrOpen(entry, listed, platform, activate);
   await forgetClosed(platform, entry.id);
+}
+
+/**
+ * The tab among `tabs` showing `entry`: one in the app it was open in first, then the active tab of any other app
+ * (a page closed in Chrome and open in Safari), then any. Pages match ignoring a trailing slash.
+ */
+export function openTabFor(entry: Reopenable, tabs: Tab[]): Tab | undefined {
+  const target = comparable(entry.reopen);
+  const showing = tabs.filter((tab) => {
+    const reopen = sourceById(tab.source)?.reopenTarget?.(tab);
+    return reopen?.kind === entry.reopen.kind && comparable(reopen) === target;
+  });
+  return showing.find((t) => t.app.bundleId === entry.app.bundleId) ?? showing.find((t) => t.active) ?? showing[0];
+}
+
+/**
+ * Jumps to the tab showing `entry` and brings its app forward with `activate`; opens it in the app it was open in
+ * (a URL in that app, a file with it) if no tab shows it, or the tab closed meanwhile. `listed` can be older than
+ * what's open (Search shows its last list while it reads again, and the entry may have been opened since), so the
+ * entry's own app is read again first.
+ */
+export async function jumpOrOpen(
+  entry: Reopenable,
+  listed: Tab[],
+  platform: Platform,
+  activate: (app: App) => Promise<void>,
+): Promise<void> {
+  const tab = openTabFor(entry, await withFreshTabs(entry.app, listed, platform));
+  if (tab) {
+    try {
+      await selectTab(tab, platform);
+      await activate(tab.app);
+      return;
+    } catch (error) {
+      if (!(error instanceof TabGoneError)) throw error;
+    }
+  }
+  await platform.openUrl(entry.reopen.target, entry.app.path);
+}
+
+/** `listed` with `app`'s tabs read again; as listed if that read fails. Sources never launch an app to list it. */
+async function withFreshTabs(app: App, listed: Tab[], platform: Platform): Promise<Tab[]> {
+  const source = sourceFor(app);
+  try {
+    const fresh = await source.list(app, platform);
+    return [...fresh, ...listed.filter((t) => t.app.bundleId !== app.bundleId)];
+  } catch (error) {
+    platform.reportError(error, `tabs: ${source.id} reopen`);
+    return listed;
+  }
+}
+
+/** Entries that open the same thing in the same app have the same key. */
+function sameAs(entry: Reopenable): string {
+  return `${entry.app.bundleId} ${comparable(entry.reopen)}`;
+}
+
+function comparable(reopen: ReopenTarget): string {
+  return reopen.kind === "url" ? reopen.target.replace(/\/$/, "") : reopen.target;
 }

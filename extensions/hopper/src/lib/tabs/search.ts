@@ -31,3 +31,14 @@ export function searchTabs<T extends Searchable>(tabs: T[], query: string): T[] 
   });
   return fuse.search(query).map((r) => r.item);
 }
+
+/**
+ * Next / Previous App (⌥→ / ⌥←): the first row of the section after (`step` 1) or before (-1) the one holding
+ * `current`, sections given as their rows' ids. Sections are in recency order, and so are an app's rows, so this
+ * is the next older / newer app's most recent row. Stays put at either end; from no known row, → goes to the top.
+ */
+export function adjacentSection(sections: string[][], current: string | undefined, step: 1 | -1): string | undefined {
+  const filled = sections.filter((rows) => rows.length > 0);
+  const at = filled.findIndex((rows) => current !== undefined && rows.includes(current));
+  return filled[at + step]?.[0] ?? current;
+}

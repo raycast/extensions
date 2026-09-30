@@ -66,18 +66,29 @@ export function snapshotOf(response: unknown): Snapshot | undefined {
   return (response as { result?: { snapshot?: Snapshot } })?.result?.snapshot;
 }
 
-/** Every reachable session's snapshot; sessions that don't answer (herdr not running) are skipped. */
-export async function readSnapshots(platform: Platform): Promise<{ socket: string; snapshot: Snapshot }[]> {
-  const sockets = await socketPaths(platform);
+/**
+ * Every reachable session's snapshot; sessions that don't answer (herdr not running) are skipped. Other failures
+ * (an answer that isn't JSON, or has no snapshot: herdr's protocol changed) are reported.
+ */
+export async function readSnapshots(
+  platform: Platform,
+  sockets?: string[],
+): Promise<{ socket: string; snapshot: Snapshot }[]> {
+  sockets ??= await socketPaths(platform);
   const results = await Promise.all(
     sockets.map((socket) =>
       platform
         .socketRequest(socket, { id: "hopper", method: "session.snapshot", params: {} })
         .then((response) => {
           const snapshot = snapshotOf(response);
+          if (!snapshot)
+            platform.reportError(new Error("herdr's session.snapshot has no snapshot"), "tabs: herdr snapshot");
           return snapshot ? [{ socket, snapshot }] : [];
         })
-        .catch(() => []),
+        .catch((error: unknown) => {
+          platform.reportError(error, "tabs: herdr snapshot");
+          return [];
+        }),
     ),
   );
   return results.flat();
@@ -177,7 +188,9 @@ export async function revealClient(platform: Platform, socket: string, app: App)
   try {
     const set = (await request("client.window_title.set", { title: marker })) as { result?: { changed?: boolean } };
     if (set?.result?.changed === false) return;
-    await focusTerminalNamed(platform, marker).catch(() => false);
+    await focusTerminalNamed(platform, marker).catch((error: unknown) =>
+      platform.reportError(error, "tabs: herdr reveal"),
+    );
   } finally {
     await request("client.window_title.clear", {});
   }
@@ -188,7 +201,12 @@ export const herdr: TabSource<Ref> = {
   bundleIds: [],
   list: async () => [],
   discover: async (apps, platform) => {
-    const [snapshots, processes] = await Promise.all([readSnapshots(platform), platform.processes()]);
+    const [sockets, processes] = await Promise.all([socketPaths(platform), platform.processes()]);
+    // herdr runs, so it has a socket: without one, a new herdr moved it.
+    if (sockets.length === 0 && processes.some((p) => p.name === "herdr")) {
+      platform.reportError(new Error("herdr runs but has no herdr.sock"), "tabs: herdr socket");
+    }
+    const snapshots = await readSnapshots(platform, sockets);
     if (snapshots.length === 0) return [];
     return snapshots.flatMap(({ socket, snapshot }) => {
       const client = clientOf(socket, processes, apps);

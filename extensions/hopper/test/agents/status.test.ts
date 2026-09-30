@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { applySeen, nextAgent, sortAgents } from "../../src/lib/agents/status.ts";
+import { applySeen, nextAgent, sortAgents, unknownStatuses } from "../../src/lib/agents/status.ts";
 import { agent } from "./helpers.ts";
 
 test("idle agents active since last seen are done; first sightings count as seen", () => {
@@ -53,4 +53,13 @@ test("Next Agent visits waiting agents in turn, skipping ones it can't jump to",
   assert.equal(nextAgent(agents, "b1")?.key, "d1");
   assert.equal(nextAgent(agents, "d1")?.key, "b1");
   assert.equal(nextAgent([{ ...agent("i"), location: here }]), undefined);
+});
+
+test("statuses outside the known set are named once, for the source to report", () => {
+  const known = new Set(["idle", "busy"]);
+  assert.equal(unknownStatuses("Test", ["idle", undefined, "busy"], known), undefined);
+  assert.equal(
+    unknownStatuses("Test", ["idle", "queued", "queued", "x".repeat(60)], known)?.message,
+    `Unknown Test status: "queued", "${"x".repeat(40)}"`,
+  );
 });

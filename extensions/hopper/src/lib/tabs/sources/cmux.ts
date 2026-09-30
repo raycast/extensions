@@ -132,9 +132,15 @@ export function parsePanels(text: string): Map<string, Panel> {
   return panels;
 }
 
+/** Read while cmux runs, so its session file is there and names its terminals: if not, a new cmux changed it. */
 async function readPanels(platform: Platform): Promise<Map<string, Panel>> {
   const [file] = await platform.readFiles(`${platform.homeDir()}/${SESSION_DIR}`, SESSION_FILE, 0);
-  return file ? parsePanels(file.text) : new Map();
+  const panels = file ? parsePanels(file.text) : new Map<string, Panel>();
+  if (panels.size === 0) {
+    const drift = file ? "cmux's session file has no terminals" : "cmux runs but has no session file";
+    platform.reportError(new Error(drift), "tabs: cmux session");
+  }
+  return panels;
 }
 
 export const cmux: TabSource<Ref> = {

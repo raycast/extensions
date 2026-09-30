@@ -116,6 +116,23 @@ test("herdr not running or no client in a known terminal: nothing listed", async
   assert.deepEqual(await herdr.discover!([ghostty], platform), []);
 });
 
+test("herdr running without a socket, or answering without a snapshot, is reported", async () => {
+  const noSocket = fakePlatform({ processes: async () => [proc(40, 1, "", "herdr")] });
+  assert.deepEqual(await herdr.discover!([ghostty], noSocket), []);
+  const noSnapshot = fakePlatform({
+    listDir: async (dir) => (dir.endsWith(".config/herdr") ? ["herdr.sock"] : []),
+    socketRequest: async () => ({ result: { state: {} } }),
+  });
+  assert.deepEqual(await herdr.discover!([ghostty], noSnapshot), []);
+  assert.deepEqual(
+    [...noSocket.reports, ...noSnapshot.reports].map((r) => [r.context, (r.error as Error).message]),
+    [
+      ["tabs: herdr socket", "herdr runs but has no herdr.sock"],
+      ["tabs: herdr snapshot", "herdr's session.snapshot has no snapshot"],
+    ],
+  );
+});
+
 test("a herdr tab in iTerm also selects the iTerm split running herdr", async () => {
   const iterm = { ...app("com.googlecode.iterm2", "iTerm"), pid: 60 };
   const scripts: string[] = [];

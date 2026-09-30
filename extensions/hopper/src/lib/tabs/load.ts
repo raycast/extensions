@@ -27,19 +27,25 @@ export async function loadTabs(apps: App[], platform: Platform): Promise<LoadRes
   }
 
   const failures: Failure[] = [];
-  const fail = (group: App[]) => (error: unknown) => {
+  const fail = (source: string, group: App[]) => (error: unknown) => {
     failures.push(...group.map((app) => ({ app, message: describeError(error) })));
+    platform.reportError(error, `tabs: ${source}`);
     return [] as Tab[];
   };
 
   const reads = [
     ...[...groups].flatMap(([source, group]) =>
       source.listAll
-        ? [source.listAll(group, platform).catch(fail(group))]
-        : group.map((app) => source.list(app, platform).catch(fail([app]))),
+        ? [source.listAll(group, platform).catch(fail(source.id, group))]
+        : group.map((app) => source.list(app, platform).catch(fail(source.id, [app]))),
     ),
     // Places inside other apps: only listed under apps being read. A failure here doesn't blame an app.
-    ...DISCOVERED.map((source) => source.discover!(apps, platform).catch(() => [] as Tab[])),
+    ...DISCOVERED.map((source) =>
+      source.discover!(apps, platform).catch((error: unknown) => {
+        platform.reportError(error, `tabs: ${source.id} discover`);
+        return [] as Tab[];
+      }),
+    ),
   ];
   const [accessibility, ...results] = await Promise.all([platform.accessibilityTrusted(), ...reads]);
   return {
@@ -61,8 +67,13 @@ export async function selectTab(tab: Tab, platform: Platform, paneId?: string): 
   if (!source) throw new Error(`Unknown tab source "${tab.source}"`);
   if (paneId !== undefined && source.selectPane) await source.selectPane(tab, paneId, platform);
   else await source.select(tab, platform);
-  // A place inside a terminal (herdr): also bring that terminal's tab and pane forward.
-  if (tab.within) await selectTab(tab.within.tab, platform, tab.within.paneId).catch(() => undefined);
+  // A place inside a terminal (herdr): also bring that terminal's tab and pane forward, if it's still there.
+  if (tab.within) {
+    const host = tab.within.tab;
+    await selectTab(host, platform, tab.within.paneId).catch((error: unknown) =>
+      platform.reportError(error, `tabs: ${host.source} select host`),
+    );
+  }
 }
 
 /** Tabs with a `hostTty` get `within`: the tab of the same app with a pane on that tty. */

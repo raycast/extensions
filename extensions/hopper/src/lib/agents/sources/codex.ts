@@ -10,7 +10,7 @@
 // updated since that process started, since earlier threads there were other, finished runs. Verified with Codex
 // 26.924 (app) and CLI 0.157.
 
-import type { Process } from "../../platform/model";
+import type { Platform, Process } from "../../platform/model";
 import type { Agent, AgentContext, AgentSource, AgentStatus, Host } from "../model";
 
 const DIR = ".codex";
@@ -122,10 +122,10 @@ export function liveCliThreads(threads: Thread[], processes: Process[]): Map<str
   return new Map([...latest.values()].map(({ thread, terminal }) => [thread.id, terminal]));
 }
 
-/** Threads with a live host, as agents; `tails` maps a thread id to its rollout's end. */
+/** Threads with a live host, as agents; `statuses` maps a thread id to its rollout's status (idle if none). */
 export function toAgents(
   threads: Thread[],
-  tails: Map<string, string>,
+  statuses: Map<string, AgentStatus>,
   processes: Process[],
   appRunning: boolean,
 ): Agent[] {
@@ -140,7 +140,7 @@ export function toAgents(
       if (!appRunning) return [];
       host = { kind: "link", bundleId: CODEX_APP, url: `codex://threads/${thread.id}` };
     }
-    const status = statusOf(tails.get(thread.id) ?? "");
+    const status = statuses.get(thread.id) ?? "idle";
     return [
       {
         key: `codex:${thread.id}`,
@@ -159,6 +159,12 @@ export function toAgents(
   });
 }
 
+/** A missing rollout reads as idle; any other failure to read it is reported. */
+const noTail = (platform: Platform) => (error: unknown) => {
+  platform.reportError(error, "agents: codex rollout");
+  return "";
+};
+
 const firstLine = (text?: string) => text?.split("\n")[0]?.trim().slice(0, 80) || undefined;
 
 export const codex: AgentSource = {
@@ -169,24 +175,39 @@ export const codex: AgentSource = {
     if (!appRunning && !cliRunning) return [];
     const dir = `${platform.homeDir()}/${DIR}`;
     const db = threadsDb(await platform.listDir(dir));
-    // No Codex database: Codex was never used here.
-    if (!db) return [];
+    // Codex runs, so it keeps a thread database: without one, a new Codex moved or renamed it.
+    if (!db) {
+      platform.reportError(new Error("Codex runs but ~/.codex has no state_N.sqlite"), "agents: codex db");
+      return [];
+    }
     const path = `${dir}/${db}`;
     const since = now - RECENT_MS;
     // The schema is Codex's own and grows often: if the full query fails, fall back to the original columns;
-    // if that fails too, no Codex agents rather than an error.
+    // if that fails too, no Codex agents rather than an error, but reported: Codex changed its schema.
     const rows = await platform
       .querySqlite(path, threadsQuery(since))
       .catch(() => platform.querySqlite(path, baseThreadsQuery(since)))
-      .catch(() => []);
+      .catch((error: unknown) => {
+        platform.reportError(error, "agents: codex threads");
+        return [];
+      });
     const threads = parseThreads(rows);
-    const tails = new Map(
+    if (rows.length > 0 && threads.length === 0) {
+      platform.reportError(new Error("Codex threads have no id"), "agents: codex threads");
+    }
+    // Each tail becomes its status as soon as it's read: up to 50 tails of 256 KB held together would take a big
+    // share of the extension's 100 MB JS heap (docs/PERFORMANCE.md).
+    const statuses = new Map(
       await Promise.all(
         threads.map(
-          async (t) => [t.id, t.rollout ? await platform.readTail(t.rollout, TAIL_BYTES).catch(() => "") : ""] as const,
+          async (t) =>
+            [
+              t.id,
+              statusOf(t.rollout ? await platform.readTail(t.rollout, TAIL_BYTES).catch(noTail(platform)) : ""),
+            ] as const,
         ),
       ),
     );
-    return toAgents(threads, tails, processes, appRunning);
+    return toAgents(threads, statuses, processes, appRunning);
   },
 };

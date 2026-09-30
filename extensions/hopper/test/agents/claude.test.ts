@@ -5,6 +5,7 @@ import {
   isLive,
   parseDesktopSession,
   parseLiveSession,
+  registryDrift,
   statusOf,
   toAgents,
   waitingLabel,
@@ -83,11 +84,7 @@ test("desktop sessions point at their tab in the Claude app, with its deep link;
       live({ pid: 1, sessionId: "cli-a", entrypoint: "claude-desktop", hostSessionId: "local_a" }),
       live({ pid: 2, sessionId: "cli-b" }),
     ],
-    [
-      parseDesktopSession(
-        JSON.stringify({ sessionId: "local_a", cliSessionId: "cli-a", title: "Fix tabs", lastFocusedAt: 9 }),
-      )!,
-    ],
+    [parseDesktopSession({ sessionId: "local_a", cliSessionId: "cli-a", title: "Fix tabs", lastFocusedAt: 9 })!],
   );
   assert.deepEqual(
     agents.map((a) => [a.key, a.title, a.host, a.seenAt]),
@@ -140,4 +137,44 @@ test("list: reads both folders, keeps live sessions, and gives terminal sessions
     agents.map((a) => [a.id, a.status, a.host]),
     [["a", "working", { kind: "process", pid: 1, tty: "ttys004" }]],
   );
+});
+
+test("list: an app session's picked fields give its agent the app's title and turn outcome", async () => {
+  let asked: readonly string[] = [];
+  const platform = fakePlatform({
+    readFiles: async (dir) =>
+      dir.endsWith(".claude/sessions")
+        ? [
+            {
+              path: "1.json",
+              text: JSON.stringify({ pid: 1, sessionId: "cli-a", status: "idle", hostSessionId: "local_a" }),
+            },
+          ]
+        : [],
+    readJsonFields: async (dir, _name, _depth, fields) => {
+      asked = fields;
+      return dir.endsWith("claude-code-sessions")
+        ? [
+            {
+              path: "local_a.json",
+              fields: { sessionId: "local_a", title: "Fix tabs", postTurnSummary: { status_category: "need_input" } },
+            },
+          ]
+        : [];
+    },
+  });
+  const agents = await claude.list({ platform, apps: [], processes: [proc(1, 0, "", "claude")], now: 0 });
+  assert.deepEqual(
+    agents.map((a) => [a.title, a.statusDetail]),
+    [["Fix tabs", "Needs input"]],
+  );
+  assert.ok(!asked.includes("remoteMcpServersConfig") && asked.includes("postTurnSummary"));
+});
+
+test("session files that don't fit this Claude Code are reported: none parse, or unknown statuses", () => {
+  const session = (status: string) => parseLiveSession(JSON.stringify({ pid: 1, sessionId: "s", status }))!;
+  assert.equal(registryDrift(1, [session("idle")]), undefined);
+  assert.equal(registryDrift(0, []), undefined);
+  assert.equal(registryDrift(2, [])?.message, "Claude Code's session files don't parse");
+  assert.equal(registryDrift(1, [session("thinking")])?.message, 'Unknown Claude Code session status: "thinking"');
 });

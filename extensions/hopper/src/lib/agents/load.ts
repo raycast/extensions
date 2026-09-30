@@ -33,6 +33,7 @@ export async function loadAgents(apps: App[], platform: Platform, options: LoadO
     AGENT_SOURCES.map((source) =>
       source.list(context).catch((error: unknown) => {
         failures.push({ source: source.id, message: error instanceof Error ? error.message : String(error) });
+        platform.reportError(error, `agents: ${source.id}`);
         return [] as Agent[];
       }),
     ),

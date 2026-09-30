@@ -1,10 +1,10 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { jumpToAgent } from "./lib/agents/load";
 import { LAST_NEXT_KEY, nextAgent, STATUS_TITLE } from "./lib/agents/status";
 import { loadAllAgents } from "./lib/platform/agents";
 import { activateApp } from "./lib/platform/macos";
 import { macosPlatform } from "./lib/platform/os";
+import { showFailure } from "./lib/platform/report";
 
 /** Jump to the agent that has waited longest for you: blocked first, then done. Run again for the next one. */
 export default async function Command() {
@@ -22,6 +22,6 @@ export default async function Command() {
     await activateApp(await jumpToAgent(agent, macosPlatform, Date.now()));
     await showHUD(`${agent.statusDetail ?? STATUS_TITLE[agent.status]}: ${agent.title}`);
   } catch (error) {
-    await showFailureToast(error, { title: "Could not jump to the next agent" });
+    await showFailure(error, "Could not jump to the next agent");
   }
 }

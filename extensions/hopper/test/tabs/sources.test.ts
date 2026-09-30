@@ -146,6 +146,22 @@ test("cmux: a workspace with several terminals lists each by name; terminals are
   assert.equal(cmux.parsePanels("{").size, 0);
 });
 
+test("cmux: a missing or empty session file is reported; workspaces still list", async () => {
+  const cmuxApp = app("com.cmuxterm.app", "cmux");
+  const out = `w1${F}t1${F}api${F}true${F}/p/api${F}T1${F}T1${R}`;
+  const missing = fakePlatform({ runAppleScript: async () => out });
+  assert.equal((await cmux.cmux.list(cmuxApp, missing)).length, 1);
+  const empty = fakePlatform({
+    runAppleScript: async () => out,
+    readFiles: async () => [{ path: "session-com.cmuxterm.app.json", text: '{"windows":[]}' }],
+  });
+  await cmux.cmux.list(cmuxApp, empty);
+  assert.deepEqual(
+    [...missing.reports, ...empty.reports].map((r) => (r.error as Error).message),
+    ["cmux runs but has no session file", "cmux's session file has no terminals"],
+  );
+});
+
 test("cmux: selecting a terminal (or a pane) focuses it", async () => {
   const platform = fakePlatform({ runAppleScript: async () => "ok" });
   const tabs = cmux.parse(app("com.cmuxterm.app"), `W1${F}T1${F}fix-bug${F}true${F}/p${F}P1,P2${F}P1${R}`);

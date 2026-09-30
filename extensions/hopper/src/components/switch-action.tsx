@@ -1,5 +1,5 @@
 import { Action, closeMainWindow, Icon, PopToRootType } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailure } from "../lib/platform/report";
 
 /** List action that switches somewhere, then closes Raycast. Shared by History and the tab lists. */
 export function SwitchAction({
@@ -21,7 +21,8 @@ export function SwitchAction({
         try {
           await onSwitch();
         } catch (error) {
-          await showFailureToast(error, { title: failureTitle });
+          // Reported under the action's title: the failure title names the tab.
+          await showFailure(error, failureTitle, title);
           return;
         }
         await closeMainWindow({ popToRootType: PopToRootType.Immediate });

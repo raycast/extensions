@@ -139,7 +139,7 @@ test("Obsidian: a tab whose header is gone opens its note in a new tab", async (
   });
 });
 
-test("Obsidian: without a readable layout, its windows", async () => {
+test("Obsidian: without a readable layout, its windows; a missing app list or layout is reported", async () => {
   const platform = fakePlatform({
     windows: async () => [
       { bundleId: "md.obsidian", windows: [{ index: 1, title: "Welcome - Work - Obsidian", minimized: false, tabs: [] }] },
@@ -149,5 +149,9 @@ test("Obsidian: without a readable layout, its windows", async () => {
   assert.deepEqual(
     tabs.map((t) => [t.title, t.source]),
     [["Welcome - Work - Obsidian", "windows"]],
+  );
+  assert.deepEqual(
+    platform.reports.map((r) => (r.error as Error).message),
+    ["Obsidian runs but has no obsidian.json"],
   );
 });

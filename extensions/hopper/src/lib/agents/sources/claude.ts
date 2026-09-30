@@ -11,10 +11,15 @@ import {
   SESSION_FILE as DESKTOP_FILE,
 } from "../../tabs/sources/claude";
 import type { Agent, AgentContext, AgentSource, AgentStatus, Host } from "../model";
+import { unknownStatuses } from "../status";
 
 const REGISTRY_DIR = ".claude/sessions";
 const REGISTRY_FILE = /^\d+\.json$/;
 const CLAUDE_APP = "com.anthropic.claudefordesktop";
+/** Session statuses statusOf knows; "" is a file without one. Any other is reported (a new Claude Code). */
+const STATUSES = new Set(["waiting", "busy", "shell", "idle", ""]);
+/** What agents need of the app's session files; the rest (mostly MCP config, ~400 KB) is dropped as each file is read. */
+const DESKTOP_FIELDS = ["sessionId", "cliSessionId", "title", "lastActivityAt", "lastFocusedAt", "postTurnSummary"];
 
 /** A running session, from its ~/.claude/sessions/<pid>.json. */
 export interface LiveSession {
@@ -72,14 +77,8 @@ export function parseLiveSession(text: string): LiveSession | undefined {
   };
 }
 
-export function parseDesktopSession(text: string): DesktopSession | undefined {
-  let d: Record<string, unknown>;
-  try {
-    d = JSON.parse(text);
-  } catch {
-    return undefined;
-  }
-  const sessionId = str(d?.sessionId);
+export function parseDesktopSession(d: Record<string, unknown>): DesktopSession | undefined {
+  const sessionId = str(d.sessionId);
   if (!sessionId) return undefined;
   const summary = d.postTurnSummary as Record<string, unknown> | undefined;
   return {
@@ -182,19 +181,35 @@ function shellQuote(path: string): string {
   return /^[\w@%+=:,./~-]+$/.test(path) ? path : `'${path.replace(/'/g, "'\\''")}'`;
 }
 
+/**
+ * Why the session files don't fit what Hopper knows of Claude Code, if they don't: files none of which parse, or
+ * statuses statusOf doesn't know (a new Claude Code). `sessions`: every file that parsed, live or not.
+ */
+export function registryDrift(files: number, sessions: LiveSession[]): Error | undefined {
+  if (files > 0 && sessions.length === 0) return new Error("Claude Code's session files don't parse");
+  return unknownStatuses(
+    "Claude Code session",
+    sessions.map((s) => s.status),
+    STATUSES,
+  );
+}
+
 export const claude: AgentSource = {
   id: "claude",
   list: async ({ platform, processes }: AgentContext) => {
     const home = platform.homeDir();
     const [registry, desktopFiles] = await Promise.all([
       platform.readFiles(`${home}/${REGISTRY_DIR}`, REGISTRY_FILE, 0),
-      platform.readFiles(`${home}/${DESKTOP_DIR}`, DESKTOP_FILE, 3),
+      platform.readJsonFields(`${home}/${DESKTOP_DIR}`, DESKTOP_FILE, 3, DESKTOP_FIELDS),
     ]);
     const procs = new Map(processes.map((p) => [p.pid, p]));
-    const live = registry.flatMap((f) => parseLiveSession(f.text) ?? []).filter((s) => isLive(s, procs));
+    const sessions = registry.flatMap((f) => parseLiveSession(f.text) ?? []);
+    const drift = registryDrift(registry.length, sessions);
+    if (drift) platform.reportError(drift, "agents: claude sessions");
+    const live = sessions.filter((s) => isLive(s, procs));
     const agents = toAgents(
       live,
-      desktopFiles.flatMap((f) => parseDesktopSession(f.text) ?? []),
+      desktopFiles.flatMap((f) => parseDesktopSession(f.fields) ?? []),
     );
     // Terminal sessions are found by their tty.
     return agents.map((agent) =>

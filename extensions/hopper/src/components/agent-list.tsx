@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { jumpToAgent, type ListedAgent } from "../lib/agents/load";
 import type { AgentStatus } from "../lib/agents/model";
 import { STATUS_TITLE } from "../lib/agents/status";
 import { loadAllAgents } from "../lib/platform/agents";
 import { activateApp } from "../lib/platform/macos";
 import { macosPlatform } from "../lib/platform/os";
+import { showFailure } from "../lib/platform/report";
 import { projectLabel } from "../lib/projects/project";
 import { tildify } from "../lib/tabs/applescript";
 import { SwitchAction } from "./switch-action";
@@ -30,6 +31,7 @@ const ALL = "all";
 export function AgentList() {
   const { data, isLoading, revalidate } = useCachedPromise(() => loadAllAgents(), [], {
     keepPreviousData: true,
+    onError: (error) => showFailure(error, "Could not read agents"),
   });
   useEffect(() => {
     const timer = setInterval(revalidate, REFRESH_MS);
@@ -83,11 +85,23 @@ export function AgentList() {
   );
 }
 
-export function AgentItem({ agent, onRefresh }: { agent: ListedAgent; onRefresh: () => void }) {
+export function AgentItem({
+  id,
+  agent,
+  onRefresh,
+  children,
+}: {
+  id?: string;
+  agent: ListedAgent;
+  onRefresh: () => void;
+  /** More actions, at the end of the panel. */
+  children?: ReactNode;
+}) {
   const where = agent.location?.label ?? "Not found";
   const place = agent.project ? projectLabel(agent.project) : agent.cwd ? tildify(agent.cwd) : undefined;
   return (
     <List.Item
+      id={id}
       icon={agent.location ? { fileIcon: agent.location.app.path } : Icon.QuestionMarkCircle}
       title={agent.title}
       subtitle={[agent.product, place].filter(Boolean).join(" · ")}
@@ -122,6 +136,7 @@ export function AgentItem({ agent, onRefresh }: { agent: ListedAgent; onRefresh:
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onRefresh}
           />
+          {children}
         </ActionPanel>
       }
     />

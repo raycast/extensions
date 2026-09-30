@@ -1,7 +1,7 @@
 import { open } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { execFile } from "node:child_process";
-import { open as openFile, readdir, readFile, stat } from "node:fs/promises";
+import { access, open as openFile, readdir, readFile, stat } from "node:fs/promises";
 import { createConnection } from "node:net";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
@@ -17,7 +17,9 @@ import {
   sidebarRows,
   webPages,
 } from "swift:../../../swift";
-import type { AppWindows, GitRepo, Platform, SidebarRow } from "./model";
+import type { AppWindows, GitRepo, JsonFields, Platform, SidebarRow } from "./model";
+import { reportError } from "./report";
+import { immutableUri, isCantOpen } from "./sqlite";
 import { readJson, writeJson } from "./storage";
 
 /** An app that stops responding must not hold up the whole list. */
@@ -26,6 +28,23 @@ const SQLITE_TIMEOUT = 2000;
 const SOCKET_TIMEOUT = 1000;
 
 const execFileAsync = promisify(execFile);
+
+const exists = (path: string) =>
+  access(path).then(
+    () => true,
+    () => false,
+  );
+
+/**
+ * Falls back to `value` when a read fails. A missing file or folder is the Platform's contract ("[] if it's
+ * missing": how sources tell an app that was never used), so only other failures are reported.
+ */
+const orElse =
+  <T>(value: T, context: string) =>
+  (error: unknown): T => {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") reportError(error, context);
+    return value;
+  };
 
 /**
  * The Platform on macOS: AppleScript through Raycast, Accessibility and the process table through the Swift
@@ -60,18 +79,34 @@ export const macosPlatform: Platform = {
     const files = await Promise.all(
       paths.map(async (path) => ({
         path,
-        text: await readFile(path, "utf8").catch(() => ""),
+        text: await readFile(path, "utf8").catch(orElse("", "files: read")),
         modified: (await stat(path).catch(() => undefined))?.mtimeMs,
       })),
     );
     return files.filter((f) => f.text !== "");
   },
-  listDir: (dir) => readdir(dir).catch(() => []),
+  readJsonFields: async (dir, name, depth, fields) => {
+    const files: JsonFields[] = [];
+    // One file at a time, so only one file's text is on the JS heap at once; read in parallel, they all were (ADR-032).
+    for (const path of await findFiles(dir, name, depth)) {
+      const data = parseJson(await readFile(path, "utf8").catch(orElse("", "files: read")));
+      if (data)
+        files.push({ path, fields: Object.fromEntries(fields.filter((f) => f in data).map((f) => [f, data[f]])) });
+    }
+    return files;
+  },
+  listDir: (dir) => readdir(dir).catch(orElse([], "files: list")),
   openUrl: (url, appPath) => open(url, appPath),
   querySqlite: async (path, sql) => {
-    const { stdout } = await execFileAsync("/usr/bin/sqlite3", ["-readonly", "-json", path, sql], {
-      timeout: SQLITE_TIMEOUT,
-      maxBuffer: 16 * 1024 * 1024,
+    const query = (file: string) =>
+      execFileAsync("/usr/bin/sqlite3", ["-readonly", "-json", file, sql], {
+        timeout: SQLITE_TIMEOUT,
+        maxBuffer: 16 * 1024 * 1024,
+      });
+    // A WAL database no app holds open can't be opened read-only; with no -wal file it's read as immutable.
+    const { stdout } = await query(path).catch(async (error: unknown) => {
+      if (!isCantOpen(error) || !(await exists(path)) || (await exists(`${path}-wal`))) throw error;
+      return query(immutableUri(path));
     });
     // sqlite3 prints nothing, not "[]", when there are no rows.
     return stdout.trim() ? JSON.parse(stdout) : [];
@@ -79,11 +114,22 @@ export const macosPlatform: Platform = {
   processes: () => processes(),
   socketRequest,
   readTail,
-  gitRepos: (dirs) => Promise.all(dirs.map((dir) => gitRepo(dir).catch(() => undefined))),
+  gitRepos: (dirs) => Promise.all(dirs.map((dir) => gitRepo(dir).catch(orElse(undefined, "projects: git")))),
+  reportError,
 };
 
+/** A JSON object's fields; undefined for anything else, or for text that doesn't parse (e.g. a file mid-write). */
+function parseJson(text: string): Record<string, unknown> | undefined {
+  try {
+    const data: unknown = JSON.parse(text);
+    return data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, unknown>) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function findFiles(dir: string, name: RegExp, depth: number): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
+  const entries = await readdir(dir, { withFileTypes: true }).catch(orElse([], "files: find"));
   const nested = await Promise.all(
     entries.map((e) => {
       const path = join(dir, e.name);

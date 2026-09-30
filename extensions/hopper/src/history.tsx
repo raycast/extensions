@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { excludeFromHistory, includeInHistory, loadHistoryState, removeFromHistory } from "./lib/apps/load-history";
 import { SwitchAction } from "./components/switch-action";
 import { activateApp } from "./lib/platform/macos";
 import type { App } from "./lib/platform/model";
+import { showFailure } from "./lib/platform/report";
 
 async function load() {
   const { apps, currentHidden, excluded } = await loadHistoryState();
@@ -13,14 +14,16 @@ async function load() {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(load);
+  const { data, isLoading, revalidate } = usePromise(load, [], {
+    onError: (error) => showFailure(error, "Could not read history"),
+  });
   const { apps = [], recent = [], excluded = [] } = data ?? {};
 
   async function update(change: Promise<void>, title: string) {
     try {
       await change;
     } catch (error) {
-      await showFailureToast(error, { title: "Could not update history" });
+      await showFailure(error, "Could not update history");
       return;
     }
     revalidate();

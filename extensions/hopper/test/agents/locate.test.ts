@@ -147,6 +147,10 @@ test("loadAgents: sources in parallel, a failing one reported, projects attached
     { source: "herdr", message: "disk on fire" },
   ]);
   assert.deepEqual(
+    platform.reports.map((r) => r.context),
+    ["agents: codex", "agents: herdr"],
+  );
+  assert.deepEqual(
     result.agents.map((a) => [a.product, a.status, a.location?.label, a.project?.name]),
     [
       ["Claude Code", "blocked", "iTerm › zsh", "app"],

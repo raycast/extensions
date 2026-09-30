@@ -43,6 +43,10 @@ test("loads every app, batching windows into one call; a failing app doesn't hid
   assert.deepEqual(result.failures, [
     { app: safari, message: "Raycast isn't allowed to control this app (Automation)" },
   ]);
+  assert.deepEqual(
+    platform.reports.map((r) => r.context),
+    ["tabs: safari"],
+  );
   assert.equal(result.accessibility, true);
 });
 

@@ -84,6 +84,31 @@ test("cursor: headers from the composerHeaders table; Cursor without it (before 
   await assert.rejects(run(false), /no such table/);
 });
 
+test("cursor: a Cursor that changed its database or moved its transcripts is reported", async () => {
+  const apps = [{ name: "Cursor", bundleId: "com.todesktop.230313mzl4w4u92", path: "/Applications/Cursor.app" }];
+  const header = { id: "a", unread: 0, blocking: 0, updatedAt: 5, folder: "/p/app" };
+  const run = async (headers: Record<string, unknown>[], status: string, readTail = async () => "") => {
+    const platform = fakePlatform({
+      querySqlite: async (_db, sql) => (sql.includes("from composerHeaders") ? headers : [{ id: "a", status }]),
+      readTail,
+    });
+    await cursor.list({ platform, apps, now: 10 } as never);
+    return platform.reports.map((r) => [r.context, (r.error as Error).message]);
+  };
+  const missing = async () => {
+    throw new Error("ENOENT: no such file or directory");
+  };
+  assert.deepEqual(await run([header, { composer: "b" }], "aborted", missing), [
+    ["agents: cursor transcript", "ENOENT: no such file or directory"],
+  ]);
+  assert.deepEqual(await run([{ composer: "a" }], "completed"), [
+    ["agents: cursor headers", "Cursor's agent headers have no composerId"],
+  ]);
+  assert.deepEqual(await run([header], "queued"), [
+    ["agents: cursor status", 'Unknown Cursor run status: "queued"'],
+  ]);
+});
+
 test("cursor: an agent saved as aborted is working while its transcript's turn is open", async () => {
   assert.equal(
     transcriptPath("/h", "/Users/me/my_app.v2", "x"),
@@ -242,6 +267,16 @@ test("codex: app threads open by link while the app runs; CLI threads need their
   assert.equal(queries.length, 1);
 });
 
+test("codex: running without a thread database is reported", async () => {
+  const platform = fakePlatform({ listDir: async () => ["config.toml"] });
+  const apps = [{ bundleId: "com.openai.codex", name: "ChatGPT", path: "/x" }];
+  assert.deepEqual(await codex.list({ platform, apps, processes: [], now: 0 }), []);
+  assert.deepEqual(
+    platform.reports.map((r) => r.context),
+    ["agents: codex db"],
+  );
+});
+
 test("codex: the thread database is the highest-numbered state file", () => {
   assert.equal(
     threadsDb(["logs_2.sqlite", "state_5.sqlite", "state_5.sqlite-wal", "state_12.sqlite"]),
@@ -250,7 +285,7 @@ test("codex: the thread database is the highest-numbered state file", () => {
   assert.equal(threadsDb(["state.sqlite", "logs_2.sqlite"]), undefined);
 });
 
-test("codex: falls back to the original columns when the schema changed, and to nothing after that", async () => {
+test("codex: falls back to the original columns when the schema changed, and to nothing (reported) after that", async () => {
   const paths: string[] = [];
   const queries: string[] = [];
   let failures = 1;
@@ -276,6 +311,11 @@ test("codex: falls back to the original columns when the schema changed, and to 
   );
   assert.equal(paths[0], "/Users/me/.codex/state_6.sqlite");
   assert.match(queries[1], /updated_at \* 1000/);
+  assert.equal(platform.reports.length, 0);
   failures = 2;
   assert.deepEqual(await codex.list(context), []);
+  assert.deepEqual(
+    platform.reports.map((r) => r.context),
+    ["agents: codex threads"],
+  );
 });
