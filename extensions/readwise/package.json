@@ -58,6 +58,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-books",
+      "title": "List Library Entries",
+      "description": "Browse your Readwise library, including books, articles, tweets, and podcasts. Returns IDs for fetching highlights and links to Readwise."
+    },
+    {
+      "name": "list-highlights",
+      "title": "List Highlights",
+      "description": "Read saved Readwise highlights and notes, optionally filtered by library entry or highlight date."
+    }
+  ],
   "preferences": [
     {
       "name": "token",

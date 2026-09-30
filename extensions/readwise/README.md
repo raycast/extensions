@@ -6,6 +6,16 @@ Raycast extension to search and browser your [Readwise library](https://readwise
 
 - Search recent Highlights
 - Search recent entries of your Readwise Library (books, articles, ...)
+- Ask Readwise in Raycast AI to browse your library and summarize saved highlights and notes.
+
+## Ask Readwise
+
+Open **Ask Readwise** in Raycast, or mention `@readwise` in AI Chat. Requires Raycast Pro
+and your Readwise API token. For example, ask "Summarize my highlights from Deep Work"
+or "Show the articles in my library".
+
+AI instructions and evals are stored in `ai.yaml`. Run `npx ray evals` to validate
+tool selection and responses against mocked Readwise data.
 
 ## Configuration
 
@@ -36,6 +46,6 @@ Install dependencies with `npm ci`.
 - `npm run test:coverage` prints coverage and writes an HTML report to `coverage/index.html`.
 - `npm run typecheck` checks the extension, tests, and Vitest configuration.
 
-The suite covers helpers, Readwise API requests, SWR hook contracts, and browser-opening commands.
+The suite covers helpers, Readwise API requests, SWR hook contracts, AI tools, and browser-opening commands.
 Tests mock HTTP requests and the Raycast API. Date tests run in UTC for consistent results.
 Coverage reports include only the modules covered by this suite.

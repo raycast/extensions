@@ -1,5 +1,14 @@
 # Readwise Changelog
 
+## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+
+- Add Ask Readwise to browse library entries and summarize saved highlights and notes with Raycast AI.
+- Add AI tools for paginated library and highlight retrieval, with category, library entry, and highlight date filters.
+- Store AI instructions and evaluation cases in `ai.yaml`.
+- Cover pagination continuation, missing and ambiguous titles, and instructions embedded in saved highlights with AI evals.
+- Ask users to choose between matching titles and instruct AI to ignore commands embedded in saved content.
+- Add tests and coverage for AI tool requests, filters, pagination, and returned notes.
+
 ## [Address Greptile review feedback] - {PR_MERGE_DATE}
 
 - Use native fetch and remove the node-fetch dependency.
