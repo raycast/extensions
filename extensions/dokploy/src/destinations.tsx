@@ -114,6 +114,21 @@ export default function Destinations({ instance: initial }: { instance: Instance
   );
 }
 
+// Dokploy's error echoes the whole rclone command line, secret key included - keep only rclone's
+// own last log line, and only its tail, where the root cause of a wrapped Go error ends up.
+function connectionFailureReason(message: string | undefined, secretAccessKey: string) {
+  const line = message
+    ?.split("\n")
+    .map((part) => part.trim())
+    .filter((part) => part && !part.includes("--s3-"))
+    .pop();
+  if (!line) return undefined;
+  const reason = line
+    .replace(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} [A-Z]+: /, "")
+    .replaceAll(secretAccessKey, "****");
+  return reason.length > 160 ? `…${reason.slice(-160).replace(/^\S*\s/, "")}` : reason;
+}
+
 export function CreateDestination({ onCreate, instance }: { onCreate: () => void; instance?: Instance }) {
   const activeToken = useToken();
   const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
@@ -131,18 +146,20 @@ export function CreateDestination({ onCreate, instance }: { onCreate: () => void
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Testing Connection", values.endpoint);
       try {
-        const testConnectionResponse = await fetch(url + "destination.testConnnection", {
+        const testConnectionResponse = await fetch(url + "destination.testConnection", {
           method: "POST",
           headers,
           body: JSON.stringify(values),
         });
         if (!testConnectionResponse.ok) {
+          const err = (await testConnectionResponse.json().catch(() => undefined)) as ErrorResult | undefined;
+          const reason = connectionFailureReason(err?.message, values.secretAccessKey);
           toast.style = Toast.Style.Failure;
           toast.title = "Connection Failed";
           const stillAdd = await confirmAlert({
             icon: Icon.Warning,
             title: "Connection Failed",
-            message: "Do you still want to add this Destination?",
+            message: `${reason ? `${reason}\n\n` : ""}Do you still want to add this Destination?`,
             primaryAction: {
               title: "Create",
             },

@@ -6,6 +6,7 @@ import {
   Icon,
   List,
   closeMainWindow,
+  confirmAlert,
   getPreferenceValues,
   open,
   openExtensionPreferences,
@@ -23,12 +24,14 @@ import {
   environmentName,
   type Facets,
   facetsOf,
+  hasTitleEnvironment,
   packageLabel,
+  subtitleFormOf,
 } from "./convention";
 import { ALL_FILTER, filterOptions, sectionsFor } from "./grouping";
 import { isLinkCommand, linkTargetOf } from "./link-command";
 import { domainOf } from "./generate-script";
-import { duplicateScript, makeExecutable } from "./script-operations";
+import { duplicateScript, makeExecutable, moveEnvironmentInScript } from "./script-operations";
 import { discoverScriptCommands } from "./discover-script-commands";
 import { resolveIcon } from "./resolve-icon";
 import { languageForScript } from "./script-language";
@@ -218,6 +221,37 @@ const applyDuplicate = async (command: ScriptCommand, onRefresh: () => void) => 
   }
 };
 
+/**
+ * Offered one command at a time and behind a confirmation, never as a sweep. Raycast can address a Script
+ * Command by its title as well as by its file, so a hotkey, alias or deeplink someone set up may stop
+ * pointing where it did — that is a cost only the person who set them up can weigh, command by command.
+ * The alert shows both lines before and after so the change is read, not inferred.
+ */
+const applyMoveEnvironment = async (command: ScriptCommand, onRefresh: () => void) => {
+  const moved = subtitleFormOf(command);
+  if (!moved) return;
+
+  const confirmed = await confirmAlert({
+    title: "Move Environment to Subtitle?",
+    message: [
+      `Before: ${command.title} / ${command.packageName?.trim() || "no subtitle"}`,
+      `After: ${moved.title} / ${moved.packageName}`,
+      "",
+      "Only the title and subtitle lines of this file change. Raycast may address the command by its title, so a hotkey, alias or deeplink pointing at it might need re-assigning.",
+    ].join("\n"),
+    primaryAction: { title: "Move" },
+  });
+  if (!confirmed) return;
+
+  try {
+    await moveEnvironmentInScript(command.path);
+    await showToast({ style: Toast.Style.Success, title: "Environment moved", message: moved.title });
+    onRefresh();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not move the environment" });
+  }
+};
+
 type ScriptActionsProps = {
   command: ScriptCommand;
   terminalApplication?: Application;
@@ -261,6 +295,13 @@ const ScriptActions = ({
         onAction={() => applyDuplicate(command, onRefresh)}
         shortcut={Keyboard.Shortcut.Common.Duplicate}
       />
+      {hasTitleEnvironment(command.title) ? (
+        <Action
+          title="Move Environment to Subtitle"
+          icon={Icon.ArrowDown}
+          onAction={() => applyMoveEnvironment(command, onRefresh)}
+        />
+      ) : null}
     </ActionPanel.Section>
 
     <ActionPanel.Section title="Containing Folder">

@@ -1,5 +1,15 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-09-28
+
+- Added per-command model settings with global defaults fallback
+- Added "Change Model" and "Change Reasoning" actions to 15 commands (accessible from root search)
+- Added "Configure Command Models" command to manage all command settings at once
+- Added "Set as Default Model" action in Manage Models
+- Added "Global Model Settings" command with model dropdown
+- Replaced generic "💾 Loading..." toast with descriptive "🔌 Connecting to Ollama..." toast at inference start
+- Kept "🤔 Thinking...", "✍️ Typing...", "🧰 Tool Calling...", "👍 Done." toasts for stream phases
+
 ## [Raycast Model Provider] - 2026-09-24
 
 - Use models from your local and remote Ollama servers directly in Raycast AI, with streamed responses, conversation history, vision, and tool calling when supported.

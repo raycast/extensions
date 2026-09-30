@@ -1,4 +1,4 @@
-import faker from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 import { allBankTypes } from "../../src/api/bank";
 
 const logoPaths = [
@@ -22,7 +22,7 @@ export default {
     },
     Body: {
       BankAccounts: [1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208].map((code) => ({
-        BankId: faker.finance.account(),
+        BankId: faker.finance.accountNumber(),
         Name: faker.finance.accountName(),
         NominalCode: code,
         BankType: faker.helpers.arrayElement(

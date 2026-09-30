@@ -43,6 +43,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "apmzoom",
+    title: "apMZoomAI · Dongdaemun Wholesale",
+    description:
+      "Search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, find stalls by building, floor and stall number, and open each item or stall on apMZoomAI, in eight languages. Read-only; never returns prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in and no API key.",
+    icon: "https://www.apmzoom.com/pwa-icon-192.png",
+    homepage: "https://github.com/apmleokeo-gif/apmzoom-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.apmzoom.com/mcp"],
+    },
+  },
+  {
     name: "atono",
     title: "Atono",
     description:
@@ -943,6 +955,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "zonefoundry",
+    title: "ZoneFoundry for Sonos",
+    description:
+      "Sonos MCP server. Control your Sonos speakers from Raycast: play songs, artists and playlists, set the volume, group rooms, move music to another room, switch to TV, and send spoken announcements and reminders. Works through the official Sonos cloud with no home bridge; needs the free ZoneFoundry iOS app signed in to your Sonos account. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://zonefoundry.dev/apple-touch-icon.png",
+    homepage: "https://zonefoundry.dev/guides/ai-agent-control/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://relay.zonefoundry.dev/mcp"],
+    },
+  },
+  {
     name: "grafana",
     title: "Grafana",
     description:
@@ -1159,6 +1183,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.smart-me.com/mcp"],
+    },
+  },
+  {
+    name: "audiopod",
+    title: "AudioPod AI",
+    description:
+      "Audio AI as tools: text-to-speech in 200+ languages, voice cloning, voice conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server reached through an `mcp-remote` bridge and authenticated with an AudioPod API key.",
+    icon: "https://audiopod.ai/logo/logo.png",
+    homepage: "https://docs.audiopod.ai/sdks/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.audiopod.ai", "--header", "X-API-Key:${AUDIOPOD_API_KEY}"],
+      env: {
+        AUDIOPOD_API_KEY: "YOUR_API_KEY_HERE",
+      },
     },
   },
 ];

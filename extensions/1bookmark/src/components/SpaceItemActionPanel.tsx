@@ -1,145 +1,55 @@
-import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { SpaceMembersView } from "../views/SpaceMembersView";
-import { NewSpaceForm } from "../views/NewSpaceForm";
-import { SpaceTagsView } from "../views/SpaceTagsView";
-import { SpaceDetailView } from "../views/SpaceDetailView";
-import { trpc, type RouterOutputs } from "../utils/trpc.util";
-import { SpaceAuthForm } from "../views/SpaceAuthForm";
-import { API_URL } from "../utils/constants.util";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { MovedToDesktopView } from "../views/MovedToDesktopView";
 
+// Raycast only toggles which spaces are searched. Manage Space and Add New Space are kept as
+// entries so that users looking for the other space actions are guided to the Desktop app
+// instead of finding them gone.
+// Manage Space stays the primary (Enter) action, taking over from the former Open Space Detail,
+// so Enter never changes anything. Enabling or disabling a space stays on its own shortcut.
 export const SpaceItemActionPanel = (props: {
-  refetch: () => void;
   spaceId: string;
   enabled: boolean;
-  authenticated: boolean;
   toggleSpace: (spaceId: string) => void;
-  myRole: RouterOutputs["user"]["me"]["associatedSpaces"][number]["myRole"];
-  // TODO: Use Prisma Type here
-  type: "PERSONAL" | "TEAM";
 }) => {
-  const { spaceId, refetch, type, enabled, authenticated, toggleSpace, myRole } = props;
+  const { spaceId, enabled, toggleSpace } = props;
 
-  // Team space invitation link. Share it with teammates so they can join the space after logging in.
-  const invitationLink = new URL(`/invite/${spaceId}`, API_URL).toString();
-  const spaceWebUrl = new URL(`/spaces/${spaceId}`, API_URL).toString();
+  const toggleAction = (
+    <Action
+      title={enabled ? "Disable Space" : "Enable Space"}
+      icon={enabled ? Icon.XMarkCircle : Icon.CheckCircle}
+      shortcut={{ modifiers: ["ctrl"], key: "d" }}
+      onAction={() => toggleSpace(spaceId)}
+    />
+  );
 
-  const handleCopyInvitationLink = async () => {
-    await Clipboard.copy(invitationLink);
-    showToast({
-      style: Toast.Style.Success,
-      title: "Invitation link copied",
-      message: invitationLink,
-    });
-  };
-
-  const leave = trpc.space.leave.useMutation();
-  const handleLeave = async () => {
-    const confirmed = await confirmAlert({
-      title: "Leave Space",
-      message:
-        "Are you sure you want to leave this space? This is irreversible and can only be rejoined by invitation from space members.",
-      primaryAction: {
-        title: "Leave",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (!confirmed) return;
-
-    leave.mutate(
-      { spaceId },
-      {
-        onSuccess: () => {
-          showToast({
-            style: Toast.Style.Success,
-            title: "You have left the space",
-          });
-          refetch();
-        },
-      },
-    );
-  };
-
-  if (!authenticated) {
-    return (
-      <ActionPanel>
-        <Action.Push
-          title="Re-authenticate"
-          icon={Icon.Lock}
-          target={<SpaceAuthForm spaceId={spaceId} needPop />}
-          onPop={refetch}
+  const manageSpaceAction = (
+    <Action.Push
+      title="Manage Space"
+      icon={Icon.Gear}
+      shortcut={{ modifiers: ["cmd"], key: "m" }}
+      target={
+        <MovedToDesktopView
+          title="Manage Space"
+          lead="Space details, members, tags, invitation links and join policies are managed in the 1bookmark Desktop app, along with creating, leaving and deleting a space."
         />
-        {myRole === "OWNER" && (
-          <Action.OpenInBrowser title="Manage Space on the Web" url={spaceWebUrl} icon={Icon.Globe} />
-        )}
-        <Action
-          title={"Leave Space"}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-          icon={Icon.Xmark}
-          onAction={handleLeave}
-        />
-      </ActionPanel>
-    );
-  }
+      }
+    />
+  );
+
+  const addNewSpaceAction = (
+    <Action.Push
+      title="Add New Space"
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={<MovedToDesktopView title="New Space" lead="Spaces are created in the 1bookmark Desktop app." />}
+    />
+  );
 
   return (
     <ActionPanel>
-      <Action.Push
-        title="Open Space Detail"
-        icon={Icon.Info}
-        target={<SpaceDetailView spaceId={spaceId} />}
-        onPop={refetch}
-      />
-      {myRole === "OWNER" && (
-        <Action.OpenInBrowser title="Manage Space on the Web" url={spaceWebUrl} icon={Icon.Globe} />
-      )}
-      <Action.Push
-        title="Tags"
-        icon={Icon.Tag}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
-        target={<SpaceTagsView spaceId={spaceId} />}
-      />
-
-      <Action
-        title={enabled ? "Disable Space" : "Enable Space"}
-        icon={enabled ? Icon.XMarkCircle : Icon.CheckCircle}
-        shortcut={{ modifiers: ["ctrl"], key: "d" }}
-        onAction={() => toggleSpace(spaceId)}
-      />
-
-      {type === "TEAM" && (
-        <>
-          <Action.Push
-            title="Members"
-            icon={Icon.TwoPeople}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-            target={<SpaceMembersView spaceId={spaceId} />}
-          />
-          <Action
-            title={"Copy Invitation Link"}
-            icon={Icon.Link}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-            onAction={handleCopyInvitationLink}
-          />
-          <Action
-            title={"Leave Space"}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-            icon={Icon.Xmark}
-            onAction={handleLeave}
-          />
-        </>
-      )}
-      {/* TODO: Additional features planned */}
-      {/* <Action title={"Delete Space"} onAction={() => console.log("Delete Space")} /> */}
-      <ActionPanel.Section>
-        <Action.Push
-          title="Add New Space"
-          icon={Icon.Plus}
-          target={<NewSpaceForm />}
-          shortcut={Keyboard.Shortcut.Common.New}
-          onPop={refetch}
-        />
-      </ActionPanel.Section>
+      {manageSpaceAction}
+      {toggleAction}
+      <ActionPanel.Section>{addNewSpaceAction}</ActionPanel.Section>
     </ActionPanel>
   );
 };

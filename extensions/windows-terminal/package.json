@@ -12,6 +12,12 @@
       "description": "Creates a new Windows Terminal instance for a profile",
       "mode": "view",
       "subtitle": "Windows Terminal"
+    },
+    {
+      "name": "open-with-terminal",
+      "title": "Open with Terminal",
+      "description": "Open the currently selected file manager item with Terminal",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -35,16 +41,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^2.5.0",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "dev": "ray develop",
@@ -64,6 +70,10 @@
     "System"
   ],
   "contributors": [
-    "artistro08"
-  ]
+    "artistro08",
+    "muhammadrizo"
+  ],
+  "allowScripts": {
+    "esbuild": true
+  }
 }

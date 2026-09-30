@@ -3,8 +3,8 @@ import { Project, Branch, Issue, TemplateDetail, MergeRequest } from "../gitlaba
 import { gitlab } from "../common";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { showFailureToast, useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
-import { projectIcon, stringToSlug, toFormValues } from "../utils";
-import { useProjectMR, useMilestones, ProjectInfoMR } from "../hooks";
+import { projectDropdownTitle, projectIcon, projectIconUrl, stringToSlug, toFormValues } from "../utils";
+import { useAvatars, useProjectMR, useMilestones, ProjectInfoMR } from "../hooks";
 
 interface MRFormValues {
   project_id: number;
@@ -503,6 +503,7 @@ function ProjectDropdown(props: {
   setSelectedProject: (value: string | ((previous: string) => string)) => void;
   value: string;
 }) {
+  const avatarSources = useAvatars(props.projects.map(projectIconUrl));
   return (
     <Form.Dropdown
       id="project_id"
@@ -516,8 +517,8 @@ function ProjectDropdown(props: {
         <Form.Dropdown.Item
           key={project.id}
           value={project.id.toString()}
-          title={project.name_with_namespace}
-          icon={projectIcon(project)}
+          title={projectDropdownTitle(project)}
+          icon={projectIcon(project, avatarSources)}
         />
       ))}
     </Form.Dropdown>

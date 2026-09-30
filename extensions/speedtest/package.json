@@ -27,6 +27,13 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "run-speedtest",
+      "title": "Run Speed Test",
+      "description": "Measure the current internet connection's download speed, upload speed, ping, jitter, and packet loss. Each call starts a new speed test."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.0",
     "extract-zip": "^2.0.1",

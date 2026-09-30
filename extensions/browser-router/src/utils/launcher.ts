@@ -5,6 +5,16 @@ import { spawn } from "child_process";
 import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { BrowserProfile } from "../types";
 
+function fileExists(filePath: string): boolean {
+  if (!filePath) return false;
+  try {
+    fs.accessSync(filePath, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getCleanBrowserEnv(): NodeJS.ProcessEnv {
   if (process.platform === "win32") {
     const standardWindowsKeys = new Set([
@@ -82,13 +92,98 @@ function getCleanBrowserEnv(): NodeJS.ProcessEnv {
   return cleanEnv;
 }
 
+function formatShellArg(arg: string): string {
+  if (arg.startsWith('"') && arg.endsWith('"') && arg.length >= 2) {
+    return arg;
+  }
+  const escaped = arg.split('"').join('\\"');
+  if (escaped.includes(" ") || escaped.includes('"')) {
+    return `"${escaped}"`;
+  }
+  return escaped;
+}
+
+function launchViaExplorerShell(executablePath: string, args: string[], cwd?: string): Promise<boolean> {
+  const formattedArgs = args.map(formatShellArg);
+  const argsString = formattedArgs.join(" ");
+
+  // Delegates process creation directly to explorer.exe (Windows Desktop Shell).
+  // By using IShellWindows.FindWindowSW, explorer.exe itself calls ShellExecute.
+  // This guarantees:
+  // 1. The browser process is a direct child of explorer.exe, not Node/Raycast/IDE.
+  // 2. Completely detached from any IDE terminal Job Objects or container virtualization.
+  // 3. Runs with the user's authentic desktop session token so Chrome's App-Bound Encryption
+  //    (elevation_service.exe) authenticates the caller and preserves all profile cookies and sign-ins.
+  const scriptContent = [
+    'var shell = new ActiveXObject("Shell.Application");',
+    "var desktop = shell.Windows().FindWindowSW(0, 0, 8, 0, 1);",
+    "if (desktop) {",
+    "  desktop.Document.Application.ShellExecute(" +
+      JSON.stringify(executablePath) +
+      ", " +
+      JSON.stringify(argsString) +
+      ", " +
+      JSON.stringify(cwd || "") +
+      ', "open", 1);',
+    "} else {",
+    '  var wsh = new ActiveXObject("WScript.Shell");',
+    "  wsh.Run(" + JSON.stringify('"' + executablePath + '"' + (argsString ? " " + argsString : "")) + ", 1, false);",
+    "}",
+  ].join("\r\n");
+
+  const tempScript = path.join(
+    process.env.TEMP || "C:\\Windows\\Temp",
+    `raycast_launch_${Date.now()}_${Math.random().toString(36).substring(2, 6)}.js`,
+  );
+
+  try {
+    fs.writeFileSync(tempScript, scriptContent, "utf8");
+  } catch {
+    return Promise.resolve(false);
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const child = spawn("cscript.exe", ["//nologo", "//B", "//E:jscript", tempScript], {
+        windowsHide: true,
+        stdio: "ignore",
+      });
+
+      child.once("exit", (exitCode) => {
+        try {
+          fs.unlinkSync(tempScript);
+        } catch {
+          // ignore
+        }
+        resolve(exitCode === 0);
+      });
+
+      child.once("error", () => {
+        try {
+          fs.unlinkSync(tempScript);
+        } catch {
+          // ignore
+        }
+        resolve(false);
+      });
+    } catch {
+      try {
+        fs.unlinkSync(tempScript);
+      } catch {
+        // ignore
+      }
+      resolve(false);
+    }
+  });
+}
+
 export async function launchBrowserProfile(
   profile: BrowserProfile,
   targetUrl?: string,
   incognito = false,
 ): Promise<boolean> {
   try {
-    if (!profile.executablePath || !fs.existsSync(profile.executablePath)) {
+    if (!profile.executablePath || !fileExists(profile.executablePath)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Browser not found",
@@ -145,12 +240,16 @@ export async function launchBrowserProfile(
       // Chrome and Edge standard profiles are specifically EXCLUDED from --user-data-dir:
       // 1. Chrome's singleton process model treats explicit --user-data-dir as a profile boundary mismatch, evicting active sign-in sessions.
       // 2. Edge's Startup Boost background service holds an exclusive lock on its User Data directory, causing hangs.
+      // Chrome, Edge, Dia, and Arc omit --user-data-dir:
+      // 1. Chrome: Passing --user-data-dir causes session detachment and breaks App-Bound encryption (guest mode).
+      // 2. Edge: Passing --user-data-dir causes Startup Boost directory locks and session detachment.
+      // 3. Dia & Arc: Unified single-window browsers with package virtualization; passing --user-data-dir detaches credentials.
       if (
         profile.browserId === "brave" ||
         profile.browserId === "vivaldi" ||
-        profile.browserId === "arc" ||
         profile.browserId === "opera" ||
-        profile.isCustom
+        profile.isCustom ||
+        !["chrome", "edge", "dia", "arc"].includes(profile.browserId)
       ) {
         if (!udd && process.platform === "win32") {
           const home = os.homedir();
@@ -160,8 +259,6 @@ export async function launchBrowserProfile(
             udd = path.join(localAppData, "BraveSoftware", "Brave-Browser", "User Data");
           } else if (profile.browserId === "vivaldi") {
             udd = path.join(localAppData, "Vivaldi", "User Data");
-          } else if (profile.browserId === "arc") {
-            udd = path.join(localAppData, "Arc", "User Data");
           } else if (profile.browserId === "opera") {
             udd = path.join(appData, "Opera Software", "Opera Stable");
           }
@@ -181,8 +278,30 @@ export async function launchBrowserProfile(
       }
     }
 
-    // Clean environment to prevent foreign Electron, IDE, or crashpad variables from polluting browser processes.
-    // An allowlist ensures spawned browsers only receive standard Windows OS environment variables.
+    // On Windows, delegate process creation directly to explorer.exe (Windows Desktop Shell).
+    // This ensures the browser is spawned by explorer.exe with the user's desktop session token,
+    // breaking completely away from any IDE terminal Job Objects so Google Chrome App-Bound Encryption
+    // can authenticate the caller and preserve all cookie sign-ins.
+    if (process.platform === "win32") {
+      const shellSuccess = await launchViaExplorerShell(
+        profile.executablePath,
+        args,
+        fs.existsSync(exeDir) ? exeDir : undefined,
+      );
+      if (shellSuccess) {
+        const modeText = incognito ? " (Incognito)" : "";
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Opened in ${profile.displayName}${modeText}`,
+          message: targetUrl ? (targetUrl.length > 50 ? targetUrl.substring(0, 47) + "..." : targetUrl) : undefined,
+        });
+
+        await closeMainWindow();
+        return true;
+      }
+    }
+
+    // Fallback: standard spawn with sanitized environment
     const cleanEnv = getCleanBrowserEnv();
 
     const child = spawn(profile.executablePath, args, {

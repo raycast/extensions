@@ -23,6 +23,33 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "cubeSize",
+          "title": "Cube",
+          "description": "Which cube to scramble.",
+          "type": "dropdown",
+          "required": false,
+          "default": "3x3",
+          "data": [
+            {
+              "title": "3×3",
+              "value": "3x3"
+            },
+            {
+              "title": "2×2",
+              "value": "2x2"
+            }
+          ]
+        },
+        {
+          "name": "hideTimer",
+          "title": "Hidden Timer",
+          "label": "Hide the timer while solving",
+          "description": "Shows \"Solving…\" instead of the running time; the final time still appears when you stop.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
           "name": "precision",
           "title": "Timer Precision",
           "description": "How finely the running timer counts up. The final time is always exact.",
@@ -64,6 +91,15 @@
           "type": "textfield",
           "required": false,
           "default": "15"
+        },
+        {
+          "name": "hideInspection",
+          "title": "Hidden Inspection",
+          "label": "Hide the inspection countdown",
+          "description": "Shows \"Inspecting…\" instead of the countdown; +2 / DNF penalties still apply.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
         }
       ]
     }

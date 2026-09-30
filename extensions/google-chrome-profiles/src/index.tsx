@@ -8,8 +8,8 @@ import {
   getPreferenceValues,
   Icon,
   Image,
+  Keyboard,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -25,6 +25,7 @@ import {
   GoogleChromeLocalState,
   getSelectedBrowser,
   Profile,
+  showDoneHUD,
 } from "./util/types";
 import {
   createBookmarkListItem,
@@ -47,6 +48,37 @@ const ProfileItem = (props: {
   onDelete: (profile: Profile) => Promise<void>;
 }) => {
   const { index, profile, browser } = props;
+  // Enter runs the first action, ⌘↵ the second.
+  const directSwitch = getPreferenceValues<ExtensionPreferences>().directSwitch === true;
+  const secondary: Keyboard.Shortcut = { modifiers: ["cmd"], key: "return" };
+
+  const showBookmarks = (
+    <Action.Push
+      key="bookmarks"
+      title="Show Bookmarks"
+      icon={Icon.Link}
+      shortcut={directSwitch ? secondary : undefined}
+      target={<ListBookmarks profile={profile} browser={browser} />}
+    />
+  );
+  const bringToFront = (
+    <Action
+      key="front"
+      title="Bring to Front"
+      icon={Icon.Window}
+      shortcut={directSwitch ? undefined : secondary}
+      onAction={async () => {
+        await openGoogleChrome(
+          profile,
+          ChromeAction.Focus,
+          async () => {
+            await showDoneHUD("Bringing to front...");
+          },
+          browser,
+        );
+      }}
+    />
+  );
 
   return (
     <List.Item
@@ -57,26 +89,7 @@ const ProfileItem = (props: {
       keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Show Bookmarks"
-            icon={Icon.Link}
-            target={<ListBookmarks profile={profile} browser={browser} />}
-          />
-          <Action
-            title="Bring to Front"
-            icon={Icon.Window}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={async () => {
-              await openGoogleChrome(
-                profile,
-                ChromeAction.Focus,
-                async () => {
-                  await showHUD("Bringing to front...");
-                },
-                browser,
-              );
-            }}
-          />
+          {directSwitch ? [bringToFront, showBookmarks] : [showBookmarks, bringToFront]}
           <Action
             title="New Window"
             icon={Icon.AppWindow}
@@ -86,7 +99,7 @@ const ProfileItem = (props: {
                 profile,
                 ChromeAction.NewWindow,
                 async () => {
-                  await showHUD("Opening new window...");
+                  await showDoneHUD("Opening new window...");
                 },
                 browser,
               );
@@ -435,7 +448,7 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
             props.profile,
             props.target,
             async () => {
-              await showHUD(hudMessage);
+              await showDoneHUD(hudMessage);
             },
             props.browser,
           );

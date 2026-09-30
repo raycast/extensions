@@ -1,3 +1,5 @@
+import { joinPackage } from "./convention";
+
 const FALLBACK_LINK_ICON = "https://api.iconify.design/mingcute/link-line.svg";
 
 const FALLBACK_FOLDER_ICON = "https://api.iconify.design/mingcute/folder-line.svg";
@@ -163,7 +165,7 @@ const escapeForShell = (value: string) => value.replace(/([\\"`$])/g, "\\$1");
  * placeholder has nothing an app could stand in for. A non-URL target is excluded for the same kind of
  * reason — a folder has no web equivalent to fall back to.
  */
-const routerAppOf = (draft: ScriptDraft) =>
+export const routerAppOf = (draft: ScriptDraft) =>
   draft.desktopApplication && !findPlaceholder(draft.target) && /^https?:\/\//i.test(draft.target)
     ? draft.desktopApplication
     : undefined;
@@ -222,9 +224,7 @@ export const buildScript = (draft: ScriptDraft) => {
   const category = draft.category?.trim().replace(/^#/, "");
   const brand = brandOf(draft);
 
-  const subtitle = [brand, environment ? `@${environment}` : undefined, category ? `#${category}` : undefined]
-    .filter(Boolean)
-    .join(" · ");
+  const subtitle = joinPackage({ brand, environment, category });
   const icon = draft.iconReference ?? defaultIconFor(draft.target);
 
   const lines = [

@@ -1,5 +1,15 @@
 import { Feed, FeedItem, GitHubPR, GitHubPRFile, StoreItem } from "../types";
-import { Cache, Color, environment, getPreferenceValues, Icon, Image, launchCommand, LaunchType } from "@raycast/api";
+import {
+  Cache,
+  Color,
+  environment,
+  getPreferenceValues,
+  Icon,
+  Image,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+} from "@raycast/api";
 import { showError } from "@chrismessina/raycast-kit";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
@@ -853,6 +863,7 @@ export async function convertPRsToStoreItems(
       type: "updated" as const,
       extensionSlug: resolvedSlug,
       prUrl: pr.html_url,
+      changeSummary: pr.title,
       platforms: pkgInfo?.platforms ?? ["macOS"],
       version: pkgInfo?.version,
       categories: pkgInfo?.categories,
@@ -865,35 +876,80 @@ export async function convertPRsToStoreItems(
   return { updated: updatedItems, removed: removedItems };
 }
 
+async function fetchStoreFeed(): Promise<Feed> {
+  const response = await fetch(FEED_URL);
+  if (!response.ok) {
+    throw new Error(`Raycast Store feed responded ${response.status} ${response.statusText}`);
+  }
+
+  const payload: unknown = await response.json();
+  if (typeof payload !== "object" || payload === null || !Array.isArray((payload as Feed).items)) {
+    throw new Error("Raycast Store feed returned an invalid response.");
+  }
+  return payload as Feed;
+}
+
+const aiScanCache = new Cache({ namespace: "store-updates-ai" });
+const AI_SCAN_TTL_MS = 10 * 60 * 1000;
+const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
+
+type StoreUpdatesResult = { items: StoreItem[]; updatesCoverageSince?: string; updatesUnavailable?: string };
+
+/** Fetches updates for AI queries. A failed GitHub request still leaves the Store feed available. */
+export async function fetchStoreUpdates(type: "new" | "all" = "all"): Promise<StoreUpdatesResult> {
+  if (type === "new") return { items: await buildStoreUpdateItems(await fetchStoreFeed(), null) };
+
+  const cached = aiScanCache.get("scan");
+  if (cached) {
+    try {
+      const scan: { fetchedAt: number; result: StoreUpdatesResult } = JSON.parse(cached);
+      if (Date.now() - scan.fetchedAt < AI_SCAN_TTL_MS && Array.isArray(scan.result.items)) return scan.result;
+    } catch {
+      // A bad cache entry is a miss.
+    }
+  }
+
+  const reset = Number(await LocalStorage.getItem<string>(RATE_LIMIT_RESET_KEY));
+  const prsRequest = reset > Date.now() ? Promise.reject(new Error("GitHub rate limit reached.")) : fetchMergedPRs();
+  const [feedResult, prsResult] = await Promise.allSettled([fetchStoreFeed(), prsRequest]);
+  if (feedResult.status === "rejected") throw feedResult.reason;
+
+  if (prsResult.status === "rejected") {
+    const error = prsResult.reason as Error & { rateLimitReset?: number };
+    if (/rate limit/i.test(error.message) && !(reset > Date.now())) {
+      const reported = error.rateLimitReset ? error.rateLimitReset * 1000 : 0;
+      const cooldown =
+        reported > Date.now() && reported <= Date.now() + 60 * 60 * 1000 ? reported : Date.now() + 5 * 60 * 1000;
+      await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(cooldown));
+    }
+    return {
+      items: await buildStoreUpdateItems(feedResult.value, null),
+      updatesUnavailable: error.message,
+    };
+  }
+
+  const prs = prsResult.value;
+  const result: StoreUpdatesResult = {
+    items: await buildStoreUpdateItems(feedResult.value, prs),
+    // Both transports return their first 50 PRs by last activity. A newer merge must
+    // be in this page, but an older merge may be outside it.
+    ...(prs.length === 50 && prs[49].updated_at ? { updatesCoverageSince: prs[49].updated_at } : {}),
+  };
+  aiScanCache.set("scan", JSON.stringify({ fetchedAt: Date.now(), result }));
+  return result;
+}
+
 /**
  * Self-contained scan used by the menu-bar command (and background refreshes).
- * Fetches the feed + merged PRs and returns the combined new + updated items,
- * sorted newest-first. New items use feed fields directly (no extra network);
- * updated items reuse convertPRsToStoreItems. Removed items are intentionally
- * omitted — the menu bar surfaces things to discover, not removals.
+ * Source failures are ignored for menu-bar refreshes.
  */
 export async function scanStoreUpdates(): Promise<StoreItem[]> {
-  const [feed, prs] = await Promise.all([
-    (async (): Promise<Feed | null> => {
-      try {
-        const response = await fetch(FEED_URL);
-        if (!response.ok) return null;
-        return (await response.json()) as Feed;
-      } catch {
-        return null;
-      }
-    })(),
-    (async (): Promise<GitHubPR[] | null> => {
-      // One transport, chosen by fetchMergedPRs. The background scan has no UI to show an
-      // error in, so any failure degrades to null and the cached items stay.
-      try {
-        return await fetchMergedPRs();
-      } catch {
-        return null;
-      }
-    })(),
-  ]);
+  const [feed, prs] = await Promise.all([fetchStoreFeed().catch(() => null), fetchMergedPRs().catch(() => null)]);
 
+  return buildStoreUpdateItems(feed, prs);
+}
+
+async function buildStoreUpdateItems(feed: Feed | null, prs: GitHubPR[] | null): Promise<StoreItem[]> {
   const newItems: StoreItem[] = asArray<FeedItem>(feed?.items)
     .map((item): StoreItem | null => {
       const parsed = parseExtensionUrl(item.url);

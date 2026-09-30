@@ -1,5 +1,14 @@
 # GitLab Changelog
 
+## [Project avatars, grouped project dropdown, and paginated project search] - 2026-09-27
+
+- Show avatars of private projects and groups; avatars are downloaded with authentication and cached locally
+- Fix project dropdown search only finding projects from the first page
+- Group projects in the project dropdown by GitLab group and add a "Recent" section with the last 3 selected projects
+- Add "Show Group Name in Project Dropdowns" preference to hide the top-level group from project names
+- Paginate Search Projects (30 per page) with server-side search that also matches group names
+- Speed up loading of multi-page lists by fetching pages in parallel
+
 ## [Squash commits checkbox in MR create form] - 2026-09-11
 
 - Add "Squash commits when merge request is accepted" checkbox to the MR create and edit forms

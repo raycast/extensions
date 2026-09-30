@@ -1,10 +1,14 @@
+export type CubeSize = "3x3" | "2x2";
+
 // A single solve. `time` is the raw solve time in milliseconds.
 // `penalty` follows csTimer: 0 = none, 2000 = +2, -1 = DNF.
+// `size` scopes the solve to a cube; older solves without it are treated as 3x3.
 export type Solve = {
   time: number;
   scramble: string;
   date: number; // unix seconds
   penalty: number;
+  size?: CubeSize;
 };
 
 // Effective time used for stats: +2 adds 2000 ms, DNF counts as the worst possible.

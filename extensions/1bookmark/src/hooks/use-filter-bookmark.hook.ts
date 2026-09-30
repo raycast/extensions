@@ -75,28 +75,24 @@ function filterAsPattern(
  */
 export const useFilterBookmark = (params: {
   keyword: string;
-  taggedPrepare: PreparedBookmark[];
-  untaggedPrepare: PreparedBookmark[];
+  prepared: PreparedBookmark[];
 }): {
-  filteredTaggedPreparedBookmarks: PreparedBookmark[];
-  filteredUntaggedPreparedBookmarks: PreparedBookmark[];
+  filteredPrepared: PreparedBookmark[];
   cleanKeyword: string;
   hasSpaceFilter: boolean;
   hasCreatorFilter: boolean;
   hasTagFilter: boolean;
 } => {
-  const { keyword, taggedPrepare, untaggedPrepare } = params;
+  const { keyword, prepared } = params;
 
   return useMemo(() => {
-    // Parse special filters from the keyword
     const { cleanKeyword, spaceFilters, creatorFilters, tagFilters } = parseKeywordFilters(keyword);
     const hasFilters = spaceFilters.length > 0 || creatorFilters.length > 0 || tagFilters.length > 0;
 
+    // If no filters are active, return the original data
     if (!hasFilters) {
-      // If there are no filters, return the original data with cleanKeyword
       return {
-        filteredTaggedPreparedBookmarks: taggedPrepare,
-        filteredUntaggedPreparedBookmarks: untaggedPrepare,
+        filteredPrepared: prepared,
         cleanKeyword,
         hasSpaceFilter: false,
         hasCreatorFilter: false,
@@ -104,18 +100,14 @@ export const useFilterBookmark = (params: {
       };
     }
 
-    // Apply filters to both tagged and untagged bookmarks
     const filters = { spaceFilters, creatorFilters, tagFilters };
-    const filteredTaggedPreparedBookmarks = filterAsPattern(taggedPrepare, filters);
-    const filteredUntaggedPreparedBookmarks = filterAsPattern(untaggedPrepare, filters);
 
     return {
-      filteredTaggedPreparedBookmarks,
-      filteredUntaggedPreparedBookmarks,
+      filteredPrepared: filterAsPattern(prepared, filters),
       cleanKeyword,
       hasSpaceFilter: spaceFilters.length > 0,
       hasCreatorFilter: creatorFilters.length > 0,
       hasTagFilter: tagFilters.length > 0,
     };
-  }, [keyword, taggedPrepare, untaggedPrepare]);
+  }, [keyword, prepared]);
 };

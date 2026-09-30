@@ -1,0 +1,20 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# local env files (never commit real values)
+.env
+.env.*
+# .env.example 是给团队看的模板(本扩展的功能之一就是生成它),要提交
+!.env.example
+
+# misc
+.DS_Store
