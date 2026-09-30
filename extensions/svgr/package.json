@@ -23,6 +23,7 @@
     "@types/svgo": "^2.6.3"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.29.7",
     "@svgr/core": "^6.2.1",
     "@svgr/plugin-jsx": "^6.2.1",
     "@svgr/plugin-svgo": "^6.2.0",
