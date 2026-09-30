@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { api } from "./api";
@@ -57,7 +57,7 @@ export default function SearchBookmarks() {
               <Action.CopyToClipboard
                 title="Copy URL"
                 content={bookmark.url}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <ConnectionActions retry={revalidate} />
             </ActionPanel>

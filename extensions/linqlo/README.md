@@ -24,17 +24,12 @@ Private collections and trash are excluded. The key is shown only once in Linqlo
 If your key expires, use **Update Integration Key** in the command's actions menu. If saving
 is denied, check both the key's write permission and your current workspace role.
 
-## Local development
-
-Run `npm ci`, `npm test`, `npm run lint`, `npm run build`, `npm run check-types`, then `npm run dev`.
-Tests require Node.js 22.18+. Development mode loads the extension into Raycast.
-
 When opening a collection, select the same workspace in the Linqlo web app as the one connected to this extension.
 
 ## Screenshots
 
-![Search bookmarks](media/search-bookmarks.png)
+![Search bookmarks](metadata/linqlo-1.png)
 
-![Save a clipboard URL](media/save-clipboard-url.png)
+![Save a clipboard URL](metadata/linqlo-3.png)
 
-![Open a collection](media/open-collection.png)
+![Open a collection](metadata/linqlo-2.png)
