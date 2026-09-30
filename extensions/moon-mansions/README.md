@@ -2,8 +2,6 @@
 
 Moon phase, illumination, zodiac sign, and lunar mansions across three traditions — plus planets and calendars — in Raycast.
 
-> Prefer a native app? [Moon Mansions for Mac](https://github.com/minhaajre/moon-mansions-mac/releases) is free — same engine as a menu-bar app, no Raycast needed.
-
 ## Commands
 
 - **Show Moon Info** — Detail view: phase, illumination %, moon age, tropical zodiac, Arab manzil (number, name, divine name, degrees, rating, theme), Vedic nakshatra (ruler, deity, theme), Chinese lodge (palace, theme), all seven classical planets with sign, degree and direct/retrograde motion, and a Calendars section (Hijri date, Chinese day/month pillars with animals, Vedic tithi, masa and vara).
@@ -12,3 +10,5 @@ Moon phase, illumination, zodiac sign, and lunar mansions across three tradition
 ## Astronomy
 
 Zero runtime dependencies. Lunar math is a Meeus Ch.47 truncation ported from a guide cross-checked against AstroSeek (±1–2°, adequate for 12.857° mansions). Planets use JPL approximate Keplerian elements, verified against a published ephemeris (≤0.5°). Vedic positions use the same Lahiri ayanamsa as the author's Ibn Arabi app. The Chinese lodge uses the traditional unequal lodge widths, not equal slices — 28 unequal slots totalling 364 units, rescaled onto the 360° circle and anchored at Horn/Spica on the Moon's tropical longitude, so allow ±1 lodge near a boundary. Hijri output is the tabular Islamic calendar (±1–2 days vs moon-sighting).
+
+> Note: a native menu-bar build without Raycast is also available under [Moon Mansions for Mac](https://github.com/minhaajre/moon-mansions-mac/releases).

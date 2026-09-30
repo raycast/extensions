@@ -2,9 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moon-mansions",
   "title": "Moon Mansions",
-  "description": "Moon phase, illumination, zodiac sign and Abu Ma'shar lunar mansion.",
+  "description": "Moon phase, illumination, zodiac and VOC plus Arab manazil, Vedic nakshatra, Chinese xiu, classical planets and traditional calendars.",
   "icon": "extension_icon.png",
   "author": "minhaaj_rehman",
+  "platforms": ["macOS", "Windows"],
   "categories": ["Other"],
   "keywords": ["moon", "mansion", "manazil", "zodiac", "astrology"],
   "license": "MIT",
@@ -12,12 +13,14 @@
     {
       "name": "info",
       "title": "Show Moon Info",
+      "subtitle": "Moon Mansions",
       "description": "Phase, illumination, zodiac and lunar mansion",
       "mode": "view"
     },
     {
       "name": "menu-bar",
       "title": "Moon in Menu Bar",
+      "subtitle": "Moon Mansions",
       "description": "Phase emoji, illumination % and mansion in the menu bar",
       "mode": "menu-bar",
       "interval": "1h"
