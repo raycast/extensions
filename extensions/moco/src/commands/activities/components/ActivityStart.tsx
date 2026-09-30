@@ -1,5 +1,6 @@
 import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { useEffect } from "react";
 import { Task } from "../../tasks/types";
 import { startActivity } from "../api";
 import { fetchProjects } from "../../projects/api";
@@ -29,7 +30,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
     keepPreviousData: true,
   });
 
-  const { handleSubmit, itemProps, values } = useForm<ActivityStartValues>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<ActivityStartValues>({
     initialValues: { description: "", date: new Date(), hours: "" },
     validation: {
       projectDropdown: task ? undefined : FormValidation.Required,
@@ -63,6 +64,20 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, o
     return result;
   }, {});
   const selectedProject = projects.find((project) => String(project.id) === values.projectDropdown);
+
+  // The task dropdown is controlled: after a project change, reset a task that belongs to another project.
+  // setValue always creates a new values object, so only call it on a real change (else it re-renders endlessly).
+  useEffect(() => {
+    if (task) {
+      return;
+    }
+    const tasks = selectedProject?.tasks ?? [];
+    const current = values.taskDropdown;
+    const next = tasks.some((t) => String(t.id) === current) ? current : tasks.length > 0 ? String(tasks[0].id) : "";
+    if (next !== current) {
+      setValue("taskDropdown", next);
+    }
+  }, [task, selectedProject, values.taskDropdown]);
 
   return (
     <Form
