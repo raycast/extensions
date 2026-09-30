@@ -236,6 +236,8 @@ describe("helpers", () => {
     const day = dateDefault("@date:2026-09-30");
     expect([day?.getFullYear(), day?.getMonth(), day?.getDate(), day?.getHours()]).toEqual([2026, 8, 30, 0]);
     expect(dateDefault("2026-01-05")?.getDate()).toBe(5);
+    // Years below 100 stay as they are (the Date(y, m, d) constructor would move them to 19xx).
+    expect(dateDefault("0050-03-04")?.getFullYear()).toBe(50);
     expect(dateDefault("@date:2026-09-30T14:30:00Z")?.getTime()).toBe(Date.parse("2026-09-30T14:30:00Z"));
     expect(dateDefault("not a date")).toBeUndefined();
     expect(dateDefault(undefined)).toBeUndefined();

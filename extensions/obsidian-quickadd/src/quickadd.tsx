@@ -24,9 +24,11 @@ import {
   vaultName,
 } from "./config";
 import { detectMode, REASON_TEXT } from "./mode";
+import BlockedView from "./BlockedView";
 import { runChoice } from "./run";
 import RunSession from "./RunSession";
 import { Choice } from "./types";
+import { basicRunBlocked } from "./uri";
 
 type LaunchContext = { vaultPath?: string; choiceId?: string; relaunched?: boolean };
 
@@ -106,7 +108,8 @@ function Choices({
     if (!choiceId || loaded.error || launched.current) return;
     launched.current = true;
     if (!direct) showToast({ style: Toast.Style.Failure, title: "Choice no longer exists" });
-    else if (mode.mode === "basic" && direct.fields.length === 0) runChoice(name, direct, []);
+    else if (mode.mode === "basic" && direct.fields.length === 0 && !basicRunBlocked(direct))
+      runChoice(name, direct, []);
   }, []);
 
   if (loaded.error) return <ErrorView message={loaded.error} />;
@@ -115,6 +118,8 @@ function Choices({
       return (
         <RunSession cli={mode.cli} vaultPath={vaultPath} vaultName={name} choice={direct} relaunched={relaunched} />
       );
+    const blocked = basicRunBlocked(direct);
+    if (blocked) return <BlockedView choice={direct} reason={blocked} />;
     if (direct.fields.length > 0)
       return <ChoiceForm vaultName={name} vault={{ vaultPath, vaultName: name }} choice={direct} />;
     return <List isLoading />;
@@ -128,6 +133,16 @@ function Choices({
           icon={Icon.Play}
           target={<RunSession cli={mode.cli} vaultPath={vaultPath} vaultName={name} choice={choice} />}
           onPush={() => visitItem(choice)}
+        />
+      );
+    }
+    const blocked = basicRunBlocked(choice);
+    if (blocked) {
+      return (
+        <Action.Push
+          title="Show Why It Can't Run"
+          icon={Icon.ExclamationMark}
+          target={<BlockedView choice={choice} reason={blocked} />}
         />
       );
     }

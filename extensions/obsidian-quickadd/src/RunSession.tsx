@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { createDeeplink } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
+import BlockedView from "./BlockedView";
 import ChoiceForm from "./ChoiceForm";
 import { ensureVaultReady, realVaultDeps } from "./ensureVault";
 import { BasicReason, isBasicReason, REASON_TEXT } from "./mode";
@@ -25,7 +26,7 @@ import { messageMarkdown, promptTitle, replyForForm, specsForPrompt, unsupported
 import { runChoice } from "./run";
 import { doneMessage, InteractiveSession, PromptEvent, SessionEvent, startSession, withoutPrompt } from "./session";
 import { Choice } from "./types";
-import { buildOpenUri } from "./uri";
+import { basicRunBlocked, buildOpenUri } from "./uri";
 
 type Phase =
   | { kind: "starting" }
@@ -265,8 +266,10 @@ function BasicFallback({
 }) {
   useEffect(() => {
     showToast({ style: Toast.Style.Failure, title: "Full QuickAdd support is off", message: REASON_TEXT[reason] });
-    if (choice.fields.length === 0) void runChoice(vaultName, choice, []);
+    if (choice.fields.length === 0 && !basicRunBlocked(choice)) void runChoice(vaultName, choice, []);
   }, []);
+  const blocked = basicRunBlocked(choice);
+  if (blocked) return <BlockedView choice={choice} reason={blocked} />;
   if (choice.fields.length > 0)
     return (
       <ChoiceForm vaultName={vaultName} vault={{ vaultPath, vaultName }} choice={choice} notice={REASON_TEXT[reason]} />

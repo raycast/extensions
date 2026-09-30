@@ -6,7 +6,6 @@ import {
   LinkTarget,
   linkableFiles,
   listNotes,
-  notesToTargets,
   obsidianLinkTargets,
   parseAliases,
   parseFileList,
@@ -42,15 +41,11 @@ export async function loadLinkTargets(vault: VaultRef): Promise<LinkTarget[]> {
       );
     }
   }
-  const settings = fileSettings(vault.vaultPath);
-  const notes = listNotes(vault.vaultPath);
-  const kept = new Set(
-    linkableFiles(
-      notes.map((note) => note.path),
-      settings,
-    ),
-  );
-  return notesToTargets(notes.filter((note) => kept.has(note.path)));
+  // Exclude first, then choose link text among the notes that remain (as Obsidian's own suggester would).
+  const newestFirst = listNotes(vault.vaultPath).map((note) => note.path);
+  const kept = linkableFiles(newestFirst, fileSettings(vault.vaultPath));
+  const rank = new Map(kept.map((path, index) => [path, -index]));
+  return obsidianLinkTargets(kept, [], (path) => rank.get(path) ?? 0);
 }
 
 /** The vault's "Files and links" settings that decide what `[[` offers. */

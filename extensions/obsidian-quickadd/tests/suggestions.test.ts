@@ -85,4 +85,16 @@ describe("loadLinkTargets without the CLI", () => {
     writeFileSync(join(root, ".obsidian/app.json"), JSON.stringify({ userIgnoreFilters: ["Archive/"] }));
     expect((await loadLinkTargets({ vaultPath: root, vaultName: "v" })).map((t) => t.link)).toEqual(["Keep"]);
   });
+
+  it("picks link text after excluding files, so a kept note isn't lengthened by an excluded namesake", async () => {
+    const root = vault({});
+    const { mkdirSync } = await import("fs");
+    for (const dir of ["Projects", "Archive", ".obsidian"]) mkdirSync(join(root, dir));
+    writeFileSync(join(root, "Projects/A.md"), "");
+    writeFileSync(join(root, "Archive/A.md"), "");
+    writeFileSync(join(root, ".obsidian/app.json"), JSON.stringify({ userIgnoreFilters: ["Archive/"] }));
+    expect((await loadLinkTargets({ vaultPath: root, vaultName: "v" })).map((t) => [t.link, t.subtitle])).toEqual([
+      ["A", "Projects"],
+    ]);
+  });
 });

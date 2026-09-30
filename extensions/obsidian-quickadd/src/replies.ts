@@ -238,7 +238,13 @@ export function dateDefault(value: unknown): Date | undefined {
   const text = value.replace(/^@date:/, "");
   // A date-only value is a local calendar day; Date.parse would read it as UTC midnight.
   const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
-  if (day) return new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
+  if (day) {
+    // setFullYear, unlike the Date(y, m, d) constructor, keeps years below 100 as they are.
+    const local = new Date(0);
+    local.setFullYear(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
+    local.setHours(0, 0, 0, 0);
+    return local;
+  }
   const time = Date.parse(text);
   return Number.isNaN(time) ? undefined : new Date(time);
 }
