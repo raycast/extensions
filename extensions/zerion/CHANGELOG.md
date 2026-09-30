@@ -1,6 +1,6 @@
 # Zerion Changelog
 
-## [Public Zerion API] - {PR_MERGE_DATE}
+## [Public Zerion API] - 2026-09-30
 
 - Moved all data fetching to the public Zerion API (api.zerion.io) with a personal API key
 - Added Sign in with Zerion: the first command you run opens a browser consent page at dashboard.zerion.io and connects a free API key automatically — no manual setup
