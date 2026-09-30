@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-09-30
 
 - Allow custom search engines to override built-in engines that use the same trigger
 
