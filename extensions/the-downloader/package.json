@@ -479,10 +479,6 @@
           "value": "apple"
         },
         {
-          "title": "Apple Intelligence (Private Cloud)",
-          "value": "apple-pcc"
-        },
-        {
           "title": "Ollama (Local)",
           "value": "ollama"
         }

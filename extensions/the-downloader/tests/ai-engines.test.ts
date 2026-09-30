@@ -1,16 +1,21 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
 
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
 import { spawn } from "node:child_process";
 import {
+  ENGINE_TITLES,
+  EnginePreference,
   FM_PATH,
+  appleAvailable,
   appleEngine,
   buildFmArgs,
   firstOllamaModel,
   friendlyFmError,
   ollamaEngine,
+  parseFmAvailability,
   readNdjson,
   resolveEngine,
   stripAnsi,
@@ -39,21 +44,28 @@ afterEach(() => {
 });
 
 describe("Apple fm", () => {
-  it("builds respond arguments for on-device and Private Cloud Compute", () => {
-    expect(buildFmArgs("be brief", "Question: hi", false)).toEqual([
+  const NOT_AGREED =
+    "\u001b[38;2;255;107;128mYOU HAVE NOT AGREED TO THE APPLE FOUNDATION MODELS CLI LEGAL NOTICE & TERMS.\nAgreeing to the Apple Foundation Models CLI Legal Notice & Terms applies to every user on the machine, so it must be run as a privileged user (e.g. 'sudo fm license').\n\u001b[0m";
+
+  it("builds `fm respond` arguments: instructions, streaming, then the prompt", () => {
+    expect(buildFmArgs("be brief", "Question: hi")).toEqual([
       "respond",
-      "Question: hi",
       "--instructions",
       "be brief",
+      "--stream",
+      "Question: hi",
     ]);
-    expect(buildFmArgs("i", "p", true)).toEqual(["respond", "p", "--instructions", "i", "--model", "pcc"]);
+  });
+
+  it("offers no Private Cloud engine: fm's only model is the on-device `system` one", () => {
+    expect(Object.keys(ENGINE_TITLES)).toEqual(["raycast", "apple", "ollama"]);
   });
 
   it("streams stdout and strips terminal escapes", async () => {
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
     const seen: string[] = [];
-    const promise = appleEngine(false).complete("i", "p", { onData: (t) => seen.push(t) });
+    const promise = appleEngine().complete("i", "p", { onData: (t) => seen.push(t) });
     child.stdout.emit("data", Buffer.from("\u001b[1mHello"));
     child.stdout.emit("data", Buffer.from(" world\u001b[0m\n"));
     child.emit("close", 0);
@@ -62,20 +74,64 @@ describe("Apple fm", () => {
     expect((spawn as ReturnType<typeof vi.fn>).mock.calls[0][0]).toBe(FM_PATH);
   });
 
-  it("explains a disabled Apple Intelligence", async () => {
+  it("explains the one-time fm terms (exit 69) instead of showing the raw notice", async () => {
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
-    const promise = appleEngine(false).complete("i", "p");
-    child.stderr.emit("data", Buffer.from("Error: Apple Intelligence is not enabled"));
-    child.emit("close", 1);
-    await expect(promise).rejects.toThrow(/Turn it on in System Settings/);
+    const promise = appleEngine().complete("i", "p");
+    child.stderr.emit("data", Buffer.from(NOT_AGREED));
+    child.emit("close", 69);
+    await expect(promise).rejects.toThrow(/sudo fm license/);
   });
 
-  it("maps other errors", () => {
+  it("explains a model that's still downloading", () => {
+    expect(friendlyFmError("Error: The model is not available. Try again later.", 1)).toMatch(/downloading/);
+    expect(friendlyFmError("System model unavailable: modelNotReady", 1)).toMatch(/downloading/);
+  });
+
+  it("maps fm's other failures to something actionable", () => {
+    expect(friendlyFmError("System model unavailable: appleIntelligenceNotEnabled", 1)).toMatch(
+      /Turn it on in System Settings/,
+    );
+    expect(friendlyFmError("System model unavailable: deviceNotEligible", 1)).toMatch(/doesn't support/);
     expect(friendlyFmError("Error: exceeded context window size", 1)).toMatch(/too long/);
-    expect(friendlyFmError("rate limit reached", 1)).toMatch(/usage limit/);
+    expect(friendlyFmError("Error: exceeded context window size", 1)).not.toMatch(/Private Cloud/);
+    expect(friendlyFmError("Error: rate limited", 1)).toMatch(/busy/);
+    expect(friendlyFmError("Error: guardrail violation", 1)).toMatch(/declined/);
     expect(friendlyFmError("", 3)).toBe("fm exited with code 3");
     expect(stripAnsi("\u001b[31mred\u001b[0m")).toBe("red");
+  });
+
+  it("reads `fm available`", () => {
+    expect(parseFmAvailability("", 0)).toEqual({ available: true });
+    expect(parseFmAvailability("System model unavailable: modelNotReady\n", 1)).toEqual({
+      available: false,
+      reason: "modelNotReady",
+    });
+    expect(parseFmAvailability(NOT_AGREED, 69)).toEqual({ available: false, reason: "license" });
+  });
+
+  it("counts Apple as available only when `fm available` succeeds", async () => {
+    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+    Object.defineProperty(process, "platform", { value: "darwin" });
+    const exists = vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    try {
+      const notReady = fakeChild();
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(notReady);
+      const first = appleAvailable();
+      notReady.stdout.emit("data", Buffer.from("System model unavailable: modelNotReady\n"));
+      notReady.emit("close", 1);
+      expect(await first).toBe(false);
+
+      const ready = fakeChild();
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(ready);
+      const second = appleAvailable();
+      ready.emit("close", 0);
+      expect(await second).toBe(true);
+      expect((spawn as ReturnType<typeof vi.fn>).mock.calls.at(-1)?.[1]).toEqual(["available"]);
+    } finally {
+      exists.mockRestore();
+      Object.defineProperty(process, "platform", platform);
+    }
   });
 });
 
@@ -140,8 +196,22 @@ describe("resolveEngine", () => {
   const settings = { ollamaUrl: "http://127.0.0.1:11434", ollamaContext: 8192 };
 
   it("returns the requested engine", async () => {
-    expect((await resolveEngine("apple-pcc", settings)).id).toBe("apple-pcc");
+    expect((await resolveEngine("apple", settings)).id).toBe("apple");
     expect((await resolveEngine("ollama", settings)).contextBudget).toBe(Math.floor(8192 * 0.6));
+  });
+
+  it("treats a saved engine that no longer exists (Private Cloud) as Automatic", async () => {
+    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+    Object.defineProperty(process, "platform", { value: "linux" });
+    try {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => new Response("{}")),
+      );
+      expect((await resolveEngine("apple-pcc" as EnginePreference, settings)).id).toBe("ollama");
+    } finally {
+      Object.defineProperty(process, "platform", platform);
+    }
   });
 
   it("falls back through what's available in auto mode", async () => {

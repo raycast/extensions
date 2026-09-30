@@ -18,7 +18,7 @@ Before downloading, the form shows what yt-dlp found — channel, duration, view
 Chat About Video works with the model you pick in the extension's preferences (**Chat: AI Engine**):
 
 - **Raycast AI** — needs Raycast Pro. Choose a model under **Chat: Raycast AI Model**.
-- **Apple Intelligence** — free, on macOS 27 with Apple Intelligence turned on, through the built-in `fm` tool. On-Device runs locally; Private Cloud handles longer videos in one go.
+- **Apple Intelligence** — free, on macOS 27 with Apple Intelligence turned on, through the built-in `fm` tool, on-device. Accept its terms once with `sudo fm license` in Terminal.
 - **Ollama** — free and local. Set the model and context size in preferences.
 
 **Automatic** uses Raycast AI when you have it, then Apple Intelligence, then a running Ollama. You can also switch engines from the dropdown in the chat. When a transcript is longer than the model's context, Chat About Video sends the passages that match the question, and reads summaries part by part so nothing is skipped.

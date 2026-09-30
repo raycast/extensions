@@ -6,13 +6,12 @@ import { runWithWatchdog } from "./run.js";
 // send instructions + a prompt, stream the text back. Budgets are in estimated
 // prompt tokens (see `estimateTokens`) and leave room for the answer.
 
-export type EngineId = "raycast" | "apple" | "apple-pcc" | "ollama";
+export type EngineId = "raycast" | "apple" | "ollama";
 export type EnginePreference = EngineId | "auto";
 
 export const ENGINE_TITLES: Record<EngineId, string> = {
   raycast: "Raycast AI",
   apple: "Apple Intelligence (On-Device)",
-  "apple-pcc": "Apple Intelligence (Private Cloud)",
   ollama: "Ollama (Local)",
 };
 
@@ -82,9 +81,15 @@ export function raycastAvailable(): boolean {
 // Apple Intelligence via `fm` (macOS 27)
 // ---------------------------------------------------------------------------
 
-export function buildFmArgs(instructions: string, prompt: string, privateCloud: boolean): string[] {
-  // The prompt is positional; ours always starts with text, never a dash.
-  return ["respond", prompt, "--instructions", instructions, ...(privateCloud ? ["--model", "pcc"] : [])];
+/**
+ * `fm respond` arguments. `--stream` is fm's default but is spelled out so the
+ * text keeps arriving as it's generated. fm has one model, the on-device
+ * `system` one (`--model` accepts nothing else on macOS 27), so there's no
+ * Private Cloud option. The prompt is positional and last; ours always starts
+ * with text, never a dash.
+ */
+export function buildFmArgs(instructions: string, prompt: string): string[] {
+  return ["respond", "--instructions", instructions, "--stream", prompt];
 }
 
 const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, "g");
@@ -93,31 +98,44 @@ export function stripAnsi(text: string): string {
   return text.replace(ANSI, "");
 }
 
-/** Turn `fm`'s stderr into something the user can act on. */
+/** fm's exit code when its one-time Legal Notice & Terms haven't been accepted. */
+const FM_EXIT_TERMS = 69;
+
+/** Turn `fm`'s output on failure into something the user can act on. */
 export function friendlyFmError(stderr: string, code: number | null): string {
   const text = stripAnsi(stderr).trim();
-  if (/not (enabled|available|supported)|unavailable|apple intelligence/i.test(text)) {
-    return "Apple Intelligence isn't available. Turn it on in System Settings → Apple Intelligence & Siri (Apple silicon, macOS 27), or pick another AI engine.";
+  if (code === FM_EXIT_TERMS || /not agreed|legal notice/i.test(text)) {
+    return "Apple's `fm` tool needs its terms accepted once: run `sudo fm license` in Terminal, then try again.";
+  }
+  if (/modelNotReady|model is not available/i.test(text)) {
+    return "Apple Intelligence isn't ready yet. If you just turned it on, it's still downloading its model (System Settings → Apple Intelligence & Siri). Try again later, or pick another AI engine.";
+  }
+  if (/appleIntelligenceNotEnabled|not enabled/i.test(text)) {
+    return "Apple Intelligence is off. Turn it on in System Settings → Apple Intelligence & Siri, or pick another AI engine.";
+  }
+  if (/deviceNotEligible|not eligible/i.test(text)) {
+    return "This Mac doesn't support Apple Intelligence. Pick another AI engine.";
   }
   if (/context|too (long|large)|exceed/i.test(text)) {
-    return "The request was too long for Apple's model. Try a narrower question, or switch to Private Cloud or Raycast AI.";
+    return "The request was too long for Apple's on-device model. Try a narrower question, or switch to Raycast AI or Ollama.";
   }
-  if (/limit|quota|rate/i.test(text)) {
-    return "Apple's Private Cloud usage limit was reached. Try again later, or use the on-device model.";
+  if (/rate.?limit/i.test(text)) {
+    return "Apple's model is busy right now. Try again in a moment.";
+  }
+  if (/guardrail|unsafe/i.test(text)) {
+    return "Apple's model declined to answer this. Try rephrasing, or pick another AI engine.";
   }
   return text || `fm exited with code ${code ?? "unknown"}`;
 }
 
-export function appleEngine(privateCloud: boolean): Engine {
-  const id: EngineId = privateCloud ? "apple-pcc" : "apple";
+export function appleEngine(): Engine {
   return {
-    id,
-    title: ENGINE_TITLES[id],
-    // On-device: 8,192-token window. Private Cloud Compute: 32,000.
-    contextBudget: privateCloud ? 22_000 : 4_500,
+    id: "apple",
+    title: ENGINE_TITLES.apple,
+    contextBudget: 4_500,
     async complete(instructions, prompt, options = {}) {
       let text = "";
-      const { code, stderr } = await runWithWatchdog(FM_PATH, buildFmArgs(instructions, prompt, privateCloud), {
+      const { code, stderr } = await runWithWatchdog(FM_PATH, buildFmArgs(instructions, prompt), {
         idleMs: 120_000,
         abortSignal: options.signal,
         onStdoutChunk: (chunk) => {
@@ -132,8 +150,29 @@ export function appleEngine(privateCloud: boolean): Engine {
   };
 }
 
-export function appleAvailable(): boolean {
-  return process.platform === "darwin" && fs.existsSync(FM_PATH);
+export type FmAvailability = { available: boolean; reason?: string };
+
+/** Read `fm available`: exit 0 means ready; otherwise it prints `System model unavailable: <reason>`. */
+export function parseFmAvailability(output: string, code: number | null): FmAvailability {
+  if (code === 0) return { available: true };
+  if (code === FM_EXIT_TERMS) return { available: false, reason: "license" };
+  const reason = /unavailable:\s*(\w+)/i.exec(stripAnsi(output))?.[1];
+  return reason ? { available: false, reason } : { available: false };
+}
+
+/**
+ * True when Apple's on-device model can answer right now — installed, terms
+ * accepted, Apple Intelligence on and its model downloaded. `fm` alone existing
+ * isn't enough: Automatic would pick an engine that can only fail.
+ */
+export async function appleAvailable(): Promise<boolean> {
+  if (process.platform !== "darwin" || !fs.existsSync(FM_PATH)) return false;
+  try {
+    const { code, stdout, stderr } = await runWithWatchdog(FM_PATH, ["available"], { idleMs: 5_000 });
+    return parseFmAvailability(`${stdout}\n${stderr}`, code).available;
+  } catch {
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -225,9 +264,7 @@ export function createEngine(id: EngineId, settings: EngineSettings): Engine {
     case "raycast":
       return raycastEngine(settings.raycastModel);
     case "apple":
-      return appleEngine(false);
-    case "apple-pcc":
-      return appleEngine(true);
+      return appleEngine();
     case "ollama":
       return ollamaEngine(settings);
   }
@@ -239,9 +276,10 @@ export function createEngine(id: EngineId, settings: EngineSettings): Engine {
  * Raycast AI, which offers Raycast Pro when asked.
  */
 export async function resolveEngine(preference: EnginePreference, settings: EngineSettings): Promise<Engine> {
-  if (preference !== "auto") return createEngine(preference, settings);
+  // An engine saved by an older version (the removed Private Cloud) counts as Automatic.
+  if (preference !== "auto" && preference in ENGINE_TITLES) return createEngine(preference, settings);
   if (raycastAvailable()) return createEngine("raycast", settings);
-  if (appleAvailable()) return createEngine("apple", settings);
+  if (await appleAvailable()) return createEngine("apple", settings);
   if (await ollamaAvailable(settings.ollamaUrl)) return createEngine("ollama", settings);
   return createEngine("raycast", settings);
 }
