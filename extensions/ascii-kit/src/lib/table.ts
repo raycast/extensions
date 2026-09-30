@@ -20,14 +20,7 @@ export function parseTable(input: string): string[][] {
   if (bare.some((l) => l.includes("\t"))) {
     split = (l) => l.split("\t");
   } else if (bare.every((l) => l.includes("|"))) {
-    // `\|` is a literal pipe inside a markdown cell.
-    split = (l) =>
-      l
-        .trim()
-        .replace(/^\|/, "")
-        .replace(/(?<!\\)\|$/, "")
-        .split(/(?<!\\)\|/)
-        .map((c) => c.replace(/\\\|/g, "|"));
+    split = splitMarkdownRow;
   } else if (bare.some((l) => /\S {2,}\S/.test(l))) {
     split = (l) => l.trim().split(/ {2,}/);
   } else if (bare.every((l) => l.includes(","))) {
@@ -39,6 +32,34 @@ export function parseTable(input: string): string[][] {
   const rows = lines.map((l) => split(l).map((c) => c.trim()));
   const cols = Math.max(...rows.map((r) => r.length));
   return rows.map((r) => [...r, ...Array(cols - r.length).fill("")]);
+}
+
+/**
+ * One markdown table row, split the way GitHub does: `\` escapes the next character, so `\|` is a
+ * literal pipe and `\\|` is a backslash, then a cell break. Other escapes are kept as written.
+ */
+function splitMarkdownRow(line: string): string[] {
+  const text = line.trim();
+  const cells: string[] = [];
+  let cell = "";
+  let endsWithBreak = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    endsWithBreak = false;
+    if (ch === "\\" && i + 1 < text.length) {
+      cell += text[i + 1] === "|" ? "|" : ch + text[i + 1];
+      i++;
+    } else if (ch === "|") {
+      cells.push(cell);
+      cell = "";
+      endsWithBreak = true;
+    } else cell += ch;
+  }
+  cells.push(cell);
+  // The outer pipes are optional and don't make cells of their own.
+  if (text.startsWith("|")) cells.shift();
+  if (endsWithBreak && cells.length > 1) cells.pop();
+  return cells;
 }
 
 /** One CSV line: a quoted cell keeps its commas, and `""` inside quotes is a literal quote. */
@@ -68,7 +89,9 @@ function splitCsv(line: string): string[] {
 
 /** First row is the header. Columns whose body cells are all numbers are right-aligned. */
 export function renderTable(input: string, style: TableStyle = "light"): string {
-  const rows = parseTable(input);
+  const parsed = parseTable(input);
+  // A pipe inside a markdown cell has to be escaped, or it starts a new column.
+  const rows = style === "markdown" ? parsed.map((r) => r.map((c) => c.replace(/\|/g, "\\|"))) : parsed;
   if (!rows.length) return "";
   const { widths, numeric, cell } = measureColumns(rows, 3);
   const body = rows.slice(1);

@@ -160,6 +160,25 @@ describe("table", () => {
     ]);
   });
 
+  it("splits after an escaped backslash, like GitHub", () => {
+    expect(
+      parseTable(String.raw`| path | note |
+| C:\\| root |
+| a | C:\\|`),
+    ).toEqual([
+      ["path", "note"],
+      [String.raw`C:\\`, "root"],
+      ["a", String.raw`C:\\`],
+    ]);
+  });
+
+  it("escapes pipes inside cells in markdown output", () => {
+    expect(renderTable('Name,Notes\napples,"a|b"', "markdown").split("\n")[2]).toBe("| apples | a\\|b  |");
+    expect(renderTable("| a | b |\n| --- | --- |\n| x \\| y | z |", "markdown").split("\n")[2]).toBe(
+      "| x \\| y | z   |",
+    );
+  });
+
   it("pads ragged rows and right-aligns numbers", () => {
     const out = renderTable("a\tb\tc\n1\t2\nx\t3\t4");
     rect(out);
