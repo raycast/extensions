@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+raycast-env.d.ts
+.DS_Store
+
+# Kept in this repository but left out of the Store submission: `ray publish` copies this folder into
+# raycast/extensions, where this .gitignore then applies. They stay tracked here (tracked files ignore .gitignore).
+SPEC.md
+VERIFICATION.md
+PR-DESCRIPTION.md
