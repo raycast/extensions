@@ -1,6 +1,7 @@
 // Copied from raycast-window-switcher src/helper.ts on 2026-09-30, unchanged except this header, import paths, and the
 // activation mode fixed to "auto" (public activation, private fallback) instead of a preference (owner, 2026-09-30),
-// and every call guarded by architectureFailure (arm64-only helper)
+// every call guarded by architectureFailure (arm64-only helper), and the list passed through
+// dropUnresolvedOnVisibleDesktop
 // Raycast-side helper access: bundled path, list, focus, quit.
 import { environment } from "@raycast/api";
 import { join } from "node:path";
@@ -20,6 +21,7 @@ import {
   runHelper as runAnyHelper,
   type RunResult,
 } from "./lib/window/run-helper.ts";
+import { dropUnresolvedOnVisibleDesktop } from "./lib/window/filter.ts";
 
 export const helperPath = () => join(environment.assetsPath, "window-helper");
 
@@ -35,7 +37,12 @@ export interface ListOutcome {
 export async function listWindows(): Promise<ListOutcome> {
   const run = await runHelper(helperPath(), ["list"], LIST_TIMEOUT_MS);
   if (!run.ok) return { parsed: run, raw: `run failed: ${run.failure.kind}: ${run.failure.detail}` };
-  return { parsed: parseList(run.stdout), raw: run.stdout };
+  const parsed = parseList(run.stdout);
+  // `raw` keeps the helper's own output for Copy Diagnostic Info; the list shown drops unreadable surfaces.
+  return {
+    parsed: parsed.ok ? { ok: true, value: dropUnresolvedOnVisibleDesktop(parsed.value) } : parsed,
+    raw: run.stdout,
+  };
 }
 
 function targetArgs(pid: number, wid: number, bundleId?: string): string[] {
