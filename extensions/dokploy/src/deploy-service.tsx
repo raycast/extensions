@@ -5,7 +5,8 @@ import { AddInstance } from "./instances";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
 import ServiceLogs from "./service-logs";
 import { OpenWebsiteAction } from "./open-website";
-import { OpenInDokployAction, servicePagePath } from "./open-in-dokploy";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { servicePagePath } from "./dokploy-pages";
 import { Candidate, FailedInstance, loadCandidates } from "./candidates";
 
 /**

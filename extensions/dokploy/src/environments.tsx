@@ -3,7 +3,8 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { Environment, ErrorResult, type ModernProject } from "./interfaces";
 import { type Instance, useToken, tokenForInstance } from "./instances";
 import Services from "./services";
-import { environmentPagePath, OpenInDokployAction } from "./open-in-dokploy";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { environmentPagePath } from "./dokploy-pages";
 import { getTotalServices, serviceScopeForEnvironment } from "./utils";
 
 export default function Environments({

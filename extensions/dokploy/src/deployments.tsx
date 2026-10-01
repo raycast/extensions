@@ -20,7 +20,8 @@ import DeploymentHistory, {
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction } from "./service-actions";
 import ServiceLogs from "./service-logs";
 import { OpenWebsiteAction } from "./open-website";
-import { OpenInDokployAction, servicePagePath } from "./open-in-dokploy";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { serviceDeploymentsPagePath } from "./dokploy-pages";
 import { parseTrpcJsonResponse, trpcQueryUrl } from "./trpc";
 
 type DeploymentState =
@@ -346,7 +347,7 @@ export default function Deployments() {
                     />
                     <OpenInDokployAction
                       url={candidate.url}
-                      path={`${servicePagePath({ ...candidate, type: deployType })}?tab=deployments`}
+                      path={serviceDeploymentsPagePath({ ...candidate, type: deployType })}
                     />
                   </ActionPanel>
                 }

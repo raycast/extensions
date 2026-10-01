@@ -1,7 +1,8 @@
 import Services from "./services";
 import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
 import Environments from "./environments";
-import { OpenInDokployAction, projectPagePath } from "./open-in-dokploy";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { projectPagePath } from "./dokploy-pages";
 import { ErrorResult, Project, type ModernProject, type Tag } from "./interfaces";
 import {
   FormValidation,
