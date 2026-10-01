@@ -13,6 +13,7 @@
     "src/lib/format*.ts",
     "src/lib/item-panel*.ts",
     "src/lib/key-press*.ts",
+    "src/lib/review-regressions.test.ts",
     "src/lib/pass-cli-normalize.test.ts",
     "src/lib/pass-cli-normalize.ts",
     "src/lib/refresh*.ts",

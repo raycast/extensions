@@ -106,16 +106,17 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     const isLatest = loads.start();
     setError(null);
 
-    const [cachedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
+    const [sharedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
+    const cachedItems = sharedItems ?? (initialVault ? await getCachedItems(initialVault.shareId) : null);
     if (!isLatest()) return;
-    if (cachedItems && cachedVaults && !hasLoadedFromCache.current) {
+    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
       // Show cached metadata right away, even when stale: the first pass-cli call can take
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
-      setVaults(cachedVaults.data);
+      setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
       hasLoadedFromCache.current = true;
 
-      const isStale = cachedItems.isStale || cachedVaults.isStale;
+      const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
       if (!isStale && !backgroundRefreshEnabled) {
         setIsLoading(false);
         return;
@@ -145,10 +146,16 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       updateItems(nextItems);
       setVaults(freshVaults);
 
+      // A failed listing with nothing to show must stay an error, rather than a successful empty result.
+      if (failedVaults.length > 0 && nextItems.length === 0) throw new Error(failedVaults[0].message);
+
+      // Only complete listings renew the cache; partial failures must remain eligible for a retry.
       // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
-      await cacheWrites.run(async () => {
-        if (isLatest()) await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
-      });
+      if (failedVaults.length === 0) {
+        await cacheWrites.run(async () => {
+          if (isLatest()) await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+        });
+      }
       if (!isLatest()) return;
       if (failedVaults.length > 0) {
         await showToast({

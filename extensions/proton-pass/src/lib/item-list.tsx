@@ -61,8 +61,13 @@ export function ItemList({
   const firstItem = suggested[0] ?? others[0];
   const activeKey = selectedKey ?? (firstItem ? itemKey(firstItem) : undefined);
   const selectedItem = useMemo(() => items.find((item) => itemKey(item) === activeKey), [items, activeKey]);
-  // Loaded even when the panel is hidden: the actions need it for custom fields.
-  const { detail, error, isLoading: isLoadingDetail } = useItemDetail(store, selectedItem);
+  // Hidden details do not fetch secrets; copy actions can load them on demand.
+  const {
+    detail: visibleDetail,
+    error,
+    isLoading: isLoadingDetail,
+  } = useItemDetail(store, isShowingDetail ? selectedItem : undefined);
+  const detail = visibleDetail ?? (selectedItem ? store.peek(selectedItem) : undefined);
   // The first suggestion is selected when the list appears; after that, the selection only moves with the user.
   const initialSelection = useRef<string | undefined>(undefined);
   if (initialSelection.current === undefined && suggested[0]) initialSelection.current = itemKey(suggested[0]);
@@ -91,12 +96,14 @@ export function ItemList({
           ...(isShowingDetail ? [] : [{ text: item.vaultName }]),
         ]}
         detail={
-          <ItemDetailPanel
-            item={item}
-            detail={isSelected ? detail : undefined}
-            isLoading={isSelected && isLoadingDetail}
-            error={isSelected ? error : undefined}
-          />
+          isShowingDetail ? (
+            <ItemDetailPanel
+              item={item}
+              detail={isSelected ? detail : undefined}
+              isLoading={isSelected && isLoadingDetail}
+              error={isSelected ? error : undefined}
+            />
+          ) : undefined
         }
         actions={
           <ItemActions

@@ -3,7 +3,7 @@ import { Item, Vault } from "./types";
 
 const ITEMS_CACHE_KEY = "proton_pass_items_cache";
 const VAULTS_CACHE_KEY = "proton_pass_vaults_cache";
-// Per-vault item caches were written by earlier versions; clearCache() still removes them.
+// Per-vault item caches were written by earlier versions; keep them available for offline vault views.
 const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -44,7 +44,8 @@ async function setCache<T>(key: string, data: T): Promise<void> {
   await LocalStorage.setItem(key, JSON.stringify(cached));
 }
 
-export const getCachedItems = () => getCache<Item[]>(ITEMS_CACHE_KEY);
+export const getCachedItems = (shareId?: string) =>
+  getCache<Item[]>(shareId ? `${VAULT_ITEMS_CACHE_PREFIX}${shareId}` : ITEMS_CACHE_KEY);
 export const setCachedItems = (items: Item[]) => setCache(ITEMS_CACHE_KEY, items);
 
 export const getCachedVaults = () => getCache<Vault[]>(VAULTS_CACHE_KEY);

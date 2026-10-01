@@ -106,7 +106,12 @@ export async function listVaults(): Promise<Vault[]> {
 }
 
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
-  return (await getAdapter()).listItems(shareId, vaultName);
+  try {
+    return await (await getAdapter()).listItems(shareId, vaultName);
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    throw error;
+  }
 }
 
 // Each pass-cli call takes ~0.5-1.5s, so listing vaults one after another adds up quickly
