@@ -1,15 +1,17 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { Vault, Item, PassCliError, PassCliErrorType, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
+import { renderErrorView } from "./lib/error-views";
 import { platformShortcut } from "./lib/shortcuts";
 
 function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<PassCliErrorType | null>(null);
   const hasLoadedFromCache = useRef(false);
 
   useEffect(() => {
@@ -28,12 +30,17 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
       }
     }
 
+    setError(null);
     try {
       const freshItems = await listItems(vault.shareId);
       setItems(freshItems);
       await setCachedItemsForVault(vault.shareId, freshItems);
     } catch (error: unknown) {
-      if (!hasLoadedFromCache.current) {
+      // A logged-out session must not keep showing cached items.
+      if (error instanceof PassCliError && error.type === "not_authenticated") {
+        setItems([]);
+        setError(error.type);
+      } else if (!hasLoadedFromCache.current) {
         const message = error instanceof Error ? error.message : "An unknown error occurred";
         await showToast({
           style: Toast.Style.Failure,
@@ -45,6 +52,9 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
       setIsLoading(false);
     }
   }
+
+  const errorView = renderErrorView(error, loadVaultItems, "Load Items");
+  if (errorView) return errorView;
 
   return (
     <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">

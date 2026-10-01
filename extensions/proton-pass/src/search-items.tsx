@@ -27,7 +27,7 @@ function escapeMarkdown(value: string): string {
   return value
     .replace(/([\\`*_[\]<>|])/g, "\\$1")
     .replace(/^(\s*)([#>+-])(?=\s)/gm, "$1\\$2")
-    .replace(/^(\s*\d+)\.(?=\s)/gm, "$1\\.");
+    .replace(/^(\s*\d+)([.)])(?=\s)/gm, "$1\\$2");
 }
 
 function originOf(raw?: string): string | undefined {
