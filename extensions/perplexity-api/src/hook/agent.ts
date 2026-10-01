@@ -8,7 +8,7 @@ export const PRESETS = ["fast", "low", "medium", "high", "xhigh"];
 
 // Sonar model slugs, mapped to the presets Perplexity's migration guide suggests,
 // so a preference saved before this version keeps working.
-const SONAR_TO_PRESET: Record<string, string> = {
+export const SONAR_TO_PRESET: Record<string, string> = {
   sonar: "fast",
   "sonar-pro": "fast",
   "sonar-reasoning": "low",
@@ -56,6 +56,21 @@ export function resolveTarget(id: string): { preset: string } | { model: string 
   return PRESETS.includes(mapped) ? { preset: mapped } : { model: mapped };
 }
 
+// Whether a request for this target carries a temperature. Presets and anthropic/* models take none,
+// so the UI offers and shows a temperature only when this is true.
+export function sendsTemperature(id: string): boolean {
+  const target = resolveTarget(id);
+  return "model" in target && !target.model.startsWith("anthropic/");
+}
+
+// The name of the target actually sent. A saved Sonar slug shows the preset it now runs as.
+export function targetLabel(id: string, models: { id: string; name: string }[]): string {
+  const target = resolveTarget(id);
+  const sent = "preset" in target ? target.preset : target.model;
+  const name = models.find((m) => m.id === sent)?.name ?? sent;
+  return sent === id ? name : `${name} (from ${id})`;
+}
+
 export function buildAgentRequest(opts: {
   target: string;
   instructions?: string;
@@ -76,11 +91,8 @@ export function buildAgentRequest(opts: {
   if ("model" in target) {
     // A request that names a model directly searches the web only if it adds the tool.
     request.tools = [filters ? { type: "web_search", filters } : { type: "web_search" }];
-    if (target.model.startsWith("anthropic/")) {
-      request.max_output_tokens = DEFAULT_MAX_OUTPUT_TOKENS;
-    } else if (opts.temperature !== undefined) {
-      request.temperature = opts.temperature;
-    }
+    if (target.model.startsWith("anthropic/")) request.max_output_tokens = DEFAULT_MAX_OUTPUT_TOKENS;
+    if (sendsTemperature(opts.target) && opts.temperature !== undefined) request.temperature = opts.temperature;
   } else if (filters) {
     // Presets already search; the tool entry only carries the filters.
     request.tools = [{ type: "web_search", filters }];

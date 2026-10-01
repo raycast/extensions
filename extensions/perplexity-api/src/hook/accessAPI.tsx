@@ -2,7 +2,7 @@ import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } 
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./configAPI";
 import { allModels as changeModels, currentDate, countToken } from "./utils";
-import { buildAgentRequest, runAgent, Citation } from "./agent";
+import { buildAgentRequest, runAgent, sendsTemperature, targetLabel, Citation } from "./agent";
 import { ResultViewProps } from "./ResultView.types";
 import OpenAI from "openai";
 
@@ -156,41 +156,42 @@ export default function ResultView(props: ResultViewProps) {
                   />
                 ))}
             </ActionPanel.Submenu>
-            <ActionPanel.Submenu
-              title="Temperature"
-              icon={Icon.Temperature}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-            >
-              {[0.2, 0.4, 0.5, 0.7, 0.8, 0.9, 1.0, 1.2].map((t) => (
-                <Action
-                  key={t}
-                  icon={{
-                    source:
-                      t <= 0.25
-                        ? Icon.Signal0
-                        : t <= 0.5
-                          ? Icon.Signal1
-                          : t <= 0.75
-                            ? Icon.Signal2
-                            : t <= 1
-                              ? Icon.Signal3
-                              : Icon.FullSignal,
-                  }}
-                  title={t.toFixed(1)}
-                  onAction={() => handleRetry({ newTemp: t })}
-                />
-              ))}
-            </ActionPanel.Submenu>
+            {sendsTemperature(metrics.model) && (
+              <ActionPanel.Submenu
+                title="Temperature"
+                icon={Icon.Temperature}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+              >
+                {[0.2, 0.4, 0.5, 0.7, 0.8, 0.9, 1.0, 1.2].map((t) => (
+                  <Action
+                    key={t}
+                    icon={{
+                      source:
+                        t <= 0.25
+                          ? Icon.Signal0
+                          : t <= 0.5
+                            ? Icon.Signal1
+                            : t <= 0.75
+                              ? Icon.Signal2
+                              : t <= 1
+                                ? Icon.Signal3
+                                : Icon.FullSignal,
+                    }}
+                    title={t.toFixed(1)}
+                    onAction={() => handleRetry({ newTemp: t })}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            )}
           </ActionPanel>
         )
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Model"
-            text={changeModels.find((m) => m.id === metrics.model)?.name ?? metrics.model}
-          />
-          <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(1)} />
+          <Detail.Metadata.Label title="Model" text={targetLabel(metrics.model, changeModels)} />
+          {sendsTemperature(metrics.model) && (
+            <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(1)} />
+          )}
           <Detail.Metadata.Label title="Prompt Tokens" text={metrics.promptTokens.toString()} />
           <Detail.Metadata.Label title="Response Tokens" text={metrics.responseTokens.toString()} />
           <Detail.Metadata.Separator />
