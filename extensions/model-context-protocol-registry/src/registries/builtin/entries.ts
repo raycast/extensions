@@ -735,7 +735,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "symbioza",
     title: "Symbioza",
     description:
-      "Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+      "Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Estimates are free; running GPU jobs requires prepaid credit added on the Symbioza website.",
     icon: "https://symbioza.dev/brand/symbioza-appicon-light-512.png",
     homepage: "https://symbioza.dev",
     configuration: {
