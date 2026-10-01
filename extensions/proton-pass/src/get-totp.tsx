@@ -99,7 +99,6 @@ export default function Command() {
         failedVaults.map(({ vault }) => vault.shareId),
       );
       const totpItems = nextItems.filter((item) => item.hasTotp);
-      if (failedVaults.length > 0 && totpItems.length === 0) throw new Error(failedVaults[0].message);
       const itemsWithTotp = await Promise.all(
         totpItems.map(async (item) => {
           try {
@@ -113,6 +112,7 @@ export default function Command() {
 
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
+      if (failedVaults.length > 0 && itemsWithTotp.length === 0) throw new Error(failedVaults[0].message);
       if (failedVaults.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
