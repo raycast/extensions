@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { getInitialIconDataUri } from "./avatar";
 import { hostnameOf, itemKey, toOpenableUrl } from "./format";
 import { ItemActions } from "./item-actions";
@@ -52,15 +52,18 @@ export function ItemList({
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);
   const { data: sortedItems, visitItem } = useFrecencySorting(items, { key: itemKey, namespace: "items" });
-  const [selectedKey, setSelectedKey] = useState<string>();
+  const [selectedKey, setSelectedKey] = useState<string | null>();
 
   const suggestedKeys = useMemo(() => new Set(suggestedItems.map(itemKey)), [suggestedItems]);
   const suggested = sortedItems.filter((item) => suggestedKeys.has(itemKey(item)));
   const others = suggested.length > 0 ? sortedItems.filter((item) => !suggestedKeys.has(itemKey(item))) : sortedItems;
   // Until Raycast reports a selection, the first item shown is the selected one.
   const firstItem = suggested[0] ?? others[0];
-  const activeKey = selectedKey ?? (firstItem ? itemKey(firstItem) : undefined);
-  const selectedItem = useMemo(() => items.find((item) => itemKey(item) === activeKey), [items, activeKey]);
+  const selectedItem = useMemo(
+    () => (selectedKey === null ? undefined : (items.find((item) => itemKey(item) === selectedKey) ?? firstItem)),
+    [items, selectedKey, firstItem],
+  );
+  const activeKey = selectedItem ? itemKey(selectedItem) : undefined;
   // Hidden details do not fetch secrets; copy actions can load them on demand.
   const {
     detail: visibleDetail,
@@ -68,9 +71,6 @@ export function ItemList({
     isLoading: isLoadingDetail,
   } = useItemDetail(store, isShowingDetail ? selectedItem : undefined);
   const detail = visibleDetail ?? (selectedItem ? store.peek(selectedItem) : undefined);
-  // The first suggestion is selected when the list appears; after that, the selection only moves with the user.
-  const initialSelection = useRef<string | undefined>(undefined);
-  if (initialSelection.current === undefined && suggested[0]) initialSelection.current = itemKey(suggested[0]);
 
   const icons = useMemo(
     () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
@@ -127,8 +127,8 @@ export function ItemList({
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search by name, username or website…"
       filtering={true}
-      selectedItemId={initialSelection.current}
-      onSelectionChange={(id) => setSelectedKey(id ?? undefined)}
+      selectedItemId={activeKey}
+      onSelectionChange={setSelectedKey}
       searchBarAccessory={searchBarAccessory}
     >
       {items.length === 0 && !isLoading ? (

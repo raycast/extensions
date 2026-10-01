@@ -22,6 +22,9 @@
 - Earlier per-vault snapshots fill gaps in partial shared caches and are removed after a complete Search Items or Get TOTP refresh, so deleted items do not return
 - Copy Password remains available on demand when cached metadata says no password was saved; Enter still follows the Primary Action preference
 - Copy Note in Show Note follows the Transient Clipboard preference, keeping notes concealed by default
+- Partial Get TOTP loads preserve saved codes for failed vaults and offer Retry
+- Offline vault views use the newer saved snapshot without restoring deleted items
+- List selection and details stay aligned when changing vaults or filtering suggestions
 - Hiding the details panel stops automatic secret loads; already-loaded custom fields and explicit copy actions remain available
 - Update vulnerable transitive brace-expansion dependencies to compatible patched versions
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser

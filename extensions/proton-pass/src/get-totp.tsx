@@ -16,6 +16,7 @@ import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
+import { failedVaultsTitle, mergeRefreshedItems } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
@@ -58,6 +59,7 @@ export default function Command() {
 
   async function loadTotpItems() {
     setError(null);
+    setIsLoading(true);
 
     const cachedItems = (await getCachedItems())?.data;
     if (cachedItems) {
@@ -91,7 +93,13 @@ export default function Command() {
       // Only a complete listing supersedes saved items, including legacy snapshots of now-empty vaults.
       if (failedVaults.length === 0) await setCachedItems(freshItems, true);
 
-      const totpItems = freshItems.filter((item) => item.hasTotp);
+      const nextItems = mergeRefreshedItems(
+        freshItems,
+        cachedItems ?? [],
+        failedVaults.map(({ vault }) => vault.shareId),
+      );
+      const totpItems = nextItems.filter((item) => item.hasTotp);
+      if (failedVaults.length > 0 && totpItems.length === 0) throw new Error(failedVaults[0].message);
       const itemsWithTotp = await Promise.all(
         totpItems.map(async (item) => {
           try {
@@ -105,13 +113,28 @@ export default function Command() {
 
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
+      if (failedVaults.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
+          message: failedVaults[0].message,
+          primaryAction: { title: "Retry", onAction: loadTotpItems },
+        });
+      }
     } catch (e: unknown) {
-      if (!cachedItems || (e instanceof PassCliError && e.type === "not_authenticated")) {
+      if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_authenticated")) {
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {
           setError("unknown");
         }
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't Load TOTP Items",
+          message: e instanceof Error ? e.message : "Unknown error",
+          primaryAction: { title: "Retry", onAction: loadTotpItems },
+        });
       }
     } finally {
       setIsLoading(false);

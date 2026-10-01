@@ -272,10 +272,30 @@ test("item-list authentication failures clear saved session metadata on both lis
 });
 
 test("opening a vault offline preserves its earlier per-vault item cache", async () => {
-  for (const sharedItems of [undefined, [{ ...item, shareId: "other" }]]) {
+  const other = { ...item, shareId: "other" };
+  const newer = { ...item, itemId: "new", title: "Newer saved login" };
+  const deleted = { ...item, itemId: "deleted", title: "Deleted login" };
+  const now = Date.now();
+  const cases = [
+    { shared: undefined, legacy: [item], sharedTime: now, legacyTime: now, expected: [item] },
+    { shared: [other], legacy: [item], sharedTime: now, legacyTime: now, expected: [item] },
+    {
+      shared: [deleted, other],
+      legacy: [item, newer],
+      sharedTime: now - 1000,
+      legacyTime: now,
+      expected: [item, newer],
+    },
+    { shared: [newer, other], legacy: [deleted], sharedTime: now, legacyTime: now - 1000, expected: [newer] },
+    { shared: [deleted, other], legacy: [], sharedTime: now - 1000, legacyTime: now, expected: [] },
+  ];
+  for (const scenario of cases) {
     const vault = { shareId: "vault", name: "Personal" };
-    const saved = new Map([["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: Date.now() })]]);
-    if (sharedItems) saved.set("proton_pass_items_cache", JSON.stringify({ data: sharedItems, timestamp: Date.now() }));
+    const saved = new Map([
+      ["proton_pass_items_cache_vault", JSON.stringify({ data: scenario.legacy, timestamp: scenario.legacyTime })],
+    ]);
+    if (scenario.shared)
+      saved.set("proton_pass_items_cache", JSON.stringify({ data: scenario.shared, timestamp: scenario.sharedTime }));
     const cache = loadView("cache.ts", {
       "@raycast/api": {
         getPreferenceValues: () => ({}),
@@ -313,7 +333,10 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
     render();
     harness.effects.forEach((effect) => effect());
     await new Promise(setImmediate);
-    assert.equal((render().props.items as Item[] | undefined)?.[0]?.title, item.title);
+    assert.deepEqual(
+      Array.from((render().props.items as Item[] | undefined) ?? [], ({ itemId }) => itemId),
+      scenario.expected.map(({ itemId }) => itemId),
+    );
   }
 });
 
@@ -417,6 +440,55 @@ test("hiding item details stops automatic secret loads while showing them select
   }
 });
 
+test("list selection follows the visible item and clears when search has no selection", () => {
+  const harness = hookHarness();
+  let requested: Item | undefined;
+  const { ItemList } = loadView("item-list.tsx", {
+    react: { ...harness.react, useCallback: (callback: unknown) => callback },
+    "@raycast/api": {
+      List: { Item: {}, Section: {}, EmptyView: {} },
+      Icon: {},
+      Image: { Mask: {} },
+      getPreferenceValues: () => ({}),
+    },
+    "@raycast/utils": {
+      useCachedState: () => [true, () => undefined],
+      useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }),
+    },
+    "./avatar": { getInitialIconDataUri: () => "" },
+    "./format": format,
+    "./item-actions": {},
+    "./item-detail-panel": {},
+    "./item-detail-store": {
+      ItemDetailStore: class {
+        peek() {
+          return undefined;
+        }
+      },
+      useItemDetail: (_store: unknown, selected: Item | undefined) => {
+        requested = selected;
+        return {};
+      },
+    },
+    "./utils": { getItemIcon: () => "" },
+  });
+  const second = { ...item, itemId: "second" };
+  const anotherVault = { ...item, shareId: "other", itemId: "third" };
+  const render = (items: Item[], suggestedItems: Item[] = []) =>
+    harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {} });
+  const initial = render([item, second], [item]);
+  assert.equal(initial.props.selectedItemId, format.itemKey(item));
+  (initial.props.onSelectionChange as (id: string | null) => void)(format.itemKey(second));
+  assert.equal(render([item, second], [item]).props.selectedItemId, format.itemKey(second));
+  assert.equal(requested, second);
+  const changedVault = render([anotherVault]);
+  assert.equal(changedVault.props.selectedItemId, format.itemKey(anotherVault));
+  assert.equal(requested, anotherVault);
+  (changedVault.props.onSelectionChange as (id: string | null) => void)(null);
+  assert.equal(render([anotherVault]).props.selectedItemId, undefined);
+  assert.equal(requested, undefined);
+});
+
 test("a complete shared cache replaces legacy per-vault caches", async () => {
   const saved = new Map([["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: 0 })]]);
   const cache = loadView("cache.ts", {
@@ -441,17 +513,32 @@ test("a complete shared cache replaces legacy per-vault caches", async () => {
   assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, []);
 });
 
-test("Get TOTP retires deleted legacy items only after a complete listing", async () => {
-  for (const complete of [true, false]) {
+test("Get TOTP preserves failed-vault codes with Retry and retires legacy items only after a complete listing", async () => {
+  const totpItem = { ...item, hasTotp: true };
+  for (const { complete, previousItems } of [
+    { complete: true, previousItems: [] },
+    { complete: false, previousItems: [totpItem] },
+    { complete: false, previousItems: [] },
+    { complete: false, previousItems: [item] },
+  ]) {
     const harness = hookHarness();
-    const previousItems = complete ? [] : [item];
+    let calls = 0;
+    const toasts: { message: string; primaryAction: { onAction: () => Promise<void> } }[] = [];
     const saved = new Map([
       ["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: 0 })],
       ["proton_pass_items_cache", JSON.stringify({ data: previousItems, timestamp: 0 })],
     ]);
     const api = {
       List: { Section: {}, EmptyView: {} },
+      Action: {},
+      ActionPanel: {},
       Icon: {},
+      Color: { Green: "green" },
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      Toast: { Style: {} },
+      showToast: async (toast: (typeof toasts)[number]) => {
+        toasts.push(toast);
+      },
       getPreferenceValues: () => ({}),
       LocalStorage: {
         getItem: async (key: string) => saved.get(key),
@@ -469,22 +556,48 @@ test("Get TOTP retires deleted legacy items only after a complete listing", asyn
       react: harness.react,
       "@raycast/api": api,
       "./lib/pass-cli": {
-        listItems: async () => [],
-        listVaultsAndItems: async () => ({
-          items: [],
-          failedVaults: complete ? [] : [{ vault: { shareId: "vault" }, message: "Offline" }],
-        }),
+        getTotp: async () => "123456",
+        listVaultsAndItems: async () => {
+          calls++;
+          return {
+            items: [],
+            failedVaults:
+              complete || calls > 1 ? [] : [{ vault: { shareId: "vault", name: "Personal" }, message: "Offline" }],
+          };
+        },
       },
       "./lib/types": { PassCliError },
-      "./lib/utils": { getTotpRemainingSeconds: () => 30 },
+      "./lib/utils": {
+        getTotpRemainingSeconds: () => 30,
+        getItemIcon: () => "",
+        formatTotpCode: (code: string) => code,
+      },
       "./lib/cache": cache,
-      "./lib/error-views": { renderErrorView: () => null },
+      "./lib/refresh": refresh,
+      "./lib/error-views": {
+        renderErrorView: (error: unknown, onRetry: unknown) => (error ? { props: { error, onRetry } } : null),
+      },
     });
     harness.render(Command, {});
     harness.effects.forEach((effect) => effect());
     await new Promise<void>((resolve) => setImmediate(resolve));
     assert.equal(saved.has("proton_pass_items_cache_vault"), !complete);
     assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, previousItems);
+    if (!complete) {
+      const view = harness.render(Command, {});
+      const hasSavedCodes = previousItems.some((item) => item.hasTotp);
+      const retry = hasSavedCodes ? toasts[0]?.primaryAction.onAction : view.props.onRetry;
+      if (hasSavedCodes) {
+        const row = actions(view).find((entry) => entry.title === totpItem.title);
+        assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0]?.tag.value, "123456");
+        assert.equal(toasts[0]?.message, "Offline");
+      } else assert.equal(view.props.error, "unknown");
+      assert.equal(typeof retry, "function");
+      await (retry as () => Promise<void>)();
+      assert.equal(calls, 2);
+      assert.equal(saved.has("proton_pass_items_cache_vault"), false);
+      assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, []);
+    }
   }
 });
 
