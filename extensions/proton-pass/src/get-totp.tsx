@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listItems, getTotp } from "./lib/pass-cli";
+import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
@@ -87,8 +87,9 @@ export default function Command() {
     }
 
     try {
-      const freshItems = await listItems();
-      await setCachedItems(freshItems);
+      const { items: freshItems, failedVaults } = await listVaultsAndItems();
+      // Only a complete listing supersedes saved items, including legacy snapshots of now-empty vaults.
+      if (failedVaults.length === 0) await setCachedItems(freshItems, true);
 
       const totpItems = freshItems.filter((item) => item.hasTotp);
       const itemsWithTotp = await Promise.all(
