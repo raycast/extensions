@@ -141,11 +141,11 @@ export function useBrewUpgrade(): BrewUpgrade {
           },
         });
 
-        if (summary.cancelled) {
+        if (summary.canceled) {
           toast.hide();
           await showToast({
             style: Toast.Style.Failure,
-            title: "Upgrade Cancelled",
+            title: "Upgrade Canceled",
             message: `${formatCount(summary.upgraded.length, "package")} upgraded`,
           });
         } else if (summary.failed.length > 0) {
@@ -171,8 +171,8 @@ export function useBrewUpgrade(): BrewUpgrade {
         toast.hide();
 
         if (error.name === "AbortError") {
-          actionsLogger.log("Upgrade cancelled by user");
-          await showToast({ style: Toast.Style.Failure, title: "Upgrade Cancelled" });
+          actionsLogger.log("Upgrade canceled by user");
+          await showToast({ style: Toast.Style.Failure, title: "Upgrade Canceled" });
         } else {
           actionsLogger.error("Upgrade failed", { name: error.name, message: error.message });
           await showBrewFailureToast("Upgrade failed", error);

@@ -42,7 +42,7 @@ ${getJSONSnippet(content)}`}
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Content Type">
             <Detail.Metadata.TagList.Item
-              text={response?.headers["content-type"]}
+              text={response?.headers["content-type"]?.toString()}
               color="#B55ABE"
             />
           </Detail.Metadata.TagList>

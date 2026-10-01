@@ -1,5 +1,11 @@
 # Linak Controller Changelog
 
+## [Fixes] - 2026-10-01
+
+- Fixes "Couldn't find your desk" when the Desk identifier preference from an older version points to a desk this Mac has never seen. The extension now looks for your desk instead, as long as only one desk is nearby, and remembers it
+- Select Desk now works even when the Desk identifier preference is set
+- Fixes the first move after the desk has been idle for a while, which could do nothing or report an obstruction
+
 ## [Built-in Bluetooth] - 2026-09-30
 
 - Talks to the desk directly over Bluetooth, so linak-controller, Python and server mode are no longer needed

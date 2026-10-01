@@ -18,8 +18,9 @@ import { ReactElement, useRef, useState } from "react";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
+import PriorityDropdown from "./components/PriorityDropdown";
 import CustomizeCreateReminderForm from "./customize-create-reminder-form";
-import { getIntervalValidationError, getPriorityIcon, parseTags } from "./helpers";
+import { getIntervalValidationError, parseTags } from "./helpers";
 import useCreateReminderFormLayout from "./hooks/useCreateReminderFormLayout";
 import { Frequency, List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
@@ -420,14 +421,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             : []),
         ];
       case "priority":
-        return [
-          <Form.Dropdown key="priority" {...itemProps.priority} title="Priority" storeValue>
-            <Form.Dropdown.Item title="None" value="" />
-            <Form.Dropdown.Item title="High" value="high" icon={getPriorityIcon("high")} />
-            <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
-            <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
-          </Form.Dropdown>,
-        ];
+        return [<PriorityDropdown key="priority" {...itemProps.priority} storeValue />];
       case "tags":
         return [
           <Form.TextField

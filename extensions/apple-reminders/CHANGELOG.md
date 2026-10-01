@@ -1,5 +1,14 @@
 # Apple Reminders Changelog
 
+## [Search and Refresh Fixes] - 2026-10-01
+
+- Report deleted or unavailable lists instead of treating them as empty, and clear previous search results while new results load.
+- Wait until typing pauses before searching, and match the English month names displayed in reminder rows on every system locale.
+- Filter by list and smart view before applying the result limit, so unrelated reminders no longer hide items in Today or after moving them between lists.
+- Search the full reminder collection, including completed reminders, before applying the 1,000-result limit. Show a prompt to narrow results when the limit is reached.
+- Refresh completed reminders with `Cmd + R`, allow refreshing empty views, and refresh My Reminders after creating an item from its action panel.
+- Add list and search filters to the Get Reminders and Get Completed Reminders AI tools.
+
 ## [Create Calendar Event from Reminder] - 2026-09-25
 
 - Add "Create Calendar Event" action (`Cmd + Shift + E`) in "My Reminders" action panel to turn any reminder into an Apple Calendar event.

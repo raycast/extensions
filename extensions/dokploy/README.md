@@ -43,9 +43,11 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - View Runs
             - Delete Schedule
         - Open Website (Applications and Compose stacks)
+        - Open in Dokploy
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - Edit Tags (add or remove a project's tags, Create Tag)
+    - Open in Dokploy (projects and environments)
     - View Docker (Containers, sorted by frecency)
         - View Docker Config
         - Restart / Start / Stop / Kill Container
@@ -62,6 +64,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Start / Stop / Reload Service
         - View Logs
         - Open Website (Applications and Compose stacks)
+        - Open in Dokploy
 - Deployments
     - See the most recent deployment of every deployed Application and Compose stack across every configured instance, sorted by recency.
         - View Deployments (full history: Roll Back, Cancel, Delete, Stop Running Builds, Cancel Queued Deployments)
@@ -69,6 +72,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Start / Stop / Reload Service
         - View Logs
         - Open Website
+        - Open in Dokploy (the service's Deployments tab)
 - Server Health (menu bar)
     - See disk/memory/container status for every configured instance from the menu bar, with the icon tinting red when any instance's disk usage crosses a configurable threshold.
 - AI Tools (read-only): List Instances, List Projects, List Services, Get Service, Get Service Logs, List Deployments, Get Deployment Logs

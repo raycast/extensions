@@ -19,9 +19,11 @@ Reading Apple Notes, calendar availability, and assigning reminders to other peo
 2. Call `get-lists` with no inputs to resolve list titles to IDs.
    If one list exists, use it. Otherwise respect the named list or the default when none was requested.
    Clarify duplicate titles; do not invent a list or use a different destination if the requested one is absent.
-3. Call `get-reminders` with no inputs for incomplete reminders and retain their IDs and `openUrl` values.
-   It returns at most 1,000 reminders, with no server-side date/list filter or cursor.
-   Filter the returned items by list and date yourself; a full result set can omit relevant items.
+3. Call `get-reminders` for incomplete reminders and retain their IDs and `openUrl` values.
+   Pass a verified `listId` when reviewing one list. Both readers also accept `searchText` to find
+   specific reminders before the 1,000-match limit is applied. There is no pagination.
+   For a full weekly review, retain undated work rather than restricting everything to a smart view.
+   A result with 1,000 items may omit relevant matches; narrow by list and disclose remaining gaps.
    For a retrospective, call `get-completed-reminders` with optional verified `listId`.
    It also caps results at 1,000 without pagination. Filter by `completionDate`, not `dueDate`.
    Errors or missing access are not empty lists; report them through the extension's normal permission flow.
@@ -56,7 +58,8 @@ Reading Apple Notes, calendar availability, and assigning reminders to other peo
 9. Inspect creation results and refresh `get-reminders` to verify edits; completed items require
    `get-completed-reminders`. The Swift update returns no reminder object, so do not fabricate a receipt.
    Keep successful IDs during multi-item capture. After an uncertain result, inspect before retrying.
-   If the 1,000-item cap prevents verification, report that gap instead of assuming success or failure.
+   Use list and search filters to find changed items. If the 1,000-item cap still prevents verification,
+   report that gap instead of assuming success or failure.
    Use existing recurring-task confirmations; a clear request already authorizes its exact changes.
 
 ## Output

@@ -152,7 +152,7 @@ describe("doctorReportMarkdown", () => {
     ...over,
   });
 
-  it("renders findings in brew's own order, one heading each labelled with its tier", () => {
+  it("renders findings in brew's own order, one heading each labeled with its tier", () => {
     const md = doctorReportMarkdown({
       tier: 1,
       findings: [f({ tier: "unsupported", text: "u" }), f({ tier: 2, text: "b" }), f({ tier: 1, text: "a" })],

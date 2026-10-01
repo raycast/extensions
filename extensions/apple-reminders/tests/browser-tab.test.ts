@@ -76,7 +76,7 @@ describe("Browser Tab Extraction Helpers", () => {
     for (const name of expected) {
       assert.ok(
         (ALL_SUPPORTED_BROWSERS as readonly string[]).includes(name),
-        `Expected ${name} to be in ALL_SUPPORTED_BROWSERS`
+        `Expected ${name} to be in ALL_SUPPORTED_BROWSERS`,
       );
     }
   });
@@ -104,4 +104,3 @@ describe("Current Tab Reminder Payload & Default Due Date", () => {
     assert.strictEqual(reminder.url, "https://github.com/raycast/extensions/pull/31436");
   });
 });
-

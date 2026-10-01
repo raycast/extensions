@@ -62,7 +62,7 @@ export async function brewInstallWithProgress(
  * `brew update` of the day — a read-only action must not mutate the tap.
  *
  * `HOMEBREW_NO_ENV_HINTS` is not cosmetic here: without it brew prints a
- * two-line "Disable this behaviour by setting …" hint on STDOUT, INSIDE the
+ * two-line "Disable this behavior by setting …" hint on STDOUT, INSIDE the
  * dependents block (`upgrade.rb:597-605`), and the plan reads those words as
  * fourteen packages it would upgrade.
  */
@@ -118,7 +118,7 @@ const NOT_INSTALLED_LINE = /^Error: \S+ not installed$/;
  *
  * Exit 1 comes from `Homebrew.failed` (`brew.rb:243`), which only `ofail` sets
  * (`utils/output.rb:117-121`), so every tolerated exit 1 has to be an `Error:`
- * line we recognise — and exactly one is:
+ * line we recognize — and exactly one is:
  *
  * - **Not installed** — `ofail "<name> not installed"` (`cmd/upgrade.rb:419`).
  *   There is nothing to upgrade, and an empty plan says so honestly. Reachable
@@ -127,7 +127,7 @@ const NOT_INSTALLED_LINE = /^Error: \S+ not installed$/;
  *   (`cmd/upgrade.rb:471-476`, taken whenever the pinned formula was NAMED).
  *   That is brew refusing, not brew finding nothing, and swallowing it renders
  *   the green "Nothing to upgrade" state over a refusal. It rethrows, along
- *   with every other unrecognised exit 1, so the preview shows its failure page
+ *   with every other unrecognized exit 1, so the preview shows its failure page
  *   with brew's own message.
  *
  * The already-up-to-date case is `opoo` (`cmd/upgrade.rb:421`) — a `Warning:`
@@ -284,5 +284,13 @@ export async function brewUnpin(item: Pinnable, kind: PinKind): Promise<void> {
 export async function brewDoctor(cancel?: AbortSignal): Promise<DoctorReport> {
   actionsLogger.log("Running brew doctor");
   const output = await execBrewJson("doctor --json", { signal: cancel });
-  return parseBrewDoctor(output.stdout);
+  const report = parseBrewDoctor(output.stdout);
+  actionsLogger.log("brew doctor finished", {
+    tier: report.tier,
+    findings: report.findings.length,
+    // What Fix All would run — so a later "Running confirmed commands" line
+    // can be matched to the report that recommended it.
+    remediations: report.findings.reduce((n, f) => n + (f.remediation?.commands.length ?? 0), 0),
+  });
+  return report;
 }

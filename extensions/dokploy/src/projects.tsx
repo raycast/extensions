@@ -1,6 +1,8 @@
 import Services from "./services";
 import { type Instance, instanceId, useInstanceScope, tokenForInstance } from "./instances";
 import Environments from "./environments";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { projectPagePath } from "./dokploy-pages";
 import { ErrorResult, Project, type ModernProject, type Tag } from "./interfaces";
 import {
   FormValidation,
@@ -173,6 +175,7 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
             : `${getTotalServices(project)} services`;
 
           const environmentsProject: ModernProject | null = !serviceScope && isModernProject(project) ? project : null;
+          const pagePath = projectPagePath(project);
 
           return (
             <List.Item
@@ -250,6 +253,7 @@ export default function Projects({ instance: initial }: { instance: Instance }) 
                     </ActionPanel.Submenu>
                   )}
                   {refreshAction}
+                  {pagePath && <OpenInDokployAction url={url} path={pagePath} onOpen={() => void visitItem(project)} />}
                   <Action
                     icon={Icon.Trash}
                     title="Delete"

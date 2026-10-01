@@ -256,7 +256,7 @@ export function isNetworkError(error: unknown): error is NetworkError {
 }
 
 /**
- * A cancelled operation, not a failure.
+ * A canceled operation, not a failure.
  *
  * Worth a named predicate because an abort is the one ending that raises NO
  * toast of its own: `showBrewFailureToast` returns early on it, and
@@ -397,7 +397,7 @@ export function upgradeSkipReason(output: string, name: string): string | undefi
     if (/no version is available for the current platform/i.test(reason)) return "No version for this platform";
     if (/the installed version is not below the minimum version/i.test(reason)) return "Installed version is not older";
     if (/artifact has not changed|latest version is already installed/i.test(reason)) return "Already up to date";
-    // An unrecognised reason is still a skip; carry brew's own words rather than
+    // An unrecognized reason is still a skip; carry brew's own words rather than
     // inventing a category or, worse, reporting an upgrade that did not happen.
     return reason.replace(/\.$/, "");
   }
@@ -579,7 +579,7 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof StaleProcessError) {
     const pkg = error.packageName ? ` for "${error.packageName}"` : "";
     const phase = error.lastPhase ? ` (stuck at ${error.lastPhase})` : "";
-    return `Process appears stuck${pkg}${phase}. The operation was cancelled.`;
+    return `Process appears stuck${pkg}${phase}. The operation was canceled.`;
   }
 
   if (error instanceof PackageDisabledError) {
@@ -625,9 +625,9 @@ export function getErrorMessage(error: unknown): string {
   }
 
   if (error instanceof BrewCommandError) {
-    // Check for null exit code (process was killed/cancelled)
+    // Check for null exit code (process was killed/canceled)
     if (error.exitCode === undefined || error.exitCode === null) {
-      return "Cancelled";
+      return "Canceled";
     }
     // Check if the stderr contains a known error pattern for better messages
     if (error.stderr) {
@@ -655,7 +655,7 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     // Handle abort errors with user-friendly message
     if (error.name === "AbortError") {
-      return "Cancelled";
+      return "Canceled";
     }
 
     // Check for ExecError-like objects
@@ -692,4 +692,19 @@ export function outdatedFetchFailureCopy(error: unknown): { title: string; messa
     title: isLock ? "Brew Is Busy" : "Failed to Check for Upgrades",
     message: isLock ? "Another brew process is running. Please wait and try again." : getErrorMessage(error),
   };
+}
+
+/**
+ * The Adopt scan's derived cask index is missing, damaged or empty.
+ *
+ * Distinct from a generic failure because the recovery is specific and the
+ * alternative is worse than an error: rendering an empty list would tell the
+ * user nothing on their Mac is adoptable, which is a different claim from
+ * "we could not look".
+ */
+export class AdoptIndexUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AdoptIndexUnavailableError";
+  }
 }

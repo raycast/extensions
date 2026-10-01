@@ -18,7 +18,7 @@
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x
 
-## [Faster Loading] - {PR_MERGE_DATE}
+## [Faster Loading] - 2026-10-01
 
 - Show cached items instantly on launch, even after the cache expired, and refresh them in the background
 - List vaults in parallel instead of one after another (about 8x faster with many vaults)
