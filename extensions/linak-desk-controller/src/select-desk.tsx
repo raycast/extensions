@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { discoverDesks, DiscoveredDesk, getDeskId, selectDesk } from "./desk";
 
@@ -22,18 +11,8 @@ export default function SelectDesk() {
   const { data, isLoading, revalidate, mutate } = usePromise(loadDesks, [], {
     failureToastOptions: { title: "Couldn't search for desks" },
   });
-  const hasPreference = !!getPreferenceValues<Preferences>().uuid?.trim();
 
   async function choose(desk: DiscoveredDesk) {
-    if (hasPreference) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Desk identifier preference is set",
-        message: "Clear it in the extension preferences to use the selected desk.",
-        primaryAction: { title: "Open Extension Preferences", onAction: openExtensionPreferences },
-      });
-      return;
-    }
     await mutate(selectDesk(desk.id), {
       optimisticUpdate: (current) => ({ desks: current?.desks ?? [], selectedId: desk.id }),
       shouldRevalidateAfter: false,

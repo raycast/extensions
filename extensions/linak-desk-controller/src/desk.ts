@@ -7,6 +7,8 @@ export type DiscoveredDesk = { id: string; name: string; rssi?: number; connecte
 export { discoverDesks };
 
 const SELECTED_DESK_KEY = "selectedDeskId";
+// Overrides the desk identifier preference with a desk picked in Select Desk or found instead, as `{ from, to }`.
+const REPLACED_PREFERENCE_KEY = "replacedDeskPreference";
 
 function parseCm(value: string | undefined, label: string, fallback?: number) {
   if (!value?.trim() && fallback !== undefined) return fallback;
@@ -21,24 +23,42 @@ function getBaseHeight() {
   return parseCm(getPreferenceValues<Preferences>().baseHeight, "lowest height", 62);
 }
 
-/** The desk identifier preference wins, then the desk picked in Select Desk. Empty means "find one". */
+/** The desk picked in Select Desk (or found instead of a stale preference), then the preference. Empty means "find one". */
 export async function getDeskId() {
   const preference = getPreferenceValues<Preferences>().uuid?.trim();
-  if (preference) return preference;
+  if (preference) return (await getReplacement(preference)) ?? preference;
   return (await LocalStorage.getItem<string>(SELECTED_DESK_KEY)) ?? "";
 }
 
-export async function selectDesk(id: string | undefined) {
-  if (id) {
-    await LocalStorage.setItem(SELECTED_DESK_KEY, id);
-  } else {
-    await LocalStorage.removeItem(SELECTED_DESK_KEY);
+async function getReplacement(preference: string) {
+  const stored = await LocalStorage.getItem<string>(REPLACED_PREFERENCE_KEY);
+  if (!stored) return undefined;
+  try {
+    const { from, to } = JSON.parse(stored) as { from: string; to: string };
+    return from === preference ? to : undefined;
+  } catch {
+    return undefined;
   }
 }
 
-/** Keeps an automatically found desk, unless the user picked one while the command was still running. */
-async function rememberDiscoveredDesk(id: string) {
-  if (!(await getDeskId())) await selectDesk(id);
+/** Remembers the desk that was used when none or a different one was requested, so later commands go straight to it. */
+async function rememberUsedDesk(requestedId: string, usedId: string) {
+  if (requestedId) {
+    if (usedId !== requestedId) await selectDesk(usedId);
+  } else if (!(await getDeskId())) {
+    // Keep an automatically found desk, unless the user picked one while the command was still running.
+    await selectDesk(usedId);
+  }
+}
+
+/** Saves the desk to control. The preference can't be changed from code, so a set one is overridden instead. */
+export async function selectDesk(id: string) {
+  const preference = getPreferenceValues<Preferences>().uuid?.trim();
+  if (preference) {
+    await LocalStorage.setItem(REPLACED_PREFERENCE_KEY, JSON.stringify({ from: preference, to: id }));
+  } else {
+    await LocalStorage.setItem(SELECTED_DESK_KEY, id);
+  }
 }
 
 export async function getStatus(): Promise<DeskStatus> {
@@ -52,8 +72,8 @@ async function runDeskCommand(title: string, command: (deskId: string) => Promis
     const deskId = await getDeskId();
     if (!deskId) toast.message = "Looking for your desk…";
     const status = await command(deskId);
-    // Remember an automatically found desk so the next command doesn't have to scan for it.
-    if (!deskId) await rememberDiscoveredDesk(status.id);
+    // Remember the desk that was actually used so the next command doesn't have to scan for it.
+    await rememberUsedDesk(deskId, status.id);
     if (status.cancelled) {
       // A newer command took over before the desk reached its target, so this isn't a success.
       toast.style = Toast.Style.Failure;

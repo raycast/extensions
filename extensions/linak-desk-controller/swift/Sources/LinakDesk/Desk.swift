@@ -112,10 +112,15 @@ final class DeskSession {
         ]
       } else {
         let found = await ble.scan(timeout: 8) { $0.peripheral.identifier == id }
-        guard let match = found.first(where: { $0.peripheral.identifier == id }) else {
+        if let match = found.first(where: { $0.peripheral.identifier == id }) {
+          candidates = [match]
+        } else if found.count == 1 {
+          // The saved identifier can be stale, e.g. one copied for an older version of the extension.
+          // With exactly one desk nearby there's nothing to guess between, so use it.
+          candidates = found
+        } else {
           throw DeskError.deskNotFound
         }
-        candidates = [match]
       }
     }
 
@@ -180,6 +185,9 @@ final class DeskSession {
     let startedAt = Date()
     var previous = reading
     var stationaryReadings = 0
+    // A desk that has been idle for a while can ignore target writes until it has been woken more than once.
+    var hasMoved = false
+    var lastWake = Date()
 
     while true {
       if Date().timeIntervalSince(startedAt) > Self.movementTimeout {
@@ -198,8 +206,20 @@ final class DeskSession {
 
       let isStationary = abs(reading.speed) < 0.01 && abs(reading.heightCm - previous.heightCm) < 0.05
       if isStationary, abs(reading.heightCm - targetCm) <= Self.tolerance { break }
+      if !isStationary { hasMoved = true }
 
-      stationaryReadings = isStationary && Date().timeIntervalSince(startedAt) > 2 ? stationaryReadings + 1 : 0
+      if !hasMoved, Date().timeIntervalSince(lastWake) >= 1 {
+        let woken = try await request.perform(ifCurrent: requestId) {
+          try await ble.write(Self.wake, to: controlCharacteristicUUID, on: peripheral)
+        }
+        guard woken else { return MoveResult(reading: reading, cancelled: true) }
+        lastWake = Date()
+      }
+
+      // Give a sleeping desk a few seconds to start before treating it as stalled.
+      let startGrace: TimeInterval = hasMoved ? 2 : 5
+      stationaryReadings =
+        isStationary && Date().timeIntervalSince(startedAt) > startGrace ? stationaryReadings + 1 : 0
       if stationaryReadings >= 4 {
         try? await stopIfCurrent(request, requestId)
         if stopAtLimit { return MoveResult(reading: reading, cancelled: false) }
