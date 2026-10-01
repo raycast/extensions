@@ -17,13 +17,14 @@ import {
   shownKinds,
   isIndexStale,
   refreshDays,
+  onSyncDone,
   onSyncProgress,
   randomFromIndex,
   searchIndex,
 } from "./search-index";
 import { markKeyAccepted, markKeyRejected } from "./hooks";
 import { libraryOwner } from "./library";
-import { downloadGameList, isRejectedKeyFailure } from "./game-list";
+import { downloadGameList } from "./game-list";
 
 async function fetcherWithAuth(url: string) {
   const { token, steamid } = getPreferenceValues<Preferences>();
@@ -69,30 +70,38 @@ export const useLocalList = () => {
   const [attempt, setAttempt] = useState(0);
   const [progress, setProgress] = useState(0);
 
+  const [version, setVersion] = useState(0);
+
   useEffect(() => onSyncProgress(setProgress), []);
+  useEffect(
+    () =>
+      onSyncDone(() => {
+        setReady(true);
+        setVersion((count) => count + 1);
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (!key || isFakeData || !safely(() => isIndexStale(refreshDays()), false)) return;
     setError(undefined);
-    downloadGameList(key)
-      .then(() => setReady(true))
-      .catch((failure: unknown) => {
-        if (isRejectedKeyFailure(failure)) return;
-        setError(failure instanceof Error ? failure : new Error(String(failure)));
-      });
+    downloadGameList(key).catch((failure: unknown) =>
+      setError(failure instanceof Error ? failure : new Error(String(failure))),
+    );
   }, [key, indexRefresh, attempt]);
 
-  return { hasKey, ready, error, progress, retry: () => setAttempt((count) => count + 1) };
+  return { hasKey, ready, error, progress, version, retry: () => setAttempt((count) => count + 1) };
 };
 
 // With a key, search never leaves the machine
 export const useGamesSearch = ({ term = "", execute = true }) => {
   const list = useLocalList();
-  const { hasKey, ready } = list;
+  const { hasKey, ready, version } = list;
   const active = execute && term.trim().length > 0;
+  // A refresh while the search is open changes the list without changing the query
   const local = useMemo(
     () => (active && hasKey && ready ? safely(() => searchIndex(term), []) : undefined),
-    [active, hasKey, ready, term],
+    [active, hasKey, ready, term, version],
   );
   const remote = useCachedPromise(isFakeData ? fakeSearch : searchSteamGameHits, [term], {
     execute: active && !hasKey,
@@ -100,7 +109,9 @@ export const useGamesSearch = ({ term = "", execute = true }) => {
   });
   const listStatus = hasKey && !ready ? list : undefined;
   if (hasKey) return { data: local, isLoading: false, isError: undefined, listStatus };
-  return { data: active ? remote.data : undefined, isLoading: remote.isLoading, isError: remote.error, listStatus };
+  // keepPreviousData would otherwise leave the last query's games under a failed search
+  const data = active && !remote.error ? remote.data : undefined;
+  return { data, isLoading: remote.isLoading, isError: remote.error, listStatus };
 };
 
 export const useRandomGames = () => {

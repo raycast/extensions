@@ -180,10 +180,21 @@ export function isIndexStale(maxAgeDays: number) {
   return indexAgeDays() > maxAgeDays;
 }
 
+const doneListeners = new Set<() => void>();
+
+export function onSyncDone(listener: () => void) {
+  doneListeners.add(listener);
+  return () => {
+    doneListeners.delete(listener);
+  };
+}
+
 export function syncIndex(key: string) {
-  syncing ??= runSync(key).finally(() => {
-    syncing = undefined;
-  });
+  syncing ??= runSync(key)
+    .then(() => doneListeners.forEach((listener) => listener()))
+    .finally(() => {
+      syncing = undefined;
+    });
   return syncing;
 }
 
@@ -201,6 +212,12 @@ async function runSync(key: string) {
   );
   let written = 0;
   const expected = expectedApps();
+  const before = new Map(
+    (
+      db().prepare("SELECT kind, count(*) AS count FROM app GROUP BY kind").all() as { kind: AppKind; count: number }[]
+    ).map((row) => [row.kind, row.count]),
+  );
+  const seen = new Map<AppKind, number>();
   // Each category comes down separately so every app knows its kind and settings can hide any of them
   for (const kind of KINDS) {
     let lastAppid = 0;
@@ -246,6 +263,7 @@ async function runSync(key: string) {
           throw error;
         }
         written += Math.min(WRITE_CHUNK, apps.length - start);
+        seen.set(kind, (seen.get(kind) ?? 0) + Math.min(WRITE_CHUNK, apps.length - start));
         progressListeners.forEach((listener) => listener(Math.min(written / expected, 0.99)));
         // Writes share a thread with the open list, so yield between chunks to keep it responsive
         await new Promise((resolve) => setImmediate(resolve));
@@ -255,13 +273,26 @@ async function runSync(key: string) {
       lastAppid = page.last_appid;
     }
   }
-  db().prepare("DELETE FROM app WHERE generation != ?").run(startedAt);
+  // Replacing the list with a reply cut short would delete every app it left out
+  for (const kind of KINDS) {
+    if ((seen.get(kind) ?? 0) < (before.get(kind) ?? 0) / 2) {
+      throw new IndexSyncError("Steam sent an incomplete game list. Try again later.", 0);
+    }
+  }
+  db().exec("BEGIN");
+  try {
+    db().prepare("DELETE FROM app WHERE generation != ?").run(startedAt);
+    db()
+      .prepare(
+        "INSERT INTO meta (key, value) VALUES ('synced_at', ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
+      )
+      .run(String(startedAt));
+    db().exec("COMMIT");
+  } catch (error) {
+    db().exec("ROLLBACK");
+    throw error;
+  }
   countCache.set("app-count", String(written));
-  db()
-    .prepare(
-      "INSERT INTO meta (key, value) VALUES ('synced_at', ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-    )
-    .run(String(startedAt));
 }
 
 type IndexRow = { appid: number; name: string; compact_name: string; padded_name: string };
@@ -406,7 +437,6 @@ export function recordLibrary(owner: string, appids: number[]) {
   const d = db();
   d.exec("BEGIN");
   try {
-    d.prepare("DELETE FROM library WHERE owner != ?").run(owner);
     const { count } = d.prepare("SELECT count(*) AS count FROM library WHERE owner = ?").get(owner) as {
       count: number;
     };

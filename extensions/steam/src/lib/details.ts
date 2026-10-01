@@ -222,6 +222,7 @@ function fromStoreItem(item: StoreItem): { data: GameData; icon?: string } {
 
 export async function fetchBatchDetails(appids: number[]) {
   const stale = [...new Set(appids)].filter(needsDetails);
+  let failed = 0;
   for (let start = 0; start < stale.length; start += BATCH_SIZE) {
     const ids = stale.slice(start, start + BATCH_SIZE);
     const url = new URL("https://api.steampowered.com/IStoreBrowseService/GetItems/v1/");
@@ -241,7 +242,10 @@ export async function fetchBatchDetails(appids: number[]) {
       }),
     );
     const response = await steamFetch(url);
-    if (!response.ok) continue;
+    if (!response.ok) {
+      failed += ids.length;
+      continue;
+    }
     const body = (await response.json()) as { response?: { store_items?: StoreItem[] } };
     const found = new Set(
       (body.response?.store_items ?? []).filter((item) => item.success && item.appid).map((item) => item.appid),
@@ -266,8 +270,12 @@ export async function fetchBatchDetails(appids: number[]) {
       });
     }
   }
-  return stale.length;
+  return { requested: stale.length, failed };
 }
+
+// Without it, tools answer from partial details as if they were complete
+export const detailsWarning = ({ failed }: { failed: number }) =>
+  failed ? `Steam didn't return details for ${failed} games, so these results may be incomplete.` : undefined;
 
 export function storeFacts(appid: number) {
   const entry = cachedDetails(appid);

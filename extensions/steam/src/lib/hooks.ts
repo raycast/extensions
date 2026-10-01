@@ -6,14 +6,15 @@ export const useIsLoggedIn = () => {
   const { token, steamid } = getPreferenceValues<Preferences>();
   const [loggedIn, setLoggedIn] = useState(Boolean(token && steamid));
   useEffect(() => {
-    // If nothing is set, we don't have to check for an api key error
-    if (token && steamid) {
-      LocalStorage.getItem("API_KEY_ERROR").then((value) => {
-        // Check if the current key/token matches the previously failed one
-        // And if it does NOT, then give it a chance to auth again
-        setLoggedIn(value !== token.trim() + steamid.trim());
-      });
-    }
+    if (!token || !steamid) return;
+    const check = () =>
+      LocalStorage.getItem("API_KEY_ERROR").then((value) => setLoggedIn(value !== token.trim() + steamid.trim()));
+    check();
+    // A later request can succeed with the same key and clear the error while the command is open
+    rejectedKeyListeners.add(check);
+    return () => {
+      rejectedKeyListeners.delete(check);
+    };
   }, [token, steamid]);
   return loggedIn;
 };

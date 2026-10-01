@@ -1,4 +1,4 @@
-import { cachedDetails, fetchBatchDetails, storeFacts } from "../lib/details";
+import { cachedDetails, detailsWarning, fetchBatchDetails, storeFacts } from "../lib/details";
 import { getSteamGameStoreUrl } from "../lib/games";
 import { ownedAppids } from "../lib/library";
 import { resolveGames, tagMatch, tagNames, tasteProfile } from "../lib/recommend";
@@ -46,7 +46,8 @@ export default async function recommendGamesTool(input: Input) {
     }
   }
 
-  await fetchBatchDetails([...likedIds, ...listedBy.keys()]);
+  const failure = detailsWarning(await fetchBatchDetails([...likedIds, ...listedBy.keys()]));
+  if (failure) warnings.push(failure);
   const [owned, names] = await Promise.all([ownedAppids(), tagNames()]);
   if (!owned) warnings.push("Your Steam library couldn't be read, so games you own may be included.");
   const profile = tasteProfile([...likedIds]);

@@ -3,6 +3,7 @@ import { GameData, GameDataSimple, GameSimple } from "../types";
 import { DefaultActions, LaunchActions } from "./Actions";
 import { GameDetails } from "./GameDetails";
 import { itemId, playtimeText } from "../lib/util";
+import { SteamGameError } from "../lib/games";
 import { useGameData } from "../lib/fetcher";
 import { cachedDetails } from "../lib/details";
 import { releaseTag } from "../lib/release-tag";
@@ -25,13 +26,14 @@ export const DynamicGameListItem = ({
   search?: string;
 }) => {
   const { data: gameData, icon: detailIcon, isError: error } = useGameData({ appid: game.appid, execute: ready });
+  const notFound = error instanceof SteamGameError && error.status === 404;
   const owned = myGames.find((g) => g.appid === game.appid);
   const image = owned?.img_icon_url
     ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${owned.img_icon_url}.jpg`
     : (game.icon ?? detailIcon);
   const genericIcon = {
     source: gameData?.type === "game" ? Icon.GameController : Icon.Circle,
-    tintColor: error ? Color.Red : gameData ? Color.SecondaryText : undefined,
+    tintColor: notFound ? Color.Red : gameData ? Color.SecondaryText : undefined,
   };
 
   return (
@@ -45,10 +47,14 @@ export const DynamicGameListItem = ({
           : [
               ...(owned ? [{ tag: { value: "Owned", color: Color.Blue } }] : []),
               ...(gameData?.type && gameData.type !== "game" ? [{ tag: gameData.type }] : []),
-              (error ? { text: "Game not found" } : releaseTag(gameData?.release_date?.date)) ?? {},
+              (notFound ? { text: "Game not found" } : releaseTag(gameData?.release_date?.date)) ?? {},
             ]
       }
-      detail={showingDetail ? <GameListDetail gameData={gameData} notFound={Boolean(error)} /> : undefined}
+      detail={
+        showingDetail ? (
+          <GameListDetail gameData={gameData} notFound={notFound} failed={Boolean(error) && !notFound} />
+        ) : undefined
+      }
       actions={
         <ActionPanel>
           <Action.Push
@@ -72,15 +78,25 @@ export const DynamicGameListItem = ({
   );
 };
 
-const GameListDetail = ({ gameData, notFound }: { gameData?: GameData; notFound: boolean }) => (
+const GameListDetail = ({
+  gameData,
+  notFound,
+  failed,
+}: {
+  gameData?: GameData;
+  notFound: boolean;
+  failed: boolean;
+}) => (
   <List.Item.Detail
-    isLoading={!gameData && !notFound}
+    isLoading={!gameData && !notFound && !failed}
     markdown={
       notFound
         ? "Steam has no store page for this game."
-        : gameData
-          ? `![](${gameData.header_image})\n\n${gameData.short_description}`
-          : undefined
+        : failed && !gameData
+          ? "Couldn't load this game's details from Steam."
+          : gameData
+            ? `![](${gameData.header_image})\n\n${gameData.short_description}`
+            : undefined
     }
     metadata={
       gameData ? (

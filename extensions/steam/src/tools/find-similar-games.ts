@@ -1,4 +1,4 @@
-import { cachedDetails, fetchBatchDetails, storeFacts } from "../lib/details";
+import { cachedDetails, detailsWarning, fetchBatchDetails, storeFacts } from "../lib/details";
 import {
   cleanSteamGameQuery,
   getSteamAppIdFromInput,
@@ -50,7 +50,7 @@ export default async function findSimilarGamesTool(input: Input) {
   }
 
   const sections = await getSimilarGames(game.appid);
-  await fetchBatchDetails(sections.flatMap((section) => section.appids));
+  const loaded = await fetchBatchDetails(sections.flatMap((section) => section.appids));
   const owned = await ownedAppids();
   const count = Math.min(Math.max(input.count ?? 20, 1), 60);
   const games = sections
@@ -83,8 +83,10 @@ export default async function findSimilarGamesTool(input: Input) {
   return {
     game,
     games,
-    warnings: [games.length ? undefined : "Steam lists no similar games for this game.", listWarning].filter(
-      (warning): warning is string => Boolean(warning),
-    ),
+    warnings: [
+      games.length ? undefined : "Steam lists no similar games for this game.",
+      detailsWarning(loaded),
+      listWarning,
+    ].filter((warning): warning is string => Boolean(warning)),
   };
 }

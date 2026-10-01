@@ -74,7 +74,12 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
         <List.Dropdown
           tooltip="Sort"
           value={sort}
-          onChange={(value) => (initialSort ? setPickedSort : setStoredSort)(value as LibrarySort)}
+          onChange={(value) => {
+            // Only a real change is saved, not the sort a shortcut opened with
+            if (value === sort) return;
+            if (initialSort) setPickedSort(value as LibrarySort);
+            setStoredSort(value as LibrarySort);
+          }}
         >
           {SORTS.map((option) => (
             <List.Dropdown.Item key={option.value} value={option.value} title={option.title} />

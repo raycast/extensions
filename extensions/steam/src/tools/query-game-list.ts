@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { cachedDetails, fetchBatchDetails, storeFacts } from "../lib/details";
+import { cachedDetails, detailsWarning, fetchBatchDetails, storeFacts } from "../lib/details";
 import { getSteamGameStoreUrl, localListWarning } from "../lib/games";
 import { isIndexReady, latestApps } from "../lib/search-index";
 import { formatSteamTimestamp } from "../lib/users";
@@ -27,7 +27,7 @@ export default async function queryGameListTool(input: Input) {
     throw new Error("The Steam game list hasn't downloaded yet. Open Search Games once to download it.");
   }
   const apps = latestApps(input.sortBy, Math.min(Math.max(input.count ?? 20, 1), 50));
-  await fetchBatchDetails(apps.map((app) => app.appid));
+  const loaded = await fetchBatchDetails(apps.map((app) => app.appid));
 
   const games = apps.map((app) => {
     const data = cachedDetails(app.appid)?.data;
@@ -55,8 +55,8 @@ export default async function queryGameListTool(input: Input) {
       : "No apps have an update time yet. They arrive with the next refresh of the game list.";
   return {
     games,
-    warnings: [games.length ? undefined : empty, localListWarning()].filter((warning): warning is string =>
-      Boolean(warning),
+    warnings: [games.length ? undefined : empty, detailsWarning(loaded), localListWarning()].filter(
+      (warning): warning is string => Boolean(warning),
     ),
   };
 }

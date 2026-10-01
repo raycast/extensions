@@ -1,4 +1,4 @@
-import { cachedDetails, fetchBatchDetails, storeFacts } from "../lib/details";
+import { cachedDetails, detailsWarning, fetchBatchDetails, storeFacts } from "../lib/details";
 import { getSteamGameStoreUrl } from "../lib/games";
 import { getOwnedGames } from "../lib/library";
 import { resolveGames, tagMatch, tagNames, tasteProfile } from "../lib/recommend";
@@ -33,7 +33,8 @@ export default async function recommendOwnedGamesTool(input: Input) {
 
   const { games: library } = await getOwnedGames();
   const likedIds = new Set(liked.map((game) => game.appid));
-  await fetchBatchDetails([...likedIds, ...library.map((game) => game.appid)]);
+  const failure = detailsWarning(await fetchBatchDetails([...likedIds, ...library.map((game) => game.appid)]));
+  if (failure) warnings.push(failure);
   const names = await tagNames();
   const profile = tasteProfile([...likedIds]);
   const count = Math.min(Math.max(input.count ?? 20, 1), 50);

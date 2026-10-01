@@ -45,7 +45,13 @@ ${gameData.short_description}
     <Detail
       isLoading={isLoading}
       navigationTitle={gameData?.name}
-      markdown={error ? error?.message : markdown}
+      markdown={
+        error instanceof SteamGameError && error.status === 404
+          ? "Steam has no store page for this game."
+          : error
+            ? error.message
+            : markdown
+      }
       actions={
         error ? null : (
           <ActionPanel>
