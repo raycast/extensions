@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { base32Decode, generateTotp, parseOtpauthUri, TotpAlgorithm } from "./totp";
+import { base32Decode, generateTotp, getTotpPeriod, parseOtpauthUri, TotpAlgorithm } from "./totp";
 
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
@@ -98,4 +98,13 @@ test("rejects codes that can't be generated locally", () => {
   assert.equal(parseOtpauthUri(`otpauth://totp/Example?secret=${secret}&period=0`), undefined);
   assert.equal(parseOtpauthUri("otpauth://totp/Example?secret=not-base32!"), undefined);
   assert.equal(parseOtpauthUri("otpauth://totp/Example"), undefined);
+});
+
+test("knows the period of time-based codes only", () => {
+  const secret = base32Encode(RFC_SECRETS.sha1);
+  assert.equal(getTotpPeriod(`otpauth://totp/Steam?secret=${secret}&encoder=steam`), 30);
+  assert.equal(getTotpPeriod(`otpauth://totp/Example?secret=${secret}&period=60`), 60);
+  assert.equal(getTotpPeriod(secret), 30);
+  assert.equal(getTotpPeriod(`otpauth://hotp/Example?secret=${secret}&counter=1`), undefined);
+  assert.equal(getTotpPeriod("not a secret!"), undefined);
 });

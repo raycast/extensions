@@ -4,10 +4,10 @@ export function itemKey(item: { shareId: string; itemId: string }): string {
   return `${item.shareId}-${item.itemId}`;
 }
 
-/** "https://www.example.com/login" -> "example.com". Values that aren't URLs are returned unchanged. */
+/** "https://www.example.com/login" or "example.com/login" -> "example.com". Values that aren't URLs are returned unchanged. */
 export function hostnameOf(url: string): string {
   try {
-    const { hostname } = new URL(url);
+    const { hostname } = new URL(toOpenableUrl(url));
     return hostname.replace(/^www\./, "") || url;
   } catch {
     return url;
@@ -31,19 +31,6 @@ export function websiteLabels(urls: string[]): string[] {
 /** Proton Pass accepts URLs without a scheme ("example.com"); browsers need one to open them. */
 export function toOpenableUrl(url: string): string {
   return /^[a-z][a-z\d+.-]*:/i.test(url) ? url : `https://${url}`;
-}
-
-/**
- * Favicon from DuckDuckGo's icon service, which answers 404 when a site has no icon so that the
- * fallback icon is shown. The service receives the domain, so callers only use it when enabled.
- */
-export function websiteIconUrl(url: string): string | undefined {
-  try {
-    const { hostname } = new URL(toOpenableUrl(url));
-    return hostname ? `https://icons.duckduckgo.com/ip3/${hostname}.ico` : undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 const TYPE_LABELS: Record<ItemType, string> = {
@@ -91,7 +78,7 @@ export function escapeMarkdown(value: string): string {
   return value
     .replace(/([\\`*_[\]<>|])/g, "\\$1")
     .replace(/^(\s*)([#>+-])(?=\s)/gm, "$1\\$2")
-    .replace(/^(\s*\d+)\.(?=\s)/gm, "$1\\.");
+    .replace(/^(\s*\d+)([.)])(?=\s)/gm, "$1\\$2");
 }
 
 /** Renders a plain-text note as markdown, keeping its line breaks. */

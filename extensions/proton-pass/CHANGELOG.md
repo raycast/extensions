@@ -9,11 +9,13 @@
 - Enter now copies the password (or opens the note for secure notes); new Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
 - Search also matches usernames, emails and website domains
-- Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead (off by default, since it sends domains to DuckDuckGo's icon service)
+- Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead, from the favicon provider set in Raycast's settings (off by default, since the provider receives the domains)
 - Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
 - Items matching the active browser tab are grouped in a Suggested section
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
+- The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
+- Update `@raycast/utils` to 2.x
 
 ## [Faster Loading] - {PR_MERGE_DATE}
 
