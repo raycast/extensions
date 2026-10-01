@@ -819,6 +819,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "worthbase",
+    title: "Worthbase",
+    description:
+      "Your household's net worth in Raycast: shares, ETFs, crypto, gold and silver, super and retirement accounts, property, cash and loans, owned by people, trusts or companies, priced daily with exact cost bases, gains, performance (XIRR), goals and history. Ask what you're worth, how your shares did or what selling would make; hand it a statement to record, previewed before anything is saved and undoable. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, Worthbase account (7-day free trial), no API key to paste.",
+    icon: "https://worthbase.app/icon-512.png",
+    homepage: "https://worthbase.app/claude/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://worthbase.app/mcp"],
+    },
+  },
+  {
     name: "xero",
     title: "Xero",
     description:
