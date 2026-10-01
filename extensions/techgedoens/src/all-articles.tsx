@@ -169,7 +169,6 @@ export default function AllArticlesCommand() {
     <List
       filtering={false}
       isLoading={isLoading}
-      navigationTitle={articleStatusTitle(selectedStatus, translations)}
       onSearchTextChange={handleSearchTextChange}
       pagination={{ hasMore, onLoadMore: loadMoreArticles, pageSize }}
       searchBarPlaceholder={translations.searchArticles}
@@ -286,19 +285,6 @@ function normalizeInitialStatusPreference(value: string | undefined): InitialSta
 async function readLastStatusFilter(): Promise<ArticleStatusFilter> {
   const storedFilter = await LocalStorage.getItem<string>(LAST_STATUS_FILTER_KEY);
   return storedFilter && isArticleStatusFilter(storedFilter) ? storedFilter : FILTER_ALL_STATUSES;
-}
-
-function articleStatusTitle(status: ArticleStatusFilter, translations: Strings): string {
-  if (status === FILTER_READ) {
-    return translations.read;
-  }
-  if (status === FILTER_UNREAD) {
-    return translations.unread;
-  }
-  if (status === FILTER_FAVORITES) {
-    return translations.favorites;
-  }
-  return translations.allArticles;
 }
 
 function statusFilterTitle(title: string, filter: ArticleStatusFilter, selectedStatus: ArticleStatusFilter): string {

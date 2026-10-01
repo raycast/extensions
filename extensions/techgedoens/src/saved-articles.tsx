@@ -56,11 +56,7 @@ export default function SavedArticlesCommand() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={translations.readLater}
-      searchBarPlaceholder={translations.searchFavorites}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder={translations.searchFavorites}>
       {!isLoading && favoriteArticles.length === 0 ? (
         <List.EmptyView
           icon={Icon.Star}

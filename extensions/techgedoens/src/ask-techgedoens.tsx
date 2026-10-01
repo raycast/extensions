@@ -74,7 +74,6 @@ export default function AskTechgedoensCommand(props: LaunchProps<{ arguments: Ar
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle="Ask Techgedöns"
       markdown={markdown}
       actions={
         <ActionPanel>

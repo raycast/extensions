@@ -119,6 +119,7 @@
     {
       "name": "latest-articles",
       "title": "Latest Articles",
+      "subtitle": "Techgedöns.de",
       "description": "Lists the latest articles from Techgedoens.de",
       "mode": "view",
       "keywords": [
@@ -133,6 +134,7 @@
     {
       "name": "all-articles",
       "title": "All Articles",
+      "subtitle": "Techgedöns.de",
       "description": "Shows the saved article archive with read status and topic filters",
       "mode": "view",
       "keywords": [
@@ -148,6 +150,7 @@
     {
       "name": "ask-techgedoens",
       "title": "Ask Techgedöns",
+      "subtitle": "Techgedöns.de",
       "description": "Answers questions using saved Techgedöns articles",
       "mode": "view",
       "arguments": [
@@ -171,6 +174,7 @@
     {
       "name": "saved-articles",
       "title": "Favorites",
+      "subtitle": "Techgedöns.de",
       "description": "Shows saved Techgedöns articles",
       "mode": "view",
       "keywords": [
@@ -185,6 +189,7 @@
     {
       "name": "search-techgedoens",
       "title": "Search Techgedöns",
+      "subtitle": "Techgedöns.de",
       "description": "Searches the complete Techgedöns.de article archive",
       "mode": "view",
       "keywords": [
@@ -201,6 +206,7 @@
     {
       "name": "refresh-articles",
       "title": "Refresh Articles",
+      "subtitle": "Techgedöns.de",
       "description": "Silently refreshes the local Techgedoens.de article cache",
       "mode": "no-view",
       "interval": "1h",
@@ -216,6 +222,7 @@
     {
       "name": "open-techgedoens",
       "title": "Open Techgedöns.de",
+      "subtitle": "Techgedöns.de",
       "description": "Opens Techgedöns.de in the default browser",
       "mode": "no-view",
       "keywords": [

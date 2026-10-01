@@ -85,7 +85,6 @@ export default function LatestArticlesCommand() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={translations.latestArticles}
       searchBarPlaceholder={translations.searchArticles}
       actions={
         <ActionPanel>

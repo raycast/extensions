@@ -10,10 +10,9 @@ import {
   List,
   open,
   openCommandPreferences,
-  showToast,
-  Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import {
   ArchivedArticle,
@@ -119,11 +118,7 @@ export default function SearchTechgedoensCommand() {
     } catch (searchError) {
       if (requestId.current === currentRequestId) {
         setHasMore(false);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: translations.feedUnavailable,
-          message: toError(searchError).message,
-        });
+        await showFailureToast(searchError, { title: translations.feedUnavailable });
       }
     } finally {
       if (requestId.current === currentRequestId) {
@@ -169,7 +164,6 @@ export default function SearchTechgedoensCommand() {
     <List
       filtering={false}
       isLoading={isLoading || isLoadingMore}
-      navigationTitle={translations.searchBlogArchive}
       onSearchTextChange={setSearchText}
       pagination={{ hasMore, onLoadMore: loadMoreArticles, pageSize: ARTICLES_PER_FEED_PAGE }}
       searchBarPlaceholder={translations.searchBlogArchivePlaceholder}
