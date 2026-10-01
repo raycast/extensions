@@ -350,3 +350,26 @@ test("wrappedFacts averages the weeks in range and dates the records", () => {
     "No goal",
   );
 });
+
+test("a past month that ends on a Sunday does not average in the next month's empty week", () => {
+  const may = { from: new Date(2026, 4, 1).getTime(), to: new Date(2026, 5, 1).getTime(), label: "May 2026" };
+  const at = (day: number, duration: number) => ({
+    start: new Date(2026, 4, day, 9).getTime(),
+    goal: "Deep work",
+    duration,
+    source: "reported" as const,
+  });
+  const sessions = [at(4, 60), at(25, 120)];
+  const facts = wrappedFacts(
+    { stats: statsOf(), sessions, firstOnRecord: sessions[0].start },
+    may,
+    1,
+    new Date(2026, 9, 1),
+  );
+  assert.deepEqual(
+    facts.weeks.map((w) => w.start),
+    ["2026-05-04", "2026-05-11", "2026-05-18", "2026-05-25"],
+    "May 31 is a Sunday, so June 1 starts a week May never reaches",
+  );
+  assert.equal(facts.weeklyAverage, 45);
+});

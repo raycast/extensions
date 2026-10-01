@@ -18,7 +18,7 @@ import { useMemo, useState } from "react";
 import { getPreferences } from "./lib/runtime.ts";
 import { periodRange, type Period } from "./lib/stats.ts";
 import { statusNotes } from "./lib/statusNotes.ts";
-import { DOWNLOADS, freePath, posterFilename, renderPosterPng } from "./lib/shareImage.ts";
+import { DOWNLOADS, posterFilename, renderPosterPng, reservePath } from "./lib/shareImage.ts";
 import { markdownImage } from "./lib/svg.ts";
 import { themeFor, tiersFor } from "./lib/theme.ts";
 import { useStats } from "./lib/useStats.ts";
@@ -72,7 +72,7 @@ export default function FocusWrapped() {
   async function savePoster() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Making your recap…" });
     try {
-      const file = await drawShareable((name) => freePath(DOWNLOADS, name));
+      const file = await drawShareable((name) => reservePath(DOWNLOADS, name));
       if (!file) return;
       toast.style = Toast.Style.Success;
       toast.title = "Saved to Downloads";

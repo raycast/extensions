@@ -312,17 +312,29 @@ test("each week gets its own budget, so where a gap falls decides whether it is 
   assert.deepEqual([...inOneWeek.shieldedDays].sort(), [], "and a broken run saves none of them");
 });
 
-test("the two walks' separate budgets can leave the best streak below the live one", () => {
+test("a gap too long to bridge gives back the shields it reached for", () => {
   process.env.TZ = BUCHAREST;
   const walk = walkStreaks([day(2025, 6, 2), day(2025, 6, 6), day(2025, 6, 8)], 1, at(2025, 6, 11));
   assert.equal(walk.current, 2, "walking back from today, 06-07 is shielded and joins 06-08 to 06-06");
-  assert.equal(walk.best, 1, "walking forward, the week's two shields went on 06-03 and 06-04 instead");
+  assert.equal(walk.best, 2, "06-03 and 06-04 could not reach 06-06, so their shields went to 06-07");
+  assert.equal(dayKey(new Date(walk.bestStart!)), "2025-06-06");
+  assert.equal(dayKey(new Date(walk.bestEnd!)), "2025-06-08");
+});
+
+test("the best streak is never shorter than the live one, even when the walks shield different gaps", () => {
+  process.env.TZ = BUCHAREST;
+  const active = [day(2025, 6, 2), day(2025, 6, 4), day(2025, 6, 6), ...days(2025, 6, 8, 15)];
+  const walk = walkStreaks(active, 1, at(2025, 6, 15));
+  assert.equal(walk.current, 10, "walking back shields 06-07 and 06-05, then 06-03 is one gap too many");
+  assert.equal(walk.best, 10, "walking forward would have spent the week on 06-03 and 06-05 and stopped at 8");
+  assert.equal(dayKey(new Date(walk.bestStart!)), "2025-06-04");
+  assert.equal(dayKey(new Date(walk.bestEnd!)), "2025-06-15");
 });
 
 test("the live walk and the best walk do not share a budget", () => {
   process.env.TZ = BUCHAREST;
   const walk = walkStreaks([...days(2025, 6, 2, 6), day(2025, 6, 12), day(2025, 6, 13)], 1, at(2025, 6, 13));
-  assert.equal(walk.best, 5, "the best walk spends its own two shields on 06-07 and 06-08, then breaks");
+  assert.equal(walk.best, 5, "the best walk cannot bridge 06-07 to 06-11, so it keeps the first five days");
   assert.equal(walk.current, 2, "the live walk still has its own two, spent on 06-10 and 06-11");
 });
 

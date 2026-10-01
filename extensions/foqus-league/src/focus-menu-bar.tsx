@@ -18,6 +18,7 @@ import {
   isRaycast2,
   learnGoalBlocks,
   rememberQuickStart,
+  resumeRecording,
   SUPPORT_URL,
 } from "./lib/runtime.ts";
 import { useStats } from "./lib/useStats.ts";
@@ -38,6 +39,11 @@ const reason = (error: unknown) => (error instanceof Error ? error.message : Str
 
 const tryLaunch = (options: Parameters<typeof launchCommand>[0], failure: string) =>
   launchCommand(options).catch((error) => showHUD(`${failure}: ${reason(error)}`));
+
+const resume = () =>
+  resumeRecording()
+    .then((status) => (status.running ? undefined : showHUD("Could not resume recording")))
+    .catch((error) => showHUD(`Could not resume recording: ${reason(error)}`));
 
 export default function FocusMenuBar() {
   const { data, isLoading, revalidate } = useStats();
@@ -164,7 +170,14 @@ export default function FocusMenuBar() {
         />
       )}
       {data?.collector && !data.collector.running && (
-        <MenuBarExtra.Item title="Not recording. Click to resume." icon={Icon.ExclamationMark} onAction={revalidate} />
+        <MenuBarExtra.Item
+          title="Not recording. Click to resume."
+          icon={Icon.ExclamationMark}
+          onAction={async () => {
+            await resume();
+            revalidate();
+          }}
+        />
       )}
 
       <MenuBarExtra.Section>

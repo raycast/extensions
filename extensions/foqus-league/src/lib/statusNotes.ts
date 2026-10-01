@@ -6,7 +6,7 @@ export type StatusSource = {
 };
 
 function parserIsBlind(data: StatusSource): boolean {
-  return data.totalOnRecord === 0 && !!data.log && data.log.records > 0 && data.log.parsed === 0;
+  return !!data.log && data.log.records > 0 && data.log.parsed === 0;
 }
 
 export type StatusNote = { kind: "sync" | "blind" | "collector" | "empty"; title: string; body: string };

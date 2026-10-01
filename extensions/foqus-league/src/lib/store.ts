@@ -12,6 +12,7 @@ export type SyncState = {
   goalBlocks: Record<string, GoalBlocks>;
   quickStarts: QuickStartMark[];
   announced: string[] | null;
+  archiveFrom: number | null;
 };
 
 export type QuickStartMark = { goal: string; at: number; categories: Category[]; start?: number };
@@ -36,6 +37,7 @@ const EMPTY_STATE: SyncState = {
   goalBlocks: {},
   quickStarts: [],
   announced: null,
+  archiveFrom: null,
 };
 
 const categories = (raw: unknown): Category[] =>
@@ -322,14 +324,13 @@ export class LocalSessionStore implements SessionStore {
         return { ok: false, reason: "collision", start: next.start };
       }
 
-      const kept = sessions.filter((s) => s.start !== prev && s.start !== next.start);
-      await this.rewrite([...kept, next].sort((a, b) => a.start - b.start));
-
       const deleted = new Set(state.deleted);
       if (prev !== undefined && prev !== next.start) deleted.add(prev);
       deleted.delete(next.start);
-
       await this.writeState({ ...state, deleted: pruneDeleted([...deleted]) });
+
+      const kept = sessions.filter((s) => s.start !== prev && s.start !== next.start);
+      await this.rewrite([...kept, next].sort((a, b) => a.start - b.start));
 
       return { ok: true };
     });
@@ -337,10 +338,10 @@ export class LocalSessionStore implements SessionStore {
 
   async remove(start: number): Promise<void> {
     await this.lock(async () => {
-      const sessions = await this.readSessions();
-      await this.rewrite(sessions.filter((s) => s.start !== start));
       const state = await this.readState();
       await this.writeState({ ...state, deleted: pruneDeleted([...state.deleted, start]) });
+      const sessions = await this.readSessions();
+      await this.rewrite(sessions.filter((s) => s.start !== start));
     });
   }
 
@@ -367,6 +368,7 @@ export class LocalSessionStore implements SessionStore {
         announced: Array.isArray(parsed.announced)
           ? parsed.announced.filter((key): key is string => typeof key === "string")
           : null,
+        archiveFrom: finite(parsed.archiveFrom) ? parsed.archiveFrom : null,
       };
     } catch {
       return { ...EMPTY_STATE };

@@ -66,7 +66,7 @@ async function runSync(): Promise<SyncReport> {
 export function useStats(from = 0, to = Number.MAX_SAFE_INTEGER) {
   const prefs = getPreferences();
 
-  const stored = useCachedPromise(readStored, [from, to, prefs.weekStartsOn], { keepPreviousData: true });
+  const stored = useCachedPromise(readStored, [from, to, prefs.weekStartsOn], { keepPreviousData: false });
 
   const sync = usePromise(runSync, [], {
     onData: (report) => {

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { freePath, posterFilename, renderPosterPng, SHARE_PIXELS } from "./shareImage.ts";
+import { posterFilename, renderPosterPng, reservePath, SHARE_PIXELS } from "./shareImage.ts";
 import { tiersFor } from "./theme.ts";
 import { renderSharePoster, SHARE_ASPECT, SHARE_WIDTH, type WrappedFacts } from "./wrappedPoster.ts";
 
@@ -13,14 +13,23 @@ test("posterFilename slugs the period and never comes out empty", () => {
   assert.equal(posterFilename("···"), "foqus-recap-recap.png");
 });
 
-test("freePath steps aside instead of overwriting", async () => {
+test("reservePath steps aside instead of overwriting", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "foqus-test-"));
   try {
-    assert.equal(await freePath(dir, "a.png"), path.join(dir, "a.png"));
-    await writeFile(path.join(dir, "a.png"), "");
-    assert.equal(await freePath(dir, "a.png"), path.join(dir, "a-2.png"));
-    await writeFile(path.join(dir, "a-2.png"), "");
-    assert.equal(await freePath(dir, "a.png"), path.join(dir, "a-3.png"));
+    await writeFile(path.join(dir, "a.png"), "a backup");
+    assert.equal(await reservePath(dir, "a.png"), path.join(dir, "a-2.png"));
+    assert.equal(await reservePath(dir, "a.png"), path.join(dir, "a-3.png"), "the name it returned is already taken");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("two exports at the same moment never share a name", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "foqus-test-"));
+  try {
+    const names = await Promise.all([1, 2, 3].map(() => reservePath(dir, "sessions.json")));
+    assert.equal(new Set(names).size, 3);
+    assert.deepEqual((await readdir(dir)).sort(), ["sessions-2.json", "sessions-3.json", "sessions.json"]);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

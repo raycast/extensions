@@ -481,6 +481,7 @@ test("Raycast 2 start carries the goal under Title, not Goal", () => {
     at: parseLogTimestamp(at),
     goal: "🎓 Probe Goal",
     plannedSeconds: 60,
+    blocked: { mode: "block", apps: [], websites: [] },
   });
 });
 
@@ -569,11 +570,26 @@ test("Raycast 2's start entry carries the blocklist it spells out", () => {
   });
 });
 
-test("a Raycast 2 session that blocked nothing carries no blocklist to learn from", () => {
+test("a Raycast 2 session that blocked nothing says so, so clearing a goal's blocks is learned", () => {
   const message =
     "Starting Focus session\n\tBlocked Apps: \n\tDuration: 60\n\tTitle: Ship\n\tMode: block\n\tBlocked Websites:";
   const event = eventFromRecord({ eventMessage: message, timestamp: "2026-09-21 11:27:35.000000+0300" });
-  assert.equal(event?.type === "start" ? event.blocked : "missing", undefined);
+  assert.deepEqual(event?.type === "start" ? event.blocked : "missing", { mode: "block", apps: [], websites: [] });
+});
+
+test("only a headline opens a session, not a later line that mentions one", () => {
+  const timestamp = "2026-09-22 04:55:00.511418+0300";
+  const opened = '[main] [ui] openRaycastCommand took 166.00ms {\n  cmd: "Start Focus Session"\n}';
+  assert.equal(eventFromRecord({ eventMessage: opened, timestamp }), null, "opening the form starts nothing");
+  const failed = "Failed to restart Focus session from notification\n\tError: timeout";
+  assert.equal(eventFromRecord({ eventMessage: failed, timestamp }), null);
+});
+
+test("Raycast 2's node-side lifecycle notices are read past on purpose, so they never count as unread", () => {
+  const updated =
+    '[handler::focus] Focus session updated {\n  id: "4a35ef65",\n  mode: "duration",\n  status: "running"\n}';
+  const lines = [V2_NODE_STARTED, updated].map((eventMessage) => JSON.stringify({ eventMessage, timestamp: at }));
+  assert.deepEqual(parseEventLines(lines.join("\n")), { events: [], records: 0 });
 });
 
 test("a Raycast 1 start has no blocklist in the log at all", () => {

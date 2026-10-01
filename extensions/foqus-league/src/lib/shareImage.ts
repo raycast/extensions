@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { access, copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdtemp, open, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
@@ -24,14 +24,26 @@ async function exists(file: string): Promise<boolean> {
   }
 }
 
-export async function freePath(dir: string, filename: string): Promise<string> {
+async function claim(file: string): Promise<boolean> {
+  try {
+    await (await open(file, "wx")).close();
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
+    throw error;
+  }
+}
+
+export async function reservePath(dir: string, filename: string): Promise<string> {
   const ext = path.extname(filename);
   const stem = filename.slice(0, filename.length - ext.length);
   for (let n = 1; n < 1000; n++) {
     const candidate = path.join(dir, n === 1 ? filename : `${stem}-${n}${ext}`);
-    if (!(await exists(candidate))) return candidate;
+    if (await claim(candidate)) return candidate;
   }
-  return path.join(dir, `${stem}-${Date.now()}${ext}`);
+  const fallback = path.join(dir, `${stem}-${Date.now()}${ext}`);
+  if (!(await claim(fallback))) throw new Error(`Could not reserve a file name in ${dir}`);
+  return fallback;
 }
 
 export async function renderPosterPng(svgMarkup: string, destination: string, aspect = 1): Promise<string> {

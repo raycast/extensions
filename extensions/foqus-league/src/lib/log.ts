@@ -7,12 +7,13 @@ const exec = promisify(execFile);
 export const PREDICATE =
   'subsystem == "com.raycast.macos" AND (category == "focus" OR eventMessage CONTAINS[c] "focus session")';
 
-const START_HEADLINE = /Start(?:ing)? focus session/i;
+const START_HEADLINE = /^Start(?:ing)? focus session/i;
 const SUMMARY_HEADLINE = /Focus session\s*activity\s*summary/i;
 const UPDATE_HEADLINE = /^Updating focus session/i;
 const END_HEADLINE = /^(?:Complete|Cancel) focus session|^Tearing down focus session/i;
 const PAUSE_HEADLINE = /^Pause focus session/i;
 const BLOCKED_HEADLINE = /^Website has been blocked/i;
+const NODE_LIFECYCLE = /^\[handler::focus\] Focus session (?:started|updated|restarted|completed|cancelled)\b/;
 
 export const MAX_SESSION_MINUTES = 12 * 60;
 
@@ -108,19 +109,22 @@ function list(value: string | null): string[] {
 }
 
 function blockedFrom(message: string): LoggedBlocks | null {
-  if (field(message, "Mode") === null) return null;
-  const apps = list(field(message, "Blocked Apps"));
-  const websites = list(field(message, "Blocked Websites"));
-  if (!apps.length && !websites.length) return null;
-  return { mode: field(message, "Mode") === "allow" ? "allow" : "block", apps, websites };
+  const mode = field(message, "Mode");
+  if (mode === null) return null;
+  return {
+    mode: mode === "allow" ? "allow" : "block",
+    apps: list(field(message, "Blocked Apps")),
+    websites: list(field(message, "Blocked Websites")),
+  };
 }
 
 export function eventFromRecord(rec: { eventMessage?: string; timestamp?: string }): FocusEvent | null {
   const message = rec.eventMessage ?? "";
+  const headline = message.split("\n", 1)[0];
   const at = rec.timestamp ? parseLogTimestamp(rec.timestamp) : null;
   if (at === null) return null;
 
-  if (START_HEADLINE.test(message)) {
+  if (START_HEADLINE.test(headline)) {
     const blocked = blockedFrom(message);
     return {
       type: "start",
@@ -131,7 +135,7 @@ export function eventFromRecord(rec: { eventMessage?: string; timestamp?: string
     };
   }
 
-  if (UPDATE_HEADLINE.test(message)) {
+  if (UPDATE_HEADLINE.test(headline)) {
     return {
       type: "update",
       at,
@@ -140,7 +144,7 @@ export function eventFromRecord(rec: { eventMessage?: string; timestamp?: string
     };
   }
 
-  if (SUMMARY_HEADLINE.test(message)) {
+  if (SUMMARY_HEADLINE.test(headline)) {
     const startedRaw = field(message, "Start date");
     return {
       type: "summary",
@@ -152,15 +156,15 @@ export function eventFromRecord(rec: { eventMessage?: string; timestamp?: string
     };
   }
 
-  if (END_HEADLINE.test(message)) {
-    return { type: "end", at, completed: /^Complete/i.test(message) || field(message, "Reason") === "completed" };
+  if (END_HEADLINE.test(headline)) {
+    return { type: "end", at, completed: /^Complete/i.test(headline) || field(message, "Reason") === "completed" };
   }
 
-  if (PAUSE_HEADLINE.test(message)) {
+  if (PAUSE_HEADLINE.test(headline)) {
     return { type: "pause", at, seconds: parseDurationSeconds(field(message, "Duration")) };
   }
 
-  if (BLOCKED_HEADLINE.test(message)) {
+  if (BLOCKED_HEADLINE.test(headline)) {
     const site = field(message, "Website");
     return site ? { type: "blocked", at, site: hostOf(site) } : null;
   }
@@ -175,7 +179,7 @@ export type LogScan = {
 
 export function isSessionRecord(message: string): boolean {
   const [headline, ...rest] = message.split("\n");
-  return /focus/i.test(headline) && rest.some((line) => /^[ \t]+\S[^:]*:/.test(line));
+  return /focus/i.test(headline) && !NODE_LIFECYCLE.test(headline) && rest.some((line) => /^[ \t]+\S[^:]*:/.test(line));
 }
 
 export function parseEventLines(text: string): LogScan {

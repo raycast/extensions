@@ -162,6 +162,7 @@ async function recordSessions(
   cursor: number,
   stream: { offset: number; reset: boolean },
   owned: OwnedCategory[] | null,
+  archiveFrom: number | null | undefined,
 ): Promise<number> {
   const { sessions, pending, consumed } = pairSessions(events, state.pending);
   const added = await target.add(sessions);
@@ -171,6 +172,7 @@ async function recordSessions(
     cursor: Math.min(Date.now(), Math.max(current.cursor ?? 0, cursor)),
     pending: mergePending(current.pending, pending, consumed),
     streamOffset: stream.reset ? stream.offset : Math.max(current.streamOffset, stream.offset),
+    archiveFrom: archiveFrom === undefined ? current.archiveFrom : archiveFrom,
     ...blocksFromEvents(events, owned, current),
   }));
 
@@ -198,11 +200,19 @@ export async function syncSessions(target: SessionStore, sources: SyncSources): 
 
   let archive: LogScan = { events: [], records: 0 };
   let warning: string | undefined;
-  if (!stream.continuous || state.cursor === null) {
+  let archiveFrom: number | null | undefined;
+  if (!stream.continuous || state.cursor === null || state.archiveFrom !== null) {
+    const since = state.archiveFrom === null ? archiveWindow(state.cursor, startedAt) : new Date(state.archiveFrom);
     try {
-      archive = await sources.archive(archiveWindow(state.cursor, startedAt));
+      archive = await sources.archive(since);
+      archiveFrom = null;
     } catch (error) {
-      if (stream.events.length === 0) throw error;
+      const missed = since.getTime();
+      if (stream.events.length === 0) {
+        await target.mutateState((current) => ({ ...current, archiveFrom: missed })).catch(() => undefined);
+        throw error;
+      }
+      archiveFrom = missed;
       warning = error instanceof Error ? error.message : String(error);
     }
   }
@@ -210,7 +220,7 @@ export async function syncSessions(target: SessionStore, sources: SyncSources): 
   const events = dedupe([...stream.events, ...archive.events]);
   const spellsOutBlocks = events.some((e) => e.type === "start" && e.blocked);
   const owned = spellsOutBlocks ? await sources.categories().catch(() => null) : [];
-  const added = await recordSessions(target, state, events, startedAt, stream, owned);
+  const added = await recordSessions(target, state, events, startedAt, stream, owned, archiveFrom);
 
   return {
     added,

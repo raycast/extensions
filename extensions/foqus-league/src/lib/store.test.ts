@@ -316,6 +316,7 @@ test("mutateState merges into the document on disk instead of overwriting it", a
       goalBlocks: {},
       quickStarts: [],
       announced: null,
+      archiveFrom: null,
     });
 
     const snapshot = await store.readState();
@@ -459,6 +460,7 @@ test("a store with nothing on disk reads empty instead of throwing", async () =>
       goalBlocks: {},
       quickStarts: [],
       announced: null,
+      archiveFrom: null,
     });
     assert.deepEqual(await fs.readdir(dir), [], "reading must not create the files either");
   });
@@ -477,6 +479,7 @@ test("a state document with wrong-typed fields is repaired field by field, not d
         goalBlocks: 7,
         quickStarts: [{ goal: "Ship", at: "now" }, "junk"],
         announced: "yes",
+        archiveFrom: "soon",
       }),
       "utf8",
     );
@@ -490,6 +493,7 @@ test("a state document with wrong-typed fields is repaired field by field, not d
     assert.deepEqual(state.goalBlocks, {});
     assert.deepEqual(state.quickStarts, [], "a mark with no time cannot be matched to a start");
     assert.equal(state.announced, null, "an unreadable ledger is re-seeded, never replayed as new");
+    assert.equal(state.archiveFrom, null, "a missed window with no time cannot be read again");
   });
 });
 
@@ -627,4 +631,26 @@ test("release leaves a lock that another holder replaced in the meantime", () =>
       return state;
     });
     assert.equal(await fs.readFile(lock, "utf8"), "another command's token", "only the owner's lock is removed");
+  }));
+
+const crashOnRewrite = (store: LocalSessionStore) => {
+  (store as unknown as { rewrite: () => Promise<void> }).rewrite = async () => {
+    throw new Error("killed between the two writes");
+  };
+};
+
+test("a delete cut short after its tombstone cannot be brought back by the next sync", () =>
+  withStore(async (store) => {
+    await store.add([at(T1)]);
+    crashOnRewrite(store);
+    await assert.rejects(store.remove(T1));
+    assert.ok((await store.readState()).deleted.includes(T1), "the tombstone lands before the session file changes");
+  }));
+
+test("a session moved to a new start keeps its old start tombstoned even if the move is cut short", () =>
+  withStore(async (store) => {
+    await store.add([at(T1)]);
+    crashOnRewrite(store);
+    await assert.rejects(store.saveSession({ previousStart: T1, session: manual(T2, "Write", 40) }));
+    assert.ok((await store.readState()).deleted.includes(T1));
   }));

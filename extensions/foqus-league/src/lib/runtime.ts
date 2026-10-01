@@ -3,7 +3,7 @@ import { execFile } from "child_process";
 import * as path from "path";
 import { setTimeout as sleep } from "timers/promises";
 import { promisify } from "util";
-import { collectorPaths as pathsUnder, collectorStatus as statusOf } from "./collector.ts";
+import { collectorPaths as pathsUnder, collectorStatus as statusOf, ensureCollector } from "./collector.ts";
 import { builtinsAsLogged, readCategories } from "./focusCategories.ts";
 import type { Category } from "./focusSetup.ts";
 import { learnGoalBlocks as learn } from "./goalBlocks.ts";
@@ -40,6 +40,7 @@ export function getPreferences(): ParsedPreferences {
 export const store = new LocalSessionStore(environment.supportPath);
 export const collectorPaths = () => pathsUnder(environment.supportPath);
 export const collectorStatus = () => statusOf(collectorPaths());
+export const resumeRecording = () => ensureCollector(collectorPaths());
 
 const installedApps = async () =>
   new Set((await getApplications()).flatMap((app) => (app.bundleId ? [app.bundleId] : [])));

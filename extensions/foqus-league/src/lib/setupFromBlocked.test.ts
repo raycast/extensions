@@ -138,6 +138,12 @@ test("Raycast 1 starts carry no blocklist, so what was already learned is kept",
   assert.deepEqual(blocksFromEvents([startEvent(10, "Ship")], owned, memory(known)).goalBlocks, known);
 });
 
+test("a Raycast 2 start that blocked nothing clears what the goal used to block", () => {
+  const known = { Ship: { categories: [{ id: "social", title: "Social" }], mode: "block" as const, skipped: [] } };
+  const after = blocksFromEvents([startEvent(10, "Ship", blocked([], []))], owned, memory(known));
+  assert.deepEqual(after.goalBlocks.Ship, { categories: [], mode: "block", skipped: [] });
+});
+
 test("a start with no goal cannot file blocks under an empty name", () => {
   assert.deepEqual(
     blocksFromEvents([startEvent(10, "", blocked([], ["booking.com"]))], owned, memory()).goalBlocks,

@@ -19,6 +19,7 @@ const EMPTY_STATE: SyncState = {
   goalBlocks: {},
   quickStarts: [],
   announced: null,
+  archiveFrom: null,
 };
 
 function fakeStore(initial: Partial<SyncState> = {}) {
@@ -308,6 +309,32 @@ test("a failed archive read the stream covered for is reported as a warning, not
 
   assert.equal(result.added, 1);
   assert.match(result.warning ?? "", /Could not read the log/);
+});
+
+test("an archive window a failed read missed is read again later, even once the stream runs unbroken", async () => {
+  const cursor = Date.now() - 60 * MINUTE;
+  const fake = fakeStore({ cursor });
+  await syncSessions(fake.store, fakeSources([startEvent(Date.now(), "Ship")], new Error("Could not read the log")));
+  const missed = fake.state().archiveFrom;
+  assert.ok(missed !== null && missed <= cursor, "the window it could not read is remembered");
+
+  const asked: number[] = [];
+  const unbroken = fakeSources([], [], 512, { continuous: true });
+  await syncSessions(fake.store, {
+    ...unbroken,
+    archive: async (since) => {
+      asked.push(since.getTime());
+      return { events: [], records: 0 };
+    },
+  });
+  assert.deepEqual(asked, [missed], "an unbroken stream alone would have skipped the archive");
+  assert.equal(fake.state().archiveFrom, null, "and a read that succeeds settles it");
+});
+
+test("a failed archive read with nothing else to show still remembers the window it missed", async () => {
+  const fake = fakeStore({ cursor: Date.now() - 10 * MINUTE });
+  await assert.rejects(() => syncSessions(fake.store, fakeSources([], new Error("Could not read the log"))));
+  assert.notEqual(fake.state().archiveFrom, null);
 });
 
 test("a start learned while the archive read was blocked survives the sync", async () => {

@@ -20,7 +20,7 @@ import { formatDayLong, formatDuration, formatTime, pluralize, truncate } from "
 import { ImportForm } from "./lib/ImportForm.tsx";
 import { SessionForm } from "./lib/SessionForm.tsx";
 import { store } from "./lib/runtime.ts";
-import { DOWNLOADS, freePath } from "./lib/shareImage.ts";
+import { DOWNLOADS, reservePath } from "./lib/shareImage.ts";
 import { UNLABELLED } from "./lib/stats.ts";
 import { dayKey } from "./lib/streaks.ts";
 import { statusNotes } from "./lib/statusNotes.ts";
@@ -107,7 +107,7 @@ export default function FocusSessions({ launchContext }: LaunchProps<{ launchCon
         await showToast({ style: Toast.Style.Failure, title: "Nothing to export yet" });
         return;
       }
-      const file = await freePath(DOWNLOADS, exportFilename());
+      const file = await reservePath(DOWNLOADS, exportFilename());
       await writeFile(file, serializeSessions(sessions), "utf8");
       await showToast({
         style: Toast.Style.Success,

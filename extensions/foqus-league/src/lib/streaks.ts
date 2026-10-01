@@ -75,8 +75,9 @@ function walkable(key: string, now: Date): boolean {
 export function walkStreaks(activeDayKeys: string[], weekStartsOn: 0 | 1, now: Date): StreakWalk {
   const keys = activeDayKeys.filter((key) => walkable(key, now));
   const active = new Set(keys);
-  const best = bestRun(active, keys, weekStartsOn);
   const live = liveRun(active, keys, weekStartsOn, now);
+  const forward = bestRun(active, keys, weekStartsOn);
+  const best = live.current > forward.length ? { length: live.current, start: live.start, end: live.end } : forward;
   return {
     current: live.current,
     best: best.length,
@@ -99,19 +100,27 @@ function bestRun(active: Set<string>, keys: string[], weekStartsOn: 0 | 1) {
   const shields = shieldLedger(weekStartsOn);
   let run = 0;
   let runStart: string | null = null;
+  let bridging: string[] = [];
   let key = keys[0];
   for (let day = 0; day <= span; day += 1, key = shiftDayKey(key, 1)) {
     if (active.has(key)) {
       if (run === 0) runStart = key;
       run += 1;
+      bridging = [];
       if (run > length) {
         length = run;
         start = runStart;
         end = key;
       }
-    } else if (!shields.spend(key)) {
-      run = 0;
-      runStart = null;
+    } else if (run > 0) {
+      if (shields.spend(key)) {
+        bridging.push(key);
+      } else {
+        for (const gap of bridging) shields.refund(gap);
+        bridging = [];
+        run = 0;
+        runStart = null;
+      }
     }
   }
   return { length, start, end };
@@ -121,6 +130,8 @@ function liveRun(active: Set<string>, keys: string[], weekStartsOn: 0 | 1, now: 
   const shields = shieldLedger(weekStartsOn);
   const shieldedDays = new Set<string>();
   let current = 0;
+  let start: string | null = null;
+  let end: string | null = null;
 
   if (keys.length) {
     const first = keys[0];
@@ -130,6 +141,8 @@ function liveRun(active: Set<string>, keys: string[], weekStartsOn: 0 | 1, now: 
     while (key >= first) {
       if (active.has(key)) {
         current += 1;
+        if (end === null) end = key;
+        start = key;
         for (const day of bridging) shieldedDays.add(day);
         bridging = [];
       } else if (shields.spend(key)) bridging.push(key);
@@ -144,6 +157,8 @@ function liveRun(active: Set<string>, keys: string[], weekStartsOn: 0 | 1, now: 
 
   return {
     current,
+    start,
+    end,
     shieldedDays,
     shieldsLeft: Math.max(0, SHIELDS_PER_WEEK - shields.spentInWeekOf(today) - todayCosts),
   };

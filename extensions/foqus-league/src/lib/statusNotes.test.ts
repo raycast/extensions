@@ -78,8 +78,10 @@ test("a single unread message is counted in the singular", () => {
   assert.match(notes[0].body, /1 log entry found/);
 });
 
-test("stored history means the screen is not empty, so the blind note would only alarm", () => {
-  assert.deepEqual(statusNotes({ totalOnRecord: 40, collector: UP, log: { records: 40, parsed: 0 } }, false), []);
+test("a parser that goes blind after a Raycast update is reported even with sessions on record", () => {
+  assert.deepEqual(titles({ totalOnRecord: 40, collector: UP, log: { records: 3, parsed: 0 } }, false), [
+    "Cannot read Focus sessions",
+  ]);
 });
 
 test("a failed log read is still reported first: it is the one the user can act on", () => {

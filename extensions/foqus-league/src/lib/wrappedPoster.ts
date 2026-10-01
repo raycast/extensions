@@ -33,7 +33,7 @@ export function wrappedFacts(
     data.sessions,
     Math.max(range.from, data.firstOnRecord ?? 0),
     weekStartsOn,
-    new Date(Math.min(range.to, now.getTime())),
+    new Date(Math.min(range.to - 1, now.getTime())),
   );
   const weeklyAverage = weeks.length ? Math.round(weeks.reduce((a, w) => a + w.minutes, 0) / weeks.length) : 0;
   const { bestStreakStart: from, bestStreakEnd: to } = stats;
