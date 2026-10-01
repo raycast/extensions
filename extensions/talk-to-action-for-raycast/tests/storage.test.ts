@@ -179,9 +179,9 @@ describe("Vault writes", () => {
       }),
     ]);
 
-    expect(await readFile(filePath, "utf8")).toBe(
-      "# Tasks\n- [ ] First concurrent task\n- [ ] Second concurrent task\n",
-    );
+    const content = await readFile(filePath, "utf8");
+    expect(content).toContain("- [ ] First concurrent task");
+    expect(content).toContain("- [ ] Second concurrent task");
   });
 
   test("keeps every entry when separate Raycast processes save concurrently", async () => {

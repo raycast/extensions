@@ -1,8 +1,9 @@
+import { execFile } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { constants, promises as fs } from "node:fs";
-import type { FileHandle } from "node:fs/promises";
+import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 
 export type InputMode = "note" | "task" | "shopping";
 export type Destination = "daily-note" | "existing-file";
@@ -53,11 +54,6 @@ interface HeadingMatch {
   text: string;
 }
 
-interface LockOwner {
-  pid: number;
-  token: string;
-}
-
 const DESTINATIONS: Destination[] = ["daily-note", "existing-file"];
 const POSITIONS: Position[] = ["append", "prepend"];
 const SECTIONS: Section[] = ["none", "after-heading", "section-end"];
@@ -65,6 +61,7 @@ const LINE_FORMATS: LineFormat[] = ["bullet", "task", "plain"];
 const targetLocks = new Map<string, Promise<void>>();
 const LOCK_WAIT_MS = 25;
 const LOCK_TIMEOUT_MS = 5_000;
+const execFileAsync = promisify(execFile);
 
 export async function saveInput(options: SaveInputOptions): Promise<SaveResult> {
   const inputLines = formatInputLines(
@@ -286,18 +283,16 @@ async function withTargetLock<T>(key: string, operation: () => Promise<T>): Prom
 async function withFilesystemLock<T>(target: ResolvedTarget, operation: () => Promise<T>): Promise<T> {
   const lockPath = await getLockPath(target);
   const deadline = Date.now() + LOCK_TIMEOUT_MS;
-  const owner: LockOwner = { pid: process.pid, token: randomUUID() };
   let acquired = false;
 
   while (!acquired) {
     try {
-      acquired = await createFilesystemLock(lockPath, owner);
+      acquired = await createFilesystemLock(lockPath);
     } catch (error) {
       throw toStorageError(error, target.relativePath);
     }
 
     if (!acquired) {
-      await removeAbandonedLock(lockPath);
       if (Date.now() >= deadline) {
         throw new StorageError("Another save is still in progress. Please submit again.");
       }
@@ -308,7 +303,7 @@ async function withFilesystemLock<T>(target: ResolvedTarget, operation: () => Pr
   try {
     return await operation();
   } finally {
-    await releaseFilesystemLock(lockPath, owner);
+    await releaseFilesystemLock(lockPath);
   }
 }
 
@@ -319,93 +314,27 @@ async function getLockPath(target: ResolvedTarget): Promise<string> {
   return path.join(lockDirectory, key + ".lock");
 }
 
-async function createFilesystemLock(lockPath: string, owner: LockOwner): Promise<boolean> {
-  const pendingPath = lockPath + "." + owner.token + ".pending";
-  let handle: FileHandle | undefined;
+async function createFilesystemLock(lockPath: string): Promise<boolean> {
   try {
-    handle = await fs.open(
-      pendingPath,
-      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
-      0o600,
-    );
-    await handle.writeFile(JSON.stringify(owner), "utf8");
-    await handle.close();
-    handle = undefined;
-    try {
-      await fs.link(pendingPath, lockPath);
-      return true;
-    } catch (error) {
-      if (isErrorCode(error, "EEXIST")) {
-        return false;
-      }
-      throw error;
-    }
-  } finally {
-    await handle?.close();
-    await fs.unlink(pendingPath).catch(() => undefined);
-  }
-}
-
-async function removeAbandonedLock(lockPath: string): Promise<void> {
-  try {
-    const owner = await readLockOwner(lockPath);
-    if (!owner) {
-      await fs.unlink(lockPath);
-    } else if (!isProcessRunning(owner.pid)) {
-      const abandonedPath = lockPath + "." + randomUUID() + ".abandoned";
-      await fs.rename(lockPath, abandonedPath);
-      await fs.unlink(abandonedPath);
-    }
+    await execFileAsync("/usr/bin/shlock", ["-f", lockPath, "-p", String(process.pid)]);
+    return true;
   } catch (error) {
-    if (!isErrorCode(error, "ENOENT")) {
-      throw error;
-    }
-  }
-}
-
-async function releaseFilesystemLock(lockPath: string, owner: LockOwner): Promise<void> {
-  try {
-    const currentOwner = await readLockOwner(lockPath);
-    if (currentOwner?.token === owner.token) {
-      await fs.unlink(lockPath);
-    }
-  } catch (error) {
-    if (!isErrorCode(error, "ENOENT")) {
-      throw error;
-    }
-  }
-}
-
-async function readLockOwner(lockPath: string): Promise<LockOwner | null> {
-  try {
-    const value = JSON.parse(await fs.readFile(lockPath, "utf8")) as unknown;
-    if (
-      typeof value === "object" &&
-      value !== null &&
-      "pid" in value &&
-      "token" in value &&
-      typeof value.pid === "number" &&
-      Number.isInteger(value.pid) &&
-      value.pid > 0 &&
-      typeof value.token === "string"
-    ) {
-      return { pid: value.pid, token: value.token };
-    }
-    return null;
-  } catch (error) {
-    if (isErrorCode(error, "ENOENT") || error instanceof SyntaxError) {
-      return null;
+    if (typeof error === "object" && error !== null && "code" in error && error.code === 1) {
+      return false;
     }
     throw error;
   }
 }
 
-function isProcessRunning(pid: number): boolean {
+async function releaseFilesystemLock(lockPath: string): Promise<void> {
   try {
-    process.kill(pid, 0);
-    return true;
+    if ((await fs.readFile(lockPath, "utf8")).trim() === String(process.pid)) {
+      await fs.unlink(lockPath);
+    }
   } catch (error) {
-    return !isErrorCode(error, "ESRCH");
+    if (!isErrorCode(error, "ENOENT")) {
+      throw error;
+    }
   }
 }
 
