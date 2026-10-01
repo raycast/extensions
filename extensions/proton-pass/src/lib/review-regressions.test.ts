@@ -13,7 +13,11 @@ type Element = { props: Record<string, unknown> };
 type Component = (props: Record<string, unknown>) => Element;
 
 // Run the real UI callbacks with Raycast services replaced; no account or clipboard access.
-function loadView(file: string, services: Record<string, unknown>): Record<string, Component> {
+function loadView(
+  file: string,
+  services: Record<string, unknown>,
+  globals: Record<string, unknown> = {},
+): Record<string, Component> {
   const module = { exports: {} };
   const jsx = (_type: unknown, props: Element["props"]) => ({ props });
   const source = readFileSync(join(process.cwd(), "src/lib", file), "utf8");
@@ -36,6 +40,7 @@ function loadView(file: string, services: Record<string, unknown>): Record<strin
     clearInterval: () => undefined,
     process: { platform: "darwin", env: { PATH: "" } },
     console: { error: () => undefined },
+    ...globals,
   });
   return module.exports;
 }
@@ -617,44 +622,66 @@ function totpCommandFixture(
   }>,
   getTotp: (shareId: string, itemId: string) => Promise<string> = async () => "123456",
   writeCache: (items: Item[]) => Promise<void> = async () => undefined,
+  globals: Record<string, unknown> = {},
 ) {
   const harness = hookHarness();
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
   const writes: Item[][] = [];
-  const { default: Command } = loadView("../get-totp.tsx", {
-    react: harness.react,
-    "@raycast/api": {
-      List: { Section: {}, EmptyView: {} },
-      Action: {},
-      ActionPanel: {},
-      Icon: {},
-      Color: {},
-      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
-      Toast: { Style: {} },
-      getPreferenceValues: () => ({}),
-      showToast: async (toast: (typeof toasts)[number]) => {
-        toasts.push(toast);
+  const copied: string[] = [];
+  const { default: Command } = loadView(
+    "../get-totp.tsx",
+    {
+      react: harness.react,
+      "@raycast/api": {
+        List: { Section: {}, EmptyView: {} },
+        Action: {},
+        ActionPanel: {},
+        Icon: {},
+        Color: {},
+        Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+        Toast: { Style: {} },
+        getPreferenceValues: () => ({}),
+        Clipboard: {
+          copy: async (value: string) => {
+            copied.push(value);
+          },
+        },
+        showToast: async (toast: (typeof toasts)[number]) => {
+          toasts.push(toast);
+        },
+      },
+      "./lib/pass-cli": { listVaultsAndItems, getTotp },
+      "./lib/types": { PassCliError },
+      "./lib/utils": {
+        getTotpRemainingSeconds: () => 30,
+        getItemIcon: () => "",
+        formatTotpCode: (code: string) => code,
+      },
+      "./lib/cache": {
+        getCachedItems: async () => null,
+        setCachedItems: async (items: Item[]) => {
+          await writeCache(items);
+          writes.push(items);
+        },
+      },
+      "./lib/refresh": refresh,
+      "./lib/error-views": {
+        renderErrorView: (error: unknown, onRetry: unknown) => (error ? { props: { error, onRetry } } : null),
       },
     },
-    "./lib/pass-cli": { listVaultsAndItems, getTotp },
-    "./lib/types": { PassCliError },
-    "./lib/utils": { getTotpRemainingSeconds: () => 30, getItemIcon: () => "", formatTotpCode: (code: string) => code },
-    "./lib/cache": {
-      getCachedItems: async () => null,
-      setCachedItems: async (items: Item[]) => {
-        await writeCache(items);
-        writes.push(items);
+    {
+      Date: class extends Date {
+        static now() {
+          return 0;
+        }
       },
+      ...globals,
     },
-    "./lib/refresh": refresh,
-    "./lib/error-views": {
-      renderErrorView: (error: unknown, onRetry: unknown) => (error ? { props: { error, onRetry } } : null),
-    },
-  });
+  );
   const render = () => harness.render(Command, {});
   render();
   harness.effects.forEach((effect) => effect());
-  return { render, toasts, writes };
+  return { render, toasts, writes, copied };
 }
 
 test("TOTP Retry keeps unsaved visible codes when their vault fails, then removes them after a successful deletion", async () => {
@@ -779,6 +806,100 @@ test("TOTP loads discard late code results and order in-flight cache writes", as
     assert.equal(fixture.writes.length, stalled === "codes" ? 1 : 2);
     assert.equal(fixture.render().props.isLoading, false);
   }
+});
+
+test("expired TOTP codes are hidden and cannot be copied after a failed Retry", async () => {
+  let now = 0;
+  let calls = 0;
+  const fixture = totpCommandFixture(
+    async () => ({
+      items: calls === 0 ? [{ ...item, hasTotp: true }] : [],
+      failedVaults: [{ vault: { shareId: calls === 0 ? "other" : "vault", name: "Offline" }, message: "Offline" }],
+    }),
+    async () => {
+      if (++calls > 1) throw new Error("Offline");
+      return "123456";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  const oldCopy = actions(row.actions).find((entry) => entry.title === "Copy TOTP Code")!
+    .onAction as () => Promise<void>;
+  now = 30_000;
+  await fixture.toasts[0].primaryAction.onAction();
+  const expiredRow = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((expiredRow.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  assert.equal(
+    actions(expiredRow.actions).some((entry) => entry.title === "Copy TOTP Code"),
+    false,
+  );
+  await oldCopy();
+  assert.deepEqual(fixture.copied, []);
+  await new Promise(setImmediate);
+});
+
+test("a boundary refresh fetches current codes for a list that replaced its snapshot", async () => {
+  let now = 0;
+  let tick!: () => void;
+  let listings = 0;
+  let codes = 0;
+  let finishListingCode!: (code: string) => void;
+  let finishRefreshCode!: (code: string) => void;
+  const listingCode = new Promise<string>((resolve) => {
+    finishListingCode = resolve;
+  });
+  const refreshCode = new Promise<string>((resolve) => {
+    finishRefreshCode = resolve;
+  });
+  const replacement = { ...item, itemId: "replacement", title: "Replacement", hasTotp: true };
+  const fixture = totpCommandFixture(
+    async () => {
+      listings++;
+      return {
+        items: [listings === 1 ? { ...item, hasTotp: true } : replacement],
+        failedVaults: [{ vault: { shareId: "other", name: "Other" }, message: "Offline" }],
+      };
+    },
+    async () => {
+      codes++;
+      if (codes === 2) return listingCode;
+      if (codes === 3) return refreshCode;
+      return codes === 1 ? "123456" : "654321";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+      setInterval: (callback: () => void) => {
+        tick = callback;
+        return 0;
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  now = 29_999;
+  const retry = fixture.toasts[0].primaryAction.onAction();
+  await new Promise(setImmediate);
+  now = 30_000;
+  tick();
+  finishListingCode("111111");
+  await retry;
+  finishRefreshCode("222222");
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === replacement.title)!;
+  assert.equal((row.accessories as { tag: { value: string } }[])[0].tag.value, "654321");
+  assert.equal(codes, 4);
 });
 
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {
