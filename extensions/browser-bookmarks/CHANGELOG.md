@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for DuckDuckGo Browser] - {PR_MERGE_DATE}
+
+- Added support for the `DuckDuckGo` browser on macOS
+
 ## [Copy Link Shortcut Preference] - 2026-09-25
 
 - Added a preference to choose the Copy Link shortcut: ⌘ C (Ctrl+C on Windows) or ⌘ ⌥ C (Ctrl+Alt+C on Windows)
