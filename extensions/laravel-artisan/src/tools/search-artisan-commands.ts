@@ -33,7 +33,6 @@ export default async function searchArtisanCommandsTool(input: Input) {
   }
   const matches = searchCommands(all, input.query);
   const commands = matches.slice(0, 10);
-  const exactName = commands[0]?.name === input.query.trim();
   return {
     version,
     commands: commands.map((command) => ({
@@ -54,10 +53,8 @@ export default async function searchArtisanCommandsTool(input: Input) {
     })),
     warnings: [
       ...versionWarnings,
-      ...(!exactName && matches.length > commands.length
-        ? [
-            `Showing the top ${commands.length} of ${matches.length} matches. Search a command name or a narrower keyword for the rest.`,
-          ]
+      ...(matches.length > commands.length
+        ? [`Showing the top ${commands.length} of ${matches.length} matches. Search a narrower keyword for the rest.`]
         : []),
       ...(commands.length ? [] : [`No Artisan command matched "${input.query}".`]),
     ],

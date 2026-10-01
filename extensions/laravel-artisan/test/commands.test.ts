@@ -81,7 +81,6 @@ describe("search-artisan-commands tool", { timeout: 30_000 }, () => {
     const [newest] = await fetchVersions();
     const result = await searchArtisanCommands({ query: "make:model", version: newest.replace(".x", "") });
     expect(result.version).toBe(newest);
-    expect(result.warnings).toEqual([]);
     const [command] = result.commands;
     expect(command).toMatchObject({ name: "make:model", usage: expect.stringMatching(/^php artisan make:model /) });
     expect(command).toHaveProperty(
@@ -107,7 +106,7 @@ describe("search-artisan-commands tool", { timeout: 30_000 }, () => {
     const versions = await fetchVersions();
     const result = await searchArtisanCommands({ query: "migrate", version: "5.x" });
     expect(result.version).toBe(versions[0]);
-    expect(result.warnings).toEqual([expect.stringContaining("isn't available")]);
+    expect(result.warnings).toContainEqual(expect.stringContaining("isn't available"));
   });
 
   it("warns when nothing matches", async () => {
@@ -123,10 +122,12 @@ describe("search-artisan-commands tool", { timeout: 30_000 }, () => {
     expect(result.warnings).toEqual([]);
   });
 
-  it("says when a keyword matches more than ten commands", async () => {
-    const result = await searchArtisanCommands({ query: "make" });
-    expect(result.commands).toHaveLength(10);
-    expect(result.warnings).toEqual([expect.stringMatching(/^Showing the top 10 of \d+ matches/)]);
+  it("says when a search matches more than ten commands, even an exact name", async () => {
+    for (const query of ["make", "migrate"]) {
+      const result = await searchArtisanCommands({ query });
+      expect(result.commands).toHaveLength(10);
+      expect(result.warnings).toEqual([expect.stringMatching(/^Showing the top 10 of \d+ matches/)]);
+    }
   });
 });
 
