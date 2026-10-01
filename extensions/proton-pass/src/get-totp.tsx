@@ -11,11 +11,12 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listItems, getTotp } from "./lib/pass-cli";
+import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
+import { failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
@@ -58,6 +59,7 @@ export default function Command() {
 
   async function loadTotpItems() {
     setError(null);
+    setIsLoading(true);
 
     const cachedItems = (await getCachedItems())?.data;
     if (cachedItems) {
@@ -87,10 +89,17 @@ export default function Command() {
     }
 
     try {
-      const freshItems = await listItems();
-      await setCachedItems(freshItems);
+      const { items: freshItems, failedVaults } = await listVaultsAndItems();
+      // Vaults that failed to load keep the items already known, and a partial listing doesn't renew the cache.
+      const {
+        items: nextItems,
+        isComplete,
+        failureMessage,
+      } = getRefreshResult(freshItems, cachedItems ?? [], failedVaults, (item) => item.hasTotp);
+      if (isComplete) await setCachedItems(nextItems);
+      if (failureMessage) throw new Error(failureMessage);
 
-      const totpItems = freshItems.filter((item) => item.hasTotp);
+      const totpItems = nextItems.filter((item) => item.hasTotp);
       const itemsWithTotp = await Promise.all(
         totpItems.map(async (item) => {
           try {
@@ -104,13 +113,29 @@ export default function Command() {
 
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
+      if (failedVaults.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
+          message: failedVaults[0].message,
+          primaryAction: { title: "Retry", onAction: () => void loadTotpItems() },
+        });
+      }
     } catch (e: unknown) {
-      if (!cachedItems || (e instanceof PassCliError && e.type === "not_authenticated")) {
+      if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_authenticated")) {
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {
           setError("unknown");
         }
+      } else {
+        // The codes on screen stay, but they may be incomplete.
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't Load 2FA Codes",
+          message: e instanceof Error ? e.message.split("\n")[0] : String(e),
+          primaryAction: { title: "Retry", onAction: () => void loadTotpItems() },
+        });
       }
     } finally {
       setIsLoading(false);

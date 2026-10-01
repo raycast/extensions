@@ -16,7 +16,9 @@
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list. Without cached items, that vault shows first, before the other vaults have loaded
 - Copy Password stays available when cached items say a login has no password, and checks when used
 - New Copy Title action (⌘⇧.). Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
-- Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
+- Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action. A vault that couldn't load says so in its empty view, with Retry, and the cache is only renewed by a complete listing
+- Get TOTP keeps the known codes of vaults that fail to load and offers Retry, instead of dropping them from the cache
+- An ended session noticed while listing a vault's items also clears the cached items
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
