@@ -118,6 +118,10 @@ export function computeStats(sessions: Session[], opts: StatsOptions): Stats {
   };
 }
 
+export function thisWeek(stats: Stats): DayCell[] {
+  return stats.days.slice(-(((stats.days.length - 1) % 7) + 1));
+}
+
 export type WeekTotal = { start: string; minutes: number };
 
 export function weeklyTotals(sessions: Session[], from: number, weekStartsOn: 0 | 1, now = new Date()): WeekTotal[] {

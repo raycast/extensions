@@ -79,8 +79,18 @@ test("parsePreferences fills every field from an empty manifest", () => {
     leagues: DEFAULT_LEAGUES,
     weekStartsOn: 1,
     menuBarFormat: "today",
+    celebrations: true,
+    streakReminder: true,
+    sound: true,
   });
   assert.equal(parsePreferences({ weekStart: "sunday", menuBarFormat: "streak" }).weekStartsOn, 0);
   assert.equal(parsePreferences({ menuBarFormat: "streak" }).menuBarFormat, "streak");
   assert.equal(parsePreferences({ menuBarFormat: "bogus" }).menuBarFormat, "today");
+});
+
+test("unticked notification boxes turn them off", () => {
+  const prefs = parsePreferences({ celebrations: false, streakReminder: false, sound: false });
+  assert.equal(prefs.celebrations, false);
+  assert.equal(prefs.streakReminder, false);
+  assert.equal(prefs.sound, false);
 });

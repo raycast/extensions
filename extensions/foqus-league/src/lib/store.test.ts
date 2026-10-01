@@ -314,6 +314,8 @@ test("mutateState merges into the document on disk instead of overwriting it", a
       streamOffset: 0,
       deleted: [],
       goalBlocks: {},
+      quickStarts: [],
+      announced: null,
     });
 
     const snapshot = await store.readState();
@@ -455,6 +457,8 @@ test("a store with nothing on disk reads empty instead of throwing", async () =>
       streamOffset: 0,
       deleted: [],
       goalBlocks: {},
+      quickStarts: [],
+      announced: null,
     });
     assert.deepEqual(await fs.readdir(dir), [], "reading must not create the files either");
   });
@@ -471,6 +475,8 @@ test("a state document with wrong-typed fields is repaired field by field, not d
         streamOffset: -5,
         deleted: [T1, "two", T3],
         goalBlocks: 7,
+        quickStarts: [{ goal: "Ship", at: "now" }, "junk"],
+        announced: "yes",
       }),
       "utf8",
     );
@@ -482,6 +488,35 @@ test("a state document with wrong-typed fields is repaired field by field, not d
     assert.equal(state.streamOffset, 0, "a negative offset would re-read bytes already consumed");
     assert.deepEqual(state.deleted, [T1, T3], "the tombstones that are numbers survive the junk beside them");
     assert.deepEqual(state.goalBlocks, {});
+    assert.deepEqual(state.quickStarts, [], "a mark with no time cannot be matched to a start");
+    assert.equal(state.announced, null, "an unreadable ledger is re-seeded, never replayed as new");
+  });
+});
+
+test("a quick-start mark is read back with its categories, and a start time that is not a number is dropped", async () => {
+  await withStore(async (store, dir) => {
+    await fs.writeFile(
+      stateFile(dir),
+      JSON.stringify({
+        version: 1,
+        quickStarts: [
+          { goal: "Ship", at: 5, categories: ["social", { id: "foqus-ship", title: "Foqus Ship" }, 7], start: "soon" },
+          { goal: "Read", at: 9, categories: [], start: 12 },
+        ],
+      }),
+      "utf8",
+    );
+    assert.deepEqual((await store.readState()).quickStarts, [
+      {
+        goal: "Ship",
+        at: 5,
+        categories: [
+          { id: "social", title: "social" },
+          { id: "foqus-ship", title: "Foqus Ship" },
+        ],
+      },
+      { goal: "Read", at: 9, categories: [], start: 12 },
+    ]);
   });
 });
 

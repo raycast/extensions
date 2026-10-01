@@ -1,3 +1,4 @@
+import { ownCategoryFor } from "./focusCategories.ts";
 import { readFocusSetup, type Category, type FocusSetup, type Stranded } from "./focusSetup.ts";
 import type { GoalBlocks, SessionStore } from "./store.ts";
 
@@ -56,6 +57,12 @@ export function planFor(
     skipped: base.skipped.filter((x) => !held.has(x.id)),
     source: "goal",
   };
+}
+
+export function withNamedCategory(plan: BlockPlan, goal: string): BlockPlan {
+  const own = ownCategoryFor(goal);
+  if (plan.mode === "allow" || !plan.skipped.length || plan.categories.some((c) => c.id === own.id)) return plan;
+  return { ...plan, categories: [...plan.categories, own], source: "goal" };
 }
 
 export function describeStranded(stranded: Stranded[]): string {

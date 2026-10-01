@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { describeStranded, planFor } from "./goalBlocks.ts";
+import { describeStranded, planFor, withNamedCategory } from "./goalBlocks.ts";
 import type { FocusSetup } from "./focusSetup.ts";
 
 const cat = (id: string, title = id) => ({ id, title });
@@ -92,6 +92,39 @@ test("an owned category is not added twice when it is also selected", () => {
   assert.deepEqual(
     plan.categories.map((c) => c.id),
     ["social", "news"],
+  );
+});
+
+test("on Raycast 2 a quick start asks for the category named after its goal, which Raycast cannot show us", () => {
+  const plan = withNamedCategory(planFor("🚀 SiteRocket", { "🚀 SiteRocket": known.Break }, null), "🚀 SiteRocket");
+  assert.deepEqual(plan.categories, [{ id: "foqus-siterocket", title: "Foqus SiteRocket" }]);
+  assert.deepEqual(
+    plan.skipped.map((s) => s.title),
+    ["Arc"],
+    "the stranded apps stay listed until a session shows the category held them",
+  );
+});
+
+test("a goal with nothing stranded is started exactly as it was last run", () => {
+  const plain = planFor("Ship", { Ship: { categories: [cat("social")], mode: "block", skipped: [] } }, null);
+  assert.equal(withNamedCategory(plain, "Ship"), plain);
+});
+
+test("an allowlist never asks for a category that may not exist, which would leave it empty", () => {
+  const allow = {
+    Read: { categories: [], mode: "allow" as const, skipped: [{ id: "arxiv.org", title: "arxiv.org", app: false }] },
+  };
+  const plan = withNamedCategory(planFor("Read", allow, null), "Read");
+  assert.deepEqual(plan.categories, [], "Raycast would drop a missing id and allow nothing at all");
+});
+
+test("the named category is not asked for twice once a session has shown it", () => {
+  const shown = {
+    Break: { categories: [cat("foqus-break", "Foqus Break")], mode: "block" as const, skipped: known.Break.skipped },
+  };
+  assert.deepEqual(
+    withNamedCategory(planFor("Break", shown, null), "Break").categories.map((c) => c.id),
+    ["foqus-break"],
   );
 });
 

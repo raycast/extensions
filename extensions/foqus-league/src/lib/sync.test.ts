@@ -17,6 +17,8 @@ const EMPTY_STATE: SyncState = {
   streamOffset: 0,
   deleted: [],
   goalBlocks: {},
+  quickStarts: [],
+  announced: null,
 };
 
 function fakeStore(initial: Partial<SyncState> = {}) {
@@ -230,6 +232,37 @@ test("goal blocks learned while the archive read was blocked survive the sync", 
   await syncSessions(fake.store, fakeSources([], [], 512, { beforeArchive: () => fake.poke({ goalBlocks: learned }) }));
 
   assert.deepEqual(fake.state().goalBlocks, learned, "the menu bar learns these on the same tick as the sync");
+});
+
+test("a quick start that blocked the goal's stranded apps is remembered as using its own category", async () => {
+  const clicked = Date.now() - MINUTE;
+  const social = { id: "social", title: "Social" };
+  const own = { id: "foqus-ship", title: "Foqus Ship" };
+  const fake = fakeStore({
+    goalBlocks: {
+      Ship: {
+        categories: [social],
+        mode: "block",
+        skipped: [{ id: "com.apple.AppStore", title: "App Store", app: true }],
+      },
+    },
+    quickStarts: [{ goal: "Ship", at: clicked, categories: [social, own] }],
+  });
+  const start: FocusEvent = {
+    type: "start",
+    at: clicked + 500,
+    goal: "Ship",
+    plannedSeconds: 1500,
+    blocked: { mode: "block", apps: ["com.apple.AppStore"], websites: ["x.com"] },
+  };
+
+  await syncSessions(
+    fake.store,
+    fakeSources([start], [], 512, { categories: [{ ...social, apps: [], websites: ["x.com"] }] }),
+  );
+
+  assert.deepEqual(fake.state().goalBlocks.Ship, { categories: [social, own], mode: "block", skipped: [] });
+  assert.equal(fake.state().quickStarts[0].start, clicked + 500, "bound to this start, so a re-read agrees");
 });
 
 test("a sync that finishes late cannot rewind the resume markers a faster one set", async () => {

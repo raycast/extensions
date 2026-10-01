@@ -10,7 +10,11 @@ export type SyncState = {
   streamOffset: number;
   deleted: number[];
   goalBlocks: Record<string, GoalBlocks>;
+  quickStarts: QuickStartMark[];
+  announced: string[] | null;
 };
+
+export type QuickStartMark = { goal: string; at: number; categories: Category[]; start?: number };
 
 export type GoalBlocks = {
   categories: Category[];
@@ -30,20 +34,40 @@ const EMPTY_STATE: SyncState = {
   streamOffset: 0,
   deleted: [],
   goalBlocks: {},
+  quickStarts: [],
+  announced: null,
 };
+
+const categories = (raw: unknown): Category[] =>
+  (Array.isArray(raw) ? raw : []).flatMap((c) => {
+    if (typeof c === "string") return [{ id: c, title: c }];
+    if (!c || typeof c !== "object") return [];
+    const row = c as Partial<Category>;
+    return typeof row.id === "string"
+      ? [{ id: row.id, title: typeof row.title === "string" ? row.title : row.id }]
+      : [];
+  });
+
+const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
+
+function parseQuickStarts(value: unknown): QuickStartMark[] {
+  return (Array.isArray(value) ? value : []).flatMap((raw) => {
+    if (!raw || typeof raw !== "object") return [];
+    const row = raw as Partial<QuickStartMark>;
+    if (typeof row.goal !== "string" || !finite(row.at)) return [];
+    return [
+      {
+        goal: row.goal,
+        at: row.at,
+        categories: categories(row.categories),
+        ...(finite(row.start) ? { start: row.start } : {}),
+      },
+    ];
+  });
+}
 
 function parseGoalBlocks(value: unknown): Record<string, GoalBlocks> {
   if (!value || typeof value !== "object") return {};
-
-  const categories = (raw: unknown): Category[] =>
-    (Array.isArray(raw) ? raw : []).flatMap((c) => {
-      if (typeof c === "string") return [{ id: c, title: c }];
-      if (!c || typeof c !== "object") return [];
-      const row = c as Partial<Category>;
-      return typeof row.id === "string"
-        ? [{ id: row.id, title: typeof row.title === "string" ? row.title : row.id }]
-        : [];
-    });
 
   const stranded = (raw: unknown): Stranded[] =>
     (Array.isArray(raw) ? raw : []).flatMap((s) => {
@@ -339,6 +363,10 @@ export class LocalSessionStore implements SessionStore {
         streamOffset: typeof parsed.streamOffset === "number" && parsed.streamOffset >= 0 ? parsed.streamOffset : 0,
         deleted: Array.isArray(parsed.deleted) ? parsed.deleted.filter((n) => typeof n === "number") : [],
         goalBlocks: parseGoalBlocks(parsed.goalBlocks),
+        quickStarts: parseQuickStarts(parsed.quickStarts),
+        announced: Array.isArray(parsed.announced)
+          ? parsed.announced.filter((key): key is string => typeof key === "string")
+          : null,
       };
     } catch {
       return { ...EMPTY_STATE };

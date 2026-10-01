@@ -8,9 +8,9 @@ import {
   type CollectorStatus,
 } from "./collector.ts";
 import { readEvents, pairSessions, MAX_SESSION_MINUTES, type LogScan } from "./log.ts";
-import { setupFromBlocked, type OwnedCategory } from "./focusSetup.ts";
-import { readCategories } from "./focusCategories.ts";
-import type { GoalBlocks, SessionStore, SyncState } from "./store.ts";
+import { setupFromBlocked, type Category, type OwnedCategory } from "./focusSetup.ts";
+import { ownCategoryFor, readCategories } from "./focusCategories.ts";
+import type { QuickStartMark, SessionStore, SyncState } from "./store.ts";
 import type { FocusEvent, PendingStart } from "./types.ts";
 
 const BACKFILL_DAYS = 1;
@@ -43,18 +43,61 @@ export type SyncSources = {
   streamBytes(): Promise<number>;
 };
 
+export const QUICK_START_MS = 30_000;
+
+const QUICK_START_MARKS = 8;
+
+const QUICK_START_TTL_MS = 12 * 60 * 60_000;
+
+export function markQuickStart(
+  marks: QuickStartMark[],
+  goal: string,
+  categories: Category[],
+  now: number,
+): QuickStartMark[] {
+  const mark = { goal, at: now, categories: categories.map(({ id, title }) => ({ id, title })) };
+  return [...marks.filter((m) => now - m.at < QUICK_START_TTL_MS), mark].slice(-QUICK_START_MARKS);
+}
+
+export type BlockMemory = Pick<SyncState, "goalBlocks" | "quickStarts">;
+
 export function blocksFromEvents(
   events: FocusEvent[],
-  owned: OwnedCategory[],
-  known: Record<string, GoalBlocks>,
-): Record<string, GoalBlocks> {
-  const learned = { ...known };
+  owned: OwnedCategory[] | null,
+  memory: BlockMemory,
+): BlockMemory {
+  const goalBlocks = { ...memory.goalBlocks };
+  let quickStarts = memory.quickStarts;
   for (const event of [...events].sort((a, b) => a.at - b.at)) {
-    if (event.type !== "start" || !event.blocked || !event.goal) continue;
+    if (event.type !== "start" || !event.goal) continue;
+    const bound = quickStarts.find((m) => m.goal === event.goal && m.start === event.at);
+    const mark =
+      bound ??
+      quickStarts.findLast(
+        (m) => m.goal === event.goal && m.start === undefined && event.at >= m.at && event.at - m.at <= QUICK_START_MS,
+      );
+    if (mark && !bound) quickStarts = quickStarts.map((m) => (m === mark ? { ...m, start: event.at } : m));
+    if (!event.blocked) continue;
+
+    if (mark) {
+      const before = goalBlocks[event.goal];
+      const shown = new Set([...event.blocked.apps, ...event.blocked.websites]);
+      const stranded = before?.skipped ?? [];
+      const own = ownCategoryFor(event.goal);
+      const ownShown = before?.categories.some((c) => c.id === own.id) || stranded.some((s) => shown.has(s.id));
+      goalBlocks[event.goal] = {
+        categories: mark.categories.filter((c) => c.id !== own.id || ownShown),
+        mode: event.blocked.mode,
+        skipped: stranded.filter((s) => !shown.has(s.id)),
+      };
+      continue;
+    }
+
+    if (!owned) continue;
     const setup = setupFromBlocked(event.goal, event.blocked, owned);
-    learned[event.goal] = { categories: setup.categories, mode: setup.mode, skipped: setup.skipped };
+    goalBlocks[event.goal] = { categories: setup.categories, mode: setup.mode, skipped: setup.skipped };
   }
-  return learned;
+  return { goalBlocks, quickStarts };
 }
 
 export function dedupe(events: FocusEvent[]): FocusEvent[] {
@@ -118,7 +161,7 @@ async function recordSessions(
   events: FocusEvent[],
   cursor: number,
   stream: { offset: number; reset: boolean },
-  owned: OwnedCategory[],
+  owned: OwnedCategory[] | null,
 ): Promise<number> {
   const { sessions, pending, consumed } = pairSessions(events, state.pending);
   const added = await target.add(sessions);
@@ -128,7 +171,7 @@ async function recordSessions(
     cursor: Math.min(Date.now(), Math.max(current.cursor ?? 0, cursor)),
     pending: mergePending(current.pending, pending, consumed),
     streamOffset: stream.reset ? stream.offset : Math.max(current.streamOffset, stream.offset),
-    goalBlocks: blocksFromEvents(events, owned, current.goalBlocks),
+    ...blocksFromEvents(events, owned, current),
   }));
 
   return added;
@@ -166,7 +209,7 @@ export async function syncSessions(target: SessionStore, sources: SyncSources): 
 
   const events = dedupe([...stream.events, ...archive.events]);
   const spellsOutBlocks = events.some((e) => e.type === "start" && e.blocked);
-  const owned = spellsOutBlocks ? await sources.categories().catch(() => []) : [];
+  const owned = spellsOutBlocks ? await sources.categories().catch(() => null) : [];
   const added = await recordSessions(target, state, events, startedAt, stream, owned);
 
   return {

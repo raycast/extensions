@@ -1,4 +1,5 @@
 import { formatDuration, pluralize } from "./format.ts";
+import { thisWeek } from "./stats.ts";
 import { dateOfDayKey } from "./streaks.ts";
 import { CHART_WIDTH, luminance, px, rect, svg, text, type TextOpts } from "./svg.ts";
 import { tierFor, type Theme, type Tier } from "./theme.ts";
@@ -227,8 +228,7 @@ function momentumBody(stats: Stats, theme: Theme, dailyGoal: number, tiers: Tier
   const progress = next ? (stats.weekMinutes - tier.min) / (next.min - tier.min) : 1;
   const lastWeek = stats.lastWeekMinutes;
   const delta = stats.weekMinutes - lastWeek;
-  const thisWeek = stats.days.slice(-(((stats.days.length - 1) % 7) + 1));
-  const hit = thisWeek.filter((d) => d.minutes >= dailyGoal).length;
+  const hit = thisWeek(stats).filter((d) => d.minutes >= dailyGoal).length;
 
   const statBaseline = INSET + 7;
   let out = statsRow(stats, theme, tier, statBaseline);

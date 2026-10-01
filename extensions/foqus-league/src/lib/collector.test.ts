@@ -286,11 +286,17 @@ async function pokeHarness(logScript: string) {
   return { dir, paths, run, pokes, strays, tails };
 }
 
-test("every line the collector writes pokes the menu bar command", async () => {
-  const h = await pokeHarness(`#!/bin/sh\nsleep 0.5\necho line-1\nsleep 0.3\necho line-2\nsleep 0.6\n`);
+test("a burst of lines pokes the menu bar once, after it settles, so one run sees the whole session", async () => {
+  const h = await pokeHarness(
+    `#!/bin/sh\nsleep 0.5\necho line-1\nsleep 0.3\necho line-2\nsleep 1.8\necho line-3\nsleep 1.8\n`,
+  );
   await h.run;
 
-  assert.deepEqual(await h.pokes(), [`-g ${MENU_BAR_DEEPLINK}`, `-g ${MENU_BAR_DEEPLINK}`]);
+  assert.deepEqual(
+    await h.pokes(),
+    [`-g ${MENU_BAR_DEEPLINK}`, `-g ${MENU_BAR_DEEPLINK}`],
+    "lines 1 and 2 share a poke; line 3, a second later, gets its own",
+  );
   assert.deepEqual(await h.strays(), [], "the wrapper takes tail and the reader down with it");
   await assert.rejects(fs.stat(`${h.paths.pid}.poke`), "and clears the FIFO behind it");
   await fs.rm(h.dir, { recursive: true, force: true });

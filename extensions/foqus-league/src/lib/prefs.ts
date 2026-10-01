@@ -3,6 +3,9 @@ export type Preferences = {
   menuBarFormat: "today" | "week" | "streak";
   dailyGoal: number;
   leagues: [number, number, number];
+  celebrations: boolean;
+  streakReminder: boolean;
+  sound: boolean;
 };
 
 export type RawPreferences = {
@@ -10,6 +13,9 @@ export type RawPreferences = {
   menuBarFormat?: string;
   dailyGoal?: string;
   leagues?: string;
+  celebrations?: boolean;
+  streakReminder?: boolean;
+  sound?: boolean;
 };
 
 export const DEFAULT_LEAGUES: [number, number, number] = [600, 1200, 2400];
@@ -34,5 +40,8 @@ export function parsePreferences(raw: RawPreferences): Preferences {
     leagues: parseLeagues(raw.leagues),
     weekStartsOn: raw.weekStart === "sunday" ? 0 : 1,
     menuBarFormat: format === "week" || format === "streak" ? format : "today",
+    celebrations: raw.celebrations !== false,
+    streakReminder: raw.streakReminder !== false,
+    sound: raw.sound !== false,
   };
 }

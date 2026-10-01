@@ -38,7 +38,7 @@ type CollectorDeps = {
   isAlive: (pid: number) => Promise<boolean>;
 };
 
-export const COLLECTOR_MARKER = "foqus-collector-6";
+export const COLLECTOR_MARKER = "foqus-collector-7";
 
 export const MENU_BAR_DEEPLINK =
   "raycast://extensions/filipimiparebine/foqus-league/focus-menu-bar?launchType=background";
@@ -55,6 +55,7 @@ if mkfifo "$fifo" 2>/dev/null; then
   tail -n 0 -F "$OUT" 2>/dev/null > "$fifo" &
   tailpid=$!
   while IFS= read -r _; do
+    while IFS= read -r -t 1 _; do :; done
     if [ "$(cat "$PIDFILE" 2>/dev/null)" != "$owner" ]; then
       kill "$tailpid" 2>/dev/null
       exit 0

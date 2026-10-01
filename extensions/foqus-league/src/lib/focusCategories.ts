@@ -1,6 +1,8 @@
+import { createHash } from "crypto";
 import { writeFile, readFile } from "fs/promises";
 import { homedir } from "os";
 import * as path from "path";
+import type { Category } from "./focusSetup.ts";
 import { freePath } from "./shareImage.ts";
 
 export const CATEGORIES_PATH = path.join(
@@ -67,7 +69,28 @@ export function categoryTitleFor(goal: string): string {
     .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}️]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
-  return `Foqus ${plain || "Focus"}`;
+  if (/^[a-z0-9]+( [a-z0-9]+)*$/i.test(plain)) return `Foqus ${plain}`;
+  const tag = createHash("sha256").update(goal.trim()).digest("hex").slice(0, 6);
+  return `Foqus ${plain || "Focus"} ${tag}`;
+}
+
+export function categoryIdFor(title: string): string {
+  return (
+    title
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "focus-category"
+  );
+}
+
+export function ownCategoryFor(goal: string): Category {
+  const title = categoryTitleFor(goal);
+  return { id: categoryIdFor(title), title };
+}
+
+export function builtinsAsLogged(categories: FocusCategory[], installed: Set<string>): FocusCategory[] {
+  return categories.filter((c) => c.builtin).map((c) => ({ ...c, apps: c.apps.filter((app) => installed.has(app)) }));
 }
 
 export function findCategory(categories: FocusCategory[], title: string): FocusCategory | undefined {

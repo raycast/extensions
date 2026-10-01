@@ -130,14 +130,18 @@ function titleForApp(bundleId: string): string {
 }
 
 export function setupFromBlocked(goal: string, blocked: LoggedBlocks, owned: OwnedCategory[]): FocusSetup {
+  const blockedApps = new Set(blocked.apps);
+  const blockedSites = new Set(blocked.websites);
   const apps = new Set(blocked.apps);
   const websites = new Set(blocked.websites);
 
   const categories: Category[] = [];
   for (const category of owned) {
-    const members = [...category.apps, ...category.websites];
-    if (!members.length) continue;
-    if (!category.apps.every((a) => apps.has(a)) || !category.websites.every((w) => websites.has(w))) continue;
+    if (!category.apps.length && !category.websites.length) continue;
+    if (categories.some((c) => c.id === category.id)) continue;
+    if (!category.apps.every((a) => blockedApps.has(a)) || !category.websites.every((w) => blockedSites.has(w))) {
+      continue;
+    }
     categories.push({ id: category.id, title: category.title });
     for (const a of category.apps) apps.delete(a);
     for (const w of category.websites) websites.delete(w);

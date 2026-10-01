@@ -96,11 +96,38 @@
     {
       "name": "leagues",
       "title": "League Thresholds",
-      "description": "Hours per week for 🥈 Silver, 🥇 Gold and 💎 Diamond, comma separated. Bronze starts at 0.",
+      "description": "Hours per week for the 🥈 Silver, 🥇 Gold and 💎 Diamond leagues, comma separated. The Bronze league starts at 0.",
       "type": "textfield",
       "required": false,
       "default": "10,20,40",
       "placeholder": "10,20,40"
+    },
+    {
+      "name": "celebrations",
+      "title": "Notifications",
+      "label": "Celebrate goals",
+      "description": "A notification when you hit your daily goal, reach a new league or a perfect week, beat last week, or hit a streak milestone.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "streakReminder",
+      "title": "",
+      "label": "Remind me to keep my streak",
+      "description": "A notification after 8 PM on a day with no focus yet, while you have a streak going.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sound",
+      "title": "",
+      "label": "Play a sound",
+      "description": "A short chime with each celebration. The evening reminder stays silent.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {

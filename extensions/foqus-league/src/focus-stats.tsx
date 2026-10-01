@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, environment, launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { HowItWorks } from "./lib/HowItWorks.tsx";
 import { getPreferences, SUPPORT_URL } from "./lib/runtime.ts";
 import { renderBoard } from "./lib/statsBoard.ts";
@@ -35,12 +36,20 @@ export default function FocusStats() {
             <Action
               title="Show Recap"
               icon={Icon.Stars}
-              onAction={() => launchCommand({ name: "focus-wrapped", type: LaunchType.UserInitiated })}
+              onAction={() =>
+                launchCommand({ name: "focus-wrapped", type: LaunchType.UserInitiated }).catch((error) =>
+                  showFailureToast(error, { title: "Could not open Show Recap" }),
+                )
+              }
             />
             <Action
               title="Browse Sessions"
               icon={Icon.List}
-              onAction={() => launchCommand({ name: "focus-sessions", type: LaunchType.UserInitiated })}
+              onAction={() =>
+                launchCommand({ name: "focus-sessions", type: LaunchType.UserInitiated }).catch((error) =>
+                  showFailureToast(error, { title: "Could not open Browse Sessions" }),
+                )
+              }
             />
             {stats && (
               <Action.Push

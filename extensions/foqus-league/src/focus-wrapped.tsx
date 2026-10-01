@@ -102,7 +102,11 @@ export default function FocusWrapped() {
           <Action
             title="Show League"
             icon={Icon.BarChart}
-            onAction={() => launchCommand({ name: "focus-stats", type: LaunchType.UserInitiated })}
+            onAction={() =>
+              launchCommand({ name: "focus-stats", type: LaunchType.UserInitiated }).catch((error) =>
+                showFailureToast(error, { title: "Could not open Show League" }),
+              )
+            }
           />
           <Action
             title="Copy as Image"

@@ -3,7 +3,16 @@ import { test } from "node:test";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
-import { categoryTitleFor, findCategory, parseCategories, readCategories, writeImportFile } from "./focusCategories.ts";
+import {
+  categoryIdFor,
+  categoryTitleFor,
+  findCategory,
+  builtinsAsLogged,
+  ownCategoryFor,
+  parseCategories,
+  readCategories,
+  writeImportFile,
+} from "./focusCategories.ts";
 
 const MIRROR = JSON.stringify([
   {
@@ -45,7 +54,46 @@ test("categoryTitleFor strips the goal's emoji, which would slugify into noise",
   assert.equal(categoryTitleFor("🏄 Break"), "Foqus Break");
   assert.equal(categoryTitleFor("🚀 SiteRocket"), "Foqus SiteRocket");
   assert.equal(categoryTitleFor("Deep  Work"), "Foqus Deep Work");
-  assert.equal(categoryTitleFor("🎯"), "Foqus Focus");
+});
+
+test("a goal with letters Raycast's ids drop gets a tag, so its category id is its own", () => {
+  assert.match(categoryTitleFor("🎯"), /^Foqus Focus [0-9a-f]{6}$/);
+  assert.match(categoryTitleFor("写作"), /^Foqus 写作 [0-9a-f]{6}$/);
+  assert.equal(categoryTitleFor("🚀 SiteRocket"), "Foqus SiteRocket", "plain Latin titles stay as they are");
+  const ids = ["写作", "阅读", "Работа", "🎯", "📚", "写作 v2", "阅读 v2", "Café", "Cafè"].map(
+    (g) => ownCategoryFor(g).id,
+  );
+  assert.equal(new Set(ids).size, ids.length, `ids collide: ${ids.join(", ")}`);
+  assert.equal(categoryTitleFor("写作"), categoryTitleFor(" 写作 "), "the tag is stable for one goal");
+});
+
+test("categoryIdFor gives the id Raycast 2 gives a category it creates from a title", () => {
+  assert.equal(categoryIdFor("Foqus SiteRocket"), "foqus-siterocket");
+  assert.equal(categoryIdFor("  Foqus Deep  Work "), "foqus-deep-work");
+  assert.equal(categoryIdFor("Foqus Café"), "foqus-caf");
+  assert.equal(categoryIdFor("🎯"), "focus-category");
+});
+
+test("ownCategoryFor names a goal's category the way its import file and Raycast 2 do", () => {
+  assert.deepEqual(ownCategoryFor("🚀 SiteRocket"), { id: "foqus-siterocket", title: "Foqus SiteRocket" });
+});
+
+test("builtinsAsLogged keeps only built-ins, with only installed apps, as Raycast 2 logs them", () => {
+  const [streaming, ...rest] = builtinsAsLogged(
+    [
+      {
+        id: "streaming",
+        title: "Streaming",
+        apps: ["com.apple.TV", "com.plexapp.plexmediaserver"],
+        websites: ["netflix.com"],
+        builtin: true,
+      },
+      { id: "0F1D-UUID", title: "Foqus Block", apps: ["com.apple.AppStore"], websites: [], builtin: false },
+    ],
+    new Set(["com.apple.TV", "com.apple.AppStore"]),
+  );
+  assert.deepEqual(streaming.apps, ["com.apple.TV"]);
+  assert.deepEqual(rest, [], "a custom category in the old Raycast 1 mirror may not exist, or differ, in Raycast 2");
 });
 
 test("findCategory matches on title, since Raycast generates the id", () => {
