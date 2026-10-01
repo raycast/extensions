@@ -17,6 +17,10 @@ export const MOCK_ITEMS: Item[] = [
     username: "johndoe",
     email: "john@example.com",
     hasTotp: true,
+    urls: ["https://github.com", "https://github.com/login"],
+    hasPassword: true,
+    hasNote: true,
+    modifiedAt: "2026-07-02T09:15:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -26,6 +30,10 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Personal",
     email: "john@example.com",
     hasTotp: false,
+    urls: ["https://netflix.com"],
+    hasPassword: true,
+    hasNote: false,
+    modifiedAt: "2026-03-18T20:40:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -35,6 +43,10 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Personal",
     username: "admin@company.io",
     hasTotp: true,
+    urls: ["https://console.aws.amazon.com"],
+    hasPassword: true,
+    hasNote: false,
+    modifiedAt: "2026-09-12T14:05:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -43,6 +55,8 @@ export const MOCK_ITEMS: Item[] = [
     type: "note",
     vaultName: "Personal",
     hasTotp: false,
+    hasNote: true,
+    modifiedAt: "2026-08-21T08:30:00.000Z",
   },
   {
     shareId: "vault-1",
@@ -60,6 +74,10 @@ export const MOCK_ITEMS: Item[] = [
     vaultName: "Work",
     email: "john@company.io",
     hasTotp: true,
+    urls: ["https://company.slack.com"],
+    hasPassword: true,
+    hasNote: false,
+    modifiedAt: "2026-09-25T11:00:00.000Z",
   },
   {
     shareId: "vault-2",
@@ -128,6 +146,17 @@ export const MOCK_ITEM_DETAILS: Record<string, ItemDetail> = {
     urls: ["https://github.com", "https://github.com/login"],
     hasTotp: true,
     note: "Main development account",
+    // RFC 6238 test secret ("12345678901234567890"), not a real account.
+    totpUri: "otpauth://totp/GitHub:johndoe?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub",
+  },
+  "item-4": {
+    shareId: "vault-1",
+    itemId: "item-4",
+    title: "Private Notes",
+    type: "note",
+    vaultName: "Personal",
+    hasTotp: false,
+    note: "Wi-Fi guest password is on the fridge.\nRenew the passport before March.",
   },
   "item-2": {
     shareId: "vault-1",
