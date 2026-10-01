@@ -1,8 +1,8 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./configAPI";
-import { Stream } from "openai/streaming";
-import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
+import { allModels as changeModels, currentDate, countToken } from "./utils";
+import { buildAgentRequest, runAgent, Citation } from "./agent";
 import { ResultViewProps } from "./ResultView.types";
 import OpenAI from "openai";
 
@@ -16,38 +16,16 @@ export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
-  const [returnedCitations, setReturnedCitations] = useState<string[]>([]);
+  const [returnedCitations, setReturnedCitations] = useState<Citation[]>([]);
   const [metrics, setMetrics] = useState({
     promptTokens: 0,
     responseTokens: 0,
     cumulativeTokens: 0,
     cumulativeCost: 0,
+    cost: 0,
     model: model_override === "global" ? global_model : model_override,
     temp: temperature ?? 0.8,
   });
-
-  async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
-    const fullSysPrompt = `Current date: ${currentDate}.\n\n${sysPrompt}`;
-    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
-    try {
-      const response = await openai.chat.completions.create({
-        model,
-        messages: [
-          { role: "system", content: fullSysPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: temp,
-        stream: enable_streaming,
-      });
-      setMetrics((m) => ({ ...m, promptTokens: countToken(fullSysPrompt + userPrompt) }));
-      return response;
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Error" });
-      setLoading(false);
-      setResponse(`## ⚠️ API Error\n\`\`\`${(error as Error).message}\`\`\``);
-      return;
-    }
-  }
 
   async function getResult(newModel?: string, newTemp?: number) {
     const startTime = Date.now();
@@ -72,35 +50,28 @@ export default function ResultView(props: ResultViewProps) {
       const model = newModel || metrics.model;
       const temp = newTemp ?? metrics.temp;
       setMetrics((m) => ({ ...m, model, temp }));
-      const response = await getChatResponse(sys_prompt, selectedText, model, temp);
-      if (!response) return;
+      const fullSysPrompt = `Current date: ${currentDate}.\n\n${sys_prompt}`;
+      const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
+      setMetrics((m) => ({ ...m, promptTokens: countToken(fullSysPrompt + userPrompt) }));
 
-      let responseContent = "";
-      const updateResponse = (part: string) => {
-        responseContent += part;
-        setResponse(responseContent);
-        setMetrics((m) => ({ ...m, responseTokens: countToken(responseContent) }));
+      const updateResponse = (text: string) => {
+        setResponse(text);
+        setMetrics((m) => ({ ...m, responseTokens: countToken(text) }));
       };
 
-      if (response instanceof Stream) {
-        let hasSetCitations = false;
-
-        for await (const part of response) {
-          updateResponse(part.choices[0]?.delta?.content ?? "");
-
-          if (!hasSetCitations && part.model.includes("sonar")) {
-            const citations = (part as OpenAI.ChatCompletionChunk).citations;
-            if (citations?.length) {
-              setReturnedCitations(citations);
-              hasSetCitations = true; // to prevent further updates
-            }
-          }
-        }
-      } else {
-        updateResponse(response.choices[0]?.message?.content ?? "");
-        const citations = (response as OpenAI.ChatCompletion).citations;
-        setReturnedCitations(response.model.includes("sonar") ? citations || [] : []);
-      }
+      const { citations, cost } = await runAgent(
+        openai,
+        buildAgentRequest({
+          target: model,
+          instructions: fullSysPrompt,
+          turns: [{ role: "user", content: userPrompt }],
+          stream: enable_streaming,
+          temperature: temp,
+        }),
+        updateResponse,
+      );
+      setReturnedCitations(citations);
+      const costCents = (cost ?? 0) * 100;
 
       const duration = (Date.now() - startTime) / 1000;
       toast.style = Toast.Style.Success;
@@ -109,11 +80,16 @@ export default function ResultView(props: ResultViewProps) {
       setMetrics((m) => ({
         ...m,
         cumulativeTokens: m.cumulativeTokens + m.promptTokens + m.responseTokens,
-        cumulativeCost: m.cumulativeCost + estimatePrice(m.promptTokens, m.responseTokens, model),
+        cost: costCents,
+        cumulativeCost: m.cumulativeCost + costCents,
       }));
     } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Error";
       if (error instanceof OpenAI.OpenAIError) {
         setResponse(`## ⚠️ API Error\n\`\`\`${error.message}\`\`\``);
+      } else if (error instanceof Error) {
+        setResponse(`## ⚠️ Error\n\`\`\`${error.message}\`\`\``);
       } else {
         setResponse("⚠️ Unexpected error. Please check your input and connection.");
       }
@@ -140,11 +116,11 @@ export default function ResultView(props: ResultViewProps) {
 
   markdownSegments.push(response);
 
-  const shouldShowCitations = returnedCitations.length > 0 && /\[\d+\]/.test(response); // check if citations are returned and referenced
+  const shouldShowCitations = returnedCitations.length > 0 && /\[(web:)?\d+\]/.test(response); // check if citations are returned and referenced
   if (shouldShowCitations) {
     const citationsSection = [
       "\n\n---\n\n**Sources**\n",
-      returnedCitations.map((citation, index) => `${index + 1}. ${citation}`).join("\n"),
+      returnedCitations.map((citation) => `${citation.id}. ${citation.url}`).join("\n"),
     ].join("");
     markdownSegments.push(citationsSection);
   }
@@ -210,7 +186,10 @@ export default function ResultView(props: ResultViewProps) {
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Model" text={changeModels.filter((m) => m.id === metrics.model)[0].name} />
+          <Detail.Metadata.Label
+            title="Model"
+            text={changeModels.find((m) => m.id === metrics.model)?.name ?? metrics.model}
+          />
           <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(1)} />
           <Detail.Metadata.Label title="Prompt Tokens" text={metrics.promptTokens.toString()} />
           <Detail.Metadata.Label title="Response Tokens" text={metrics.responseTokens.toString()} />
@@ -219,10 +198,7 @@ export default function ResultView(props: ResultViewProps) {
             title="Total Tokens"
             text={(metrics.promptTokens + metrics.responseTokens).toString()}
           />
-          <Detail.Metadata.Label
-            title="Total Cost"
-            text={`${estimatePrice(metrics.promptTokens, metrics.responseTokens, metrics.model).toFixed(4)}¢`}
-          />
+          <Detail.Metadata.Label title="Total Cost" text={`${metrics.cost.toFixed(4)}¢`} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Cumulative Tokens" text={metrics.cumulativeTokens.toString()} />
           <Detail.Metadata.Label title="Cumulative Cost" text={`${metrics.cumulativeCost.toFixed(4)}¢`} />
