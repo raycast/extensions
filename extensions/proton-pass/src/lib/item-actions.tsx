@@ -195,7 +195,8 @@ export const ItemActions = memo(function ItemActions({
         <Action
           title="Copy Title"
           icon={Icon.Text}
-          shortcut={Keyboard.Shortcut.Common.CopyName}
+          // ⌘⇧. like Copy Name on macOS; Copy Name's Windows shortcut (Ctrl+Alt+C) is Copy Email's here.
+          shortcut={platformShortcut(["cmd", "shift"], ".")}
           onAction={() => copy("Title", async () => item.title, false)}
         />
       </ActionPanel.Section>
