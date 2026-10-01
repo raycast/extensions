@@ -40,6 +40,13 @@
       "mode": "no-view"
     },
     {
+      "name": "copy-for-slack",
+      "title": "Copy for Slack",
+      "subtitle": "Qobuz",
+      "description": "Copy the current track title and one song.link URL, so Slack unfurls a single preview card with the artwork.",
+      "mode": "no-view"
+    },
+    {
       "name": "now-playing",
       "title": "Now Playing",
       "subtitle": "Qobuz",

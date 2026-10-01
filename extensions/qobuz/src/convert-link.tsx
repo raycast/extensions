@@ -12,7 +12,7 @@ import {
   type ResolveFailure,
   type ResolvedTrack,
 } from "./lib/resolve";
-import { shareClipboard, shareLinks, shareQuery, type ShareLink } from "./lib/share";
+import { shareClipboard, shareLinks, shareQuery, slackClipboard, type ShareLink } from "./lib/share";
 
 type Source = "argument" | "now-playing" | "clipboard";
 
@@ -185,6 +185,7 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
   }
 
   if (data.mode === "from-qobuz") {
+    const slackShare = slackClipboard(data.track, data.links);
     return (
       <ActionPanel>
         <Action.CopyToClipboard
@@ -192,6 +193,7 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
           icon={Icon.Link}
           content={shareClipboard(data.track, data.links)}
         />
+        {slackShare && <Action.CopyToClipboard title="Copy for Slack" icon={Icon.SpeechBubble} content={slackShare} />}
         {data.links
           .filter((link) => link.platform !== "qobuz")
           .map((link) => (

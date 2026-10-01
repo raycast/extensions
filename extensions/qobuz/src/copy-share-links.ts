@@ -1,24 +1,12 @@
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import type { QobuzClient, Track } from "@kud/qobuz";
 import { getClient } from "./lib/client";
+import { nowPlaying } from "./lib/now-playing-track";
 import { countServices, shareClipboard, shareLinks, shareTitle } from "./lib/share";
-
-// The Qobuz app rewrites its player-state file on every queue change, so a
-// read can land mid-write and parse as "nothing playing". One retry covers it.
-const RETRY_DELAY_MS = 150;
-
-const nowPlaying = async (client: QobuzClient): Promise<Track | undefined> => {
-  const first = await client.nowPlaying();
-  if (first) return first;
-  await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-  return client.nowPlaying();
-};
 
 export default async function Command() {
   try {
-    const client = await getClient();
-    const track = await nowPlaying(client);
+    const track = await nowPlaying(await getClient());
     if (!track) {
       await showToast({ style: Toast.Style.Failure, title: "Nothing playing in Qobuz" });
       return;
