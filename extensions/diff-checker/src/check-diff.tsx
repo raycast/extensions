@@ -45,12 +45,11 @@ interface DiffProps {
 function DiffView(props: DiffProps) {
   const { original, changed } = props;
   const diff = getDiffText(original, changed);
-  const markdown = `
-  ## Diff
+  const markdown = `## Diff
 
-  \`\`\`
+\`\`\`diff
 ${diff}
-  \`\`\``;
+\`\`\``;
   return <Detail markdown={markdown} />;
 }
 
