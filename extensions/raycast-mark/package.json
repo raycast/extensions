@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-mark",
   "title": "Goose Mark",
-  "description": "Local bookmarks with favicon persistence and template URLs",
+  "description": "Grid-based local bookmark management with multi-location categories, template URLs, and portable JSON backups",
   "version": "0.1.0",
   "private": false,
   "license": "MIT",

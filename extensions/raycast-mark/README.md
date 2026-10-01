@@ -1,6 +1,8 @@
 # Goose Mark for Raycast
 
-A local-first bookmark extension with add/edit/delete, two-level categories and multiple locations, favorites and recent items, JSON import/export, explicit conflict resolution, and optional bring-your-own-key AI metadata suggestions.
+Goose Mark is a standalone, local-first Raycast bookmark manager. Browse a visual grid, organize each bookmark in multiple locations within two-level categories, and open saved links or parameterized URL templates.
+
+Add, edit, and delete bookmarks; use favorites and recent items; and transfer JSON backups with portable icons. Library changes are recorded as events, with explicit conflict resolution when concurrent versions disagree. Shared JSON files and bring-your-own-key AI metadata suggestions are optional.
 
 Only **Search Marks** is registered as a command. Add bookmarks and open Settings & Data from its action panel. The source for the data layer and its self-checks is in `src/repository.ts`, `src/import-export.ts`, `src/ai.ts`, and `tests/core.test.ts`. A successful build does not verify behavior inside Raycast or synchronization across Macs.
 
@@ -38,11 +40,13 @@ The extension defaults to English and offers Simplified Chinese in its language 
 
 A dedicated directory can be placed under `~/Library/Mobile Documents/com~apple~CloudDocs/…`; confirm in Finder that it really is in iCloud Drive. **File synchronization is not a database or a backup**: there is no promised latency bound, conflict-free concurrent writing, or zero data loss. Files may be placeholders, stale, removed from local storage, or unavailable offline; unreadable files block writes instead of being treated as an empty library. Deletions may propagate to other devices on the same account, and available storage may be shared with other iCloud uses. Absolute paths may need to be selected again on another Mac; the directory preference is not synced by this extension. A local event write does not prove upload or visibility on another device. No sync-progress UI is provided; export backups regularly.
 
-### Migrate from goose-mark (uTools)
+### Optional JSON compatibility
 
-The old library is a uTools database. This extension does not read it or the original project's repository.
+Import JSON accepts this extension's backups and legacy Goose Mark (uTools) exports with `{groups, bookmarks}`. Legacy application databases are not read directly.
 
-1. Export JSON with `{groups, bookmarks}` from the old goose-mark.
+To import a legacy export:
+
+1. Export JSON with `{groups, bookmarks}` from the source application.
 2. Open **Search Marks → Settings & Data → Import JSON** and choose the file.
 3. Read the preview and warnings. Embedded icons are saved under the new library's `icons/`; an imported legacy `file` icon path is **never read** and a site favicon is attempted instead. Missing IDs and timestamps are generated or defaulted as indicated.
 4. For different contents with the same ID, inspect the full difference (URL, deletion, locations, description, tags, and categories) and choose **Keep Local** or **Use Imported**. Different IDs with the same URL produce a warning, not an automatic merge.
@@ -78,7 +82,7 @@ Settings & Data lists every concurrent version of each entity, including tombsto
 
 ## Not implemented in this version
 
-HTML/URL Wizard import, bulk actions, pinyin search, dead-link checks, page scraping, category ordering or dragging, emptying trash, copying descriptions, and moving a subcategory across parent categories or promoting it. The icon pipeline uses local files and site favicons rather than the old uTools attachment API.
+HTML/URL Wizard import, bulk actions, pinyin search, dead-link checks, page scraping, category ordering or dragging, emptying trash, copying descriptions, and moving a subcategory across parent categories or promoting it. The icon pipeline uses local files and site favicons.
 
 ## Verification and publication status
 
