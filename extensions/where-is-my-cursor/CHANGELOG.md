@@ -1,6 +1,6 @@
 # Where's Cursor Changelog
 
-## [Store Review Fixes] - {PR_MERGE_DATE}
+## [Store Review Fixes] - 2026-10-01
 
 - Compile the Swift helper from source at build time instead of shipping a prebuilt binary.
 - Show a failure toast when the Swift helper fails to compile, launch, or run.
