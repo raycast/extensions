@@ -163,9 +163,10 @@ export default function Command() {
     try {
       while (true) {
         const currentItems = itemsRef.current;
+        const codeTimeStep = getTotpTimeStep();
         const updatedItems = await Promise.all(currentItems.map(loadCode));
-        // Refresh the replacement list if a listing changed it while these requests were running.
-        if (itemsRef.current !== currentItems) continue;
+        // Re-fetch if either the list or the time step changed while these requests were running.
+        if (itemsRef.current !== currentItems || codeTimeStep !== getTotpTimeStep()) continue;
         setItems(updatedItems);
         itemsRef.current = updatedItems;
         break;

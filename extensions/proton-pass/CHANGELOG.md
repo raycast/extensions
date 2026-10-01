@@ -26,6 +26,7 @@
 - Partial Get TOTP refreshes remove deleted codes from successful vaults before showing errors for failed vaults
 - Get TOTP Retry preserves unsaved visible codes for failed vaults; overlapping loads only apply the latest result and serialize cache writes
 - Expired Get TOTP codes are hidden and cannot be copied; boundary refreshes fetch codes again if the item list changes underneath them
+- A slow code refresh that crosses a TOTP time step immediately retries for the new time step
 - Offline vault views use the newer saved snapshot without restoring deleted items
 - List selection and details stay aligned when changing vaults or filtering suggestions
 - Hiding the details panel stops automatic secret loads; already-loaded custom fields and explicit copy actions remain available

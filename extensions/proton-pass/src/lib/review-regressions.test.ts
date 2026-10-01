@@ -902,6 +902,50 @@ test("a boundary refresh fetches current codes for a list that replaced its snap
   assert.equal(codes, 4);
 });
 
+test("a slow code refresh retries in the new time step instead of waiting for another boundary", async () => {
+  let now = 0;
+  let tick!: () => void;
+  let codes = 0;
+  let finishOldCode!: (code: string) => void;
+  const oldCode = new Promise<string>((resolve) => {
+    finishOldCode = resolve;
+  });
+  const fixture = totpCommandFixture(
+    async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+    async () => {
+      codes++;
+      if (codes === 2) return oldCode;
+      return codes === 1 ? "123456" : "654321";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+      setInterval: (callback: () => void) => {
+        tick = callback;
+        return 0;
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  now = 29_999;
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  const refresh = actions(row.actions).find((entry) => entry.title === "Refresh Codes")!
+    .onAction as () => Promise<void>;
+  const pending = refresh();
+  now = 30_000;
+  tick();
+  finishOldCode("111111");
+  await pending;
+  const updated = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "654321");
+  assert.equal(codes, 3);
+  assert.equal(fixture.render().props.isLoading, false);
+});
+
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {
   const harness = hookHarness();
   const vault = { shareId: "vault", name: "Personal" };
