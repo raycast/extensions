@@ -1,5 +1,27 @@
 # Trakt Manager Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+
+- **Continue Watching includes paused movies**, with an All / Shows / Movies filter, like Trakt's Continue Watching.
+- **Trakt's card actions on Continue Watching**: "Drop Show" and "Drop Movie" (after a confirmation), "Browse Seasons" on shows, and "Now Watching" to check in for the runtime of an episode or movie without posting to connected social networks. While a check-in is active, it becomes "Stop Check-In".
+- **"Mark as Watched on…"** records a watch on the release date (episodes), on an unknown date, or on a date you pick.
+- **Search results follow Trakt's card menu**: "Add to Watchlist" or "Remove from Watchlist" depending on whether the title is already on your watchlist, "Mark as Watched" ("Mark Whole Show as Watched" on shows) with "Mark as Watched on…", and "Now Watching" or "Stop Check-In" on movies.
+
+### Changed
+
+- **Up Next is now Continue Watching**, with wide cards showing the title's artwork, the next episode's number and name, a movie's length, and a progress ring whose tooltip says how many episodes or how much time is left.
+- **"Check-In" is now "Mark as Watched"**: it always added a watch at the current time, never a Trakt check-in. It is the first action in Continue Watching. On a show, the old "Check-In" is named "Mark First Episode as Watched", and the duplicate "Add to History" on episodes is gone.
+- History shows "Unknown date" instead of January 1, 1970 for a watch saved without a date.
+- The "Get up Next Episodes" AI tool reads the same list of shows in progress, and no longer reports a total item count, since Trakt sends a fixed placeholder for it.
+
+### Fixed
+
+- Continue Watching (formerly Up Next) no longer lists shows you have not started.
+- Marking as watched, removing from the watchlist and dropping a show report an error when Trakt stored nothing, instead of a success.
+- A detail view no longer keeps stale actions: in search, its watchlist and check-in actions follow changes at once, and on the Watchlist, History and Continue Watching screens it closes after an action that changes or removes the item.
+
 ## [Update] - 2026-09-23
 
 ### Added

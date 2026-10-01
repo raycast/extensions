@@ -5,26 +5,44 @@ import { SeasonGrid } from "./season-grid";
 import { IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "../lib/constants";
 import { createMovieMarkdown, createMovieMetadata } from "../lib/detail-helpers";
 import { getIMDbUrl, getTraktUrl } from "../lib/helper";
-import { TraktMovieHistoryListItem, TraktMovieListItem, TraktShowListItem } from "../lib/schema";
+import {
+  TraktMovieHistoryListItem,
+  TraktMovieListItem,
+  TraktPlaybackMovieItem,
+  TraktShowListItem,
+} from "../lib/schema";
 
-type MediaAction<T> = {
+export type MediaAction<T> = {
   title: string;
   icon: Icon;
   shortcut?: Keyboard.Shortcut;
   onAction: (item: T) => void;
 };
 
-type MovieActionItem = TraktMovieListItem | TraktMovieHistoryListItem;
+type MovieActionItem = TraktMovieListItem | TraktMovieHistoryListItem | TraktPlaybackMovieItem;
 
 type MovieActionPanelProps<M extends MovieActionItem> = {
   item: M;
   actions: MediaAction<M>[];
+  /** Runs on Enter, ahead of "View Details". */
+  primaryAction?: MediaAction<M>;
+  /** Extra actions placed right after `primaryAction`, ahead of "View Details". */
+  afterPrimary?: ActionPanel.Props["children"];
+  /** Extra sections added after the browser links, e.g. destructive actions. */
+  footer?: ActionPanel.Props["children"];
+  /**
+   * Replaces `actions`, in the panel and in the detail view. Use a component that
+   * reads its own state: a detail view keeps what it was opened with and would not see later changes.
+   */
+  actionItems?: (item: M) => ActionPanel.Props["children"];
 };
 
 type ShowActionPanelProps = {
   item: TraktShowListItem;
   actions: MediaAction<TraktShowListItem>[];
-  onCheckInFirstEpisode: (item: TraktShowListItem) => void;
+  /** Replaces `actions`. */
+  actionItems?: ActionPanel.Props["children"];
+  onMarkFirstEpisodeWatched: (item: TraktShowListItem) => void;
 };
 
 const MovieBrowserActions = <M extends MovieActionItem>({ item }: { item: M }) => (
@@ -58,9 +76,18 @@ const MediaActionList = <T,>({ item, actions }: { item: T; actions: MediaAction<
   </>
 );
 
-export const MovieActionPanel = <M extends MovieActionItem>({ item, actions }: MovieActionPanelProps<M>) => (
+export const MovieActionPanel = <M extends MovieActionItem>({
+  item,
+  actions,
+  primaryAction,
+  afterPrimary,
+  footer,
+  actionItems,
+}: MovieActionPanelProps<M>) => (
   <ActionPanel>
     <ActionPanel.Section>
+      {primaryAction && <MediaActionList item={item} actions={[primaryAction]} />}
+      {afterPrimary}
       <Action.Push
         icon={Icon.Eye}
         title="View Details"
@@ -74,7 +101,8 @@ export const MovieActionPanel = <M extends MovieActionItem>({ item, actions }: M
             actions={(movie) => (
               <ActionPanel>
                 <ActionPanel.Section>
-                  <MediaActionList item={movie} actions={actions} />
+                  {primaryAction && <MediaActionList item={movie} actions={[primaryAction]} />}
+                  {actionItems ? actionItems(movie) : <MediaActionList item={movie} actions={actions} />}
                 </ActionPanel.Section>
                 <MovieBrowserActions item={movie} />
               </ActionPanel>
@@ -82,13 +110,14 @@ export const MovieActionPanel = <M extends MovieActionItem>({ item, actions }: M
           />
         }
       />
-      <MediaActionList item={item} actions={actions} />
+      {actionItems ? actionItems(item) : <MediaActionList item={item} actions={actions} />}
     </ActionPanel.Section>
     <MovieBrowserActions item={item} />
+    {footer}
   </ActionPanel>
 );
 
-export const ShowActionPanel = ({ item, actions, onCheckInFirstEpisode }: ShowActionPanelProps) => (
+export const ShowActionPanel = ({ item, actions, actionItems, onMarkFirstEpisodeWatched }: ShowActionPanelProps) => (
   <ActionPanel>
     <ActionPanel.Section>
       <Action.Push
@@ -97,10 +126,10 @@ export const ShowActionPanel = ({ item, actions, onCheckInFirstEpisode }: ShowAc
         target={<SeasonGrid showId={item.show.ids.trakt} slug={item.show.ids.slug} imdbId={item.show.ids.imdb} />}
       />
       <Action
-        title="Check-In"
+        title="Mark First Episode as Watched"
         icon={Icon.Checkmark}
         shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        onAction={() => onCheckInFirstEpisode(item)}
+        onAction={() => onMarkFirstEpisodeWatched(item)}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>
@@ -111,8 +140,6 @@ export const ShowActionPanel = ({ item, actions, onCheckInFirstEpisode }: ShowAc
       />
       <Action.OpenInBrowser icon={getFavicon(IMDB_APP_URL)} title="Open in Imdb" url={getIMDbUrl(item.show.ids.imdb)} />
     </ActionPanel.Section>
-    <ActionPanel.Section>
-      <MediaActionList item={item} actions={actions} />
-    </ActionPanel.Section>
+    <ActionPanel.Section>{actionItems ?? <MediaActionList item={item} actions={actions} />}</ActionPanel.Section>
   </ActionPanel>
 );

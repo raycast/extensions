@@ -1,4 +1,4 @@
-import { withPagination } from "../lib/schema";
+import { scanPageComplete, withPagination } from "../lib/schema";
 import { CompactUpNextItem, toCompactUpNext } from "./compact-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
@@ -16,7 +16,6 @@ type Input = {
 type Output = {
   data: CompactUpNextItem[];
   page: number;
-  totalItems?: number;
   hasMore: boolean;
   /**
    * Always false: this is a browse page, not a lookup. Absence from it does not mean
@@ -35,14 +34,11 @@ export default async function tool(input: Input): Promise<Output> {
 
   const response = await executeToolCall(
     (signal) =>
-      toolTraktClient.shows.getUpNextShows({
+      toolTraktClient.shows.getUpNextNitroShows({
         query: {
           page,
           limit: safeLimit,
-          extended: "full",
-          sort_by: "added",
-          sort_how: "desc",
-          include_stats: true,
+          intent: "continue",
         },
         fetchOptions: { signal },
       }),
@@ -54,8 +50,7 @@ export default async function tool(input: Input): Promise<Output> {
   return {
     data: paginated.data.map(toCompactUpNext),
     page,
-    totalItems: paginated.pagination["x-pagination-item-count"],
-    hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+    hasMore: !scanPageComplete(paginated.data.length, paginated.pagination, safeLimit),
     exhaustive: false,
   };
 }

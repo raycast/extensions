@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { Dispatch, SetStateAction, useCallback } from "react";
+import { closeTopDetail } from "./detail-stack";
 
 type RunActionOptions = {
   setActionLoading: Dispatch<SetStateAction<boolean>>;
@@ -13,6 +14,8 @@ export function useActionRunner<T>({ setActionLoading, onSuccess }: RunActionOpt
       try {
         await action(item);
         onSuccess?.();
+        // A screen that revalidates after an action changed its list; a detail opened from it is stale.
+        if (onSuccess) closeTopDetail();
         showToast({
           title: message,
           style: Toast.Style.Success,
