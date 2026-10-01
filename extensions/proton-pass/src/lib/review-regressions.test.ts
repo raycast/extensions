@@ -57,7 +57,7 @@ const item: Item = {
 
 function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: Item = item, detail?: ItemDetail) {
   const events: string[] = [];
-  const fills: { values: string[] }[] = [];
+  const fills: { values: string[]; target: unknown }[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
     "@raycast/api": {
@@ -85,7 +85,14 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
     },
     "./autofill": {
       canFillFrontmostApp: true,
-      fillFrontmostApp: async (request: { values: string[] }) => fills.push(request),
+      getTargetApp: async () => {
+        events.push("target");
+        return { name: "Example", bundleId: "com.example.app" };
+      },
+      fillApp: async (target: unknown, request: { values: string[] }) => {
+        events.push("fill");
+        fills.push({ ...request, target });
+      },
     },
     "./format": { websiteLabels: () => [] },
     "./item-view": {},
@@ -96,7 +103,12 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
   const panel = ItemActions({
     item: selectedItem,
     detail,
-    store: { peek: () => ({ ...selectedItem, password: "fake-secret" }) },
+    store: {
+      peek: () => {
+        if (primaryAction === "fill") events.push("load");
+        return { ...selectedItem, password: "fake-secret" };
+      },
+    },
     isShowingDetail: true,
     onToggleDetail: () => undefined,
     onUse: () => events.push("use"),
@@ -122,6 +134,8 @@ test("Enter views details by default and copies or fills only when selected in p
   assert.equal(titles(filling.entries)[0], "Fill Login");
   await (filling.entries.find((entry) => entry.title === "Fill Login")?.onAction as () => Promise<void>)();
   assert.deepEqual(Array.from(filling.fills[0].values), [item.email, "fake-secret"]);
+  assert.deepEqual(filling.events, ["target", "load", "use", "fill"]);
+  assert.equal((filling.fills[0].target as { bundleId: string }).bundleId, "com.example.app");
   assert.equal(titles(itemActions("fill", { ...item, hasPassword: false }).entries)[0], "View Details");
   assert.ok(titles(itemActions("fill", { ...item, hasPassword: false }).entries).includes("Paste Email"));
 });
