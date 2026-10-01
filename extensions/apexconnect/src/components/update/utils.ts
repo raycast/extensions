@@ -1,7 +1,7 @@
+import { showFailureToast } from "@raycast/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
-import { getErrorMessage } from "@lib/utils";
-import { Toast, confirmAlert, showToast } from "@raycast/api";
+import { confirmAlert } from "@raycast/api";
 
 export interface HACSRepo {
   name: string | undefined;
@@ -24,7 +24,7 @@ export async function callUpdateInstallService(state: State, options?: { backup?
     )
       await apex.callService("update", "install", { entity_id: state.entity_id, backup: backup });
   } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    showFailureToast(error);
   }
 }
 
@@ -37,7 +37,7 @@ export async function callUpdateSkipService(state: State) {
     )
       await apex.callService("update", "skip", { entity_id: state.entity_id });
   } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    showFailureToast(error);
   }
 }
 

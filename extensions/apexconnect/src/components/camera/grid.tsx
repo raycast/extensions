@@ -1,9 +1,10 @@
+import { showFailureToast } from "@raycast/utils";
 import { EntityStandardActionSections } from "@components/entity";
 import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { State } from "@lib/apexapi";
 import { getFriendlyName } from "@lib/utils";
-import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, Image, List, getPreferenceValues } from "@raycast/api";
 import {
   CameraOpenStreamInBrowserAction,
   CameraOpenStreamInIINAAction,
@@ -22,7 +23,6 @@ export function getCameraRefreshInterval(): number | null {
   }
   const msec = parseFloat(userValue);
   if (Number.isNaN(msec)) {
-    console.log(`invalid value ${userValue}, fallback to null`);
     return null;
   }
   if (msec < 1) {
@@ -34,7 +34,7 @@ export function getCameraRefreshInterval(): number | null {
 
 function CameraGridItem(props: { state: State }): JSX.Element {
   const s = props.state;
-  const { localFilepath, imageFilepath } = useImage(s.entity_id);
+  const { localFilepath, imageFilepath } = useImage(s);
   const content: Image.ImageLike =
     s.state === "unavailable" ? { source: "video.png", tintColor: Color.Blue } : { source: localFilepath || "" };
   const titleParts = [getFriendlyName(s)];
@@ -79,11 +79,7 @@ export function CameraGrid(): JSX.Element {
   const { states } = useStateSearch(undefined, "camera", "", allStates);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot get Apex Connect Cameras",
-      message: error.message,
-    });
+    showFailureToast(error, { title: "Cannot get Apex Connect Cameras" });
   }
 
   if (!states) {

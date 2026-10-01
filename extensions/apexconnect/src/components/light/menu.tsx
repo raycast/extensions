@@ -1,9 +1,10 @@
+import { showFailureToast } from "@raycast/utils";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon, stateChangeSleep } from "@components/state/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { getFriendlyName } from "@lib/utils";
+import { Icon, MenuBarExtra } from "@raycast/api";
 import {
   callLightBrightnessService,
   getLightBrightnessValues,
@@ -35,8 +36,7 @@ function LightTurnOnMenubarItem(props: { state: State }) {
       await apex.turnOnLight(props.state.entity_id);
       await stateChangeSleep();
     } catch (error) {
-      console.log(error);
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item title="Turn On" onAction={handle} icon={"power-btn.png"} />;
@@ -51,7 +51,7 @@ function LightTurnOffMenubarItem(props: { state: State }) {
       await apex.turnOffLight(props.state.entity_id);
       await stateChangeSleep();
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon="power-btn.png" />;

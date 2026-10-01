@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import { ShowAttributesAction } from "@components/entity";
 import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
@@ -6,7 +7,7 @@ import { PrimaryIconColor } from "@components/state/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
 import { getStateTooltip } from "@lib/utils";
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useState } from "react";
 import { HACSRepo } from "./utils";
 
@@ -51,11 +52,7 @@ export function UpdatesList(): JSX.Element {
   const { states } = useStateSearch(searchText, "update", "", allStates);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot fetch Apex Connect Updates",
-      message: error.message,
-    });
+    showFailureToast(error, { title: "Cannot fetch Apex Connect Updates" });
   }
 
   if (!states) {

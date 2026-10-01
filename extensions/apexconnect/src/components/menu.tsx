@@ -1,5 +1,5 @@
+import { showFailureToast } from "@raycast/utils";
 import { apex } from "@lib/common";
-import { getErrorMessage } from "@lib/utils";
 import {
   Clipboard,
   Icon,
@@ -7,12 +7,10 @@ import {
   Keyboard,
   LaunchType,
   MenuBarExtra,
-  Toast,
   launchCommand,
   open,
   openCommandPreferences,
   showHUD,
-  showToast,
 } from "@raycast/api";
 import { ReactNode } from "react";
 
@@ -37,7 +35,7 @@ export function CopyToClipboardMenubarItem(props: { title: string; content: stri
     try {
       await copyToClipboardWithHUD(props.content);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return (
@@ -87,7 +85,7 @@ export function LaunchCommandMenubarItem(props: {
     try {
       return await launchCommand({ name: props.name, type: props.type });
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) || "Internal Error" });
+      showFailureToast(error, { title: "Internal Error" });
     }
   };
   return (

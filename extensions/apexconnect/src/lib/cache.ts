@@ -11,7 +11,6 @@ export function getLargeCacheDirectory(): string {
 export async function getCacheFilepath(filename: string, ensureDirectory = false): Promise<string> {
   const cacheDir = getLargeCacheDirectory();
   if (ensureDirectory) {
-    console.log(`create cache directoy '${cacheDir}'`);
     await fs.mkdir(cacheDir, { recursive: true });
   }
   const cacheFilePath = path.join(cacheDir, filename);

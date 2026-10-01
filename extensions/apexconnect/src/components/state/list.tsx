@@ -1,3 +1,4 @@
+import { showFailureToast } from "@raycast/utils";
 import { AutomationActionPanel } from "@components/automation/actions";
 import { ButtonActionPanel } from "@components/button/actions";
 import { CameraActionPanel } from "@components/camera/actions";
@@ -27,7 +28,7 @@ import { ZoneActionPanel } from "@components/zone/actions";
 import { apex, shouldDisplayEntityID } from "@lib/common";
 import { State } from "@lib/apexapi";
 import { getStateTooltip } from "@lib/utils";
-import { ActionPanel, Image, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
@@ -38,11 +39,7 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
   const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot search Apex Connect states.",
-      message: error.message,
-    });
+    showFailureToast(error, { title: "Cannot search Apex Connect states." });
   }
 
   if (!states) {
@@ -99,7 +96,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
         icon = apex.urlJoin(ep);
       }
     }
-    if (shouldDisplayEntityID()) {
+    if (!shouldDisplayEntityID()) {
       return extra;
     }
     if (extra) {

@@ -1,15 +1,13 @@
+import { showFailureToast } from "@raycast/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
-import { getErrorMessage } from "@lib/utils";
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
-import { dateToUnixTimestamp, unixTimestampToDate } from "./utils";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { dateToUnixTimestamp } from "./utils";
 
 export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boolean }): JSX.Element {
   const s = props.state;
   const hasDate = props.hasDate;
   const hasTime = props.hasTime;
-  const current = unixTimestampToDate(s.attributes.timestamp);
-  console.log(current);
   const { pop } = useNavigation();
   const handle = async (input: Form.Values) => {
     try {
@@ -35,11 +33,7 @@ export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTi
         pop();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error);
     }
   };
   let mode = Form.DatePicker.Type.DateTime;

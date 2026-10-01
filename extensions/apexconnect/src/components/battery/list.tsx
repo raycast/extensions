@@ -1,7 +1,8 @@
+import { showFailureToast } from "@raycast/utils";
 import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { sortBatteries } from "./utils";
 
@@ -11,11 +12,7 @@ export function BatteryList(): JSX.Element {
   const { states } = useStateSearch(searchText, "", "battery", allStates);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot search Apex Connect Batteries",
-      message: error.message,
-    });
+    showFailureToast(error, { title: "Cannot search Apex Connect Batteries" });
   }
 
   if (!states) {

@@ -90,7 +90,7 @@ On `MyWifi1` or `MyWifi2`, the internal URL is used. On any other network, it fa
 | Covers | view | Get/set states of covers |
 | Fans | view | Get/set states of fans |
 | Climate | view | Get/set states of climate entities |
-| Mediaplayers | view | Get/set states of media players |
+| Media Players | view | Get/set states of media players |
 | Cameras | view | Query cameras |
 | Vacuum Cleaners | view | Query vacuum cleaners |
 | Sensors | view | Get/set states of sensors |
@@ -113,7 +113,7 @@ On `MyWifi1` or `MyWifi2`, the internal URL is used. On any other network, it fa
 | Connection Check | view | Check the connection to Apex Connect |
 | Notifications Menu | menu-bar | Persistent notifications, low batteries, and updates |
 | Weather Menu | menu-bar | Weather entity in the menu bar |
-| Mediaplayer Menu | menu-bar | Media players in the menu bar |
+| Media Player Menu | menu-bar | Media players in the menu bar |
 | Lights Menu | menu-bar | Lights in the menu bar |
 | Covers Menu | menu-bar | Covers in the menu bar |
 | Batteries Menu | menu-bar | Batteries in the menu bar |
@@ -127,7 +127,7 @@ On `MyWifi1` or `MyWifi2`, the internal URL is used. On any other network, it fa
 |                                                     |                                                     |
 | --------------------------------------------------- | --------------------------------------------------- |
 | ![All Entities](./media/apexconnect-1.png)        | ![Lights](./media/apexconnect-2.png)              |
-| ![Mediaplayers](./media/apexconnect-3.png)        | ![Covers](./media/apexconnect-4.png)              |
+| ![Media Players](./media/apexconnect-3.png)        | ![Covers](./media/apexconnect-4.png)              |
 
 ## License
 

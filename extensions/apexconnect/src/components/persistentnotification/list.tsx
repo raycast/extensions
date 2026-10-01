@@ -1,6 +1,7 @@
+import { showFailureToast } from "@raycast/utils";
 import { getApexWSConnection, apex } from "@lib/common";
-import { ensureShort, getErrorMessage } from "@lib/utils";
-import { Icon, MenuBarExtra, Toast, open, showToast } from "@raycast/api";
+import { ensureShort } from "@lib/utils";
+import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { callService } from "@apexinfosysindia/js-websocket";
 import { HAPersistentNotification } from "./utils";
 
@@ -11,7 +12,7 @@ export function PersistentNotificationMenuItem(props: { notification: HAPersiste
       const con = await getApexWSConnection();
       await callService(con, "persistent_notification", "dismiss", { notification_id: s.notification_id });
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   const title = s.title;

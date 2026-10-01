@@ -1,9 +1,10 @@
+import { showFailureToast } from "@raycast/utils";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getIcon } from "@components/state/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
-import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
+import { Icon, MenuBarExtra } from "@raycast/api";
 
 function CoverOpenMenubarItem(props: { state: State }) {
   if (props.state.attributes.current_position >= 100) {
@@ -13,7 +14,7 @@ function CoverOpenMenubarItem(props: { state: State }) {
     try {
       await apex.openCover(props.state.entity_id);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item title="Open" onAction={handle} icon={Icon.ChevronUp} />;
@@ -27,7 +28,7 @@ function CoverCloseMenubarItem(props: { state: State }) {
     try {
       await apex.closeCover(props.state.entity_id);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item title="Close" onAction={handle} icon={Icon.ChevronDown} />;
@@ -38,7 +39,7 @@ function CoverStopMenubarItem(props: { state: State }) {
     try {
       await apex.stopCover(props.state.entity_id);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item title="Stop" onAction={handle} icon={Icon.XMarkCircle} />;

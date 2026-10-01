@@ -1,8 +1,9 @@
+import { showFailureToast } from "@raycast/utils";
 import { getIcon } from "@components/state/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { getFriendlyName } from "@lib/utils";
+import { MenuBarExtra } from "@raycast/api";
 import { capitalize } from "lodash-es";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 
@@ -11,7 +12,7 @@ function SwitchToggleItem(props: { state: State }) {
     try {
       await apex.toggleSwitch(props.state.entity_id);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item title="Toggle" onAction={handle} icon={"toggle.png"} />;
@@ -22,7 +23,7 @@ function SwitchTurnOnItem(props: { state: State }) {
     try {
       await apex.turnOnSwitch(props.state.entity_id);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   if (props.state.state !== "off") {
@@ -36,7 +37,7 @@ function SwitchTurnOffItem(props: { state: State }) {
     try {
       await apex.turnOnSwitch(props.state.entity_id);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   if (props.state.state !== "on") {

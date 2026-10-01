@@ -1,7 +1,7 @@
 import { getApexWSConnection, apex } from "@lib/common";
 import { getErrorMessage } from "@lib/utils";
-import { Action, ActionPanel, Color, Icon, Image, List, Toast, clearSearchBar, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Image, List, clearSearchBar } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 interface PlainSpeech {
@@ -136,16 +136,13 @@ export default function AssistCommand(): JSX.Element {
   const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
 
   if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+    showFailureToast(error);
   }
 
   const process = async () => {
     try {
       if (searchText.length <= 0) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Empty Requests are not allowed",
-        });
+        showFailureToast("", { title: "Empty Requests are not allowed" });
         return;
       }
       const connection = await getApexWSConnection();
@@ -168,11 +165,7 @@ export default function AssistCommand(): JSX.Element {
         setConversations([{ text: searchText, author: Author.Me, date: new Date() }, ...convs]);
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error);
     }
   };
   const userPicture = (): Image.ImageLike | undefined => {

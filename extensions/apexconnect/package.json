@@ -7,6 +7,7 @@
   "license": "MIT",
   "description": "Apex Connect+ remote control. Control your house with Raycast 🚀",
   "icon": "apex-connect.png",
+  "platforms": ["macOS"],
   "commands": [
     {
       "name": "index",
@@ -59,7 +60,7 @@
     },
     {
       "name": "mediaplayers",
-      "title": "Mediaplayers",
+      "title": "Media Players",
       "subtitle": "Apex Connect",
       "description": "Get/Set states of Apex Connect mediaplayers",
       "mode": "view"
@@ -220,6 +221,7 @@
     {
       "name": "weathermenu",
       "title": "Weather Menu",
+      "subtitle": "Apex Connect",
       "description": "Display Weather entity in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
@@ -251,7 +253,8 @@
     },
     {
       "name": "mediaplayermenu",
-      "title": "Mediaplayer Menu",
+      "title": "Media Player Menu",
+      "subtitle": "Apex Connect",
       "description": "Display Media Players in the Menu Bar",
       "mode": "menu-bar",
       "interval": "1m",
@@ -277,6 +280,7 @@
     {
       "name": "lightsmenu",
       "title": "Lights Menu",
+      "subtitle": "Apex Connect",
       "description": "Display Lights in the Menu Bar",
       "mode": "menu-bar",
       "interval": "1m",
@@ -302,6 +306,7 @@
     {
       "name": "coversmenu",
       "title": "Covers Menu",
+      "subtitle": "Apex Connect",
       "description": "Display Covers in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
@@ -327,6 +332,7 @@
     {
       "name": "batteriesmenu",
       "title": "Batteries Menu",
+      "subtitle": "Apex Connect",
       "description": "Display Batteries in the Menu Bar",
       "mode": "menu-bar",
       "interval": "30m",
@@ -360,6 +366,7 @@
     {
       "name": "entitiesmenu",
       "title": "Entities Menu",
+      "subtitle": "Apex Connect",
       "description": "Show given entities in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
@@ -385,6 +392,7 @@
     {
       "name": "entitymenu01",
       "title": "Entity Menu 1",
+      "subtitle": "Apex Connect",
       "description": "Show a Single Entity directly in the Menubar",
       "mode": "menu-bar",
       "interval": "5m",
@@ -402,6 +410,7 @@
     {
       "name": "entitymenu02",
       "title": "Entity Menu 2",
+      "subtitle": "Apex Connect",
       "description": "Show a Single Entity directly in the Menubar",
       "mode": "menu-bar",
       "interval": "5m",
@@ -420,6 +429,7 @@
     {
       "name": "entitymenu03",
       "title": "Entity Menu 3",
+      "subtitle": "Apex Connect",
       "description": "Show a Single Entity directly in the Menubar",
       "mode": "menu-bar",
       "interval": "5m",
@@ -533,7 +543,7 @@
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
     "multicast-dns": "^7.2.5",
-    "node-fetch": "^2.6.1",
+    "undici": "^6.21.0",
     "open": "^8.3.0",
     "ping": "^0.4.4",
     "plist": "^3.0.6",
@@ -545,7 +555,6 @@
     "@types/lodash-es": "^4.17.6",
     "@types/multicast-dns": "^7.2.1",
     "@types/node": "^20.8.10",
-    "@types/node-fetch": "^2.5.12",
     "@types/ping": "^0.4.1",
     "@types/plist": "^3.0.2",
     "@types/react": "^18.2.27",

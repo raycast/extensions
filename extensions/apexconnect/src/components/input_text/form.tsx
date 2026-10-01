@@ -1,7 +1,7 @@
+import { showFailureToast } from "@raycast/utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
-import { getErrorMessage } from "@lib/utils";
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 
 export function InputTextForm(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -26,11 +26,7 @@ export function InputTextForm(props: { state: State }): JSX.Element {
         pop();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error);
     }
   };
   const mode: string = s.attributes.mode || "text";

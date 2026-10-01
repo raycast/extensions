@@ -1,7 +1,8 @@
+import { showFailureToast } from "@raycast/utils";
 import { useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
-import { List, Toast, showToast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 
 export function MotionsList(): JSX.Element {
@@ -10,11 +11,7 @@ export function MotionsList(): JSX.Element {
   const { states } = useStateSearch(searchText, "binary_sensor", "motion", allStates);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot fetch Apex Connect Motion Sensors",
-      message: error.message,
-    });
+    showFailureToast(error, { title: "Cannot fetch Apex Connect Motion Sensors" });
   }
 
   if (!states) {

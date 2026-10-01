@@ -1,8 +1,9 @@
+import { showFailureToast } from "@raycast/utils";
 import { State } from "@lib/apexapi";
-import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
+import { Color, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
 
 import { MenuBarSubmenu } from "@components/menu";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { getFriendlyName } from "@lib/utils";
 import { ReactElement } from "react";
 import { getIcon } from "../state/utils";
 import {
@@ -20,7 +21,7 @@ async function launchWeatherCommand() {
   try {
     await launchCommand({ name: "weather", type: LaunchType.UserInitiated });
   } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) || "Internal Error" });
+    showFailureToast(error, { title: "Internal Error" });
   }
 }
 

@@ -30,7 +30,6 @@ class EntityRegistry {
 }
 
 async function getEntityRegistry(con: Connection): Promise<EntityRegistry> {
-  console.log("fetch entity registry");
   const entries: EntityRegistryEntry[] | null | undefined = await con.sendMessagePromise({
     type: "config/entity_registry/list",
   });
@@ -59,17 +58,13 @@ export function useHAStates(): {
           const entityRegistry = await getEntityRegistry(con);
 
           subscribeEntities(con, (entities) => {
-            console.log("incoming entities changes");
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const haStates = Object.entries(entities).map(([k, v]) => v as State);
-            console.log("set new entities");
             if (haStates.length > 0) {
               // Apex Connect often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
               const filteredStates = haStates.filter((s) => entityRegistry.isUserVisible(s.entity_id));
               setStates(filteredStates);
               setIsLoading(false);
-            } else {
-              console.log("ignore empty states callback");
             }
           });
           hawsRef.current = con;

@@ -1,5 +1,6 @@
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
+import { showFailureToast } from "@raycast/utils";
+import { Icon, MenuBarExtra } from "@raycast/api";
+import { getFriendlyName, range } from "@lib/utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
@@ -15,7 +16,7 @@ function MediaPlayerVolumeItem(props: { state: State; volume: number }) {
     try {
       await apex.setVolumeLevelMedia(props.state.entity_id, v);
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+      showFailureToast(error);
     }
   };
   return <MenuBarExtra.Item key={v} title={`${Math.round(v * 100)}%`} onAction={setVolume} />;

@@ -1,18 +1,14 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import fetch, { Response } from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
+import { LocalStorage } from "@raycast/api";
 import urljoin from "url-join";
-import { getErrorMessage } from "./utils";
 import fs from "fs";
-import { pipeline } from "stream";
-import util from "util";
-import { Agent } from "https";
+import { Agent, Response, fetch } from "undici";
 import { getWifiSSIDSync } from "./wifi";
 import * as ping from "ping";
 import { URL } from "url";
 import { queryMdns } from "./mdns";
 import { generateMobileDeviceRegistration, ApexMobileDeviceRegistrationResponse } from "./mobiledevice";
 import { Connection } from "@apexinfosysindia/js-websocket";
-const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
   const p: string[] = [];
@@ -69,10 +65,10 @@ export class ApexConnectClient {
     this.preferCompanionApp = options?.preferCompanionApp === undefined ? false : options.preferCompanionApp;
   }
 
-  private httpsAgent(url: string): Agent | undefined {
+  private httpsDispatcher(url: string): Agent | undefined {
     if (url.startsWith("https://")) {
       return new Agent({
-        rejectUnauthorized: !this._ignoreCerts,
+        connect: { rejectUnauthorized: !this._ignoreCerts },
       });
     }
   }
@@ -100,18 +96,8 @@ export class ApexConnectClient {
   private isHomeSSIDActive(): boolean {
     const ssid = getWifiSSIDSync();
     if (ssid) {
-      console.log("Current SSID: ", ssid);
-      if (!this.wifiSSIDs || this.wifiSSIDs.length <= 0) {
-        console.log("No WiFi SSIDs are specified for the internal url");
-      }
       if (this.wifiSSIDs && this.wifiSSIDs.includes(ssid)) {
         return true;
-      } else {
-        console.log(
-          `Current SSID (${ssid}) is not in home network list (${
-            this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
-          })`,
-        );
       }
     }
     return false;
@@ -120,7 +106,6 @@ export class ApexConnectClient {
   private async pingHostSuccessful(url: string): Promise<boolean> {
     try {
       const u = new URL(url);
-      console.log(`ping ${u.hostname}`);
       const res = await ping.promise.probe(u.hostname, {
         timeout: 2,
         extra: ["-i", "1", "-c", "1"],
@@ -162,18 +147,14 @@ export class ApexConnectClient {
     }
     if (this.urlInternal && this.urlInternal.length > 0) {
       if (this.isHomeSSIDActive()) {
-        console.log("Current SSID is Home Network");
         this._nearestURL = this.urlInternal;
         return this.urlInternal;
       }
       if (this.usePing) {
         const res = await this.pingHostSuccessful(this.urlInternal);
         if (res) {
-          console.log(`ping to internal host ${this.urlInternal} successful`);
           this._nearestURL = this.urlInternal;
           return this.urlInternal;
-        } else {
-          console.log(`internal host ${this.urlInternal} is not pingable`);
         }
       }
     }
@@ -185,10 +166,9 @@ export class ApexConnectClient {
   public async fetch(url: string, params: { [key: string]: string } = {}): Promise<any> {
     const ps = paramString(params);
     const fullUrl = urljoin(await this.nearestURL(), "api", url + ps);
-    console.log(`send GET request: ${fullUrl}`);
     try {
       const response = await fetch(fullUrl, {
-        agent: this.httpsAgent(fullUrl),
+        dispatcher: this.httpsDispatcher(fullUrl),
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -196,22 +176,19 @@ export class ApexConnectClient {
         },
       });
       const json = await response.json();
-      console.log("JJJ");
       return json;
     } catch (error) {
-      console.log(error);
+      showFailureToast(error, { title: "Error" });
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async post(url: string, params: { [key: string]: any } = {}): Promise<Response> {
     const fullUrl = urljoin(await this.nearestURL(), "api", url);
-    console.log(`send POST request: ${fullUrl}`);
     const body = JSON.stringify(params);
-    console.log(body);
     //try {
     const response = await fetch(fullUrl, {
-      agent: this.httpsAgent(fullUrl),
+      dispatcher: this.httpsDispatcher(fullUrl),
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -219,12 +196,10 @@ export class ApexConnectClient {
       },
       body: body,
     });
-    console.log(`status: ${response.status}`);
     if (response.status < 200 || response.status >= 300) {
       throw new Error(`Status code ${response.status}`);
     }
     //} catch (e) {
-    //    console.log(e);
     //}
     return response;
   }
@@ -236,11 +211,7 @@ export class ApexConnectClient {
       await this.post(`services/${domain}/${service}`, (params = userparams));
       return true;
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error);
       return false;
     }
   }
@@ -377,49 +348,105 @@ export class ApexConnectClient {
   }
 
   async downloadFile(url: string, params: { localFilepath: string }): Promise<string> {
-    const fullUrl = urljoin(this.url, "api", url);
-    console.log(`download ${url}`);
-    const response = await fetch(fullUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-      },
+    const fullUrl = urljoin(await this.nearestURL(), "api", url);
+    // Snapshot endpoints (e.g. camera_proxy) can serve a stale cached frame
+    // over a reused keep-alive connection; a dedicated one-shot dispatcher
+    // forces a fresh connection so each call actually gets a new frame.
+    const dispatcher = new Agent({
+      connect: { rejectUnauthorized: !this._ignoreCerts },
+      connections: 1,
+      pipelining: 0,
     });
-    if (!response.ok) {
-      throw new Error(`unexpected response ${response.statusText}`);
+    try {
+      const response = await fetch(fullUrl, {
+        method: "GET",
+        dispatcher,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`,
+          Connection: "close",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`unexpected response ${response.statusText}`);
+      }
+      const buffer = Buffer.from(await response.arrayBuffer());
+      await fs.promises.writeFile(params.localFilepath, buffer);
+      return params.localFilepath;
+    } finally {
+      await dispatcher.close();
     }
-    console.log(`write ${url} to ${params.localFilepath}`);
-    await streamPipeline(response.body, fs.createWriteStream(params.localFilepath));
-    return params.localFilepath;
   }
 
   async getCameraProxyURL(entityID: string, localFilepath: string): Promise<void> {
     await this.downloadFile(`camera_proxy/${entityID}`, { localFilepath: localFilepath });
   }
 
+  /**
+   * The still-image snapshot endpoint (camera_proxy) can serve a cached frame
+   * indefinitely; the backend only pulls fresh frames from the camera while an
+   * MJPEG stream consumer is attached. Reopening a stream connection on every
+   * poll makes some cameras/integrations stop responding for minutes, so this
+   * keeps one connection open and hands every decoded JPEG frame to the
+   * caller until `signal` aborts (or the stream itself ends/errors).
+   */
+  async readCameraStream(
+    streamUrl: string,
+    signal: AbortSignal,
+    onFrame: (frame: Buffer) => void | Promise<void>,
+  ): Promise<void> {
+    const response = await fetch(streamUrl, {
+      method: "GET",
+      dispatcher: this.httpsDispatcher(streamUrl),
+      signal,
+    });
+    if (!response.ok || !response.body) {
+      throw new Error(`unexpected response ${response.statusText}`);
+    }
+    const reader = response.body.getReader();
+    try {
+      let acc = Buffer.alloc(0);
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (signal.aborted) {
+            return;
+          }
+          throw new Error("camera stream ended unexpectedly");
+        }
+        acc = Buffer.concat([acc, Buffer.from(value)]);
+        for (;;) {
+          const start = acc.indexOf(Buffer.from([0xff, 0xd8]));
+          if (start === -1) {
+            break;
+          }
+          const end = acc.indexOf(Buffer.from([0xff, 0xd9]), start + 2);
+          if (end === -1) {
+            break;
+          }
+          await onFrame(acc.subarray(start, end + 2));
+          acc = acc.subarray(end + 2);
+        }
+      }
+    } finally {
+      await reader.cancel().catch(() => undefined);
+    }
+  }
+
   async registerMobileDevice(con: Connection) {
     const registrationData = await generateMobileDeviceRegistration();
     let webhook_id = await LocalStorage.getItem<string>("webhook_id");
-    if (webhook_id && webhook_id.length > 0) {
-      console.log(`Use existing webhook id ${webhook_id}`);
-    } else {
-      console.log("Register Device in Apex Connect");
+    if (!webhook_id || webhook_id.length <= 0) {
       const response = await this.post("mobile_app/registrations", registrationData);
-      const data: ApexMobileDeviceRegistrationResponse = await response.json();
+      const data = (await response.json()) as ApexMobileDeviceRegistrationResponse;
       webhook_id = data.webhook_id;
       await LocalStorage.setItem("webhook_id", webhook_id);
     }
 
-    if (this.messageSubscription) {
-      console.log("Use existing message subscription");
-    } else {
-      console.log("Create message subscription");
+    if (!this.messageSubscription) {
       try {
         this.messageSubscription = await con.subscribeMessage(
-          (result) => {
-            console.log(result);
-          },
+          () => undefined,
           {
             type: "mobile_app/push_notification_channel",
             webhook_id: webhook_id,
@@ -428,7 +455,7 @@ export class ApexConnectClient {
           { resubscribe: true },
         );
       } catch (error) {
-        console.log(error);
+        showFailureToast(error, { title: "Error" });
       }
     }
   }

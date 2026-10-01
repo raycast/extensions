@@ -1,5 +1,6 @@
+import { showFailureToast } from "@raycast/utils";
 import { State } from "@lib/apexapi";
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useHAStates } from "./hooks";
 
@@ -9,11 +10,7 @@ export function StatesAttributesList(): JSX.Element {
   const { states } = useSearch(searchText, allStates);
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Cannot search Apex Connect states",
-      message: error.message,
-    });
+    showFailureToast(error, { title: "Cannot search Apex Connect states" });
   }
 
   if (!states) {

@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { Connection, createConnection, createLongLivedTokenAuth } from "@apexinfosysindia/js-websocket";
 import { ApexConnectClient } from "./apexapi";
 import { createSocket } from "./socket";
@@ -34,12 +34,9 @@ export const apex = createApexConnectClient();
 
 export async function getApexWSConnection(): Promise<Connection> {
   if (con) {
-    console.log("return existing ws con");
     return con;
   } else {
-    console.log(`Create new Apex Connect ws con from command '${environment.commandName}'`);
     const instance = await apex.nearestURL();
-    console.log(`Nearest Instance URL ${instance}`);
     const auth = createLongLivedTokenAuth(instance, apex.token);
     con = await createConnection({ auth, createSocket: async () => createSocket(auth, apex.ignoreCerts) });
     return con;
@@ -48,6 +45,5 @@ export async function getApexWSConnection(): Promise<Connection> {
 
 export function shouldDisplayEntityID(): boolean {
   const preferences = getPreferenceValues();
-  const result = (preferences.instance as boolean) || false;
-  return result;
+  return (preferences.showEntityId as boolean) || false;
 }
