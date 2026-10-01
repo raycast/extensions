@@ -1,53 +1,22 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { AIProviderProfile, StoredAIProviderState } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
-import {
-  assignGlobalServiceOrder,
-  getAvailableProviderKeys,
-  getBuiltinProviderCandidates,
-  getProviderOrder,
-} from "@/core/query/providerOrder";
+import { DictionaryType, TranslationType } from "@/core/results/kinds";
+import type { ProviderIconConfig, QueryInput } from "@/core/results/types";
+import { getAIProviderCacheIdentity } from "@/providers/profiles/cacheIdentity";
+import { isAIDictionaryCandidate } from "@/providers/profiles/dictionaryCandidate";
+import { resolveAIProviderRuntimeConfig } from "@/providers/profiles/runtime";
+import type { AIProviderProfile, StoredAIProviderState } from "@/providers/profiles/types";
 
-import { dictionaryProviderServices, type DictionaryServiceConfig, resolveDictionaryServices } from "./dictionary";
-import type { NativeJSONUnsupportedHandler } from "./dictionary/ai";
-import { resolveTranslationServices, type TranslationServiceConfig, translationServices } from "./translation";
+import { builtinDictionaryServices, type DictionaryServiceConfig } from "./dictionary";
+import { createAIDictionaryProvider, type NativeJSONUnsupportedHandler } from "./dictionary/ai";
+import { assignGlobalServiceOrder, getAIProviderKey, getCombinedProviderOrder } from "./order";
+import { builtinTranslationServices as builtinTranslations, type TranslationServiceConfig } from "./translation";
+import { createAITranslationProvider } from "./translation/ai";
 
-const builtinServices = [...dictionaryProviderServices, ...translationServices];
-const builtinCandidates = getBuiltinProviderCandidates(builtinServices);
-
-function getLegacyServicesOrder(): string[] {
-  return myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
-}
-
-const defaultProviderOrder = getProviderOrder([], undefined, getLegacyServicesOrder(), builtinCandidates);
-
-/** Built-in registries with one shared provider order for UI and runtime consumers. */
-export const builtinDictionaryProviderServices = assignGlobalServiceOrder(
-  dictionaryProviderServices,
-  defaultProviderOrder,
-);
-export const builtinTranslationServices = assignGlobalServiceOrder(translationServices, defaultProviderOrder);
-export const builtinProviderServices = [...builtinDictionaryProviderServices, ...builtinTranslationServices];
-
-export type BuiltinProviderService =
-  (typeof builtinDictionaryProviderServices)[number] | (typeof builtinTranslationServices)[number];
-
-export interface ProviderServiceSnapshot {
+interface ProviderServiceSnapshot {
   translationServices: TranslationServiceConfig[];
   dictionaryServices: DictionaryServiceConfig[];
-}
-
-export function getCombinedProviderOrder(
-  profiles: AIProviderProfile[],
-  savedOrder?: string[],
-  servicesOrder: string[] = getLegacyServicesOrder(),
-): string[] {
-  return getProviderOrder(profiles, savedOrder, servicesOrder, builtinCandidates);
-}
-
-export function getCombinedAvailableProviderKeys(profiles: AIProviderProfile[]): string[] {
-  return getAvailableProviderKeys(profiles, builtinCandidates);
 }
 
 export function resolveProviderServices(
@@ -55,9 +24,60 @@ export function resolveProviderServices(
   onNativeJSONUnsupported?: NativeJSONUnsupportedHandler,
 ): ProviderServiceSnapshot {
   const { profiles, providerOrder: savedOrder } = state;
-  const providerOrder = getCombinedProviderOrder(profiles, savedOrder, getLegacyServicesOrder());
+  const providerOrder = getCombinedProviderOrder(
+    profiles,
+    savedOrder,
+    myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [],
+  );
+  const translationServices = [...builtinTranslations];
+  const dictionaryServices = [...builtinDictionaryServices];
+  for (const profile of profiles) {
+    const runtime = resolveAIProviderRuntimeConfig(profile);
+    const getConfig = () => {
+      if (runtime.kind === "issue") throw new Error(runtime.message);
+      return runtime.config;
+    };
+    const enabled = profile.enabled && runtime.kind === "ready";
+    const isDictionaryQuery = (query: QueryInput) =>
+      profile.wordResultMode === "dictionary" && isAIDictionaryCandidate(query);
+    const common = {
+      label: profile.name,
+      providerKey: getAIProviderKey(profile),
+      order: profile.order,
+      icon: resolveAIProviderIcon(profile),
+      cacheIdentity: getAIProviderCacheIdentity(profile, 1),
+    };
+    translationServices.push({
+      ...common,
+      id: `profile:${profile.id}`,
+      type: TranslationType.OpenAI,
+      enabled: (query) => enabled && !isDictionaryQuery(query),
+      createProvider: () => createAITranslationProvider(getConfig()),
+    });
+    if (profile.wordResultMode === "dictionary") {
+      dictionaryServices.push({
+        ...common,
+        id: `profile:${profile.id}:dictionary`,
+        type: DictionaryType.AI,
+        enabled: (query) => enabled && isDictionaryQuery(query),
+        createProvider: () => createAIDictionaryProvider(getConfig(), onNativeJSONUnsupported),
+        canTriggerAutomaticAudio: false,
+      });
+    }
+  }
   return {
-    translationServices: resolveTranslationServices(profiles, providerOrder),
-    dictionaryServices: resolveDictionaryServices(profiles, providerOrder, onNativeJSONUnsupported),
+    translationServices: assignGlobalServiceOrder(translationServices, providerOrder),
+    dictionaryServices: assignGlobalServiceOrder(dictionaryServices, providerOrder),
   };
+}
+
+const builtinSnapshot = resolveProviderServices({ version: 2, profiles: [], migratedLegacyProviders: [] });
+export const builtinDictionaryProviderServices = builtinSnapshot.dictionaryServices;
+export const builtinTranslationServices = builtinSnapshot.translationServices;
+
+function resolveAIProviderIcon(profile: AIProviderProfile): ProviderIconConfig {
+  if (profile.icon.kind !== "favicon" || profile.icon.website || profile.adapter !== "openai-compatible") {
+    return profile.icon;
+  }
+  return { kind: "favicon", website: profile.website ?? profile.endpoint };
 }

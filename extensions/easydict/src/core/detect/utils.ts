@@ -1,32 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { config } from "@/core/config";
-import { englishLanguageItem } from "@/core/language/consts";
-import { logTrace } from "@/utils/logger";
-
-/**
- * check if the language is preferred language
- */
-export function isPreferredLanguage(languageId: string): boolean {
-  return config.preferredLanguages.map((item) => item.youdaoLangCode).includes(languageId);
-}
-
-/**
- * check if preferred languages contains English language
- */
-export function checkIfPreferredLanguagesContainEnglish(): boolean {
-  return (
-    config.preferredLanguages.find((item) => item.youdaoLangCode === englishLanguageItem.youdaoLangCode) !== undefined
-  );
-}
-
-/**
- * check if preferred languages contains Chinese language
- */
-export function checkIfPreferredLanguagesContainChinese(): boolean {
-  const languageIdPrefix = "zh";
-  return config.preferredLanguages.find((item) => item.youdaoLangCode.startsWith(languageIdPrefix)) !== undefined;
-}
+import { logTrace } from "@/shared/logger";
 
 /**
  * return remove all punctuation from the text

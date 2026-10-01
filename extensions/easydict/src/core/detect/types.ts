@@ -1,13 +1,18 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { LanguageDetectType } from "@/types/api";
+import type { LanguageCode } from "@/core/language/types";
+import type { LanguageDetectType } from "@/core/results/kinds";
 
-export interface DetectedLangModel<T = unknown> {
-  type: LanguageDetectType;
-  youdaoLangCode: string; // pl
-  sourceLangCode: string; // eg. apple detect 波兰语
-  confirmed: boolean;
-  detectedLanguageArray?: [string, number][]; // [['ita', 1], ['fra', 0.6]]
-  result?: T;
-  prior?: boolean; // has higher priority than other detected languages, such as has two identical detected languages.
+interface LanguageCandidate {
+  readonly language: LanguageCode | undefined;
+  readonly confidence: number;
 }
+
+/** A detector reports observations; only the detection policy decides whether to confirm them. */
+export type DetectionObservation =
+  | Readonly<{ kind: "single"; type: LanguageDetectType; language: LanguageCode | undefined; confidence?: number }>
+  | Readonly<{ kind: "ranked"; type: LanguageDetectType; candidates: readonly LanguageCandidate[] }>;
+
+export type DetectionDecision =
+  | { type: LanguageDetectType; language: LanguageCode; confirmed: boolean }
+  | { type: LanguageDetectType; language: "auto"; confirmed: false };

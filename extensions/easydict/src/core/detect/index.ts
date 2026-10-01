@@ -1,364 +1,183 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
+
 import { getPreferenceValues } from "@raycast/api";
 
 import { config } from "@/core/config";
-import { autoDetectLanguageItem, chineseLanguageItem, englishLanguageItem } from "@/core/language/consts";
-import { isValidLangCode } from "@/core/language/utils";
-import type { BaseDetectProvider, DetectOptions } from "@/providers/detect/base";
+import type { LanguageCode, SourceLanguage } from "@/core/language/types";
+import { LanguageDetectType } from "@/core/results/kinds";
+import type { BaseDetectProvider } from "@/providers/detect/base";
 import { detectServices } from "@/providers/detect/registry";
-import { LanguageDetectType } from "@/types/api";
-import { CancelledError } from "@/utils/errors";
-import { logError, logSummary, logTrace } from "@/utils/logger";
+import { CancelledError } from "@/shared/errors";
+import { logError, logSummary, logTrace } from "@/shared/logger";
 
-import type { DetectedLangModel } from "./types";
-import {
-  checkIfPreferredLanguagesContainChinese,
-  checkIfPreferredLanguagesContainEnglish,
-  isChinese,
-  isEnglishOrNumber,
-  isPreferredLanguage,
-} from "./utils";
+import type { DetectionDecision, DetectionObservation } from "./types";
+import { isChinese, isEnglishOrNumber } from "./utils";
 
-interface DetectContext {
-  apiDetectedLanguageList: DetectedLangModel[];
-  hasDetectFinished: boolean;
-  signal?: AbortSignal;
+interface DetectSnapshot {
+  remote: readonly BaseDetectProvider[];
+  local: readonly BaseDetectProvider[];
+  preferred: readonly SourceLanguage[];
+  speedFirst: boolean;
 }
 
-const defaultConfirmedConfidence = 0.8;
+type SingleObservation = Extract<DetectionObservation, { kind: "single" }>;
 
-let apiDetectors: BaseDetectProvider[] | null = null;
-let localDetectors: BaseDetectProvider[] | null = null;
-
-function initDetectors() {
+function createSnapshot(): DetectSnapshot {
   const preferences = getPreferenceValues<Preferences>();
   const enabled = detectServices
-    .filter((c) => {
-      if (c.preference && preferences[c.preference] === false) {
-        return false;
-      }
-      return true;
-    })
-    .map((c) => new c.provider())
-    .filter((p) => p.isEnabled());
-
-  apiDetectors = enabled.filter((p) => !p.isLocal);
-  localDetectors = enabled.filter((p) => p.isLocal);
+    .filter((service) => !service.preference || preferences[service.preference] !== false)
+    .map((service) => new service.provider())
+    .filter((provider) => provider.isEnabled());
+  return {
+    remote: enabled.filter((provider) => !provider.isLocal),
+    local: enabled.filter((provider) => provider.isLocal),
+    preferred: config.preferredLanguages.map((item) => item.youdaoLangCode),
+    speedFirst: config.enableDetectLanguageSpeedFirst,
+  };
 }
 
-/**
- * given text, callback with LanguageDetectTypeResult.
- *
- * Prioritize the API language detection, if over time, try to use local language detection.
- */
-export async function detectLanguage(text: string, signal?: AbortSignal): Promise<DetectedLangModel> {
-  const ctx: DetectContext = { apiDetectedLanguageList: [], hasDetectFinished: false, signal };
-
-  // Covert text to lowercase, because Tencent LanguageDetect API is case sensitive, such as 'Section' is detected as 'fr' 😑
-  const lowerCaseText = text.toLowerCase();
-
-  const startTime = performance.now();
-  const detectedLanguage = await raceDetectTextLanguage(lowerCaseText, ctx);
-  const result = await getFinalDetectedLanguage(text, detectedLanguage, defaultConfirmedConfidence, ctx);
-  const duration = (performance.now() - startTime).toFixed(0);
-
+export async function detectLanguage(text: string, signal?: AbortSignal): Promise<DetectionDecision> {
+  if (signal?.aborted) throw new CancelledError();
+  const snapshot = createSnapshot();
+  const started = performance.now();
+  // Tencent's detector is case-sensitive; retain the current remote normalization.
+  const decision =
+    (await detectRemote(text.toLowerCase(), snapshot, signal)) ?? (await detectLocal(text, snapshot, signal));
   const source =
-    result.type === LanguageDetectType.Simple || result.type === LanguageDetectType.Franc
-      ? `local:${result.type}`
-      : result.type.toString();
-  const confirmed = result.confirmed ? "confirmed" : "unconfirmed";
-  logSummary("Detect", `${result.youdaoLangCode} (${source}, ${duration}ms, ${confirmed})`);
-
-  return result;
+    decision.type === LanguageDetectType.Simple || decision.type === LanguageDetectType.Franc
+      ? `local:${decision.type}`
+      : decision.type;
+  logSummary(
+    "Detect",
+    `${decision.language} (${source}, ${(performance.now() - started).toFixed(0)}ms, ${decision.confirmed ? "confirmed" : "unconfirmed"})`,
+  );
+  return decision;
 }
 
-/**
- * Get enabled API detect providers from the registry.
- */
-function getDetectAPIs(signal?: AbortSignal): Array<(text: string) => Promise<DetectedLangModel>> {
-  initDetectors();
-  const opts: DetectOptions = { signal };
-  return apiDetectors!.map((provider) => (text: string) => provider.detect(text, opts));
+function decisionFor(observation: SingleObservation, confirmed = false): DetectionDecision {
+  return observation.language === undefined
+    ? { type: observation.type, language: "auto", confirmed: false }
+    : { type: observation.type, language: observation.language, confirmed };
 }
 
-/**
- * Race to detect language, if success, callback API detect language, else local detect language
- */
-function raceDetectTextLanguage(lowerCaseText: string, ctx: DetectContext): Promise<DetectedLangModel | undefined> {
-  if (ctx.signal?.aborted) {
-    return Promise.reject(new CancelledError());
-  }
+/** Retain the detector-specific confidence used when no early consensus wins. */
+function fallbackDecision(observation: SingleObservation): DetectionDecision {
+  return decisionFor(
+    observation,
+    observation.type === LanguageDetectType.Baidu ||
+      (observation.type === LanguageDetectType.Volcano && (observation.confidence ?? 0) > 0.5),
+  );
+}
 
-  const raceController = new AbortController();
-  const signal = ctx.signal ? AbortSignal.any([ctx.signal, raceController.signal]) : raceController.signal;
-  const detectActionList = getDetectAPIs(signal).map((detect) => detect(lowerCaseText));
+function chooseRemoteFallback(observations: SingleObservation[]): DetectionDecision | undefined {
+  if (observations.length === 1) return fallbackDecision(observations[0]);
+  // Previously every mapped observation acquired `prior`; preserve the first such observation without mutating it.
+  const firstMapped = observations.find((observation) => observation.language !== undefined);
+  if (firstMapped) return fallbackDecision(firstMapped);
+  const bing = observations.find((observation) => observation.type === LanguageDetectType.Bing);
+  return bing ? decisionFor(bing) : undefined;
+}
 
-  ctx.hasDetectFinished = false;
-  let detectCount = 0;
+function detectRemote(
+  text: string,
+  snapshot: DetectSnapshot,
+  callerSignal?: AbortSignal,
+): Promise<DetectionDecision | undefined> {
+  if (!snapshot.remote.length) return Promise.resolve(undefined);
+  const controller = new AbortController();
+  const signal = callerSignal ? AbortSignal.any([callerSignal, controller.signal]) : controller.signal;
+  const observations: SingleObservation[] = [];
 
   return new Promise((resolve, reject) => {
     let settled = false;
-    const handleAbort = () => {
+    let remaining = snapshot.remote.length;
+    const finish = (decision: DetectionDecision | undefined) => {
       if (settled) return;
       settled = true;
-      ctx.hasDetectFinished = true;
-      raceController.abort();
-      ctx.signal?.removeEventListener("abort", handleAbort);
+      callerSignal?.removeEventListener("abort", abort);
+      if (decision?.confirmed) controller.abort();
+      resolve(decision);
+    };
+    const abort = () => {
+      if (settled) return;
+      settled = true;
+      callerSignal?.removeEventListener("abort", abort);
+      controller.abort();
       reject(new CancelledError());
     };
-    const finish = (result: DetectedLangModel | undefined) => {
-      if (settled) return;
-      settled = true;
-      ctx.signal?.removeEventListener("abort", handleAbort);
-      resolve(result);
-    };
-
-    if (ctx.signal?.aborted) {
-      handleAbort();
+    if (callerSignal?.aborted) {
+      abort();
       return;
     }
-    ctx.signal?.addEventListener("abort", handleAbort, { once: true });
+    callerSignal?.addEventListener("abort", abort, { once: true });
 
-    if (detectActionList.length === 0) {
-      finish(undefined);
-      return;
-    }
-
-    detectActionList.forEach((detectAction) => {
-      detectAction
-        .then((detectedLang) => handleDetectedLanguage(detectedLang, ctx))
-        .then((result) => {
-          if (result) {
-            ctx.hasDetectFinished = true;
-            raceController.abort();
-            finish(result);
+    for (const provider of snapshot.remote) {
+      provider
+        .detect(text, { signal })
+        .then((observation) => {
+          if (settled || observation.kind !== "single") return;
+          observations.push(observation);
+          if (observation.language === undefined) return;
+          const matching = observations.filter((candidate) => candidate.language === observation.language).length;
+          if (
+            snapshot.remote.length === 1 ||
+            (snapshot.speedFirst && snapshot.preferred.includes(observation.language)) ||
+            matching >= 2
+          ) {
+            finish(decisionFor(observation, true));
           }
         })
         .catch((error) => {
           if (error instanceof CancelledError) {
-            if (!ctx.signal?.aborted) {
-              logTrace("Detect", "detect cancelled");
-            }
+            if (!callerSignal?.aborted) logTrace("Detect", "detect cancelled");
           } else {
-            logError("Detect", `race detect error`, error);
+            logError("Detect", "race detect error", error);
           }
         })
         .finally(() => {
-          detectCount += 1;
-          // If the last detection action is still not resolve, return undefined.
-          if (detectCount === detectActionList.length && !ctx.hasDetectFinished) {
-            if (!ctx.signal?.aborted) {
-              logTrace("Detect", "no confirmed API detection");
-            }
-            finish(undefined);
-          }
+          remaining -= 1;
+          if (remaining === 0 && !settled) finish(chooseRemoteFallback(observations));
         });
-    });
+    }
   });
 }
 
-/**
- * Handle detected language.
- */
-function handleDetectedLanguage(
-  detectedLangModel: DetectedLangModel,
-  ctx: DetectContext,
-): Promise<DetectedLangModel | undefined> {
-  return new Promise((resolve) => {
-    if (ctx.hasDetectFinished) {
-      return resolve(undefined);
-    }
-
-    // Record it in the apiDetectedLanguage.
-    ctx.apiDetectedLanguageList.push(detectedLangModel);
-    const detectedLangCode = detectedLangModel.youdaoLangCode;
-
-    // Detected language must be valid language.
-    if (!isValidLangCode(detectedLangCode)) {
-      return resolve(undefined);
-    }
-
-    // Iterate API detected language list, checking for at least two identical valid results.
-    const detectedIdenticalLanguages: DetectedLangModel[] = [];
-    const detectedTypes: string[] = [];
-
-    for (const lang of ctx.apiDetectedLanguageList) {
-      if (lang.youdaoLangCode === detectedLangCode) {
-        detectedIdenticalLanguages.push(lang);
-        detectedTypes.push(lang.type.toString().split(" ")[0]);
-      }
-
-      // If enabled speed first, and API detected two `preferred` language, try to use it.
-      // Perf: To speed up language detection, we use the first detected && preferred language.
-      if (detectedIdenticalLanguages.length === 1) {
-        // Mark two identical language as prior.
-        detectedLangModel.prior = true;
-
-        const onlyOneDetectService = apiDetectors!.length === 1;
-
-        if (onlyOneDetectService || (isPreferredLanguage(detectedLangCode) && config.enableDetectLanguageSpeedFirst)) {
-          detectedLangModel.confirmed = true;
-          return resolve(detectedLangModel);
-        }
-      }
-
-      if (detectedIdenticalLanguages.length >= 2) {
-        detectedLangModel.confirmed = true;
-        return resolve(detectedLangModel);
-      }
-    }
-
-    return resolve(undefined);
-  });
-}
-
-/**
- * Get the final confirmed language, for handling some special case.
- *
- * 1. If detect language is confirmed, use it directly.
- * 2. Try to use the most accurate language in apiDetectedLanguageList.
- * 3. If all language detect failed, use local detect language.
- */
-async function getFinalDetectedLanguage(
-  text: string,
-  detectedLangModel: DetectedLangModel | undefined,
-  confirmedConfidence: number,
-  ctx: DetectContext,
-): Promise<DetectedLangModel> {
-  if (detectedLangModel && detectedLangModel.confirmed) {
-    return detectedLangModel;
-  }
-
-  const finalDetectedLang = handleFinalDetectedLangFromAPIList(ctx.apiDetectedLanguageList);
-  if (finalDetectedLang) {
-    return finalDetectedLang;
-  }
-
-  return await getLocalTextLanguageDetectResult(text, confirmedConfidence, ctx.signal);
-}
-
-/**
- * Handle final detected language from API list, return the most accurate language.
- */
-function handleFinalDetectedLangFromAPIList(
-  apiDetectedLanguageList: DetectedLangModel[],
-): DetectedLangModel | undefined {
-  // If only one detected language, return it.
-  if (apiDetectedLanguageList.length === 1) {
-    return apiDetectedLanguageList[0];
-  }
-
-  // If prior is true, return it.
-  const priorDetectedLang = apiDetectedLanguageList.find((lang) => lang.prior);
-  if (priorDetectedLang) {
-    return priorDetectedLang;
-  }
-
-  // If Baidu detected language is valid, return it.
-  const baiduDetectedLang = apiDetectedLanguageList.find((lang) => lang.type === LanguageDetectType.Baidu);
-  if (baiduDetectedLang && isValidLangCode(baiduDetectedLang.youdaoLangCode)) {
-    return baiduDetectedLang;
-  }
-
-  // If Bing detected language, return it.
-  for (const lang of apiDetectedLanguageList) {
-    if (lang.type === LanguageDetectType.Bing) {
-      return lang;
-    }
-  }
-
-  return undefined;
-}
-
-/**
- *  Get local detect language result.
- *
- *  @confirmedConfidence if local detect preferred language confidence > confirmedConfidence, give priority to use it.
- *  * NOTE: Only preferred language confidence > confirmedConfidence will mark as confirmed.
- *
- *  First, if franc detect language is confirmed, use it directly.
- *  Second, if detect preferred language confidence > lowConfidence, use it, but not confirmed.
- *  Third, if franc detect language is valid, use it, but not confirmed.
- *  Finally, if simple detect language is preferred language, use it. else use "auto".
- */
-async function getLocalTextLanguageDetectResult(
-  text: string,
-  confirmedConfidence: number,
-  signal?: AbortSignal,
-  lowConfidence = 0.2,
-): Promise<DetectedLangModel> {
-  initDetectors();
-
-  if (localDetectors && localDetectors.length > 0) {
-    const localProvider = localDetectors[0];
+async function detectLocal(text: string, snapshot: DetectSnapshot, signal?: AbortSignal): Promise<DetectionDecision> {
+  if (signal?.aborted) throw new CancelledError();
+  const provider = snapshot.local[0];
+  if (provider) {
     try {
-      const localDetectResult = await localProvider.detect(text, { confirmedConfidence, signal });
-      if (localDetectResult.confirmed) {
-        return localDetectResult;
-      }
-
-      // if detect preferred language confidence > lowConfidence, use it, mark it as unconfirmed.
-      const detectedLanguageArray = localDetectResult.detectedLanguageArray;
-      if (detectedLanguageArray) {
-        for (const [languageId, confidence] of detectedLanguageArray) {
-          if (confidence > lowConfidence && isPreferredLanguage(languageId)) {
-            const lowConfidenceDetect: DetectedLangModel = {
-              type: localDetectResult.type,
-              sourceLangCode: localDetectResult.sourceLangCode,
-              youdaoLangCode: languageId,
-              confirmed: false,
-              detectedLanguageArray: localDetectResult.detectedLanguageArray,
-            };
-            return lowConfidenceDetect;
-          }
-        }
-      }
-
-      // if local detect language is valid, use it, such as 'fr', 'it'.
-      const youdaoLangCode = localDetectResult.youdaoLangCode;
-      if (isValidLangCode(youdaoLangCode)) {
-        return localDetectResult;
+      const observation = await provider.detect(text, { signal });
+      if (signal?.aborted) throw new CancelledError();
+      if (observation.kind === "ranked") {
+        const confident = observation.candidates.find(
+          (candidate) =>
+            candidate.language !== undefined &&
+            candidate.confidence > 0.8 &&
+            snapshot.preferred.includes(candidate.language),
+        );
+        if (confident?.language) return { type: observation.type, language: confident.language, confirmed: true };
+        const preferred = observation.candidates.find(
+          (candidate) =>
+            candidate.language !== undefined &&
+            candidate.confidence > 0.2 &&
+            snapshot.preferred.includes(candidate.language),
+        );
+        const language = preferred?.language ?? observation.candidates[0]?.language;
+        if (language) return { type: observation.type, language, confirmed: false };
+      } else if (observation.language) {
+        return decisionFor(observation);
       }
     } catch (error) {
-      if (error instanceof CancelledError) {
-        logTrace("Detect", "local detect cancelled");
-      } else {
-        logError("Detect", "local detect error", error);
-      }
+      if (signal?.aborted || error instanceof CancelledError) throw new CancelledError();
+      logError("Detect", "local detect error", error);
     }
   }
 
-  // if simple detect is preferred language, use simple detect language('en', 'zh').
-  const simpleDetectLangTypeResult = simpleDetectTextLanguage(text);
-  if (isPreferredLanguage(simpleDetectLangTypeResult.youdaoLangCode)) {
-    return simpleDetectLangTypeResult;
-  }
-
-  // finally, use "auto" as fallback.
-  return {
-    type: LanguageDetectType.Simple,
-    sourceLangCode: "",
-    youdaoLangCode: "auto",
-    confirmed: false,
-  };
-}
-
-/**
- * Get simple detect language id according to text, priority to use English and Chinese, and then auto.
- *
- * * NOTE: simple detect language, always set confirmed = false.
- */
-function simpleDetectTextLanguage(text: string): DetectedLangModel {
-  let fromYoudaoLangCode = autoDetectLanguageItem.youdaoLangCode;
-  if (isEnglishOrNumber(text) && checkIfPreferredLanguagesContainEnglish()) {
-    fromYoudaoLangCode = englishLanguageItem.youdaoLangCode;
-  } else if (isChinese(text) && checkIfPreferredLanguagesContainChinese()) {
-    fromYoudaoLangCode = chineseLanguageItem.youdaoLangCode;
-  }
-  return {
-    type: LanguageDetectType.Simple,
-    sourceLangCode: fromYoudaoLangCode,
-    youdaoLangCode: fromYoudaoLangCode,
-    confirmed: false,
-  };
+  let language: LanguageCode | undefined;
+  if (isEnglishOrNumber(text) && snapshot.preferred.includes("en")) language = "en";
+  else if (isChinese(text) && snapshot.preferred.some((code) => code.startsWith("zh"))) language = "zh-CHS";
+  return language === undefined || !snapshot.preferred.includes(language)
+    ? { type: LanguageDetectType.Simple, language: "auto", confirmed: false }
+    : { type: LanguageDetectType.Simple, language, confirmed: false };
 }
