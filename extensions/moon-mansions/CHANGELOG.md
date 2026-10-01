@@ -1,6 +1,6 @@
 # Moon Mansions Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-01
 - Show Moon Info command (Detail view)
 - Moon in Menu Bar command with tap-to-copy rows
 - Arab, Vedic and Chinese lunar mansions with themes
