@@ -2,11 +2,11 @@ import { Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { WebApiKeyNotice } from "../errors";
-import { useLibraryFirstSeen, useMyGames, useResultsWithDetails } from "../lib/fetcher";
+import { useLibraryFirstSeen, useMyGames, useOwnership, useResultsWithDetails } from "../lib/fetcher";
 import { useIsLoggedIn } from "../lib/hooks";
 import { GameDataSimple } from "../types";
 import { MyGamesListType } from "./ListItems";
-import { addedText, playedText, playtimeText } from "../lib/util";
+import { addedText, playedText } from "../lib/util";
 
 export type LibrarySort = "name" | "playtime" | "last-played" | "added" | "never-played";
 
@@ -29,6 +29,7 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
   const { games: myGames, loading: loadingDetails } = useResultsWithDetails(owned);
   const isLoading = loadingGames || loadingDetails;
   const firstSeen = useLibraryFirstSeen(myGames);
+  const ownership = useOwnership(myGames);
   const isLoggedIn = useIsLoggedIn();
 
   const games = useMemo(() => {
@@ -58,8 +59,7 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
   const detailFor = (game: GameDataSimple) => {
     if (sort === "last-played") return playedText(game.rtime_last_played);
     if (sort === "added") return addedText(firstSeen.get(game.appid)?.firstSeen);
-    if (sort === "never-played") return "";
-    return playtimeText(game.playtime_forever);
+    return undefined;
   };
 
   if (!isLoggedIn) return <WebApiKeyNotice />;
@@ -93,7 +93,13 @@ export const MyGames = ({ initialSort }: { initialSort?: LibrarySort }) => {
         title={isLoading ? "Loading Your Games…" : SORTS.find((option) => option.value === sort)?.empty}
       />
       {games.map((game) => (
-        <MyGamesListType key={game.appid} id={`${sort}:${game.appid}`} game={game} detail={detailFor(game)} />
+        <MyGamesListType
+          key={game.appid}
+          id={`${sort}:${game.appid}`}
+          game={game}
+          detail={detailFor(game)}
+          owned={ownership.get(game.appid)}
+        />
       ))}
     </List>
   );

@@ -3,6 +3,14 @@
 export const itemId = (context: string, appid?: number, search = "") => `${context}:${appid ?? 0}:${search}`;
 export const appidFromItemId = (id?: string | null) => Number(id?.split(":")[1] ?? 0);
 
+const DAY = 86_400;
+
+// Steam's own recently played window
+export const playedRecently = (seconds?: number) => (seconds ?? 0) > Date.now() / 1000 - 14 * DAY;
+// Games from the first import were not necessarily just bought, so they never count as new
+export const addedRecently = (entry?: { firstSeen: number; baseline: boolean }) =>
+  Boolean(entry && !entry.baseline && entry.firstSeen > Date.now() / 1000 - 14 * DAY);
+
 const relativeDay = (seconds: number) => {
   const days = Math.floor((Date.now() / 1000 - seconds) / 86_400);
   if (days <= 0) return "today";

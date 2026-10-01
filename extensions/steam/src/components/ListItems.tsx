@@ -4,15 +4,27 @@ import { DefaultActions, LaunchActions } from "./Actions";
 import { GameDetails } from "./GameDetails";
 import { itemId, playtimeText } from "../lib/util";
 import { SteamGameError } from "../lib/games";
-import { useGameData } from "../lib/fetcher";
+import { Ownership, useGameData } from "../lib/fetcher";
 import { cachedDetails } from "../lib/details";
 import { releaseTag } from "../lib/release-tag";
+
+function ownedTags(owned: Ownership | undefined, { showOwned }: { showOwned: boolean }) {
+  if (!owned) return [];
+  const tags: List.Item.Accessory[] = [];
+  if (owned.isNew) tags.push({ tag: { value: "New", color: Color.Green } });
+  if (owned.recentlyPlayed) tags.push({ tag: { value: "Recently Played", color: Color.Purple } });
+  const minutes = owned.game.playtime_forever;
+  if (minutes > 0) tags.push({ tag: { value: playtimeText(minutes), color: Color.Orange } });
+  // Any of the others already says the game is yours
+  if (showOwned && !tags.length) tags.push({ tag: { value: "Owned", color: Color.Blue } });
+  return tags;
+}
 
 export const DynamicGameListItem = ({
   game,
   context,
   ready,
-  myGames = [],
+  owned,
   showingDetail = false,
   onToggleDetail,
   search,
@@ -20,16 +32,16 @@ export const DynamicGameListItem = ({
   game: GameSimple;
   context: "recent" | "recently-viewed" | "random" | "similar" | "Search";
   ready: boolean;
-  myGames?: GameDataSimple[];
+  owned?: Map<number, Ownership>;
   showingDetail?: boolean;
   onToggleDetail?: () => void;
   search?: string;
 }) => {
   const { data: gameData, icon: detailIcon, isError: error } = useGameData({ appid: game.appid, execute: ready });
   const notFound = error instanceof SteamGameError && error.status === 404;
-  const owned = myGames.find((g) => g.appid === game.appid);
-  const image = owned?.img_icon_url
-    ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${owned.img_icon_url}.jpg`
+  const mine = game.appid ? owned?.get(game.appid) : undefined;
+  const image = mine?.game.img_icon_url
+    ? `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${mine.game.img_icon_url}.jpg`
     : (game.icon ?? detailIcon);
   const genericIcon = {
     source: gameData?.type === "game" ? Icon.GameController : Icon.Circle,
@@ -45,7 +57,7 @@ export const DynamicGameListItem = ({
         showingDetail
           ? undefined
           : [
-              ...(owned ? [{ tag: { value: "Owned", color: Color.Blue } }] : []),
+              ...ownedTags(mine, { showOwned: true }),
               ...(gameData?.type && gameData.type !== "game" ? [{ tag: gameData.type }] : []),
               (notFound ? { text: "Game not found" } : releaseTag(gameData?.release_date?.date)) ?? {},
             ]
@@ -128,7 +140,19 @@ const GameListDetail = ({
   />
 );
 
-export const MyGamesListType = ({ game, id, detail }: { game: GameDataSimple; id?: string; detail?: string }) => (
+export const MyGamesListType = ({
+  game,
+  id,
+  detail,
+  owned,
+  hide,
+}: {
+  game: GameDataSimple;
+  id?: string;
+  detail?: string;
+  owned?: Ownership;
+  hide?: "isNew" | "recentlyPlayed";
+}) => (
   <List.Item
     id={id}
     key={game.appid}
@@ -137,7 +161,8 @@ export const MyGamesListType = ({ game, id, detail }: { game: GameDataSimple; id
       source: `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`,
     }}
     accessories={[
-      { text: detail ?? playtimeText(game.playtime_forever) },
+      ...(detail ? [{ text: detail }] : []),
+      ...ownedTags(owned && hide ? { ...owned, [hide]: false } : owned, { showOwned: false }),
       releaseTag(cachedDetails(game.appid)?.data.release_date?.date) ?? {},
     ]}
     actions={

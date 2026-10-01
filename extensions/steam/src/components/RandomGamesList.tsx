@@ -1,7 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { DownloadingEmptyView } from "./DownloadingList";
 import { useState } from "react";
-import { useMyGames, useRandomGames, useResultsWithDetails } from "../lib/fetcher";
+import { useMyGames, useOwnership, useRandomGames, useResultsWithDetails } from "../lib/fetcher";
 import { useShowingDetail } from "../lib/hooks";
 import { appidFromItemId } from "../lib/util";
 import { DynamicGameListItem } from "./ListItems";
@@ -12,6 +12,7 @@ export const RandomGamesList = () => {
   const isLoading = picking || detailsLoading;
   const [hovered, setHovered] = useState(0);
   const { data: myGames } = useMyGames();
+  const owned = useOwnership(myGames);
   const { showingDetail, toggleDetail } = useShowingDetail();
 
   return (
@@ -34,7 +35,7 @@ export const RandomGamesList = () => {
           key={game.appid}
           game={game}
           ready={hovered === game.appid}
-          myGames={myGames}
+          owned={owned}
           showingDetail={showingDetail}
           onToggleDetail={toggleDetail}
         />

@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { MIN_QUERY_LENGTH, SearchEmptyView } from "./SearchEmptyView";
 import { ListStatus } from "./DownloadingList";
 import { useState } from "react";
-import { useGamesSearch, useMyGames, useResultsWithDetails } from "../lib/fetcher";
+import { useGamesSearch, useMyGames, useOwnership, useResultsWithDetails } from "../lib/fetcher";
 import { useShowingDetail } from "../lib/hooks";
 import { appidFromItemId, itemId } from "../lib/util";
 import { DynamicGameListItem } from "./ListItems";
@@ -67,6 +67,7 @@ export const SearchList = ({
   onToggleDetail: () => void;
 }) => {
   const { data: myGames } = useMyGames();
+  const owned = useOwnership(myGames);
   return (
     <>
       <SearchEmptyView
@@ -84,7 +85,7 @@ export const SearchList = ({
             key={game.appid}
             game={game}
             ready={hovered === game.appid}
-            myGames={myGames}
+            owned={owned}
             showingDetail={showingDetail}
             onToggleDetail={onToggleDetail}
             search={search}

@@ -5,7 +5,8 @@
 - Fix game details showing "Game not found" for every game
 - With a Web API Key, search runs from a local list of every Steam game, refreshed daily or weekly. Games stay findable by their old names after a rename
 - Add a Refresh Game List action
-- Show each result's icon, price, release year, and an Owned tag, with this year's releases in yellow
+- Show each result's icon, price, and release year, with this year's releases in yellow
+- Tag games you own with your playtime, New if added in the last two weeks, and Recently Played if played in the last two weeks
 - Show recently added, viewed, and played games when the command opens
 - Sort My Games by name, most played, last played, recently added, or never played, and remember the sort
 - Add a View Similar Games action, from Steam's More Like This list

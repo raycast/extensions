@@ -24,6 +24,7 @@ import {
 } from "./search-index";
 import { markKeyAccepted, markKeyRejected } from "./hooks";
 import { libraryOwner } from "./library";
+import { addedRecently, playedRecently } from "./util";
 import { downloadGameList } from "./game-list";
 
 async function fetcherWithAuth(url: string) {
@@ -232,3 +233,23 @@ export const useLibraryFirstSeen = (games?: GameDataSimple[]) =>
         : new Map<number, LibraryEntry>(),
     [games],
   );
+
+export type Ownership = { game: GameDataSimple; isNew: boolean; recentlyPlayed: boolean };
+
+export const useOwnership = (myGames?: GameDataSimple[]) => {
+  const firstSeen = useLibraryFirstSeen(myGames);
+  return useMemo(
+    () =>
+      new Map<number, Ownership>(
+        (myGames ?? []).map((game) => [
+          game.appid,
+          {
+            game,
+            isNew: addedRecently(firstSeen.get(game.appid)),
+            recentlyPlayed: playedRecently(game.rtime_last_played),
+          },
+        ]),
+      ),
+    [myGames, firstSeen],
+  );
+};

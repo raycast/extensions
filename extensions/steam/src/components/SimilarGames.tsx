@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { cachedDetails } from "../lib/details";
-import { useMyGames, useResultsWithDetails } from "../lib/fetcher";
+import { useMyGames, useOwnership, useResultsWithDetails } from "../lib/fetcher";
 import { useShowingDetail } from "../lib/hooks";
 import { getSimilarGames } from "../lib/similar";
 import { appidFromItemId } from "../lib/util";
@@ -21,6 +21,7 @@ export const SimilarGames = ({ appid, name }: { appid: number; name?: string }) 
   const isLoading = finding || loading;
   const [hovered, setHovered] = useState(0);
   const { data: myGames } = useMyGames();
+  const owned = useOwnership(myGames);
   const { showingDetail, toggleDetail } = useShowingDetail();
 
   const shown = new Set(games?.map((game) => game.appid));
@@ -56,7 +57,7 @@ export const SimilarGames = ({ appid, name }: { appid: number; name?: string }) 
               key={game.appid}
               game={game}
               ready={hovered === game.appid}
-              myGames={myGames}
+              owned={owned}
               showingDetail={showingDetail}
               onToggleDetail={toggleDetail}
             />

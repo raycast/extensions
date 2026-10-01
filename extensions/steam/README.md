@@ -23,6 +23,12 @@ Both are optional, set in the extension preferences. A future version will requi
 - Launch or install games in Steam
 - Hide software, DLC, videos, or hardware
 
+## FAQ
+
+**Why doesn't my DLC show as owned?**
+
+Steam's Web API lists the games you own, but not DLC. Steam only shares your DLC with the Steam client and store when you're signed in, so the extension can't see it.
+
 ## AI Tools
 
 - **Search Steam Games**: find a game by title
