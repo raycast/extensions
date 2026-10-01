@@ -17,6 +17,7 @@ import {
   formatToSpecV2,
   LINTEN_CLOUD_BASE,
   SynthesizeReport,
+  isValidUrlInput,
 } from "./api";
 
 export function CompiledArchiveView({
@@ -39,9 +40,7 @@ export function CompiledArchiveView({
 
     try {
       let rawText = target;
-      const isUrl =
-        /^https?:\/\//i.test(target.trim()) ||
-        (target.trim().includes(".") && !target.includes("\n"));
+      const isUrl = isValidUrlInput(target);
       if (isUrl) {
         let cleanUrl = target.trim();
         if (
@@ -229,9 +228,7 @@ export default function CompileCommand() {
 
     setLoading(true);
 
-    const isUrl =
-      /^https?:\/\//i.test(trimmed) ||
-      (trimmed.includes(".") && !trimmed.includes("\n"));
+    const isUrl = isValidUrlInput(trimmed);
 
     const toast = await showToast({
       style: Toast.Style.Animated,

@@ -21,6 +21,7 @@ import {
   LINTEN_CLOUD_BASE,
   AuditReport,
   LinkProbeReport,
+  isValidUrlInput,
 } from "./api";
 
 export function AuditReportView({
@@ -358,9 +359,7 @@ export default function AuditCommand() {
 
     setLoading(true);
 
-    const isUrl =
-      /^https?:\/\//i.test(trimmed) ||
-      (trimmed.includes(".") && !trimmed.includes("\n"));
+    const isUrl = isValidUrlInput(trimmed);
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -384,9 +383,29 @@ export default function AuditCommand() {
           cleanUrl = cleanUrl.replace(/\/$/, "") + "/llms.txt";
         }
 
+        // Fetch remote manifest content to extract and probe all contained documentation links
+        let remoteContent = "";
+        try {
+          const fetchResp = await fetch(cleanUrl, {
+            headers: {
+              "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
+              Accept: "text/plain,text/markdown,*/*",
+            },
+          });
+          if (fetchResp.ok) {
+            remoteContent = await fetchResp.text();
+          }
+        } catch {
+          // If direct fetch fails, probeLinks falls back to baseUrl
+        }
+
+        const probePayload = remoteContent
+          ? { baseUrl: cleanUrl, content: remoteContent }
+          : { baseUrl: cleanUrl, urls: [cleanUrl] };
+
         [auditRes, linkRes] = await Promise.all([
           auditRemoteUrl(cleanUrl),
-          probeLinks({ baseUrl: cleanUrl, urls: [cleanUrl] }).catch(() => ({
+          probeLinks(probePayload).catch(() => ({
             ok: false,
             total: 0,
             auditedCount: 0,
@@ -405,6 +424,14 @@ export default function AuditCommand() {
             results: [],
           })),
         ]);
+      }
+
+      if (!auditRes.ok || !auditRes.report) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Audit Failed";
+        toast.message =
+          auditRes.error || "Unable to retrieve audit report for this target.";
+        return;
       }
 
       toast.style = Toast.Style.Success;

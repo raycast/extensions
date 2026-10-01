@@ -1,6 +1,6 @@
 # Linten Changelog
 
-## [Initial Version] - 2026-10-01
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of Linten for Raycast.
 - Audit Spec v2 syntax & markdown structure.

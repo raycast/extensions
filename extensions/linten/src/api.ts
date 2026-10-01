@@ -146,6 +146,31 @@ export async function probeLinks(payload: {
   return (await res.json()) as LinkProbeReport;
 }
 
+export function isValidUrlInput(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.includes("\n") || trimmed.includes(" ")) return false;
+  if (/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(trimmed)) return true;
+  return /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+([/?#]\S*)?$/.test(trimmed);
+}
+
+function isLocalOrInternalUrl(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr);
+    const host = parsed.hostname.toLowerCase();
+    return (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "::1" ||
+      host.endsWith(".local") ||
+      /^10\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Synthesizes the companion llms-full.txt archive via Linten Cloud API
  */
@@ -155,6 +180,12 @@ export async function synthesizeCompanion(input: {
 }): Promise<SynthesizeReport> {
   let content = input.content || "";
   const url = input.url;
+
+  if (url && isLocalOrInternalUrl(url)) {
+    throw new Error(
+      "Local and private network URLs cannot be compiled via Linten Cloud. Please provide a public URL or paste markdown directly.",
+    );
+  }
 
   // If a URL was provided without raw markdown content, fetch the llms.txt content first
   if (url && !content.trim()) {
@@ -264,14 +295,10 @@ export function formatToSpecV2(raw: string): string {
       continue;
     }
 
-    // 3. Blockquote summary
-    if (
-      foundFirstH1 &&
-      !foundSummary &&
-      sections.length === 0 &&
-      /^>\s*(.+)$/.test(trimmed)
-    ) {
-      summary = trimmed.replace(/^>\s*/, "").trim();
+    // 3. Blockquote summary (handles single and multi-line blockquotes)
+    if (foundFirstH1 && sections.length === 0 && /^>\s*(.*)$/.test(trimmed)) {
+      const quoteText = trimmed.replace(/^>\s*/, "").trim();
+      summary = summary ? `${summary}\n> ${quoteText}` : quoteText;
       foundSummary = true;
       continue;
     }
@@ -285,12 +312,26 @@ export function formatToSpecV2(raw: string): string {
     }
 
     // 5. Standardize Markdown link items: - [Title](url): Description
-    if (/^[-*+]\s+\[([^\]]+)\]\(([^)]+)\)(.*)$/.test(trimmed)) {
-      const match = trimmed.match(/^[-*+]\s+\[([^\]]+)\]\(([^)]+)\)(.*)$/);
-      if (match) {
-        const anchor = match[1].trim();
-        const url = match[2].trim();
-        let desc = match[3].trim();
+    const listMatch = trimmed.match(/^[-*+]\s+\[([^\]]+)\]\((.+)$/);
+    if (listMatch) {
+      const anchor = listMatch[1].trim();
+      const rest = listMatch[2];
+      // Find closing ')' of the markdown link while balancing parentheses within URL
+      let depth = 1;
+      let closeIdx = -1;
+      for (let i = 0; i < rest.length; i++) {
+        if (rest[i] === "(") depth++;
+        else if (rest[i] === ")") {
+          depth--;
+          if (depth === 0) {
+            closeIdx = i;
+            break;
+          }
+        }
+      }
+      if (closeIdx !== -1) {
+        const url = rest.substring(0, closeIdx).trim();
+        let desc = rest.substring(closeIdx + 1).trim();
         if (desc.startsWith(":")) {
           desc = desc.substring(1).trim();
         }
