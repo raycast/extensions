@@ -1,5 +1,9 @@
 # MemRadar Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+The extension now runs on Raycast for Windows. Keyboard shortcuts use Ctrl on Windows.
+
 ## [Initial Version] - 2026-09-30
 
 ### Added
