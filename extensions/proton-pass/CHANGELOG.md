@@ -33,6 +33,7 @@
 - Copy Note in Show Note follows the Transient Clipboard preference, keeping notes concealed by default
 - Partial Get TOTP loads preserve saved codes for failed vaults and offer Retry
 - Partial Get TOTP refreshes remove deleted codes from successful vaults before showing errors for failed vaults
+- Get TOTP Retry preserves unsaved visible codes for failed vaults; overlapping loads only apply the latest result and serialize cache writes
 - Offline vault views use the newer saved snapshot without restoring deleted items
 - List selection and details stay aligned when changing vaults or filtering suggestions
 - Hiding the details panel stops automatic secret loads; already-loaded custom fields and explicit copy actions remain available
