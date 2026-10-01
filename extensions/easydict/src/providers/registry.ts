@@ -45,7 +45,8 @@ export function resolveProviderServices(
       providerKey: getAIProviderKey(profile),
       order: profile.order,
       icon: resolveAIProviderIcon(profile),
-      cacheIdentity: getAIProviderCacheIdentity(profile, 1),
+      // Bump when the AI prompts change to invalidate cached results.
+      cacheIdentity: getAIProviderCacheIdentity(profile, 2),
     };
     translationServices.push({
       ...common,

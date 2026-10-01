@@ -22,12 +22,12 @@ describe("AI dictionary content", () => {
   });
 
   it("keeps the resolved headword, pronunciation, definitions, and separately copyable forms", () => {
-    const sections = renderContent(buildAIWordContent({ ...query, word: "ran" }, createWordResult()));
+    const sections = renderContent(buildAIWordContent({ ...query, word: "ran" }, createWordResult("rʌn")));
 
     expect(sections.map((section) => section.kind)).toEqual(["translation", "definitions", "pairs"]);
     expect(sections[0].items[0]).toMatchObject({
       subtitle: "run",
-      service: { query: { isWord: true, phonetic: "rʌn" } },
+      service: { query: { isWord: true, phonetic: "/rʌn/" } },
     });
     expect(sections[1].items[0]).toMatchObject({
       title: "[verb] 跑; 奔跑",
@@ -35,6 +35,17 @@ describe("AI dictionary content", () => {
     });
     expect(sections[1].items[0].renderBody()).toContain("I run daily\\.");
     expect(sections[2].items[0]).toMatchObject({ title: "past tense", subtitle: "ran" });
+  });
+
+  it.each([
+    ["rʌn", "/rʌn/"],
+    ["/rʌn/", "/rʌn/"],
+    ["/ rʌn /", "/rʌn/"],
+    [undefined, undefined],
+  ])("normalizes the model pronunciation %j to %j", (pronunciation, expected) => {
+    const content = buildAIWordContent(query, createWordResult(pronunciation));
+
+    expect(content.query.phonetic).toBe(expected);
   });
 
   it("renders structured fields as literal text while preserving their copy text", () => {
@@ -57,12 +68,12 @@ describe("AI dictionary content", () => {
   });
 });
 
-function createWordResult(): AIWordResult {
+function createWordResult(pronunciation: string | undefined): AIWordResult {
   return {
     translation: "跑",
     entry: {
       headword: "run",
-      pronunciation: "rʌn",
+      pronunciation,
       senses: [
         {
           partOfSpeech: "verb",

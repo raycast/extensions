@@ -29,7 +29,16 @@ export function buildAIWordContent(query: QueryInput, result: AIWordResult): Dic
   }
   return {
     kind: "dictionary",
-    query: { ...query, isWord: entry !== null, phonetic: entry?.pronunciation },
+    query: { ...query, isWord: entry !== null, phonetic: normalizePhonetic(entry?.pronunciation) },
     sections,
   };
+}
+
+/**
+ * The model may omit the enclosing slashes or pad them with spaces, so every
+ * surface reads the same `/.../` form. An omitted pronunciation stays omitted.
+ */
+function normalizePhonetic(phonetic: string | undefined): string | undefined {
+  const core = phonetic?.replace(/^[\s/]+|[\s/]+$/g, "");
+  return core ? `/${core}/` : undefined;
 }
