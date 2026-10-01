@@ -2,6 +2,24 @@
 
 This extension is a meta registry for MCP servers. It is used to discover and install MCP servers. You can install servers in Raycast but also other clients that support MCP such as Claude or Cursor.
 
+## Installation requirements
+
+Local servers require the runtime shown in their details. Install [Node.js with npm](https://nodejs.org/en/download) for `npx` servers such as Google Drive and Filesystem, or [uv](https://docs.astral.sh/uv/getting-started/installation/) for `uvx` servers such as Git. Server-specific credentials and allowed folders may also be required; check the server's homepage.
+
+Linear connects directly to its [hosted MCP endpoint](https://linear.app/docs/mcp) in Raycast and prompts you to sign in. It does not require Node.js in Raycast. Installation into other clients retains the `mcp-remote` proxy and requires Node.js.
+
+## Troubleshooting installation
+
+### `spawn npx ENOENT` or `spawn uvx ENOENT`
+
+Raycast could not find the executable. Check `node --version` and `npx --version`, or `uvx --version`, in Terminal. Install the required runtime if the commands are missing. Restart Raycast after installation or PATH changes so it picks up the updated environment, as described in the [Raycast MCP manual](https://manual.raycast.com/ai/model-context-protocol).
+
+If the command works in Terminal but still fails in Raycast, use `command -v npx` or `command -v uvx` to find its full path and set it as the server's command. For `npx`, also include the directory containing `node` in the server's `PATH` environment variable while retaining the rest of your PATH. An absolute path to `npx` alone does not fix a missing `node` executable.
+
+### Linear fails with `Cannot find module 'iconv-lite'`
+
+This error comes from the local npm proxy's dependencies. Update the registry extension and install Linear again in Raycast using its direct HTTP connection. Existing server configurations are not changed automatically. You can also edit the existing server to use HTTP with `https://mcp.linear.app/mcp`, then sign in. The old `/sse` endpoint is no longer available.
+
 ## How to contribute?
 
 There are three ways you can contribute to the registry:
@@ -12,7 +30,7 @@ There are three ways you can contribute to the registry:
 
 ### Add a new MCP server to the registry
 
-To add a new MCP server to the registry, you need to create a new entry in the `src/registries/builtin/entries.ts` file. You can add to the `OFFICIAL_ENTRIES` or `COMMUNITY_ENTRIES` array. Former is used for servers that are officially supported by the companies or makers of the service. Latter is used for community servers.
+To add a new MCP server to the registry, you need to create a new entry in the `src/registries/builtin/entries.ts` file. You can add to the `OFFICIAL_ENTRIES` or `COMMUNITY_ENTRIES` array. Former is used for servers that are officially supported by the companies or makers of the service. Latter is used for community servers. For a hosted server that supports direct HTTP connections in Raycast, set `remoteUrl` to its MCP endpoint and retain `configuration` as the local proxy fallback for other clients.
 
 ### Add a new MCP client to the registry
 
