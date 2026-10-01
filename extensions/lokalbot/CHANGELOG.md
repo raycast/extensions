@@ -1,6 +1,6 @@
 # LokalBot Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-01
 
 - Added Quick Recall for searching LokalBot meeting titles and summaries.
 - Added Recent Meetings for browsing the latest captured meetings.
