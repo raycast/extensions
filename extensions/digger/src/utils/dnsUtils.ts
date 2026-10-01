@@ -39,7 +39,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // rejections that cannot arrive here — `hostname` comes from `new URL()`, and a
   // name malformed enough to trip them fails the main fetch anyway, so the user
   // already has a top-level error. ECANCELLED is the ONE code that would be
-  // mislabelled, since cancellation is not failure; it is unreachable today
+  // mislabeled, since cancellation is not failure; it is unreachable today
   // because this function takes no signal and never constructs a dns.Resolver.
   // Give it one, and add ECANCELLED here at the same time.
   const BENIGN = new Set([
