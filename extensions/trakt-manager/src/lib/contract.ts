@@ -11,6 +11,7 @@ import {
   TraktHiddenAddResponseSchema,
   TraktHistoryAddResponseSchema,
   TraktNoSharing,
+  TraktWatchlistAddResponseSchema,
   TraktWatchlistRemoveResponseSchema,
   TraktMovieList,
   TraktPlaybackMovieList,
@@ -126,7 +127,8 @@ const TraktMovieContract = c.router({
     method: "POST",
     path: "/sync/watchlist",
     responses: {
-      201: z.unknown(),
+      200: TraktWatchlistAddResponseSchema,
+      201: TraktWatchlistAddResponseSchema,
     },
     body: z.object({
       movies: z.array(TraktIdSchema),
@@ -256,7 +258,8 @@ const TraktShowContract = c.router({
     method: "POST",
     path: "/sync/watchlist",
     responses: {
-      201: z.unknown(),
+      200: TraktWatchlistAddResponseSchema,
+      201: TraktWatchlistAddResponseSchema,
     },
     body: z.object({
       shows: z.array(TraktIdSchema),

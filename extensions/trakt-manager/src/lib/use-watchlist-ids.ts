@@ -25,10 +25,11 @@ async function collectIds<T>(
     const entries = data as T[];
     ids.push(...entries.map(pick));
 
-    if (scanPageComplete(entries.length, pagination, PAGE_LIMIT)) break;
+    if (scanPageComplete(entries.length, pagination, PAGE_LIMIT)) return ids;
   }
 
-  return ids;
+  // A partial list would mark the titles beyond it as "not on the watchlist": refuse it instead.
+  throw new Error("Your watchlist is too long to read in full");
 }
 
 const CACHE_KEY = "trakt-watchlist-ids";
@@ -80,7 +81,12 @@ export function useWatchlistSync() {
       return { movies, shows };
     },
     [],
-    { onData: setIds, failureToastOptions: { title: "Could not read your watchlist" } },
+    {
+      onData: setIds,
+      // Without a full list the state is unknown, so search offers both Add and Remove.
+      onError: () => setIds(undefined),
+      failureToastOptions: { title: "Could not read your watchlist" },
+    },
   );
 
   return { revalidate };

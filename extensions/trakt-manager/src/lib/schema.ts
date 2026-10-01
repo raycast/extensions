@@ -147,6 +147,12 @@ export const TraktMovieListItem = z.object({
 
 export const TraktMovieList = z.array(TraktMovieListItem);
 
+/** Response of `POST /sync/watchlist`. An item already listed counts under `existing`, not `added`. */
+export const TraktWatchlistAddResponseSchema = z.object({
+  added: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+  existing: z.object({ movies: z.number().optional(), shows: z.number().optional() }).optional(),
+});
+
 /** Response of `POST /sync/watchlist/remove`. `deleted` counts the items that were on the watchlist. */
 export const TraktWatchlistRemoveResponseSchema = z.object({
   deleted: z.object({ movies: z.number().optional(), shows: z.number().optional() }),

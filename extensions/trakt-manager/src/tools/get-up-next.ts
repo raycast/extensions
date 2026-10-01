@@ -47,10 +47,25 @@ export default async function tool(input: Input): Promise<Output> {
 
   const paginated = withPagination(response);
 
+  // up_next_nitro sends a fixed page count (trakt/trakt-api#926), so a full page does not prove
+  // there is a next one: when this page is full, look at the next page before promising more.
+  let hasMore = !scanPageComplete(paginated.data.length, paginated.pagination, safeLimit);
+  if (hasMore) {
+    const next = await executeToolCall(
+      (signal) =>
+        toolTraktClient.shows.getUpNextNitroShows({
+          query: { page: page + 1, limit: safeLimit, intent: "continue" },
+          fetchOptions: { signal },
+        }),
+      "Failed to fetch up-next shows",
+    );
+    hasMore = Array.isArray(next.body) && next.body.length > 0;
+  }
+
   return {
     data: paginated.data.map(toCompactUpNext),
     page,
-    hasMore: !scanPageComplete(paginated.data.length, paginated.pagination, safeLimit),
+    hasMore,
     exhaustive: false,
   };
 }

@@ -9,7 +9,7 @@ type RunActionOptions = {
 
 export function useActionRunner<T>({ setActionLoading, onSuccess }: RunActionOptions) {
   return useCallback(
-    async (item: T, action: (item: T) => Promise<void>, message: string) => {
+    async (item: T, action: (item: T) => Promise<void>, message: string): Promise<boolean> => {
       setActionLoading(true);
       try {
         await action(item);
@@ -20,11 +20,13 @@ export function useActionRunner<T>({ setActionLoading, onSuccess }: RunActionOpt
           title: message,
           style: Toast.Style.Success,
         });
+        return true;
       } catch (error) {
         showToast({
           title: (error as Error).message,
           style: Toast.Style.Failure,
         });
+        return false;
       } finally {
         setActionLoading(false);
       }

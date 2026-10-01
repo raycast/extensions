@@ -145,6 +145,9 @@ export default function Command() {
 
   const runShowAction = useActionRunner<TraktShowListItem>({ setActionLoading, onSuccess: revalidate });
   const runMovieAction = useActionRunner<TraktPlaybackMovieItem>({ setActionLoading, onSuccess: revalidate });
+  // A check-in leaves the item in the list: no revalidate, so an open detail stays open.
+  const runShowCheckin = useActionRunner<TraktShowListItem>({ setActionLoading });
+  const runMovieCheckin = useActionRunner<TraktPlaybackMovieItem>({ setActionLoading });
 
   const upNextMarkdown = useCallback((show: TraktShowListItem) => {
     return createEpisodeMarkdown(show.progress.next_episode, show.show);
@@ -209,11 +212,12 @@ export default function Command() {
       <MarkWatchedOnActions allowReleaseDate onMark={(watchedAt) => markShowWatchedAction(show, watchedAt)} />
       <CheckinActions
         item={show}
+        type="episode"
         traktId={show.progress.next_episode.ids.trakt}
         title={showLabel(show)}
         client={traktClient}
         signal={signal}
-        run={runShowAction}
+        run={runShowCheckin}
         checkIn={(item) => checkInEpisode(traktClient, item.progress.next_episode.ids.trakt, { signal: signal() })}
       />
     </>
@@ -304,11 +308,12 @@ export default function Command() {
           />
           <CheckinActions
             item={entry}
+            type="movie"
             traktId={entry.movie.ids.trakt}
             title={entry.movie.title}
             client={traktClient}
             signal={signal}
-            run={runMovieAction}
+            run={runMovieCheckin}
             checkIn={(item) => checkInMovie(traktClient, item.movie.ids.trakt, { signal: signal() })}
           />
         </>

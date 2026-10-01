@@ -20,7 +20,7 @@ type SearchItemActionsProps<T> = {
   item: T;
   client: TraktClient;
   signal: () => AbortSignal | undefined;
-  run: (item: T, action: (item: T) => Promise<void>, message: string) => Promise<void>;
+  run: (item: T, action: (item: T) => Promise<void>, message: string) => Promise<boolean>;
 };
 
 /**
@@ -90,6 +90,7 @@ export const MovieSearchActions = ({
       <MarkWatchedOnActions allowReleaseDate={false} onMark={markWatched} />
       <CheckinActions
         item={movie}
+        type="movie"
         traktId={traktId}
         title={movie.movie.title}
         client={client}

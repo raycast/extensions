@@ -102,9 +102,11 @@ export const MovieActionPanel = <M extends MovieActionItem>({
               <ActionPanel>
                 <ActionPanel.Section>
                   {primaryAction && <MediaActionList item={movie} actions={[primaryAction]} />}
+                  {afterPrimary}
                   {actionItems ? actionItems(movie) : <MediaActionList item={movie} actions={actions} />}
                 </ActionPanel.Section>
                 <MovieBrowserActions item={movie} />
+                {footer}
               </ActionPanel>
             )}
           />

@@ -5,14 +5,19 @@ import { useCheckinState } from "../lib/use-checkin-state";
 
 type TraktClient = ReturnType<typeof initTraktClient>;
 
+/** Used only when Trakt's expiry could not be read back; "Stop Check-In" works whatever the expiry. */
+const FALLBACK_CHECKIN_MS = 4 * 60 * 60 * 1000;
+
 type CheckinActionsProps<T> = {
   item: T;
+  /** Whether this item checks in to a movie or an episode. */
+  type: "movie" | "episode";
   /** The Trakt id of the movie or episode this item would check in to. */
   traktId: number;
   title: string;
   client: TraktClient;
   signal: () => AbortSignal | undefined;
-  run: (item: T, action: (item: T) => Promise<void>, message: string) => Promise<void>;
+  run: (item: T, action: (item: T) => Promise<void>, message: string) => Promise<boolean>;
   /** Starts the check-in. */
   checkIn: (item: T) => Promise<void>;
 };
@@ -22,7 +27,16 @@ type CheckinActionsProps<T> = {
  * every other one (HTTP 409), so with one active the start action would only fail and is not offered.
  * A component reading the shared check-in state, so a detail view opened earlier stays right.
  */
-export const CheckinActions = <T,>({ item, traktId, title, client, signal, run, checkIn }: CheckinActionsProps<T>) => {
+export const CheckinActions = <T,>({
+  item,
+  type,
+  traktId,
+  title,
+  client,
+  signal,
+  run,
+  checkIn,
+}: CheckinActionsProps<T>) => {
   const { active, setActive } = useCheckinState();
 
   if (active) {
@@ -55,8 +69,14 @@ export const CheckinActions = <T,>({ item, traktId, title, client, signal, run, 
           item,
           async (current) => {
             await checkIn(current);
-            // The expiry comes from Trakt, so read it back rather than guess the runtime.
-            setActive(await fetchActiveCheckin(client, { signal: signal() }));
+            // The expiry comes from Trakt, so read it back. The check-in already succeeded: if that
+            // read fails, keep it active until a later read corrects the expiry, rather than report
+            // a failure and offer "Now Watching" again, which Trakt would refuse with a 409.
+            try {
+              setActive(await fetchActiveCheckin(client, { signal: signal() }));
+            } catch {
+              setActive({ type, traktId, title, expiresAt: new Date(Date.now() + FALLBACK_CHECKIN_MS).toISOString() });
+            }
           },
           `Now watching "${title}"`,
         )

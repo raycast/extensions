@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 
-type OnMark = (watchedAt: string) => void;
+/** Resolves `false` when the save failed, so a form can stay open with the chosen date. */
+type OnMark = (watchedAt: string) => Promise<boolean> | void;
 
 const OtherDateForm = ({ onMark }: { onMark: OnMark }) => {
   const { pop } = useNavigation();
@@ -12,14 +13,13 @@ const OtherDateForm = ({ onMark }: { onMark: OnMark }) => {
           <Action.SubmitForm
             title="Mark as Watched"
             icon={Icon.Checkmark}
-            onSubmit={(values: { date: Date | null }) => {
+            onSubmit={async (values: { date: Date | null }) => {
               if (!values.date) {
                 showToast({ title: "Pick a date", style: Toast.Style.Failure });
                 return;
               }
 
-              pop();
-              onMark(values.date.toISOString());
+              if ((await onMark(values.date.toISOString())) !== false) pop();
             }}
           />
         </ActionPanel>

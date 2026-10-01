@@ -21,18 +21,17 @@ export async function addMovieToWatchlist(
   movie: TraktMovieListItem,
   { signal }: MutationOptions,
 ) {
-  await traktClient.movies.addMovieToWatchlist({
-    body: {
-      movies: [
-        {
-          ids: { trakt: movie.movie.ids.trakt },
-        },
-      ],
-    },
-    fetchOptions: {
-      signal,
-    },
+  const response = await traktClient.movies.addMovieToWatchlist({
+    body: { movies: [{ ids: { trakt: movie.movie.ids.trakt } }] },
+    fetchOptions: { signal },
   });
+
+  // 2xx alone proves nothing: the movie must be counted as added, or as already there.
+  const stored =
+    response.status === 200 || response.status === 201
+      ? (response.body.added.movies ?? 0) + (response.body.existing?.movies ?? 0)
+      : 0;
+  if (stored < 1) throw new Error("Trakt did not add this movie to your watchlist");
 }
 
 export async function removeMovieFromWatchlist(
@@ -81,20 +80,17 @@ export async function addShowToWatchlist(
   show: TraktShowListItem,
   { signal }: MutationOptions,
 ) {
-  await traktClient.shows.addShowToWatchlist({
-    body: {
-      shows: [
-        {
-          ids: {
-            trakt: show.show.ids.trakt,
-          },
-        },
-      ],
-    },
-    fetchOptions: {
-      signal,
-    },
+  const response = await traktClient.shows.addShowToWatchlist({
+    body: { shows: [{ ids: { trakt: show.show.ids.trakt } }] },
+    fetchOptions: { signal },
   });
+
+  // 2xx alone proves nothing: the show must be counted as added, or as already there.
+  const stored =
+    response.status === 200 || response.status === 201
+      ? (response.body.added.shows ?? 0) + (response.body.existing?.shows ?? 0)
+      : 0;
+  if (stored < 1) throw new Error("Trakt did not add this show to your watchlist");
 }
 
 export async function removeShowFromWatchlist(
@@ -219,7 +215,7 @@ export async function markEpisodeWatched(
 
 /**
  * "Drop show": Trakt hides it from Continue Watching (`dropped`), and Trakt Web also hides it from
- * the calendar. The first call decides success; the calendar call is best effort.
+ * the calendar. A failed calendar call is reported, with the drop itself kept.
  */
 export async function dropShow(traktClient: TraktClient, showTraktId: number, { signal }: MutationOptions) {
   const body = { shows: [{ ids: { trakt: showTraktId } }] };
@@ -231,10 +227,10 @@ export async function dropShow(traktClient: TraktClient, showTraktId: number, { 
     throw new Error("Trakt did not drop this show. It may already be dropped.");
   }
 
-  try {
-    await traktClient.shows.hideShowFromCalendar({ body, fetchOptions: { signal } });
-  } catch {
-    // The show is dropped; it can stay on the calendar until Trakt Web hides it.
+  // The client answers a network failure with status 500 rather than throwing, so read the status.
+  const calendar = await traktClient.shows.hideShowFromCalendar({ body, fetchOptions: { signal } });
+  if (calendar.status !== 200 && calendar.status !== 201) {
+    throw new Error("The show is dropped, but Trakt kept it on your calendar. Hide it there on Trakt Web.");
   }
 }
 
