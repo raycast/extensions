@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { noteToMarkdown } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
@@ -6,6 +6,7 @@ import { Item } from "./types";
 
 /** Full note in its own view, with the original formatting. */
 export function NoteView({ item, store }: { item: Item; store: ItemDetailStore }) {
+  const concealSecrets = getPreferenceValues<Preferences>().copyPasswordTransient ?? true;
   const { data: detail, isLoading, error } = usePromise((current: Item) => store.load(current), [item]);
   const note = detail?.note;
 
@@ -22,7 +23,7 @@ export function NoteView({ item, store }: { item: Item; store: ItemDetailStore }
       actions={
         note ? (
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Note" content={note} concealed={true} />
+            <Action.CopyToClipboard title="Copy Note" content={note} concealed={concealSecrets} />
           </ActionPanel>
         ) : undefined
       }

@@ -14,6 +14,7 @@ interface CachedData<T> {
 
 export interface CacheEntry<T> {
   data: T;
+  timestamp: number;
   /** True once the entry is older than the Cache Expiration preference. Stale data is still returned so it can be shown while a refresh runs. */
   isStale: boolean;
 }
@@ -33,7 +34,7 @@ async function getCache<T>(key: string): Promise<CacheEntry<T> | null> {
     if (!raw) return null;
 
     const cached: CachedData<T> = JSON.parse(raw);
-    return { data: cached.data, isStale: !isCacheFresh(cached) };
+    return { data: cached.data, timestamp: cached.timestamp, isStale: !isCacheFresh(cached) };
   } catch {
     return null;
   }

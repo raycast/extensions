@@ -116,10 +116,17 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       initialVault ? getCachedItems(initialVault.shareId) : null,
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
-    // An earlier partial shared listing can omit the opened vault. Keep its legacy snapshot until a full refresh.
+    // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
+    // Replace that vault's items rather than unioning snapshots, so deleted items do not return.
     const cachedItems =
-      legacyItems && !sharedHasVault
-        ? { data: [...(sharedItems?.data ?? []), ...legacyItems.data], isStale: true }
+      legacyItems && (!sharedHasVault || legacyItems.timestamp > (sharedItems?.timestamp ?? 0))
+        ? {
+            data: [
+              ...(sharedItems?.data.filter((item) => item.shareId !== initialVault?.shareId) ?? []),
+              ...legacyItems.data,
+            ],
+            isStale: true,
+          }
         : sharedItems;
     if (!isLatest()) return;
     if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
