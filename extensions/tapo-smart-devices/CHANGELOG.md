@@ -1,6 +1,6 @@
 # Tapo Smart Devices Changelog
 
-## [Up to 95% Faster Loading] - {PR_MERGE_DATE}
+## [Up to 95% Faster Loading] - 2026-10-01
 
 - Devices load in ~0.3s instead of 5–10s
 - Turn devices on/off instantly, even while refreshing
