@@ -1,6 +1,6 @@
 # Twos Changelog
 
-## [Create things from search] - {PR_MERGE_DATE}
+## [Create things from search] - 2026-10-01
 
 - Add a Create Thing action to search results and the empty state. Press Command+N to open Add Thing with your search text already filled in.
 
