@@ -1,6 +1,6 @@
 # Privacy Mask Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-01
 
 - Masks personal information in the selected text or the clipboard, entirely on device
 - Japanese personal names via Apple Intelligence's on-device model, with English names via `NLTagger`
