@@ -1,6 +1,6 @@
 # Raycast Wallpaper Changelog
 
-## [Fix Windows wallpapers and improve reliability] - {PR_MERGE_DATE}
+## [Fix Windows wallpapers and improve reliability] - 2026-10-01
 
 - Convert HEIC wallpapers to full-resolution JPEGs on Windows to prevent blank backgrounds.
 - Fix opening the wallpaper folder when no directory is configured, and create missing download folders.
