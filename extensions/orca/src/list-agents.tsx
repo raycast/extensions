@@ -38,6 +38,12 @@ const STATUS_LABELS: Record<StatusFilter, string> = {
   all: "All Agents",
 };
 
+const EMPTY_TITLES: Record<StatusFilter, string> = {
+  waiting: "Nobody is waiting",
+  stopped: "Nobody is waiting or finished",
+  all: "No agents running",
+};
+
 function shortBranch(branch?: string): string | undefined {
   if (!branch) return undefined;
   return branch.replace(/^refs\/heads\//, "");
@@ -183,11 +189,13 @@ export default function Command(
     >
       <List.EmptyView
         icon={Icon.Dot}
-        title={isLoading ? "Asking Orca…" : "Nobody is waiting"}
+        title={isLoading ? "Asking Orca…" : EMPTY_TITLES[status]}
         description={
           isLoading
             ? undefined
-            : `No agent matches "${STATUS_LABELS[status]}". Switch the dropdown to see the rest.`
+            : status === "all"
+              ? "Orca has no panes of the types set in Agent Types."
+              : `No agent matches "${STATUS_LABELS[status]}". Switch the dropdown to see the rest.`
         }
       />
 

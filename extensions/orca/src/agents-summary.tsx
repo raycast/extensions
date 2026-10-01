@@ -5,10 +5,18 @@ import {
   launchCommand,
   updateCommandMetadata,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-import { StatusFilter, SummaryMode, loadAgents, summarize } from "./orca.ts";
+import {
+  AgentFilter,
+  StatusFilter,
+  SummaryMode,
+  filterRows,
+  loadAgents,
+  summarize,
+} from "./orca.ts";
 
 const execFileAsync = promisify(execFile);
 
@@ -21,11 +29,17 @@ const EXTENSION_NAME = "Orca";
  * updateCommandMetadata only ever writes its own command's subtitle.
  */
 export default async function Command() {
-  const { orcaPath, summaryMode } =
+  const { orcaPath, summaryMode, agentFilter } =
     getPreferenceValues<Preferences.AgentsSummary>();
 
   try {
-    const rows = await loadAgents(orcaPath, execFileAsync);
+    // The same agent types List All Agents shows: with Claude Only set, a
+    // waiting Codex pane must not surface here either.
+    const rows = filterRows(
+      await loadAgents(orcaPath, execFileAsync),
+      "all",
+      agentFilter as AgentFilter,
+    );
     await updateCommandMetadata({
       subtitle:
         summarize(rows, (summaryMode as SummaryMode) ?? "sessions") ??
@@ -41,10 +55,17 @@ export default async function Command() {
   // everything: arriving from a count of blocked agents, the useful view is the
   // full picture with those agents on top, not a list pre-filtered down to them.
   if (environment.launchType === LaunchType.UserInitiated) {
-    await launchCommand({
-      name: "list-agents",
-      type: LaunchType.UserInitiated,
-      context: { status: "all" satisfies StatusFilter },
-    });
+    try {
+      await launchCommand({
+        name: "list-agents",
+        type: LaunchType.UserInitiated,
+        context: { status: "all" satisfies StatusFilter },
+      });
+    } catch (error) {
+      // Throws when List All Agents has been disabled in Raycast's settings.
+      await showFailureToast(error, {
+        title: "Could not open List All Agents",
+      });
+    }
   }
 }

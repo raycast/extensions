@@ -40,7 +40,7 @@ Actions:
 | Show worktree in Finder | — |
 | Refresh | `⌘R` |
 
-### Orca Agents
+### Show Waiting Agents
 
 A background command that keeps a live status in the root search, refreshed
 every minute even while Raycast is closed.
@@ -145,11 +145,11 @@ Started on its own it has no prompt to run, so it opens **Add Prompt** instead.
 
 | Preference | Default | What it does |
 | --- | --- | --- |
-| Root Search Subtitle | Blocked Sessions | What **Orca Agents** writes under its name in the root search: the blocked sessions by project and name, or plain counts. Affects that command only. |
-| Agent Types | All agents | Which panes count as agents in **List All Agents**: all, Claude only, Codex only, or every pane including plain shells. |
+| Root Search Subtitle | Blocked Sessions | What **Show Waiting Agents** writes under its name in the root search: the blocked sessions by project and name, or plain counts. Affects that command only. |
+| Agent Types | All agents | Which panes count as agents, in **List All Agents** and in the root search subtitle alike: all, Claude only, Codex only, or every pane including plain shells. |
 | Orca CLI Path | bundled binary | Where the `orca` executable lives. |
 
-**List All Agents** takes no preference for which agents it shows. It opens on
+**List All Agents** takes no preference for which states it shows. It opens on
 all of them — the blocked ones lead the list anyway — and its dropdown narrows
 the view to *Waiting for Input* or *Waiting & Finished* for that session.
 

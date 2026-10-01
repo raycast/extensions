@@ -52,7 +52,7 @@
     {
       "name": "summaryMode",
       "title": "Root Search Subtitle",
-      "description": "What the Orca Agents command shows under its name in the root search, refreshed in the background every minute. It does not affect List All Agents — that command opens on all agents, with the blocked ones on top, and its own dropdown narrows the view.",
+      "description": "What the Show Waiting Agents command shows under its name in the root search, refreshed in the background every minute. It does not affect List All Agents — that command opens on all agents, with the blocked ones on top, and its own dropdown narrows the view.",
       "type": "dropdown",
       "required": false,
       "default": "sessions",
@@ -70,7 +70,7 @@
     {
       "name": "agentFilter",
       "title": "Agent Types",
-      "description": "Which panes count as agents worth listing.",
+      "description": "Which panes count as agents, in List All Agents and in the root search subtitle alike.",
       "type": "dropdown",
       "required": false,
       "default": "all-agents",

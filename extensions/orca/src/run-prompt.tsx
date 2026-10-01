@@ -29,7 +29,15 @@ export default async function Command(
 ) {
   const spec = props.launchContext;
   if (!spec?.prompt) {
-    await launchCommand({ name: "add-prompt", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({
+        name: "add-prompt",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (error) {
+      // Throws when Add Prompt has been disabled in Raycast's settings.
+      await showFailureToast(error, { title: "Could not open Add Prompt" });
+    }
     return;
   }
 
