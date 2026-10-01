@@ -30,9 +30,9 @@ type ExtensionPreferences = {
   "browserApp"?: import("@raycast/api").Application,
   /** Local Project URL Template - The template for the URL of your projects (use {project} as placeholder for the project name, additionally you can use any placeholder defined in the project config file) */
   "localProjectUrlTemplate": string,
-  /** undefined - Resize the editor window after launching a project */
+  /** undefined - Resize the editor window after launching a project (macOS only) */
   "resizeEditorWindowAfterLaunch"?: boolean,
-  /** Resize Mode - The mode to use when resizing the editor window */
+  /** Resize Mode - The mode to use when resizing the editor window (macOS only) */
   "windowResizeMode": "reasonable-size" | "almost-maximize" | "toggle-fullscreen" | "maximize" | "left-half" | "center-half" | "right-half" | "top-half" | "bottom-half" | "previous-display" | "next-display" | "previous-desktop" | "next-desktop"
 }
 

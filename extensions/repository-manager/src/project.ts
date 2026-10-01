@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs'
 import { Icon, Image } from '@raycast/api'
-import { homedir } from 'os'
+import { getDisplayPath, resolveUserPath } from './platform'
 import path from 'path'
 import gitConfigParser from 'parse-git-config'
 // Removed parse-github-url to avoid deprecation warnings
@@ -102,19 +102,14 @@ export class Project {
     }
 
     private initializeProject(projectPath: string): void {
-        this.fullPath = projectPath
-        this.displayPath = this.getDisplayPath(projectPath)
-        this.pathParts = projectPath.split(path.sep).filter(Boolean)
+        this.fullPath = resolveUserPath(projectPath)
+        this.displayPath = getDisplayPath(this.fullPath)
+        this.pathParts = this.fullPath.split(path.sep).filter(Boolean)
         this.name = this.pathParts.at(-1) || ''
 
         this.setPrimaryDirectory()
         this.setConfiguration()
         this.gitRemotes = parseGitRemotes(this.fullPath)
-    }
-
-    private getDisplayPath(fullPath: string): string {
-        const homeDir = homedir()
-        return fullPath.startsWith(homeDir) ? fullPath.replace(homeDir, '~') : fullPath
     }
 
     private setPrimaryDirectory(): void {

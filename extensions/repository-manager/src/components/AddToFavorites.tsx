@@ -1,3 +1,4 @@
+import { projectShortcut } from '../platform'
 import { Action, Icon } from '@raycast/api'
 import { showSuccessToast, showErrorToast } from '../ui/toast'
 import { getFavoriteProjects, setFavoriteProjects } from '../helpers'
@@ -47,7 +48,7 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
             title={project.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             key="add-to-favorites"
             icon={project.isFavorite ? Icon.StarDisabled : Icon.Star}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'f' }}
+            shortcut={projectShortcut('f', ['shift'])}
             onAction={toggleFavorite}
         />
     )
