@@ -1,6 +1,6 @@
 import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 import { expiryWarning, preferredExpiry } from "./lib/expiry";
-import { onlyFiles, uploadPaths } from "./lib/upload";
+import { onlyFiles, reusedNote, uploadPaths } from "./lib/upload";
 
 export default async function Command() {
   let paths: string[];
@@ -25,10 +25,14 @@ export default async function Command() {
   const uploads = await uploadPaths(files, { expires });
   // The failure toast stays up when Delete After didn't take.
   if (uploads.length === files.length && !expiryWarning(uploads, expires)) {
-    await showHUD(
-      uploads.length === 1
-        ? `Uploaded ${uploads[0].filename}, link copied`
-        : `Uploaded ${uploads.length} files, links copied`,
-    );
+    if (uploads.length === 1) {
+      await showHUD(
+        uploads[0].reused
+          ? "Already uploaded, copied the existing link"
+          : `Uploaded ${uploads[0].filename}, link copied`,
+      );
+    } else {
+      await showHUD(`Uploaded ${uploads.length} files. ${reusedNote(uploads)}Links copied`);
+    }
   }
 }

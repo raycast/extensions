@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, useNavigation } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
+import path from "node:path";
 import { listDestinations } from "../api/client";
 import { destinationIcon } from "../lib/format";
 import { onlyFiles, uploadPaths } from "../lib/upload";
@@ -8,6 +9,8 @@ import { DELETE_AFTER_OPTIONS, parseExpiry, preferredExpiry } from "../lib/expir
 
 type Values = {
   files: string[];
+  /** Optional new name for a single file; the extension is kept when left out. */
+  name: string;
   destinationId: string;
   folder: string;
   /** Days as a string, "0" meaning never. */
@@ -32,9 +35,10 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
   });
   const defaultDestination = destinationId ?? destinations?.find((destination) => destination.isDefault)?.id;
 
-  const { handleSubmit, itemProps, setValidationError } = useForm<Values>({
+  const { handleSubmit, itemProps, setValidationError, values } = useForm<Values>({
     initialValues: {
       files: initialFiles ?? [],
+      name: "",
       // "/" is the bucket root with files keeping their names; empty means the path template.
       folder: prefix === undefined ? "" : prefix || "/",
       // Aktar can't auto-delete into a chosen folder, so a preset folder starts at Never.
@@ -61,6 +65,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         // An empty folder means "use the destination's path template".
         prefix: folder ? folder : undefined,
         expires,
+        filename: files.length === 1 ? uploadName(values.name, files[0]) : undefined,
       });
       if (uploads.length === 0) return false;
       if (onUploaded) {
@@ -71,6 +76,8 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       }
     },
   });
+
+  const singleFile = values.files?.length === 1 ? path.basename(values.files[0]) : undefined;
 
   return (
     <Form
@@ -83,6 +90,14 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       }
     >
       <Form.FilePicker title="Files" allowMultipleSelection canChooseDirectories={false} {...itemProps.files} />
+      {singleFile && (
+        <Form.TextField
+          title="Name"
+          placeholder={path.parse(singleFile).name}
+          info="Optional. Uploads the file under this name instead. The file's extension is kept unless you type one. With the destination's path template, it becomes {filename}; in a folder, it's the file's name there."
+          {...itemProps.name}
+        />
+      )}
       <Form.Dropdown
         id="destinationId"
         title="Destination"
@@ -116,4 +131,14 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       </Form.Dropdown>
     </Form>
   );
+}
+
+/**
+ * The typed name with path separators removed, keeping the file's own
+ * extension unless the name has one. Undefined when nothing was typed.
+ */
+function uploadName(typed: string, filePath: string) {
+  const name = typed.replace(/[/\\]/g, "").trim();
+  if (!name || /^\.+$/.test(name)) return undefined;
+  return path.extname(name) ? name : `${name}${path.extname(filePath)}`;
 }

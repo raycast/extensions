@@ -44,21 +44,21 @@
       "name": "upload-file",
       "title": "Upload File",
       "subtitle": "Aktar",
-      "description": "Pick files, a destination, and an optional folder or auto-delete time, then upload them and copy their links.",
+      "description": "Pick files, a destination, and an optional name, folder, or auto-delete time, then upload them and copy their links.",
       "mode": "view"
     },
     {
       "name": "search-uploads",
       "title": "Search Uploads",
       "subtitle": "Aktar",
-      "description": "Search your upload history, copy links in any format, and delete uploads.",
+      "description": "Search your upload history, copy links in any format, show QR codes, and delete uploads.",
       "mode": "view"
     },
     {
       "name": "browse-buckets",
       "title": "Browse Buckets",
       "subtitle": "Aktar",
-      "description": "Browse the folders and files in your destinations' buckets: copy links, create temporary links, rename, move, delete, and upload.",
+      "description": "Browse the folders and files in your destinations' buckets: copy links, create temporary links and QR codes, rename, move, delete, and upload.",
       "mode": "view"
     },
     {

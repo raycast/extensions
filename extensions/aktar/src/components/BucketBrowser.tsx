@@ -28,6 +28,7 @@ import { showAktarFailure } from "../lib/errors";
 import { FORMAT_TITLES, formatBytes, formatLink, isImageName, thumbnail } from "../lib/format";
 import { resolveFormat } from "../lib/output";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
+import { QRCodeView } from "./QRCodeView";
 import { UploadForm } from "./UploadForm";
 
 type Entry = { type: "folder"; folder: BucketFolder } | { type: "object"; object: BucketObject };
@@ -166,14 +167,28 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                         content={formatLink(object.url, object.name, format)}
                       />
                       <Action.OpenInBrowser url={object.url} />
+                      <Action.Push
+                        title="Show QR Code"
+                        icon={Icon.Mobile}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                        target={<QRCodeView name={object.name} link={object.url} />}
+                      />
                     </>
                   ) : (
-                    <TemporaryLinkAction
-                      destination={destination}
-                      object={object}
-                      seconds={3600}
-                      title="Copy 1-Hour Link"
-                    />
+                    <>
+                      <TemporaryLinkAction
+                        destination={destination}
+                        object={object}
+                        seconds={3600}
+                        title="Copy 1-Hour Link"
+                      />
+                      <Action.Push
+                        title="Show 1-Hour Link QR Code"
+                        icon={Icon.Mobile}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                        target={<TemporaryLinkQRCode destination={destination} object={object} seconds={3600} />}
+                      />
+                    </>
                   )}
                   <Action
                     title={isShowingDetail ? "Hide Preview" : "Show Preview"}
@@ -209,6 +224,22 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                         object={object}
                         seconds={duration.seconds}
                         title={duration.title}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
+                  <ActionPanel.Submenu
+                    title="Show Temporary Link QR Code"
+                    icon={Icon.Mobile}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  >
+                    {TEMPORARY_LINK_DURATIONS.map((duration) => (
+                      <Action.Push
+                        key={duration.seconds}
+                        title={duration.title}
+                        icon={Icon.Clock}
+                        target={
+                          <TemporaryLinkQRCode destination={destination} object={object} seconds={duration.seconds} />
+                        }
                       />
                     ))}
                   </ActionPanel.Submenu>
@@ -294,6 +325,27 @@ function TemporaryLinkAction({
         } catch (error) {
           await showAktarFailure(error, "Couldn't create a temporary link");
         }
+      }}
+    />
+  );
+}
+
+/** A QR code for a temporary link, created when the view opens. */
+function TemporaryLinkQRCode({
+  destination,
+  object,
+  seconds,
+}: {
+  destination: Destination;
+  object: BucketObject;
+  seconds: number;
+}) {
+  return (
+    <QRCodeView
+      name={object.name}
+      link={async () => {
+        const link = await createTemporaryLink(destination.id, object.key, seconds);
+        return { url: link.url, note: `Temporary link, expires ${new Date(link.expiresAt).toLocaleString()}.` };
       }}
     />
   );

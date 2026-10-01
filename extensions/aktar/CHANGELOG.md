@@ -1,5 +1,12 @@
 # Aktar Changelog
 
+## [QR Codes and Renaming] - {PR_MERGE_DATE}
+
+- Show QR Code (⌘⇧Q) in Search Uploads and Browse Buckets, for public links and temporary links. Copy the QR code image or save it to Downloads
+- Name field in Upload File: upload a single file under a different name, keeping its extension
+- "Already uploaded" when Aktar finds the same file already in the destination and copies its existing link instead of uploading it again
+- WebP and AVIF image conversion, `{md5}` and `{sha256}` file names, and files larger than 5 GB are handled by Aktar 0.10.0 for Mac and Aktar 0.3.0 for Windows, with no extension settings needed
+
 ## [Delete After] - 2026-09-30
 
 - Delete After option (1, 7, 14, or 30 days) for Upload Clipboard, Upload Selected Files, and Upload File. Aktar puts the file under a `tmp/` folder whose bucket lifecycle rule deletes it on schedule. Needs Aktar 0.5.0 or later
