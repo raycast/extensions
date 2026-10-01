@@ -112,15 +112,11 @@ final class DeskSession {
         ]
       } else {
         let found = await ble.scan(timeout: 8) { $0.peripheral.identifier == id }
-        if let match = found.first(where: { $0.peripheral.identifier == id }) {
-          candidates = [match]
-        } else if found.count == 1 {
-          // The saved identifier can be stale, e.g. one copied for an older version of the extension.
-          // With exactly one desk nearby there's nothing to guess between, so use it.
-          candidates = found
-        } else {
+        // This Mac has never seen the desk. The TypeScript side may retry with discovery for a stale preference.
+        guard let match = found.first(where: { $0.peripheral.identifier == id }) else {
           throw DeskError.deskNotFound
         }
+        candidates = [match]
       }
     }
 

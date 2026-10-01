@@ -2,7 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Fixes "Couldn't find your desk" when the Desk identifier preference from an older version no longer matches your desk. If exactly one desk is nearby, it's used and remembered
+- Fixes "Couldn't find your desk" when the Desk identifier preference from an older version points to a desk this Mac has never seen. The extension now looks for your desk instead, as long as only one desk is nearby, and remembers it
 - Select Desk now works even when the Desk identifier preference is set
 - Fixes the first move after the desk has been idle for a while, which could do nothing or report an obstruction
 

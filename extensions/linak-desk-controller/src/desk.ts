@@ -41,14 +41,25 @@ async function getReplacement(preference: string) {
   }
 }
 
-/** Remembers the desk that was used when none or a different one was requested, so later commands go straight to it. */
+/** Remembers the desk a command used so the next one goes straight to it, unless the user picked a desk meanwhile. */
 async function rememberUsedDesk(requestedId: string, usedId: string) {
-  if (requestedId) {
-    if (usedId !== requestedId) await selectDesk(usedId);
-  } else if (!(await getDeskId())) {
-    // Keep an automatically found desk, unless the user picked one while the command was still running.
-    await selectDesk(usedId);
-  }
+  if (usedId === requestedId) return;
+  if ((await getDeskId()) === requestedId) await selectDesk(usedId);
+}
+
+// Swift's message for a desk identifier this Mac has never seen (`DeskError.deskNotFound`).
+const UNKNOWN_DESK_MESSAGE = "Couldn't find your desk.";
+
+/**
+ * A desk identifier preference set for an older version of the extension can point to a desk this Mac has never seen.
+ * Only then is it safe to fall back to discovery, which refuses to guess when several desks are nearby. A desk picked
+ * in Select Desk, or one this Mac knows but can't reach right now, never falls back, so another desk is never moved.
+ */
+function isStalePreference(deskId: string, error: unknown) {
+  const preference = getPreferenceValues<Preferences>().uuid?.trim();
+  return (
+    !!preference && deskId === preference && error instanceof Error && error.message.startsWith(UNKNOWN_DESK_MESSAGE)
+  );
 }
 
 /** Saves the desk to control. The preference can't be changed from code, so a set one is overridden instead. */
@@ -71,7 +82,14 @@ async function runDeskCommand(title: string, command: (deskId: string) => Promis
   try {
     const deskId = await getDeskId();
     if (!deskId) toast.message = "Looking for your desk…";
-    const status = await command(deskId);
+    let status: DeskStatus;
+    try {
+      status = await command(deskId);
+    } catch (error) {
+      if (!isStalePreference(deskId, error)) throw error;
+      toast.message = "Looking for your desk…";
+      status = await command("");
+    }
     // Remember the desk that was actually used so the next command doesn't have to scan for it.
     await rememberUsedDesk(deskId, status.id);
     if (status.cancelled) {
