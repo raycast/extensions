@@ -3,6 +3,7 @@
 ## [Fix AI tools] - {PR_MERGE_DATE}
 
 - AI tools, blobs and SQLite work again after Val Town changed how it returns their results
+- The API token preference says which permissions the token needs
 
 ## [Windows support] - 2026-08-23
 

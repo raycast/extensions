@@ -61,7 +61,7 @@
       "type": "password",
       "required": true,
       "title": "Val Town API Token",
-      "description": "Create one at val.town/settings/api",
+      "description": "Create one at val.town/settings/api with read and write on Vals, Blob storage and SQLite. With less, a val's runs, blobs and database won't load.",
       "placeholder": "vt_..."
     }
   ],
@@ -83,7 +83,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --test"
+    "test": "node --test",
+    "live-check": "esbuild scripts/live-check.ts --bundle --platform=node --format=esm --alias:@raycast/api=./scripts/raycast-stub.mjs --outfile=node_modules/.cache/live-check.mjs --log-level=warning && node node_modules/.cache/live-check.mjs"
   },
   "platforms": [
     "macOS",
