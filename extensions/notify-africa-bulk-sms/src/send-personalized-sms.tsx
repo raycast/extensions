@@ -136,5 +136,7 @@ function personalizedResults(messages: SmsMessage[], response: BulkSendResponse)
 }
 
 function isAcceptedStatus(status: string | undefined): boolean {
-  return Boolean(status && !["FAILED", "CANCELLED"].includes(status.toUpperCase()));
+  return Boolean(
+    status && ["ACCEPTED", "COMPLETED", "DELIVERED", "PROCESSING", "SCHEDULED", "SENT"].includes(status.toUpperCase()),
+  );
 }
