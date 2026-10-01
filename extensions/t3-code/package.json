@@ -13,18 +13,21 @@
     {
       "name": "ask-t3",
       "title": "Prompt T3 Code",
+      "subtitle": "T3 Code",
       "description": "Start a new T3 Code session with a prompt.",
       "mode": "view"
     },
     {
       "name": "waiting-threads",
       "title": "Waiting T3 Threads",
+      "subtitle": "T3 Code",
       "description": "Active threads where the agent has stopped and the ball is in your court.",
       "mode": "view"
     },
     {
       "name": "search-threads",
       "title": "Search T3 Threads",
+      "subtitle": "T3 Code",
       "description": "Search every live thread and open it in T3 Code.",
       "mode": "view"
     }
