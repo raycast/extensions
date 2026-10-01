@@ -20,6 +20,8 @@ import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
 import ServiceSchedules from "./service-schedules";
 import { OpenWebsiteAction } from "./open-website";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { servicePagePath } from "./dokploy-pages";
 import Templates from "./templates";
 import { DatabaseActions } from "./database-actions";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
@@ -326,6 +328,16 @@ export default function Services({
                       onOpen={() => void visitItem(service)}
                     />
                   )}
+                  <OpenInDokployAction
+                    url={url}
+                    path={servicePagePath({
+                      projectId: environment.projectId,
+                      environmentId: environment.environmentId,
+                      type: service.type,
+                      id: service.id,
+                    })}
+                    onOpen={() => void visitItem(service)}
+                  />
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />

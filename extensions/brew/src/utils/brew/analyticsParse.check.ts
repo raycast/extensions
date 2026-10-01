@@ -16,6 +16,7 @@ import {
   AnalyticsCounts,
   POPULARITY_PERIOD,
   analyticsRows,
+  tapHasAnalytics,
   byPopularity,
   packageStatus,
   parseRanks,
@@ -141,6 +142,19 @@ assert.deepEqual(
   loaded.map((r) => r.text),
   ["1", "2", "3"],
 );
+// A third-party tap has no analytics to be missing, so the rows are dropped
+// entirely rather than reserved. Reserving them states a fetch problem that did
+// not happen: the detail lookup 404s for a tapped package, which sets `failed`,
+// and three "Unavailable" rows then imply counts that will never exist.
+assert.equal(analyticsRows(undefined, false, "steipete/tap").length, 0, "third-party tap has no stats rows");
+assert.equal(analyticsRows(undefined, true, "steipete/tap").length, 0, "not even when the fetch failed");
+assert.equal(analyticsRows(undefined, false, "homebrew/core").length, 3, "core keeps its reserved rows");
+assert.equal(analyticsRows(undefined, false, "homebrew/cask").length, 3, "so does the cask tap");
+// An unknown tap keeps them: losing real counts is worse than an extra row.
+assert.equal(analyticsRows(undefined, false, undefined).length, 3, "unknown tap keeps its rows");
+assert.equal(analyticsRows(undefined, false, null).length, 3, "a null tap reads as unknown");
+assert.ok(tapHasAnalytics("homebrew/core") && !tapHasAnalytics("cameroncooke/axe"));
+
 // Build errors stay conditional — a permanent "0" row would be noise.
 assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": { asc: 7 } } } }).length, 4);
 assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": {} } } }).length, 3);

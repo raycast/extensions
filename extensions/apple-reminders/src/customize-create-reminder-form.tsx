@@ -36,6 +36,23 @@ export default function CustomizeCreateReminderForm() {
     <List isLoading={isLoading}>
       <List.Section title="Create Reminder Form" subtitle="Toggle fields, move items, and place separators">
         {layout.map((item, index) => {
+          const moveActions = (
+            <>
+              <Action
+                title="Move up"
+                icon={Icon.ArrowUp}
+                shortcut={Keyboard.Shortcut.Common.MoveUp}
+                onAction={() => setValue(moveLayoutItem(layout, index, -1))}
+              />
+              <Action
+                title="Move Down"
+                icon={Icon.ArrowDown}
+                shortcut={Keyboard.Shortcut.Common.MoveDown}
+                onAction={() => setValue(moveLayoutItem(layout, index, 1))}
+              />
+            </>
+          );
+
           if (item.type === "separator") {
             separatorCount += 1;
 
@@ -53,18 +70,7 @@ export default function CustomizeCreateReminderForm() {
                       icon={Icon.Plus}
                       onAction={() => setValue(insertSeparatorAfter(layout, index))}
                     />
-                    <Action
-                      title="Move up"
-                      icon={Icon.ArrowUp}
-                      shortcut={Keyboard.Shortcut.Common.MoveUp}
-                      onAction={() => setValue(moveLayoutItem(layout, index, -1))}
-                    />
-                    <Action
-                      title="Move Down"
-                      icon={Icon.ArrowDown}
-                      shortcut={Keyboard.Shortcut.Common.MoveDown}
-                      onAction={() => setValue(moveLayoutItem(layout, index, 1))}
-                    />
+                    {moveActions}
                     <Action
                       title="Delete Separator"
                       icon={Icon.Trash}
@@ -132,18 +138,7 @@ export default function CustomizeCreateReminderForm() {
                       }
                     />
                   ) : null}
-                  <Action
-                    title="Move up"
-                    icon={Icon.ArrowUp}
-                    shortcut={Keyboard.Shortcut.Common.MoveUp}
-                    onAction={() => setValue(moveLayoutItem(layout, index, -1))}
-                  />
-                  <Action
-                    title="Move Down"
-                    icon={Icon.ArrowDown}
-                    shortcut={Keyboard.Shortcut.Common.MoveDown}
-                    onAction={() => setValue(moveLayoutItem(layout, index, 1))}
-                  />
+                  {moveActions}
                   <Action
                     title="Reset to Defaults"
                     icon={Icon.ArrowCounterClockwise}

@@ -8,8 +8,10 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../../swift/AppleReminders";
 
-import { applyTagsToNotes, extractTagsFromNotes, formatTags, getPriorityIcon, parseReminderDueDate } from "../helpers";
+import { applyTagsToNotes, extractTagsFromNotes, formatTags, parseReminderDueDate } from "../helpers";
 import { List, Priority, Reminder, useData } from "../hooks/useData";
+
+import PriorityDropdown from "./PriorityDropdown";
 
 type EditReminderProps = {
   reminder: Reminder;
@@ -155,12 +157,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
       <Form.TextField {...itemProps.title} title="Title" placeholder="New Reminder" />
       <Form.DatePicker {...itemProps.dueDate} title="Due Date" type={Form.DatePicker.Type.DateTime} />
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
-      <Form.Dropdown {...itemProps.priority} title="Priority">
-        <Form.Dropdown.Item title="None" value="" />
-        <Form.Dropdown.Item title="High" value="high" icon={getPriorityIcon("high")} />
-        <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
-        <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
-      </Form.Dropdown>
+      <PriorityDropdown {...itemProps.priority} />
       <Form.TextField
         {...itemProps.tags}
         title="Tags"

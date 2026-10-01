@@ -337,9 +337,29 @@ export interface ChunkedRemote<T> extends Remote<T> {
   /** In-flight index fetch for deduplication */
   indexFetch?: Promise<CacheIndex>;
   /**
-   * Shrink a record before it is written to a chunk — the hook for a field
-   * worth reading but not worth storing whole (see `compactCaskArtifacts`).
-   * Runs on a freshly parsed object, so it may mutate in place.
+   * Per-type build extras, created FRESH for each build — a hook that
+   * accumulates (the adopt index) must not carry a previous build's records.
+   */
+  buildHooks?: () => ChunkedBuildHooks<T>;
+}
+
+/** Per-type extras for a chunked build. Formulae pass none. */
+export interface ChunkedBuildHooks<T> {
+  /**
+   * Observe each record while it is still WHOLE, before `compact` strips it.
+   * The only chance to derive anything from a field the cache does not store.
+   */
+  onRecord?: (item: T) => void;
+  /**
+   * Shrink each record before it is written to a chunk. Runs on the freshly
+   * parsed object, which nothing else holds, so it may mutate in place; see
+   * `compactCaskArtifacts`. Omitted for formulae, which store what they parse.
    */
   compact?: (item: T) => T;
+  /**
+   * Write derived data into the partial directory, just before the swap, so it
+   * lands with the chunks it was derived from. **Best-effort**: a failure is
+   * logged and the build still publishes.
+   */
+  writeSidecar?: (partialDir: string) => Promise<void>;
 }

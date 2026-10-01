@@ -4,7 +4,7 @@
  *
  * The list opens with everything not pinned selected — exactly what a plain
  * `brew upgrade` would do — so running immediately is equivalent to Upgrade
- * All. A pin is a lock, matching brew's own behaviour: a pinned package cannot
+ * All. A pin is a lock, matching brew's own behavior: a pinned package cannot
  * be selected, and upgrading one means unpinning it first, which selects it.
  * Formulae and casks behave identically here.
  * Upgrades are reported via the toast/HUD, with the icon of each item
