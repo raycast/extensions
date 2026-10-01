@@ -31,7 +31,10 @@ export const ItemActions = memo(function ItemActions({
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
-  const viewDetailsFirst = (preferences.primaryAction ?? "details") === "details";
+  const hasPassword = item.type === "login" && item.hasPassword !== false;
+  // Copy Password only takes Enter where there's a password to copy; notes open with Show Note.
+  const viewDetailsFirst =
+    (preferences.primaryAction ?? "details") === "details" || (!hasPassword && item.type !== "note");
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
 
@@ -80,7 +83,7 @@ export const ItemActions = memo(function ItemActions({
     <ActionPanel>
       <ActionPanel.Section>
         {viewDetailsFirst && viewDetailsAction}
-        {item.type === "login" && item.hasPassword !== false && (
+        {hasPassword && (
           <Action
             title="Copy Password"
             icon={Icon.Key}
