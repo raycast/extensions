@@ -192,7 +192,7 @@ export default function SearchThings() {
       title="Create Thing"
       icon={Icon.PlusCircle}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
-      target={<AddThing initialText={query} />}
+      target={<AddThing defaultValue={query} />}
     />
   ) : null;
 
