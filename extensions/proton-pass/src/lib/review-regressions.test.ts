@@ -7,6 +7,8 @@ import ts from "typescript";
 import * as refresh from "./refresh";
 import * as format from "./format";
 import * as shortcuts from "./shortcuts";
+import * as fillSequence from "./fill-sequence";
+import * as keyPress from "./key-press";
 import { Item, ItemDetail, PassCliError } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -45,6 +47,33 @@ function actions(element: unknown): Element["props"][] {
   const props = (element as Element).props;
   return [props, ...[props.children].flat().flatMap(actions)];
 }
+
+test("autofill captures the restored external app and rejects Raycast as the target", async () => {
+  const externalApp = { name: "Example", bundleId: "com.example.app" };
+  const raycast = { name: "Raycast", bundleId: "com.raycast.macos" };
+  for (const restoredApp of [externalApp, raycast, undefined]) {
+    let frontmostApp: typeof externalApp | undefined = raycast;
+    const { getTargetApp } = loadView("autofill.ts", {
+      "@raycast/api": {
+        PopToRootType: { Suspended: "suspended" },
+        closeMainWindow: async () => {
+          frontmostApp = restoredApp;
+        },
+        getFrontmostApplication: async () => frontmostApp,
+      },
+      "@raycast/utils": {},
+      "./fill-sequence": fillSequence,
+      "./key-press": keyPress,
+    }) as unknown as { getTargetApp: () => Promise<typeof externalApp> };
+    if (restoredApp === externalApp) {
+      const target = await getTargetApp();
+      assert.equal(target.bundleId, externalApp.bundleId);
+      assert.equal(target.name, externalApp.name);
+    } else {
+      await assert.rejects(getTargetApp(), /Couldn't find the app to fill/);
+    }
+  }
+});
 
 const item: Item = {
   shareId: "vault",

@@ -23,12 +23,16 @@ export interface TargetApp {
 }
 
 /**
- * Takes the app to fill, i.e. the frontmost app, which is the one Raycast was opened from. Call it as soon as
- * the action runs, before anything slow such as loading the item, so that no other app can become the target.
+ * Closes Raycast before capturing the restored frontmost app. Call it as soon as the action runs,
+ * before loading the item or code, then keep checking this same target while filling.
  */
 export async function getTargetApp(): Promise<TargetApp> {
+  await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Suspended });
+  await wait(FOCUS_DELAY_MS);
   const app = await getFrontmostApplication().catch(() => undefined);
-  if (!app || !isBundleId(app.bundleId)) throw new TargetAppError("Couldn't find the app to fill");
+  if (!app || !isBundleId(app.bundleId) || /^com\.raycast\./i.test(app.bundleId)) {
+    throw new TargetAppError("Couldn't find the app to fill");
+  }
   return { name: app.name, bundleId: app.bundleId };
 }
 
