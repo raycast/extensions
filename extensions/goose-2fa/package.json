@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "goose-2fa",
   "title": "Goose 2FA",
-  "description": "Two-factor code manager sharing a JSON data source with uTools: codes, groups, trash, import/export, screenshot scanning and direct typing",
+  "description": "Local TOTP and HOTP accounts with QR screenshot scanning, copy/paste, JSON backups, and an optional shared data file",
   "icon": "icon.png",
   "author": "eachann_",
   "categories": [
