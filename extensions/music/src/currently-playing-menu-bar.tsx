@@ -122,7 +122,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={hasArtwork && showAlbumArtOnly ? undefined : title}>
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={showAlbumArt && showAlbumArtOnly ? undefined : title}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={menuBarIcon}

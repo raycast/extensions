@@ -320,7 +320,7 @@
         },
         {
           "name": "showAlbumArtOnly",
-          "description": "If enabled, only the album art is shown in the Menu Bar and the track title is hidden. The title is still shown when no album art is available. Requires Show album art.",
+          "description": "If enabled, only the album art is shown in the Menu Bar and the track title is hidden. When no album art is available, the Music icon is shown on its own. Requires Show album art.",
           "type": "checkbox",
           "label": "Album art only (hide title)",
           "default": false,
