@@ -1,13 +1,20 @@
 import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { listVaultsAndItems } from "./pass-cli";
+import { listItems, listVaultsAndItems } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
 import { hostnameOf } from "./format";
 import { ItemList } from "./item-list";
-import { createRequestTracker, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
+
+/** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
+const ACTIVE_TAB_TIMEOUT_MS = 500;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
+}
 
 function originOf(raw?: string): string | undefined {
   if (!raw) return undefined;
@@ -70,14 +77,15 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     itemsRef.current = next;
     setItems(next);
   }
-  const { data: activeOrigin } = usePromise(
+  const { data: activeOrigin, isLoading: isLoadingActiveTab } = usePromise(
     async (isWebIntegrationEnabled: boolean) => {
       if (!isWebIntegrationEnabled) return undefined;
       if (!environment.canAccess(BrowserExtension)) return undefined;
 
       try {
-        const tabs = await BrowserExtension.getTabs();
-        return originOf(tabs.find((tab) => tab.active)?.url);
+        // A late answer is dropped: suggestions showing up afterwards would move the selection under the user.
+        const tabs = await withTimeout(BrowserExtension.getTabs(), ACTIVE_TAB_TIMEOUT_MS);
+        return originOf(tabs?.find((tab) => tab.active)?.url);
       } catch {
         return undefined;
       }
@@ -91,6 +99,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
   const loads = useMemo(createRequestTracker, []);
+  const cacheWrites = useMemo(createSerialQueue, []);
 
   async function loadItems() {
     const isLatest = loads.start();
@@ -114,6 +123,16 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
     setIsLoading(true);
     try {
+      if (initialVault && itemsRef.current.length === 0) {
+        // Nothing cached yet: show the opened vault first, without waiting for every other vault.
+        const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
+          if (err instanceof PassCliError && err.type === "not_authenticated") throw err;
+          return []; // The full listing below reports the failure.
+        });
+        if (!isLatest()) return;
+        if (vaultItems.length > 0) updateItems(vaultItems);
+      }
+
       const { vaults: freshVaults, items: freshItems, failedVaults } = await listVaultsAndItems();
       if (!isLatest()) return;
       // Vaults that failed to load keep the items already known, instead of looking empty.
@@ -125,7 +144,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       updateItems(nextItems);
       setVaults(freshVaults);
 
-      await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+      // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
+      await cacheWrites.run(async () => {
+        if (isLatest()) await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+      });
       if (!isLatest()) return;
       if (failedVaults.length > 0) {
         await showToast({
@@ -138,8 +160,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     } catch (err: unknown) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
-      // A logged-out session must surface even when cached items are on screen.
-      if (!hasLoadedFromCache.current || type === "not_authenticated") {
+      // Errors only replace items already on screen when the session has ended.
+      if (itemsRef.current.length === 0 || type === "not_authenticated") {
         const message = err instanceof Error ? err.message : "An unknown error occurred";
         setError({ type, message });
       }
@@ -162,10 +184,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   return (
     <ItemList
-      items={filteredItems}
+      // Items wait for the active tab, so that the suggested login is selected from the start.
+      items={isLoadingActiveTab ? [] : filteredItems}
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingActiveTab}
       navigationTitle={initialVault ? "Search Items" : undefined}
       searchBarAccessory={
         <VaultDropdown

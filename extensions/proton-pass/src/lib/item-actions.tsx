@@ -92,7 +92,7 @@ export const ItemActions = memo(function ItemActions({
           <Action
             title="Copy Username"
             icon={Icon.Person}
-            shortcut={platformShortcut(["cmd", "shift"], "c")}
+            shortcut={platformShortcut(["cmd", "shift"], "u")}
             onAction={() => copy("Username", async () => item.username, false)}
           />
         )}
@@ -112,6 +112,12 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("2FA Code", getTotpCode, true)}
           />
         )}
+        <Action
+          title="Copy Title"
+          icon={Icon.Text}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
+          onAction={() => copy("Title", async () => item.title, false)}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
         {urls[0] && (

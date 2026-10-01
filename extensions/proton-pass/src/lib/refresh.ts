@@ -30,3 +30,15 @@ export function createRequestTracker() {
     },
   };
 }
+
+/** Runs tasks one after the other, in the order they were queued, e.g. cache writes of overlapping refreshes. */
+export function createSerialQueue() {
+  let last: Promise<unknown> = Promise.resolve();
+  return {
+    run<T>(task: () => Promise<T>): Promise<T> {
+      const result = last.then(task);
+      last = result.catch(() => undefined);
+      return result;
+    },
+  };
+}
