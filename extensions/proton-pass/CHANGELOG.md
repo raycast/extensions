@@ -6,7 +6,8 @@
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
 - Websites are shown as clickable tags, including saved hostnames with ports
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
-- Enter now copies the password after a confirmation explaining the new default action (or opens the note for secure notes); the confirmation can be remembered and reset in command settings. New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
+- New Primary Action preference: Enter still opens View Details by default, or copies the password (notes open with Show Note, and items without a password keep View Details). View Details shows the same rows as the panel, beside the title and the full note
+- New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
 - Search also matches usernames, emails and website domains
 - Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead, from the favicon provider set in Raycast's settings (off by default, since the provider receives the domains)

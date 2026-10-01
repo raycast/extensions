@@ -171,14 +171,14 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       const message = err instanceof Error ? err.message : "An unknown error occurred";
       // Items belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") updateItems([]);
-      // Items still on screen stay there; otherwise the error replaces the list.
       if (itemsRef.current.length === 0) {
         setError({ type, message });
       } else {
+        // The items on screen (cached, or the opened vault's) stay, but they can be outdated or incomplete.
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Load Items",
-          message,
+          title: "Couldn't Load Items",
+          message: message.split("\n")[0],
           primaryAction: { title: "Retry", onAction: () => void loadItems() },
         });
       }

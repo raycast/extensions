@@ -7,7 +7,7 @@ import ts from "typescript";
 import * as refresh from "./refresh";
 import * as format from "./format";
 import * as shortcuts from "./shortcuts";
-import { Item, PassCliError } from "./types";
+import { Item, ItemDetail, PassCliError } from "./types";
 
 type Element = { props: Record<string, unknown> };
 type Component = (props: Record<string, unknown>) => Element;
@@ -55,7 +55,7 @@ const item: Item = {
   email: "test@example.com",
 };
 
-function itemActions(confirmed: boolean) {
+function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = item, detail?: ItemDetail) {
   const events: string[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
@@ -74,11 +74,7 @@ function itemActions(confirmed: boolean) {
           },
         },
       },
-      getPreferenceValues: () => ({}),
-      confirmAlert: async () => {
-        events.push("confirm");
-        return confirmed;
-      },
+      getPreferenceValues: () => ({ primaryAction }),
       Clipboard: {
         copy: async () => {
           events.push("copy");
@@ -87,13 +83,15 @@ function itemActions(confirmed: boolean) {
       showToast: async () => undefined,
     },
     "./format": { websiteLabels: () => [] },
+    "./item-view": {},
     "./note-view": {},
     "./shortcuts": shortcuts,
     "./use-totp-code": {},
   });
   const panel = ItemActions({
-    item,
-    store: { peek: () => ({ ...item, password: "fake-secret" }) },
+    item: selectedItem,
+    detail,
+    store: { peek: () => ({ ...selectedItem, password: "fake-secret" }) },
     isShowingDetail: true,
     onToggleDetail: () => undefined,
     onUse: () => events.push("use"),
@@ -101,18 +99,23 @@ function itemActions(confirmed: boolean) {
   return { entries: actions(panel), events };
 }
 
-test("the new default password action confirms before copying and honors cancellation", async () => {
-  for (const confirmed of [false, true]) {
-    const { entries, events } = itemActions(confirmed);
-    const password = entries.find((entry) => entry.title === "Copy Password");
-    assert.ok(password);
-    await (password.onAction as () => Promise<void>)();
-    assert.deepEqual(events, confirmed ? ["confirm", "copy", "use"] : ["confirm"]);
-  }
+test("Enter views details by default and copies passwords only when selected in preferences", async () => {
+  const titles = (entries: Element["props"][]) => entries.filter((entry) => entry.title).map((entry) => entry.title);
+  assert.equal(titles(itemActions().entries)[0], "View Details");
+  const { entries, events } = itemActions("copy");
+  assert.equal(titles(entries)[0], "Copy Password");
+  await (entries.find((entry) => entry.title === "Copy Password")?.onAction as () => Promise<void>)();
+  assert.deepEqual(events, ["copy", "use"]);
+  assert.equal(titles(itemActions("copy", { ...item, hasPassword: false }).entries)[0], "View Details");
+  assert.equal(titles(itemActions("copy", { ...item, type: "credit_card" }).entries)[0], "View Details");
+  assert.equal(titles(itemActions("copy", { ...item, type: "note" }).entries)[0], "Show Note");
+  const addedPassword = { ...item, password: "fake-secret" };
+  assert.equal(titles(itemActions("copy", { ...item, hasPassword: false }, addedPassword).entries)[0], "Copy Password");
+  assert.equal(titles(itemActions("copy", item, { ...item, password: undefined }).entries)[0], "View Details");
 });
 
 test("Copy Email and Copy Title have distinct Windows shortcuts", () => {
-  const { entries } = itemActions(true);
+  const { entries } = itemActions();
   const shortcut = (title: string) =>
     (entries.find((entry) => entry.title === title)?.shortcut as { Windows: unknown }).Windows;
   assert.notEqual(JSON.stringify(shortcut("Copy Email")), JSON.stringify(shortcut("Copy Title")));
@@ -200,7 +203,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
   await new Promise(setImmediate);
   assert.deepEqual(render().props.items, [item]);
   assert.equal(toasts.length, 1);
-  assert.equal(toasts[0].title, "Failed to Load Items");
+  assert.equal(toasts[0].title, "Couldn't Load Items");
   assert.equal(toasts[0].message, "Network unavailable");
   assert.equal(calls, 1);
   toasts[0].primaryAction.onAction();
