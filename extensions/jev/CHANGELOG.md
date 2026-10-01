@@ -1,6 +1,6 @@
 # Jev Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-01
 
 - Run saved text checks for categorization, yes/no questions, and scoring.
 - Review document folder suggestions, confirm moves on the same volume, and undo unchanged files.
