@@ -26,5 +26,5 @@ export default function Command() {
   }
   if (!data) return <List isLoading={true} />;
 
-  return <Directory />;
+  return <Directory fullTextIndexed={data.fullTextIndexed} />;
 }

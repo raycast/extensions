@@ -1,21 +1,26 @@
 import { environment, LocalStorage, Cache } from "@raycast/api";
+import { execFile } from "child_process";
 import { statSync, writeFileSync } from "fs";
 import {
   DEDUPE_ENTITIES_SQL,
   findSearchIndexes,
   indexSignature,
   normalizeSearchText,
-  tokenizeSearchText,
+  BUILD_FULL_TEXT_INDEX_SQL,
   IndexFile,
 } from "./search";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
+import { promisify } from "util";
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
 
 let SQL: SqlJsStatic;
 
 const SIGNATURE_KEY = "onenote-db-signature";
+const FULL_TEXT_INDEXED_KEY = "onenote-db-full-text-indexed";
+
+const execFileAsync = promisify(execFile);
 
 export const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenote-data.db");
 
@@ -63,7 +68,9 @@ export const create_or_update_db = async (force_update = false) => {
     NEEDUPDATE = true;
   }
 
-  if (NEEDUPDATE == false) return true;
+  if (NEEDUPDATE == false) {
+    return { fullTextIndexed: (await LocalStorage.getItem<boolean>(FULL_TEXT_INDEXED_KEY)) === true };
+  }
 
   // Load OneNote databases:
   for (const db_file of ALL_DB_PATHS) {
@@ -113,25 +120,12 @@ export const create_or_update_db = async (force_update = false) => {
   // modified copy, preferring the one from the most recently updated index on ties.
   db.run(DEDUPE_ENTITIES_SQL);
 
-  // Pre-normalized titles (substring search) and a word index of titles and content (indexed search).
-  db.run("UPDATE Entities SET TitleSearch = normalize_search_text(coalesce(Title, ''))");
-  db.run("BEGIN");
-  const insertWord = db.prepare("INSERT INTO SearchWords (word, EntityRowId) VALUES (?, ?)");
-  const readContent = db.prepare(
-    "SELECT rowid, coalesce(Title, '') || char(10) || coalesce(Content, '') FROM Entities"
+  // One normalized title + content text per note; the trigram index is built over it after the file is saved.
+  db.run(
+    "UPDATE Entities SET SearchText = normalize_search_text(coalesce(Title, '') || char(10) || coalesce(Content, ''))"
   );
-  while (readContent.step()) {
-    const [rowid, text] = readContent.get() as [number, string];
-    for (const word of new Set(tokenizeSearchText(text))) {
-      insertWord.run([word, rowid]);
-    }
-  }
-  readContent.free();
-  insertWord.free();
-  db.run("COMMIT");
   db.exec(
-    "CREATE INDEX SearchWords_word ON SearchWords (word, EntityRowId);\
-     CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
+    "CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
      CREATE INDEX Entities_RecentTime ON Entities (RecentTime DESC);"
   );
 
@@ -143,19 +137,30 @@ export const create_or_update_db = async (force_update = false) => {
     cache.set(result[0] as string, result[1] as string);
   }
 
-  // WRITE DB TO FILE
-  const buffer = Buffer.from(db.export());
-
-  writeFileSync(ONENOTE_MERGED_DB, buffer);
-  await LocalStorage.setItem(SIGNATURE_KEY, signature);
-
-  // CLOSE DBs
+  // WRITE DB TO FILE, then release the in-memory databases before SQLite builds the index on disk
+  writeFileSync(ONENOTE_MERGED_DB, Buffer.from(db.export()));
   for (const _db of ALL_DB) {
     _db.close();
   }
   db.close();
-  return true;
+
+  const fullTextIndexed = await buildFullTextIndex();
+  await LocalStorage.setItem(FULL_TEXT_INDEXED_KEY, fullTextIndexed);
+  await LocalStorage.setItem(SIGNATURE_KEY, signature);
+  return { fullTextIndexed };
 };
+
+// Runs out of process so the index is streamed to disk instead of held in memory. Falls back to unindexed search
+// when the system SQLite lacks FTS5 or the trigram tokenizer.
+async function buildFullTextIndex() {
+  try {
+    await execFileAsync("sqlite3", [ONENOTE_MERGED_DB, BUILD_FULL_TEXT_INDEX_SQL]);
+    return true;
+  } catch (error) {
+    console.warn("Could not build the full-text search index; falling back to unindexed search.", error);
+    return false;
+  }
+}
 
 const CREATE_TABLE_SQL =
   "DROP TABLE IF EXISTS Entities;\n" +
@@ -175,7 +180,5 @@ const CREATE_TABLE_SQL =
   "Title               TEXT, " +
   "EnterpriseIdentity  TEXT," +
   "Content             TEXT, " +
-  "TitleSearch         TEXT" +
-  "); \n" +
-  "DROP TABLE IF EXISTS SearchWords;\n" +
-  "CREATE TABLE SearchWords (word TEXT NOT NULL, EntityRowId INTEGER NOT NULL);";
+  "SearchText          TEXT" +
+  "); ";

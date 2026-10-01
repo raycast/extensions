@@ -20,34 +20,30 @@ const {
   searchCondition,
   findSearchIndexes,
   normalizeSearchText,
-  tokenizeSearchText,
+  BUILD_FULL_TEXT_INDEX_SQL,
   indexSignature,
   DEDUPE_ENTITIES_SQL,
 } = compiled.exports;
 
-// Mirrors the tables create_or_update_db builds.
+const { execFileSync } = require("node:child_process");
+
+// Mirrors the Entities table create_or_update_db builds.
 function createSearchDb(SQL, notes) {
   const db = new SQL.Database();
-  db.run("CREATE TABLE Entities (Title TEXT, Content TEXT, ParentGOID TEXT, TitleSearch TEXT)");
-  db.run("CREATE TABLE SearchWords (word TEXT NOT NULL, EntityRowId INTEGER NOT NULL)");
-  db.run("CREATE INDEX SearchWords_word ON SearchWords (word, EntityRowId)");
-  notes.forEach(([title, content, parent], index) => {
-    const rowid = index + 1;
+  db.run("CREATE TABLE Entities (Title TEXT, Content TEXT, ParentGOID TEXT, SearchText TEXT)");
+  for (const [title, content, parent] of notes) {
     db.run("INSERT INTO Entities VALUES (?, ?, ?, ?)", [
       title,
       content,
       parent ?? "parent",
-      normalizeSearchText(title),
+      normalizeSearchText(`${title}\n${content}`),
     ]);
-    for (const word of new Set(tokenizeSearchText(`${title}\n${content}`))) {
-      db.run("INSERT INTO SearchWords VALUES (?, ?)", [word, rowid]);
-    }
-  });
+  }
   return db;
 }
 
-const countMatches = (db, text) =>
-  db.exec(`SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition(text)}`)[0]?.values.length ?? 0;
+const countMatches = (db, text, indexed = false) =>
+  db.exec(`SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition(text, indexed)}`)[0]?.values.length ?? 0;
 
 test("searches full content, combines terms, and treats SQL characters literally", async () => {
   const SQL = await require("sql.js")();
@@ -60,7 +56,6 @@ test("searches full content, combines terms, and treats SQL characters literally
       db.exec(`SELECT substr(Content, 1, 1000) FROM Entities WHERE ParentGOID = 'parent' ${searchCondition(text)}`);
     assert.equal(query("needle O'Brien")[0].values.length, 1);
     assert.equal(query("100%")[0].values.length, 1);
-    assert.equal(query("need")[0].values.length, 1);
     assert.equal(query("absent").length, 0);
     assert.equal(query("' OR 1=1 --").length, 0);
     assert.equal(query("   ")[0].values.length, 1);
@@ -85,19 +80,53 @@ test("matches differently cased accented letters in titles and content", async (
   }
 });
 
-test("content search uses the word index instead of scanning note text", async () => {
-  const SQL = await require("sql.js")();
-  const db = createSearchDb(SQL, [["Title", "alpha beta"]]);
+function sqliteSupportsTrigram() {
   try {
-    const plan = db
-      .exec(`EXPLAIN QUERY PLAN SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition("alpha")}`)[0]
-      .values.map((row) => row[3])
-      .join("\n");
-    assert.match(plan, /SEARCH SearchWords USING (COVERING )?INDEX SearchWords_word/);
-  } finally {
-    db.close();
+    execFileSync("sqlite3", [":memory:", "CREATE VIRTUAL TABLE t USING fts5(x, tokenize='trigram');"]);
+    return true;
+  } catch {
+    return false;
   }
-});
+}
+
+test(
+  "trigram index finds substrings inside words, including accents and quotes, and is used by the query",
+  { skip: !sqliteSupportsTrigram() && "sqlite3 with FTS5 trigram is unavailable" },
+  async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "onenote-fts-"));
+    const file = path.join(dir, "merged.db");
+    try {
+      const SQL = await require("sql.js")();
+      const db = createSearchDb(SQL, [
+        ["Title", "A note about Photography"],
+        ["\u00c9cole", 'say "hi" to O\'Brien'],
+        ["Other", "unrelated"],
+      ]);
+      await fs.writeFile(file, Buffer.from(db.export()));
+      db.close();
+      execFileSync("sqlite3", [file, BUILD_FULL_TEXT_INDEX_SQL]);
+
+      const count = (text) =>
+        Number(
+          execFileSync("sqlite3", [file, `SELECT count(*) FROM Entities WHERE 1 = 1 ${searchCondition(text, true)}`])
+        );
+      assert.equal(count("graph"), 1);
+      assert.equal(count("GRAPH"), 1);
+      assert.equal(count("\u00e9col"), 1);
+      assert.equal(count("o'bri"), 1);
+      assert.equal(count('"hi"'), 1);
+      assert.equal(count("graph absent"), 0);
+      assert.equal(count("un"), 1); // too short for trigrams: falls back to a scan
+      const plan = execFileSync("sqlite3", [
+        file,
+        `EXPLAIN QUERY PLAN SELECT 1 FROM Entities WHERE 1 = 1 ${searchCondition("graph", true)}`,
+      ]).toString();
+      assert.match(plan, /EntitiesFts VIRTUAL TABLE INDEX/);
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true });
+    }
+  }
+);
 
 test("keeps one copy per note, preferring the newest, and ties go to the newest index", async () => {
   const SQL = await require("sql.js")();

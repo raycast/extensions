@@ -9,13 +9,13 @@ import { getAncestorsStr, getIcon, getParentTitle, newNote, openNote, parseDatet
 // Rows loaded at a time; more are loaded as the user scrolls, which bounds each query's work and payload.
 const PAGE_SIZE = 100;
 
-export function getListItems(query: string, elt: OneNoteItem | undefined = undefined) {
+export function getListItems(query: string, fullTextIndexed: boolean, elt: OneNoteItem | undefined = undefined) {
   const [sort, setSort] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [limit, setLimit] = useState(PAGE_SIZE);
   const { data, isLoading, permissionView } = useSQL<OneNoteItem>(
     ONENOTE_MERGED_DB,
-    `${query.replace("ORDER BY", `${searchCondition(searchText)} ORDER BY`)} LIMIT ${limit};`
+    `${query.replace("ORDER BY", `${searchCondition(searchText, fullTextIndexed)} ORDER BY`)} LIMIT ${limit};`
   );
   const results = data;
 
@@ -53,11 +53,11 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
           .sort((a, b) => b.id - a.id)
           .map((type) => (
             <List.Section title={type.desc} key={type.id}>
-              <Items items={results || []} elt={elt} type={type.id} />
+              <Items items={results || []} elt={elt} type={type.id} fullTextIndexed={fullTextIndexed} />
             </List.Section>
           ))
       ) : (
-        <Items items={results || []} elt={elt} type={0} />
+        <Items items={results || []} elt={elt} type={0} fullTextIndexed={fullTextIndexed} />
       )}
 
       <List.EmptyView
@@ -78,7 +78,7 @@ function quoteSql(value: string) {
   return value.replaceAll("'", "''");
 }
 
-function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined }) {
+function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined; fullTextIndexed: boolean }) {
   return (
     <>
       {props.items.map((item) => {
@@ -101,7 +101,7 @@ function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | u
                   <Action.Push
                     title="Browse"
                     icon={Icon.ChevronRight}
-                    target={<Directory elt={item} />}
+                    target={<Directory elt={item} fullTextIndexed={props.fullTextIndexed} />}
                     shortcut={{ modifiers: [], key: "tab" }}
                   />
                   {/* <Action
@@ -139,7 +139,7 @@ function TypeDropdown(props: { onSortChange: (newSort: string) => void }) {
   );
 }
 
-export function Directory(props: { elt?: OneNoteItem }) {
+export function Directory(props: { elt?: OneNoteItem; fullTextIndexed: boolean }) {
   if (props) {
     if (props.elt) {
       const item = props.elt;
@@ -149,13 +149,13 @@ export function Directory(props: { elt?: OneNoteItem }) {
         const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE ParentGOID = '${quoteSql(
           props.elt.GOID
         )}' ORDER BY RecentTime DESC`;
-        return getListItems(query, props.elt);
+        return getListItems(query, props.fullTextIndexed, props.elt);
       }
     }
   }
   // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC`;
   const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC`;
-  return getListItems(query);
+  return getListItems(query, props.fullTextIndexed);
 }
 
 function PageDetail({ item }: { item: OneNoteItem }) {

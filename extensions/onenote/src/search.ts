@@ -2,38 +2,39 @@ import { readdir } from "fs/promises";
 import { resolve } from "path";
 
 // Bump when the merged database layout or search normalization changes so existing databases are rebuilt.
-export const DATABASE_SCHEMA_VERSION = 3;
+export const DATABASE_SCHEMA_VERSION = 4;
+
+// Terms shorter than this cannot be looked up in a trigram index.
+const MIN_INDEXED_TERM_LENGTH = 3;
 
 // SQLite's lower() only folds ASCII in some builds, so text is normalized in JavaScript instead.
 export function normalizeSearchText(text: string) {
   return text.normalize("NFC").toLowerCase();
 }
 
-// Splits text into the lowercase words stored in the SearchWords index.
-export function tokenizeSearchText(text: string) {
-  return normalizeSearchText(text)
-    .split(/[^\p{L}\p{M}\p{N}]+/u)
-    .filter(Boolean);
-}
-
 function sqlLiteral(text: string) {
   return `'${text.replaceAll("'", "''")}'`;
 }
 
-// Content is searched through the SearchWords index (words starting with each typed word) and titles by substring,
-// so a search never scans the full text of every note.
-export function searchCondition(searchText: string) {
+// Built by SQLite itself after the merged database is saved, because sql.js has no FTS5. The trigram tokenizer
+// makes MATCH an indexed substring search, and the external-content table reuses Entities.SearchText.
+export const BUILD_FULL_TEXT_INDEX_SQL = `BEGIN;
+DROP TABLE IF EXISTS EntitiesFts;
+CREATE VIRTUAL TABLE EntitiesFts USING fts5(SearchText, content='Entities', content_rowid='rowid', tokenize='trigram');
+INSERT INTO EntitiesFts (rowid, SearchText) SELECT rowid, SearchText FROM Entities;
+COMMIT;`;
+
+// SearchText holds each note's normalized title and content. Terms of 3+ characters use the trigram index
+// when it exists (anywhere-in-word substring match); shorter terms, or a missing index, fall back to a scan.
+export function searchCondition(searchText: string, fullTextIndexed = false) {
   const terms = normalizeSearchText(searchText).trim().split(/\s+/).filter(Boolean);
   return terms
     .map((term) => {
-      const inTitle = `instr(TitleSearch, ${sqlLiteral(term)}) > 0`;
-      const inContent = tokenizeSearchText(term).map(
-        (word) =>
-          `rowid IN (SELECT EntityRowId FROM SearchWords WHERE word >= ${sqlLiteral(word)} AND word < ${sqlLiteral(
-            word
-          )} || char(1114111))`
-      );
-      return inContent.length === 0 ? `AND ${inTitle}` : `AND (${inTitle} OR (${inContent.join(" AND ")}))`;
+      if (fullTextIndexed && [...term].length >= MIN_INDEXED_TERM_LENGTH) {
+        const phrase = `"${term.replaceAll('"', '""')}"`;
+        return `AND rowid IN (SELECT rowid FROM EntitiesFts WHERE EntitiesFts MATCH ${sqlLiteral(phrase)})`;
+      }
+      return `AND instr(SearchText, ${sqlLiteral(term)}) > 0`;
     })
     .join(" ");
 }
