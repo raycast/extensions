@@ -430,19 +430,29 @@ export class ApexConnectClient {
         for (;;) {
           const start = acc.indexOf(Buffer.from([0xff, 0xd8]));
           if (start === -1) {
+            // No frame start buffered at all (just multipart boundary/header
+            // bytes between frames) - that's never large, so drop it rather
+            // than let it grow unbounded if a malformed stream never sends one.
+            if (acc.length > 64 * 1024) {
+              acc = Buffer.alloc(0);
+            }
             break;
           }
-          const end = acc.indexOf(Buffer.from([0xff, 0xd9]), start + 2);
+          if (start > 0) {
+            acc = acc.subarray(start);
+          }
+          const end = acc.indexOf(Buffer.from([0xff, 0xd9]), 2);
           if (end === -1) {
+            // Frame started but hasn't finished arriving yet. Keep waiting -
+            // a real JPEG can legitimately be several MB - but give up and
+            // resync on the next start marker if it never completes.
+            if (acc.length > 20 * 1024 * 1024) {
+              acc = Buffer.alloc(0);
+            }
             break;
           }
-          await onFrame(acc.subarray(start, end + 2));
+          await onFrame(acc.subarray(0, end + 2));
           acc = acc.subarray(end + 2);
-        }
-        // Bound memory if a frame never completes (corrupt/truncated JPEG):
-        // a real frame is never anywhere near this large.
-        if (acc.length > 5 * 1024 * 1024) {
-          acc = Buffer.alloc(0);
         }
       }
     } finally {

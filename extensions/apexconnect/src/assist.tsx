@@ -107,6 +107,7 @@ function getInitialConversations(): ConversationContent[] {
 
 function PipelinesDropdownList(props: {
   pipelines: HAAssistPipelines | undefined;
+  value?: string;
   onChange?: (newValue: HAAssistPipeline | undefined) => void;
 }): JSX.Element | null {
   const p = props.pipelines;
@@ -120,7 +121,7 @@ function PipelinesDropdownList(props: {
     props.onChange(p.pipelines?.find((p) => p.id === newValue));
   };
   return (
-    <List.Dropdown tooltip="Assist" onChange={onAction}>
+    <List.Dropdown tooltip="Assist" value={props.value} onChange={onAction}>
       {p?.pipelines?.map((a) => (
         <List.Dropdown.Item key={a.id} title={`${a.name} (${a.conversation_language})`} value={a.id} />
       ))}
@@ -200,6 +201,7 @@ export default function AssistCommand(): JSX.Element {
       searchBarAccessory={
         <PipelinesDropdownList
           pipelines={pipelines}
+          value={selectedPipeline?.id}
           onChange={(newLanguage: HAAssistPipeline | undefined) => {
             setSelectedPipeline(newLanguage);
             setConversations(newLanguage ? getInitialConversations() : []);
