@@ -22,6 +22,7 @@ import {
   AuditReport,
   LinkProbeReport,
   isValidUrlInput,
+  isLocalOrInternalUrl,
 } from "./api";
 
 export function AuditReportView({
@@ -383,36 +384,57 @@ export default function AuditCommand() {
           cleanUrl = cleanUrl.replace(/\/$/, "") + "/llms.txt";
         }
 
-        // Fetch remote manifest content to extract and probe all contained documentation links
-        let remoteContent = "";
-        try {
-          const fetchResp = await fetch(cleanUrl, {
-            headers: {
-              "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
-              Accept: "text/plain,text/markdown,*/*",
-            },
-          });
-          if (fetchResp.ok) {
-            remoteContent = await fetchResp.text();
-          }
-        } catch {
-          // If direct fetch fails, probeLinks falls back to baseUrl
+        if (isLocalOrInternalUrl(cleanUrl)) {
+          throw new Error(
+            "Local and private network URLs cannot be audited via Linten Cloud. Please provide a public URL or paste markdown directly.",
+          );
         }
 
-        const probePayload = remoteContent
-          ? { baseUrl: cleanUrl, content: remoteContent }
-          : { baseUrl: cleanUrl, urls: [cleanUrl] };
+        // Bounded download (4s timeout, max 2MB) running concurrently with cloud audit
+        async function fetchRemoteContentWithTimeout(
+          url: string,
+        ): Promise<string> {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 4000);
+          try {
+            const fetchResp = await fetch(url, {
+              signal: controller.signal,
+              headers: {
+                "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
+                Accept: "text/plain,text/markdown,*/*",
+              },
+            });
+            if (fetchResp.ok) {
+              const text = await fetchResp.text();
+              return text.length > 2000000 ? text.substring(0, 2000000) : text;
+            }
+          } catch {
+            // timeout or network failure, fall back to probing baseUrl
+          } finally {
+            clearTimeout(timer);
+          }
+          return "";
+        }
 
-        [auditRes, linkRes] = await Promise.all([
+        const [auditOutcome, linkOutcome] = await Promise.all([
           auditRemoteUrl(cleanUrl),
-          probeLinks(probePayload).catch(() => ({
-            ok: false,
-            total: 0,
-            auditedCount: 0,
-            summary: { ok: 0, redirect: 0, broken: 0, timeout: 0, score: 0 },
-            results: [],
-          })),
+          fetchRemoteContentWithTimeout(cleanUrl)
+            .then((remoteContent) => {
+              const probePayload = remoteContent
+                ? { baseUrl: cleanUrl, content: remoteContent }
+                : { baseUrl: cleanUrl, urls: [cleanUrl] };
+              return probeLinks(probePayload);
+            })
+            .catch(() => ({
+              ok: false,
+              total: 0,
+              auditedCount: 0,
+              summary: { ok: 0, redirect: 0, broken: 0, timeout: 0, score: 0 },
+              results: [],
+            })),
         ]);
+        auditRes = auditOutcome;
+        linkRes = linkOutcome;
       } else {
         [auditRes, linkRes] = await Promise.all([
           auditRawContent(trimmed),

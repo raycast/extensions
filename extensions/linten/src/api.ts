@@ -150,10 +150,10 @@ export function isValidUrlInput(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed || trimmed.includes("\n") || trimmed.includes(" ")) return false;
   if (/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(trimmed)) return true;
-  return /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+([/?#]\S*)?$/.test(trimmed);
+  return /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+(:\d+)?([/?#]\S*)?$/.test(trimmed);
 }
 
-function isLocalOrInternalUrl(urlStr: string): boolean {
+export function isLocalOrInternalUrl(urlStr: string): boolean {
   try {
     const parsed = new URL(urlStr);
     const host = parsed.hostname.toLowerCase();

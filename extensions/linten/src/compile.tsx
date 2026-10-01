@@ -18,6 +18,7 @@ import {
   LINTEN_CLOUD_BASE,
   SynthesizeReport,
   isValidUrlInput,
+  isLocalOrInternalUrl,
 } from "./api";
 
 export function CompiledArchiveView({
@@ -51,6 +52,11 @@ export function CompiledArchiveView({
         }
         if (!cleanUrl.endsWith("/llms.txt") && !cleanUrl.includes("llms.txt")) {
           cleanUrl = cleanUrl.replace(/\/$/, "") + "/llms.txt";
+        }
+        if (isLocalOrInternalUrl(cleanUrl)) {
+          throw new Error(
+            "Local and private network URLs cannot be loaded. Please paste markdown directly.",
+          );
         }
         const resp = await fetch(cleanUrl, {
           headers: {
