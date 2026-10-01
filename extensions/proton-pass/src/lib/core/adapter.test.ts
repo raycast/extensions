@@ -93,9 +93,11 @@ test("returns false for the real unauthenticated CLI failure", async () => {
 
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
-  assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id", "X", "--output", "json", "--show-secrets"]);
-  assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id", "X", "--item-id", "Y", "--output", "json"]);
-  assert.deepEqual(itemTotpArgs("X", "Y"), ["item", "totp", "--share-id", "X", "--item-id", "Y", "--output", "json"]);
+  assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id=X", "--output", "json", "--show-secrets"]);
+  assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id=X", "--item-id=Y", "--output", "json"]);
+  assert.deepEqual(itemTotpArgs("X", "Y"), ["item", "totp", "--share-id=X", "--item-id=Y", "--output", "json"]);
+  // IDs starting with "-" must stay attached to their flag so pass-cli doesn't parse them as options.
+  assert.deepEqual(itemViewArgs("-share", "-5item").slice(2, 4), ["--share-id=-share", "--item-id=-5item"]);
   assert.equal(itemViewArgs("X", "Y").includes("--show-secrets"), false);
   assert.equal(itemTotpArgs("X", "Y").includes("--show-secrets"), false);
 });

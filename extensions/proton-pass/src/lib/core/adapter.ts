@@ -28,16 +28,18 @@ export function vaultListArgs(): string[] {
   return ["vault", "list", "--output", "json"];
 }
 
+// IDs are passed as `--flag=value`: they are base64url and can start with "-", which pass-cli would
+// otherwise parse as another option ("unexpected argument '-5' found").
 export function itemListArgs(shareId: string): string[] {
-  return ["item", "list", "--share-id", shareId, "--output", "json", "--show-secrets"];
+  return ["item", "list", `--share-id=${shareId}`, "--output", "json", "--show-secrets"];
 }
 
 export function itemViewArgs(shareId: string, itemId: string): string[] {
-  return ["item", "view", "--share-id", shareId, "--item-id", itemId, "--output", "json"];
+  return ["item", "view", `--share-id=${shareId}`, `--item-id=${itemId}`, "--output", "json"];
 }
 
 export function itemTotpArgs(shareId: string, itemId: string): string[] {
-  return ["item", "totp", "--share-id", shareId, "--item-id", itemId, "--output", "json"];
+  return ["item", "totp", `--share-id=${shareId}`, `--item-id=${itemId}`, "--output", "json"];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

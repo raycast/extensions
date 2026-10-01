@@ -38,3 +38,21 @@ test("normalizes the real fake CLI authentication failure", async () => {
     return true;
   });
 });
+
+test("keeps the pass-cli command line out of error messages", () => {
+  const error = Object.assign(
+    new Error("Command failed: /Users/someone/pass-cli item view --share-id=SHARE --item-id=ITEM\nerror: boom"),
+    { stderr: "error: boom\n" },
+  );
+
+  const normalized = normalizeCliExecutionError(error, "/Users/someone/pass-cli");
+
+  assert.equal(normalized.type, "unknown");
+  assert.equal(normalized.message, "error: boom");
+
+  const withoutStderr = normalizeCliExecutionError(
+    new Error("Command failed: /Users/someone/pass-cli item view --item-id=ITEM\nkilled"),
+    "/Users/someone/pass-cli",
+  );
+  assert.equal(withoutStderr.message, "killed");
+});

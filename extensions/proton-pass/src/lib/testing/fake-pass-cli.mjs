@@ -15,10 +15,10 @@ const expectedArgs = {
   "malformed-json": ["vault", "list", "--output", "json"],
   "json:vaults-array": ["vault", "list", "--output", "json"],
   "json:vaults-wrapper": ["vault", "list", "--output", "json"],
-  "json:items-full": ["item", "list", "--share-id", "vault-1", "--output", "json", "--show-secrets"],
-  "json:item-view": ["item", "view", "--share-id", "vault-1", "--item-id", "item-login", "--output", "json"],
-  "json:totps-wrapper": ["item", "totp", "--share-id", "vault-1", "--item-id", "item-1", "--output", "json"],
-  "json:totps-flat": ["item", "totp", "--share-id", "vault-1", "--item-id", "item-1", "--output", "json"],
+  "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
+  "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
+  "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
+  "json:totps-flat": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
 };
 
 if (mode in expectedArgs && JSON.stringify(args) !== JSON.stringify(expectedArgs[mode])) {

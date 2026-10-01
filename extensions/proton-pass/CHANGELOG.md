@@ -7,6 +7,8 @@
 - Skip the separate authentication check and the duplicate vault listing before loading items
 - Fix: item details always showed "Unknown Vault"
 - Fix: URLs and other values in item details showed stray backslashes (e.g. `example\.com`)
+- Fix: items whose ID starts with "-" could not be opened, and copying their password or TOTP code failed
+- Error messages no longer include the pass-cli command line (local paths and item IDs)
 
 ## [Improvements] - 2026-09-19
 
