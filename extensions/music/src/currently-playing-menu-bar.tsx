@@ -1,15 +1,17 @@
-import { getPreferenceValues, Icon, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, Icon, Image, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
+import fs from "node:fs";
 import { useEffect, useState } from "react";
 
 import * as music from "./util/scripts";
+import { getArtworkPath } from "./util/artwork";
 import { PlayerState } from "./util/models";
 import { formatTitle } from "./util/track";
 import { handleTaskEitherError } from "./util/utils";
 
-const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
+const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle, showAlbumArt, showAlbumArtOnly } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
@@ -30,14 +32,29 @@ export default function CurrentlyPlayingMenuBarCommand() {
     data: snapshot,
     mutate,
   } = useCachedPromise(
-    () =>
-      pipe(
+    async () => {
+      const result = await pipe(
         music.currentTrack.getMenuBarSnapshot(),
         TE.matchW(
-          () => ({ kind: "not-running" }) as const,
+          (error) => {
+            console.error("Menu bar snapshot failed:", error);
+            return { kind: "not-running" } as const;
+          },
           (value) => value,
         ),
-      )(),
+      )();
+
+      // Resolved in the same step as the snapshot so Raycast keeps the command
+      // alive until the artwork is ready. Cache hits cost only a file check.
+      let artworkPath: string | undefined;
+      if (showAlbumArt && result.kind === "ok") {
+        artworkPath = await getArtworkPath(result.track.artist, result.track.album, result.track.name).catch(
+          () => undefined,
+        );
+      }
+
+      return { ...result, artworkPath };
+    },
     [],
     { keepPreviousData: true },
   );
@@ -46,6 +63,11 @@ export default function CurrentlyPlayingMenuBarCommand() {
   const playerState = snapshot?.kind === "ok" ? snapshot.playerState : undefined;
   const isPlaying = playerState === PlayerState.PLAYING;
   const isFavorited = currentTrack?.favorited === "true";
+
+  const artworkPath = snapshot?.artworkPath;
+  const hasArtwork = showAlbumArt && !!artworkPath && fs.existsSync(artworkPath);
+  const menuBarIcon: Image.ImageLike =
+    hasArtwork && artworkPath ? { source: artworkPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
 
   const title = currentTrack
     ? formatTitle({
@@ -100,10 +122,10 @@ export default function CurrentlyPlayingMenuBarCommand() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title}>
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={showAlbumArt && showAlbumArtOnly ? undefined : title}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon="icon.png"
+          icon={menuBarIcon}
           title={dropdownTitle}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
