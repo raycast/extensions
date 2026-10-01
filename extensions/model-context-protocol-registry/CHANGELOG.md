@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Fix Linear Installation and Clarify Runtime Setup] - {PR_MERGE_DATE}
+## [Fix Linear Installation and Clarify Runtime Setup] - 2026-10-01
 
 - Connect Linear directly in Raycast without requiring Node.js or the npm proxy, and update its endpoint for other clients.
 - Show the proxy command and Node.js requirement for other clients alongside Linear's direct Raycast setup.
