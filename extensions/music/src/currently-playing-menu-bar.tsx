@@ -36,10 +36,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
       const result = await pipe(
         music.currentTrack.getMenuBarSnapshot(),
         TE.matchW(
-          (error) => {
-            console.error("Menu bar snapshot failed:", error);
-            return { kind: "not-running" } as const;
-          },
+          () => ({ kind: "not-running" }) as const,
           (value) => value,
         ),
       )();
