@@ -33,6 +33,11 @@ export type Upload = {
   /** When Aktar's lifecycle rule deletes the file. Null keeps it forever; missing before Aktar 0.5.0. */
   expiresAt?: string | null;
   formats: Record<OutputFormat, string>;
+  /**
+   * Only on an upload reply: true when nothing was uploaded because the same
+   * file was already in that destination, and Aktar reused its existing link.
+   */
+  reused?: boolean;
 };
 
 export type BucketFolder = {
