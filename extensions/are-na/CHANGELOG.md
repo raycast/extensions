@@ -4,7 +4,7 @@
 
 - Added Windows support with platform-specific action shortcuts and a text-preview font fallback.
 - Images and attachments now download without curl, using the system Downloads folder or an optional Download Directory preference.
-- Downloads preserve existing files, sanitize filenames, report HTTP failures, and remove incomplete files.
+- Downloads preserve existing files and Are.na filenames, sanitize long names while retaining file extensions, report HTTP failures, and remove incomplete files.
 
 ## [Expand Commands and AI Tools] - 2026-09-12
 

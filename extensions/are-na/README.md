@@ -16,7 +16,7 @@ Prefer a personal access token? Create one in [Are.na’s token settings](https:
 
 The extension supports macOS and Windows. Available content and editing actions depend on your Are.na account’s permissions.
 
-Images and attachments save to your system's Downloads folder, including redirected Windows Downloads folders. Select an optional **Download Directory** in extension preferences to use a different folder or if the system folder cannot be detected. Existing files are kept; another download with the same name gets a numbered suffix.
+Images and attachments save to your system's Downloads folder, including redirected Windows Downloads folders. Select an optional **Download Directory** in extension preferences to use a different folder or if the system folder cannot be detected. Downloads use the filename supplied by Are.na when available, preserving its extension when shortening long names. Existing files are kept; another download with the same name gets a numbered suffix.
 
 Custom actions use Command on macOS and Control on Windows, including opening links, copying content, and switching between list and grid views.
 

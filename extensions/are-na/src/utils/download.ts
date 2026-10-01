@@ -8,13 +8,15 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { isHttpUrl } from "./url";
 
-export function getDownloadFilename(url: string): string {
+export function getDownloadFilename(url: string, suggestedFilename?: string): string {
   const encodedName = new URL(url).pathname.split("/").pop() || "download";
-  let name: string;
-  try {
-    name = decodeURIComponent(encodedName);
-  } catch {
-    name = encodedName;
+  let name = suggestedFilename?.trim() || encodedName;
+  if (!suggestedFilename?.trim()) {
+    try {
+      name = decodeURIComponent(encodedName);
+    } catch {
+      name = encodedName;
+    }
   }
   name = name
     .replace(/[<>:"/\\|?*]/g, "_")
@@ -23,13 +25,17 @@ export function getDownloadFilename(url: string): string {
   if (!name) name = "download";
   if (/^(?:con|prn|aux|nul|conin\$|conout\$|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i.test(name)) name = `_${name}`;
 
-  // Leave room for a duplicate suffix within common filesystem filename limits.
+  // Keep the extension when it can fit, leaving room for duplicate suffixes.
+  let extension = path.extname(name);
+  if (Buffer.byteLength(extension, "utf8") >= 180) extension = "";
+  const basename = extension ? name.slice(0, -extension.length) : name;
+  const byteLimit = 180 - Buffer.byteLength(extension, "utf8");
   let boundedName = "";
-  for (const character of name) {
-    if (Buffer.byteLength(boundedName + character, "utf8") > 180) break;
+  for (const character of basename) {
+    if (Buffer.byteLength(boundedName + character, "utf8") > byteLimit) break;
     boundedName += character;
   }
-  return boundedName.replace(/[ .]+$/g, "") || "download";
+  return (boundedName.replace(/[ .]+$/g, "") || "_") + extension;
 }
 
 async function getWindowsDownloadsDirectory(): Promise<string> {
@@ -76,7 +82,7 @@ export async function getDownloadsDirectory(): Promise<string> {
   throw new Error("Choose an existing, accessible Download Directory in extension preferences.");
 }
 
-export async function saveDownload(url: string): Promise<string> {
+export async function saveDownload(url: string, suggestedFilename?: string): Promise<string> {
   if (!isHttpUrl(url)) throw new Error("The download URL must use HTTP or HTTPS.");
   const parsed = new URL(url);
   if (parsed.username || parsed.password) throw new Error("Download URLs cannot contain login credentials.");
@@ -92,7 +98,7 @@ export async function saveDownload(url: string): Promise<string> {
     if (!response.ok) throw new Error(`Download failed (HTTP ${response.status}).`);
     if (!source) throw new Error("The download response has no body.");
 
-    const filename = getDownloadFilename(url);
+    const filename = getDownloadFilename(url, suggestedFilename);
     const { name, ext } = path.parse(filename);
     for (let duplicate = 0; duplicate < 100; duplicate++) {
       const destination = path.join(directory, duplicate ? `${name} (${duplicate})${ext}` : filename);
@@ -119,10 +125,10 @@ export async function saveDownload(url: string): Promise<string> {
   }
 }
 
-export async function downloadFile(url: string): Promise<string | null> {
+export async function downloadFile(url: string, suggestedFilename?: string): Promise<string | null> {
   try {
     await showToast({ style: Toast.Style.Animated, title: "Downloading file" });
-    const destination = await saveDownload(url);
+    const destination = await saveDownload(url, suggestedFilename);
     await showToast({ style: Toast.Style.Success, title: "Download completed", message: destination });
     return destination;
   } catch (error) {

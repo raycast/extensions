@@ -92,6 +92,40 @@ test("downloads binary data through a web stream and preserves signed URL parame
   assert.equal(client.failures.length, 0);
 });
 
+test("opaque URLs keep the filename and extension supplied by Are.na", async (t) => {
+  const directory = await fixture(t);
+  const url = "https://cdn.example/opaque-id?token=abc%2Fdef";
+  const client = await loadDownload({
+    directory,
+    fetcher: async (requested) => {
+      assert.equal(requested, url);
+      return new Response("document");
+    },
+  });
+  const saved = await client.downloadFile(url, "Résumé 2026.pdf");
+  assert.equal(saved, path.join(directory, "Résumé 2026.pdf"));
+  assert.equal(await fs.readFile(saved, "utf8"), "document");
+  assert.equal(client.toasts.at(-1).style, "success");
+});
+
+test("long Unicode filenames keep their extension within the byte limit", async () => {
+  const { getDownloadFilename } = await loadDownload();
+  for (const extension of [".png", ".pdf"]) {
+    const filename = "😀".repeat(100) + extension;
+    for (const saved of [
+      getDownloadFilename("https://cdn.example/" + encodeURIComponent(filename)),
+      getDownloadFilename("https://cdn.example/opaque-id", filename),
+    ]) {
+      assert.ok(saved.endsWith(extension));
+      assert.ok(Buffer.byteLength(saved) <= 180);
+      assert.equal(saved.slice(0, -extension.length).replaceAll("😀", ""), "");
+    }
+  }
+  assert.equal(getDownloadFilename("https://cdn.example/fallback.png", " "), "fallback.png");
+  assert.equal(getDownloadFilename("https://cdn.example/id", "CON.pdf"), "_CON.pdf");
+  assert.equal(getDownloadFilename("https://cdn.example/id", "../folder\\file.pdf"), ".._folder_file.pdf");
+});
+
 test("concurrent downloads keep an existing file and use different numbered destinations", async (t) => {
   const directory = await fixture(t);
   const existing = path.join(directory, "image.png");

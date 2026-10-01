@@ -71,7 +71,7 @@ export function ImageBlockView({ block }: ImageBlockViewProps) {
               icon={Icon.Download}
               onAction={async () => {
                 try {
-                  await downloadFile(cdnUrl);
+                  await downloadFile(cdnUrl, block.image?.filename);
                 } catch (error) {
                   showFailureToast(error, { title: "Failed to download image" });
                 }

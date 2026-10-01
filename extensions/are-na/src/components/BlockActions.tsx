@@ -59,7 +59,7 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
                 try {
                   const candidates = [block.image?.original?.url, block.image?.display?.url, block.image?.thumb?.url];
                   const fileUrl = candidates.find(isHttpUrl);
-                  if (fileUrl) await downloadFile(fileUrl);
+                  if (fileUrl) await downloadFile(fileUrl, block.image?.filename);
                 } catch (error) {
                   showFailureToast(error, { title: "Failed to download image" });
                 }
@@ -75,7 +75,7 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
             onAction={async () => {
               try {
                 if (block.attachment?.url) {
-                  await downloadFile(block.attachment.url);
+                  await downloadFile(block.attachment.url, block.attachment.file_name);
                 }
               } catch (error) {
                 showFailureToast(error, { title: "Failed to download attachment" });
