@@ -70,10 +70,12 @@ describe("loadLinkContext", () => {
     expect(loadPageLink).toHaveBeenCalled();
   });
 
-  it("says Spotify isn't supported yet", async () => {
-    await expect(loadLinkContext("https://open.spotify.com/track/1")).rejects.toThrow(
-      "Spotify links aren't supported in chat yet.",
-    );
+  it("says Spotify isn't supported yet, pointing to Download instead of a retry", async () => {
+    await expect(loadLinkContext("https://open.spotify.com/track/1")).rejects.toMatchObject({
+      name: "LinkLoadError",
+      message: "Spotify links aren't supported in chat yet. You can still download them.",
+      fix: "download",
+    });
   });
 
   it("caches a link with a body, and reads again when forced", async () => {

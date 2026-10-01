@@ -75,7 +75,9 @@ export async function loadLinkContext(
   if (!trimmed || !isValidUrl(trimmed)) throw new Error("Invalid URL — provide an http(s) link.");
   const url = normalizeUrl(trimmed);
   const kind = linkKindOf(url);
-  if (kind === "spotify") throw new Error("Spotify links aren't supported in chat yet.");
+  if (kind === "spotify") {
+    throw new LinkLoadError("Spotify links aren't supported in chat yet. You can still download them.", "download");
+  }
 
   const archived = kind === "page" && !!options.archived;
   const language = kind === "video" ? options.language?.trim() || "auto" : archived ? "archive" : "-";

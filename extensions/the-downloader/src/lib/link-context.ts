@@ -126,12 +126,13 @@ export function truncateToTokens(text: string, tokens: number): string {
 
 /**
  * A link that couldn't be loaded; `fix` names what can get past it: a setting
- * to change, or the Internet Archive's saved copy of the page.
+ * to change, the Internet Archive's saved copy of the page, or downloading it
+ * instead (a link the chat can't read at all, so retrying won't help).
  */
 export class LinkLoadError extends Error {
   constructor(
     message: string,
-    readonly fix?: "preferences" | "archive",
+    readonly fix?: "preferences" | "archive" | "download",
   ) {
     super(message);
     this.name = "LinkLoadError";

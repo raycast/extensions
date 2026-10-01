@@ -165,7 +165,7 @@ type Turn = ChatTurn & {
   finishedAt?: number;
 };
 
-type LoadError = { message: string; fix?: "preferences" | "archive" };
+type LoadError = { message: string; fix?: "preferences" | "archive" | "download" };
 
 async function saveFile(name: string, content: string, ext: string) {
   const target = uniqueFilePath(downloadPath, sanitizeVideoTitle(name), ext);
@@ -662,7 +662,15 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
       {loadError.fix === "archive" && !archived && (
         <Action title="Read Archived Copy" icon={Icon.Clock} onAction={() => readFromArchive(true)} />
       )}
-      <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => load(true)} />
+      {loadError.fix === "download" ? (
+        <Action
+          title="Download"
+          icon={Icon.Download}
+          onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } })}
+        />
+      ) : (
+        <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => load(true)} />
+      )}
       {archived && <Action title="Read Live Page" icon={Icon.Globe} onAction={() => readFromArchive(false)} />}
       {loadError.fix === "preferences" && (
         <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
