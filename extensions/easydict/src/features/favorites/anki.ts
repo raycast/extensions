@@ -71,31 +71,14 @@ async function invokeAnki<T>(url: string, action: string, params: object = {}): 
 async function ensureDeckAndModel(url: string, deckName: string) {
   await invokeAnki(url, "createDeck", { deck: deckName });
   const modelNames = await invokeAnki<string[]>(url, "modelNames");
-  if (!modelNames.includes(ANKI_MODEL_NAME)) {
-    await invokeAnki(url, "createModel", {
-      modelName: ANKI_MODEL_NAME,
-      inOrderFields: ANKI_MODEL_FIELDS,
-      css: ANKI_MODEL_CSS,
-      isCloze: false,
-      cardTemplates: [{ Name: ANKI_TEMPLATE_NAME, Front: ANKI_FRONT_TEMPLATE, Back: ANKI_BACK_TEMPLATE }],
-    });
-    return;
-  }
-
-  // Note types created by an earlier version lack newer fields; add them and refresh the templates to show them.
-  const fieldNames = await invokeAnki<string[]>(url, "modelFieldNames", { modelName: ANKI_MODEL_NAME });
-  const missingFields = ANKI_MODEL_FIELDS.filter((field) => !fieldNames.includes(field));
-  if (!missingFields.length) return;
-  for (const fieldName of missingFields) {
-    await invokeAnki(url, "modelFieldAdd", { modelName: ANKI_MODEL_NAME, fieldName });
-  }
-  await invokeAnki(url, "updateModelTemplates", {
-    model: {
-      name: ANKI_MODEL_NAME,
-      templates: { [ANKI_TEMPLATE_NAME]: { Front: ANKI_FRONT_TEMPLATE, Back: ANKI_BACK_TEMPLATE } },
-    },
+  if (modelNames.includes(ANKI_MODEL_NAME)) return;
+  await invokeAnki(url, "createModel", {
+    modelName: ANKI_MODEL_NAME,
+    inOrderFields: ANKI_MODEL_FIELDS,
+    css: ANKI_MODEL_CSS,
+    isCloze: false,
+    cardTemplates: [{ Name: ANKI_TEMPLATE_NAME, Front: ANKI_FRONT_TEMPLATE, Back: ANKI_BACK_TEMPLATE }],
   });
-  await invokeAnki(url, "updateModelStyling", { model: { name: ANKI_MODEL_NAME, css: ANKI_MODEL_CSS } });
 }
 
 /**
@@ -107,8 +90,9 @@ export function buildAnkiNote(favorite: FavoriteWord, deckName: string): AnkiNot
   const phonetic = rows.find((row) => row.accessory?.phonetic)?.accessory?.phonetic ?? favorite.query.phonetic ?? "";
   const translations = resolveFavoriteTranslations(favorite) ?? [];
   const explanations = rows.filter((row) => row.kind === "definition").map((row) => row.copyText);
+  // Linguee stores an empty audio URL, so fall through to the first saved result that has one.
   const speechUrl =
-    favorite.query.speechUrl ?? rows.find((row) => row.service.query.speechUrl)?.service.query.speechUrl;
+    favorite.query.speechUrl || rows.find((row) => row.service.query.speechUrl)?.service.query.speechUrl;
   const audioName = favorite.query.word.replace(/[^\p{L}\p{N}]+/gu, "_");
   return {
     deckName,
@@ -152,6 +136,8 @@ export async function addFavoritesToAnki(
   if (failure) throw new Error(`AnkiConnect: ${failure.error}`);
 
   const addable = notes.filter((_, index) => checks[index].canAdd);
-  if (addable.length) await invokeAnki(endpoint, "addNotes", { notes: addable });
-  return { added: addable.length, skipped: favorites.length - addable.length };
+  const results = addable.length ? await invokeAnki<(number | null)[]>(endpoint, "addNotes", { notes: addable }) : [];
+  // addNotes reports a note that failed after the pre-check as null; do not count it as added.
+  const added = results.filter((id) => id !== null).length;
+  return { added, skipped: favorites.length - added };
 }

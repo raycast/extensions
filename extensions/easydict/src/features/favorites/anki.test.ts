@@ -1,26 +1,29 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ComposedService } from "@/core/content/compose";
 import type { DictionaryContent } from "@/core/content/types";
 import { DictionaryType, TranslationType } from "@/core/results/kinds";
 import type { QueryWordInfo } from "@/core/results/types";
 
-import { buildAnkiNote, normalizeAnkiUrl } from "./anki";
-import { buildFavoriteWord } from "./model";
+import { addFavoritesToAnki, buildAnkiNote, normalizeAnkiUrl } from "./anki";
+import { buildFavoriteWord, type FavoriteWord } from "./model";
+
+const timedFetch = vi.hoisted(() => vi.fn());
 
 // The Anki client reaches @/consts through the shared HTTP client; only the timeout is read.
 vi.mock("@/consts", () => ({ networkTimeout: 1000 }));
+vi.mock("@/shared/http", () => ({ timedFetch }));
 // Saved content resolves SVG text colors against Raycast's appearance.
 vi.mock("@raycast/api", () => ({ environment: { appearance: "light" } }));
 
 const query: QueryWordInfo = { word: "ephemeral", fromLanguage: "en", toLanguage: "zh-CHS", isWord: true };
 
-function translationService(paragraphs: string[]): ComposedService {
+function translationService(paragraphs: string[], speechUrl?: string): ComposedService {
   return {
     type: TranslationType.Youdao,
-    content: { kind: "translation", query, paragraphs },
+    content: { kind: "translation", query: speechUrl ? { ...query, speechUrl } : query, paragraphs },
     serviceId: "youdao-translate",
     serviceLabel: "Youdao Translate",
     serviceOrder: 0,
@@ -87,11 +90,56 @@ describe("buildAnkiNote", () => {
     expect(buildAnkiNote(buildFavoriteWord(query, [translationService(["短暂的"])]), "Easydict").audio).toBeUndefined();
   });
 
+  it("falls back to a later saved result when the saved word has an empty audio URL", () => {
+    const url = "https://www.linguee.com/mp3/EN_US_ephemeral.mp3";
+    const favorite = buildFavoriteWord({ ...query, speechUrl: "" }, [
+      dictionaryService([{ kind: "translation", text: "短暂的" }]),
+      translationService(["短暂的"], url),
+    ]);
+
+    const note = buildAnkiNote(favorite, "Easydict");
+
+    expect(note.audio).toEqual([{ url, filename: "easydict-en-ephemeral.mp3", fields: ["Audio"] }]);
+  });
+
   it("escapes HTML because Anki renders fields as HTML", () => {
     const favorite = buildFavoriteWord({ ...query, word: "<b>&" }, [translationService(['"x" < y'])]);
     const note = buildAnkiNote(favorite, "Easydict");
 
     expect(note.fields.Word).toBe("&lt;b&gt;&amp;");
     expect(note.fields.Translation).toBe("&quot;x&quot; &lt; y");
+  });
+});
+
+describe("addFavoritesToAnki", () => {
+  const url = "127.0.0.1:8765";
+  const favorite = (word: string): FavoriteWord =>
+    buildFavoriteWord({ ...query, word }, [translationService(["短暂的"])]);
+
+  beforeEach(() => {
+    timedFetch.mockReset();
+    timedFetch.mockImplementation(async (_url: string, options: { body: { action: string } }) => {
+      switch (options.body.action) {
+        case "createDeck":
+          return { result: null, error: null };
+        case "modelNames":
+          return { result: ["Easydict"], error: null };
+        case "canAddNotesWithErrorDetail":
+          return { result: [{ canAdd: true }, { canAdd: true }], error: null };
+        case "addNotes":
+          return { result: [1, null], error: null };
+        default:
+          throw new Error(`Unexpected AnkiConnect action: ${options.body.action}`);
+      }
+    });
+  });
+
+  it("reports a note that AnkiConnect fails to add as skipped instead of added", async () => {
+    await expect(
+      addFavoritesToAnki([favorite("one"), favorite("two")], { deckName: "Easydict", url }),
+    ).resolves.toEqual({
+      added: 1,
+      skipped: 1,
+    });
   });
 });

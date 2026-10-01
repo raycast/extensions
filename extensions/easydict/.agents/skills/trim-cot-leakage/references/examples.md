@@ -8,7 +8,7 @@ These examples adapt the upstream skill to Easydict. They illustrate decisions, 
 
 **After:** “Clearing the cache advances its generation so requests started before the clear cannot repopulate it.”
 
-Both the mechanism and its purpose survive. `(decision 7)` is not a durable reference. In Easydict, check the generation guard in [`src/core/query/cache.ts`](../../../../src/core/query/cache.ts) and the caller in [`src/hooks/useQueryEngine.ts`](../../../../src/hooks/useQueryEngine.ts) before using this wording.
+Both the mechanism and its purpose survive. `(decision 7)` is not a durable reference. In Easydict, check the generation guard in [`src/core/query/cache.ts`](../../../../src/core/query/cache.ts) and the caller in [`src/features/search/useQueryEngine.ts`](../../../../src/features/search/useQueryEngine.ts) before using this wording.
 
 **Before:** “Follow the provider icon decision in design §3.2.”
 

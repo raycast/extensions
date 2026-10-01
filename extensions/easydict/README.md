@@ -138,7 +138,7 @@ Use the **Manage Providers** command to manage AI providers and to set the order
 
 - Built-in providers are listed here for ordering only; enable and configure them in Extension Settings.
 - Reorder any provider with **Move Up**/**Move Down** (`Cmd+Option+Up/Down` on macOS, `Ctrl+Alt+Up/Down` on Windows).
-- 
+
 **AI providers**
 
 - AI providers connect to **Raycast AI** or any **OpenAI-compatible endpoint**.
