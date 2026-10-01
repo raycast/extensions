@@ -15,12 +15,19 @@ export async function getCurrentTotpCode(item: Item, detail?: ItemDetail): Promi
   return params ? generateTotp(params).code : getTotp(item.shareId, item.itemId);
 }
 
+/** 2FA code of the item shown in the details panel; `failed` when pass-cli couldn't provide it. */
+export interface TotpState {
+  code?: DisplayedCode;
+  failed: boolean;
+}
+
 /** Live TOTP code for the item shown in the detail panel, generated locally from its otpauth URI when possible. */
-export function useTotpCode(item: Item, detail: ItemDetail | undefined): DisplayedCode | undefined {
+export function useTotpCode(item: Item, detail: ItemDetail | undefined): TotpState {
   const params = useMemo(() => (detail?.totpUri ? parseOtpauthUri(detail.totpUri) : undefined), [detail?.totpUri]);
   const isEnabled = item.hasTotp && detail !== undefined;
   const [now, setNow] = useState(() => Date.now());
-  const [cliCode, setCliCode] = useState<{ step: number; code: string }>();
+  // What pass-cli returned, for the details and the period it was asked for: a refresh never shows the previous code.
+  const [cliResult, setCliResult] = useState<{ detail: ItemDetail; step: number; code?: string }>();
 
   useEffect(() => {
     if (!isEnabled) return;
@@ -35,23 +42,28 @@ export function useTotpCode(item: Item, detail: ItemDetail | undefined): Display
   const step = period ? Math.floor(now / 1000 / period) : 0;
 
   useEffect(() => {
-    if (!isEnabled || params) return;
+    if (!item.hasTotp || !detail || params) return;
     let cancelled = false;
     getTotp(item.shareId, item.itemId).then(
       (code) => {
-        if (!cancelled) setCliCode({ step, code });
+        if (!cancelled) setCliResult({ detail, step, code });
       },
-      () => undefined,
+      () => {
+        if (!cancelled) setCliResult({ detail, step });
+      },
     );
     return () => {
       cancelled = true;
     };
-  }, [isEnabled, params, step, item.shareId, item.itemId]);
+  }, [item.hasTotp, detail, params, step, item.shareId, item.itemId]);
 
-  if (!isEnabled) return undefined;
-  if (params) return generateTotp(params, now);
-  if (cliCode?.step !== step) return undefined;
-  return period
-    ? { code: cliCode.code, remainingSeconds: period - (Math.floor(now / 1000) % period) }
-    : { code: cliCode.code };
+  if (!isEnabled) return { failed: false };
+  if (params) return { code: generateTotp(params, now), failed: false };
+  const result = cliResult?.detail === detail && cliResult.step === step ? cliResult : undefined;
+  if (!result) return { failed: false };
+  if (!result.code) return { failed: true };
+  const code: DisplayedCode = period
+    ? { code: result.code, remainingSeconds: period - (Math.floor(now / 1000) % period) }
+    : { code: result.code };
+  return { code, failed: false };
 }

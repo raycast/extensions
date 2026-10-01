@@ -5,6 +5,7 @@ import { listItems, listVaultsAndItems } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
+import { NotLoggedInView, loginWithBrowserAndReload } from "./login-view";
 import { hostnameOf } from "./format";
 import { ItemList } from "./item-list";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
@@ -160,8 +161,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     } catch (err: unknown) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
-      // Errors only replace items already on screen when the session has ended.
-      if (itemsRef.current.length === 0 || type === "not_authenticated") {
+      // Items belong to the session that listed them: once it has ended, they must not show up again.
+      if (type === "not_authenticated") updateItems([]);
+      // Items still on screen stay there; otherwise the error replaces the list.
+      if (itemsRef.current.length === 0) {
         const message = err instanceof Error ? err.message : "An unknown error occurred";
         setError({ type, message });
       }
@@ -179,6 +182,9 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     return filteredItems.filter((item) => matchesActiveOrigin(item, activeOrigin));
   }, [activeOrigin, filteredItems, webIntegrationEnabled]);
 
+  if (error?.type === "not_authenticated") {
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadItems)} />;
+  }
   const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;
 

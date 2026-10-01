@@ -102,10 +102,14 @@
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
-      "description": "What Enter does on a login. Fill Login pastes into the app you were using.",
-      "default": "copy",
+      "description": "What Enter does on an item. Fill Login pastes into the app you were using.",
+      "default": "details",
       "required": false,
       "data": [
+        {
+          "title": "View Details",
+          "value": "details"
+        },
         {
           "title": "Copy Password",
           "value": "copy"

@@ -89,6 +89,9 @@ test("shows loading and unavailable states for values that need the item details
   const failed = getPanelRows({ item: cachedLogin, isLoading: false, error: "boom" });
   assert.deepEqual(valueOf(failed, "password"), { kind: "unavailable" });
   assert.deepEqual(valueOf(failed, "totp"), { kind: "unavailable" });
+
+  const failedCode = getPanelRows({ item: login, detail: { ...login }, totpFailed: true, isLoading: false });
+  assert.deepEqual(valueOf(failedCode, "totp"), { kind: "unavailable" });
 });
 
 test("prefers loaded details and lists websites and custom fields", () => {

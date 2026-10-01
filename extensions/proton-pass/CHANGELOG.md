@@ -5,7 +5,7 @@
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
 - Filling only types into the app Raycast was opened from, and stops if another app comes in front
 - Paste Email, Paste Username, Paste Password and Paste 2FA Code (⌘⇧T) actions, for logins split over several screens
-- Primary Action preference: Copy Password (default) or Fill Login
+- Fill Login (macOS) choice for the Primary Action preference, to fill with Enter
 - Submit After Filling preference (off by default) presses Return after the password
 - Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards, also as concealed since it can be a secret
 
@@ -15,7 +15,8 @@
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
 - Websites are shown as clickable tags
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
-- Enter now copies the password (or opens the note for secure notes); new Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
+- New Primary Action preference: Enter still opens View Details by default, or copies the password. View Details shows the same rows as the panel, beside the title and the full note
+- New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
 - Search also matches usernames, emails and website domains
 - Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead, from the favicon provider set in Raycast's settings (off by default, since the provider receives the domains)
@@ -24,6 +25,7 @@
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list. Without cached items, that vault shows first, before the other vaults have loaded
 - New Copy Title action (⌘⇧.). Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
+- When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x
