@@ -35,6 +35,7 @@ export default function SendSmsFromFile() {
   if (preview) {
     return (
       <Detail
+        isLoading={isSending}
         markdown={importPreviewMarkdown(preview.recipients)}
         actions={
           <ActionPanel>

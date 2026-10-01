@@ -1,6 +1,6 @@
 import { Action, ActionPanel, confirmAlert, Detail, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { sendSingle } from "./api.js";
+import { sendBulk, type BulkSendResponse } from "./api.js";
 import { InputError, parsePersonalizedMessages, requireSenderId, type SmsMessage } from "./lib.js";
 import { personalizedResultsMarkdown, type PersonalizedSmsResult } from "./result-ui.js";
 import { usePinnedSenderId } from "./sender-id.js";
@@ -124,23 +124,15 @@ async function sendMessages(
   senderId: string,
   messages: SmsMessage[],
 ): Promise<PersonalizedSmsResult[]> {
-  const results: PersonalizedSmsResult[] = [];
+  const response = await sendBulk(apiKey, senderId, messages);
+  return personalizedResults(messages, response);
+}
 
-  for (const message of messages) {
-    try {
-      const response = await sendSingle(apiKey, senderId, message);
-      results.push({
-        recipient: message.recipient,
-        outcome: "Accepted",
-        messageId: response.messageId,
-      });
-    } catch (caught) {
-      results.push({
-        recipient: message.recipient,
-        outcome: caught instanceof Error ? caught.message : "Failed",
-      });
-    }
-  }
-
-  return results;
+function personalizedResults(messages: SmsMessage[], response: BulkSendResponse): PersonalizedSmsResult[] {
+  const outcome = response.rejectedCount === 0 ? "Accepted" : "Submitted; check delivery status";
+  return messages.map((message, index) => ({
+    recipient: message.recipient,
+    outcome,
+    messageId: response.results[index]?.messageId,
+  }));
 }
