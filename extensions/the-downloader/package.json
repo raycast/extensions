@@ -718,7 +718,7 @@
     }
   ],
   "ai": {
-    "instructions": "Write every reply in the language of the user's message (German question → German answer), even though the tool output is in English. After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. To summarize a link or answer anything about what it says, call read-link once — it returns the details too, so don't also call get-link-info. Call get-link-info only for how a link is doing (views, likes, comments) or basic facts about it. When answering from a video's transcript, show when things are said: the timestamp itself is the link text, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows — never hide the link behind other words — and every point of a video summary gets its timestamp. For posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports.",
+    "instructions": "Match the language of the user's message, not of the tool output: an English message gets an English reply, a German one German, a Czech one Czech. After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. To summarize a link or answer anything about what it says, call read-link once — it returns the details too, so don't also call get-link-info. Call get-link-info only for how a link is doing (views, likes, comments) or basic facts about it. When answering from a video's transcript, show when things are said: the timestamp itself is the link text, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows — never hide the link behind other words — and every point of a video summary gets its timestamp. For posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports.",
     "skills": [
       {
         "name": "summarize-link",
@@ -764,7 +764,7 @@
       {
         "input": "@the-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
         "mocks": {
-          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
+          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nWhen you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s) — never other words."
         },
         "expected": [
           {
@@ -807,7 +807,7 @@
       {
         "input": "@the-downloader summarize https://www.youtube.com/watch?v=ykaj0pS4A1A in 3 bullet points",
         "mocks": {
-          "read-link": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Transcript\n[0:00] Focus helps you block distracting apps and websites.\n[0:20] Start a session from Raycast and pick what to block.\n[0:40] Take breaks and review your sessions.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=ykaj0pS4A1A&t=245s)."
+          "read-link": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Transcript\n[0:00] Focus helps you block distracting apps and websites.\n[0:20] Start a session from Raycast and pick what to block.\n[0:40] Take breaks and review your sessions.\n\nWhen you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=ykaj0pS4A1A&t=245s) — never other words."
         },
         "expected": [
           {
@@ -823,6 +823,9 @@
           },
           {
             "matches": "\\b\\d{1,2}:\\d{2}\\b"
+          },
+          {
+            "matches": "\\b(the|The|is|and)\\b"
           }
         ]
       },
@@ -830,7 +833,7 @@
         "input": "@the-downloader was hat er über Elon Musk gesagt? https://www.youtube.com/watch?v=T_5zHExXN7o",
         "usedAsExample": false,
         "mocks": {
-          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nLink to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s)."
+          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nWhen you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s) — never other words."
         },
         "expected": [
           {
@@ -868,6 +871,9 @@
             "not": {
               "matches": "\\[\\d{1,2}:\\d{2}\\]"
             }
+          },
+          {
+            "matches": "\\b(the|The|is|and)\\b"
           }
         ]
       },
@@ -895,6 +901,9 @@
             "not": {
               "matches": "\\[\\d{1,2}:\\d{2}\\]"
             }
+          },
+          {
+            "matches": "\\b(the|The|is|and)\\b"
           }
         ]
       }

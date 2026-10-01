@@ -79,7 +79,7 @@ describe("read-link tool", () => {
     loadLinkContext.mockResolvedValue(article);
     const text = await readLink({ url: "https://example.com/news/bridges" });
     expect(text).toContain("## Article text\nThe main bridge was rebuilt with steel cables.");
-    expect(text).not.toContain("Link to a moment");
+    expect(text).not.toContain("point to a moment");
   });
 
   it("leaves rejecting non-URLs to the loader, which runs nothing for them", async () => {

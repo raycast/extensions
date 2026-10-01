@@ -315,7 +315,9 @@ export function bodyForSave(ctx: LinkContext): { name: string; content: string }
 /** How to link a moment, for models answering from the tool output (videos on YouTube and Vimeo). */
 function momentLinkLine(ctx: LinkContext): string {
   const at = (s: number) => timestampUrl(ctx, s);
-  return at(0) ? `\n\nLink to a moment with its offset in seconds, e.g. [4:05](${at(245)}).` : "";
+  return at(0)
+    ? `\n\nWhen you point to a moment, make its time the link text, like [4:05](${at(245)}) — never other words.`
+    : "";
 }
 
 /** The `get-link-info` tool's answer: details and statistics, no body. */

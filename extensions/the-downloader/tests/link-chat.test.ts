@@ -360,10 +360,10 @@ describe("exports and tool output", () => {
     expect(linkInfoForAI(withCaptions)).toContain("Use the read-link tool to read what is said.");
     expect(linkInfoForAI(videoWith(1))).toContain("None listed");
     expect(linkTextForAI(videoWith(2))).toContain(
-      "Link to a moment with its offset in seconds, e.g. [4:05](https://www.youtube.com/watch?v=abc&t=245s).",
+      "When you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=abc&t=245s) — never other words.",
     );
     expect(linkTextForAI(pageWith(2))).toContain("## Article text\nParagraph 0");
-    expect(linkTextForAI(pageWith(2))).not.toContain("Link to a moment");
+    expect(linkTextForAI(pageWith(2))).not.toContain("point to a moment");
     expect(linkTextForAI(pageWith(0, { note: "Couldn't read this page's text." }))).toContain(
       "Not available: Couldn't read this page's text.",
     );
