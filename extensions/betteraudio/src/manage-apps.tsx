@@ -21,6 +21,7 @@ import {
   listDevices,
 } from "./lib/cli";
 import { EQ_PRESETS, VOLUME_STEPS } from "./lib/constants";
+import { buildAppPathMap, getAppPath, type AppPathMap } from "./lib/app-paths";
 import { ErrorView } from "./components/ErrorView";
 import type { CLIAppInfo } from "./lib/types";
 
@@ -33,11 +34,7 @@ export default function Command() {
   } = useCachedPromise(listApps);
   const { data: appPaths } = useCachedPromise(async () => {
     const applications = await getApplications();
-    return new Map(
-      applications
-        .filter((application) => application.bundleId)
-        .map((application) => [application.bundleId!, application.path]),
-    );
+    return buildAppPathMap(applications);
   });
 
   if (error) return <ErrorView error={error} />;
@@ -74,7 +71,7 @@ function AppItem({
   revalidate,
 }: {
   app: CLIAppInfo;
-  appPaths?: Map<string, string>;
+  appPaths?: AppPathMap;
   revalidate: () => void;
 }) {
   const volumePercent = Math.round(app.volume);
@@ -98,8 +95,8 @@ function AppItem({
       title={app.name}
       subtitle={app.bundleID ?? app.id}
       icon={
-        app.bundleID && appPaths?.get(app.bundleID)
-          ? { fileIcon: appPaths.get(app.bundleID)! }
+        app.bundleID && getAppPath(appPaths, app.bundleID)
+          ? { fileIcon: getAppPath(appPaths, app.bundleID) }
           : Icon.SpeakerHigh
       }
       accessories={accessories}
