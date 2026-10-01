@@ -25,6 +25,7 @@ import {
   noteToMarkdown,
   toOpenableUrl,
   websiteIconUrl,
+  websiteLabels,
 } from "./format";
 import { TotpCode, generateTotp, parseOtpauthUri } from "./totp";
 import { getInitialIconDataUri } from "./avatar";
@@ -159,6 +160,7 @@ interface ItemDetailPanelProps {
 const ItemDetailPanel = memo(function ItemDetailPanel({ item, detail, isLoading, error }: ItemDetailPanelProps) {
   const totp = useTotpCode(item, detail);
   const urls = detail?.urls ?? item.urls ?? [];
+  const websiteNames = websiteLabels(urls);
   const customFields = detail?.customFields ?? [];
   const hasPassword = detail ? detail.password !== undefined : item.hasPassword;
   const modified = item.modifiedAt ? formatRelativeTime(item.modifiedAt) : undefined;
@@ -207,7 +209,7 @@ const ItemDetailPanel = memo(function ItemDetailPanel({ item, detail, isLoading,
               {urls.map((url, index) => (
                 <List.Item.Detail.Metadata.TagList.Item
                   key={`${url}-${index}`}
-                  text={hostnameOf(url)}
+                  text={websiteNames[index]}
                   onAction={() => open(toOpenableUrl(url))}
                 />
               ))}
@@ -293,6 +295,7 @@ const ItemActions = memo(function ItemActions({
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = getPreferenceValues<Preferences>().copyPasswordTransient ?? true;
   const urls = detail?.urls ?? item.urls ?? [];
+  const websiteNames = websiteLabels(urls);
 
   async function loadDetail(): Promise<ItemDetail> {
     const loaded = store.peek(item);
@@ -435,7 +438,11 @@ const ItemActions = memo(function ItemActions({
       {urls.length > 1 && (
         <ActionPanel.Section title="Websites">
           {urls.map((url, index) => (
-            <Action.OpenInBrowser key={`${url}-${index}`} title={`Open ${hostnameOf(url)}`} url={toOpenableUrl(url)} />
+            <Action.OpenInBrowser
+              key={`${url}-${index}`}
+              title={`Open ${websiteNames[index]}`}
+              url={toOpenableUrl(url)}
+            />
           ))}
         </ActionPanel.Section>
       )}

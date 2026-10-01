@@ -7,6 +7,7 @@ import {
   noteToMarkdown,
   toOpenableUrl,
   websiteIconUrl,
+  websiteLabels,
 } from "./format";
 
 test("shows the hostname of a URL without www", () => {
@@ -52,4 +53,12 @@ test("builds website icon URLs from the hostname only", () => {
   );
   assert.equal(websiteIconUrl("example.org"), "https://icons.duckduckgo.com/ip3/example.org.ico");
   assert.equal(websiteIconUrl("not a url"), undefined);
+});
+
+test("tells websites on the same hostname apart by their path", () => {
+  assert.deepEqual(websiteLabels(["https://example.com", "https://www.example.com/login/"]), [
+    "example.com",
+    "example.com/login",
+  ]);
+  assert.deepEqual(websiteLabels(["https://example.com/a", "https://example.org/b"]), ["example.com", "example.org"]);
 });

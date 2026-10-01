@@ -14,6 +14,20 @@ export function hostnameOf(url: string): string {
   }
 }
 
+/** Labels for an item's websites: the hostname, plus the path for websites that share a hostname. */
+export function websiteLabels(urls: string[]): string[] {
+  const hosts = urls.map(hostnameOf);
+  return urls.map((url, index) => {
+    if (hosts.filter((host) => host === hosts[index]).length < 2) return hosts[index];
+    try {
+      const path = new URL(toOpenableUrl(url)).pathname.replace(/\/+$/, "");
+      return `${hosts[index]}${path}`;
+    } catch {
+      return url;
+    }
+  });
+}
+
 /** Proton Pass accepts URLs without a scheme ("example.com"); browsers need one to open them. */
 export function toOpenableUrl(url: string): string {
   return /^[a-z][a-z\d+.-]*:/i.test(url) ? url : `https://${url}`;
