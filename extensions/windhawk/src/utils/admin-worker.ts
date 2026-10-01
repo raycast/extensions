@@ -2,7 +2,7 @@ import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
 import { readFile, unlink, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { tmpdir, userInfo } from "node:os";
 import { randomUUID } from "node:crypto";
 import { getCliPath } from "./helpers";
 
@@ -68,6 +68,35 @@ async function isProcessAlive(pid: number): Promise<boolean> {
     return stdout.includes(String(pid));
   } catch {
     return false;
+  }
+}
+
+/**
+ * Restricts an elevated-execution artifact (worker/launcher/setup/cleanup script)
+ * to current-user read-only + Administrators full, dropping inherited ACLs.
+ * Rewriting such a file requires unlocking it first (unlockArtifact restores
+ * inherited permissions via icacls /reset, which the file owner can always do);
+ * all writers in this module use unlock-unlink-write-lock for locked paths.
+ * Best-effort: a failure here must never break registration/unregistration itself.
+ */
+async function lockArtifact(filePath: string): Promise<void> {
+  try {
+    const user = userInfo().username;
+    await execFileAsync(
+      "icacls.exe",
+      [filePath, "/inheritance:r", "/grant:r", `${user}:R`, "/grant:r", "*S-1-5-32-544:F"],
+      { timeout: 10000 },
+    );
+  } catch {
+    // hardening only - continue with default inherited permissions
+  }
+}
+
+async function unlockArtifact(filePath: string): Promise<void> {
+  try {
+    await execFileAsync("icacls.exe", [filePath, "/reset"], { timeout: 10000 });
+  } catch {
+    // file may not exist yet - the following unlink/write will handle it
   }
 }
 
@@ -209,8 +238,14 @@ export async function registerWorker(): Promise<void> {
 
     const workerPsContent = getWorkerScriptContent(cliPath);
 
+    await unlockArtifact(WORKER_SCRIPT_PATH);
+    await unlink(WORKER_SCRIPT_PATH).catch(() => {});
     await writeFile(WORKER_SCRIPT_PATH, workerPsContent, "utf-8");
+    await lockArtifact(WORKER_SCRIPT_PATH);
+    await unlockArtifact(LAUNCHER_VBS_PATH);
+    await unlink(LAUNCHER_VBS_PATH).catch(() => {});
     await writeFile(LAUNCHER_VBS_PATH, getLauncherVbsContent(), "utf-8");
+    await lockArtifact(LAUNCHER_VBS_PATH);
 
     const launcherPathEscaped = escapePathForPowerShell(LAUNCHER_VBS_PATH);
     const setupPsContent = `
@@ -277,7 +312,10 @@ export async function registerWorker(): Promise<void> {
       }
     `;
 
+    await unlockArtifact(SETUP_PS_PATH);
+    await unlink(SETUP_PS_PATH).catch(() => {});
     await writeFile(SETUP_PS_PATH, setupPsContent, "utf-8");
+    await lockArtifact(SETUP_PS_PATH);
 
     const setupPsPathEscaped = SETUP_PS_PATH.replace(/\\/g, "\\\\");
     const helperVbsContent = [
@@ -287,30 +325,18 @@ export async function registerWorker(): Promise<void> {
       `objShell.ShellExecute "powershell.exe", psArgs, "", "runas", 0`,
     ].join("\r\n");
 
+    await unlockArtifact(HELPER_VBS_PATH);
+    await unlink(HELPER_VBS_PATH).catch(() => {});
     await writeFile(HELPER_VBS_PATH, helperVbsContent, "utf-8");
-    console.log("[admin-worker] artifacts written, launching UAC helper…");
+    await lockArtifact(HELPER_VBS_PATH);
     await execFileAsync("wscript.exe", [HELPER_VBS_PATH]);
-    console.log("[admin-worker] helper dispatched, waiting for elevated worker…");
 
     let active = false;
-    let loggedLines = 0;
-    const drainSetupLog = async () => {
-      const text = await readFile(LOG_FILE, "utf-8").catch(() => "");
-      if (!text) return;
-      const lines = text.split("\n");
-      while (loggedLines < lines.length) {
-        const line = lines[loggedLines++].trim();
-        if (line) console.log(`[admin-worker] ${line}`);
-      }
-    };
-
     for (let i = 0; i < 100; i++) {
       await new Promise((r) => setTimeout(r, 400));
-      await drainSetupLog();
       active = await isWorkerRunning();
       if (active) break;
     }
-    await drainSetupLog();
 
     if (!active) {
       const logTail = await readFile(LOG_FILE, "utf-8")
@@ -322,6 +348,7 @@ export async function registerWorker(): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to register admin worker: ${message}`);
   } finally {
+    await unlockArtifact(HELPER_VBS_PATH);
     await unlink(HELPER_VBS_PATH).catch(() => {});
   }
 }
@@ -363,7 +390,10 @@ export async function unregisterWorker(): Promise<void> {
     `;
 
     const cleanupPsPath = join(tmpdir(), "raycast_windhawk_cleanup.ps1");
+    await unlockArtifact(cleanupPsPath);
+    await unlink(cleanupPsPath).catch(() => {});
     await writeFile(cleanupPsPath, cleanupPsContent, "utf-8");
+    await lockArtifact(cleanupPsPath);
 
     const cleanupVbsContent = [
       `q = Chr(34)`,
@@ -373,7 +403,10 @@ export async function unregisterWorker(): Promise<void> {
     ].join("\r\n");
 
     const cleanupVbsPath = join(tmpdir(), "raycast_windhawk_cleanup.vbs");
+    await unlockArtifact(cleanupVbsPath);
+    await unlink(cleanupVbsPath).catch(() => {});
     await writeFile(cleanupVbsPath, cleanupVbsContent, "utf-8");
+    await lockArtifact(cleanupVbsPath);
 
     await execFileAsync("wscript.exe", [cleanupVbsPath]);
 
@@ -392,6 +425,7 @@ export async function unregisterWorker(): Promise<void> {
       }
     }
 
+    await unlockArtifact(cleanupVbsPath);
     await unlink(cleanupVbsPath).catch(() => {});
 
     if (!verified) {

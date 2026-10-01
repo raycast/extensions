@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getMods } from "./utils/mods";
 import { Mod } from "./types";
@@ -9,6 +9,7 @@ import {
   InstallModAction,
   InstallVersionAction,
   InstallVersionSubmenu,
+  ManageElevationAction,
   OpenInBrowserAction,
   RefreshAction,
   ShowDetailsAction,
@@ -29,7 +30,7 @@ export default function Command() {
     isLoading,
     error,
     revalidate,
-  } = usePromise(async () => {
+  } = useCachedPromise(async () => {
     return await getMods();
   });
 
@@ -43,10 +44,12 @@ export default function Command() {
     setPatches((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
   };
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: "Failed to load mods" });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: "Failed to load mods" });
+    }
+  }, [error]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search mods…" isShowingDetail throttle>
@@ -206,6 +209,9 @@ export default function Command() {
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <RefreshAction revalidate={revalidate} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <ManageElevationAction />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

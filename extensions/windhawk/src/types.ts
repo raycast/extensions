@@ -24,9 +24,6 @@ export interface InstalledModDetails {
     exclude: string[];
   };
   readme: string;
-  config: {
-    disabled: boolean;
-  };
   enabled: boolean;
   updateAvailable: boolean;
   availableUpdateVersion: string | null;

@@ -1,5 +1,6 @@
 import { ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { getModDetails } from "../utils/mods";
 import {
   CopyCommandsSubmenu,
@@ -29,10 +30,12 @@ export default function ModDetail({ modId }: { modId: string }) {
     return await getModDetails(modId);
   });
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: "Failed to load mod details" });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: "Failed to load mod details" });
+    }
+  }, [error]);
 
   const id = mod?.id;
   const version = mod?.metadata?.version;

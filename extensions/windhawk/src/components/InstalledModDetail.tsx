@@ -1,6 +1,7 @@
 import { ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
-import { getInstalledModDetails } from "../utils/mods";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
+import { getInstalledModDetails } from "../utils/mods";
 import {
   CopyCommandsSubmenu,
   CopyModInfoSubmenu,
@@ -9,6 +10,7 @@ import {
   ToggleModAction,
   UninstallModAction,
   ViewChangelogAction,
+  ViewInstalledModSourceCodeAction,
 } from "./Actions";
 
 export default function InstalledModDetail({ modId }: { modId: string }) {
@@ -21,10 +23,12 @@ export default function InstalledModDetail({ modId }: { modId: string }) {
     return await getInstalledModDetails(modId);
   });
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: "Failed to load installed mod details" });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: "Failed to load installed mod details" });
+    }
+  }, [error]);
 
   const id = mod?.id;
   const version = mod?.metadata?.version;
@@ -91,11 +95,12 @@ export default function InstalledModDetail({ modId }: { modId: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ToggleModAction id={id ?? ""} enabled={!mod?.config?.disabled} onSuccess={revalidate} />
+            <ToggleModAction id={id ?? ""} enabled={enabled ?? false} onSuccess={revalidate} />
             <UninstallModAction id={id ?? ""} name={name ?? ""} onSuccess={revalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ViewChangelogAction id={id ?? ""} name={name ?? ""} />
+            <ViewInstalledModSourceCodeAction id={id ?? ""} name={name ?? ""} />
             <OpenInBrowserAction id={id ?? ""} shortcut={Keyboard.Shortcut.Common.OpenWith} />
           </ActionPanel.Section>
           <ActionPanel.Section>

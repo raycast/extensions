@@ -268,7 +268,7 @@ export function UninstallModAction<T>({
         if (
           await confirmAlert({
             icon: { source: Icon.Trash, tintColor: Color.Red },
-            title: `Uninstall "${name}" extension`,
+            title: `Uninstall "${name}" mod`,
             message: `This will also remove its configuration and settings.`,
             primaryAction: { title: "Uninstall", style: Alert.ActionStyle.Destructive },
           })

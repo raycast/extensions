@@ -1,5 +1,6 @@
 import { ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { listVersions } from "../utils/mods";
 import { timestampToLongUTCDate } from "../utils/helpers";
 import { CopyVersionAction, InstallModAction, RefreshAction } from "./Actions";
@@ -20,10 +21,12 @@ export default function ModVersionsList({
     return await listVersions(id);
   });
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: `Failed to load versions for ${id}` });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: `Failed to load versions for ${id}` });
+    }
+  }, [error]);
 
   return (
     <List isLoading={isLoading}>

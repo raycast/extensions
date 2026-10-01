@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Keyboard } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
+import { useEffect } from "react";
 import { OpenInBrowserAction, RefreshAction } from "./Actions";
 
 export default function ModSourceCode({ id, name }: { id: string; name: string }) {
@@ -10,10 +11,12 @@ export default function ModSourceCode({ id, name }: { id: string; name: string }
     revalidate,
   } = useFetch(`https://raw.githubusercontent.com/ramensoftware/windhawk-mods/refs/heads/main/mods/${id}.wh.cpp`);
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: `Could not fetch source code for ${id}` });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: `Could not fetch source code for ${id}` });
+    }
+  }, [error]);
 
   return (
     <Detail

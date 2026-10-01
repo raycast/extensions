@@ -1,5 +1,6 @@
 import { ActionPanel, List, Icon, Color, Keyboard } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { getInstalledMods } from "./utils/mods";
 import InstalledModDetail from "./components/InstalledModDetail";
 import {
@@ -22,14 +23,16 @@ export default function Command() {
     isLoading,
     error,
     revalidate,
-  } = usePromise(async () => {
+  } = useCachedPromise(async () => {
     return await getInstalledMods();
   });
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: "Failed to load mods" });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: "Failed to load mods" });
+    }
+  }, [error]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search installed mods…" isShowingDetail throttle>

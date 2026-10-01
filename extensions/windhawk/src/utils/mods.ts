@@ -1,11 +1,11 @@
 import { showFailureToast } from "@raycast/utils";
 import { InstalledMod, InstalledModDetails, Mod, ModDetails, ModVersion } from "../types";
-import { execp, getCliPath } from "./helpers";
+import { execFileAsync, getCliPath } from "./helpers";
 
 const cliPath = getCliPath();
 
 export async function getInstalledMods(): Promise<InstalledMod[]> {
-  const res = await execp(`"${cliPath}" mod list --json`, {
+  const res = await execFileAsync(cliPath, ["mod", "list", "--json"], {
     env: { ...process.env, ProgramData: process.env.ProgramData || "C:\\ProgramData" },
   });
 
@@ -41,7 +41,7 @@ export async function getInstalledMods(): Promise<InstalledMod[]> {
 
 async function fetchLatestRepoVersion(id: string): Promise<string | null> {
   try {
-    const res = await execp(`"${cliPath}" repo show ${id} --json`);
+    const res = await execFileAsync(cliPath, ["repo", "show", id, "--json"]);
     const parsed = JSON.parse(res.stdout);
     return parsed?.data?.version ?? null;
   } catch {
@@ -53,7 +53,7 @@ export async function getInstalledModDetails(id: string): Promise<InstalledModDe
   // `mod show [id] --json` does not include enabled/updateAvailable,
   // so they are fetched separately from the installed mods list.
   const [res, installedMods] = await Promise.all([
-    execp(`"${cliPath}" mod show ${id} --json`, {
+    execFileAsync(cliPath, ["mod", "show", id, "--json"], {
       env: { ...process.env, ProgramData: process.env.ProgramData || "C:\\ProgramData" },
     }),
     getInstalledMods().catch(() => [] as InstalledMod[]),
@@ -80,7 +80,7 @@ export async function getInstalledModDetails(id: string): Promise<InstalledModDe
 
 export async function getMods(): Promise<Mod[]> {
   const [repoResult, installedMods] = await Promise.all([
-    execp(`"${cliPath}" repo list --json`),
+    execFileAsync(cliPath, ["repo", "list", "--json"]),
     getInstalledMods().catch(() => []),
   ]);
 
@@ -114,7 +114,7 @@ export async function getModDetails(id: string): Promise<ModDetails> {
   // `repo show` has no installed-mod info, so the installed
   // version is fetched separately from the installed mods list.
   const [res, installedMods] = await Promise.all([
-    execp(`"${cliPath}" repo show ${id} --json`),
+    execFileAsync(cliPath, ["repo", "show", id, "--json"]),
     getInstalledMods().catch(() => [] as InstalledMod[]),
   ]);
 
@@ -139,7 +139,7 @@ export async function getModDetails(id: string): Promise<ModDetails> {
 }
 
 export async function listVersions(id: string) {
-  const res = await execp(`"${cliPath}" repo versions ${id} --json`);
+  const res = await execFileAsync(cliPath, ["repo", "versions", id, "--json"]);
 
   try {
     const parsed = JSON.parse(res.stdout);

@@ -1,16 +1,16 @@
 import { getPreferenceValues } from "@raycast/api";
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
 
 export const preferences = getPreferenceValues();
 
-export const execp = promisify(exec);
+export const execFileAsync = promisify(execFile);
 
 export function getCliPath(): string {
   const cliPath = preferences.cliPath;
 
-  if (cliPath) return cliPath;
+  if (cliPath) return cliPath.replace(/^"|"$/g, "");
 
   return path.join("C:", "Program Files", "Windhawk", "windhawk-cli.exe");
 }

@@ -1,5 +1,6 @@
 import { ActionPanel, Detail } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { RefreshAction } from "./Actions";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -16,10 +17,12 @@ export default function InstalledModSourceCode({ id, name }: { id: string; name:
     return file;
   });
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: `Could not get source code for ${id}` });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: `Could not get source code for ${id}` });
+    }
+  }, [error]);
 
   return (
     <Detail

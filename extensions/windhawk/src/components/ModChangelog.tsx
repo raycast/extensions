@@ -1,5 +1,6 @@
 import { ActionPanel, Detail } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
+import { useEffect } from "react";
 import { RefreshAction } from "./Actions";
 
 export function ModChangelog({ id, name }: { id: string; name: string }) {
@@ -12,10 +13,12 @@ export function ModChangelog({ id, name }: { id: string; name: string }) {
     `https://raw.githubusercontent.com/ramensoftware/windhawk-mods/refs/heads/pages/changelogs/${encodeURIComponent(id)}.md`,
   );
 
-  if (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    showFailureToast(message, { title: `Could not fetch changelog for ${id}` });
-  }
+  useEffect(() => {
+    if (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showFailureToast(message, { title: `Could not fetch changelog for ${id}` });
+    }
+  }, [error]);
 
   return (
     <Detail
