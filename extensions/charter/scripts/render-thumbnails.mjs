@@ -44,10 +44,10 @@ async function loadModule(entry, name) {
   return import(pathToFileURL(bundle).href + `?t=${Date.now()}`);
 }
 
-// The same copies the Render Chart command ships, so thumbnails match what it draws.
-const vendorDir = join(root, "assets", "vendor");
+// Local copies of Mermaid, ECharts and the world map, written by npm run vendor.
+const vendorDir = join(root, ".vendor");
 const { CHARTS } = await loadModule(join(root, "src", "data", "charts.ts"), "charts");
-const { buildPage, captureSelector } = await loadModule(join(root, "src", "lib", "render", "page.ts"), "page");
+const { buildPage } = await loadModule(join(root, "scripts", "thumbnail-page.ts"), "page");
 const { SHADCN_VIEW } = await loadModule(join(root, "src", "data", "urls.ts"), "urls");
 
 function stageStyle(scale) {
@@ -63,7 +63,7 @@ function stageStyle(scale) {
 `;
 }
 
-/** The Render Chart page, restyled so the drawing fills a fixed 3:2 stage. */
+/** The drawing page, restyled so it fills a fixed 3:2 stage. */
 function thumbnailPage(source, dark, scale) {
   return buildPage(source, dark, vendorDir).replace("</head>", `<style>${stageStyle(scale)}</style></head>`);
 }

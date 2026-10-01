@@ -16,7 +16,6 @@ import {
   type Provider,
 } from "../lib/catalog";
 import ChartDetail from "./ChartDetail";
-import RenderView from "./RenderView";
 
 function shortcut(key: Keyboard.KeyEquivalent, ...extra: Keyboard.KeyModifier[]): Keyboard.Shortcut {
   return { modifiers: ["cmd", ...extra], key };
@@ -145,15 +144,6 @@ export default function ChartActions(props: ChartActionsProps) {
           />
         )}
         {!docsFirst && openDocs}
-        {provider !== "shadcn" && raw && (
-          <Action.Push
-            title="Render Template"
-            icon={Icon.Image}
-            shortcut={shortcut("r", "shift")}
-            target={<RenderView source={{ kind: provider, text: raw }} title={chart.name} />}
-            onPush={used}
-          />
-        )}
         {provider === "shadcn" && preview && (
           <Action.OpenInBrowser
             title="Open Preview"
@@ -216,17 +206,6 @@ export default function ChartActions(props: ChartActionsProps) {
             onCopy={used}
           />
         ))}
-        {others
-          .filter((other) => other !== "shadcn")
-          .map((other) => (
-            <Action.Push
-              key={`render-${other}`}
-              title={`Render ${PROVIDERS[other].title} ${TEMPLATE_NOUN[other]}`}
-              icon={Icon.Image}
-              target={<RenderView source={{ kind: other, text: rawTemplate(chart, other) ?? "" }} title={chart.name} />}
-              onPush={used}
-            />
-          ))}
         {provider !== "shadcn" && shadcnCopies}
       </ActionPanel.Section>
 

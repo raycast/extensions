@@ -1,10 +1,14 @@
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { ChartSource } from "./source";
+/** What a page draws: a Mermaid diagram or an ECharts option. */
+export interface ChartSource {
+  kind: "mermaid" | "echarts";
+  text: string;
+}
 
 /** The ECharts canvas needs a size up front; Mermaid sizes its own SVG up to this width. */
 const CANVAS = { width: 900, height: 560 };
-export const MAX_WIDTH = 1200;
+const MAX_WIDTH = 1200;
 
 const baseStyle = `
   html, body { margin: 0; background: transparent; }
@@ -60,14 +64,9 @@ function inlineSafe(json: string): string {
   return json.replace(/<\//g, "<\\/");
 }
 
-/** The page the browser loads: the vendored library plus the source, signalling through window.status. */
+/** The page the thumbnail script loads: the vendored library plus the source, signalling through window.status. */
 export function buildPage(source: ChartSource, dark: boolean, vendorDir: string): string {
   const script = pathToFileURL(join(vendorDir, `${source.kind}.min.js`)).href;
   if (source.kind === "mermaid") return mermaidPage(inlineSafe(JSON.stringify(source.text)), dark, script);
   return echartsPage(inlineSafe(source.text), dark, script, pathToFileURL(join(vendorDir, "maps.js")).href);
-}
-
-/** The element to capture: Mermaid's SVG at its natural size, or the ECharts canvas. */
-export function captureSelector(source: ChartSource): string {
-  return source.kind === "mermaid" ? "#stage svg" : "#chart";
 }

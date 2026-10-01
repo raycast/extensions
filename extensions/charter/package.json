@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "charter",
   "title": "Charter - Chart and Diagram Catalog",
-  "description": "Browse chart and diagram types with Mermaid, shadcn and ECharts examples, docs and prompt snippets, and draw Mermaid and ECharts on your Mac",
+  "description": "Browse chart and diagram types with Mermaid, shadcn and ECharts examples, docs and prompt snippets",
   "icon": "charter.png",
   "author": "aic",
   "platforms": [
@@ -29,37 +29,11 @@
       "subtitle": "Charter",
       "description": "Browse chart and diagram types by family through a Mermaid, shadcn or ECharts lens, and copy the docs link, example or prompt snippet",
       "mode": "view"
-    },
-    {
-      "name": "render-chart",
-      "title": "Render Chart",
-      "subtitle": "Charter",
-      "description": "Draw a Mermaid diagram or an Apache ECharts option from the selection, the clipboard or a pasted source, then copy or save the picture",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "browser",
-      "title": "Browser",
-      "description": "A Chromium-based browser that draws the charts. Leave empty to use Google Chrome, Chromium, Brave, Arc or Microsoft Edge, whichever is installed.",
-      "type": "appPicker",
-      "required": false
-    },
-    {
-      "name": "krokiUrl",
-      "title": "Kroki Server",
-      "description": "Draws Mermaid diagrams when no browser is found, and only when you ask. Point it at your own Kroki to keep diagrams off the public server.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://kroki.io",
-      "placeholder": "https://kroki.io"
     }
   ],
   "dependencies": {
     "@raycast/api": "^2.4.1",
-    "@raycast/utils": "^2.3.1",
-    "puppeteer-core": "^25.11.0"
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -70,6 +44,7 @@
     "eslint": "^10.5.0",
     "mermaid": "^12.0.0",
     "prettier": "^3.8.5",
+    "puppeteer-core": "^25.11.0",
     "topojson-client": "^3.1.0",
     "typescript": "^6.0.3",
     "world-atlas": "^2.0.2"
