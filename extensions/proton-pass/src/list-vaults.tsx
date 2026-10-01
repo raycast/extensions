@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listVaults, listItems, checkAuth, loginWithBrowser } from "./lib/pass-cli";
+import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
 import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
@@ -19,11 +19,11 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
   async function loadVaultItems() {
     const cachedItems = await getCachedItemsForVault(vault.shareId);
     if (cachedItems && !hasLoadedFromCache.current) {
-      setItems(cachedItems);
-      setIsLoading(false);
+      setItems(cachedItems.data);
       hasLoadedFromCache.current = true;
 
-      if (!backgroundRefreshEnabled) {
+      if (!cachedItems.isStale && !backgroundRefreshEnabled) {
+        setIsLoading(false);
         return;
       }
     }
@@ -111,28 +111,21 @@ export default function Command() {
 
     const cachedVaults = await getCachedVaults();
     if (cachedVaults && !hasLoadedFromCache.current) {
-      setVaults(cachedVaults);
-      setIsLoading(false);
+      setVaults(cachedVaults.data);
       hasLoadedFromCache.current = true;
 
-      if (!backgroundRefreshEnabled) {
+      if (!cachedVaults.isStale && !backgroundRefreshEnabled) {
+        setIsLoading(false);
         return;
       }
     }
 
     try {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        setError(new PassCliError("Not authenticated. Please log in to Proton Pass.", "not_authenticated"));
-        setIsLoading(false);
-        return;
-      }
-
       const freshVaults = await listVaults();
       setVaults(freshVaults);
       await setCachedVaults(freshVaults);
     } catch (err: unknown) {
-      if (!hasLoadedFromCache.current) {
+      if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
         } else {

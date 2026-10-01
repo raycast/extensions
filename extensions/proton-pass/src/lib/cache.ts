@@ -11,7 +11,13 @@ interface CachedData<T> {
   timestamp: number;
 }
 
-function isCacheValid<T>(cached: CachedData<T>): boolean {
+export interface CacheEntry<T> {
+  data: T;
+  /** True once the entry is older than the Cache Expiration preference. Stale data is still returned so it can be shown while a refresh runs. */
+  isStale: boolean;
+}
+
+function isCacheFresh<T>(cached: CachedData<T>): boolean {
   const { cacheExpiration } = getPreferenceValues<Preferences>();
 
   const minutes = Number(cacheExpiration);
@@ -20,15 +26,13 @@ function isCacheValid<T>(cached: CachedData<T>): boolean {
   return Date.now() - cached.timestamp < ttlMs;
 }
 
-async function getCache<T>(key: string): Promise<T | null> {
+async function getCache<T>(key: string): Promise<CacheEntry<T> | null> {
   try {
     const raw = await LocalStorage.getItem<string>(key);
     if (!raw) return null;
 
     const cached: CachedData<T> = JSON.parse(raw);
-    if (!isCacheValid(cached)) return null;
-
-    return cached.data;
+    return { data: cached.data, isStale: !isCacheFresh(cached) };
   } catch {
     return null;
   }

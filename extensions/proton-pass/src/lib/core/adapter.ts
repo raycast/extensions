@@ -78,7 +78,7 @@ export interface PassCliAdapter {
   checkAuth(): Promise<boolean>;
   listVaults(): Promise<Vault[]>;
   listItems(shareId: string, vaultName: string): Promise<Item[]>;
-  getItem(shareId: string, itemId: string): Promise<ItemDetail>;
+  getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
 }
 
@@ -124,9 +124,9 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
         )
         .map((item) => normalizeItem(item, vaultName, shareId));
     },
-    getItem: async (shareId, itemId) => {
+    getItem: async (shareId, itemId, vaultName) => {
       const data = parseJson(await run(itemViewArgs(shareId, itemId)), "item view");
-      return normalizeItemDetail(unwrapItemResponse(data), undefined, shareId);
+      return normalizeItemDetail(unwrapItemResponse(data), vaultName, shareId);
     },
     getTotpCodes: async (shareId, itemId) => {
       const data = parseJson(await run(itemTotpArgs(shareId, itemId)), "item totp");
