@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Search and Refresh Fixes] - {PR_MERGE_DATE}
+## [Search and Refresh Fixes] - 2026-10-01
 
 - Report deleted or unavailable lists instead of treating them as empty, and clear previous search results while new results load.
 - Wait until typing pauses before searching, and match the English month names displayed in reminder rows on every system locale.
