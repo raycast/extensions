@@ -127,7 +127,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     return filteredItems.filter((item) => matchesActiveOrigin(item, activeOrigin));
   }, [activeOrigin, filteredItems, webIntegrationEnabled]);
 
-  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items");
+  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;
 
   return (
