@@ -12,17 +12,12 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
-import { Item, PassCliError, PassCliErrorType } from "./lib/types";
+import { PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
-
-interface TotpItem extends Item {
-  currentTotp?: string;
-  /** 30-second step the code was asked for in: it's only taken as valid during that step. */
-  codeStep?: number;
-}
+import { applyRefreshedCodes, TotpItem } from "./lib/totp-codes";
 
 function getTotpTimeStep(): number {
   return Math.floor(Date.now() / 30_000);
@@ -103,7 +98,6 @@ export default function Command() {
         if (!isLatest()) return;
         setItems(itemsWithTotp);
         itemsRef.current = itemsWithTotp;
-        if (hasOutdatedCode(itemsWithTotp)) void refreshTotpCodes();
       }
     }
 
@@ -170,8 +164,9 @@ export default function Command() {
     isRefreshingRef.current = true;
     setIsRefreshing(true);
     try {
-      const currentItems = itemsRef.current;
-      const updatedItems = await Promise.all(currentItems.map(withCurrentCode));
+      const refreshed = await Promise.all(itemsRef.current.map(withCurrentCode));
+      // A load may have replaced the list meanwhile: only the codes of the items shown now are updated.
+      const updatedItems = applyRefreshedCodes(itemsRef.current, refreshed, getTotpTimeStep());
       setItems(updatedItems);
       itemsRef.current = updatedItems;
     } finally {
