@@ -13,7 +13,7 @@
     "benoit.grelard",
     "sdorra",
     "sebdanielsson",
-    "ray.dhruv"
+    "0xdhrv"
   ],
   "license": "MIT",
   "categories": [
@@ -63,7 +63,7 @@
   ],
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
+    "js-yaml@4": "4.3.2"
   },
   "preferences": [
     {

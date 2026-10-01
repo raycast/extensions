@@ -6,6 +6,10 @@
 - Show the proxy command and Node.js requirement for other clients alongside Linear's direct Raycast setup.
 - Show Node.js and uv setup requirements in server details and document how to resolve missing executable errors.
 
+## [Add 60fps MCP Server] - 2026-09-30
+
+- Add 60fps to the official registry: real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server at https://mcp.60fps.design/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key.
+
 ## [Add Better Design MCP Server] - 2026-09-30
 
 - Add Better Design to the official registry: design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server at https://better-design.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key.

@@ -13,12 +13,18 @@ import {
 import { useMemo, useState } from "react";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines, removeCustomSearchEngine } from "./data/custom-search-engines";
+import { getBuiltinSearchEngine, getEffectiveSearchEngines } from "./data/search-engines";
 import type { SearchEngine } from "./types";
 import { useDefaultSearchEngine } from "./data/cache";
 import Fuse from "fuse.js";
 import AddCustomSearchEngine from "./add-custom-search-engine";
 
 type FilterType = "all" | "custom" | "builtin";
+
+const getCustomEngineTag = (engine: SearchEngine) => {
+  const overriddenBuiltin = getBuiltinSearchEngine(engine.t);
+  return overriddenBuiltin ? `Overrides ${overriddenBuiltin.s}` : "Custom";
+};
 
 export default function BrowseSearchEngines() {
   const [searchText, setSearchText] = useState("");
@@ -33,7 +39,7 @@ export default function BrowseSearchEngines() {
       case "builtin":
         return builtinSearchEngines;
       default:
-        return [...customSearchEngines, ...builtinSearchEngines];
+        return getEffectiveSearchEngines(customSearchEngines);
     }
   }, [filter, customSearchEngines]);
 
@@ -92,7 +98,7 @@ export default function BrowseSearchEngines() {
     push(<AddCustomSearchEngine onEngineAdded={refreshCustomEngines} />);
   };
 
-  const handleEditEngine = (engine: SearchEngine) => {
+  const handleCustomizeEngine = (engine: SearchEngine) => {
     push(<AddCustomSearchEngine engine={engine} onEngineAdded={refreshCustomEngines} />);
   };
 
@@ -158,91 +164,105 @@ export default function BrowseSearchEngines() {
           </ActionPanel>
         }
       />
-      {filteredSearchEngines.map((searchEngine) => (
-        <List.Item
-          key={searchEngine.t}
-          title={searchEngine.s}
-          subtitle={`!${searchEngine.t}`}
-          accessories={[
-            { tag: searchEngine.ad || searchEngine.d },
-            { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
-            { text: searchEngine.isCustom ? "Custom" : "" },
-            { text: searchEngine.t === defaultSearchEngine?.t ? "Default" : "" },
-            { icon: searchEngine.t === defaultSearchEngine?.t ? Icon.CheckCircle : undefined },
-          ]}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
-                {searchEngine.urls && searchEngine.urls.length > 1 ? (
-                  <>
-                    {searchEngine.urls.map((url, index) => (
+      {filteredSearchEngines.map((searchEngine) => {
+        const isOverridden =
+          !searchEngine.isCustom && customSearchEngines.some((engine) => engine.t === searchEngine.t);
+        const isDefault = !isOverridden && searchEngine.t === defaultSearchEngine?.t;
+
+        return (
+          <List.Item
+            key={searchEngine.t}
+            title={searchEngine.s}
+            subtitle={`!${searchEngine.t}`}
+            accessories={[
+              { tag: searchEngine.ad || searchEngine.d },
+              { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
+              { tag: searchEngine.isCustom ? getCustomEngineTag(searchEngine) : undefined },
+              { text: isDefault ? "Default" : "" },
+              { icon: isDefault ? Icon.CheckCircle : undefined },
+            ]}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  {!isOverridden && (
+                    <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
+                  )}
+                  {searchEngine.urls && searchEngine.urls.length > 1 ? (
+                    searchEngine.urls.map((url, index) => (
                       <Action.OpenInBrowser
                         key={index}
                         title={`Test Search - URL ${index + 1}`}
                         url={url.replace("{{{s}}}", "test")}
                       />
-                    ))}
-                  </>
-                ) : (
-                  <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
-                )}
-              </ActionPanel.Section>
+                    ))
+                  ) : (
+                    <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                  )}
+                </ActionPanel.Section>
 
-              <ActionPanel.Section>
-                <Action
-                  title="Add Custom Search Engine"
-                  icon={Icon.Plus}
-                  onAction={handleAddEngine}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd"], key: "n" },
-                    Windows: { modifiers: ["ctrl"], key: "n" },
-                  }}
-                />
-                {searchEngine.isCustom && (
-                  <>
+                <ActionPanel.Section>
+                  <Action
+                    title="Add Custom Search Engine"
+                    icon={Icon.Plus}
+                    onAction={handleAddEngine}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "n" },
+                      Windows: { modifiers: ["ctrl"], key: "n" },
+                    }}
+                  />
+                  {searchEngine.isCustom ? (
+                    <>
+                      <Action
+                        title="Edit Custom Search Engine"
+                        icon={Icon.Pencil}
+                        onAction={() => handleCustomizeEngine(searchEngine)}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd"], key: "e" },
+                          Windows: { modifiers: ["ctrl"], key: "e" },
+                        }}
+                      />
+                      <Action
+                        title="Delete Custom Search Engine"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                      />
+                    </>
+                  ) : !isOverridden ? (
                     <Action
-                      title="Edit Custom Search Engine"
+                      title="Create Custom Override"
                       icon={Icon.Pencil}
-                      onAction={() => handleEditEngine(searchEngine)}
+                      onAction={() => handleCustomizeEngine(searchEngine)}
+                    />
+                  ) : null}
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  {!isOverridden && (
+                    <Action.CopyToClipboard
+                      title="Copy Search Engine Shortcut"
+                      content={`!${searchEngine.t}`}
                       shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "e" },
-                        Windows: { modifiers: ["ctrl"], key: "e" },
+                        macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "s" },
                       }}
                     />
-                    <Action
-                      title="Delete Custom Search Engine"
-                      icon={Icon.Trash}
-                      style={Action.Style.Destructive}
-                      onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
-                      shortcut={Keyboard.Shortcut.Common.Remove}
-                    />
-                  </>
-                )}
-              </ActionPanel.Section>
-
-              <ActionPanel.Section>
-                <Action.CopyToClipboard
-                  title="Copy Search Engine Shortcut"
-                  content={`!${searchEngine.t}`}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                  }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Search Engine Domain"
-                  content={searchEngine.ad || searchEngine.d}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "d" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "d" },
-                  }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+                  )}
+                  <Action.CopyToClipboard
+                    title="Copy Search Engine Domain"
+                    content={searchEngine.ad || searchEngine.d}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                    }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

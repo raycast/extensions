@@ -1,0 +1,33 @@
+{
+  "originHash" : "3821036ec8b060558ebd553551edb55d17ce0097419c2bb0683aa7e2ee2ee37d",
+  "pins" : [
+    {
+      "identity" : "extensions-swift-tools",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/raycast/extensions-swift-tools",
+      "state" : {
+        "revision" : "cd9f343928ecc8fbfae9912ea04d54ef51789fac",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "privmask",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/snaka/privmask",
+      "state" : {
+        "revision" : "d69e51402225b802ff0db442d82d75a613a00e34",
+        "version" : "0.3.1"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "79e4b74a295b6eb74a8b585e3a39d29e70c1dbd1",
+        "version" : "603.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}

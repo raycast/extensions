@@ -1,0 +1,7 @@
+node_modules/
+dist/
+raycast-env.d.ts
+*.log
+.DS_Store
+evidence/local-data/
+evidence/jev-backup-*.json

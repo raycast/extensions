@@ -2,9 +2,23 @@ import { List, Image, Icon } from "@raycast/api";
 import { ALL_CHAINS } from "../shared/constants";
 import { ChainInfo } from "../shared/types";
 
-export function ChainsSelector({ chains, onChange }: { chains: ChainInfo[]; onChange(value: string): void }) {
+export function ChainsSelector({
+  chains,
+  value,
+  onChange,
+}: {
+  chains: ChainInfo[];
+  /** Makes the dropdown controlled (e.g. History inheriting the Wallet Overview's filter) instead of stored. */
+  value?: string;
+  onChange(value: string): void;
+}) {
   return (
-    <List.Dropdown tooltip="Filter portfolio by network" storeValue={true} onChange={onChange}>
+    <List.Dropdown
+      tooltip="Filter portfolio by network"
+      storeValue={value === undefined}
+      value={value}
+      onChange={onChange}
+    >
       <List.Dropdown.Item
         value={ALL_CHAINS}
         title="All Networks"

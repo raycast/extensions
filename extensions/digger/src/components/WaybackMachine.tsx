@@ -156,10 +156,7 @@ function WaybackMachineDetail({
                 text="Couldn't check"
                 icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
               />
-              <List.Item.Detail.Metadata.Label
-                title=""
-                text="The archive lookup failed, so we don't know whether snapshots exist"
-              />
+              <List.Item.Detail.Metadata.Label title="" text="Archive lookup failed. Snapshots unknown." />
             </>
           ) : isRateLimited ? (
             <>
@@ -168,10 +165,7 @@ function WaybackMachineDetail({
                 text="Temporarily unavailable"
                 icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
               />
-              <List.Item.Detail.Metadata.Label
-                title=""
-                text="The Wayback Machine API is rate limiting requests. Try again later."
-              />
+              <List.Item.Detail.Metadata.Label title="" text="Rate limited by the Wayback Machine. Try again later." />
               {history?.archiveUrl && (
                 <List.Item.Detail.Metadata.Link
                   title="Browse Archive"

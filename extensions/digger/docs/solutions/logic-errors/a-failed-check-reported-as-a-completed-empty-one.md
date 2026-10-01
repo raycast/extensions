@@ -35,7 +35,7 @@ only by adversarial review, and two of those were introduced by the fix for anot
 ## Symptoms
 
 - A precise-count timeout produced `snapshotCount = pageCount * 5000` — the formula
-  meant for *large* archives — reporting a site with 8 snapshots as **5,000**, labelled
+  meant for *large* archives — reporting a site with 8 snapshots as **5,000**, labeled
   an estimate rather than a failure.
 - A non-2xx CDX response rendered "No snapshots available" for an archive whose page
   count had already proven non-empty.

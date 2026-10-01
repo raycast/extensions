@@ -14,8 +14,7 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { getDefaultSearchEngine } from "./data/cache";
-import { builtinSearchEngines } from "./data/builtin-search-engines";
-import { getCustomSearchEngines } from "./data/custom-search-engines";
+import { getSearchEngine } from "./data/search-engines";
 import { isValidUrl } from "./utils";
 
 async function safeOpenUrl(url: string): Promise<void> {
@@ -103,31 +102,19 @@ async function runSearch(rawQuery: string) {
   }
 }
 
-function findSearchEngine(key?: string) {
-  if (!key) return null;
-
-  // First check custom search engines
-  const customEngines = getCustomSearchEngines();
-  const customEngine = customEngines.find((engine) => engine.t === key.toLowerCase());
-  if (customEngine) return customEngine;
-
-  // Then check built-in search engines
-  return builtinSearchEngines.find((engine) => engine.t === key.toLowerCase());
-}
-
 function processQuery(rawQuery: string) {
   let query = rawQuery?.trim() ?? "";
 
   const searchEngineKeyMatch = query.match(/!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
-  const searchEngine = findSearchEngine(searchEngineKey);
+  const searchEngine = getSearchEngine(searchEngineKey);
 
   if (query.includes("@")) {
     const siteMatch = query.match(/@(\S+)/i);
     const siteKey = siteMatch?.[1]?.toLowerCase();
 
     if (siteKey) {
-      const siteEngine = findSearchEngine(siteKey);
+      const siteEngine = getSearchEngine(siteKey);
       if (siteEngine) {
         query = query.replace(/@\S+\s*/i, "").trim();
         query += ` site:${siteEngine.ad || siteEngine.d}`;
