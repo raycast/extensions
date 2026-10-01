@@ -33,6 +33,8 @@ export const ItemActions = memo(function ItemActions({
   const concealSecrets = preferences.copyPasswordTransient ?? true;
   // Loaded details are newer than the cached item, e.g. when a password was added since.
   const hasPassword = item.type === "login" && (detail ? detail.password !== undefined : item.hasPassword !== false);
+  // Until the details are loaded, the cached item may be outdated: Copy Password then checks when used.
+  const canCopyPassword = item.type === "login" && (!detail || detail.password !== undefined);
   // Copy Password only takes Enter where there's a password to copy; notes open with Show Note.
   const viewDetailsFirst =
     (preferences.primaryAction ?? "details") === "details" || (!hasPassword && item.type !== "note");
@@ -84,7 +86,7 @@ export const ItemActions = memo(function ItemActions({
     <ActionPanel>
       <ActionPanel.Section>
         {viewDetailsFirst && viewDetailsAction}
-        {hasPassword && (
+        {canCopyPassword && (
           <Action
             title="Copy Password"
             icon={Icon.Key}

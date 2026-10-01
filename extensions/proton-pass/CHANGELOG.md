@@ -14,6 +14,7 @@
 - Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
 - Items matching the active browser tab are grouped in a Suggested section. The list waits briefly for the active tab, so the suggested login is selected from the start and the selection doesn't move afterwards
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list. Without cached items, that vault shows first, before the other vaults have loaded
+- Copy Password stays available when cached items say a login has no password, and checks when used
 - New Copy Title action (⌘⇧.). Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
