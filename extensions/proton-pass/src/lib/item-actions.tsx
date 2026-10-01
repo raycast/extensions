@@ -32,7 +32,8 @@ export const ItemActions = memo(function ItemActions({
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
-  const hasPassword = item.type === "login" && item.hasPassword !== false;
+  // Loaded details are newer than the cached item, e.g. when a password was added since.
+  const hasPassword = item.type === "login" && (detail ? detail.password !== undefined : item.hasPassword !== false);
   const canFill = canFillFrontmostApp && hasPassword;
   const canPaste = canFillFrontmostApp && Boolean(item.email || item.username || hasPassword || item.hasTotp);
   const primaryAction = preferences.primaryAction ?? "details";
