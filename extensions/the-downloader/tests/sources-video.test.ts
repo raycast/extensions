@@ -61,6 +61,13 @@ describe("videoToLink", () => {
     expect(stats["Likes per 100 views"]).toBe("3.32");
   });
 
+  it("says 1 day, not 1 days", () => {
+    const fresh: Video = { title: "New", duration: 60, formats: [], upload_date: "20260929", view_count: 10 };
+    const age = (now: number) => videoToLink("u", fresh, { segments: [] }, now).stats.find((s) => s.label === "Age");
+    expect(age(Date.UTC(2026, 8, 30, 12))?.value).toBe("1 day");
+    expect(age(Date.UTC(2026, 9, 2, 12))?.value).toBe("3 days");
+  });
+
   it("renders the same dossier the chat used to send", () => {
     const md = dossierMarkdown(videoToLink("https://youtu.be/arj7oStGLkU", ted, { segments }, NOW));
     expect(md).toContain("- Channel: TED (verified)");

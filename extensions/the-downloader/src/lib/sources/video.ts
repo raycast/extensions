@@ -1,6 +1,7 @@
 import { NoTranscriptError, NoTranscriptReason, TranscriptSegment, fetchTranscriptSegments } from "../../transcript.js";
 import { Format, Video } from "../../types.js";
 import { hostnameOf } from "../detect.js";
+import { plural } from "../format.js";
 import { LinkContext, LinkFact, formatTimestamp } from "../link-context.js";
 import { formatCount } from "../media-info.js";
 
@@ -122,7 +123,7 @@ function statsOf(video: Video, now: number): LinkFact[] {
   add("Likes", formatCount(video.like_count));
   add("Comments", formatCount(video.comment_count));
   add("Channel subscribers", formatCount(video.channel_follower_count));
-  add("Age", s.ageDays !== undefined ? `${Math.floor(s.ageDays)} days` : undefined);
+  add("Age", s.ageDays !== undefined ? plural(Math.floor(s.ageDays), "day") : undefined);
   add("Views per day", s.viewsPerDay !== undefined ? formatCount(Math.round(s.viewsPerDay)) : undefined);
   add("Likes per 100 views", s.likeRate !== undefined ? s.likeRate.toFixed(2) : undefined);
   add("Comments per 1,000 views", s.commentsPer1kViews !== undefined ? s.commentsPer1kViews.toFixed(2) : undefined);
