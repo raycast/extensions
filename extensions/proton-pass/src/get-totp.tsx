@@ -10,13 +10,13 @@ import {
   getPreferenceValues,
   Keyboard,
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
-import { failedVaultsTitle, mergeRefreshedItems } from "./lib/refresh";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
@@ -37,6 +37,9 @@ export default function Command() {
   const itemsRef = useRef<TotpItem[]>([]);
   const currentTimeStepRef = useRef<number>(getTotpTimeStep());
   const isRefreshingRef = useRef(false);
+  const hasLoadedFromCache = useRef(false);
+  const loads = useMemo(createRequestTracker, []);
+  const cacheWrites = useMemo(createSerialQueue, []);
 
   useEffect(() => {
     loadTotpItems();
@@ -58,44 +61,47 @@ export default function Command() {
   }, []);
 
   async function loadTotpItems() {
+    const isLatest = loads.start();
     setError(null);
     setIsLoading(true);
 
-    const cachedItems = (await getCachedItems())?.data;
-    if (cachedItems) {
-      const cachedTotpItems = cachedItems.filter((item) => item.hasTotp);
-      if (cachedTotpItems.length > 0) {
-        const itemsWithPlaceholder = cachedTotpItems.map((item) => ({
-          ...item,
-          currentTotp: undefined,
-        }));
-        setItems(itemsWithPlaceholder);
-        itemsRef.current = itemsWithPlaceholder;
-        setIsLoading(false);
-
-        const itemsWithTotp = await Promise.all(
-          cachedTotpItems.map(async (item) => {
-            try {
-              const totp = await getTotp(item.shareId, item.itemId);
-              return { ...item, currentTotp: totp };
-            } catch {
-              return { ...item, currentTotp: undefined };
-            }
-          }),
-        );
-        setItems(itemsWithTotp);
-        itemsRef.current = itemsWithTotp;
-      }
-    }
-
     try {
-      const { items: freshItems, failedVaults } = await listVaultsAndItems();
-      // Only a complete listing supersedes saved items, including legacy snapshots of now-empty vaults.
-      if (failedVaults.length === 0) await setCachedItems(freshItems, true);
+      const cachedItems = !hasLoadedFromCache.current ? (await getCachedItems())?.data : undefined;
+      if (!isLatest()) return;
+      hasLoadedFromCache.current = true;
+      if (cachedItems) {
+        const cachedTotpItems = cachedItems.filter((item) => item.hasTotp);
+        if (cachedTotpItems.length > 0) {
+          const itemsWithPlaceholder = cachedTotpItems.map((item) => ({
+            ...item,
+            currentTotp: undefined,
+          }));
+          setItems(itemsWithPlaceholder);
+          itemsRef.current = itemsWithPlaceholder;
+          setIsLoading(false);
 
-      const nextItems = mergeRefreshedItems(
+          const itemsWithTotp = await Promise.all(
+            cachedTotpItems.map(async (item) => {
+              try {
+                const totp = await getTotp(item.shareId, item.itemId);
+                return { ...item, currentTotp: totp };
+              } catch {
+                return { ...item, currentTotp: undefined };
+              }
+            }),
+          );
+          if (!isLatest()) return;
+          setItems(itemsWithTotp);
+          itemsRef.current = itemsWithTotp;
+        }
+      }
+
+      const { items: freshItems, failedVaults } = await listVaultsAndItems();
+      if (!isLatest()) return;
+
+      const nextItems: TotpItem[] = mergeRefreshedItems(
         freshItems,
-        cachedItems ?? [],
+        itemsRef.current,
         failedVaults.map(({ vault }) => vault.shareId),
       );
       const totpItems = nextItems.filter((item) => item.hasTotp);
@@ -105,10 +111,18 @@ export default function Command() {
             const totp = await getTotp(item.shareId, item.itemId);
             return { ...item, currentTotp: totp };
           } catch {
-            return { ...item, currentTotp: undefined };
+            return item;
           }
         }),
       );
+      if (!isLatest()) return;
+      // Serialize complete cache writes so an older in-flight write cannot outlast a newer one.
+      if (failedVaults.length === 0) {
+        await cacheWrites.run(async () => {
+          if (isLatest()) await setCachedItems(freshItems, true);
+        });
+      }
+      if (!isLatest()) return;
 
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
@@ -122,6 +136,7 @@ export default function Command() {
         });
       }
     } catch (e: unknown) {
+      if (!isLatest()) return;
       if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_authenticated")) {
         if (e instanceof PassCliError) {
           setError(e.type);
@@ -137,7 +152,7 @@ export default function Command() {
         });
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
@@ -158,6 +173,8 @@ export default function Command() {
           }
         }),
       );
+      // A listing may have replaced this snapshot while the code requests were running.
+      if (itemsRef.current !== currentItems) return;
       setItems(updatedItems);
       itemsRef.current = updatedItems;
     } finally {

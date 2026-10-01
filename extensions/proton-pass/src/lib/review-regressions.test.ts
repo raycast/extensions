@@ -610,6 +610,177 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
   }
 });
 
+function totpCommandFixture(
+  listVaultsAndItems: () => Promise<{
+    items: Item[];
+    failedVaults: { vault: { shareId: string; name: string }; message: string }[];
+  }>,
+  getTotp: (shareId: string, itemId: string) => Promise<string> = async () => "123456",
+  writeCache: (items: Item[]) => Promise<void> = async () => undefined,
+) {
+  const harness = hookHarness();
+  const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
+  const writes: Item[][] = [];
+  const { default: Command } = loadView("../get-totp.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Section: {}, EmptyView: {} },
+      Action: {},
+      ActionPanel: {},
+      Icon: {},
+      Color: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      Toast: { Style: {} },
+      getPreferenceValues: () => ({}),
+      showToast: async (toast: (typeof toasts)[number]) => {
+        toasts.push(toast);
+      },
+    },
+    "./lib/pass-cli": { listVaultsAndItems, getTotp },
+    "./lib/types": { PassCliError },
+    "./lib/utils": { getTotpRemainingSeconds: () => 30, getItemIcon: () => "", formatTotpCode: (code: string) => code },
+    "./lib/cache": {
+      getCachedItems: async () => null,
+      setCachedItems: async (items: Item[]) => {
+        await writeCache(items);
+        writes.push(items);
+      },
+    },
+    "./lib/refresh": refresh,
+    "./lib/error-views": {
+      renderErrorView: (error: unknown, onRetry: unknown) => (error ? { props: { error, onRetry } } : null),
+    },
+  });
+  const render = () => harness.render(Command, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  return { render, toasts, writes };
+}
+
+test("TOTP Retry keeps unsaved visible codes when their vault fails, then removes them after a successful deletion", async () => {
+  let calls = 0;
+  const fixture = totpCommandFixture(
+    async () => {
+      calls++;
+      return {
+        items: calls === 1 ? [{ ...item, hasTotp: true }] : [],
+        failedVaults:
+          calls < 3
+            ? [{ vault: { shareId: calls === 1 ? "other" : "vault", name: "Offline vault" }, message: "Offline" }]
+            : [],
+      };
+    },
+    async () => {
+      if (calls > 1) throw new Error("Offline");
+      return "123456";
+    },
+  );
+  await new Promise(setImmediate);
+  await fixture.toasts[0].primaryAction.onAction();
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title);
+  assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0].tag.value, "123456");
+  assert.equal(fixture.writes.length, 0);
+  await fixture.toasts[1].primaryAction.onAction();
+  assert.equal(
+    actions(fixture.render()).some((entry) => entry.title === item.title),
+    false,
+  );
+  assert.deepEqual(fixture.writes, [[]]);
+});
+
+test("only the latest TOTP load can replace codes, cache, loading state, or errors", async () => {
+  for (const olderFails of [false, true]) {
+    let calls = 0;
+    let finishOlder!: () => void;
+    const oldResult = new Promise<void>((resolve) => {
+      finishOlder = resolve;
+    });
+    const newer = { ...item, itemId: "new", title: "New login", hasTotp: true };
+    const fixture = totpCommandFixture(async () => {
+      calls++;
+      if (calls === 1)
+        return {
+          items: [{ ...item, hasTotp: true }],
+          failedVaults: [{ vault: { shareId: "other", name: "Other" }, message: "Offline" }],
+        };
+      if (calls === 2) {
+        await oldResult;
+        if (olderFails) throw new Error("Old failure");
+        return { items: [{ ...item, hasTotp: true }], failedVaults: [] };
+      }
+      return { items: [newer], failedVaults: [] };
+    });
+    await new Promise(setImmediate);
+    const retry = fixture.toasts[0].primaryAction.onAction;
+    const older = retry();
+    await new Promise(setImmediate);
+    await retry();
+    finishOlder();
+    await older;
+    const view = fixture.render();
+    assert.equal(
+      actions(view).some((entry) => entry.title === item.title),
+      false,
+    );
+    assert.equal(
+      actions(view).some((entry) => entry.title === newer.title),
+      true,
+    );
+    assert.deepEqual(fixture.writes, [[newer]]);
+    assert.equal(fixture.toasts.length, 1);
+    assert.equal(view.props.isLoading, false);
+  }
+});
+
+test("TOTP loads discard late code results and order in-flight cache writes", async () => {
+  for (const stalled of ["codes", "cache"]) {
+    let calls = 0;
+    let finishOlder!: () => void;
+    const wait = new Promise<void>((resolve) => {
+      finishOlder = resolve;
+    });
+    const olderItem = { ...item, itemId: "old", title: "Old login", hasTotp: true };
+    const newerItem = { ...item, itemId: "new", title: "New login", hasTotp: true };
+    const fixture = totpCommandFixture(
+      async () => {
+        calls++;
+        return {
+          items: [calls === 2 ? olderItem : newerItem],
+          failedVaults: calls === 1 ? [{ vault: { shareId: "other", name: "Other" }, message: "Offline" }] : [],
+        };
+      },
+      async (_shareId, itemId) => {
+        if (stalled === "codes" && itemId === "old") await wait;
+        return "123456";
+      },
+      async (items) => {
+        if (stalled === "cache" && items[0].itemId === "old") await wait;
+      },
+    );
+    await new Promise(setImmediate);
+    const retry = fixture.toasts[0].primaryAction.onAction;
+    const older = retry();
+    await new Promise(setImmediate);
+    const newer = retry();
+    await new Promise(setImmediate);
+    if (stalled === "codes") await newer;
+    else assert.equal(fixture.render().props.isLoading, true);
+    finishOlder();
+    await Promise.all([older, newer]);
+    assert.equal(
+      actions(fixture.render()).some((entry) => entry.title === olderItem.title),
+      false,
+    );
+    assert.equal(
+      actions(fixture.render()).some((entry) => entry.title === newerItem.title),
+      true,
+    );
+    assert.deepEqual(fixture.writes.at(-1), [newerItem]);
+    assert.equal(fixture.writes.length, stalled === "codes" ? 1 : 2);
+    assert.equal(fixture.render().props.isLoading, false);
+  }
+});
+
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {
   const harness = hookHarness();
   const vault = { shareId: "vault", name: "Personal" };
