@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Color, Grid, Icon, Keyboard, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Grid, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { getFavicon, getProgressIcon, useCachedPromise } from "@raycast/utils";
 import { type PaginationOptions } from "./lib/pagination";
 import { setMaxListeners } from "node:events";
@@ -20,6 +20,7 @@ import {
   checkInMovie,
   dropMoviePlayback,
   dropShow,
+  hideShowFromCalendar,
   markEpisodeWatched,
   markPlaybackMovieWatched,
 } from "./lib/media-mutations";
@@ -184,11 +185,30 @@ export default function Command() {
     });
     if (!confirmed) return;
 
-    await runShowAction(
+    let calendarHidden = true;
+    const dropped = await runShowAction(
       show,
-      (item) => dropShow(traktClient, item.show.ids.trakt, { signal: signal() }),
+      async (item) => {
+        ({ calendarHidden } = await dropShow(traktClient, item.show.ids.trakt, { signal: signal() }));
+      },
       `Dropped "${show.show.title}"`,
     );
+
+    // The drop succeeded and the list refreshed; only the calendar step is left, so retry just that.
+    if (dropped && !calendarHidden) {
+      showToast({
+        title: `Dropped "${show.show.title}", but it is still on your calendar`,
+        style: Toast.Style.Failure,
+        primaryAction: {
+          title: "Retry Hiding from Calendar",
+          onAction: async (toast) => {
+            const hidden = await hideShowFromCalendar(traktClient, show.show.ids.trakt, {});
+            toast.style = hidden ? Toast.Style.Success : Toast.Style.Failure;
+            toast.title = hidden ? `Hid "${show.show.title}" from your calendar` : "Trakt kept it on your calendar";
+          },
+        },
+      });
+    }
   };
 
   const dropMovieAction = async (movie: TraktPlaybackMovieItem) => {

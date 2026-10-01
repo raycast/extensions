@@ -215,7 +215,8 @@ export async function markEpisodeWatched(
 
 /**
  * "Drop show": Trakt hides it from Continue Watching (`dropped`), and Trakt Web also hides it from
- * the calendar. A failed calendar call is reported, with the drop itself kept.
+ * the calendar. Throws only when the drop fails; a refused calendar hide comes back as
+ * `calendarHidden: false`, since the show has already left Continue Watching.
  */
 export async function dropShow(traktClient: TraktClient, showTraktId: number, { signal }: MutationOptions) {
   const body = { shows: [{ ids: { trakt: showTraktId } }] };
@@ -227,11 +228,20 @@ export async function dropShow(traktClient: TraktClient, showTraktId: number, { 
     throw new Error("Trakt did not drop this show. It may already be dropped.");
   }
 
+  return { calendarHidden: await hideShowFromCalendar(traktClient, showTraktId, { signal }) };
+}
+
+/**
+ * Hides a show from the calendar. Returns `false` when Trakt refused, so a drop that already
+ * succeeded is not reported as failed and only this step needs retrying.
+ */
+export async function hideShowFromCalendar(traktClient: TraktClient, showTraktId: number, { signal }: MutationOptions) {
   // The client answers a network failure with status 500 rather than throwing, so read the status.
-  const calendar = await traktClient.shows.hideShowFromCalendar({ body, fetchOptions: { signal } });
-  if (calendar.status !== 200 && calendar.status !== 201) {
-    throw new Error("The show is dropped, but Trakt kept it on your calendar. Hide it there on Trakt Web.");
-  }
+  const response = await traktClient.shows.hideShowFromCalendar({
+    body: { shows: [{ ids: { trakt: showTraktId } }] },
+    fetchOptions: { signal },
+  });
+  return response.status === 200 || response.status === 201;
 }
 
 /** Short, readable reason from an error body, if Trakt sent one. */

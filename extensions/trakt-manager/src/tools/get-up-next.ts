@@ -51,15 +51,20 @@ export default async function tool(input: Input): Promise<Output> {
   // there is a next one: when this page is full, look at the next page before promising more.
   let hasMore = !scanPageComplete(paginated.data.length, paginated.pagination, safeLimit);
   if (hasMore) {
-    const next = await executeToolCall(
-      (signal) =>
-        toolTraktClient.shows.getUpNextNitroShows({
-          query: { page: page + 1, limit: safeLimit, intent: "continue" },
-          fetchOptions: { signal },
-        }),
-      "Failed to fetch up-next shows",
-    );
-    hasMore = Array.isArray(next.body) && next.body.length > 0;
+    // Only a hint: a failed lookahead must not discard the page already fetched, so keep "maybe more".
+    try {
+      const next = await executeToolCall(
+        (signal) =>
+          toolTraktClient.shows.getUpNextNitroShows({
+            query: { page: page + 1, limit: safeLimit, intent: "continue" },
+            fetchOptions: { signal },
+          }),
+        "Failed to fetch up-next shows",
+      );
+      hasMore = Array.isArray(next.body) && next.body.length > 0;
+    } catch {
+      hasMore = true;
+    }
   }
 
   return {
