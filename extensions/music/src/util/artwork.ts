@@ -11,7 +11,9 @@ const execFileAsync = promisify(execFile);
 // Menu bar icons render at roughly 18pt, so 2x of that is plenty.
 const ICON_PX = 40;
 const MAX_CACHED_FILES = 50;
-const MISS_TTL_MS = 60 * 60 * 1000;
+// Short on purpose: right after a skip Music often has not loaded the new
+// track's artwork yet, so a miss must not stick for long.
+const MISS_TTL_MS = 15 * 1000;
 
 const artworkDir = path.join(environment.supportPath, "artwork");
 const inFlight = new Map<string, Promise<string | undefined>>();
@@ -70,7 +72,7 @@ async function extract(key: string, album: string): Promise<string | undefined> 
     end run
   `,
     [rawPath, album],
-    { timeout: 8_000 },
+    { timeout: 5_000 },
   ).catch(() => "none");
 
   if (result === "mismatch") return undefined; // transient, try again next poll

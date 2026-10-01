@@ -319,6 +319,14 @@
           "required": false
         },
         {
+          "name": "showAlbumArtOnly",
+          "description": "If enabled, only the album art is shown in the Menu Bar and the track title is hidden. The title is still shown when no album art is available. Requires Show album art.",
+          "type": "checkbox",
+          "label": "Album art only (hide title)",
+          "default": false,
+          "required": false
+        },
+        {
           "name": "hideArtistName",
           "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
