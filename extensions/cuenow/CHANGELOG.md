@@ -1,6 +1,6 @@
 # CueNow Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-01
 
 - Added the **Create Note** command, which opens a new CueNow sticky note ready to type in.
 - Added the **Search Notes** command, which lists every note by title or content and can open, hide, copy or delete one.
