@@ -44,7 +44,6 @@ for (const [address, prefix] of [
   ["192.0.0.0", 24], // IETF protocol assignments
   ["192.0.2.0", 24], // documentation
   ["192.168.0.0", 16], // private
-  ["198.18.0.0", 15], // benchmarking
   ["198.51.100.0", 24], // documentation
   ["203.0.113.0", 24], // documentation
   ["224.0.0.0", 4], // multicast
@@ -150,7 +149,8 @@ const systemResolve: Resolver = async (host) =>
     family: a.family === 6 ? 6 : 4,
   }));
 
-function abortError(): Error {
+/** The error a stopped request rejects with. */
+export function abortError(): Error {
   return Object.assign(new Error("The request was stopped."), { name: "AbortError" });
 }
 
@@ -158,23 +158,21 @@ function formatSize(bytes: number): string {
   return bytes >= 1024 * 1024 ? `${Math.round(bytes / (1024 * 1024))} MB` : `${Math.ceil(bytes / 1024)} KB`;
 }
 
-/** The address to connect to, after checking the host name and everything it resolves to. */
-async function checkedAddress(
-  host: string,
-  resolve: Resolver,
-  allow: (ip: string) => boolean,
-): Promise<{ address: string; family: 4 | 6 }> {
+type Target = { address: string; family: 4 | 6 };
+
+/** The addresses to connect to, after checking the host name and everything it resolves to. */
+async function checkedAddresses(host: string, resolve: Resolver, allow: (ip: string) => boolean): Promise<Target[]> {
   if (isBlockedHostname(host)) throw new BlockedAddressError(host);
   const literal = net.isIP(host);
   if (literal) {
     if (!allow(host)) throw new BlockedAddressError(host);
-    return { address: host, family: literal === 6 ? 6 : 4 };
+    return [{ address: host, family: literal === 6 ? 6 : 4 }];
   }
   const addresses = await resolve(host);
   if (addresses.length === 0) throw new Error(`Couldn't find ${host}.`);
   // One private answer is enough to refuse: a rebinding name mixes both.
   if (addresses.some((a) => !allow(a.address))) throw new BlockedAddressError(host);
-  return addresses[0];
+  return addresses;
 }
 
 function decoder(encoding: string | undefined): Transform | undefined {
@@ -193,12 +191,7 @@ function decoder(encoding: string | undefined): Transform | undefined {
 
 type Hop = { status: number; location?: string; contentType: string; response: http.IncomingMessage };
 
-function request(
-  url: URL,
-  target: { address: string; family: 4 | 6 },
-  headers: { accept: string; userAgent: string },
-  signal: AbortSignal,
-) {
+function request(url: URL, targets: Target[], headers: { accept: string; userAgent: string }, signal: AbortSignal) {
   const client = url.protocol === "https:" ? https : http;
   return new Promise<Hop>((resolve, reject) => {
     const req = client.request(
@@ -214,10 +207,11 @@ function request(
           "accept-encoding": "gzip, deflate, br",
           "accept-language": "en;q=0.9, *;q=0.5",
         },
-        // Connect to the address that was checked — never a fresh lookup.
+        // Connect only to addresses that were checked — never a fresh lookup. All of
+        // them, so Node can fall back from a dead one (Happy Eyeballs).
         lookup: (_host, options, callback) => {
-          if (options.all) callback(null, [target]);
-          else callback(null, target.address, target.family);
+          if (options.all) callback(null, targets);
+          else callback(null, targets[0].address, targets[0].family);
         },
         signal,
       },
@@ -283,28 +277,31 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
         throw new Error("Only http and https links can be read.");
       }
       const host = current.hostname.replace(/^\[|\]$/g, "");
-      const target = await checkedAddress(host, resolve, allow);
+      const targets = await checkedAddresses(host, resolve, allow);
       if (controller.signal.aborted) throw abortError();
       const hop = await request(
         current,
-        target,
+        targets,
         { accept: acceptHeader, userAgent: options.userAgent ?? USER_AGENT },
         controller.signal,
       );
 
       if (hop.status >= 300 && hop.status < 400 && hop.location) {
-        hop.response.resume();
+        // Close it: draining would read an endless or huge body with no cap or deadline.
+        hop.response.destroy();
         if (redirects >= maxRedirects) throw new Error("The link redirects too many times.");
         current = new URL(hop.location, current);
         continue;
       }
       if (hop.status >= 400 || hop.status < 200) {
-        hop.response.resume();
+        // Close it: draining would read an endless or huge body with no cap or deadline.
+        hop.response.destroy();
         throw new HttpError(hop.status, host);
       }
       const type = hop.contentType.split(";")[0].trim().toLowerCase();
       if (options.accept?.length && !options.accept.some((a) => (a.endsWith("/") ? type.startsWith(a) : type === a))) {
-        hop.response.resume();
+        // Close it: draining would read an endless or huge body with no cap or deadline.
+        hop.response.destroy();
         throw new Error(`This link isn't a web page (${type || "unknown type"}).`);
       }
       const body = await readBody(hop, options.maxBytes ?? DEFAULT_MAX_BYTES, controller.signal);

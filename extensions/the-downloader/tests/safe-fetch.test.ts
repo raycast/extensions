@@ -30,10 +30,16 @@ describe("isBlockedAddress", () => {
     "64:ff9b::a00:1",
   ])("blocks %s", (ip) => expect(isBlockedAddress(ip)).toBe(true));
 
-  it.each(["93.184.216.34", "1.1.1.1", "172.32.0.1", "100.128.0.1", "2606:4700::1111", "64:ff9b::5db8:d822"])(
-    "allows %s",
-    (ip) => expect(isBlockedAddress(ip)).toBe(false),
-  );
+  // 198.18.x.x is what fake-IP proxies (Surge, Clash) answer for every name; blocking it broke every page for them.
+  it.each([
+    "93.184.216.34",
+    "1.1.1.1",
+    "172.32.0.1",
+    "100.128.0.1",
+    "198.18.0.1",
+    "2606:4700::1111",
+    "64:ff9b::5db8:d822",
+  ])("allows %s", (ip) => expect(isBlockedAddress(ip)).toBe(false));
 
   it("blocks anything that isn't an IP address", () => {
     expect(isBlockedAddress("not-an-ip")).toBe(true);
@@ -169,6 +175,34 @@ describe("safeFetch", () => {
       status: 404,
     });
     expect(new HttpError(403, "x.com")).toBeInstanceOf(Error);
+  });
+
+  it("closes a response it rejects instead of draining it in the background", async () => {
+    let closed = false;
+    routes["/endless"] = (res) => {
+      res.writeHead(200, { "content-type": "audio/mpeg" });
+      const timer = setInterval(() => res.write(Buffer.alloc(1024)), 5);
+      res.on("close", () => {
+        clearInterval(timer);
+        closed = true;
+      });
+    };
+    await expect(
+      safeFetch(`http://s.test:${port}/endless`, { ...onlyLoopback, accept: ["text/html"] }),
+    ).rejects.toThrow(/isn't a web page/);
+    for (let i = 0; i < 50 && !closed; i++) await new Promise((r) => setTimeout(r, 20));
+    expect(closed).toBe(true);
+  });
+
+  it("tries every checked address, so one dead address doesn't sink the request", async () => {
+    routes["/both"] = (res) => res.writeHead(200, { "content-type": "text/html" }).end("reached");
+    const resolve = async () => [
+      { address: "::1", family: 6 as const },
+      { address: "127.0.0.1", family: 4 as const },
+    ];
+    const allowAddress = (ip: string) => ip === "127.0.0.1" || ip === "::1";
+    const response = await safeFetch(`http://dual.test:${port}/both`, { resolve, allowAddress });
+    expect(response.body.toString()).toBe("reached");
   });
 
   it("gives up on a server that never answers", async () => {

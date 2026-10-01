@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { safeFetch } from "./safe-fetch.js";
+import { abortError, safeFetch } from "./safe-fetch.js";
 
 // A post's images, for engines that can look at them (Apple's on-device model,
 // Ollama vision models). Chat About Link's Look at Images preference decides: ask
@@ -36,10 +36,6 @@ const EXTENSIONS: Record<string, string> = {
   "image/heic": "heic",
   "image/avif": "avif",
 };
-
-function abortError(): Error {
-  return Object.assign(new Error("The request was stopped."), { name: "AbortError" });
-}
 
 /**
  * Download up to `max` images into `dir` through safeFetch (never the local
