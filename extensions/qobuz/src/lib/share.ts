@@ -9,8 +9,8 @@ import { isLikelyMatch } from "./resolve";
 export type Platform = "qobuz" | "deezer" | "apple" | "spotify" | "tidal" | "songlink";
 
 // "exact" is an id-level match (own link, ISRC). "approximate" passed the
-// text-match guard. "search" lands on a results page, not the track — the
-// message says so, because a friend who taps it should know.
+// text-match guard. "search" lands on a results page, not the track; the
+// message reads the same either way, and the in-app actions say which it is.
 export type Confidence = "exact" | "approximate" | "search";
 
 export type ShareLink = { platform: Platform; url: string; confidence: Confidence };
@@ -182,13 +182,10 @@ export const shareLinks = async (track: Track): Promise<ShareLink[]> => {
 
 export const shareTitle = (track: Track): string => `${track.artist?.name ?? "?"} — ${track.title}`;
 
-const lineLabel = ({ platform, confidence }: ShareLink): string =>
-  confidence === "search" ? `${PLATFORM_LABEL[platform]} (search)` : PLATFORM_LABEL[platform];
-
 const isSonglink = (link: ShareLink): boolean => link.platform === "songlink";
 
 export const formatShareMessage = (track: Track, links: ShareLink[]): string => {
-  const line = (link: ShareLink) => `${lineLabel(link)}: ${link.url}`;
+  const line = (link: ShareLink) => `${PLATFORM_LABEL[link.platform]}: ${link.url}`;
   const services = links.filter((link) => !isSonglink(link)).map(line);
   const songlink = links.filter(isSonglink).map(line);
   return [`🎵 ${shareTitle(track)}`, "", ...services, ...(songlink.length ? ["", ...songlink] : [])].join("\n");
@@ -198,12 +195,9 @@ const escapeHtml = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 // Rich-text destinations (Slack, Notion, Mail) take this; hiding the URLs
-// behind the names is what lets it collapse to one line. A search link is
-// set in italics: a glyph pastes into Slack as a full-size colour emoji.
-const htmlLink = ({ platform, url, confidence }: ShareLink): string => {
-  const label = confidence === "search" ? `<i>${PLATFORM_LABEL[platform]}</i>` : PLATFORM_LABEL[platform];
-  return `<a href="${escapeHtml(url)}">${label}</a>`;
-};
+// behind the names is what lets it collapse to one line.
+const htmlLink = ({ platform, url }: ShareLink): string =>
+  `<a href="${escapeHtml(url)}">${PLATFORM_LABEL[platform]}</a>`;
 
 const htmlTitle = (track: Track): string => `🎵 <b>${escapeHtml(shareTitle(track))}</b>`;
 
