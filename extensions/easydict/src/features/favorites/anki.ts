@@ -49,6 +49,8 @@ interface AddToAnkiResult {
   added: number;
   /** Words already in the deck, or repeated within the same batch. */
   skipped: number;
+  /** Notes AnkiConnect failed to create after the duplicate check; they can be retried. */
+  failed: number;
 }
 
 async function invokeAnki<T>(url: string, action: string, params: object = {}): Promise<T> {
@@ -137,7 +139,8 @@ export async function addFavoritesToAnki(
 
   const addable = notes.filter((_, index) => checks[index].canAdd);
   const results = addable.length ? await invokeAnki<(number | null)[]>(endpoint, "addNotes", { notes: addable }) : [];
-  // addNotes reports a note that failed after the pre-check as null; do not count it as added.
+  // addNotes reports a note that failed after the pre-check as null.
   const added = results.filter((id) => id !== null).length;
-  return { added, skipped: favorites.length - added };
+  const failed = results.length - added;
+  return { added, skipped: favorites.length - added - failed, failed };
 }

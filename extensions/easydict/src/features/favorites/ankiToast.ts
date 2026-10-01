@@ -21,18 +21,26 @@ export async function addFavoritesToAnkiWithToast(
   const deckName = myPreferences.ankiDeckName;
   const toast = await showToast({ style: Toast.Style.Animated, title: "Adding to Anki..." });
   try {
-    const { added, skipped } = await addFavoritesToAnki(favorites, {
+    const { added, skipped, failed } = await addFavoritesToAnki(favorites, {
       deckName,
       url: myPreferences.ankiConnectUrl,
     });
-    logTrace("Anki", `deck=${deckName}, added=${added}, skipped=${skipped}`);
-    toast.style = Toast.Style.Success;
-    if (justFavorited) {
-      toast.title = added ? "Added to Favorites and Anki" : "Added to Favorites";
-      toast.message = added ? `Deck: ${deckName}` : `Already in Anki deck "${deckName}"`;
+    logTrace("Anki", `deck=${deckName}, added=${added}, skipped=${skipped}, failed=${failed}`);
+    if (failed) {
+      toast.style = Toast.Style.Failure;
+      toast.title = justFavorited
+        ? "Added to Favorites; Some Anki Cards Failed"
+        : `Failed to add ${failed} ${failed === 1 ? "Word" : "Words"} to Anki`;
+      toast.message = added ? `${added} added; retry the failed words.` : "Retry the failed words.";
     } else {
-      toast.title = added ? `Added ${added} ${added === 1 ? "Word" : "Words"} to Anki` : "Already in Anki";
-      toast.message = added && skipped ? `${skipped} already in "${deckName}"` : `Deck: ${deckName}`;
+      toast.style = Toast.Style.Success;
+      if (justFavorited) {
+        toast.title = added ? "Added to Favorites and Anki" : "Added to Favorites";
+        toast.message = added ? `Deck: ${deckName}` : `Already in Anki deck "${deckName}"`;
+      } else {
+        toast.title = added ? `Added ${added} ${added === 1 ? "Word" : "Words"} to Anki` : "Already in Anki";
+        toast.message = added && skipped ? `${skipped} already in "${deckName}"` : `Deck: ${deckName}`;
+      }
     }
   } catch (error) {
     logError("Anki", `add to anki error: ${error}`);

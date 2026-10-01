@@ -115,8 +115,10 @@ describe("addFavoritesToAnki", () => {
   const url = "127.0.0.1:8765";
   const favorite = (word: string): FavoriteWord =>
     buildFavoriteWord({ ...query, word }, [translationService(["短暂的"])]);
+  let addNotesResult: (number | null)[];
 
   beforeEach(() => {
+    addNotesResult = [1, 2];
     timedFetch.mockReset();
     timedFetch.mockImplementation(async (_url: string, options: { body: { action: string } }) => {
       switch (options.body.action) {
@@ -127,19 +129,23 @@ describe("addFavoritesToAnki", () => {
         case "canAddNotesWithErrorDetail":
           return { result: [{ canAdd: true }, { canAdd: true }], error: null };
         case "addNotes":
-          return { result: [1, null], error: null };
+          return { result: addNotesResult, error: null };
         default:
           throw new Error(`Unexpected AnkiConnect action: ${options.body.action}`);
       }
     });
   });
 
-  it("reports a note that AnkiConnect fails to add as skipped instead of added", async () => {
+  it("reports every note AnkiConnect created as added", async () => {
     await expect(
       addFavoritesToAnki([favorite("one"), favorite("two")], { deckName: "Easydict", url }),
-    ).resolves.toEqual({
-      added: 1,
-      skipped: 1,
-    });
+    ).resolves.toEqual({ added: 2, skipped: 0, failed: 0 });
+  });
+
+  it("reports a note that AnkiConnect fails to add as failed, not skipped", async () => {
+    addNotesResult = [1, null];
+    await expect(
+      addFavoritesToAnki([favorite("one"), favorite("two")], { deckName: "Easydict", url }),
+    ).resolves.toEqual({ added: 1, skipped: 0, failed: 1 });
   });
 });
