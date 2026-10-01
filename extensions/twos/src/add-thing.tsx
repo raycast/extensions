@@ -9,7 +9,7 @@ interface Values {
   url: string;
 }
 
-export default function AddThing() {
+export default function AddThing({ initialText = "" }: { initialText?: string }) {
   const [lists, setLists] = useState<TwosList[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,7 +75,7 @@ export default function AddThing() {
           <Form.Dropdown.Item key={l.id} value={l.id} title={`${l.emoji || ""} ${l.title}`.trim()} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea id="text" title="Text" placeholder="Buy oat milk" autoFocus />
+      <Form.TextArea id="text" title="Text" placeholder="Buy oat milk" defaultValue={initialText} autoFocus />
       <Form.Dropdown id="type" title="Type" defaultValue="">
         <Form.Dropdown.Item value="" title="Default" />
         <Form.Dropdown.Item value="todo" title="To-do (checkbox)" />
