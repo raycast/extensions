@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { myPreferences } from "@/consts";
 import { DictionaryType, TranslationType } from "@/core/results/kinds";
 import type { QueryInput } from "@/core/results/types";
+import { getAIProviderCacheIdentity } from "@/providers/profiles/cacheIdentity";
 import type { OpenAICompatibleProfile } from "@/providers/profiles/types";
 
 import { builtinProviderCatalog, getBuiltinProviderPreferenceStatus } from "./catalog";
@@ -127,6 +128,16 @@ describe("combined provider registry", () => {
         ?.canTriggerAutomaticAudio,
     ).toBe(false);
     expect(profiles.map((profile) => profile.order)).toEqual([0, 0]);
+  });
+
+  it("bumps the dictionary cache identity without invalidating cached translations", () => {
+    const profile = createProfile("cached", "dictionary");
+    const snapshot = resolveProviderServices({ version: 2, profiles: [profile], migratedLegacyProviders: [] });
+    const translation = snapshot.translationServices.find((service) => service.id === "profile:cached")!;
+    const dictionary = snapshot.dictionaryServices.find((service) => service.id === "profile:cached:dictionary")!;
+
+    expect(translation.cacheIdentity).toBe(getAIProviderCacheIdentity(profile, 1));
+    expect(dictionary.cacheIdentity).toBe(getAIProviderCacheIdentity(profile, 2));
   });
 
   it("reports implicit preference enablement while applying its query restrictions at runtime", () => {

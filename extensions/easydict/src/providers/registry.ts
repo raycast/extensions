@@ -19,6 +19,13 @@ interface ProviderServiceSnapshot {
   dictionaryServices: DictionaryServiceConfig[];
 }
 
+/**
+ * Cache identities carry a prompt version per AI surface, so changing one prompt invalidates
+ * only its own cached results. Bump the matching constant when that prompt changes.
+ */
+const AI_TRANSLATION_PROMPT_VERSION = 1;
+const AI_DICTIONARY_PROMPT_VERSION = 2;
+
 export function resolveProviderServices(
   state: StoredAIProviderState,
   onNativeJSONUnsupported?: NativeJSONUnsupportedHandler,
@@ -45,12 +52,11 @@ export function resolveProviderServices(
       providerKey: getAIProviderKey(profile),
       order: profile.order,
       icon: resolveAIProviderIcon(profile),
-      // Bump when the AI prompts change to invalidate cached results.
-      cacheIdentity: getAIProviderCacheIdentity(profile, 2),
     };
     translationServices.push({
       ...common,
       id: `profile:${profile.id}`,
+      cacheIdentity: getAIProviderCacheIdentity(profile, AI_TRANSLATION_PROMPT_VERSION),
       type: TranslationType.OpenAI,
       enabled: (query) => enabled && !isDictionaryQuery(query),
       createProvider: () => createAITranslationProvider(getConfig()),
@@ -59,6 +65,7 @@ export function resolveProviderServices(
       dictionaryServices.push({
         ...common,
         id: `profile:${profile.id}:dictionary`,
+        cacheIdentity: getAIProviderCacheIdentity(profile, AI_DICTIONARY_PROMPT_VERSION),
         type: DictionaryType.AI,
         enabled: (query) => enabled && isDictionaryQuery(query),
         createProvider: () => createAIDictionaryProvider(getConfig(), onNativeJSONUnsupported),
