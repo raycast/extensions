@@ -1,6 +1,6 @@
 # Linak Controller Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-10-01
 
 - Fixes "Couldn't find your desk" when the Desk identifier preference from an older version points to a desk this Mac has never seen. The extension now looks for your desk instead, as long as only one desk is nearby, and remembers it
 - Select Desk now works even when the Desk identifier preference is set
