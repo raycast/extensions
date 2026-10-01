@@ -97,8 +97,3 @@ export function tencentSign(action: string, payload: Record<string, unknown>) {
     },
   };
 }
-
-export interface TencentError {
-  Code: string;
-  Message: string;
-}

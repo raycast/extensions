@@ -1,6 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { LanguageDetectType } from "@/types/api";
+import { LanguageDetectType } from "@/core/results/kinds";
 import type { BooleanPreferenceKey } from "@/types/preferences";
 
 import { BaiduDetectProvider } from "./baidu";
