@@ -8,6 +8,7 @@
   "categories": ["System", "Productivity", "Other"],
   "license": "MIT",
   "commands": [
+    { "name": "get-tethered", "title": "Get Tethered", "description": "Open the Tethered website to download the Mac app", "mode": "no-view" },
     { "name": "auto-power", "title": "Auto Power", "description": "Set Tethered to Auto Power", "mode": "no-view" },
     { "name": "low-power", "title": "Low Power", "description": "Set Tethered to Low Power", "mode": "no-view" },
     { "name": "high-power", "title": "High Power", "description": "Set Tethered to High Power", "mode": "no-view" },

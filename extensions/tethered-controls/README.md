@@ -4,6 +4,7 @@ Control [Tethered](https://tetheredmac.com/) directly from Raycast. Tethered mus
 
 ## Commands
 
+- Open the Tethered website to download the Mac app.
 - Choose Auto, Low, or High Power mode.
 - Start or stop Caffeinate, or search your saved Caffeinate presets.
 - Start a timed Caffeinate session by entering a duration from 1 to 1,440 minutes.
@@ -17,7 +18,7 @@ Saved profiles and Caffeinate presets are read from Tethered's local preferences
 
 ## Setup
 
-Install and open the current Tethered app, then install this extension from the Raycast Store. Search for **Tethered** in Raycast to find its commands. You can assign aliases or hotkeys in Raycast's Extensions settings.
+Run **Get Tethered** to open the website and download the Mac app. Install and open the current Tethered app, then use the extension's controls. Search for **Tethered** in Raycast to find its commands. You can assign aliases or hotkeys in Raycast's Extensions settings.
 
 The extension sends requests to the running Tethered app. If **Show Status** cannot get a fresh response, check that Tethered is running and updated. Raycast's action confirmation means the request was sent; use **Show Status** or Tethered itself to confirm the resulting state.
 
