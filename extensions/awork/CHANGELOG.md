@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [New AI Thread] - {PR_MERGE_DATE}
+## [New AI Thread] - 2026-10-01
 
 - Added **New AI Thread** to open your workspace's awork AI page in the browser directly from Raycast. Enter an optional prompt to prefill the AI chat, ready to review and send in awork.
 
