@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Quick Capture] - 2026-10-01
+
+- Add a Quick Capture command for preset Daily Note, To Do, and Shopping routes without the Advanced URI plugin
+- Add shopping items at the top of the configured existing note
+
 ## [Fix notes not loading when a file name contains a backslash] - 2026-09-28
 
 - Fix Search Note and Bookmarked Notes showing no notes for a vault when any note's file name contains a backslash
