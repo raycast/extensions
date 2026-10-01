@@ -9,6 +9,7 @@
   "include": [
     "src/lib/avatar*.ts",
     "src/lib/core/**/*.ts",
+    "src/lib/fill-sequence*.ts",
     "src/lib/format*.ts",
     "src/lib/item-panel*.ts",
     "src/lib/key-press*.ts",
