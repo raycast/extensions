@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Raycast 2 Deeplink Fix] - {PR_MERGE_DATE}
+## [Raycast 2 Deeplink Fix] - 2026-10-01
 
 ### Fixed
 
