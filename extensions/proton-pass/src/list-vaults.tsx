@@ -1,17 +1,67 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, PassCliErrorType, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
-import { renderErrorView } from "./lib/error-views";
 import { platformShortcut } from "./lib/shortcuts";
+
+async function loginWithBrowserAndReload(reload: () => Promise<void>) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Starting Proton Pass login",
+    message: "Complete authentication in your browser",
+  });
+
+  try {
+    await loginWithBrowser();
+    toast.style = Toast.Style.Success;
+    toast.title = "Logged in";
+    toast.message = "Reloading";
+    await reload();
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to login";
+    toast.style = Toast.Style.Failure;
+    toast.title = "Login failed";
+    toast.message = message;
+  }
+}
+
+function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="Not Logged In"
+        description={
+          process.platform === "darwin"
+            ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
+            : "Use browser login to authenticate with Proton Pass."
+        }
+        actions={
+          <ActionPanel>
+            <Action title="Login with Browser" icon={Icon.Globe} onAction={onLogin} />
+            {process.platform === "darwin" && (
+              <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
+            )}
+            <Action.OpenInBrowser
+              title="View CLI Documentation"
+              url={PROTON_PASS_CLI_DOCS}
+              icon={Icon.Globe}
+              shortcut={platformShortcut(["cmd"], "d")}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
 
 function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<PassCliErrorType | null>(null);
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
   const hasLoadedFromCache = useRef(false);
 
   useEffect(() => {
@@ -30,7 +80,7 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
       }
     }
 
-    setError(null);
+    setIsLoggedOut(false);
     try {
       const freshItems = await listItems(vault.shareId);
       setItems(freshItems);
@@ -39,7 +89,7 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
       // A logged-out session must not keep showing cached items.
       if (error instanceof PassCliError && error.type === "not_authenticated") {
         setItems([]);
-        setError(error.type);
+        setIsLoggedOut(true);
       } else if (!hasLoadedFromCache.current) {
         const message = error instanceof Error ? error.message : "An unknown error occurred";
         await showToast({
@@ -53,8 +103,7 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
     }
   }
 
-  const errorView = renderErrorView(error, loadVaultItems, "Load Items");
-  if (errorView) return errorView;
+  if (isLoggedOut) return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaultItems)} />;
 
   return (
     <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">
@@ -148,27 +197,6 @@ export default function Command() {
     }
   }
 
-  async function handleBrowserLogin() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting Proton Pass login",
-      message: "Complete authentication in your browser",
-    });
-
-    try {
-      await loginWithBrowser();
-      toast.style = Toast.Style.Success;
-      toast.title = "Logged in";
-      toast.message = "Reloading vaults";
-      await loadVaults();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Failed to login";
-      toast.style = Toast.Style.Failure;
-      toast.title = "Login failed";
-      toast.message = message;
-    }
-  }
-
   function getRoleIcon(role: VaultRole): Icon {
     switch (role) {
       case "owner":
@@ -217,33 +245,7 @@ export default function Command() {
   }
 
   if (error?.type === "not_authenticated") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Lock}
-          title="Not Logged In"
-          description={
-            process.platform === "darwin"
-              ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
-              : "Use browser login to authenticate with Proton Pass."
-          }
-          actions={
-            <ActionPanel>
-              <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              {process.platform === "darwin" && (
-                <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
-              )}
-              <Action.OpenInBrowser
-                title="View CLI Documentation"
-                url={PROTON_PASS_CLI_DOCS}
-                icon={Icon.Globe}
-                shortcut={platformShortcut(["cmd"], "d")}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaults)} />;
   }
 
   if (error?.type === "keyring_error") {
