@@ -1,7 +1,7 @@
 {
   "name": "tethered-controls",
   "title": "Tethered",
-  "description": "Control Tethered directly from Raycast. Tethered must be installed and running. A substantial number of actions are only available to users with Pro access.",
+  "description": "Control Tethered directly from Raycast.\nTethered must be installed and running.\nA number of actions are only available to users with Pro access.",
   "author": "Tumerit",
   "icon": "icon.png",
   "platforms": ["macOS"],

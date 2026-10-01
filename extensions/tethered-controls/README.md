@@ -1,6 +1,8 @@
 # Tethered for Raycast
 
-Control [Tethered](https://tetheredmac.com/) directly from Raycast. Tethered must be installed and running. A substantial number of actions are only available to users with Pro access.
+Control [Tethered](https://tetheredmac.com/) directly from Raycast.<br>
+Tethered must be installed and running.<br>
+A number of actions are only available to users with Pro access.
 
 ## Commands
 
