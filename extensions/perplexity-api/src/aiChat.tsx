@@ -15,8 +15,8 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
 import { ChatData, Chats } from "./hook/AIChat.types";
-import { currentDate } from "./hook/utils";
-import { buildAgentRequest, runAgent, Turn } from "./hook/agent";
+import { allModels, currentDate } from "./hook/utils";
+import { buildAgentRequest, runAgent, targetLabel, Turn } from "./hook/agent";
 
 const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Perplexity";
@@ -101,7 +101,7 @@ export default function Chat() {
         answer: "",
         creationDate: new Date().toISOString(),
         finished: false,
-        modelName: model,
+        modelName: targetLabel(model, allModels),
       });
       return data;
     });
@@ -314,7 +314,7 @@ export default function Chat() {
             {
               name: "New Chat",
               creationDate: new Date(),
-              modelName: model,
+              modelName: targetLabel(model, allModels),
               messages: [],
             },
           ],

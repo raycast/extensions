@@ -7,7 +7,7 @@
 - Sources are now read from the response's search results, and cost is the actual cost the API reports instead of an estimate.
 - Search and Deep Research tools pass domain and recency filters through the `web_search` tool.
 - The Temperature action and label are shown only for models that take a temperature (not for presets).
-- The Model label shows the preset a saved Sonar choice now runs as.
+- The Model label shows the preset a saved Sonar choice now runs as, and so does the model line in AI Chat.
 - Added tests for the request builder and the stream parser (`npm test`).
 
 ## [Added Integration Attribution] - 2026-09-20
