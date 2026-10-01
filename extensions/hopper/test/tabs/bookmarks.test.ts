@@ -59,3 +59,28 @@ test("rename changes only that bookmark's title, in place", async () => {
     ["https://b.com", "My PRs"],
   );
 });
+
+test("changes made at once all land: each reads the list the one before saved", async () => {
+  const store = new Map<string, unknown>();
+  // Slow storage, so the changes overlap.
+  const platform = fakePlatform({
+    loadJson: async <T>(key: string, fallback: T) => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return (store.get(key) as T) ?? fallback;
+    },
+    saveJson: async (key, value) => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      store.set(key, value);
+    },
+  });
+  const [a, b] = [bookmarkFor(tab(chrome, "1", "https://a.com"))!, bookmarkFor(tab(chrome, "2", "https://b.com"))!];
+  await setBookmark(platform, a, true, 1);
+  await Promise.all([setBookmark(platform, b, true, 2), renameBookmark(platform, a.id, "My PRs")]);
+  assert.deepEqual(
+    (await loadBookmarks(platform)).map((x) => [x.id, x.title]),
+    [
+      [b.id, "https://b.com"],
+      [a.id, "My PRs"],
+    ],
+  );
+});

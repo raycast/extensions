@@ -116,11 +116,16 @@ test("openConversation: chat and Cowork pages; not Code sessions, new chats, or 
   assert.equal(openConversation(undefined), undefined);
 });
 
-test("remember: newest first, replaces the same title or path, capped at 200", () => {
+test("remember: newest first, replaces the same path (renamed), keeps same-titled chats, capped at 200", () => {
   const known = Array.from({ length: 200 }, (_, i) => ({ title: `t${i}`, path: `chat/${i}`, seenAt: i }));
   const next = remember(known, { title: "t5", path: "chat/new" }, 1000);
   assert.deepEqual(next[0], { title: "t5", path: "chat/new", seenAt: 1000 });
-  assert.equal(next.filter((k) => k.title === "t5").length, 1);
+  assert.equal(next.filter((k) => k.title === "t5").length, 2);
+  const renamed = remember(known, { title: "renamed", path: "chat/5" }, 1000);
+  assert.deepEqual(
+    renamed.filter((k) => k.path === "chat/5"),
+    [{ title: "renamed", path: "chat/5", seenAt: 1000 }],
+  );
   assert.equal(next.length, 200);
   assert.equal(remember(known, { title: "fresh", path: "chat/fresh" }, 1).length, 200);
 });
@@ -147,6 +152,37 @@ test("a conversation's id is learned while open; its sidebar row then opens by d
   );
   await claude.select(tabs[0], platform);
   assert.deepEqual(urls, [`claude://claude.ai/${CHAT}`]);
+});
+
+test("same-titled conversations stay apart: each row opens its own, listed or not", async () => {
+  const OTHER = "chat/0b6c1c4e-7a0d-4c41-9d43-5f2f1f8c2a10";
+  let rows = [row("Idle Trip", "Trip"), row("Idle Trip", "Trip")];
+  const platform = fakePlatform({
+    sidebarRows: async () => rows,
+    loadJson: async <T>() =>
+      [
+        { title: "Trip", path: CHAT, seenAt: 2 },
+        { title: "Trip", path: OTHER, seenAt: 1 },
+      ] as T,
+    webPages: async () => [page("Trip", OTHER)],
+  });
+  const withSidebar = await claude.list(claudeApp, platform);
+  assert.deepEqual(
+    withSidebar.map((t) => [t.key, t.active, t.ref]),
+    [
+      [`${claudeApp.bundleId}:row:Trip`, true, { path: OTHER }],
+      [`${claudeApp.bundleId}:row:Trip#2`, false, { path: CHAT }],
+    ],
+  );
+  rows = [];
+  const hidden = await claude.list(claudeApp, platform);
+  assert.deepEqual(
+    hidden.map((t) => [t.key, t.active, t.ref]),
+    [
+      [`${claudeApp.bundleId}:row:Trip`, true, { path: OTHER }],
+      [`${claudeApp.bundleId}:row:Trip#2`, false, { path: CHAT }],
+    ],
+  );
 });
 
 test("sidebar showing no conversations: known ones are listed, the open one active", async () => {

@@ -59,11 +59,13 @@ export async function loadAgents(apps: App[], platform: Platform, options: LoadO
 /**
  * One agent per session. herdr reports the agents in its panes, some also known to their own source (a Claude
  * Code session in a herdr pane): the source's agent is kept, with herdr's pane as its host, since the process's
- * terminal is herdr's and not an app's. Agent CLIs found by process name inside herdr are dropped: herdr lists
- * them itself, with a status; so are those another source already describes.
+ * terminal is herdr's and not an app's. An agent CLI found by process name inside herdr is dropped when herdr lists
+ * an agent in its folder (that one, with a status; a CLI whose folder is unknown, when herdr lists any); so are
+ * those another source already describes. herdr's agents carry no pid, so the folder is what ties them together.
  */
 export function mergeAgents(agents: Agent[], runsInHerdr: (pid: number) => boolean): Agent[] {
   const herdr = agents.filter((a) => a.source === "herdr");
+  const herdrCwds = new Set(herdr.map((a) => a.cwd));
   const herdrBySession = new Map(herdr.flatMap((a) => (a.sessionIds ?? []).map((id) => [id, a] as const)));
   const absorbed = new Set<string>();
   // A process another source already describes (Codex's thread in that terminal) isn't listed again as a bare CLI.
@@ -78,7 +80,8 @@ export function mergeAgents(agents: Agent[], runsInHerdr: (pid: number) => boole
       absorbed.add(pane.key);
       return [{ ...agent, host: pane.host, status: agent.status === "unknown" ? pane.status : agent.status }];
     }
-    if (agent.source === "cli" && herdr.length > 0 && agent.host.kind === "process" && runsInHerdr(agent.host.pid)) {
+    const listedByHerdr = agent.cwd ? herdrCwds.has(agent.cwd) : herdr.length > 0;
+    if (agent.source === "cli" && listedByHerdr && agent.host.kind === "process" && runsInHerdr(agent.host.pid)) {
       return [];
     }
     return [agent];

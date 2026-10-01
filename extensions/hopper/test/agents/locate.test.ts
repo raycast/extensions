@@ -91,7 +91,11 @@ test("locate: terminal agents to their exact pane, else their app; places to the
 test("locate: tabs already read (Search) are used as they are, and find places whose app wasn't read", async () => {
   const claudeTab = { ...tab("claude:s", []), app: claudeApp, source: "claude" };
   const [desktop] = await locate(
-    [agent("desktop", { host: { kind: "place", tabKey: "claude:s", bundleId: claudeApp.bundleId, url: "claude://x" } })],
+    [
+      agent("desktop", {
+        host: { kind: "place", tabKey: "claude:s", bundleId: claudeApp.bundleId, url: "claude://x" },
+      }),
+    ],
     [claudeApp],
     [],
     [claudeTab],
@@ -99,7 +103,7 @@ test("locate: tabs already read (Search) are used as they are, and find places w
   assert.deepEqual([desktop.location?.tab?.key, desktop.location?.label], ["claude:s", "Claude"]);
 });
 
-test("merge: herdr's pane hosts the session it shares; CLIs inside herdr or claimed by a source drop out", () => {
+test("merge: herdr's pane hosts the session it shares; CLIs herdr lists or a source claims drop out", () => {
   const merged = mergeAgents(
     [
       agent("claude:s1", { source: "claude", status: "working", sessionIds: ["s1"] }),
@@ -109,8 +113,26 @@ test("merge: herdr's pane hosts the session it shares; CLIs inside herdr or clai
         sessionIds: ["s1"],
         host: { kind: "place", tabKey: "herdr:/s:w1", paneId: "p1" },
       }),
-      agent("herdr:p2", { source: "herdr", host: { kind: "place", tabKey: "herdr:/s:w1", paneId: "p2" } }),
+      agent("herdr:p2", {
+        source: "herdr",
+        cwd: "/p/app",
+        host: { kind: "place", tabKey: "herdr:/s:w1", paneId: "p2" },
+      }),
       agent("cli:32", { source: "cli", status: "unknown", host: { kind: "process", pid: 32, tty: "ttys020" } }),
+      // In herdr, in a folder where herdr lists an agent (herdr:p2): herdr's row describes it.
+      agent("cli:32b", {
+        source: "cli",
+        cwd: "/p/app",
+        status: "unknown",
+        host: { kind: "process", pid: 32, tty: "ttys020" },
+      }),
+      // In herdr, but herdr lists no agent in its folder (its session's snapshot failed, or herdr missed it): kept.
+      agent("cli:32c", {
+        source: "cli",
+        cwd: "/p/other",
+        status: "unknown",
+        host: { kind: "process", pid: 32, tty: "ttys020" },
+      }),
       agent("codex:t", { source: "codex", host: { kind: "process", pid: 22, tty: "ttys009" } }),
       agent("cli:22", { source: "cli", status: "unknown", host: { kind: "process", pid: 22, tty: "ttys009" } }),
     ],
@@ -121,6 +143,7 @@ test("merge: herdr's pane hosts the session it shares; CLIs inside herdr or clai
     [
       ["claude:s1", "place"],
       ["herdr:p2", "place"],
+      ["cli:32c", "process"],
       ["codex:t", "process"],
     ],
   );
@@ -166,7 +189,13 @@ test("jumping selects the tab and pane with the tab's source, else opens the lin
     runAppleScript: async (script) => (calls.push(script.includes('"S1"') ? "select S1" : script), "ok"),
     openUrl: async (url) => void calls.push(`open ${url}`),
   });
-  const location = { app: iterm, label: "iTerm", tab: tab("zsh", [{ id: "S1", tty: "ttys004" }]), paneId: "S1", url: "x://" };
+  const location = {
+    app: iterm,
+    label: "iTerm",
+    tab: tab("zsh", [{ id: "S1", tty: "ttys004" }]),
+    paneId: "S1",
+    url: "x://",
+  };
   const app = await jumpToAgent({ ...agent("a"), location }, platform, 42);
   await jumpToAgent({ ...agent("b"), location: { app: claudeApp, label: "Claude", url: "claude://x" } }, platform, 43);
   assert.equal(app.name, "iTerm");

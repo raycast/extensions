@@ -33,17 +33,30 @@ export function withoutBookmark(bookmarks: Bookmark[], id: string): Bookmark[] {
   return bookmarks.filter((b) => b.id !== id);
 }
 
+/** The last change to the saved list; each change waits for it, so two quick ones can't read the same list. */
+let lastChange: Promise<unknown> = Promise.resolve();
+
+/** Applies `change` to the saved bookmarks, one change at a time, and returns the bookmarks after. */
+function changeBookmarks(platform: Platform, change: (bookmarks: Bookmark[]) => Bookmark[]): Promise<Bookmark[]> {
+  const run = lastChange.then(async () => {
+    const next = change(await loadBookmarks(platform));
+    await platform.saveJson(KEY, next);
+    return next;
+  });
+  lastChange = run.catch(() => undefined);
+  return run;
+}
+
 /** Adds `entry` (`on`) or removes it, and returns the bookmarks after. */
-export async function setBookmark(
+export function setBookmark(
   platform: Platform,
   entry: Omit<Bookmark, "addedAt">,
   on: boolean,
   now: number,
 ): Promise<Bookmark[]> {
-  const bookmarks = await loadBookmarks(platform);
-  const next = on ? withBookmark(bookmarks, entry, now) : withoutBookmark(bookmarks, entry.id);
-  await platform.saveJson(KEY, next);
-  return next;
+  return changeBookmarks(platform, (bookmarks) =>
+    on ? withBookmark(bookmarks, entry, now) : withoutBookmark(bookmarks, entry.id),
+  );
 }
 
 /** `bookmarks` with `id` named `title` (a clean name for a long URL or a generic page title); order unchanged. */
@@ -52,8 +65,6 @@ export function withTitle(bookmarks: Bookmark[], id: string, title: string): Boo
 }
 
 /** Renames the bookmark `id`, and returns the bookmarks after. */
-export async function renameBookmark(platform: Platform, id: string, title: string): Promise<Bookmark[]> {
-  const next = withTitle(await loadBookmarks(platform), id, title);
-  await platform.saveJson(KEY, next);
-  return next;
+export function renameBookmark(platform: Platform, id: string, title: string): Promise<Bookmark[]> {
+  return changeBookmarks(platform, (bookmarks) => withTitle(bookmarks, id, title));
 }

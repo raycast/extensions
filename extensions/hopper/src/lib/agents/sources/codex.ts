@@ -5,7 +5,9 @@
 // "blocked" here; the app's live state is only on its private app-server pipe and internal IPC bus, which aren't
 // for other apps (ADR-022).
 //
-// Threads from the app open with its codex://threads/<id> link, while the app runs. A CLI thread is listed while
+// Threads from the app open with its codex://threads/<id> link, while the app runs. The app and the IDE extension
+// both record source "vscode"; the originator ("Codex Desktop" for the app) tells them apart, and IDE threads aren't
+// listed, since nothing says which editor window runs them. A CLI thread is listed while
 // a `codex` process in a terminal works in its folder (that process is its host): only the folder's latest thread
 // updated since that process started, since earlier threads there were other, finished runs. Verified with Codex
 // 26.924 (app) and CLI 0.157.
@@ -15,19 +17,22 @@ import type { Agent, AgentContext, AgentSource, AgentStatus, Host } from "../mod
 
 const DIR = ".codex";
 const CODEX_APP = "com.openai.codex";
+/** `originator` of the app's threads (verified with Codex 26.924); the IDE extension's threads have their own. */
+const APP_ORIGINATOR = "Codex Desktop";
 /** App threads older than this aren't listed: the list is for what's going on now. */
 const RECENT_MS = 24 * 60 * 60 * 1000;
 /** Enough of a rollout's end to hold its last turn events (big lines, e.g. tool output, can come after them). */
 const TAIL_BYTES = 256 * 1024;
 
-const threadsQuery = (since: number) => `select id, source, cwd,
+const threadsQuery = (since: number) => `select id, source, originator, cwd,
   coalesce(nullif(name, ''), nullif(title, '')) as title,
   updated_at_ms as updatedAt, rollout_path as rollout
 from threads
 where archived = 0 and source in ('cli', 'vscode', 'appServer') and updated_at_ms > ${Math.floor(since)}
 order by updated_at_ms desc limit 50`;
 
-/** The same from the columns the table was created with, for when Codex renames or drops a later one. */
+/** The same from the columns the table was created with, for when Codex renames or drops a later one (no
+ * originator: every non-CLI thread counts as the app's, as before Codex recorded it). */
 const baseThreadsQuery = (since: number) => `select id, source, cwd, nullif(title, '') as title,
   updated_at * 1000 as updatedAt, rollout_path as rollout
 from threads
@@ -51,6 +56,8 @@ export interface Thread {
   id: string;
   /** "cli" for the terminal UI; "vscode" / "appServer" for the app and IDE extension. */
   source: string;
+  /** The client that started it: "Codex Desktop" for the app. Unset in databases from before Codex recorded it. */
+  originator?: string;
   cwd?: string;
   title?: string;
   updatedAt?: number;
@@ -65,6 +72,7 @@ export function parseThreads(rows: Record<string, unknown>[]): Thread[] {
           {
             id: r.id,
             source: str(r.source) ?? "",
+            originator: str(r.originator),
             cwd: str(r.cwd),
             title: str(r.title),
             updatedAt: typeof r.updatedAt === "number" ? r.updatedAt : undefined,
@@ -137,7 +145,7 @@ export function toAgents(
       if (!terminal) return [];
       host = { kind: "process", pid: terminal.pid, tty: terminal.tty };
     } else {
-      if (!appRunning) return [];
+      if (!appRunning || (thread.originator && thread.originator !== APP_ORIGINATOR)) return [];
       host = { kind: "link", bundleId: CODEX_APP, url: `codex://threads/${thread.id}` };
     }
     const status = statuses.get(thread.id) ?? "idle";

@@ -80,7 +80,10 @@ test("cursor: headers from the composerHeaders table; Cursor without it (before 
       apps: [{ name: "Cursor", bundleId: "com.todesktop.230313mzl4w4u92", path: "/Applications/Cursor.app" }],
       now: 10,
     } as never);
-  assert.deepEqual((await run(true)).map((a) => a.id), ["a"]);
+  assert.deepEqual(
+    (await run(true)).map((a) => a.id),
+    ["a"],
+  );
   await assert.rejects(run(false), /no such table/);
 });
 
@@ -104,9 +107,7 @@ test("cursor: a Cursor that changed its database or moved its transcripts is rep
   assert.deepEqual(await run([{ composer: "a" }], "completed"), [
     ["agents: cursor headers", "Cursor's agent headers have no composerId"],
   ]);
-  assert.deepEqual(await run([header], "queued"), [
-    ["agents: cursor status", 'Unknown Cursor run status: "queued"'],
-  ]);
+  assert.deepEqual(await run([header], "queued"), [["agents: cursor status", 'Unknown Cursor run status: "queued"']]);
 });
 
 test("cursor: an agent saved as aborted is working while its transcript's turn is open", async () => {
@@ -225,17 +226,38 @@ test("codex: a terminal hosts only its folder's latest thread, and only if updat
     thread("stale", "/b", 90), // /b's process hasn't written a thread yet
     { id: "app", source: "vscode", cwd: "/a", updatedAt: 300 },
   ];
-  assert.deepEqual([...liveCliThreads(threads, processes)].map(([id, p]) => [id, p.pid]), [["live", 1]]);
+  assert.deepEqual(
+    [...liveCliThreads(threads, processes)].map(([id, p]) => [id, p.pid]),
+    [["live", 1]],
+  );
 });
 
-test("codex: app threads open by link while the app runs; CLI threads need their terminal", async () => {
+test("codex: app threads open by link while the app runs; IDE threads aren't listed; CLI threads need their terminal", async () => {
   const queries: string[] = [];
   const platform = fakePlatform({
     listDir: async () => ["state_5.sqlite"],
     querySqlite: async (_path, sql) => {
       queries.push(sql);
       return [
-        { id: "t1", source: "vscode", cwd: "/a", title: "Review\nmore", updatedAt: 5, rollout: "/r1" },
+        {
+          id: "t1",
+          source: "vscode",
+          originator: "Codex Desktop",
+          cwd: "/a",
+          title: "Review\nmore",
+          updatedAt: 5,
+          rollout: "/r1",
+        },
+        // From the IDE extension: runs in an editor, not the app.
+        {
+          id: "ide",
+          source: "vscode",
+          originator: "codex_vscode",
+          cwd: "/a",
+          title: "IDE",
+          updatedAt: 5,
+          rollout: "/r4",
+        },
         { id: "t2", source: "cli", cwd: "/a", title: null, updatedAt: 4, rollout: "/r2" },
         { id: "t3", source: "cli", cwd: "/gone", title: "old", updatedAt: 3, rollout: "/r3" },
       ];

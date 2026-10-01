@@ -1,6 +1,7 @@
 // Safari tabs have no id: remember window id + position, and the URL to catch a tab that moved.
 // Private windows are skipped entirely (ADR-018). AppleScript can't tell them apart; only their Accessibility
-// title can ("<page>, Private Browsing"), so the two window lists are matched by title in front-to-back order.
+// title can: the page title wrapped in localized text ("<page>, Private Browsing", "<page>、プライベートブラウズ"),
+// while an ordinary window's is the page title alone. So the two window lists are matched in front-to-back order.
 
 import { isTrue, listScript, parseRecords, quote, runSelect } from "../applescript";
 import { webReopenTarget } from "../reopen";
@@ -44,9 +45,6 @@ set current tab of win to target
 set index of win to 1
 return "ok"`;
 
-/** English only: Safari localizes it, and exposes no other marker (AXIdentifier's IsSecure is false too). */
-const PRIVATE_SUFFIX = ", Private Browsing";
-
 /** Rows: windowId, index, title, url, active, window name. */
 export function parse(app: App, out: string): Tab<Ref>[] {
   return parseRecords(out, 6).map(([windowId, index, title, url, active]) => ({
@@ -70,27 +68,28 @@ export function scriptWindows(out: string): { id: string; name: string }[] {
 }
 
 /**
- * Ids of the AppleScript windows to leave out: private ones, matched to Accessibility windows by title in
- * order. Fails closed: when Accessibility sees no windows (not granted), or a window can't be matched while a
- * private window is unaccounted for, it's left out.
+ * Ids of the AppleScript windows to leave out: private ones. Each AppleScript window takes the next Accessibility
+ * window titled with its name: exactly (ordinary) or wrapped in more text (private, in any language; Safari exposes
+ * no other marker, AXIdentifier's IsSecure is false too). Fails closed: when Accessibility sees no windows (not
+ * granted), every window is left out; a window that can't be matched (on another Space, or retitled between the two
+ * reads) is left out while an Accessibility window is unaccounted for, since that one may be private.
  */
 export function privateWindowIds(script: { id: string; name: string }[], ax: AXWindow[]): Set<string> {
   if (script.length > 0 && ax.length === 0) return new Set(script.map((w) => w.id));
-  const pool = ax.map((w) => {
-    const isPrivate = w.title.endsWith(PRIVATE_SUFFIX);
-    return { title: isPrivate ? w.title.slice(0, -PRIVATE_SUFFIX.length) : w.title, isPrivate, used: false };
-  });
+  const pool = ax.map((w) => ({ title: w.title, used: false }));
   const hidden = new Set<string>();
   const unmatched: string[] = [];
   for (const w of script) {
-    const match = pool.find((p) => !p.used && p.title === w.name);
+    const match = pool.find(
+      (p) => !p.used && (p.title === w.name || (p.title.length > w.name.length && p.title.includes(w.name))),
+    );
     if (!match) unmatched.push(w.id);
     else {
       match.used = true;
-      if (match.isPrivate) hidden.add(w.id);
+      if (match.title !== w.name) hidden.add(w.id);
     }
   }
-  if (pool.some((p) => p.isPrivate && !p.used)) for (const id of unmatched) hidden.add(id);
+  if (pool.some((p) => !p.used)) for (const id of unmatched) hidden.add(id);
   return hidden;
 }
 

@@ -32,7 +32,7 @@ const SIDEBAR: SidebarSpec = {
 type ConversationRef = { path: string };
 type Ref = { sessionId: string } | ConversationRef | SidebarRef;
 
-/** Conversations whose id was seen, by title; most recently seen first. */
+/** Conversations whose id was seen; most recently seen first. Titles can repeat (two chats both named "Trip"). */
 export interface KnownConversation {
   title: string;
   path: string;
@@ -93,18 +93,28 @@ export function openConversation(page: WebPage | undefined): Omit<KnownConversat
   return path && title ? { title, path } : undefined;
 }
 
-/** `known` with `seen` first (replacing entries with its title or path), capped. */
+/** `known` with `seen` first (replacing the entry with its path: a renamed conversation), capped. */
 export function remember(
   known: KnownConversation[],
   seen: Omit<KnownConversation, "seenAt">,
   now: number,
 ): KnownConversation[] {
-  const rest = known.filter((k) => k.title !== seen.title && k.path !== seen.path);
+  const rest = known.filter((k) => k.path !== seen.path);
   return [{ ...seen, seenAt: now }, ...rest].slice(0, MAX_KNOWN);
 }
 
-function conversationTab(app: App, title: string, path: string, active: boolean): Tab<Ref> {
-  return { key: `${app.bundleId}:row:${title}`, app, source: claude.id, kind: "session", title, active, ref: { path } };
+/** Key of the `n`th (0-based) conversation titled `title`, the same whether it's listed from the sidebar or not. */
+const conversationKey = (app: App, title: string, n: number) =>
+  `${app.bundleId}:row:${title}${n > 0 ? `#${n + 1}` : ""}`;
+
+/** Calls `f` with each item and how many before it had the same title. */
+function byOccurrence<T extends { title: string }, U>(items: T[], f: (item: T, n: number) => U): U[] {
+  const counts = new Map<string, number>();
+  return items.map((item) => {
+    const n = counts.get(item.title) ?? 0;
+    counts.set(item.title, n + 1);
+    return f(item, n);
+  });
 }
 
 async function readSessions(platform: Platform): Promise<CodeSession[]> {
@@ -131,23 +141,34 @@ export const claude: TabSource<Ref> = {
       (await platform.labelWithSuffix(app.bundleId, SIDEBAR.activeSuffix!));
     const code = fromSessions(app, sessions, active);
     // In Code mode the sidebar repeats the sessions; in Chat mode it adds conversations the files don't have,
-    // opened by deep link when their id is known.
+    // opened by deep link when their id is known. Rows have only titles: the n-th row with a title takes the n-th
+    // most recently seen conversation with it (the sidebar lists the most recent first). A repeated title with no
+    // known conversation left is left out: opening its row by name would open the first one.
     const titles = new Set(code.map((t) => t.title));
-    const paths = new Map(known.map((k) => [k.title, k.path]));
-    const extra = sidebar
-      .filter((t) => !titles.has(t.title))
-      .map((t): Tab<Ref> => {
-        const path = paths.get(t.title);
-        return path ? { ...t, ref: { path } } : t;
-      });
+    const pathsByTitle = new Map<string, string[]>();
+    for (const k of known) pathsByTitle.set(k.title, [...(pathsByTitle.get(k.title) ?? []), k.path]);
+    const extra = byOccurrence(
+      sidebar.filter((t) => !titles.has(t.title)),
+      (t, n): Tab<Ref>[] => {
+        const path = pathsByTitle.get(t.title)?.[n];
+        const isActive = current ? path === current.path : t.active && n === 0;
+        if (path) return [{ ...t, key: conversationKey(app, t.title, n), active: isActive, ref: { path } }];
+        return n === 0 ? [t] : [];
+      },
+    ).flat();
     // No conversations in the sidebar (hidden, or Code mode): list the ones seen lately.
     const recent =
       extra.length > 0
         ? []
-        : known
-            .filter((k) => !titles.has(k.title))
-            .slice(0, MAX_LISTED)
-            .map((k) => conversationTab(app, k.title, k.path, k.title === active));
+        : byOccurrence(known.filter((k) => !titles.has(k.title)).slice(0, MAX_LISTED), (k, n): Tab<Ref> => ({
+            key: conversationKey(app, k.title, n),
+            app,
+            source: claude.id,
+            kind: "session",
+            title: k.title,
+            active: k.path === current?.path || (!current && k.title === active && n === 0),
+            ref: { path: k.path },
+          }));
     const tabs = [...code, ...extra, ...recent];
     return tabs.length > 0 ? tabs : ((await windows.list(app, platform)) as Tab[] as Tab<Ref>[]);
   },

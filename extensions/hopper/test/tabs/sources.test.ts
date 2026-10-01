@@ -110,9 +110,28 @@ test("Safari: fails closed when a private window can't be placed, or Accessibili
     { id: "2", name: "News" },
   ];
   assert.deepEqual([...safari.privateWindowIds(script, [win(1, "Other, Private Browsing"), win(2, "News")])], ["1"]);
-  assert.deepEqual([...safari.privateWindowIds(script, [win(1, "Other"), win(2, "News")])], []);
+  // "Other" may be a private window (in a language whose wrapper isn't known) retitled between the two reads.
+  assert.deepEqual([...safari.privateWindowIds(script, [win(1, "Other"), win(2, "News")])], ["1"]);
+  // On another Space: Accessibility doesn't see it, and every window it sees is accounted for.
+  assert.deepEqual([...safari.privateWindowIds(script, [win(2, "News")])], []);
   assert.deepEqual([...safari.privateWindowIds(script, [])], ["1", "2"]);
   assert.deepEqual([...safari.privateWindowIds([], [])], []);
+});
+
+test("Safari: private windows are recognized in any language", () => {
+  const script = [
+    { id: "1", name: "Bank" },
+    { id: "2", name: "Bank" },
+    { id: "3", name: "Mail" },
+    { id: "4", name: "News" },
+  ];
+  const ax = [
+    win(1, "Bank, „Privates Surfen“"),
+    win(2, "Bank"),
+    win(3, "ท่องเว็บแบบส่วนตัวเรื่องMail"),
+    win(4, "News"),
+  ];
+  assert.deepEqual([...safari.privateWindowIds(script, ax)], ["1", "3"]);
 });
 
 test("cmux: a workspace with several terminals lists each by name; terminals are panes with their tty", () => {
