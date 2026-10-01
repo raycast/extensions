@@ -1,6 +1,6 @@
 # Digger Changelog
 
-## [SVG extraction, and faster access to Well-Known files and color tokens] - {PR_MERGE_DATE}
+## [SVG extraction, and faster access to Well-Known files and color tokens] - 2026-10-01
 
 ### Added
 
