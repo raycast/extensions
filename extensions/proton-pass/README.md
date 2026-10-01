@@ -50,12 +50,21 @@ pass-cli vault list
 ## Preferences
 
 - **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Default Password Length**: Length for generated passwords (default: 20)
-- **Default Password Type**: Random characters or memorable passphrase
 - **Transient Clipboard**: Clear password from clipboard after pasting
 - **Background Refresh**: Automatically refresh cached vault and item data
 - **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
 - **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
+
+### Generate Password
+
+Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
+
+- **Password Type**: Random password or passphrase (default: random)
+- **Password Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Uppercase**, **Symbols** and **Numbers**: Characters to use, all on by default (numbers also apply to passphrases)
+- **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Capitalization**: Capitalize passphrase words (on by default)
 
 ## Troubleshooting
 

@@ -8,6 +8,7 @@
   },
   "include": [
     "src/lib/core/**/*.ts",
+    "src/lib/generator-defaults*.ts",
     "src/lib/pass-cli-normalize.test.ts",
     "src/lib/pass-cli-normalize.ts",
     "src/lib/shortcuts*.ts",

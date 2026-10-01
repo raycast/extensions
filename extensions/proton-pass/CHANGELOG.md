@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Password Generator Defaults] - {PR_MERGE_DATE}
+
+- Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
+- Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
+
 ## [Faster Loading] - 2026-10-01
 
 - Show cached items instantly on launch, even after the cache expired, and refresh them in the background
