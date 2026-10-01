@@ -345,7 +345,11 @@ function TemporaryLinkQRCode({
       name={object.name}
       link={async () => {
         const link = await createTemporaryLink(destination.id, object.key, seconds);
-        return { url: link.url, note: `Temporary link, expires ${new Date(link.expiresAt).toLocaleString()}.` };
+        return {
+          url: link.url,
+          note: `Temporary link, expires ${new Date(link.expiresAt).toLocaleString()}.`,
+          expiresAt: link.expiresAt,
+        };
       }}
     />
   );

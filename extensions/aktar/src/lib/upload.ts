@@ -93,7 +93,7 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     if (uploads.length === 1) {
       toast.title = uploads[0].reused ? "Already uploaded" : `Uploaded ${uploads[0].filename}`;
       toast.message = uploads[0].reused
-        ? `Copied the existing link.${expiryNote(uploads[0])}`
+        ? `Copied the existing link${warning ? "" : expiryNote(uploads[0])}`
         : "Link copied to clipboard";
     } else {
       const summary = batchSummary(uploads);

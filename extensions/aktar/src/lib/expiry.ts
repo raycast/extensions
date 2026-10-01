@@ -34,11 +34,11 @@ export function formatExpiryDate(expiresAt: string) {
 }
 
 /**
- * Why a Delete After request didn't take, or undefined when every upload got
- * an expiry. Aktar versions before 0.5.0 ignore `expires` and answer without
- * an `expiresAt` field; a `null` one means Aktar kept the file anyway. A
- * reused upload keeps the expiry of the earlier upload, so it's also checked
- * to be no later than what was asked for.
+ * Why a Delete After request didn't take as asked, or undefined when every
+ * upload got the expiry it asked for. Aktar versions before 0.5.0 ignore
+ * `expires` and answer without an `expiresAt` field; a `null` one means Aktar
+ * kept the file anyway. A reused upload keeps the expiry of the earlier
+ * upload, so it's checked against what was asked for, in both directions.
  */
 export function expiryWarning(uploads: Upload[], expires: number | undefined) {
   if (!expires) return undefined;
@@ -54,28 +54,32 @@ export function expiryWarning(uploads: Upload[], expires: number | undefined) {
     return `Aktar didn't apply Delete After. ${subject} ${verbFor(kept.length)} kept forever.`;
   }
 
-  const later = uploads.filter((upload) => upload.reused && outlives(upload, expires));
-  if (later.length > 0) {
-    const date = formatExpiryDate(later[0].expiresAt as string);
-    const when = later.length === 1 ? `is deleted on ${date}` : "are deleted later";
-    return `${subjectFor(later.length)} ${verbFor(later.length)} already uploaded and ${when}, not in ${expires} ${expires === 1 ? "day" : "days"}.`;
+  const different = uploads.filter((upload) => upload.reused && !expiresAsAsked(upload, expires));
+  if (different.length > 0) {
+    const asked = `in ${expires} ${expires === 1 ? "day" : "days"}`;
+    if (different.length === 1) {
+      const date = formatExpiryDate(different[0].expiresAt as string);
+      return `${subjectFor(1)} was already uploaded, so it's deleted on ${date}, not ${asked}.`;
+    }
+    return `${subjectFor(different.length)} were already uploaded, so they keep their earlier delete dates, not ${asked}.`;
   }
   return undefined;
 }
 
 /**
- * True when the upload is deleted later than `days` from now. Lifecycle rules
- * run once a day, so a day of slack keeps a matching expiry from counting.
+ * True when the upload is deleted about `days` from now. Lifecycle rules run
+ * once a day, so a day either way still counts as what was asked for.
  */
-function outlives(upload: Upload, days: number) {
+function expiresAsAsked(upload: Upload, days: number) {
   if (!upload.expiresAt) return false;
   const DAY = 24 * 60 * 60 * 1000;
-  return new Date(upload.expiresAt).getTime() > Date.now() + (days + 1) * DAY;
+  const difference = new Date(upload.expiresAt).getTime() - (Date.now() + days * DAY);
+  return Math.abs(difference) <= DAY;
 }
 
-/** " Deleted on Oct 6." for an upload that expires, otherwise empty. */
+/** ". Deleted on Oct 6" for an upload that expires, otherwise empty. */
 export function expiryNote(upload: Upload) {
-  return upload.expiresAt ? ` Deleted on ${formatExpiryDate(upload.expiresAt)}.` : "";
+  return upload.expiresAt ? `. Deleted on ${formatExpiryDate(upload.expiresAt)}` : "";
 }
 
 /**

@@ -3,12 +3,14 @@ import { usePromise } from "@raycast/utils";
 import { pathToFileURL } from "node:url";
 import { useState } from "react";
 import { showAktarFailure } from "../lib/errors";
-import { saveQRCode, writeQRCode } from "../lib/qr";
+import { ensureQRCode, saveQRCode, writeQRCode } from "../lib/qr";
 
 type Link = {
   url: string;
   /** Shown under the link, e.g. when a temporary link expires. */
   note?: string;
+  /** When a temporary link stops working; its QR image is removed after that. */
+  expiresAt?: string;
 };
 
 type Resolved = Link & {
@@ -37,7 +39,7 @@ export function QRCodeView({ name, link }: Props) {
       const resolved: Link = typeof from === "string" ? { url: from } : await from();
       // A link too long for a QR code is still worth showing, with its own actions.
       try {
-        return { ...resolved, file: await writeQRCode(resolved.url) };
+        return { ...resolved, file: await writeQRCode(resolved.url, resolved.expiresAt) };
       } catch (qrError) {
         return { ...resolved, qrError: qrError instanceof Error ? qrError.message : String(qrError) };
       }
@@ -84,7 +86,7 @@ export function QRCodeView({ name, link }: Props) {
               <Action.CopyToClipboard title="Copy Link" content={data.url} />
               <Action.OpenInBrowser url={data.url} />
             </ActionPanel.Section>
-            {data.file && <QRCodeActions file={data.file} name={name} />}
+            {data.file && <QRCodeActions file={data.file} link={data} name={name} />}
             {refreshAction && <ActionPanel.Section>{refreshAction}</ActionPanel.Section>}
           </ActionPanel>
         ) : (
@@ -100,7 +102,7 @@ export function QRCodeView({ name, link }: Props) {
   );
 }
 
-function QRCodeActions({ file, name }: { file: string; name: string }) {
+function QRCodeActions({ file, link, name }: { file: string; link: Link; name: string }) {
   return (
     <ActionPanel.Section>
       <Action
@@ -108,8 +110,12 @@ function QRCodeActions({ file, name }: { file: string; name: string }) {
         icon={Icon.Image}
         shortcut={Keyboard.Shortcut.Common.Copy}
         onAction={async () => {
-          await Clipboard.copy({ file });
-          await showToast({ style: Toast.Style.Success, title: "Copied QR code image" });
+          try {
+            await Clipboard.copy({ file: await ensureQRCode(file, link.url, link.expiresAt) });
+            await showToast({ style: Toast.Style.Success, title: "Copied QR code image" });
+          } catch (error) {
+            await showAktarFailure(error, "Couldn't copy the QR code");
+          }
         }}
       />
       <Action
@@ -118,7 +124,7 @@ function QRCodeActions({ file, name }: { file: string; name: string }) {
         shortcut={Keyboard.Shortcut.Common.Save}
         onAction={async () => {
           try {
-            const saved = await saveQRCode(file, name);
+            const saved = await saveQRCode(await ensureQRCode(file, link.url, link.expiresAt), name);
             await showInFinder(saved);
             await showToast({ style: Toast.Style.Success, title: "Saved QR code to Downloads" });
           } catch (error) {

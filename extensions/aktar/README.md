@@ -29,13 +29,13 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 
 **Show QR Code** (⌘⇧Q) in Search Uploads or Browse Buckets shows a QR code for the file's link, to open it on your phone or put it on a slide. Copy the QR code image to paste it anywhere, or save it as a PNG in your Downloads folder. In Browse Buckets you can also show a QR code for a temporary link (1 hour, 1 day, or 7 days), which works even for private buckets. **Create New Link** (⌘R) makes a fresh one when it has expired.
 
-The QR code is made on your Mac. The link is never sent to a QR service. QR images not shown for a week are removed from the extension's support folder.
+The QR code is made on your Mac. The link is never sent to a QR service. The QR images of temporary links are removed from the extension's support folder once those links expire.
 
 ## What Aktar Does for You
 
 Uploads from Raycast go through the Aktar app, so they follow its settings:
 
-- **Already uploaded** (Aktar 0.10.0 or later): when the same file is already in that destination with the same Delete After time, Aktar doesn't upload it again and copies its existing link. The extension tells you with an "Already uploaded" message, and when the link expires. Older Aktar versions upload the file again.
+- **Already uploaded** (Aktar 0.10.0 or later): when the same file is already in that destination with the same Delete After time, Aktar doesn't upload it again and copies its existing link. The extension tells you with an "Already uploaded" message and the day the existing file is deleted, with a warning when that's not the Delete After you picked. Older Aktar versions upload the file again.
 - **Image conversion**: Aktar can convert images to WebP or AVIF before uploading (Aktar 0.10.0 or later).
 - **Hash file names**: path templates can use `{md5}` and `{sha256}` for names that only change when the file does.
 - **Large files**: files over 5 GB are uploaded in parts automatically.
