@@ -50,13 +50,13 @@ export function ImageBlockView({ block }: ImageBlockViewProps) {
             icon={Icon.Globe}
             url={blockPageUrl}
             title="Open on Are.na"
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } }}
           />
           <Action.CopyToClipboard
             icon={Icon.Link}
             content={blockPageUrl}
             title="Copy Block URL"
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
           />
           {sourceUrl && sourceUrl !== blockPageUrl ? (
             <Action.OpenInBrowser icon={Icon.Link} url={sourceUrl} title="Open Source URL" />

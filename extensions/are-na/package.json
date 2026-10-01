@@ -162,6 +162,13 @@
   ],
   "preferences": [
     {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Optional folder for downloaded images and attachments. Leave empty to use your system's Downloads folder.",
+      "type": "directory",
+      "required": false
+    },
+    {
       "name": "accessToken",
       "label": "Personal Access Token",
       "description": "Optional personal access token. Leave blank to sign in with OAuth instead.",
@@ -226,7 +233,8 @@
     "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "overrides": {
     "brace-expansion": "5.0.9",

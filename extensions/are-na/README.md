@@ -14,7 +14,11 @@ Search your collections, save references, and connect ideas on Are.na without le
 
 Prefer a personal access token? Create one in [Are.na’s token settings](https://www.are.na/settings/personal-access-tokens) and enter it in the extension’s **Personal Access Token** preference. Leave that preference blank to use browser sign-in. Your token needs write access to create, edit, or remove content.
 
-The extension supports macOS. Available content and editing actions depend on your Are.na account’s permissions.
+The extension supports macOS and Windows. Available content and editing actions depend on your Are.na account’s permissions.
+
+Images and attachments save to your system's Downloads folder, including redirected Windows Downloads folders. Select an optional **Download Directory** in extension preferences to use a different folder or if the system folder cannot be detected. Existing files are kept; another download with the same name gets a numbered suffix.
+
+Custom actions use Command on macOS and Control on Windows, including opening links, copying content, and switching between list and grid views.
 
 ## Commands
 
@@ -91,11 +95,12 @@ Results load in pages. Channel digests summarize a sample of up to 100 items and
 
 ## Preferences
 
-| Preference                | Default    | Purpose                                                                 |
-| ------------------------- | ---------- | ----------------------------------------------------------------------- |
-| **Personal Access Token** | Empty      | Use a token instead of browser sign-in.                                 |
-| **Default Page Size**     | 24         | Number of search results fetched per page.                              |
-| **Default Search Sort**   | Best Match | Choose Best Match, Recently Updated, or Recently Created for discovery. |
+| Preference                | Default    | Purpose                                                                             |
+| ------------------------- | ---------- | ----------------------------------------------------------------------------------- |
+| **Personal Access Token** | Empty      | Use a token instead of browser sign-in.                                             |
+| **Default Page Size**     | 24         | Number of search results fetched per page.                                          |
+| **Default Search Sort**   | Best Match | Choose Best Match, Recently Updated, or Recently Created for discovery.             |
+| **Download Directory**    | Downloads  | Choose a folder for images and attachments; empty uses the system Downloads folder. |
 
 ## Development
 
