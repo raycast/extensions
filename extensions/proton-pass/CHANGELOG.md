@@ -4,7 +4,7 @@
 
 - Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last, and their copy actions also work with the panel hidden
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
-- Websites are shown as clickable tags
+- Websites are shown as clickable tags, including saved hostnames with ports
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
 - Enter now copies the password after a confirmation explaining the new default action (or opens the note for secure notes); the confirmation can be remembered and reset in command settings. New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
@@ -16,6 +16,9 @@
 - New Copy Title action (⌘⇧. on macOS, Ctrl+Shift+. on Windows), distinct from Copy Email on both platforms. Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
 - A failed full account load also shows an error with Retry when cached or early-loaded vault items remain visible
+- Item-list authentication failures clear saved metadata, including earlier per-vault caches; offline vault views can still read those earlier caches
+- Failed vault loads stay retryable and do not renew the cache as a fresh empty result
+- Hiding the details panel stops automatic secret loads; already-loaded custom fields and explicit copy actions remain available
 - Update vulnerable transitive brace-expansion dependencies to compatible patched versions
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID

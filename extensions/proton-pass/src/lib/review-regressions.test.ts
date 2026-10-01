@@ -5,6 +5,7 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import * as refresh from "./refresh";
+import * as format from "./format";
 import * as shortcuts from "./shortcuts";
 import { Item, PassCliError } from "./types";
 
@@ -30,6 +31,9 @@ function loadView(file: string, services: Record<string, unknown>): Record<strin
     URL,
     Error,
     setTimeout,
+    clearTimeout,
+    process: { platform: "darwin", env: { PATH: "" } },
+    console: { error: () => undefined },
   });
   return module.exports;
 }
@@ -114,18 +118,21 @@ test("Copy Email and Copy Title have distinct Windows shortcuts", () => {
   assert.notEqual(JSON.stringify(shortcut("Copy Email")), JSON.stringify(shortcut("Copy Title")));
 });
 
-test("a failed full load keeps early vault items visible and offers a working Retry", async () => {
+function hookHarness() {
   const slots: unknown[] = [];
   let cursor = 0;
   const effects: (() => void)[] = [];
-  const toasts: { title: string; message: string; primaryAction: { onAction: () => void } }[] = [];
-  let calls = 0;
   const cell = (initial: unknown) => {
     const index = cursor++;
     if (!(index in slots)) slots[index] = initial;
     return index;
   };
-  const { SearchItemsView } = loadView("search-items-view.tsx", {
+  return {
+    effects,
+    render(component: Component, props: Record<string, unknown>) {
+      cursor = 0;
+      return component(props);
+    },
     react: {
       useState: (initial: unknown) => {
         const index = cell(initial);
@@ -151,6 +158,15 @@ test("a failed full load keeps early vault items visible and offers a working Re
         }
       },
     },
+  };
+}
+
+test("a failed full load keeps early vault items visible and offers a working Retry", async () => {
+  const harness = hookHarness();
+  const toasts: { title: string; message: string; primaryAction: { onAction: () => void } }[] = [];
+  let calls = 0;
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
     "@raycast/api": {
       List: { Dropdown: { Section: {}, Item: {} } },
       Icon: {},
@@ -177,11 +193,10 @@ test("a failed full load keeps early vault items visible and offers a working Re
     "./refresh": refresh,
   });
   const render = () => {
-    cursor = 0;
-    return SearchItemsView({ initialVault: { shareId: "vault", name: "Personal" } });
+    return harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" } });
   };
   render();
-  effects.forEach((effect) => effect());
+  harness.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
   assert.deepEqual(render().props.items, [item]);
   assert.equal(toasts.length, 1);
@@ -192,4 +207,178 @@ test("a failed full load keeps early vault items visible and offers a working Re
   await new Promise(setImmediate);
   assert.equal(calls, 2);
   assert.deepEqual(render().props.items, [item]);
+});
+
+test("item-list authentication failures clear saved session metadata on both listing paths", async () => {
+  let clears = 0;
+  const vault = { shareId: "vault", name: "Personal" };
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":" },
+    "./cache": {
+      clearCache: async () => {
+        clears++;
+      },
+    },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => ({
+        listVaults: async () => [vault],
+        listItems: async () => {
+          throw new PassCliError("Session ended", "not_authenticated");
+        },
+      }),
+    },
+    "./core/login": {},
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as {
+    listItems: (id: string, vaults: unknown[]) => Promise<unknown>;
+    listVaultsAndItems: () => Promise<unknown>;
+  };
+  await assert.rejects(api.listItems("vault", [vault]), /Session ended/);
+  await assert.rejects(api.listVaultsAndItems(), /Session ended/);
+  assert.equal(clears, 2);
+});
+
+test("opening a vault offline preserves its earlier per-vault item cache", async () => {
+  const vault = { shareId: "vault", name: "Personal" };
+  const saved = new Map([["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: Date.now() })]]);
+  const cache = loadView("cache.ts", {
+    "@raycast/api": {
+      getPreferenceValues: () => ({}),
+      LocalStorage: { getItem: async (key: string) => saved.get(key) },
+    },
+  });
+  const harness = hookHarness();
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({ enableBackgroundRefresh: false }),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": {
+      listItems: async () => {
+        throw new PassCliError("Offline", "network_error");
+      },
+      listVaultsAndItems: async () => {
+        throw new PassCliError("Offline", "network_error");
+      },
+    },
+    "./types": { PassCliError },
+    "./cache": cache,
+    "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+  });
+  const render = () => harness.render(SearchItemsView, { initialVault: vault });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal((render().props.items as Item[] | undefined)?.[0]?.title, item.title);
+});
+
+test("failed vault loads remain retryable and never write a fresh empty cache", async () => {
+  const harness = hookHarness();
+  let calls = 0;
+  let writes = 0;
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": {
+      listVaultsAndItems: async () => {
+        calls++;
+        return {
+          vaults: [{ shareId: "vault", name: "Personal" }],
+          items: [],
+          failedVaults: [{ vault: { shareId: "vault", name: "Personal" }, message: "Offline" }],
+        };
+      },
+    },
+    "./types": { PassCliError },
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      setCachedItems: async () => {
+        writes++;
+      },
+      setCachedVaults: async () => {
+        writes++;
+      },
+    },
+    "./error-views": {
+      renderErrorView: (type: unknown, onRetry: unknown, _title: unknown, message: unknown) =>
+        type ? { props: { error: type, onRetry, message } } : null,
+    },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(writes, 0);
+  assert.equal(render().props.error, "unknown");
+  assert.equal(render().props.message, "Offline");
+  await (render().props.onRetry as () => Promise<void>)();
+  assert.equal(calls, 2);
+  assert.equal(writes, 0);
+});
+
+test("hiding item details stops automatic secret loads while showing them selects the item", () => {
+  for (const isShowingDetail of [false, true]) {
+    let requested: Item | undefined;
+    const { ItemList } = loadView("item-list.tsx", {
+      "@raycast/api": {
+        List: { Item: {}, Section: {}, EmptyView: {} },
+        Icon: {},
+        Image: { Mask: {} },
+        getPreferenceValues: () => ({}),
+      },
+      "@raycast/utils": {
+        useCachedState: () => [isShowingDetail, () => undefined],
+        useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }),
+      },
+      react: {
+        useMemo: (factory: () => unknown) => factory(),
+        useState: () => [undefined, () => undefined],
+        useRef: (value: unknown) => ({ current: value }),
+        useCallback: (callback: unknown) => callback,
+      },
+      "./avatar": { getInitialIconDataUri: () => "" },
+      "./format": format,
+      "./item-actions": {},
+      "./item-detail-panel": {},
+      "./item-detail-store": {
+        ItemDetailStore: class {
+          peek() {
+            return undefined;
+          }
+        },
+        useItemDetail: (_store: unknown, selected: Item | undefined) => {
+          requested = selected;
+          return { isLoading: false };
+        },
+      },
+      "./utils": { getItemIcon: () => "" },
+    });
+    ItemList({ items: [item], isLoading: false, emptyView: {} });
+    assert.equal(requested, isShowingDetail ? item : undefined);
+  }
 });
