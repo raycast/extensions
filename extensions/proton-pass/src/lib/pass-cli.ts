@@ -79,6 +79,8 @@ export async function loginWithBrowser(): Promise<void> {
       timeoutMs: LOGIN_TIMEOUT_MS,
     },
   );
+  // The new session may belong to another account, so don't show the previous session's cached items.
+  await clearCache();
 }
 
 export async function checkAuth(): Promise<boolean> {
@@ -94,39 +96,69 @@ export async function listVaults(): Promise<Vault[]> {
     await ensureMockCacheCleared();
     return MOCK_VAULTS;
   }
-  return (await getAdapter()).listVaults();
+  try {
+    return await (await getAdapter()).listVaults();
+  } catch (error) {
+    // Cached items belong to the session that wrote them: once it has ended, they must not show up again.
+    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    throw error;
+  }
 }
 
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
   return (await getAdapter()).listItems(shareId, vaultName);
 }
 
-export async function listItems(shareId?: string): Promise<Item[]> {
+// Each pass-cli call takes ~0.5-1.5s, so listing vaults one after another adds up quickly
+// for accounts with many vaults. Run a bounded number of calls in parallel instead.
+const VAULT_LIST_CONCURRENCY = 8;
+
+async function mapWithConcurrency<T, R>(values: T[], limit: number, fn: (value: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(values.length);
+  let next = 0;
+  async function worker() {
+    while (next < values.length) {
+      const index = next++;
+      results[index] = await fn(values[index]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
+  return results;
+}
+
+export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Item[]> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
     return shareId ? MOCK_ITEMS.filter((item) => item.shareId === shareId) : MOCK_ITEMS;
   }
 
-  const vaults = await listVaults();
+  const knownVaults = vaults ?? (await listVaults());
   if (shareId) {
-    const vault = vaults.find((candidate) => candidate.shareId === shareId);
+    const vault = knownVaults.find((candidate) => candidate.shareId === shareId);
     return listItemsFromVault(shareId, vault?.name ?? "Unknown Vault");
   }
 
-  const allItems: Item[] = [];
-  for (const vault of vaults) {
+  const itemsPerVault = await mapWithConcurrency(knownVaults, VAULT_LIST_CONCURRENCY, async (vault) => {
     try {
-      allItems.push(...(await listItemsFromVault(vault.shareId, vault.name)));
+      return await listItemsFromVault(vault.shareId, vault.name);
     } catch (error) {
       const type = error instanceof PassCliError ? error.type : "unknown";
       const message = error instanceof Error ? error.message : "Unknown error";
       console.error(`Failed to list items from vault ${vault.name} (${type}): ${message}`);
+      return [];
     }
-  }
-  return allItems;
+  });
+  return itemsPerVault.flat();
 }
 
-export async function getItem(shareId: string, itemId: string): Promise<ItemDetail> {
+/** Lists vaults once and reuses them for the item listing, instead of listing vaults twice. */
+export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: Item[] }> {
+  const vaults = await listVaults();
+  const items = await listItems(undefined, vaults);
+  return { vaults, items };
+}
+
+export async function getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail> {
   if (USE_MOCK_DATA) {
     const detail = MOCK_ITEM_DETAILS[itemId];
     if (detail) return detail;
@@ -134,7 +166,7 @@ export async function getItem(shareId: string, itemId: string): Promise<ItemDeta
     if (item) return { ...item, password: "mock-password-123" };
     throw new PassCliError("Item not found", "invalid_output");
   }
-  return (await getAdapter()).getItem(shareId, itemId);
+  return (await getAdapter()).getItem(shareId, itemId, vaultName);
 }
 
 export async function getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>> {

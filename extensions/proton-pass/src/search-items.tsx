@@ -14,15 +14,20 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { listItems, listVaults, getItem, getTotp, checkAuth } from "./lib/pass-cli";
+import { listVaultsAndItems, getItem, getTotp } from "./lib/pass-cli";
 import { Item, ItemDetail as ItemDetailType, PassCliError, PassCliErrorType, Vault } from "./lib/types";
 import { getItemIcon, formatItemSubtitle, maskPassword } from "./lib/utils";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { platformShortcut } from "./lib/shortcuts";
 
+// Raycast's markdown renderer shows backslash escapes literally in some contexts (e.g. "example\\.com"),
+// so only escape characters that actually change inline rendering, plus block markers at line start.
 function escapeMarkdown(value: string): string {
-  return value.replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
+  return value
+    .replace(/([\\`*_[\]<>|])/g, "\\$1")
+    .replace(/^(\s*)([#>+-])(?=\s)/gm, "$1\\$2")
+    .replace(/^(\s*\d+)([.)])(?=\s)/gm, "$1\\$2");
 }
 
 function originOf(raw?: string): string | undefined {
@@ -51,7 +56,7 @@ function ItemDetail({ item }: { item: Item }) {
 
   async function loadDetail() {
     try {
-      const itemDetail = await getItem(item.shareId, item.itemId);
+      const itemDetail = await getItem(item.shareId, item.itemId, item.vaultName);
       setDetail(itemDetail);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "An unknown error occurred";
@@ -315,37 +320,31 @@ export default function Command() {
 
     const [cachedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
     if (cachedItems && cachedVaults && !hasLoadedFromCache.current) {
-      setItems(cachedItems);
-      setVaults(cachedVaults);
-      setIsLoading(false);
+      // Show cached metadata right away, even when stale: the first pass-cli call can take
+      // several seconds, so waiting for it before rendering anything feels broken.
+      setItems(cachedItems.data);
+      setVaults(cachedVaults.data);
       hasLoadedFromCache.current = true;
 
-      if (!backgroundRefreshEnabled) {
+      const isStale = cachedItems.isStale || cachedVaults.isStale;
+      if (!isStale && !backgroundRefreshEnabled) {
+        setIsLoading(false);
         return;
       }
     }
 
     try {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        setError({ type: "not_authenticated" });
-        setIsLoading(false);
-        return;
-      }
-
-      const [freshItems, freshVaults] = await Promise.all([listItems(), listVaults()]);
+      const { vaults: freshVaults, items: freshItems } = await listVaultsAndItems();
       setItems(freshItems);
       setVaults(freshVaults);
 
       await Promise.all([setCachedItems(freshItems), setCachedVaults(freshVaults)]);
     } catch (err: unknown) {
-      if (!hasLoadedFromCache.current) {
-        if (err instanceof PassCliError) {
-          setError({ type: err.type, message: err.message });
-        } else {
-          const message = err instanceof Error ? err.message : "An unknown error occurred";
-          setError({ type: "unknown", message });
-        }
+      const type = err instanceof PassCliError ? err.type : "unknown";
+      // A logged-out session must surface even when cached items are on screen.
+      if (!hasLoadedFromCache.current || type === "not_authenticated") {
+        const message = err instanceof Error ? err.message : "An unknown error occurred";
+        setError({ type, message });
       }
     } finally {
       setIsLoading(false);
@@ -371,7 +370,7 @@ export default function Command() {
     return match ? `${match.shareId}-${match.itemId}` : undefined;
   }, [activeOrigin, sortedFilteredItems, webIntegrationEnabled]);
 
-  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items");
+  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;
 
   return (

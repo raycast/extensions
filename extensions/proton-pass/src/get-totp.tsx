@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listItems, getTotp, checkAuth } from "./lib/pass-cli";
+import { listItems, getTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
@@ -59,7 +59,7 @@ export default function Command() {
   async function loadTotpItems() {
     setError(null);
 
-    const cachedItems = await getCachedItems();
+    const cachedItems = (await getCachedItems())?.data;
     if (cachedItems) {
       const cachedTotpItems = cachedItems.filter((item) => item.hasTotp);
       if (cachedTotpItems.length > 0) {
@@ -87,13 +87,6 @@ export default function Command() {
     }
 
     try {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        setError("not_authenticated");
-        setIsLoading(false);
-        return;
-      }
-
       const freshItems = await listItems();
       await setCachedItems(freshItems);
 
@@ -112,7 +105,7 @@ export default function Command() {
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
     } catch (e: unknown) {
-      if (!cachedItems) {
+      if (!cachedItems || (e instanceof PassCliError && e.type === "not_authenticated")) {
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {

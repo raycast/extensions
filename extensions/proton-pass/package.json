@@ -111,7 +111,7 @@
       "name": "cacheExpiration",
       "type": "dropdown",
       "title": "Cache Expiration",
-      "description": "How long cached metadata remains usable. Background Refresh can update it sooner.",
+      "description": "How long cached metadata is considered fresh. Older data is still shown instantly while it refreshes in the background.",
       "default": "5",
       "required": false,
       "data": [
