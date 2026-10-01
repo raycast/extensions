@@ -15,7 +15,7 @@
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
 - Websites are shown as clickable tags
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
-- New Primary Action preference: Enter still opens View Details by default, or copies the password. View Details shows the same rows as the panel, beside the title and the full note
+- New Primary Action preference: Enter still opens View Details by default, or copies the password (notes open with Show Note, and items without a password keep View Details). View Details shows the same rows as the panel, beside the title and the full note
 - New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
 - Search also matches usernames, emails and website domains

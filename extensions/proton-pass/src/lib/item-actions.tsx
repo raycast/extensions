@@ -36,7 +36,8 @@ export const ItemActions = memo(function ItemActions({
   const canFill = canFillFrontmostApp && hasPassword;
   const canPaste = canFillFrontmostApp && Boolean(item.email || item.username || hasPassword || item.hasTotp);
   const primaryAction = preferences.primaryAction ?? "details";
-  const viewDetailsFirst = primaryAction === "details";
+  // Copy Password and Fill Login only take Enter where there's a password; notes open with Show Note.
+  const viewDetailsFirst = primaryAction === "details" || (!hasPassword && item.type !== "note");
   const fillFirst = canFill && primaryAction === "fill";
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
