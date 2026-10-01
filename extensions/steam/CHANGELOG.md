@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [Local Search, Recommendations, and New AI Tools] - {PR_MERGE_DATE}
+## [Local Search, Recommendations, and New AI Tools] - 2026-10-01
 
 - Fix game details showing "Game not found" for every game
 - With a Web API Key, search runs from a local list of every Steam game, refreshed daily or weekly. Games stay findable by their old names after a rename
