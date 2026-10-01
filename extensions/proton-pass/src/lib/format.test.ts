@@ -14,6 +14,11 @@ test("adds a scheme to URLs saved without one", () => {
   assert.equal(toOpenableUrl("example.com/login"), "https://example.com/login");
   assert.equal(toOpenableUrl("http://example.com"), "http://example.com");
   assert.equal(toOpenableUrl("ssh://example.com"), "ssh://example.com");
+  assert.equal(toOpenableUrl("localhost:3000/login"), "https://localhost:3000/login");
+  assert.equal(toOpenableUrl("example.com:8443"), "https://example.com:8443");
+  assert.equal(toOpenableUrl("[::1]:3000/login"), "https://[::1]:3000/login");
+  assert.equal(toOpenableUrl("mailto:hello@example.com"), "mailto:hello@example.com");
+  assert.equal(toOpenableUrl("tel:123456"), "tel:123456");
 });
 
 test("formats modification dates relative to now", () => {

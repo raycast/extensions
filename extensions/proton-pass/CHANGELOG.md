@@ -4,7 +4,7 @@
 
 - Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last, and their copy actions also work with the panel hidden
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
-- Websites are shown as clickable tags
+- Websites are shown as clickable tags, including saved hosts with a port (`example.com:8443`)
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
 - New Primary Action preference: Enter still opens View Details by default, or copies the password (notes open with Show Note, and items without a password keep View Details). View Details shows the same rows as the panel, beside the title and the full note
 - New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
@@ -19,7 +19,7 @@
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
-- Update `@raycast/utils` to 2.x
+- Update `@raycast/utils` to 2.x, and `brace-expansion` to versions without known vulnerabilities
 - Shorter preference texts; Background Refresh, Web Integration and Website Icons are grouped under Item List
 
 ## [Faster Loading] - 2026-10-01
