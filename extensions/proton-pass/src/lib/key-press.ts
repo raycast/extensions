@@ -24,7 +24,9 @@ export function keyPressScript(keyCode: number, modifiers: KeyModifier[], bundle
   const using = modifiers.length > 0 ? ` using {${modifiers.map((modifier) => `${modifier} down`).join(", ")}}` : "";
   return [
     'tell application "System Events"',
-    `  if bundle identifier of first application process whose frontmost is true is not "${bundleId}" then error "${NOT_FRONTMOST_ERROR}"`,
+    // In a variable first: a comparison right after a `whose` filter would become part of the filter.
+    "  set frontmostBundleId to bundle identifier of first application process whose frontmost is true",
+    `  if frontmostBundleId is not "${bundleId}" then error "${NOT_FRONTMOST_ERROR}"`,
     `  key code ${keyCode}${using}`,
     "end tell",
   ].join("\n");

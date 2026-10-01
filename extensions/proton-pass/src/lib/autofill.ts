@@ -72,6 +72,7 @@ function createRaycastDriver(): FillDriver {
     },
     wait,
     showHud: (message) => showHUD(message),
+    logError: (error) => console.error("Couldn't fill:", error),
     finish: () => popToRoot({ clearSearchBar: true }),
   };
 }

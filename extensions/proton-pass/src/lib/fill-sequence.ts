@@ -22,6 +22,8 @@ export interface FillDriver {
   returnToPreviousApp(): Promise<void>;
   wait(ms: number): Promise<void>;
   showHud(message: string): Promise<void>;
+  /** Records why filling failed, since the HUD only gives the gist. */
+  logError?(error: unknown): void;
   /** Called last, whatever happened. */
   finish(): Promise<void>;
 }
@@ -86,6 +88,7 @@ export async function runFill(
       if (getClipboardValue && clipboardValueFailureHud) await driver.showHud(clipboardValueFailureHud);
     }
   } catch (error: unknown) {
+    driver.logError?.(error);
     if (hasChangedClipboard) await driver.restoreClipboard(previousClipboard);
     await driver.showHud(failureHud(error));
   } finally {
