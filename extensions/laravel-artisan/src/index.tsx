@@ -1,10 +1,16 @@
-import { List, Icon, Action, ActionPanel, environment, AI } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, environment, AI, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { useVersions } from "./hooks/useVersions";
 import { useCommands } from "./hooks/useCommands";
 import { DetailsView } from "./components/DetailsView";
 import { VersionSelect } from "./components/VersionSelect";
-import { SummaryView } from "./components/SummaryView";
+
+// Raycast can't deeplink an extension's own Ask command, so Quick AI gets the mention as text
+const askAiUrl = (prompt: string) =>
+  `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/ai/quick-ai?fallbackText=${encodeURIComponent(
+    `@laravel-artisan{id=node_package_e:n:KevinBatdorf/laravel-artisan} ${prompt}`,
+  )}`;
 
 export default function Artisan() {
   const [version, setVersion] = useState<string | undefined>(undefined);
@@ -39,7 +45,15 @@ export default function Artisan() {
           actions={
             <ActionPanel>
               {environment.canAccess(AI) ? (
-                <Action.Push target={<SummaryView command={command} />} title="View Summary" />
+                <Action
+                  title="Ask AI"
+                  icon={Icon.SpeechBubble}
+                  onAction={() =>
+                    open(askAiUrl(`Tell me about php artisan ${command.name} in Laravel ${version}`)).catch((error) =>
+                      showFailureToast(error, { title: "Couldn't open Quick AI" }),
+                    )
+                  }
+                />
               ) : null}
               {/* TODO: Not sure if we can append a space after the command */}
               <Action.CopyToClipboard title="Copy to Clipboard" content={command.name} />

@@ -54,6 +54,7 @@
     }
   ],
   "ai": {
+    "instructions": "Before answering any question about an Artisan command, what it does, or its options and arguments, call Search Artisan Commands and answer from its results, not from memory. Pass the Laravel version when the user names one.",
     "evals": [
       {
         "input": "@laravel-artisan how do I make a model with a migration?",
@@ -93,6 +94,44 @@
           },
           {
             "includes": "--migration"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-artisan tell me about the tinker command",
+        "mocks": {
+          "search-artisan-commands": {
+            "version": "13.x",
+            "commands": [
+              {
+                "name": "tinker",
+                "description": "Interact with your application",
+                "usage": "php artisan tinker [--execute [EXECUTE]] [--] [<include>...]",
+                "options": [
+                  {
+                    "name": "--execute",
+                    "description": "Execute the given code using Tinker",
+                    "takesValue": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "include",
+                    "description": "Include file(s) before starting tinker",
+                    "required": false
+                  }
+                ]
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-artisan-commands"
+          },
+          {
+            "includes": "--execute"
           }
         ]
       }
