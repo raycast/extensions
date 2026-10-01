@@ -67,18 +67,12 @@ export default function Command() {
     return { projectMap, customerMap };
   };
 
-  useEffect(() => {
-    // Load everything first and set the state in one go. Raycast keeps showing the previous menu while
-    // isLoading is true, so a partial state (activities without projects) would render as a flicker.
-    const load = async () => {
-      // try/finally: a failing cache read must not leave the menu in the loading state.
-      try {
-        await loadMenu();
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    const loadMenu = async () => {
+  // Load everything first and set the state in one go. Raycast keeps showing the previous menu while
+  // isLoading is true, so a partial state (activities without projects) would render as a flicker.
+  const load = async (forceRefresh: boolean) => {
+    setIsLoading(true);
+    // try/finally: a failing cache read must not leave the menu in the loading state.
+    try {
       const [cachedActivities, cachedProjects, layouts, order] = await Promise.all([
         getTodaysActivities(),
         getProjects(),
@@ -91,7 +85,8 @@ export default function Command() {
       // so the menu opens without waiting for the API. A click fetches too when the cache is empty (first run)
       // or holds activities of another day (after midnight or sleep, before the next background run).
       const isStale = cachedActivities.some((activity) => activity.date !== localDate());
-      if (environment.launchType === LaunchType.Background || cachedProjects.length === 0 || isStale) {
+      const isBackground = environment.launchType === LaunchType.Background;
+      if (forceRefresh || isBackground || cachedProjects.length === 0 || isStale) {
         try {
           ({ activities, projects } = await refreshCache());
         } catch (error) {
@@ -102,8 +97,13 @@ export default function Command() {
       setFavoriteOrder(order);
       setActivities(activities);
       setProjects(projects.filter((project) => project.contract?.active !== false));
-    };
-    load().catch((error) => console.error("Error loading the MOCO menu bar", error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load(false).catch((error) => console.error("Error loading the MOCO menu bar", error));
   }, []);
 
   // Hidden projects (project list) and hidden or inactive tasks stay out of the menu.
@@ -339,6 +339,12 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          icon={Icon.ArrowClockwise}
+          title="Refresh"
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          onAction={() => load(true).catch((error) => console.error("Error loading the MOCO menu bar", error))}
+        />
         {hiddenProjects.length > 0 ? (
           <MenuBarExtra.Submenu icon={Icon.EyeDisabled} title="Hidden Projects">
             {Array.from(hiddenCustomerMaps.customerMap.entries()).flatMap(([customerId, customer]) => {

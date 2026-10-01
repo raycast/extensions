@@ -55,6 +55,8 @@ moco_menu_bar, background run (30s)
 moco_menu_bar, click
   → reads the cache (fast, no API wait), fetches only if the cache is empty or from another day
   → after a timer action: refreshTodaysActivities()
+moco_menu_bar, "Refresh" row (⌘R)
+  → always refreshCache()
 views (lists, forms)
   → useCachedPromise → API, cached between runs
 ```
