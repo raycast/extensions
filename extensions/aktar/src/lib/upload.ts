@@ -4,7 +4,7 @@ import path from "node:path";
 import { getStatus, uploadFile } from "../api/client";
 import type { Upload } from "../api/types";
 import { showAktarFailure } from "./errors";
-import { expiryWarning, isExpiryNotSetUp } from "./expiry";
+import { expiryNote, expiryWarning, isExpiryNotSetUp } from "./expiry";
 import { fetchFormat, formatUploads } from "./output";
 
 export type UploadTarget = {
@@ -92,10 +92,13 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     toast.style = Toast.Style.Success;
     if (uploads.length === 1) {
       toast.title = uploads[0].reused ? "Already uploaded" : `Uploaded ${uploads[0].filename}`;
-      toast.message = uploads[0].reused ? "Copied the existing link" : "Link copied to clipboard";
+      toast.message = uploads[0].reused
+        ? `Copied the existing link.${expiryNote(uploads[0])}`
+        : "Link copied to clipboard";
     } else {
-      toast.title = `Uploaded ${uploads.length} files`;
-      toast.message = `${reusedNote(uploads)}Links copied to clipboard`;
+      const summary = batchSummary(uploads);
+      toast.title = summary.title;
+      toast.message = `${summary.note}Links copied to clipboard`;
     }
     if (warning) {
       toast.style = Toast.Style.Failure;
@@ -106,14 +109,24 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     }
   } else {
     toast.style = Toast.Style.Failure;
-    toast.title = `Uploaded ${uploads.length} of ${paths.length} files`;
-    toast.message = `${reusedNote(uploads)}${warning ? `${failures[0]}. ${warning}` : failures[0]}`;
+    const reused = uploads.filter((upload) => upload.reused).length;
+    toast.title = `Uploaded ${uploads.length - reused} of ${paths.length} files`;
+    toast.message = `${reused > 0 ? `${reused} already uploaded. ` : ""}${warning ? `${failures[0]}. ${warning}` : failures[0]}`;
   }
   return uploads;
 }
 
-/** "2 already uploaded. " when Aktar reused existing links for some of the files, otherwise empty. */
-export function reusedNote(uploads: Upload[]) {
+/**
+ * The title for several finished uploads, counting only the files that were
+ * actually uploaded, and a note ("2 already uploaded. ") for the ones whose
+ * existing links Aktar reused instead.
+ */
+export function batchSummary(uploads: Upload[]) {
   const reused = uploads.filter((upload) => upload.reused).length;
-  return reused > 0 ? `${reused === uploads.length ? "All" : reused} already uploaded. ` : "";
+  const uploaded = uploads.length - reused;
+  if (uploaded === 0) return { title: `All ${reused} files already uploaded`, note: "" };
+  return {
+    title: `Uploaded ${uploaded} ${uploaded === 1 ? "file" : "files"}`,
+    note: reused > 0 ? `${reused} already uploaded. ` : "",
+  };
 }

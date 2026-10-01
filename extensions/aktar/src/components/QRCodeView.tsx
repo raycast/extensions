@@ -11,6 +11,12 @@ type Link = {
   note?: string;
 };
 
+type Resolved = Link & {
+  /** The QR code PNG, or undefined when the link couldn't be made into one (see `qrError`). */
+  file?: string;
+  qrError?: string;
+};
+
 type Props = {
   /** The file the link points to; names the saved image and the view. */
   name: string;
@@ -25,26 +31,46 @@ const DISPLAY_SIZE = 300;
 export function QRCodeView({ name, link }: Props) {
   // Kept from the first render, so a new function on every render doesn't create a new link each time.
   const [source] = useState(() => link);
-  const { data, isLoading } = usePromise(
-    async (from: Props["link"]) => {
+  const canRefresh = typeof source === "function";
+  const { data, error, isLoading, revalidate } = usePromise(
+    async (from: Props["link"]): Promise<Resolved> => {
       const resolved: Link = typeof from === "string" ? { url: from } : await from();
-      return { ...resolved, file: await writeQRCode(resolved.url) };
+      // A link too long for a QR code is still worth showing, with its own actions.
+      try {
+        return { ...resolved, file: await writeQRCode(resolved.url) };
+      } catch (qrError) {
+        return { ...resolved, qrError: qrError instanceof Error ? qrError.message : String(qrError) };
+      }
     },
     [source],
     {
       onError: (error) => {
-        showAktarFailure(error, "Couldn't create the QR code");
+        showAktarFailure(error, "Couldn't create the link");
       },
     },
   );
 
-  const markdown = data
-    ? [
-        `![QR code for the link](${pathToFileURL(data.file).href}?raycast-width=${DISPLAY_SIZE}&raycast-height=${DISPLAY_SIZE})`,
-        "```\n" + data.url + "\n```",
-        data.note ?? "",
-      ].join("\n\n")
-    : "";
+  const refreshAction = canRefresh && (
+    <Action
+      title="Create New Link"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={revalidate}
+    />
+  );
+
+  let markdown = "";
+  if (data) {
+    markdown = [
+      data.file
+        ? `![QR code for the link](${pathToFileURL(data.file).href}?raycast-width=${DISPLAY_SIZE}&raycast-height=${DISPLAY_SIZE})`
+        : `Couldn't create the QR code: ${data.qrError}`,
+      "```\n" + data.url + "\n```",
+      data.note ?? "",
+    ].join("\n\n");
+  } else if (error && !isLoading) {
+    markdown = `Couldn't create the link: ${error.message}`;
+  }
 
   return (
     <Detail
@@ -52,40 +78,54 @@ export function QRCodeView({ name, link }: Props) {
       navigationTitle={`QR Code for ${name}`}
       markdown={markdown}
       actions={
-        data && (
+        data ? (
           <ActionPanel>
             <ActionPanel.Section>
               <Action.CopyToClipboard title="Copy Link" content={data.url} />
               <Action.OpenInBrowser url={data.url} />
             </ActionPanel.Section>
-            <ActionPanel.Section>
-              <Action
-                title="Copy QR Code Image"
-                icon={Icon.Image}
-                shortcut={Keyboard.Shortcut.Common.Copy}
-                onAction={async () => {
-                  await Clipboard.copy({ file: data.file });
-                  await showToast({ style: Toast.Style.Success, title: "Copied QR code image" });
-                }}
-              />
-              <Action
-                title="Save QR Code"
-                icon={Icon.Download}
-                shortcut={Keyboard.Shortcut.Common.Save}
-                onAction={async () => {
-                  try {
-                    const saved = await saveQRCode(data.file, name);
-                    await showInFinder(saved);
-                    await showToast({ style: Toast.Style.Success, title: "Saved QR code to Downloads" });
-                  } catch (error) {
-                    await showAktarFailure(error, "Couldn't save the QR code");
-                  }
-                }}
-              />
-            </ActionPanel.Section>
+            {data.file && <QRCodeActions file={data.file} name={name} />}
+            {refreshAction && <ActionPanel.Section>{refreshAction}</ActionPanel.Section>}
           </ActionPanel>
+        ) : (
+          error &&
+          refreshAction && (
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          )
         )
       }
     />
+  );
+}
+
+function QRCodeActions({ file, name }: { file: string; name: string }) {
+  return (
+    <ActionPanel.Section>
+      <Action
+        title="Copy QR Code Image"
+        icon={Icon.Image}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+        onAction={async () => {
+          await Clipboard.copy({ file });
+          await showToast({ style: Toast.Style.Success, title: "Copied QR code image" });
+        }}
+      />
+      <Action
+        title="Save QR Code"
+        icon={Icon.Download}
+        shortcut={Keyboard.Shortcut.Common.Save}
+        onAction={async () => {
+          try {
+            const saved = await saveQRCode(file, name);
+            await showInFinder(saved);
+            await showToast({ style: Toast.Style.Success, title: "Saved QR code to Downloads" });
+          } catch (error) {
+            await showAktarFailure(error, "Couldn't save the QR code");
+          }
+        }}
+      />
+    </ActionPanel.Section>
   );
 }

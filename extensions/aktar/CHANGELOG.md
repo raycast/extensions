@@ -2,9 +2,9 @@
 
 ## [QR Codes and Renaming] - {PR_MERGE_DATE}
 
-- Show QR Code (⌘⇧Q) in Search Uploads and Browse Buckets, for public links and temporary links. Copy the QR code image or save it to Downloads
+- Show QR Code (⌘⇧Q) in Search Uploads and Browse Buckets, for public links and temporary links. Copy the QR code image or save it to Downloads, or create a new temporary link (⌘R)
 - Name field in Upload File: upload a single file under a different name, keeping its extension
-- "Already uploaded" when Aktar finds the same file already in the destination and copies its existing link instead of uploading it again
+- "Already uploaded" when Aktar finds the same file already in the destination and copies its existing link instead of uploading it again (Aktar 0.10.0 or later). Batch messages count only the files actually uploaded
 - WebP and AVIF image conversion, `{md5}` and `{sha256}` file names, and files larger than 5 GB are handled by Aktar 0.10.0 for Mac and Aktar 0.3.0 for Windows, with no extension settings needed
 
 ## [Delete After] - 2026-09-30

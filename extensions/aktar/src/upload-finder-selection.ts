@@ -1,6 +1,6 @@
 import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 import { expiryWarning, preferredExpiry } from "./lib/expiry";
-import { onlyFiles, reusedNote, uploadPaths } from "./lib/upload";
+import { batchSummary, onlyFiles, uploadPaths } from "./lib/upload";
 
 export default async function Command() {
   let paths: string[];
@@ -32,7 +32,8 @@ export default async function Command() {
           : `Uploaded ${uploads[0].filename}, link copied`,
       );
     } else {
-      await showHUD(`Uploaded ${uploads.length} files. ${reusedNote(uploads)}Links copied`);
+      const summary = batchSummary(uploads);
+      await showHUD(`${summary.title}. ${summary.note}Links copied`);
     }
   }
 }
