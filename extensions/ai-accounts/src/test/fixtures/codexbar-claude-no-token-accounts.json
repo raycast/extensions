@@ -1,0 +1,11 @@
+[
+  {
+    "source": "auto",
+    "provider": "claude",
+    "error": {
+      "message": "No token accounts configured for claude.",
+      "code": 1,
+      "kind": "provider"
+    }
+  }
+]
