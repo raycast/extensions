@@ -243,6 +243,12 @@ export function allPausesWithinSession(
   );
 }
 
+export function isOpenWithFutureStart(start: Date, end: Date | null | undefined, nowIso?: string): boolean {
+  if (end) return false;
+  const now = nowIso ? new Date(nowIso) : new Date();
+  return start.getTime() > now.getTime();
+}
+
 function rangesOverlap(aStart: Date, aEnd: Date | null, bStart: Date, bEnd: Date | null, nowIso?: string): boolean {
   const now = nowIso ? new Date(nowIso) : new Date();
   return overlapMs(aStart, aEnd ?? now, bStart, bEnd ?? now) > 0;

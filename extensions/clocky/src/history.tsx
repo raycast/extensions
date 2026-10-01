@@ -22,6 +22,7 @@ import {
   hasAnotherOpenSession,
   hasOverlappingPause,
   hasOverlappingSession,
+  isOpenWithFutureStart,
   isPauseWithinSession,
   msBetween,
   msToClock,
@@ -257,6 +258,14 @@ function SessionForm({
       await showToast(Toast.Style.Failure, "End time must be after start time");
       return;
     }
+    if (isOpenWithFutureStart(start, hasEnd ? end : null)) {
+      await showToast(
+        Toast.Style.Failure,
+        "An open session can't start in the future",
+        "Set an end time or pick an earlier start",
+      );
+      return;
+    }
     const success = await onSave({ start, end: hasEnd ? end : undefined });
     if (success) pop();
   };
@@ -459,6 +468,14 @@ function PauseForm({
   const handleSubmit = async () => {
     if (hasEnd && end.getTime() < start.getTime()) {
       await showToast(Toast.Style.Failure, "End time must be after start time");
+      return;
+    }
+    if (isOpenWithFutureStart(start, hasEnd ? end : null)) {
+      await showToast(
+        Toast.Style.Failure,
+        "An open pause can't start in the future",
+        "Set an end time or pick an earlier start",
+      );
       return;
     }
     const success = await onSave({ start, end: hasEnd ? end : undefined });

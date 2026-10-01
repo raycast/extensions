@@ -10,6 +10,7 @@ import {
   hasAnotherOpenSession,
   hasOverlappingPause,
   hasOverlappingSession,
+  isOpenWithFutureStart,
   isPauseWithinSession,
   normalizeWorkDays,
 } from "./utils";
@@ -232,6 +233,28 @@ describe("hasOverlappingPause", () => {
         "2026-09-07T10:00:00.000Z",
       ),
     ).toBe(true);
+  });
+});
+
+describe("isOpenWithFutureStart", () => {
+  const nowIso = "2026-09-07T12:00:00.000Z";
+
+  it("returns true for an open entry starting after now", () => {
+    expect(isOpenWithFutureStart(new Date("2026-09-07T13:00:00.000Z"), null, nowIso)).toBe(true);
+  });
+
+  it("returns false for an open entry starting before now", () => {
+    expect(isOpenWithFutureStart(new Date("2026-09-07T11:00:00.000Z"), null, nowIso)).toBe(false);
+  });
+
+  it("returns false for an open entry starting exactly now", () => {
+    expect(isOpenWithFutureStart(new Date(nowIso), undefined, nowIso)).toBe(false);
+  });
+
+  it("returns false for a closed entry starting after now", () => {
+    expect(
+      isOpenWithFutureStart(new Date("2026-09-07T13:00:00.000Z"), new Date("2026-09-07T14:00:00.000Z"), nowIso),
+    ).toBe(false);
   });
 });
 

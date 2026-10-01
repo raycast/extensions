@@ -9,11 +9,11 @@ A clocked-in period with a `start` and optional `end`. Open when `end` is unset,
 _Avoid_: Shift, entry, clock-in
 
 **valid Session**:
-A Session that does not overlap any other Session in time, regardless of whether that other Session is open or closed.
+A Session that does not overlap any other Session in time, regardless of whether that other Session is open or closed. An open Session cannot start in the future, since it would count as the active Session immediately.
 
 **Pause**:
 A break within a single Session, with its own `start` and optional `end`, open and closed by the same rule as a Session.
 _Avoid_: Break (in code; fine in prose)
 
 **valid Pause**:
-A Pause that falls entirely within its own Session's start/end, and does not overlap any other Pause on the same Session.
+A Pause that falls entirely within its own Session's start/end, and does not overlap any other Pause on the same Session. An open Pause cannot start in the future, since it would count as the active Pause immediately.
