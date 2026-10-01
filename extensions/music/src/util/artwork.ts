@@ -14,6 +14,11 @@ const MAX_CACHED_FILES = 50;
 // Short on purpose: right after a skip Music often has not loaded the new
 // track's artwork yet, so a miss must not stick for long.
 const MISS_TTL_MS = 15 * 1000;
+// A leftover .raw means an extraction was interrupted. Real ones finish in seconds.
+const STALE_RAW_MS = 60 * 1000;
+// Reusing a cached cover refreshes its age so pruning drops the least recently
+// played albums first. Skipped when recent, to avoid a write on every poll.
+const TOUCH_AFTER_MS = 60 * 1000;
 
 const artworkDir = path.join(environment.supportPath, "artwork");
 const inFlight = new Map<string, Promise<string | undefined>>();
@@ -25,16 +30,42 @@ function cacheKey(artist: string, album: string, name: string): string {
   return createHash("sha1").update(basis.toLowerCase()).digest("hex").slice(0, 16);
 }
 
+function ageMs(file: string): number {
+  return Date.now() - fs.statSync(file).mtimeMs;
+}
+
 function prune(): void {
   try {
-    const files = fs
-      .readdirSync(artworkDir)
+    const names = fs.readdirSync(artworkDir);
+
+    // Expired misses and interrupted extractions are just clutter.
+    for (const name of names) {
+      const limit = name.endsWith(".miss") ? MISS_TTL_MS : name.endsWith(".raw") ? STALE_RAW_MS : undefined;
+      if (limit === undefined) continue;
+      const file = path.join(artworkDir, name);
+      if (ageMs(file) > limit) fs.rmSync(file, { force: true });
+    }
+
+    const covers = names
       .filter((f) => f.endsWith(".png"))
       .map((f) => ({ f, t: fs.statSync(path.join(artworkDir, f)).mtimeMs }))
       .sort((a, b) => b.t - a.t);
-    for (const { f } of files.slice(MAX_CACHED_FILES)) fs.rmSync(path.join(artworkDir, f), { force: true });
+    for (const { f } of covers.slice(MAX_CACHED_FILES)) fs.rmSync(path.join(artworkDir, f), { force: true });
   } catch {
     // best effort
+  }
+}
+
+/** True if the cover exists. Also refreshes its age if it has not been used recently. */
+function useCachedCover(file: string): boolean {
+  try {
+    if (ageMs(file) > TOUCH_AFTER_MS) {
+      const now = new Date();
+      fs.utimesSync(file, now, now);
+    }
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -109,7 +140,7 @@ async function extract(key: string, album: string): Promise<string | undefined> 
 export async function getArtworkPath(artist: string, album: string, name: string): Promise<string | undefined> {
   const key = cacheKey(artist, album, name);
   const finalPath = path.join(artworkDir, `${key}.png`);
-  if (fs.existsSync(finalPath)) return finalPath;
+  if (useCachedCover(finalPath)) return finalPath;
 
   const missPath = path.join(artworkDir, `${key}.miss`);
   try {
