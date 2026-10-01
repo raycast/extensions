@@ -2,7 +2,10 @@ import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
 
 export function isTimerEditable(state: State) {
-  return state.entity_id.startsWith("timer") && state.attributes.editable === true;
+  // `editable` reflects whether the timer's definition can be edited in the
+  // UI, not whether its state can be changed - YAML-defined timers report
+  // editable: false but still accept start/pause/cancel.
+  return state.entity_id.startsWith("timer");
 }
 
 export async function callTimerStartService(state: State) {

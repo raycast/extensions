@@ -14,5 +14,8 @@ export async function callInputBooleanTurnOffService(state: State) {
 }
 
 export function isEditableInputBoolean(state: State) {
-  return state.entity_id.startsWith("input_boolean") && state.attributes.editable === true;
+  // `editable` reflects whether the helper's definition (name/icon) can be
+  // edited in the UI, not whether its state can be changed - YAML-defined
+  // helpers report editable: false but still accept turn_on/turn_off/toggle.
+  return state.entity_id.startsWith("input_boolean");
 }

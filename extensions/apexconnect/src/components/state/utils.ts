@@ -24,11 +24,15 @@ export function filterViaPreferencePatterns(states: State[] | undefined, mainPat
   const includedPatterns = includedEntitiesPreferences({ fallback: mainPattern });
   const excludedPatterns = excludedEntitiesPreferences();
   const filterKeepOrder = () => {
-    let res: State[] = [];
+    const seen = new Set<string>();
+    const res: State[] = [];
     for (const includePattern of includedPatterns) {
       const f = filterStates(states, { include: [includePattern], exclude: excludedPatterns });
-      if (f && f.length > 0) {
-        res = res.concat(f);
+      for (const s of f ?? []) {
+        if (!seen.has(s.entity_id)) {
+          seen.add(s.entity_id);
+          res.push(s);
+        }
       }
     }
     return res;
@@ -57,9 +61,20 @@ export function excludedEntitiesPreferences(): string[] {
   return (hidden.split(",").map((h) => h.trim()) || []).filter((h) => h.length > 0);
 }
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function wildcardFilter(filter: string, text: string) {
-  const r = new RegExp("^" + filter.replace(/\*/g, ".*") + "$").test(text);
-  return r;
+  // Only `*` is a wildcard here; everything else in a user-supplied pattern
+  // (e.g. "light.[") must be escaped or RegExp() throws and breaks whatever
+  // view is rendering at the time.
+  try {
+    const pattern = "^" + escapeRegExp(filter).replace(/\\\*/g, ".*") + "$";
+    return new RegExp(pattern).test(text);
+  } catch {
+    return false;
+  }
 }
 
 function wildcardFilters(filters: string[], text: string) {
@@ -247,7 +262,11 @@ export function getStateValue(state: State): string | undefined {
   } else if (state.entity_id.startsWith("binary_sensor")) {
     return getDeviceClassState(state);
   } else if (state.entity_id.startsWith("input_button")) {
-    return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
+    const date = new Date(state.state);
+    if (Number.isNaN(date.getTime())) {
+      return state.state;
+    }
+    return date.toISOString().replace("T", " ").replace("Z", "");
   } else if (state.entity_id.startsWith("update")) {
     if (state.attributes.in_progress === true) {
       return "in progress 🔄";

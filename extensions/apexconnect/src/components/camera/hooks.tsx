@@ -57,14 +57,22 @@ export function useImage(
           return;
         }
         let lastSaved = 0;
+        let savedOnce = false;
         try {
           await apex.readCameraStream(streamUrl, controller.signal, async (frame) => {
-            const interval = getCameraRefreshInterval() ?? 0;
-            const now = Date.now();
-            if (now - lastSaved < interval) {
+            const interval = getCameraRefreshInterval();
+            // null means the user disabled automatic refresh: show the first
+            // frame once and then leave it be, instead of (via `?? 0`) saving
+            // every single incoming frame as fast as the camera sends them.
+            if (interval === null) {
+              if (savedOnce) {
+                return;
+              }
+            } else if (Date.now() - lastSaved < interval) {
               return;
             }
-            lastSaved = now;
+            lastSaved = Date.now();
+            savedOnce = true;
             await saveFrame(frame);
           });
           return; // signal aborted cleanly on unmount

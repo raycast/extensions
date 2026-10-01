@@ -47,6 +47,9 @@ export function useHAStates(): {
   const hawsRef = useRef<Connection>();
 
   useEffect(() => {
+    let didUnmount = false;
+    let unsubscribe: ReturnType<typeof subscribeEntities> | undefined;
+
     async function fetchData() {
       setIsLoading(true);
       setError(undefined);
@@ -54,12 +57,23 @@ export function useHAStates(): {
       try {
         if (!hawsRef.current) {
           const con = await getApexWSConnection();
+          if (didUnmount) {
+            return;
+          }
 
           const entityRegistry = await getEntityRegistry(con);
+          if (didUnmount) {
+            return;
+          }
 
-          subscribeEntities(con, (entities) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const haStates = Object.entries(entities).map(([k, v]) => v as State);
+          // Reopening this view must not leave the previous callback attached
+          // to the shared connection - it would keep firing on a component
+          // that's gone, piling up with every reopen.
+          unsubscribe = subscribeEntities(con, (entities) => {
+            if (didUnmount) {
+              return;
+            }
+            const haStates = Object.values(entities) as State[];
             if (haStates.length > 0) {
               // Apex Connect often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
               const filteredStates = haStates.filter((s) => entityRegistry.isUserVisible(s.entity_id));
@@ -74,13 +88,20 @@ export function useHAStates(): {
         }
         //eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        const err = e instanceof Error ? e : new Error(e);
-        setError(err);
-        setIsLoading(false);
+        if (!didUnmount) {
+          const err = e instanceof Error ? e : new Error(e);
+          setError(err);
+          setIsLoading(false);
+        }
       }
     }
 
     fetchData();
+
+    return () => {
+      didUnmount = true;
+      unsubscribe?.();
+    };
   }, []);
 
   return { states, error, isLoading };

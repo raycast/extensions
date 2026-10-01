@@ -22,7 +22,7 @@ export function TimerStartAction(props: { state: State }): JSX.Element | null {
 
 export function TimerPauseAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("timer") || s.attributes.editable !== true) {
+  if (!isTimerEditable(s)) {
     return null;
   }
   return (

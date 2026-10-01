@@ -35,7 +35,7 @@ function SwitchTurnOnItem(props: { state: State }) {
 function SwitchTurnOffItem(props: { state: State }) {
   const handle = async () => {
     try {
-      await apex.turnOnSwitch(props.state.entity_id);
+      await apex.turnOffSwitch(props.state.entity_id);
     } catch (error) {
       showFailureToast(error);
     }

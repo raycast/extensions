@@ -44,6 +44,8 @@ export class ApexConnectClient {
   public url: string;
   public urlInternal: string | undefined;
   private _nearestURL: string | undefined;
+  private _nearestURLCheckedAt = 0;
+  private static readonly NEAREST_URL_TTL_MS = 60_000;
   private _ignoreCerts = false;
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
@@ -139,7 +141,14 @@ export class ApexConnectClient {
    * @returns The nearest reachable url which is define in the preferences
    */
   public async nearestDefinedURL(): Promise<string> {
-    if (this._nearestURL && this._nearestURL.length > 0) {
+    // Cache the choice briefly rather than forever: a long-running menu bar
+    // command whose Mac switches networks must eventually recheck which URL
+    // is reachable instead of being stuck on the first answer.
+    if (
+      this._nearestURL &&
+      this._nearestURL.length > 0 &&
+      Date.now() - this._nearestURLCheckedAt < ApexConnectClient.NEAREST_URL_TTL_MS
+    ) {
       return this._nearestURL;
     }
     if (!this.url || this.url.length <= 0) {
@@ -148,17 +157,20 @@ export class ApexConnectClient {
     if (this.urlInternal && this.urlInternal.length > 0) {
       if (this.isHomeSSIDActive()) {
         this._nearestURL = this.urlInternal;
+        this._nearestURLCheckedAt = Date.now();
         return this.urlInternal;
       }
       if (this.usePing) {
         const res = await this.pingHostSuccessful(this.urlInternal);
         if (res) {
           this._nearestURL = this.urlInternal;
+          this._nearestURLCheckedAt = Date.now();
           return this.urlInternal;
         }
       }
     }
     this._nearestURL = this.url;
+    this._nearestURLCheckedAt = Date.now();
     return this._nearestURL;
   }
 
@@ -257,7 +269,7 @@ export class ApexConnectClient {
   }
 
   async playMedia(entityID: string): Promise<boolean> {
-    return await this.callService("media_player", "play_media", { entity_id: entityID });
+    return await this.callService("media_player", "media_play", { entity_id: entityID });
   }
 
   async playPauseMedia(entityID: string): Promise<boolean> {
@@ -289,7 +301,7 @@ export class ApexConnectClient {
   }
 
   async muteMedia(entityID: string): Promise<boolean> {
-    return await this.callService("media_player", "volume_mute", { entity_id: entityID });
+    return await this.callService("media_player", "volume_mute", { entity_id: entityID, is_volume_muted: true });
   }
 
   async setVolumeLevelMedia(entityID: string, volumeLevel: number): Promise<boolean> {
@@ -426,6 +438,11 @@ export class ApexConnectClient {
           }
           await onFrame(acc.subarray(start, end + 2));
           acc = acc.subarray(end + 2);
+        }
+        // Bound memory if a frame never completes (corrupt/truncated JPEG):
+        // a real frame is never anywhere near this large.
+        if (acc.length > 5 * 1024 * 1024) {
+          acc = Buffer.alloc(0);
         }
       }
     } finally {

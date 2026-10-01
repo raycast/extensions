@@ -139,6 +139,21 @@ export default function AssistCommand(): JSX.Element {
     showFailureToast(error);
   }
 
+  // The dropdown's onChange only fires on an explicit user selection; with a
+  // single pipeline (or none picked yet) it never fires, which otherwise
+  // leaves the view loading forever with no Send action available.
+  useEffect(() => {
+    if (!pipelines || selectedPipeline) {
+      return;
+    }
+    const preferred = pipelines.pipelines?.find((p) => p.id === pipelines.preferred_pipeline);
+    const initial = preferred ?? pipelines.pipelines?.[0];
+    if (initial) {
+      setSelectedPipeline(initial);
+      setConversations(getInitialConversations());
+    }
+  }, [pipelines, selectedPipeline]);
+
   const process = async () => {
     try {
       if (searchText.length <= 0) {
