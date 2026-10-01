@@ -123,6 +123,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       setVaults(freshVaults);
 
       await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+      if (!isLatest()) return;
       if (failedVaults.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
