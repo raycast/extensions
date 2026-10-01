@@ -28,6 +28,7 @@
 - Error messages no longer include the pass-cli command line (local paths and item IDs)
 - Cached items are cleared when logging in through the extension or when the session has ended, so another account's items don't show up
 - Fix: a vault's item list kept showing cached items after the session ended, instead of the login screen
+- Fix: a vault whose items failed to load looked empty; it now shows the error with a Retry action
 
 ## [Improvements] - 2026-09-19
 
