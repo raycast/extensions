@@ -10,13 +10,13 @@ import {
   getPreferenceValues,
   Keyboard,
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
-import { failedVaultsTitle, getRefreshResult } from "./lib/refresh";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
@@ -37,6 +37,8 @@ export default function Command() {
   const itemsRef = useRef<TotpItem[]>([]);
   const currentTimeStepRef = useRef<number>(getTotpTimeStep());
   const isRefreshingRef = useRef(false);
+  // A slower, older load must not overwrite a newer one (e.g. Retry during a load).
+  const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
     loadTotpItems();
@@ -58,10 +60,13 @@ export default function Command() {
   }, []);
 
   async function loadTotpItems() {
+    const isLatest = loads.start();
     setError(null);
     setIsLoading(true);
 
-    const cachedItems = (await getCachedItems())?.data;
+    // The cache is only shown while nothing else is: Retry keeps the codes on screen.
+    const cachedItems = itemsRef.current.length > 0 ? undefined : (await getCachedItems())?.data;
+    if (!isLatest()) return;
     if (cachedItems) {
       const cachedTotpItems = cachedItems.filter((item) => item.hasTotp);
       if (cachedTotpItems.length > 0) {
@@ -83,6 +88,7 @@ export default function Command() {
             }
           }),
         );
+        if (!isLatest()) return;
         setItems(itemsWithTotp);
         itemsRef.current = itemsWithTotp;
       }
@@ -90,27 +96,33 @@ export default function Command() {
 
     try {
       const { items: freshItems, failedVaults } = await listVaultsAndItems();
-      // Vaults that failed to load keep the items already known, and a partial listing doesn't renew the cache.
+      if (!isLatest()) return;
+      // Vaults that failed to load keep the items on screen (or cached ones before anything was shown),
+      // and a partial listing doesn't renew the cache.
+      const knownItems: TotpItem[] = itemsRef.current.length > 0 ? itemsRef.current : (cachedItems ?? []);
       const {
         items: nextItems,
         isComplete,
         failureMessage,
-      } = getRefreshResult(freshItems, cachedItems ?? [], failedVaults, (item) => item.hasTotp);
-      if (isComplete) await setCachedItems(nextItems);
+      } = getRefreshResult(freshItems, knownItems, failedVaults, (item) => item.hasTotp);
+      // Fresh items only: codes on screen must never reach the cache.
+      if (isComplete) await setCachedItems(freshItems);
       if (failureMessage) throw new Error(failureMessage);
 
-      const totpItems = nextItems.filter((item) => item.hasTotp);
+      const totpItems: TotpItem[] = nextItems.filter((item) => item.hasTotp);
       const itemsWithTotp = await Promise.all(
         totpItems.map(async (item) => {
           try {
             const totp = await getTotp(item.shareId, item.itemId);
             return { ...item, currentTotp: totp };
           } catch {
-            return { ...item, currentTotp: undefined };
+            // Like the periodic refresh, keep the code on screen.
+            return item;
           }
         }),
       );
 
+      if (!isLatest()) return;
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
       if (failedVaults.length > 0) {
@@ -122,6 +134,7 @@ export default function Command() {
         });
       }
     } catch (e: unknown) {
+      if (!isLatest()) return;
       if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_authenticated")) {
         if (e instanceof PassCliError) {
           setError(e.type);
@@ -138,7 +151,7 @@ export default function Command() {
         });
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
