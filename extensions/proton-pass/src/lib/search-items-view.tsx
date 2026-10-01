@@ -1,4 +1,4 @@
-import { List, Icon, getPreferenceValues, BrowserExtension, environment } from "@raycast/api";
+import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import { listVaultsAndItems } from "./pass-cli";
@@ -62,6 +62,13 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const webIntegrationEnabled = preferences.enableWebIntegration ?? true;
   const hasLoadedFromCache = useRef(false);
+  // Latest items, for loadItems() which can run long after it was created (e.g. from a toast action).
+  const itemsRef = useRef<Item[]>([]);
+
+  function updateItems(next: Item[]) {
+    itemsRef.current = next;
+    setItems(next);
+  }
   const { data: activeOrigin } = usePromise(
     async (isWebIntegrationEnabled: boolean) => {
       if (!isWebIntegrationEnabled) return undefined;
@@ -88,7 +95,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     if (cachedItems && cachedVaults && !hasLoadedFromCache.current) {
       // Show cached metadata right away, even when stale: the first pass-cli call can take
       // several seconds, so waiting for it before rendering anything feels broken.
-      setItems(cachedItems.data);
+      updateItems(cachedItems.data);
       setVaults(cachedVaults.data);
       hasLoadedFromCache.current = true;
 
@@ -101,11 +108,25 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
     setIsLoading(true);
     try {
-      const { vaults: freshVaults, items: freshItems } = await listVaultsAndItems();
-      setItems(freshItems);
+      const { vaults: freshVaults, items: freshItems, failedVaults } = await listVaultsAndItems();
+      // Vaults that failed to load keep the items already known, instead of looking empty.
+      const failedIds = new Set(failedVaults.map(({ vault }) => vault.shareId));
+      const nextItems = [...freshItems, ...itemsRef.current.filter((item) => failedIds.has(item.shareId))];
+      updateItems(nextItems);
       setVaults(freshVaults);
 
-      await Promise.all([setCachedItems(freshItems), setCachedVaults(freshVaults)]);
+      await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+      if (failedVaults.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title:
+            failedVaults.length === 1
+              ? `Couldn't Load ${failedVaults[0].vault.name}`
+              : `Couldn't Load ${failedVaults.length} Vaults`,
+          message: failedVaults[0].message,
+          primaryAction: { title: "Retry", onAction: () => void loadItems() },
+        });
+      }
     } catch (err: unknown) {
       const type = err instanceof PassCliError ? err.type : "unknown";
       // A logged-out session must surface even when cached items are on screen.

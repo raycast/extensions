@@ -21,6 +21,7 @@
 - Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
 - Items matching the active browser tab are grouped in a Suggested section
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list
+- Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x
