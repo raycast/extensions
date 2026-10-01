@@ -3,7 +3,6 @@
 ## [Quick Capture] - {PR_MERGE_DATE}
 
 - Add a Quick Capture command for preset Daily Note, To Do, and Shopping routes without the Advanced URI plugin
-- Add shopping items at the top of the configured existing note
 
 ## [Fix notes not loading when a file name contains a backslash] - 2026-09-28
 

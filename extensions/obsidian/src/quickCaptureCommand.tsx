@@ -1,7 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { promises as fs } from "fs";
 import path from "path";
-import lockfile from "proper-lockfile";
 import { useState } from "react";
 import { applyTemplates } from "./api/templating/templating.service";
 import { Obsidian } from "@/obsidian";
@@ -40,26 +39,6 @@ async function resolveNotePath(vaultPath: string, relativePath: string): Promise
   return note;
 }
 
-async function prependShoppingItem(notePath: string, entry: string) {
-  const release = await lockfile.lock(notePath, {
-    retries: { retries: 4, factor: 1.5, minTimeout: 100, maxTimeout: 500 },
-  });
-
-  try {
-    const beforeRead = await fs.stat(notePath);
-    const existing = await fs.readFile(notePath, "utf8");
-    const beforeWrite = await fs.stat(notePath);
-
-    if (beforeRead.mtimeMs !== beforeWrite.mtimeMs || beforeRead.size !== beforeWrite.size) {
-      throw new Error("The shopping note changed while it was being saved. Please try again.");
-    }
-
-    await fs.writeFile(notePath, `${entry}\n${existing}`);
-  } finally {
-    await release();
-  }
-}
-
 export default function QuickCaptureCommand() {
   const preferences = getPreferenceValues<Preferences.QuickCaptureCommand>();
   const [type, setType] = useState<CaptureType>("daily");
@@ -94,11 +73,7 @@ export default function QuickCaptureCommand() {
       const content = await applyTemplates(values.text.trim());
       const entry = values.type === "todo" ? `- [ ] ${content}` : `- ${content}`;
 
-      if (values.type === "shopping") {
-        await prependShoppingItem(notePath, entry);
-      } else {
-        await fs.appendFile(notePath, `\n${entry}`);
-      }
+      await fs.appendFile(notePath, `\n${entry}`);
 
       await showToast({ style: Toast.Style.Success, title: "Saved to Obsidian" });
       await closeMainWindow();

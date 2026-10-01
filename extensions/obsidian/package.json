@@ -675,7 +675,7 @@
           "type": "textfield",
           "title": "Shopping Note Path",
           "required": false,
-          "description": "Existing Markdown file path within the vault. Shopping items are added at the top."
+          "description": "Existing Markdown file path within the vault."
         }
       ]
     }
@@ -732,7 +732,6 @@
     "luxon": "^3.4.4",
     "minisearch": "^7.1.2",
     "pako": "^2.1.0",
-    "proper-lockfile": "^4.1.2",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
@@ -741,7 +740,6 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.14.1",
     "@types/pako": "^2.0.3",
-    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "19.0.10",
     "@vitest/coverage-v8": "^3.2.6",
     "eslint": "^9.22.0",
