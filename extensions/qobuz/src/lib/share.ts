@@ -1,4 +1,4 @@
-import type { Clipboard } from "@raycast/api";
+import { getPreferenceValues, type Clipboard } from "@raycast/api";
 import type { Track } from "@kud/qobuz";
 import { deepLink } from "./client";
 import { isLikelyMatch } from "./resolve";
@@ -33,6 +33,19 @@ const PLATFORM_LABEL: Record<Platform, string> = {
   spotify: "Spotify",
   tidal: "Tidal",
   songlink: "All platforms",
+};
+
+const PREFERENCE_KEY: Record<Exclude<Platform, "qobuz">, keyof Preferences> = {
+  spotify: "includeSpotify",
+  apple: "includeApple",
+  deezer: "includeDeezer",
+  tidal: "includeTidal",
+  songlink: "includeSonglink",
+};
+
+export const enabledLinks = (links: ShareLink[]): ShareLink[] => {
+  const preferences = getPreferenceValues<Preferences>();
+  return links.filter((link) => link.platform === "qobuz" || preferences[PREFERENCE_KEY[link.platform]] !== false);
 };
 
 const fetchJson = async <T>(
@@ -199,10 +212,13 @@ const htmlTitle = (track: Track): string => `🎵 <b>${escapeHtml(shareTitle(tra
 export const formatShareHtml = (track: Track, links: ShareLink[]): string =>
   `${htmlTitle(track)}<br>\n${links.map(htmlLink).join(" · ")}`;
 
-export const shareClipboard = (track: Track, links: ShareLink[]): Clipboard.Content => ({
-  text: formatShareMessage(track, links),
-  html: formatShareHtml(track, links),
-});
+export const shareClipboard = (track: Track, links: ShareLink[]): Clipboard.Content => {
+  const enabled = enabledLinks(links);
+  return {
+    text: formatShareMessage(track, enabled),
+    html: formatShareHtml(track, enabled),
+  };
+};
 
 // Slack unfurls nothing once a message holds more than five links, and picks
 // for itself which ones get a card below that. One bare song.link URL is the
@@ -216,4 +232,4 @@ export const slackClipboard = (track: Track, links: ShareLink[]): Clipboard.Cont
   };
 };
 
-export const countServices = (links: ShareLink[]): number => links.filter((l) => !isSonglink(l)).length;
+export const countServices = (links: ShareLink[]): number => enabledLinks(links).filter((l) => !isSonglink(l)).length;

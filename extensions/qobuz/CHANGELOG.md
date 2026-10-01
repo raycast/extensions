@@ -8,6 +8,7 @@
 - Copy Share Links: the clipboard also carries a rich-text version — title and one line of linked platform names — which Slack, Notion and Mail paste in place of the plain lines
 - Convert Track Link: the Qobuz → other services direction gains the same Copy Share Links action, one Open/Search action per service, and per-service match tags in the metadata
 - Rename the list and menu-bar "Copy Share Link" actions to "Copy Qobuz Link", matching the detail views
+- Copy Share Links / Convert Track Link: extension preferences let you choose which streaming services appear in the share message (Spotify, Apple Music, Deezer, Tidal, All platforms); all enabled by default
 
 ## [Now Playing fallback] - 2026-09-12
 

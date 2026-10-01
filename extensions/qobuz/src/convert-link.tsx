@@ -12,7 +12,7 @@ import {
   type ResolveFailure,
   type ResolvedTrack,
 } from "./lib/resolve";
-import { shareClipboard, shareLinks, shareQuery, slackClipboard, type ShareLink } from "./lib/share";
+import { shareClipboard, shareLinks, shareQuery, slackClipboard, enabledLinks, type ShareLink } from "./lib/share";
 
 type Source = "argument" | "now-playing" | "clipboard";
 
@@ -185,6 +185,7 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
   }
 
   if (data.mode === "from-qobuz") {
+    const enabled = enabledLinks(data.links);
     const slackShare = slackClipboard(data.track, data.links);
     return (
       <ActionPanel>
@@ -194,7 +195,7 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
           content={shareClipboard(data.track, data.links)}
         />
         {slackShare && <Action.CopyToClipboard title="Copy for Slack" icon={Icon.SpeechBubble} content={slackShare} />}
-        {data.links
+        {enabled
           .filter((link) => link.platform !== "qobuz")
           .map((link) => (
             <Action.OpenInBrowser
@@ -273,13 +274,14 @@ function ToQobuzMetadata({ data, track }: { data: ToQobuz; track: Track }) {
 }
 
 function FromQobuzMetadata({ data, track }: { data: FromQobuz; track: Track }) {
+  const enabled = enabledLinks(data.links);
   return (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Source" text={SOURCE_LABEL[data.source]} />
       <Detail.Metadata.Separator />
       <TrackFacts track={track} />
       <Detail.Metadata.Separator />
-      {data.links
+      {enabled
         .filter((link) => link.platform !== "qobuz" && link.platform !== "songlink")
         .map((link) => (
           <Detail.Metadata.TagList key={link.platform} title={LINK_LABEL[link.platform]}>

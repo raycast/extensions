@@ -18,7 +18,7 @@ Search Qobuz, see what's playing, and manage your favourites and playlists — o
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Now Playing**        | Menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link. Refreshes every minute.                                    |
 | **Convert Track Link** | Convert the track Qobuz is on — or a Spotify, YouTube Music, or Qobuz track link from the clipboard — to the other services, with an exact ISRC match where one exists. |
-| **Copy Share Links**   | Copy a ready-to-paste message for the current track: title and artist, then a link per streaming service and a song.link line for everything else.                      |
+| **Copy Share Links**   | Copy a ready-to-paste message for the current track: title and artist, then a link per streaming service and a song.link line for everything else. Preferences control which services appear (all on by default). |
 | **Copy for Slack**     | Copy the current track title and a single song.link URL, so Slack unfurls one preview card with the artwork.                                                            |
 
 ### Playback controls

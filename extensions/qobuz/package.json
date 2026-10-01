@@ -121,6 +121,47 @@
       "title": "Qobuz Token",
       "description": "Your Qobuz user_auth_token (X-User-Auth-Token header from a www.qobuz.com/api.json request). Leave empty to reuse the token from the Qobuz CLI's Keychain entry.",
       "required": false
+    },
+    {
+      "name": "includeSpotify",
+      "type": "checkbox",
+      "title": "Include in Share Message",
+      "label": "Spotify",
+      "description": "Include a Spotify link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeApple",
+      "type": "checkbox",
+      "label": "Apple Music",
+      "description": "Include an Apple Music link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeDeezer",
+      "type": "checkbox",
+      "label": "Deezer",
+      "description": "Include a Deezer link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeTidal",
+      "type": "checkbox",
+      "label": "Tidal",
+      "description": "Include a Tidal link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeSonglink",
+      "type": "checkbox",
+      "label": "All platforms (song.link)",
+      "description": "Include a song.link URL that resolves to all other platforms.",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
