@@ -1,7 +1,7 @@
 import { SuggestionPrefs } from "./model";
 
-// Raw preference values as Raycast delivers them (see package.json "preferences").
-export interface RawPreferences {
+// Parser input type, not a copy of the manifest preferences.
+export interface PreferenceInput {
   cswapPath?: string;
   codexbarPath?: string;
   codexPath?: string;
@@ -29,12 +29,28 @@ export interface Config {
   suggestion: SuggestionPrefs;
 }
 
-export function toConfig(raw: RawPreferences): Config {
+export function detectExecutable(candidates: readonly string[], isExecutable: (file: string) => boolean): string {
+  return candidates.find(isExecutable) ?? candidates[0];
+}
+
+export function toConfig(raw: PreferenceInput, isExecutable: (file: string) => boolean = () => false): Config {
   const threshold = Number.parseInt(raw.switchThreshold ?? "20", 10);
   return {
     cswapPath: raw.cswapPath?.trim() || "~/.local/bin/cswap",
-    codexbarPath: raw.codexbarPath?.trim() || "/opt/homebrew/bin/codexbar",
-    codexPath: raw.codexPath?.trim() || "/opt/homebrew/bin/codex",
+    codexbarPath:
+      raw.codexbarPath?.trim() ||
+      detectExecutable(
+        [
+          "/opt/homebrew/bin/codexbar",
+          "/usr/local/bin/codexbar",
+          "/Applications/CodexBar.app/Contents/Helpers/CodexBarCLI",
+          "~/Applications/CodexBar.app/Contents/Helpers/CodexBarCLI",
+        ],
+        isExecutable,
+      ),
+    codexPath:
+      raw.codexPath?.trim() ||
+      detectExecutable(["/opt/homebrew/bin/codex", "/usr/local/bin/codex", "~/.local/bin/codex"], isExecutable),
     codexSwitchMode: raw.codexSwitchMode === "direct" ? "direct" : "codexbar",
     afterSwitchCommand: raw.afterSwitchCommand?.trim() ?? "",
     menuBarValue: raw.menuBarValue === "weekly" || raw.menuBarValue === "headroom" ? raw.menuBarValue : "detailed",

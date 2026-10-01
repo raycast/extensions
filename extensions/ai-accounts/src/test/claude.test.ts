@@ -1279,9 +1279,9 @@ test("claudeLogins readers accept only well-formed UUIDs and never throw", () =>
   assert.equal(readClaudeAppAccountUuid(paths), APP_UUID);
 });
 
-/** Run addClaudeAccountCommand under zsh with fake cswap/claude/open; returns the call order and output. */
-async function runAddCommand(cswapScript: string | null): Promise<{ order: string[]; out: string }> {
-  const { addClaudeAccountCommand } = await import("../lib/claudeLogins");
+/** Run the add command with fake cswap/claude/open, optionally through the terminal sh wrapper. */
+async function runAddCommand(cswapScript: string | null, shell?: string): Promise<{ order: string[]; out: string }> {
+  const { addClaudeAccountCommand, shellQuote } = await import("../lib/claudeLogins");
   const { spawnSync } = await import("node:child_process");
   const dir = tempDir();
   const bin = path.join(dir, "bin dir's");
@@ -1295,7 +1295,9 @@ async function runAddCommand(cswapScript: string | null): Promise<{ order: strin
   const cmd = addClaudeAccountCommand(path.join(bin, "cswap"), {
     reopenUrl: "raycast://extensions/x/ai-accounts/accounts",
   });
-  const res = spawnSync("/bin/zsh", ["-f", "-c", `alias claude='echo ALIAS >> ${log}'; ${cmd}`], {
+  const command = shell ? `/bin/sh -c ${shellQuote(cmd)}` : `alias claude='echo ALIAS >> ${log}'; ${cmd}`;
+  const shellFlags = !shell || shell === "/bin/zsh" ? ["-f"] : path.basename(shell) === "fish" ? ["--no-config"] : [];
+  const res = spawnSync(shell ?? "/bin/zsh", [...shellFlags, "-c", command], {
     env: { PATH: `${bin}:/usr/bin:/bin`, TERM: "dumb", HOME: dir },
     encoding: "utf8",
   });
@@ -1324,6 +1326,30 @@ test("add command: never signs in when the current login cannot be saved", async
     /Could not save your current Claude login, so nothing was changed:\s+Error: The stored credential rotated/,
   );
 });
+
+for (const shell of ["/bin/sh", "/bin/zsh", "fish"]) {
+  test(`add command: sh wrapper fails closed under ${shell}`, async (t) => {
+    let shellPath = shell;
+    if (shell === "fish") {
+      const { spawnSync } = await import("node:child_process");
+      const found = spawnSync("/bin/sh", ["-c", "command -v fish"], { encoding: "utf8" });
+      if (found.status !== 0 || !path.isAbsolute(found.stdout.trim())) {
+        t.skip("fish is not installed");
+        return;
+      }
+      shellPath = found.stdout.trim();
+    }
+    const { order, out } = await runAddCommand(
+      `echo "Error: The stored credential rotated while it was being verified"; exit 1`,
+      shellPath,
+    );
+    assert.deepEqual(order, ["cswap add"]);
+    assert.match(
+      out,
+      /Could not save your current Claude login, so nothing was changed:\s+Error: The stored credential rotated/,
+    );
+  });
+}
 
 test("add command: with no current login it goes straight to sign-in", async () => {
   const { order } = await runAddCommand(

@@ -446,6 +446,7 @@ test("invalid or repeated requests never reach the switcher", async () => {
     { ...request(b), targetKey: "codex:b@example.com|" },
     { ...request(b), via: "cli" },
     { ...request(b), expectedEmail: 3 },
+    { ...request(b), targetLabel: "x".repeat(513) },
     null,
   ];
   for (const r of bad) {
@@ -454,6 +455,8 @@ test("invalid or repeated requests never reach the switcher", async () => {
     assert.equal(result.state, "failed");
   }
   assert.equal(switchCalls.length, 0);
+
+  assert.equal(isSwitchRequest({ ...request(b), targetLabel: "x".repeat(512) }), true);
 
   const first = await performSwitch(deps, request(b, "dup"));
   assert.deepEqual(first, { state: "failed", message: "slot changed" });

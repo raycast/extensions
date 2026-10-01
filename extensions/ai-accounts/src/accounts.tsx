@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, showFailureToast } from "@raycast/utils";
 import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 import { sanitize } from "./lib/exec";
 import { displayLabels, PROVIDER_NAMES, refreshStale, RefreshResult, sourceName } from "./lib/flow";
@@ -287,8 +287,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
       }
     } catch (error) {
       if (mounted.current) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error, {
           title: "Refresh failed",
           message: sanitize(error instanceof Error ? error.message : error),
         });
@@ -434,8 +433,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
       await openCswapDashboardInTerminal(cfg.cswapPath);
       return true;
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Could not open a terminal",
         message: sanitize(error instanceof Error ? error.message : error),
       });
@@ -472,8 +470,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
     try {
       await openAddClaudeAccountInTerminal(cfg.cswapPath);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Could not open a terminal",
         message: sanitize(error instanceof Error ? error.message : error),
       });
@@ -519,8 +516,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
       await openCodexBar();
       return true;
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Could not open CodexBar",
         message: sanitize(error instanceof Error ? error.message : error),
       });
@@ -632,7 +628,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
     );
   }
 
-  /** ⌘⇧S on any row of a provider acts on that provider's actionable suggestion (revalidated before acting). */
+  /** ⌘⇧Return on any row of a provider acts on that provider's actionable suggestion (revalidated before acting). */
   function suggestedAction(provider: Provider): ReactElement | null {
     const s = actionable.find((x) => x.provider === provider);
     const target = s?.targetKey ? snapshot.providers[provider].accounts.find((a) => a.key === s.targetKey) : undefined;
@@ -646,7 +642,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
       <Action
         title={title}
         icon={Icon.Switch}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
         onAction={() => void actOnSuggestion(s)}
       />
     );
@@ -963,12 +959,12 @@ export default function Command(props: LaunchProps<{ launchContext?: { action?: 
                 <Action.CopyToClipboard
                   title="Copy Email"
                   content={account.email}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
               ) : null}
               {slot !== null ? (
                 <Action.CopyToClipboard
-                  title={`Copy "cswap run ${slot} --share-history" Command`}
+                  title="Copy Run Command (Shared History)"
                   content={`cswap run ${slot} --share-history`}
                 />
               ) : null}

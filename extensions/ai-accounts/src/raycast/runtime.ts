@@ -6,7 +6,7 @@ import path from "node:path";
 import { Color, environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
 import { createDeeplink, runAppleScript } from "@raycast/utils";
 import { fetchClaude, switchClaude } from "../lib/claude";
-import { addClaudeAccountCommand, defaultClaudeLoginPaths } from "../lib/claudeLogins";
+import { addClaudeAccountCommand, defaultClaudeLoginPaths, shellQuote } from "../lib/claudeLogins";
 import {
   CODEX_TARGET_NOT_SAVED,
   CodexPaths,
@@ -20,14 +20,21 @@ import { codexDaemonControl, preflightCodexSwitch, switchCodexDirect } from "../
 import { childEnv, resolveExecutable, runQuery, sanitize } from "../lib/exec";
 import { FlowDeps, Level, remainingLevel, Switcher, SwitchOutcome } from "../lib/flow";
 import { Account, SwitchRequest, SwitchResult } from "../lib/model";
-import { Config, RawPreferences, toConfig } from "../lib/prefs";
+import { Config, toConfig } from "../lib/prefs";
 import { readSnapshot, upsertOperation } from "../lib/store";
 
 // Raycast wiring: preferences, state directory, fetchers/switchers, and the launch helpers
-// the list and menu bar share. Executable paths come only from preferences, never from launch context.
+// the list and menu bar share. Executable paths come from preferences or local detection, never launch context.
 
 export function getConfig(): Config {
-  return toConfig(getPreferenceValues<RawPreferences>());
+  return toConfig(getPreferenceValues<Preferences>(), (file) => {
+    try {
+      fs.accessSync(expandPath(file), fs.constants.X_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  });
 }
 
 export function stateDir(): string {
@@ -216,7 +223,13 @@ export async function requestSwitch(
     targetLabel: label,
     via,
   };
-  await launchCommand({ name: "switch-account", type: LaunchType.Background, context: { ...req } });
+  try {
+    await launchCommand({ name: "switch-account", type: LaunchType.Background, context: { ...req } });
+  } catch (error) {
+    throw new Error(
+      `Could not start the switch: ${sanitize(error instanceof Error ? error.message : error) || "unknown error"}`,
+    );
+  }
   return req;
 }
 
@@ -231,7 +244,7 @@ export function runAfterSwitchCommand(cfg: Config, req: SwitchRequest, result: S
       env: {
         ...childEnv(),
         AI_ACCOUNTS_PROVIDER: req.provider,
-        AI_ACCOUNTS_ACCOUNT: req.targetLabel,
+        AI_ACCOUNTS_ACCOUNT: sanitize(req.targetLabel, 120),
         AI_ACCOUNTS_RESULT: result.state,
       },
     });
@@ -291,10 +304,6 @@ function terminalScript(): string {
   return candidates.some((file) => fs.existsSync(file)) ? ITERM_SCRIPT : TERMINAL_SCRIPT;
 }
 
-function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
-}
-
 export async function openCswapDashboardInTerminal(cswapPath: string): Promise<void> {
   await runAppleScript(terminalScript(), [`${shellQuote(expandPath(cswapPath))} tui`], { timeout: 15_000 });
 }
@@ -305,7 +314,8 @@ export async function openCswapDashboardInTerminal(cswapPath: string): Promise<v
  */
 export async function openAddClaudeAccountInTerminal(cswapPath: string): Promise<void> {
   const reopenUrl = createDeeplink({ command: "accounts", context: { action: "refresh-claude" } });
-  await runAppleScript(terminalScript(), [addClaudeAccountCommand(expandPath(cswapPath), { reopenUrl })], {
+  const cmd = addClaudeAccountCommand(expandPath(cswapPath), { reopenUrl });
+  await runAppleScript(terminalScript(), [`/bin/sh -c ${shellQuote(cmd)}`], {
     timeout: 15_000,
   });
 }

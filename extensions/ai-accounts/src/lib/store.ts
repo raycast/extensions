@@ -86,7 +86,7 @@ const DETACHED_CHILD_MS = 120_000;
 /** An unreadable lock (creator died between create and write) is abandoned after this. */
 const UNREADABLE_STALE_MS = 5_000;
 /** The exclusive section is held for microseconds; a marker this old was left by a terminated worker. */
-const GUARD_STALE_MS = 5_000;
+export const GUARD_STALE_MS = 5_000;
 
 const OWNER_TAG = `${process.pid}:${threadId}`;
 

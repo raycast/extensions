@@ -1,5 +1,5 @@
 import { Color, Icon, Image, Keyboard, launchCommand, LaunchProps, LaunchType, MenuBarExtra } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { displayLabels, PROVIDER_NAMES, refreshStale, sourceName } from "./lib/flow";
 import {
@@ -200,23 +200,29 @@ export default function Command(props: LaunchProps<{ launchContext?: { force?: b
 
   function launchSwitch(account: Account, via: "menubar" | "suggestion"): void {
     const label = labels[account.provider].get(account.key) ?? account.label;
-    requestSwitch(account, via, label).catch(() => undefined);
+    requestSwitch(account, via, label).catch((error) =>
+      showFailureToast(error, { title: "Could not start the switch" }),
+    );
   }
 
   function openAccounts(): void {
-    launchCommand({ name: "accounts", type: LaunchType.UserInitiated }).catch(() => undefined);
+    launchCommand({ name: "accounts", type: LaunchType.UserInitiated }).catch((error) =>
+      showFailureToast(error, { title: "Could not open AI Accounts" }),
+    );
   }
 
   /** The sign-in tab and its progress run in the list, which stays loaded until the new account appears. */
   function addClaudeAccount(): void {
     launchCommand({ name: "accounts", type: LaunchType.UserInitiated, context: { action: "add-claude" } }).catch(
-      () => undefined,
+      (error) => showFailureToast(error, { title: "Could not open AI Accounts" }),
     );
   }
 
   /** Where a blocked switch is made instead: CodexBar for Codex; the list (which explains the reason) for Claude. */
   function handOff(provider: Provider): () => void {
-    return provider === "codex" ? () => void openCodexBar().catch(() => undefined) : openAccounts;
+    return provider === "codex"
+      ? () => void openCodexBar().catch((error) => showFailureToast(error, { title: "Could not open CodexBar" }))
+      : openAccounts;
   }
 
   function suggestionItem(s: Suggestion) {
@@ -277,7 +283,8 @@ export default function Command(props: LaunchProps<{ launchContext?: { force?: b
       if (cfg.codexSwitchMode === "codexbar" || account.switchTarget?.kind === "codex-managed") {
         onAction = () => launchSwitch(account, "menubar");
       } else {
-        onAction = () => void openCodexBar().catch(() => undefined);
+        onAction = () =>
+          void openCodexBar().catch((error) => showFailureToast(error, { title: "Could not open CodexBar" }));
       }
     } else if (account.switchTarget?.kind === "cswap") {
       onAction = () => launchSwitch(account, "menubar");
@@ -346,15 +353,17 @@ export default function Command(props: LaunchProps<{ launchContext?: { force?: b
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => {
-            launchCommand({ name: "menubar", type: LaunchType.Background, context: { force: true } }).catch(
-              () => undefined,
+            launchCommand({ name: "menubar", type: LaunchType.Background, context: { force: true } }).catch((error) =>
+              showFailureToast(error, { title: "Could not refresh AI Accounts" }),
             );
           }}
         />
         <MenuBarExtra.Item
           title="Open CodexBar"
           icon={Icon.AppWindow}
-          onAction={() => void openCodexBar().catch(() => undefined)}
+          onAction={() =>
+            void openCodexBar().catch((error) => showFailureToast(error, { title: "Could not open CodexBar" }))
+          }
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

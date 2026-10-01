@@ -47,7 +47,7 @@ function tokenMetadata(tokens: UsageTokens) {
 
 export default function UsageStatistics() {
   const [snapshot, setSnapshot] = useState(() => readStatsSnapshot(stateDir()));
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [refreshFailed, setRefreshFailed] = useState(false);
   const mounted = useRef(false);

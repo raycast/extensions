@@ -133,7 +133,7 @@ export function isSwitchRequest(value: unknown): value is SwitchRequest {
     return false;
   }
   if (!(v.expectedEmail === null || typeof v.expectedEmail === "string")) return false;
-  if (typeof v.targetLabel !== "string") return false;
+  if (typeof v.targetLabel !== "string" || v.targetLabel.length > 512) return false;
   if (typeof v.via !== "string" || !VIA.has(v.via)) return false;
   return true;
 }

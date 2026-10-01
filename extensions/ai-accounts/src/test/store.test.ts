@@ -8,6 +8,7 @@ import { Worker } from "node:worker_threads";
 import {
   acquireLock,
   LOCK_LEASE_MS,
+  GUARD_STALE_MS,
   LockHandle,
   providerLockHeld,
   readOperations,
@@ -110,9 +111,13 @@ test("a terminated worker's lock is reclaimed within the lease, while a live wor
   }
   assert.ok(fs.existsSync(lockPath(dir)));
   const started = Date.now();
-  const h = await acquireLock(dir, "provider-claude", { purpose: "switch", staleMs: 400, waitMs: 5_000 });
+  const h = await acquireLock(dir, "provider-claude", {
+    purpose: "switch",
+    staleMs: 400,
+    waitMs: GUARD_STALE_MS + 3_000,
+  });
   assert.ok(h);
-  assert.ok(Date.now() - started < 2_000, `reclaimed after ${Date.now() - started} ms`);
+  assert.ok(Date.now() - started < GUARD_STALE_MS + 2_000, `reclaimed after ${Date.now() - started} ms`);
   h.release();
   assertNoDebris(dir);
 });

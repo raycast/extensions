@@ -1,4 +1,5 @@
 import { launchCommand, LaunchProps, LaunchType, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { sanitize } from "./lib/exec";
 import { ensureFinalRecord, isSwitchRequest, performSwitch } from "./lib/flow";
 import { SwitchRequest, SwitchResult } from "./lib/model";
@@ -26,7 +27,11 @@ async function report(req: SwitchRequest, result: SwitchResult): Promise<void> {
 export default async function Command(props: LaunchProps<{ launchContext?: SwitchRequest }>) {
   const ctx: unknown = props.launchContext;
   if (!isSwitchRequest(ctx)) {
-    await launchCommand({ name: "accounts", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "accounts", type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not open AI Accounts" });
+    }
     return;
   }
   const cfg = getConfig();

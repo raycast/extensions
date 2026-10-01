@@ -60,7 +60,7 @@ export function readClaudeAppAccountUuid(paths: ClaudeLoginPaths): string | null
   return uuidOf(config.lastKnownAccountUuid);
 }
 
-function shellQuote(value: string): string {
+export function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 

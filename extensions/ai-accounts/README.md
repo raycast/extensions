@@ -14,7 +14,8 @@ You need Raycast on macOS and the backend for each provider you use.
 
 ### Claude Code
 
-Install claude-swap, then register each Claude Code account:
+Install [claude-swap](https://github.com/realiti4/claude-swap), then register
+each Claude Code account. If you need `uv`, install it with `brew install uv`:
 
 ```sh
 uv tool install claude-swap
@@ -33,21 +34,25 @@ new Claude Code logins is enabled by default in the extension preferences.
 
 ### Codex
 
-Install CodexBar and add your Codex accounts through CodexBar:
+Install [CodexBar](https://github.com/steipete/CodexBar) and add your Codex
+accounts through CodexBar:
 
 ```sh
 brew install --cask steipete/tap/codexbar
 ```
 
-Open CodexBar and finish account setup before opening AI Accounts. If a backend
-executable is installed elsewhere, set its path in the extension preferences.
+Open CodexBar and finish account setup before opening AI Accounts. The extension
+detects CodexBar and Codex CLI paths in Apple silicon and Intel Homebrew
+locations, the CodexBar app bundle, and `~/.local/bin` for Codex. Set a path in
+the extension preferences to override detection.
 
 ## Accounts and switching
 
 Open **AI Accounts** to see accounts, remaining quota, and reset times. Select a
-Claude Code account and press Return to switch through claude-swap. Suggestions
-use the lowest remaining quota window and default to a 20% threshold. You can
-change that threshold, include model-specific limits, exclude accounts from
+Claude Code account and press Return to switch through claude-swap. Press
+Command-Shift-Return to switch to the suggested account. Suggestions use the
+lowest remaining quota window and default to a 20% threshold. You can change
+that threshold, include model-specific limits, exclude accounts from
 suggestions, or enable advice for weekly quota that resets soon.
 
 Codex switching defaults to opening CodexBar. Finish the switch in
@@ -55,13 +60,15 @@ Codex switching defaults to opening CodexBar. Finish the switch in
 
 Direct Codex switching is an experimental opt-in preference. It replaces
 `~/.codex/auth.json` using CodexBar's saved accounts, as the System Account menu
-does. It stops and restarts the Codex app-server daemon when it is running, and
+does, and refreshes CodexBar's saved copy of the account being replaced. A failed
+check after writing the file is reported without rolling back the switch. It
+stops and restarts the Codex app-server daemon when it is running, and
 can interrupt running Codex turns. Finish your current turns before using it.
 If an account can't be switched directly, finish the switch in CodexBar.
 
 ### After-switch command
 
-Set the optional **After-switch Command** preference to run a local command
+Set the optional **After-Switch Command** preference to run a local command
 after a switch returns `succeeded`, `noop`, or `unknown`. It runs through
 `/bin/sh -c` in a detached background process. For example, you can refresh a
 status bar after changing accounts.
@@ -96,10 +103,15 @@ charges.
 AI Accounts processes data locally. It reads usage through claude-swap and
 CodexBar, identity claims from local login files, and usage counts from local
 logs. It caches account labels, quota readings, switch results, and statistics.
-The extension doesn't transmit or cache authentication tokens. The provider
-tools manage credentials and may contact their services to refresh usage or
-logins; experimental direct switching writes the local Codex authentication
-file.
+The extension doesn't transmit or cache authentication tokens. Automatic Claude
+login tracking is on by default: account refreshes, including menu bar
+background refreshes, may run `cswap add` to save the current login in
+claude-swap's credential store. You can turn this off in the extension
+preferences. The provider tools manage credentials and may contact their
+services to refresh usage or logins. Experimental direct switching replaces
+`~/.codex/auth.json` and refreshes CodexBar's saved copy of the account being
+replaced; a failed check after writing is reported without rolling back the
+switch.
 
 Claude Code switching doesn't change the Claude desktop app's separate login.
 Quota readings can be delayed or unavailable, and the extension shows backend

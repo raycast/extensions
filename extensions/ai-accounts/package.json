@@ -40,7 +40,8 @@
       "name": "switch-account",
       "title": "Switch AI Account",
       "description": "Perform a Claude or Codex account switch requested from the AI Accounts list or menu bar",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Claude + Codex"
     }
   ],
   "preferences": [
@@ -50,7 +51,8 @@
       "description": "Absolute path to cswap (claude-swap). A leading ~ is expanded.",
       "type": "textfield",
       "required": false,
-      "default": "~/.local/bin/cswap"
+      "default": "~/.local/bin/cswap",
+      "placeholder": "~/.local/bin/cswap"
     },
     {
       "name": "autoAddClaudeLogins",
@@ -64,18 +66,20 @@
     {
       "name": "codexbarPath",
       "title": "CodexBar CLI",
-      "description": "Absolute path to the codexbar CLI",
+      "description": "Absolute path to the codexbar CLI. Leave empty to detect it automatically.",
       "type": "textfield",
       "required": false,
-      "default": "/opt/homebrew/bin/codexbar"
+      "default": "",
+      "placeholder": "Detected automatically"
     },
     {
       "name": "codexPath",
       "title": "Codex CLI",
-      "description": "Absolute path to the codex CLI (used to stop and start the app-server daemon around a switch)",
+      "description": "Absolute path to the codex CLI (used to stop and start the app-server daemon around a switch). Leave empty to detect it automatically.",
       "type": "textfield",
       "required": false,
-      "default": "/opt/homebrew/bin/codex"
+      "default": "",
+      "placeholder": "Detected automatically"
     },
     {
       "name": "codexSwitchMode",
@@ -97,11 +101,12 @@
     },
     {
       "name": "afterSwitchCommand",
-      "title": "After-switch Command",
+      "title": "After-Switch Command",
       "description": "Run /bin/sh -c after a successful or unknown-outcome switch, for example to refresh a status bar. Sets AI_ACCOUNTS_PROVIDER (claude|codex), AI_ACCOUNTS_ACCOUNT (target label), and AI_ACCOUNTS_RESULT (succeeded|noop|unknown).",
       "type": "textfield",
       "required": false,
-      "default": ""
+      "default": "",
+      "placeholder": "~/bin/refresh-status-bar.sh"
     },
     {
       "name": "switchThreshold",
@@ -157,7 +162,8 @@
       "description": "Comma-separated emails or labels that suggestions must never target (you can still switch to them manually)",
       "type": "textfield",
       "required": false,
-      "default": ""
+      "default": "",
+      "placeholder": "work@example.com, personal"
     },
     {
       "name": "menuBarValue",
@@ -201,7 +207,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.5.3",
+    "@raycast/api": "^2.6.0",
     "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
@@ -218,7 +224,9 @@
     "dev": "ray develop",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test src/test/*.test.ts",
-    "lint": "eslint src",
-    "publish": "npx @raycast/api@latest publish"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   }
 }
