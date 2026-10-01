@@ -1,7 +1,6 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import { getPreferenceValues, environment } from "@raycast/api";
-import { formatDuration, intervalToDuration } from "date-fns";
 import { Format, Video } from "./types.js";
 import { execSync } from "child_process";
 import { findHomebrewPath, resolveBinary, isWindows, isMac } from "./lib/binary.js";
@@ -97,19 +96,6 @@ export const getGalleryDlPath = () => resolveBinary("gallery-dl", galleryDlPathP
 export const getDenoPath = () => resolveBinary("deno", denoPathPreference);
 export const getSpotdlPath = () => resolveBinary("spotdl", spotDlPathPreference, environment.supportPath);
 export const getMonolithPath = () => resolveBinary("monolith", monolithPathPreference);
-
-export function formatHHMM(seconds: number) {
-  const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
-
-  return formatDuration(duration, {
-    format: duration.hours && duration.hours > 0 ? ["hours", "minutes", "seconds"] : ["minutes", "seconds"],
-    zero: true,
-    delimiter: ":",
-    locale: {
-      formatDistance: (_token, count) => String(count).padStart(2, "0"),
-    },
-  });
-}
 
 export function formatTbr(tbr: number | null) {
   if (!tbr) return "";

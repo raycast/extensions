@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { formatBytes, formatClock, formatSpeed, plural, progressMessage, wrapText, escapeMarkdown } from "../src/lib/format";
+import {
+  formatBytes,
+  formatClock,
+  formatSpeed,
+  plural,
+  progressMessage,
+  wrapText,
+  escapeMarkdown,
+} from "../src/lib/format";
 
 describe("formatBytes", () => {
   it("uses decimal units with sensible precision", () => {
@@ -23,6 +31,13 @@ describe("formatClock", () => {
     expect(formatClock(161)).toBe("2:41");
     expect(formatClock(3723)).toBe("1:02:03");
     expect(formatClock(undefined)).toBe("—");
+  });
+
+  it("keeps zero seconds and minutes (a one-minute TikTok showed as 01 in the Download form)", () => {
+    expect(formatClock(5)).toBe("0:05");
+    expect(formatClock(60)).toBe("1:00");
+    expect(formatClock(3600)).toBe("1:00:00");
+    expect(formatClock(7380)).toBe("2:03:00");
   });
 });
 

@@ -44,11 +44,10 @@ import { DownloadInit, DownloadSession } from "../lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "../lib/history.js";
 import { QUALITY_VALUES, QualityValue, estimateQuality, maxHeight, qualityTitle } from "../lib/estimate.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
-import { progressMessage } from "../lib/format.js";
+import { formatClock, progressMessage } from "../lib/format.js";
 import extractTranscript from "../transcript.js";
 import {
   downloadPath,
-  formatHHMM,
   getDenoPath,
   getFormatTitle,
   getFormatValue,
@@ -362,7 +361,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       const views = formatCount(video.view_count);
       detailsText = [
         video.uploader ?? video.channel,
-        video.duration ? formatHHMM(video.duration) : undefined,
+        video.duration ? formatClock(video.duration) : undefined,
         views ? `${views} views` : undefined,
         best ? `up to ${best}` : undefined,
       ]

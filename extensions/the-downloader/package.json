@@ -900,7 +900,6 @@
     "@mozilla/readability": "^0.6.0",
     "@raycast/api": "^2.5.3",
     "@raycast/utils": "^2.3.2",
-    "date-fns": "^4.4.0",
     "execa": "^9.6.1",
     "linkedom": "^0.18.13",
     "srt-parser-2": "^1.2.3",
