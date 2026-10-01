@@ -1,10 +1,11 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { Vault, Item, PassCliError, PassCliErrorType, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
+import { renderErrorView } from "./lib/error-views";
 import { platformShortcut } from "./lib/shortcuts";
 
 async function loginWithBrowserAndReload(reload: () => Promise<void>) {
@@ -61,7 +62,7 @@ function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
 function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const [error, setError] = useState<PassCliErrorType | null>(null);
   const hasLoadedFromCache = useRef(false);
 
   useEffect(() => {
@@ -80,30 +81,31 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
       }
     }
 
-    setIsLoggedOut(false);
+    setError(null);
+    setIsLoading(true);
     try {
       const freshItems = await listItems(vault.shareId);
       setItems(freshItems);
       await setCachedItemsForVault(vault.shareId, freshItems);
-    } catch (error: unknown) {
-      // A logged-out session must not keep showing cached items.
-      if (error instanceof PassCliError && error.type === "not_authenticated") {
+    } catch (err: unknown) {
+      const type = err instanceof PassCliError ? err.type : "unknown";
+      // A logged-out session must not keep showing cached items, and a failed load must not look like an empty vault.
+      if (type === "not_authenticated") {
         setItems([]);
-        setIsLoggedOut(true);
+        setError(type);
       } else if (!hasLoadedFromCache.current) {
-        const message = error instanceof Error ? error.message : "An unknown error occurred";
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load items",
-          message,
-        });
+        setError(type);
       }
     } finally {
       setIsLoading(false);
     }
   }
 
-  if (isLoggedOut) return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaultItems)} />;
+  if (error === "not_authenticated") {
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaultItems)} />;
+  }
+  const errorView = renderErrorView(error, loadVaultItems, "Load Items");
+  if (errorView) return errorView;
 
   return (
     <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">
