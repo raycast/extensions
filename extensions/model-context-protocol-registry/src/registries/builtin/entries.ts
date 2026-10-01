@@ -1236,6 +1236,162 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "bioflow",
+    title: "BioFlow",
+    description:
+      "Edit and publish your link-in-bio page, its links and blocks, and read page analytics and signups from BioFlow. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/bioflow/assets/logo.png",
+    homepage: "https://getbioflow.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.getbioflow.com/api/mcp"],
+    },
+  },
+  {
+    name: "dodomain",
+    title: "DoDomain",
+    description:
+      "Connect customers' custom domains to your product: guided DNS setup, verification and certificates, managed from DoDomain. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/dodomain/assets/logo.png",
+    homepage: "https://dodomain.io/docs/connecting-ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.dodomain.io/api/mcp"],
+    },
+  },
+  {
+    name: "getitdone",
+    title: "GetItDone",
+    description:
+      "Create, update and track tasks and projects across your GetItDone team workspaces. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/getitdone/assets/logo.png",
+    homepage: "https://nowgetitdone.com/docs/connecting-ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.nowgetitdone.com/api/mcp"],
+    },
+  },
+  {
+    name: "notifly",
+    title: "Notifly",
+    description:
+      "Manage notification workflows, subscribers and topics, and trigger delivery across email, SMS, push, chat and in-app channels with Notifly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/notifly/assets/logo.png",
+    homepage: "https://notifly.io/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.notifly.io/mcp"],
+    },
+  },
+  {
+    name: "postify",
+    title: "Postify",
+    description:
+      "Draft, schedule and publish social media posts to your connected channels, and read post analytics, from your Postify calendar. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/postify/assets/logo.png",
+    homepage: "https://usepostify.com/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.usepostify.com/api/mcp"],
+    },
+  },
+  {
+    name: "sendly",
+    title: "Sendly",
+    description:
+      "Send transactional email, run campaigns, and manage contacts, lists and segments in Sendly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/sendly/assets/logo.png",
+    homepage: "https://docs.sendly.now/guides/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.sendly.now/api/mcp"],
+    },
+  },
+  {
+    name: "shorty",
+    title: "Shorty",
+    description:
+      "Summarize and transcribe videos, audio files, documents and web pages with Shorty. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/shorty/assets/logo.png",
+    homepage: "https://aishorty.com/docs/connecting-ai-assistants",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://aishorty.com/api/mcp"],
+    },
+  },
+  {
+    name: "snapvisor",
+    title: "SnapVisor",
+    description:
+      "Review visual regression builds, approve or reject screenshot changes, and manage SnapVisor projects. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/snapvisor/assets/logo.png",
+    homepage: "https://snapvisor.io/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.snapvisor.io/"],
+    },
+  },
+  {
+    name: "superbooks",
+    title: "SuperBooks",
+    description:
+      "Work with your SuperBooks books: transactions and categories, invoices, customers, receipts, time tracking and financial reports. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/superbooks/assets/logo.png",
+    homepage: "https://docs.superbooks.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.superbooks.io/mcp"],
+    },
+  },
+  {
+    name: "unotes",
+    title: "uNotes",
+    description:
+      "Search a library of university course materials (past exams, assignments, lab reports, lecture notes) and your uNotes flashcards and quizzes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/unotes/assets/logo.png",
+    homepage: "https://unotes.net/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://unotes.net/api/mcp"],
+    },
+  },
+  {
+    name: "upapi",
+    title: "upAPI",
+    description:
+      "Call a catalog of ready-to-use APIs through one upAPI account and key, without signing up for each upstream service. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/upapi/assets/logo.png",
+    homepage: "https://upapi.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.upapi.io/api/mcp"],
+    },
+  },
+  {
+    name: "uptimely",
+    title: "Uptimely",
+    description:
+      "Manage uptime monitors, incidents and status pages, and read check results, in Uptimely. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/uptimely/assets/logo.png",
+    homepage: "https://getuptimely.com/integrations",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.getuptimely.com/api/mcp"],
+    },
+  },
+  {
+    name: "voicelabs",
+    title: "VoiceLabs",
+    description:
+      "Generate speech from text in your voices and transcribe audio with VoiceLabs. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/voicelabs/assets/logo.png",
+    homepage: "https://voicelabs.now/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.voicelabs.now/api/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
