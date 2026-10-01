@@ -43,16 +43,27 @@ const withDeviceClient = async <T>(ip: string, request: (client: TapoClient) => 
     }
   }
 
-  const { email, password } = getPreferenceValues<Preferences>();
-  const client = await withDeadline(loginDeviceByIp(email, password, ip), deadline);
+  const client = await withDeadline(loginToDevice(ip), deadline);
   clients.set(ip, client);
 
   return withDeadline(request(client), deadline);
 };
 
-// tp-link-tapo-connect only reports failed logins through its error messages.
-const isSignInError = (error: unknown): boolean =>
-  error instanceof Error && /password|credential|login/i.test(error.message);
+class SignInError extends Error {}
+
+const loginToDevice = async (ip: string): Promise<TapoClient> => {
+  const { email, password } = getPreferenceValues<Preferences>();
+
+  try {
+    return await loginDeviceByIp(email, password, ip);
+  } catch (error) {
+    // tp-link-tapo-connect only reports failed logins through its error messages.
+    if (error instanceof Error && /password|credential|login/i.test(error.message)) {
+      throw new SignInError(error.message);
+    }
+    throw error;
+  }
+};
 
 // Maps each IP to the ID of the device last confirmed to be there.
 const verifiedDeviceIds = new Map<string, string>();
@@ -208,7 +219,8 @@ export const queryDevicesOnLocalNetwork = async (devices: Device[]): Promise<Dev
 
         return { ...device, availabilityStatus: DeviceStatusEnum.Available, isTurnedOn: deviceInfo.device_on };
       } catch (error) {
-        const availabilityStatus = isSignInError(error) ? DeviceStatusEnum.SignInFailed : DeviceStatusEnum.NotAvailable;
+        const availabilityStatus =
+          error instanceof SignInError ? DeviceStatusEnum.SignInFailed : DeviceStatusEnum.NotAvailable;
 
         return { ...device, availabilityStatus };
       }
