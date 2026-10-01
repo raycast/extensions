@@ -1,6 +1,6 @@
 import { Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getInitialIconDataUri } from "./avatar";
 import { hostnameOf, itemKey, toOpenableUrl } from "./format";
 import { ItemActions } from "./item-actions";
@@ -61,11 +61,11 @@ export function ItemList({
   const firstItem = suggested[0] ?? others[0];
   const activeKey = selectedKey ?? (firstItem ? itemKey(firstItem) : undefined);
   const selectedItem = useMemo(() => items.find((item) => itemKey(item) === activeKey), [items, activeKey]);
-  const {
-    detail,
-    error,
-    isLoading: isLoadingDetail,
-  } = useItemDetail(store, isShowingDetail ? selectedItem : undefined);
+  // Loaded even when the panel is hidden: the actions need it for custom fields.
+  const { detail, error, isLoading: isLoadingDetail } = useItemDetail(store, selectedItem);
+  // The first suggestion is selected when the list appears; after that, the selection only moves with the user.
+  const initialSelection = useRef<string | undefined>(undefined);
+  if (initialSelection.current === undefined && suggested[0]) initialSelection.current = itemKey(suggested[0]);
 
   const icons = useMemo(
     () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
@@ -120,7 +120,7 @@ export function ItemList({
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search by name, username or website…"
       filtering={true}
-      selectedItemId={suggested[0] ? itemKey(suggested[0]) : undefined}
+      selectedItemId={initialSelection.current}
       onSelectionChange={(id) => setSelectedKey(id ?? undefined)}
       searchBarAccessory={searchBarAccessory}
     >

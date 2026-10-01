@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createRequestTracker, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
 import { Item } from "./types";
 
 function item(shareId: string, itemId: string): Item {
@@ -31,4 +31,29 @@ test("only the latest request is current", () => {
   const second = tracker.start();
   assert.equal(first(), false);
   assert.equal(second(), true);
+});
+
+test("queued tasks run one after the other, in order", async () => {
+  const queue = createSerialQueue();
+  const events: string[] = [];
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const slow = queue.run(async () => {
+    events.push("slow start");
+    await wait(20);
+    events.push("slow end");
+  });
+  const failing = queue.run(async () => {
+    events.push("failing");
+    throw new Error("write failed");
+  });
+  const fast = queue.run(async () => {
+    events.push("fast");
+    return 42;
+  });
+
+  await slow;
+  await assert.rejects(failing, /write failed/);
+  assert.equal(await fast, 42);
+  assert.deepEqual(events, ["slow start", "slow end", "failing", "fast"]);
 });

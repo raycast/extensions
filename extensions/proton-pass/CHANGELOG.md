@@ -10,7 +10,7 @@
 
 ## [Item Details Panel] - {PR_MERGE_DATE}
 
-- Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last
+- Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last, and their copy actions also work with the panel hidden
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
 - Websites are shown as clickable tags
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
@@ -19,8 +19,9 @@
 - Search also matches usernames, emails and website domains
 - Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead, from the favicon provider set in Raycast's settings (off by default, since the provider receives the domains)
 - Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
-- Items matching the active browser tab are grouped in a Suggested section
-- Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list
+- Items matching the active browser tab are grouped in a Suggested section. The list waits briefly for the active tab, so the suggested login is selected from the start and the selection doesn't move afterwards
+- Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list. Without cached items, that vault shows first, before the other vaults have loaded
+- New Copy Title action (⌘⇧.). Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
