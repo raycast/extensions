@@ -12,6 +12,7 @@
     "src/lib/format*.ts",
     "src/lib/item-panel*.ts",
     "src/lib/refresh*.ts",
+    "src/lib/review-regressions.test.ts",
     "src/lib/totp*.ts",
     "src/lib/pass-cli-normalize.test.ts",
     "src/lib/pass-cli-normalize.ts",

@@ -6,15 +6,16 @@
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
 - Websites are shown as clickable tags
 - 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
-- Enter now copies the password (or opens the note for secure notes); new Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
+- Enter now copies the password after a confirmation explaining the new default action (or opens the note for secure notes); the confirmation can be remembered and reset in command settings. New Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
 - Search also matches usernames, emails and website domains
 - Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead, from the favicon provider set in Raycast's settings (off by default, since the provider receives the domains)
 - Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
 - Items matching the active browser tab are grouped in a Suggested section. The list waits briefly for the active tab, so the suggested login is selected from the start and the selection doesn't move afterwards
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list. Without cached items, that vault shows first, before the other vaults have loaded
-- New Copy Title action (⌘⇧.). Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
+- New Copy Title action (⌘⇧. on macOS, Ctrl+Shift+. on Windows), distinct from Copy Email on both platforms. Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
+- A failed full account load also shows an error with Retry when cached or early-loaded vault items remain visible
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history

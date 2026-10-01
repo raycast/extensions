@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  Keyboard,
+  Toast,
+  confirmAlert,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { memo } from "react";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
@@ -69,7 +79,20 @@ export const ItemActions = memo(function ItemActions({
             title="Copy Password"
             icon={Icon.Key}
             shortcut={Keyboard.Shortcut.Common.Copy}
-            onAction={() => copy("Password", async () => (await loadDetail()).password, true)}
+            onAction={async () => {
+              if (
+                await confirmAlert({
+                  title: "Enter Now Copies Passwords",
+                  message:
+                    "Pressing Enter on a login now copies its password. Use Show Details (⌘D on macOS, Ctrl+D on Windows) to view details.",
+                  primaryAction: { title: "Copy Password" },
+                  dismissAction: { title: "Cancel" },
+                  rememberUserChoice: true,
+                })
+              ) {
+                await copy("Password", async () => (await loadDetail()).password, true);
+              }
+            }}
           />
         )}
         {item.type === "note" && (
@@ -115,7 +138,7 @@ export const ItemActions = memo(function ItemActions({
         <Action
           title="Copy Title"
           icon={Icon.Text}
-          shortcut={Keyboard.Shortcut.Common.CopyName}
+          shortcut={platformShortcut(["cmd", "shift"], ".")}
           onAction={() => copy("Title", async () => item.title, false)}
         />
       </ActionPanel.Section>

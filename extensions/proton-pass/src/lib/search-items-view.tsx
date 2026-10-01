@@ -161,12 +161,19 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     } catch (err: unknown) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
+      const message = err instanceof Error ? err.message : "An unknown error occurred";
       // Items belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") updateItems([]);
       // Items still on screen stay there; otherwise the error replaces the list.
       if (itemsRef.current.length === 0) {
-        const message = err instanceof Error ? err.message : "An unknown error occurred";
         setError({ type, message });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Load Items",
+          message,
+          primaryAction: { title: "Retry", onAction: () => void loadItems() },
+        });
       }
     } finally {
       if (isLatest()) setIsLoading(false);
