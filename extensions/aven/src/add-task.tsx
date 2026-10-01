@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { promisify } from "node:util";
 import { execFile as execFileCallback } from "node:child_process";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, getPreferenceValues } from "@raycast/api";
@@ -28,8 +28,13 @@ export default function Command() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInFlight = useRef(false);
 
-  const { data: workspacesOutput, isLoading: isLoadingWorkspaces } = useExec("aven", ["workspace", "list"], {
+  const {
+    data: workspacesOutput,
+    isLoading: isLoadingWorkspaces,
+    error: workspacesError,
+  } = useExec("aven", ["workspace", "list"], {
     env: AVEN_ENV,
   });
 
@@ -41,11 +46,14 @@ export default function Command() {
     setWorkspaceKey((preferred ?? workspaces[0]).key);
   }, [workspaces, workspaceKey, preferences.defaultWorkspace]);
 
-  const { data: projectsOutput, isLoading: isLoadingProjects } = useExec(
-    "aven",
-    ["project", "list", "--json", "--workspace", workspaceKey],
-    { env: AVEN_ENV, execute: workspaceKey !== "" },
-  );
+  const {
+    data: projectsOutput,
+    isLoading: isLoadingProjects,
+    error: projectsError,
+  } = useExec("aven", ["project", "list", "--json", "--workspace", workspaceKey], {
+    env: AVEN_ENV,
+    execute: workspaceKey !== "",
+  });
 
   const projects = useMemo<Project[]>(() => {
     if (!projectsOutput) return [];
@@ -66,13 +74,23 @@ export default function Command() {
     setProjectKey((preferred ?? projects[0]).key);
   }, [projects, projectKey, preferences.defaultProject]);
 
+  const listError = workspacesError ?? projectsError;
+
   async function handleSubmit() {
+    if (submitInFlight.current) return;
+
+    if (listError) {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to load from aven", message: listError.message });
+      return;
+    }
+
     const validationError = validateTaskForm({ title, workspaceKey, projectKey });
     if (validationError) {
       await showToast({ style: Toast.Style.Failure, title: validationError });
       return;
     }
 
+    submitInFlight.current = true;
     setIsSubmitting(true);
     try {
       const args = buildAddTaskArgs({ title, workspaceKey, projectKey, status, description });
@@ -87,6 +105,7 @@ export default function Command() {
       });
     } finally {
       setIsSubmitting(false);
+      submitInFlight.current = false;
     }
   }
 
@@ -99,6 +118,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      {listError && <Form.Description title="Error" text={listError.message} />}
       <Form.Dropdown id="workspace" title="Workspace" value={workspaceKey} onChange={setWorkspaceKey}>
         {workspaces.map((workspace) => (
           <Form.Dropdown.Item key={workspace.key} value={workspace.key} title={workspace.name} />
