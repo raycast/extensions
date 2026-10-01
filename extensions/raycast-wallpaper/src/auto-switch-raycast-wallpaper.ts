@@ -36,26 +36,16 @@ export const getRandomWallpaper = async () => {
     if (_wallpaperList.length !== 0) {
       await setRandomWallpaper(_wallpaperList, _excludeList);
     } else {
-      await axios({
-        method: "GET",
-        url: RAYCAST_WALLPAPER_LIST_URL,
-        params: {
-          format: "json",
-        },
-      })
-        .then(async (axiosRes) => {
-          const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
-          await setRandomWallpaper(_raycastWallpaper, _excludeList);
-          cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
-        })
-        .catch((error) => {
-          captureException(error);
-          console.error(error);
-        });
+      const response = await axios.get<RaycastWallpaper[]>(RAYCAST_WALLPAPER_LIST_URL);
+      await setRandomWallpaper(response.data, _excludeList);
+      cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(response.data));
     }
   } catch (e) {
     captureException(e);
     console.error(e);
+    if (environment.launchType === LaunchType.UserInitiated) {
+      await showFailureToast(e, { title: "Could not switch wallpaper" });
+    }
   }
 };
 
