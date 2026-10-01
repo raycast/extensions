@@ -1,6 +1,6 @@
 # Changelog
 
-## [New Catalog, Menu Bar Controls, and AI] - {PR_MERGE_DATE}
+## [New Catalog, Menu Bar Controls, and AI] - 2026-10-01
 
 - Replaced the 22 bundled sounds with the full Moodist catalog of 89 sounds in 9 categories, downloaded on first play and cached
 - Removed the bundled Swift player, so the extension now works on Intel Macs and no longer needs Swift to build
