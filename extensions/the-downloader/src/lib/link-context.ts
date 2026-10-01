@@ -194,7 +194,8 @@ function splitToFit(text: string, maxTokens: number): string[] {
   if (estimateTokens(text) <= maxTokens) return [text];
   const pieces: string[] = [];
   let current = "";
-  for (const sentence of text.split(/(?<=[.!?。！？])\s*/u)) {
+  // A sentence ends at . ! ? followed by a space (not inside 23.5, v2.0 or example.com), or at 。！？.
+  for (const sentence of text.split(/(?<=[.!?])\s+|(?<=[。！？])/u)) {
     if (!sentence) continue;
     if (estimateTokens(sentence) > maxTokens) {
       if (current) pieces.push(current);

@@ -148,7 +148,9 @@ export function buildPrompt(ctx: LinkContext, question: string, history: ChatTur
 
   // The last question helps follow-ups like "tell me more about that".
   const query = [question, history.at(-1)?.question ?? ""].join(" ");
-  const picked = selectChunks(chunkBody(ctx.body, 350), query, Math.max(bodyBudget, 300));
+  // Chunks no bigger than half the budget, so at least one always fits.
+  const budget = Math.max(bodyBudget, 120);
+  const picked = selectChunks(chunkBody(ctx.body, Math.min(350, Math.floor(budget / 2))), query, budget);
   const excerpts = picked.map((c) => c.text).join(ctx.body.type === "segments" ? "\n…\n" : "\n\n…\n\n");
   return {
     mode: "excerpts",
@@ -334,12 +336,18 @@ export function linkInfoForAI(ctx: LinkContext): string {
   return `${dossier}\n\n${kind}\n\n${more}${momentLinkLine(ctx)}\n`;
 }
 
+/** Most text `read-link` hands Raycast AI: a 6-hour transcript or a huge page shouldn't fill its whole context. */
+export const TOOL_BODY_TOKENS = 50_000;
+
 /** The `read-link` tool's answer: the details, then the transcript with `[m:ss]` timestamps, the caption or the article. */
 export function linkTextForAI(ctx: LinkContext): string {
   const dossier = dossierMarkdown(ctx, 1_500);
   const name = BODY_NAMES[ctx.kind].full;
+  const full = bodyText(ctx.body);
+  const text = truncateToTokens(full, TOOL_BODY_TOKENS);
+  const cut = text === full ? "" : "\n\n(The text is longer; this is its start.)";
   const body = hasBody(ctx)
-    ? `## ${name}\n${bodyText(ctx.body)}`
+    ? `## ${name}\n${text}${cut}`
     : `## ${name}\nNot available${ctx.note ? `: ${ctx.note}` : ""}. Answer from the information above and say that the ${BODY_NAMES[ctx.kind].notes} couldn't be read.`;
   return `${dossier}\n\n${body}${momentLinkLine(ctx)}\n`;
 }

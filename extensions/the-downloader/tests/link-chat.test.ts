@@ -166,6 +166,16 @@ describe("buildPrompt", () => {
     expect(plan.prompt).toContain("steel cables");
   });
 
+  it("still sends some excerpts when the budget is very small", () => {
+    // Paragraphs of ~340 tokens: each 350-token chunk is bigger than a 300-token floor.
+    const paragraph = (i: number) => `In section ${i} the storm damaged the river banks badly. `.repeat(24);
+    const big = pageWith(1, {
+      body: { type: "paragraphs", paragraphs: Array.from({ length: 40 }, (_, i) => paragraph(i)) },
+    });
+    const excerpts = buildPrompt(big, "What did the storm damage?", [], 250).prompt.split("## Article excerpts")[1];
+    expect(excerpts).toMatch(/In section \d+ the storm damaged/);
+  });
+
   it("says what's missing when there's no body", () => {
     const empty = pageWith(0, { note: "Couldn't read this page's text (it may need a login or JavaScript)." });
     expect(buildPrompt(empty, "q", [], 10_000).prompt).toContain("The page's text couldn't be read.");
@@ -327,6 +337,13 @@ describe("exports and tool output", () => {
     expect(bodyForSave(videoWith(2)).content).toContain("[0:30]");
     expect(bodyForSave(post)).toMatchObject({ name: "Launch day - Caption" });
     expect(bodyForSave(pageWith(2))).toMatchObject({ name: "Bridges reopen - Text" });
+  });
+
+  it("caps what read-link hands the AI, saying it's cut", () => {
+    const huge = pageWith(1, { body: { type: "paragraphs", paragraphs: ["word ".repeat(400_000)] } });
+    const text = linkTextForAI(huge);
+    expect(text.length).toBeLessThan(260_000);
+    expect(text).toContain("(The text is longer; this is its start.)");
   });
 
   it("tells the AI tools what kind of link it is, with moment links only for videos", () => {

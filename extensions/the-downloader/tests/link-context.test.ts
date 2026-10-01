@@ -110,6 +110,18 @@ describe("the body", () => {
     expect(selectChunks(chunks, "number 150", 150)).not.toEqual([]);
   });
 
+  it("never splits inside a number, a version or a domain", () => {
+    const long = Array.from(
+      { length: 120 },
+      (_, i) => `Item ${i} costs $23.5 million, needs v2.0 and is on example.com.`,
+    ).join(" ");
+    const text = chunkBody({ type: "paragraphs", paragraphs: [long] }, 100)
+      .map((c) => c.text)
+      .join(" ");
+    expect(text).not.toMatch(/23\. 5|v2\. 0|example\. com/);
+    expect(text).toContain("$23.5 million");
+  });
+
   it("splits text without sentence breaks too (e.g. Chinese)", () => {
     const chunks = chunkBody({ type: "paragraphs", paragraphs: ["酵母需要新鲜的面粉".repeat(200)] }, 100);
     expect(chunks.length).toBeGreaterThan(5);
