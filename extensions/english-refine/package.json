@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "english-refine",
+  "type": "module",
+  "title": "Refine",
+  "description": "Refine selected text into clearer, more natural English while preserving its meaning and constraints.",
+  "icon": "extension-icon.png",
+  "author": "francesco_castrovilli",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "refine-text",
+      "title": "Refine Selected Text",
+      "description": "Refine selected text in place using your saved settings, with progress and completion badges.",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Refine Settings",
+      "description": "Choose discovered models, reasoning effort, processing mode, and the system prompt without selecting text.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your provider's API key. Sent only to the configured API base URL.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "baseUrl",
+      "title": "API Base URL",
+      "description": "The OpenAI-compatible API root, including /v1 if needed. Run Refine Settings to set the model, effort, mode, and system prompt.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.openai.com/v1",
+      "placeholder": "https://api.openai.com/v1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0",
+    "openai": "^7.25.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.11.0",
+    "prettier": "^3.6.2",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "bundle": "ray bundle",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
