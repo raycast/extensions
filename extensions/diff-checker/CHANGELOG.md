@@ -1,6 +1,6 @@
 # Changelog
 
-## [Use standard diff markers] - {PR_MERGE_DATE}
+## [Use standard diff markers] - 2026-10-01
 
 - Check Diff now uses `+`/`-` markers and a `diff` code fence for syntax highlighting
 
