@@ -1,11 +1,11 @@
 # Window Switcher & Badges
 
-One hotkey opens one app-first list. Every running app with a discovered window is there, so any window (hidden,
-minimized, on another Desktop, full screen, or plain) can be reached and focused exactly. The apps whose Dock badges
-you track show their current badge text on the same rows, and pinned apps are listed even when they have no window, so
-the list also works as a launcher.
+One hotkey opens a list of every running app and its windows: hidden, minimized, full screen, or on another Desktop.
+Pick one and you land on that exact window. The apps you track show their Dock badges on the same rows, and pinned
+apps stay in the list even with no window open, so it also works as a launcher.
 
-Works with Raycast Free on Macs with Apple silicon. No Pro APIs, no Screen Recording, no network, no background process.
+Works with Raycast Free on Macs with Apple silicon. No Pro features, Screen Recording, network access, or background
+process.
 
 ![Pinned + Badged: pinned apps with their Dock badges, Minimized tags, and the pinned Trash row](media/pinned-and-badged.png)
 
@@ -15,120 +15,127 @@ Works with Raycast Free on Macs with Apple silicon. No Pro APIs, no Screen Recor
 
 ## Requirements
 
-- A Mac with Apple silicon. Both helpers are built for arm64 only; on an Intel Mac the list says "Requires a Mac with
-  Apple silicon" instead of reading windows or badges.
-- Accessibility granted to **Raycast.app** (System Settings → Privacy & Security → Accessibility; named Device Control
-  and Data Access on macOS 27). The helpers run as children of Raycast and use Raycast's grant; nothing else needs one.
+- A Mac with Apple silicon. On an Intel Mac the list shows "Requires a Mac with Apple silicon".
+- Accessibility access for **Raycast** (System Settings → Privacy & Security → Accessibility; called Device Control and
+  Data Access on macOS 27). The extension's helpers use Raycast's access; nothing else needs it.
 
-Do not switch Raycast's Accessibility permission off while Raycast is running: on the author's Mac that froze keyboard
-and click input twice (Raycast's Hyper Key event tap). Quit Raycast first if you need to change it.
+Quit Raycast before turning its Accessibility access off. Turning it off while Raycast is running can freeze your
+keyboard and mouse input.
 
 ## Set the hotkeys
 
-Raycast Settings → Extensions → **Window Switcher & Badges**:
+Open Raycast Settings → Extensions → **Window Switcher & Badges** and record hotkeys for these commands:
 
-- **Manage Apps**: put your main hotkey here. It reopens the list fresh on every press, so the window scan and the
-  badge read are never stale. **App List** is the screen Manage Apps opens; it needs no hotkey.
-- **Quit Selected App** (optional): quits the app selected in the open list (normal quit) and keeps the list open. Apps
-  running without a window (Discord in its tray, Mail with its window closed) are found through the system's
-  `lsappinfo`. Pressed with no list open, or more than 30 s after the last selection, it just opens the list.
-- **Quit Other Apps** (optional): quits every running app in the list except the selected one, after a confirmation;
-  never Finder.
-- **Manage Pinned Apps** (optional): the same screen as ⌘⇧C in the list.
+- **Manage Apps**: your main hotkey. Every press reopens the list with a fresh window scan and badge read. **App List**
+  is the screen it opens and needs no hotkey.
+- **Quit Selected App** (optional): quits the app selected in the open list and keeps the list open. It also works for
+  apps running without a window, such as Discord in the menu bar or Mail with its window closed. With no list open, or
+  more than 30 seconds after your last selection, it just opens the list.
+- **Quit Other Apps** (optional): quits every running app in the list except the selected one, after asking. Finder is
+  never quit.
+- **Manage Pinned Apps** (optional): opens the same screen as ⌘⇧C in the list.
 
-Inside the list, the row actions Quit <App> (⌃Q) and Quit Other Apps (⌃⇧Q) do the same as the two quit commands. The
-commands exist because Raycast's Hyper Key cannot drive a row action: Raycast turns it into its own hotkeys before the
-list sees the keystroke, but it can trigger a command hotkey.
+In the list, ⌃Q and ⌃⇧Q do the same as the two quit commands. The commands exist so you can use them with Raycast's
+Hyper Key, which works for command hotkeys but not for actions inside a list.
 
 ## Using it
 
-Each press runs the window helper and the badge helper once, independently. Rows appear as soon as your settings load
-and fill in as each helper answers; a failure of one never hides what the other found.
+Every press reads windows and Dock badges separately. Rows appear right away and fill in as each read finishes; if one
+read fails, you still see what the other found.
 
-**App row:** icon, app name, the window title as subtitle when the row targets one window (clipped to 64 characters;
-the full title is in the tooltip), then (in this order, only those that apply) `N windows` for two or more, `Hidden`,
-and for a one-window app `Minimized`, `k of N match` while searching, `▸` when the app's windows are collapsed, the
-Dock badge (tracked apps only: `3`, a red `•` for ten or more with the count in the tooltip, an orange `•` or text for
-non-numeric badges, a muted `−` for no badge, `Not in Dock`, `Not installed`, or a yellow `Unavailable` marker), and
-one icon slot at the far right: the pin, a yellow warning when the window read failed, an exclamation mark when a
-window could not be read, or a blank so rows line up.
+**What a row shows**, left to right:
 
-**Window rows** sit directly beneath their app row (`↳ title`) for apps with two or more windows; a one-window app is
-one direct row. Return on a window row focuses exactly that window. Duplicate titles are numbered
-(`2 of 3 with this title`).
+- The app icon and name, plus the window title when the row stands for one window (long titles are shortened; hover
+  for the full title).
+- Tags, when they apply: `N windows`, `Hidden`, `Minimized`, `k of N match` while searching, and `▸` when the app's
+  windows are collapsed.
+- The Dock badge, for tracked apps only: a number such as `3`; a red `•` for ten or more (hover for the count); an
+  orange `•` or text for other badges; a gray `−` for no badge; or `Not in Dock`, `Not installed`, or a yellow
+  `Unavailable`.
+- At the far right: a pin for pinned apps, or a warning icon when windows could not be read.
 
-**Return on an app row:** switches to its only window; on an expanded multi-window app switches to the first window
-listed beneath (the action label names it); on a collapsed one shows its windows; on an app with no windows opens the
-app. A window that has closed gives "That window closed" and a rescan, never a substitute window.
+**Windows.** Apps with two or more windows list them underneath (`↳ title`). Return on a window row switches to exactly
+that window, even if it is minimized, hidden, or on another Desktop. Windows with the same title are numbered
+(`2 of 3 with this title`). If a window has closed since the list opened, you get "That window closed" and a fresh
+scan, never a different window.
 
-**Search** matches every whitespace-separated word, case-insensitively, against app names and window titles. A
-distinctive title fragment gives the app row with that title as subtitle, `1 of N matches`, and one window row; Return
-focuses it. Typing an app's name gives just the app row (`Show Windows` expands it). Identical titles give
-`2 of N match`, never a silent pick.
+**Return on an app row** switches to its only window, or to the first window listed under it (the action name says
+which). On an app with collapsed windows it shows them, and on an app with no windows it opens the app.
 
-**Filters** (⌘P dropdown, or ⌘⇧V to cycle): **All Apps** (default: every app with a window, plus tracked apps that are
-pinned, badged, or whose badge is unavailable), **Pinned + Badged**, and **Badged Only** (tracked apps only, in your
-order). The filter is remembered.
+**Search** matches every word you type against app names and window titles. Type part of a window title to narrow the
+list to that window, then press Return. Typing an app's name shows just that app. If several windows share a title, all
+of them are listed (`2 of N match`) instead of one being picked for you.
 
-**Trash** (a **Utilities** section below every app row, so it never changes the app order): pin it with ⌘. on the row
-or in Manage Pinned Apps to keep it at the end of All Apps and Pinned + Badged; unpinned, type `trash`, `empty`, or
-`bin` to find it in those two filters. Badged Only never shows it. Return opens the Trash in Finder. **Empty Trash…**
-(in the ⌘K actions panel) always asks first; after you confirm, Raycast's own System Actions → Empty Trash does the erasing, so Raycast may
-also ask: the first time, "Run Command / Always Run Command" (Raycast asks whenever an extension starts another
-extension's command), then its own warning if `Show Warning Before Emptying Trash` is on. This extension never deletes
-a file and needs no Finder permission. If Empty Trash is disabled in Raycast, a toast says so and nothing is erased.
+**Filters** (⌘P, or ⌘⇧V to cycle):
 
-**Sort** (⌘⇧S, All Apps only): **Alphabetical** (default) or **Recent in This Command**. The second is named for what
-it measures: apps you switched to or opened *through this command* first, then apps with an on-screen window front to
-back, then the rest alphabetically. It is not a system-wide last-used history.
+- **All Apps** (default): every app with a window, plus tracked apps that are pinned, badged, or whose badge can't be
+  read.
+- **Pinned + Badged** and **Badged Only**: tracked apps only, in your order.
 
-**Other actions:** ⌘R refreshes both helpers; ⌘⇧R windows only; ⌘⌥R badges only. ⌘. pins or unpins (pinning an
-untracked app adds it to badge tracking too). ⌃Q quits the selected app (normal quit; the list stays open and
-rescans) and ⌃⇧Q quits every other running app in the list after a confirmation (Finder is never quit). ⌥←/⌥→ collapse
-or expand a group, ⌥⇧←/⌥⇧→ all groups; the `Expand windows by default` preference sets the starting state for each
-press. ⌘⇧C opens Manage Pinned Apps. ⌘⇧D copies diagnostic info (it includes window titles and badge text, only goes
-to the clipboard when you ask, and is kept out of Raycast's Clipboard History).
+The list remembers your filter.
+
+**Trash** has its own row in a **Utilities** section below the apps. Pin it (⌘.) to keep it at the end of All Apps and
+Pinned + Badged; otherwise type `trash`, `empty`, or `bin` to find it there. Return opens the Trash in Finder.
+**Empty Trash…** (in the ⌘K actions) always asks first, then hands off to Raycast's own Empty Trash command. Raycast
+may ask too: once to let this extension run its command, and again if Raycast's own warning is on. This extension never
+deletes files itself, and if Raycast's Empty Trash is turned off, nothing is erased.
+
+**Sort** (⌘⇧S, All Apps only): **Alphabetical** (default) or **Recent in This Command**, which puts the apps you last
+switched to or opened from this list first, then apps with windows on screen, then the rest alphabetically. It doesn't
+track app use outside this command.
+
+**Shortcuts in the list:**
+
+| Keys           | Action                                                                                                |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| ⌘R / ⌘⇧R / ⌘⌥R | Refresh everything / windows only / badges only                                                       |
+| ⌘.             | Pin or unpin (pinning an untracked app also tracks its badge)                                         |
+| ⌃Q             | Quit the selected app; the list stays open                                                            |
+| ⌃⇧Q            | Quit every other app in the list, after asking (never Finder)                                         |
+| ⌥← / ⌥→        | Collapse or expand an app's windows (add ⇧ for all apps)                                              |
+| ⌘⇧C            | Open Manage Pinned Apps                                                                               |
+| ⌘⇧D            | Copy diagnostic info (includes window titles and badge text; kept out of Raycast's Clipboard History) |
+
+The **Expand windows by default** preference sets whether apps start expanded.
 
 ## Manage Pinned Apps
 
-⌘⇧C in the list, or the **Manage Pinned Apps** command. Sections: Pinned, Badge Tracking, Utilities, and Available.
+Open it with ⌘⇧C in the list or with the **Manage Pinned Apps** command. It has four sections:
 
-- **Badge tracking** means the list reads that app's Dock badge (the red count on its Dock icon) and shows it on the
-  row. It only matters for apps that badge (Mail, Slack, Discord, Messages, Calendar). A badge-tracked app that is not
-  pinned is listed only while it has a window or a badge.
-- **Pinned** apps are badge-tracked and always listed in All Apps and Pinned + Badged, even with no window, so the list
-  works as a launcher for them.
-- **Available** apps are not badge-tracked and appear only while they have a window.
-- Move Up/Down (⌘⌥↑/↓) sets the order used by the two badge filters; Pin/Unpin (⌘.); Add; Remove (⌃X). Utilities holds
-  the Trash row's own pin, outside that order.
+- **Pinned**: tracked apps that are always listed in All Apps and Pinned + Badged, even with no window open, so you can
+  launch them from the list.
+- **Badge Tracking**: apps whose Dock badge the list shows, listed only while they have a window or a badge. Tracking
+  matters only for apps that show badges, like Mail, Slack, Discord, Messages, and Calendar.
+- **Utilities**: the Trash row's pin.
+- **Available**: every other installed app, listed only while it has a window. Select one and press Return to track it.
 
-Changes apply as soon as you return to the list, with no rescan.
+⌘⌥↑ and ⌘⌥↓ change the order the badge filters use, ⌘. pins or unpins, and ⌃X removes an app. Changes apply as soon
+as you go back to the list.
 
-This is a command rather than a set of preferences because Raycast preferences have no list or reordering type.
+It is a command rather than a set of preferences because Raycast preferences can't hold an ordered list.
 
 ## First run and your data
 
-On the first run the extension badge-tracks and pins a default set of apps (Reminders, Mail, WhatsApp, Calendar, Slack,
-Discord, Microsoft Teams, those installed) and starts in All Apps. Adjust them in Manage Pinned Apps. Removing every app
-is respected: the defaults never come back on their own. If the saved list is unreadable, the defaults are restored
-with a toast.
+The first time it runs, the extension tracks and pins a default set of apps, where installed: Reminders, Mail,
+WhatsApp, Calendar, Slack, Discord, and Microsoft Teams. Change them in Manage Pinned Apps. If you remove them all, they
+stay removed. If the saved list ever can't be read, the defaults come back and a message says so.
 
-Stored in Raycast's local storage for this extension: tracked apps (bundle ID, path, name), pins, the Trash pin,
-filter, sort, recency stamps (bundle IDs and timestamps, at most 50), and a setup marker. Never stored: badge values,
-window titles, window IDs. Nothing leaves your Mac.
+The extension stores only its own settings in Raycast: the apps you track and pin, the Trash pin, your filter and
+sort, and a short history of apps you switched to through the list (app IDs and times, at most 50). It never stores
+window titles or badge values, and nothing leaves your Mac.
 
-Uninstalling the extension in Raycast removes it and its storage. Nothing else is installed: no LaunchAgent, login
-item, or background process.
+Uninstalling the extension in Raycast removes it and its settings. It installs nothing else: no login item and no
+background process.
 
 ## How it works
 
 Two small Swift helpers in `assets/` run on demand while the list is open, each with `execFile`, no shell, and a hard
 timeout. No helper process exists while the list is closed.
 
-| Helper | What it reads | Source | Build |
-| --- | --- | --- | --- |
-| `assets/window-helper` | Windows of running apps (Accessibility), their Desktop, and focus | `helper/window/*.swift` | `npm run build:helper:window` (`swiftc -O -swift-version 5 -target arm64-apple-macos14`, Swift 6.4) |
-| `assets/dock-badges` | Dock items and their badge text (Accessibility) | `helper/badge/dock-badges.swift` | `npm run build:helper:badge` (`swiftc -O -target arm64-apple-macos14`) |
+| Helper                 | What it reads                                                     | Source                           | Build                                                                                               |
+| ---------------------- | ----------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `assets/window-helper` | Windows of running apps (Accessibility), their Desktop, and focus | `helper/window/*.swift`          | `npm run build:helper:window` (`swiftc -O -swift-version 5 -target arm64-apple-macos14`, Swift 6.4) |
+| `assets/dock-badges`   | Dock items and their badge text (Accessibility)                   | `helper/badge/dock-badges.swift` | `npm run build:helper:badge` (`swiftc -O -target arm64-apple-macos14`)                              |
 
 The source hashes are recorded in `helper/window/SOURCES.sha256` and `helper/badge/dock-badges.swift.sha256`, and
 `npm test` fails if a committed binary or a Swift source differs from the recorded values. Rebuilding from these
