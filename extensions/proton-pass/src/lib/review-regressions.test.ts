@@ -128,6 +128,25 @@ test("Copy Email and Copy Title have distinct Windows shortcuts", () => {
   assert.notEqual(JSON.stringify(shortcut("Copy Email")), JSON.stringify(shortcut("Copy Title")));
 });
 
+test("Show Note copying follows the Transient Clipboard preference and conceals by default", () => {
+  for (const copyPasswordTransient of [undefined, true, false]) {
+    const { NoteView } = loadView("note-view.tsx", {
+      "@raycast/api": {
+        Action: {},
+        ActionPanel: {},
+        Detail: {},
+        getPreferenceValues: () => ({ copyPasswordTransient }),
+      },
+      "@raycast/utils": { usePromise: () => ({ data: { note: "fake note" }, isLoading: false }) },
+      "./format": format,
+    });
+    const view = NoteView({ item: { ...item, type: "note" }, store: {} });
+    const copy = actions(view.props.actions).find((entry) => entry.title === "Copy Note");
+    assert.equal(copy?.content, "fake note");
+    assert.equal(copy?.concealed, copyPasswordTransient ?? true);
+  }
+});
+
 function hookHarness() {
   const slots: unknown[] = [];
   let cursor = 0;

@@ -21,13 +21,14 @@
 - Failed vault loads stay retryable and do not renew the cache as a fresh empty result; an empty selected vault keeps a Retry action even when other vaults load
 - Earlier per-vault snapshots fill gaps in partial shared caches and are removed after a complete Search Items or Get TOTP refresh, so deleted items do not return
 - Copy Password remains available on demand when cached metadata says no password was saved; Enter still follows the Primary Action preference
+- Copy Note in Show Note follows the Transient Clipboard preference, keeping notes concealed by default
 - Hiding the details panel stops automatic secret loads; already-loaded custom fields and explicit copy actions remain available
 - Update vulnerable transitive brace-expansion dependencies to compatible patched versions
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x
-- Shorter preference texts
+- Shorter preference texts; Background Refresh, Web Integration and Website Icons are grouped under Item List
 
 ## [Faster Loading] - 2026-10-01
 
