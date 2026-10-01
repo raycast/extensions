@@ -42,7 +42,7 @@ function isStatus(value: unknown): value is Status {
 async function requestStatus(): Promise<Status> {
   const request = crypto.randomUUID();
   await sendToTethered(`tethered://status?request=${request}`);
-  for (let attempt = 0; attempt < 20; attempt++) {
+  for (let attempt = 0; attempt < 60; attempt++) {
     const value = await readStoredData("raycastStatus");
     if (isStatus(value) && value.request === request) return value;
     await new Promise((resolve) => setTimeout(resolve, 150));
@@ -50,14 +50,28 @@ async function requestStatus(): Promise<Status> {
   throw new Error("Tethered did not return a fresh status. Open the updated app and try again.");
 }
 
+let pendingStatusRequest: Promise<Status> | undefined;
+
+function requestStatusOnce(): Promise<Status> {
+  if (pendingStatusRequest) return pendingStatusRequest;
+  pendingStatusRequest = requestStatus();
+  void pendingStatusRequest.then(
+    () => { pendingStatusRequest = undefined; },
+    () => { pendingStatusRequest = undefined; },
+  );
+  return pendingStatusRequest;
+}
+
 const yesNo = (value: boolean) => value ? "On" : "Off";
+const powerModeLabel = (value: string) => ({ auto: "Auto", low: "Low", high: "High" } as Record<string, string>)[value] ?? value;
+const calibrationLabel = (value: string) => ({ opportunityWaitingForNaturalFull: "Waiting for opportunity" } as Record<string, string>)[value] ?? value;
 
 export default function Command() {
   const [status, setStatus] = useState<Status | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    void requestStatus().then(setStatus).catch(async (error: unknown) => {
+    void requestStatusOnce().then(setStatus).catch(async (error: unknown) => {
       const detail = error instanceof Error ? error.message : String(error);
       await showToast({ style: Toast.Style.Failure, title: "Could not read Tethered status", message: detail });
     }).finally(() => setIsLoading(false));
@@ -66,9 +80,9 @@ export default function Command() {
   const markdown = status ? [
     `# Tethered Status`,
     `Battery: ${status.batteryLevel < 0 ? "Unavailable" : `${Math.round(status.batteryLevel)}%`} (${status.isACConnected ? "AC" : "Battery"}, ${status.isCharging ? "Charging" : "Not charging"})`,
-    `Power mode: ${status.powerMode}`,
+    `Power mode: ${powerModeLabel(status.powerMode)}`,
     `Caffeinate: ${yesNo(status.caffeinateActive)}`,
-    `Calibration: ${status.calibrationPhase}`,
+    `Calibration: ${calibrationLabel(status.calibrationPhase)}`,
     `Topup: ${yesNo(status.topupEnabled)}`,
     `Sailing: ${yesNo(status.sailingEnabled)} (active: ${yesNo(status.sailingActive)})`,
     `Heat Protection: ${yesNo(status.heatProtectionEnabled)} (active: ${yesNo(status.heatProtectionActive)})`,
