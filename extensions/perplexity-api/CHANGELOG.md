@@ -1,6 +1,6 @@
 # Perplexity API Changelog
 
-## [Migrate to the Agent API] - {PR_MERGE_DATE}
+## [Migrate to the Agent API] - 2026-10-01
 
 - Moved all requests from the Sonar chat completions endpoint to Perplexity's Agent API (`/v1/responses`).
 - Replaced the Sonar models with the Agent API presets (`fast`, `low`, `medium`, `high`, `xhigh`) and the `openai/gpt-5.6-sol` and `openai/gpt-5.6-luna` models. Saved Sonar choices are mapped to the closest preset.
