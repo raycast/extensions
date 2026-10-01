@@ -33,7 +33,7 @@ npx prettier --write <files>
 | `moco`                   | `src/moco.tsx`           | project list → tasks → start/log activity                                                                  |
 | `moco_today`             | `src/moco_today.tsx`     | today's activities                                                                                         |
 | `moco_menu_bar`          | `src/moco_menu_bar.tsx`  | menu bar, `interval: 30s`, refreshes the cache                                                             |
-| `start_timer`            | `src/start_timer.tsx`    | start form for direct access (search, hotkeys)                                                             |
+| `start_timer`            | `src/start_timer.tsx`    | start form for direct access, also opened from the menu bar ("Add Activity…")                              |
 | `edit_timer`             | `src/edit_timer.tsx`     | edit form for direct access, also opened from the menu bar with `{ activity }`                             |
 | `menu_bar_tools`         | `src/menu_bar_tools.tsx` | menu-bar-only windows via `launchContext.view` (actions, favorites, settings), only a hint without context |
 

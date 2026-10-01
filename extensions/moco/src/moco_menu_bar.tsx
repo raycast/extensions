@@ -259,6 +259,13 @@ export default function Command() {
       <MenuBarExtra.Submenu icon={Icon.Calendar} title={`Today · ${totalHoursMinutes} (${activities.length})`}>
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
+            key="add-activity"
+            icon={Icon.Plus}
+            title="Add Activity…"
+            tooltip="Book hours or start a timer for any project and task"
+            onAction={() => launchCommand({ name: "start_timer", type: LaunchType.UserInitiated })}
+          />
+          <MenuBarExtra.Item
             key="open-dashboard"
             icon={Icon.Globe}
             title="Open Activities in MOCO"
