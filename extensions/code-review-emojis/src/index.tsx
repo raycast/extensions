@@ -54,6 +54,19 @@ export default function Command() {
 
   return (
     <List searchBarPlaceholder="Search emojis…">
+      <List.EmptyView
+        title="No Emojis Found"
+        description="Try a different search term."
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser
+              title="Open Code Review Emoji Guide"
+              url="https://github.com/erikthedeveloper/code-review-emoji-guide"
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+          </ActionPanel>
+        }
+      />
       <List.Section title="Emojis">
         {EMOJIS.map((emoji) => (
           <List.Item
