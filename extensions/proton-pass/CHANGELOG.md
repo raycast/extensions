@@ -20,7 +20,7 @@
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x
-- Shorter preference texts
+- Shorter preference texts; Background Refresh, Web Integration and Website Icons are grouped under Item List
 
 ## [Faster Loading] - 2026-10-01
 
