@@ -90,6 +90,21 @@ export function parseOtpauthUri(raw: string): TotpParams | undefined {
   return { secret, algorithm, digits, period };
 }
 
+/**
+ * Period in seconds of a time-based code, including formats that can't be generated locally (e.g. Steam).
+ * Undefined for counter-based (HOTP) or unreadable codes.
+ */
+export function getTotpPeriod(raw: string): number | undefined {
+  const value = raw.trim();
+  if (!value.toLowerCase().startsWith("otpauth://")) return base32Decode(value) ? 30 : undefined;
+  try {
+    const url = new URL(value);
+    return url.host.toLowerCase() === "totp" ? parsePositiveInteger(url.searchParams.get("period"), 30) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** RFC 6238 TOTP. */
 export function generateTotp(params: TotpParams, nowMs: number = Date.now()): TotpCode {
   const seconds = Math.floor(nowMs / 1000);

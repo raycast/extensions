@@ -93,8 +93,8 @@
       "name": "copyPasswordTransient",
       "type": "checkbox",
       "title": "Transient Clipboard",
-      "label": "Clear password from clipboard after paste",
-      "description": "When enabled, passwords will be cleared from clipboard after pasting",
+      "label": "Keep copied secrets out of clipboard history",
+      "description": "When enabled, copied passwords and 2FA codes aren't recorded in Raycast's clipboard history",
       "default": true,
       "required": false
     },
@@ -182,14 +182,14 @@
       "type": "checkbox",
       "title": "Website Icons",
       "label": "Show website icons for logins",
-      "description": "Fetches icons from DuckDuckGo's icon service, which receives the website domains of your logins (not your usernames or passwords). When disabled, logins show their initials.",
+      "description": "Shows icons from the favicon provider set in Raycast's settings, which receives the website domains of your logins (not your usernames or passwords). When disabled, logins show their initials.",
       "default": false,
       "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

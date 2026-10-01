@@ -17,11 +17,13 @@
 - Enter now copies the password (or opens the note for secure notes); new Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
 - Frequently used items are ranked first
 - Search also matches usernames, emails and website domains
-- Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead (off by default, since it sends domains to DuckDuckGo's icon service)
+- Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead, from the favicon provider set in Raycast's settings (off by default, since the provider receives the domains)
 - Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
 - Items matching the active browser tab are grouped in a Suggested section
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
+- The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
+- Update `@raycast/utils` to 2.x
 
 ## [Faster Loading] - {PR_MERGE_DATE}
 
@@ -32,6 +34,8 @@
 - Fix: URLs and other values in item details showed stray backslashes (e.g. `example\.com`)
 - Fix: items whose ID starts with "-" could not be opened, and copying their password or TOTP code failed
 - Error messages no longer include the pass-cli command line (local paths and item IDs)
+- Cached items are cleared when logging in through the extension or when the session has ended, so another account's items don't show up
+- Fix: a vault's item list kept showing cached items after the session ended, instead of the login screen
 
 ## [Improvements] - 2026-09-19
 

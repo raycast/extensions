@@ -146,7 +146,7 @@ export default function Command() {
   if (errorView) return errorView;
 
   async function copyTotp(totp: string, title: string) {
-    await Clipboard.copy(totp, { transient: preferences.copyPasswordTransient ?? true });
+    await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
     showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: title });
   }
 

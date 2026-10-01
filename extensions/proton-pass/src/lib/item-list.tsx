@@ -13,7 +13,7 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { useCachedState, useFrecencySorting, usePromise } from "@raycast/utils";
+import { getFavicon, useCachedState, useFrecencySorting, usePromise } from "@raycast/utils";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getItem, getTotp } from "./pass-cli";
 import { Item, ItemDetail } from "./types";
@@ -24,10 +24,9 @@ import {
   itemKey,
   noteToMarkdown,
   toOpenableUrl,
-  websiteIconUrl,
   websiteLabels,
 } from "./format";
-import { TotpCode, generateTotp, parseOtpauthUri } from "./totp";
+import { generateTotp, getTotpPeriod, parseOtpauthUri } from "./totp";
 import { getInitialIconDataUri } from "./avatar";
 import { canFillFrontmostApp, fillFrontmostApp } from "./autofill";
 import { formatTotpCode, getItemIcon } from "./utils";
@@ -109,8 +108,14 @@ function useItemDetail(store: ItemDetailStore, item: Item | undefined) {
   };
 }
 
+/** A 2FA code, with the seconds it stays valid when its period is known. */
+interface DisplayedCode {
+  code: string;
+  remainingSeconds?: number;
+}
+
 /** Live TOTP code for the item shown in the detail panel, generated locally from its otpauth URI when possible. */
-function useTotpCode(item: Item, detail: ItemDetail | undefined): TotpCode | undefined {
+function useTotpCode(item: Item, detail: ItemDetail | undefined): DisplayedCode | undefined {
   const params = useMemo(() => (detail?.totpUri ? parseOtpauthUri(detail.totpUri) : undefined), [detail?.totpUri]);
   const isEnabled = item.hasTotp && detail !== undefined;
   const [now, setNow] = useState(() => Date.now());
@@ -123,10 +128,11 @@ function useTotpCode(item: Item, detail: ItemDetail | undefined): TotpCode | und
     return () => clearInterval(timer);
   }, [isEnabled]);
 
-  const period = params?.period ?? 30;
-  const step = Math.floor(now / 1000 / period);
+  // Codes that can't be generated locally come from pass-cli: refreshed every period when the URI is
+  // time-based, fetched once otherwise (counter-based codes have no lifetime to count down).
+  const period = params?.period ?? (detail?.totpUri ? getTotpPeriod(detail.totpUri) : undefined);
+  const step = period ? Math.floor(now / 1000 / period) : 0;
 
-  // Codes that can't be generated locally are fetched from pass-cli once per period.
   useEffect(() => {
     if (!isEnabled || params) return;
     let cancelled = false;
@@ -143,8 +149,10 @@ function useTotpCode(item: Item, detail: ItemDetail | undefined): TotpCode | und
 
   if (!isEnabled) return undefined;
   if (params) return generateTotp(params, now);
-  const remainingSeconds = period - (Math.floor(now / 1000) % period);
-  return cliCode?.step === step ? { code: cliCode.code, remainingSeconds, period } : undefined;
+  if (cliCode?.step !== step) return undefined;
+  return period
+    ? { code: cliCode.code, remainingSeconds: period - (Math.floor(now / 1000) % period) }
+    : { code: cliCode.code };
 }
 
 interface ItemDetailPanelProps {
@@ -174,10 +182,13 @@ const ItemDetailPanel = memo(function ItemDetailPanel({ item, detail, isLoading,
 
   let totpCode: LabelText = EMPTY_VALUE;
   if (totp) {
-    totpCode = {
-      value: `${formatTotpCode(totp.code)}  ·  ${totp.remainingSeconds}s`,
-      color: totp.remainingSeconds <= 5 ? Color.Orange : undefined,
-    };
+    totpCode =
+      totp.remainingSeconds === undefined
+        ? formatTotpCode(totp.code)
+        : {
+            value: `${formatTotpCode(totp.code)}  ·  ${totp.remainingSeconds}s`,
+            color: totp.remainingSeconds <= 5 ? Color.Orange : undefined,
+          };
   } else if (item.hasTotp) {
     totpCode = error ? UNAVAILABLE_VALUE : LOADING_VALUE;
   }
@@ -572,10 +583,10 @@ const ItemActions = memo(function ItemActions({
 function getListIcon(item: Item, showWebsiteIcons: boolean): Image.ImageLike {
   if (item.type !== "login") return getItemIcon(item.type);
   const initials = getInitialIconDataUri(item.title);
-  // Website icons come from a third-party service that receives the domain, so they're opt-in.
-  const iconUrl = showWebsiteIcons && item.urls?.[0] ? websiteIconUrl(item.urls[0]) : undefined;
-  return iconUrl
-    ? { source: iconUrl, fallback: initials, mask: Image.Mask.RoundedRectangle }
+  const url = item.urls?.[0];
+  // Website icons come from the favicon provider set in Raycast, which receives the domain, so they're opt-in.
+  return showWebsiteIcons && url
+    ? getFavicon(toOpenableUrl(url), { fallback: initials, mask: Image.Mask.RoundedRectangle })
     : { source: initials, fallback: getItemIcon(item.type) };
 }
 
@@ -609,7 +620,8 @@ export function ItemList({
 }: ItemListProps) {
   const showWebsiteIcons = getPreferenceValues<Preferences>().showWebsiteIcons ?? false;
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-item-details", true);
-  const store = useMemo(() => new ItemDetailStore(), []);
+  // A new store whenever the list is refreshed, so loaded details are never older than the items.
+  const store = useMemo(() => new ItemDetailStore(), [items]);
   const { data: sortedItems, visitItem } = useFrecencySorting(items, { key: itemKey, namespace: "items" });
   const [selectedKey, setSelectedKey] = useState<string>();
 
