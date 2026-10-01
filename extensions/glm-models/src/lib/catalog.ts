@@ -44,13 +44,6 @@ export const REASONING_EFFORTS = [
   "none",
 ] as const;
 
-type Preferences = {
-  apiKey: string;
-  platform?: string;
-  customBaseUrl?: string;
-  extraModels?: string;
-};
-
 /** Maps a platform preference value to its base URL; null when custom is selected without a URL. */
 export function resolveBaseURL(
   platform: string | undefined,
@@ -451,18 +444,20 @@ export type ModelsProbe =
 
 // Raycast polls getModels every few seconds (AI surfaces refresh on their own
 // schedule), so a successful /models probe is cached briefly in memory:
-// successes for 60s, overlapping callers deduped onto one fetch. The cache
-// key includes the credential pair, so validating a typed-different key in
-// Check Setup always probes live; failures are never cached.
+// successes for 60s, overlapping callers deduped onto one fetch. The cache and
+// the in-flight map are keyed by the credential pair, so a typed-different key
+// in Check Setup always probes live and can never receive a background probe's
+// result; failures are never cached. Explicit refreshes bypass the cache.
 const MODELS_PROBE_CACHE_TTL_MS = 60_000;
 let modelsProbeCache:
   { key: string; fetchedAt: number; probe: ModelsProbe } | undefined;
-let modelsProbeInFlight: Promise<ModelsProbe> | undefined;
+const modelsProbeInFlight: Record<string, Promise<ModelsProbe>> = {};
 
 /** Probes GET {base}/models and classifies the outcome so failures can be explained to the user. */
 export async function probeModelsEndpoint(
   baseURL: string,
   apiKey: string,
+  options?: { bypassCache?: boolean },
 ): Promise<ModelsProbe> {
   if (!baseURL || !apiKey) {
     return {
@@ -473,17 +468,21 @@ export async function probeModelsEndpoint(
   }
   const cacheKey = `${baseURL}|${apiKey}`;
   if (
+    !options?.bypassCache &&
     modelsProbeCache &&
     modelsProbeCache.key === cacheKey &&
     Date.now() - modelsProbeCache.fetchedAt < MODELS_PROBE_CACHE_TTL_MS
   ) {
     return modelsProbeCache.probe;
   }
-  modelsProbeInFlight ??= probeModelsLive(baseURL, apiKey, cacheKey);
+  const inFlight = modelsProbeInFlight[cacheKey];
+  if (inFlight) return inFlight;
+  const probe = probeModelsLive(baseURL, apiKey, cacheKey);
+  modelsProbeInFlight[cacheKey] = probe;
   try {
-    return await modelsProbeInFlight;
+    return await probe;
   } finally {
-    modelsProbeInFlight = undefined;
+    delete modelsProbeInFlight[cacheKey];
   }
 }
 
@@ -572,6 +571,11 @@ export const getModels: AI.GetModels = async () => {
     probeModelsEndpoint(baseURL, apiKey),
   ]);
 
+  // The curated fallback is GLM/Z.ai-specific — a Custom endpoint may serve an
+  // entirely different model family, so it never gets these ids (use the
+  // Extra Models preference to force-include ids there).
+  const allowCuratedFallback = platform !== "custom";
+
   let dynamicIds: string[];
   if (probe.ok) {
     // Raycast polls discovery every few seconds — emit the breadcrumb only
@@ -591,10 +595,21 @@ export const getModels: AI.GetModels = async () => {
     // models.dev mirrors the platform model lists and is already filtered to
     // chat models; the curated catalog is the last resort.
     const catalogIds = Object.keys(metadata);
-    dynamicIds = catalogIds.length > 0 ? catalogIds : FALLBACK_IDS;
-    console.log(
-      `glm-models: using the ${catalogIds.length > 0 ? "models.dev" : "curated fallback"} model list (${dynamicIds.length} ids)`,
-    );
+    dynamicIds =
+      catalogIds.length > 0
+        ? catalogIds
+        : allowCuratedFallback
+          ? FALLBACK_IDS
+          : [];
+    if (dynamicIds.length > 0) {
+      console.log(
+        `glm-models: using the ${catalogIds.length > 0 ? "models.dev" : "curated fallback"} model list (${dynamicIds.length} ids)`,
+      );
+    } else {
+      console.log(
+        "glm-models: no model fallback for a Custom endpoint — set the Extra Models preference to force-include model ids",
+      );
+    }
   }
 
   // The keyword blocklist applies to live ids unconditionally; the `^glm`
@@ -624,15 +639,21 @@ export const getModels: AI.GetModels = async () => {
     );
   }
   if (ids.length === 0) {
-    // An account where every discovered id was filtered out shouldn't leave
-    // the picker empty.
-    console.log(
-      "glm-models: every discovered id was filtered out — using the curated fallback model list",
-    );
-    for (const id of FALLBACK_IDS) {
-      if (seen.has(id)) continue;
-      seen.add(id);
-      ids.push(id);
+    if (!allowCuratedFallback) {
+      console.log(
+        "glm-models: no usable models for a Custom endpoint — returning an empty list",
+      );
+    } else {
+      // An account where every discovered id was filtered out shouldn't leave
+      // the picker empty.
+      console.log(
+        "glm-models: every discovered id was filtered out — using the curated fallback model list",
+      );
+      for (const id of FALLBACK_IDS) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+        ids.push(id);
+      }
     }
   }
   // Anything the user explicitly asked for.

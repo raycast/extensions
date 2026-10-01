@@ -1,6 +1,45 @@
 # Changelog
 
-## 1.2.4
+## [1.3.0] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Check Setup can no longer report a trial key as working (or rejected) based on a concurrent background probe made with the saved key — the in-flight `/models` dedupe is now keyed by base URL + key, like the result cache
+- Check Setup now reports "Validated, but not applied" when a tested Custom base URL differs from the saved one (previously only key and platform changes were detected, and validating a new URL refreshed the model list from the old saved URL)
+- A Custom endpoint with a failing `/models` route no longer falls back to the curated GLM list — a Custom endpoint may serve a different model family entirely; use the Extra Models preference to force-include ids there
+- Refresh Models now always checks the live `/models` endpoint instead of serving the 60-second discovery cache
+
+### Changed
+
+- `getPreferenceValues` now uses the manifest-generated `Preferences` type (raycast-env.d.ts) instead of a handwritten copy — the platform arrives as its literal union
+- Removed the unused direct `zod` dependency (still present transitively via the AI SDK)
+- CHANGELOG headers now use the Store format `## [version] - {PR_MERGE_DATE}`
+
+## [1.2.8] - {PR_MERGE_DATE}
+
+### Added
+
+- `.zcodeignore` (ZCode workspace ignore rules — synced from `.gitignore` plus tool defaults)
+
+## [1.2.7] - {PR_MERGE_DATE}
+
+### Changed
+
+- Dependency policy re-verified after the Socket supply-chain comment on the Store PR: the pinned `ai@5.0.222` + `@ai-sdk/openai-compatible@1.0.46` pair remains the newest audit-clean release set — every later 5.0.x (`5.0.223`–`5.0.271`) pulls an `undici` with 5 current advisories, and npm's only suggested fix is the breaking `openai-compatible` 3.x major; the rationale is now documented on the PR
+
+## [1.2.6] - {PR_MERGE_DATE}
+
+### Added
+
+- Store screenshot of AI Chat using GLM-5.3-Flash (model picker, reasoning and reasoning-effort settings visible), replacing the removed settings screenshot
+
+## [1.2.5] - {PR_MERGE_DATE}
+
+### Removed
+
+- One of the three store screenshots (`metadata/glm-models-3.png`) — the remaining two cover the setup and validation flows
+
+## [1.2.4] - {PR_MERGE_DATE}
 
 ### Fixed
 
@@ -15,13 +54,13 @@
 - Discovery logging is change-only: the "discovered N model ids" line fires on first discovery or when the id set changes, not on every poll
 - The curated fallback catalog documents when its ids were last verified against the live endpoint
 
-## 1.2.3
+## [1.2.3] - {PR_MERGE_DATE}
 
 ### Added
 
 - Store screenshots of the extension in use (in `metadata/`), shown on the extension details page in the Raycast Store
 
-## 1.2.2
+## [1.2.2] - {PR_MERGE_DATE}
 
 ### Fixed
 
@@ -29,7 +68,7 @@
 - Refresh Models now validates the saved key + platform while refreshing and reports the outcome in the HUD ("\<Platform\>: N models available" or the validation failure) — the one-step way to pick up a platform change from the settings
 - Check Setup also refreshes Raycast's model list after successfully validating the saved combination
 
-## 1.2.1
+## [1.2.1] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -39,7 +78,7 @@
 
 - `PLATFORM_OPTIONS` and the models.dev slug map are now keyed by a typed `Platform` union, so a value that drifts from the manifest dropdown fails at compile time (ported from alibaba-model-studio); the README development file map now lists `src/check-setup.tsx`
 
-## 1.2.0
+## [1.2.0] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -52,56 +91,56 @@
 - Models known to models.dev as non-thinking hide the reasoning-effort picker; unknown models keep it (benefit of the doubt)
 - Code-review hardening: an empty/renamed models.dev provider section is treated as a failed lookup (stale cache + backoff instead of caching an empty catalog for 24h); cached metadata is validated before use; overlapping discovery passes share one models.dev fetch; the non-chat keyword blocklist always applies to live ids while only the GLM-prefix rule needs metadata corroboration; vision is derived from input modalities (the `attachment` flag only when undeclared, since it covers documents too); entries without declared modalities are kept; a discovery that filters out every id falls back to the curated list
 
-## 1.1.7
+## [1.1.7] - {PR_MERGE_DATE}
 
 ### Changed
 
 - Code-review hardening: fail fast with an actionable message when the API key or Custom base URL is unset instead of an opaque fetch error; the Custom base URL must be HTTPS, is pre-filled in Check Setup and falls back to the saved value; a missing API key no longer crashes model discovery; image attachments that aren't valid base64 (e.g. data-URL prefixed) are dropped with a warning instead of failing the turn; turns left with no content after part conversion are omitted; catalog lookups use own-property checks; refresh failures are logged; `engines` declared and `@types`/SDK versions pinned (with `zod` explicit) to dedupe nested type packages
 
-## 1.1.6
+## [1.1.6] - {PR_MERGE_DATE}
 
 ### Changed
 
 - Clarified setup guidance for GLM Coding Plan Team subscribers: Team Plan keys use the same endpoints as individual Coding Plans — pick a GLM Coding Plan option; the key-rejected error and the platform preference description now say so
 
-## 1.1.5
+## [1.1.5] - {PR_MERGE_DATE}
 
 ### Added
 
 - Z.ai logo on every model in Raycast's model pickers, with light and dark appearance variants via the `@dark` asset convention (`assets/z-ai-logo.png` / `assets/z-ai-logo@dark.png`) — replaces the default sparkle icon
 
-## 1.1.4
+## [1.1.4] - {PR_MERGE_DATE}
 
 ### Changed
 
 - Store submission preparation: `author` set to the Raycast username, categories corrected to schema-valid values (`Productivity`, `Developer Tools` — `AI` is not in the manifest enum), and the required ESLint + Prettier toolchain added (`lint` / `fix-lint` scripts, `@raycast/eslint-config`)
 
-## 1.1.3
+## [1.1.3] - {PR_MERGE_DATE}
 
 ### Changed
 
 - Renamed the extension to `glm-models` ("GLM Models") — the model family name shared by the Z.ai and BigModel platforms the extension serves
 
-## 1.1.2
+## [1.1.2] - {PR_MERGE_DATE}
 
 ### Changed
 
 - Code review cleanup: error handling around model refresh (command and Check Setup action), single preference read in `getModels`, flattened nested ternary in the `/models` response parser, documented the stream-type cast, removed a dead `"disabled"` reasoning-effort branch, and warned instead of silently dropping URL-shaped image attachments
 - `npm audit fix`: updated transitive dependencies to clear 5 vulnerabilities (4 moderate, 1 high) in `undici`
 
-## 1.1.1
+## [1.1.1] - {PR_MERGE_DATE}
 
 ### Changed
 
 - Consistent platform terminology everywhere: `Z.ai (pay-as-you-go)`, `BigModel (pay-as-you-go)`, `Z.ai GLM Coding Plan`, `BigModel GLM Coding Plan` — raw preference values (e.g. `bigmodel`) are no longer shown in the Check Setup summary, and its description no longer assumes the Z.ai platform
 
-## 1.1.0
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 
 - GLM Coding Plan platform options: `Z.ai Coding Plan` (`api.z.ai/api/coding/paas/v4`) and `BigModel Coding Plan` (`open.bigmodel.cn/api/coding/paas/v4`) — Coding Plan keys use different endpoints than pay-as-you-go keys
 
-## 1.0.0
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -113,4 +152,3 @@
 - "Refresh Models" command to re-run model discovery
 - First-run onboarding: required API key and platform preferences with a setup help page
 
-{PR_MERGE_DATE}

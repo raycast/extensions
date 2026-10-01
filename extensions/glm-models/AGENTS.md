@@ -14,7 +14,7 @@ A Raycast extension that exposes Z.ai / BigModel (GLM) models to Raycast's built
 - `npm audit` — dependency vulnerability check; must report **0 vulnerabilities** before finishing any change
 - `npm run publish` — publish to the Raycast Store (opens a PR to `raycast/extensions`; needs GitHub auth; not used for this personal extension yet)
 
-Both `tsc --noEmit` and `npm run build` must pass, and `npm audit` must report 0 vulnerabilities, before finishing any change. Fix audit findings by moving to a vulnerability-free pin set — `ai 5.0.222` + `@ai-sdk/openai-compatible 1.0.46` is the current clean, mutually-released pair (every `ai` 5.0.223–267 pulls a vulnerable `undici`). Never use `npm audit fix --force` here: it jumps SDK majors (e.g. `openai-compatible` 1.x → 3.x) and breaks the provider API.
+Both `tsc --noEmit` and `npm run build` must pass, and `npm audit` must report 0 vulnerabilities, before finishing any change. Fix audit findings by moving to a vulnerability-free pin set — `ai 5.0.222` + `@ai-sdk/openai-compatible 1.0.46` is the current clean, mutually-released pair. Every later 5.0.x release (`5.0.223` through at least `5.0.271`, re-verified 2026-10-01 after the Socket supply-chain comment on the Store PR) pulls a vulnerable `undici` transitively via `@ai-sdk/provider-utils` ≥ 3.0.31 — 5 advisories, and npm's only suggested fix is the breaking `openai-compatible` 3.x major. Never use `npm audit fix --force` here: it jumps SDK majors (e.g. `openai-compatible` 1.x → 3.x) and breaks the provider API.
 
 ## Architecture
 

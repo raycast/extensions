@@ -88,9 +88,15 @@ export default function CheckSetup() {
         // so instead of implying validation switched anything.
         const keyChanged = Boolean(enteredKey) && enteredKey !== saved.apiKey;
         const platformChanged = values.platform !== saved.platform;
+        // A changed Custom base URL doesn't show up in the platform value.
+        const urlChanged = baseURL !== saved.baseURL;
+        const savedSetup =
+          saved.platform === "custom"
+            ? `${platformTitle(saved.platform)} (${saved.baseURL || "no URL set"})`
+            : platformTitle(saved.platform);
         const unsaved =
-          keyChanged || platformChanged
-            ? `\n\nValidated, but not applied — the saved Platform is still ${platformTitle(saved.platform)}. Update the extension preferences, then run Refresh Models.`
+          keyChanged || platformChanged || urlChanged
+            ? `\n\nValidated, but not applied — the saved setup is still ${savedSetup}. Update the extension preferences, then run Refresh Models.`
             : "";
         setResult({
           ok: true,

@@ -10,7 +10,11 @@ export default async function Command() {
 
   // Raycast fires no preference-change event, so this is the one-step path
   // after editing the settings: validate the saved combination and refresh.
-  const probe = await probeModelsEndpoint(baseURL, apiKey);
+  // An explicit refresh must check the live endpoint, not the 60-second
+  // discovery cache.
+  const probe = await probeModelsEndpoint(baseURL, apiKey, {
+    bypassCache: true,
+  });
   try {
     await AI.refreshModels();
     if (probe.ok) {
