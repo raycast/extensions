@@ -1330,6 +1330,7 @@
   "k8scat/jenkins": "jenkins",
   "gdsmith/jetbrains": "jetbrains",
   "Automattic_Inc/jetpack-commands": "jetpack-commands",
+  "Olli0103/jev": "jev",
   "raycast/jira": "jira",
   "sven/jira-search": "jira-search",
   "emanguy/jira-search-self-hosted": "jira-search-self-hosted",
