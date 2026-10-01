@@ -75,6 +75,7 @@ function AppItem({
   revalidate: () => void;
 }) {
   const volumePercent = Math.round(app.volume);
+  const iconPath = app.bundleID ? getAppPath(appPaths, app.bundleID) : undefined;
   const accessories: List.Item.Accessory[] = [];
 
   if (app.isMuted) {
@@ -94,11 +95,7 @@ function AppItem({
     <List.Item
       title={app.name}
       subtitle={app.bundleID ?? app.id}
-      icon={
-        app.bundleID && getAppPath(appPaths, app.bundleID)
-          ? { fileIcon: getAppPath(appPaths, app.bundleID) }
-          : Icon.SpeakerHigh
-      }
+      icon={iconPath ? { fileIcon: iconPath } : Icon.SpeakerHigh}
       accessories={accessories}
       actions={
         <ActionPanel>
