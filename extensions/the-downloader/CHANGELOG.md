@@ -1,6 +1,8 @@
 # The Downloader Changelog
 
-## [Chat About Link & AI Skills] - {PR_MERGE_DATE}
+## [Chat About Link, Live Downloads, History & Fixes] - {PR_MERGE_DATE}
+
+### Chat About Link & AI
 
 - **New Chat About Link command.** Paste a link — a video (YouTube, TikTok, X, Vimeo…), a social post (Instagram, Reddit, Pinterest…) or any article — and ask anything about it. Videos load with their timestamped transcript, title, channel, chapters, tags, description and statistics (views, likes, comments, subscribers, views per day, likes per 100 views, comments per 1,000 views), with timestamps you can click to jump to that moment. Posts load their caption, author, co-authors, date, likes, comments and hashtags through gallery-dl (Reddit and, lately, Instagram need Gallery: Cookies from Browser; the chat says so and opens preferences). Articles are read with Firefox's Reader View engine, in the page's own text encoding, and never from your local network. Suggested questions fit each kind. Copy or save a conversation as Markdown, copy the whole context for any other AI, or save the transcript or text. Chats are kept, so you can continue them from Recent Chats. Available from the Download form, Media Preview, the live view and Download History (⌘⇧A).
 - **Choose your AI.** Raycast AI (with a model picker), Apple Intelligence on macOS 27 (on-device) through the system `fm` tool, or a local Ollama model. Automatic picks the first one available. Long transcripts and articles that don't fit a small model are handled by sending the most relevant passages, or by reading part by part for summaries. The chat says when Apple's model or an Ollama model is still loading.
@@ -12,7 +14,7 @@
 - **Transcripts fetch one caption track**, chosen from the tracks the video lists: uploaded captions first, then the transcription of the spoken language (not a machine translation). That means fewer YouTube rate limits. In Auto, a video in another language still gets its transcript.
 - Transcript segments now start at their first spoken line, not at a dropped `[Music]` cue.
 
-## [Live Download View, History & Refreshed Screens] - {PR_MERGE_DATE}
+### Live downloads, History & setup
 
 - **See every download live.** Pressing Download now opens a view with a progress ring, speed, time left, downloaded size and elapsed time, a download-speed chart, and a step strip — Prepare → Video → Audio → Merge → Saved when yt-dlp fetches video and audio separately. Galleries and Spotify count files and tracks over time; webpages, transcripts and thumbnails show their step and a running clock. The sidebar lists the title, channel, duration, source, type, format, size, folder and saved file, and the video's thumbnail sits below the chart.
 - **Finished and failed downloads stay on screen** with Open File, Show in Finder, Copy File, Copy Path and Download Another, or the full error with Copy Error.
@@ -25,25 +27,26 @@
 - **The Download form knows what it's downloading.** Once yt-dlp has read the link, a details line shows the channel, duration, views and the best quality on offer, and every Quality choice shows the resolution and estimated size it will actually fetch for the chosen container (`1080p · ≈ 52.1 MB`, `1080p · 720p max · ≈ 40.2 MB`). Container and audio formats explain their trade-offs.
 - **Media Preview (⌘Y)** from the form: thumbnail, title, stats, the start of the description, and a table of the available formats, with channel, subscribers, views, likes, comments, upload date and best quality in the sidebar.
 - **Update Libraries is a proper list now**: each tool with what it does, its installed version and a status tag (Up to Date, Update → x.y.z, Not Installed, Check Failed), grouped into Updates Available / Installed / Not Installed. Upgrade one tool or all of them, Check Again (⌘R), copy the version report, or open a tool's website.
-- **Fixes.**
-  - Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
-  - Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
-  - When a download type's tool isn't installed, the setup screen also offers the types that already work (e.g. Download as Video Instead), so a missing tool never blocks the form.
-  - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
-  - Transcripts never overwrite an existing file with the same title (a number is added), and saving a webpage again numbers the new copy instead of replacing the old one.
-  - Transcripts use a video's uploaded captions before YouTube's automatic ones, fall back to the language the video is spoken in when there are no English captions, keep going when one caption track fails to download (e.g. rate limiting), and no longer contain stray `\h` codes.
-  - Update Libraries and the update prompt only update the spotDL The Downloader installed itself; a spotDL from Homebrew or pip is left to its own package manager instead of being replaced.
-  - The Download Video AI tool accepts only real http(s) links, tries sites The Downloader doesn't recognize (like the form's Video option), and downloads with the same settings as the form, including the WebM-to-MKV fallback.
-  - Spotify errors are only reported as a private or unreachable playlist when Spotify's API actually said so.
-  - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
-  - The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
-  - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
-  - Download History refreshes while it's open, shows titles as plain text, and re-applies an entry or removal that a download finishing in another command overwrote.
-  - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
 - **Friendlier setup screens.** The installer explains what the missing tool is for instead of an error banner, shows the terminal command as an alternative, lists the tool, package and website in a sidebar (plus whether Spotify credentials are set, for spotDL), and shows that an install is running.
 - Upgraded to Raycast API 2.5 and @raycast/utils 2.3, with ESLint 10 and the React 19 / Node 22 types the API expects.
 
-## [Fix: Download Correctness] - {PR_MERGE_DATE}
+### Fixes and improvements
+
+- - Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
+- - Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
+- - When a download type's tool isn't installed, the setup screen also offers the types that already work (e.g. Download as Video Instead), so a missing tool never blocks the form.
+- - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
+- - Transcripts never overwrite an existing file with the same title (a number is added), and saving a webpage again numbers the new copy instead of replacing the old one.
+- - Transcripts use a video's uploaded captions before YouTube's automatic ones, fall back to the language the video is spoken in when there are no English captions, keep going when one caption track fails to download (e.g. rate limiting), and no longer contain stray `\h` codes.
+- - Update Libraries and the update prompt only update the spotDL The Downloader installed itself; a spotDL from Homebrew or pip is left to its own package manager instead of being replaced.
+- - The Download Video AI tool accepts only real http(s) links, tries sites The Downloader doesn't recognize (like the form's Video option), and downloads with the same settings as the form, including the WebM-to-MKV fallback.
+- - Spotify errors are only reported as a private or unreachable playlist when Spotify's API actually said so.
+- - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
+- - The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
+- - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
+- - Download History refreshes while it's open, shows titles as plain text, and re-applies an entry or removal that a download finishing in another command overwrote.
+- - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
+- The Download form's details line shows durations like `1:00` and `1:00:00` (a one-minute video showed `01`).
 
 - **Deno is optional in Fast Download.** A missing Deno no longer blocks the whole video path — only some extractors (e.g. YouTube) benefit from a JS runtime, so sites like Twitch, Vimeo, or TikTok now download without it, matching the AI tool and transcript behavior.
 - **Titles with punctuation are no longer mangled.** `sanitizeVideoTitle` cut every title at its last `.`/`!`/`?` — "Mr. Robot S01E01" became "Mr" in the form's title line, transcript filenames, and the AI tool's result. The sentence-boundary cut now applies only to titles that actually exceed the 200-character cap.
@@ -56,8 +59,6 @@
 - **Windows installer**: a missing winget now surfaces as an error toast instead of an unhandled error with no feedback.
 - **spotDL auto-download network calls are bounded** (30s release lookup, 10min binary download), so a stalled GitHub transfer can no longer leave the Installer's spinner up forever.
 - Internal cleanup: removed dead `parseHHMM`/`isValidHHMM`/`checkUpToDate` helpers and the unused audio-only half of the format list; the exact-format dropdown now falls back to yt-dlp's approximate file size when no exact size is published.
-
-## [Release Readiness] - {PR_MERGE_DATE}
 
 - **Transcript extraction overhauled.** It now uses the same robust yt-dlp metadata path as the rest of the extension — fixing a crash on yt-dlp debug/warning output, passing the Deno JS runtime (without which YouTube transcript extraction silently failed), and running through the hang-prevention watchdog (closed stdin + idle-kill). The Download form's transcript action gained a **Stop** button and is cancelled on dismiss, subtitle language matching now catches regional/auto variants (`en-US`, `en-GB`, `en-orig`), playlist URLs no longer pull every entry's subtitles, and an empty transcript reports a clear failure instead of saving a blank file.
 - **Filenames are sanitized on every platform.** Path separators (`/`, `\`) and leading dots are stripped from titles everywhere — previously a title like "AC/DC" broke transcript saving on macOS and a crafted title could write outside the chosen folder.

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-downloader",
   "title": "The Downloader",
-  "description": "Download videos, audio, image galleries, Spotify music, and complete webpages from YouTube, Reddit, Spotify and more",
+  "description": "Download videos, audio, image galleries, Spotify music and webpages — and chat with AI about any video, post or article.",
   "type": "module",
   "icon": "icon.png",
   "author": "Stheno",
@@ -18,7 +18,11 @@
     "music",
     "yt-dlp",
     "webpage",
-    "monolith"
+    "monolith",
+    "ai",
+    "chat",
+    "summarize",
+    "transcript"
   ],
   "license": "MIT",
   "commands": [
