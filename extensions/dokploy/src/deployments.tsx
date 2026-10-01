@@ -20,6 +20,7 @@ import DeploymentHistory, {
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction } from "./service-actions";
 import ServiceLogs from "./service-logs";
 import { OpenWebsiteAction } from "./open-website";
+import { OpenInDokployAction, servicePagePath } from "./open-in-dokploy";
 import { parseTrpcJsonResponse, trpcQueryUrl } from "./trpc";
 
 type DeploymentState =
@@ -53,7 +54,7 @@ async function fetchLatestDeployment(candidate: Candidate): Promise<DeploymentSt
 interface CentralizedService {
   name: string;
   appName: string;
-  environment: { name: string; project: { name: string } };
+  environment: { environmentId: string; name: string; project: { projectId: string; name: string } };
 }
 
 interface CentralizedDeployment extends Deployment {
@@ -92,7 +93,9 @@ async function loadCentralizedEntries(instance: Instance): Promise<Entry[] | und
         status: "",
         instanceKey: instanceId(instance),
         instanceName: instance.name,
+        projectId: service.environment.project.projectId,
         projectName: service.environment.project.name,
+        environmentId: service.environment.environmentId,
         environmentName: service.environment.name,
         url,
         headers,
@@ -340,6 +343,10 @@ export default function Deployments() {
                       service={{ id: candidate.id, type: deployType, name: candidate.name }}
                       url={candidate.url}
                       headers={candidate.headers}
+                    />
+                    <OpenInDokployAction
+                      url={candidate.url}
+                      path={`${servicePagePath({ ...candidate, type: deployType })}?tab=deployments`}
                     />
                   </ActionPanel>
                 }

@@ -5,6 +5,7 @@ import { AddInstance } from "./instances";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
 import ServiceLogs from "./service-logs";
 import { OpenWebsiteAction } from "./open-website";
+import { OpenInDokployAction, servicePagePath } from "./open-in-dokploy";
 import { Candidate, FailedInstance, loadCandidates } from "./candidates";
 
 /**
@@ -152,6 +153,11 @@ export default function DeployService() {
                         onOpen={() => void visitItem(candidate)}
                       />
                     )}
+                    <OpenInDokployAction
+                      url={candidate.url}
+                      path={servicePagePath({ ...candidate, type: candidate.deployType })}
+                      onOpen={() => void visitItem(candidate)}
+                    />
                   </ActionPanel>
                 }
               />

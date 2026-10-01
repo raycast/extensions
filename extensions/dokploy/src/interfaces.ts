@@ -76,6 +76,8 @@ export interface Environment extends ServiceCollections {
   createdAt: string;
   env: string;
   projectId: ProjectId;
+  /** The environment Dokploy opens a project on. Not sent by older instances. */
+  isDefault?: boolean;
 }
 
 export interface Tag {

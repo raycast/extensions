@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Open in Dokploy] - {PR_MERGE_DATE}
+
+- Add `Open in Dokploy` (Cmd+Shift+O) to `Projects`, `Environments`, `Services`, `Deploy Service` and `Deployments`, which opens that project, environment or service in Dokploy's web panel. From `Deployments` it opens the service's Deployments tab. On Dokploy older than v0.25.0 (no environments yet) the old page paths are used.
+
 ## [Open Website] - 2026-09-30
 
 - Add `Open Website` (Cmd+O) to Applications and Compose stacks in `Services`, `Deploy Service` and `Deployments`, so a service's site opens without going through its domains first. With one domain it opens right away, with several you pick one, and disabled domains are skipped.
