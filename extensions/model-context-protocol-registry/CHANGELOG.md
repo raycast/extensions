@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Symbioza MCP Server] - 2026-10-01
+
+- Add Symbioza to the official registry: Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.
+
 ## [Add 60fps MCP Server] - 2026-09-30
 
 - Add 60fps to the official registry: real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server at https://mcp.60fps.design/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key.

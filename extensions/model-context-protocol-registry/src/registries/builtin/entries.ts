@@ -732,6 +732,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "symbioza",
+    title: "Symbioza",
+    description:
+      "Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://symbioza.dev/brand/symbioza-appicon-light-512.png",
+    homepage: "https://symbioza.dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://symbioza.dev/mcp"],
+    },
+  },
+  {
     name: "square",
     title: "Square",
     description:
