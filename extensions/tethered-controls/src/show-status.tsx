@@ -68,6 +68,11 @@ function requestStatusOnce(): Promise<Status> {
   return pendingStatusRequest;
 }
 
+async function requestFreshStatus(): Promise<Status> {
+  await pendingStatusRequest?.catch(() => undefined);
+  return requestStatusOnce();
+}
+
 const yesNo = (value: boolean) => (value ? "On" : "Off");
 const powerModeLabel = (value: string) =>
   (({ auto: "Auto", low: "Low", high: "High" }) as Record<string, string>)[value] ?? value;
@@ -91,7 +96,7 @@ export default function Command() {
     setStatus(null);
     setErrorMessage(null);
     try {
-      const latestStatus = await (forceNew ? requestStatus() : requestStatusOnce());
+      const latestStatus = await (forceNew ? requestFreshStatus() : requestStatusOnce());
       if (sequence === requestSequence.current) setStatus(latestStatus);
     } catch (error) {
       if (sequence !== requestSequence.current) return;
