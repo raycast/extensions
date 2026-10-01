@@ -73,7 +73,8 @@ export async function loadLinkContext(
 ): Promise<LinkContext> {
   const trimmed = raw.trim();
   if (!trimmed || !isValidUrl(trimmed)) throw new Error("Invalid URL — provide an http(s) link.");
-  const url = normalizeUrl(trimmed);
+  // The standard parsed form: what every reader gets, so no tool parses the raw text its own way.
+  const url = new URL(normalizeUrl(trimmed)).href;
   const kind = linkKindOf(url);
   if (kind === "spotify") {
     throw new LinkLoadError("Spotify links aren't supported in chat yet. You can still download them.", "download");

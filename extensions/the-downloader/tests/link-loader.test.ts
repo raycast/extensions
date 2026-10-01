@@ -63,6 +63,11 @@ describe("loadLinkContext", () => {
     expect(vi.mocked(loadPostLink).mock.calls[0][0]).toBe("https://instagram.com/p/norm-1/");
   });
 
+  it("hands readers the standard parsed form of the link", async () => {
+    await loadLinkContext("HTTPS://Example.COM/Path?x=1", { force: true });
+    expect(vi.mocked(loadPageLink).mock.calls.at(-1)?.[0]).toBe("https://example.com/Path?x=1");
+  });
+
   it("sends each kind to its reader, with the language only for videos", async () => {
     await loadLinkContext("https://www.youtube.com/watch?v=route", { language: "de", force: true });
     expect(vi.mocked(loadVideoLink).mock.calls[0][1]).toMatchObject({ language: "de" });

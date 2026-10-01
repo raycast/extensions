@@ -24,7 +24,7 @@ export default async function tool(input: Input) {
   // entry point must too (defense in depth against a prompt-injected value).
   const raw = input.url?.trim() ?? "";
   if (!raw || !isValidUrl(raw)) throw new Error("Invalid URL — provide an http(s) link.");
-  const url = normalizeUrl(raw);
+  const url = new URL(normalizeUrl(raw)).href;
   if (linkKindOf(url) !== "video") return linkInfoForAI(await loadLinkContext(url, { archiveFallback: true }));
 
   // Videos: metadata only — no need to wait for the captions.

@@ -51,3 +51,16 @@ describe("normalizeUrl", () => {
     expect(normalizeUrl("http://example.com")).toBe("http://example.com");
   });
 });
+
+describe("isValidUrl and parser mismatches", () => {
+  it("rejects a backslash, which Node and Python's URL parsers read differently", () => {
+    // WHATWG reads the host as youtube.com; Python (yt-dlp, gallery-dl) as 127.0.0.1.
+    expect(isValidUrl("https://youtube.com\\@127.0.0.1/")).toBe(false);
+    expect(isValidUrl("https://example.com\\path")).toBe(false);
+  });
+
+  it("rejects control characters", () => {
+    expect(isValidUrl("https://example.com/a\u0000b")).toBe(false);
+    expect(isValidUrl("https://example.com/a\nb")).toBe(false);
+  });
+});

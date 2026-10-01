@@ -9,6 +9,10 @@ import validator from "validator";
  * run it through `normalizeUrl` before handing it to a tool.
  */
 export function isValidUrl(url: string): boolean {
+  // A backslash or control character makes Node's parser and Python's (yt-dlp,
+  // gallery-dl) disagree about the host: `https://youtube.com\@127.0.0.1/` is
+  // youtube.com to one and 127.0.0.1 to the other. No real link needs them.
+  if ([...url].some((c) => c === "\\" || c.charCodeAt(0) < 0x20 || c.charCodeAt(0) === 0x7f)) return false;
   return validator.isURL(url, { require_protocol: false, protocols: ["http", "https"] });
 }
 
