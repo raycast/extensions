@@ -147,7 +147,7 @@ function Optimize({ cli }: { cli: string }) {
         <List.EmptyView icon={Icon.Warning} title="Mint could not look for copies" description={scan.error.message} />
       ) : null}
       <List.Section title="Can come back">
-        {sources.map((source) => {
+        {sources.map((source, _index, all) => {
           const sourceIDs = source.groups.flatMap((group) => group.copies.map((copy) => copy.id));
           const remaining = source.groups.reduce(
             (sum, group) =>
@@ -163,14 +163,26 @@ function Optimize({ cli }: { cli: string }) {
           const mine = run?.keys.includes(source.key);
           const finished = receipt?.keys.includes(source.key) && !busy;
           const shared = sourceIDs.filter((id) => strike.struck.has(id)).length;
-          const freed = source.groups
-            .filter((group) =>
-              isDone(
-                group.copies.map((copy) => copy.id),
-                strike.struck,
-              ),
-            )
-            .reduce((sum, group) => sum + group.bytes, 0);
+          const settled = (of: Source) =>
+            of.groups
+              .filter((group) =>
+                isDone(
+                  group.copies.map((copy) => copy.id),
+                  strike.struck,
+                ),
+              )
+              .reduce((sum, group) => sum + group.bytes, 0);
+          // What Mint measured for the whole run, shared among its sources by
+          // what each was expected to give, so the sources add up to it.
+          const estimate = settled(source);
+          const runEstimate = receipt
+            ? all.filter((other) => receipt.keys.includes(other.key)).reduce((sum, other) => sum + settled(other), 0)
+            : 0;
+          const freed = receipt && runEstimate > 0 ? Math.round((receipt.bytes * estimate) / runEstimate) : estimate;
+          const receiptText =
+            receipt && receipt.keys.length > 1
+              ? `of ${formatCompact(receipt.bytes)} back · nothing deleted`
+              : "back · nothing deleted";
           return (
             <List.Item
               key={source.key}
@@ -194,7 +206,7 @@ function Optimize({ cli }: { cli: string }) {
                           gone: strike.gone,
                           running: mine ? `Optimizing · ${shared} of ${sourceIDs.length}` : undefined,
                           // Each source states its own share of what came back.
-                          receipt: finished ? { bytes: freed, text: "back · nothing deleted" } : undefined,
+                          receipt: finished ? { bytes: freed, text: receiptText } : undefined,
                         })
                   }
                 />

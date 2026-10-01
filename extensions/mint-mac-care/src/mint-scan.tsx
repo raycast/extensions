@@ -26,6 +26,7 @@ import {
   baseName,
   bucketPicture,
   bucketsOf,
+  finishedRows,
   isDone,
 } from "./mint-panes";
 import { MissingMint } from "./missing-mint";
@@ -213,12 +214,9 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
         30 * 60_000,
       );
       setDiskSession(result.nextSessionID ?? undefined);
-      const failed = new Set((result.failures ?? []).map((failure) => failure.path));
-      // Rows Mint held back for the free allowance are not named: only the
-      // ones it named as finished are struck then.
-      const done = result.blockedCount
-        ? []
-        : entries.filter((entry) => !failed.has(entry.path)).map((entry) => entry.id);
+      // Rows Mint held back for the free allowance are not named, so nothing
+      // is struck then.
+      const done = result.blockedCount ? [] : finishedRows(entries, result.failedCount ?? 0, result.failures);
       const problems = [
         result.blockedCount ? `${plural(result.blockedCount, "item")} held back: the free 1 GB is used up` : undefined,
         result.failedCount

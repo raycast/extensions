@@ -5,7 +5,9 @@ import {
   escapeMarkdown,
   formatBytes,
   formatSignedBytes,
+  isAtLeastVersion,
   isCompatibleMintCLIVersion,
+  MINIMUM_APP_VERSION,
   parseJSON,
   parseMintCommandJSON,
   shortPath,
@@ -94,4 +96,17 @@ test("writes sizes the way Mint does: decimal units", () => {
   assert.equal(formatBytes(61_248_467_865), "61.25 GB");
   assert.equal(formatBytes(999_960_000), "1 GB");
   assert.equal(formatBytes(494_384_795_648), "494.38 GB");
+});
+
+test("Mint older than 1.0.80 is not ready, whatever capabilities it lists", () => {
+  assert.equal(isAtLeastVersion("1.0.80", MINIMUM_APP_VERSION), true);
+  assert.equal(isAtLeastVersion("1.0.100", MINIMUM_APP_VERSION), true);
+  assert.equal(isAtLeastVersion("1.1", MINIMUM_APP_VERSION), true);
+  assert.equal(isAtLeastVersion("1.0.79", MINIMUM_APP_VERSION), false);
+  assert.equal(isAtLeastVersion("1.0.72", MINIMUM_APP_VERSION), false);
+  assert.equal(isAtLeastVersion("beta", MINIMUM_APP_VERSION), false);
+  assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: "1.0.72" }), false);
+  assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: "1.0.81" }), true);
+  // The copy in Homebrew's bin cannot say its version; resolveMintCLI judges it by Mint.app.
+  assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, appVersion: undefined }), true);
 });

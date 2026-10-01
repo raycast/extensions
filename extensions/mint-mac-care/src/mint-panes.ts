@@ -657,3 +657,24 @@ export function undoPicture(batch: UndoBatch, appearance: Appearance): string {
   });
   return markdownImage(picture.svg, PANE_WIDTH, picture.height);
 }
+
+/**
+ * The rows a removal finished, from what Mint reported. Mint names a failure
+ * by the path it failed on, which for a row holding many files is a file
+ * inside it, so a row is kept when a named failure is at or under its path.
+ * When Mint counts more failures than it names, the rows cannot be told
+ * apart and none is struck: a row that may still be on disk never leaves.
+ */
+export function finishedRows<T extends { id: string; path: string }>(
+  rows: T[],
+  failedCount: number,
+  failures: Array<{ path: string }> | undefined,
+): string[] {
+  const named = (failures ?? []).map((failure) => failure.path);
+  if (failedCount > named.length) return [];
+  const inside = (row: T) => {
+    const folder = row.path.endsWith("/") ? row.path : `${row.path}/`;
+    return named.some((path) => path === row.path || path.startsWith(folder));
+  };
+  return rows.filter((row) => !inside(row)).map((row) => row.id);
+}

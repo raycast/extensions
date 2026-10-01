@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { openMint, plural, runMintSurface, shortPath } from "./mint-cli";
 import { AutoCareJSON, folderCare, folderStatus } from "./mint-model";
 import { savedFolderProgress } from "./mint-saved";
@@ -47,6 +47,9 @@ function FolderList({ cli }: { cli: string }) {
     { failureToastOptions: { title: "Mint could not list its folders" } },
   );
   const saved = savedFolderProgress();
+  // A folder is previewed once it is selected, never all at once on opening:
+  // each preview walks the folder (Greptile, PR #31781).
+  const [selected, setSelected] = useState<string | undefined>();
 
   const addFolder = (
     <Action.Push
@@ -63,6 +66,7 @@ function FolderList({ cli }: { cli: string }) {
       isShowingDetail={(folders.data?.folders.length ?? 0) > 0}
       navigationTitle="Organize a Folder"
       searchBarPlaceholder="Filter folders"
+      onSelectionChange={(id) => setSelected(id ?? undefined)}
     >
       {!folders.isLoading && (folders.data?.folders.length ?? 0) === 0 ? (
         <List.EmptyView
@@ -77,6 +81,7 @@ function FolderList({ cli }: { cli: string }) {
           key={folder.path}
           cli={cli}
           folder={folder}
+          active={selected === folder.path}
           care={folderCare(folder.path, folders.data?.care, folder.organizeOnArrival)}
           saved={saved[folder.path]}
           addFolder={addFolder}
@@ -95,6 +100,7 @@ function FolderList({ cli }: { cli: string }) {
 function FolderRow({
   cli,
   folder,
+  active,
   care,
   saved,
   addFolder,
@@ -102,6 +108,7 @@ function FolderRow({
 }: {
   cli: string;
   folder: Folder;
+  active: boolean;
   care: string;
   saved: number | undefined;
   addFolder: React.ReactElement;
@@ -111,10 +118,15 @@ function FolderRow({
   const [run, setRun] = useState<{ categories: string[] } | undefined>();
   const [receipt, setReceipt] = useState<{ text: string } | undefined>();
   const strike = useStrike();
+  const [wanted, setWanted] = useState(active);
+  useEffect(() => {
+    if (active) setWanted(true);
+  }, [active]);
   const preview = usePromise(
     async (path: string, target: string) =>
       runMintSurface<OrganizeResponse>(path, { action: "organize.preview", path: target }, 10 * 60_000),
     [cli, folder.path],
+    { execute: wanted },
   );
   // The plan the pane drew stays on screen through a run, so its rows can be struck.
   const [plan, setPlan] = useState<SortResult | undefined>();
@@ -204,6 +216,7 @@ function FolderRow({
 
   return (
     <List.Item
+      id={folder.path}
       icon={{ fileIcon: folder.path }}
       title={name}
       accessories={[
@@ -383,17 +396,25 @@ function AddFolder({ cli, onAdded }: { cli: string; onAdded: () => void }) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Adding the folder…" });
     try {
       await runMintSurface(cli, { action: "organize.add", path, confirmed: true }, 60_000);
-      await runMintSurface(cli, { action: "organize.configure", path, mode: values.template, confirmed: true }, 60_000);
-      toast.style = Toast.Style.Success;
-      toast.title = `${folderName(path)} added`;
-      toast.message = "Nothing moves until you organize it.";
-      onAdded();
-      pop();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Mint could not add this folder";
       toast.message = error instanceof Error ? error.message : String(error);
+      return;
     }
+    // The folder is in Mint from here on, whatever happens to its template.
+    onAdded();
+    try {
+      await runMintSurface(cli, { action: "organize.configure", path, mode: values.template, confirmed: true }, 60_000);
+      toast.style = Toast.Style.Success;
+      toast.title = `${folderName(path)} added`;
+      toast.message = "Nothing moves until you organize it.";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `${folderName(path)} added, but its template was not set`;
+      toast.message = `Choose its template in Mint before you organize it. ${error instanceof Error ? error.message : String(error)}`;
+    }
+    pop();
   }
   return (
     <Form

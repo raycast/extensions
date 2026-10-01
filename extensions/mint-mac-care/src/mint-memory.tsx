@@ -89,8 +89,14 @@ function FreeMemory({ cli }: { cli: string }) {
         allowAdvanced: advanced,
         confirmed: true,
       });
-      const quit = new Set(result.quitNames);
-      const done = apps.filter((app) => quit.has(app.name)).map((app) => app.id);
+      // Mint answers with names. Apps that share a name are struck only when
+      // the answer names all of them; otherwise none is, since which one quit
+      // cannot be told.
+      const count = (names: string[], name: string) => names.filter((other) => other === name).length;
+      const selectedNames = apps.map((app) => app.name);
+      const done = apps
+        .filter((app) => count(result.quitNames, app.name) >= count(selectedNames, app.name))
+        .map((app) => app.id);
       strike.end(done, () => {
         setRun(undefined);
         setReceipt({ key: pile.key, bytes: result.freedBytes, text: "freed" });

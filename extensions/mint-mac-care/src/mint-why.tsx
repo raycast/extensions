@@ -39,8 +39,12 @@ export default function Command() {
 function DiskGrowth() {
   const [view, setView] = useState<GrowthView>("sources");
   const growth = usePromise(async () => {
-    const lines = parseAtlasHistory(await readFile(join(SUPPORT, "volume-atlas-history.jsonl"), "utf8"));
-    return { lines, paths: await atlasPaths() } satisfies Growth;
+    // No file yet is no history; any other failure is said as itself.
+    const text = await readFile(join(SUPPORT, "volume-atlas-history.jsonl"), "utf8").catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return "";
+      throw error;
+    });
+    return { lines: parseAtlasHistory(text), paths: await atlasPaths() } satisfies Growth;
   });
   const lines = growth.data?.lines ?? [];
   const rows = growers(lines, view, WINDOW_DAYS);
@@ -120,7 +124,15 @@ function DiskGrowth() {
         </List.Dropdown>
       }
     >
-      {!growth.isLoading && lines.length === 0 ? (
+      {growth.error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Mint's disk history could not be read"
+          description={growth.error.message}
+          actions={actionsFor()}
+        />
+      ) : null}
+      {!growth.isLoading && !growth.error && lines.length === 0 ? (
         <List.EmptyView
           icon={Icon.LineChart}
           title="No history yet"

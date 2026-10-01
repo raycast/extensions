@@ -7,6 +7,11 @@ export const MINIMUM_SCHEMA_VERSION = 2;
 
 // cli.native.v1 is where Organize and Optimize reach the surface (Mint 1.0.72).
 const REQUIRED_CAPABILITIES = ["scan-lite.v1", "status.v1", "why.v1", "surface.v1", "agents.v1", "cli.native.v1"];
+// 1.0.72 to 1.0.79 carry the same capabilities, and before 1.0.73 every
+// removal a free person started was refused. Only the CLI inside Mint.app
+// knows its app's version; the copy Mint puts in Homebrew's bin does not.
+export const MINIMUM_APP_VERSION = "1.0.80";
+const BUNDLED_CLI = "/Applications/Mint.app/Contents/Resources/mint-cli";
 export const MINT_BUNDLE_ID = "com.mint.app";
 export const MINT_DOWNLOAD_URL = "https://mintstorage.app/r/raycast-download";
 export const MINT_WEBSITE_URL = "https://mintstorage.app/r/raycast";
@@ -62,12 +67,9 @@ export type MintSurfaceResponse = MintCommandEnvelope & {
 };
 
 function cliCandidates(): string[] {
-  return [
-    process.env.MINT_CLI_PATH,
-    "/opt/homebrew/bin/mint-cli",
-    "/usr/local/bin/mint-cli",
-    "/Applications/Mint.app/Contents/Resources/mint-cli",
-  ].filter((candidate): candidate is string => Boolean(candidate));
+  return [process.env.MINT_CLI_PATH, BUNDLED_CLI, "/opt/homebrew/bin/mint-cli", "/usr/local/bin/mint-cli"].filter(
+    (candidate): candidate is string => Boolean(candidate),
+  );
 }
 
 export function verifyMintCLISignature(path: string): boolean {
@@ -89,18 +91,41 @@ export function readMintCLIVersion(path: string): MintCLIVersion | undefined {
   return parseJSON<MintCLIVersion>(result.stdout || undefined);
 }
 
+/** Whether a version like "1.0.80" is at least `minimum`; anything unreadable is not. */
+export function isAtLeastVersion(version: string, minimum: string): boolean {
+  const parse = (value: string) => value.split(".").map((part) => Number.parseInt(part, 10));
+  const have = parse(version);
+  const need = parse(minimum);
+  if (have.some((part) => !Number.isFinite(part))) return false;
+  for (let index = 0; index < Math.max(have.length, need.length); index += 1) {
+    const a = have[index] ?? 0;
+    const b = need[index] ?? 0;
+    if (a !== b) return a > b;
+  }
+  return true;
+}
+
+/**
+ * The CLI answers for this extension: Mint, the schema, every capability,
+ * and Mint 1.0.80 or later when it says its version. A copy that cannot say
+ * (outside Mint.app) is judged by what Mint.app said, in resolveMintCLI.
+ */
 export function isCompatibleMintCLIVersion(version: MintCLIVersion | undefined): version is MintCLIVersion {
   return Boolean(
     version?.product === "Mint" &&
     Number.isInteger(version.schemaVersion) &&
     (version.schemaVersion ?? 0) >= MINIMUM_SCHEMA_VERSION &&
-    REQUIRED_CAPABILITIES.every((capability) => version.capabilities?.includes(capability)),
+    REQUIRED_CAPABILITIES.every((capability) => version.capabilities?.includes(capability)) &&
+    (version.appVersion === undefined || isAtLeastVersion(version.appVersion, MINIMUM_APP_VERSION)),
   );
 }
 
 export function resolveMintCLI(): MintCLIResolution {
   let sawUntrusted = false;
   let sawIncompatible = false;
+  // Mint.app said it is older than the minimum: a copy that cannot say its
+  // version came from that app.
+  let appTooOld = false;
   const checkedPaths = new Set<string>();
 
   for (const candidate of cliCandidates()) {
@@ -121,7 +146,10 @@ export function resolveMintCLI(): MintCLIResolution {
     }
 
     const version = readMintCLIVersion(resolved);
-    if (!isCompatibleMintCLIVersion(version)) {
+    if (version?.appVersion !== undefined && !isAtLeastVersion(version.appVersion, MINIMUM_APP_VERSION)) {
+      appTooOld = true;
+    }
+    if (!isCompatibleMintCLIVersion(version) || (appTooOld && version.appVersion === undefined)) {
       sawIncompatible = true;
       continue;
     }

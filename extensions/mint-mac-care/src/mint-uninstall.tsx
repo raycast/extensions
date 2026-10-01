@@ -17,7 +17,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { useEffect, useRef, useState } from "react";
 import { useStrike } from "./use-strike";
-import { formatCompact, plural, runMintSurface } from "./mint-cli";
+import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
 
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
@@ -25,6 +25,7 @@ import {
   Remnant,
   UninstallScan as UninstallScanResponse,
   appPicture,
+  finishedRows,
   orderedRemnants,
   uninstallPlan,
 } from "./mint-panes";
@@ -76,6 +77,10 @@ function InstalledApps({ cli }: { cli: string }) {
   const [selected, setSelected] = useState<string | undefined>();
   const [looked, setLooked] = useState<Record<string, Looked>>({});
   const [removed, setRemoved] = useState<Set<string>>(new Set());
+  // The app went to the Trash but some leftovers stayed. Mint looks at an
+  // app through its bundle, so it cannot look at this one again: what stayed
+  // is kept on screen with Mint's reason, to open in Finder.
+  const [stayed, setStayed] = useState<Record<string, { scan: UninstallScanResponse; reason?: string }>>({});
   const [run, setRun] = useState<{ appID: string; ids: string[]; verb: string } | undefined>();
   const pending = useRef<Partial<Record<string, Promise<UninstallScanResponse>>>>({});
   const strike = useStrike();
@@ -107,7 +112,7 @@ function InstalledApps({ cli }: { cli: string }) {
     if (!app || looked[app.id] || app.id in pending.current) return;
     const timer = setTimeout(() => look(app).catch(() => undefined), 250);
     return () => clearTimeout(timer);
-  }, [selected, data]);
+  }, [selected, data, looked]);
 
   const forget = (id: string) => {
     delete pending.current[id];
@@ -186,14 +191,14 @@ function InstalledApps({ cli }: { cli: string }) {
         allowAdmin: true,
         confirmed: true,
       });
-      const failed = new Set((result.failures ?? []).map((failure) => failure.path));
       // Rows Mint held back for the free allowance are not named, so nothing
       // is struck then; a cancelled password keeps the rows that needed it.
-      const done = result.quotaBlockedCount
-        ? []
-        : items
-            .filter((item) => !failed.has(item.path) && !(result.adminAuthorizationWasCancelled && item.requiresAdmin))
-            .map((item) => item.id);
+      const finished = new Set(
+        result.quotaBlockedCount ? [] : finishedRows(items, result.failedCount ?? 0, result.failures),
+      );
+      const done = items
+        .filter((item) => finished.has(item.id) && !(result.adminAuthorizationWasCancelled && item.requiresAdmin))
+        .map((item) => item.id);
       const problems = [
         result.quotaBlockedCount ? `${result.quotaBlockedCount} held back: the free 1 GB is used up` : undefined,
         result.adminAuthorizationWasCancelled ? "the password was cancelled" : undefined,
@@ -201,9 +206,19 @@ function InstalledApps({ cli }: { cli: string }) {
           ? `${result.failedCount} kept: ${result.failures?.[0]?.reason ?? "macOS refused"}`
           : undefined,
       ].filter(Boolean);
+      const kept = scan.items.filter((item) => item.category !== "app-bundle" && !done.includes(item.id));
       strike.end(done, async () => {
         setRun(undefined);
-        if (result.removedAppBundle) setRemoved((current) => new Set(current).add(app.id));
+        if (result.removedAppBundle && kept.length === 0) {
+          setRemoved((current) => new Set(current).add(app.id));
+        } else if (result.removedAppBundle) {
+          setStayed((current) => ({
+            ...current,
+            [app.id]: { scan: { ...scan, items: kept }, reason: result.failures?.[0]?.reason },
+          }));
+        }
+        // An app still installed is looked at again at once (the lookup
+        // runs when its scan is forgotten).
         forget(app.id);
         await showToast({
           style: problems.length && !result.deletedCount ? Toast.Style.Failure : Toast.Style.Success,
@@ -240,6 +255,32 @@ function InstalledApps({ cli }: { cli: string }) {
         <List.EmptyView title="Mint could not list your apps" description={error.message} icon={Icon.Warning} />
       ) : null}
       {apps.map((app) => {
+        const left = stayed[app.id];
+        if (left) {
+          const bytes = left.scan.items.reduce((sum, item) => sum + Math.max(0, item.sizeBytes), 0);
+          return (
+            <List.Item
+              key={app.id}
+              id={app.id}
+              icon={Icon.Trash}
+              title={app.name}
+              accessories={[{ text: `${plural(left.scan.items.length, "leftover")} stayed` }]}
+              detail={
+                <List.Item.Detail
+                  markdown={appPicture(left.scan, appearance, {
+                    receipt: { bytes, text: left.reason ? `stayed · ${left.reason}` : "stayed after the app went" },
+                  })}
+                />
+              }
+              actions={
+                <ActionPanel>
+                  {left.scan.items[0] ? <Action.ShowInFinder path={left.scan.items[0].path} /> : null}
+                  <Action title="Open Mint" icon={Icon.AppWindow} onAction={() => openMint()} />
+                </ActionPanel>
+              }
+            />
+          );
+        }
         const result = looked[app.id];
         const scan = result?.scan;
         const plan = scan ? uninstallPlan(scan) : undefined;
@@ -319,6 +360,16 @@ function InstalledApps({ cli }: { cli: string }) {
   );
 }
 
+/** Whether `pid` still runs a program from inside the bundle. */
+async function stillInside(pid: number, bundlePath: string): Promise<boolean> {
+  try {
+    const { stdout } = await execFileAsync("/bin/ps", ["-p", String(pid), "-o", "comm="]);
+    return stdout.trim().startsWith(`${bundlePath}/`);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Every process running from inside the app's bundle, the app and its
  * helpers, from `ps`: asking never starts anything.
@@ -365,6 +416,9 @@ async function quit(app: InstalledApp, running: Running[]): Promise<Running[]> {
   const left = await runningInside(app.path);
   if (left.some((process) => process.path.startsWith(main))) return left;
   for (const helper of left) {
+    // Asked again right before the signal: a helper that exited in between
+    // may have left its PID to some other program.
+    if (!(await stillInside(helper.pid, app.path))) continue;
     try {
       process.kill(helper.pid, "SIGTERM");
     } catch {

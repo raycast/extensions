@@ -45,10 +45,11 @@ export function escapeXML(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/** A markdown image Raycast draws at the given size. */
+/** A markdown image Raycast draws at the given size. The alt text can be a folder or app name, so it is escaped. */
 export function markdownImage(svg: string, width: number, height: number, alt = ""): string {
   const data = Buffer.from(svg, "utf8").toString("base64");
-  return `![${alt}](data:image/svg+xml;base64,${data}?raycast-width=${width}&raycast-height=${height})`;
+  const label = alt.replace(/[\\[\]]/g, "\\$&").replace(/[\r\n]+/g, " ");
+  return `![${label}](data:image/svg+xml;base64,${data}?raycast-width=${width}&raycast-height=${height})`;
 }
 
 type RingPart = { bytes: number; color: string };

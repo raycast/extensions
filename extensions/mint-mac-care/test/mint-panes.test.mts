@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   bucketPicture,
   bucketsOf,
+  finishedRows,
   isDone,
   remainingBytes,
   groupCopies,
@@ -202,4 +203,21 @@ test("each Mint run is named for what it did", () => {
   assert.equal(undoTitle(batch("reorganize", [])), "Organized Desktop");
   assert.equal(undoTitle(batch("uninstall", ["Alder", "Alder.app"], "/Applications")), "Uninstalled Alder");
   assert.equal(undoTitle(batch("disk-flow-segment", [])), "Moved 3 items to the Trash");
+});
+
+test("a removal strikes only rows Mint did not name as failed, and none when it cannot tell", () => {
+  const rows = [
+    { id: "cache", path: "/Users/x/Library/Caches/Codex" },
+    { id: "log", path: "/Users/x/Library/Logs/old.log" },
+    { id: "npm", path: "/Users/x/.npm" },
+  ];
+  // Mint names a file inside the cache row, as it does for a row of many files.
+  assert.deepEqual(finishedRows(rows, 1, [{ path: "/Users/x/Library/Caches/Codex/Cache_Data/f_00a1" }]), ["log", "npm"]);
+  assert.deepEqual(finishedRows(rows, 1, [{ path: "/Users/x/Library/Logs/old.log" }]), ["cache", "npm"]);
+  // A path that only starts with a row's name is not inside it.
+  assert.deepEqual(finishedRows(rows, 1, [{ path: "/Users/x/.npmrc" }]), ["cache", "log", "npm"]);
+  // Two failures counted, one named: which other row failed cannot be told.
+  assert.deepEqual(finishedRows(rows, 2, [{ path: "/Users/x/.npm" }]), []);
+  assert.deepEqual(finishedRows(rows, 1, undefined), []);
+  assert.deepEqual(finishedRows(rows, 0, undefined), ["cache", "log", "npm"]);
 });

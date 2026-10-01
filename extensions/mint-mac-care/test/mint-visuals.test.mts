@@ -317,3 +317,9 @@ test("fitText measures, not counts: wide letters are cut sooner than narrow ones
     "Codex app cache…",
   );
 });
+
+test("a name in an image's alt text cannot break the Markdown around it", () => {
+  const image = markdownImage("<svg/>", 420, 100, "Odd ](name) [x]\\ two\nlines");
+  assert.ok(image.startsWith("![Odd \\](name) \\[x\\]\\\\ two lines]("), image.slice(0, 60));
+  assert.equal(image.match(/\]\(data:/g)?.length, 1);
+});
