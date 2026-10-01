@@ -1,6 +1,9 @@
 import { showToast, Toast } from "@raycast/api";
 import { api } from "../../utils/api";
 import { localDate } from "./utils";
+
+// MOCO does not document the exact success codes (e.g. for DELETE), so accept every 2xx status.
+const isSuccess = (status: number) => status >= 200 && status < 300;
 import { z } from "zod";
 import { Activity, EditActivityRequest, StartActivityRequest } from "./types";
 import { Project } from "../projects/types";
@@ -114,7 +117,7 @@ export const startActivity = async (values: StartActivityRequest): Promise<boole
       task_id: values.taskID,
     })
     .then((response) => {
-      if (response.status == 200) {
+      if (isSuccess(response.status)) {
         toast.style = Toast.Style.Success;
         toast.title = `Activity ${verb}ed`;
         return true;
@@ -145,7 +148,7 @@ export const toggleActivity = async (activityID: number, startActivity: boolean)
   const result = await api
     .patch(`/activities/${activityID}/${startActivity ? "start_timer" : "stop_timer"}`, {})
     .then((response) => {
-      if (response.status == 200) {
+      if (isSuccess(response.status)) {
         toast.style = Toast.Style.Success;
         toast.title = `Timer ${startActivity ? "started" : "stopped"}`;
         return true;
@@ -180,7 +183,7 @@ export const editActivity = async (values: EditActivityRequest, activityID: numb
       hours: values.hours,
     })
     .then((response) => {
-      if (response.status == 200) {
+      if (isSuccess(response.status)) {
         toast.style = Toast.Style.Success;
         toast.title = "Activity updated";
         return true;
@@ -211,7 +214,7 @@ export const deleteActivity = async (activityID: number): Promise<boolean | void
   const result = await api
     .delete(`/activities/${activityID}`)
     .then((response) => {
-      if (response.status == 204) {
+      if (isSuccess(response.status)) {
         toast.style = Toast.Style.Success;
         toast.title = "Activity deleted";
         return true;

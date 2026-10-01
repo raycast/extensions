@@ -11,6 +11,7 @@
 - Fixed "Hide Project" marking projects as favorites by @TheFRedFox
 - Fixed the API key being written to the log by @TheFRedFox
 - Fixed dates using UTC instead of local time, which could book the previous day around midnight by @TheFRedFox
+- Fixed deleting an activity being reported as failed although it was deleted, and ask before deleting by @TheFRedFox
 
 ## [v1.1.4] - 2026-08-17
 

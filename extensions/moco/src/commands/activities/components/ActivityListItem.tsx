@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
 import { Activity } from "../types";
-import { toggleActivity, deleteActivity } from "../api";
+import { toggleActivity } from "../api";
+import { confirmAndDeleteActivity } from "../confirmAndDelete";
 import { ActivityEdit } from "./ActivityEdit";
 import { timeDelta, secondsParser, localDate } from "../utils";
 import { Actions } from "./ActivityList";
@@ -74,8 +75,8 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
                   : { source: Icon.Stop, tintColor: Color.Red }
               }
               title={`${activity.timer_started_at === null ? "Start" : "Stop"} timer`}
-              onAction={() =>
-                toggleActivity(activity.id, activity.timer_started_at === null).then(() =>
+              onAction={async () => {
+                if ((await toggleActivity(activity.id, activity.timer_started_at === null)) === true) {
                   modifyActivity(
                     index,
                     {
@@ -83,9 +84,9 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
                       timer_started_at: activity.timer_started_at === null ? new Date().toISOString() : null,
                     },
                     Actions.update,
-                  ),
-                )
-              }
+                  );
+                }
+              }}
             />
           ) : null}
           <Action.Push
@@ -98,7 +99,11 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
             <Action
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
               title="Delete"
-              onAction={() => deleteActivity(activity.id).then(() => modifyActivity(index, activity, Actions.delete))}
+              onAction={async () => {
+                if (await confirmAndDeleteActivity(activity)) {
+                  modifyActivity(index, activity, Actions.delete);
+                }
+              }}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
           ) : null}
