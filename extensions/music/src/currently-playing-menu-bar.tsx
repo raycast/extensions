@@ -11,8 +11,9 @@ import { PlayerState } from "./util/models";
 import { formatTitle } from "./util/track";
 import { handleTaskEitherError } from "./util/utils";
 
-const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle, showAlbumArt, showAlbumArtOnly } =
+const { hideArtistName, hideTrackTitle, maxTextLength, cleanupTitle, hideIconWhenIdle, iconType } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
+const showCoverImage = iconType === "cover-image";
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
   const handledTask = pipe(
@@ -44,7 +45,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
       // Resolved in the same step as the snapshot so Raycast keeps the command
       // alive until the artwork is ready. Cache hits cost only a file check.
       let artworkPath: string | undefined;
-      if (showAlbumArt && result.kind === "ok") {
+      if (showCoverImage && result.kind === "ok") {
         artworkPath = await getArtworkPath(result.track.artist, result.track.album, result.track.name).catch(
           () => undefined,
         );
@@ -62,19 +63,21 @@ export default function CurrentlyPlayingMenuBarCommand() {
   const isFavorited = currentTrack?.favorited === "true";
 
   const artworkPath = snapshot?.artworkPath;
-  const hasArtwork = showAlbumArt && !!artworkPath && fs.existsSync(artworkPath);
-  const menuBarIcon: Image.ImageLike =
-    hasArtwork && artworkPath ? { source: artworkPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
+  const coverPath = showCoverImage && artworkPath && fs.existsSync(artworkPath) ? artworkPath : undefined;
+  const trackIcon: Image.ImageLike = coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
 
   const title = currentTrack
     ? formatTitle({
         name: currentTrack.name,
         artistName: currentTrack.artist,
         hideArtistName,
+        hideTrackTitle,
         maxTextLength,
         cleanupTitle,
       })
     : "";
+  // "None" hides the icon, but never when there is no text left to show.
+  const menuBarIcon: Image.ImageLike | undefined = iconType === "none" && title ? undefined : trackIcon;
 
   const DROPDOWN_MAX = 40;
   const fullTitle = currentTrack
@@ -119,10 +122,10 @@ export default function CurrentlyPlayingMenuBarCommand() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={showAlbumArt && showAlbumArtOnly ? undefined : title}>
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={title || undefined}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon={menuBarIcon}
+          icon={trackIcon}
           title={dropdownTitle}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
