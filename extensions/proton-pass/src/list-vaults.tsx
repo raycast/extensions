@@ -1,62 +1,11 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listVaults, loginWithBrowser } from "./lib/pass-cli";
+import { listVaults } from "./lib/pass-cli";
 import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
+import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
 import { getCachedVaults, setCachedVaults } from "./lib/cache";
-import { openTerminalForLogin } from "./lib/terminal";
 import { platformShortcut } from "./lib/shortcuts";
-
-async function loginWithBrowserAndReload(reload: () => Promise<void>) {
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Starting Proton Pass login",
-    message: "Complete authentication in your browser",
-  });
-
-  try {
-    await loginWithBrowser();
-    toast.style = Toast.Style.Success;
-    toast.title = "Logged in";
-    toast.message = "Reloading";
-    await reload();
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to login";
-    toast.style = Toast.Style.Failure;
-    toast.title = "Login failed";
-    toast.message = message;
-  }
-}
-
-function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
-  return (
-    <List>
-      <List.EmptyView
-        icon={Icon.Lock}
-        title="Not Logged In"
-        description={
-          process.platform === "darwin"
-            ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
-            : "Use browser login to authenticate with Proton Pass."
-        }
-        actions={
-          <ActionPanel>
-            <Action title="Login with Browser" icon={Icon.Globe} onAction={onLogin} />
-            {process.platform === "darwin" && (
-              <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
-            )}
-            <Action.OpenInBrowser
-              title="View CLI Documentation"
-              url={PROTON_PASS_CLI_DOCS}
-              icon={Icon.Globe}
-              shortcut={platformShortcut(["cmd"], "d")}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
-}
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);

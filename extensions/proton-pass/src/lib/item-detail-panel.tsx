@@ -64,8 +64,8 @@ interface ItemDetailPanelProps {
 }
 
 export const ItemDetailPanel = memo(function ItemDetailPanel({ item, detail, isLoading, error }: ItemDetailPanelProps) {
-  const totp = useTotpCode(item, detail);
-  const { fields, metadata, customFields } = getPanelRows({ item, detail, totp, isLoading, error });
+  const { code: totp, failed: totpFailed } = useTotpCode(item, detail);
+  const { fields, metadata, customFields } = getPanelRows({ item, detail, totp, totpFailed, isLoading, error });
   const iconOf = (row: PanelRow) => (row.id === "type" ? getItemIcon(item.type) : ROW_ICONS[row.id]);
 
   return (

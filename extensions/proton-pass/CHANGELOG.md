@@ -15,6 +15,7 @@
 - Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list. Without cached items, that vault shows first, before the other vaults have loaded
 - New Copy Title action (⌘⇧.). Copy Username moves to ⌘⇧U, since ⌘⇧C copies the password
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
+- When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x

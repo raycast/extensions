@@ -27,6 +27,8 @@ export interface PanelInput {
   /** Loaded details of the item, when it's selected. */
   detail?: ItemDetail;
   totp?: { code: string; remainingSeconds?: number };
+  /** The 2FA code couldn't be fetched. */
+  totpFailed?: boolean;
   isLoading: boolean;
   error?: string;
   now?: number;
@@ -44,7 +46,7 @@ function text(value: string | undefined): PanelValue {
  * shown as such, so fields stay in place while browsing. Custom fields, which only some items have,
  * come last.
  */
-export function getPanelRows({ item, detail, totp, isLoading, error, now }: PanelInput): PanelRows {
+export function getPanelRows({ item, detail, totp, totpFailed, isLoading, error, now }: PanelInput): PanelRows {
   // Value of the fields that are only known once the item's details are loaded.
   const notLoaded: PanelValue = error ? { kind: "unavailable" } : isLoading ? { kind: "loading" } : EMPTY;
 
@@ -55,7 +57,7 @@ export function getPanelRows({ item, detail, totp, isLoading, error, now }: Pane
 
   let code = EMPTY;
   if (totp) code = { kind: "code", ...totp };
-  else if (item.hasTotp) code = error ? { kind: "unavailable" } : { kind: "loading" };
+  else if (item.hasTotp) code = error || totpFailed ? { kind: "unavailable" } : { kind: "loading" };
 
   const urls = detail?.urls ?? item.urls ?? [];
   const labels = websiteLabels(urls);
