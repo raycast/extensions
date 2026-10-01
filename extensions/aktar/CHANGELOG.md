@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [QR Codes and Renaming] - {PR_MERGE_DATE}
+## [QR Codes and Renaming] - 2026-10-01
 
 - Show QR Code (⌘⇧Q) in Search Uploads and Browse Buckets, for public links and temporary links. Copy the QR code image or save it to Downloads, or create a new temporary link (⌘R)
 - Name field in Upload File: upload a single file under a different name, keeping its extension
