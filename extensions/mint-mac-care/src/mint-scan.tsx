@@ -3,343 +3,457 @@ import {
   ActionPanel,
   Alert,
   Color,
-  Form,
   Icon,
+  Keyboard,
+  LaunchType,
   List,
   Toast,
   confirmAlert,
+  environment,
+  launchCommand,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
-import { formatBytes, runMintSurface, shortPath } from "./mint-cli";
+import { getProgressIcon, usePromise } from "@raycast/utils";
+import { useMemo, useRef, useState } from "react";
+import { MintCLIVersion, formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
+import {
+  Bucket,
+  BucketKey,
+  DiskScan,
+  Entry,
+  OptimizeScan,
+  baseName,
+  bucketPicture,
+  bucketsOf,
+  isDone,
+} from "./mint-panes";
 import { MissingMint } from "./missing-mint";
+import { progressMarkdown, updatingDots } from "./progress-row";
 import { useMintCLI } from "./use-mint-cli";
+import { newProgressToken, useMintProgress } from "./use-progress";
+import { useStrike } from "./use-strike";
+import { rememberDuration } from "./use-wait";
 
-type ScanOptions = {
-  exactDuplicates: boolean;
-  similarPhotos: boolean;
-  agentArchives: boolean;
-};
-
-type DiskItem = {
-  id: string;
-  label: string;
-  path: string;
-  sizeBytes: number;
-  sizeHuman?: string;
-  category: string;
-  bucket: string;
-  defaultSelected: boolean;
-  tier: "recommended" | "needs-review";
-};
-
-type DiskSection = {
-  id: string;
-  title: string;
-  tier: "recommended" | "needs-review";
-  totalBytes: number;
-  items: DiskItem[];
-};
-
-type AgentCandidate = {
-  id: string;
-  title: string;
-  path: string;
-  sizeBytes: number;
-  estimatedSaving: number;
-  duplicateCount: number;
-  defaultSelected: boolean;
-  reversible: boolean;
-};
-
-type DiskScanResponse = {
-  sessionID: string;
-  notice?: string | null;
-  scanMode: string;
-  itemCount: number;
-  totalBytes: number;
-  totalHuman?: string;
-  sections: DiskSection[];
-  agentArchives?: {
-    complete: boolean;
-    estimatedSaving: number;
-    candidates: AgentCandidate[];
-  };
-};
-
-type DiskCleanResponse = {
+type DiskClean = {
   cleanedCount: number;
   failedCount: number;
-  keptCount: number;
-  processedBytes: number;
+  physicallyReclaimedBytes?: number;
   movedToTrashBytes: number;
   permanentlyDeletedBytes: number;
   blockedCount: number;
+  failures?: Array<{ path: string; reason: string }>;
+  /** Mint 1.0.81: the scan's other rows, reviewable again without a second scan. */
+  nextSessionID?: string | null;
 };
+type OptimizeResult = {
+  reclaimedBytes: number;
+  cancelled: boolean;
+  failures?: Array<{ name: string; reason: string }>;
+};
+type Receipt = { bytes: number; text: string };
+type Run = { key: BucketKey; verb: string; ids: string[] };
 
-type AgentOptimizeResponse = {
-  optimizedCount: number;
-  savedBytes: number;
-  quotaBlockedCount: number;
-  safetyBlockedCount: number;
-};
+const SCAN_KEY = "disk.scan";
+const OPTIMIZE_KEY = "optimize.scan";
 
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
-  const { push } = useNavigation();
-
   if (resolution.status !== "ready") return <MissingMint resolution={resolution} onRetry={recheck} />;
+  return <FreeDisk cli={resolution.path} version={resolution.version} />;
+}
+
+/**
+ * The Disk page in Raycast: its groups on the left from the first second,
+ * each filling as Mint answers; what is in the selected one on the right.
+ * ↵ acts on the whole group, and its rows are struck and fold away one by
+ * one as they go. Yours is the person's own, so it is chosen, never removed
+ * all at once.
+ */
+function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
+  const grouped = version.capabilities?.includes("surface.groups.v1") ?? false;
+  const tokens = useRef({ disk: newProgressToken(), copies: newProgressToken() });
+  const [diskSession, setDiskSession] = useState<string | undefined>();
+  const [run, setRun] = useState<Run | undefined>();
+  const [receipts, setReceipts] = useState<Partial<Record<BucketKey, Receipt>>>({});
+  // Mint's answers are single-use: the copies one is spent by an Optimize.
+  const [copiesSpent, setCopiesSpent] = useState<string | undefined>();
+  const strike = useStrike();
+
+  const scan = usePromise(
+    async (path: string, token: string) => {
+      const started = Date.now();
+      const result = await runMintSurface<DiskScan>(path, { action: "disk.scan", progressToken: token }, 30 * 60_000);
+      rememberDuration(SCAN_KEY, (Date.now() - started) / 1000);
+      return result;
+    },
+    [cli, tokens.current.disk],
+    { onData: (result) => setDiskSession(result.sessionID) },
+  );
+  const copies = usePromise(
+    async (path: string, token: string) => {
+      const started = Date.now();
+      const result = await runMintSurface<OptimizeScan>(
+        path,
+        { action: "disk.optimize.scan", progressToken: token },
+        30 * 60_000,
+      );
+      rememberDuration(OPTIMIZE_KEY, (Date.now() - started) / 1000);
+      return result;
+    },
+    [cli, tokens.current.copies],
+  );
+  const diskProgress = useMintProgress(tokens.current.disk, scan.isLoading, SCAN_KEY);
+  const copiesProgress = useMintProgress(tokens.current.copies, copies.isLoading, OPTIMIZE_KEY);
+  const buckets = useMemo(() => bucketsOf(scan.data, copies.data, grouped), [scan.data, copies.data, grouped]);
+
+  const rescan = () => {
+    tokens.current = { disk: newProgressToken(), copies: newProgressToken() };
+    strike.reset();
+    setReceipts({});
+    setDiskSession(undefined);
+    setCopiesSpent(undefined);
+    scan.revalidate();
+    copies.revalidate();
+  };
+
+  /**
+   * One run on one group: its rows are struck as Mint finishes each (Mint
+   * 1.0.81 says which) or, on an older Mint, when it answers; the receipt
+   * takes the group's place once the last row has folded away.
+   */
+  async function act(
+    bucket: Bucket,
+    entries: Entry[],
+    verb: string,
+    request: (token: string) => Promise<{ done: string[]; receipt: Receipt; problem?: string }>,
+  ) {
+    if (run || strike.active) return;
+    const ids = entries.flatMap((entry) => entry.ids);
+    const token = newProgressToken();
+    setRun({ key: bucket.key, verb, ids });
+    strike.begin(ids.length, token);
+    try {
+      const { done, receipt, problem } = await request(token);
+      strike.end(done, () => {
+        setRun(undefined);
+        setReceipts((current) => ({ ...current, [bucket.key]: receipt }));
+      });
+      if (problem) await showToast({ style: Toast.Style.Failure, title: problem });
+    } catch (error) {
+      strike.end([], () => setRun(undefined));
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Mint could not finish",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  const optimizeAll = (bucket: Bucket) =>
+    act(bucket, bucket.entries, "Optimizing", async (progressToken) => {
+      setCopiesSpent(copies.data?.sessionID);
+      const result = await runMintSurface<OptimizeResult>(
+        cli,
+        {
+          action: "disk.optimize",
+          sessionID: copies.data!.sessionID,
+          itemIDs: bucket.entries.flatMap((entry) => entry.ids),
+          confirmed: true,
+          progressToken,
+        },
+        30 * 60_000,
+      );
+      const failures = result.failures ?? [];
+      const refused = new Set(failures.map((failure) => failure.name));
+      const done = result.cancelled
+        ? []
+        : (copies.data?.items ?? [])
+            .filter((copy) => !refused.has(copy.path) && !refused.has(baseName(copy.path)))
+            .map((copy) => copy.id);
+      return {
+        done,
+        receipt: { bytes: result.reclaimedBytes, text: "back · nothing deleted" },
+        problem: failures.length
+          ? `${plural(failures.length, "file")} left as they were: ${failures[0].reason}`
+          : undefined,
+      };
+    });
+
+  const clean = async (bucket: Bucket, entries: Entry[], permanent: boolean) => {
+    if (!diskSession) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Scan again first",
+        message: "Mint's last answer was used.",
+      });
+      return;
+    }
+    const bytes = entries.reduce((sum, entry) => sum + entry.bytes, 0);
+    if (permanent) {
+      const accepted = await confirmAlert({
+        icon: Icon.Trash,
+        title: `Delete ${formatCompact(bytes)} permanently?`,
+        message: `${plural(entries.length, "item")}, not moved to the Trash. Mint checks each one again before it acts.`,
+        primaryAction: { title: "Delete Permanently", style: Alert.ActionStyle.Destructive },
+      });
+      if (!accepted) return;
+    }
+    await act(bucket, entries, permanent ? "Deleting" : "Moving to the Trash", async (progressToken) => {
+      const result = await runMintSurface<DiskClean>(
+        cli,
+        {
+          action: "disk.clean",
+          sessionID: diskSession,
+          itemIDs: entries.map((entry) => entry.id),
+          confirmed: true,
+          permanent,
+          progressToken,
+        },
+        30 * 60_000,
+      );
+      setDiskSession(result.nextSessionID ?? undefined);
+      const failed = new Set((result.failures ?? []).map((failure) => failure.path));
+      // Rows Mint held back for the free allowance are not named: only the
+      // ones it named as finished are struck then.
+      const done = result.blockedCount
+        ? []
+        : entries.filter((entry) => !failed.has(entry.path)).map((entry) => entry.id);
+      const problems = [
+        result.blockedCount ? `${plural(result.blockedCount, "item")} held back: the free 1 GB is used up` : undefined,
+        result.failedCount
+          ? `${result.failedCount} kept: ${result.failures?.[0]?.reason ?? "macOS refused"}`
+          : undefined,
+      ].filter(Boolean);
+      return {
+        done,
+        receipt: permanent
+          ? { bytes: result.physicallyReclaimedBytes ?? result.permanentlyDeletedBytes, text: "freed" }
+          : { bytes: result.movedToTrashBytes, text: "moved to the Trash" },
+        problem: problems.length ? problems.join(" · ") : undefined,
+      };
+    });
+  };
+
+  const appearance = environment.appearance === "light" ? "light" : "dark";
+  const total = buckets.reduce((sum, bucket) => sum + bucket.bytes, 0);
+  const anyLoading = scan.isLoading || copies.isLoading;
 
   return (
-    <Form
-      navigationTitle="Free Disk with Mint"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm<ScanOptions>
-            title="Scan and Review"
-            icon={Icon.MagnifyingGlass}
-            onSubmit={(values) => push(<DiskReview cli={resolution.path} options={values} />)}
-          />
-        </ActionPanel>
-      }
+    <List
+      isLoading={anyLoading || Boolean(run)}
+      isShowingDetail
+      navigationTitle="Free Disk"
+      searchBarPlaceholder={scan.data && copies.data ? `${formatCompact(total)} can be freed` : "Scanning your Mac…"}
     >
-      <Form.Description text="Basic cleanup always runs. Add deeper checks for this scan only; Mint will not change anything until you review the results." />
-      <Form.Separator />
-      <Form.Checkbox id="exactDuplicates" title="Exact Duplicates" label="Hash candidate files · takes longer" />
-      <Form.Checkbox
-        id="similarPhotos"
-        title="Similar Photos"
-        label="Compare photo thumbnails · may take much longer"
-      />
-      <Form.Checkbox
-        id="agentArchives"
-        title="AI Agents"
-        label="Measure archived Codex sessions · reversible optimize"
-      />
-      <Form.Description text="Every cleanup uses the same Mint Boundaries, weekly allowance, cleanup method, history, and Undo as the Mint app." />
-    </Form>
+      <List.Section title="What can go">
+        {buckets.map((bucket) => {
+          const optimizable = bucket.key === "optimizable";
+          const loading = optimizable ? copies.isLoading : scan.isLoading;
+          const error = optimizable ? copies.error : scan.error;
+          const progress = optimizable ? copiesProgress : diskProgress;
+          const receipt = receipts[bucket.key];
+          const left = bucket.entries.filter((entry) => !isDone(entry.ids, strike.struck));
+          const remaining = left.reduce((sum, entry) => sum + entry.bytes, 0);
+          const here = run?.key === bucket.key ? run : undefined;
+          const running = here
+            ? `${here.verb} · ${here.ids.filter((id) => strike.struck.has(id)).length} of ${here.ids.length}`
+            : undefined;
+          const accessories: List.Item.Accessory[] = loading
+            ? [{ text: updatingDots() }]
+            : error
+              ? [{ icon: { source: Icon.Warning, tintColor: Color.Orange }, tooltip: error.message }]
+              : receipt && left.length === 0
+                ? [
+                    { icon: { source: Icon.CheckCircle, tintColor: bucket.color } },
+                    { text: `−${formatCompact(receipt.bytes)}` },
+                  ]
+                : [{ text: bucket.entries.length ? formatCompact(remaining) : "None" }];
+          const markdown = loading
+            ? progressMarkdown(optimizable ? "Looking for identical copies" : "Scanning your Mac", progress)
+            : error
+              ? `Mint could not look here.\n\n${error.message}`
+              : bucketPicture(bucket, buckets, appearance, {
+                  struck: strike.struck,
+                  gone: strike.gone,
+                  running,
+                  receipt,
+                });
+          const busy = Boolean(run) || strike.active;
+          return (
+            <List.Item
+              key={bucket.key}
+              id={bucket.key}
+              icon={
+                loading
+                  ? getProgressIcon(progress?.fraction ?? 0, bucket.color)
+                  : { source: Icon.CircleFilled, tintColor: bucket.color }
+              }
+              title={bucket.title}
+              accessories={accessories}
+              detail={<List.Item.Detail markdown={markdown} />}
+              actions={
+                <ActionPanel>
+                  {!loading && !busy && left.length ? (
+                    optimizable ? (
+                      copiesSpent === copies.data?.sessionID ? (
+                        <Action title="Scan Again to Optimize" icon={Icon.ArrowClockwise} onAction={rescan} />
+                      ) : (
+                        <>
+                          <Action title="Optimize All" icon={Icon.Stars} onAction={() => optimizeAll(bucket)} />
+                          <Action
+                            title="See by Source"
+                            icon={Icon.List}
+                            shortcut={Keyboard.Shortcut.Common.Open}
+                            onAction={() => launchCommand({ name: "mint-optimize", type: LaunchType.UserInitiated })}
+                          />
+                        </>
+                      )
+                    ) : diskSession ? (
+                      bucket.key === "safeToClean" ? (
+                        <>
+                          <Action title="Clean All" icon={Icon.Trash} onAction={() => clean(bucket, left, true)} />
+                          <Action.Push
+                            title="Choose Items"
+                            icon={Icon.List}
+                            shortcut={Keyboard.Shortcut.Common.Open}
+                            target={
+                              <ChooseItems
+                                bucket={bucket}
+                                entries={left}
+                                preselected
+                                onClean={(entries, permanent) => clean(bucket, entries, permanent)}
+                              />
+                            }
+                          />
+                        </>
+                      ) : (
+                        <Action.Push
+                          title="Choose What to Remove"
+                          icon={Icon.List}
+                          target={
+                            <ChooseItems
+                              bucket={bucket}
+                              entries={left}
+                              preselected={false}
+                              onClean={(entries, permanent) => clean(bucket, entries, permanent)}
+                            />
+                          }
+                        />
+                      )
+                    ) : (
+                      <Action title="Scan Again to Clean" icon={Icon.ArrowClockwise} onAction={rescan} />
+                    )
+                  ) : null}
+                  <ActionPanel.Section>
+                    {!loading && !busy ? (
+                      <Action
+                        title="Scan Again"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={rescan}
+                      />
+                    ) : null}
+                    <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+    </List>
   );
 }
 
-function DiskReview({ cli, options }: { cli: string; options: ScanOptions }) {
+function ChooseItems({
+  bucket,
+  entries,
+  preselected,
+  onClean,
+}: {
+  bucket: Bucket;
+  entries: Entry[];
+  preselected: boolean;
+  onClean: (entries: Entry[], permanent: boolean) => Promise<void>;
+}) {
   const { pop } = useNavigation();
-  const [selectedIDs, setSelectedIDs] = useState<Set<string>>(new Set());
-  const initializedSession = useRef<string | undefined>(undefined);
-  const { data, error, isLoading } = usePromise(async () =>
-    runMintSurface<DiskScanResponse>(
-      cli,
-      {
-        action: "disk.scan",
-        includeExactDuplicates: options.exactDuplicates,
-        includeSimilarPhotos: options.similarPhotos,
-        includeAgentArchives: options.agentArchives,
-      },
-      30 * 60_000,
-    ),
-  );
-
-  const diskItems = data?.sections.flatMap((section) => section.items) ?? [];
-  const agentItems = data?.agentArchives?.candidates ?? [];
-
-  useEffect(() => {
-    if (!data || initializedSession.current === data.sessionID) return;
-    initializedSession.current = data.sessionID;
-    setSelectedIDs(
-      new Set([
-        ...diskItems.filter((item) => item.defaultSelected).map((item) => item.id),
-        ...agentItems.filter((item) => item.defaultSelected).map((item) => item.id),
-      ]),
-    );
-  }, [data, diskItems, agentItems]);
-
+  const [chosen, setChosen] = useState<Set<string>>(new Set(preselected ? entries.map((entry) => entry.id) : []));
+  const picked = entries.filter((entry) => chosen.has(entry.id));
+  const pickedBytes = picked.reduce((sum, entry) => sum + entry.bytes, 0);
   const toggle = (id: string) =>
-    setSelectedIDs((current) => {
+    setChosen((current) => {
       const next = new Set(current);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-
-  const selectedDisk = diskItems.filter((item) => selectedIDs.has(item.id));
-  const selectedAgents = agentItems.filter((item) => selectedIDs.has(item.id));
-  const allIDs = [...diskItems.map((item) => item.id), ...agentItems.map((item) => item.id)];
-
-  async function cleanSelected() {
-    if (!data || (selectedDisk.length === 0 && selectedAgents.length === 0)) return;
-    const accepted = await confirmAlert({
-      icon: Icon.Trash,
-      title: "Run the selected Mint actions?",
-      message: [
-        selectedDisk.length
-          ? `${selectedDisk.length} Disk item${selectedDisk.length === 1 ? "" : "s"} will use Mint's current cleanup method and weekly allowance.`
-          : undefined,
-        selectedAgents.length
-          ? `${selectedAgents.length} archived Codex conversation${selectedAgents.length === 1 ? "" : "s"} will be optimized reversibly.`
-          : undefined,
-        "Protected paths remain untouched. Needs Review items are authorized for this run only.",
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
-      primaryAction: { title: "Run in Mint", style: Alert.ActionStyle.Destructive },
-    });
-    if (!accepted) return;
-
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Mint is working…" });
-    const summaries: string[] = [];
-    try {
-      // Disk cleanup consumes the shared review session, so reversible Agent
-      // optimization runs first when both were selected.
-      if (selectedAgents.length) {
-        const result = await runMintSurface<AgentOptimizeResponse>(cli, {
-          action: "agent.optimize",
-          sessionID: data.sessionID,
-          agentIDs: selectedAgents.map((item) => item.id),
-          confirmed: true,
-        });
-        summaries.push(`${result.optimizedCount} AI archive${result.optimizedCount === 1 ? "" : "s"} optimized`);
-        if (result.quotaBlockedCount) summaries.push(`${result.quotaBlockedCount} held by weekly allowance`);
-      }
-      if (selectedDisk.length) {
-        const result = await runMintSurface<DiskCleanResponse>(cli, {
-          action: "disk.clean",
-          sessionID: data.sessionID,
-          itemIDs: selectedDisk.map((item) => item.id),
-          confirmed: true,
-        });
-        summaries.push(`${result.cleanedCount} Disk item${result.cleanedCount === 1 ? "" : "s"} processed`);
-        if (result.blockedCount) summaries.push(`${result.blockedCount} held by weekly allowance`);
-        if (result.failedCount) summaries.push(`${result.failedCount} could not be changed`);
-      }
-      toast.style = Toast.Style.Success;
-      toast.title = "Mint finished";
-      toast.message = summaries.join(" · ");
-      pop();
-    } catch (actionError) {
-      toast.style = Toast.Style.Failure;
-      toast.title = summaries.length ? "Mint completed part of the request" : "Mint could not complete the request";
-      toast.message = actionError instanceof Error ? actionError.message : String(actionError);
-    }
-  }
-
+  // Back to the group first, so its rows are struck where the person is looking.
+  const go = (permanent: boolean) => async () => {
+    pop();
+    await onClean(picked, permanent);
+  };
   return (
-    <List isLoading={isLoading} navigationTitle="Review Disk Cleanup" searchBarPlaceholder="Filter Mint findings">
-      {error ? (
-        <List.EmptyView title="Disk scan failed" description={error.message} icon={Icon.ExclamationMark} />
-      ) : null}
-      {!error && !isLoading && data && diskItems.length === 0 && agentItems.length === 0 ? (
-        <List.EmptyView
-          title="Nothing to clean"
-          description={data.notice ?? "Mint did not find actionable items."}
-          icon={Icon.CheckCircle}
-        />
-      ) : null}
-
-      {data?.sections.map((section) => (
-        <List.Section
-          key={section.id}
-          title={section.title}
-          subtitle={`${section.items.length} · ${formatBytes(section.totalBytes)}`}
-        >
-          {section.items.map((item) => (
-            <List.Item
-              key={item.id}
-              icon={{
-                source: selectedIDs.has(item.id) ? Icon.CheckCircle : Icon.Circle,
-                tintColor: selectedIDs.has(item.id) ? Color.Green : Color.SecondaryText,
-              }}
-              title={item.label}
-              subtitle={shortPath(item.path)}
-              accessories={[
-                { text: item.sizeHuman ?? formatBytes(item.sizeBytes) },
-                ...(section.tier === "needs-review" ? [{ tag: { value: "Needs Review", color: Color.Orange } }] : []),
-              ]}
-              actions={
-                <ReviewActions
-                  selected={selectedIDs.has(item.id)}
-                  toggle={() => toggle(item.id)}
-                  run={cleanSelected}
-                  canRun={selectedIDs.size > 0}
-                  selectAll={() => setSelectedIDs(new Set(allIDs))}
-                  clearAll={() => setSelectedIDs(new Set())}
-                  path={item.path}
+    <List
+      navigationTitle={picked.length ? `${formatCompact(pickedBytes)} chosen` : bucket.title}
+      searchBarPlaceholder={`Search ${bucket.title}`}
+    >
+      {entries.map((entry) => {
+        const isChosen = chosen.has(entry.id);
+        return (
+          <List.Item
+            key={entry.id}
+            icon={{ fileIcon: entry.path }}
+            title={entry.title}
+            subtitle={entry.detail}
+            accessories={[
+              { text: formatCompact(entry.bytes) },
+              {
+                icon: {
+                  source: isChosen ? Icon.CheckCircle : Icon.Circle,
+                  tintColor: isChosen ? Color.PrimaryText : Color.SecondaryText,
+                },
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={isChosen ? "Unchoose" : "Choose"}
+                  icon={isChosen ? Icon.Circle : Icon.CheckCircle}
+                  onAction={() => toggle(entry.id)}
                 />
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
-
-      {agentItems.length ? (
-        <List.Section
-          title="AI Agents · Reversible Optimize"
-          subtitle={formatBytes(data?.agentArchives?.estimatedSaving ?? 0)}
-        >
-          {agentItems.map((item) => (
-            <List.Item
-              key={item.id}
-              icon={{
-                source: selectedIDs.has(item.id) ? Icon.CheckCircle : Icon.Circle,
-                tintColor: selectedIDs.has(item.id) ? Color.Green : Color.SecondaryText,
-              }}
-              title={item.title}
-              subtitle={shortPath(item.path)}
-              accessories={[
-                { text: `${formatBytes(item.estimatedSaving)} saving` },
-                { tag: { value: "Undoable", color: Color.Blue } },
-              ]}
-              actions={
-                <ReviewActions
-                  selected={selectedIDs.has(item.id)}
-                  toggle={() => toggle(item.id)}
-                  run={cleanSelected}
-                  canRun={selectedIDs.size > 0}
-                  selectAll={() => setSelectedIDs(new Set(allIDs))}
-                  clearAll={() => setSelectedIDs(new Set())}
-                  path={item.path}
-                />
-              }
-            />
-          ))}
-        </List.Section>
-      ) : null}
+                {picked.length ? (
+                  bucket.key === "safeToClean" ? (
+                    <Action
+                      title="Clean Chosen"
+                      icon={Icon.Trash}
+                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      onAction={go(true)}
+                    />
+                  ) : (
+                    <>
+                      <Action
+                        title="Move Chosen to Trash"
+                        icon={Icon.Trash}
+                        shortcut={{ modifiers: ["cmd"], key: "return" }}
+                        onAction={go(false)}
+                      />
+                      <Action
+                        title="Delete Chosen Permanently"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                        onAction={go(true)}
+                      />
+                    </>
+                  )
+                ) : null}
+                <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
-  );
-}
-
-function ReviewActions({
-  selected,
-  toggle,
-  run,
-  canRun,
-  selectAll,
-  clearAll,
-  path,
-}: {
-  selected: boolean;
-  toggle: () => void;
-  run: () => Promise<void>;
-  canRun: boolean;
-  selectAll: () => void;
-  clearAll: () => void;
-  path: string;
-}) {
-  return (
-    <ActionPanel>
-      <Action
-        title={selected ? "Keep This Item" : "Select This Item"}
-        icon={selected ? Icon.XMarkCircle : Icon.CheckCircle}
-        onAction={toggle}
-      />
-      {canRun ? (
-        <Action title="Clean and Optimize Selected" icon={Icon.Trash} style={Action.Style.Destructive} onAction={run} />
-      ) : null}
-      <ActionPanel.Section>
-        <Action title="Select All" icon={Icon.Checkmark} onAction={selectAll} />
-        <Action title="Deselect All" icon={Icon.Circle} onAction={clearAll} />
-        <Action.ShowInFinder path={path} />
-      </ActionPanel.Section>
-    </ActionPanel>
   );
 }

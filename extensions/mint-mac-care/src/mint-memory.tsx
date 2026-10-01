@@ -1,37 +1,28 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
-import { formatBytes, runMintSurface } from "./mint-cli";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  environment,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { formatCompact, openMint, plural, runMintSurface } from "./mint-cli";
+
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
+import { MemoryApp as App, MemoryScan, Pile, PileKey, everyPile, pilePicture, pilesOf } from "./mint-panes";
+import { useStrike } from "./use-strike";
 
-type MemoryItem = {
-  id: string;
-  name: string;
-  bytes: number;
-  sizeHuman?: string;
-  processCount: number;
-  bundleIdentifier?: string | null;
-  bundlePath?: string | null;
-  agentKind?: string | null;
-  action: "quit" | "force-quit" | "terminate" | "locked";
-  selectable: boolean;
-  advanced: boolean;
-  needsReview: boolean;
-  defaultSelected: boolean;
-};
-
-type MemoryScanResponse = {
-  sessionID: string;
-  sampledAt: string;
-  detailsUnavailable: boolean;
-  totalBytes?: number | null;
-  usedBytes?: number | null;
-  items: MemoryItem[];
-};
-
-type MemoryReleaseResponse = {
-  requestedNames: string[];
+type MemoryRelease = {
   quitNames: string[];
   survivedNames: string[];
   freedBytes: number;
@@ -41,212 +32,276 @@ type MemoryReleaseResponse = {
 export default function Command() {
   const { resolution, recheck } = useMintCLI();
   if (resolution.status !== "ready") return <MissingMint resolution={resolution} onRetry={recheck} />;
-  return <MemoryReview cli={resolution.path} />;
+  return <FreeMemory cli={resolution.path} />;
 }
 
-function MemoryReview({ cli }: { cli: string }) {
-  const [selectedIDs, setSelectedIDs] = useState<Set<string>>(new Set());
-  const initializedSession = useRef<string | undefined>(undefined);
-  const { data, error, isLoading, revalidate } = usePromise(async () =>
-    runMintSurface<MemoryScanResponse>(cli, { action: "memory.scan" }, 60_000),
+/**
+ * The Memory page's piles on the left, the apps in the selected one on the
+ * right. ↵ on Idle quits every idle app; In use and Ask first are chosen app
+ * by app. Each app is struck as it quits. The last answer shows at once
+ * while Mint looks again; nothing acts on it until the fresh one is in.
+ */
+function FreeMemory({ cli }: { cli: string }) {
+  const [run, setRun] = useState<{ key: PileKey; ids: string[] } | undefined>();
+  const [receipt, setReceipt] = useState<{ key: PileKey; bytes: number; text: string } | undefined>();
+  const [spent, setSpent] = useState<string | undefined>();
+  const strike = useStrike();
+  const scan = useCachedPromise(
+    async (path: string) => runMintSurface<MemoryScan>(path, { action: "memory.scan" }, 60_000),
+    [cli],
+    { keepPreviousData: true },
   );
+  const busy = Boolean(run) || strike.active;
+  // A release uses Mint's answer: until it looks again, nothing else acts on it.
+  const fresh = !scan.isLoading && !busy && Boolean(scan.data) && spent !== scan.data?.sessionID;
+  const piles = everyPile(pilesOf(scan.data));
+  const used = scan.data?.usedBytes ?? 0;
+  const appearance = environment.appearance === "light" ? "light" : "dark";
 
-  useEffect(() => {
-    if (!data || initializedSession.current === data.sessionID) return;
-    initializedSession.current = data.sessionID;
-    setSelectedIDs(new Set(data.items.filter((item) => item.defaultSelected).map((item) => item.id)));
-  }, [data]);
-
-  const selected = data?.items.filter((item) => selectedIDs.has(item.id) && item.selectable) ?? [];
-  const toggle = (item: MemoryItem) => {
-    if (!item.selectable) return;
-    setSelectedIDs((current) => {
-      const next = new Set(current);
-      if (next.has(item.id)) next.delete(item.id);
-      else next.add(item.id);
-      return next;
-    });
+  const lookAgain = () => {
+    strike.reset();
+    setReceipt(undefined);
+    scan.revalidate();
   };
 
-  async function releaseSelected() {
-    if (!data || selected.length === 0) return;
-    const hasAdvanced = selected.some((item) => item.advanced);
-    const accepted = await confirmAlert({
-      icon: Icon.MemoryChip,
-      title: `Release memory from ${selected.length} group${selected.length === 1 ? "" : "s"}?`,
-      message: hasAdvanced
-        ? "Mint will first ask apps to quit normally. Advanced selections can be force-quit or sent SIGTERM if they remain running; unsaved work may be lost. Boundaries are rechecked immediately before acting."
-        : "Mint will ask the selected background apps to quit normally. Apps may show a save prompt; Mint will not force-quit standard selections.",
-      primaryAction: {
-        title: hasAdvanced ? "Release with Advanced Actions" : "Release Memory",
-        style: hasAdvanced ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
-      },
-    });
-    if (!accepted) return;
-
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Mint is releasing memory…" });
+  async function release(pile: Pile, apps: App[]) {
+    if (!scan.data || apps.length === 0 || busy) return;
+    const advanced = apps.some((app) => app.advanced);
+    if (advanced) {
+      const accepted = await confirmAlert({
+        icon: Icon.MemoryChip,
+        title: `Quit ${plural(apps.length, "app")}?`,
+        message:
+          "Each is asked to quit first. What keeps running is forced to quit, and unsaved work there may be lost.",
+        primaryAction: { title: "Quit", style: Alert.ActionStyle.Destructive },
+      });
+      if (!accepted) return;
+    }
+    const ids = apps.map((app) => app.id);
+    setSpent(scan.data.sessionID);
+    setRun({ key: pile.key, ids });
+    strike.begin(ids.length);
     try {
-      const result = await runMintSurface<MemoryReleaseResponse>(cli, {
+      const result = await runMintSurface<MemoryRelease>(cli, {
         action: "memory.release",
-        sessionID: data.sessionID,
-        itemIDs: selected.map((item) => item.id),
-        allowAdvanced: hasAdvanced,
+        sessionID: scan.data.sessionID,
+        itemIDs: ids,
+        allowAdvanced: advanced,
         confirmed: true,
       });
-      toast.style = result.survivedNames.length ? Toast.Style.Failure : Toast.Style.Success;
-      toast.title = result.quitNames.length
-        ? `${result.quitNames.length} group${result.quitNames.length === 1 ? "" : "s"} quit`
-        : "No process was changed";
-      toast.message = [
-        result.freedBytes > 0 ? `${formatBytes(result.freedBytes)} returned` : undefined,
-        result.survivedNames.length ? `${result.survivedNames.length} still running` : undefined,
+      const quit = new Set(result.quitNames);
+      const done = apps.filter((app) => quit.has(app.name)).map((app) => app.id);
+      strike.end(done, () => {
+        setRun(undefined);
+        setReceipt({ key: pile.key, bytes: result.freedBytes, text: "freed" });
+      });
+      const problems = [
+        result.survivedNames.length ? `${result.survivedNames.join(", ")} kept running` : undefined,
         result.handlingReviewBlockedNames.length
-          ? `${result.handlingReviewBlockedNames.length} blocked by Boundaries`
+          ? `${plural(result.handlingReviewBlockedNames.length, "app")} on your Ignore list`
           : undefined,
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      initializedSession.current = undefined;
-      setSelectedIDs(new Set());
-      await revalidate();
-    } catch (releaseError) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Mint could not release memory";
-      toast.message = releaseError instanceof Error ? releaseError.message : String(releaseError);
+      ].filter(Boolean);
+      if (problems.length) await showToast({ style: Toast.Style.Failure, title: problems.join(" · ") });
+    } catch (error) {
+      strike.end([], () => setRun(undefined));
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Mint could not free memory",
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  const standard = data?.items.filter((item) => !item.needsReview && item.selectable) ?? [];
-  const confirmation = data?.items.filter((item) => item.needsReview && item.selectable) ?? [];
-  const contextOnly = data?.items.filter((item) => !item.selectable) ?? [];
+  const memoryLine =
+    scan.data?.usedBytes && scan.data.totalBytes
+      ? `${formatCompact(scan.data.usedBytes)} of ${formatCompact(scan.data.totalBytes)} in use`
+      : undefined;
+  const idle = piles.find((pile) => pile.key === "idle");
 
   return (
-    <List isLoading={isLoading} navigationTitle="Free Memory" searchBarPlaceholder="Filter running apps and processes">
-      {error ? (
-        <List.EmptyView title="Memory scan failed" description={error.message} icon={Icon.ExclamationMark} />
+    <List
+      isLoading={scan.isLoading || busy}
+      isShowingDetail
+      navigationTitle="Free Memory"
+      searchBarPlaceholder={
+        scan.data
+          ? idle?.apps.length
+            ? `${formatCompact(idle.bytes)} idle · ${memoryLine ?? ""}`
+            : (memoryLine ?? "")
+          : "Looking at what is running…"
+      }
+    >
+      {scan.error && !scan.data ? (
+        <List.EmptyView icon={Icon.Warning} title="Mint could not read memory" description={scan.error.message} />
       ) : null}
-      {!error && !isLoading && data?.detailsUnavailable ? (
+      {scan.data?.detailsUnavailable ? (
         <List.EmptyView
-          title="Process details unavailable"
-          description="This Mint edition can show host memory but cannot quit other apps."
           icon={Icon.Lock}
+          title="This Mint edition cannot quit other apps"
+          description="Open Mint to see your memory."
         />
       ) : null}
-      {!error && !isLoading && data && !data.detailsUnavailable && data.items.length === 0 ? (
-        <List.EmptyView title="No releasable processes" icon={Icon.CheckCircle} />
+      {scan.data && !scan.data.detailsUnavailable && piles.length === 0 ? (
+        <List.EmptyView
+          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+          title="Nothing to quit"
+          description={memoryLine ? `${memoryLine}. Every app left is part of macOS.` : undefined}
+        />
       ) : null}
-
-      <MemorySection
-        title="Safer to Quit"
-        items={standard}
-        selectedIDs={selectedIDs}
-        toggle={toggle}
-        run={releaseSelected}
-        canRun={selected.length > 0}
-        selectAll={() =>
-          setSelectedIDs(new Set(data?.items.filter((item) => item.selectable).map((item) => item.id) ?? []))
-        }
-        clearAll={() => setSelectedIDs(new Set())}
-      />
-      <MemorySection
-        title="Confirmation Required"
-        items={confirmation}
-        selectedIDs={selectedIDs}
-        toggle={toggle}
-        run={releaseSelected}
-        canRun={selected.length > 0}
-        selectAll={() =>
-          setSelectedIDs(new Set(data?.items.filter((item) => item.selectable).map((item) => item.id) ?? []))
-        }
-        clearAll={() => setSelectedIDs(new Set())}
-      />
-      <MemorySection
-        title="Running · Context Only"
-        items={contextOnly}
-        selectedIDs={selectedIDs}
-        toggle={toggle}
-        run={releaseSelected}
-        canRun={selected.length > 0}
-        selectAll={() => undefined}
-        clearAll={() => setSelectedIDs(new Set())}
-      />
+      {piles.length && !scan.data?.detailsUnavailable ? (
+        <List.Section title="Memory" subtitle={memoryLine}>
+          {piles.map((pile) => {
+            const left = pile.apps.filter((app) => !strike.struck.has(app.id));
+            const here = run?.key === pile.key ? run : undefined;
+            const done = receipt?.key === pile.key && !busy ? receipt : undefined;
+            return (
+              <List.Item
+                key={pile.key}
+                id={pile.key}
+                icon={{ source: Icon.CircleFilled, tintColor: pile.color }}
+                title={pile.title}
+                accessories={
+                  done && left.length === 0
+                    ? [
+                        { icon: { source: Icon.CheckCircle, tintColor: pile.color } },
+                        { text: `−${formatCompact(done.bytes)}` },
+                      ]
+                    : [
+                        {
+                          text: pile.apps.length ? formatCompact(left.reduce((sum, app) => sum + app.size, 0)) : "None",
+                        },
+                      ]
+                }
+                detail={
+                  <List.Item.Detail
+                    markdown={pilePicture(pile, piles, used, appearance, {
+                      struck: strike.struck,
+                      gone: strike.gone,
+                      running: here
+                        ? `Quitting · ${here.ids.filter((id) => strike.struck.has(id)).length} of ${here.ids.length}`
+                        : undefined,
+                      receipt: done,
+                    })}
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    {fresh && left.length && pile.key === "idle" ? (
+                      <>
+                        <Action
+                          title="Quit All Idle Apps"
+                          icon={Icon.MemoryChip}
+                          onAction={() => release(pile, left)}
+                        />
+                        <Action.Push
+                          title="Choose Apps"
+                          icon={Icon.List}
+                          shortcut={Keyboard.Shortcut.Common.Open}
+                          target={<ChooseApps pile={pile} preselected onQuit={(apps) => release(pile, apps)} />}
+                        />
+                      </>
+                    ) : fresh && left.length ? (
+                      <Action.Push
+                        title="Choose Apps to Quit"
+                        icon={Icon.List}
+                        target={<ChooseApps pile={pile} preselected={false} onQuit={(apps) => release(pile, apps)} />}
+                      />
+                    ) : null}
+                    <ActionPanel.Section>
+                      {!busy ? (
+                        <Action
+                          title="Look Again"
+                          icon={Icon.ArrowClockwise}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          onAction={lookAgain}
+                        />
+                      ) : null}
+                      <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      ) : null}
     </List>
   );
 }
 
-function MemorySection({
-  title,
-  items,
-  selectedIDs,
-  toggle,
-  run,
-  canRun,
-  selectAll,
-  clearAll,
+function ChooseApps({
+  pile,
+  preselected,
+  onQuit,
 }: {
-  title: string;
-  items: MemoryItem[];
-  selectedIDs: Set<string>;
-  toggle: (item: MemoryItem) => void;
-  run: () => Promise<void>;
-  canRun: boolean;
-  selectAll: () => void;
-  clearAll: () => void;
+  pile: Pile;
+  preselected: boolean;
+  onQuit: (apps: App[]) => Promise<void>;
 }) {
-  if (!items.length) return null;
+  const { pop } = useNavigation();
+  const [chosen, setChosen] = useState<Set<string>>(new Set(preselected ? pile.apps.map((app) => app.id) : []));
+  const picked = pile.apps.filter((app) => chosen.has(app.id));
+  const pickedBytes = picked.reduce((sum, app) => sum + app.size, 0);
+  const toggle = (id: string) =>
+    setChosen((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const quit = async () => {
+    pop();
+    await onQuit(picked);
+  };
   return (
-    <List.Section title={title} subtitle={`${items.length} process group${items.length === 1 ? "" : "s"}`}>
-      {items.map((item) => (
-        <List.Item
-          key={item.id}
-          icon={
-            item.bundlePath
-              ? { fileIcon: item.bundlePath }
-              : {
-                  source: selectedIDs.has(item.id) ? Icon.CheckCircle : item.selectable ? Icon.Circle : Icon.Lock,
-                  tintColor: selectedIDs.has(item.id) ? Color.Green : Color.SecondaryText,
-                }
-          }
-          title={item.name}
-          subtitle={
-            item.agentKind ??
-            item.bundleIdentifier ??
-            `${item.processCount} process${item.processCount === 1 ? "" : "es"}`
-          }
-          accessories={[
-            ...(item.selectable
-              ? [
-                  {
-                    tag: {
-                      value: selectedIDs.has(item.id) ? "Selected" : "Keep Running",
-                      color: selectedIDs.has(item.id) ? Color.Green : Color.SecondaryText,
-                    },
-                  },
-                ]
-              : []),
-            { text: item.sizeHuman ?? formatBytes(item.bytes) },
-            ...(item.advanced ? [{ tag: { value: "Advanced", color: Color.Orange } }] : []),
-            ...(item.needsReview ? [{ tag: { value: "Needs Review", color: Color.Yellow } }] : []),
-          ]}
-          actions={
-            <ActionPanel>
-              {item.selectable ? (
+    <List
+      navigationTitle={picked.length ? `${formatCompact(pickedBytes)} chosen` : pile.title}
+      searchBarPlaceholder={`Search ${pile.title.toLowerCase()} apps`}
+    >
+      {pile.apps.map((app) => {
+        const isChosen = chosen.has(app.id);
+        return (
+          <List.Item
+            key={app.id}
+            icon={appIcon(app, pile.color)}
+            title={app.name}
+            subtitle={app.agentKind ? `running ${app.agentKind}` : undefined}
+            accessories={[
+              { text: formatCompact(app.size) },
+              {
+                icon: {
+                  source: isChosen ? Icon.CheckCircle : Icon.Circle,
+                  tintColor: isChosen ? Color.PrimaryText : Color.SecondaryText,
+                },
+              },
+            ]}
+            actions={
+              <ActionPanel>
                 <Action
-                  title={selectedIDs.has(item.id) ? "Keep Running" : "Select for Release"}
-                  icon={selectedIDs.has(item.id) ? Icon.XMarkCircle : Icon.CheckCircle}
-                  onAction={() => toggle(item)}
+                  title={isChosen ? "Unchoose" : "Choose"}
+                  icon={isChosen ? Icon.Circle : Icon.CheckCircle}
+                  onAction={() => toggle(app.id)}
                 />
-              ) : null}
-              {canRun ? <Action title="Release Selected" icon={Icon.MemoryChip} onAction={run} /> : null}
-              <ActionPanel.Section>
-                <Action title="Select All Releasable" icon={Icon.Checkmark} onAction={selectAll} />
-                <Action title="Deselect All" icon={Icon.Circle} onAction={clearAll} />
-                {item.bundlePath ? <Action.ShowInFinder path={item.bundlePath} /> : null}
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List.Section>
+                {picked.length ? (
+                  <Action
+                    title={`Quit ${plural(picked.length, "App")}`}
+                    icon={Icon.MemoryChip}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    onAction={quit}
+                  />
+                ) : null}
+                {app.bundlePath ? (
+                  <Action.ShowInFinder path={app.bundlePath} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+                ) : null}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
   );
+}
+
+function appIcon(app: App, color: string): Image.ImageLike {
+  return app.bundlePath ? { fileIcon: app.bundlePath } : { source: Icon.Terminal, tintColor: color };
 }

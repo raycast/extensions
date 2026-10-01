@@ -1,11 +1,15 @@
-import { execFile, spawnSync } from "node:child_process";
+import { execFile, spawn, spawnSync } from "node:child_process";
 import { existsSync, realpathSync } from "node:fs";
 import { homedir } from "node:os";
 
 export const MINT_TEAM_ID = "DRV5ZMT5U8";
 export const MINIMUM_SCHEMA_VERSION = 2;
 
-const REQUIRED_CAPABILITIES = ["scan-lite.v1", "status.v1", "why.v1", "surface.v1", "agents.v1"];
+// cli.native.v1 is where Organize and Optimize reach the surface (Mint 1.0.72).
+const REQUIRED_CAPABILITIES = ["scan-lite.v1", "status.v1", "why.v1", "surface.v1", "agents.v1", "cli.native.v1"];
+export const MINT_BUNDLE_ID = "com.mint.app";
+export const MINT_DOWNLOAD_URL = "https://mintstorage.app/r/raycast-download";
+export const MINT_WEBSITE_URL = "https://mintstorage.app/r/raycast";
 const SIGNING_REQUIREMENT = `=anchor apple generic and identifier "mint-cli" and certificate leaf[subject.OU] = "${MINT_TEAM_ID}"`;
 const inFlightSurfaceRequests = new Map<string, Promise<MintSurfaceResponse>>();
 
@@ -43,6 +47,11 @@ export type MintSurfaceRequest = {
   allowAdvanced?: boolean;
   allowAdmin?: boolean;
   confirmed?: boolean;
+  permanent?: boolean;
+  confirmReview?: boolean;
+  mode?: string;
+  /** Mint 1.0.81 writes this request's progress to a file named by it. */
+  progressToken?: string;
 };
 
 export type MintSurfaceResponse = MintCommandEnvelope & {
@@ -159,26 +168,6 @@ export function parseMintCommandJSON<T extends object>(
   return payload as T & MintCommandEnvelope;
 }
 
-/**
- * `mint-cli agents --json` deliberately mirrors the MCP tool payload instead
- * of the command-envelope format. The CLI signature is verified before it is
- * run; this structural check keeps the Raycast view fail-closed as the payload
- * evolves.
- */
-export function parseMintAgentsJSON<T extends object>(
-  value: string | undefined,
-): (T & { available: boolean }) | undefined {
-  const payload = parseJSON<Record<string, unknown>>(value);
-  if (!payload || typeof payload.available !== "boolean") return undefined;
-  if (
-    payload.available &&
-    (!Array.isArray(payload.tools) || typeof payload.totalBytes !== "number" || !Number.isFinite(payload.totalBytes))
-  ) {
-    return undefined;
-  }
-  return payload as T & { available: boolean };
-}
-
 export function runMintSurface<T extends object>(
   cliPath: string,
   request: Omit<MintSurfaceRequest, "schemaVersion">,
@@ -226,13 +215,30 @@ export function runMintSurface<T extends object>(
   return operation;
 }
 
+/**
+ * Sizes the way Mint writes them: decimal units, as Finder and the app do, so
+ * a number here matches the same number in Mint's window.
+ */
 export function formatBytes(bytes = 0): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
 
   const units = ["B", "KB", "MB", "GB", "TB"];
-  const unit = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-  const value = bytes / 1024 ** unit;
-  return `${value.toFixed(value >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`;
+  const decimals = [0, 0, 1, 2, 2];
+  const unit = Math.min(Math.floor(Math.log10(bytes) / 3), units.length - 1);
+  const value = bytes / 1000 ** unit;
+  const rounded = Number(value.toFixed(decimals[unit]));
+  // 999.96 MB rounds to 1000 MB; say 1 GB instead.
+  if (rounded >= 1000 && unit < units.length - 1) return formatBytes(1000 ** (unit + 1));
+  return `${rounded} ${units[unit]}`;
+}
+
+/** The menu bar dropdown's sizes (formatBytesCompact): one decimal for GB. */
+export function formatCompact(bytes = 0): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
+  if (bytes >= 1e6) return `${Math.round(bytes / 1e6)} MB`;
+  if (bytes >= 1e3) return `${Math.round(bytes / 1e3)} KB`;
+  return `${Math.round(bytes)} B`;
 }
 
 export function formatSignedBytes(bytes = 0): string {
@@ -248,4 +254,15 @@ export function shortPath(path: string, home = homedir()): string {
   if (!home) return path;
   if (path === home) return "~";
   return path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
+}
+
+export function plural(count: number, one: string, many = `${one}s`): string {
+  return `${count.toLocaleString("en-US")} ${count === 1 ? one : many}`;
+}
+
+/** Opens Mint by its bundle identifier, wherever it is installed. */
+export function openMint(): void {
+  const child = spawn("/usr/bin/open", ["-b", MINT_BUNDLE_ID], { detached: true, stdio: "ignore" });
+  child.on("error", () => undefined);
+  child.unref();
 }
