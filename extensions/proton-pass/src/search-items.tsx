@@ -24,7 +24,10 @@ import { platformShortcut } from "./lib/shortcuts";
 // Raycast's markdown renderer shows backslash escapes literally in some contexts (e.g. "example\\.com"),
 // so only escape characters that actually change inline rendering, plus block markers at line start.
 function escapeMarkdown(value: string): string {
-  return value.replace(/([\\`*_[\]<>|])/g, "\\$1").replace(/^(\s*)([#>+-]|\d+\.)(?=\s)/gm, "$1\\$2");
+  return value
+    .replace(/([\\`*_[\]<>|])/g, "\\$1")
+    .replace(/^(\s*)([#>+-])(?=\s)/gm, "$1\\$2")
+    .replace(/^(\s*\d+)\.(?=\s)/gm, "$1\\.");
 }
 
 function originOf(raw?: string): string | undefined {
