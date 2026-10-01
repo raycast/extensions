@@ -5,7 +5,7 @@
   "author": "Tumerit",
   "icon": "icon.png",
   "platforms": ["macOS"],
-  "categories": ["System", "Productivity", "Other"],
+  "categories": ["System", "Productivity"],
   "license": "MIT",
   "commands": [
     { "name": "get-tethered", "title": "Get Tethered", "description": "Open the Tethered website to download the Mac app", "mode": "no-view" },
