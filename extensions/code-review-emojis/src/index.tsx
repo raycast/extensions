@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Keyboard, getPreferenceValues } from "@raycast/api";
 
 interface EMOJI {
   icon: string;
@@ -50,8 +50,10 @@ const EMOJIS: EMOJI[] = [
 ];
 
 export default function Command() {
+  const { primaryAction } = getPreferenceValues<Preferences>();
+
   return (
-    <List searchBarPlaceholder="Search Emojis">
+    <List searchBarPlaceholder="Search emojis…">
       <List.Section title="Emojis">
         {EMOJIS.map((emoji) => (
           <List.Item
@@ -60,23 +62,30 @@ export default function Command() {
             title={emoji.title}
             actions={
               <ActionPanel>
-                <Action.Paste content={emoji.icon} />
+                <ActionPanel.Section>
+                  {primaryAction === "copy" ? (
+                    <>
+                      <Action.CopyToClipboard content={emoji.icon} />
+                      <Action.Paste content={emoji.icon} />
+                    </>
+                  ) : (
+                    <>
+                      <Action.Paste content={emoji.icon} />
+                      <Action.CopyToClipboard content={emoji.icon} />
+                    </>
+                  )}
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    title="Open Code Review Emoji Guide"
+                    url="https://github.com/erikthedeveloper/code-review-emoji-guide"
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
         ))}
-      </List.Section>
-      <List.Section title="More">
-        <List.Item
-          key={"📘"}
-          icon={"📘"}
-          title={"Open Code Review Emoji Guide"}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url="https://github.com/erikthedeveloper/code-review-emoji-guide" />
-            </ActionPanel>
-          }
-        />
       </List.Section>
     </List>
   );

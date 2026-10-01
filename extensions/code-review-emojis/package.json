@@ -19,15 +19,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.2"
+    "@raycast/api": "^2.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -35,5 +35,34 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "muhammadrizo"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "description": "The action to perform when selecting an item",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Paste",
+          "value": "paste"
+        },
+        {
+          "title": "Copy",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
+  "allowScripts": {
+    "esbuild": true
   }
 }
