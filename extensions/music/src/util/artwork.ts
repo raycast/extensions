@@ -14,8 +14,8 @@ const MAX_CACHED_FILES = 50;
 // Short on purpose: right after a skip Music often has not loaded the new
 // track's artwork yet, so a miss must not stick for long.
 const MISS_TTL_MS = 15 * 1000;
-// A leftover .raw means an extraction was interrupted. Real ones finish in seconds.
-const STALE_RAW_MS = 60 * 1000;
+// A leftover .raw or .tmp means an extraction was interrupted. Real ones finish in seconds.
+const STALE_TEMP_MS = 60 * 1000;
 // Reusing a cached cover refreshes its age so pruning drops the least recently
 // played albums first. Skipped when recent, to avoid a write on every poll.
 const TOUCH_AFTER_MS = 60 * 1000;
@@ -35,24 +35,41 @@ function ageMs(file: string): number {
 }
 
 function prune(): void {
+  let names: string[];
   try {
-    const names = fs.readdirSync(artworkDir);
-
-    // Expired misses and interrupted extractions are just clutter.
-    for (const name of names) {
-      const limit = name.endsWith(".miss") ? MISS_TTL_MS : name.endsWith(".raw") ? STALE_RAW_MS : undefined;
-      if (limit === undefined) continue;
-      const file = path.join(artworkDir, name);
-      if (ageMs(file) > limit) fs.rmSync(file, { force: true });
-    }
-
-    const covers = names
-      .filter((f) => f.endsWith(".png"))
-      .map((f) => ({ f, t: fs.statSync(path.join(artworkDir, f)).mtimeMs }))
-      .sort((a, b) => b.t - a.t);
-    for (const { f } of covers.slice(MAX_CACHED_FILES)) fs.rmSync(path.join(artworkDir, f), { force: true });
+    names = fs.readdirSync(artworkDir);
   } catch {
-    // best effort
+    return;
+  }
+
+  // Each file is handled on its own, so one that vanishes mid-scan (another
+  // run pruning or renaming) doesn't abort the rest of the cleanup.
+  const covers: { file: string; age: number }[] = [];
+  for (const name of names) {
+    const file = path.join(artworkDir, name);
+    try {
+      const age = ageMs(file);
+      if (name.endsWith(".png")) {
+        covers.push({ file, age });
+      } else if (name.endsWith(".miss")) {
+        // Expired misses are just clutter.
+        if (age > MISS_TTL_MS) fs.rmSync(file, { force: true });
+      } else if (name.endsWith(".raw") || name.endsWith(".tmp")) {
+        // Leftovers from interrupted extractions.
+        if (age > STALE_TEMP_MS) fs.rmSync(file, { force: true });
+      }
+    } catch {
+      // skip it
+    }
+  }
+
+  covers.sort((x, y) => x.age - y.age);
+  for (const { file } of covers.slice(MAX_CACHED_FILES)) {
+    try {
+      fs.rmSync(file, { force: true });
+    } catch {
+      // best effort
+    }
   }
 }
 
@@ -69,24 +86,30 @@ function useCachedCover(file: string): boolean {
   }
 }
 
-async function extract(key: string, artist: string, album: string): Promise<string | undefined> {
+async function extract(key: string, artist: string, album: string, name: string): Promise<string | undefined> {
   const finalPath = path.join(artworkDir, `${key}.png`);
   const missPath = path.join(artworkDir, `${key}.miss`);
-  const rawPath = path.join(artworkDir, `${key}.raw`);
+  // Unique per run, so overlapping refreshes never share temp files.
+  const tag = `${process.pid}-${Date.now()}`;
+  const rawPath = path.join(artworkDir, `${key}.${tag}.raw`);
+  const tmpPath = path.join(artworkDir, `${key}.${tag}.tmp`);
 
-  // Writes the artwork's original bytes to disk. The cache key is artist +
-  // album, so both must still match: otherwise the track changed since the
-  // snapshot and we could cache the wrong cover under this key.
+  // Writes the artwork's original bytes to disk. Everything the cache key is
+  // built from must still match (artist + album, or artist + track name when
+  // there is no album): otherwise the track changed since the snapshot and we
+  // could cache the wrong cover under this key.
   const result = await runAppleScript(
     `
     on run argv
       set rawPath to item 1 of argv
       set expectedArtist to item 2 of argv
       set expectedAlbum to item 3 of argv
+      set expectedName to item 4 of argv
       tell application "Music"
         if player state is stopped then return "none"
         set t to current track
         if (artist of t) is not expectedArtist or (album of t) is not expectedAlbum then return "mismatch"
+        if expectedAlbum is "" and (name of t) is not expectedName then return "mismatch"
         if (count of artworks of t) is 0 then return "none"
         set d to raw data of artwork 1 of t
       end tell
@@ -104,7 +127,7 @@ async function extract(key: string, artist: string, album: string): Promise<stri
       return "ok"
     end run
   `,
-    [rawPath, artist, album],
+    [rawPath, artist, album, name],
     { timeout: 5_000 },
   ).catch(() => "none");
 
@@ -121,13 +144,16 @@ async function extract(key: string, artist: string, album: string): Promise<stri
         String(ICON_PX),
         rawPath,
         "--out",
-        finalPath,
+        tmpPath,
       ]);
+      // Rename is atomic on the same volume, so readers never see a partial PNG.
+      fs.renameSync(tmpPath, finalPath);
       return finalPath;
     } catch {
       // fall through to recording a miss
     } finally {
       fs.rmSync(rawPath, { force: true });
+      fs.rmSync(tmpPath, { force: true });
     }
   }
 
@@ -155,7 +181,7 @@ export async function getArtworkPath(artist: string, album: string, name: string
   if (pending) return pending;
 
   fs.mkdirSync(artworkDir, { recursive: true });
-  const job = extract(key, artist, album).finally(() => {
+  const job = extract(key, artist, album, name).finally(() => {
     inFlight.delete(key);
     prune();
   });
