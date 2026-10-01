@@ -52,13 +52,13 @@ pass-cli vault list
 - **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
 - **Default Password Length**: Length for generated passwords (default: 20)
 - **Default Password Type**: Random characters or memorable passphrase
-- **Transient Clipboard**: Keep copied passwords and 2FA codes out of Raycast's clipboard history
+- **Transient Clipboard**: Keep copied passwords and 2FA codes out of clipboard history
 - **Primary Action**: What Enter does on a login: copy the password (default), or fill the login (macOS)
 - **Submit After Filling**: Press Return after filling the password (off by default)
-- **Background Refresh**: Automatically refresh cached vault and item data
-- **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
-- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
-- **Website Icons**: Show website icons for logins instead of their initials. Icons come from the favicon provider set in Raycast's settings, which receives the website domains (off by default)
+- **Background Refresh**: Refresh items in the background, even when the cache is still fresh
+- **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
+- **Web Integration**: Suggest logins for the active browser tab (requires the Raycast browser extension)
+- **Website Icons**: Show website icons instead of initials, from Raycast's favicon provider, which receives the domains (off by default)
 
 ## Filling Logins (macOS)
 

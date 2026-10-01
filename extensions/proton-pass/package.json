@@ -94,7 +94,7 @@
       "type": "checkbox",
       "title": "Transient Clipboard",
       "label": "Keep copied secrets out of clipboard history",
-      "description": "When enabled, copied passwords and 2FA codes aren't recorded in Raycast's clipboard history",
+      "description": "Applies to passwords and 2FA codes.",
       "default": true,
       "required": false
     },
@@ -102,7 +102,7 @@
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
-      "description": "What Enter does on a login. Fill Login pastes the email (or the username) and the password into the app you were using (macOS), so only use it with the cursor in a login field.",
+      "description": "What Enter does on a login. Fill Login pastes into the app you were using.",
       "default": "copy",
       "required": false,
       "data": [
@@ -120,8 +120,8 @@
       "name": "submitAfterFill",
       "type": "checkbox",
       "title": "Submit After Filling",
-      "label": "Press Return after filling the password",
-      "description": "When enabled, Fill Login also submits the login form.",
+      "label": "Press Return after the password",
+      "description": "Submits the login form after Fill Login.",
       "default": false,
       "required": false
     },
@@ -129,8 +129,8 @@
       "name": "enableBackgroundRefresh",
       "type": "checkbox",
       "title": "Background Refresh",
-      "label": "Automatically refresh cached vault and item data",
-      "description": "When enabled, cached results will refresh in the background",
+      "label": "Refresh items in the background",
+      "description": "Even when the cache is still fresh.",
       "default": true,
       "required": false
     },
@@ -138,7 +138,7 @@
       "name": "cacheExpiration",
       "type": "dropdown",
       "title": "Cache Expiration",
-      "description": "How long cached metadata is considered fresh. Older data is still shown instantly while it refreshes in the background.",
+      "description": "How long cached items stay fresh.",
       "default": "5",
       "required": false,
       "data": [
@@ -172,8 +172,8 @@
       "name": "enableWebIntegration",
       "type": "checkbox",
       "title": "Web Integration",
-      "label": "Match active browser tab URL in Search Items",
-      "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
+      "label": "Suggest logins for the active browser tab",
+      "description": "Requires the Raycast browser extension.",
       "default": true,
       "required": false
     },
@@ -181,8 +181,8 @@
       "name": "showWebsiteIcons",
       "type": "checkbox",
       "title": "Website Icons",
-      "label": "Show website icons for logins",
-      "description": "Shows icons from the favicon provider set in Raycast's settings, which receives the website domains of your logins (not your usernames or passwords). When disabled, logins show their initials.",
+      "label": "Show website icons",
+      "description": "Fetched from Raycast's favicon provider, which receives the domains.",
       "default": false,
       "required": false
     }
