@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { moveCurrentTab, readCurrentTab, SourceTab } from "./util/chrome";
 import { extractProfiles, filterProfiles, readChromeLocalState } from "./util/profiles";
-import { getSelectedBrowser, Profile } from "./util/types";
+import { getSelectedBrowser, showDoneHUD, Profile } from "./util/types";
 import { isValidUrl } from "./util/util";
 
 export default function Command() {
@@ -21,7 +21,7 @@ export default function Command() {
     setLoading(true);
     try {
       await moveCurrentTab(tab, destination, browser, allProfiles);
-      await showHUD(`Moved tab to ${destination.name}`);
+      await showDoneHUD(`Moved tab to ${destination.name}`);
     } catch (error) {
       await showToast(
         Toast.Style.Failure,

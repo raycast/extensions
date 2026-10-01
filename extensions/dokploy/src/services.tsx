@@ -19,6 +19,7 @@ import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
 import ServiceSchedules from "./service-schedules";
+import { OpenWebsiteAction } from "./open-website";
 import Templates from "./templates";
 import { DatabaseActions } from "./database-actions";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
@@ -315,6 +316,14 @@ export default function Services({
                       icon={Icon.Clock}
                       title="View Schedules"
                       target={<ServiceSchedules service={{ ...service, type: service.type }} />}
+                    />
+                  )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <OpenWebsiteAction
+                      service={{ id: service.id, type: service.type, name: service.name }}
+                      url={url}
+                      headers={headers}
+                      onOpen={() => void visitItem(service)}
                     />
                   )}
                 </ActionPanel.Section>

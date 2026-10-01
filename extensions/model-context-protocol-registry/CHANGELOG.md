@@ -1,5 +1,29 @@
 # Model Context Protocol Registry Changelog
 
+## [Add 60fps MCP Server] - 2026-09-30
+
+- Add 60fps to the official registry: real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server at https://mcp.60fps.design/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key.
+
+## [Add Better Design MCP Server] - 2026-09-30
+
+- Add Better Design to the official registry: design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server at https://better-design.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key.
+
+## [Add GitDiagram MCP Server] - 2026-09-30
+
+- Add GitDiagram to the official registry: architecture diagrams of public GitHub repositories, with a written explanation of how a codebase is organized, its main components with their source paths, how they connect, and Mermaid source, plus a search of GitDiagram's existing diagrams and explainer-video transcripts. Read-only remote Streamable HTTP server at https://gitdiagram.com/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add Opus Growth MCP Server] - 2026-09-30
+
+- Add Opus Growth to the community registry: manage advertising from chat across Google, Meta, Microsoft, TikTok and LinkedIn (campaigns, ad groups, creatives, audiences, bidding, keywords and extensions), plus reporting and SEO with Search Console, GA4, GTM, Google Business Profile and YouTube. Hosted remote Streamable HTTP server at https://mcp.opus-growth.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
+## [Add Recordist] - 2026-09-30
+
+- Add Recordist community entry (`@recordist/gateway`): search and read the meetings recorded on your own computer.
+
+## [Add AudioPod AI MCP Server] - 2026-09-30
+
+- Add AudioPod AI to the official registry: text-to-speech in 200+ languages, voice cloning and conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server at https://mcp.audiopod.ai through `mcp-remote`, authenticated with an AudioPod API key.
+
 ## [Add apMZoomAI Dongdaemun Wholesale MCP Server] - 2026-09-27
 
 - Add apMZoomAI · Dongdaemun Wholesale to the official registry: search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, and find stalls by building, floor and stall number, with links to each item or stall on apMZoomAI, in eight languages. Read-only; no prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in, no API key.

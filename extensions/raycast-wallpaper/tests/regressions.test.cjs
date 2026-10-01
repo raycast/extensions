@@ -200,6 +200,63 @@ test("auto switch propagates native failures", async () => {
   await assert.rejects(platform.autoSetWallpaper(wallpaper), /Native failure/);
 });
 
+test("AI wallpaper setting awaits the converted file and honors its monitor override", async () => {
+  let downloaded = false;
+  const platform = loadSource(
+    "src/utils/platform-utils.ts",
+    {
+      "@raycast/api": {},
+      "@raycast/utils": {},
+      "./common-utils": {
+        cachePicture: async () => {
+          await new Promise((resolve) => setImmediate(resolve));
+          downloaded = true;
+          return "C:/converted.jpg";
+        },
+      },
+      "../types/preferences": { applyTo: "every" },
+      "rust:../../rust": {
+        set_wallpaper: async (file, mode) => {
+          assert.equal(downloaded, true);
+          assert.equal(file, "C:\\converted.jpg");
+          assert.equal(mode, "current");
+          return "ok";
+        },
+      },
+    },
+    "win32",
+  );
+  await platform.applyWallpaper(wallpaper, "current");
+  await assert.rejects(platform.applyWallpaper(wallpaper, "invalid"), /Invalid monitor/);
+});
+
+test("AI wallpaper setting propagates download and native failures", async () => {
+  let downloadFails = true;
+  const platform = loadSource(
+    "src/utils/platform-utils.ts",
+    {
+      "@raycast/api": {},
+      "@raycast/utils": {},
+      "./common-utils": {
+        cachePicture: async () => {
+          if (downloadFails) throw new Error("Download failed");
+          return "C:/converted.jpg";
+        },
+      },
+      "../types/preferences": {},
+      "rust:../../rust": {
+        set_wallpaper: async () => {
+          throw new Error("Monitor unavailable");
+        },
+      },
+    },
+    "win32",
+  );
+  await assert.rejects(platform.applyWallpaper(wallpaper, "current"), /Download failed/);
+  downloadFails = false;
+  await assert.rejects(platform.applyWallpaper(wallpaper, "current"), /Monitor unavailable/);
+});
+
 test("auto switch records refresh time only after a successful wallpaper change", async (t) => {
   t.mock.method(console, "error", () => {});
   const store = new Map([["Raycast_Wallpapers_List_Cache", JSON.stringify([pngWallpaper])]]);

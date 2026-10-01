@@ -1,5 +1,27 @@
 # Digger Changelog
 
+## [SVG extraction, and faster access to Well-Known files and color tokens] - 2026-10-01
+
+### Added
+
+- **View All SVGs** in Resources & Assets — the SVGs in a page's HTML: inline,
+  sprite symbols rebuilt as standalone files, `<img>`, `<object>`, favicons, and
+  in-page CSS `url()`. Copy as SVG, Copy as PNG on macOS, or Export as SVG.
+- Preview SVGs on a white, black or gray backdrop (⇧⌘B) so logos drawn in black or
+  white stay readable, and Quick Look any SVG with ⌘Y.
+
+### Changed
+
+- Image thumbnails and the site's favicon now download through Digger's network
+  check before they are shown, so a page cannot make Raycast request an address on
+  your local network.
+- The Images, Fonts, Stylesheets and Scripts blocks in Resources & Assets each show
+  their own icon — image, text, swatch, code — green when the dig found some and red
+  when it found none.
+- Pressing Enter on the Well-Known and Theme sections now opens their file and
+  token lists, instead of reopening the site you just dug in a browser, which did
+  nothing specific to either section. Open in Browser is still in the action panel.
+
 ## [Well-Known files, Theme colors, and resource exports] - 2026-09-11
 
 ### Added

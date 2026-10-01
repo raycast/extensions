@@ -34,12 +34,20 @@ async function setWallpaperWindows(path: string, applyTo: string) {
 }
 
 export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
+  await applyWallpaper(wallpaper, applyTo);
+};
+
+export async function applyWallpaper(wallpaper: RaycastWallpaper, monitor: string) {
+  if (monitor !== "current" && monitor !== "every") {
+    throw new Error("Invalid monitor. Use current or every.");
+  }
+
   const actualPath = await cachePicture(wallpaper);
   const result = await (process.platform === "win32"
-    ? setWallpaperWindows(actualPath, applyTo)
-    : setWallpaperMacOS(actualPath, applyTo));
+    ? setWallpaperWindows(actualPath, monitor)
+    : setWallpaperMacOS(actualPath, monitor));
   if (result !== "ok") throw new Error("Error setting wallpaper.");
-};
+}
 
 export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");

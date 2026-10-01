@@ -6,7 +6,7 @@
 
 This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each **instance** you can:
 
-- View Projects (sorted by frecency)
+- View Projects (sorted by frecency, with each project's tags; search by tag name or Filter by Tag)
     - View Services (sorted by frecency)
         - Create Application
         - Create Database
@@ -42,11 +42,17 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Run Now
             - View Runs
             - Delete Schedule
+        - Open Website (Applications and Compose stacks)
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
+    - Edit Tags (add or remove a project's tags, Create Tag)
     - View Docker (Containers, sorted by frecency)
         - View Docker Config
+        - Restart / Start / Stop / Kill Container
+        - Browse Files (running containers, read-only)
+        - Remove Container
         - Docker Cleanup (disk usage, clean stopped containers/unused images/unused volumes/build cache, full prune)
+        - Docker Events (recent events on the server, 5 minutes to 24 hours)
     - View S3 Destinations
         - Delete S3 Destination
     - View Users
@@ -55,12 +61,14 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Logs
+        - Open Website (Applications and Compose stacks)
 - Deployments
     - See the most recent deployment of every deployed Application and Compose stack across every configured instance, sorted by recency.
         - View Deployments (full history: Roll Back, Cancel, Delete, Stop Running Builds, Cancel Queued Deployments)
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Logs
+        - Open Website
 - Server Health (menu bar)
     - See disk/memory/container status for every configured instance from the menu bar, with the icon tinting red when any instance's disk usage crosses a configurable threshold.
 - AI Tools (read-only): List Instances, List Projects, List Services, Get Service, Get Service Logs, List Deployments, Get Deployment Logs

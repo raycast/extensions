@@ -1,5 +1,10 @@
 # Coffee Changelog
 
+## [Fix] - 2026-09-29
+
+- Use cache API to prevent menu bar icon flicker on background update cycles.
+- Keep menu bar item visible until caffeination cache is initialized on startup to avoid flicker.
+
 ## [Fix, Enhancement] - 2026-09-26
 
 - Keep the empty pot icon visible in the menu bar for 5 seconds after decaffeinating before hiding, preserving the decaffeinated state across Raycast restarts.

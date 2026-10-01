@@ -82,7 +82,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.2",
-    "@xmldom/xmldom": "^0.8.10",
+    "@xmldom/xmldom": "^0.8.15",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

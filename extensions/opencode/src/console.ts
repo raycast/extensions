@@ -2,7 +2,8 @@ import { z } from "zod";
 
 const CONFIG_URL = "https://opencode.ai/console/api/config";
 const MANAGED_URL = "https://opencode.ai/inference/openai/v1";
-const TOKEN_PLACEHOLDER = "{env:OPENCODE_CONSOLE_TOKEN}";
+
+export type Format = "anthropic" | "openai" | "google" | "openai-compatible";
 
 const Model = z.object({
   id: z.string().optional(),
@@ -11,21 +12,18 @@ const Model = z.object({
   tool_call: z.boolean().optional(),
   modalities: z.object({ input: z.array(z.string()) }).optional(),
   cost: z.object({ input: z.number(), output: z.number() }).optional(),
-  limit: z.object({ context: z.number() }).optional(),
-  provider: z.object({ npm: z.string().optional(), api: z.string().optional() }).optional(),
+  limit: z.object({ context: z.number(), output: z.number().optional() }).optional(),
+  provider: z.object({ npm: z.string().optional() }).optional(),
   disabled: z.boolean().optional(),
 });
 
 const Provider = z.object({
   npm: z.string(),
   api: z.string(),
-  options: z.object({ headers: z.record(z.string(), z.string()).optional() }).optional(),
   models: z.record(z.string(), Model).optional(),
 });
 
 const Config = z.object({ config: z.object({ provider: z.record(z.string(), Provider) }) });
-
-export type ConsoleModel = Awaited<ReturnType<typeof loadModels>>[number];
 
 export async function loadModels(apiKey: string) {
   const response = await fetch(CONFIG_URL, {
@@ -43,17 +41,15 @@ export async function loadModels(apiKey: string) {
       Object.entries(provider.models ?? {})
         .filter(([, model]) => model.disabled !== true && !isFree(model))
         .map(([modelKey, model]) => ({
-          id: modelKey,
-          apiModelID: model.id ?? modelKey,
+          id: model.id ?? modelKey,
           title: model.name ?? modelKey,
           price: model.cost,
-          package: model.provider?.npm ?? provider.npm,
-          baseURL: model.provider?.api ?? provider.api,
-          headers: withToken(provider.options?.headers ?? {}, apiKey),
+          format: toFormat(model.provider?.npm ?? provider.npm),
           temperature: model.temperature !== false,
           tools: model.tool_call ?? false,
           vision: model.modalities?.input.includes("image") ?? false,
           contextWindow: model.limit?.context,
+          outputLimit: model.limit?.output,
         })),
     );
 }
@@ -63,8 +59,9 @@ function isFree(model: z.infer<typeof Model>) {
   return model.cost !== undefined && model.cost.input === 0 && model.cost.output === 0;
 }
 
-function withToken(values: Record<string, string>, apiKey: string) {
-  return Object.fromEntries(
-    Object.entries(values).map(([key, value]) => [key, value.replaceAll(TOKEN_PLACEHOLDER, apiKey)]),
-  );
+function toFormat(npm: string): Format {
+  if (npm === "@ai-sdk/anthropic") return "anthropic";
+  if (npm === "@ai-sdk/openai") return "openai";
+  if (npm === "@ai-sdk/google") return "google";
+  return "openai-compatible";
 }

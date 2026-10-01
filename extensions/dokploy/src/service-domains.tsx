@@ -18,12 +18,12 @@ import { useComposeContainers } from "./compose-containers";
 import { Domain, ErrorResult } from "./interfaces";
 
 // Only applications and compose stacks can have a domain; the five database kinds cannot.
-type DomainableKind = "application" | "compose";
-const ENDPOINTS: Record<DomainableKind, string> = {
+export type DomainableKind = "application" | "compose";
+export const ENDPOINTS: Record<DomainableKind, string> = {
   application: "domain.byApplicationId",
   compose: "domain.byComposeId",
 };
-const ID_FIELDS: Record<DomainableKind, string> = {
+export const ID_FIELDS: Record<DomainableKind, string> = {
   application: "applicationId",
   compose: "composeId",
 };

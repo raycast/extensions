@@ -1,6 +1,6 @@
 import { CACHE_SCHEMA } from "./cacheSchema";
 
-/** See CACHE.SALT. Bump this string when behaviour changes but types do not. */
+/** See CACHE.SALT. Bump this string when behavior changes but types do not. */
 const CACHE_SALT = "1";
 
 /**
@@ -31,8 +31,17 @@ export const TIMEOUTS = {
   WELL_KNOWN_TOTAL: 20000,
   /** One conditional GET of the IANA registry CSV. Off the dig's critical path. */
   REGISTRY_FETCH: 8000,
-  /** One stylesheet fetched for its colour tokens. */
+  /** One stylesheet fetched for its color tokens. */
   STYLESHEET: 6000,
+  /** The whole document, re-fetched for "View All SVGs". The dig stops at
+   *  `</head>`; this reads the body too, so it gets a larger budget. */
+  FULL_PAGE: 20000,
+  /** One external SVG file: a sprite sheet, or an `<img>` source being copied. */
+  SVG_FILE: 8000,
+  /** One page-referenced image downloaded for display (a thumbnail, a favicon). */
+  IMAGE_FETCH: 8000,
+  /** Rasterizing one SVG to PNG through AppKit. Measured at ~0.1s. */
+  SVG_RASTER: 10000,
 } as const;
 
 /**
@@ -64,7 +73,7 @@ export const CACHE = {
    * the defect. Derive it instead. See scripts/cache-schema.mjs.
    */
   /**
-   * Bumped BY HAND when behaviour changes but the shape does not.
+   * Bumped BY HAND when behavior changes but the shape does not.
    *
    * The hash cannot see this case, and pretending otherwise is worse than
    * admitting it: correcting a classifier to report "unavailable" where it used
@@ -108,7 +117,7 @@ export const LIMITS = {
    *  XML declaration or an opening brace; far short of downloading the file. */
   SNIFF_BYTES: 1024,
   /** Simultaneous `/.well-known/` probes. The catalog is ~110 paths and firing
-   *  them all at once is scanner behaviour; a cap keeps one dig comparable to
+   *  them all at once is scanner behavior; a cap keeps one dig comparable to
    *  loading an ordinary web page. */
   WELL_KNOWN_CONCURRENCY: 10,
   /** Rows an export will build from one resource. A sitemap's size is the
@@ -129,6 +138,29 @@ export const LIMITS = {
    *  pathological site cannot run forever. */
   MAX_STYLESHEETS_DEEP: 40,
   MAX_THEME_TOKENS_DEEP: 2000,
+  /** Bytes of the full document read for "View All SVGs". linear.app is 1.3MB;
+   *  the cap exists so an endless stream cannot hold the view open. */
+  MAX_PAGE_BYTES: 8 * 1024 * 1024,
+  /** SVGs listed in one grid. linear.app yields ~440 after dedupe. Nothing here
+   *  is cached — it only bounds the grid for a pathological page. */
+  MAX_SVG_ASSETS: 1000,
+  /** External sprite files read per view. Pages reference one or two. */
+  MAX_SPRITE_FILES: 10,
+  /** Bytes read from one external SVG. A file cut off mid-way is broken markup,
+   *  so exceeding this fails the read rather than returning half a file. */
+  MAX_SVG_FILE_BYTES: 4 * 1024 * 1024,
+  /** File-backed SVGs downloaded for grid thumbnails. Pages link a handful; past
+   *  this, tiles show a placeholder rather than the grid fetching without end. */
+  MAX_REMOTE_SVGS: 60,
+  /** Simultaneous thumbnail downloads. */
+  REMOTE_SVG_CONCURRENCY: 6,
+  /** Page-referenced images downloaded for display, and how many at once. */
+  MAX_GUARDED_IMAGES: 100,
+  IMAGE_CONCURRENCY: 6,
+  /** Bytes read from one displayed image. Open Graph images run to a few MB. */
+  MAX_IMAGE_BYTES: 10 * 1024 * 1024,
+  /** Longest side, in pixels, of a PNG made by Copy as PNG. */
+  SVG_PNG_SIZE: 1024,
 } as const;
 
 /**

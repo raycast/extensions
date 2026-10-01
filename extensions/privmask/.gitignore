@@ -1,0 +1,10 @@
+node_modules
+raycast-env.d.ts
+.eslintcache
+dist
+
+# Build output from `ray build` / `ray develop`
+assets/compiled_raycast_swift
+swift/*/.raycast-swift-build
+swift/*/.build
+swift/*/.swiftpm
