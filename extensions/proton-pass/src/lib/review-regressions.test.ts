@@ -48,16 +48,17 @@ function actions(element: unknown): Element["props"][] {
   return [props, ...[props.children].flat().flatMap(actions)];
 }
 
-test("autofill captures the restored external app and rejects Raycast as the target", async () => {
+test("autofill keeps the original external target when closing changes focus and rejects Raycast", async () => {
   const externalApp = { name: "Example", bundleId: "com.example.app" };
+  const otherApp = { name: "Other", bundleId: "com.example.other" };
   const raycast = { name: "Raycast", bundleId: "com.raycast.macos" };
-  for (const restoredApp of [externalApp, raycast, undefined]) {
-    let frontmostApp: typeof externalApp | undefined = raycast;
+  for (const initialApp of [externalApp, raycast, undefined]) {
+    let frontmostApp: typeof externalApp | undefined = initialApp;
     const { getTargetApp } = loadView("autofill.ts", {
       "@raycast/api": {
         PopToRootType: { Suspended: "suspended" },
         closeMainWindow: async () => {
-          frontmostApp = restoredApp;
+          frontmostApp = otherApp;
         },
         getFrontmostApplication: async () => frontmostApp,
       },
@@ -65,7 +66,7 @@ test("autofill captures the restored external app and rejects Raycast as the tar
       "./fill-sequence": fillSequence,
       "./key-press": keyPress,
     }) as unknown as { getTargetApp: () => Promise<typeof externalApp> };
-    if (restoredApp === externalApp) {
+    if (initialApp === externalApp) {
       const target = await getTargetApp();
       assert.equal(target.bundleId, externalApp.bundleId);
       assert.equal(target.name, externalApp.name);
