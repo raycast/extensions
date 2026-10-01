@@ -17,14 +17,7 @@
     {
       "name": "uv-index",
       "title": "UV Index",
-      "subtitle": "Check Now",
       "description": "Shows the current UV index for your city or town. The last reading stays visible next to the command in search.",
-      "mode": "no-view"
-    },
-    {
-      "name": "change-location",
-      "title": "Change UV Location",
-      "description": "Set the city or town the UV index is shown for.",
       "mode": "no-view"
     },
     {

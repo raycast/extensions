@@ -15,8 +15,8 @@ export default function Command() {
       )}
       {error && !data && <MenuBarExtra.Item title="Couldn't get UV index" />}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
-        <MenuBarExtra.Item title="Change City…" icon={Icon.Pin} onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item title="Refresh" onAction={revalidate} />
+        <MenuBarExtra.Item title="Change City" onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
