@@ -18,7 +18,8 @@
     "xmok",
     "byheaven",
     "christianmagill",
-    "ray.dhruv"
+    "ray.dhruv",
+    "stillo"
   ],
   "license": "MIT",
   "keywords": [
@@ -306,6 +307,14 @@
           "description": "If enabled, the icon in the Menu Bar will be hidden when Music is not running or when nothing is playing",
           "type": "checkbox",
           "label": "Hide icon when idle",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showAlbumArt",
+          "description": "If enabled, the current track's album art replaces the Music icon in the Menu Bar",
+          "type": "checkbox",
+          "label": "Show album art",
           "default": false,
           "required": false
         },

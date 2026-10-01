@@ -1,15 +1,17 @@
-import { getPreferenceValues, Icon, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, Icon, Image, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
+import fs from "node:fs";
 import { useEffect, useState } from "react";
 
 import * as music from "./util/scripts";
+import { getArtworkPath } from "./util/artwork";
 import { PlayerState } from "./util/models";
 import { formatTitle } from "./util/track";
 import { handleTaskEitherError } from "./util/utils";
 
-const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
+const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle, showAlbumArt } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
@@ -46,6 +48,18 @@ export default function CurrentlyPlayingMenuBarCommand() {
   const playerState = snapshot?.kind === "ok" ? snapshot.playerState : undefined;
   const isPlaying = playerState === PlayerState.PLAYING;
   const isFavorited = currentTrack?.favorited === "true";
+
+  // Fetched separately from the snapshot so the title never waits on artwork.
+  // Re-runs only when the artist or album changes; cache hits are a file check.
+  const { data: artworkPath } = useCachedPromise(
+    (artist: string, album: string, name: string) => getArtworkPath(artist, album, name),
+    [currentTrack?.artist ?? "", currentTrack?.album ?? "", currentTrack?.album ? "" : (currentTrack?.name ?? "")],
+    { execute: showAlbumArt && !!currentTrack },
+  );
+  const menuBarIcon: Image.ImageLike =
+    showAlbumArt && artworkPath && fs.existsSync(artworkPath)
+      ? { source: artworkPath, mask: Image.Mask.RoundedRectangle }
+      : "icon.png";
 
   const title = currentTrack
     ? formatTitle({
@@ -100,10 +114,10 @@ export default function CurrentlyPlayingMenuBarCommand() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title}>
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={title}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon="icon.png"
+          icon={menuBarIcon}
           title={dropdownTitle}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
