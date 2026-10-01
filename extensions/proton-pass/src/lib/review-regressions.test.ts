@@ -32,6 +32,8 @@ function loadView(file: string, services: Record<string, unknown>): Record<strin
     Error,
     setTimeout,
     clearTimeout,
+    setInterval: () => 0,
+    clearInterval: () => undefined,
     process: { platform: "darwin", env: { PATH: "" } },
     console: { error: () => undefined },
   });
@@ -418,6 +420,53 @@ test("a complete shared cache replaces legacy per-vault caches", async () => {
   await cache.setCachedItems([], true);
   assert.equal(saved.has("proton_pass_items_cache_vault"), false);
   assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, []);
+});
+
+test("Get TOTP retires deleted legacy items only after a complete listing", async () => {
+  for (const complete of [true, false]) {
+    const harness = hookHarness();
+    const previousItems = complete ? [] : [item];
+    const saved = new Map([
+      ["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: 0 })],
+      ["proton_pass_items_cache", JSON.stringify({ data: previousItems, timestamp: 0 })],
+    ]);
+    const api = {
+      List: { Section: {}, EmptyView: {} },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      LocalStorage: {
+        getItem: async (key: string) => saved.get(key),
+        setItem: async (key: string, value: string) => {
+          saved.set(key, value);
+        },
+        allItems: async () => Object.fromEntries(saved),
+        removeItem: async (key: string) => {
+          saved.delete(key);
+        },
+      },
+    };
+    const cache = loadView("cache.ts", { "@raycast/api": api });
+    const { default: Command } = loadView("../get-totp.tsx", {
+      react: harness.react,
+      "@raycast/api": api,
+      "./lib/pass-cli": {
+        listItems: async () => [],
+        listVaultsAndItems: async () => ({
+          items: [],
+          failedVaults: complete ? [] : [{ vault: { shareId: "vault" }, message: "Offline" }],
+        }),
+      },
+      "./lib/types": { PassCliError },
+      "./lib/utils": { getTotpRemainingSeconds: () => 30 },
+      "./lib/cache": cache,
+      "./lib/error-views": { renderErrorView: () => null },
+    });
+    harness.render(Command, {});
+    harness.effects.forEach((effect) => effect());
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.equal(saved.has("proton_pass_items_cache_vault"), !complete);
+    assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, previousItems);
+  }
 });
 
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {
