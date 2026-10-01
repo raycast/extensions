@@ -24,9 +24,12 @@ type MovieActionItem = TraktMovieListItem | TraktMovieHistoryListItem | TraktPla
 type MovieActionPanelProps<M extends MovieActionItem> = {
   item: M;
   actions: MediaAction<M>[];
-  /** Runs on Enter, ahead of "View Details". */
+  /**
+   * The main action after "View Details" (so it gets ⌘↵), and first in the detail view.
+   * "View Details" keeps Enter: Raycast asks extensions not to change a default action silently.
+   */
   primaryAction?: MediaAction<M>;
-  /** Extra actions placed right after `primaryAction`, ahead of "View Details". */
+  /** Extra actions placed right after `primaryAction`. */
   afterPrimary?: ActionPanel.Props["children"];
   /** Extra sections added after the browser links, e.g. destructive actions. */
   footer?: ActionPanel.Props["children"];
@@ -86,8 +89,6 @@ export const MovieActionPanel = <M extends MovieActionItem>({
 }: MovieActionPanelProps<M>) => (
   <ActionPanel>
     <ActionPanel.Section>
-      {primaryAction && <MediaActionList item={item} actions={[primaryAction]} />}
-      {afterPrimary}
       <Action.Push
         icon={Icon.Eye}
         title="View Details"
@@ -112,6 +113,8 @@ export const MovieActionPanel = <M extends MovieActionItem>({
           />
         }
       />
+      {primaryAction && <MediaActionList item={item} actions={[primaryAction]} />}
+      {afterPrimary}
       {actionItems ? actionItems(item) : <MediaActionList item={item} actions={actions} />}
     </ActionPanel.Section>
     <MovieBrowserActions item={item} />

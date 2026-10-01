@@ -12,7 +12,7 @@
 ### Changed
 
 - **Up Next is now Continue Watching**, with wide cards showing the title's artwork, the next episode's number and name, a movie's length, and a progress ring whose tooltip says how many episodes or how much time is left.
-- **"Check-In" is now "Mark as Watched"**: it always added a watch at the current time, never a Trakt check-in. It is the first action in Continue Watching. On a show, the old "Check-In" is named "Mark First Episode as Watched", and the duplicate "Add to History" on episodes is gone.
+- **"Check-In" is now "Mark as Watched"**: it always added a watch at the current time, never a Trakt check-in. In Continue Watching it comes right after "View Details" (⌘↵). On a show, the old "Check-In" is named "Mark First Episode as Watched", and the duplicate "Add to History" on episodes is gone.
 - History shows "Unknown date" instead of January 1, 1970 for a watch saved without a date.
 - The "Get up Next Episodes" AI tool reads the same list of shows in progress, and no longer reports a total item count, since Trakt sends a fixed placeholder for it.
 

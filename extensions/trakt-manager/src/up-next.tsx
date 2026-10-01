@@ -226,7 +226,6 @@ export default function Command() {
   const showActions = (item: TraktShowListItem) => (
     <ActionPanel>
       <ActionPanel.Section>
-        {showWatchActions(item)}
         <Action.Push
           icon={Icon.Eye}
           title="View Details"
@@ -259,6 +258,7 @@ export default function Command() {
             />
           }
         />
+        {showWatchActions(item)}
         <Action.Push
           icon={Icon.Switch}
           title="Browse Seasons"
