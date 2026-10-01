@@ -8,10 +8,7 @@ type CheckoutResponse = {
   message?: string;
 };
 
-function isCheckoutResponse(
-  value: unknown,
-  request: string,
-): value is CheckoutResponse {
+function isCheckoutResponse(value: unknown, request: string): value is CheckoutResponse {
   if (typeof value !== "object" || value === null) return false;
   const response = value as Record<string, unknown>;
   return (
@@ -31,9 +28,7 @@ export default async function Command(): Promise<void> {
     await sendToTethered(`tethered://checkout?request=${request}`);
     let didReachTethered = false;
     for (let attempt = 0; attempt < 100; attempt++) {
-      const value = await readStoredData("raycastCheckout").catch(
-        () => undefined,
-      );
+      const value = await readStoredData("raycastCheckout").catch(() => undefined);
       if (isCheckoutResponse(value, request)) {
         didReachTethered = true;
         switch (value.state) {
@@ -60,11 +55,7 @@ export default async function Command(): Promise<void> {
             return;
         }
       }
-      if (
-        attempt === 14 &&
-        !didReachTethered &&
-        !(await isTetheredRunning().catch(() => true))
-      ) {
+      if (attempt === 14 && !didReachTethered && !(await isTetheredRunning().catch(() => true))) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Please install and open Tethered",

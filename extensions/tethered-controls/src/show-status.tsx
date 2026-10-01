@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { readStoredData } from "./read-stored-items";
 import { sendToTethered } from "./send-to-tethered";
 
@@ -49,9 +49,7 @@ async function requestStatus(): Promise<Status> {
     if (isStatus(value) && value.request === request) return value;
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
-  throw new Error(
-    "Tethered did not return a fresh status. Open the updated app and try again.",
-  );
+  throw new Error("Tethered did not return a fresh status. Open the updated app and try again.");
 }
 
 let pendingStatusRequest: Promise<Status> | undefined;
@@ -72,39 +70,31 @@ function requestStatusOnce(): Promise<Status> {
 
 const yesNo = (value: boolean) => (value ? "On" : "Off");
 const powerModeLabel = (value: string) =>
-  (({ auto: "Auto", low: "Low", high: "High" }) as Record<string, string>)[
-    value
-  ] ?? value;
+  (({ auto: "Auto", low: "Low", high: "High" }) as Record<string, string>)[value] ?? value;
 const calibrationLabel = (value: string) =>
-  (
-    ({ opportunityWaitingForNaturalFull: "Waiting for opportunity" }) as Record<
-      string,
-      string
-    >
-  )[value] ?? value;
+  (({ opportunityWaitingForNaturalFull: "Waiting for opportunity" }) as Record<string, string>)[value] ?? value;
 const escapeMarkdown = (value: string) =>
   Array.from(
-    value
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\r?\n/g, " "),
-    (character) =>
-      "\\`*_{}[]()#+-.!|~".includes(character) ? `\\${character}` : character,
+    value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\r?\n/g, " "),
+    (character) => ("\\`*_{}[]()#+-.!|~".includes(character) ? `\\${character}` : character),
   ).join("");
 
 export default function Command() {
   const [status, setStatus] = useState<Status | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const requestSequence = useRef(0);
 
-  const refreshStatus = useCallback(async () => {
+  const refreshStatus = useCallback(async (forceNew = false) => {
+    const sequence = ++requestSequence.current;
     setIsLoading(true);
     setStatus(null);
     setErrorMessage(null);
     try {
-      setStatus(await requestStatusOnce());
+      const latestStatus = await (forceNew ? requestStatus() : requestStatusOnce());
+      if (sequence === requestSequence.current) setStatus(latestStatus);
     } catch (error) {
+      if (sequence !== requestSequence.current) return;
       const detail = error instanceof Error ? error.message : String(error);
       setErrorMessage(detail);
       await showToast({
@@ -113,7 +103,7 @@ export default function Command() {
         message: detail,
       });
     } finally {
-      setIsLoading(false);
+      if (sequence === requestSequence.current) setIsLoading(false);
     }
   }, []);
 
@@ -144,7 +134,7 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Refresh Status" onAction={refreshStatus} />
+          <Action title="Refresh Status" onAction={() => refreshStatus(true)} />
         </ActionPanel>
       }
     />

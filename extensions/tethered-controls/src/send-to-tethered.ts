@@ -11,13 +11,9 @@ const notificationScript = `function run(argv) {
 }`;
 
 export async function sendToTethered(url: string): Promise<void> {
-  await execFileAsync(
-    "/usr/bin/osascript",
-    ["-l", "JavaScript", "-e", notificationScript, url],
-    {
-      timeout: 10000,
-    },
-  );
+  await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", notificationScript, url], {
+    timeout: 10000,
+  });
 }
 
 export async function isTetheredRunning(): Promise<boolean> {
@@ -25,12 +21,8 @@ export async function isTetheredRunning(): Promise<boolean> {
     ObjC.import("AppKit");
     return $.NSRunningApplication.runningApplicationsWithBundleIdentifier("com.Tumerit.Tethered").count > 0;
   }`;
-  const { stdout } = await execFileAsync(
-    "/usr/bin/osascript",
-    ["-l", "JavaScript", "-e", script],
-    {
-      timeout: 10000,
-    },
-  );
+  const { stdout } = await execFileAsync("/usr/bin/osascript", ["-l", "JavaScript", "-e", script], {
+    timeout: 10000,
+  });
   return stdout.trim() === "true";
 }

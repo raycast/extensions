@@ -44,13 +44,8 @@ export default function Command() {
   }, []);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search Caffeinate presets"
-    >
-      {presets.length === 0 && !isLoading ? (
-        <List.EmptyView title="No saved Caffeinate presets found" />
-      ) : null}
+    <List isLoading={isLoading} searchBarPlaceholder="Search Caffeinate presets">
+      {presets.length === 0 && !isLoading ? <List.EmptyView title="No saved Caffeinate presets found" /> : null}
       {presets.map((preset) => (
         <List.Item
           key={preset.id}
@@ -60,10 +55,7 @@ export default function Command() {
               <Action
                 title="Run Preset"
                 onAction={() =>
-                  runControl(
-                    `/caffeinate/preset?name=${encodeURIComponent(preset.name)}`,
-                    `Run ${preset.name}`,
-                  )
+                  runControl(`/caffeinate/preset?name=${encodeURIComponent(preset.name)}`, `Run ${preset.name}`)
                 }
               />
               <Action title="Refresh Presets" onAction={reload} />

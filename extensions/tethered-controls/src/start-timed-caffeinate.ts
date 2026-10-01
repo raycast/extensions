@@ -6,12 +6,7 @@ export default async function Command({
 }: LaunchProps<{ arguments: Arguments.StartTimedCaffeinate }>): Promise<void> {
   const value = rawMinutes.trim();
   const minutes = Number(value);
-  if (
-    !/^\d+$/.test(value) ||
-    !Number.isSafeInteger(minutes) ||
-    minutes < 1 ||
-    minutes > 1440
-  ) {
+  if (!/^\d+$/.test(value) || !Number.isSafeInteger(minutes) || minutes < 1 || minutes > 1440) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Enter a duration from 1 to 1440 minutes",

@@ -45,9 +45,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Tethered profiles">
-      {profiles.length === 0 && !isLoading ? (
-        <List.EmptyView title="No saved profiles found" />
-      ) : null}
+      {profiles.length === 0 && !isLoading ? <List.EmptyView title="No saved profiles found" /> : null}
       {profiles.map((profile) => (
         <List.Item
           key={profile.id}
@@ -57,10 +55,7 @@ export default function Command() {
               <Action
                 title="Apply Profile"
                 onAction={() =>
-                  runControl(
-                    `/profile/apply?name=${encodeURIComponent(profile.name)}`,
-                    `Apply ${profile.name}`,
-                  )
+                  runControl(`/profile/apply?name=${encodeURIComponent(profile.name)}`, `Apply ${profile.name}`)
                 }
               />
               <Action title="Refresh Profiles" onAction={reload} />
