@@ -287,14 +287,10 @@ export default function Command() {
                   icon={isRunning ? Icon.Play : undefined}
                   title={activity.task.name}
                   subtitle={time.slice(0, time.lastIndexOf(":"))}
-                  tooltip={`Project: ${activity.project.name}\nTask: ${activity.task.name}\nDescription: ${activity.description}\n\nClick: ${isRunning ? "stop" : "continue"} timer · Right-click: edit`}
+                  tooltip={`Project: ${activity.project.name}\nTask: ${activity.task.name}\nDescription: ${activity.description}\n\nClick: ${isRunning ? "stop" : "continue"} timer · Right-click: more actions`}
                   onAction={async (event: MenuBarExtra.ActionEvent) => {
                     if (event.type === "right-click") {
-                      await launchCommand({
-                        name: "edit_timer",
-                        type: LaunchType.UserInitiated,
-                        context: { activity },
-                      });
+                      await openMenuBarTool({ view: "activity-actions", activity });
                       return;
                     }
                     await toggleActivity(activity.id, !isRunning);

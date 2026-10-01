@@ -3,7 +3,7 @@
 ## [v1.2.0] - {PR_MERGE_DATE}
 
 - Added today's total time and timer controls to the menu bar by @TheFRedFox
-- Added favorites, a "Today" list and task actions to the menu bar by @TheFRedFox
+- Added favorites, a "Today" list (add, edit and delete activities) and task actions to the menu bar by @TheFRedFox
 - Added the "Start New Timer" and "Edit Current / Last Active Timer" commands by @TheFRedFox
 - Added favorites management and settings to the menu bar by @TheFRedFox
 - Added validation to the start and edit forms by @TheFRedFox

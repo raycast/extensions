@@ -2,6 +2,7 @@ import { environment, List } from "@raycast/api";
 import { MenuBarToolsContext } from "./commands/menu-bar/tools";
 import { TaskActions } from "./commands/menu-bar/TaskActions";
 import { ProjectActions } from "./commands/menu-bar/ProjectActions";
+import { ActivityActions } from "./commands/menu-bar/ActivityActions";
 import { MenuBarSettings } from "./commands/menu-bar/MenuBarSettings";
 import { FavoriteList } from "./commands/favorites/FavoriteList";
 
@@ -14,6 +15,8 @@ export default function Command() {
       return <TaskActions task={context.task} isFavorite={context.isFavorite} />;
     case "project-actions":
       return <ProjectActions project={context.project} />;
+    case "activity-actions":
+      return <ActivityActions activity={context.activity} />;
     case "favorites":
       return <FavoriteList />;
     case "settings":
@@ -23,7 +26,7 @@ export default function Command() {
         <List>
           <List.EmptyView
             title="Opened from the menu bar"
-            description="Open it from the MOCO menu bar: right-click a task, click a project's ⚙ row, or use Manage Favorites… / Menu Bar Settings…"
+            description="Open it from the MOCO menu bar: right-click a task or a Today activity, click a project's ⚙ row, or use Manage Favorites… / Menu Bar Settings…"
           />
         </List>
       );
