@@ -29,6 +29,7 @@ import {
 } from "./format";
 import { TotpCode, generateTotp, parseOtpauthUri } from "./totp";
 import { getInitialIconDataUri } from "./avatar";
+import { canFillFrontmostApp, fillFrontmostApp } from "./autofill";
 import { formatTotpCode, getItemIcon } from "./utils";
 import { platformShortcut } from "./shortcuts";
 
@@ -292,8 +293,12 @@ const ItemActions = memo(function ItemActions({
   onRefresh,
   onUse,
 }: ItemActionsProps) {
+  const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
-  const concealSecrets = getPreferenceValues<Preferences>().copyPasswordTransient ?? true;
+  const concealSecrets = preferences.copyPasswordTransient ?? true;
+  const hasPassword = item.type === "login" && item.hasPassword !== false;
+  const canFill = canFillFrontmostApp && hasPassword;
+  const fillFirst = canFill && preferences.primaryAction === "fill";
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
 
@@ -329,17 +334,74 @@ const ItemActions = memo(function ItemActions({
     return params ? generateTotp(params).code : getTotp(item.shareId, item.itemId);
   }
 
+  /** Pastes into the app that was in front of Raycast; the 2FA code is then left in the clipboard. */
+  async function fill(fields: "login" | "email" | "username" | "password") {
+    try {
+      const loaded = await loadDetail();
+      // Most logins use the email, so it comes first; the username is used when there's no email.
+      const identifier = loaded.email ?? loaded.username;
+      const values = {
+        login: [identifier, loaded.password],
+        email: [loaded.email],
+        username: [loaded.username],
+        password: [loaded.password],
+      }[fields];
+      if (!values.every((value): value is string => Boolean(value))) {
+        const missing =
+          fields === "login"
+            ? identifier
+              ? "Password"
+              : "Email or Username"
+            : { email: "Email", username: "Username", password: "Password" }[fields];
+        await showToast({ style: Toast.Style.Failure, title: `No ${missing} Saved for This Item` });
+        return;
+      }
+      onUse(item);
+      await fillFrontmostApp({
+        values,
+        submit: fields === "login" && preferences.submitAfterFill,
+        getClipboardValue:
+          fields === "login" || fields === "password" ? (item.hasTotp ? getTotpCode : undefined) : undefined,
+        clipboardValueHud: "2FA code copied, paste it with ⌘V",
+      });
+    } catch (error: unknown) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Fill",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async function pasteTotpCode() {
+    try {
+      const code = await getTotpCode();
+      onUse(item);
+      await fillFrontmostApp({ values: [code] });
+    } catch (error: unknown) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Paste 2FA Code",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  const copyPasswordAction = hasPassword ? (
+    <Action
+      title="Copy Password"
+      icon={Icon.Key}
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      onAction={() => copy("Password", async () => (await loadDetail()).password, true)}
+    />
+  ) : null;
+  const fillAction = canFill ? <Action title="Fill Login" icon={Icon.Keyboard} onAction={() => fill("login")} /> : null;
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {item.type === "login" && item.hasPassword !== false && (
-          <Action
-            title="Copy Password"
-            icon={Icon.Key}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-            onAction={() => copy("Password", async () => (await loadDetail()).password, true)}
-          />
-        )}
+        {fillFirst ? fillAction : copyPasswordAction}
+        {fillFirst ? copyPasswordAction : fillAction}
         {item.type === "note" && (
           <Action.Push
             title="Show Note"
@@ -381,6 +443,21 @@ const ItemActions = memo(function ItemActions({
           />
         )}
       </ActionPanel.Section>
+      {canFill && (
+        <ActionPanel.Section title="Paste">
+          {item.email && <Action title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />}
+          {item.username && <Action title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />}
+          <Action title="Paste Password" icon={Icon.Key} onAction={() => fill("password")} />
+          {item.hasTotp && (
+            <Action
+              title="Paste 2FA Code"
+              icon={Icon.Clock}
+              shortcut={platformShortcut(["cmd", "shift"], "t")}
+              onAction={pasteTotpCode}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
         {urls[0] && (
           <Action.OpenInBrowser

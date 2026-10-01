@@ -99,6 +99,33 @@
       "required": false
     },
     {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "What Enter does on a login. Fill Login pastes the email (or the username) and the password into the app you were using (macOS), so only use it with the cursor in a login field.",
+      "default": "copy",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy Password",
+          "value": "copy"
+        },
+        {
+          "title": "Fill Login",
+          "value": "fill"
+        }
+      ]
+    },
+    {
+      "name": "submitAfterFill",
+      "type": "checkbox",
+      "title": "Submit After Filling",
+      "label": "Press Return after filling the password",
+      "description": "When enabled, Fill Login also submits the login form.",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "enableBackgroundRefresh",
       "type": "checkbox",
       "title": "Background Refresh",

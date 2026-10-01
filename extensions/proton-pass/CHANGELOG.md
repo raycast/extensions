@@ -1,5 +1,13 @@
 # proton-pass Changelog
 
+## [Fill Logins] - {PR_MERGE_DATE}
+
+- Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
+- Paste Email, Paste Username, Paste Password and Paste 2FA Code (⌘⇧T) actions, for logins split over several screens
+- Primary Action preference: Copy Password (default) or Fill Login
+- Submit After Filling preference (off by default) presses Return after the password
+- Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards
+
 ## [Item Details Panel] - {PR_MERGE_DATE}
 
 - Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last

@@ -10,6 +10,7 @@
     "src/lib/avatar*.ts",
     "src/lib/core/**/*.ts",
     "src/lib/format*.ts",
+    "src/lib/key-press*.ts",
     "src/lib/totp*.ts",
     "src/lib/pass-cli-normalize.test.ts",
     "src/lib/pass-cli-normalize.ts",

@@ -53,10 +53,22 @@ pass-cli vault list
 - **Default Password Length**: Length for generated passwords (default: 20)
 - **Default Password Type**: Random characters or memorable passphrase
 - **Transient Clipboard**: Clear password from clipboard after pasting
+- **Primary Action**: What Enter does on a login: copy the password (default), or fill the login (macOS)
+- **Submit After Filling**: Press Return after filling the password (off by default)
 - **Background Refresh**: Automatically refresh cached vault and item data
 - **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
 - **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
 - **Website Icons**: Show website icons for logins instead of their initials. Icons are fetched from DuckDuckGo's icon service, which receives the website domains (off by default)
+
+## Filling Logins (macOS)
+
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a 2FA code, the code is then left in the clipboard, ready to paste on the next screen.
+
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
+
+Values go through the clipboard marked as concealed, so clipboard history skips them, and the previous clipboard is restored afterwards. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+
+To fill with Enter, set **Primary Action** to _Fill Login_.
 
 ## Troubleshooting
 
