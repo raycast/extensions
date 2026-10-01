@@ -224,36 +224,23 @@ export default function Command() {
       tooltip={`Timer ${runningActivity ? "Running" : "Not running"}`}
     >
       {timerActivity ? (
-        <MenuBarExtra.Submenu icon={runningActivity ? Icon.Play : Icon.Pause} title={timerActivity.task.name}>
-          <MenuBarExtra.Item
-            title={timerActivity.project.name}
-            tooltip={`Project: ${timerActivity.project.name}\nTask: ${timerActivity.task.name}\nDescription: ${timerActivity.description}`}
-          />
-          {runningActivity ? (
-            <MenuBarExtra.Item
-              icon={Icon.Stop}
-              title="Stop Timer"
-              onAction={() => toggleActivity(timerActivity.id, false).then(() => refreshItems())}
-            />
-          ) : (
-            <MenuBarExtra.Item
-              icon={Icon.Play}
-              title="Continue Timer"
-              onAction={() => toggleActivity(timerActivity.id, true).then(() => refreshItems())}
-            />
-          )}
-          <MenuBarExtra.Item
-            icon={Icon.Pencil}
-            title="Edit…"
-            onAction={() =>
-              launchCommand({
+        <MenuBarExtra.Item
+          icon={runningActivity ? Icon.Play : Icon.Pause}
+          title={timerActivity.task.name}
+          tooltip={`Project: ${timerActivity.project.name}\nTask: ${timerActivity.task.name}\nDescription: ${timerActivity.description}\n\nClick: ${runningActivity ? "stop" : "continue"} timer · Right-click: edit`}
+          onAction={async (event: MenuBarExtra.ActionEvent) => {
+            if (event.type === "right-click") {
+              await launchCommand({
                 name: "edit_timer",
                 type: LaunchType.UserInitiated,
                 context: { activity: timerActivity },
-              })
+              });
+              return;
             }
-          />
-        </MenuBarExtra.Submenu>
+            await toggleActivity(timerActivity.id, runningActivity === undefined);
+            await refreshItems();
+          }}
+        />
       ) : null}
 
       <MenuBarExtra.Submenu icon={Icon.Calendar} title={`Today · ${totalHoursMinutes} (${activities.length})`}>
