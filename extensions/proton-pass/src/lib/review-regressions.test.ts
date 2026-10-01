@@ -123,7 +123,12 @@ test("Enter views details by default and copies or fills only when selected in p
   assert.equal(titles(entries)[0], "Copy Password");
   await (entries.find((entry) => entry.title === "Copy Password")?.onAction as () => Promise<void>)();
   assert.deepEqual(events, ["copy", "use"]);
-  assert.equal(titles(itemActions("copy", { ...item, hasPassword: false }).entries)[0], "View Details");
+  const stale = itemActions("copy", { ...item, hasPassword: false });
+  assert.equal(titles(stale.entries)[0], "View Details");
+  const explicitCopy = stale.entries.find((entry) => entry.title === "Copy Password");
+  assert.ok(explicitCopy);
+  await (explicitCopy.onAction as () => Promise<void>)();
+  assert.deepEqual(stale.events, ["copy", "use"]);
   assert.equal(titles(itemActions("copy", { ...item, type: "credit_card" }).entries)[0], "View Details");
   assert.equal(titles(itemActions("copy", { ...item, type: "note" }).entries)[0], "Show Note");
   const addedPassword = { ...item, password: "fake-secret" };
@@ -272,46 +277,49 @@ test("item-list authentication failures clear saved session metadata on both lis
 });
 
 test("opening a vault offline preserves its earlier per-vault item cache", async () => {
-  const vault = { shareId: "vault", name: "Personal" };
-  const saved = new Map([["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: Date.now() })]]);
-  const cache = loadView("cache.ts", {
-    "@raycast/api": {
-      getPreferenceValues: () => ({}),
-      LocalStorage: { getItem: async (key: string) => saved.get(key) },
-    },
-  });
-  const harness = hookHarness();
-  const { SearchItemsView } = loadView("search-items-view.tsx", {
-    react: harness.react,
-    "@raycast/api": {
-      List: { Dropdown: { Section: {}, Item: {} } },
-      Icon: {},
-      getPreferenceValues: () => ({ enableBackgroundRefresh: false }),
-      Toast: { Style: {} },
-      showToast: async () => undefined,
-    },
-    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
-    "./pass-cli": {
-      listItems: async () => {
-        throw new PassCliError("Offline", "network_error");
+  for (const sharedItems of [undefined, [{ ...item, shareId: "other" }]]) {
+    const vault = { shareId: "vault", name: "Personal" };
+    const saved = new Map([["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: Date.now() })]]);
+    if (sharedItems) saved.set("proton_pass_items_cache", JSON.stringify({ data: sharedItems, timestamp: Date.now() }));
+    const cache = loadView("cache.ts", {
+      "@raycast/api": {
+        getPreferenceValues: () => ({}),
+        LocalStorage: { getItem: async (key: string) => saved.get(key) },
       },
-      listVaultsAndItems: async () => {
-        throw new PassCliError("Offline", "network_error");
+    });
+    const harness = hookHarness();
+    const { SearchItemsView } = loadView("search-items-view.tsx", {
+      react: harness.react,
+      "@raycast/api": {
+        List: { Dropdown: { Section: {}, Item: {} } },
+        Icon: {},
+        getPreferenceValues: () => ({ enableBackgroundRefresh: false }),
+        Toast: { Style: {} },
+        showToast: async () => undefined,
       },
-    },
-    "./types": { PassCliError },
-    "./cache": cache,
-    "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
-    "./login-view": {},
-    "./format": {},
-    "./item-list": {},
-    "./refresh": refresh,
-  });
-  const render = () => harness.render(SearchItemsView, { initialVault: vault });
-  render();
-  harness.effects.forEach((effect) => effect());
-  await new Promise(setImmediate);
-  assert.equal((render().props.items as Item[] | undefined)?.[0]?.title, item.title);
+      "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+      "./pass-cli": {
+        listItems: async () => {
+          throw new PassCliError("Offline", "network_error");
+        },
+        listVaultsAndItems: async () => {
+          throw new PassCliError("Offline", "network_error");
+        },
+      },
+      "./types": { PassCliError },
+      "./cache": cache,
+      "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+      "./login-view": {},
+      "./format": {},
+      "./item-list": {},
+      "./refresh": refresh,
+    });
+    const render = () => harness.render(SearchItemsView, { initialVault: vault });
+    render();
+    harness.effects.forEach((effect) => effect());
+    await new Promise(setImmediate);
+    assert.equal((render().props.items as Item[] | undefined)?.[0]?.title, item.title);
+  }
 });
 
 test("failed vault loads remain retryable and never write a fresh empty cache", async () => {
@@ -412,4 +420,88 @@ test("hiding item details stops automatic secret loads while showing them select
     assert.equal(Boolean(row.props.detail), isShowingDetail);
     assert.equal(requested, isShowingDetail ? item : undefined);
   }
+});
+
+test("a complete shared cache replaces legacy per-vault caches", async () => {
+  const saved = new Map([["proton_pass_items_cache_vault", JSON.stringify({ data: [item], timestamp: 0 })]]);
+  const cache = loadView("cache.ts", {
+    "@raycast/api": {
+      getPreferenceValues: () => ({}),
+      LocalStorage: {
+        getItem: async (key: string) => saved.get(key),
+        setItem: async (key: string, value: string) => {
+          saved.set(key, value);
+        },
+        allItems: async () => Object.fromEntries(saved),
+        removeItem: async (key: string) => {
+          saved.delete(key);
+        },
+      },
+    },
+  }) as unknown as { setCachedItems: (items: Item[], completeListing?: boolean) => Promise<void> };
+  await cache.setCachedItems([]);
+  assert.equal(saved.has("proton_pass_items_cache_vault"), true);
+  await cache.setCachedItems([], true);
+  assert.equal(saved.has("proton_pass_items_cache_vault"), false);
+  assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, []);
+});
+
+test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {
+  const harness = hookHarness();
+  const vault = { shareId: "vault", name: "Personal" };
+  let calls = 0;
+  let writes = 0;
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": {
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        calls++;
+        if (calls === 2) throw new PassCliError("Offline retry", "network_error");
+        return {
+          vaults: [vault, { shareId: "other", name: "Other" }],
+          items: [{ ...item, shareId: "other" }],
+          failedVaults: [{ vault, message: "Offline" }],
+        };
+      },
+    },
+    "./types": { PassCliError },
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      setCachedItems: async () => {
+        writes++;
+      },
+      setCachedVaults: async () => {
+        writes++;
+      },
+    },
+    "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+  });
+  const render = () => harness.render(SearchItemsView, { initialVault: vault });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal((render().props.items as Item[]).length, 0);
+  const empty = render().props.emptyView as { title: string; description: string; onRetry: () => Promise<void> };
+  assert.equal(empty.title, "Couldn't Load Items");
+  assert.equal(empty.description, "Offline");
+  await empty.onRetry();
+  assert.equal(calls, 2);
+  assert.equal(writes, 0);
+  const retriedEmpty = render().props.emptyView as typeof empty;
+  assert.equal(retriedEmpty.description, "Offline retry");
+  assert.equal(typeof retriedEmpty.onRetry, "function");
 });

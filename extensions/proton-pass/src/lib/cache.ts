@@ -46,7 +46,17 @@ async function setCache<T>(key: string, data: T): Promise<void> {
 
 export const getCachedItems = (shareId?: string) =>
   getCache<Item[]>(shareId ? `${VAULT_ITEMS_CACHE_PREFIX}${shareId}` : ITEMS_CACHE_KEY);
-export const setCachedItems = (items: Item[]) => setCache(ITEMS_CACHE_KEY, items);
+export const setCachedItems = async (items: Item[], completeListing = false) => {
+  await setCache(ITEMS_CACHE_KEY, items);
+  if (!completeListing) return;
+  // A complete account listing supersedes older per-vault snapshots, including items deleted since.
+  const entries = await LocalStorage.allItems();
+  await Promise.all(
+    Object.keys(entries)
+      .filter((key) => key.startsWith(VAULT_ITEMS_CACHE_PREFIX))
+      .map((key) => LocalStorage.removeItem(key)),
+  );
+};
 
 export const getCachedVaults = () => getCache<Vault[]>(VAULTS_CACHE_KEY);
 export const setCachedVaults = (vaults: Vault[]) => setCache(VAULTS_CACHE_KEY, vaults);

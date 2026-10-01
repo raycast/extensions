@@ -27,7 +27,9 @@
 - Vaults that fail to load keep their cached items, and a toast shows the error with a Retry action
 - A failed full account load also shows an error with Retry when cached or early-loaded vault items remain visible
 - Item-list authentication failures clear saved metadata, including earlier per-vault caches; offline vault views can still read those earlier caches
-- Failed vault loads stay retryable and do not renew the cache as a fresh empty result
+- Failed vault loads stay retryable and do not renew the cache as a fresh empty result; an empty selected vault keeps a Retry action even when other vaults load
+- Earlier per-vault snapshots fill gaps in partial shared caches and are removed after a complete refresh, so deleted items do not return
+- Copy Password remains available on demand when cached metadata says no password was saved; Enter still follows the Primary Action preference
 - Hiding the details panel stops automatic secret loads; already-loaded custom fields and explicit copy actions remain available
 - Update vulnerable transitive brace-expansion dependencies to compatible patched versions
 - When the session has ended, Search Items and the vaults opened from List Vaults offer Login with Browser
