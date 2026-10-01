@@ -381,7 +381,9 @@ test("hiding item details stops automatic secret loads while showing them select
       },
       "./utils": { getItemIcon: () => "" },
     });
-    ItemList({ items: [item], isLoading: false, emptyView: {} });
+    const list = ItemList({ items: [item], isLoading: false, emptyView: {} });
+    const row = (list.props.children as Element[])[0];
+    assert.equal(Boolean(row.props.detail), isShowingDetail);
     assert.equal(requested, isShowingDetail ? item : undefined);
   }
 });

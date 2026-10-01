@@ -96,12 +96,14 @@ export function ItemList({
           ...(isShowingDetail ? [] : [{ text: item.vaultName }]),
         ]}
         detail={
-          <ItemDetailPanel
-            item={item}
-            detail={isSelected ? detail : undefined}
-            isLoading={isSelected && isLoadingDetail}
-            error={isSelected ? error : undefined}
-          />
+          isShowingDetail ? (
+            <ItemDetailPanel
+              item={item}
+              detail={isSelected ? detail : undefined}
+              isLoading={isSelected && isLoadingDetail}
+              error={isSelected ? error : undefined}
+            />
+          ) : undefined
         }
         actions={
           <ItemActions
