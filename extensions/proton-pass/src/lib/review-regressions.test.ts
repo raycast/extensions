@@ -946,6 +946,38 @@ test("a slow code refresh retries in the new time step instead of waiting for an
   assert.equal(fixture.render().props.isLoading, false);
 });
 
+test("repeated slow TOTP responses stop with Retry instead of keeping refresh running", async () => {
+  let now = 0;
+  let codes = 0;
+  const fixture = totpCommandFixture(
+    async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+    async () => {
+      codes++;
+      if (codes === 2 || codes === 3) now += 31_000;
+      return "123456";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  await (actions(row.actions).find((entry) => entry.title === "Refresh Codes")!.onAction as () => Promise<void>)();
+  assert.equal(codes, 3);
+  assert.equal(fixture.render().props.isLoading, false);
+  const updated = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  const retry = fixture.toasts.at(-1)?.primaryAction;
+  assert.equal(typeof retry?.onAction, "function");
+  await retry!.onAction();
+  assert.equal(codes, 4);
+});
+
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {
   const harness = hookHarness();
   const vault = { shareId: "vault", name: "Personal" };

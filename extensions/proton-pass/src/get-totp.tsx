@@ -161,14 +161,27 @@ export default function Command() {
     isRefreshingRef.current = true;
     setIsRefreshing(true);
     try {
+      let retriedTimeStep = false;
       while (true) {
         const currentItems = itemsRef.current;
         const codeTimeStep = getTotpTimeStep();
         const updatedItems = await Promise.all(currentItems.map(loadCode));
         // Re-fetch if either the list or the time step changed while these requests were running.
-        if (itemsRef.current !== currentItems || codeTimeStep !== getTotpTimeStep()) continue;
+        if (itemsRef.current !== currentItems) continue;
+        if (codeTimeStep !== getTotpTimeStep() && !retriedTimeStep) {
+          retriedTimeStep = true;
+          continue;
+        }
         setItems(updatedItems);
         itemsRef.current = updatedItems;
+        if (codeTimeStep !== getTotpTimeStep()) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Couldn't Refresh TOTP Codes",
+            message: "The refresh took too long. Try refreshing again.",
+            primaryAction: { title: "Retry", onAction: refreshTotpCodes },
+          });
+        }
         break;
       }
     } finally {
