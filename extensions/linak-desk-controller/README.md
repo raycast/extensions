@@ -33,5 +33,6 @@ Running a new command while the desk is moving takes over from the previous one.
 ## Troubleshooting
 
 - **The desk doesn't accept the connection:** the desk isn't paired with this Mac. Make sure it isn't connected to another device, such as the Desk Control app on your phone. Then hold the Bluetooth button on the controller until the light blinks and run the command again.
+- **"Couldn't find your desk":** if you set a Desk identifier for an older version of the extension, it may no longer match your desk. Clear it in the preferences, or run **Select Desk** to choose your desk.
 - **The reported height is off by a constant amount:** change **Lowest height** in the preferences to your desk's height at its lowest position (62 cm for IDÅSEN).
 - **Raycast can't use Bluetooth:** allow Raycast in System Settings → Privacy & Security → Bluetooth.
