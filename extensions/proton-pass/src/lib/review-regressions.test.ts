@@ -515,11 +515,12 @@ test("a complete shared cache replaces legacy per-vault caches", async () => {
 
 test("Get TOTP preserves failed-vault codes with Retry and retires legacy items only after a complete listing", async () => {
   const totpItem = { ...item, hasTotp: true };
-  for (const { complete, previousItems } of [
+  for (const { complete, previousItems, failedShareId = "vault" } of [
     { complete: true, previousItems: [] },
     { complete: false, previousItems: [totpItem] },
     { complete: false, previousItems: [] },
     { complete: false, previousItems: [item] },
+    { complete: false, previousItems: [totpItem], failedShareId: "other" },
   ]) {
     const harness = hookHarness();
     let calls = 0;
@@ -562,7 +563,9 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
           return {
             items: [],
             failedVaults:
-              complete || calls > 1 ? [] : [{ vault: { shareId: "vault", name: "Personal" }, message: "Offline" }],
+              complete || calls > 1
+                ? []
+                : [{ vault: { shareId: failedShareId, name: "Personal" }, message: "Offline" }],
           };
         },
       },
@@ -585,13 +588,19 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
     assert.deepEqual(JSON.parse(saved.get("proton_pass_items_cache")!).data, previousItems);
     if (!complete) {
       const view = harness.render(Command, {});
-      const hasSavedCodes = previousItems.some((item) => item.hasTotp);
+      const hasSavedCodes = previousItems.some((item) => item.hasTotp && item.shareId === failedShareId);
       const retry = hasSavedCodes ? toasts[0]?.primaryAction.onAction : view.props.onRetry;
       if (hasSavedCodes) {
         const row = actions(view).find((entry) => entry.title === totpItem.title);
         assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0]?.tag.value, "123456");
         assert.equal(toasts[0]?.message, "Offline");
-      } else assert.equal(view.props.error, "unknown");
+      } else {
+        assert.equal(view.props.error, "unknown");
+        assert.equal(
+          actions(view).some((entry) => entry.title === totpItem.title),
+          false,
+        );
+      }
       assert.equal(typeof retry, "function");
       await (retry as () => Promise<void>)();
       assert.equal(calls, 2);
