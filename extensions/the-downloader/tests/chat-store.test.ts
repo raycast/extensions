@@ -9,7 +9,6 @@ import {
   findChat,
   loadChats,
   parseChats,
-  removeChat,
   saveChat,
   upsertChat,
 } from "../src/lib/chat-store";
@@ -63,7 +62,7 @@ describe("parseChats", () => {
   });
 });
 
-describe("upsertChat / removeChat", () => {
+describe("upsertChat", () => {
   it("replaces the chat with the same key and sorts newest first", () => {
     const list = [chat("a", 3), chat("b", 2)];
     const next = upsertChat(list, chat("b", 5, 2));
@@ -79,10 +78,6 @@ describe("upsertChat / removeChat", () => {
     expect(next[0].turns).toHaveLength(TURN_LIMIT);
     expect(next[0].turns[0].question).toBe("q5");
     expect(next.some((c) => c.key === "c0")).toBe(false);
-  });
-
-  it("removes by key", () => {
-    expect(removeChat([chat("a", 1), chat("b", 2)], "a").map((c) => c.key)).toEqual(["b"]);
   });
 });
 

@@ -63,10 +63,6 @@ export function upsertChat(list: StoredChat[], chat: StoredChat, limit = CHAT_LI
   return [trimmed, ...list.filter((c) => c.key !== chat.key)].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, limit);
 }
 
-export function removeChat(list: StoredChat[], key: string): StoredChat[] {
-  return list.filter((c) => c.key !== key);
-}
-
 const store = jsonStore<StoredChat>("video-chats-v1", parseChats);
 
 // When the user deleted each chat, kept apart from the chats so a save's write

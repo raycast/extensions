@@ -188,6 +188,17 @@ async function saveFile(name: string, content: string, ext: string) {
   }
 }
 
+/** The Download command with this link filled in. */
+function openDownload(url: string) {
+  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } }).catch((error) =>
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't open Download",
+      message: error instanceof Error ? error.message : String(error),
+    }),
+  );
+}
+
 /** `2026-09-28` → a localized date. */
 function formatDate(iso: string | undefined): string | undefined {
   if (!iso) return undefined;
@@ -203,7 +214,9 @@ function bodySummary(ctx: LinkContext): string {
     const note = (ctx.note ?? "Nothing to read.").replace(/[_*`]/g, "");
     const from =
       ctx.kind === "video" ? "the title, description, chapters and statistics" : "the title, description and details";
-    const archive = ctx.noteReason === "unreadable" && !ctx.archive ? ", or read the Internet Archive's copy (⌘K)" : "";
+    const actions = process.platform === "win32" ? "Ctrl+K" : "⌘K";
+    const archive =
+      ctx.noteReason === "unreadable" && !ctx.archive ? `, or read the Internet Archive's copy (${actions})` : "";
     return `_${note} Answers come from ${from}. Reload to try again${archive}._`;
   }
   const tokens = formatCount(estimateTokens(bodyText(ctx.body)));
@@ -429,12 +442,13 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
       });
       setCtx(context);
       const stored = await findChat(chatKey(context));
-      if (stored && !force) {
-        setTurns(
-          stored.turns
-            .map((t, i) => ({ ...t, id: `stored-${i}`, status: "done" as const, askedAt: stored.updatedAt }))
-            .reverse(),
-        );
+      if (stored) {
+        // Restore whenever the list is empty — also after Try Again on a failed first
+        // load, or the next answer would save over the stored conversation.
+        const restored = stored.turns
+          .map((t, i) => ({ ...t, id: `stored-${i}`, status: "done" as const, askedAt: stored.updatedAt }))
+          .reverse();
+        setTurns((prev) => (prev.length > 0 ? prev : restored));
       }
       return context;
     } catch (error) {
@@ -628,11 +642,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.OpenInBrowser title="Open Link" url={ctx.url} shortcut={Keyboard.Shortcut.Common.Open} />
-        <Action
-          title={WORDS[ctx.kind].download}
-          icon={Icon.Download}
-          onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } })}
-        />
+        <Action title={WORDS[ctx.kind].download} icon={Icon.Download} onAction={() => openDownload(url)} />
         <Action
           title="Reload"
           icon={Icon.ArrowClockwise}
@@ -671,11 +681,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
         <Action title="Read Archived Copy" icon={Icon.Clock} onAction={() => readFromArchive(true)} />
       )}
       {loadError.fix === "download" ? (
-        <Action
-          title="Download"
-          icon={Icon.Download}
-          onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } })}
-        />
+        <Action title="Download" icon={Icon.Download} onAction={() => openDownload(url)} />
       ) : (
         <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => load(true)} />
       )}
@@ -856,7 +862,6 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
             actions={
               <ActionPanel>
                 {askTyped}
-                <Action.OpenInBrowser title="Open Link" url={ctx.url} />
                 {ctx.stats.length > 0 && (
                   <Action.CopyToClipboard
                     title="Copy Statistics"
@@ -868,9 +873,6 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
                 )}
                 {!hasBody(ctx) && ctx.noteReason === "language" && (
                   <Action title="Open Chat Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
-                )}
-                {!hasBody(ctx) && ctx.noteReason === "blocked" && (
-                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                 )}
                 {commonActions}
               </ActionPanel>

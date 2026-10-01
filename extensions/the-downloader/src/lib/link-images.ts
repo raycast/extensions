@@ -10,8 +10,6 @@ import { abortError, safeFetch } from "./safe-fetch.js";
 export const MAX_CHAT_IMAGES = 4;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
-export type ImagePreference = "ask" | "always" | "never";
-
 /** What to do with a post's images: ask first, send them, or skip them (no images, a text-only engine, or "never"). */
 export function imageDecision(
   preference: string | undefined,

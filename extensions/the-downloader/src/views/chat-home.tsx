@@ -19,7 +19,7 @@ import { LinkKind } from "../lib/link-context.js";
 import { escapeMarkdown, plural, withoutImages } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { linkKindOf } from "../lib/link-loader.js";
-import { isValidUrl } from "../utils.js";
+import { isValidUrl, normalizeUrl } from "../utils.js";
 import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { LinkChat } from "./link-chat.js";
 
@@ -65,9 +65,7 @@ function chatMarkdown(chat: StoredChat): string {
 export function ChatHome({ initialText = "" }: { initialText?: string }) {
   const [searchText, setSearchText] = useState(initialText);
   // A pasted link must take ↵ — otherwise the recent chat that was selected keeps it.
-  const [selectedId, setSelectedId] = useState<string | undefined>(
-    isValidUrl(initialText.trim()) ? `start-${initialText.trim()}` : undefined,
-  );
+  const [selectedId, setSelectedId] = useState<string>();
   const [chats, setChats] = useState<StoredChat[]>();
   const [found, setFound] = useState<Candidate[]>([]);
   const prefs = useMemo(() => getPreferenceValues<Preferences.ChatLink>(), []);
@@ -82,7 +80,9 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
       // Same opt-ins as the Download command.
       const { autoLoadUrlFromClipboard, enableBrowserExtensionSupport } = getPreferenceValues<ExtensionPreferences>();
       const copied = autoLoadUrlFromClipboard ? (await Clipboard.readText())?.trim() : undefined;
-      if (copied && isValidUrl(copied)) candidates.push({ url: copied, title: "Copied Link", icon: Icon.Clipboard });
+      if (copied && isValidUrl(copied)) {
+        candidates.push({ url: normalizeUrl(copied), title: "Copied Link", icon: Icon.Clipboard });
+      }
       if (enableBrowserExtensionSupport) {
         try {
           const tab = (await BrowserExtension.getTabs()).find((t) => t.active);
@@ -98,7 +98,7 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
   }, []);
 
   const typed = searchText.trim();
-  const typedUrl = isValidUrl(typed) ? typed : undefined;
+  const typedUrl = isValidUrl(typed) ? normalizeUrl(typed) : undefined;
   const starts = [
     ...(typedUrl ? [{ url: typedUrl, title: "Pasted Link", icon: Icon.Link }] : []),
     ...found.filter((c) => c.url !== typedUrl),
@@ -136,7 +136,7 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
       searchText={searchText}
       onSearchTextChange={(text) => {
         setSearchText(text);
-        if (isValidUrl(text.trim())) setSelectedId(`start-${text.trim()}`);
+        if (isValidUrl(text.trim())) setSelectedId(`start-${normalizeUrl(text.trim())}`);
       }}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}

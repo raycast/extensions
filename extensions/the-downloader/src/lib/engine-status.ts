@@ -264,11 +264,14 @@ async function probeApple(): Promise<FmProbe> {
 
 function ollamaInstalled(): boolean {
   const home = os.homedir();
+  const localAppData = process.env.LOCALAPPDATA || path.join(home, "AppData", "Local");
   return [
     "/Applications/Ollama.app",
     path.join(home, "Applications", "Ollama.app"),
     "/usr/local/bin/ollama",
     "/opt/homebrew/bin/ollama",
+    // Windows installs it per user.
+    path.join(localAppData, "Programs", "Ollama", "ollama.exe"),
   ].some((p) => fs.existsSync(p));
 }
 
