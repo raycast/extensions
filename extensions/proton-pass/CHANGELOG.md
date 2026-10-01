@@ -3,10 +3,11 @@
 ## [Fill Logins] - {PR_MERGE_DATE}
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
+- Filling only types into the app Raycast was opened from, and stops if another app comes in front
 - Paste Email, Paste Username, Paste Password and Paste 2FA Code (⌘⇧T) actions, for logins split over several screens
 - Primary Action preference: Copy Password (default) or Fill Login
 - Submit After Filling preference (off by default) presses Return after the password
-- Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards
+- Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards, also as concealed since it can be a secret
 
 ## [Item Details Panel] - {PR_MERGE_DATE}
 

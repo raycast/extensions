@@ -66,9 +66,11 @@ pass-cli vault list
 
 For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
 
-Values go through the clipboard marked as concealed, so clipboard history skips them, and the previous clipboard is restored afterwards. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
 
-To fill with Enter, set **Primary Action** to _Fill Login_.
+Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+
+To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
 
 ## Troubleshooting
 

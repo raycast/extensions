@@ -32,6 +32,7 @@ export const ItemActions = memo(function ItemActions({
   const concealSecrets = preferences.copyPasswordTransient ?? true;
   const hasPassword = item.type === "login" && item.hasPassword !== false;
   const canFill = canFillFrontmostApp && hasPassword;
+  const canPaste = canFillFrontmostApp && Boolean(item.email || item.username || hasPassword || item.hasTotp);
   const fillFirst = canFill && preferences.primaryAction === "fill";
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
@@ -95,6 +96,7 @@ export const ItemActions = memo(function ItemActions({
         getClipboardValue:
           fields === "login" || fields === "password" ? (item.hasTotp ? getTotpCode : undefined) : undefined,
         clipboardValueHud: "2FA code copied, paste it with ⌘V",
+        clipboardValueFailureHud: "Filled, but couldn't copy the 2FA code",
       });
     } catch (error: unknown) {
       await showToast({
@@ -181,11 +183,11 @@ export const ItemActions = memo(function ItemActions({
           onAction={() => copy("Title", async () => item.title, false)}
         />
       </ActionPanel.Section>
-      {canFill && (
+      {canPaste && (
         <ActionPanel.Section title="Paste">
           {item.email && <Action title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />}
           {item.username && <Action title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />}
-          <Action title="Paste Password" icon={Icon.Key} onAction={() => fill("password")} />
+          {hasPassword && <Action title="Paste Password" icon={Icon.Key} onAction={() => fill("password")} />}
           {item.hasTotp && (
             <Action
               title="Paste 2FA Code"
