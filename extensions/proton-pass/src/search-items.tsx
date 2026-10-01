@@ -370,7 +370,7 @@ export default function Command() {
     return match ? `${match.shareId}-${match.itemId}` : undefined;
   }, [activeOrigin, sortedFilteredItems, webIntegrationEnabled]);
 
-  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items");
+  const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;
 
   return (

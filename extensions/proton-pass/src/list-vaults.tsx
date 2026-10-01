@@ -62,7 +62,7 @@ function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
 function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<PassCliErrorType | null>(null);
+  const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
   const hasLoadedFromCache = useRef(false);
 
   useEffect(() => {
@@ -89,22 +89,23 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
       await setCachedItemsForVault(vault.shareId, freshItems);
     } catch (err: unknown) {
       const type = err instanceof PassCliError ? err.type : "unknown";
+      const message = err instanceof Error ? err.message : undefined;
       // A logged-out session must not keep showing cached items, and a failed load must not look like an empty vault.
       if (type === "not_authenticated") {
         setItems([]);
-        setError(type);
+        setError({ type, message });
       } else if (!hasLoadedFromCache.current) {
-        setError(type);
+        setError({ type, message });
       }
     } finally {
       setIsLoading(false);
     }
   }
 
-  if (error === "not_authenticated") {
+  if (error?.type === "not_authenticated") {
     return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaultItems)} />;
   }
-  const errorView = renderErrorView(error, loadVaultItems, "Load Items");
+  const errorView = renderErrorView(error?.type ?? null, loadVaultItems, "Load Items", error?.message);
   if (errorView) return errorView;
 
   return (
