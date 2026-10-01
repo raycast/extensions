@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for DuckDuckGo Browser] - {PR_MERGE_DATE}
+## [Support for DuckDuckGo Browser] - 2026-10-01
 
 - Added support for the `DuckDuckGo` browser on macOS
 
