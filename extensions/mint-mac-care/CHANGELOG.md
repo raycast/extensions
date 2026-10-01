@@ -1,6 +1,6 @@
 # Mint Changelog
 
-## [Optimize, Organize and a status at a glance] - {PR_MERGE_DATE}
+## [Optimize, Organize and a status at a glance] - 2026-10-01
 
 - Every command is a list with a picture: groups on the left, what is in each on the right, ↵ acting on the whole group.
 - View Mac Status is the Mint menu bar dropdown on one screen: Disk and Memory rings with their Auto Care, and your organized folders with how many files each would sort.
