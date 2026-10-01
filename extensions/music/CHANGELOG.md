@@ -1,5 +1,11 @@
 # Apple Music Changelog
 
+## [Album Art in Menu Bar] - {PR_MERGE_DATE}
+
+- Added an optional "Show album art" preference to the Menu Bar Player that replaces the Music icon with the current track's cover. Covers are extracted from Music, resized, and cached per album, and fall back to the Music icon when unavailable.
+- Added an "Album art only (hide title)" preference to show just the cover or icon in the Menu Bar.
+- The Menu Bar Player now refreshes right after the Next, Previous, Play, Pause, Play/Pause, and Dislike & Skip commands instead of waiting for its next interval run.
+
 ## [Playback and Search Reliability] - 2026-09-28
 
 - Added timeouts for Music scripts and fixed subprocess completion handling.
