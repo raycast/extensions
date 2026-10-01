@@ -64,7 +64,9 @@ export default function CurrentlyPlayingMenuBarCommand() {
 
   const artworkPath = snapshot?.artworkPath;
   const coverPath = showCoverImage && artworkPath && fs.existsSync(artworkPath) ? artworkPath : undefined;
-  const trackIcon: Image.ImageLike = coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
+  // The chosen icon is used both in the Menu Bar and in the dropdown's top row.
+  const trackIcon: Image.ImageLike | undefined =
+    iconType === "none" ? undefined : coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
 
   const title = currentTrack
     ? formatTitle({
@@ -76,15 +78,18 @@ export default function CurrentlyPlayingMenuBarCommand() {
         cleanupTitle,
       })
     : "";
-  // "None" hides the icon, but never when there is no text left to show.
-  const menuBarIcon: Image.ImageLike | undefined = iconType === "none" && title ? undefined : trackIcon;
+  // Icon, title and artist are chosen independently. The only exception: if all
+  // three are hidden, show the Apple Music icon so the item stays clickable.
+  const menuBarIcon: Image.ImageLike | undefined = !trackIcon && !title ? "icon.png" : trackIcon;
 
   const DROPDOWN_MAX = 40;
+  // The dropdown always shows the full title and artist, whatever is hidden in
+  // the Menu Bar, so clicking the item is how you see everything.
   const fullTitle = currentTrack
     ? formatTitle({
         name: currentTrack.name,
         artistName: currentTrack.artist,
-        hideArtistName,
+        hideArtistName: false,
         maxTextLength: "999",
         cleanupTitle,
       })

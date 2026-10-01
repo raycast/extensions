@@ -320,7 +320,7 @@
         },
         {
           "name": "hideTrackTitle",
-          "description": "If enabled, the track title will be hidden in the Menu Bar. Hide both the artist name and track title to show only the icon",
+          "description": "If enabled, the track title will be hidden in the Menu Bar",
           "type": "checkbox",
           "label": "Hide Track Title",
           "default": false,
@@ -345,7 +345,7 @@
         {
           "name": "iconType",
           "title": "Menu Bar Icon",
-          "description": "Choose between the default Apple Music icon, the cover image of the current track, or no icon. The Apple Music icon is still shown when there is nothing else to display.",
+          "description": "Choose between the Apple Music icon, the cover art of the current track, or no icon.",
           "type": "dropdown",
           "default": "music-icon",
           "data": [
@@ -354,11 +354,11 @@
               "value": "music-icon"
             },
             {
-              "title": "Cover Image",
+              "title": "Cover Art",
               "value": "cover-image"
             },
             {
-              "title": "None",
+              "title": "No Icon",
               "value": "none"
             }
           ],
