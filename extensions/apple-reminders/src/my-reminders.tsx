@@ -1,33 +1,48 @@
-import { Action, ActionPanel, Color, Icon, List, clearSearchBar, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, clearSearchBar, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
+import CompletedRemindersAction from "./components/CompletedRemindersAction";
 import ReminderListItem from "./components/ReminderListItem";
 import { CreateReminderForm } from "./create-reminder";
 import { useData } from "./hooks/useData";
+import { useDebouncedSearchText } from "./hooks/useDebouncedSearchText";
 import useViewReminders from "./hooks/useViewReminders";
 
 export default function Command() {
   const { displayCompletionDate } = getPreferenceValues<Preferences.MyReminders>();
   const [listId, setListId] = useCachedState<string>("view", "today");
-  const [newReminderTitle, setNewReminderTitle] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const { debouncedSearchText, isSearchPending } = useDebouncedSearchText(searchText);
 
-  const { data, isLoading, mutate } = useData();
+  const { data, lists, isLoading, error, mutate } = useData(listId, debouncedSearchText, { execute: !isSearchPending });
 
-  const { sections, viewProps } = useViewReminders(listId, { data });
+  const { sections, viewProps, hasMoreReminders, isLoadingCompletedReminders } = useViewReminders(listId, {
+    data,
+    searchText: debouncedSearchText,
+    execute: !isSearchPending,
+  });
 
+  async function refresh() {
+    if (isSearchPending) return;
+    await Promise.all([mutate(), viewProps.completed.value ? viewProps.completed.mutate?.() : undefined]);
+  }
+
+  const isFetching = isSearchPending || isLoading || isLoadingCompletedReminders;
+  const fetchError = !isFetching ? error : undefined;
   const placeholder =
     listId === "all" ? "Filter by title, notes, priority, tags or list" : "Filter by title, notes, priority or tags";
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isFetching}
+      navigationTitle={hasMoreReminders ? "My Reminders · Search to Narrow Results" : "My Reminders"}
       searchBarPlaceholder={placeholder}
-      onSearchTextChange={setNewReminderTitle}
-      filtering={{ keepSectionOrder: true }}
+      onSearchTextChange={setSearchText}
+      filtering={false}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by List" onChange={setListId} value={listId}>
-          {data?.lists && data.lists.length > 0 ? (
+          {lists.length > 0 || error ? (
             <>
               <List.Dropdown.Section>
                 <List.Dropdown.Item
@@ -48,7 +63,7 @@ export default function Command() {
                 <List.Dropdown.Item title="All" icon={Icon.Tray} value="all" />
               </List.Dropdown.Section>
 
-              {data?.lists.map((list) => {
+              {lists.map((list) => {
                 return (
                   <List.Dropdown.Item
                     key={list.id}
@@ -75,7 +90,7 @@ export default function Command() {
                     displayCompletionDate={displayCompletionDate}
                     viewProps={viewProps}
                     listId={listId}
-                    lists={data?.lists}
+                    lists={lists}
                     mutate={mutate}
                   />
                 );
@@ -85,22 +100,32 @@ export default function Command() {
       )}
 
       <List.EmptyView
-        title="No Reminders"
-        description="Create a new reminder by pressing the ⏎ key."
+        title={isFetching ? "Loading Reminders" : fetchError ? "Unable to Load Reminders" : "No Reminders"}
+        description={
+          isFetching
+            ? "Waiting for reminder results."
+            : fetchError
+              ? fetchError.message
+              : "Create a new reminder by pressing the ⏎ key."
+        }
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Create Reminder"
-              icon={Icon.Plus}
-              target={<CreateReminderForm draftValues={{ title: newReminderTitle }} listId={listId} mutate={mutate} />}
-              onPop={() => clearSearchBar()}
-            />
+            {!isFetching && !fetchError ? (
+              <Action.Push
+                title="Create Reminder"
+                icon={Icon.Plus}
+                target={<CreateReminderForm draftValues={{ title: searchText }} listId={listId} mutate={mutate} />}
+                onPop={() => clearSearchBar()}
+              />
+            ) : null}
+
+            <CompletedRemindersAction completed={viewProps.completed} />
 
             <Action
-              title={`${viewProps.completed.value ? "Hide" : "Display"} Completed Reminders`}
-              icon={viewProps.completed.value ? Icon.EyeDisabled : Icon.Eye}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-              onAction={() => viewProps.completed.toggle()}
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={refresh}
             />
           </ActionPanel>
         }
