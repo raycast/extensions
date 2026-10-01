@@ -7,6 +7,7 @@ import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from
 import { renderErrorView } from "./error-views";
 import { hostnameOf } from "./format";
 import { ItemList } from "./item-list";
+import { createRequestTracker, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
 
 function originOf(raw?: string): string | undefined {
   if (!raw) return undefined;
@@ -88,12 +89,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     loadItems();
   }, []);
 
-  // Each load gets an id, so that a slower, older load can't overwrite a newer one (e.g. Retry during a refresh).
-  const latestLoad = useRef(0);
+  // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
+  const loads = useMemo(createRequestTracker, []);
 
   async function loadItems() {
-    const loadId = ++latestLoad.current;
-    const isLatest = () => loadId === latestLoad.current;
+    const isLatest = loads.start();
     setError(null);
 
     const [cachedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
@@ -117,8 +117,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       const { vaults: freshVaults, items: freshItems, failedVaults } = await listVaultsAndItems();
       if (!isLatest()) return;
       // Vaults that failed to load keep the items already known, instead of looking empty.
-      const failedIds = new Set(failedVaults.map(({ vault }) => vault.shareId));
-      const nextItems = [...freshItems, ...itemsRef.current.filter((item) => failedIds.has(item.shareId))];
+      const nextItems = mergeRefreshedItems(
+        freshItems,
+        itemsRef.current,
+        failedVaults.map(({ vault }) => vault.shareId),
+      );
       updateItems(nextItems);
       setVaults(freshVaults);
 
@@ -127,10 +130,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (failedVaults.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title:
-            failedVaults.length === 1
-              ? `Couldn't Load ${failedVaults[0].vault.name}`
-              : `Couldn't Load ${failedVaults.length} Vaults`,
+          title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
           message: failedVaults[0].message,
           primaryAction: { title: "Retry", onAction: () => void loadItems() },
         });
