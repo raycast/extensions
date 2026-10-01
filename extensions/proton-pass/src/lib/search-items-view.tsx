@@ -88,10 +88,16 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     loadItems();
   }, []);
 
+  // Each load gets an id, so that a slower, older load can't overwrite a newer one (e.g. Retry during a refresh).
+  const latestLoad = useRef(0);
+
   async function loadItems() {
+    const loadId = ++latestLoad.current;
+    const isLatest = () => loadId === latestLoad.current;
     setError(null);
 
     const [cachedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
+    if (!isLatest()) return;
     if (cachedItems && cachedVaults && !hasLoadedFromCache.current) {
       // Show cached metadata right away, even when stale: the first pass-cli call can take
       // several seconds, so waiting for it before rendering anything feels broken.
@@ -109,6 +115,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     setIsLoading(true);
     try {
       const { vaults: freshVaults, items: freshItems, failedVaults } = await listVaultsAndItems();
+      if (!isLatest()) return;
       // Vaults that failed to load keep the items already known, instead of looking empty.
       const failedIds = new Set(failedVaults.map(({ vault }) => vault.shareId));
       const nextItems = [...freshItems, ...itemsRef.current.filter((item) => failedIds.has(item.shareId))];
@@ -128,6 +135,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         });
       }
     } catch (err: unknown) {
+      if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
       // A logged-out session must surface even when cached items are on screen.
       if (!hasLoadedFromCache.current || type === "not_authenticated") {
@@ -135,7 +143,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         setError({ type, message });
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
