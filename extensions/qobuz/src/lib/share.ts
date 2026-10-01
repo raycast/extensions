@@ -24,8 +24,6 @@ const MUSICBRAINZ_TIMEOUT_MS = 2000;
 // MusicBrainz asks every client to identify itself with a way to reach it.
 const MUSICBRAINZ_USER_AGENT = "QobuzRaycastExtension/1.0 (https://github.com/raycast/extensions)";
 
-const SEARCH_MARK = "🔍";
-
 const PLATFORM_LABEL: Record<Platform, string> = {
   qobuz: "Qobuz",
   deezer: "Deezer",
@@ -185,7 +183,7 @@ export const shareLinks = async (track: Track): Promise<ShareLink[]> => {
 export const shareTitle = (track: Track): string => `${track.artist?.name ?? "?"} — ${track.title}`;
 
 const lineLabel = ({ platform, confidence }: ShareLink): string =>
-  confidence === "search" ? `${PLATFORM_LABEL[platform]} ${SEARCH_MARK}` : PLATFORM_LABEL[platform];
+  confidence === "search" ? `${PLATFORM_LABEL[platform]} (search)` : PLATFORM_LABEL[platform];
 
 const isSonglink = (link: ShareLink): boolean => link.platform === "songlink";
 
@@ -200,11 +198,11 @@ const escapeHtml = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 // Rich-text destinations (Slack, Notion, Mail) take this; hiding the URLs
-// behind the names is what lets it collapse to one line. The search mark sits
-// outside the anchor so it isn't underlined, glued on so it never wraps alone.
+// behind the names is what lets it collapse to one line. A search link is
+// set in italics: a glyph pastes into Slack as a full-size colour emoji.
 const htmlLink = ({ platform, url, confidence }: ShareLink): string => {
-  const anchor = `<a href="${escapeHtml(url)}">${PLATFORM_LABEL[platform]}</a>`;
-  return confidence === "search" ? `${anchor}&nbsp;${SEARCH_MARK}` : anchor;
+  const label = confidence === "search" ? `<i>${PLATFORM_LABEL[platform]}</i>` : PLATFORM_LABEL[platform];
+  return `<a href="${escapeHtml(url)}">${label}</a>`;
 };
 
 const htmlTitle = (track: Track): string => `🎵 <b>${escapeHtml(shareTitle(track))}</b>`;
@@ -220,9 +218,9 @@ export const shareClipboard = (track: Track, links: ShareLink[]): Clipboard.Cont
   };
 };
 
-// Slack unfurls nothing once a message holds more than five links, and picks
-// for itself which ones get a card below that. One bare song.link URL is the
-// only way to get exactly one card, with artwork, from a pasted message.
+// Slack unfurls a card for each of the first five links, so the full message
+// draws one per service. One bare song.link URL is the only way to get exactly
+// one card, with artwork, from a pasted message.
 export const slackClipboard = (track: Track, links: ShareLink[]): Clipboard.Content | undefined => {
   const songlink = links.find(isSonglink);
   if (!songlink) return undefined;
