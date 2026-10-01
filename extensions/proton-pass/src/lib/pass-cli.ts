@@ -79,6 +79,8 @@ export async function loginWithBrowser(): Promise<void> {
       timeoutMs: LOGIN_TIMEOUT_MS,
     },
   );
+  // The new session may belong to another account, so don't show the previous session's cached items.
+  await clearCache();
 }
 
 export async function checkAuth(): Promise<boolean> {
@@ -94,7 +96,13 @@ export async function listVaults(): Promise<Vault[]> {
     await ensureMockCacheCleared();
     return MOCK_VAULTS;
   }
-  return (await getAdapter()).listVaults();
+  try {
+    return await (await getAdapter()).listVaults();
+  } catch (error) {
+    // Cached items belong to the session that wrote them: once it has ended, they must not show up again.
+    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    throw error;
+  }
 }
 
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {

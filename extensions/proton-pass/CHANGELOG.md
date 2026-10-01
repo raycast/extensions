@@ -24,6 +24,8 @@
 - Fix: URLs and other values in item details showed stray backslashes (e.g. `example\.com`)
 - Fix: items whose ID starts with "-" could not be opened, and copying their password or TOTP code failed
 - Error messages no longer include the pass-cli command line (local paths and item IDs)
+- Cached items are cleared when logging in through the extension or when the session has ended, so another account's items don't show up
+- Fix: a vault's item list kept showing cached items after the session ended, instead of the login screen
 
 ## [Improvements] - 2026-09-19
 
