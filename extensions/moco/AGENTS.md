@@ -73,6 +73,7 @@ views (lists, forms)
 | `status:project:<id>`, `status:task:<id>` | `"favorite"` or `"hidden"` (one status per item)                         |
 | `menu-bar:customer-layouts`               | `{ [customerId]: "submenu" \| "hidden" }`, default inline, `0` = "Other" |
 | `menu-bar:favorite-order`                 | task IDs in menu order, favorites without a position go last             |
+| `menu-bar:show-total-time`                | `true`/`false`: today's total time next to the icon, default `true`      |
 | `user`, `todays_activities`, `projects`   | cache written by the menu bar's background runs                          |
 | `cleanup:legacy-status-keys`              | flag: old `<projectId>` keys (≤ v1.1.4) removed once                     |
 

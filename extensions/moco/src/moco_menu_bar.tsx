@@ -15,6 +15,7 @@ import {
   getCustomerLayouts,
   getFavoriteOrder,
   getProjects,
+  getShowTotalTime,
   getTodaysActivities,
   sortByFavoriteOrder,
   StatusType,
@@ -27,6 +28,7 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [customerLayouts, setCustomerLayouts] = useState<Record<number, CustomerLayout>>({});
   const [favoriteOrder, setFavoriteOrder] = useState<number[]>([]);
+  const [showTotalTime, setShowTotalTime] = useState<boolean>(true);
   const projectStatusState = useStatuses("project");
   const taskStatusState = useStatuses("task");
   const projectStatuses = projectStatusState.statuses ?? new Map<number, StatusType>();
@@ -73,11 +75,12 @@ export default function Command() {
     setIsLoading(true);
     // try/finally: a failing cache read must not leave the menu in the loading state.
     try {
-      const [cachedActivities, cachedProjects, layouts, order] = await Promise.all([
+      const [cachedActivities, cachedProjects, layouts, order, showTotal] = await Promise.all([
         getTodaysActivities(),
         getProjects(),
         getCustomerLayouts(),
         getFavoriteOrder(),
+        getShowTotalTime(),
       ]);
       let activities = cachedActivities;
       let projects = cachedProjects;
@@ -94,6 +97,7 @@ export default function Command() {
         }
       }
       setCustomerLayouts(layouts);
+      setShowTotalTime(showTotal);
       setFavoriteOrder(order);
       setActivities(activities);
       setProjects(projects.filter((project) => project.contract?.active !== false));
@@ -207,6 +211,7 @@ export default function Command() {
   }
 
   const totalTime = sumUpActivities(activities);
+  const totalHoursMinutes = totalTime.slice(0, totalTime.lastIndexOf(":"));
   // Render the menu only once data and statuses are known, see the comment in useEffect.
   const isMenuLoading = isLoading || projectStatusState.isLoading || taskStatusState.isLoading;
 
@@ -215,11 +220,9 @@ export default function Command() {
       isLoading={isMenuLoading}
       icon={{ source: runningActivity ? "MocoLogoRunning.png" : "MocoLogo.png" }}
       // Total time of today as h:mm. Raycast re-runs the command every 30s (package.json interval).
-      title={isMenuLoading ? undefined : totalTime.slice(0, totalTime.lastIndexOf(":"))}
+      title={isMenuLoading || !showTotalTime ? undefined : totalHoursMinutes}
       tooltip={`Timer ${runningActivity ? "Running" : "Not running"}`}
     >
-      <MenuBarExtra.Item icon={Icon.Stopwatch} title={`Total Time: ${sumUpActivities(activities)}`} />
-
       {timerActivity ? (
         <MenuBarExtra.Submenu icon={runningActivity ? Icon.Play : Icon.Pause} title={timerActivity.task.name}>
           <MenuBarExtra.Item
@@ -253,50 +256,48 @@ export default function Command() {
         </MenuBarExtra.Submenu>
       ) : null}
 
-      {activities.length > 0 ? (
-        <MenuBarExtra.Submenu icon={Icon.Calendar} title={`Today (${activities.length})`}>
-          <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              key="open-dashboard"
-              icon={Icon.Globe}
-              title="Open Activities in MOCO"
-              tooltip="Opens the MOCO time tracking page in the default browser"
-              onAction={() => open(`https://${getPreferenceValues<Preferences>().url_prefix}.mocoapp.com/activities`)}
-            />
-          </MenuBarExtra.Section>
-          <MenuBarExtra.Section>
-            {[...activities]
-              .sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
-              .map((activity) => {
-                const isRunning = activity.timer_started_at !== null;
-                const seconds =
-                  activity.seconds + (activity.timer_started_at !== null ? timeDelta(activity.timer_started_at) : 0);
-                const time = secondsParser(seconds);
-                return (
-                  <MenuBarExtra.Item
-                    key={`today-${activity.id}`}
-                    icon={isRunning ? Icon.Play : undefined}
-                    title={activity.task.name}
-                    subtitle={time.slice(0, time.lastIndexOf(":"))}
-                    tooltip={`Project: ${activity.project.name}\nTask: ${activity.task.name}\nDescription: ${activity.description}\n\nClick: ${isRunning ? "stop" : "continue"} timer · Right-click: edit`}
-                    onAction={async (event: MenuBarExtra.ActionEvent) => {
-                      if (event.type === "right-click") {
-                        await launchCommand({
-                          name: "edit_timer",
-                          type: LaunchType.UserInitiated,
-                          context: { activity },
-                        });
-                        return;
-                      }
-                      await toggleActivity(activity.id, !isRunning);
-                      await refreshItems();
-                    }}
-                  />
-                );
-              })}
-          </MenuBarExtra.Section>
-        </MenuBarExtra.Submenu>
-      ) : null}
+      <MenuBarExtra.Submenu icon={Icon.Calendar} title={`Today · ${totalHoursMinutes} (${activities.length})`}>
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            key="open-dashboard"
+            icon={Icon.Globe}
+            title="Open Activities in MOCO"
+            tooltip="Opens the MOCO time tracking page in the default browser"
+            onAction={() => open(`https://${getPreferenceValues<Preferences>().url_prefix}.mocoapp.com/activities`)}
+          />
+        </MenuBarExtra.Section>
+        <MenuBarExtra.Section>
+          {[...activities]
+            .sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
+            .map((activity) => {
+              const isRunning = activity.timer_started_at !== null;
+              const seconds =
+                activity.seconds + (activity.timer_started_at !== null ? timeDelta(activity.timer_started_at) : 0);
+              const time = secondsParser(seconds);
+              return (
+                <MenuBarExtra.Item
+                  key={`today-${activity.id}`}
+                  icon={isRunning ? Icon.Play : undefined}
+                  title={activity.task.name}
+                  subtitle={time.slice(0, time.lastIndexOf(":"))}
+                  tooltip={`Project: ${activity.project.name}\nTask: ${activity.task.name}\nDescription: ${activity.description}\n\nClick: ${isRunning ? "stop" : "continue"} timer · Right-click: edit`}
+                  onAction={async (event: MenuBarExtra.ActionEvent) => {
+                    if (event.type === "right-click") {
+                      await launchCommand({
+                        name: "edit_timer",
+                        type: LaunchType.UserInitiated,
+                        context: { activity },
+                      });
+                      return;
+                    }
+                    await toggleActivity(activity.id, !isRunning);
+                    await refreshItems();
+                  }}
+                />
+              );
+            })}
+        </MenuBarExtra.Section>
+      </MenuBarExtra.Submenu>
 
       {favoriteTasks.length > 0 ? (
         <MenuBarExtra.Section title="Favorites">

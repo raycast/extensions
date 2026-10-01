@@ -131,3 +131,13 @@ export const sortByFavoriteOrder = <T>(items: T[], order: number[], taskID: (ite
   const positionOf = (item: T) => position.get(taskID(item)) ?? order.length;
   return [...items].sort((a, b) => positionOf(a) - positionOf(b));
 };
+
+// Show today's total time next to the menu bar icon. Default: on.
+const SHOW_TOTAL_TIME_KEY = "menu-bar:show-total-time";
+
+export const getShowTotalTime = async (): Promise<boolean> =>
+  (await LocalStorage.getItem<boolean>(SHOW_TOTAL_TIME_KEY)) ?? true;
+
+export const storeShowTotalTime = async (show: boolean): Promise<void> => {
+  await LocalStorage.setItem(SHOW_TOTAL_TIME_KEY, show);
+};
