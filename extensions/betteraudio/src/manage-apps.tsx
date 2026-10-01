@@ -75,7 +75,9 @@ function AppItem({
   revalidate: () => void;
 }) {
   const volumePercent = Math.round(app.volume);
-  const iconPath = app.bundleID ? getAppPath(appPaths, app.bundleID) : undefined;
+  const iconPath = app.bundleID
+    ? getAppPath(appPaths, app.bundleID)
+    : undefined;
   const accessories: List.Item.Accessory[] = [];
 
   if (app.isMuted) {
