@@ -1,7 +1,7 @@
 import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { listItems, listVaultsAndItems } from "./pass-cli";
+import { listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
@@ -67,6 +67,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
+  const [failedVaults, setFailedVaults] = useState<VaultFailure[]>([]);
+  const [loadFailureMessage, setLoadFailureMessage] = useState<string>();
   const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const webIntegrationEnabled = preferences.enableWebIntegration ?? true;
@@ -105,9 +107,20 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   async function loadItems() {
     const isLatest = loads.start();
     setError(null);
+    setFailedVaults([]);
+    setLoadFailureMessage(undefined);
 
-    const [sharedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
-    const cachedItems = sharedItems ?? (initialVault ? await getCachedItems(initialVault.shareId) : null);
+    const [sharedItems, cachedVaults, legacyItems] = await Promise.all([
+      getCachedItems(),
+      getCachedVaults(),
+      initialVault ? getCachedItems(initialVault.shareId) : null,
+    ]);
+    const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
+    // An earlier partial shared listing can omit the opened vault. Keep its legacy snapshot until a full refresh.
+    const cachedItems =
+      legacyItems && !sharedHasVault
+        ? { data: [...(sharedItems?.data ?? []), ...legacyItems.data], isStale: true }
+        : sharedItems;
     if (!isLatest()) return;
     if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
       // Show cached metadata right away, even when stale: the first pass-cli call can take
@@ -135,33 +148,34 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         if (vaultItems.length > 0) updateItems(vaultItems);
       }
 
-      const { vaults: freshVaults, items: freshItems, failedVaults } = await listVaultsAndItems();
+      const { vaults: freshVaults, items: freshItems, failedVaults: failures } = await listVaultsAndItems();
       if (!isLatest()) return;
+      setFailedVaults(failures);
       // Vaults that failed to load keep the items already known, instead of looking empty.
       const nextItems = mergeRefreshedItems(
         freshItems,
         itemsRef.current,
-        failedVaults.map(({ vault }) => vault.shareId),
+        failures.map(({ vault }) => vault.shareId),
       );
       updateItems(nextItems);
       setVaults(freshVaults);
 
       // A failed listing with nothing to show must stay an error, rather than a successful empty result.
-      if (failedVaults.length > 0 && nextItems.length === 0) throw new Error(failedVaults[0].message);
+      if (failures.length > 0 && nextItems.length === 0) throw new Error(failures[0].message);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
       // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
-      if (failedVaults.length === 0) {
+      if (failures.length === 0) {
         await cacheWrites.run(async () => {
-          if (isLatest()) await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+          if (isLatest()) await Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]);
         });
       }
       if (!isLatest()) return;
-      if (failedVaults.length > 0) {
+      if (failures.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: failedVaultsTitle(failedVaults.map(({ vault }) => vault.name)),
-          message: failedVaults[0].message,
+          title: failedVaultsTitle(failures.map(({ vault }) => vault.name)),
+          message: failures[0].message,
           primaryAction: { title: "Retry", onAction: () => void loadItems() },
         });
       }
@@ -174,6 +188,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (itemsRef.current.length === 0) {
         setError({ type, message });
       } else {
+        setLoadFailureMessage(message);
         // The items on screen (cached, or the opened vault's) stay, but they can be outdated or incomplete.
         await showToast({
           style: Toast.Style.Failure,
@@ -191,6 +206,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     () => (selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => item.shareId === selectedVaultId)),
     [items, selectedVaultId],
   );
+  const emptyFailureMessage =
+    failedVaults.find(({ vault }) => vault.shareId === selectedVaultId)?.message ?? loadFailureMessage;
   const suggestedItems = useMemo(() => {
     if (!webIntegrationEnabled || !activeOrigin) return [];
     return filteredItems.filter((item) => matchesActiveOrigin(item, activeOrigin));
@@ -219,9 +236,12 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         />
       }
       emptyView={{
-        icon: Icon.MagnifyingGlass,
-        title: "No Items Found",
-        description: selectedVaultId === ALL_VAULTS_VALUE ? "Your vaults are empty" : "No items in this vault",
+        icon: emptyFailureMessage ? Icon.ExclamationMark : Icon.MagnifyingGlass,
+        title: emptyFailureMessage ? "Couldn't Load Items" : "No Items Found",
+        description:
+          emptyFailureMessage ??
+          (selectedVaultId === ALL_VAULTS_VALUE ? "Your vaults are empty" : "No items in this vault"),
+        onRetry: emptyFailureMessage ? loadItems : undefined,
       }}
       onRefresh={loadItems}
     />

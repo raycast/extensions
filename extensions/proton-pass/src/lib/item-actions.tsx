@@ -31,6 +31,8 @@ export const ItemActions = memo(function ItemActions({
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
+  // A stale list may say there is no password; explicit copying can check without loading secrets while browsing.
+  const canCopyPassword = item.type === "login" && (!detail || detail.password !== undefined);
   // Loaded details are newer than the cached item, e.g. when a password was added since.
   const hasPassword = item.type === "login" && (detail ? detail.password !== undefined : item.hasPassword !== false);
   // Copy Password only takes Enter where there's a password to copy; notes open with Show Note.
@@ -84,7 +86,7 @@ export const ItemActions = memo(function ItemActions({
     <ActionPanel>
       <ActionPanel.Section>
         {viewDetailsFirst && viewDetailsAction}
-        {hasPassword && (
+        {canCopyPassword && (
           <Action
             title="Copy Password"
             icon={Icon.Key}

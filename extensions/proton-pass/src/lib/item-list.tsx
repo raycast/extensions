@@ -1,4 +1,4 @@
-import { Icon, Image, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { getInitialIconDataUri } from "./avatar";
@@ -33,7 +33,7 @@ export interface ItemListProps {
   isLoading: boolean;
   navigationTitle?: string;
   searchBarAccessory?: List.Props["searchBarAccessory"];
-  emptyView: { icon: Image.ImageLike; title: string; description: string };
+  emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
 }
 
@@ -132,7 +132,18 @@ export function ItemList({
       searchBarAccessory={searchBarAccessory}
     >
       {items.length === 0 && !isLoading ? (
-        <List.EmptyView icon={emptyView.icon} title={emptyView.title} description={emptyView.description} />
+        <List.EmptyView
+          icon={emptyView.icon}
+          title={emptyView.title}
+          description={emptyView.description}
+          actions={
+            emptyView.onRetry ? (
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={emptyView.onRetry} />
+              </ActionPanel>
+            ) : undefined
+          }
+        />
       ) : suggested.length > 0 ? (
         <>
           <List.Section title={suggestionsTitle}>{suggested.map(renderItem)}</List.Section>
