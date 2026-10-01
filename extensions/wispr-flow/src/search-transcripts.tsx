@@ -115,7 +115,9 @@ export default function Command() {
     }
   }, []);
 
-  const { isLoading, data, pagination, revalidate } = useCachedPromise(
+  // Not cached on purpose: a cached first page is the list as of the previous
+  // open, and most opens follow a dictation by seconds.
+  const { isLoading, data, pagination, revalidate } = usePromise(
     (
       search: string,
       app: string,
@@ -152,10 +154,10 @@ export default function Command() {
   // "Oldest First" it lands in Older, the last section.
   const firstRenderedId = groups[0]?.transcripts[0]?.transcriptEntityId;
 
-  // `useCachedPromise` paints last run's results before the fresh query lands, so
-  // Raycast anchors the selection to whatever was on top back then. Anything
-  // dictated since is prepended above it and the highlight ends up buried. Pin the
-  // selection to the first rendered row once this query's own results arrive.
+  // When the query changes, the previous query's rows stay on screen until the
+  // new ones land, and Raycast keeps the selection anchored to a row from the
+  // old set. Pin the selection to the first rendered row once this query's own
+  // results arrive.
   //
   // The pin has to follow a full loading cycle rather than just `!isLoading`:
   // when the query changes there is one render where queryKey is already new but
@@ -239,9 +241,12 @@ export default function Command() {
 
   const { data: uniqueAppsData } = useCachedPromise(
     (archived: boolean) => {
+      // Naming `isArchived` in the outer WHERE forces a table scan, and `app`
+      // sits behind the audio blob in every row. As a subquery, each half is
+      // answered from an index alone.
       const archiveCondition = archived
         ? ""
-        : "AND (isArchived = 0 OR isArchived IS NULL)";
+        : "AND rowid NOT IN (SELECT rowid FROM History WHERE isArchived != 0)";
       return executeSQL<{ app: string }>(
         dbPath,
         `SELECT DISTINCT app FROM History WHERE app IS NOT NULL AND app != '' ${archiveCondition} ORDER BY app`,
@@ -256,7 +261,8 @@ export default function Command() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [uniqueAppsData]);
 
-  const { data: installedApps } = usePromise(getApplications);
+  // Cached so rows carry their app icon on the first paint.
+  const { data: installedApps } = useCachedPromise(() => getApplications());
   const { data: winRegistryMap } = usePromise(() =>
     process.platform === "win32"
       ? getWindowsAppPathMap()

@@ -1,5 +1,10 @@
 # GitHub Copilot Changelog
 
+## [Use GitHub Copilot models in Raycast AI] - 2026-09-28
+
+- Provide your GitHub Copilot models to Raycast AI Chat, Quick AI and AI Commands (requires Raycast Pro)
+- Only list models your Copilot plan lets you pick, plus Copilot's Auto model
+
 ## [Create tasks without auto-opening a pull request] - 2026-06-26
 
 - Create tasks without auto-opening a pull request, with a prompt placeholder explaining that users can ask Copilot to open a PR

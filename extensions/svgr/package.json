@@ -23,6 +23,7 @@
     "@types/svgo": "^2.6.3"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.29.7",
     "@svgr/core": "^6.2.1",
     "@svgr/plugin-jsx": "^6.2.1",
     "@svgr/plugin-svgo": "^6.2.0",
@@ -46,7 +47,7 @@
   ],
   "overrides": {
     "js-yaml@3": "3.15.1",
-    "fast-uri": "3.1.5",
+    "fast-uri": "3.1.7",
     "brace-expansion@1": "1.1.16",
     "brace-expansion@2": "2.1.2",
     "brace-expansion@5": "5.0.9"

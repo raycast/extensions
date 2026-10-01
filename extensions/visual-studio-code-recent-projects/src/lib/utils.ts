@@ -150,5 +150,14 @@ export function isValidHexColor(color: string): boolean {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
 }
 
+/**
+ * VS Code stores file URIs with a lowercase drive letter (e.g. `file:///c:/...`),
+ * so `fileURLToPath()` yields `c:\...`. Uppercase it for display since
+ * Windows paths are case-insensitive. No-op on other platforms.
+ */
+export function uppercaseWindowsDriveLetter(displayPath: string): string {
+  return displayPath.replace(/^([a-z]:)/, (match) => match.toUpperCase());
+}
+
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";

@@ -8,6 +8,7 @@ export function getTotalServices(services: ServiceCollections): number {
     services.mysql.length +
     services.postgres.length +
     services.redis.length +
+    (services.libsql?.length ?? 0) +
     services.compose.length
   );
 }

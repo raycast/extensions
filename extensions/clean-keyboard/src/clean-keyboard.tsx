@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Icon, List, LaunchProps, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isMac, isTahoe, readFnState, setFnState } from "./lib/utils";
 
 interface Duration {
@@ -50,11 +50,12 @@ const durations: Duration[] = [
   },
 ];
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext?: { durationSeconds: number } }>) {
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
   const savedFnState = useRef<boolean | null>(null);
+  const autoLockStarted = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -84,7 +85,7 @@ export default function Command() {
     }
   }, [isRunning]);
 
-  const lockAction = async (duration: Duration) => {
+  const lockAction = useCallback(async (duration: Duration) => {
     let handler: (duration: number | null) => Promise<void>;
     if (isMac) {
       const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
@@ -119,7 +120,21 @@ export default function Command() {
     setIcon(duration.icon);
     setIsRunning(true);
     await showToast({ title: "Keyboard locked" });
-  };
+  }, []);
+
+  useEffect(() => {
+    const seconds = props.launchContext?.durationSeconds;
+    if (seconds === undefined || autoLockStarted.current) return;
+    const duration =
+      durations.find((item) => (item.seconds ?? 0) === seconds) ??
+      (Number.isInteger(seconds) && seconds > 0 ? { display: `${seconds} seconds`, seconds, icon: "🧼" } : undefined);
+    if (duration) {
+      autoLockStarted.current = true;
+      lockAction(duration).catch((error) => {
+        showToast({ title: "Failed to lock keyboard", message: String(error), style: Toast.Style.Failure });
+      });
+    }
+  }, [lockAction, props.launchContext?.durationSeconds]);
 
   const unlockAction = async () => {
     let stopHandler: () => Promise<void>;
