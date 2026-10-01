@@ -1,6 +1,6 @@
 # Aven for Raycast
 
-A Raycast extension that integrates with [aven](https://github.com/), the local-first CLI/TUI task manager, letting you create tasks without leaving Raycast.
+A Raycast extension that integrates with [aven](https://aventasks.dev/), the local-first CLI/TUI task manager, letting you create tasks without leaving Raycast.
 
 ## Requirements
 
