@@ -16,14 +16,27 @@ import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
-import { createRequestTracker, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
+  /** 30-second step the code was fetched in: it's only valid during that step. */
+  codeStep?: number;
 }
 
 function getTotpTimeStep(): number {
   return Math.floor(Date.now() / 30_000);
+}
+
+/** The item with its current code. If that fails, an earlier code is kept only while it's still valid. */
+async function withCurrentCode(item: TotpItem): Promise<TotpItem> {
+  try {
+    const totp = await getTotp(item.shareId, item.itemId);
+    return { ...item, currentTotp: totp, codeStep: getTotpTimeStep() };
+  } catch {
+    // An expired code must neither be shown nor copied.
+    return item.codeStep === getTotpTimeStep() ? item : { ...item, currentTotp: undefined, codeStep: undefined };
+  }
 }
 
 export default function Command() {
@@ -39,6 +52,7 @@ export default function Command() {
   const isRefreshingRef = useRef(false);
   // A slower, older load must not overwrite a newer one (e.g. Retry during a load).
   const loads = useMemo(createRequestTracker, []);
+  const cacheWrites = useMemo(createSerialQueue, []);
 
   useEffect(() => {
     loadTotpItems();
@@ -78,16 +92,7 @@ export default function Command() {
         itemsRef.current = itemsWithPlaceholder;
         setIsLoading(false);
 
-        const itemsWithTotp = await Promise.all(
-          cachedTotpItems.map(async (item) => {
-            try {
-              const totp = await getTotp(item.shareId, item.itemId);
-              return { ...item, currentTotp: totp };
-            } catch {
-              return { ...item, currentTotp: undefined };
-            }
-          }),
-        );
+        const itemsWithTotp = await Promise.all(cachedTotpItems.map(withCurrentCode));
         if (!isLatest()) return;
         setItems(itemsWithTotp);
         itemsRef.current = itemsWithTotp;
@@ -105,22 +110,17 @@ export default function Command() {
         isComplete,
         failureMessage,
       } = getRefreshResult(freshItems, knownItems, failedVaults, (item) => item.hasTotp);
-      // Fresh items only: codes on screen must never reach the cache.
-      if (isComplete) await setCachedItems(freshItems);
+      // Fresh items only: codes on screen must never reach the cache. Writes run in request order and only
+      // for the latest load, so an older load can't overwrite a newer one.
+      if (isComplete) {
+        await cacheWrites.run(async () => {
+          if (isLatest()) await setCachedItems(freshItems);
+        });
+      }
       if (failureMessage) throw new Error(failureMessage);
 
       const totpItems: TotpItem[] = nextItems.filter((item) => item.hasTotp);
-      const itemsWithTotp = await Promise.all(
-        totpItems.map(async (item) => {
-          try {
-            const totp = await getTotp(item.shareId, item.itemId);
-            return { ...item, currentTotp: totp };
-          } catch {
-            // Like the periodic refresh, keep the code on screen.
-            return item;
-          }
-        }),
-      );
+      const itemsWithTotp = await Promise.all(totpItems.map(withCurrentCode));
 
       if (!isLatest()) return;
       setItems(itemsWithTotp);
@@ -162,16 +162,7 @@ export default function Command() {
     setIsRefreshing(true);
     try {
       const currentItems = itemsRef.current;
-      const updatedItems = await Promise.all(
-        currentItems.map(async (item) => {
-          try {
-            const totp = await getTotp(item.shareId, item.itemId);
-            return { ...item, currentTotp: totp };
-          } catch {
-            return item;
-          }
-        }),
-      );
+      const updatedItems = await Promise.all(currentItems.map(withCurrentCode));
       setItems(updatedItems);
       itemsRef.current = updatedItems;
     } finally {
