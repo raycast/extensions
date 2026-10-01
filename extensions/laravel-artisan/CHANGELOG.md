@@ -1,6 +1,6 @@
 # Laravel Artisan Changelog
 
-## [AI Tool, Windows Support, and Fixes] - {PR_MERGE_DATE}
+## [AI Tool, Windows Support, and Fixes] - 2026-10-01
 
 - Add an AI tool for searching Artisan commands and their options
 - Replace the AI summary with an Ask AI action that opens Quick AI about the command
