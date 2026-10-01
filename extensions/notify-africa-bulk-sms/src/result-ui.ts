@@ -3,6 +3,7 @@ import type { BulkSendResponse } from "./api.js";
 export type PersonalizedSmsResult = {
   recipient: string;
   outcome: string;
+  accepted: boolean;
   messageId?: string;
 };
 
@@ -39,13 +40,12 @@ ${messageIdRows}`
 }
 
 export function personalizedResultsMarkdown(results: PersonalizedSmsResult[]): string {
-  const accepted = results.filter((result) => result.outcome === "Accepted");
+  const accepted = results.filter((result) => result.accepted);
   const failed = results.length - accepted.length;
   const rows = results
     .map((result, index) => {
-      const status = result.outcome === "Accepted" ? "Accepted" : "Failed";
-      const detail =
-        result.outcome === "Accepted" ? (result.messageId ?? "Accepted without message ID") : result.outcome;
+      const status = result.accepted ? "Accepted" : "Failed";
+      const detail = result.accepted ? (result.messageId ?? result.outcome) : result.outcome;
 
       return `| ${index + 1} | ${result.recipient} | ${status} | ${escapeTableCell(detail)} |`;
     })

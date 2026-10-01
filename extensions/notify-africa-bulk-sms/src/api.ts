@@ -10,7 +10,7 @@ export type BulkSendResponse = {
   rejectedCount: number;
   creditsDeducted: number;
   remainingBalance: number;
-  results: Array<{ messageId?: string }>;
+  results: Array<{ messageId?: string; status?: string }>;
 };
 
 export class NotifyApiError extends Error {

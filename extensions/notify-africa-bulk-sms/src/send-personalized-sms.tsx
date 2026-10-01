@@ -68,9 +68,7 @@ export default function SendPersonalizedSms() {
         title: "Sending personalized SMS…",
       });
       const nextResults = await sendMessages(apiKey, senderId, messages);
-      toast.style = nextResults.every((result) => result.outcome === "Accepted")
-        ? Toast.Style.Success
-        : Toast.Style.Failure;
+      toast.style = nextResults.every((result) => result.accepted) ? Toast.Style.Success : Toast.Style.Failure;
       toast.title = "Personalized SMS complete";
       setResults(nextResults);
     } catch (caught) {
@@ -129,10 +127,14 @@ async function sendMessages(
 }
 
 function personalizedResults(messages: SmsMessage[], response: BulkSendResponse): PersonalizedSmsResult[] {
-  const outcome = response.rejectedCount === 0 ? "Accepted" : "Submitted; check delivery status";
   return messages.map((message, index) => ({
     recipient: message.recipient,
-    outcome,
+    accepted: isAcceptedStatus(response.results[index]?.status),
+    outcome: response.results[index]?.status ?? "Unknown",
     messageId: response.results[index]?.messageId,
   }));
+}
+
+function isAcceptedStatus(status: string | undefined): boolean {
+  return Boolean(status && !["FAILED", "CANCELLED"].includes(status.toUpperCase()));
 }
