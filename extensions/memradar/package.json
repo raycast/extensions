@@ -10,7 +10,8 @@
     "Data"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
