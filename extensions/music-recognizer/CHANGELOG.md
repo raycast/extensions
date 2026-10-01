@@ -1,6 +1,6 @@
 # Music Recognizer Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-01
 
 - Recognize the song currently playing on your PC from system loopback audio (no extra drivers or binaries)
 - Powered by AudD's music recognition API, using your own API token
