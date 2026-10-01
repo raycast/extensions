@@ -41,6 +41,7 @@ import {
 } from "../lib/link-context.js";
 import { fetchImages, imageDecision, imageQuestion } from "../lib/link-images.js";
 import { linkKindOf, loadLinkContext } from "../lib/link-loader.js";
+import { escapeMarkdown, withoutImages } from "../lib/format.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
 import { timestampUrl } from "../lib/sources/video.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
@@ -216,9 +217,10 @@ function overviewMarkdown(ctx: LinkContext): string {
   const parts: string[] = [];
   const image = safeImageUrl(ctx.thumbnail);
   if (image) parts.push(`![${ctx.kind === "post" ? "First image" : "Thumbnail"}](${image})`);
-  parts.push(`## ${ctx.title}`);
+  // Titles, names and chapters come from the page or the video: shown as text, never as Markdown.
+  parts.push(`## ${escapeMarkdown(ctx.title)}`);
   const line = [
-    ctx.author,
+    ctx.author ? escapeMarkdown(ctx.author) : undefined,
     ctx.kind === "video" && ctx.video?.duration ? formatTimestamp(ctx.video.duration) : undefined,
     stat(ctx, "Views") ? `${stat(ctx, "Views")} views` : undefined,
     fact(ctx, "Reading time") ? `${fact(ctx, "Reading time")} read` : undefined,
@@ -230,7 +232,9 @@ function overviewMarkdown(ctx: LinkContext): string {
     parts.push(
       [
         "### Chapters",
-        ...ctx.chapters.map((c) => linkifyTimestamps(`- [${formatTimestamp(c.start_time)}] ${c.title}`, link)),
+        ...ctx.chapters.map((c) =>
+          linkifyTimestamps(`- [${formatTimestamp(c.start_time)}] ${escapeMarkdown(c.title)}`, link),
+        ),
       ].join("\n"),
     );
   }
@@ -259,7 +263,11 @@ function turnMarkdown(turn: Turn, ctx: LinkContext | undefined): string {
   let body: string;
   if (turn.status === "error") body = `**Couldn't answer.** ${turn.error ?? ""}`;
   else if (!turn.answer) body = `_${turn.progress ?? "Thinking…"}_`;
-  else body = ctx?.kind === "video" ? linkifyTimestamps(turn.answer, (s) => timestampUrl(ctx, s)) : turn.answer;
+  else {
+    // A page can steer the model's Markdown; Raycast would load any image in it.
+    const answer = withoutImages(turn.answer);
+    body = ctx?.kind === "video" ? linkifyTimestamps(answer, (s) => timestampUrl(ctx, s)) : answer;
+  }
   const took =
     turn.finishedAt && turn.status === "done"
       ? ` · ${Math.max(1, Math.round((turn.finishedAt - turn.askedAt) / 1000))}s`

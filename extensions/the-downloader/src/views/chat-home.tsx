@@ -16,7 +16,7 @@ import {
 import { EnginePreference, engineSettings } from "../lib/ai-engines.js";
 import { StoredChat, deleteChat, loadChats } from "../lib/chat-store.js";
 import { LinkKind } from "../lib/link-context.js";
-import { plural } from "../lib/format.js";
+import { escapeMarkdown, plural, withoutImages } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { linkKindOf } from "../lib/link-loader.js";
 import { isValidUrl } from "../utils.js";
@@ -46,12 +46,12 @@ function chatMarkdown(chat: StoredChat): string {
     .slice(-3)
     .map(
       (t) =>
-        `**${t.question.replace(/\n/g, " ")}**\n\n${t.answer.length > 400 ? `${t.answer.slice(0, 400)}…` : t.answer}`,
+        `**${escapeMarkdown(t.question.replace(/\n/g, " "))}**\n\n${withoutImages(t.answer.length > 400 ? `${t.answer.slice(0, 400)}…` : t.answer)}`,
     );
   return [
     thumb ? `![Thumbnail](${thumb})` : "",
-    `## ${chat.title}`,
-    [chat.channel, hostOf(chat.url)].filter(Boolean).join(" · "),
+    `## ${escapeMarkdown(chat.title)}`,
+    escapeMarkdown([chat.channel, hostOf(chat.url)].filter(Boolean).join(" · ")),
     ...recent,
   ]
     .filter(Boolean)

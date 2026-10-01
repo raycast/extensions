@@ -31,3 +31,13 @@ describe("canChat", () => {
     expect(canChat("spotify")).toBe(false);
   });
 });
+
+describe("safeImageUrl and local addresses", () => {
+  it("refuses images on IP addresses and local names, which Raycast would fetch from this Mac", () => {
+    expect(safeImageUrl("https://192.168.1.1/admin.png")).toBeUndefined();
+    expect(safeImageUrl("https://[::1]/x.png")).toBeUndefined();
+    expect(safeImageUrl("https://router.local/x.png")).toBeUndefined();
+    expect(safeImageUrl("https://nas.internal/x.png")).toBeUndefined();
+    expect(safeImageUrl("https://i.ytimg.com/vi/abc/hq.jpg")).toBe("https://i.ytimg.com/vi/abc/hq.jpg");
+  });
+});

@@ -1,3 +1,5 @@
+import net from "node:net";
+import { isBlockedHostname } from "./safe-fetch.js";
 import { Color, Icon } from "@raycast/api";
 import { DownloadKind } from "./download-session.js";
 
@@ -56,7 +58,10 @@ export function safeImageUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
   try {
     const u = new URL(url);
-    return u.protocol === "https:" ? u.toString().replace(/\(/g, "%28").replace(/\)/g, "%29") : undefined;
+    // Raycast fetches the image from this Mac: never from a local name or a bare IP address.
+    const host = u.hostname.replace(/^\[|\]$/g, "");
+    if (u.protocol !== "https:" || net.isIP(host) || isBlockedHostname(host)) return undefined;
+    return u.toString().replace(/\(/g, "%28").replace(/\)/g, "%29");
   } catch {
     return undefined;
   }

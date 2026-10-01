@@ -71,3 +71,17 @@ export function progressMessage(p: { percent?: number; speed?: number; eta?: num
 export function escapeMarkdown(text: string): string {
   return text.replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, "\\$&");
 }
+
+/**
+ * Markdown from an untrusted source (an AI answer a web page could steer)
+ * without images: Raycast loads them by itself, so one could carry chat text to
+ * any server or make this Mac request a local address. Inline and reference
+ * images become their alt text; image-like HTML tags are dropped. Links stay —
+ * they only open when clicked.
+ */
+export function withoutImages(markdown: string): string {
+  return markdown
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/!\[([^\]]*)\]\[[^\]]*\]/g, "$1")
+    .replace(/<(img|picture|source|video|audio|iframe|object|embed)\b[^>]*>/gi, "");
+}
