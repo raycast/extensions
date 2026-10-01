@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.1] - {PR_MERGE_DATE}
+
+### Changed
+
+- The AI Chat store screenshot is recomposed on the shared background like the other screenshots
+
 ## [1.3.0] - {PR_MERGE_DATE}
 
 ### Fixed
