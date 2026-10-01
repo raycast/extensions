@@ -20,7 +20,7 @@ import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshR
 
 interface TotpItem extends Item {
   currentTotp?: string;
-  /** 30-second step the code was fetched in: it's only valid during that step. */
+  /** 30-second step the code was asked for in: it's only taken as valid during that step. */
   codeStep?: number;
 }
 
@@ -28,11 +28,18 @@ function getTotpTimeStep(): number {
   return Math.floor(Date.now() / 30_000);
 }
 
+/** Codes asked for in an earlier step may have expired, e.g. when a step boundary passed during a load. */
+function hasOutdatedCode(items: TotpItem[]): boolean {
+  return items.some((item) => item.currentTotp && item.codeStep !== getTotpTimeStep());
+}
+
 /** The item with its current code. If that fails, an earlier code is kept only while it's still valid. */
 async function withCurrentCode(item: TotpItem): Promise<TotpItem> {
+  // Taken before asking: a code that arrives after a step boundary may belong to the earlier step.
+  const step = getTotpTimeStep();
   try {
     const totp = await getTotp(item.shareId, item.itemId);
-    return { ...item, currentTotp: totp, codeStep: getTotpTimeStep() };
+    return { ...item, currentTotp: totp, codeStep: step };
   } catch {
     // An expired code must neither be shown nor copied.
     return item.codeStep === getTotpTimeStep() ? item : { ...item, currentTotp: undefined, codeStep: undefined };
@@ -96,6 +103,7 @@ export default function Command() {
         if (!isLatest()) return;
         setItems(itemsWithTotp);
         itemsRef.current = itemsWithTotp;
+        if (hasOutdatedCode(itemsWithTotp)) void refreshTotpCodes();
       }
     }
 
@@ -125,6 +133,7 @@ export default function Command() {
       if (!isLatest()) return;
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
+      if (hasOutdatedCode(itemsWithTotp)) void refreshTotpCodes();
       if (failedVaults.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
@@ -174,9 +183,22 @@ export default function Command() {
   const errorView = renderErrorView(error, loadTotpItems, "Load TOTP Items");
   if (errorView) return errorView;
 
-  async function copyTotp(totp: string, title: string) {
-    await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
-    showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: title });
+  async function copyTotp(item: TotpItem) {
+    try {
+      // A code asked for in an earlier step may have expired: copy a fresh one instead.
+      const totp =
+        item.currentTotp && item.codeStep === getTotpTimeStep()
+          ? item.currentTotp
+          : await getTotp(item.shareId, item.itemId);
+      await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
+      showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: item.title });
+    } catch (error: unknown) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Copy TOTP",
+        message: error instanceof Error ? error.message.split("\n")[0] : String(error),
+      });
+    }
   }
 
   function getTimerColor(): Color {
@@ -206,11 +228,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 {item.currentTotp && (
-                  <Action
-                    title="Copy TOTP Code"
-                    icon={Icon.Clipboard}
-                    onAction={() => copyTotp(item.currentTotp!, item.title)}
-                  />
+                  <Action title="Copy TOTP Code" icon={Icon.Clipboard} onAction={() => copyTotp(item)} />
                 )}
                 <Action
                   title="Refresh Codes"
