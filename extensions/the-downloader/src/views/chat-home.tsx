@@ -64,6 +64,10 @@ function chatMarkdown(chat: StoredChat): string {
  */
 export function ChatHome({ initialText = "" }: { initialText?: string }) {
   const [searchText, setSearchText] = useState(initialText);
+  // A pasted link must take ↵ — otherwise the recent chat that was selected keeps it.
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    isValidUrl(initialText.trim()) ? `start-${initialText.trim()}` : undefined,
+  );
   const [chats, setChats] = useState<StoredChat[]>();
   const [found, setFound] = useState<Candidate[]>([]);
   const prefs = useMemo(() => getPreferenceValues<Preferences.ChatLink>(), []);
@@ -130,7 +134,12 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
       isLoading={chats === undefined}
       filtering={false}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        if (isValidUrl(text.trim())) setSelectedId(`start-${text.trim()}`);
+      }}
+      selectedItemId={selectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       searchBarPlaceholder="Paste a link, or search your chats…"
       isShowingDetail={shown.length > 0 || starts.length > 0 || (!!engine.status && !engine.status.ready)}
     >
