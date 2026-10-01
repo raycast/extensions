@@ -1,0 +1,6 @@
+node_modules
+swift/locatecursor/.build
+swift/locatecursor/.build/artifacts
+swift/locatecursor/.raycast-swift-build
+swift/locatecursor/.swiftpm
+.DS_Store
