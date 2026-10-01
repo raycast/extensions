@@ -1,9 +1,68 @@
 import find from "local-devices";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { cloudLogin, loginDeviceByIp, TapoDevice } from "tp-link-tapo-connect";
 
 import { AvailableDevice, DeviceStatusEnum, DeviceTypeEnum, Device } from "./types";
 import { isWindows, normaliseMacAddress } from "./utils";
+
+const LOCAL_REQUEST_TIMEOUT_MS = 3000;
+
+type TapoClient = Awaited<ReturnType<typeof loginDeviceByIp>>;
+
+const cache = new Cache();
+const clients = new Map<string, TapoClient>();
+
+const devicesCacheKey = () => `devices:${getPreferenceValues<Preferences>().email}`;
+
+const withTimeout = async <T>(promise: Promise<T>): Promise<T> => {
+  let timer: NodeJS.Timeout | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("Device did not respond in time")), LOCAL_REQUEST_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+// Reuses the device session, logging in again if it has expired.
+const withDeviceClient = async <T>(ip: string, request: (client: TapoClient) => Promise<T>): Promise<T> => {
+  const cachedClient = clients.get(ip);
+
+  if (cachedClient) {
+    try {
+      return await withTimeout(request(cachedClient));
+    } catch {
+      clients.delete(ip);
+    }
+  }
+
+  const { email, password } = getPreferenceValues<Preferences>();
+  const client = await withTimeout(loginDeviceByIp(email, password, ip));
+  clients.set(ip, client);
+
+  return withTimeout(request(client));
+};
+
+// Maps each IP to the ID of the device last confirmed to be there.
+const verifiedDeviceIds = new Map<string, string>();
+
+// Guards against a cached IP having been reassigned to another device.
+const getVerifiedDeviceInfo = async (client: TapoClient, device: Device, ip: string) => {
+  const deviceInfo = await client.getDeviceInfo();
+
+  if (normaliseMacAddress(deviceInfo.mac) !== normaliseMacAddress(device.macAddress)) {
+    verifiedDeviceIds.delete(ip);
+    throw new Error(`Device at ${ip} is not ${device.alias}`);
+  }
+
+  verifiedDeviceIds.set(ip, device.deviceId);
+  return deviceInfo;
+};
 
 const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum | null => {
   switch (tapoDeviceType) {
@@ -43,7 +102,13 @@ const tapoDeviceToDevice = (tapoDevice: TapoDevice): Device | null => {
 const isSupportedDevice = (device: Device): boolean =>
   device.type === DeviceTypeEnum.Plug || device.type === DeviceTypeEnum.Bulb;
 
-export const getDevices = async (): Promise<Device[]> => {
+export const getDevices = async (useCache = false): Promise<Device[]> => {
+  const cachedDevices = useCache ? cache.get(devicesCacheKey()) : undefined;
+
+  if (cachedDevices) {
+    return JSON.parse(cachedDevices);
+  }
+
   const { email, password } = getPreferenceValues<Preferences>();
 
   const cloudAPI = await cloudLogin(email, password);
@@ -55,33 +120,38 @@ export const getDevices = async (): Promise<Device[]> => {
     .filter(isSupportedDevice);
 };
 
-export const turnDeviceOn = async (device: AvailableDevice): Promise<void> => {
-  const { email, password } = getPreferenceValues<Preferences>();
+export const saveDevices = (devices: Device[]): void => cache.set(devicesCacheKey(), JSON.stringify(devices));
 
-  const toast = await showToast({ title: `Turning ${device.alias} on...`, style: Toast.Style.Animated });
-
-  // We will only call this function with available, logged-in devices, so we can
-  // assume that they key is there.
-  const tapoClient = await loginDeviceByIp(email, password, device.ip);
-  await tapoClient.turnOn();
-
-  toast.style = Toast.Style.Success;
-  toast.title = `Turned ${device.alias} on.`;
+export const clearSavedDevices = (): void => {
+  cache.remove(devicesCacheKey());
 };
 
-export const turnDeviceOff = async (device: AvailableDevice): Promise<void> => {
-  const { email, password } = getPreferenceValues<Preferences>();
+const setDevicePower = async (device: AvailableDevice, turnOn: boolean): Promise<void> => {
+  const state = turnOn ? "on" : "off";
+  const toast = await showToast({ title: `Turning ${device.alias} ${state}...`, style: Toast.Style.Animated });
 
-  const toast = await showToast({ title: `Turning ${device.alias} off...`, style: Toast.Style.Animated });
+  try {
+    await withDeviceClient(device.ip, async (client) => {
+      if (verifiedDeviceIds.get(device.ip) !== device.deviceId) {
+        await getVerifiedDeviceInfo(client, device, device.ip);
+      }
 
-  // We will only call this function with available, logged-in devices, so we can
-  // assume that they key is there.
-  const tapoClient = await loginDeviceByIp(email, password, device.ip);
-  await tapoClient.turnOff();
+      return turnOn ? client.turnOn() : client.turnOff();
+    });
 
-  toast.style = Toast.Style.Success;
-  toast.title = `Turned ${device.alias} off.`;
+    toast.style = Toast.Style.Success;
+    toast.title = `Turned ${device.alias} ${state}.`;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = `Failed to turn ${device.alias} ${state}`;
+    toast.message = (error as Error).message;
+    throw error;
+  }
 };
+
+export const turnDeviceOn = (device: AvailableDevice): Promise<void> => setDevicePower(device, true);
+
+export const turnDeviceOff = (device: AvailableDevice): Promise<void> => setDevicePower(device, false);
 
 export const locateDevicesOnLocalNetwork = async (devices: Device[]): Promise<Device[]> => {
   const arpPath = isWindows ? "C:\\Windows\\System32\\arp.exe" : "/usr/sbin/arp";
@@ -97,30 +167,30 @@ export const locateDevicesOnLocalNetwork = async (devices: Device[]): Promise<De
 
       return { ...device, ip, availabilityStatus: DeviceStatusEnum.Available };
     } else {
-      return { ...device, availabilityStatus: DeviceStatusEnum.NotAvailable };
+      return { ...device, ip: undefined, availabilityStatus: DeviceStatusEnum.NotAvailable };
     }
   });
 };
 
-export const queryDevicesOnLocalNetwork = async (devices: Device[]) => {
-  const { email, password } = getPreferenceValues<Preferences>();
-
-  return Promise.all(
+export const queryDevicesOnLocalNetwork = async (devices: Device[]): Promise<Device[]> =>
+  Promise.all(
     devices.map(async (device) => {
-      if (device.ip) {
-        const tapoClient = await loginDeviceByIp(email, password, device.ip);
-        const deviceInfo = await tapoClient.getDeviceInfo();
-        const isTurnedOn = deviceInfo.device_on;
-
-        return { ...device, ...tapoClient, isTurnedOn };
-      } else {
+      if (!device.ip) {
         // We haven't been able to locate this device on the local network, so we won't
         // be able to query its state.
-        return device;
+        return { ...device, availabilityStatus: DeviceStatusEnum.NotAvailable };
+      }
+
+      try {
+        const ip = device.ip;
+        const deviceInfo = await withDeviceClient(ip, (client) => getVerifiedDeviceInfo(client, device, ip));
+
+        return { ...device, availabilityStatus: DeviceStatusEnum.Available, isTurnedOn: deviceInfo.device_on };
+      } catch {
+        return { ...device, availabilityStatus: DeviceStatusEnum.NotAvailable };
       }
     }),
   );
-};
 
 export const isAvailableDevice = (device: Device): device is AvailableDevice =>
   device.availabilityStatus === DeviceStatusEnum.Available;

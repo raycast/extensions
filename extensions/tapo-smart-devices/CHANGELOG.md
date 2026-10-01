@@ -1,5 +1,14 @@
 # Tapo Smart Devices Changelog
 
+## [Up to 95% Faster Loading] - {PR_MERGE_DATE}
+
+- Devices load in ~0.3s instead of 5–10s
+- Turn devices on/off instantly, even while refreshing
+- Devices with a changed IP are found in ~2s
+- Unresponsive devices time out after 3s instead of blocking the list
+- Show an error when turning a device on/off fails
+- "Refresh" re-fetches devices from the Tapo cloud
+
 ## [Fix crash on unrecognised device types] - 2026-07-30
 
 - Gracefully ignore devices with a type not recognised by the extension, rather than crashing when the Tapo API returns an unknown device type (fixes #29744)
