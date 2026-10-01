@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Adopt Apps] - {PR_MERGE_DATE}
+## [Adopt Apps] - 2026-10-01
 
 - New **Adopt Apps** command: finds apps already on your Mac that Homebrew has a cask for, and hands them to Homebrew so they upgrade with everything else
 - Matches are grouped by what vouches for them — **Ready to Adopt**, **Likely Adoptable**, **Unlikely Adoptions** — and anything not ready goes through **Preview Adoption** (⌘⇧I) first. An app Homebrew would refuse to adopt as it stands (missing files the cask links, or a conflicting cask already installed) is listed under **Can't Adopt**, with the reason in its tooltip
