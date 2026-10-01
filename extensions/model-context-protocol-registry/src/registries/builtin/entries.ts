@@ -822,7 +822,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "trvlrr",
     title: "Trvlrr",
     description:
-      "Your travel journal in Raycast: every trip you've taken and the ones you're planning, with their flights, stays, activities and expenses, plus lifetime stats (countries, cities, flights, distance) and photo search. Ask about a trip, add a booking by pasting it, or import a whole trip from anywhere. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key to paste.",
+      "Your travel journal in Raycast: every trip you've taken and the ones you're planning, with their flights, stays, activities and expenses, plus lifetime stats (countries, cities, flights, distance) and, with Trvlrr Plus, photo search. Ask about a trip, add a booking by pasting it, or import a whole trip from anywhere. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key to paste.",
     icon: "https://trvlrr.app/icon-512.png",
     homepage: "https://trvlrr.app/features/ai-assistant",
     configuration: {

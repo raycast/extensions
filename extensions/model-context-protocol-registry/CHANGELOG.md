@@ -1,8 +1,8 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Trvlrr MCP Server] - 2026-10-01
+## [Add Trvlrr MCP Server] - {PR_MERGE_DATE}
 
-- Add Trvlrr to the official registry: a travel journal and trip planner — trips taken and planned with their flights, stays, activities and expenses, lifetime travel stats and photo search; ask about a trip, add a booking or import a trip from anywhere. Hosted remote Streamable HTTP server at https://trvlrr.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key.
+- Add Trvlrr to the official registry: a travel journal and trip planner — trips taken and planned with their flights, stays, activities and expenses, lifetime travel stats and, with Trvlrr Plus, photo search; ask about a trip, add a booking or import a trip from anywhere. Hosted remote Streamable HTTP server at https://trvlrr.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key.
 
 ## [Add 60fps MCP Server] - 2026-09-30
 
