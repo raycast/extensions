@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { parseEventStream } from "./sse";
+import { unwrapUntrusted } from "./untrusted";
 
 const MCP_URL = "https://api.val.town/v3/mcp";
 
@@ -84,12 +85,6 @@ export async function callTool<T>(name: string, args: Record<string, unknown> = 
   } catch {
     throw new McpError(`${name} answered with something other than JSON: ${text.slice(0, 200)}`);
   }
-}
-
-/** Blob and SQLite results arrive inside prose and an untrusted-output tag, not as bare JSON. */
-function unwrapUntrusted(text: string): string {
-  const match = text.match(/<untrusted-output\b[^\n]*? id="([^"]+)">\r?\n([\s\S]*?)\r?\n<\/untrusted-output id="\1">/);
-  return match ? match[2] : text;
 }
 
 /** For a tool whose success is an empty response, where no body is the expected answer. */
