@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Devino MCP Servers] - {PR_MERGE_DATE}
+## [Add Devino MCP Servers] - 2026-10-01
 
 - Add 13 remote MCP servers from Devino Solutions to the official registry: BioFlow, DoDomain, GetItDone, Notifly, Postify, Sendly, Shorty, SnapVisor, SuperBooks, uNotes, upAPI, Uptimely, VoiceLabs. Each is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.
 
