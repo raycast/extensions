@@ -14,17 +14,24 @@ export function hostnameOf(url: string): string {
   }
 }
 
-/** Labels for an item's websites: the hostname, plus the path for websites that share a hostname. */
+/**
+ * Labels for an item's websites: the hostname, plus as much of the path and query string as needed to tell
+ * apart websites that share it.
+ */
 export function websiteLabels(urls: string[]): string[] {
-  const hosts = urls.map(hostnameOf);
-  return urls.map((url, index) => {
-    if (hosts.filter((host) => host === hosts[index]).length < 2) return hosts[index];
+  const levels = urls.map((url) => {
+    const host = hostnameOf(url);
     try {
-      const path = new URL(toOpenableUrl(url)).pathname.replace(/\/+$/, "");
-      return `${hosts[index]}${path}`;
+      const { pathname, search, hash } = new URL(toOpenableUrl(url));
+      const path = `${host}${pathname.replace(/\/+$/, "")}`;
+      return [host, path, `${path}${search}`, `${path}${search}${hash}`];
     } catch {
-      return url;
+      return [url];
     }
+  });
+  return levels.map((options) => {
+    const unique = options.find((label, level) => levels.filter((other) => other[level] === label).length < 2);
+    return unique ?? options[options.length - 1];
   });
 }
 

@@ -53,4 +53,12 @@ test("tells websites on the same hostname apart by their path", () => {
     "example.com/login",
     "example.com/settings",
   ]);
+  assert.deepEqual(
+    websiteLabels(["https://example.com/a?team=1", "https://example.com/a?team=2", "https://example.com/b"]),
+    ["example.com/a?team=1", "example.com/a?team=2", "example.com/b"],
+  );
+  assert.deepEqual(websiteLabels(["https://example.com/a", "https://example.com/a"]), [
+    "example.com/a",
+    "example.com/a",
+  ]);
 });
