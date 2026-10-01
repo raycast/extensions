@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { memo } from "react";
-import { canFillFrontmostApp, fillFrontmostApp } from "./autofill";
+import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
 import { ItemView } from "./item-view";
@@ -76,6 +76,8 @@ export const ItemActions = memo(function ItemActions({
   /** Pastes into the app that was in front of Raycast; the 2FA code is then left in the clipboard. */
   async function fill(fields: "login" | "email" | "username" | "password") {
     try {
+      // Taken first: loading the item can take a moment, during which another app could come in front.
+      const target = await getTargetApp();
       const loaded = await loadDetail();
       // Most logins use the email, so it comes first; the username is used when there's no email.
       const identifier = loaded.email ?? loaded.username;
@@ -96,7 +98,7 @@ export const ItemActions = memo(function ItemActions({
         return;
       }
       onUse(item);
-      await fillFrontmostApp({
+      await fillApp(target, {
         values,
         submit: fields === "login" && preferences.submitAfterFill,
         getClipboardValue:
@@ -115,9 +117,10 @@ export const ItemActions = memo(function ItemActions({
 
   async function pasteTotpCode() {
     try {
+      const target = await getTargetApp();
       const code = await getTotpCode();
       onUse(item);
-      await fillFrontmostApp({ values: [code] });
+      await fillApp(target, { values: [code] });
     } catch (error: unknown) {
       await showToast({
         style: Toast.Style.Failure,

@@ -16,9 +16,20 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-interface TargetApp {
+/** The app to fill: the one Raycast was opened from. */
+export interface TargetApp {
   name: string;
   bundleId: string;
+}
+
+/**
+ * Takes the app to fill, i.e. the frontmost app, which is the one Raycast was opened from. Call it as soon as
+ * the action runs, before anything slow such as loading the item, so that no other app can become the target.
+ */
+export async function getTargetApp(): Promise<TargetApp> {
+  const app = await getFrontmostApplication().catch(() => undefined);
+  if (!app || !isBundleId(app.bundleId)) throw new TargetAppError("Couldn't find the app to fill");
+  return { name: app.name, bundleId: app.bundleId };
 }
 
 function notInFront(app: TargetApp): TargetAppError {
@@ -30,10 +41,8 @@ async function isInFront(app: TargetApp): Promise<boolean> {
   return bundleId.toLowerCase() === app.bundleId.toLowerCase();
 }
 
-/** Fills the app Raycast was opened from, and only that app: every key press checks that it's in front. */
-function createRaycastDriver(): FillDriver {
-  let target: TargetApp | undefined;
-
+/** Fills the target app, and only that app: every key press checks that it's in front. */
+function createRaycastDriver(target: TargetApp): FillDriver {
   return {
     readClipboard: () => Clipboard.read(),
     async restoreClipboard(previous) {
@@ -46,7 +55,6 @@ function createRaycastDriver(): FillDriver {
     },
     copyConcealed: (value) => Clipboard.copy(value, { concealed: true }),
     async pressKey(keyCode, modifiers = []) {
-      if (!target) throw new TargetAppError("Couldn't find the app to fill");
       try {
         await runAppleScript(keyPressScript(keyCode, modifiers, target.bundleId));
       } catch (error: unknown) {
@@ -55,11 +63,6 @@ function createRaycastDriver(): FillDriver {
       }
     },
     async returnToPreviousApp() {
-      // The frontmost app is the one Raycast was opened from, i.e. the app to fill.
-      const app = await getFrontmostApplication().catch(() => undefined);
-      if (!app || !isBundleId(app.bundleId)) throw new TargetAppError("Couldn't find the app to fill");
-      target = { name: app.name, bundleId: app.bundleId };
-
       // Keep the command running while filling; finish() goes back to the root search.
       await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Suspended });
       await wait(FOCUS_DELAY_MS);
@@ -77,7 +80,7 @@ function createRaycastDriver(): FillDriver {
   };
 }
 
-/** Closes Raycast and pastes values into the app that was in front of it; see runFill(). */
-export function fillFrontmostApp(request: FillRequest): Promise<void> {
-  return runFill(createRaycastDriver(), request);
+/** Closes Raycast and pastes values into the target app, from getTargetApp(); see runFill(). */
+export function fillApp(target: TargetApp, request: FillRequest): Promise<void> {
+  return runFill(createRaycastDriver(target), request);
 }
