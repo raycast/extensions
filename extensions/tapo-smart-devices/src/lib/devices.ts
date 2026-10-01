@@ -14,14 +14,14 @@ const clients = new Map<string, TapoClient>();
 
 const devicesCacheKey = () => `devices:${getPreferenceValues<Preferences>().email}`;
 
-const withTimeout = async <T>(promise: Promise<T>): Promise<T> => {
+const withDeadline = async <T>(promise: Promise<T>, deadline: number): Promise<T> => {
   let timer: NodeJS.Timeout | undefined;
 
   try {
     return await Promise.race([
       promise,
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error("Device did not respond in time")), LOCAL_REQUEST_TIMEOUT_MS);
+        timer = setTimeout(() => reject(new Error("Device did not respond in time")), deadline - Date.now());
       }),
     ]);
   } finally {
@@ -31,22 +31,28 @@ const withTimeout = async <T>(promise: Promise<T>): Promise<T> => {
 
 // Reuses the device session, logging in again if it has expired.
 const withDeviceClient = async <T>(ip: string, request: (client: TapoClient) => Promise<T>): Promise<T> => {
+  // One deadline covers the retry too, so a dead device can't exceed the timeout.
+  const deadline = Date.now() + LOCAL_REQUEST_TIMEOUT_MS;
   const cachedClient = clients.get(ip);
 
   if (cachedClient) {
     try {
-      return await withTimeout(request(cachedClient));
+      return await withDeadline(request(cachedClient), deadline);
     } catch {
       clients.delete(ip);
     }
   }
 
   const { email, password } = getPreferenceValues<Preferences>();
-  const client = await withTimeout(loginDeviceByIp(email, password, ip));
+  const client = await withDeadline(loginDeviceByIp(email, password, ip), deadline);
   clients.set(ip, client);
 
-  return withTimeout(request(client));
+  return withDeadline(request(client), deadline);
 };
+
+// tp-link-tapo-connect only reports failed logins through its error messages.
+const isSignInError = (error: unknown): boolean =>
+  error instanceof Error && /password|credential|login/i.test(error.message);
 
 // Maps each IP to the ID of the device last confirmed to be there.
 const verifiedDeviceIds = new Map<string, string>();
@@ -126,6 +132,19 @@ export const clearSavedDevices = (): void => {
   cache.remove(devicesCacheKey());
 };
 
+// Runs power commands for each device one at a time, so they reach it in the order they were issued.
+const powerCommandQueues = new Map<string, Promise<void>>();
+
+const enqueuePowerCommand = (deviceId: string, command: () => Promise<void>): Promise<void> => {
+  const result = (powerCommandQueues.get(deviceId) ?? Promise.resolve()).then(command);
+  powerCommandQueues.set(
+    deviceId,
+    result.catch(() => undefined),
+  );
+
+  return result;
+};
+
 const setDevicePower = async (device: AvailableDevice, turnOn: boolean): Promise<void> => {
   const state = turnOn ? "on" : "off";
   const toast = await showToast({ title: `Turning ${device.alias} ${state}...`, style: Toast.Style.Animated });
@@ -149,9 +168,11 @@ const setDevicePower = async (device: AvailableDevice, turnOn: boolean): Promise
   }
 };
 
-export const turnDeviceOn = (device: AvailableDevice): Promise<void> => setDevicePower(device, true);
+export const turnDeviceOn = (device: AvailableDevice): Promise<void> =>
+  enqueuePowerCommand(device.deviceId, () => setDevicePower(device, true));
 
-export const turnDeviceOff = (device: AvailableDevice): Promise<void> => setDevicePower(device, false);
+export const turnDeviceOff = (device: AvailableDevice): Promise<void> =>
+  enqueuePowerCommand(device.deviceId, () => setDevicePower(device, false));
 
 export const locateDevicesOnLocalNetwork = async (devices: Device[]): Promise<Device[]> => {
   const arpPath = isWindows ? "C:\\Windows\\System32\\arp.exe" : "/usr/sbin/arp";
@@ -186,8 +207,10 @@ export const queryDevicesOnLocalNetwork = async (devices: Device[]): Promise<Dev
         const deviceInfo = await withDeviceClient(ip, (client) => getVerifiedDeviceInfo(client, device, ip));
 
         return { ...device, availabilityStatus: DeviceStatusEnum.Available, isTurnedOn: deviceInfo.device_on };
-      } catch {
-        return { ...device, availabilityStatus: DeviceStatusEnum.NotAvailable };
+      } catch (error) {
+        const availabilityStatus = isSignInError(error) ? DeviceStatusEnum.SignInFailed : DeviceStatusEnum.NotAvailable;
+
+        return { ...device, availabilityStatus };
       }
     }),
   );

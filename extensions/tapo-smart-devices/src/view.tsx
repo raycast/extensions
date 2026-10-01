@@ -1,6 +1,6 @@
-import { ActionPanel, List, Action, showToast, Toast, Keyboard } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast, Keyboard, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AvailableDevice, Device } from "./lib/types";
+import { AvailableDevice, Device, DeviceStatusEnum } from "./lib/types";
 import {
   clearSavedDevices,
   getDeviceIcon,
@@ -17,7 +17,11 @@ import { split } from "./lib/utils";
 
 const SCAN_DELAY_MS = 500;
 
+let latestFetchId = 0;
+
 const fetchDevices = async () => {
+  const fetchId = ++latestFetchId;
+
   try {
     const cachedDevices = await getDevices(true);
     const queryingDevices = queryDevicesOnLocalNetwork(cachedDevices);
@@ -46,7 +50,11 @@ const fetchDevices = async () => {
             return isAvailableDevice(device) || locatedDevice.ip ? device : locatedDevice;
           }),
         );
-    saveDevices(augmentedLocatedDevices);
+
+    // An older fetch finishing last must not overwrite a newer device list.
+    if (fetchId === latestFetchId) {
+      saveDevices(augmentedLocatedDevices);
+    }
     return augmentedLocatedDevices;
   } catch (error) {
     showToast({ title: (error as Error).toString(), style: Toast.Style.Failure });
@@ -133,6 +141,7 @@ const AvailableDeviceListItem = (props: AvailableDeviceProps) => {
 
 const UnavailableDeviceListItem = (props: { device: Device; revalidate: () => void }) => {
   const { device, revalidate } = props;
+  const signInFailed = device.availabilityStatus === DeviceStatusEnum.SignInFailed;
 
   return (
     <List.Item
@@ -140,8 +149,14 @@ const UnavailableDeviceListItem = (props: { device: Device; revalidate: () => vo
       subtitle={device.name}
       key={device.deviceId}
       icon={getDeviceIcon(device)}
+      accessories={
+        signInFailed
+          ? [{ icon: Icon.Warning, text: "Sign-in failed", tooltip: "Check your Tapo email and password" }]
+          : undefined
+      }
       actions={
         <ActionPanel>
+          {signInFailed && <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />}
           <Action title="Refresh" onAction={revalidate} />
         </ActionPanel>
       }
