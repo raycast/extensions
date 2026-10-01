@@ -69,22 +69,24 @@ function useCachedCover(file: string): boolean {
   }
 }
 
-async function extract(key: string, album: string): Promise<string | undefined> {
+async function extract(key: string, artist: string, album: string): Promise<string | undefined> {
   const finalPath = path.join(artworkDir, `${key}.png`);
   const missPath = path.join(artworkDir, `${key}.miss`);
   const rawPath = path.join(artworkDir, `${key}.raw`);
 
-  // Writes the artwork's original bytes to disk. The album check guards
-  // against the track changing between the snapshot and this call.
+  // Writes the artwork's original bytes to disk. The cache key is artist +
+  // album, so both must still match: otherwise the track changed since the
+  // snapshot and we could cache the wrong cover under this key.
   const result = await runAppleScript(
     `
     on run argv
       set rawPath to item 1 of argv
-      set expectedAlbum to item 2 of argv
+      set expectedArtist to item 2 of argv
+      set expectedAlbum to item 3 of argv
       tell application "Music"
         if player state is stopped then return "none"
         set t to current track
-        if (album of t) is not expectedAlbum then return "mismatch"
+        if (artist of t) is not expectedArtist or (album of t) is not expectedAlbum then return "mismatch"
         if (count of artworks of t) is 0 then return "none"
         set d to raw data of artwork 1 of t
       end tell
@@ -102,7 +104,7 @@ async function extract(key: string, album: string): Promise<string | undefined> 
       return "ok"
     end run
   `,
-    [rawPath, album],
+    [rawPath, artist, album],
     { timeout: 5_000 },
   ).catch(() => "none");
 
@@ -153,7 +155,7 @@ export async function getArtworkPath(artist: string, album: string, name: string
   if (pending) return pending;
 
   fs.mkdirSync(artworkDir, { recursive: true });
-  const job = extract(key, album).finally(() => {
+  const job = extract(key, artist, album).finally(() => {
     inFlight.delete(key);
     prune();
   });
