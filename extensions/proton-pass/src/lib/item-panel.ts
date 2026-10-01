@@ -74,8 +74,8 @@ export function getPanelRows({ item, detail, totp, totpFailed, isLoading, error,
 
   return {
     fields: [
-      { id: "username", title: "Username", value: text(detail?.username ?? item.username) },
-      { id: "email", title: "Email", value: text(detail?.email ?? item.email) },
+      { id: "username", title: "Username", value: text((detail ?? item).username) },
+      { id: "email", title: "Email", value: text((detail ?? item).email) },
       { id: "password", title: "Password", value: password },
       { id: "totp", title: "2FA Code", value: code },
       { id: "website", title: "Website", value: websites },

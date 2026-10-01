@@ -15,7 +15,11 @@ type Element = { props: Record<string, unknown> };
 type Component = (props: Record<string, unknown>) => Element;
 
 // Run the real UI callbacks with Raycast services replaced; no account or clipboard access.
-function loadView(file: string, services: Record<string, unknown>): Record<string, Component> {
+function loadView(
+  file: string,
+  services: Record<string, unknown>,
+  globals: Record<string, unknown> = {},
+): Record<string, Component> {
   const module = { exports: {} };
   const jsx = (_type: unknown, props: Element["props"]) => ({ props });
   const source = readFileSync(join(process.cwd(), "src/lib", file), "utf8");
@@ -38,6 +42,7 @@ function loadView(file: string, services: Record<string, unknown>): Record<strin
     clearInterval: () => undefined,
     process: { platform: "darwin", env: { PATH: "" } },
     console: { error: () => undefined },
+    ...globals,
   });
   return module.exports;
 }
@@ -90,6 +95,7 @@ const item: Item = {
 function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: Item = item, detail?: ItemDetail) {
   const events: string[] = [];
   const fills: { values: string[]; target: unknown }[] = [];
+  const contents: string[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
     "@raycast/api": {
@@ -109,7 +115,8 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
       },
       getPreferenceValues: () => ({ primaryAction }),
       Clipboard: {
-        copy: async () => {
+        copy: async (value: string) => {
+          contents.push(value);
           events.push("copy");
         },
       },
@@ -138,14 +145,14 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
     store: {
       peek: () => {
         if (primaryAction === "fill") events.push("load");
-        return { ...selectedItem, password: "fake-secret" };
+        return detail ?? { ...selectedItem, password: "fake-secret" };
       },
     },
     isShowingDetail: true,
     onToggleDetail: () => undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), events, fills };
+  return { entries: actions(panel), events, fills, contents };
 }
 
 test("Enter views details by default and copies or fills only when selected in preferences", async () => {
@@ -175,6 +182,30 @@ test("Enter views details by default and copies or fills only when selected in p
   assert.equal((filling.fills[0].target as { bundleId: string }).bundleId, "com.example.app");
   assert.equal(titles(itemActions("fill", { ...item, hasPassword: false }).entries)[0], "View Details");
   assert.ok(titles(itemActions("fill", { ...item, hasPassword: false }).entries).includes("Paste Email"));
+});
+
+test("copying and pasting item fields uses loaded values and omits fields removed since the cached listing", async () => {
+  const loaded = { ...item, username: "new-user", email: "new@example.com", title: "New title" };
+  const { entries, contents, fills } = itemActions(undefined, item, loaded);
+  const pasteUsername = entries.find((entry) => entry.title === "Paste Username");
+  assert.ok(pasteUsername);
+  await (pasteUsername.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(fills[0].values), [loaded.username]);
+  for (const title of ["Copy Username", "Copy Email", "Copy Title"]) {
+    await (entries.find((entry) => entry.title === title)!.onAction as () => Promise<void>)();
+  }
+  assert.deepEqual(contents, [loaded.username, loaded.email, loaded.title]);
+  const removed = itemActions(
+    undefined,
+    { ...item, username: "old-user" },
+    { ...item, username: undefined, email: undefined },
+  );
+  assert.equal(
+    removed.entries.some((entry) =>
+      ["Copy Username", "Copy Email", "Paste Username", "Paste Email"].includes(String(entry.title)),
+    ),
+    false,
+  );
 });
 
 test("Copy Email and Copy Title have distinct Windows shortcuts", () => {
@@ -673,44 +704,84 @@ function totpCommandFixture(
   }>,
   getTotp: (shareId: string, itemId: string) => Promise<string> = async () => "123456",
   writeCache: (items: Item[]) => Promise<void> = async () => undefined,
+  globals: Record<string, unknown> = {},
 ) {
   const harness = hookHarness();
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
   const writes: Item[][] = [];
-  const { default: Command } = loadView("../get-totp.tsx", {
-    react: harness.react,
-    "@raycast/api": {
-      List: { Section: {}, EmptyView: {} },
-      Action: {},
-      ActionPanel: {},
-      Icon: {},
-      Color: {},
-      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
-      Toast: { Style: {} },
-      getPreferenceValues: () => ({}),
-      showToast: async (toast: (typeof toasts)[number]) => {
-        toasts.push(toast);
+  const copied: string[] = [];
+  let clears = 0;
+  let savedItems: Item[] = [];
+  const { default: Command } = loadView(
+    "../get-totp.tsx",
+    {
+      react: harness.react,
+      "@raycast/api": {
+        List: { Section: {}, EmptyView: {} },
+        Action: {},
+        ActionPanel: {},
+        Icon: {},
+        Color: {},
+        Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+        Toast: { Style: {} },
+        getPreferenceValues: () => ({}),
+        Clipboard: {
+          copy: async (value: string) => {
+            copied.push(value);
+          },
+        },
+        showToast: async (toast: (typeof toasts)[number]) => {
+          toasts.push(toast);
+        },
+      },
+      "./lib/pass-cli": { listVaultsAndItems, getTotp },
+      "./lib/types": { PassCliError },
+      "./lib/utils": {
+        getTotpRemainingSeconds: () => 30,
+        getItemIcon: () => "",
+        formatTotpCode: (code: string) => code,
+      },
+      "./lib/cache": {
+        getCachedItems: async () => null,
+        setCachedItems: async (items: Item[]) => {
+          await writeCache(items);
+          savedItems = items;
+          writes.push(items);
+        },
+        clearCache: async () => {
+          clears++;
+          savedItems = [];
+        },
+      },
+      "./lib/refresh": refresh,
+      "./lib/error-views": {
+        renderErrorView: (error: unknown, onRetry: unknown) => (error ? { props: { error, onRetry } } : null),
       },
     },
-    "./lib/pass-cli": { listVaultsAndItems, getTotp },
-    "./lib/types": { PassCliError },
-    "./lib/utils": { getTotpRemainingSeconds: () => 30, getItemIcon: () => "", formatTotpCode: (code: string) => code },
-    "./lib/cache": {
-      getCachedItems: async () => null,
-      setCachedItems: async (items: Item[]) => {
-        await writeCache(items);
-        writes.push(items);
+    {
+      Date: class extends Date {
+        static now() {
+          return 0;
+        }
       },
+      ...globals,
     },
-    "./lib/refresh": refresh,
-    "./lib/error-views": {
-      renderErrorView: (error: unknown, onRetry: unknown) => (error ? { props: { error, onRetry } } : null),
-    },
-  });
+  );
   const render = () => harness.render(Command, {});
   render();
   harness.effects.forEach((effect) => effect());
-  return { render, toasts, writes };
+  return {
+    render,
+    toasts,
+    writes,
+    copied,
+    get clears() {
+      return clears;
+    },
+    get savedItems() {
+      return savedItems;
+    },
+  };
 }
 
 test("TOTP Retry keeps unsaved visible codes when their vault fails, then removes them after a successful deletion", async () => {
@@ -835,6 +906,256 @@ test("TOTP loads discard late code results and order in-flight cache writes", as
     assert.equal(fixture.writes.length, stalled === "codes" ? 1 : 2);
     assert.equal(fixture.render().props.isLoading, false);
   }
+});
+
+test("expired TOTP codes are hidden and cannot be copied after a failed Retry", async () => {
+  let now = 0;
+  let calls = 0;
+  const fixture = totpCommandFixture(
+    async () => ({
+      items: calls === 0 ? [{ ...item, hasTotp: true }] : [],
+      failedVaults: [{ vault: { shareId: calls === 0 ? "other" : "vault", name: "Offline" }, message: "Offline" }],
+    }),
+    async () => {
+      if (++calls > 1) throw new Error("Offline");
+      return "123456";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  const oldCopy = actions(row.actions).find((entry) => entry.title === "Copy TOTP Code")!
+    .onAction as () => Promise<void>;
+  now = 30_000;
+  await fixture.toasts[0].primaryAction.onAction();
+  const expiredRow = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((expiredRow.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  assert.equal(
+    actions(expiredRow.actions).some((entry) => entry.title === "Copy TOTP Code"),
+    false,
+  );
+  await oldCopy();
+  assert.deepEqual(fixture.copied, []);
+  await new Promise(setImmediate);
+});
+
+test("a boundary refresh fetches current codes for a list that replaced its snapshot", async () => {
+  let now = 0;
+  let tick!: () => void;
+  let listings = 0;
+  let codes = 0;
+  let finishListingCode!: (code: string) => void;
+  let finishRefreshCode!: (code: string) => void;
+  const listingCode = new Promise<string>((resolve) => {
+    finishListingCode = resolve;
+  });
+  const refreshCode = new Promise<string>((resolve) => {
+    finishRefreshCode = resolve;
+  });
+  const replacement = { ...item, itemId: "replacement", title: "Replacement", hasTotp: true };
+  const fixture = totpCommandFixture(
+    async () => {
+      listings++;
+      return {
+        items: [listings === 1 ? { ...item, hasTotp: true } : replacement],
+        failedVaults: [{ vault: { shareId: "other", name: "Other" }, message: "Offline" }],
+      };
+    },
+    async () => {
+      codes++;
+      if (codes === 2) return listingCode;
+      if (codes === 3) return refreshCode;
+      return codes === 1 ? "123456" : "654321";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+      setInterval: (callback: () => void) => {
+        tick = callback;
+        return 0;
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  now = 29_999;
+  const retry = fixture.toasts[0].primaryAction.onAction();
+  await new Promise(setImmediate);
+  now = 30_000;
+  tick();
+  finishListingCode("111111");
+  await retry;
+  finishRefreshCode("222222");
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === replacement.title)!;
+  assert.equal((row.accessories as { tag: { value: string } }[])[0].tag.value, "654321");
+  assert.equal(codes, 4);
+});
+
+test("a slow code refresh retries in the new time step instead of waiting for another boundary", async () => {
+  let now = 0;
+  let tick!: () => void;
+  let codes = 0;
+  let finishOldCode!: (code: string) => void;
+  const oldCode = new Promise<string>((resolve) => {
+    finishOldCode = resolve;
+  });
+  const fixture = totpCommandFixture(
+    async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+    async () => {
+      codes++;
+      if (codes === 2) return oldCode;
+      return codes === 1 ? "123456" : "654321";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+      setInterval: (callback: () => void) => {
+        tick = callback;
+        return 0;
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  now = 29_999;
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  const refresh = actions(row.actions).find((entry) => entry.title === "Refresh Codes")!
+    .onAction as () => Promise<void>;
+  const pending = refresh();
+  now = 30_000;
+  tick();
+  finishOldCode("111111");
+  await pending;
+  const updated = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "654321");
+  assert.equal(codes, 3);
+  assert.equal(fixture.render().props.isLoading, false);
+});
+
+test("repeated slow TOTP responses stop with Retry instead of keeping refresh running", async () => {
+  let now = 0;
+  let codes = 0;
+  const fixture = totpCommandFixture(
+    async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+    async () => {
+      codes++;
+      if (codes === 2 || codes === 3) now += 31_000;
+      return "123456";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+    },
+  );
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  await (actions(row.actions).find((entry) => entry.title === "Refresh Codes")!.onAction as () => Promise<void>)();
+  assert.equal(codes, 3);
+  assert.equal(fixture.render().props.isLoading, false);
+  const updated = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  const retry = fixture.toasts.at(-1)?.primaryAction;
+  assert.equal(typeof retry?.onAction, "function");
+  await retry!.onAction();
+  assert.equal(codes, 4);
+});
+
+test("TOTP session expiry clears rows and cache and prevents old copy callbacks or partial retries restoring them", async () => {
+  for (const source of ["listing", "code", "refresh"]) {
+    let listings = 0;
+    let codes = 0;
+    const fixture = totpCommandFixture(
+      async () => {
+        listings++;
+        if (source === "listing" && listings === 2) throw new PassCliError("Session ended", "not_authenticated");
+        return {
+          items: listings < 3 ? [{ ...item, hasTotp: true }] : [],
+          failedVaults: [{ vault: { shareId: listings < 3 ? "other" : "vault", name: "Offline" }, message: "Offline" }],
+        };
+      },
+      async () => {
+        if (++codes === 2 && source !== "listing") throw new PassCliError("Session ended", "not_authenticated");
+        return "123456";
+      },
+    );
+    await new Promise(setImmediate);
+    const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+    const oldCopy = actions(row.actions).find((entry) => entry.title === "Copy TOTP Code")!
+      .onAction as () => Promise<void>;
+    if (source === "refresh") {
+      await (actions(row.actions).find((entry) => entry.title === "Refresh Codes")!.onAction as () => Promise<void>)();
+      listings++;
+    } else await fixture.toasts[0].primaryAction.onAction();
+    const errorView = fixture.render();
+    assert.equal(errorView.props.error, "not_authenticated");
+    assert.equal(fixture.clears, 1);
+    assert.deepEqual(fixture.savedItems, []);
+    await oldCopy();
+    await new Promise(setImmediate);
+    assert.deepEqual(fixture.copied, []);
+    await (errorView.props.onRetry as () => Promise<void>)();
+    assert.equal(fixture.render().props.error, "unknown");
+    assert.equal(
+      actions(fixture.render()).some((entry) => entry.title === item.title),
+      false,
+    );
+  }
+});
+
+test("TOTP session reset clears an in-flight cache write and prevents that load restoring rows", async () => {
+  let listings = 0;
+  let rejectCodes = false;
+  let finishWrite!: () => void;
+  const write = new Promise<void>((resolve) => {
+    finishWrite = resolve;
+  });
+  const fresh = { ...item, itemId: "new", title: "New login", hasTotp: true };
+  const fixture = totpCommandFixture(
+    async () => {
+      listings++;
+      return {
+        items: [listings === 1 ? { ...item, hasTotp: true } : fresh],
+        failedVaults: listings === 1 ? [{ vault: { shareId: "other", name: "Other" }, message: "Offline" }] : [],
+      };
+    },
+    async () => {
+      if (rejectCodes) throw new PassCliError("Session ended", "not_authenticated");
+      return "123456";
+    },
+    async () => write,
+  );
+  await new Promise(setImmediate);
+  const loading = fixture.toasts[0].primaryAction.onAction();
+  await new Promise(setImmediate);
+  rejectCodes = true;
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  const refreshing = (
+    actions(row.actions).find((entry) => entry.title === "Refresh Codes")!.onAction as () => Promise<void>
+  )();
+  await new Promise(setImmediate);
+  finishWrite();
+  await Promise.all([loading, refreshing]);
+  assert.equal(fixture.render().props.error, "not_authenticated");
+  assert.deepEqual(fixture.savedItems, []);
+  assert.equal(fixture.clears, 1);
 });
 
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {

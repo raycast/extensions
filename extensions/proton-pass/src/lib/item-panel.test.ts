@@ -108,6 +108,15 @@ test("prefers loaded details and lists websites and custom fields", () => {
   const rows = getPanelRows({ item: login, detail, totp: { code: "123456", remainingSeconds: 12 }, isLoading: false });
 
   assert.deepEqual(valueOf(rows, "username"), { kind: "text", text: "alice.work" });
+  for (const removed of [undefined, ""]) {
+    const removedRows = getPanelRows({
+      item: login,
+      detail: { ...detail, username: removed, email: removed },
+      isLoading: false,
+    });
+    assert.deepEqual(valueOf(removedRows, "username"), { kind: "empty" });
+    assert.deepEqual(valueOf(removedRows, "email"), { kind: "empty" });
+  }
   assert.deepEqual(valueOf(rows, "note"), { kind: "empty" });
   assert.deepEqual(valueOf(rows, "totp"), { kind: "code", code: "123456", remainingSeconds: 12 });
   assert.deepEqual(valueOf(rows, "website"), {

@@ -11,6 +11,31 @@ export function mergeRefreshedItems(
   return [...freshItems, ...previousItems.filter((item) => failed.has(item.shareId))];
 }
 
+/** A vault whose items couldn't be listed, as listVaultsAndItems() reports it. */
+interface ListingFailure {
+  vault: { shareId: string };
+  message: string;
+}
+
+/**
+ * Outcome of a refresh. Vaults that failed keep their known items, only a complete listing may renew the
+ * cache, and a listing that failed with nothing left to show is a failure rather than an empty account.
+ */
+export function getRefreshResult(
+  freshItems: Item[],
+  previousItems: Item[],
+  failures: ListingFailure[],
+  isShown: (item: Item) => boolean = () => true,
+): { items: Item[]; isComplete: boolean; failureMessage?: string } {
+  const items = mergeRefreshedItems(
+    freshItems,
+    previousItems,
+    failures.map(({ vault }) => vault.shareId),
+  );
+  const failureMessage = failures.length > 0 && !items.some(isShown) ? failures[0].message : undefined;
+  return { items, isComplete: failures.length === 0, failureMessage };
+}
+
 /** Title of the toast shown for vaults that failed to load. */
 export function failedVaultsTitle(vaultNames: string[]): string {
   return vaultNames.length === 1 ? `Couldn't Load ${vaultNames[0]}` : `Couldn't Load ${vaultNames.length} Vaults`;

@@ -32,12 +32,14 @@ export const ItemActions = memo(function ItemActions({
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
   const concealSecrets = preferences.copyPasswordTransient ?? true;
-  // A stale list may say there is no password; explicit copying can check without loading secrets while browsing.
-  const canCopyPassword = item.type === "login" && (!detail || detail.password !== undefined);
   // Loaded details are newer than the cached item, e.g. when a password was added since.
   const hasPassword = item.type === "login" && (detail ? detail.password !== undefined : item.hasPassword !== false);
+  // Like the rows shown, field actions use the loaded details, which are newer than the cached item.
+  const { title, username, email } = detail ?? item;
+  // Until the details are loaded, the cached item may be outdated: Copy Password then checks when used.
+  const canCopyPassword = item.type === "login" && (!detail || detail.password !== undefined);
   const canFill = canFillFrontmostApp && hasPassword;
-  const canPaste = canFillFrontmostApp && Boolean(item.email || item.username || hasPassword || item.hasTotp);
+  const canPaste = canFillFrontmostApp && Boolean(email || username || hasPassword || item.hasTotp);
   const primaryAction = preferences.primaryAction ?? "details";
   // Copy Password and Fill Login only take Enter where there's a password; notes open with Show Note.
   const viewDetailsFirst = primaryAction === "details" || (!hasPassword && item.type !== "note");
@@ -175,20 +177,20 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("Note", async () => (await loadDetail()).note, true)}
           />
         )}
-        {item.username && (
+        {username && (
           <Action
             title="Copy Username"
             icon={Icon.Person}
             shortcut={platformShortcut(["cmd", "shift"], "u")}
-            onAction={() => copy("Username", async () => item.username, false)}
+            onAction={() => copy("Username", async () => username, false)}
           />
         )}
-        {item.email && (
+        {email && (
           <Action
             title="Copy Email"
             icon={Icon.Envelope}
             shortcut={platformShortcut(["cmd", "opt"], "c")}
-            onAction={() => copy("Email", async () => item.email, false)}
+            onAction={() => copy("Email", async () => email, false)}
           />
         )}
         {item.hasTotp && (
@@ -204,13 +206,13 @@ export const ItemActions = memo(function ItemActions({
           icon={Icon.Text}
           // ⌘⇧. like Copy Name on macOS; Copy Name's Windows shortcut (Ctrl+Alt+C) is Copy Email's here.
           shortcut={platformShortcut(["cmd", "shift"], ".")}
-          onAction={() => copy("Title", async () => item.title, false)}
+          onAction={() => copy("Title", async () => title, false)}
         />
       </ActionPanel.Section>
       {canPaste && (
         <ActionPanel.Section title="Paste">
-          {item.email && <Action title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />}
-          {item.username && <Action title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />}
+          {email && <Action title="Paste Email" icon={Icon.Envelope} onAction={() => fill("email")} />}
+          {username && <Action title="Paste Username" icon={Icon.Person} onAction={() => fill("username")} />}
           {hasPassword && <Action title="Paste Password" icon={Icon.Key} onAction={() => fill("password")} />}
           {item.hasTotp && (
             <Action
@@ -317,8 +319,8 @@ export const ItemActions = memo(function ItemActions({
                 {
                   type: item.type,
                   hasPassword: item.hasPassword,
-                  hasUsername: Boolean(item.username),
-                  hasEmail: Boolean(item.email),
+                  hasUsername: Boolean(username),
+                  hasEmail: Boolean(email),
                   urlCount: urls.length,
                   hasTotp: item.hasTotp,
                   hasNote: detail ? Boolean(detail.note) : undefined,
