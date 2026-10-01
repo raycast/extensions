@@ -37,7 +37,9 @@ export function websiteLabels(urls: string[]): string[] {
 
 /** Proton Pass accepts URLs without a scheme ("example.com"); browsers need one to open them. */
 export function toOpenableUrl(url: string): string {
-  return /^[a-z][a-z\d+.-]*:/i.test(url) ? url : `https://${url}`;
+  // "example.com:8443" looks like a scheme followed by a path, but it's a host with a port.
+  const hasHostPort = /^(?:localhost|[^/:]+\.[^/:]+|\[[^\]]+\]):\d+(?:[/?#]|$)/i.test(url);
+  return !hasHostPort && /^[a-z][a-z\d+.-]*:/i.test(url) ? url : `https://${url}`;
 }
 
 const TYPE_LABELS: Record<ItemType, string> = {
