@@ -246,7 +246,7 @@ export function FormulaList(props: FormulaListProps) {
  * the page — like the counted Dependencies and Pinned sections beside it.
  */
 function sectionCount(n: number): string {
-  return n.toLocaleString("en-US");
+  return n.toLocaleString();
 }
 
 export function FormulaListItem(props: {
