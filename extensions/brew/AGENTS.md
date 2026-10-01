@@ -248,8 +248,8 @@ remediation resolves off `customBrewPath` rather than whatever was inherited. It
 appends the command list to the alert body itself, so **callers pass prose
 only** — never re-list the commands in `message`. `showCommands: false` drops
 that list where the prose already says everything (Adopt, Link/Unlink Cask,
-Update Homebrew): the exact line is information for a `sudo chown`
-remediation, and noise for `brew update`. `toastTitle` exists because
+Update Homebrew, and the tap dialogs): the exact line is information for a
+`sudo chown` remediation, and noise for `brew update` or `brew trust --tap`. `toastTitle` exists because
 the alert title can be a full sentence and a toast cannot; `labels` replaces the
 raw command in the toasts for a routine action, where the command is noise.
 
@@ -275,6 +275,46 @@ guess**: an unknown operator, requirement name, version string or host all read
 as installable, since a false ⊘ hides a package the user could have had. Only
 the `test` context is ignored. `disabled`, OS-family, macOS-version and arch
 constraints all mark "Can't Install".
+
+## Third-party taps and trust
+
+Homebrew 7 will not load a formula, cask or command from a non-official tap
+until it is trusted (`brew trust`, recorded in `~/.homebrew/trust.json`), at
+one of three scopes: a whole tap, one formula, one cask. The extension never
+invents its own consent model; it asks before Homebrew's. Measured on 7.0.6:
+
+- **A command that names a qualified package trusts it by itself** —
+  `brew install`, `brew upgrade`, and both with `--dry-run`. So the install
+  and upgrade previews would grant trust silently the moment they mounted.
+  `ensureTrusted` (`src/components/trust.ts`) runs before every such path:
+  Install, Upgrade, Preview Install, Preview Upgrade, and the Run … in
+  Terminal forms. It trusts the ONE package, never the tap.
+- **`brew upgrade` with no names does not.** It skips an untrusted tap's
+  packages and warns, so Upgrade All needs no gate.
+- **Reading is not gated.** `brew info --json=v2` returns full records from an
+  untrusted tap, which is why Manage Taps lists every tap's packages whatever
+  their trust.
+- **`brew info` refuses a tap that is not added**, and exits 1 for a name it
+  cannot find. So installing a pasted `user/repo/name` from Search taps first,
+  then asks `brew info` for the record.
+- **`brew trust` records any name without checking it** — even
+  `nobody-xyz/nothing/thing`. The formula-or-cask flag therefore has to come
+  from brew's own record, never from a guess.
+- **`tap-info`'s `private` is not a GitHub check.** Any tap with a custom
+  remote reads `private: true` (`tap.rb`), public or not, so it is not shown.
+
+`brewIdentifier` qualifies every package outside homebrew/core and
+homebrew/cask (`steipete/tap/birdclaw`): unqualified, brew resolves core
+first, so a tapped package sharing a core name would install the wrong
+software. Pin lookups strip it back (`pinLookupKey`), and `upgradeSkipReason`
+accepts either spelling. An outdated CASK carries no `tap` and an unqualified
+token, so its tap is unknowable and it passes `ensureTrusted` ungated.
+
+Manage Taps loads every tap's packages with one `brew info` per kind. One name
+that no longer resolves fails the whole call, so `brewFetchTapPackages` halves
+a failed batch until the bad names are isolated and reports them as
+`unavailable` (the section subtitle's "Won't Load"). Only an unknown-name
+failure is split; a lock or a cancel still throws.
 
 ## Adopt Apps
 

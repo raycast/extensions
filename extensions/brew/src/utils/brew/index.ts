@@ -154,6 +154,19 @@ export {
 } from "./services";
 export type { Service, ServiceStatus, ServiceAction } from "./services";
 
+// Third-party taps
+export {
+  brewFetchQualifiedPackage,
+  brewFetchTapPackages,
+  brewFetchTaps,
+  brewIsTapped,
+  brewPackageTrust,
+  brewTapCommand,
+  parseTapName,
+  tapCommandName,
+} from "./taps";
+export type { PackageTrust, Tap, TapStatus, TapTarget } from "./taps";
+
 // Installability (Homebrew 7's ⊘ marker, derived from the API JSON)
 export { installabilityOf } from "./installability";
 export { brewHost } from "./host";
@@ -170,6 +183,8 @@ export type { VulnSeverity, Vulnerability, VulnFinding, VulnResults } from "./vu
 // Helpers
 export {
   brewName,
+  isThirdPartyTap,
+  thirdPartyTapOf,
   brewIsInstalled,
   brewInstallPath,
   brewFormatVersion,
