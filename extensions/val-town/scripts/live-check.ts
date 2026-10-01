@@ -12,6 +12,7 @@ import {
   readFile,
   sqliteExecute,
 } from "../src/lib/api";
+import { McpError } from "../src/lib/mcp";
 import { parseEventStream } from "../src/lib/sse";
 import { loadState } from "../src/lib/store";
 import getValInfo from "../src/tools/get-val-info";
@@ -54,15 +55,23 @@ async function check<T>(name: string, run: () => Promise<T>): Promise<T | undefi
     console.log(`ok    ${name}`);
     return result;
   } catch (error) {
-    // The log is public, and what follows the colon can quote the account's data.
-    const reason = error instanceof Error ? error.message.split(":")[0] : "unknown error";
-    console.error(`FAIL  ${name}: ${reason}`);
+    console.error(`FAIL  ${name}: ${describe(error)}`);
     failed = true;
   }
 }
 
+/** Thrown with text this script wrote, so it is safe to print anywhere. */
+class CheckError extends Error {}
+
+// The CI log is public, and Val Town's error text can quote the account's data.
+function describe(error: unknown): string {
+  if (error instanceof CheckError || !process.env.CI) return error instanceof Error ? error.message : String(error);
+  if (error instanceof McpError && error.status) return `Val Town error (HTTP ${error.status})`;
+  return "Val Town error. Run npm run live-check locally to see it.";
+}
+
 function has(value: unknown, field: string): asserts value {
-  if (!value) throw new Error(`reply has no ${field}`);
+  if (!value) throw new CheckError(`reply has no ${field}`);
 }
 
 type ToolSchema = { name: string; inputSchema: { properties?: Record<string, unknown>; required?: string[] } };
@@ -77,7 +86,7 @@ async function toolSchemas(): Promise<ToolSchema[]> {
     },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
   });
-  if (!response.ok) throw new Error(`tools/list answered HTTP ${response.status}`);
+  if (!response.ok) throw new CheckError(`tools/list answered HTTP ${response.status}`);
   const message = parseEventStream(await response.text(), 1) as { result?: { tools?: ToolSchema[] } };
   has(message.result?.tools, "tools");
   return message.result.tools;
@@ -94,7 +103,7 @@ await check("tool arguments", async () => {
       ...(schema.required ?? []).filter((arg) => !sent.includes(arg)).map((arg) => `${name} now requires ${arg}`),
     ];
   });
-  if (drift.length) throw new Error(drift.join("; "));
+  if (drift.length) throw new CheckError(drift.join("; "));
 });
 
 const orgs = await check("list_orgs", async () => {
