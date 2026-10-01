@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Symbioza MCP Server] - 2026-10-01
+## [Add Symbioza MCP Server] - {PR_MERGE_DATE}
 
 - Add Symbioza to the official registry: Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.
 
