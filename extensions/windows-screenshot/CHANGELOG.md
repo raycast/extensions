@@ -1,6 +1,6 @@
 # Windows Screenshot Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-01
 
 - Full screen, active window, and interactive region capture using native Windows APIs
 - Magnifying loupe preview with precision crosshair guides during region capture
