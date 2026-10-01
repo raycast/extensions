@@ -13,12 +13,12 @@ function getDiffText(original: string, changed: string): string {
 
 function getPrefix(change: Diff.Change) {
   if (change.added) {
-    return ">>>";
+    return "+";
   }
   if (change.removed) {
-    return "<<<";
+    return "-";
   }
-  return "     ";
+  return " ";
 }
 
 export { getDiffText };
