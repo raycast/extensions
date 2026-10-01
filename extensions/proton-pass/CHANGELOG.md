@@ -6,7 +6,7 @@
 - Filling only types into the app Raycast was opened from, and stops if another app comes in front
 - Paste Email, Paste Username, Paste Password and Paste 2FA Code (⌘⇧T) actions, for logins split over several screens
 - Fill Login (macOS) choice for the Primary Action preference, to fill with Enter
-- Submit After Filling preference (off by default) presses Return after the password
+- Fill Login preference, off by default: press Return after the password to submit the login form
 - Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards, also as concealed since it can be a secret
 
 ## [Item Details Panel] - {PR_MERGE_DATE}
@@ -29,7 +29,7 @@
 - Fix: the item matching the active browser tab was never preselected, because list items had no ID
 - The Transient Clipboard preference now describes what it does: copied passwords and 2FA codes are kept out of clipboard history
 - Update `@raycast/utils` to 2.x
-- Shorter preference texts
+- Shorter preference texts; Background Refresh, Web Integration and Website Icons are grouped under Item List
 
 ## [Faster Loading] - 2026-10-01
 
