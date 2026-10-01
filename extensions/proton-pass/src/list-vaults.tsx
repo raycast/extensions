@@ -1,98 +1,11 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
-import { getItemIcon } from "./lib/utils";
-import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
+import { listVaults, loginWithBrowser } from "./lib/pass-cli";
+import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { SearchItemsView } from "./lib/search-items-view";
+import { getCachedVaults, setCachedVaults } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
 import { platformShortcut } from "./lib/shortcuts";
-
-function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
-  const [items, setItems] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const hasLoadedFromCache = useRef(false);
-
-  useEffect(() => {
-    loadVaultItems();
-  }, []);
-
-  async function loadVaultItems() {
-    const cachedItems = await getCachedItemsForVault(vault.shareId);
-    if (cachedItems && !hasLoadedFromCache.current) {
-      setItems(cachedItems.data);
-      hasLoadedFromCache.current = true;
-
-      if (!cachedItems.isStale && !backgroundRefreshEnabled) {
-        setIsLoading(false);
-        return;
-      }
-    }
-
-    try {
-      const freshItems = await listItems(vault.shareId);
-      setItems(freshItems);
-      await setCachedItemsForVault(vault.shareId, freshItems);
-    } catch (error: unknown) {
-      if (!hasLoadedFromCache.current) {
-        const message = error instanceof Error ? error.message : "An unknown error occurred";
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load items",
-          message,
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">
-      {items.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon={Icon.Folder}
-          title="No Items in This Vault"
-          description="This vault is empty or contains no visible items."
-        />
-      ) : (
-        items.map((item) => (
-          <List.Item
-            key={`${item.shareId}-${item.itemId}`}
-            icon={getItemIcon(item.type)}
-            title={item.title}
-            subtitle={item.username || item.email}
-            accessories={[item.hasTotp ? { icon: Icon.Clock, tooltip: "Has TOTP" } : {}, { text: item.type }].filter(
-              (acc) => Object.keys(acc).length > 0,
-            )}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Title"
-                  content={item.title}
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                />
-                {item.username && (
-                  <Action.CopyToClipboard
-                    title="Copy Username"
-                    content={item.username}
-                    shortcut={platformShortcut(["cmd", "shift"], "u")}
-                  />
-                )}
-                {item.email && (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={item.email}
-                    shortcut={platformShortcut(["cmd", "shift"], "e")}
-                  />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))
-      )}
-    </List>
-  );
-}
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
@@ -337,11 +250,7 @@ export default function Command() {
             ].filter((accessory) => accessory !== undefined)}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Items"
-                  icon={Icon.List}
-                  target={<VaultItems vault={vault} backgroundRefreshEnabled={backgroundRefreshEnabled} />}
-                />
+                <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView initialVault={vault} />} />
                 <Action.CopyToClipboard
                   title="Copy Vault Name"
                   content={vault.name}

@@ -56,6 +56,7 @@ pass-cli vault list
 - **Background Refresh**: Automatically refresh cached vault and item data
 - **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
 - **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
+- **Website Icons**: Show website icons for logins instead of their initials. Icons are fetched from DuckDuckGo's icon service, which receives the website domains (off by default)
 
 ## Troubleshooting
 

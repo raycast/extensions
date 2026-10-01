@@ -1,5 +1,20 @@
 # proton-pass Changelog
 
+## [Item Details Panel] - {PR_MERGE_DATE}
+
+- Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last
+- Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
+- Websites are shown as clickable tags
+- 2FA codes are generated locally from the item's otpauth URI, with pass-cli as a fallback for formats that can't be computed locally
+- Enter now copies the password (or opens the note for secure notes); new Open Website (⌘O), Copy Website URL (⌘U) and Refresh Items (⌘R) actions
+- Frequently used items are ranked first
+- Search also matches usernames, emails and website domains
+- Logins show their initials as icon, generated locally; the new Website Icons preference shows website icons instead (off by default, since it sends domains to DuckDuckGo's icon service)
+- Icons in the list show which items have a note or a 2FA code; Copy TOTP Code is now Copy 2FA Code
+- Items matching the active browser tab are grouped in a Suggested section
+- Opening a vault from List Vaults shows Search Items with that vault selected, instead of a separate, more limited list
+- Fix: the item matching the active browser tab was never preselected, because list items had no ID
+
 ## [Faster Loading] - {PR_MERGE_DATE}
 
 - Show cached items instantly on launch, even after the cache expired, and refresh them in the background

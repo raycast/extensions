@@ -149,6 +149,15 @@
       "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
       "default": true,
       "required": false
+    },
+    {
+      "name": "showWebsiteIcons",
+      "type": "checkbox",
+      "title": "Website Icons",
+      "label": "Show website icons for logins",
+      "description": "Fetches icons from DuckDuckGo's icon service, which receives the website domains of your logins (not your usernames or passwords). When disabled, logins show their initials.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
