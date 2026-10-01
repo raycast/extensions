@@ -73,8 +73,8 @@ export interface UpgradeSummary {
   upgraded: UpgradePackage[];
   failed: UpgradePackage[];
   skipped: UpgradePackage[];
-  /** True if the run was cancelled before all packages were upgraded */
-  cancelled: boolean;
+  /** True if the run was canceled before all packages were upgraded */
+  canceled: boolean;
 }
 
 /**
@@ -168,7 +168,7 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   let packages: UpgradePackage[] = all.filter((pkg) => !isPinned(pkg.name, pkg.isCask));
   const pinned: UpgradePackage[] = all.filter((pkg) => isPinned(pkg.name, pkg.isCask));
 
-  // Honour the selection: upgrade only the reviewed packages that are still
+  // Honor the selection: upgrade only the reviewed packages that are still
   // outdated. Everything else stays untouched.
   if (options?.selection) {
     packages = restrictToSelection(packages, options.selection);
@@ -179,7 +179,7 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
     onEvent?.({ type: "package", package: pkg, status: "skipped", message: "Pinned" });
   }
 
-  const summary: UpgradeSummary = { upgraded: [], failed: [], skipped: [...pinned], cancelled: false };
+  const summary: UpgradeSummary = { upgraded: [], failed: [], skipped: [...pinned], canceled: false };
 
   if (packages.length === 0) {
     actionsLogger.log("No packages to upgrade");
@@ -233,17 +233,17 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
 
   for (const pkg of packages) {
     if (cancel?.aborted) {
-      summary.cancelled = true;
+      summary.canceled = true;
     }
 
-    // Skip the remaining packages once cancelled, locked out or stopped by an error
-    if (summary.cancelled || stop) {
+    // Skip the remaining packages once canceled, locked out or stopped by an error
+    if (summary.canceled || stop) {
       summary.skipped.push(pkg);
       onEvent?.({
         type: "package",
         package: pkg,
         status: "skipped",
-        message: summary.cancelled ? "Cancelled" : "Skipped",
+        message: summary.canceled ? "Canceled" : "Skipped",
       });
       continue;
     }
@@ -276,9 +276,9 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
 
       // Cancellation aborts the running brew process: treat it as skipped
       if (cancel?.aborted || error.name === "AbortError") {
-        summary.cancelled = true;
+        summary.canceled = true;
         summary.skipped.push(pkg);
-        onEvent?.({ type: "package", package: pkg, status: "skipped", message: "Cancelled" });
+        onEvent?.({ type: "package", package: pkg, status: "skipped", message: "Canceled" });
         continue;
       }
 
@@ -314,7 +314,7 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
     upgraded: summary.upgraded.length,
     failed: summary.failed.length,
     skipped: summary.skipped.length,
-    cancelled: summary.cancelled,
+    canceled: summary.canceled,
   });
 
   return summary;

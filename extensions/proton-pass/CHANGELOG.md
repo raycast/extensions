@@ -1,5 +1,18 @@
 # proton-pass Changelog
 
+## [Faster Loading] - 2026-10-01
+
+- Show cached items instantly on launch, even after the cache expired, and refresh them in the background
+- List vaults in parallel instead of one after another (about 8x faster with many vaults)
+- Skip the separate authentication check and the duplicate vault listing before loading items
+- Fix: item details always showed "Unknown Vault"
+- Fix: URLs and other values in item details showed stray backslashes (e.g. `example\.com`)
+- Fix: items whose ID starts with "-" could not be opened, and copying their password or TOTP code failed
+- Error messages no longer include the pass-cli command line (local paths and item IDs)
+- Cached items are cleared when logging in through the extension or when the session has ended, so another account's items don't show up
+- Fix: a vault's item list kept showing cached items after the session ended, instead of the login screen
+- Fix: a vault whose items failed to load looked empty; it now shows the error with a Retry action
+
 ## [Improvements] - 2026-09-19
 
 - Add a Cache Expiration preference for cached vault and item metadata: 5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days (default: 5 minutes)

@@ -1,4 +1,4 @@
-import { withPagination } from "../lib/schema";
+import { scanPageComplete, withPagination } from "../lib/schema";
 import { CompactUpNextItem, toCompactUpNext } from "./compact-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
@@ -16,7 +16,6 @@ type Input = {
 type Output = {
   data: CompactUpNextItem[];
   page: number;
-  totalItems?: number;
   hasMore: boolean;
   /**
    * Always false: this is a browse page, not a lookup. Absence from it does not mean
@@ -35,14 +34,11 @@ export default async function tool(input: Input): Promise<Output> {
 
   const response = await executeToolCall(
     (signal) =>
-      toolTraktClient.shows.getUpNextShows({
+      toolTraktClient.shows.getUpNextNitroShows({
         query: {
           page,
           limit: safeLimit,
-          extended: "full",
-          sort_by: "added",
-          sort_how: "desc",
-          include_stats: true,
+          intent: "continue",
         },
         fetchOptions: { signal },
       }),
@@ -51,11 +47,30 @@ export default async function tool(input: Input): Promise<Output> {
 
   const paginated = withPagination(response);
 
+  // up_next_nitro sends a fixed page count (trakt/trakt-api#926), so a full page does not prove
+  // there is a next one: when this page is full, look at the next page before promising more.
+  let hasMore = !scanPageComplete(paginated.data.length, paginated.pagination, safeLimit);
+  if (hasMore) {
+    // Only a hint: a failed lookahead must not discard the page already fetched, so keep "maybe more".
+    try {
+      const next = await executeToolCall(
+        (signal) =>
+          toolTraktClient.shows.getUpNextNitroShows({
+            query: { page: page + 1, limit: safeLimit, intent: "continue" },
+            fetchOptions: { signal },
+          }),
+        "Failed to fetch up-next shows",
+      );
+      hasMore = Array.isArray(next.body) && next.body.length > 0;
+    } catch {
+      hasMore = true;
+    }
+  }
+
   return {
     data: paginated.data.map(toCompactUpNext),
     page,
-    totalItems: paginated.pagination["x-pagination-item-count"],
-    hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+    hasMore,
     exhaustive: false,
   };
 }

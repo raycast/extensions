@@ -54,7 +54,7 @@ pass-cli vault list
 - **Default Password Type**: Random characters or memorable passphrase
 - **Transient Clipboard**: Clear password from clipboard after pasting
 - **Background Refresh**: Automatically refresh cached vault and item data
-- **Cache Expiration**: How long cached metadata stays usable (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes)
+- **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
 - **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
 
 ## Troubleshooting

@@ -1,15 +1,68 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listVaults, listItems, checkAuth, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
+import { Vault, Item, PassCliError, PassCliErrorType, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
+import { renderErrorView } from "./lib/error-views";
 import { platformShortcut } from "./lib/shortcuts";
+
+async function loginWithBrowserAndReload(reload: () => Promise<void>) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Starting Proton Pass login",
+    message: "Complete authentication in your browser",
+  });
+
+  try {
+    await loginWithBrowser();
+    toast.style = Toast.Style.Success;
+    toast.title = "Logged in";
+    toast.message = "Reloading";
+    await reload();
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to login";
+    toast.style = Toast.Style.Failure;
+    toast.title = "Login failed";
+    toast.message = message;
+  }
+}
+
+function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
+  return (
+    <List>
+      <List.EmptyView
+        icon={Icon.Lock}
+        title="Not Logged In"
+        description={
+          process.platform === "darwin"
+            ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
+            : "Use browser login to authenticate with Proton Pass."
+        }
+        actions={
+          <ActionPanel>
+            <Action title="Login with Browser" icon={Icon.Globe} onAction={onLogin} />
+            {process.platform === "darwin" && (
+              <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
+            )}
+            <Action.OpenInBrowser
+              title="View CLI Documentation"
+              url={PROTON_PASS_CLI_DOCS}
+              icon={Icon.Globe}
+              shortcut={platformShortcut(["cmd"], "d")}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
 
 function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
   const hasLoadedFromCache = useRef(false);
 
   useEffect(() => {
@@ -19,32 +72,41 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
   async function loadVaultItems() {
     const cachedItems = await getCachedItemsForVault(vault.shareId);
     if (cachedItems && !hasLoadedFromCache.current) {
-      setItems(cachedItems);
-      setIsLoading(false);
+      setItems(cachedItems.data);
       hasLoadedFromCache.current = true;
 
-      if (!backgroundRefreshEnabled) {
+      if (!cachedItems.isStale && !backgroundRefreshEnabled) {
+        setIsLoading(false);
         return;
       }
     }
 
+    setError(null);
+    setIsLoading(true);
     try {
       const freshItems = await listItems(vault.shareId);
       setItems(freshItems);
       await setCachedItemsForVault(vault.shareId, freshItems);
-    } catch (error: unknown) {
-      if (!hasLoadedFromCache.current) {
-        const message = error instanceof Error ? error.message : "An unknown error occurred";
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load items",
-          message,
-        });
+    } catch (err: unknown) {
+      const type = err instanceof PassCliError ? err.type : "unknown";
+      const message = err instanceof Error ? err.message : undefined;
+      // A logged-out session must not keep showing cached items, and a failed load must not look like an empty vault.
+      if (type === "not_authenticated") {
+        setItems([]);
+        setError({ type, message });
+      } else if (!hasLoadedFromCache.current) {
+        setError({ type, message });
       }
     } finally {
       setIsLoading(false);
     }
   }
+
+  if (error?.type === "not_authenticated") {
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaultItems)} />;
+  }
+  const errorView = renderErrorView(error?.type ?? null, loadVaultItems, "Load Items", error?.message);
+  if (errorView) return errorView;
 
   return (
     <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">
@@ -111,28 +173,21 @@ export default function Command() {
 
     const cachedVaults = await getCachedVaults();
     if (cachedVaults && !hasLoadedFromCache.current) {
-      setVaults(cachedVaults);
-      setIsLoading(false);
+      setVaults(cachedVaults.data);
       hasLoadedFromCache.current = true;
 
-      if (!backgroundRefreshEnabled) {
+      if (!cachedVaults.isStale && !backgroundRefreshEnabled) {
+        setIsLoading(false);
         return;
       }
     }
 
     try {
-      const isAuth = await checkAuth();
-      if (!isAuth) {
-        setError(new PassCliError("Not authenticated. Please log in to Proton Pass.", "not_authenticated"));
-        setIsLoading(false);
-        return;
-      }
-
       const freshVaults = await listVaults();
       setVaults(freshVaults);
       await setCachedVaults(freshVaults);
     } catch (err: unknown) {
-      if (!hasLoadedFromCache.current) {
+      if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
         } else {
@@ -142,27 +197,6 @@ export default function Command() {
       }
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function handleBrowserLogin() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting Proton Pass login",
-      message: "Complete authentication in your browser",
-    });
-
-    try {
-      await loginWithBrowser();
-      toast.style = Toast.Style.Success;
-      toast.title = "Logged in";
-      toast.message = "Reloading vaults";
-      await loadVaults();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Failed to login";
-      toast.style = Toast.Style.Failure;
-      toast.title = "Login failed";
-      toast.message = message;
     }
   }
 
@@ -214,33 +248,7 @@ export default function Command() {
   }
 
   if (error?.type === "not_authenticated") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Lock}
-          title="Not Logged In"
-          description={
-            process.platform === "darwin"
-              ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
-              : "Use browser login to authenticate with Proton Pass."
-          }
-          actions={
-            <ActionPanel>
-              <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              {process.platform === "darwin" && (
-                <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
-              )}
-              <Action.OpenInBrowser
-                title="View CLI Documentation"
-                url={PROTON_PASS_CLI_DOCS}
-                icon={Icon.Globe}
-                shortcut={platformShortcut(["cmd"], "d")}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaults)} />;
   }
 
   if (error?.type === "keyring_error") {

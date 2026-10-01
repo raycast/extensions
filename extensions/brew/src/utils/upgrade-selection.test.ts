@@ -501,7 +501,7 @@ describe("pinned refusal detection", () => {
 /**
  * Homebrew warns and skips rather than failing for these, exiting 0 — so the run
  * would otherwise report an upgrade that never happened. The message shapes are
- * taken from the installed source; the unrecognised-reason case below is a
+ * taken from the installed source; the unrecognized-reason case below is a
  * deliberate synthetic fixture.
  */
 describe("declined upgrades are read from brew's warnings", () => {
@@ -552,7 +552,7 @@ describe("declined upgrades are read from brew's warnings", () => {
     expect(upgradeSkipReason("Warning: zoom has been deprecated because it is discontinued", "zoom")).toBeUndefined();
   });
 
-  it("carries an unrecognised reason through rather than claiming an upgrade", () => {
+  it("carries an unrecognized reason through rather than claiming an upgrade", () => {
     expect(upgradeSkipReason("Warning: Not upgrading fd, some future reason.", "fd")).toBe("some future reason");
   });
 

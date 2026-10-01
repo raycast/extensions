@@ -1,7 +1,7 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
 import { myPreferences } from "@/consts";
-import { myDecrypt } from "@/utils/crypto";
+import { myDecrypt } from "@/shared/crypto";
 
 /**
  * Service keys.

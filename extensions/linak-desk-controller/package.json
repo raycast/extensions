@@ -45,7 +45,7 @@
     },
     {
       "name": "uuid",
-      "description": "Optional. Leave empty to find your desk automatically, or use the Select Desk command to pick one.",
+      "description": "Optional. Leave empty to find your desk automatically. Select Desk overrides this.",
       "type": "textfield",
       "required": false,
       "title": "Desk identifier",

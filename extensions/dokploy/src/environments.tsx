@@ -3,6 +3,8 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { Environment, ErrorResult, type ModernProject } from "./interfaces";
 import { type Instance, useToken, tokenForInstance } from "./instances";
 import Services from "./services";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { environmentPagePath } from "./dokploy-pages";
 import { getTotalServices, serviceScopeForEnvironment } from "./utils";
 
 export default function Environments({
@@ -82,6 +84,7 @@ export default function Environments({
                 title="Create Environment"
                 target={<CreateEnvironment project={project} instance={instance} />}
               />
+              <OpenInDokployAction url={url} path={environmentPagePath(project.projectId, environment.environmentId)} />
               <Action
                 icon={Icon.Trash}
                 title="Delete"

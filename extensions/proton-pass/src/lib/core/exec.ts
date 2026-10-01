@@ -107,7 +107,10 @@ export function normalizeCliExecutionError(
     return new PassCliError("Network error. Check your connection and try again.", type);
   }
 
-  const safeDetails = combined || "An unknown error occurred while running pass-cli.";
+  // Node's error message starts with "Command failed: <full command line>", which would expose local
+  // paths and item IDs in the UI, so only pass-cli's own output is shown.
+  const details = stderr.trim() || message.replace(/^Command failed:[^\n]*\n?/, "").trim();
+  const safeDetails = details || "An unknown error occurred while running pass-cli.";
   return new PassCliError(
     safeDetails.length > 600 ? `${safeDetails.slice(0, 299)}…${safeDetails.slice(-300)}` : safeDetails,
     "unknown",
