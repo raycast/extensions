@@ -11,7 +11,7 @@ import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
 import { createEpisodeMarkdown, createEpisodeMetadata } from "./lib/detail-helpers";
-import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
+import { formatWatchedAt, getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { fetchCombinedMediaPage, fetchMediaPage, mediaListCacheOptions } from "./lib/media-pagination";
 import { removeEpisodeFromHistory, removeMovieFromHistory } from "./lib/media-mutations";
 import { TraktMovieHistoryListItem, TraktShowHistoryListItem } from "./lib/schema";
@@ -20,8 +20,6 @@ type HistoryFilterType = "all" | "movie" | "show";
 
 type HistoryItem =
   { mediaType: "movie"; item: TraktMovieHistoryListItem } | { mediaType: "show"; item: TraktShowHistoryListItem };
-
-const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
 
 const historyQuery = {
   limit: 10,
@@ -209,7 +207,7 @@ export default function Command() {
         item.mediaType === "movie" ? item.item.movie.title : `${item.item.show.title} - ${item.item.episode.title}`
       }
       subtitle={(item) => {
-        const watchedAt = item.item.watched_at ? formatter.format(new Date(item.item.watched_at)) : "";
+        const watchedAt = formatWatchedAt(item.item.watched_at);
         if (item.mediaType === "movie") {
           return watchedAt;
         }

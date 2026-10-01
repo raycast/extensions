@@ -24,9 +24,9 @@ Search for episodes by title.
 
 Lists movies and shows that are in your watchlist.
 
-### Up Next
+### Continue Watching
 
-Get the list of shows that are up next.
+Lists the shows and movies you are in the middle of, like Trakt's Continue Watching. Filter by All, Shows or Movies.
 
 ### History
 
