@@ -99,6 +99,24 @@
       "required": false
     },
     {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "What Enter does on an item.",
+      "default": "details",
+      "required": false,
+      "data": [
+        {
+          "title": "View Details",
+          "value": "details"
+        },
+        {
+          "title": "Copy Password",
+          "value": "copy"
+        }
+      ]
+    },
+    {
       "name": "enableBackgroundRefresh",
       "type": "checkbox",
       "title": "Background Refresh",

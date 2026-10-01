@@ -2,6 +2,7 @@ import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceVal
 import { memo } from "react";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
+import { ItemView } from "./item-view";
 import { NoteView } from "./note-view";
 import { platformShortcut } from "./shortcuts";
 import { Item, ItemDetail } from "./types";
@@ -11,8 +12,9 @@ interface ItemActionsProps {
   item: Item;
   detail?: ItemDetail;
   store: ItemDetailStore;
-  isShowingDetail: boolean;
-  onToggleDetail: () => void;
+  /** Given in the list only: the item view has no details panel. */
+  isShowingDetail?: boolean;
+  onToggleDetail?: () => void;
   onRefresh?: () => void;
   onUse: (item: Item) => void;
 }
@@ -26,8 +28,10 @@ export const ItemActions = memo(function ItemActions({
   onRefresh,
   onUse,
 }: ItemActionsProps) {
+  const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
-  const concealSecrets = getPreferenceValues<Preferences>().copyPasswordTransient ?? true;
+  const concealSecrets = preferences.copyPasswordTransient ?? true;
+  const viewDetailsFirst = (preferences.primaryAction ?? "details") === "details";
   const urls = detail?.urls ?? item.urls ?? [];
   const websiteNames = websiteLabels(urls);
 
@@ -61,9 +65,21 @@ export const ItemActions = memo(function ItemActions({
     return getCurrentTotpCode(item, store.peek(item));
   }
 
+  // The item view shows the full note and has no panel: View Details and Show Note are only offered in the list.
+  const isInList = onToggleDetail !== undefined;
+  const viewDetailsAction = isInList ? (
+    <Action.Push
+      title="View Details"
+      icon={Icon.Info}
+      target={<ItemView item={item} store={store} onUse={onUse} />}
+      onPush={() => onUse(item)}
+    />
+  ) : null;
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        {viewDetailsFirst && viewDetailsAction}
         {item.type === "login" && item.hasPassword !== false && (
           <Action
             title="Copy Password"
@@ -72,7 +88,7 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("Password", async () => (await loadDetail()).password, true)}
           />
         )}
-        {item.type === "note" && (
+        {isInList && item.type === "note" && (
           <Action.Push
             title="Show Note"
             icon={Icon.Eye}
@@ -136,7 +152,7 @@ export const ItemActions = memo(function ItemActions({
             onAction={() => copy("URL", async () => urls[0], false)}
           />
         )}
-        {item.type !== "note" && (item.hasNote || detail?.note) && (
+        {isInList && item.type !== "note" && (item.hasNote || detail?.note) && (
           <Action.Push
             title="Show Note"
             icon={Icon.Eye}
@@ -185,12 +201,15 @@ export const ItemActions = memo(function ItemActions({
         </ActionPanel.Section>
       )}
       <ActionPanel.Section>
-        <Action
-          title={isShowingDetail ? "Hide Details" : "Show Details"}
-          icon={Icon.AppWindowSidebarRight}
-          shortcut={platformShortcut(["cmd"], "d")}
-          onAction={onToggleDetail}
-        />
+        {!viewDetailsFirst && viewDetailsAction}
+        {isInList && (
+          <Action
+            title={isShowingDetail ? "Hide Details" : "Show Details"}
+            icon={Icon.AppWindowSidebarRight}
+            shortcut={platformShortcut(["cmd"], "d")}
+            onAction={onToggleDetail}
+          />
+        )}
         {onRefresh && (
           <Action
             title="Refresh Items"
