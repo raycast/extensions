@@ -1,6 +1,6 @@
 # Code Review Emoji Guide Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-10-01
 
 - Add support for Windows platform
 - Add `Copy to Clipboard` action
