@@ -1,19 +1,10 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, Toast, environment, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { formatBytes, runMintSurface, shortPath } from "./mint-cli";
+import { openMint, plural, runMintSurface } from "./mint-cli";
+
 import { MissingMint } from "./missing-mint";
 import { useMintCLI } from "./use-mint-cli";
-
-type UndoBatch = {
-  id: string;
-  kind: "journal" | "agent-archive";
-  timestamp: string;
-  trigger: string;
-  folderPath: string;
-  operationCount: number;
-  totalBytes: number;
-  fileNames: string[];
-};
+import { UndoBatch, UndoKind, undoKind, undoPicture, undoTitle } from "./mint-panes";
 
 type UndoListResponse = { items: UndoBatch[] };
 type UndoResponse = { batchID: string; restoredCount: number; restoredPaths: string[] };
@@ -24,91 +15,95 @@ export default function Command() {
   return <UndoList cli={resolution.path} />;
 }
 
+/** Mint's recent runs on the left, what each one changed on the right; ↵ puts it back. */
 function UndoList({ cli }: { cli: string }) {
-  const { data, error, isLoading, revalidate } = usePromise(async () =>
-    runMintSurface<UndoListResponse>(cli, { action: "undo.list" }, 30_000),
+  const { data, error, isLoading, revalidate } = usePromise(
+    async (path: string) => runMintSurface<UndoListResponse>(path, { action: "undo.list" }, 30_000),
+    [cli],
   );
+  const appearance = environment.appearance === "light" ? "light" : "dark";
 
   async function undo(batch: UndoBatch) {
-    const accepted = await confirmAlert({
-      icon: Icon.ArrowCounterClockwise,
-      title: `Restore ${batch.operationCount} item${batch.operationCount === 1 ? "" : "s"}?`,
-      message:
-        batch.kind === "agent-archive"
-          ? "Mint will restore the original duplicate screenshot bytes inside this archived AI conversation. The file is revalidated before Mint writes it."
-          : "Mint follows later Mint/Finder moves and restores only when the recorded file identity is still safe. Existing files are never overwritten.",
-      primaryAction: { title: "Undo This Mint Action", style: Alert.ActionStyle.Default },
-    });
-    if (!accepted) return;
-
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Mint is restoring files…" });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Putting it back…" });
     try {
       const result = await runMintSurface<UndoResponse>(cli, {
         action: "undo.execute",
         batchID: batch.id,
         confirmed: true,
       });
-      toast.style = Toast.Style.Success;
-      toast.title = `Restored ${result.restoredCount} item${result.restoredCount === 1 ? "" : "s"}`;
-      toast.message = shortPath(batch.folderPath);
-      await revalidate();
+      // The window stays open: the run leaves the list, and the toast says what came back.
+      if (result.restoredCount >= batch.operationCount) {
+        toast.style = Toast.Style.Success;
+        toast.title = `Put back ${plural(result.restoredCount, "item")}`;
+        revalidate();
+        return;
+      }
+      toast.style = result.restoredCount ? Toast.Style.Success : Toast.Style.Failure;
+      toast.title = `Put back ${result.restoredCount} of ${batch.operationCount}`;
+      toast.message = "The rest were moved, changed or replaced since. Mint never overwrites a file.";
+      revalidate();
     } catch (undoError) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Mint could not complete Undo";
+      toast.title = "Mint could not put it back";
       toast.message = undoError instanceof Error ? undoError.message : String(undoError);
     }
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Undo Mint Actions" searchBarPlaceholder="Filter recent Mint actions">
+    <List
+      isLoading={isLoading}
+      isShowingDetail={(data?.items.length ?? 0) > 0}
+      navigationTitle="Undo Mint Action"
+      searchBarPlaceholder="Search what Mint did"
+    >
       {error ? (
-        <List.EmptyView title="Could not load Undo history" description={error.message} icon={Icon.ExclamationMark} />
+        <List.EmptyView title="Mint could not read its history" description={error.message} icon={Icon.Warning} />
       ) : null}
       {!error && !isLoading && data?.items.length === 0 ? (
         <List.EmptyView
-          title="Nothing to undo"
-          description="Recoverable cleanup and organize actions will appear here."
           icon={Icon.CheckCircle}
+          title="Nothing to undo"
+          description="What Mint moves or cleans to the Trash shows here for 90 days."
         />
       ) : null}
-      <List.Section title="Recoverable Actions" subtitle="Up to 90 days · no overwrite">
-        {data?.items.map((batch) => (
-          <List.Item
-            key={batch.id}
-            icon={{ source: triggerIcon(batch.trigger), tintColor: Color.Blue }}
-            title={triggerTitle(batch.trigger)}
-            subtitle={batch.fileNames.join(", ") || shortPath(batch.folderPath)}
-            accessories={[
-              { text: `${batch.operationCount} item${batch.operationCount === 1 ? "" : "s"}` },
-              batch.totalBytes > 0 ? { text: formatBytes(batch.totalBytes) } : {},
-              { date: new Date(batch.timestamp) },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action title="Undo This Mint Action" icon={Icon.ArrowCounterClockwise} onAction={() => undo(batch)} />
-                <Action.ShowInFinder path={batch.folderPath} />
-                <Action title="Refresh History" icon={Icon.ArrowClockwise} onAction={revalidate} />
-              </ActionPanel>
-            }
-          />
-        ))}
+      <List.Section title="Can be put back">
+        {data?.items.map((batch) => {
+          const kind = undoKind(batch.trigger);
+          return (
+            <List.Item
+              key={batch.id}
+              icon={ICONS[kind]}
+              title={undoTitle(batch)}
+              keywords={batch.fileNames}
+              accessories={[{ date: new Date(batch.timestamp) }]}
+              detail={<List.Item.Detail markdown={undoPicture(batch, appearance)} />}
+              actions={
+                <ActionPanel>
+                  <Action title="Put It Back" icon={Icon.ArrowCounterClockwise} onAction={() => undo(batch)} />
+                  <Action.ShowInFinder path={batch.folderPath} />
+                  <ActionPanel.Section>
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={revalidate}
+                    />
+                    <Action title="Open Mint" icon={Icon.AppWindow} onAction={openMint} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
 }
 
-function triggerTitle(trigger: string): string {
-  if (trigger === "agent-optimize") return "AI Archive Optimization";
-  if (trigger === "uninstall") return "Uninstall";
-  if (trigger === "declutter" || trigger.includes("cleanup")) return "Disk Cleanup";
-  if (trigger === "reorganize" || trigger.includes("organize")) return "File Organization";
-  return "Mint File Action";
-}
-
-function triggerIcon(trigger: string): Icon {
-  if (trigger === "agent-optimize") return Icon.Stars;
-  if (trigger === "uninstall") return Icon.AppWindow;
-  if (trigger === "declutter" || trigger.includes("cleanup")) return Icon.Trash;
-  if (trigger === "reorganize" || trigger.includes("organize")) return Icon.Folder;
-  return Icon.Document;
-}
+const ICONS: Record<UndoKind, Icon> = {
+  organize: Icon.Folder,
+  trash: Icon.Trash,
+  uninstall: Icon.AppWindow,
+  optimize: Icon.Stars,
+  other: Icon.Document,
+};
