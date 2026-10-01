@@ -628,6 +628,8 @@ function totpCommandFixture(
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
   const writes: Item[][] = [];
   const copied: string[] = [];
+  let clears = 0;
+  let savedItems: Item[] = [];
   const { default: Command } = loadView(
     "../get-totp.tsx",
     {
@@ -661,7 +663,12 @@ function totpCommandFixture(
         getCachedItems: async () => null,
         setCachedItems: async (items: Item[]) => {
           await writeCache(items);
+          savedItems = items;
           writes.push(items);
+        },
+        clearCache: async () => {
+          clears++;
+          savedItems = [];
         },
       },
       "./lib/refresh": refresh,
@@ -681,7 +688,18 @@ function totpCommandFixture(
   const render = () => harness.render(Command, {});
   render();
   harness.effects.forEach((effect) => effect());
-  return { render, toasts, writes, copied };
+  return {
+    render,
+    toasts,
+    writes,
+    copied,
+    get clears() {
+      return clears;
+    },
+    get savedItems() {
+      return savedItems;
+    },
+  };
 }
 
 test("TOTP Retry keeps unsaved visible codes when their vault fails, then removes them after a successful deletion", async () => {
@@ -976,6 +994,86 @@ test("repeated slow TOTP responses stop with Retry instead of keeping refresh ru
   assert.equal(typeof retry?.onAction, "function");
   await retry!.onAction();
   assert.equal(codes, 4);
+});
+
+test("TOTP session expiry clears rows and cache and prevents old copy callbacks or partial retries restoring them", async () => {
+  for (const source of ["listing", "code", "refresh"]) {
+    let listings = 0;
+    let codes = 0;
+    const fixture = totpCommandFixture(
+      async () => {
+        listings++;
+        if (source === "listing" && listings === 2) throw new PassCliError("Session ended", "not_authenticated");
+        return {
+          items: listings < 3 ? [{ ...item, hasTotp: true }] : [],
+          failedVaults: [{ vault: { shareId: listings < 3 ? "other" : "vault", name: "Offline" }, message: "Offline" }],
+        };
+      },
+      async () => {
+        if (++codes === 2 && source !== "listing") throw new PassCliError("Session ended", "not_authenticated");
+        return "123456";
+      },
+    );
+    await new Promise(setImmediate);
+    const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+    const oldCopy = actions(row.actions).find((entry) => entry.title === "Copy TOTP Code")!
+      .onAction as () => Promise<void>;
+    if (source === "refresh") {
+      await (actions(row.actions).find((entry) => entry.title === "Refresh Codes")!.onAction as () => Promise<void>)();
+      listings++;
+    } else await fixture.toasts[0].primaryAction.onAction();
+    const errorView = fixture.render();
+    assert.equal(errorView.props.error, "not_authenticated");
+    assert.equal(fixture.clears, 1);
+    assert.deepEqual(fixture.savedItems, []);
+    await oldCopy();
+    await new Promise(setImmediate);
+    assert.deepEqual(fixture.copied, []);
+    await (errorView.props.onRetry as () => Promise<void>)();
+    assert.equal(fixture.render().props.error, "unknown");
+    assert.equal(
+      actions(fixture.render()).some((entry) => entry.title === item.title),
+      false,
+    );
+  }
+});
+
+test("TOTP session reset clears an in-flight cache write and prevents that load restoring rows", async () => {
+  let listings = 0;
+  let rejectCodes = false;
+  let finishWrite!: () => void;
+  const write = new Promise<void>((resolve) => {
+    finishWrite = resolve;
+  });
+  const fresh = { ...item, itemId: "new", title: "New login", hasTotp: true };
+  const fixture = totpCommandFixture(
+    async () => {
+      listings++;
+      return {
+        items: [listings === 1 ? { ...item, hasTotp: true } : fresh],
+        failedVaults: listings === 1 ? [{ vault: { shareId: "other", name: "Other" }, message: "Offline" }] : [],
+      };
+    },
+    async () => {
+      if (rejectCodes) throw new PassCliError("Session ended", "not_authenticated");
+      return "123456";
+    },
+    async () => write,
+  );
+  await new Promise(setImmediate);
+  const loading = fixture.toasts[0].primaryAction.onAction();
+  await new Promise(setImmediate);
+  rejectCodes = true;
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  const refreshing = (
+    actions(row.actions).find((entry) => entry.title === "Refresh Codes")!.onAction as () => Promise<void>
+  )();
+  await new Promise(setImmediate);
+  finishWrite();
+  await Promise.all([loading, refreshing]);
+  assert.equal(fixture.render().props.error, "not_authenticated");
+  assert.deepEqual(fixture.savedItems, []);
+  assert.equal(fixture.clears, 1);
 });
 
 test("an empty failed selected vault offers lasting Retry while other vaults load", async () => {

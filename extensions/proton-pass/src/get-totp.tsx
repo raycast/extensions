@@ -14,7 +14,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
-import { getCachedItems, setCachedItems } from "./lib/cache";
+import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./lib/refresh";
 
@@ -36,7 +36,8 @@ async function loadCode(item: TotpItem): Promise<TotpItem> {
   try {
     const code = await getTotp(item.shareId, item.itemId);
     return { ...item, currentTotp: timeStep === getTotpTimeStep() ? code : undefined, currentTotpTimeStep: timeStep };
-  } catch {
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
     return { ...item, currentTotp: currentCode(item) };
   }
 }
@@ -136,7 +137,9 @@ export default function Command() {
       }
     } catch (e: unknown) {
       if (!isLatest()) return;
-      if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_authenticated")) {
+      if (e instanceof PassCliError && e.type === "not_authenticated") {
+        await resetSession();
+      } else if (itemsRef.current.length === 0) {
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {
@@ -155,6 +158,15 @@ export default function Command() {
     }
   }
 
+  async function resetSession() {
+    loads.start(); // Invalidate pending listings and queued cache writes from the ended session.
+    itemsRef.current = [];
+    setItems([]);
+    setError("not_authenticated");
+    setIsLoading(false);
+    await cacheWrites.run(clearCache);
+  }
+
   async function refreshTotpCodes() {
     if (isRefreshingRef.current) return;
 
@@ -165,7 +177,17 @@ export default function Command() {
       while (true) {
         const currentItems = itemsRef.current;
         const codeTimeStep = getTotpTimeStep();
-        const updatedItems = await Promise.all(currentItems.map(loadCode));
+        let updatedItems: TotpItem[];
+        try {
+          updatedItems = await Promise.all(currentItems.map(loadCode));
+        } catch (error) {
+          if (itemsRef.current !== currentItems) continue;
+          if (error instanceof PassCliError && error.type === "not_authenticated") {
+            await resetSession();
+            break;
+          }
+          throw error;
+        }
         // Re-fetch if either the list or the time step changed while these requests were running.
         if (itemsRef.current !== currentItems) continue;
         if (codeTimeStep !== getTotpTimeStep() && !retriedTimeStep) {
@@ -194,7 +216,10 @@ export default function Command() {
   if (errorView) return errorView;
 
   async function copyTotp(item: TotpItem) {
-    const totp = currentCode(item);
+    const currentItem = itemsRef.current.find(
+      (entry) => entry.shareId === item.shareId && entry.itemId === item.itemId,
+    );
+    const totp = currentItem && currentCode(currentItem);
     if (!totp) {
       showToast({ style: Toast.Style.Failure, title: "TOTP Code Expired", message: "Refresh to get a current code" });
       refreshTotpCodes();
