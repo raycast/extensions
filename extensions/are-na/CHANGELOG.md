@@ -1,6 +1,6 @@
 # Are.na Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-10-01
 
 - Added Windows support with platform-specific action shortcuts and a text-preview font fallback.
 - Images and attachments now download without curl, using the system Downloads folder or an optional Download Directory preference.
