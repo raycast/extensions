@@ -8,6 +8,7 @@
 - Load commands from the weekly-updated data files instead of a separate API
 - Fix the details showing options as arguments and arguments as options
 - Fix a blank default on arguments that take a list, like queue:retry's IDs
+- Fix a few commands showing twice in the list
 - Update dependencies
 
 ## [Added AI Summaries] - 2023-05-17

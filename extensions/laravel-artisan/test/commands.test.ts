@@ -31,7 +31,9 @@ describe("GitHub data", { timeout: 30_000 }, () => {
   it("loads each version's commands in the shape the extension reads", async () => {
     for (const version of await fetchVersions()) {
       const commands = await fetchCommands(version);
-      expect(commands.map(({ name }) => name)).toContain("migrate");
+      const names = commands.map(({ name }) => name);
+      expect(names).toContain("migrate");
+      expect(new Set(names).size).toBe(names.length);
       for (const command of commands) {
         expect(command.name).not.toMatch(/^_/);
         expect(command).toMatchObject({
@@ -81,16 +83,24 @@ describe("search-artisan-commands tool", { timeout: 30_000 }, () => {
     expect(result.version).toBe(newest);
     expect(result.warnings).toEqual([]);
     const [command] = result.commands;
-    expect(command.name).toBe("make:model");
-    expect(command.usage).toMatch(/^php artisan make:model /);
-    expect(command.options).toContainEqual(expect.objectContaining({ name: "--migration", takesValue: false }));
-    expect(command.arguments).toContainEqual(expect.objectContaining({ name: "name", required: true }));
+    expect(command).toMatchObject({ name: "make:model", usage: expect.stringMatching(/^php artisan make:model /) });
+    expect(command).toHaveProperty(
+      "options",
+      expect.arrayContaining([expect.objectContaining({ name: "--migration", takesValue: false })]),
+    );
+    expect(command).toHaveProperty(
+      "arguments",
+      expect.arrayContaining([expect.objectContaining({ name: "name", required: true })]),
+    );
   });
 
   it("leaves out an empty list default", async () => {
     const result = await searchArtisanCommands({ query: "queue:retry" });
     const command = result.commands.find(({ name }) => name === "queue:retry");
-    expect(command?.arguments).toContainEqual(expect.objectContaining({ name: "id", default: undefined }));
+    expect(command).toHaveProperty(
+      "arguments",
+      expect.arrayContaining([expect.objectContaining({ name: "id", default: undefined })]),
+    );
   });
 
   it("falls back to the newest version, with a warning", async () => {
@@ -106,10 +116,17 @@ describe("search-artisan-commands tool", { timeout: 30_000 }, () => {
     expect(result.warnings).toEqual(['No Artisan command matched "zzqqxxjj".']);
   });
 
-  it("caps an empty query at ten commands", async () => {
+  it("lists every command's name and description for an empty query", async () => {
+    const commands = await fetchCommands((await fetchVersions())[0]);
     const result = await searchArtisanCommands({});
-    expect(result.commands).toHaveLength(10);
+    expect(result.commands).toEqual(commands.map(({ name, description }) => ({ name, description })));
     expect(result.warnings).toEqual([]);
+  });
+
+  it("says when a keyword matches more than ten commands", async () => {
+    const result = await searchArtisanCommands({ query: "make" });
+    expect(result.commands).toHaveLength(10);
+    expect(result.warnings).toEqual([expect.stringMatching(/^Showing the top 10 of \d+ matches/)]);
   });
 });
 
@@ -144,10 +161,40 @@ describe("cache", () => {
     expect(store.get("index.ts")).toBe(entry);
   });
 
+  it("keeps an old copy when the download breaks off", async () => {
+    const entry = cacheEntry('"99.x": v99,', DAY * 2);
+    store.set("index.ts", entry);
+    const response = new Response('"14.x": v14,');
+    vi.spyOn(response, "text").mockRejectedValue(new TypeError("terminated"));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(response);
+    expect(await fetchVersions()).toEqual(["99.x"]);
+    expect(store.get("index.ts")).toBe(entry);
+  });
+
+  it("keeps an old copy when the new file lists no versions", async () => {
+    const entry = cacheEntry('"99.x": v99,', DAY * 2);
+    store.set("index.ts", entry);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("export default {};"));
+    expect(await fetchVersions()).toEqual(["99.x"]);
+    expect(store.get("index.ts")).toBe(entry);
+  });
+
+  it("throws when the file lists no versions and nothing is cached", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(""));
+    await expect(fetchVersions()).rejects.toThrow("Couldn't read the Laravel versions.");
+    expect(store.size).toBe(0);
+  });
+
   it("throws when offline with nothing cached", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("fetch failed"));
     await expect(fetchVersions()).rejects.toThrow("Couldn't load the Laravel versions. Check your connection.");
     expect(store.size).toBe(0);
+  });
+
+  it("lists a command the file repeats once", async () => {
+    const command = { name: "make:config", description: "", synopsis: "", aliases: [], arguments: [], options: [] };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify([command, command])));
+    expect(await fetchCommands("99.x")).toEqual([command]);
   });
 
   it("throws with the status when GitHub fails and nothing is cached", async () => {

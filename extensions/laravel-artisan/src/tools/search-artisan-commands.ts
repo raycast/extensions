@@ -2,7 +2,7 @@ import { argumentDefault, fetchCommands, fetchVersions, searchCommands } from ".
 
 type Input = {
   /**
-   * A command name like "make:model", or one or two keywords like "model" or "queue". The search is fuzzy, so full sentences match poorly. Leave empty to list every command.
+   * A command name like "make:model", or one or two keywords like "model" or "queue". The search is fuzzy, so full sentences match poorly. Leave empty to list every command by name and description only.
    */
   query?: string;
   /**
@@ -19,7 +19,21 @@ export default async function searchArtisanCommandsTool(input: Input) {
   const versions = await fetchVersions();
   const wanted = input.version?.match(/\d+/)?.[0];
   const version = versions.find((available) => available === `${wanted}.x`) ?? versions[0];
-  const commands = searchCommands(await fetchCommands(version), input.query ?? "").slice(0, 10);
+  const versionWarnings =
+    wanted && version !== `${wanted}.x`
+      ? [`Laravel ${input.version} isn't available, so this is ${version}. Available: ${versions.join(", ")}.`]
+      : [];
+  const all = await fetchCommands(version);
+  if (!input.query?.trim()) {
+    return {
+      version,
+      commands: all.map(({ name, description }) => ({ name, description })),
+      warnings: versionWarnings,
+    };
+  }
+  const matches = searchCommands(all, input.query);
+  const commands = matches.slice(0, 10);
+  const exactName = commands[0]?.name === input.query.trim();
   return {
     version,
     commands: commands.map((command) => ({
@@ -39,8 +53,11 @@ export default async function searchArtisanCommandsTool(input: Input) {
       })),
     })),
     warnings: [
-      ...(wanted && version !== `${wanted}.x`
-        ? [`Laravel ${input.version} isn't available, so this is ${version}. Available: ${versions.join(", ")}.`]
+      ...versionWarnings,
+      ...(!exactName && matches.length > commands.length
+        ? [
+            `Showing the top ${commands.length} of ${matches.length} matches. Search a command name or a narrower keyword for the rest.`,
+          ]
         : []),
       ...(commands.length ? [] : [`No Artisan command matched "${input.query}".`]),
     ],
