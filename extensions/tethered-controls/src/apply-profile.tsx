@@ -6,7 +6,8 @@ import { readStoredItems } from "./read-stored-items";
 type Profile = { id: string; name: string };
 
 async function readProfiles(): Promise<Profile[]> {
-  return readStoredItems<Profile>("settingsProfiles",
+  return readStoredItems<Profile>(
+    "settingsProfiles",
     (profile): profile is Profile =>
       typeof profile === "object" &&
       profile !== null &&
@@ -28,7 +29,11 @@ export default function Command() {
       setProfiles(await readProfiles());
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
-      await showToast({ style: Toast.Style.Failure, title: "Could not load Tethered profiles", message: detail });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not load Tethered profiles",
+        message: detail,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -40,14 +45,24 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Tethered profiles">
-      {profiles.length === 0 && !isLoading ? <List.EmptyView title="No saved profiles found" /> : null}
+      {profiles.length === 0 && !isLoading ? (
+        <List.EmptyView title="No saved profiles found" />
+      ) : null}
       {profiles.map((profile) => (
         <List.Item
           key={profile.id}
           title={profile.name}
           actions={
             <ActionPanel>
-              <Action title="Apply Profile" onAction={() => runControl(`/profile/apply?name=${encodeURIComponent(profile.name)}`, `Apply ${profile.name}`)} />
+              <Action
+                title="Apply Profile"
+                onAction={() =>
+                  runControl(
+                    `/profile/apply?name=${encodeURIComponent(profile.name)}`,
+                    `Apply ${profile.name}`,
+                  )
+                }
+              />
               <Action title="Refresh Profiles" onAction={reload} />
             </ActionPanel>
           }

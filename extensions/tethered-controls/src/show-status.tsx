@@ -1,5 +1,5 @@
-import { Detail, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
 import { readStoredData } from "./read-stored-items";
 import { sendToTethered } from "./send-to-tethered";
 
@@ -23,7 +23,8 @@ type Status = {
 function isStatus(value: unknown): value is Status {
   if (typeof value !== "object" || value === null) return false;
   const status = value as Record<string, unknown>;
-  return typeof status.request === "string" &&
+  return (
+    typeof status.request === "string" &&
     typeof status.updatedAt === "number" &&
     typeof status.batteryLevel === "number" &&
     typeof status.isCharging === "boolean" &&
@@ -36,18 +37,21 @@ function isStatus(value: unknown): value is Status {
     typeof status.sailingActive === "boolean" &&
     typeof status.heatProtectionEnabled === "boolean" &&
     typeof status.heatProtectionActive === "boolean" &&
-    typeof status.activeProfile === "string";
+    typeof status.activeProfile === "string"
+  );
 }
 
 async function requestStatus(): Promise<Status> {
   const request = crypto.randomUUID();
   await sendToTethered(`tethered://status?request=${request}`);
   for (let attempt = 0; attempt < 60; attempt++) {
-    const value = await readStoredData("raycastStatus");
+    const value = await readStoredData("raycastStatus").catch(() => undefined);
     if (isStatus(value) && value.request === request) return value;
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
-  throw new Error("Tethered did not return a fresh status. Open the updated app and try again.");
+  throw new Error(
+    "Tethered did not return a fresh status. Open the updated app and try again.",
+  );
 }
 
 let pendingStatusRequest: Promise<Status> | undefined;
@@ -56,39 +60,93 @@ function requestStatusOnce(): Promise<Status> {
   if (pendingStatusRequest) return pendingStatusRequest;
   pendingStatusRequest = requestStatus();
   void pendingStatusRequest.then(
-    () => { pendingStatusRequest = undefined; },
-    () => { pendingStatusRequest = undefined; },
+    () => {
+      pendingStatusRequest = undefined;
+    },
+    () => {
+      pendingStatusRequest = undefined;
+    },
   );
   return pendingStatusRequest;
 }
 
-const yesNo = (value: boolean) => value ? "On" : "Off";
-const powerModeLabel = (value: string) => ({ auto: "Auto", low: "Low", high: "High" } as Record<string, string>)[value] ?? value;
-const calibrationLabel = (value: string) => ({ opportunityWaitingForNaturalFull: "Waiting for opportunity" } as Record<string, string>)[value] ?? value;
+const yesNo = (value: boolean) => (value ? "On" : "Off");
+const powerModeLabel = (value: string) =>
+  (({ auto: "Auto", low: "Low", high: "High" }) as Record<string, string>)[
+    value
+  ] ?? value;
+const calibrationLabel = (value: string) =>
+  (
+    ({ opportunityWaitingForNaturalFull: "Waiting for opportunity" }) as Record<
+      string,
+      string
+    >
+  )[value] ?? value;
+const escapeMarkdown = (value: string) =>
+  Array.from(
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\r?\n/g, " "),
+    (character) =>
+      "\\`*_{}[]()#+-.!|~".includes(character) ? `\\${character}` : character,
+  ).join("");
 
 export default function Command() {
   const [status, setStatus] = useState<Status | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    void requestStatusOnce().then(setStatus).catch(async (error: unknown) => {
+  const refreshStatus = useCallback(async () => {
+    setIsLoading(true);
+    setStatus(null);
+    setErrorMessage(null);
+    try {
+      setStatus(await requestStatusOnce());
+    } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
-      await showToast({ style: Toast.Style.Failure, title: "Could not read Tethered status", message: detail });
-    }).finally(() => setIsLoading(false));
+      setErrorMessage(detail);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not read Tethered status",
+        message: detail,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const markdown = status ? [
-    `# Tethered Status`,
-    `Battery: ${status.batteryLevel < 0 ? "Unavailable" : `${Math.round(status.batteryLevel)}%`} (${status.isACConnected ? "AC" : "Battery"}, ${status.isCharging ? "Charging" : "Not charging"})`,
-    `Power mode: ${powerModeLabel(status.powerMode)}`,
-    `Caffeinate: ${yesNo(status.caffeinateActive)}`,
-    `Calibration: ${calibrationLabel(status.calibrationPhase)}`,
-    `Topup: ${yesNo(status.topupEnabled)}`,
-    `Sailing: ${yesNo(status.sailingEnabled)} (active: ${yesNo(status.sailingActive)})`,
-    `Heat Protection: ${yesNo(status.heatProtectionEnabled)} (active: ${yesNo(status.heatProtectionActive)})`,
-    `Profile: ${status.activeProfile || "None"}`,
-    `Updated: ${new Date(status.updatedAt * 1000).toLocaleTimeString()}`,
-  ].join("\n\n") : "Waiting for Tethered status…";
+  useEffect(() => {
+    void refreshStatus();
+  }, [refreshStatus]);
 
-  return <Detail isLoading={isLoading} markdown={markdown} />;
+  const markdown = status
+    ? [
+        `# Tethered Status`,
+        `Battery: ${status.batteryLevel < 0 ? "Unavailable" : `${Math.round(status.batteryLevel)}%`} (${status.isACConnected ? "AC" : "Battery"}, ${status.isCharging ? "Charging" : "Not charging"})`,
+        `Power mode: ${powerModeLabel(status.powerMode)}`,
+        `Caffeinate: ${yesNo(status.caffeinateActive)}`,
+        `Calibration: ${calibrationLabel(status.calibrationPhase)}`,
+        `Topup: ${yesNo(status.topupEnabled)}`,
+        `Sailing: ${yesNo(status.sailingEnabled)} (active: ${yesNo(status.sailingActive)})`,
+        `Heat Protection: ${yesNo(status.heatProtectionEnabled)} (active: ${yesNo(status.heatProtectionActive)})`,
+        `Profile: ${status.activeProfile ? escapeMarkdown(status.activeProfile) : "None"}`,
+        `Updated: ${new Date(status.updatedAt * 1000).toLocaleTimeString()}`,
+      ].join("\n\n")
+    : errorMessage
+      ? `Could not read Tethered status: ${escapeMarkdown(errorMessage)}`
+      : "Waiting for Tethered status…";
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action title="Refresh Status" onAction={refreshStatus} />
+        </ActionPanel>
+      }
+    />
+  );
 }

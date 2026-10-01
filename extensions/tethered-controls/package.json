@@ -1,37 +1,147 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tethered-controls",
   "title": "Tethered",
   "description": "Control Tethered directly from Raycast. Tethered must be installed and running. A number of actions are only available to users with Pro access.",
   "author": "Tumerit",
   "icon": "icon.png",
-  "platforms": ["macOS"],
-  "categories": ["System", "Productivity"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
-    { "name": "get-tethered", "title": "Get Tethered", "description": "Open the Tethered website to download the Mac app", "mode": "no-view" },
-    { "name": "auto-power", "title": "Auto Power", "description": "Set Tethered to Auto Power", "mode": "no-view" },
-    { "name": "low-power", "title": "Low Power", "description": "Set Tethered to Low Power", "mode": "no-view" },
-    { "name": "high-power", "title": "High Power", "description": "Set Tethered to High Power", "mode": "no-view" },
-    { "name": "start-caffeinate", "title": "Start Caffeinate", "description": "Start the default Tethered Caffeinate preset", "mode": "no-view" },
-    { "name": "start-timed-caffeinate", "title": "Start Timed Caffeinate", "description": "Keep your Mac awake for a chosen number of minutes", "mode": "no-view", "arguments": [{ "name": "minutes", "type": "text", "placeholder": "Minutes (1–1440)", "required": true }] },
-    { "name": "stop-caffeinate", "title": "Stop Caffeinate", "description": "Stop Tethered Caffeinate", "mode": "no-view" },
-    { "name": "run-caffeinate-preset", "title": "Run Caffeinate Preset", "description": "Browse and run saved Caffeinate presets", "mode": "view" },
-    { "name": "show-status", "title": "Show Status", "description": "Read the current Tethered battery and control state", "mode": "view" },
-    { "name": "get-tethered-pro", "title": "Get Tethered Pro", "description": "Open checkout for Tethered Pro on this Mac", "mode": "no-view" },
-    { "name": "start-calibration", "title": "Start Calibration", "description": "Start a manual battery calibration cycle", "mode": "no-view" },
-    { "name": "cancel-calibration", "title": "Cancel Calibration", "description": "Cancel the current battery calibration cycle", "mode": "no-view" },
-    { "name": "enable-topup", "title": "Enable Topup", "description": "Charge to full with Tethered Topup", "mode": "no-view" },
-    { "name": "disable-topup", "title": "Disable Topup", "description": "Return to the normal charging limit", "mode": "no-view" },
-    { "name": "enable-sailing", "title": "Enable Sailing", "description": "Enable Tethered Sailing behavior", "mode": "no-view" },
-    { "name": "disable-sailing", "title": "Disable Sailing", "description": "Disable Tethered Sailing behavior", "mode": "no-view" },
-    { "name": "enable-heat-protection", "title": "Enable Heat Protection", "description": "Enable battery temperature protection", "mode": "no-view" },
-    { "name": "disable-heat-protection", "title": "Disable Heat Protection", "description": "Disable battery temperature protection", "mode": "no-view" },
-    { "name": "apply-profile", "title": "Apply Profile", "description": "Browse and apply saved Tethered settings profiles", "mode": "view" }
+    {
+      "name": "get-tethered",
+      "title": "Get Tethered",
+      "description": "Open the Tethered website to download the Mac app",
+      "mode": "no-view"
+    },
+    {
+      "name": "auto-power",
+      "title": "Auto Power",
+      "description": "Set Tethered to Auto Power",
+      "mode": "no-view"
+    },
+    {
+      "name": "low-power",
+      "title": "Low Power",
+      "description": "Set Tethered to Low Power",
+      "mode": "no-view"
+    },
+    {
+      "name": "high-power",
+      "title": "High Power",
+      "description": "Set Tethered to High Power",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-caffeinate",
+      "title": "Start Caffeinate",
+      "description": "Start the default Tethered Caffeinate preset",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-timed-caffeinate",
+      "title": "Start Timed Caffeinate",
+      "description": "Keep your Mac awake for a chosen number of minutes",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "minutes",
+          "type": "text",
+          "placeholder": "Minutes (1–1440)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "stop-caffeinate",
+      "title": "Stop Caffeinate",
+      "description": "Stop Tethered Caffeinate",
+      "mode": "no-view"
+    },
+    {
+      "name": "run-caffeinate-preset",
+      "title": "Run Caffeinate Preset",
+      "description": "Browse and run saved Caffeinate presets",
+      "mode": "view"
+    },
+    {
+      "name": "show-status",
+      "title": "Show Status",
+      "description": "Read the current Tethered battery and control state",
+      "mode": "view"
+    },
+    {
+      "name": "get-tethered-pro",
+      "title": "Get Tethered Pro",
+      "description": "Open checkout for Tethered Pro on this Mac",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-calibration",
+      "title": "Start Calibration",
+      "description": "Start a manual battery calibration cycle",
+      "mode": "no-view"
+    },
+    {
+      "name": "cancel-calibration",
+      "title": "Cancel Calibration",
+      "description": "Cancel the current battery calibration cycle",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable-topup",
+      "title": "Enable Topup",
+      "description": "Charge to full with Tethered Topup",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable-topup",
+      "title": "Disable Topup",
+      "description": "Return to the normal charging limit",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable-sailing",
+      "title": "Enable Sailing",
+      "description": "Enable Tethered Sailing behavior",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable-sailing",
+      "title": "Disable Sailing",
+      "description": "Disable Tethered Sailing behavior",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable-heat-protection",
+      "title": "Enable Heat Protection",
+      "description": "Enable battery temperature protection",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable-heat-protection",
+      "title": "Disable Heat Protection",
+      "description": "Disable battery temperature protection",
+      "mode": "no-view"
+    },
+    {
+      "name": "apply-profile",
+      "title": "Apply Profile",
+      "description": "Browse and apply saved Tethered settings profiles",
+      "mode": "view"
+    }
   ],
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
     "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -39,8 +149,11 @@
     "react": "19.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.0.0",
     "@types/react": "19.0.10",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
     "typescript": "^5.0.0"
   }
 }
