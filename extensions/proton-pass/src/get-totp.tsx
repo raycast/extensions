@@ -16,7 +16,7 @@ import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
-import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./lib/refresh";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
 
 interface TotpItem extends Item {
   currentTotp?: string;
@@ -106,17 +106,17 @@ export default function Command() {
       const { items: freshItems, failedVaults } = await listVaultsAndItems();
       if (!isLatest()) return;
 
-      const nextItems: TotpItem[] = mergeRefreshedItems(
-        freshItems,
-        itemsRef.current,
-        failedVaults.map(({ vault }) => vault.shareId),
-      );
-      const totpItems = nextItems.filter((item) => item.hasTotp);
+      const {
+        items: nextItems,
+        isComplete,
+        failureMessage,
+      } = getRefreshResult(freshItems, itemsRef.current, failedVaults, (item) => item.hasTotp);
+      const totpItems: TotpItem[] = nextItems.filter((item) => item.hasTotp);
       const codeTimeStep = getTotpTimeStep();
       const itemsWithTotp = await Promise.all(totpItems.map(loadCode));
       if (!isLatest()) return;
       // Serialize complete cache writes so an older in-flight write cannot outlast a newer one.
-      if (failedVaults.length === 0) {
+      if (isComplete) {
         await cacheWrites.run(async () => {
           if (isLatest()) await setCachedItems(freshItems, true);
         });
@@ -126,7 +126,7 @@ export default function Command() {
       setItems(itemsWithTotp);
       itemsRef.current = itemsWithTotp;
       if (codeTimeStep !== getTotpTimeStep()) refreshTotpCodes();
-      if (failedVaults.length > 0 && itemsWithTotp.length === 0) throw new Error(failedVaults[0].message);
+      if (failureMessage) throw new Error(failureMessage);
       if (failedVaults.length > 0) {
         await showToast({
           style: Toast.Style.Failure,

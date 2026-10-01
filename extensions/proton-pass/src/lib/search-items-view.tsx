@@ -8,7 +8,7 @@ import { renderErrorView } from "./error-views";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./login-view";
 import { hostnameOf } from "./format";
 import { ItemList } from "./item-list";
-import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
+import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./refresh";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -159,20 +159,16 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (!isLatest()) return;
       setFailedVaults(failures);
       // Vaults that failed to load keep the items already known, instead of looking empty.
-      const nextItems = mergeRefreshedItems(
-        freshItems,
-        itemsRef.current,
-        failures.map(({ vault }) => vault.shareId),
-      );
+      const { items: nextItems, isComplete, failureMessage } = getRefreshResult(freshItems, itemsRef.current, failures);
       updateItems(nextItems);
       setVaults(freshVaults);
 
       // A failed listing with nothing to show must stay an error, rather than a successful empty result.
-      if (failures.length > 0 && nextItems.length === 0) throw new Error(failures[0].message);
+      if (failureMessage) throw new Error(failureMessage);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
       // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
-      if (failures.length === 0) {
+      if (isComplete) {
         await cacheWrites.run(async () => {
           if (isLatest()) await Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]);
         });
@@ -246,7 +242,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         icon: emptyFailureMessage ? Icon.ExclamationMark : Icon.MagnifyingGlass,
         title: emptyFailureMessage ? "Couldn't Load Items" : "No Items Found",
         description:
-          emptyFailureMessage ??
+          emptyFailureMessage?.split("\n")[0] ??
           (selectedVaultId === ALL_VAULTS_VALUE ? "Your vaults are empty" : "No items in this vault"),
         onRetry: emptyFailureMessage ? loadItems : undefined,
       }}

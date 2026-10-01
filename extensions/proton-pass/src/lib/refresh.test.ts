@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createRequestTracker, createSerialQueue, failedVaultsTitle, mergeRefreshedItems } from "./refresh";
+import {
+  createRequestTracker,
+  createSerialQueue,
+  failedVaultsTitle,
+  getRefreshResult,
+  mergeRefreshedItems,
+} from "./refresh";
 import { Item } from "./types";
 
 function item(shareId: string, itemId: string): Item {
@@ -56,4 +62,35 @@ test("queued tasks run one after the other, in order", async () => {
   await assert.rejects(failing, /write failed/);
   assert.equal(await fast, 42);
   assert.deepEqual(events, ["slow start", "slow end", "failing", "fast"]);
+});
+
+test("only a complete listing can renew the cache", () => {
+  const fresh = [item("vault-1", "a")];
+  const previous = [item("vault-1", "old"), item("vault-2", "b")];
+
+  assert.deepEqual(getRefreshResult(fresh, previous, []), {
+    items: fresh,
+    isComplete: true,
+    failureMessage: undefined,
+  });
+
+  const partial = getRefreshResult(fresh, previous, [{ vault: { shareId: "vault-2" }, message: "timeout" }]);
+  assert.deepEqual(
+    partial.items.map(({ itemId }) => itemId),
+    ["a", "b"],
+  );
+  assert.equal(partial.isComplete, false);
+  assert.equal(partial.failureMessage, undefined);
+});
+
+test("a failed listing with nothing to show is a failure, not an empty account", () => {
+  const failures = [
+    { vault: { shareId: "vault-1" }, message: "timeout" },
+    { vault: { shareId: "vault-2" }, message: "network" },
+  ];
+  assert.equal(getRefreshResult([], [], failures).failureMessage, "timeout");
+
+  // Get TOTP only shows items with a 2FA code.
+  const withoutCodes = getRefreshResult([item("vault-3", "c")], [], failures, (candidate) => candidate.hasTotp);
+  assert.equal(withoutCodes.failureMessage, "timeout");
 });

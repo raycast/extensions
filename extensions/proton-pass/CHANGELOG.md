@@ -22,6 +22,7 @@
 - Earlier per-vault snapshots fill gaps in partial shared caches and are removed after a complete Search Items or Get TOTP refresh, so deleted items do not return
 - Copy Password remains available on demand when cached metadata says no password was saved; Enter still follows the Primary Action preference
 - Copy Note in Show Note follows the Transient Clipboard preference, keeping notes concealed by default
+- Copy Username, Copy Email and Copy Title use loaded details when available, matching the displayed values
 - Partial Get TOTP loads preserve saved codes for failed vaults and offer Retry
 - Partial Get TOTP refreshes remove deleted codes from successful vaults before showing errors for failed vaults
 - Get TOTP Retry preserves unsaved visible codes for failed vaults; overlapping loads only apply the latest result and serialize cache writes

@@ -64,6 +64,7 @@ const item: Item = {
 
 function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = item, detail?: ItemDetail) {
   const events: string[] = [];
+  const contents: string[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
     "@raycast/api": {
@@ -83,7 +84,8 @@ function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = it
       },
       getPreferenceValues: () => ({ primaryAction }),
       Clipboard: {
-        copy: async () => {
+        copy: async (value: string) => {
+          contents.push(value);
           events.push("copy");
         },
       },
@@ -103,7 +105,7 @@ function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = it
     onToggleDetail: () => undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), events };
+  return { entries: actions(panel), events, contents };
 }
 
 test("Enter views details by default and copies passwords only when selected in preferences", async () => {
@@ -124,6 +126,24 @@ test("Enter views details by default and copies passwords only when selected in 
   const addedPassword = { ...item, password: "fake-secret" };
   assert.equal(titles(itemActions("copy", { ...item, hasPassword: false }, addedPassword).entries)[0], "Copy Password");
   assert.equal(titles(itemActions("copy", item, { ...item, password: undefined }).entries)[0], "View Details");
+});
+
+test("copying item fields uses loaded values and omits fields removed since the cached listing", async () => {
+  const loaded = { ...item, username: "new-user", email: "new@example.com", title: "New title" };
+  const { entries, contents } = itemActions(undefined, item, loaded);
+  for (const title of ["Copy Username", "Copy Email", "Copy Title"]) {
+    await (entries.find((entry) => entry.title === title)!.onAction as () => Promise<void>)();
+  }
+  assert.deepEqual(contents, [loaded.username, loaded.email, loaded.title]);
+  const removed = itemActions(
+    undefined,
+    { ...item, username: "old-user" },
+    { ...item, username: undefined, email: undefined },
+  );
+  assert.equal(
+    removed.entries.some((entry) => entry.title === "Copy Username" || entry.title === "Copy Email"),
+    false,
+  );
 });
 
 test("Copy Email and Copy Title have distinct Windows shortcuts", () => {
