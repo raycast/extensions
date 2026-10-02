@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { AuthError, redirectUriForRegistration, sessionInfo, signIn, signOut } from "./lib/auth";
 import { authMode, prefs } from "./lib/preferences";
-import { cacheClear } from "./lib/cache";
+import { clearSessionData } from "./lib/cache";
 import { NavigationActions } from "./components/actions";
 
 type Session = Awaited<ReturnType<typeof sessionInfo>>;
@@ -54,7 +54,7 @@ export default function SignInCommand() {
     setLastError(null);
     try {
       await signIn();
-      cacheClear();
+      await clearSessionData();
       await reload();
       toast.style = Toast.Style.Success;
       toast.title = "Signed in to SnapTrade";
@@ -73,7 +73,7 @@ export default function SignInCommand() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Signing out…" });
     try {
       const result = await signOut();
-      cacheClear();
+      await clearSessionData();
       await reload();
       if (result.revoked) {
         toast.style = Toast.Style.Success;
