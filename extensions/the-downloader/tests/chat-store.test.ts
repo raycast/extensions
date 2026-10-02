@@ -91,6 +91,23 @@ describe("storage", () => {
     expect(await findChat("x")).toBeUndefined();
     expect((await loadChats()).map((c) => c.key)).toEqual(["y"]);
   });
+
+  it("keeps a chat, and fails the deletion, when its deletion can't be noted", async () => {
+    // Without the note, a save's pending check (maybe in another command) would
+    // take the deletion for a lost write and bring the chat back.
+    await saveChat(chat("kept", 10));
+    const real = LocalStorage.setItem.bind(LocalStorage);
+    const spy = vi.spyOn(LocalStorage, "setItem").mockImplementation(async (key: string, value: string) => {
+      if (key === "video-chats-deleted-v1") throw new Error("disk full");
+      return real(key, value);
+    });
+    try {
+      await expect(deleteChat("kept")).rejects.toThrow(/disk full/);
+      expect((await findChat("kept"))?.title).toBe("kept");
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
 
 describe("concurrent writes from another command", () => {

@@ -588,7 +588,15 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
     if (!confirmed) return;
     abortRef.current?.abort();
     setTurns([]);
-    await deleteChat(chatKey(ctx));
+    try {
+      await deleteChat(chatKey(ctx));
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't clear the saved chat",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   if (missingTool) {

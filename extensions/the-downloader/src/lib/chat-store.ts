@@ -110,11 +110,15 @@ export async function saveChat(chat: StoredChat): Promise<void> {
   }
 }
 
+/**
+ * Delete a chat. The deletion is noted first: without the note, a save's pending
+ * check (maybe in another command) would take the removal for a lost write and
+ * bring the chat back. So when the note can't be saved, nothing is deleted and
+ * this rejects.
+ */
 export async function deleteChat(key: string): Promise<StoredChat[]> {
   const at = Date.now();
-  await deletions
-    .mutate((list) => [...list.filter((d) => d.key !== key), { key, at }].slice(-DELETION_LIMIT))
-    .catch((error) => console.error("Could not note a chat deletion", error));
+  await deletions.mutate((list) => [...list.filter((d) => d.key !== key), { key, at }].slice(-DELETION_LIMIT));
   // A save made after the deletion (the chat was started again) stays.
   const deleted = (c: StoredChat) => c.key === key && c.updatedAt <= at;
   return store.mutate(

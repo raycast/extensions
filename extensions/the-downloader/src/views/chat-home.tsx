@@ -10,8 +10,10 @@ import {
   Image,
   Keyboard,
   List,
+  Toast,
   confirmAlert,
   getPreferenceValues,
+  showToast,
 } from "@raycast/api";
 import { EnginePreference, engineSettings } from "../lib/ai-engines.js";
 import { StoredChat, deleteChat, loadChats } from "../lib/chat-store.js";
@@ -22,6 +24,8 @@ import { linkKindOf } from "../lib/link-loader.js";
 import { isValidUrl, normalizeUrl } from "../utils.js";
 import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { LinkChat } from "./link-chat.js";
+
+const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 type Candidate = { url: string; title: string; icon: Icon };
 
@@ -114,7 +118,11 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
   const refresh = () => void loadChats().then(setChats);
 
   async function remove(chat: StoredChat) {
-    setChats(await deleteChat(chat.key));
+    try {
+      setChats(await deleteChat(chat.key));
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't delete the chat", message: errorText(error) });
+    }
   }
 
   async function removeAll() {
@@ -125,8 +133,12 @@ export function ChatHome({ initialText = "" }: { initialText?: string }) {
       primaryAction: { title: "Delete All", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    for (const chat of chats ?? []) await deleteChat(chat.key);
-    setChats([]);
+    try {
+      for (const chat of chats ?? []) await deleteChat(chat.key);
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't delete every chat", message: errorText(error) });
+    }
+    refresh();
   }
 
   return (
