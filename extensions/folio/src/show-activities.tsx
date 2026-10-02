@@ -30,9 +30,11 @@ function iconFor(type: string): { source: Icon; tintColor: Color } {
       return { source: Icon.Coins, tintColor: Color.Green };
     case "CONTRIBUTION":
     case "EXTERNAL_ASSET_TRANSFER_IN":
+    case "INTERNAL_CASH_TRANSFER_IN":
       return { source: Icon.Plus, tintColor: Color.Green };
     case "WITHDRAWAL":
     case "EXTERNAL_ASSET_TRANSFER_OUT":
+    case "INTERNAL_CASH_TRANSFER_OUT":
       return { source: Icon.Minus, tintColor: Color.Red };
     case "FEE":
     case "TAX":
