@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Fix Window Switcher Dismissal] - {PR_MERGE_DATE}
+## [Fix Window Switcher Dismissal] - 2026-10-02
 
 - Close Raycast after successful window actions instead of leaving Root Search visible.
 
