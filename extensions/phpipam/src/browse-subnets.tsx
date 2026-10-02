@@ -2,7 +2,12 @@ import { Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { phpipam } from "./api";
-import { ErrorView, SubnetListItem, silentPromiseOptions } from "./components";
+import {
+  ErrorView,
+  SubnetListItem,
+  silentPromiseOptions,
+  useVlanNumbers,
+} from "./components";
 import { s, sortSubnets } from "./utils";
 
 export default function Command() {
@@ -11,6 +16,7 @@ export default function Command() {
     [],
     silentPromiseOptions,
   );
+  const vlans = useVlanNumbers();
 
   if (error) {
     return <ErrorView error={error} onRetry={revalidate} />;
@@ -35,6 +41,7 @@ export default function Command() {
           key={s(subnet.id)}
           subnet={subnet}
           sectionId={s(subnet.sectionId)}
+          vlans={vlans}
         />
       ))}
     </List>

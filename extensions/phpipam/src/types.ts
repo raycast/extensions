@@ -14,6 +14,8 @@ export interface Section {
 }
 
 export interface SubnetUsage {
+  /** phpIPAM's usage endpoint names this "maxhosts" (no underscore). */
+  maxhosts?: Scalar;
   max_hosts?: Scalar;
   Used?: Scalar;
   Used_percent?: Scalar;
@@ -54,14 +56,18 @@ export interface IpAddress {
   note?: Scalar;
   port?: Scalar;
   switch?: Scalar;
-  /** ipTag id: 1 Offline, 2 Used, 3 Reserved, 4 DHCP. */
+  /** ipTag id: 1 Offline, 2 Used, 3 Reserved, 4 DHCP. The API renames the
+   *  "state" column to "tag" in GET responses (remap_keys). */
   state?: Scalar;
+  tag?: Scalar;
   lastSeen?: Scalar;
   [key: string]: unknown;
 }
 
 export interface Vlan {
-  vlanId: Scalar;
+  /** "vlanId" on search results; some phpIPAM versions return "id". */
+  vlanId?: Scalar;
+  id?: Scalar;
   name: Scalar;
   number: Scalar;
   description: Scalar;
@@ -69,7 +75,9 @@ export interface Vlan {
 }
 
 export interface Vrf {
-  vrfId: Scalar;
+  /** "vrfId" on search results; some phpIPAM versions return "id". */
+  vrfId?: Scalar;
+  id?: Scalar;
   name: Scalar;
   rd: Scalar;
   description: Scalar;

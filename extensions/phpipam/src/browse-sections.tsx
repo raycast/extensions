@@ -2,7 +2,12 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { phpipam } from "./api";
-import { ErrorView, SubnetListItem, silentPromiseOptions } from "./components";
+import {
+  ErrorView,
+  SubnetListItem,
+  silentPromiseOptions,
+  useVlanNumbers,
+} from "./components";
 import type { Section } from "./types";
 import { s, sortSubnets } from "./utils";
 
@@ -13,6 +18,7 @@ function SectionSubnetsView({ section }: { section: Section }) {
     [sectionId],
     silentPromiseOptions,
   );
+  const vlans = useVlanNumbers();
 
   if (error) {
     return <ErrorView error={error} onRetry={revalidate} />;
@@ -34,6 +40,7 @@ function SectionSubnetsView({ section }: { section: Section }) {
           key={s(subnet.id)}
           subnet={subnet}
           sectionId={sectionId}
+          vlans={vlans}
         />
       ))}
     </List>

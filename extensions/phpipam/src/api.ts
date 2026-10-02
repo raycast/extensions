@@ -226,20 +226,39 @@ function collect<T>(envelope: ApiEnvelope<unknown> | undefined): T[] {
   return Array.isArray(envelope?.data) ? (envelope.data as T[]) : [];
 }
 
+/**
+ * phpIPAM answers empty collections with 404 "No X found" instead of an
+ * empty array — treat exactly that response as an empty list. Some versions
+ * answer "no sections available" as a 200 without any data, so a non-array
+ * success also means empty. Other 404s (missing subnets, invalid ids) still
+ * surface as errors.
+ */
+async function apiGetList<T>(path: string): Promise<T[]> {
+  try {
+    const result = await apiGet<T[]>(path);
+    return Array.isArray(result) ? result : [];
+  } catch (error) {
+    if (error instanceof ApiError && /no .+ found/i.test(error.message)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
 export const phpipam = {
   async sections(): Promise<Section[]> {
-    return apiGet<Section[]>("sections/");
+    return apiGetList<Section>("sections/");
   },
 
   /** Subnets of a section, enriched with usage statistics by the API. */
   async sectionSubnets(sectionId: string): Promise<Subnet[]> {
-    return apiGet<Subnet[]>(
+    return apiGetList<Subnet>(
       `sections/${encodeURIComponent(sectionId)}/subnets/`,
     );
   },
 
   async allSubnets(): Promise<Subnet[]> {
-    return apiGet<Subnet[]>("subnets/");
+    return apiGetList<Subnet>("subnets/");
   },
 
   async subnet(subnetId: string): Promise<Subnet> {
@@ -253,7 +272,7 @@ export const phpipam = {
   },
 
   async subnetAddresses(subnetId: string): Promise<IpAddress[]> {
-    return apiGet<IpAddress[]>(
+    return apiGetList<IpAddress>(
       `subnets/${encodeURIComponent(subnetId)}/addresses/`,
     );
   },
@@ -274,10 +293,26 @@ export const phpipam = {
     }
   },
 
+  /** All VLANs, used to resolve subnet vlanIds to 802.1Q numbers. */
+  async vlans(): Promise<Vlan[]> {
+    return apiGetList<Vlan>("vlans/");
+  },
+
   async search(term: string): Promise<SearchResults> {
-    const raw = await apiGet<Record<string, ApiEnvelope<unknown>>>(
-      `search/${encodeURIComponent(term)}/?subnets=1&addresses=1&vlan=1&vrf=1`,
-    );
+    let raw: Record<string, ApiEnvelope<unknown>>;
+    try {
+      raw = await apiGet<Record<string, ApiEnvelope<unknown>>>(
+        `search/${encodeURIComponent(term)}/?subnets=1&addresses=1&vlan=1&vrf=1`,
+      );
+    } catch (error) {
+      // phpIPAM also reports "nothing matched" as an error; that is an
+      // empty result set, not a failure.
+      if (error instanceof ApiError && /no results/i.test(error.message)) {
+        raw = {};
+      } else {
+        throw error;
+      }
+    }
     return {
       subnets: collect<Subnet>(raw.subnets),
       addresses: collect<IpAddress>(raw.addresses),

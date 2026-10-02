@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
 
-import type { IpAddress, Scalar, Subnet } from "./types";
+import type { IpAddress, Scalar, Subnet, Vlan } from "./types";
 
 /** Stringify loose API values ("1", 1, null → "1", "1", ""). */
 export function s(v: Scalar): string {
@@ -117,6 +117,15 @@ export function subnetLabel(subnet: Subnet): string {
 
 export function isFolder(subnet: Subnet): boolean {
   return s(subnet.isFolder) === "1";
+}
+
+/**
+ * A subnet's vlanId is the VLAN table's primary key, not the 802.1Q number
+ * shown in the phpIPAM UI — resolve ids to numbers via /vlans/. The VLAN's
+ * own primary key is "vlanId" on some phpIPAM versions and "id" on others.
+ */
+export function vlanNumberMap(vlans: Vlan[]): Map<string, string> {
+  return new Map(vlans.map((v) => [s(v.vlanId ?? v.id), s(v.number)]));
 }
 
 export function sortSubnets(subnets: Subnet[]): Subnet[] {

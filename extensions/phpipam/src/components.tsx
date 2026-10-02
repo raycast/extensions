@@ -26,6 +26,7 @@ import {
   subnetLabel,
   tagColor,
   tagName,
+  vlanNumberMap,
 } from "./utils";
 
 export function subnetWebUrl(subnet: Subnet): string {
@@ -88,7 +89,8 @@ export function AddressListItem({
   family?: 4 | 6;
 }) {
   const ip = ipOf(address, family);
-  const state = s(address.state);
+  // phpIPAM's API renames the address "state" column to "tag" in responses.
+  const state = s(address.tag ?? address.state);
   const hostname = s(address.hostname);
   const tag = tagName(state);
 
@@ -147,19 +149,28 @@ export function AddressListItem({
   );
 }
 
+/** Resolves subnet vlanIds to 802.1Q numbers; undefined while loading. */
+export function useVlanNumbers(): Map<string, string> | undefined {
+  const { data } = usePromise(() => phpipam.vlans(), [], silentPromiseOptions);
+  return data ? vlanNumberMap(data) : undefined;
+}
+
 export function SubnetListItem({
   subnet,
   sectionId,
+  vlans,
 }: {
   subnet: Subnet;
   sectionId?: string;
+  /** 802.1Q numbers by VLAN id; while absent the VLAN accessory is omitted. */
+  vlans?: Map<string, string>;
 }) {
   const label = subnetLabel(subnet);
   const folder = isFolder(subnet);
+  const vlanNumber = vlans?.get(s(subnet.vlanId));
 
   const accessories: List.Item.Accessory[] = [];
-  if (!folder && s(subnet.vlanId))
-    accessories.push({ text: `VLAN ${s(subnet.vlanId)}` });
+  if (!folder && vlanNumber) accessories.push({ text: `VLAN ${vlanNumber}` });
   if (!folder && subnet.usage) {
     const usedPct = fmtPct(subnet.usage.Used_percent);
     if (usedPct) accessories.push({ text: `${usedPct} used` });
@@ -177,7 +188,7 @@ export function SubnetListItem({
       keywords={[
         s(subnet.description),
         ...label.split("/"),
-        `vlan ${s(subnet.vlanId)}`,
+        `vlan ${vlanNumber}`,
       ]}
       actions={
         <ActionPanel>
@@ -260,6 +271,7 @@ export function SubnetDetailView({
     [subnetId],
     silentPromiseOptions,
   );
+  const vlans = useVlanNumbers();
 
   if (error) {
     return <ErrorView error={error} onRetry={revalidate} />;
@@ -268,6 +280,7 @@ export function SubnetDetailView({
   const subnet = data?.subnet;
   const notFolder = subnet ? !isFolder(subnet) : false;
   const family = subnet ? subnetFamily(subnet) : undefined;
+  const vlanNumber = vlans?.get(s(subnet?.vlanId));
   const usage = notFolder ? data?.usage.value : undefined;
   const usageError = notFolder ? data?.usage.error : undefined;
   const addressList = sortAddresses(data?.addresses.value ?? [], family);
@@ -286,7 +299,10 @@ export function SubnetDetailView({
         </List.Section>
       ) : usage ? (
         <List.Section title="Usage">
-          <InfoRow title="Hosts" value={fmtNum(usage.max_hosts)} />
+          <InfoRow
+            title="Hosts"
+            value={fmtNum(usage.maxhosts ?? usage.max_hosts)}
+          />
           <InfoRow
             title="Used"
             value={`${fmtNum(usage.Used)} (${fmtPct(usage.Used_percent)})`}
@@ -307,9 +323,7 @@ export function SubnetDetailView({
           {isFolder(subnet) ? null : (
             <InfoRow title="Mask" value={`/${s(subnet.mask)}`} />
           )}
-          {s(subnet.vlanId) ? (
-            <InfoRow title="VLAN" value={s(subnet.vlanId)} />
-          ) : null}
+          {vlanNumber ? <InfoRow title="VLAN" value={vlanNumber} /> : null}
           {s(subnet.isFull) === "1" ? (
             <InfoRow title="Marked as" value="Full" />
           ) : null}

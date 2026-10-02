@@ -8,6 +8,7 @@ import {
   ErrorView,
   SubnetListItem,
   silentPromiseOptions,
+  useVlanNumbers,
 } from "./components";
 import type { IpAddress, SearchResults, Vlan, Vrf } from "./types";
 import { s, subnetFamily } from "./utils";
@@ -84,7 +85,7 @@ function VrfListItem({ vrf }: { vrf: Vrf }) {
   return (
     <List.Item
       icon={Icon.Map}
-      title={name || `VRF #${s(vrf.vrfId)}`}
+      title={name || `VRF #${s(vrf.vrfId ?? vrf.id)}`}
       subtitle={s(vrf.description) || rd}
       accessories={rd ? [{ text: `RD ${rd}` }] : []}
       keywords={[name, rd, s(vrf.description)]}
@@ -145,6 +146,7 @@ export default function Command() {
     [familyKey],
     silentPromiseOptions,
   );
+  const vlans = useVlanNumbers();
 
   if (error) {
     return <ErrorView error={error} onRetry={revalidate} />;
@@ -189,17 +191,24 @@ export default function Command() {
           </List.Section>
           <List.Section title={`Subnets (${results.subnets.length})`}>
             {results.subnets.map((subnet) => (
-              <SubnetListItem key={`subnet-${s(subnet.id)}`} subnet={subnet} />
+              <SubnetListItem
+                key={`subnet-${s(subnet.id)}`}
+                subnet={subnet}
+                vlans={vlans}
+              />
             ))}
           </List.Section>
           <List.Section title={`VLANs (${results.vlans.length})`}>
             {results.vlans.map((vlan) => (
-              <VlanListItem key={`vlan-${s(vlan.vlanId)}`} vlan={vlan} />
+              <VlanListItem
+                key={`vlan-${s(vlan.vlanId ?? vlan.id)}`}
+                vlan={vlan}
+              />
             ))}
           </List.Section>
           <List.Section title={`VRFs (${results.vrfs.length})`}>
             {results.vrfs.map((vrf) => (
-              <VrfListItem key={`vrf-${s(vrf.vrfId)}`} vrf={vrf} />
+              <VrfListItem key={`vrf-${s(vrf.vrfId ?? vrf.id)}`} vrf={vrf} />
             ))}
           </List.Section>
         </>
