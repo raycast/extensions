@@ -1,6 +1,6 @@
 # AndroMeld Changelog
 
-## [Multi-open app labels] - {PR_MERGE_DATE}
+## [Multi-open app labels] - 2026-10-02
 
 - Show multi-open apps and their user names in the app subtitle.
 
