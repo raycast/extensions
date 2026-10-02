@@ -4,14 +4,13 @@
     "lib": ["ES2021"],
     "module": "commonjs",
     "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "types": ["node", "react"],
+    "jsx": "react-jsx",
     "isolatedModules": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "noImplicitAny": true,
     "strict": true,
-    "jsx": "react-jsx"
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }
-
