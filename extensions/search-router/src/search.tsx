@@ -12,9 +12,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getDefaultSearchEngine } from "./data/cache";
 import { getSearchEngine } from "./data/search-engines";
+import { getCustomSearchEngines } from "./data/custom-search-engines";
+import type { SearchEngine } from "./types";
 import { isValidUrl } from "./utils";
 
 async function safeOpenUrl(url: string): Promise<void> {
@@ -30,9 +32,43 @@ type SearchFormValues = {
   query: string;
 };
 
+// Form.Description collapses ordinary newlines; Unicode line separators keep examples on separate lines.
+const lineSeparator = "\u2028";
+
+function formatSearchExamples(examples: [string, string][], customSearchEngines: SearchEngine[]) {
+  return examples
+    .map(([trigger, query]) => `!${trigger} ${query} — ${getSearchEngine(trigger, customSearchEngines)?.s ?? trigger}`)
+    .join(lineSeparator);
+}
+
 export default function SearchTheWeb(props: SearchProps) {
   const initialQuery = props.arguments.query || props.fallbackText || "";
   const didRunInitialQuery = useRef(false);
+  const examples = useMemo(() => {
+    if (initialQuery) return undefined;
+    const customSearchEngines = getCustomSearchEngines();
+    return {
+      everyday: formatSearchExamples(
+        [
+          ["g", "cats"],
+          ["yt", "guitar lessons"],
+          ["w", "Bangkok"],
+          ["gm", "coffee Bangkok"],
+          ["gi", "northern lights"],
+        ],
+        customSearchEngines,
+      ),
+      forums: formatSearchExamples(
+        [
+          ["gh", "markdown parser"],
+          ["so", "typescript generics"],
+          ["r", "mechanical keyboards"],
+        ],
+        customSearchEngines,
+      ),
+      siteName: getSearchEngine("gh", customSearchEngines)?.s ?? "GitHub",
+    };
+  }, [initialQuery]);
 
   useEffect(() => {
     if (!initialQuery || didRunInitialQuery.current) return;
@@ -54,6 +90,23 @@ export default function SearchTheWeb(props: SearchProps) {
       }
     >
       <Form.TextField id="query" title="Query" placeholder="Search with !bangs" defaultValue={initialQuery} />
+      {examples && (
+        <>
+          <Form.Separator />
+          <Form.Description title="Everyday" text={examples.everyday} />
+          <Form.Description title="Code & forums" text={examples.forums} />
+          <Form.Separator />
+          <Form.Description
+            title="Tips"
+            text={[
+              "Plain text uses your default search engine.",
+              "Bangs work at the end too: cats !g",
+              `Search within ${examples.siteName}: markdown parser @gh`,
+              "A bang alone opens its website: !w",
+            ].join(lineSeparator)}
+          />
+        </>
+      )}
     </Form>
   );
 }
@@ -104,29 +157,31 @@ async function runSearch(rawQuery: string) {
 
 function processQuery(rawQuery: string) {
   let query = rawQuery?.trim() ?? "";
+  const customSearchEngines = getCustomSearchEngines();
 
-  const searchEngineKeyMatch = query.match(/!(\S+)/i);
+  const searchEngineKeyMatch = query.match(/(?:^|\s)!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
-  const searchEngine = getSearchEngine(searchEngineKey);
+  const searchEngine = getSearchEngine(searchEngineKey, customSearchEngines);
 
-  if (query.includes("@")) {
-    const siteMatch = query.match(/@(\S+)/i);
-    const siteKey = siteMatch?.[1]?.toLowerCase();
+  // Use the first recognized standalone @token, leaving emails and unknown mentions intact.
+  for (const siteMatch of query.matchAll(/(^|\s)@(\S+)/g)) {
+    const siteEngine = getSearchEngine(siteMatch[2], customSearchEngines);
+    if (!siteEngine) continue;
 
-    if (siteKey) {
-      const siteEngine = getSearchEngine(siteKey);
-      if (siteEngine) {
-        query = query.replace(/@\S+\s*/i, "").trim();
-        query += ` site:${siteEngine.ad || siteEngine.d}`;
-      }
-    }
+    query = (
+      query.slice(0, siteMatch.index) +
+      siteMatch[1] +
+      query.slice(siteMatch.index + siteMatch[0].length).trimStart()
+    ).trim();
+    query += ` site:${siteEngine.ad || siteEngine.d}`;
+    break;
   }
 
-  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+  const cleanQuery = query.replace(/(^|\s)!\S+\s*/i, "$1").trim();
   let finalQuery = cleanQuery;
   if (!searchEngine && searchEngineKey) {
     finalQuery = `${searchEngineKey} ${cleanQuery}`;
   }
 
-  return { searchEngine: searchEngine || getDefaultSearchEngine(), finalQuery, searchEngineKey };
+  return { searchEngine: searchEngine || getDefaultSearchEngine(customSearchEngines), finalQuery, searchEngineKey };
 }
