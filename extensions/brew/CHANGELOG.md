@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Third-party taps] - {PR_MERGE_DATE}
+## [Third-party taps] - 2026-10-02
 
 - New **Manage Taps** command: every tap you have added is a section listing the formulae and casks it provides, with a dropdown to narrow to one tap. Add a tap by typing `user/repo` (or `user/repo <url>` for a repository not named `homebrew-…`), and remove it, or on Homebrew 7 trust and stop trusting it, from any of its rows
 - A tap that only adds `brew` commands gets one row naming them; ↵ opens its repository
