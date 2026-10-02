@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatCount, formatRows, formatUploadDate, qualityName } from "../src/lib/media-info";
+import { formatCount, formatRows, formatUploadDate, qualityName, siteName } from "../src/lib/media-info";
 import { Format, Video } from "../src/types";
 
 const f = (p: Partial<Format> & { format_id: string }): Format => ({
@@ -55,5 +55,22 @@ describe("formatRows", () => {
       ["2160p", "60", "VP9", "WEBM", "—"],
       ["720p", "30", "H.264", "MP4", "2.00 MB"],
     ]);
+  });
+});
+
+describe("siteName", () => {
+  it("spells yt-dlp's extractor keys the way the sites do", () => {
+    expect(siteName("Youtube")).toBe("YouTube");
+    expect(siteName("YoutubeTab")).toBe("YouTube");
+    expect(siteName("TikTok")).toBe("TikTok");
+    expect(siteName("Twitter")).toBe("X");
+    expect(siteName("TwitchVod")).toBe("Twitch");
+    expect(siteName("SoundcloudSet")).toBe("SoundCloud");
+  });
+
+  it("keeps a key it doesn't know, and nothing stays nothing", () => {
+    expect(siteName("Rumble")).toBe("Rumble");
+    expect(siteName(undefined)).toBeUndefined();
+    expect(siteName(null)).toBeUndefined();
   });
 });

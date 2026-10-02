@@ -17,6 +17,7 @@ import {
 import { HERO_W, downloadHeroSvg, heroFrameKey } from "../lib/charts.js";
 import { DownloadSession, DownloadSnapshot, knownTotalBytes, useDownloadSession } from "../lib/download-session.js";
 import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
+import { siteName } from "../lib/media-info.js";
 import { formatBytes, formatClock, plural } from "../lib/format.js";
 import { markdownImage } from "../lib/svg.js";
 import { DownloadHistory, HISTORY_SHORTCUT } from "./history-view.js";
@@ -103,7 +104,7 @@ export function DownloadView({ session }: { session: DownloadSession }) {
           <Detail.Metadata.Label title="Title" text={title} />
           {s.meta?.uploader && <Detail.Metadata.Label title="Channel" text={s.meta.uploader} />}
           {s.meta?.duration ? <Detail.Metadata.Label title="Duration" text={formatClock(s.meta.duration)} /> : null}
-          <Detail.Metadata.Label title="Source" text={s.meta?.source ?? hostOf(s.url)} />
+          <Detail.Metadata.Label title="Source" text={siteName(s.meta?.source) ?? hostOf(s.url)} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Type">
             <Detail.Metadata.TagList.Item

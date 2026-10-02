@@ -6,6 +6,33 @@ import { Video } from "../types.js";
 
 const compact = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 });
 
+// yt-dlp's extractor keys (`Youtube`, `YoutubeTab`, `TwitchVod`) as the sites spell themselves.
+const SITE_NAMES: Record<string, string> = {
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  twitter: "X",
+  twitch: "Twitch",
+  vimeo: "Vimeo",
+  dailymotion: "Dailymotion",
+  bilibili: "Bilibili",
+  facebook: "Facebook",
+  soundcloud: "SoundCloud",
+  streamable: "Streamable",
+  instagram: "Instagram",
+};
+
+/** The site's own name for a yt-dlp extractor key, or undefined when it isn't one we know. */
+export function knownSiteName(extractorKey: string | null | undefined): string | undefined {
+  const key = (extractorKey ?? "").toLowerCase();
+  const known = key ? Object.keys(SITE_NAMES).find((k) => key.startsWith(k)) : undefined;
+  return known ? SITE_NAMES[known] : undefined;
+}
+
+/** `Youtube` → `YouTube`; a key we don't know is shown as yt-dlp gives it. */
+export function siteName(extractorKey: string | null | undefined): string | undefined {
+  return knownSiteName(extractorKey) ?? (extractorKey || undefined);
+}
+
 export function formatCount(value: number | null | undefined): string | undefined {
   return typeof value === "number" && value >= 0 ? compact.format(value) : undefined;
 }

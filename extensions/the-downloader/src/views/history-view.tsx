@@ -32,6 +32,7 @@ import {
   removeFromHistory,
 } from "../lib/history.js";
 import { KIND_COLOR, KIND_ICON, canChat, hostOf, itemNoun, kindTitle, safeImageUrl } from "../lib/kinds.js";
+import { siteName } from "../lib/media-info.js";
 import { markdownImage } from "../lib/svg.js";
 import { ChatAboutLinkAction } from "./chat-action.js";
 
@@ -298,7 +299,7 @@ export function DownloadHistory() {
                         {e.duration ? (
                           <List.Item.Detail.Metadata.Label title="Duration" text={formatClock(e.duration)} />
                         ) : null}
-                        <List.Item.Detail.Metadata.Label title="Source" text={e.source ?? hostOf(e.url)} />
+                        <List.Item.Detail.Metadata.Label title="Source" text={siteName(e.source) ?? hostOf(e.url)} />
                         {e.format && <List.Item.Detail.Metadata.Label title="Format" text={e.format} />}
                         {size && <List.Item.Detail.Metadata.Label title={e.items ? "Saved" : "Size"} text={size} />}
                         {took && <List.Item.Detail.Metadata.Label title="Took" text={took} />}

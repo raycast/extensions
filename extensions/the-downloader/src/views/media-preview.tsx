@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon, Keyboard, useNavigation } from "@ray
 import { maxHeight } from "../lib/estimate.js";
 import { escapeMarkdown, formatClock } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
-import { formatCount, formatRows, formatUploadDate, qualityName } from "../lib/media-info.js";
+import { formatCount, formatRows, formatUploadDate, qualityName, siteName } from "../lib/media-info.js";
 import { Format, Video } from "../types.js";
 import { ChatAboutLinkAction } from "./chat-action.js";
 
@@ -80,7 +80,7 @@ export function MediaPreview({ video, url }: { video: Video; url: string }) {
           <Detail.Metadata.Separator />
           {best && <Detail.Metadata.Label title="Best Quality" text={qualityName(best)} icon={Icon.Star} />}
           {videoFormats > 0 && <Detail.Metadata.Label title="Video Formats" text={String(videoFormats)} />}
-          <Detail.Metadata.Label title="Source" text={video.extractor_key ?? hostOf(url)} />
+          <Detail.Metadata.Label title="Source" text={siteName(video.extractor_key) ?? hostOf(url)} />
           <Detail.Metadata.Link title="Original" text={hostOf(url)} target={url} />
         </Detail.Metadata>
       }

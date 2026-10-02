@@ -3,7 +3,7 @@ import { Format, Video } from "../../types.js";
 import { hostnameOf } from "../detect.js";
 import { plural } from "../format.js";
 import { LinkContext, LinkFact, formatTimestamp } from "../link-context.js";
-import { formatCount } from "../media-info.js";
+import { formatCount, knownSiteName } from "../media-info.js";
 
 // Videos: yt-dlp's metadata plus the timestamped transcript, as a LinkContext.
 // Video-only helpers (moment links, caption languages, engagement rates) live
@@ -87,25 +87,8 @@ export function slimVideo(video: Video): Video {
   return slim;
 }
 
-const SITE_NAMES: Record<string, string> = {
-  youtube: "YouTube",
-  tiktok: "TikTok",
-  twitter: "X",
-  vimeo: "Vimeo",
-  dailymotion: "Dailymotion",
-  bilibili: "Bilibili",
-  facebook: "Facebook",
-  soundcloud: "SoundCloud",
-  streamable: "Streamable",
-  instagram: "Instagram",
-};
-
-function siteName(video: Video, url: string): string {
-  const key = (video.extractor_key ?? "").toLowerCase();
-  const known = Object.keys(SITE_NAMES).find((k) => key === k || key.startsWith(k));
-  if (known) return SITE_NAMES[known];
-  if (key.startsWith("twitch")) return "Twitch";
-  return hostnameOf(url) || video.extractor_key || "Video";
+function siteOf(video: Video, url: string): string {
+  return knownSiteName(video.extractor_key) ?? (hostnameOf(url) || video.extractor_key || "Video");
 }
 
 function publishedAt(video: Video): string | undefined {
@@ -160,7 +143,7 @@ export function videoToLink(url: string, video: Video, transcript: VideoTranscri
     kind: "video",
     // Unchanged from Chat About Video, so chats saved before still open.
     key: id && extractor_key ? `${extractor_key.toLowerCase()}:${id}` : url,
-    site: siteName(video, url),
+    site: siteOf(video, url),
     title: video.title,
     author: video.uploader ?? video.channel ?? undefined,
     authorVerified: video.channel_is_verified ?? undefined,
