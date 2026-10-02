@@ -3,7 +3,6 @@ import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import fs from "node:fs";
-import { useEffect, useState } from "react";
 
 import * as music from "./util/scripts";
 import { getArtworkPath } from "./util/artwork";
@@ -14,6 +13,11 @@ import { handleTaskEitherError } from "./util/utils";
 const { hideArtistName, hideTrackTitle, maxTextLength, cleanupTitle, hideIconWhenIdle, iconType } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
 const showCoverImage = iconType === "cover-image";
+
+const DROPDOWN_TRACK_MAX = 60;
+const DROPDOWN_ARTIST_MAX = 40;
+
+const truncate = (text: string, max: number) => (text.length <= max ? text : text.substring(0, max).trim() + "…");
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
   const handledTask = pipe(
@@ -82,10 +86,22 @@ export default function CurrentlyPlayingMenuBarCommand() {
   // three are hidden, show the Apple Music icon so the item stays clickable.
   const menuBarIcon: Image.ImageLike | undefined = !trackIcon && !title ? "icon.png" : trackIcon;
 
-  const DROPDOWN_MAX = 40;
-  // The dropdown always shows the full title and artist, whatever is hidden in
-  // the Menu Bar, so clicking the item is how you see everything.
-  const fullTitle = currentTrack
+  // Open menus don't redraw, so a scrolling title would just freeze at a random
+  // point. The dropdown always shows the track and artist statically, whatever
+  // is hidden in the Menu Bar, capped so very long names don't make the menu
+  // excessively wide.
+  const dropdownTrack = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName: true,
+        maxTextLength: String(DROPDOWN_TRACK_MAX),
+        cleanupTitle,
+      })
+    : "";
+  const dropdownArtist = currentTrack ? truncate(currentTrack.artist, DROPDOWN_ARTIST_MAX) : undefined;
+  // Full, untruncated text on hover in case either part was cut off.
+  const dropdownTooltip = currentTrack
     ? formatTitle({
         name: currentTrack.name,
         artistName: currentTrack.artist,
@@ -93,30 +109,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
         maxTextLength: "999",
         cleanupTitle,
       })
-    : "";
-  const needsScroll = fullTitle.length > DROPDOWN_MAX;
-  const SEPARATOR = "   ·   ";
-  const paddedTitle = needsScroll ? fullTitle + SEPARATOR : fullTitle;
-
-  const [scrollOffset, setScrollOffset] = useState(0);
-
-  useEffect(() => {
-    setScrollOffset(0);
-  }, [currentTrack?.id]);
-
-  useEffect(() => {
-    if (!needsScroll) return;
-
-    const interval = setInterval(() => {
-      setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [needsScroll, paddedTitle.length]);
-
-  const dropdownTitle = needsScroll
-    ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
-    : fullTitle;
+    : undefined;
 
   if (!snapshot || snapshot.kind === "not-running") {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -131,7 +124,9 @@ export default function CurrentlyPlayingMenuBarCommand() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={trackIcon}
-          title={dropdownTitle}
+          title={dropdownTrack}
+          subtitle={dropdownArtist}
+          tooltip={dropdownTooltip}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
         />
