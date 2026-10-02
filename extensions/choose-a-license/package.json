@@ -43,5 +43,8 @@
   },
   "allowScripts": {
     "esbuild": true
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
