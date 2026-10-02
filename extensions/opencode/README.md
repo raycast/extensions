@@ -12,4 +12,12 @@ Models come from the managed OpenCode catalog and are billed pay-as-you-go to yo
 
 Run **Refresh Models** after changing models in the Console to update the picker immediately.
 
+## OpenCode Go
+
+If you subscribe to [OpenCode Go](https://opencode.ai/docs/go/), check **OpenCode Go** in the preferences. Go models use the same API key and show up as `<model> (Go)`.
+
+## Ask OpenCode
+
+**Ask OpenCode** is a standalone chat that works without Raycast AI. It saves your conversations so you can follow up later, and you can copy questions, answers or whole threads.
+
 Using models provided by extensions requires Raycast Pro.
