@@ -24,7 +24,7 @@ export type ChatTurn = { question: string; answer: string };
 
 const SHARED_RULES = [
   "If they don't cover something, say so plainly instead of guessing, and mark any outside knowledge as such.",
-  "Use Markdown: short paragraphs, bullet lists where they help, bold for key terms. No preamble.",
+  "Use Markdown: short paragraphs, bullet lists where they help, bold for key terms. No preamble, and no source tags like [Description] or [Transcript].",
   "Reply in the language of the question.",
 ];
 

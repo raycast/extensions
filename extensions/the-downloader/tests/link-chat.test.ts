@@ -91,6 +91,12 @@ describe("chatInstructions", () => {
     expect(chatInstructions("post")).toMatch(/caption/);
     expect(chatInstructions("page")).toMatch(/article/);
   });
+
+  it("asks for no source tags, so an answer doesn't end a point with [Video description]", () => {
+    for (const kind of ["video", "post", "page"] as const) {
+      expect(chatInstructions(kind)).toMatch(/no source tags like \[Description\] or \[Transcript\]/);
+    }
+  });
 });
 
 describe("answer preferences", () => {
