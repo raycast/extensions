@@ -1,6 +1,6 @@
 # Prismical Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-02
 
 - Search, preview, create and append notes through the Prismical public API.
 - View note transcripts and copy note content or links.
