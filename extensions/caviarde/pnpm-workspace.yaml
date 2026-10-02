@@ -1,0 +1,3 @@
+allowBuilds:
+  # Its native binary ships in the platform package; vitest runs without it.
+  esbuild: false
