@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-02
 
 - Browse the latest Techgedöns articles in a compact list.
 - Search the complete public blog archive and filter results by topic.
