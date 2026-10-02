@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Add bang tips and support bang aliases] - {PR_MERGE_DATE}
+## [Add bang tips and support bang aliases] - 2026-10-02
 
 - Add search tips to the query form as there is a lot of empty space there on the form.
 - Add shortcut aliases such as `!w`, `!gm`, `!so`, and `!r` for searches and `@` site filters.
