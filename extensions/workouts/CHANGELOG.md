@@ -1,6 +1,6 @@
 # Workouts Changelog
 
-## [Personal Strava Apps and Connection Fixes] - {PR_MERGE_DATE}
+## [Personal Strava Apps and Connection Fixes] - 2026-10-02
 
 - Connect using your own Strava app with required Client ID and Client Secret preferences and automatic OAuth token refresh.
 - Add step-by-step setup instructions and links in the extension and README.
