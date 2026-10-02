@@ -4,7 +4,7 @@
  * Supports Pinwork's natural language parsing:
  * - "Buy groceries tomorrow"
  * - "Call mom at 3pm #personal"
- * - "Review PR :ProjectName ~30m"
+ * - "Plan repairs Friday at 2pm ~45min #home >Apartment"
  */
 
 import {
@@ -88,7 +88,7 @@ export default function QuickAddCommand() {
     >
       <Form.TextField
         title="Task"
-        placeholder="Buy groceries tomorrow at 2pm #errands ~30m"
+        placeholder="Buy groceries tomorrow at 2pm #errands ~30min"
         autoFocus
         {...itemProps.text}
       />
@@ -96,8 +96,8 @@ export default function QuickAddCommand() {
       <Form.Description
         title="Hints"
         text={`Examples:
-Buy groceries tomorrow at 2pm #errands ~30m
-Review PR :Pinwork !fri`}
+Buy groceries tomorrow at 2pm #errands ~30min
+Plan repairs Friday at 2pm ~45min #home >Apartment`}
       />
     </Form>
   );

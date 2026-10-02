@@ -12,8 +12,9 @@ import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
 import { connectionGuard } from "./components/ConnectionErrorView";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
+import { DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
+import { revalidated } from "./utils/fetchError";
 import { labelLists } from "./utils/listLabels";
 
 const log = logger.child("[Lists]");
@@ -60,7 +61,7 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
       action: async () => {
         try {
           log.log("Refreshing list bookmarks", { listId, listName });
-          await revalidate();
+          await revalidated(revalidate);
           log.info("List bookmarks refreshed", { listId });
         } catch (error) {
           log.error("Failed to refresh list bookmarks", { listId, listName, error });
@@ -187,7 +188,6 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -280,7 +280,6 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.editList")} onSubmit={handleSubmit} icon={Icon.Pencil} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -421,6 +420,9 @@ export default function Lists() {
           try {
             log.info("Deleting list", { listId: id, listName });
             await fetchDeleteList(id);
+            // Plain revalidate, NOT revalidated(): the list is already gone. A
+            // refresh that fails here must not turn a completed delete into
+            // "Couldn't delete list" — the hook's own onError reports it.
             await revalidate();
             log.info("List deleted", { listId: id });
           } catch (error) {

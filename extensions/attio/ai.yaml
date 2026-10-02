@@ -1,0 +1,166 @@
+instructions: |
+  - Format created records as markdown links using the `url` the create tools return. `search-records` results carry NO URLs — refer to those records by plain title and never invent a link.
+  - Resolve referenced records with `search-records`. Never invent record IDs and never silently pick an unrelated fuzzy match. If multiple plausible matches remain, ask the user to clarify.
+  - Before creating a person or company, call `search-records` with the name (and email or domain when given). If a likely match already exists, tell the user and ask whether to create anyway — never create a duplicate silently.
+  - `search-records` searches people, companies, and deals. Scope with `objects` when the user names a record type ("find the company acme" → `objects: ["companies"]`); omit it to search all three. Email addresses, domains, and deal titles are all valid queries.
+  - `create-person`: pass the full name as spoken ("Ada Lovelace") in `name`. Put an email in `email_address` and a role in `job_title` — never fold them into the name. Use `description` for free-text context the user gives about the person.
+  - `create-company`: `domain` is a bare hostname ("acme.com"). Strip any protocol, path, or "www." the user pastes ("https://www.acme.com/about" → "acme.com").
+  - `create-deal`: `value` is a plain number — convert "$5k" or "5,000" to 5000. `stage` must match a stage title configured in the workspace; pass the user's words and the tool resolves them case-insensitively. If the tool errors listing several matching stages, relay those choices and ask the user to pick one.
+  - `create-deal` `owner` accepts a workspace member's full name or email. If the tool reports multiple members share the name, ask the user for the owner's email. Attio usually requires a deal owner — ask for one if the user didn't specify it.
+  - If a tool fails with a scope or permission error, tell the user which scope their Attio access token is missing (e.g. `record_permission:read-write` for creating records) instead of retrying.
+  - These tools cover searching records and creating people, companies, and deals. For tasks, notes, lists, webhooks, editing, or deleting, direct the user to the extension's commands (Search Tasks, Search Notes, Manage Webhooks, and the object search commands).
+
+evals:
+  # Routing: plain search, scoped search, email lookup
+  - input: "@attio find the company acme"
+    mocks:
+      search-records:
+        - record_id: "6d3e1f70-0000-4000-8000-000000000001"
+          object: "companies"
+          title: "Acme Corp"
+    expected:
+      - callsTool:
+          name: "search-records"
+          arguments:
+            query:
+              includes: "acme"
+            objects:
+              includes: "companies"
+
+  - input: "@attio who is ada@example.com?"
+    mocks:
+      search-records:
+        - record_id: "6d3e1f70-0000-4000-8000-000000000002"
+          object: "people"
+          title: "Ada Lovelace"
+    expected:
+      - callsTool:
+          name: "search-records"
+          arguments:
+            query:
+              includes: "ada@example.com"
+      - includes: "Ada Lovelace"
+
+  - input: "@attio search my deals for renewal"
+    mocks:
+      search-records:
+        - record_id: "6d3e1f70-0000-4000-8000-000000000003"
+          object: "deals"
+          title: "Globex — Renewal 2027"
+    expected:
+      - callsTool:
+          name: "search-records"
+          arguments:
+            query:
+              includes: "renewal"
+            objects:
+              includes: "deals"
+
+  # Create person: dupe-check first, email goes in email_address
+  - input: "@attio add Ada Lovelace (ada@example.com) as a new contact"
+    mocks:
+      search-records: []
+      create-person:
+        record_id: "6d3e1f70-0000-4000-8000-000000000004"
+        url: "https://app.attio.com/example/person/6d3e1f70-0000-4000-8000-000000000004"
+    expected:
+      - callsTool:
+          name: "create-person"
+          arguments:
+            name: "Ada Lovelace"
+            email_address: "ada@example.com"
+
+  - input: "@attio create a contact for Grace Hopper, she's the CTO at Navy Systems"
+    usedAsExample: false
+    mocks:
+      search-records: []
+      create-person:
+        record_id: "6d3e1f70-0000-4000-8000-000000000005"
+        url: "https://app.attio.com/example/person/6d3e1f70-0000-4000-8000-000000000005"
+    expected:
+      - callsTool:
+          name: "create-person"
+          arguments:
+            name: "Grace Hopper"
+            job_title:
+              includes: "CTO"
+
+  # A likely-duplicate person: surface the match, don't create silently
+  - input: "@attio add Ada Lovelace as a contact"
+    usedAsExample: false
+    mocks:
+      search-records:
+        - record_id: "6d3e1f70-0000-4000-8000-000000000002"
+          object: "people"
+          title: "Ada Lovelace"
+    expected:
+      - callsTool: "search-records"
+      - not:
+          callsTool: "create-person"
+
+  # Create company: pasted URL is stripped to a bare domain
+  - input: "@attio create a company called Acme with the website https://www.acme.com/about"
+    mocks:
+      search-records: []
+      create-company:
+        record_id: "6d3e1f70-0000-4000-8000-000000000006"
+        url: "https://app.attio.com/example/company/6d3e1f70-0000-4000-8000-000000000006"
+    expected:
+      - callsTool:
+          name: "create-company"
+          arguments:
+            name: "Acme"
+            domain: "acme.com"
+
+  # Create deal: shorthand value converts to a plain number; owner passes through
+  - input: "@attio start a deal named Acme Enterprise worth $5k, owned by chris@example.com"
+    mocks:
+      create-deal:
+        record_id: "6d3e1f70-0000-4000-8000-000000000007"
+        url: "https://app.attio.com/example/deal/6d3e1f70-0000-4000-8000-000000000007"
+    expected:
+      - callsTool:
+          name: "create-deal"
+          arguments:
+            name: "Acme Enterprise"
+            value: 5000
+            owner:
+              includes: "chris@example.com"
+
+  - input: "@attio create a deal called Globex Renewal in the won stage"
+    usedAsExample: false
+    mocks:
+      create-deal:
+        record_id: "6d3e1f70-0000-4000-8000-000000000008"
+        url: "https://app.attio.com/example/deal/6d3e1f70-0000-4000-8000-000000000008"
+    expected:
+      - callsTool:
+          name: "create-deal"
+          arguments:
+            name:
+              includes: "Globex Renewal"
+            stage:
+              includes: "won"
+
+  # Routing boundary: reading data must not create anything
+  - input: "@attio do we have anyone from Initech in the CRM?"
+    usedAsExample: false
+    mocks:
+      search-records: []
+    expected:
+      - callsTool: "search-records"
+      - not:
+          callsTool: "create-person"
+
+  # Out of tool scope: point at the extension's commands
+  - input: "@attio create a task to follow up with Ada next week"
+    usedAsExample: false
+    mocks:
+      search-records: []
+    expected:
+      - not:
+          callsTool: "create-person"
+      - not:
+          callsTool: "create-company"
+      - not:
+          callsTool: "create-deal"

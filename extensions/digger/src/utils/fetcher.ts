@@ -1,8 +1,35 @@
+import { getPreferenceValues } from "@raycast/api";
 import { LIMITS, TIMEOUTS } from "./config";
 import { getLogger } from "./logger";
 import { redactUrlForLog } from "./urlUtils";
 
 const log = getLogger("fetcher");
+
+/**
+ * The language to ask servers for, from the Page Language preference.
+ *
+ * WITHOUT this header a content-negotiating site picks a locale for us, and Digger
+ * faithfully reports whatever it was handed: muse.ai serves
+ * `<html lang="ar-AR" dir="rtl">` to a request that expresses no preference, which
+ * surfaced as a Language row reading `ar-AR` for an en-US page. It affects the
+ * title, description and Open Graph tags too, not just the Language row.
+ *
+ * It reads a PREFERENCE rather than the machine locale, because the Store
+ * guidelines are explicit: "If the locale might affect functionality … please use
+ * the preferences API." Deriving it from `Intl` also made the result depend on a
+ * setting the user cannot see from inside Raycast, so two machines analysing the
+ * same URL could legitimately disagree about its title.
+ */
+export function preferredLanguage(): string {
+  try {
+    const configured = getPreferenceValues<Preferences>().acceptLanguage?.trim();
+    const tag = configured && configured !== "" ? configured : "en-US";
+    const base = tag.split("-")[0];
+    return base === tag ? `${tag}, *;q=0.5` : `${tag}, ${base};q=0.9, *;q=0.5`;
+  } catch {
+    return "en-US, en;q=0.9, *;q=0.5";
+  }
+}
 
 /**
  * Common fetch options to avoid V8 RegExpCompiler crashes in Raycast's
@@ -11,6 +38,11 @@ const log = getLogger("fetcher");
  */
 const FETCH_HEADERS = {
   "Accept-Encoding": "identity",
+  // A getter, not a captured value: reading the preference at module load would
+  // pin whatever it was when the command started.
+  get "Accept-Language"() {
+    return preferredLanguage();
+  },
 };
 
 export interface FetchResult {
@@ -169,7 +201,7 @@ export async function fetchHeadOnlyWithFallback(
   try {
     return await fetchHeadOnly(url, timeout, signal);
   } catch (httpsError) {
-    // A CANCELLED request is not a failed one — bail before warning or retrying.
+    // A CANCELED request is not a failed one — bail before warning or retrying.
     //
     // `fetchHeadOnly` throws a plain Error("Fetch aborted") when the caller's
     // signal fires, which arrives here indistinguishably from a genuine TLS or
@@ -189,9 +221,11 @@ export async function fetchHeadOnlyWithFallback(
     // that is worth surfacing even when the user has not opted into verbose
     // diagnostics — `log` would hide it from the bug report that needs it most.
     //
-    // The URL is stripped of its query string first: warn is not verbose-gated,
-    // so it emits for every user, and the logger's redactor does not scrub
-    // arbitrary query values. See redactUrlForLog.
+    // The URL is stripped of its query string first, because `warn` is NOT
+    // verbose-gated — it emits for every user, including one who enabled
+    // nothing. The logger's strict level would also cover this, but it is a
+    // user preference and off by default, so it cannot be the protection on a
+    // sink the user never opted into. See redactUrlForLog.
     const httpUrl = url.replace(/^https:\/\//i, "http://");
     log.warn("fetchHeadOnlyWithFallback:https-failed-trying-http", {
       url: redactUrlForLog(url),
@@ -206,6 +240,103 @@ export async function fetchHeadOnlyWithFallback(
       throw httpsError;
     }
   }
+}
+
+/**
+ * Reads at most `maxBytes` of a body, then cancels the stream.
+ *
+ * `await response.text()` buffers the WHOLE body before any cap can be applied,
+ * so slicing afterward limits what is parsed and not what is downloaded.
+ * Reading chunk by chunk and canceling bounds the memory, not just the parse.
+ */
+export async function readCappedBytes(
+  response: Response,
+  maxBytes: number,
+): Promise<{ bytes: Buffer; truncated: boolean }> {
+  const reader = response.body?.getReader();
+  if (!reader) return { bytes: Buffer.alloc(0), truncated: false };
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (total < maxBytes) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      const slice = value.byteLength > maxBytes - total ? value.subarray(0, maxBytes - total) : value;
+      chunks.push(slice);
+      total += slice.byteLength;
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+  }
+  // Reaching the cap counts as truncated without reading on to prove it. One
+  // more read would stall on a server that pauses there, turning a body that
+  // was fully read into a timeout; a body exactly at the cap is rare, and
+  // calling it truncated only adds a caveat.
+  return { bytes: Buffer.concat(chunks), truncated: total >= maxBytes };
+}
+
+/** readCappedBytes, decoded as UTF-8 — a BOM is dropped and a character split at the cap becomes U+FFFD. */
+export async function readCappedText(
+  response: Response,
+  maxBytes: number,
+): Promise<{ text: string; truncated: boolean }> {
+  const { bytes, truncated } = await readCappedBytes(response, maxBytes);
+  return { text: new TextDecoder("utf-8", { fatal: false }).decode(bytes), truncated };
+}
+
+/** Runs `fn` over `items`, at most `limit` at a time, taking no new item once `signal` aborts. */
+export async function forEachWithConcurrency<T>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<void>,
+  signal?: AbortSignal,
+): Promise<void> {
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length && !signal?.aborted) await fn(items[next++]);
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+}
+
+export interface FullPageResult {
+  html: string;
+  finalUrl: string;
+  status: number;
+  headers: Record<string, string>;
+  /** The page exceeded LIMITS.MAX_PAGE_BYTES and only its start was read. */
+  truncated: boolean;
+}
+
+/**
+ * The whole document, for on-demand scans that need the body — the dig reads
+ * only `<head>` (see fetchHeadOnly).
+ *
+ * This is the URL the user asked about, not a page-supplied one, so it takes no
+ * network guard, the same as the dig itself.
+ *
+ * Throws on a non-2xx. `fetch` resolves a 429 or a 500, and scanning the error
+ * page it carries would report that page's SVGs — usually none — as the site's.
+ */
+export async function fetchFullPage(url: string, signal?: AbortSignal): Promise<FullPageResult> {
+  const timeout = AbortSignal.timeout(TIMEOUTS.FULL_PAGE);
+  const response = await fetch(url, {
+    redirect: "follow",
+    headers: FETCH_HEADERS,
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+  });
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new Error(`The page returned HTTP ${response.status}`);
+  }
+  const { text, truncated } = await readCappedText(response, LIMITS.MAX_PAGE_BYTES);
+  return {
+    html: text,
+    finalUrl: response.url || url,
+    status: response.status,
+    headers: extractHeaders(response),
+    truncated,
+  };
 }
 
 /**
@@ -239,6 +370,144 @@ function isValidTextResource(contentType: string | undefined, content: string): 
   }
 
   return true;
+}
+
+/** What the opening bytes of a response actually look like, regardless of its label. */
+export type ResourceShape =
+  | "html"
+  | "xml"
+  | "json"
+  | "text"
+  | "empty"
+  /**
+   * The opening bytes were all whitespace AND the sniff budget ran out before the
+   * stream ended, so what follows is unknown. Distinct from "empty", which is a
+   * response that genuinely ended with no content: a server that pads with 1KB of
+   * spaces before a valid <urlset> is publishing a sitemap, and calling that
+   * "empty" reports a real file as absent.
+   */
+  | "unknown"
+  /** A bot-challenge or login interstitial: the check never got to look. */
+  | "challenge";
+
+export interface ResourceProbe {
+  status: number;
+  contentType?: string;
+  /** Judged from the opening bytes, which is the only thing that cannot lie. */
+  shape: ResourceShape;
+  finalUrl: string;
+  redirected: boolean;
+  /** From `Content-Length`; absent on a chunked response. */
+  size?: number;
+}
+
+/**
+ * Markers of an interstitial: a bot challenge or a login wall served with 200.
+ *
+ * Such a page is HTML, so the shape rule would file it as absence — "this site
+ * publishes no sitemap" inferred from a page that never let us look. The check
+ * failed; it did not complete.
+ */
+const CHALLENGE_MARKERS =
+  /just a moment|checking your browser|verify you are (?:a )?human|cf-browser-verification|_cf_chl_opt|attention required|ddos-guard|px-captcha|please enable (?:js|javascript) and cookies|incapsula/i;
+
+/** True when the opening bytes are an HTML document rather than a data file. */
+function looksLikeHtmlDocument(head: string): boolean {
+  const start = head.trimStart().slice(0, 500).toLowerCase();
+  return (
+    start.startsWith("<!doctype html") ||
+    start.startsWith("<html") ||
+    start.startsWith("<head") ||
+    start.startsWith("<body") ||
+    /<html[\s>]/.test(start) ||
+    /<head[\s>]/.test(start)
+  );
+}
+
+/**
+ * Classifies a response by its opening bytes.
+ *
+ * The Content-Type is a claim; these bytes are evidence. A single-page app
+ * labels its shell `text/html` (easy), but a catch-all that labels the same
+ * shell `text/plain` — or serves `{"error":"not found"}` as `application/json` —
+ * defeats any header-only rule. Sniffing is what both the sitemap check and the
+ * well-known sweep need, and it is the same question in both places.
+ */
+function sniffShape(head: string, complete: boolean): ResourceShape {
+  const start = head.trimStart();
+  if (start === "") return complete ? "empty" : "unknown";
+  // Order matters: a challenge page IS HTML, and must not be filed as absence.
+  if (CHALLENGE_MARKERS.test(start.slice(0, 2000))) return "challenge";
+  if (looksLikeHtmlDocument(start)) return "html";
+  if (start.startsWith("<?xml") || /^<(urlset|sitemapindex|rss|feed|xrd)[\s>:]/i.test(start)) return "xml";
+  if (start.startsWith("{") || start.startsWith("[")) return "json";
+  return "text";
+}
+
+/**
+ * Reads only the OPENING BYTES of a resource, enough to tell what it is, then
+ * cancels.
+ *
+ * The whole body is never downloaded here: a sitemap can be megabytes and the
+ * well-known sweep issues a hundred of these, so paying for the full transfer
+ * to answer "does this exist and what is it" is the wrong trade. Contents load
+ * on demand when the user opens the file — the same rule robots.txt and
+ * sitemap.xml already follow in the UI.
+ */
+export async function probeResource(
+  url: string,
+  options: { timeout?: number; signal?: AbortSignal } = {},
+): Promise<ResourceProbe> {
+  const { timeout = TIMEOUTS.RESOURCE_FETCH, signal } = options;
+  const deadline = AbortSignal.timeout(timeout);
+  const response = await fetch(url, {
+    redirect: "follow",
+    headers: FETCH_HEADERS,
+    signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
+  });
+
+  const contentType = response.headers.get("content-type") || undefined;
+  const contentLength = response.headers.get("content-length");
+
+  let head = "";
+  // BYTES, not characters. `head.length` counts UTF-16 units, so a budget
+  // checked against it reads 3KB for 1024 three-byte characters and, worse,
+  // decodes a 64KB first chunk in full before ever testing the limit.
+  let bytesRead = 0;
+  let complete = false;
+  const reader = response.body?.getReader();
+  if (reader) {
+    try {
+      const decoder = new TextDecoder("utf-8", { fatal: false });
+      while (bytesRead < LIMITS.SNIFF_BYTES) {
+        const { done, value } = await reader.read();
+        if (done) {
+          complete = true;
+          break;
+        }
+        if (!value) continue;
+        const remaining = LIMITS.SNIFF_BYTES - bytesRead;
+        const slice = value.byteLength > remaining ? value.subarray(0, remaining) : value;
+        bytesRead += slice.byteLength;
+        head += decoder.decode(slice, { stream: true });
+      }
+      // Flush, or a multi-byte character straddling the cut is dropped.
+      head += decoder.decode();
+    } finally {
+      await reader.cancel().catch(() => undefined);
+    }
+  } else {
+    complete = true;
+  }
+
+  return {
+    status: response.status,
+    contentType,
+    shape: sniffShape(head, complete),
+    finalUrl: response.url || url,
+    redirected: response.redirected,
+    size: contentLength ? Number(contentLength) : undefined,
+  };
 }
 
 /**

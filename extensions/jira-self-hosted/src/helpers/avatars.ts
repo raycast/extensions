@@ -14,5 +14,5 @@ export function getUserAvatar(user?: User | null) {
 
 export function getProjectAvatar(project: Project) {
   if (!project.avatarUrls) return Icon.List;
-  return { source: project.avatarUrls["32x32"], mask: Image.Mask.RoundedRectangle };
+  return { source: project.avatarUrls["32x32"], fallback: Icon.List, mask: Image.Mask.RoundedRectangle };
 }

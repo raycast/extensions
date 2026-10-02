@@ -9,11 +9,12 @@ import {
 } from "../utils/constants.util";
 import { RankingEntries } from "../types";
 
-// 다른 사용자로 로그인했을 때 로컬 전용 사용자 선호 캐시를 초기화하는 훅.
-// 같은 사용자가 로그아웃 후 재로그인하면 선호도(disabled space, ranking 등)는 보존된다.
-// 사용처: 로그인 후 me 쿼리가 도달하는 화면(예: search-bookmarks.tsx 진입부)에서 한 번 호출.
-// NOTE: 영구 보존되는 user-scoped 캐시 키를 새로 추가하면 여기에도 추가해야 함
-//       (web의 hooks/use-user-cache-reset.ts, mobile의 hooks/use-user-cache-reset.ts 도 동일).
+// Hook that resets the local-only user preference caches when a different user logs in.
+// If the same user logs out and logs back in, preferences (disabled spaces, ranking, etc.) are preserved.
+// Usage: call once on a screen reached after login where the me query resolves (e.g. the entry point of
+// search-bookmarks.tsx).
+// NOTE: when adding a new persistently stored user-scoped cache key, add it here as well
+//       (likewise in web's hooks/use-user-cache-reset.ts and mobile's hooks/use-user-cache-reset.ts).
 export const useUserCacheReset = (currentEmail: string | undefined) => {
   const [lastEmail, setLastEmail] = useCachedState<string>(CACHED_KEY_LAST_LOGGED_IN_EMAIL, "");
   const [, setDisabledSpaceIds] = useCachedState<string[]>(CACHED_KEY_DISABLED_SPACE_IDS, []);

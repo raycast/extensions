@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, PopToRootType, showHUD } from "@raycast/api";
 
 export type GoogleChromeLocalState = {
   profile: {
@@ -29,9 +29,19 @@ export type GoogleChromeInfoCacheProfile = {
    */
   gaia_name?: string;
   /**
+   * The Google account's given (first) name, eg: `Steve`. This — not `name`
+   * or `gaia_name` — is what Chrome's Profiles menu bar item actually shows
+   * for a signed-in profile: `${gaia_given_name} (${name})`, eg "Steve (Work)".
+   */
+  gaia_given_name?: string;
+  /**
    * The email of the user Google account, eg: `steve.jobs@gmail.com`.
    */
   user_name?: string;
+  /**
+   * When the profile was last active, in seconds since the epoch.
+   */
+  active_time?: number;
 };
 
 export type Profile = {
@@ -40,9 +50,23 @@ export type Profile = {
    */
   name: string;
   /**
+   * When the profile was last active, in seconds since the epoch.
+   */
+  activeTime?: number;
+  /**
    * The folder name where the Chrome profile is stored.
    */
   directory: string;
+  /**
+   * The Google account's given (first) name, eg: `Steve`, if this profile is
+   * signed in. Kept separate from `ga` below (rather than nested in it)
+   * because it's the one piece needed to match Chrome's Profiles menu bar
+   * item — which shows `${givenName} (${profile name})` for a signed-in
+   * profile, eg "Steve (Work)", not the profile's own name — and unlike the
+   * rest of the account info it's carried across the Quicklink/deeplink
+   * command (`open-profile.tsx`), which has no use for the avatar/email.
+   */
+  givenName?: string;
   /**
    * The Google Account if the user has sync the profile with a google account.
    */
@@ -58,7 +82,7 @@ export type Profile = {
     /**
      * The GA user profile picture URL.
      */
-    pictureURL: string;
+    pictureURL?: string;
   };
 };
 
@@ -114,4 +138,12 @@ export const BROWSERS: Record<string, BrowserConfig> = {
 export function getSelectedBrowser(): BrowserConfig {
   const { browser } = getPreferenceValues<ExtensionPreferences>();
   return BROWSERS[browser] ?? BROWSERS["chrome"];
+}
+
+// Raycast otherwise reopens on the pushed profile view after its window closes.
+export function showDoneHUD(title: string) {
+  const { popToRootAfterOpen } = getPreferenceValues<ExtensionPreferences>();
+  return showHUD(title, {
+    popToRootType: popToRootAfterOpen ? PopToRootType.Immediate : PopToRootType.Default,
+  });
 }

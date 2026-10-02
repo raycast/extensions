@@ -14,6 +14,8 @@ import {
 import { showToastWithPromise } from "./utils/toast.util";
 import SetAiStatusForm from "./components/set-status/set-ai-status-form.component";
 
+const BUILT_IN_EMOJIS: Record<string, string> = SLACK_EMOJI_CODE_MAP;
+
 // Reverse of SLACK_EMOJI_CODE_MAP: raw emoji glyph -> `:name:`. Raycast's argument field attaches an
 // emoji auto-picker that inserts a raw Unicode glyph (e.g. 👈) rather than its name, so we map it back.
 // The variation-selector-stripped key is added as a fallback so e.g. both `☝️` and `☝` resolve.
@@ -76,28 +78,27 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
       execute: !!me?.id,
     },
   );
-  const { data: workspaceEmojis, isLoading: isFetchWorkspaceEmojisLoading } = useCachedPromise(
-    SlackClient.getWorkspaceEmojis,
-  );
-
   const isLoading = useMemo(() => {
-    return isFetchProfileLoading || isFetchMeLoading || isFetchWorkspaceEmojisLoading;
-  }, [isFetchProfileLoading, isFetchMeLoading, isFetchWorkspaceEmojisLoading]);
-
-  const emojis: { [key: string]: string } = useMemo(() => {
-    return {
-      ...workspaceEmojis,
-      ...SLACK_EMOJI_CODE_MAP,
-    };
-  }, [workspaceEmojis]);
+    return isFetchProfileLoading || isFetchMeLoading;
+  }, [isFetchProfileLoading, isFetchMeLoading]);
 
   const currentStatusEmoji = useMemo(() => {
     if (!profile?.status_emoji) {
       return undefined;
     }
 
-    return emojis[profile.status_emoji];
-  }, [profile?.status_emoji, emojis]);
+    return BUILT_IN_EMOJIS[profile.status_emoji];
+  }, [profile?.status_emoji]);
+
+  const statusFormEmojis = useMemo<Record<string, string | undefined>>(() => {
+    const currentEmoji = profile?.status_emoji;
+    if (!currentEmoji || BUILT_IN_EMOJIS[currentEmoji]) {
+      return BUILT_IN_EMOJIS;
+    }
+
+    // Preserve an existing custom emoji in the form without loading the full workspace catalog.
+    return { ...BUILT_IN_EMOJIS, [currentEmoji]: undefined };
+  }, [profile?.status_emoji]);
 
   const getCurrentStatusText = useCallback(
     (defaultStatusText?: string) => {
@@ -316,7 +317,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
                 title={"Open Status Form"}
                 target={
                   <StatusForm
-                    emojis={emojis}
+                    emojis={statusFormEmojis}
                     formInitialValues={{
                       statusText: getCurrentStatusText(),
                       emoji: getCurrentStatusEmojiName(),
@@ -336,10 +337,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
           icon={"😁"}
           actions={
             <ActionPanel>
-              <Action.Push
-                title={"Choose Emoji"}
-                target={<EmojiPicker emojis={emojis} onSelect={handleEmojiChange} />}
-              />
+              <Action.Push title={"Choose Emoji"} target={<EmojiPicker onSelect={handleEmojiChange} />} />
             </ActionPanel>
           }
         />

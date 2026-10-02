@@ -1,10 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isApiReachable } from "../utils/connection";
+import { probeApi } from "../utils/connection";
 import { ensureReachable } from "../utils/submitGuard";
 import { useCanRecoverLocally } from "./useCanRecoverLocally";
 
-export type ReachabilityState = "checking" | "reachable" | "unreachable";
+export type ReachabilityState = "checking" | "reachable" | "unauthorized" | "unreachable";
 
 /**
  * Whether the API is answering, resolved once before dependent fetches run.
@@ -17,7 +17,10 @@ export type ReachabilityState = "checking" | "reachable" | "unreachable";
  * them from firing at all until we know there's something to talk to.
  */
 export function useApiReachable() {
-  const { apiUrl } = getPreferenceValues<Preferences>();
+  // Raycast snapshots preferences per command run, so apiKey cannot change
+  // mid-run today — it is in the deps below because memoizing on apiUrl alone
+  // would be wrong. Recovery is relaunching; see AuthErrorView's popToRoot.
+  const { apiUrl, apiKey } = getPreferenceValues<Preferences>();
   const [state, setState] = useState<ReachabilityState>("checking");
   const [isRecovering, setIsRecovering] = useState(false);
   // Only probed once the server is known down — a healthy hosted user never
@@ -33,10 +36,19 @@ export function useApiReachable() {
   }, []);
 
   const check = useCallback(async () => {
-    const reachable = Boolean(apiUrl) && (await isApiReachable(apiUrl));
-    if (mounted.current) setState(reachable ? "reachable" : "unreachable");
-    return reachable;
-  }, [apiUrl]);
+    // probeApi, not isApiReachable: a rejected key must not report "reachable".
+    // Every consumer gates its dependent fetches on `=== "reachable"`, so this
+    // one classification is what stops a bad key cascading into a doomed
+    // /api/v1/lists request (and its toast) behind every view that has one.
+    // Blank apiUrl is "unauthorized", NOT "unreachable". Nothing is down — the
+    // extension was never configured — and "unreachable" sends the user to
+    // Docker recovery for a problem only Settings can fix. Kept identical to
+    // what the fetch layer and ensureReachable now report, so the same broken
+    // config cannot be diagnosed three different ways in three places.
+    const result = apiUrl ? await probeApi(apiUrl) : "unauthorized";
+    if (mounted.current) setState(result === "ok" ? "reachable" : result);
+    return result === "ok";
+  }, [apiUrl, apiKey]);
 
   useEffect(() => {
     check();
@@ -56,6 +68,9 @@ export function useApiReachable() {
   return {
     state,
     offline: state === "unreachable",
+    // Distinct from `offline`: the server is up and there is nothing to start,
+    // so the form must offer Settings rather than a Start action that lies.
+    unauthorized: state === "unauthorized",
     reachable: state === "reachable",
     /** Offer the Start action only when starting something could actually help. */
     canStart,

@@ -10,6 +10,7 @@ type SpotlightSearchPreferences = {
   searchScope: string;
   isShowingDetail: boolean;
   openFolderAfterMove: boolean;
+  openBehaviour: "newWindow" | "newTab" | "currentTab";
 };
 
 type FolderSearchPlugin = {

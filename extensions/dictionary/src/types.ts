@@ -1,4 +1,5 @@
 import { Image, List } from "@raycast/api";
+import type { Key } from "react";
 import { supportedLanguages } from "./constants";
 export type LanguageCode = keyof typeof supportedLanguages;
 export type LanguageTitle = (typeof supportedLanguages)[LanguageCode]["title"];
@@ -21,6 +22,7 @@ export interface DefsBody<T> {
   definitions: T[];
 }
 export interface DefItem {
+  key?: Key;
   id?: string;
   title: string;
   subtitle?: string;

@@ -36,7 +36,7 @@ jobs:
       - name: Setup git
         uses: raycast/github-actions/setup-git@master
 
-      - name: Update the docs in the main repo
+      - name: Update the docs in the clients repo
         if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
         id: commit
         env:
@@ -46,26 +46,26 @@ jobs:
           # sync docs
           ###########################
 
-          echo "🛠️ Syncing to main repo..."
+          echo "🛠️ Syncing to clients repo..."
 
           cd ${{ github.workspace }}
 
-          git clone --depth=1 --single-branch --branch "master" "https://$API_TOKEN_GITHUB@github.com/raycast/raycast-macos.git" "raycast-macos"
+          git clone --depth=1 --single-branch --branch "main" "https://$API_TOKEN_GITHUB@github.com/raycast/raycast-clients.git" "raycast-clients"
 
           for file in ${{ steps.changed-files.outputs.deleted_files }}; do
-            echo "Removing raycast-macos/Commands/$file"
+            echo "Removing raycast-clients/projects/desktop-raycast/packages/node-extension-api/$file"
             # If it's already removed, that's ok
-            rm "raycast-macos/Commands/$file" || true
+            rm "raycast-clients/projects/desktop-raycast/packages/node-extension-api/$file" || true
           done
 
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "Updating raycast-macos/Commands/$file"
+            echo "Updating raycast-clients/projects/desktop-raycast/packages/node-extension-api/$file"
             # If this fails, it's because there is a space in the filename
             # so it's from GitBook messing things up. Ignore it
-            rsync -arv "$file" "raycast-macos/Commands/$file" || true
+            rsync -arv "$file" "raycast-clients/projects/desktop-raycast/packages/node-extension-api/$file" || true
           done
 
-          cd raycast-macos
+          cd raycast-clients
 
           if [[ $(git diff --stat) != '' ]]; then
             git checkout -b docs-sync-${{ github.sha }}
@@ -78,7 +78,7 @@ jobs:
             echo 'has_commit=false' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Open PR on the main repo
+      - name: Open PR on the clients repo
         uses: actions/github-script@v9
         if: steps.commit.outputs.has_commit == 'true'
         with:
@@ -86,9 +86,9 @@ jobs:
           script: |
             github.rest.pulls.create({
               owner: 'raycast',
-              repo: 'raycast-macos',
+              repo: 'raycast-clients',
               head: 'docs-sync-${{ github.sha }}',
-              base: 'master',
+              base: 'main',
               title: 'API Docs: Update from the extensions repo'
             })
 

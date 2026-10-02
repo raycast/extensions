@@ -27,7 +27,7 @@ function CopyTotpAction({ skipReprompt, shortcut }: CopyTotpActionProps) {
       if (error) throw error;
 
       await toast?.hide();
-      await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
+      await Clipboard.copy(totp, { concealed: getTransientCopyPreference("other") });
       await showCopySuccessMessage("Copied code to clipboard");
     } catch (error) {
       toast.message = "Failed to get TOTP";

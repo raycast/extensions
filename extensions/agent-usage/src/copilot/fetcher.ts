@@ -75,22 +75,27 @@ function deriveFromMonthlyAndLimited(monthly?: number | string, limited?: number
   return clampPercent((limitedNum / monthlyNum) * 100);
 }
 
-function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; error: CopilotError | null } {
+export function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; error: CopilotError | null } {
   if (!data || typeof data !== "object") {
     return { usage: null, error: { type: "parse_error", message: "Invalid Copilot API response format" } };
   }
 
   const response = data as CopilotResponse;
 
-  const premiumRemaining =
-    getPercentRemaining(response.quota_snapshots?.premium_interactions) ??
+  const aiCreditsSnapshot = response.quota_snapshots?.premium_interactions;
+  const aiCreditsRemainingPercent =
+    getPercentRemaining(aiCreditsSnapshot) ??
     deriveFromMonthlyAndLimited(response.monthly_quotas?.completions, response.limited_user_quotas?.completions);
+  const aiCreditsEntitlement =
+    toNumber(aiCreditsSnapshot?.entitlement) ?? toNumber(response.monthly_quotas?.completions);
+  const aiCreditsRemaining =
+    toNumber(aiCreditsSnapshot?.remaining) ?? toNumber(response.limited_user_quotas?.completions);
 
   const chatRemaining =
     getPercentRemaining(response.quota_snapshots?.chat) ??
     deriveFromMonthlyAndLimited(response.monthly_quotas?.chat, response.limited_user_quotas?.chat);
 
-  if (premiumRemaining === null && chatRemaining === null) {
+  if (aiCreditsRemainingPercent === null && chatRemaining === null) {
     return {
       usage: null,
       error: {
@@ -103,7 +108,9 @@ function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; erro
   return {
     usage: {
       plan: formatPlan(response.copilot_plan),
-      premiumRemaining,
+      aiCreditsRemainingPercent,
+      aiCreditsRemaining,
+      aiCreditsEntitlement,
       chatRemaining,
       quotaResetDate: response.quota_reset_date || null,
     },

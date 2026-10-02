@@ -30,13 +30,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "2.0.5",
-    "@raycast/utils": "2.3.0",
-    "bonjour-service": "1.4.4"
+    "@raycast/api": "2.4.1",
+    "@raycast/utils": "2.3.1",
+    "bonjour": "3.5.1"
   },
   "devDependencies": {
-    "@types/node": "26.2.0",
-    "@types/react": "19.2.18",
+    "@types/bonjour": "3.5.13",
+    "@types/node": "26.5.1",
+    "@types/react": "19.3.0",
     "react-devtools": "6.1.1",
     "typescript": "7.0.2"
   },
@@ -50,5 +51,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "allowScripts": {
+    "electron@23.3.13": true,
+    "esbuild@0.28.2": true
+  }
 }

@@ -8,7 +8,7 @@ Aside is a focused Raycast companion for [Aside](https://aside.com/). It lets yo
 
 | Command | Description |
 |:---|:---|
-| Search Aside | Search Google, open URLs, revisit history, and jump to pinned or other open tabs. |
+| Search Aside | Search Google, open URLs, find bookmarks and history, and jump to open tabs. |
 | Search Bookmarks | Search Aside bookmarks, open saved pages, and manage bookmark ranking. |
 | Search Browser History | Search recently visited pages from the configured Aside profile. |
 | Open New Tab | Open a new tab in the frontmost Aside window. |
@@ -17,7 +17,7 @@ Aside is a focused Raycast companion for [Aside](https://aside.com/). It lets yo
 
 **Capabilities include:**
 * Focus, reload, close, duplicate, or deduplicate tabs (keeps the first tab per URL)
-* Search nested bookmarks with frecency ranking, plus full history from a dedicated command
+* Search nested bookmarks with shared frecency ranking from Search Aside or the dedicated command
 * Auto-discover Aside profiles and switch bookmarks/history from the search-bar dropdown; open tabs stay shared across profiles
 * Copy URLs, titles, Markdown links, and bookmark exports; create Raycast Quicklinks from results
 

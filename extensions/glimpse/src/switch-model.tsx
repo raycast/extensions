@@ -1,12 +1,17 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { ErrorEmptyView } from "./error-view";
 import { glimpse, ModelEntry } from "./glimpse";
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(async () => {
-    const res = await glimpse<{ models: ModelEntry[] }>(["model", "list"]);
-    return res.models;
-  });
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    async () => {
+      const res = await glimpse<{ models: ModelEntry[] }>(["model", "list"]);
+      return res.models;
+    },
+    [],
+    { onError: () => undefined },
+  );
 
   async function activate(model: ModelEntry) {
     const target = model.remote ? "remote" : model.key;
@@ -24,28 +29,18 @@ export default function Command() {
     }
   }
 
-  async function installAndActivate(model: ModelEntry) {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Downloading ${model.label}…`,
-    });
+  // The CLI can't download models, so hand that off to Glimpse's Models page.
+  async function openModels() {
     try {
-      // model install downloads to the local model cache; can take a while.
-      await glimpse(["model", "install", model.key]);
-      await glimpse(["model", "set", model.key]);
-      toast.style = Toast.Style.Success;
-      toast.title = `Active model: ${model.label}`;
-      revalidate();
+      await glimpse(["open", "models"]);
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Glimpse";
-      toast.message = (error as Error).message;
+      await showFailureToast(error, { title: "Couldn't open Glimpse" });
     }
   }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search models">
-      {(data ?? []).map((model) => {
+      {(error ? [] : (data ?? [])).map((model) => {
         const ready = model.installed || model.remote;
         return (
           <List.Item
@@ -72,15 +67,24 @@ export default function Command() {
                 {ready ? (
                   <Action title="Use Model" icon={Icon.Check} onAction={() => activate(model)} />
                 ) : (
-                  <Action title="Download and Use" icon={Icon.Download} onAction={() => installAndActivate(model)} />
+                  <Action title="Download in Glimpse" icon={Icon.Download} onAction={openModels} />
                 )}
-                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => revalidate()}
+                />
               </ActionPanel>
             }
           />
         );
       })}
-      <List.EmptyView title="No models" description="Download a model in Glimpse." />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView title="No models" description="Download a model in Glimpse." />
+      )}
     </List>
   );
 }

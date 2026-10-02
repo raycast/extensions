@@ -1,1 +1,1 @@
-export type Emoji = { [key: string]: string };
+export type Emoji = { [key: string]: string | undefined };

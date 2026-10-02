@@ -6,6 +6,7 @@ import {
   Icon,
   List,
   closeMainWindow,
+  confirmAlert,
   getPreferenceValues,
   open,
   openExtensionPreferences,
@@ -16,14 +17,25 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { useState } from "react";
-import { categoryLabel, categoryName, environmentLabel, environmentName, facetsOf, packageLabel } from "./convention";
+import {
+  categoryLabel,
+  categoryName,
+  environmentLabel,
+  environmentName,
+  type Facets,
+  facetsOf,
+  hasTitleEnvironment,
+  packageLabel,
+  subtitleFormOf,
+} from "./convention";
 import { ALL_FILTER, filterOptions, sectionsFor } from "./grouping";
 import { isLinkCommand, linkTargetOf } from "./link-command";
-import { duplicateScript, makeExecutable } from "./script-operations";
+import { domainOf } from "./generate-script";
+import { duplicateScript, makeExecutable, moveEnvironmentInScript } from "./script-operations";
 import { discoverScriptCommands } from "./discover-script-commands";
 import { resolveIcon } from "./resolve-icon";
 import { languageForScript } from "./script-language";
-import type { DiscoveryResult, ScriptCommand } from "./types";
+import type { DiscoveryResult, ScriptArgument, ScriptCommand } from "./types";
 
 /**
  * Declared here rather than using the generated `Preferences` global: this view is shared by two
@@ -37,9 +49,60 @@ type SearchPreferences = {
   terminalApplication?: Application;
 };
 
+/** A leading title segment that is a hostname — so `Chat · Mozilla` is left alone. */
+const HOST_SEGMENT = /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i;
+
+/**
+ * `netflix.com · Watch Later` → `Watch Later`.
+ *
+ * The convention leads a web row's title with its host, and it is right to: in Raycast's own launcher a
+ * row appears among apps and extensions, and a leading domain says *this opens a browser* before the rest
+ * is read. That is a signal about strangers, and in this list there are none — every row is already a link
+ * command, already sorted by package. Firing on every row, it answers nothing while spending the front of
+ * the only column that can differ: rows on one service share their leading characters and render
+ * identically once the column truncates them. The host is not discarded, it moves to the subtitle, where
+ * it does the verification job instead — and where it varies between neighbours that the package, being
+ * the sort key, cannot. Nothing searchable is lost either — `keywords` still carries the whole title.
+ */
+const nameWithoutHost = (name: string) => {
+  const separator = name.indexOf(" · ");
+  if (separator < 0) return name;
+
+  return HOST_SEGMENT.test(name.slice(0, separator)) ? name.slice(separator + 3) : name;
+};
+
+/**
+ * The host, because once the title stops carrying it that is what tells two rows of one brand apart. The
+ * package stays where it is still the more useful word: a title that is nothing but a host already shows
+ * the destination, a command with no link target has no host to show at all, and a command with no icon
+ * has nothing else naming its brand — the mark normally carries that, so a row without one is the single
+ * case where the package still has to be read rather than seen. A declared-but-broken icon is not covered:
+ * telling one from a working icon needs the file system, and a subtitle is composed synchronously.
+ */
+const rowSubtitle = (command: ScriptCommand, facets: Facets) => {
+  const brand = facets.brand ? packageLabel(facets.brand) : undefined;
+  if (HOST_SEGMENT.test(facets.name)) return brand;
+
+  const target = linkTargetOf(command)?.target;
+  const host = target ? domainOf(target) : undefined;
+  if (!host) return brand;
+
+  return command.icon?.trim() ? host : (brand ?? host);
+};
+
 const BODY_PREVIEW_LINES = 300;
 
 const RAYCAST_DIRECTORY_SETTINGS = "Raycast Settings → Extensions → Script Commands → Add Directories";
+
+/**
+ * A dropdown's choices are the whole of what it tells you — a placeholder like "Surface" names the
+ * axis but not what you can pick along it. Text and password arguments have no choices, so they fall
+ * back to the placeholder they prompt with.
+ */
+const argumentTags = (argument: ScriptArgument, index: number) =>
+  argument.data?.length
+    ? argument.data.map((choice) => choice.title)
+    : [argument.placeholder ?? argument.type ?? `argument${index + 1}`];
 
 const sourceBlock = (command: ScriptCommand) => {
   const lines = command.body.split("\n");
@@ -108,12 +171,11 @@ const ScriptMetadata = ({ command }: { command: ScriptCommand }) => {
 
       {command.argumentsList.length > 0 ? (
         <List.Item.Detail.Metadata.TagList title="Prompts For">
-          {command.argumentsList.map((argument, index) => (
-            <List.Item.Detail.Metadata.TagList.Item
-              key={index}
-              text={argument.placeholder ?? argument.type ?? `argument${index + 1}`}
-            />
-          ))}
+          {command.argumentsList.flatMap((argument, index) =>
+            argumentTags(argument, index).map((text) => (
+              <List.Item.Detail.Metadata.TagList.Item key={`${index}-${text}`} text={text} />
+            )),
+          )}
         </List.Item.Detail.Metadata.TagList>
       ) : null}
 
@@ -156,6 +218,37 @@ const applyDuplicate = async (command: ScriptCommand, onRefresh: () => void) => 
     onRefresh();
   } catch (error) {
     await showFailureToast(error, { title: "Could not duplicate the script" });
+  }
+};
+
+/**
+ * Offered one command at a time and behind a confirmation, never as a sweep. Raycast can address a Script
+ * Command by its title as well as by its file, so a hotkey, alias or deeplink someone set up may stop
+ * pointing where it did — that is a cost only the person who set them up can weigh, command by command.
+ * The alert shows both lines before and after so the change is read, not inferred.
+ */
+const applyMoveEnvironment = async (command: ScriptCommand, onRefresh: () => void) => {
+  const moved = subtitleFormOf(command);
+  if (!moved) return;
+
+  const confirmed = await confirmAlert({
+    title: "Move Environment to Subtitle?",
+    message: [
+      `Before: ${command.title} / ${command.packageName?.trim() || "no subtitle"}`,
+      `After: ${moved.title} / ${moved.packageName}`,
+      "",
+      "Only the title and subtitle lines of this file change. Raycast may address the command by its title, so a hotkey, alias or deeplink pointing at it might need re-assigning.",
+    ].join("\n"),
+    primaryAction: { title: "Move" },
+  });
+  if (!confirmed) return;
+
+  try {
+    await moveEnvironmentInScript(command.path);
+    await showToast({ style: Toast.Style.Success, title: "Environment moved", message: moved.title });
+    onRefresh();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not move the environment" });
   }
 };
 
@@ -202,6 +295,13 @@ const ScriptActions = ({
         onAction={() => applyDuplicate(command, onRefresh)}
         shortcut={Keyboard.Shortcut.Common.Duplicate}
       />
+      {hasTitleEnvironment(command.title) ? (
+        <Action
+          title="Move Environment to Subtitle"
+          icon={Icon.ArrowDown}
+          onAction={() => applyMoveEnvironment(command, onRefresh)}
+        />
+      ) : null}
     </ActionPanel.Section>
 
     <ActionPanel.Section title="Containing Folder">
@@ -359,8 +459,8 @@ export const SearchView = ({ linksOnly }: SearchViewProps) => {
             <List.Item
               key={command.path}
               icon={resolveIcon(command)}
-              title={facets.name}
-              subtitle={facets.brand ? packageLabel(facets.brand) : undefined}
+              title={nameWithoutHost(facets.name)}
+              subtitle={rowSubtitle(command, facets)}
               keywords={[
                 command.title,
                 command.filename,

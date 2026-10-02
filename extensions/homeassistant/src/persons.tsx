@@ -1,5 +1,6 @@
 import { StatesList } from "@components/state/list";
+import { LaunchProps } from "@raycast/api";
 
-export default function main() {
-  return <StatesList domain="person" />;
+export default function main(props: LaunchProps) {
+  return <StatesList domain="person" initialSearchText={props.fallbackText} />;
 }

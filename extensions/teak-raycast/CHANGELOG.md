@@ -1,5 +1,10 @@
 # Changelog
 
+## [Reliable search and favorites] - 2026-09-16
+
+- Search, favorites, and AI tools now use Teak's current card listing API
+- Fixed search and favorites against the latest Teak backend
+
 ## [Sign in with your browser] - 2026-07-03
 
 - Sign in with your browser in one step — copying an API key is no longer required to get started

@@ -1,23 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { supabase } from "../lib/supabase";
-import type { Deck } from "../types";
-
-/**
- * Fetches all decks for the given user.
- */
-async function _fetchDecks(userId: string): Promise<Deck[]> {
-  const { data: deckRows, error } = await supabase
-    .from("decks")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    throw new Error(`Failed to fetch decks: ${error.message}`);
-  }
-
-  return (deckRows as Deck[]) || [];
-}
+import { fetchDecks } from "../lib/decks";
 
 /**
  * Hook that fetches decks for the authenticated user.
@@ -27,7 +9,7 @@ export function useDecks(userId: string | null) {
   // Reason: the empty-string fallback is never fetched — `execute` gates the
   // call until a real userId exists. It only satisfies the argument type
   // without a non-null assertion.
-  const { data, isLoading, error } = useCachedPromise((id: string) => _fetchDecks(id), [userId ?? ""], {
+  const { data, isLoading, error } = useCachedPromise(fetchDecks, [userId ?? ""], {
     execute: !!userId,
   });
 

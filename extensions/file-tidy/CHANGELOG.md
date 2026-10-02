@@ -1,5 +1,9 @@
 # File Tidy Changelog
 
+## [New Icon] - 2026-09-15
+
+- A refreshed extension icon: a mint tray on a deep-green gradient, redrawn with the Raycast Icon Maker.
+
 ## [New Icon, and Previews That Leave No Trace] - 2026-08-18
 
 - A refreshed extension icon, with the Store screenshots re-shot to match.

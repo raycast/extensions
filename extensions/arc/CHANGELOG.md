@@ -1,5 +1,14 @@
 # Arc Changelog
 
+## [Fix] - 2026-09-14
+
+- Fixed `Search Tabs` becoming slow with many tabs by batching the AppleScript calls used to look up each tab's Space name, instead of issuing one call per tab.
+
+## [Improvements] - 2026-09-07
+
+- Display the Space name in `Search Tabs` and `Search Arc` results to help distinguish tabs with identical names across different Spaces.
+- `getTabsWithSpaceInfo` now falls back to `getTabs()` when the AppleScript response is empty or unparseable, so a Space-metadata failure drops only the Space tags — not the entire tab list.
+
 ## [Fix SQL injection in history and download search] - 2026-06-23
 
 - Escape single quotes and LIKE wildcards (`%`, `_`) in search queries to prevent SQL injection

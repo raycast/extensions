@@ -1,7 +1,6 @@
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, Keyboard } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 
-import { getTeams } from "./api/getTeams";
 import { getLinearClient, linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => {
@@ -17,19 +16,17 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     }
 
     const viewer = await linearClient.viewer;
-    const { teams } = await getTeams();
-
     let teamId: string | undefined;
 
     if (preferences.preferredTeamKey) {
-      const team = teams.find((t) => t.key === preferences.preferredTeamKey);
-      if (team) {
-        teamId = team.id;
-      }
+      const key = preferences.preferredTeamKey.trim().toUpperCase();
+      const { nodes } = await linearClient.teams({ filter: { key: { eq: key } } });
+      teamId = nodes[0]?.id;
     }
 
     if (!teamId) {
-      teamId = teams[0].id;
+      const { nodes } = await viewer.teams({ first: 1 });
+      teamId = nodes[0]?.id;
     }
 
     if (!teamId) {

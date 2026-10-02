@@ -7,7 +7,9 @@ import {
   getffmpegPath,
   getffprobePath,
   getCommonArgs,
+  isLiveStream,
   looksLikeFilePath,
+  normalizeVideoUrl,
   sanitizeVideoTitle,
 } from "../utils.js";
 import fs from "node:fs";
@@ -45,13 +47,13 @@ export default async function tool(input: Input) {
     "--no-playlist",
     "--dump-json",
     "--format-sort=res,ext,tbr",
-    input.url,
+    normalizeVideoUrl(input.url),
   ]);
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
   // Check if it's a live stream
-  if (video.live_status !== "not_live" && video.live_status !== undefined) {
+  if (isLiveStream(video)) {
     throw new Error("Live streams are not supported");
   }
 
@@ -73,7 +75,7 @@ export default async function tool(input: Input) {
   options.push("--print", "after_move:filepath");
 
   // Execute download
-  const result = await execa(ytdlPath, [...options, input.url]);
+  const result = await execa(ytdlPath, [...options, normalizeVideoUrl(input.url)]);
 
   if (result.failed) {
     throw new Error(`Failed to download video: ${result.stderr}`);

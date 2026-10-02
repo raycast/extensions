@@ -8,6 +8,8 @@ type Input = {
    * Title for the new channel.
    */
   title: string;
+  /** Optional channel description in Markdown. */
+  description?: string;
   /**
    * Visibility: public (open to everyone), closed (listed but not open), or private.
    */
@@ -20,6 +22,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     info: [
       { name: "Title", value: input.title },
       { name: "Visibility", value: input.visibility },
+      { name: "Description", value: input.description ?? "None" },
     ],
   };
 };
@@ -35,7 +38,7 @@ export default async function tool(input: Input) {
     }
 
     const arena = await getAuthenticatedArena();
-    const channel = await arena.channel().create(title, input.visibility);
+    const channel = await arena.channel().create(title, input.visibility, input.description);
     return { channel: channelSummary(channel) };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

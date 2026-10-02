@@ -2,14 +2,62 @@ import { executeSQL } from "@raycast/utils";
 
 import { escapeSQLString, getOpenNoteURL, NOTES_DB, Link, Backlink, Tag, NoteItem } from "../helpers";
 
-export async function getNotes(maxQueryResults: number, filterByTags: string[] = [], searchText?: string) {
+// SQLite's LOWER()/LIKE only fold ASCII case and never strip accents, so "cafe" wouldn't match
+// "Café" in SQL. This is the authoritative, fully Unicode-aware check applied in JS; the SQL-side
+// filter below only folds the common Latin accents, as a bound on how much data JS has to look at.
+function normalizeForSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+// Common Latin accented characters mapped to their base letter, used to build a SQL expression
+// that approximates normalizeForSearch well enough to prefilter and bound the query in SQL.
+const SQL_DIACRITIC_REPLACEMENTS: [string, string][] = [
+  ["àáâãäå", "a"],
+  ["èéêë", "e"],
+  ["ìíîï", "i"],
+  ["òóôõö", "o"],
+  ["ùúûü", "u"],
+  ["ýÿ", "y"],
+  ["ñ", "n"],
+  ["ç", "c"],
+];
+
+function foldSqlColumn(column: string): string {
+  const withDiacriticsFolded = SQL_DIACRITIC_REPLACEMENTS.reduce((expr, [accentedChars, base]) => {
+    return [...accentedChars, ...accentedChars.toUpperCase()].reduce(
+      (inner, accentedChar) => `REPLACE(${inner}, '${accentedChar}', '${base}')`,
+      expr,
+    );
+  }, column);
+  return `LOWER(${withDiacriticsFolded})`;
+}
+
+export async function getNotes(
+  maxQueryResults: number,
+  filterByTags: string[] = [],
+  searchText?: string,
+  exactTitleMatch = false,
+) {
   const trimmedSearchText = searchText?.trim();
-  const searchFilter = trimmedSearchText
-    ? ` AND (
-        note.ztitle1 LIKE '%${escapeSQLString(trimmedSearchText)}%' OR
-        note.zsnippet LIKE '%${escapeSQLString(trimmedSearchText)}%'
-      )`
-    : "";
+  const foldedSearchText = trimmedSearchText ? escapeSQLString(normalizeForSearch(trimmedSearchText)) : "";
+  // SQLite's LOWER() only folds ASCII case, so a SQL-side fold can't be trusted to find exact
+  // matches that differ only by case in non-Latin scripts (e.g. "Привет" vs "ПРИВЕТ"). For those,
+  // skip the SQL filter and let the JS-side normalizeForSearch check below do the real matching.
+  const hasNonAsciiSearchText = trimmedSearchText
+    ? [...trimmedSearchText].some((char) => char.charCodeAt(0) > 127)
+    : false;
+  let searchFilter = "";
+  if (trimmedSearchText && exactTitleMatch && !hasNonAsciiSearchText) {
+    searchFilter = ` AND ${foldSqlColumn("TRIM(note.ztitle1)")} = '${foldedSearchText}'`;
+  } else if (trimmedSearchText && !exactTitleMatch) {
+    searchFilter = ` AND (
+      ${foldSqlColumn("note.ztitle1")} LIKE '%${foldedSearchText}%' OR
+      ${foldSqlColumn("note.zsnippet")} LIKE '%${foldedSearchText}%'
+    )`;
+  }
 
   const query = `
     SELECT
@@ -147,6 +195,19 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
       const noteTags = note.tags.map((t) => t.text);
       return filterByTags.every((tag) => noteTags.includes(`#${tag.replace("#", "")}`));
     });
+  }
+
+  if (trimmedSearchText) {
+    const normalizedQuery = normalizeForSearch(trimmedSearchText);
+    notesWithAdditionalFields = notesWithAdditionalFields.filter((note) =>
+      exactTitleMatch
+        ? normalizeForSearch(note.title.trim()) === normalizedQuery
+        : normalizeForSearch(note.title).includes(normalizedQuery) ||
+          normalizeForSearch(note.snippet).includes(normalizedQuery),
+    );
+    if (exactTitleMatch) {
+      notesWithAdditionalFields = notesWithAdditionalFields.slice(0, maxQueryResults);
+    }
   }
 
   return notesWithAdditionalFields;

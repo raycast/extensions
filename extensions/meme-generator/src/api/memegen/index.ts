@@ -2,6 +2,7 @@ import fetch, { Response } from "node-fetch";
 import { MemegenTemplatesResponse } from "./types";
 import { ApiModule, Meme } from "../types";
 import { withCache } from "@raycast/utils";
+import buildMemegenImageUrl from "../../lib/buildMemegenImageUrl";
 
 interface GetMemesResult {
   success: true;
@@ -49,33 +50,9 @@ interface GenerateMemeResult {
   url: string;
 }
 
-/**
- * Escapes text for use in memegen URLs according to their special character rules
- */
-function escapeTextForUrl(text: string): string {
-  return text
-    .replace(/_/g, "__") // Underscore → double underscore (must be first)
-    .replace(/-/g, "--") // Dash → double dash
-    .replace(/ /g, "_") // Space → underscore
-    .replace(/\?/g, "~q") // Question mark
-    .replace(/&/g, "~a") // Ampersand
-    .replace(/%/g, "~p") // Percentage
-    .replace(/#/g, "~h") // Hashtag
-    .replace(/\//g, "~s") // Slash
-    .replace(/\\/g, "~b") // Backslash
-    .replace(/</g, "~l") // Less-than
-    .replace(/>/g, "~g") // Greater-than
-    .replace(/"/g, "''"); // Double quote → two single quotes
-}
-
 export async function generateMeme({ id, boxes }: GenerateMemeInput): Promise<GenerateMemeResult> {
   try {
-    // Escape text for each box
-    const escapedTexts = boxes.map((box) => escapeTextForUrl(box.text || "_"));
-
-    // Build the URL path: /images/{template_id}/{text1}/{text2}/...
-    const textsPath = escapedTexts.join("/");
-    const url = `https://api.memegen.link/images/${id}/${textsPath}.png`;
+    const url = buildMemegenImageUrl({ id, boxes });
 
     // Memegen generates images via GET request - the URL itself is the image
     // We just need to verify it's accessible
@@ -109,4 +86,5 @@ export const memegenApi: ApiModule = {
   parseTemplates,
   getMemes,
   generateMeme,
+  previewUrl: buildMemegenImageUrl,
 };

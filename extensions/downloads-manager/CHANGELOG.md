@@ -1,5 +1,18 @@
 # Downloads Manager Changelog
 
+## [Align shortcuts with Search Screenshots] - 2026-09-09
+
+Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
+
+- Added a Primary Action preference to copy downloads with Enter, while keeping Open as the default.
+- Added pasting the selected download to the focused app with Command+Enter on macOS or Ctrl+Enter on Windows.
+- Added Open and Reveal shortcuts and switched Copy Path to Raycast's standard platform-specific shortcut.
+- Organized the action menu consistently across list and grid layouts.
+
+## [Add toggle to show filename being deleted permanently] - 2026-08-30
+
+- Added a toggle to the preference to show/hide the latest downloaded file being permanently deleted.
+
 ## [Fix download management reliability] - 2026-08-25
 
 - Fixed moving downloads to Trash on macOS when the Downloads folder is backed by iCloud Drive, including keeping the list accurate when only some selected items move successfully ([#29951](https://github.com/raycast/extensions/issues/29951), [#30503](https://github.com/raycast/extensions/issues/30503)).

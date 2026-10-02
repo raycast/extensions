@@ -4,15 +4,19 @@ import type {
   StatusAdapter,
   StatusSnapshot,
 } from "@/types";
+import { compactSnapshotForList } from "@/lib/snapshot-compact";
+import { mapPool } from "@/lib/async-pool";
 import { applyRegionFilter } from "@/lib/regions";
 import { isRailwayHost, normalizeSiteUrl } from "@/lib/url";
 import { aiStudioAdapter } from "@/adapters/aistudio";
 import { awsAdapter } from "@/adapters/aws";
 import { betterstackAdapter } from "@/adapters/betterstack";
 import { checklyAdapter } from "@/adapters/checkly";
+import { firehydrantAdapter } from "@/adapters/firehydrant";
 import { googleCloudAdapter } from "@/adapters/googlecloud";
 import { incidentIoAdapter } from "@/adapters/incident-io";
 import { instatusAdapter } from "@/adapters/instatus";
+import { onlineornotAdapter } from "@/adapters/onlineornot";
 import { outagedeckAdapter } from "@/adapters/outagedeck";
 import { railwayAdapter } from "@/adapters/railway";
 import { rssAdapter } from "@/adapters/rss";
@@ -36,6 +40,8 @@ const adapters: Record<SiteProvider, StatusAdapter> = {
   googlecloud: googleCloudAdapter,
   aistudio: aiStudioAdapter,
   outagedeck: outagedeckAdapter,
+  onlineornot: onlineornotAdapter,
+  firehydrant: firehydrantAdapter,
 };
 
 export function getAdapter(provider: SiteProvider): StatusAdapter {
@@ -94,6 +100,16 @@ export async function detectProvider(siteUrl: string): Promise<SiteProvider> {
     return "statuspage";
   }
 
+  const isOnlineOrNot = await onlineornotAdapter.detect?.(normalized);
+  if (isOnlineOrNot) {
+    return "onlineornot";
+  }
+
+  const isFireHydrant = await firehydrantAdapter.detect?.(normalized);
+  if (isFireHydrant) {
+    return "firehydrant";
+  }
+
   const isCheckly = await checklyAdapter.detect?.(normalized);
   if (isCheckly) {
     return "checkly";
@@ -110,7 +126,7 @@ export async function detectProvider(siteUrl: string): Promise<SiteProvider> {
   }
 
   throw new Error(
-    "Unsupported status page. Try OutageDeck, Statuspage, Better Stack, incident.io, Instatus, Checkly, an RSS status feed, or status.railway.app",
+    "This URL does not match a supported status page or RSS feed.",
   );
 }
 
@@ -124,12 +140,10 @@ export async function fetchSnapshot(
 export async function fetchAllSnapshots(
   sites: Array<FetchSnapshotInput & { id: string; provider: SiteProvider }>,
 ): Promise<Record<string, StatusSnapshot>> {
-  const entries = await Promise.all(
-    sites.map(async (site) => {
-      const snapshot = await fetchSnapshot(site);
-      return [site.id, snapshot] as const;
-    }),
-  );
+  const entries = await mapPool(sites, 2, async (site) => {
+    const snapshot = await fetchSnapshot(site);
+    return [site.id, compactSnapshotForList(snapshot)] as const;
+  });
 
   return Object.fromEntries(entries);
 }

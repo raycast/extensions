@@ -12,8 +12,19 @@ export interface Contact {
   favorited: boolean;
   recent: boolean;
   status: ContactStatus;
-  /** Present for a busy contact: the call they're on. Absent on CLIs predating the contract. */
+  /** Present when the CLI exposes a busy contact’s call. */
   call?: ContactCall | null;
+}
+
+export interface Machine {
+  id: string;
+  platform: string;
+  device_name?: string;
+  call_id?: string;
+}
+
+export function machineCallAction(machine: Machine): "start" | "none" {
+  return machine.call_id ? "none" : "start";
 }
 
 /**
@@ -27,51 +38,23 @@ export interface ContactCall {
   capacity: number;
   sfu_backed: boolean;
   personal_room?: { owner: number; auto_join_behavior: string } | null;
-  joinable?: boolean;
+  joinable: boolean;
 }
 
-/**
- * Whether a busy contact's call can be joined. `unknown` is the older-CLI case:
- * builds predating the contract omit `call` entirely, so there is nothing to
- * judge — the action stays on offer and the CLI rejects it if it must. Treating
- * unknown as "not joinable" would strip Join Call from every busy contact
- * against those builds.
- */
 export type Joinability = "joinable" | "not-joinable" | "unknown";
 
 export function callJoinability(contact: Contact | undefined): Joinability {
-  const call = contact?.call;
-  if (!call) {
-    return "unknown";
-  }
-  if (typeof call.joinable === "boolean") {
-    return call.joinable ? "joinable" : "not-joinable";
-  }
-  // A build that sends the call but not the derived flag: apply the same predicate.
-  if (call.id && Array.isArray(call.participant_ids) && typeof call.capacity === "number") {
-    return call.participant_ids.length < call.capacity ? "joinable" : "not-joinable";
-  }
-  return "unknown";
+  if (typeof contact?.call?.joinable !== "boolean") return "unknown";
+  return contact.call.joinable ? "joinable" : "not-joinable";
 }
 
-/**
- * What a contact's entry should offer. Mirrors the Tuple app's popover: no way
- * to ring someone offline, and joining only a call that has room. The CLI
- * enforces the same rules — `call start` at an offline or busy target is
- * rejected outright — so offering the action anyway would just be a button that
- * fails. Forcing past the guard is deliberately not on offer, because the app
- * doesn't offer it either.
- *
- * A status that is neither busy nor offline counts as reachable: the daemon
- * passes presence through verbatim and "available" is a synonym for online.
- */
 export type ContactCallAction = "start" | "join" | "none";
 
 export function contactCallAction(contact: Contact): ContactCallAction {
   if (contact.status === "busy") {
-    return callJoinability(contact) === "not-joinable" ? "none" : "join";
+    return callJoinability(contact) === "joinable" ? "join" : "none";
   }
-  return contact.status === "offline" ? "none" : "start";
+  return contact.status === "online" || contact.status === "available" ? "start" : "none";
 }
 
 export interface CallParticipant {
@@ -80,7 +63,6 @@ export interface CallParticipant {
   email: string;
 }
 
-/** One grouped live call from `tuple call list`. */
 export interface OngoingCall {
   id: string;
   participants: CallParticipant[];
@@ -92,7 +74,6 @@ export interface OngoingCall {
   current: boolean;
 }
 
-/** A stored (recorded) call, from `tuple transcription list`. */
 export interface StoredCall {
   call_id: string;
   title: string;
@@ -105,14 +86,12 @@ export interface StoredCall {
 }
 
 /**
- * The active call, normalized by `tuple call current --format json`. The CLI
+ * The active call, normalized by `tuple state --format json`. The CLI
  * reconciles the direct-call and room-based shapes into one flat roster:
  * `participants` is the other people (the local user is already excluded),
  * `muted` is the local mic state, `transcribing` is whether the local user is
  * recording the call, and `active_room_slug` is the room slug for room-based
- * calls (null for direct calls). The command exits non-zero when there is no
- * active call, so consumers handle absence via the NoActiveCall error rather
- * than a null payload.
+ * calls (null for direct calls). The state summary sets `in_call: false` and `call: null` when idle.
  */
 export interface CallView {
   call_id: string;
@@ -151,7 +130,7 @@ export interface Room {
   slug: string;
   name: string;
   http_value: string;
-  /** RFC 3339 creation time. Older CLIs omit it. */
+  /** RFC 3339 creation time; empty when the server has no timestamp. */
   created_at?: string;
   favorited: boolean;
   members: RoomMember[];
@@ -159,7 +138,6 @@ export interface Room {
   active_call: boolean;
 }
 
-/** The newest-created personal room when the CLI provides enough data to identify it reliably. */
 export function primaryPersonalRoom(rooms: Room[]): Room | undefined {
   const personalRooms = rooms.filter((room) => room.kind === "personal");
   if (personalRooms.length <= 1) {
@@ -171,8 +149,10 @@ export function primaryPersonalRoom(rooms: Room[]): Room | undefined {
   return personalRooms.reduce((primary, room) => (room.created_at! > primary.created_at! ? room : primary));
 }
 
-/** One full-text search hit, from `tuple transcription search --format json`. */
-export interface TranscriptMatch {
+export interface CaptureMatch {
+  kind: "spoken" | "content";
+  app_name?: string;
+  url?: string;
   call_id: string;
   time: string;
   user_id: number;
@@ -191,8 +171,8 @@ export enum TupleErrorKind {
   AlreadyInCall = "already_in_call",
   /** The Tuple app/daemon is not running, so the CLI could not reach it. */
   DaemonDown = "daemon_down",
-  /** The transcript store doesn't exist yet — transcription has never run on this machine. */
-  TranscriptionUnavailable = "transcription_unavailable",
+  /** The Capture store doesn't exist yet because Capture has never run on this machine. */
+  CaptureUnavailable = "transcription_unavailable",
   /** `call start` refused: the target is offline. The app offers no start action for them either. */
   ContactOffline = "contact_offline",
   /** `call start` refused: the target is already on a call. Join it instead. */
@@ -204,7 +184,7 @@ export enum TupleErrorKind {
 }
 
 /**
- * The error envelope `--format json` writes to *stdout* (with exit 1) on
+ * The error envelope `--format json` writes to stderr (with exit 1) on
  * current CLIs. `kind` is the daemon's or command's stable identifier;
  * `error_code` is the HTTP status when the failure came from the daemon.
  */
@@ -225,4 +205,44 @@ export class TupleError extends Error {
     this.kind = kind;
     this.detail = detail;
   }
+}
+
+export interface CanonicalCall {
+  id: string;
+  state: "active" | "ended";
+  title: string | null;
+  summary: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  participants: CallParticipant[];
+}
+
+export interface StateSummary {
+  in_call: boolean;
+  call: CallView | null;
+}
+
+export interface CaptureRecord {
+  id: number;
+  type: string;
+  time: string;
+  category?: "transcript" | "events" | "content";
+  data: {
+    user?: { id: number; full_name: string; email?: string };
+    participants?: CallParticipant[];
+    user_id?: number;
+    text?: string;
+    start?: string;
+    veiled?: boolean;
+    [key: string]: unknown;
+  };
+}
+
+export interface ExportReceipt {
+  file: string;
+  format: string;
+  calls: number;
+  records: number;
+  bytes: number;
+  replaced: boolean;
 }

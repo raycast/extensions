@@ -75,21 +75,22 @@ async function requestTokens(options: RequestTokenWithCode | RequestTokenWithRef
   if (!response.ok) {
     if (tokenResponse.error_description?.includes("AADSTS7000218")) {
       throw new Error(
-        "Microsoft app registration is configured as a confidential client. In Azure Portal, set Authentication -> Platform to 'Mobile and desktop applications' with redirect URI 'https://raycast.com/redirect?packageName=Extension' and enable 'Allow public client flows'."
+        "Microsoft app registration is configured as a confidential client. In Azure Portal, set Authentication -> Platform to 'Mobile and desktop applications' with redirect URI 'https://raycast.com/redirect?packageName=Extension' and enable 'Allow public client flows'.",
       );
     }
     throw new Error(
-      tokenResponse.error_description ?? tokenResponse.error ?? `Token request failed with status ${response.status}`
+      tokenResponse.error_description ?? tokenResponse.error ?? `Token request failed with status ${response.status}`,
     );
   }
 
   if (!tokenResponse.access_token) {
-    throw new Error("Token request succeeded but access_token is missing");
+    throw new Error("Microsoft returned an invalid token response without an access token. Please sign in again.");
   }
 
   const tokenSet: OAuth.TokenResponse = {
     access_token: tokenResponse.access_token,
-    refresh_token: tokenResponse.refresh_token,
+    refresh_token:
+      tokenResponse.refresh_token ?? (options.grantType === "refresh_token" ? options.refreshToken : undefined),
     id_token: tokenResponse.id_token,
     scope: tokenResponse.scope,
     expires_in: tokenResponse.expires_in,

@@ -11,7 +11,8 @@
     "ridemountainpig",
     "litomore",
     "yusifaliyevpro",
-    "shivraj-roy"
+    "shivraj-roy",
+    "alexi.build"
   ],
   "platforms": [
     "macOS",
@@ -47,6 +48,13 @@
           "required": false
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "lock-keyboard",
+      "title": "Lock Keyboard",
+      "description": "Lock the keyboard for cleaning for a chosen duration."
     }
   ],
   "dependencies": {

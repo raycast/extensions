@@ -1,14 +1,17 @@
 import { useFetch } from "@raycast/utils";
-import { Carrier, getSupportedCarriersUrl } from "../api";
+import { getSupportedCarriersUrl, responseError } from "../api";
+import { parseCarriers, parseJson } from "../schemas";
 
 export function useCarriers() {
-  const { data, isLoading, error, revalidate } = useFetch<Carrier[]>(getSupportedCarriersUrl(), {
+  const { data, isLoading, error, revalidate } = useFetch(getSupportedCarriersUrl(), {
     parseResponse: async (response) => {
-      const json = (await response.json()) as Record<string, string>;
-      return Object.entries(json)
-        .map(([code, name]) => ({ code, name }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+      // Supplying `parseResponse` replaces the default, so this hook owns the status check.
+      if (!response.ok) {
+        throw await responseError(response, `Couldn't reach Parcel (${response.status})`);
+      }
+      return parseCarriers(parseJson(await response.text()));
     },
+    failureToastOptions: { title: "Couldn't load carrier names" },
   });
 
   return { carriers: data ?? [], isLoading, error, revalidate };

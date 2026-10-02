@@ -1,0 +1,169 @@
+instructions: |
+  Find public domain artworks by color using search-artworks. Accept opaque CSS colors, including hex codes, named colors, rgb(), and hsl().
+  For multiple brand colors, search each color separately and explain which color each result matches. These tools do not perform text searches by title or artist.
+  Search results already contain full palettes and source links. Do not call get-artwork-palette again for the same search results.
+  Only use image URLs returned by the tools; never invent placeholder or swatch image URLs.
+  Use get-artwork-palette with an exact artwork ID returned by search-artworks, or supplied by the user. Never invent an ID.
+  Show the artwork's title, artist when available, source museum, image URL, and source link. Palette shares are percentages of the image.
+  When closestMatchesOnly is true, explain that the results are the nearest available colors and no close matches were found.
+  When cachedCatalog is true, mention that the catalog could not be refreshed and saved data is being used.
+  These tools only read Museum's catalog. They cannot pick a screen color, copy or download images, or change wallpaper. Those actions are available in the extension's commands.
+evals:
+  [
+    {
+      "input": "@try-museum Find 3 artworks matching #1E3A5F.",
+      "mocks":
+        {
+          "search-artworks":
+            {
+              "color": "#1E3A5F",
+              "closestMatchesOnly": false,
+              "total": 28,
+              "cachedCatalog": false,
+              "artworks":
+                [
+                  {
+                    "id": "met:53461",
+                    "title": "Preparing Tea by a Mountain Gorge",
+                    "artist": "Aoki Mokubei",
+                    "date": "1825",
+                    "museum": "The Metropolitan Museum of Art",
+                    "sourceUrl": "https://www.metmuseum.org/art/collection/search/53461",
+                    "imageUrl": "https://media.trymuseum.com/artworks/met/53461-754b77eb09af.webp",
+                    "palette":
+                      [
+                        { "hex": "#1C3E55", "share": 52 },
+                        { "hex": "#15344B", "share": 21 },
+                        { "hex": "#CAB191", "share": 17 },
+                        { "hex": "#AC9578", "share": 5 },
+                        { "hex": "#83735F", "share": 3 },
+                        { "hex": "#58534A", "share": 2 },
+                      ],
+                    "colorDistance": 0.024556588932303714,
+                  },
+                  {
+                    "id": "nga:1469",
+                    "title": "Pendant with a Triton",
+                    "artist": "Alfred André",
+                    "date": "1885/1890",
+                    "museum": "National Gallery of Art",
+                    "sourceUrl": "https://www.nga.gov/collection/art-object-page.1469.html",
+                    "imageUrl": "https://media.trymuseum.com/artworks/nga/1469-f4eddc1936ae.webp",
+                    "palette":
+                      [
+                        { "hex": "#094762", "share": 81 },
+                        { "hex": "#6A5534", "share": 5 },
+                        { "hex": "#957A47", "share": 5 },
+                        { "hex": "#BDA167", "share": 3 },
+                        { "hex": "#452E19", "share": 3 },
+                        { "hex": "#E9D69B", "share": 3 },
+                      ],
+                    "colorDistance": 0.04090916513050957,
+                  },
+                  {
+                    "id": "cleveland:142792",
+                    "title": "Wrestlers in a Circus",
+                    "artist": "Ernst Ludwig Kirchner",
+                    "date": "1909",
+                    "museum": "Cleveland Museum of Art",
+                    "sourceUrl": "https://clevelandart.org/art/1966.49",
+                    "imageUrl": "https://media.trymuseum.com/artworks/cleveland/142792-81002a64b4a3.webp",
+                    "palette":
+                      [
+                        { "hex": "#A76749", "share": 30 },
+                        { "hex": "#AC813B", "share": 21 },
+                        { "hex": "#2C2A29", "share": 16 },
+                        { "hex": "#773A30", "share": 13 },
+                        { "hex": "#61673F", "share": 11 },
+                        { "hex": "#1F3660", "share": 9 },
+                      ],
+                    "colorDistance": 0.012967441446272085,
+                  },
+                ],
+            },
+        },
+      "expected": [{ "callsTool": { "name": "search-artworks", "arguments": { "color": "#1E3A5F", "limit": 3 } } }],
+    },
+    {
+      "input": "@try-museum Get the palette for artwork nga:998.",
+      "mocks":
+        {
+          "get-artwork-palette":
+            {
+              "id": "nga:998",
+              "title": "Statuette of a Woman",
+              "artist": "Auguste Rodin",
+              "date": "early 1880s",
+              "museum": "National Gallery of Art",
+              "sourceUrl": "https://www.nga.gov/collection/art-object-page.998.html",
+              "imageUrl": "https://media.trymuseum.com/artworks/nga/998-d07b9a4816e7.webp",
+              "palette":
+                [
+                  { "hex": "#BCBAB8", "share": 40 },
+                  { "hex": "#9D958F", "share": 25 },
+                  { "hex": "#ABA9A5", "share": 18 },
+                  { "hex": "#9A7B64", "share": 7 },
+                  { "hex": "#82644E", "share": 6 },
+                  { "hex": "#603D2E", "share": 4 },
+                ],
+              "cachedCatalog": false,
+            },
+        },
+      "expected": [{ "callsTool": { "name": "get-artwork-palette", "arguments": { "id": "nga:998" } } }],
+    },
+    {
+      "input": "@try-museum Find art matching lime.",
+      "mocks":
+        {
+          "search-artworks":
+            {
+              "color": "#00FF00",
+              "closestMatchesOnly": true,
+              "total": 4430,
+              "cachedCatalog": false,
+              "artworks":
+                [
+                  {
+                    "id": "nga:1715",
+                    "title": "Bottle Vase",
+                    "artist": "Chinese Qing Dynasty",
+                    "date": "late 17th/early 18th century",
+                    "museum": "National Gallery of Art",
+                    "sourceUrl": "https://www.nga.gov/collection/art-object-page.1715.html",
+                    "imageUrl": "https://media.trymuseum.com/artworks/nga/1715-5e4a6e01bf5f.webp",
+                    "palette":
+                      [
+                        { "hex": "#A9A29F", "share": 31 },
+                        { "hex": "#83C687", "share": 25 },
+                        { "hex": "#4E4B47", "share": 20 },
+                        { "hex": "#76736D", "share": 15 },
+                        { "hex": "#529459", "share": 7 },
+                        { "hex": "#1C231B", "share": 2 },
+                      ],
+                    "colorDistance": 0.2091283877338501,
+                  },
+                  {
+                    "id": "cleveland:172784",
+                    "title": "White Flower",
+                    "artist": "Georgia O'Keeffe",
+                    "date": "1929",
+                    "museum": "Cleveland Museum of Art",
+                    "sourceUrl": "https://clevelandart.org/art/1930.2162",
+                    "imageUrl": "https://media.trymuseum.com/artworks/cleveland/172784-be1a419251e1.webp",
+                    "palette":
+                      [
+                        { "hex": "#DFE0D2", "share": 53 },
+                        { "hex": "#C8D0C1", "share": 27 },
+                        { "hex": "#A4BCB2", "share": 8 },
+                        { "hex": "#D5DD91", "share": 7 },
+                        { "hex": "#589581", "share": 3 },
+                        { "hex": "#CDB744", "share": 2 },
+                      ],
+                    "colorDistance": 0.2147073720740934,
+                  },
+                ],
+            },
+        },
+      "expected": [{ "callsTool": "search-artworks" }, { "matches": "([Cc]losest|[Nn]earest|[Nn]o close)" }],
+    },
+  ]

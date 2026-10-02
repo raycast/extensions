@@ -1,10 +1,11 @@
 import { Color, List } from "@raycast/api";
-import { MutatePromise, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import type { JSX } from "react";
 import { useState } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
+import { uniqueById } from "../helpers";
 import { ISSUE_DEFAULT_SORT_QUERY, normalizeIssueSearchText, parseIssueNumberLookup } from "../helpers/issue";
 
 import IssueListItem from "./IssueListItem";
@@ -82,6 +83,7 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
     },
     [searchText, sortQuery, statusFilter],
   );
+  const issues = uniqueById(data ?? []);
 
   return (
     <List
@@ -93,12 +95,12 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
       pagination={pagination}
       searchBarAccessory={<IssueStatusDropdown value={statusFilter} onChange={setStatusFilter} />}
     >
-      <List.Section title="Issues" subtitle={`${data?.length ?? 0}`}>
-        {data?.map((d) => (
+      <List.Section title="Issues" subtitle={`${issues.length}`}>
+        {issues.map((d) => (
           <IssueListItem
             key={d.id}
             issue={d}
-            mutateList={mutateList as MutatePromise<IssueFieldsFragment[] | undefined>}
+            mutateList={mutateList}
             sortQuery={sortQuery}
             setSortQuery={setSortQuery}
           />

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Icon, showToast, Toast, closeMainWindow, showHUD } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast, PopToRootType, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { getInitialSpaceId, setStoredSpaceId } from "./helpers/spaces";
@@ -42,13 +42,10 @@ export default function Command() {
           return;
         }
         setValue("mdText", "");
-        showToast({
-          style: Toast.Style.Success,
-          title: "Saved",
+        await showHUD("Notes saved to daily note", {
+          clearRootSearch: true,
+          popToRootType: PopToRootType.Immediate,
         });
-
-        showHUD("Notes saved to daily note");
-        closeMainWindow();
       } catch (e) {
         if (e instanceof Error) {
           handleUnexpectedError(e);

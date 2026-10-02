@@ -1,0 +1,21 @@
+{
+  "lookupEvidenceId": "3A038A2D-D666-5811-A678-DD60A7972C71",
+  "readiness": {
+    "checkRevision": 40,
+    "checkedAt": "2026-09-11T23:59:50.000Z",
+    "evidenceId": "3A038A2D-D666-5811-A678-DD60A7972C71",
+    "expiresAt": "2026-09-12T00:14:50.000Z",
+    "inventoryRevision": 70,
+    "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+    "source": "homebrew",
+    "state": "ready",
+    "target": {
+      "appId": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+      "bundleId": "org.example.readiness.alpha",
+      "canonicalPath": "/Applications/FixtureAlpha.app",
+      "caskToken": "fixture-alpha",
+      "expectedTargetVersion": "2.0",
+      "installedVersion": "1.0"
+    }
+  }
+}

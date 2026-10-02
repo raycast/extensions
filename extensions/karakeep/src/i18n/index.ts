@@ -21,6 +21,13 @@ export const translations = {
       notRunning: "Karakeep isn't running",
       notRunningDescription: "Press ↵ to start it.",
       unreachable: "Can't reach Karakeep",
+      // A rejected API key. Distinct from every "can't reach" state above: the
+      // server answered, it just refused us.
+      unauthorized: "Invalid API key",
+      unauthorizedDescription:
+        "Karakeep rejected the API key. Press ↵ to fix it in Extension Settings, then run this command again.",
+      unauthorizedFormHint: "Karakeep rejected your API key. Fix it in Extension Settings, then reopen this command.",
+      unauthorizedToast: "Karakeep rejected the API key. Update it in Extension Settings.",
       // {{apiUrl}} is interpolated by translate(); a function value would only
       // receive searchText/count, not an arbitrary parameter.
       unreachableDescription: "Nothing is responding at {{apiUrl}}. Check that Karakeep is running.",
@@ -101,7 +108,7 @@ export const translations = {
       // Types and Fields
       type: "Type",
       typeText: "Plain Text",
-      typeLink: "URL Link",
+      typeLink: "URL",
       content: "Content",
       contentRequired: "Content is required",
       contentTooLong: "Content cannot exceed 2500 characters",
@@ -145,8 +152,8 @@ export const translations = {
       actions: {
         openInBrowser: "Open in Browser",
         previewInDashboard: "Preview in Dashboard",
-        openLink: "Open Link",
-        copyLink: "Copy Link",
+        openLink: "Open URL",
+        copyLink: "Copy URL",
         copyContent: "Copy Content",
         aiSummary: "AI Summary",
         addToList: "Add to List",
@@ -318,19 +325,8 @@ export const translations = {
       listName: "Name",
       listNamePlaceholder: "Enter list name",
       listIcon: "Icon",
-      listIconPlaceholder: "Any emoji, e.g. 🔖 (⌘I to browse)",
+      listIconPlaceholder: "Any emoji, e.g. 🔖",
       listIconInvalid: "Must be a single emoji",
-      iconPicker: {
-        title: "Choose Icon",
-        searchPlaceholder: "Search 1,900+ emoji...",
-        select: "Use This Icon",
-        suggested: "Suggested",
-        results: "Results",
-        empty: {
-          title: "No matching emoji",
-          description: "Try a different word, or type the emoji directly in the Icon field.",
-        },
-      },
       listDescription: "Description",
       listDescriptionPlaceholder: "Optional description",
       listParent: "Parent List",
@@ -355,7 +351,7 @@ export const translations = {
         isArchived: "is:archived — Archived",
         isRead: "is:read — Read",
         isUnread: "is:unread — Unread",
-        typeLink: "type:link — Links",
+        typeLink: "type:link — URLs",
         typeText: "type:text — Notes",
         typeImage: "type:image — Images",
         typeVideo: "type:video — Videos",
@@ -533,8 +529,8 @@ export const translations = {
         clearCache: "Clear Cache",
         delete: "Delete",
         viewImage: "View Image",
-        openLink: "Open Link",
-        copyLink: "Copy Link",
+        openLink: "Open URL",
+        copyLink: "Copy URL",
         addToBrowser: "Add Karakeep to Browser",
         browsers: {
           chrome: "Chrome",
@@ -592,7 +588,7 @@ export const translations = {
       lists: "Lists",
       highlights: "Highlights",
       byType: "By Type",
-      links: "Links",
+      links: "URLs",
       notes: "Notes",
       assets: "Assets",
       bookmarksSaved: "Bookmarks Saved",
@@ -689,6 +685,10 @@ export const translations = {
       notRunning: "Karakeep 未运行",
       notRunningDescription: "按 ↵ 启动。",
       unreachable: "无法连接到 Karakeep",
+      unauthorized: "API 密钥无效",
+      unauthorizedDescription: "Karakeep 拒绝了该 API 密钥。按 ↵ 在扩展设置中修复，然后重新运行此命令。",
+      unauthorizedFormHint: "Karakeep 拒绝了你的 API 密钥。请在扩展设置中修复，然后重新打开此命令。",
+      unauthorizedToast: "Karakeep 拒绝了该 API 密钥。请在扩展设置中更新。",
       unreachableDescription: "{{apiUrl}} 无响应。请检查 Karakeep 是否正在运行。",
 
       // 恢复操作
@@ -762,7 +762,7 @@ export const translations = {
       // 类型和字段
       type: "类型",
       typeText: "纯文本",
-      typeLink: "URL 链接",
+      typeLink: "URL",
       content: "内容",
       contentRequired: "请输入内容",
       contentTooLong: "内容不能超过2500字符",
@@ -806,8 +806,8 @@ export const translations = {
       actions: {
         openInBrowser: "在浏览器中打开",
         previewInDashboard: "在控制台中预览",
-        openLink: "打开链接",
-        copyLink: "复制链接",
+        openLink: "打开 URL",
+        copyLink: "复制 URL",
         copyContent: "复制内容",
         aiSummary: "AI 摘要",
         addToList: "添加到列表",
@@ -974,19 +974,8 @@ export const translations = {
       listName: "名称",
       listNamePlaceholder: "输入列表名称",
       listIcon: "图标",
-      listIconPlaceholder: "任意表情符号，例如 🔖（按 ⌘I 浏览）",
+      listIconPlaceholder: "任意表情符号，例如 🔖",
       listIconInvalid: "必须是单个表情符号",
-      iconPicker: {
-        title: "选择图标",
-        searchPlaceholder: "搜索 1900+ 表情符号...",
-        select: "使用此图标",
-        suggested: "推荐",
-        results: "搜索结果",
-        empty: {
-          title: "未找到匹配的表情符号",
-          description: "请尝试其他关键词，或直接在“图标”字段中输入表情符号。",
-        },
-      },
       listDescription: "描述",
       listDescriptionPlaceholder: "可选描述",
       listParent: "父列表",
@@ -1011,7 +1000,7 @@ export const translations = {
         isArchived: "is:archived — 已归档",
         isRead: "is:read — 已读",
         isUnread: "is:unread — 未读",
-        typeLink: "type:link — 链接",
+        typeLink: "type:link — URL",
         typeText: "type:text — 笔记",
         typeImage: "type:image — 图片",
         typeVideo: "type:video — 视频",
@@ -1189,8 +1178,8 @@ export const translations = {
         clearCache: "清除缓存",
         delete: "删除",
         viewImage: "查看图片",
-        openLink: "打开链接",
-        copyLink: "复制链接",
+        openLink: "打开 URL",
+        copyLink: "复制 URL",
         addToBrowser: "添加到浏览器",
         browsers: {
           chrome: "Chrome",
@@ -1248,7 +1237,7 @@ export const translations = {
       lists: "列表",
       highlights: "高亮",
       byType: "按类型",
-      links: "链接",
+      links: "URL",
       notes: "笔记",
       assets: "资源",
       bookmarksSaved: "已保存书签",
@@ -1313,9 +1302,9 @@ export const translations = {
     },
 
     quickBookmark: {
-      gettingBrowserUrl: "正在获取浏览器链接...",
+      gettingBrowserUrl: "正在获取浏览器 URL...",
       failedToGetBrowserUrl: {
-        title: "获取浏览器链接失败",
+        title: "获取浏览器 URL 失败",
         message: "请确认浏览器已打开且有活动标签页",
       },
       creatingBookmark: "正在创建书签...",

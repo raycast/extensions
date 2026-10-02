@@ -17,6 +17,7 @@ import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
 import type { Instance } from "../types";
 import { launchInstance, showInstance } from "../utils/instance";
+import { getInstanceAccessories, getInstanceKeywords, getInstanceSubtitle } from "../utils/instance-display";
 import {
   getMinecraftFolderPath,
   isPrismLauncherInstalled,
@@ -71,7 +72,7 @@ export default function ManageInstances() {
 
   return (
     <List
-      searchBarPlaceholder={"Search by instance name"}
+      searchBarPlaceholder={"Search by instance name, version or loader"}
       {...(isPrismInstalled ? { isLoading: instances === undefined } : { isLoading: isPrismInstalledLoading })}
     >
       <When condition={isPrismInstalled}>
@@ -79,7 +80,9 @@ export default function ManageInstances() {
           <List.Item
             key={`instance-${index}`}
             title={instance.name}
-            accessories={instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
+            subtitle={getInstanceSubtitle(instance)}
+            keywords={getInstanceKeywords(instance)}
+            accessories={getInstanceAccessories(instance)}
             icon={{
               source: instance.icon ?? "instance-icon.png",
             }}

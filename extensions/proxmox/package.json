@@ -34,14 +34,26 @@
         "pve",
         "storage"
       ]
+    },
+    {
+      "name": "manage-servers",
+      "title": "Manage Servers",
+      "subtitle": "Proxmox",
+      "description": "Add, edit or remove Proxmox servers",
+      "mode": "view",
+      "keywords": [
+        "pve",
+        "server",
+        "host"
+      ]
     }
   ],
   "preferences": [
     {
       "name": "serverUrl",
-      "description": "The URL of your Proxmox server",
+      "description": "The URL of your Proxmox server. Additional servers can be added with the Manage Servers command",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Server URL",
       "placeholder": "https://pve.local:8006"
     },
@@ -49,7 +61,7 @@
       "name": "tokenId",
       "description": "The token ID of your Proxmox server",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Token ID",
       "placeholder": "root@pam!raycast"
     },
@@ -57,14 +69,14 @@
       "name": "tokenSecret",
       "description": "The token secret of your Proxmox server",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Token Secret",
       "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.9",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

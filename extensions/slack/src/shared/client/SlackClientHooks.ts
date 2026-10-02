@@ -1,10 +1,17 @@
 import { handleError } from "../utils";
 import { SlackClient } from "./SlackClient";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
+import { useMemo, useRef } from "react";
+import { createDirectoryUserSearch, mergeDirectorySearchResults } from "./directory";
 
 export const useChannels = () =>
-  useCachedPromise(
-    () => Promise.all([SlackClient.getUsers(), SlackClient.getChannels(), SlackClient.getGroups()]),
+  usePromise(
+    async () => {
+      const users = await SlackClient.getUsers();
+      const channels = await SlackClient.getChannels();
+      const groups = await SlackClient.getGroups(users);
+      return [users, channels, groups] as const;
+    },
     [],
     {
       onError(error) {
@@ -12,6 +19,68 @@ export const useChannels = () =>
       },
     },
   );
+
+export const useDirectorySearch = (query: string) => {
+  const userSearchAbortable = useRef<AbortController>(null);
+  const channelSearchAbortable = useRef<AbortController>(null);
+  const conversationSearchAbortable = useRef<AbortController>(null);
+
+  const userSearch = useMemo(
+    () =>
+      createDirectoryUserSearch(() => SlackClient.searchDirectoryMembers(query, userSearchAbortable.current?.signal)),
+    [query],
+  );
+
+  const users = usePromise(
+    (...args: [string]) => {
+      // Keep the query in the hook arguments so each query starts a fresh execution.
+      void args;
+      return userSearch.getUsers();
+    },
+    [query],
+    {
+      abortable: userSearchAbortable,
+      onError(error) {
+        handleError(error, "Failed to search Slack users");
+      },
+    },
+  );
+  const channels = usePromise(
+    (searchText: string) =>
+      SlackClient.searchConversations(searchText, channelSearchAbortable.current?.signal, undefined, "channels"),
+    [query],
+    {
+      abortable: channelSearchAbortable,
+      onError(error) {
+        handleError(error, "Failed to search Slack channels");
+      },
+    },
+  );
+  const conversations = usePromise(
+    (searchText: string) =>
+      SlackClient.searchConversations(
+        searchText,
+        conversationSearchAbortable.current?.signal,
+        userSearch.getUserNames,
+        "groups",
+      ),
+    [query],
+    {
+      abortable: conversationSearchAbortable,
+      onError(error) {
+        handleError(error, "Failed to search Slack conversations");
+      },
+    },
+  );
+
+  return {
+    data: mergeDirectorySearchResults(
+      users.data,
+      channels.data || conversations.data ? [channels.data?.[0] ?? [], conversations.data?.[1] ?? []] : undefined,
+    ),
+    isLoading: users.isLoading || channels.isLoading || conversations.isLoading,
+  };
+};
 
 export const useMe = () => useCachedPromise(SlackClient.getMe);
 

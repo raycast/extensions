@@ -1,15 +1,14 @@
 import { List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import { getBoundedPreferenceNumber } from "./components/Menu";
+import { getSearchPageSize } from "./components/Menu";
 import RepositoryListItem from "./components/RepositoryListItem";
-import { ExtendedRepositoryFieldsFragment, OrderDirection, StarOrderField } from "./generated/graphql";
+import { OrderDirection, ExtendedRepositoryFieldsFragment, StarOrderField } from "./generated/graphql";
+import { compactFragmentNodes, uniqueById } from "./helpers";
 import { STARRED_REPO_DEFAULT_SORT_QUERY, STARRED_REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
 import { withGitHubClient } from "./helpers/withGithubClient";
-
-const STARRED_REPOSITORIES_BATCH_SIZE = 25;
 
 function MyStarredRepositories() {
   const { github } = getGitHubClient();
@@ -20,132 +19,56 @@ function MyStarredRepositories() {
   });
   const sortTypesData = STARRED_REPO_SORT_TYPES_TO_QUERIES;
 
-  const [allRepositories, setAllRepositories] = useState<ExtendedRepositoryFieldsFragment[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [isPendingMutation, setIsPendingMutation] = useState(false);
-
-  const { data, isLoading, mutate } = useCachedPromise(
-    async (sort: string, afterCursor: string | null) => {
-      const orderByField = sort.split(":")[0].toUpperCase() as StarOrderField;
-      const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
-      const requestedCount = getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 });
-      const repos: ExtendedRepositoryFieldsFragment[] = [];
-      let pageInfo: { hasNextPage: boolean; endCursor?: string | null } = {
-        hasNextPage: false,
-        endCursor: afterCursor,
-      };
-      let nextCursor = afterCursor;
-
-      while (repos.length < requestedCount) {
+  const {
+    data,
+    isLoading,
+    mutate: mutateList,
+    pagination,
+  } = useCachedPromise(
+    (sort: string) =>
+      async ({ cursor }) => {
+        const orderByField = sort.split(":")[0].toUpperCase() as StarOrderField;
+        const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
         const result = await github.myStarredRepositories({
-          numberOfItems: Math.min(STARRED_REPOSITORIES_BATCH_SIZE, requestedCount - repos.length),
-          after: nextCursor,
+          numberOfItems: getSearchPageSize(),
+          after: cursor,
           orderByField,
           orderByDirection,
         });
-
         const starredRepositories = result.viewer.starredRepositories;
-        repos.push(...(starredRepositories.nodes as ExtendedRepositoryFieldsFragment[]));
-        pageInfo = starredRepositories.pageInfo;
 
-        if (!pageInfo.hasNextPage || !pageInfo.endCursor) {
-          break;
-        }
-
-        nextCursor = pageInfo.endCursor;
-      }
-
-      return {
-        repositories: repos,
-        hasNextPage: pageInfo.hasNextPage,
-        endCursor: pageInfo.endCursor,
-      };
-    },
-    [sortQuery, cursor],
-    {
-      keepPreviousData: true,
-      onData: (result) => {
-        // Skip onData updates during mutations to avoid conflicts
-        if (isPendingMutation) {
-          return;
-        }
-
-        if (cursor === null) {
-          // Initial load or sort change
-          setAllRepositories(result.repositories);
-        } else {
-          // Pagination - append new data
-          setAllRepositories((prev) => [...prev, ...result.repositories]);
-        }
-        setHasMore(result.hasNextPage);
+        return {
+          data: compactFragmentNodes<ExtendedRepositoryFieldsFragment>(starredRepositories.nodes),
+          hasMore: starredRepositories.pageInfo.hasNextPage,
+          cursor: starredRepositories.pageInfo.endCursor ?? undefined,
+        };
       },
-    },
+    [sortQuery],
+    { keepPreviousData: true },
   );
 
-  // Reset pagination when sort changes
-  useEffect(() => {
-    setAllRepositories([]);
-    setCursor(null);
-    setHasMore(true);
-  }, [sortQuery]);
+  const repositories = useMemo(() => uniqueById(data ?? []), [data]);
+  const repositoryIds = useMemo(() => new Set(repositories.map((repository) => repository.id)), [repositories]);
 
   useEffect(
-    () => history.forEach((repository) => allRepositories?.find((r) => r.id === repository.id && visitRepository(r))),
-    [allRepositories],
+    () => history.forEach((repository) => repositories.find((r) => r.id === repository.id && visitRepository(r))),
+    [repositories],
   );
 
   const validHistory = useMemo(
-    () => history.filter((repository) => allRepositories?.find((r) => r.id === repository.id)),
-    [allRepositories, history],
+    () => history.filter((repository) => repositoryIds.has(repository.id)),
+    [history, repositoryIds],
   );
+
+  const historyIds = useMemo(() => new Set(validHistory.map((repository) => repository.id)), [validHistory]);
 
   const myStarredRepositories = useMemo(
-    () => allRepositories?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
-    [allRepositories, validHistory],
+    () => repositories.filter((repository) => !historyIds.has(repository.id)),
+    [historyIds, repositories],
   );
-
-  const handleLoadMore = () => {
-    if (hasMore && !isLoading && data?.endCursor) {
-      setCursor(data.endCursor);
-    }
-  };
-
-  const mutateList = useCallback(
-    async (
-      _asyncUpdate?: unknown,
-      options?: {
-        optimisticUpdate?: (data: ExtendedRepositoryFieldsFragment[]) => ExtendedRepositoryFieldsFragment[] | undefined;
-      },
-    ) => {
-      if (options?.optimisticUpdate) {
-        setAllRepositories((prev) => options.optimisticUpdate!(prev) ?? prev);
-      }
-
-      setIsPendingMutation(true);
-      try {
-        setCursor(null);
-        setAllRepositories([]);
-        setHasMore(true);
-        await mutate();
-      } finally {
-        setIsPendingMutation(false);
-      }
-    },
-    [mutate],
-  );
-  const isInitialLoading = isLoading && allRepositories.length === 0;
 
   return (
-    <List
-      isLoading={isInitialLoading}
-      throttle
-      pagination={{
-        onLoadMore: handleLoadMore,
-        hasMore: hasMore,
-        pageSize: 1,
-      }}
-    >
+    <List isLoading={isLoading} throttle pagination={pagination}>
       <List.Section
         title="Visited Starred Repositories"
         subtitle={validHistory ? String(validHistory.length) : undefined}

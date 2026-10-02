@@ -1,10 +1,12 @@
 import { existsSync, readdirSync, readFile } from "fs";
-import { stat } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
 
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+
+import { loadChromiumFavicons } from "../utils/chromiumFavicons";
+import { getChromiumFaviconSignature, getChromiumSourceSignature } from "../utils/chromiumSourceSignature";
 
 const read = promisify(readFile);
 
@@ -177,26 +179,6 @@ async function getChromiumProfiles(path: string): Promise<ChromiumProfilesResult
   return { profiles, defaultProfile };
 }
 
-async function getFileSignature(filePath: string) {
-  try {
-    const fileStat = await stat(filePath);
-    return `${filePath}:${fileStat.size}:${fileStat.mtimeMs}`;
-  } catch {
-    return `${filePath}:missing`;
-  }
-}
-
-async function getChromiumSourceSignature(path: string, profile: string) {
-  const signatures = [await getFileSignature(join(path, "Local State"))];
-
-  if (profile) {
-    signatures.push(await getFileSignature(join(path, profile, "Bookmarks")));
-    signatures.push(await getFileSignature(join(path, profile, "AccountBookmarks")));
-  }
-
-  return signatures.join("|");
-}
-
 type UseChromiumBookmarksParams = {
   path: string;
   browserIcon: string;
@@ -210,6 +192,7 @@ export default function useChromiumBookmarks(
 ) {
   const [storedCurrentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
   const lastKnownSourceSignatureRef = useRef<string | undefined>(undefined);
+  const lastKnownFaviconSignatureRef = useRef<string | undefined>(undefined);
   const isCheckingForChangesRef = useRef(false);
 
   const {
@@ -245,7 +228,7 @@ export default function useChromiumBookmarks(
   const {
     data,
     isLoading: isLoadingBookmarks,
-    mutate: mutateBookmarks,
+    mutate: mutateBookmarkData,
   } = useCachedPromise(
     async (profile, isEnabled, currentPath) => {
       if (!profile || !isEnabled || !hasChromiumBookmarksFile(currentPath, profile)) {
@@ -257,9 +240,46 @@ export default function useChromiumBookmarks(
     [currentProfile, enabled, path],
   );
 
+  const toolbarRoot = data?.roots.bookmark_bar;
+  const otherRoot = data?.roots.other;
+
+  const rawBookmarks = useMemo(() => {
+    const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
+    const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
+
+    return [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
+      return {
+        ...bookmark,
+        id: `${bookmark.id}-${browserBundleId}`,
+        browser: browserBundleId,
+      };
+    });
+  }, [toolbarRoot, otherRoot, browserBundleId]);
+
+  const { data: favicons = {}, mutate: mutateFavicons } = useCachedPromise(
+    async (profile, isEnabled, currentPath, currentBrowserBundleId, currentBookmarks) => {
+      if (!profile || !isEnabled) {
+        return {};
+      }
+
+      try {
+        return await loadChromiumFavicons(currentPath, profile, currentBrowserBundleId, currentBookmarks);
+      } catch (error) {
+        console.error(`Could not load local favicons for ${currentBrowserBundleId}`, error);
+        return {};
+      }
+    },
+    [currentProfile, enabled, path, browserBundleId, rawBookmarks],
+  );
+
+  const bookmarks = useMemo(
+    () => rawBookmarks.map((bookmark) => ({ ...bookmark, favicon: favicons[bookmark.url] })),
+    [favicons, rawBookmarks],
+  );
+
   const mutate = useCallback(async () => {
-    await Promise.all([mutateProfiles(), mutateBookmarks()]);
-  }, [mutateBookmarks, mutateProfiles]);
+    await Promise.all([mutateProfiles(), mutateBookmarkData(), mutateFavicons()]);
+  }, [mutateBookmarkData, mutateFavicons, mutateProfiles]);
 
   const isLoading =
     isLoadingProfiles || isLoadingBookmarks || (enabled && currentProfile === "" && profiles.length > 0);
@@ -267,16 +287,21 @@ export default function useChromiumBookmarks(
   useEffect(() => {
     if (!enabled) {
       lastKnownSourceSignatureRef.current = undefined;
+      lastKnownFaviconSignatureRef.current = undefined;
       return;
     }
 
     let isActive = true;
 
     async function primeSignature() {
-      const sourceSignature = await getChromiumSourceSignature(path, currentProfile);
+      const [sourceSignature, faviconSignature] = await Promise.all([
+        getChromiumSourceSignature(path, currentProfile),
+        getChromiumFaviconSignature(path, currentProfile),
+      ]);
 
       if (isActive) {
         lastKnownSourceSignatureRef.current = sourceSignature;
+        lastKnownFaviconSignatureRef.current = faviconSignature;
       }
     }
 
@@ -302,17 +327,29 @@ export default function useChromiumBookmarks(
       isCheckingForChangesRef.current = true;
 
       try {
-        const nextSourceSignature = await getChromiumSourceSignature(path, currentProfile);
+        const [nextSourceSignature, nextFaviconSignature] = await Promise.all([
+          getChromiumSourceSignature(path, currentProfile),
+          getChromiumFaviconSignature(path, currentProfile),
+        ]);
         const previousSourceSignature = lastKnownSourceSignatureRef.current;
+        const previousFaviconSignature = lastKnownFaviconSignatureRef.current;
 
-        if (!previousSourceSignature) {
+        if (!previousSourceSignature || !previousFaviconSignature) {
           lastKnownSourceSignatureRef.current = nextSourceSignature;
+          lastKnownFaviconSignatureRef.current = nextFaviconSignature;
           return;
         }
 
-        if (nextSourceSignature !== previousSourceSignature) {
-          lastKnownSourceSignatureRef.current = nextSourceSignature;
+        const sourceChanged = nextSourceSignature !== previousSourceSignature;
+        const faviconChanged = nextFaviconSignature !== previousFaviconSignature;
+
+        lastKnownSourceSignatureRef.current = nextSourceSignature;
+        lastKnownFaviconSignatureRef.current = nextFaviconSignature;
+
+        if (sourceChanged) {
           await mutate();
+        } else if (faviconChanged) {
+          await mutateFavicons();
         }
       } finally {
         isCheckingForChangesRef.current = false;
@@ -327,33 +364,21 @@ export default function useChromiumBookmarks(
       isActive = false;
       clearInterval(timer);
     };
-  }, [currentProfile, enabled, mutate, path]);
+  }, [currentProfile, enabled, isLoading, mutate, mutateFavicons, path]);
 
-  const toolbarRoot = data?.roots.bookmark_bar;
-  const otherRoot = data?.roots.other;
+  const folders = useMemo(() => {
+    const toolbarFolders = toolbarRoot ? getFolders(toolbarRoot) : [];
+    const otherFolders = otherRoot ? getFolders(otherRoot) : [];
 
-  const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
-  const toolbarFolders = toolbarRoot ? getFolders(toolbarRoot) : [];
-
-  const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
-  const otherFolders = otherRoot ? getFolders(otherRoot) : [];
-
-  const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
-    return {
-      ...bookmark,
-      id: `${bookmark.id}-${browserBundleId}`,
-      browser: browserBundleId,
-    };
-  });
-
-  const folders = [...toolbarFolders, ...otherFolders].map((folder) => {
-    return {
-      ...folder,
-      id: `${folder.id}-${browserBundleId}`,
-      icon: browserIcon,
-      browser: browserBundleId,
-    };
-  });
+    return [...toolbarFolders, ...otherFolders].map((folder) => {
+      return {
+        ...folder,
+        id: `${folder.id}-${browserBundleId}`,
+        icon: browserIcon,
+        browser: browserBundleId,
+      };
+    });
+  }, [toolbarRoot, otherRoot, browserBundleId, browserIcon]);
 
   return {
     bookmarks,

@@ -1,6 +1,6 @@
 import { launchCommand, LaunchType } from "@raycast/api";
 import { checkDNDExtensionInstall, setDND } from "./doNotDisturb";
-import { continueInterval, createInterval, pauseInterval, resetInterval } from "./intervals";
+import { continueInterval, createInterval, pauseInterval, resetInterval, skipInterval } from "./intervals";
 import { IntervalType } from "./types";
 
 export async function startTimer(type: IntervalType, duration?: number) {
@@ -27,6 +27,13 @@ export async function stopTimer() {
   setDND(false);
   await refreshMenuBar();
   return "Timer stopped";
+}
+
+export async function skipTimer() {
+  await checkDNDExtensionInstall();
+  const interval = skipInterval();
+  await refreshMenuBar();
+  return interval;
 }
 
 async function refreshMenuBar() {

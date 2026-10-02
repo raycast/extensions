@@ -1,14 +1,20 @@
 import { ActionPanel, List, Icon, Action, showToast, Toast } from "@raycast/api";
-import { Server, ServiceAction } from "../../api/Server";
+import { SERVICE_ACTIONS, Server, Service, ServiceAction } from "../../api/Server";
 import { IServer } from "../../types";
 import { unwrapToken } from "../../lib/auth";
 import { SitesList } from "../sites/SitesList";
 import { ServerEvents } from "./ServerEvents";
 
-const serviceActions: { action: ServiceAction; verb: string; running: string }[] = [
-  { action: "reboot", verb: "Reboot", running: "Rebooting" },
-  { action: "start", verb: "Start", running: "Starting" },
-  { action: "stop", verb: "Stop", running: "Stopping" },
+const verbs: Record<ServiceAction, { verb: string; running: string }> = {
+  reboot: { verb: "Reboot", running: "Rebooting" },
+  reload: { verb: "Reload", running: "Reloading" },
+  stop: { verb: "Stop", running: "Stopping" },
+};
+
+const services: { key: Service; label: string }[] = [
+  { key: "database", label: "Database" },
+  { key: "nginx", label: "Nginx" },
+  { key: "php", label: "PHP" },
 ];
 
 export const ServerSingle = ({ server }: { server: IServer }) => {
@@ -109,23 +115,23 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
             </ActionPanel>
           }
         />
-        {Object.entries({ mysql: "MySQL", nginx: "Nginx", postgres: "Postgres", php: "PHP" }).map(([key, label]) => {
+        {services.map(({ key, label }) => {
           return (
             <List.Item
               id={key}
               key={key}
               title={label}
               icon={Icon.ArrowClockwise}
-              accessories={[{ text: "reboot, start or stop" }]}
+              accessories={[{ text: SERVICE_ACTIONS[key].join(" or ") }]}
               actions={
                 <ActionPanel>
-                  {serviceActions.map(({ action, verb, running }) => (
+                  {SERVICE_ACTIONS[key].map((action) => (
                     <Action
                       key={action}
                       icon={action === "stop" ? Icon.Stop : Icon.ArrowClockwise}
-                      title={`${verb} ${label}`}
+                      title={`${verbs[action].verb} ${label}`}
                       onAction={async () => {
-                        showToast(Toast.Style.Animated, `${running} ${label}...`);
+                        showToast(Toast.Style.Animated, `${verbs[action].running} ${label}...`);
                         await Server.runAction({ server, token, action, service: key }).catch(() => {
                           showToast(Toast.Style.Failure, `Failed to ${action} ${label}`);
                         });

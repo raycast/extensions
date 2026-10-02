@@ -15,7 +15,8 @@
     "ivens_joris",
     "FollowTheProcess",
     "justyt65",
-    "npc203"
+    "npc203",
+    "lvigerust"
   ],
   "categories": [
     "Developer Tools"
@@ -31,14 +32,36 @@
       "title": "Open with Zed",
       "subtitle": "Zed",
       "description": "Opens the currently selected Finder item with Zed",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openInNewWindow",
+          "type": "checkbox",
+          "title": "Window",
+          "required": false,
+          "label": "Open in New Window",
+          "default": false,
+          "description": "Open selected items in a new Zed window"
+        }
+      ]
     },
     {
       "name": "search",
       "title": "Search Recent Projects",
       "subtitle": "Zed",
       "description": "Search and open recent projects with Zed",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openInNewWindow",
+          "type": "checkbox",
+          "title": "Window",
+          "required": false,
+          "label": "Open in New Window",
+          "default": false,
+          "description": "Open projects in a new Zed window"
+        }
+      ]
     },
     {
       "name": "open-new-window",

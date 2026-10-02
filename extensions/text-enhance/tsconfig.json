@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "module": "commonjs",
     "moduleResolution": "node",
     "jsx": "react-jsx",
@@ -12,12 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*",
-    "raycast-env.d.ts"
-  ]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

@@ -10,7 +10,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function normalizeVaultRole(value: unknown): VaultRole {
+function normalizeVaultRole(value: unknown): VaultRole | undefined {
   const raw = trimOrUndefined(value)?.toLowerCase();
   switch (raw) {
     case "owner":
@@ -19,7 +19,7 @@ function normalizeVaultRole(value: unknown): VaultRole {
     case "viewer":
       return raw;
     default:
-      return "viewer";
+      return undefined;
   }
 }
 
@@ -31,7 +31,12 @@ export function normalizeVault(raw: unknown): Vault {
   const shareId = trimOrUndefined(raw.share_id ?? raw.shareId ?? raw.shareID ?? raw.id);
   const name = trimOrUndefined(raw.name);
   const itemCountValue = raw.itemCount ?? raw.item_count ?? raw.items_count ?? raw.itemsCount;
-  const itemCount = typeof itemCountValue === "number" ? itemCountValue : Number(itemCountValue ?? 0);
+  const itemCount =
+    itemCountValue === undefined
+      ? undefined
+      : typeof itemCountValue === "number"
+        ? itemCountValue
+        : Number(itemCountValue);
   const role = normalizeVaultRole(raw.role);
 
   if (!shareId || !name) {
@@ -41,9 +46,21 @@ export function normalizeVault(raw: unknown): Vault {
   return {
     shareId,
     name,
-    itemCount: Number.isFinite(itemCount) ? itemCount : 0,
+    itemCount: itemCount !== undefined && Number.isFinite(itemCount) ? itemCount : undefined,
     role,
   };
+}
+
+/** pass-cli prints timestamps without a zone ("2025-06-01T12:34:56"), which are treated as UTC. Unix seconds are accepted too. */
+function normalizeTimestamp(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return new Date(value < 1e12 ? value * 1000 : value).toISOString();
+  }
+  const raw = trimOrUndefined(value);
+  if (!raw) return undefined;
+  const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw);
+  const time = Date.parse(hasZone ? raw : `${raw}Z`);
+  return Number.isNaN(time) ? undefined : new Date(time).toISOString();
 }
 
 function getItemTypeFromContent(contentData: unknown): {
@@ -101,6 +118,9 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
 
   const totpUri = loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
+  const hasPassword = loginData ? trimOrUndefined(loginData.password) !== undefined : undefined;
+  const modifiedAt = normalizeTimestamp(raw.modify_time ?? raw.modifyTime ?? raw.modified_at);
+  const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
 
   const vaultName = vaultNameOverride ?? trimOrUndefined(raw.vaultName ?? raw.vault_name) ?? "Unknown Vault";
 
@@ -118,6 +138,9 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
     username,
     email,
     hasTotp,
+    hasPassword,
+    modifiedAt,
+    hasNote,
   };
 }
 
@@ -187,6 +210,7 @@ export function normalizeItemDetail(
   const typeData = getTypeSpecificData(raw);
 
   const password = typeData ? trimOrUndefined(typeData.password) : undefined;
+  const totpUri = typeData ? trimOrUndefined(typeData.totp_uri ?? typeData.totpUri) : undefined;
 
   const urls = typeData ? normalizeUrls(typeData.urls) : undefined;
 
@@ -204,5 +228,6 @@ export function normalizeItemDetail(
     urls,
     note,
     customFields,
+    totpUri,
   };
 }

@@ -1,6 +1,8 @@
 import { List, Icon, confirmAlert, Alert, ActionPanel, Action, Color, Keyboard } from "@raycast/api";
 import { BetaGroup, betaTestersSchema, BetaTester, App, betaTesterUsageSchemas } from "../Model/schemas";
 import { useAppStoreConnectApi, fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
+import { betaTesterDisplayName } from "../Utils/testers";
+import { presentError } from "../Utils/utils";
 import { useEffect, useState } from "react";
 import ExternalBetaGroupTesters from "./ExternalBetaGroupTesters";
 import AddExternalBetaTester from "./AddExternalBetaTester";
@@ -81,21 +83,18 @@ export default function BetaGroupDetail({ app, group }: Props) {
     const usage = getBetaTesterUsage(betaTester);
     const accessories = [];
     if (usage) {
-      accessories.push({
-        text: usage.values.sessionCount.toString(),
-        icon: { source: Icon.Mobile, tintColor: Color.Green },
-        tooltip: "Sessions",
+      // Tint only when there is something to report. Colouring a zero made every row
+      // show a red crash marker, so the colour read as an alert rather than a count.
+      const countAccessory = (count: number, icon: Icon, activeColor: Color, tooltip: string) => ({
+        text: count.toString(),
+        icon: { source: icon, tintColor: count > 0 ? activeColor : Color.SecondaryText },
+        tooltip: `${tooltip}: ${count}`,
       });
-      accessories.push({
-        text: usage.values.crashCount.toString(),
-        icon: { source: Icon.Exclamationmark, tintColor: Color.Red },
-        tooltip: "Crashes",
-      });
-      accessories.push({
-        text: usage.values.feedbackCount.toString(),
-        icon: { source: Icon.Envelope, tintColor: Color.Yellow },
-        tooltip: "Feedback",
-      });
+      accessories.push(countAccessory(usage.values.sessionCount, Icon.Mobile, Color.Green, "Sessions"));
+      // Bug, not a bare exclamation mark: it reads as "crash" rather than "alert", and
+      // matches the enclosed shape of the icons either side of it.
+      accessories.push(countAccessory(usage.values.crashCount, Icon.Bug, Color.Red, "Crashes"));
+      accessories.push(countAccessory(usage.values.feedbackCount, Icon.Envelope, Color.Yellow, "Feedback"));
     }
     if (betaTester.attributes.state) {
       accessories.push({ text: textForState(betaTester), icon: iconForState(betaTester) });
@@ -163,15 +162,24 @@ export default function BetaGroupDetail({ app, group }: Props) {
                 primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
               })
             ) {
+              // Optimistic: the row goes first, and is restored if the request fails.
+              // Without the catch the rejection escapes this fire-and-forget handler
+              // and the row stays gone while the tester is still in the group.
+              const previousTesters = testers;
               setTesters(testers.filter((t) => t.id !== tester.id));
-              await fetchAppStoreConnect(`/betaTesters/${tester.id}/relationships/betaGroups`, "DELETE", {
-                data: [
-                  {
-                    type: "betaGroups",
-                    id: group.id,
-                  },
-                ],
-              });
+              try {
+                await fetchAppStoreConnect(`/betaTesters/${tester.id}/relationships/betaGroups`, "DELETE", {
+                  data: [
+                    {
+                      type: "betaGroups",
+                      id: group.id,
+                    },
+                  ],
+                });
+              } catch (error) {
+                setTesters(previousTesters);
+                presentError(error);
+              }
             }
           })();
         }}
@@ -218,22 +226,22 @@ export default function BetaGroupDetail({ app, group }: Props) {
     >
       {testers?.map((tester: BetaTester) => (
         <List.Item
-          title={
-            (tester.attributes.inviteType === "PUBLIC_LINK"
-              ? tester.attributes.firstName
-              : tester.attributes.firstName + " " + tester.attributes.lastName) ?? ""
-          }
-          subtitle={tester.attributes.inviteType === "PUBLIC_LINK" ? "Public link" : tester.attributes.email ?? ""}
           key={tester.id}
+          title={betaTesterDisplayName(tester)}
+          subtitle={tester.attributes.inviteType === "PUBLIC_LINK" ? "Public link" : tester.attributes.email ?? ""}
           icon={{ source: Icon.Person }}
           accessories={listAccessory(tester)}
           actions={
             <ActionPanel>
-              {copyAction(tester)}
-              {removeTesterAction(tester)}
-              {addNewTesterAction()}
-              {addMultipleTestersAction()}
-              {manageBuildsAction()}
+              <ActionPanel.Section title={betaTesterDisplayName(tester)}>
+                {copyAction(tester)}
+                {removeTesterAction(tester)}
+              </ActionPanel.Section>
+              <ActionPanel.Section title={group.attributes.name}>
+                {addNewTesterAction()}
+                {addMultipleTestersAction()}
+                {manageBuildsAction()}
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

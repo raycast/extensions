@@ -17,12 +17,15 @@ export function SecretStoreList() {
       setIsLoading(true);
       const allStores: SecretStore[] = [];
       let cursor: string | undefined;
+      let previousCursor: string | undefined;
 
       do {
+        previousCursor = cursor;
         const response = await getSecretStores(cursor);
         allStores.push(...response.data);
-        cursor = response.meta.cursor;
-      } while (cursor);
+        cursor = response.meta?.next_cursor;
+        // Stop when the cursor ends or stops advancing (guards a looping API)
+      } while (cursor && cursor !== previousCursor);
 
       setStores(allStores);
     } catch (error) {

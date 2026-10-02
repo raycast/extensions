@@ -1,5 +1,15 @@
 # Clean Keyboard Changelog
 
+## [Add Ask AI Raycast Command] - 2026-09-29
+
+- Added an Ask AI tool that locks the keyboard for a requested duration
+- Allowed custom durations through Ask AI
+- Added AI instructions and evals in `ai.yaml`
+
+## [Fix Forever Duration] - 2026-08-29
+
+- Fixed the Forever option unlocking the keyboard after 15 seconds and ensured manual unlock exits its native handler
+
 ## [Lock Fn Keys] - 2026-05-07
 
 - Added opt-in preference to also block the function row while cleaning (macOS Tahoe 26+ only)

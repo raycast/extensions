@@ -27,7 +27,7 @@ export default async function main() {
       do shell script "defaults write com.apple.ComfortSounds comfortSoundsEnabled -bool false"
       log "Background sounds turned off"
     end if
-    do shell script "killall -HUP heard"
+    do shell script "killall -HUP heard || true"
     getBackgroundSounds()
   end setBackgroundSounds
   

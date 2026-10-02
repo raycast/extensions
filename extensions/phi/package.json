@@ -96,6 +96,26 @@
       "title": "New Incognito Window",
       "description": "Open a new incognito window",
       "mode": "no-view"
+    },
+    {
+      "name": "new-kiosk-window",
+      "title": "New Kiosk Window",
+      "description": "Open a new Kiosk window, optionally with a URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-incognito-space",
+      "title": "New Incognito Space",
+      "description": "Create and activate a new Incognito Space",
+      "mode": "no-view"
     }
   ],
   "scripts": {

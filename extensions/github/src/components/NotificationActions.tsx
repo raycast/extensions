@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast, Keyboard } from "@raycast/api";
-import { MutatePromise, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
+import { RevalidateList } from "../helpers";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
 import { NotificationWithIcon } from "../notifications";
@@ -9,7 +10,7 @@ import { NotificationWithIcon } from "../notifications";
 type NotificationActionsProps = {
   notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<NotificationWithIcon[] | undefined> | MutatePromise<NotificationWithIcon[]>;
+  mutateList: RevalidateList;
 };
 
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {

@@ -243,7 +243,7 @@ query repositoryProjectsForPullRequests($owner: String!, $name: String!, $pullRe
 }
 
 fragment PullRequestCommitFields on PullRequest {
-  commits(last: 100) {
+  commits(last: $numberOfItems, before: $before) {
     totalCount
     nodes {
       commit {
@@ -263,10 +263,14 @@ fragment PullRequestCommitFields on PullRequest {
         treeUrl
       }
     }
+    pageInfo {
+      hasPreviousPage
+      startCursor
+    }
   }
 }
 
-query pullRequestCommits($nodeId: ID!) {
+query pullRequestCommits($nodeId: ID!, $numberOfItems: Int!, $before: String) {
   node(id: $nodeId) {
     ...PullRequestCommitFields
   }

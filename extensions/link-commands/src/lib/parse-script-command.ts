@@ -1,4 +1,5 @@
 import { basename, dirname } from "node:path";
+import { environment } from "@raycast/api";
 import type { ScriptArgument, ScriptCommand } from "./types";
 
 /**
@@ -9,7 +10,7 @@ import type { ScriptArgument, ScriptCommand } from "./types";
  */
 const METADATA_PATTERN = /@raycast\.([A-Za-z][A-Za-z0-9]*)\s*(.*)$/;
 
-const HEADER_SCAN_LINES = 100;
+export const HEADER_SCAN_LINES = 100;
 
 const ARGUMENT_KEYS = ["argument1", "argument2", "argument3"] as const;
 
@@ -41,6 +42,27 @@ const readMetadata = (body: string) => {
 
 const stripExtension = (filename: string) => filename.replace(/\.[^.]+$/, "");
 
+/**
+ * Slug algorithm transcribed from the shipped Raycast 2 backend bundle.
+ * The extension slug and the command slug both go through it (`"Script Commands"` → `script-commands`).
+ *
+ * NFD → strip combining marks → lowercase → trim
+ *   → remove [^a-z0-9 -] → collapse whitespace to "-" → collapse repeated "-"
+ *
+ * Note it **deletes** disallowed characters rather than treating them as separators,
+ * so `github.com` becomes `githubcom`, not `github-com`.
+ */
+export const slugify = (input: string): string => {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9 -]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+};
+
 export type ParseInput = {
   path: string;
   body: string;
@@ -52,6 +74,11 @@ export type ParseInput = {
  * Verified against working links in the wild: a script named `flux-quit.sh` titled "Quit Flux" is
  * reached at `raycast://script-commands/flux-quit`, never `quit-flux`. Deriving it from the title
  * produces links that silently fail to resolve.
+ *
+ * @deprecated This was true for Raycast 1. Raycast 2 moved Script Commands to an internal extension
+ * addressed as `raycast://extensions/raycast/script-commands/<title-slug>`, where the slug is
+ * derived from the title via the algorithm in `slugify()`. This file now emits a version-aware
+ * deeplink that works on both versions.
  */
 export const parseScriptCommand = ({ path, body, isExecutable }: ParseInput): ScriptCommand | undefined => {
   const metadata = readMetadata(body);
@@ -59,21 +86,32 @@ export const parseScriptCommand = ({ path, body, isExecutable }: ParseInput): Sc
 
   const filename = basename(path);
   const deeplinkId = stripExtension(filename);
+  const title = metadata.title || deeplinkId;
+  const titleSlug = slugify(title);
 
   const argumentsList = ARGUMENT_KEYS.map((key) => parseArgument(metadata[key])).filter(
     (argument): argument is ScriptArgument => argument !== undefined,
   );
+
+  // Raycast 1: raycast://script-commands/<deeplinkId>
+  // Raycast 2: raycast://extensions/raycast/script-commands/<titleSlug>
+  // Detect version at parse time; emitting both URLs causes double-execution on versions where both resolve.
+  const isRaycast2 = environment.raycastVersion.startsWith("2.");
+  const deeplink = isRaycast2
+    ? `raycast://extensions/raycast/script-commands/${encodeURIComponent(titleSlug)}`
+    : `raycast://script-commands/${encodeURIComponent(deeplinkId)}`;
 
   return {
     path,
     directory: dirname(path),
     filename,
     deeplinkId,
-    deeplink: `raycast://script-commands/${encodeURIComponent(deeplinkId)}`,
+    titleSlug,
+    deeplink,
     body,
     isExecutable,
     schemaVersion: metadata.schemaVersion,
-    title: metadata.title || deeplinkId,
+    title,
     mode: metadata.mode,
     packageName: metadata.packageName,
     icon: metadata.icon,

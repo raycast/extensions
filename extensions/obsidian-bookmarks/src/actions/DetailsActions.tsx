@@ -1,4 +1,4 @@
-import { Action, Alert, Color, confirmAlert, FileIcon, Icon, showHUD } from "@raycast/api";
+import { Action, Alert, Color, confirmAlert, FileIcon, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { Dispatch, SetStateAction, useMemo } from "react";
 import { useFileIcon } from "../hooks/use-applications";
 import { usePreference } from "../hooks/use-preferences";
@@ -140,7 +140,17 @@ const createDestructiveActions = (file: File): ActionGroup<DetailActionPreferenc
             },
           });
           if (confirm) {
-            methods.deleteFile(file);
+            try {
+              await methods.deleteFile(file);
+              await showHUD("Bookmark deleted");
+              await popToRoot();
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to delete bookmark",
+                message: String(error),
+              });
+            }
           }
         },
       },

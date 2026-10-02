@@ -11,7 +11,7 @@ instructions: |
   - User wants to create or replace recurring schedules → use schedule-caffeination
   - User wants to see recurring schedules → use list-caffeination-schedules
   - User wants to pause, resume, or delete a recurring schedule → call list-caffeination-schedules first, then use manage-caffeination-schedule with the matching day
-  - User wants to stop caffeination → use decaffeinate. If a schedule is actively running, explain that it must be paused or deleted instead
+  - User wants to stop caffeination → use decaffeinate. Interrupting a running schedule pauses it until resumed; mention that when it happens
 
   When confirming actions, mention the specific duration, end time, application, or schedule as applicable.
 evals:

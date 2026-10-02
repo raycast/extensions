@@ -1,12 +1,12 @@
-import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
-import { getPortFromUrl, isApiReachable, isLocalHost } from "./connection";
+import { getPortFromUrl, isLocalHost, probeApi } from "./connection";
 import { findContainerByPort, findDockerPath, isDockerRunning, startContainer, waitForApi } from "./docker";
 import { getTranslator } from "../i18n/standalone";
 
 const log = logger.child("[SubmitGuard]");
 
-export type ReachabilityResult = "ok" | "unreachable";
+export type ReachabilityResult = "ok" | "unauthorized" | "unreachable";
 
 /**
  * Whether a stopped local container exists that starting could actually fix.
@@ -50,10 +50,55 @@ export async function ensureReachable(
 ): Promise<ReachabilityResult> {
   const t = getTranslator();
   const { apiUrl } = getPreferenceValues<Preferences>();
-  if (!apiUrl) return "ok";
+  // NOT "ok". Letting a blank URL through meant the pre-flight passed and the
+  // write then failed on its own — the one outcome this guard exists to
+  // prevent, and it reported the failure as a bad key rather than absent config.
+  if (!apiUrl) {
+    const toast = await presentToast(existingToast, {
+      style: Toast.Style.Failure,
+      title: t("connection.unauthorized"),
+      message: t("connection.unauthorizedToast"),
+    });
+    toast.primaryAction = { title: t("connection.openSettings"), onAction: openExtensionPreferences };
+    if (recoverableInput) await Clipboard.copy(recoverableInput);
+    return "unauthorized";
+  }
 
   // Fast path: don't add latency to the normal case where the server is up.
-  if (await isApiReachable(apiUrl)) return "ok";
+  const probe = await probeApi(apiUrl);
+  if (probe === "ok") return "ok";
+
+  // The server is up and answering — it just refused the key. Fail here rather
+  // than letting the write go ahead to fail on its own: nothing about a 401 gets
+  // better by attempting it, and stopping first is what keeps a multi-step save
+  // from committing half of itself. Docker recovery is skipped entirely; there
+  // is nothing to start.
+  if (probe === "unauthorized") {
+    log.info("API key rejected before submit", { apiUrl });
+    const detail = `${apiUrl} rejected the configured API key (HTTP 401).`;
+    const toast = await presentToast(existingToast, {
+      style: Toast.Style.Failure,
+      title: t("connection.unauthorized"),
+      // NOT unauthorizedDescription: that one says "Press ↵ to update it", which
+      // is only true where ↵ is the Settings action. Here it may be Copy Again.
+      message: t("connection.unauthorizedToast"),
+    });
+
+    // Deliberately not attachRecovery(): its ordering rule ("recovering what was
+    // typed beats diagnosing why") still holds, but the runner-up is Settings
+    // rather than Copy Error — there is nothing here to diagnose. With no input
+    // to rescue, Settings takes ↵ outright.
+    const openSettings = { title: t("connection.openSettings"), onAction: openExtensionPreferences };
+    if (recoverableInput) {
+      await Clipboard.copy(recoverableInput);
+      toast.primaryAction = { title: t("connection.copyAgain"), onAction: () => Clipboard.copy(recoverableInput) };
+      toast.secondaryAction = openSettings;
+    } else {
+      toast.primaryAction = openSettings;
+      toast.secondaryAction = { title: t("connection.copyError"), onAction: () => Clipboard.copy(detail) };
+    }
+    return "unauthorized";
+  }
 
   log.info("API unreachable before submit", { apiUrl });
 

@@ -1,5 +1,9 @@
 # QR Code Generator Changelog
 
+## [Fix cropped QR code previews] - 2026-10-02
+
+- Fixed QR codes being cut off when generated from the clipboard, selected text, or the form's Generate and Show action.
+
 ## [Add contributor] - 2026-06-16
 
 - Added stefan.imbesi to the contributors list

@@ -1,6 +1,15 @@
 import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { execFileSync } from "node:child_process";
-import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning, deviceName } from "./utils";
+import {
+  Schedule,
+  startCaffeinate,
+  getSchedule,
+  stopCaffeinate,
+  isCaffeinateRunning,
+  getCaffeinationReason,
+  formatDuration,
+  deviceName,
+} from "./utils";
 
 const AUTO_CAFFEINATE_PID_KEY = "autoCaffeinateRaycastPid";
 const SCHEDULE_MONITOR_LAST_RUN_KEY = "scheduleMonitorLastRun";
@@ -29,30 +38,52 @@ export async function isScheduleMonitorActivated(): Promise<boolean> {
 /**
  * Returns a session identifier for the currently-running Raycast instance.
  *
- * Primary: `lsappinfo` queries Raycast's start time via LaunchServices using
+ * macOS: uses `lsappinfo` to query Raycast's start time via LaunchServices using
  * the bundle ID — immune to process-table visibility restrictions that cause
  * `pgrep` to return nothing from within the extension context.
+ *
+ * Windows: queries the Raycast.exe PID via `tasklist` — stable across the session
+ * regardless of which process spawns the extension command.
  *
  * Fallback: `process.ppid` (the Raycast Helper PID) which is stable within a
  * session in production builds, though it may vary across commands in dev mode.
  */
 function getRaycastSessionId(): string {
-  try {
-    const out = execFileSync("/usr/bin/lsappinfo", ["info", "-app", "com.raycast.macos"], { encoding: "utf8" }).trim();
+  if (process.platform === "win32") {
+    try {
+      const out = execFileSync("tasklist", ["/FI", "IMAGENAME eq Raycast.exe", "/FO", "CSV", "/NH"], {
+        encoding: "utf8",
+      }).trim();
 
-    const pidMatch = out.match(/pid\s*=\s*(\d+)/);
-    if (pidMatch?.[1]) {
-      return `pid:${pidMatch[1]}`;
+      // CSV output: "Raycast.exe","12345","Console","1","12,452 K"
+      const pidMatch = out.match(/"Raycast\.exe","(\d+)"/);
+      if (pidMatch?.[1]) {
+        return `pid:${pidMatch[1]}`;
+      }
+    } catch {
+      // tasklist failed or Raycast not running — fall through.
     }
+  } else {
+    try {
+      const out = execFileSync("/usr/bin/lsappinfo", ["info", "-app", "com.raycast.macos"], {
+        encoding: "utf8",
+      }).trim();
 
-    const dateMatch = out.match(/\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}/);
-    if (dateMatch?.[0]) {
-      return `launch:${dateMatch[0]}`;
+      const pidMatch = out.match(/pid\s*=\s*(\d+)/);
+      if (pidMatch?.[1]) {
+        return `pid:${pidMatch[1]}`;
+      }
+
+      const dateMatch = out.match(/\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}/);
+      if (dateMatch?.[0]) {
+        return `launch:${dateMatch[0]}`;
+      }
+    } catch {
+      // lsappinfo unavailable or Raycast not registered yet — fall through.
     }
-  } catch {
-    // lsappinfo unavailable or Raycast not registered yet — fall through.
-    // On Windows this always throws, so the stable fallback below is used.
   }
+
+  // Fallback: parent PID (stable in production on both platforms; may vary in dev).
   return `ppid:${process.ppid}`;
 }
 
@@ -85,7 +116,12 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
     endTime.setHours(endHour, endMinute, 0, 0);
     const remainingSeconds = Math.ceil((endTime.getTime() - currentDate.getTime()) / 1000);
 
-    await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${remainingSeconds}`);
+    await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${remainingSeconds}`, {
+      kind: "schedule",
+      day: schedule.day,
+      from: schedule.from,
+      to: schedule.to,
+    });
     schedule.IsRunning = true;
     await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
     return true;
@@ -156,7 +192,28 @@ export default async function Command(props: {
   let subtitle = "✖ Decaffeinated";
 
   if (isCaffeinated || isScheduled || autoStarted) {
-    subtitle = "✔ Caffeinated";
+    subtitle = "✓ Caffeinated";
+
+    const reason = await getCaffeinationReason();
+    if (reason?.kind === "while") {
+      subtitle = `✓ Caffeinated (while ${reason.appName} is running)`;
+    } else if (reason?.kind === "for") {
+      const endsAt = new Date(reason.endsAt);
+      const remainingSeconds = Math.floor((endsAt.getTime() - Date.now()) / 1000);
+      if (!Number.isNaN(endsAt.getTime()) && remainingSeconds > 0) {
+        subtitle = `✓ Caffeinated (${formatDuration(remainingSeconds)} left)`;
+      }
+    } else if (reason?.kind === "until") {
+      const until = new Date(reason.until);
+      if (!Number.isNaN(until.getTime()) && until.getTime() > Date.now()) {
+        const time = until.toLocaleTimeString([], { timeStyle: "short" });
+        const sameDay = until.toDateString() === new Date().toDateString();
+        const label = sameDay ? time : `${until.toLocaleDateString([], { weekday: "short" })} ${time}`;
+        subtitle = `✓ Caffeinated (until ${label})`;
+      }
+    } else if (reason?.kind === "schedule") {
+      subtitle = `✓ Caffeinated (schedule: ${pluralDay(reason.day)} from ${reason.from} to ${reason.to})`;
+    }
   }
 
   await updateCommandMetadata({ subtitle });
@@ -164,4 +221,9 @@ export default async function Command(props: {
   if (props.launchContext?.returnToSchedule) {
     await launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated });
   }
+}
+
+function pluralDay(day: string): string {
+  const name = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+  return name.endsWith("s") ? name : `${name}s`;
 }

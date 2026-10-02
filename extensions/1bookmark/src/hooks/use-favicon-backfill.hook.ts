@@ -10,7 +10,7 @@ type Bookmark = RouterOutputs["bookmark"]["listAll"][number];
 const RETRY_AFTER_MS = ms("4h");
 const CONCURRENCY = 5;
 const BATCH_REPORT_SIZE = 20;
-// 시도 횟수가 이 이상이면 영구 실패로 보고 재시도하지 않음.
+// At or above this attempt count the bookmark is treated as a permanent failure and not retried.
 const MAX_ATTEMPT_COUNT = 20;
 
 function needsBackfill(b: Bookmark, now: number): boolean {
@@ -20,13 +20,15 @@ function needsBackfill(b: Bookmark, now: number): boolean {
   return now - new Date(b.faviconAttemptedAt).getTime() > RETRY_AFTER_MS;
 }
 
-// 북마크 목록을 보고 favicon이 비어있는 항목을 클라이언트에서 resolve해 서버에 보고한다.
-// 한 번 처리한 id는 프로세스 수명 동안 재시도하지 않는다 (세션 간 중복 요청 방지).
-// 서버 보고와 동시에 listAll 캐시를 낙관적으로 업데이트해 UI에 즉시 반영.
+// Scans the bookmark list, resolves favicons on the client for entries with an empty favicon, and
+// reports them to the server. An id that has been processed once is not retried for the lifetime of
+// the process (prevents duplicate requests across sessions). The listAll cache is optimistically
+// updated at the same time as the server report so the UI reflects the change immediately.
 //
-// 주의: useMutation 반환 객체는 상태(isPending 등)가 바뀌면 새 참조가 되므로
-// deps에 넣으면 effect cleanup이 돌면서 진행 중인 백필을 죽인다. 그래서
-// mutateAsync(안정 참조)만 뽑아 쓰고, 취소 신호는 unmount 전용 ref로 관리한다.
+// Caution: the object returned by useMutation gets a new reference whenever its state (isPending, etc.)
+// changes, so putting it in deps would trigger the effect cleanup and kill the in-progress backfill.
+// Therefore only mutateAsync (a stable reference) is extracted, and the cancellation signal is managed
+// with an unmount-only ref.
 export function useFaviconBackfill(bookmarks: Bookmark[] | undefined) {
   const inFlight = useRef<Set<string>>(new Set());
   const queryClient = useQueryClient();
@@ -57,7 +59,7 @@ export function useFaviconBackfill(bookmarks: Bookmark[] | undefined) {
         const batch = pending;
         pending = [];
 
-        // 서버로 보고하기 전에 로컬 listAll 캐시를 낙관적 업데이트.
+        // Optimistically update the local listAll cache before reporting to the server.
         const attemptedAt = new Date();
         const updates = new Map(batch.map((a) => [a.id, a.faviconUrl] as const));
         queryClient.setQueriesData<Bookmark[]>({ queryKey: getQueryKey(trpc.bookmark.listAll) }, (old) =>
@@ -75,8 +77,8 @@ export function useFaviconBackfill(bookmarks: Bookmark[] | undefined) {
         try {
           await reportAttempts({ attempts: batch });
         } catch {
-          // 서버 반영 실패 시 다음 listAll 새로고침 때 자동 교정됨.
-          // 전송 실패한 항목은 inFlight에서 빼서 이후 effect에서 재시도할 수 있게 한다.
+          // If the server update fails, it is corrected automatically on the next listAll refresh.
+          // Remove the entries that failed to send from inFlight so a later effect can retry them.
           batch.forEach((a) => inFlight.current.delete(a.id));
         }
       };

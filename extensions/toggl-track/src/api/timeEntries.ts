@@ -40,28 +40,49 @@ export async function getMyTimeEntries<Meta extends boolean = false>({
   return sorted;
 }
 
-export async function getRunningTimeEntry() {
-  // Toggl POST/PATCH endpoints return tags:null while GET returns tags:[].
-  // Normalize on read so stale cache entries with null tags don't crash downstream .map() calls.
-  const normalize = (e: TimeEntry): TimeEntry => ({ ...e, tags: e.tags ?? [] });
+// Toggl POST/PATCH endpoints return tags:null while GET returns tags:[].
+// Normalize on read so stale cache entries with null tags don't crash downstream .map() calls.
+const normalizeTimeEntry = (e: TimeEntry): TimeEntry => ({ ...e, tags: e.tags ?? [] });
 
-  const cached = cacheHelper.get<TimeEntry>("runningTimeEntry");
-  if (cached) return normalize(cached);
-
-  if (cacheOnly) {
-    const stale = cacheHelper.getRaw<TimeEntry>("runningTimeEntry");
-    if (stale) return normalize(stale);
-    return null;
-  }
-
+async function getRunningTimeEntryFromApi() {
   const result = await get<TimeEntry | null>("/me/time_entries/current");
+  // The API is authoritative in both directions: "nothing is running" has to evict
+  // the cached entry, or cache-backed views (the menu bar, Low Data Mode reads)
+  // keep showing a timer that has already been stopped elsewhere.
   if (result) {
-    cacheHelper.set("runningTimeEntry", normalize(result));
+    cacheHelper.set("runningTimeEntry", normalizeTimeEntry(result));
+  } else {
+    cacheHelper.remove("runningTimeEntry");
   }
   if (extensionUpdateScript) {
     runTrigger(extensionUpdateScript, result);
   }
-  return result ? normalize(result) : result;
+  return result ? normalizeTimeEntry(result) : result;
+}
+
+export async function getRunningTimeEntry() {
+  const cached = cacheHelper.get<TimeEntry>("runningTimeEntry");
+  if (cached) return normalizeTimeEntry(cached);
+
+  if (cacheOnly) {
+    const stale = cacheHelper.getRaw<TimeEntry>("runningTimeEntry");
+    if (stale) return normalizeTimeEntry(stale);
+    return null;
+  }
+
+  return getRunningTimeEntryFromApi();
+}
+
+/**
+ * Read the running entry straight from the API, bypassing the cache-only rules
+ * that Low Data Mode (and the menu bar) apply.
+ *
+ * For user-initiated one-shot actions that must not act on cached state at all —
+ * currently the Quickstop Timer command, where a stale entry would mean stopping
+ * the wrong timer.
+ */
+export async function refetchRunningTimeEntry() {
+  return getRunningTimeEntryFromApi();
 }
 
 type CreateTimeEntryParameters = {
@@ -71,6 +92,8 @@ type CreateTimeEntryParameters = {
   tags: string[];
   taskId?: number;
   billable?: boolean;
+  /** Minutes to back-date the start time by. Callers must pass a non-negative value. */
+  startTimeOffset?: number;
 };
 export async function createTimeEntry({
   projectId,
@@ -79,8 +102,19 @@ export async function createTimeEntry({
   tags,
   taskId,
   billable,
+  startTimeOffset,
 }: CreateTimeEntryParameters) {
   const now = new Date();
+  // Back-date before the duration is derived below — a running entry encodes its
+  // start as -1 * (Unix start time), so both fields must agree.
+  //
+  // Shift the absolute timestamp rather than calling setMinutes(): setMinutes() is
+  // local calendar arithmetic, so across a DST transition it lands somewhere other
+  // than the requested offset (back-dating 10 minutes over a spring-forward gap
+  // puts the start 50 minutes into the future, producing a negative duration).
+  if (startTimeOffset) {
+    now.setTime(now.getTime() - startTimeOffset * 60 * 1000);
+  }
   // Toggl v9 returns the TimeEntry directly (not wrapped in { data: TimeEntry })
   const response = await post<TimeEntry>(`/workspaces/${workspaceId}/time_entries`, {
     billable,

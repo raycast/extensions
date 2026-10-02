@@ -1,4 +1,4 @@
-import { Action, Alert, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, Alert, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useAtom } from "jotai";
 import { notesAtom } from "../services/atoms";
 import { getTintColor } from "../utils/utils";
@@ -34,7 +34,7 @@ const DeleteNoteAction = ({ createdAt }: { createdAt?: Date }) => {
         source: Icon.Trash,
         tintColor: getTintColor("red"),
       }}
-      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={deleteNote}
     />
   );

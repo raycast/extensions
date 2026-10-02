@@ -7,6 +7,7 @@ import {
   App,
   betaBuildLocalizationsSchema,
   BetaTester,
+  betaTesterSchema,
 } from "../Model/schemas";
 import { useAppStoreConnectApi, fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
@@ -136,17 +137,15 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
       return;
     }
 
-    const response = await fetchAppStoreConnect(`/builds/${build.build.id}/relationships/individualTesters`, "POST", {
+    await fetchAppStoreConnect(`/builds/${build.build.id}/relationships/individualTesters`, "POST", {
       data: usersToAdd,
     });
-    if (response && response.ok) {
-      if (!allUsers) return;
-      didUpdateExistingTesters(
-        allUsers?.filter((user) => {
-          return testersIDs.includes(user.id);
-        }),
-      );
-    }
+    if (!allUsers) return;
+    didUpdateExistingTesters(
+      allUsers?.filter((user) => {
+        return testersIDs.includes(user.id);
+      }),
+    );
   };
 
   const addNewUsers = async (externalTesters: string) => {
@@ -178,19 +177,10 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
         const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
           data: userToAdd,
         });
-        if (response && response.ok) {
-          const json = await response.json();
-          addedUsers.push({
-            type: "betaTesters",
-            id: json.data.id,
-            attributes: {
-              firstName: json.data.attributes.firstName,
-              lastName: json.data.attributes.lastName,
-              email: json.data.attributes.email,
-              inviteType: json.data.inviteType,
-              state: json.data.state,
-            },
-          } as BetaTester);
+        const json = await response.json();
+        const addedUser = betaTesterSchema.safeParse(json.data);
+        if (addedUser.success) {
+          addedUsers.push(addedUser.data);
         }
       }
     }
@@ -225,19 +215,10 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
         const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
           data: userToAdd,
         });
-        if (response && response.ok) {
-          const json = await response.json();
-          addedUsers.push({
-            type: "betaTesters",
-            id: json.data.id,
-            attributes: {
-              firstName: json.data.attributes.firstName,
-              lastName: json.data.attributes.lastName,
-              email: json.data.attributes.email,
-              inviteType: json.data.inviteType,
-              state: json.data.state,
-            },
-          } as BetaTester);
+        const json = await response.json();
+        const addedUser = betaTesterSchema.safeParse(json.data);
+        if (addedUser.success) {
+          addedUsers.push(addedUser.data);
         }
       }
     }
@@ -300,14 +281,13 @@ export default function AddIndividualTester({ build, app, didUpdateExistingTeste
           await submitForBetaReview();
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Submitted for beta review",
+            title: "Submitted for Beta Review",
+            message: "Apple will review this build before external testers can install it.",
           });
         } else {
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Updated",
+            title: "Testers Updated",
           });
         }
       } catch (error) {

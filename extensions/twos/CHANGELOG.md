@@ -1,5 +1,9 @@
 # Twos Changelog
 
+## [Create things from search] - 2026-10-01
+
+- Add a Create Thing action to search results and the empty state. Press Command+N to open Add Thing with your search text already filled in.
+
 ## [Photo results and opening in the desktop app] - 2026-08-16
 
 - **Search Things** now finds things by the text inside their photos. A

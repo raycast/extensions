@@ -23,7 +23,16 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
+import {
+  formatReminderTime,
+  getAttachedUrls,
+  getPriorityIcon,
+  isOverdue,
+  isToday,
+  isTomorrow,
+  truncate,
+} from "./helpers";
+import { openAttachedUrls } from "./helpers/open-attached-urls";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -182,7 +191,9 @@ export default function Command() {
   const displayReminderTitle = titleType === "firstReminder" && remindersCount > 0;
   if (displayReminderTitle) {
     const firstReminder = sections[0].items[0];
-    title = truncate(addPriorityToTitle(firstReminder.title, firstReminder.priority), 30);
+    const formattedTime = formatReminderTime(firstReminder);
+    const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+    title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
   return (
@@ -216,17 +227,20 @@ export default function Command() {
           {section.items.map((reminder) => {
             const attachedUrls = getAttachedUrls(reminder);
 
+            const formattedTime = formatReminderTime(reminder);
+            const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
                 title={truncate(
-                  addPriorityToTitle(
+                  `${timePrefix}${addPriorityToTitle(
                     displayListTitleForMenuBarReminders
                       ? addListTitle(reminder.title, reminder.list?.title)
                       : reminder.title,
                     reminder.priority,
-                  ),
+                  )}`,
                 )}
               >
                 <MenuBarExtra.Item
@@ -238,25 +252,7 @@ export default function Command() {
                   <MenuBarExtra.Item
                     title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
                     icon={Icon.Link}
-                    onAction={async () => {
-                      let failedCount = 0;
-                      for (const url of attachedUrls) {
-                        try {
-                          await open(url);
-                        } catch (error) {
-                          console.error("Failed to open URL", url, error);
-                          failedCount++;
-                        }
-                      }
-
-                      if (failedCount > 0) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
-                          message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
-                        });
-                      }
-                    }}
+                    onAction={() => openAttachedUrls(attachedUrls)}
                   />
                 ) : null}
 

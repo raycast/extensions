@@ -28,13 +28,14 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       {server.ip_address && <Action.CopyToClipboard title="Copy IP Address" content={server.ip_address} />}
       <Action.CopyToClipboard title="Copy Server ID" content={server.id} />
       <Action
-        title="Clear All Server Cache"
+        title="Clear Cached Forge Data"
+        style={Action.Style.Destructive}
+        icon={Icon.Trash}
         onAction={async () => {
           await clearCache();
           await LocalStorage.clear();
-          await showToast({ title: "All Forge Cache Cleared" });
+          await showToast({ title: "Cleared. Forge is read again on the next command." });
         }}
-        icon={Icon.Eraser}
       />
     </>
   );

@@ -77,7 +77,7 @@ export function ExtensionItemDetail({ item }: { item: StoreItem }) {
 
           <List.Item.Detail.Metadata.Link title="Author" text={item.authorName} target={item.authorUrl} />
           {item.type !== "removed" && (
-            <List.Item.Detail.Metadata.Link title="Store" text="Open in Raycast Store" target={storeDeeplink} />
+            <List.Item.Detail.Metadata.Link title="Store" text="View Extension in Store" target={storeDeeplink} />
           )}
         </List.Item.Detail.Metadata>
       }

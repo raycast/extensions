@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fetch",
+  "title": "Fetch",
+  "description": "Download one or many files with curl: batch downloads, URL range patterns, and download history.",
+  "icon": "fetch-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "download",
+      "title": "Download",
+      "description": "Download a single file from a URL.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "download-batch",
+      "title": "Download Batch",
+      "description": "Download multiple files from a list of URLs.",
+      "mode": "view"
+    },
+    {
+      "name": "download-history",
+      "title": "Download History",
+      "description": "View download history.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outputDirectory",
+      "title": "Output Directory",
+      "description": "Default directory to save downloaded files",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "overwriteExisting",
+      "title": "Overwrite Existing",
+      "description": "Overwrite files if they already exist",
+      "type": "checkbox",
+      "default": false,
+      "label": "Overwrite existing files",
+      "required": false
+    },
+    {
+      "name": "followRedirects",
+      "title": "Follow Redirects",
+      "description": "Automatically follow HTTP redirects",
+      "type": "checkbox",
+      "default": true,
+      "label": "Follow HTTP redirects",
+      "required": false
+    },
+    {
+      "name": "defaultTimeout",
+      "title": "Stall Timeout",
+      "description": "Seconds with no data received before a download is abandoned",
+      "type": "textfield",
+      "default": "300",
+      "required": false,
+      "placeholder": "300"
+    },
+    {
+      "name": "maxParallelDownloads",
+      "title": "Max Parallel Downloads",
+      "description": "Maximum concurrent downloads for batch operations (capped at 10)",
+      "type": "textfield",
+      "default": "3",
+      "required": false,
+      "placeholder": "3"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Enable before reproducing an issue, then share only the lines written afterward. Masks every URL query string and fragment, including values that automatic redaction cannot recognize by name. Does not change lines already in the console.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-downloader": "^0.1.5",
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "sync-runner": "node scripts/sync-runner.mjs",
+    "predev": "npm run sync-runner",
+    "prebuild": "npm run sync-runner"
+  }
+}

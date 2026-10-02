@@ -32,3 +32,35 @@ export function filterValidMatches(
     matches: validMatches,
   };
 }
+
+/**
+ * Drops every match that overlaps one kept before it.
+ *
+ * LanguageTool can flag the same words twice — a spelling rule and a grammar
+ * rule reaching for the same span. Applying both would splice the second
+ * replacement into the middle of the first and corrupt every offset after it,
+ * so only one of an overlapping pair can survive. The leftmost wins, and the
+ * longer one where two start together: that is the match whose replacement the
+ * reader sees marked in the text.
+ */
+export function withoutOverlappingMatches(
+  result: CheckTextResponse,
+): CheckTextResponse {
+  const matches = result.matches ?? [];
+  if (matches.length < 2) return result;
+
+  const ordered = [...matches].sort(
+    (a, b) => a.offset - b.offset || b.length - a.length,
+  );
+
+  const kept: Match[] = [];
+  let end = -1;
+
+  for (const match of ordered) {
+    if (match.offset < end) continue;
+    kept.push(match);
+    end = match.offset + match.length;
+  }
+
+  return kept.length === matches.length ? result : { ...result, matches: kept };
+}

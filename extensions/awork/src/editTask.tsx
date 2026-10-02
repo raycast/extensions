@@ -114,7 +114,7 @@ function EditTaskForm(props: { task: EditableTask; accessToken: string; onUpdate
           try {
             const workspaceUrl = await LocalStorage.getItem<string>("URL");
             if (!workspaceUrl) throw new Error("The awork workspace URL is unavailable");
-            await open(`${workspaceUrl.replace(/\/$/, "")}/tasks/${props.task.id}`);
+            await open(`${workspaceUrl.replace(/\/$/, "")}/tasks/${props.task.taskIdentifier ?? props.task.id}`);
           } catch (error) {
             await showFailureToast(error, { title: "Task updated, but couldn't open it" });
           }

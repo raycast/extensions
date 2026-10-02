@@ -1,13 +1,12 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
 import { myPreferences } from "@/consts";
-import { getLangCode } from "@/core/language/utils";
-import { getLingueeWebDictionaryURL } from "@/providers/dictionary/linguee/parse";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RuntimeServiceConfig } from "@/core/results/types";
+import { builtinTranslationProviders, getBuiltinProviderPreferenceStatus } from "@/providers/catalog";
+import { getLingueeWebDictionaryURL } from "@/providers/dictionary/linguee/url";
 import { getYoudaoWebDictionaryURL } from "@/providers/dictionary/youdao/utils";
 import { checkIsWord } from "@/providers/shared/utils";
-import { TranslationType } from "@/types/api";
-import type { BooleanPreferenceKey } from "@/types/preferences";
-import type { QueryInput } from "@/types/query";
 
 import { AppleTranslateProvider } from "./apple";
 import { BaiduTranslateProvider } from "./baidu";
@@ -17,93 +16,73 @@ import { CaiyunTranslateProvider } from "./caiyun";
 import { DeepLTranslateProvider } from "./deepL";
 import { DeepLXTranslateProvider } from "./deepLX";
 import { GoogleTranslateProvider } from "./google";
-import { GeminiTranslateProvider, OpenAITranslateProvider } from "./openai-compatible";
 import { TencentTranslateProvider } from "./tencent";
 import { VolcanoTranslateProvider } from "./volcano";
 import { YoudaoTranslateProvider } from "./youdao";
 
-export interface TranslationServiceConfig {
+export interface TranslationServiceConfig extends RuntimeServiceConfig {
   type: TranslationType;
-  preference: BooleanPreferenceKey;
-  provider: new () => BaseTranslateProvider;
-  getWebUrl?: (queryWordInfo: QueryInput) => string | undefined;
-  isEnabled?: (queryWordInfo: QueryInput) => boolean;
+  enabled: (queryWordInfo: QueryInput) => boolean;
+  createProvider: () => BaseTranslateProvider;
 }
 
-/** Static registry — provider classes, instantiated by the engine. */
-export const translationServices: TranslationServiceConfig[] = [
-  { type: TranslationType.Bing, preference: "enableBingTranslate", provider: BingTranslateProvider },
-  {
-    type: TranslationType.Baidu,
-    preference: "enableBaiduTranslate",
-    provider: BaiduTranslateProvider,
-    getWebUrl: (q) => {
-      const text = encodeURIComponent(q.word);
-      const from = getLangCode(q.fromLanguage, "baiduLangCode");
-      const to = getLangCode(q.toLanguage, "baiduLangCode");
-      return from && to ? `https://fanyi.baidu.com/#${from}/${to}/${text}` : undefined;
+function getBuiltinTranslationCacheIdentity(type: TranslationType): string {
+  switch (type) {
+    case TranslationType.Bing:
+      return JSON.stringify({ type, host: myPreferences.bingHost });
+    case TranslationType.DeepL:
+      return JSON.stringify({ type, endpoint: myPreferences.deepLEndpoint, credential: myPreferences.deepLAuthKey });
+    case TranslationType.Baidu:
+      return JSON.stringify({ type, appId: myPreferences.baiduAppId, credential: myPreferences.baiduAppSecret });
+    case TranslationType.Tencent:
+      return JSON.stringify({
+        type,
+        secretId: myPreferences.tencentSecretId,
+        credential: myPreferences.tencentSecretKey,
+      });
+    case TranslationType.Volcano:
+      return JSON.stringify({
+        type,
+        accessKeyId: myPreferences.volcanoAccessKeyId,
+        credential: myPreferences.volcanoAccessKeySecret,
+      });
+    case TranslationType.Caiyun:
+      return JSON.stringify({ type, credential: myPreferences.caiyunToken });
+    default:
+      return type;
+  }
+}
+
+const builtinProviderClasses = {
+  [TranslationType.Bing]: BingTranslateProvider,
+  [TranslationType.Baidu]: BaiduTranslateProvider,
+  [TranslationType.Tencent]: TencentTranslateProvider,
+  [TranslationType.Volcano]: VolcanoTranslateProvider,
+  [TranslationType.Caiyun]: CaiyunTranslateProvider,
+  [TranslationType.Google]: GoogleTranslateProvider,
+  [TranslationType.DeepL]: DeepLTranslateProvider,
+  [TranslationType.DeepLX]: DeepLXTranslateProvider,
+  [TranslationType.Apple]: AppleTranslateProvider,
+  [TranslationType.Youdao]: YoudaoTranslateProvider,
+} satisfies Record<(typeof builtinTranslationProviders)[number]["type"], new () => BaseTranslateProvider>;
+
+export const builtinTranslationServices: TranslationServiceConfig[] = builtinTranslationProviders.map((service) => {
+  const status = getBuiltinProviderPreferenceStatus(service, myPreferences);
+  return {
+    ...service,
+    cacheIdentity: getBuiltinTranslationCacheIdentity(service.type),
+    enabled: (query) => {
+      if (status.enabledInPreferences) return true;
+      if (service.type === TranslationType.DeepL) {
+        return Boolean(status.implicitlyEnabledBy) && getLingueeWebDictionaryURL(query) !== undefined;
+      }
+      if (service.type === TranslationType.Youdao) {
+        return (
+          Boolean(status.implicitlyEnabledBy) && getYoudaoWebDictionaryURL(query) !== undefined && checkIsWord(query)
+        );
+      }
+      return false;
     },
-  },
-  { type: TranslationType.Tencent, preference: "enableTencentTranslate", provider: TencentTranslateProvider },
-  { type: TranslationType.Volcano, preference: "enableVolcanoTranslate", provider: VolcanoTranslateProvider },
-  { type: TranslationType.Caiyun, preference: "enableCaiyunTranslate", provider: CaiyunTranslateProvider },
-  { type: TranslationType.Gemini, preference: "enableGeminiTranslate", provider: GeminiTranslateProvider },
-  {
-    type: TranslationType.Google,
-    preference: "enableGoogleTranslate",
-    provider: GoogleTranslateProvider,
-    getWebUrl: (q) => {
-      const text = encodeURIComponent(q.word);
-      const from = getLangCode(q.fromLanguage, "googleLangCode");
-      const to = getLangCode(q.toLanguage, "googleLangCode");
-      return from && to ? `https://translate.google.com/?sl=${from}&tl=${to}&text=${text}&op=translate` : undefined;
-    },
-  },
-  {
-    type: TranslationType.DeepL,
-    preference: "enableDeepLTranslate",
-    isEnabled: (q) => {
-      const explicitlyEnabled = myPreferences.enableDeepLTranslate;
-      const implicitlyEnabledByLinguee =
-        myPreferences.enableLingueeDictionary &&
-        !!myPreferences.deepLAuthKey &&
-        getLingueeWebDictionaryURL(q) !== undefined;
-      return explicitlyEnabled || implicitlyEnabledByLinguee;
-    },
-    provider: DeepLTranslateProvider,
-    getWebUrl: (q) => {
-      const text = encodeURIComponent(q.word);
-      const from = getLangCode(q.fromLanguage, "deepLSourceId")?.toLowerCase();
-      const to = getLangCode(q.toLanguage, "deepLSourceId")?.toLowerCase();
-      return from && to ? `https://www.deepl.com/translator#${from}/${to}/${text}` : undefined;
-    },
-  },
-  {
-    type: TranslationType.DeepLX,
-    preference: "enableDeepLXTranslate",
-    provider: DeepLXTranslateProvider,
-    getWebUrl: (q) => {
-      const text = encodeURIComponent(q.word);
-      const from = getLangCode(q.fromLanguage, "deepLSourceId")?.toLowerCase();
-      const to = getLangCode(q.toLanguage, "deepLSourceId")?.toLowerCase();
-      return from && to ? `https://www.deepl.com/translator#${from}/${to}/${text}` : undefined;
-    },
-  },
-  { type: TranslationType.Apple, preference: "enableAppleTranslate", provider: AppleTranslateProvider },
-  {
-    type: TranslationType.Youdao,
-    preference: "enableYoudaoTranslate",
-    isEnabled: (q) => {
-      const explicitlyEnabled = myPreferences.enableYoudaoTranslate;
-      const implicitlyEnabledByDictionary =
-        myPreferences.enableYoudaoDictionary && getYoudaoWebDictionaryURL(q) !== undefined && checkIsWord(q);
-      return explicitlyEnabled || implicitlyEnabledByDictionary;
-    },
-    provider: YoudaoTranslateProvider,
-  },
-  {
-    type: TranslationType.OpenAI,
-    preference: "enableOpenAITranslate",
-    provider: OpenAITranslateProvider,
-  },
-];
+    createProvider: () => new builtinProviderClasses[service.type](),
+  };
+});

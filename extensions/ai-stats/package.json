@@ -6,10 +6,11 @@
   "version": "1.0.0",
   "icon": "extension_icon.png",
   "author": "JonathanRReed",
+  "platforms": ["macOS", "Windows"],
   "license": "MIT",
   "categories": ["Developer Tools", "Data"],
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=22.22.2"
   },
   "commands": [
     {
@@ -54,26 +55,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1",
     "@supabase/supabase-js": "^2.57.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "18.3.5",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
-  "overrides": {
-    "@types/react": "18.3.5",
-    "@raycast/api": {
-      "@types/react": "18.3.5"
-    }
-  },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

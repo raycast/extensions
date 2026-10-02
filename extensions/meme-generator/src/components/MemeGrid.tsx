@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ApiModule, Meme } from "../api/types";
-import MemeForm from "./MemeForm";
+import MemeEditor from "./MemeEditor";
 import MemePreview from "./MemePreview";
 
 interface MemeGridProps {
@@ -75,7 +75,7 @@ export default function MemeGrid({ apiModule }: MemeGridProps) {
                 <Action.Push
                   icon={Icon.CheckCircle}
                   title="Select Template"
-                  target={<MemeForm {...meme} apiModule={apiModule} />}
+                  target={<MemeEditor {...meme} apiModule={apiModule} />}
                 />
                 <Action.Push icon={Icon.Eye} title="Preview Template" target={<MemePreview {...meme} />} />
               </ActionPanel>

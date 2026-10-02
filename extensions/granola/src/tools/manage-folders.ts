@@ -1,3 +1,4 @@
+import getAccessToken from "../utils/getAccessToken";
 import { Action, Tool } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import {
@@ -58,6 +59,7 @@ function requireString(value: string | undefined, name: string): string {
  * Mutating actions use Raycast tool confirmations.
  */
 export default async function tool(input: Input): Promise<Output> {
+  await getAccessToken();
   try {
     if (input.action === "get") {
       return await getDocumentList(requireString(input.folderId, "folderId"));

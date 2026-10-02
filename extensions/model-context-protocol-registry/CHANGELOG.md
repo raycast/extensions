@@ -1,5 +1,162 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Symbioza MCP Server] - 2026-10-02
+
+- Add Symbioza to the official registry: Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Estimates are free; running GPU jobs requires prepaid credit added on the Symbioza website.
+
+## [Add Devino MCP Servers] - 2026-10-01
+
+- Add 13 remote MCP servers from Devino Solutions to the official registry: BioFlow, DoDomain, GetItDone, Notifly, Postify, Sendly, Shorty, SnapVisor, SuperBooks, uNotes, upAPI, Uptimely, VoiceLabs. Each is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.
+
+## [Fix Linear Installation and Clarify Runtime Setup] - 2026-10-01
+
+- Connect Linear directly in Raycast without requiring Node.js or the npm proxy, and update its endpoint for other clients.
+- Show the proxy command and Node.js requirement for other clients alongside Linear's direct Raycast setup.
+- Show Node.js and uv setup requirements in server details and document how to resolve missing executable errors.
+
+## [Add Trvlrr MCP Server] - 2026-10-01
+
+- Add Trvlrr to the official registry: a travel journal and trip planner — trips taken and planned with their flights, stays, activities and expenses, lifetime travel stats and, with Trvlrr Plus, photo search; ask about a trip, add a booking or import a trip from anywhere. Hosted remote Streamable HTTP server at https://trvlrr.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key.
+
+## [Add 60fps MCP Server] - 2026-09-30
+
+- Add 60fps to the official registry: real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server at https://mcp.60fps.design/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key.
+
+## [Add Better Design MCP Server] - 2026-09-30
+
+- Add Better Design to the official registry: design systems, UI and UX principles, icons and UI review for AI coding agents. Find or create a design system that fits your product, install its components, and review finished screens for hard-to-read text, hard-to-find buttons and unclear copy. Hosted remote Streamable HTTP server at https://better-design.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Better Design account, no API key.
+
+## [Add GitDiagram MCP Server] - 2026-09-30
+
+- Add GitDiagram to the official registry: architecture diagrams of public GitHub repositories, with a written explanation of how a codebase is organized, its main components with their source paths, how they connect, and Mermaid source, plus a search of GitDiagram's existing diagrams and explainer-video transcripts. Read-only remote Streamable HTTP server at https://gitdiagram.com/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add Opus Growth MCP Server] - 2026-09-30
+
+- Add Opus Growth to the community registry: manage advertising from chat across Google, Meta, Microsoft, TikTok and LinkedIn (campaigns, ad groups, creatives, audiences, bidding, keywords and extensions), plus reporting and SEO with Search Console, GA4, GTM, Google Business Profile and YouTube. Hosted remote Streamable HTTP server at https://mcp.opus-growth.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
+## [Add Recordist] - 2026-09-30
+
+- Add Recordist community entry (`@recordist/gateway`): search and read the meetings recorded on your own computer.
+
+## [Add AudioPod AI MCP Server] - 2026-09-30
+
+- Add AudioPod AI to the official registry: text-to-speech in 200+ languages, voice cloning and conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server at https://mcp.audiopod.ai through `mcp-remote`, authenticated with an AudioPod API key.
+
+## [Add apMZoomAI Dongdaemun Wholesale MCP Server] - 2026-09-27
+
+- Add apMZoomAI · Dongdaemun Wholesale to the official registry: search wholesale fashion items listed by stalls in the Dongdaemun market in Seoul, see new arrivals, and find stalls by building, floor and stall number, with links to each item or stall on apMZoomAI, in eight languages. Read-only; no prices or merchant contact details. Hosted remote Streamable HTTP server at https://www.apmzoom.com/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add ZoneFoundry for Sonos MCP Server] - 2026-09-27
+
+- Add ZoneFoundry for Sonos to the official registry: control your Sonos speakers (play music, volume, grouping, moving playback between rooms, switching to TV, spoken announcements and reminders) through the official Sonos cloud, with no home bridge. Hosted remote Streamable HTTP server at https://relay.zonefoundry.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add Mnemoverse MCP Server] - 2026-09-26
+
+- Add Mnemoverse to the official registry: hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next; shared rooms for multi-agent work. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com.
+
+## [Add Award Travel Finder, Airport Lounge List, FlightQueue and FlightSeatMap MCP Servers] - 2026-09-26
+
+- Add Award Travel Finder to the official registry: search award flight availability across 28 airlines and award-chart pricing for 23 loyalty programs. Hosted remote Streamable HTTP server at https://mcp.awardtravelfinder.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+- Add Airport Lounge List to the official registry: search 8,500+ airport lounges and check access by card, membership or status. Hosted remote Streamable HTTP server at https://mcp.airportloungelist.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+- Add FlightQueue to the official registry: airport security wait times, FAA delays, EES border queues and baggage stats. Hosted remote Streamable HTTP server at https://mcp.flightqueue.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+- Add FlightSeatMap to the official registry: seat maps, seat ratings, traveller reviews and seat alerts for 117 airlines. Hosted remote Streamable HTTP server at https://mcp.flightseatmap.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add Quibbly MCP Server] - 2026-09-26
+
+- Add Quibbly to the official registry: search synced LinkedIn conversations and connections, see who watched your videos, manage follow-ups, notes and tags, and draft replies that you send yourself. Hosted remote Streamable HTTP server at https://server.quibbly.co/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
+## [Add QuoteBill MCP Server] - 2026-09-26
+
+- Add QuoteBill to the official registry: draft quotations and invoices from 133 templates, look up the published tax rate for 195 countries with the official source, total line items and get a link that opens the finished document on quotebill.com (Excel, Word or PDF). Read-only tools. Hosted remote Streamable HTTP server at https://quotebill.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free QuoteBill account, no API key.
+
+## [Add SpringBrand MCP Server] - 2026-09-25
+
+- Add SpringBrand to the official registry: social listening across X, TikTok, Instagram, YouTube, Reddit and Xiaohongshu; website traffic, traffic-source and SEO research; company, contact and creator discovery; and copy, image, video and voiceover generation, all behind one connector and billed per call. Hosted remote Streamable HTTP server at https://connector.springbrand.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
+
+## [Add Scout7 MCP Server] - 2026-09-25
+
+- Add Scout7 to the official registry: plans a week of organic marketing from your brand, writes SEO blogs, videos, LinkedIn carousels and social posts, schedules them across your channels and reports what moved, with your approval before anything goes live. Hosted remote Streamable HTTP server at https://mcp.scout7.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add Engine DJ, Serato DJ and Bandcamp MCP Servers] - 2026-09-24
+
+- Add Engine DJ, Serato DJ and Bandcamp to the community registry: ask an AI assistant about your Engine DJ (Denon) or Serato DJ library (harmonic BPM and Camelot key search, duplicate and missing-file audits, playlists and crates built on request) or dig Bandcamp without an account. Open-source local stdio servers started with `npx`; not affiliated with inMusic, Serato or Bandcamp.
+
+## [Add AI Applyd MCP Server] - 2026-09-24
+
+- Add AI Applyd to the official registry: search jobs matched to your resume, tailor the resume and cover letter to a posting, and submit the application on the employer's own hiring system across 15 ATS platforms; score a resume against a job and get interview prep. Hosted remote Streamable HTTP server at https://mcp.aiapplyd.com/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add Clera MCP Server] - 2026-09-24
+
+- Add Clera to the official registry: search 210,000+ vetted startup candidates who opted in to hearing about roles, review the people Clera already picked for your open roles and request intros; candidates search open startup jobs, read full listings and save the good ones. Hosted remote Streamable HTTP server at https://mcp.getclera.com through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key; free during the beta.
+
+## [Add RemoveDuplicates.org MCP Server] - 2026-09-24
+
+- Add RemoveDuplicates.org to the official registry: remove duplicate lines or CSV/TSV rows and get the cleaned text back with counts. Remote Streamable HTTP server at https://removeduplicates.org/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add Codex Reset MCP Server] - 2026-09-24
+
+- Add Codex Reset to the official registry: OpenAI Codex usage-limit reset forecast for the next 24 and 48 hours, the verified reset record with source links, and Codex service status. Read-only remote Streamable HTTP server at https://codex-reset.com/mcp through `mcp-remote`; no sign-in, no API key.
+
+## [Add QuillHub MCP Server] - 2026-09-23
+
+- Add QuillHub to the official registry: search meeting transcripts, read who said what, decisions and action items, quotes from one person across meetings, and new transcriptions from files or links. Remote Streamable HTTP server at https://mcp.quillhub.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add SocialFaktory MCP Server] - 2026-09-22
+
+- Add SocialFaktory to the official registry: write, generate, schedule and publish a brand's social content, in its own voice, on every channel. Remote Streamable HTTP server at https://www.socialfaktory.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add BlindPay MCP Server] - 2026-09-22
+
+- Add BlindPay to the official registry: stablecoin global payments (receivers, virtual accounts, FX quotes, payouts, payins, balances, history). Remote Streamable HTTP server at https://mcp.blindpay.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add GTD Brain MCP Server] - 2026-09-21
+
+- Add GTD Brain to the official registry: a Getting Things Done board (capture to Inbox, next actions by context, projects, waiting-for, weekly review) shared with the GTD Brain web, iOS and Android apps. Remote Streamable HTTP server at https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp through `mcp-remote`; OAuth 2.1 sign-in with an email code, no API key.
+
+## [Add Sitelemetry MCP Server] - 2026-09-19
+
+- Add Sitelemetry to the official registry: authorized website audits (security posture, technical SEO, AI visibility, analytics integrations, WCAG 2.2 accessibility and performance) with evidence-backed findings and fixes in nine languages. Remote Streamable HTTP server at https://sitelemetry.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add Quantral MCP Server] - 2026-09-19
+
+- Add Quantral to the official registry: per-company stock sentiment scores (0-100), top signals, monthly recaps and the mentions behind each score from the sources Quantral tracks. Hosted remote Streamable HTTP server at https://app.quantral.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in, Quantral subscription required.
+
+## [Add EmpirioLabs AI MCP Server] - 2026-09-14
+
+- Add EmpirioLabs AI to the community registry: 180+ AI models, media generation, web search and research, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server at https://mcp.empiriolabs.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in or an EmpirioLabs API key.
+
+## [Add Pixelesq MCP Server] - 2026-09-12
+
+- Add Pixelesq to the official registry: build and manage a Pixelesq website (pages, sections, content, SEO and analytics) with every edit saved as a draft until you publish. Remote Streamable HTTP server at https://mcp.pixelesq.app/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
+## [Add Vibe Prospecting MCP Server] - 2026-09-12
+
+- Add Vibe Prospecting to the community registry for B2B company and contact intelligence in prospecting workflows. Connects to the remote OAuth MCP server through `mcp-remote`.
+
+## [Add Metabrain, AgentMailKit and Site Spec MCP Servers] - 2026-09-11
+
+Add three community servers. Metabrain gives coding agents persistent memory in a local SQLite file (learn, recall, verdict, hypotheses, start_brief, stats, capture_error). AgentMailKit runs email sends as named jobs with a preview step and dry_run defaulting to true (list_jobs, run_job, preview_job, list_plugins). Site Spec audits and repairs a website across 40 SEO, accessibility, privacy, structured data and AI searchability checks (audit_site, fix_issue, compile_spec, list_checks). All three are local stdio servers that need no API key.
+
+## [Add Neither MCP Server] - 2026-09-11
+
+Add Neither to the community registry: project context your AI can query through MCP (selected notes/documents in Cursor or Claude Desktop, related context, source evidence). Local stdio via `npx -y @neitherai/mcp-server@latest`; requires `NEITHER_API_KEY`.
+
+## [Add Contracko MCP Server] - 2026-09-11
+
+Add Contracko to the community registry for contract review, document search, and renewal tracking. Connects to the remote OAuth MCP server through `mcp-remote`.
+
+## [Add Kyma API MCP Server] - 2026-09-10
+
+Add Kyma API to the community registry: hosted MCP server for one endpoint across open and frontier models, with measured per-model uptime, public usage rankings, and a spend-capped chat tool. OAuth 2.1 sign-in via the `@kyma-api/mcp-server` stdio bridge.
+
+## [Add Hermoso MCP Server] - 2026-09-08
+
+Add Hermoso to the official registry: an AI ad studio for marketers. Research winning ads across the Meta, Google and LinkedIn ad libraries and organic social, generate finished on-brand image and video ads, publish and schedule to your own channels, and build and manage paid campaigns across the major ad platforms. Remote Streamable HTTP server with OAuth sign-in through an `mcp-remote` bridge, no API key.
+
+## [Add Stellary MCP Server] - 2026-09-02
+
+Add Stellary to the community registry: AI-native project piloting and project management (open beta). Remote Streamable HTTP MCP server via mcp-remote; Bearer PAT required.
+
 ## [Refresh plori MCP Server] - 2026-08-24
 
 Refresh plori's description for its current persistent-environment positioning and support for runs, human input, scheduling, connections, and workflows.

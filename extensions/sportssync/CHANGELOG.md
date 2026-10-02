@@ -1,5 +1,9 @@
 # Sportssync Changelog
 
+## [Fixed Schedule Issues] - 2026-09-20
+
+- Removed date ranges from schedules due to deprecation of parameter by ESPN (each schedule will now just fetch the events for the current day)
+
 ## [Added Windows Support] - 2026-08-10
 
 - Added Windows Support

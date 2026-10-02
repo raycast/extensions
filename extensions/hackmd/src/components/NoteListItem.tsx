@@ -1,12 +1,25 @@
 import type { Note } from "@hackmd/api/dist/type";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { getPreferences } from "../lib/preference";
 import NoteDetail from "./NoteDetail";
 import NoteActions from "./NoteActions";
 import { usePinnedNotes } from "../hooks/usePinnedNotes";
 
-export default function NoteListItem({ note, mutate }: { note: Note; mutate?: () => void }) {
+export default function NoteListItem({
+  note,
+  mutate,
+  additionalActions,
+  showProfileAction,
+}: {
+  note: Note;
+  mutate?: () => void;
+  additionalActions?: ActionPanel.Props["children"];
+  showProfileAction?: boolean;
+}) {
   const { isPinned } = usePinnedNotes();
   const pinned = isPinned(note);
+  const { instance_url } = getPreferences();
+  const profilePath = note.teamPath || note.userPath;
 
   return (
     <List.Item
@@ -32,6 +45,15 @@ export default function NoteListItem({ note, mutate }: { note: Note; mutate?: ()
           />
 
           {note && <NoteActions note={note} mutate={mutate} onDeleteCallback={mutate} />}
+          {showProfileAction && profilePath && (
+            <ActionPanel.Section>
+              <Action.OpenInBrowser
+                title="Open Profile in Browser"
+                url={new URL(`@${encodeURIComponent(profilePath)}`, instance_url).toString()}
+              />
+            </ActionPanel.Section>
+          )}
+          {additionalActions}
         </ActionPanel>
       }
     />

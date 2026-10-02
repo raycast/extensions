@@ -8,8 +8,8 @@ import {
   getPreferenceValues,
   Icon,
   Image,
+  Keyboard,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -22,10 +22,10 @@ import {
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
   GoogleChromeBookmarkURL,
-  GoogleChromeInfoCache,
   GoogleChromeLocalState,
   getSelectedBrowser,
   Profile,
+  showDoneHUD,
 } from "./util/types";
 import {
   createBookmarkListItem,
@@ -38,6 +38,7 @@ import {
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
+import { extractProfiles, filterProfiles } from "./util/profiles";
 import { getFavicon } from "@raycast/utils";
 
 const ProfileItem = (props: {
@@ -47,6 +48,37 @@ const ProfileItem = (props: {
   onDelete: (profile: Profile) => Promise<void>;
 }) => {
   const { index, profile, browser } = props;
+  // Enter runs the first action, ⌘↵ the second.
+  const directSwitch = getPreferenceValues<ExtensionPreferences>().directSwitch === true;
+  const secondary: Keyboard.Shortcut = { modifiers: ["cmd"], key: "return" };
+
+  const showBookmarks = (
+    <Action.Push
+      key="bookmarks"
+      title="Show Bookmarks"
+      icon={Icon.Link}
+      shortcut={directSwitch ? secondary : undefined}
+      target={<ListBookmarks profile={profile} browser={browser} />}
+    />
+  );
+  const bringToFront = (
+    <Action
+      key="front"
+      title="Bring to Front"
+      icon={Icon.Window}
+      shortcut={directSwitch ? undefined : secondary}
+      onAction={async () => {
+        await openGoogleChrome(
+          profile,
+          ChromeAction.Focus,
+          async () => {
+            await showDoneHUD("Bringing to front...");
+          },
+          browser,
+        );
+      }}
+    />
+  );
 
   return (
     <List.Item
@@ -57,26 +89,7 @@ const ProfileItem = (props: {
       keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Show Bookmarks"
-            icon={Icon.Link}
-            target={<ListBookmarks profile={profile} browser={browser} />}
-          />
-          <Action
-            title="Bring to Front"
-            icon={Icon.Window}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={async () => {
-              await openGoogleChrome(
-                profile,
-                ChromeAction.Focus,
-                async () => {
-                  await showHUD("Bringing to front...");
-                },
-                browser,
-              );
-            }}
-          />
+          {directSwitch ? [bringToFront, showBookmarks] : [showBookmarks, bringToFront]}
           <Action
             title="New Window"
             icon={Icon.AppWindow}
@@ -86,7 +99,7 @@ const ProfileItem = (props: {
                 profile,
                 ChromeAction.NewWindow,
                 async () => {
-                  await showHUD("Opening new window...");
+                  await showDoneHUD("Opening new window...");
                 },
                 browser,
               );
@@ -107,6 +120,7 @@ const ProfileItem = (props: {
 
 export default function Command() {
   const browser = getSelectedBrowser();
+  const [searchText, setSearchText] = useState("");
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
@@ -132,7 +146,7 @@ export default function Command() {
   }
 
   const infoCache = localState?.profile.info_cache;
-  const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
+  const profiles = infoCache && extractProfiles(infoCache);
 
   const deleteProfile = async (profile: Profile) => {
     if (
@@ -158,19 +172,22 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
+    <List
+      isLoading={!profiles && !error}
+      searchBarPlaceholder="Search Profile"
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
       {profiles &&
-        profiles
-          .sort(sortAlphabetically)
-          .map((profile, index) => (
-            <ProfileItem
-              key={profile.directory}
-              index={index}
-              profile={profile}
-              browser={browser}
-              onDelete={deleteProfile}
-            />
-          ))}
+        filterProfiles(profiles, searchText).map((profile, index) => (
+          <ProfileItem
+            key={profile.directory}
+            index={index}
+            profile={profile}
+            browser={browser}
+            onDelete={deleteProfile}
+          />
+        ))}
     </List>
   );
 }
@@ -178,28 +195,6 @@ export default function Command() {
 //------------
 // Utils
 //------------
-
-const extractProfileFromInfoCache =
-  (infoCache: GoogleChromeInfoCache) =>
-  (infoCacheKey: string): Profile => {
-    const profile = infoCache[infoCacheKey];
-
-    return {
-      directory: infoCacheKey,
-      name: profile.name,
-      ...(profile.gaia_name &&
-        profile.user_name &&
-        profile.last_downloaded_gaia_picture_url_with_size && {
-          ga: {
-            name: profile.gaia_name,
-            email: profile.user_name,
-            pictureURL: profile.last_downloaded_gaia_picture_url_with_size,
-          },
-        }),
-    };
-  };
-
-const sortAlphabetically = (a: Profile, b: Profile) => a.name.localeCompare(b.name);
 
 const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): GoogleChromeBookmarkURL[] =>
   folder.children.flatMap((e) => {
@@ -318,6 +313,7 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
       isLoading={!bookmarkFile && !error}
       searchBarPlaceholder={`Search Bookmark in ${props.profile.name}`}
       onSearchTextChange={onSearchTextChange}
+      filtering={false}
     >
       {!searchText && (
         <List.Section>
@@ -402,7 +398,16 @@ function newTabUrlWithQuery(searchText: string) {
 
 function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
   const context = encodeURIComponent(
-    JSON.stringify({ directory: props.profile.directory, name: props.profile.name, ...props.target }),
+    JSON.stringify({
+      directory: props.profile.directory,
+      name: props.profile.name,
+      // Carried across the deeplink so a Quicklink for a signed-in profile
+      // can match Chrome's Profiles menu without a Local State fallback
+      // read — see `openGoogleChrome`. (JSON.stringify drops it when
+      // undefined, so a local profile's deeplink stays unchanged.)
+      givenName: props.profile.givenName,
+      ...props.target,
+    }),
   );
   const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/frouo/${
     environment.extensionName
@@ -438,12 +443,12 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
       <Action
         title={`Open in ${props.browser.appName}`}
         icon={Icon.Globe}
-        onAction={() => {
-          openGoogleChrome(
+        onAction={async () => {
+          await openGoogleChrome(
             props.profile,
             props.target,
             async () => {
-              await showHUD(hudMessage);
+              await showDoneHUD(hudMessage);
             },
             props.browser,
           );

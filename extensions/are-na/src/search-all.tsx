@@ -16,7 +16,10 @@ function ToggleViewAction({ mode, toggle }: { mode: "list" | "grid"; toggle: () 
     <Action
       icon={mode === "list" ? Icon.AppWindowGrid2x2 : Icon.List}
       title={mode === "list" ? "View as Grid" : "View as List"}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "v" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+      }}
       onAction={toggle}
     />
   );
@@ -214,7 +217,7 @@ function SearchAllCommand() {
                 {result!.blocks.map((block: Block) => (
                   <Grid.Item
                     key={`block-${block.id}`}
-                    content={getIconSource(block)}
+                    content={getIconSource(block, true)}
                     title={block.title || block.generated_title || `Block ${block.id}`}
                     subtitle={block.class}
                     actions={

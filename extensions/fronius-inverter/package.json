@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fronius-inverter",
   "title": "Fronius Inverter",
   "description": "A Raycast extension to monitor your Fronius Gen24 inverter with a realtime dashboard and background error monitoring.",
@@ -12,48 +13,105 @@
     {
       "name": "dashboard",
       "title": "Fronius Dashboard",
+      "subtitle": "Fronius Inverter",
       "description": "View realtime inverter and system overview data.",
       "mode": "view",
-      "command": "src/dashboard.tsx",
       "shortcut": "cmd+shift+d"
     },
     {
       "name": "watch",
       "title": "Inverter Watch",
-      "description": "Continuously monitor inverter errors and open the dashboard on click.",
-      "mode": "menu-bar",
-      "command": "src/watch.tsx"
+      "subtitle": "Fronius Inverter",
+      "description": "Monitor production, connectivity, and inverter errors from the menu bar.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "test-connection",
+      "title": "Test Fronius Connection",
+      "subtitle": "Fronius Inverter",
+      "description": "Check the configured inverter and its realtime power-flow endpoint.",
+      "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-status",
+      "title": "Get Fronius Status",
+      "description": "Read current inverter, energy, Smart Meter, battery, Ohmpilot, and power-flow data."
+    }
+  ],
+  "ai": {
+    "instructions": "Treat Fronius data as read-only. Call get-status before answering questions about current production, consumption, grid flow, battery, Smart Meter, Ohmpilot, inverter state, or errors. Use site.pvPowerWatts for current production. An inverter's connectedPvPowerWatts is configured connected PV capacity, not realtime output. State the timestamp and units when they matter. Treat null values and partialDataWarnings as unavailable data. Do not invent error-code meanings, forecasts, savings, trends, or optimization claims from a single snapshot. If the returned data does not support an answer, say what is missing and suggest the Fronius manual or a qualified installer. Never claim to change inverter settings.",
+    "evals": [
+      {
+        "input": "@fronius-inverter how much solar power am I producing right now?",
+        "mocks": {
+          "get-status": {
+            "timestamp": "2026-09-15T10:00:00Z",
+            "site": {
+              "pvPowerWatts": 4200
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-status"
+          }
+        ]
+      },
+      {
+        "input": "@fronius-inverter what is my battery charge and current home consumption?",
+        "mocks": {
+          "get-status": {
+            "timestamp": "2026-09-15T10:00:00Z",
+            "site": {
+              "batteryChargePercent": 72,
+              "loadPowerWatts": -950
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-status"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "baseUrl",
       "title": "Fronius API Base URL",
-      "description": "The base URL of your Fronius inverter (e.g., http://192.168.0.75)",
+      "description": "The base URL of your Fronius inverter (e.g., http://192.168.1.100)",
       "type": "textfield",
-      "default": "http://192.168.0.75",
+      "placeholder": "http://192.168.1.100",
       "required": true
     }
   ],
-  "main": "src/dashboard.tsx",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
+    "test": "vitest run",
+    "test:live": "vitest run --config vitest.live.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.17.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@raycast/api": "2.3.1",
+    "react": "19.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
-  }
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.20.2",
+    "@types/react": "19.3.0",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

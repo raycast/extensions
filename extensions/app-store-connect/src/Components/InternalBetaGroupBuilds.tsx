@@ -6,7 +6,9 @@ import {
   buildsWithBetaDetailSchema,
   preReleaseVersionSchemas,
 } from "../Model/schemas";
+import { platformWithVersion, VersionWithPlatform } from "../Utils/statusHelpers";
 import { useAppStoreConnectApi, fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
+import { presentError } from "../Utils/utils";
 import { useEffect, useState } from "react";
 import BuildDetail from "./BuildDetail";
 import IndividualTestersList from "./IndividualTestersList";
@@ -14,12 +16,6 @@ import ManageInternalBuilds from "./ManageInternalBuilds";
 interface Props {
   group: BetaGroup;
   app: App;
-}
-
-interface VersionWithPlatform {
-  id: string;
-  platform: string;
-  version: string;
 }
 
 export default function ExternalBetaGroupBuilds({ group, app }: Props) {
@@ -68,24 +64,6 @@ export default function ExternalBetaGroupBuilds({ group, app }: Props) {
       );
     }
   }, [selectedVersion]);
-
-  const platformWithVersion = (appStoreVersion: VersionWithPlatform | undefined) => {
-    if (!appStoreVersion) {
-      return "";
-    }
-    switch (appStoreVersion.platform) {
-      case "IOS":
-        return "iOS " + appStoreVersion.version;
-      case "MAC_OS":
-        return "macOS " + appStoreVersion.version;
-      case "TV_OS":
-        return "tvOS " + appStoreVersion.version;
-      case "VISION_OS":
-        return "visionOS " + appStoreVersion.version;
-      default:
-        return appStoreVersion.platform + " " + appStoreVersion.version;
-    }
-  };
 
   const getProcessingStatus = (item: BuildWithBetaDetailAndBetaGroups) => {
     const betaDetails = item.buildBetaDetails;
@@ -210,7 +188,7 @@ export default function ExternalBetaGroupBuilds({ group, app }: Props) {
           }}
         >
           {(versions ?? [])?.map((version: VersionWithPlatform) => (
-            <List.Dropdown.Item title={platformWithVersion(version)} value={version.id} />
+            <List.Dropdown.Item key={version.id} title={platformWithVersion(version)} value={version.id} />
           ))}
         </List.Dropdown>
       }
@@ -238,15 +216,23 @@ export default function ExternalBetaGroupBuilds({ group, app }: Props) {
                             primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
                           })
                         ) {
+                          // Optimistic: restore the build if the request fails, and catch
+                          // so the rejection cannot escape this fire-and-forget handler.
+                          const previousBuilds = currentBuilds;
                           setCurrentBuilds(currentBuilds.filter((b) => b.build.id !== bg.build.id));
-                          await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds `, "DELETE", {
-                            data: [
-                              {
-                                type: "builds",
-                                id: bg.build.id,
-                              },
-                            ],
-                          });
+                          try {
+                            await fetchAppStoreConnect(`/betaGroups/${group.id}/relationships/builds`, "DELETE", {
+                              data: [
+                                {
+                                  type: "builds",
+                                  id: bg.build.id,
+                                },
+                              ],
+                            });
+                          } catch (error) {
+                            setCurrentBuilds(previousBuilds);
+                            presentError(error);
+                          }
                         }
                       })();
                     }}

@@ -6,9 +6,9 @@ import { getVoices, killRunningSay, say } from "native-say";
 
 import { languageItemList } from "@/core/language/consts";
 import type { LanguageItem } from "@/core/language/types";
-import { showErrorToast } from "@/utils/errors";
-import { logError, logTrace, logWarn } from "@/utils/logger";
-import { trimTextLength } from "@/utils/text";
+import { getLangCode } from "@/core/language/utils";
+import { showErrorToast } from "@/shared/errors";
+import { logError, logTrace, logWarn } from "@/shared/logger";
 
 let cachedVoices: Voice[] | null = null;
 
@@ -40,7 +40,9 @@ async function getBestMatchVoice(languageItem: LanguageItem): Promise<string | u
   }
 
   // 2. If no preferred voice is found (or none installed), dynamically find by language code
-  const langCode = languageItem.appleLangCode?.replace("_", "-") || languageItem.googleLangCode;
+  const langCode =
+    getLangCode(languageItem.youdaoLangCode, "appleLangCode")?.replace("_", "-") ||
+    getLangCode(languageItem.youdaoLangCode, "googleLangCode");
   if (!langCode) return undefined;
 
   const targetCulture = langCode.toLowerCase();
@@ -61,15 +63,12 @@ async function getBestMatchVoice(languageItem: LanguageItem): Promise<string | u
 }
 
 /**
- * Play text using native-say. Optionally truncate to 40 chars.
+ * Play text using native-say, truncating to 40 chars.
  * Dispatches to platform-specific TTS engines.
  */
-export async function playTTS(
-  text: string,
-  youdaoLanguageId: string,
-  options?: { truncate?: boolean; signal?: AbortSignal },
-) {
-  const output = options?.truncate ? trimTextLength(text, 40) : text;
+export async function playTTS(text: string, youdaoLanguageId: string, options?: { signal?: AbortSignal }) {
+  const trimmedText = text.trim();
+  const output = trimmedText.length > 40 ? trimmedText.slice(0, 40) + "..." : trimmedText;
 
   if (process.platform !== "darwin" && process.platform !== "win32") {
     logWarn("AudioTTS", `unsupported platform for TTS: ${process.platform}`);

@@ -1,5 +1,6 @@
 import { Cache, Image, LaunchType, MenuBarExtra, launchCommand, updateCommandMetadata } from "@raycast/api";
 import { useAllSites } from "./hooks/useAllSites";
+import { warmOrgCache } from "./lib/warm";
 import { ISite } from "./types";
 import { runAppleScript } from "run-applescript";
 import { useEffect } from "react";
@@ -20,6 +21,9 @@ interface RecentEntry {
 }
 
 export default function Command() {
+  // Refires on every state change if it sits in the render body
+  useEffect(() => warmOrgCache(), []);
+
   const { sites: sitesTokenOne, loading: loadingOne } = useAllSites("laravel_forge_api_token");
   const { sites: sitesTokenTwo, loading: loadingTwo } = useAllSites("laravel_forge_api_token_two");
   const allSites = [...(sitesTokenOne ?? []), ...(sitesTokenTwo ?? [])];

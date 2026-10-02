@@ -2,7 +2,7 @@
 
 import { chineseLanguageItem } from "@/core/language/consts";
 import { getLanguageOfTwoExceptChinese } from "@/core/language/utils";
-import type { QueryInput } from "@/types/query";
+import type { QueryInput } from "@/core/results/types";
 
 /**
  * Get youdao web dictionary URL.
@@ -37,8 +37,8 @@ export function getYoudaoWebDictionaryLanguageId(queryTextInfo: QueryInput): str
   }
 
   const { fromLanguage, toLanguage } = queryTextInfo;
-  let from = chineseLanguageItem.youdaoLangCode;
-  let to = chineseLanguageItem.youdaoLangCode;
+  let from: string = chineseLanguageItem.youdaoLangCode;
+  let to: string = chineseLanguageItem.youdaoLangCode;
   if (fromLanguage === from) {
     to = toLanguage;
   } else {

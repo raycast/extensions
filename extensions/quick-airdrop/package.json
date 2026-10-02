@@ -5,6 +5,9 @@
   "description": "Trigger the macOS AirDrop sheet for files, URLs, and clipboard contents — straight from Raycast",
   "icon": "extension-icon.png",
   "author": "ridemountainpig",
+  "contributors": [
+    "mattiacolombomc"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -36,6 +39,24 @@
       "title": "AirDrop Selected Text",
       "description": "AirDrop the text currently selected in the frontmost app",
       "mode": "no-view"
+    },
+    {
+      "name": "copy-last-airdropped-file",
+      "title": "Copy Last AirDropped File",
+      "description": "Copy the most recently AirDropped file to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last-airdropped-file",
+      "title": "Paste Last AirDropped File",
+      "description": "Paste the most recently AirDropped file into the frontmost app",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-airdropped-files",
+      "title": "Search AirDropped Files",
+      "description": "Browse the files received via AirDrop and copy, paste, or open them",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -19,12 +19,19 @@
       "subtitle": "Claude Artifacts",
       "description": "Quickly find and open Claude Artifacts",
       "mode": "view"
+    },
+    {
+      "name": "doctor",
+      "title": "Run Doctor",
+      "subtitle": "Claude Artifacts",
+      "description": "Check that artifact tracking is working and recover publishes the hook missed",
+      "mode": "view"
     }
   ],
   "tools": [],
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.1.4",
-    "@raycast/api": "^2.0.6",
+    "@raycast/api": "^2.1.2",
     "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {

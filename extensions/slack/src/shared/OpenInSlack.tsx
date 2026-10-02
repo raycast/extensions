@@ -1,6 +1,7 @@
-import { Action, closeMainWindow, getApplications, getPreferenceValues } from "@raycast/api";
+import { Action, Icon, open, closeMainWindow, getApplications, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { directMessageAction } from "./directMessageAction";
 import { buildScriptEnsuringSlackIsRunning } from "./utils";
 
 // `application` hint breaks slack:// URI forwarding on Windows; mac-only.
@@ -72,12 +73,17 @@ export const OpenChatInSlack = ({
           }}
         />
       )}
-      {conversationId && conversationId.trim().length > 0 && (
-        <Action.OpenInBrowser
-          url={`https://app.slack.com/client/${workspaceId}/${conversationId}`}
-          onOpen={() => closeMainWindow()}
-        />
-      )}
+      <Action
+        title="Open in Browser"
+        icon={Icon.Globe}
+        onAction={() =>
+          directMessageAction(userId, conversationId, async (id) => {
+            await open(`https://app.slack.com/client/${workspaceId}/${id}`);
+            await onAction?.();
+            await closeMainWindow();
+          })
+        }
+      />
     </>
   );
 };

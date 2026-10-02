@@ -1,34 +1,25 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { getFavicon, useFrecencySorting, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { OpenBookmarkAction, OpenInDefaultBrowserAction, RefreshAction, UrlActions } from "./components/actions";
+import { RefreshAction } from "./components/actions";
+import { BookmarkListItem } from "./components/bookmark-list-item";
 import { ProfileDropdown } from "./components/profile-dropdown";
-import { getBookmarks } from "./lib/bookmarks";
+import { filterBookmarks, useProfileBookmarks } from "./lib/bookmarks";
 import { useAsideProfiles } from "./lib/profiles";
-import { filterSearchable } from "./lib/search";
 
 export default function SearchBookmarks() {
   const [searchText, setSearchText] = useState("");
   const { profile: configuredProfile } = getPreferenceValues<Preferences.SearchBookmarks>();
   const { profile, setProfile, profiles, isLoading: isLoadingProfiles } = useAsideProfiles(configuredProfile);
-  const { data, isLoading, error, revalidate } = usePromise(getBookmarks, [profile], {
-    onError(err) {
+  const { bookmarks, sortedBookmarks, visitBookmark, resetRanking, isLoading, error, revalidate } = useProfileBookmarks(
+    profile,
+    (err) => {
       showToast({ style: Toast.Style.Failure, title: "Could not read bookmarks", message: err.message });
     },
-  });
-
-  const {
-    data: sortedBookmarks,
-    visitItem,
-    resetRanking,
-  } = useFrecencySorting(data ?? [], {
-    namespace: "aside-bookmarks",
-    key: (bookmark) => bookmark.id,
-  });
+  );
   const bookmarksJson = useMemo(
     () =>
       JSON.stringify(
-        (data ?? []).map(({ title, url, folder }) => ({
+        (bookmarks ?? []).map(({ title, url, folder }) => ({
           title: title || url,
           url,
           folder: folder || null,
@@ -36,9 +27,9 @@ export default function SearchBookmarks() {
         null,
         2,
       ),
-    [data],
+    [bookmarks],
   );
-  const filteredBookmarks = filterSearchable(sortedBookmarks, searchText, (bookmark) => bookmark.folder);
+  const filteredBookmarks = filterBookmarks(sortedBookmarks, searchText);
 
   return (
     <List
@@ -68,34 +59,25 @@ export default function SearchBookmarks() {
         />
       ) : (
         filteredBookmarks.map((bookmark) => (
-          <List.Item
+          <BookmarkListItem
             key={bookmark.id}
-            icon={getFavicon(bookmark.url, { fallback: Icon.Bookmark })}
-            title={bookmark.title || bookmark.url}
-            subtitle={bookmark.url}
-            accessories={bookmark.folder ? [{ icon: Icon.Folder, text: bookmark.folder }] : undefined}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <OpenBookmarkAction bookmark={bookmark} onOpen={() => visitItem(bookmark)} />
-                  <OpenInDefaultBrowserAction url={bookmark.url} onOpen={() => visitItem(bookmark)} />
-                </ActionPanel.Section>
-                <UrlActions url={bookmark.url} title={bookmark.title || bookmark.url} />
-                <ActionPanel.Section title="Bookmark">
-                  <Action.CopyToClipboard
-                    title="Copy Bookmarks as JSON"
-                    icon={Icon.Clipboard}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                    content={bookmarksJson}
-                  />
-                  <Action
-                    title="Reset Ranking"
-                    icon={Icon.ArrowCounterClockwise}
-                    onAction={() => resetRanking(bookmark)}
-                  />
-                  <RefreshAction subject="Bookmarks" revalidate={revalidate} />
-                </ActionPanel.Section>
-              </ActionPanel>
+            bookmark={bookmark}
+            onOpen={() => visitBookmark(bookmark)}
+            additionalActions={
+              <ActionPanel.Section title="Bookmark">
+                <Action.CopyToClipboard
+                  title="Copy Bookmarks as JSON"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                  content={bookmarksJson}
+                />
+                <Action
+                  title="Reset Ranking"
+                  icon={Icon.ArrowCounterClockwise}
+                  onAction={() => resetRanking(bookmark)}
+                />
+                <RefreshAction subject="Bookmarks" revalidate={revalidate} />
+              </ActionPanel.Section>
             }
           />
         ))

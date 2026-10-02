@@ -47,7 +47,7 @@ const EncryptMessage = () => {
     try {
       const password = randomString(24);
 
-      const response = await fetch(`${preferences.apiUrl}/secret`, {
+      const response = await fetch(`${preferences.apiUrl}/create/secret`, {
         method: "post",
         body: JSON.stringify({
           expiration: parseInt(values.expiration),

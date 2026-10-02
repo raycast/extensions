@@ -1,10 +1,15 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { NetworkService, normalizeHardwarePort, openNetworkSettings, useNetworkServices } from "./network-services";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import {
+  NetworkService,
+  normalizeHardwarePort,
+  openNetworkSettings,
+  transitionLabel,
+  useNetworkServices,
+} from "./network-services";
 
 export default function Command() {
   const {
     isLoading,
-    error,
     favoriteServices,
     invalidServices,
     otherServices,
@@ -16,10 +21,6 @@ export default function Command() {
     hideInvalidDevices,
     getActionForService,
   } = useNetworkServices();
-
-  if (error) {
-    showToast(Toast.Style.Failure, "Something went wrong", error.message);
-  }
 
   return (
     <List isLoading={isLoading}>
@@ -51,13 +52,17 @@ export default function Command() {
 
   function NetworkServiceItem({ service }: { service: NetworkService }) {
     const actionDetails = getActionForService(service);
+    const transition = transitionLabel(service.status);
 
     return (
       <List.Item
         icon={actionDetails.icon}
         title={service.name}
         subtitle={normalizeHardwarePort(service.hardwarePort, service.name)}
-        accessories={service.favorite ? [{ icon: Icon.Star }] : []}
+        accessories={[
+          ...(transition ? [{ text: transition }] : []),
+          ...(service.favorite ? [{ icon: Icon.Star }] : []),
+        ]}
         actions={
           <ActionPanel>
             {actionDetails.actionName && (

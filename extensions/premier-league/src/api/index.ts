@@ -25,11 +25,14 @@ import {
   TeamForm,
 } from "../types";
 import { competitions } from "../components/searchbar_competition";
-import { getCompetitionTimestamp } from "../utils";
+import { subHours } from "date-fns";
+import { getCompetitionTimestamp, isFinished } from "../utils";
 
 const epl = competitions[0].value;
 
 const endpoint = "https://sdp-prem-prod.premier-league-prod.pulselive.com/api";
+
+const LIVE_WINDOW_HOURS = 3;
 
 interface Pagination<T> {
   data: T[];
@@ -140,7 +143,7 @@ export const getMatchweek = async (): Promise<number> => {
   }
 };
 
-export const getUpcomingMatchweek = async (
+export const getLatestPlayedMatchweek = async (
   season: string,
   comp: string = "8",
 ): Promise<number | undefined> => {
@@ -152,16 +155,44 @@ export const getUpcomingMatchweek = async (
     params: {
       competition: comp,
       season,
-      _sort: "kickoff:asc",
-      _limit: 1,
-      [`kickoff>${now}`]: "",
+      _sort: "kickoff:desc",
+      _limit: 20,
+      [`kickoff<${now}`]: "",
     },
   };
 
   try {
     const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
 
-    return data.data[0]?.matchWeek;
+    return data.data.find(isFinished)?.matchWeek;
+  } catch {
+    return undefined;
+  }
+};
+
+export const getUpcomingMatchweek = async (
+  season: string,
+  comp: string = "8",
+): Promise<number | undefined> => {
+  const from = getCompetitionTimestamp(subHours(new Date(), LIVE_WINDOW_HOURS));
+
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v2/matches`,
+    params: {
+      competition: comp,
+      season,
+      _sort: "kickoff:asc",
+      _limit: 20,
+      [`kickoff>${from}`]: "",
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+    const match = data.data.find((m) => !isFinished(m)) ?? data.data[0];
+
+    return match?.matchWeek;
   } catch {
     return undefined;
   }
@@ -297,8 +328,8 @@ export const getMatches = async (
     method: "get",
     url: `${endpoint}/v2/matches`,
     params: {
-      ...props,
       _sort: "kickoff:asc",
+      ...props,
     },
   };
 

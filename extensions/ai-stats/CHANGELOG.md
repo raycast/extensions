@@ -1,5 +1,12 @@
 # AI Stats Changelog
 
+## [Windows Support and Raycast Update] - 2026-09-05
+
+- Add Windows support with platform-specific Ctrl and Alt shortcuts
+- Update Raycast dependencies and the required Node.js version
+- Keep the selected leaderboard metric in sync with its dropdown
+- Show retry actions when model or leaderboard requests fail
+
 ## [1.0.0] - 2025-09-15
 
 ### Added
