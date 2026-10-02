@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { rebaseOnSeries, type UpdateOp } from "../lib/api";
 import { showApiError } from "../lib/feedback";
 import { localToDate, toLocalDateTime } from "../lib/format";
@@ -26,6 +26,14 @@ export function MoveForm(props: { event: ScheduleEvent; onMove: (op: UpdateOp) =
     // No new time picked — nothing to move.
     if (!values.start) {
       pop();
+      return;
+    }
+    if (Form.DatePicker.isFullDay(values.start)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Choose a start time",
+        message: "Pick a date and time to move the block to.",
+      });
       return;
     }
     const start = toLocalDateTime(values.start);

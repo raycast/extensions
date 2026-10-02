@@ -75,6 +75,14 @@ export function EditForm(props: {
       return;
     }
     if (name && name !== event.name) patch.name = name;
+    if (values.end && Form.DatePicker.isFullDay(values.end)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Choose an end time",
+        message: "Pick a date and time for the end of the block.",
+      });
+      return;
+    }
     const end = values.end ? toLocalDateTime(values.end) : null;
     if (end && end !== event.end) {
       // The server stores a span of 5 minutes to 168 hours; check it before the round-trip.

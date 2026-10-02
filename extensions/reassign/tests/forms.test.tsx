@@ -3,6 +3,7 @@ import type { ApiResult } from "../src/lib/api";
 const mock = vi.hoisted(() => ({
   writable: [] as { id: string }[],
   calendarFields: {} as Record<string, unknown>,
+  fullDays: new Set<Date>(),
   pop: vi.fn(),
   stateful: false,
   hookIndex: 0,
@@ -56,14 +57,17 @@ vi.mock("@raycast/api", () => ({
     TextArea: "TextArea",
     Checkbox: "Checkbox",
     Dropdown: Object.assign("Dropdown", { Item: "Item" }),
-    DatePicker: Object.assign("DatePicker", { Type: { Date: "date", DateTime: "datetime" } }),
+    DatePicker: Object.assign("DatePicker", {
+      Type: { Date: "date", DateTime: "datetime" },
+      isFullDay: (date: Date) => mock.fullDays.has(date),
+    }),
   }),
   List: Object.assign("List", { EmptyView: "EmptyView" }),
   Icon: {},
   Color: {},
   Keyboard: { Shortcut: { Common: {} } },
   useNavigation: () => ({ pop: mock.pop }),
-  showToast: async () => mock.toast,
+  showToast: async (options: Record<string, unknown>) => Object.assign(mock.toast, options),
   Toast: { Style: { Failure: "failure", Success: "success", Animated: "animated" } },
 }));
 vi.mock("@raycast/utils", () => ({
@@ -95,6 +99,7 @@ const event = { id: "id", name: "work", start: "2026-09-21T23:00", end: "2026-09
 beforeEach(() => {
   mock.writable = [];
   mock.calendarFields = {};
+  mock.fullDays.clear();
   mock.pop.mockReset();
   mock.stateful = false;
   mock.hookValues = [];
@@ -103,6 +108,7 @@ beforeEach(() => {
   mock.effects = [];
   mock.toast = {};
   mock.undo.mockReset();
+  mock.rebase.mockReset();
   mock.undo.mockResolvedValue({ ok: true });
 });
 afterEach(() => {
@@ -183,6 +189,70 @@ it("edit form refuses an end that is not after the start", async () => {
   const tree = EditForm({ event, areas: [], activityTypes: [], onSubmit: submit });
   await tree.props.actions.props.children.props.onSubmit({ name: "work", end: new Date(2026, 8, 21, 22) });
   expect(submit).not.toHaveBeenCalled();
+});
+it("edit form keeps date-only input open and accepts an explicit midnight correction", async () => {
+  const onSubmit = vi.fn(async () => true);
+  const tree = EditForm({ event, areas: [], activityTypes: [], onSubmit });
+  const dateOnly = new Date(2026, 8, 22);
+  mock.fullDays.add(dateOnly);
+
+  await tree.props.actions.props.children.props.onSubmit({ name: "Renamed", end: dateOnly });
+
+  expect(onSubmit).not.toHaveBeenCalled();
+  expect(mock.pop).not.toHaveBeenCalled();
+  expect(mock.toast).toMatchObject({
+    style: "failure",
+    title: "Choose an end time",
+    message: "Pick a date and time for the end of the block.",
+  });
+
+  await tree.props.actions.props.children.props.onSubmit({ name: "Renamed", end: new Date(2026, 8, 22, 0, 0) });
+
+  expect(onSubmit).toHaveBeenCalledWith({ op: "update", id: "id", name: "Renamed", end: "2026-09-22T00:00" });
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+});
+it("move form keeps date-only input open and accepts an explicit midnight correction", async () => {
+  const onMove = vi.fn(async () => true);
+  const tree = MoveForm({ event, onMove });
+  const dateOnly = new Date(2026, 8, 22);
+  mock.fullDays.add(dateOnly);
+
+  await tree.props.actions.props.children.props.onSubmit({ start: dateOnly });
+
+  expect(onMove).not.toHaveBeenCalled();
+  expect(mock.pop).not.toHaveBeenCalled();
+  expect(mock.toast).toMatchObject({
+    style: "failure",
+    title: "Choose a start time",
+    message: "Pick a date and time to move the block to.",
+  });
+
+  await tree.props.actions.props.children.props.onSubmit({ start: new Date(2026, 8, 22, 0, 0) });
+
+  expect(onMove).toHaveBeenCalledWith({ op: "update", id: "id", start: "2026-09-22T00:00" });
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+});
+it.each(["edit", "move"])("%s form rejects date-only input before rebasing a series", async (form) => {
+  mock.rebase.mockResolvedValue({ ok: true, data: { start: "2026-09-02T00:00", end: "2026-09-02T00:00" } });
+  const occurrence = { ...event, id: "series@2026-09-21" };
+  const submit = vi.fn(async () => true);
+  const tree =
+    form === "edit"
+      ? EditForm({ event: occurrence, areas: [], activityTypes: [], onSubmit: submit })
+      : MoveForm({ event: occurrence, onMove: submit });
+  const dateOnly = new Date(2026, 8, 22);
+  mock.fullDays.add(dateOnly);
+
+  await tree.props.actions.props.children.props.onSubmit({
+    name: "work",
+    start: dateOnly,
+    end: dateOnly,
+    scope: "all",
+  });
+
+  expect(mock.rebase).not.toHaveBeenCalled();
+  expect(submit).not.toHaveBeenCalled();
+  expect(mock.pop).not.toHaveBeenCalled();
 });
 it("move form sends a lone start, so the server keeps the duration", async () => {
   const onMove = vi.fn(async () => true);

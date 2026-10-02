@@ -95,7 +95,11 @@ export function applyUndoToast(
       t.title = "Undoing…";
       t.message = undefined;
       try {
-        const undone = await undo([token]);
+        const result = await undo([token]);
+        // A 2xx receipt can still reject the token. Keep the row's error code
+        // so stale/conflict refusals stay retryable and spent tokens are retired.
+        const failed = result.ok ? batchFailure(result.data) : undefined;
+        const undone = failed ? rowError(failed) : result;
         completed = undone.ok;
         t.style = undone.ok ? Toast.Style.Success : Toast.Style.Failure;
         t.title = undone.ok ? "Undid the change" : "Could not undo the change";

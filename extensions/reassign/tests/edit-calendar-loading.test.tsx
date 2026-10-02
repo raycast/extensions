@@ -30,7 +30,7 @@ vi.mock("@raycast/api", () => ({
     Checkbox: "Checkbox",
     TagPicker: Object.assign("TagPicker", { Item: "Item" }),
     Dropdown: Object.assign("Dropdown", { Item: "Item" }),
-    DatePicker: Object.assign("DatePicker", { Type: { DateTime: "datetime" } }),
+    DatePicker: Object.assign("DatePicker", { Type: { DateTime: "datetime" }, isFullDay: () => false }),
   }),
   Icon: {},
   useNavigation: () => ({ pop: mock.pop }),

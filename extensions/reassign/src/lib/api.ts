@@ -383,8 +383,8 @@ export function confirmSchedule(
   return request<Record<string, unknown>>("POST", PATHS.scheduleConfirm, { items });
 }
 
-export function undo(tokens: string[]): Promise<ApiResult<Record<string, unknown>>> {
-  return request<Record<string, unknown>>("POST", PATHS.actionsUndo, { tokens });
+export function undo(tokens: string[]): Promise<ApiResult<BatchReceipt>> {
+  return request<BatchReceipt>("POST", PATHS.actionsUndo, { tokens });
 }
 
 /** Send one AI Inbox capture. One undoToken covers all the created items. */

@@ -128,6 +128,68 @@ it("reports a spent token to the caller and sends no second undo", async () => {
   expect(onUndone).not.toHaveBeenCalled();
 });
 
+it.each([
+  ["conflict", "Could not undo the change"],
+  ["stale", "The block changed since then"],
+  ["internal", "Could not undo the change"],
+])("a 2xx undo with error code %s stays retryable until a successful receipt", async (code, title) => {
+  mock.undo.mockResolvedValueOnce({
+    ok: true,
+    data: { results: [{ index: 0, status: "error", error: { code, message: "The undo was refused." } }] },
+  });
+  mock.undo.mockResolvedValueOnce({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  const onSpent = vi.fn();
+  const onUndone = vi.fn();
+  const toast: ToastState = {};
+  const run = applyUndoToast(toast as unknown as Toast, "tok-1", { onSpent, onUndone });
+
+  await toast.primaryAction!.onAction(toast);
+
+  expect(toast).toMatchObject({ style: "failure", title, message: "The undo was refused." });
+  expect(toast.primaryAction).toBeDefined();
+  expect(onSpent).not.toHaveBeenCalled();
+  expect(onUndone).not.toHaveBeenCalled();
+
+  await run();
+
+  expect(mock.undo.mock.calls).toEqual([[["tok-1"]], [["tok-1"]]]);
+  expect(toast.style).toBe("success");
+  expect(toast.title).toBe("Undid the change");
+  expect(toast.message).toBeUndefined();
+  expect(toast.primaryAction).toBeUndefined();
+  expect(onSpent).not.toHaveBeenCalled();
+  expect(onUndone).toHaveBeenCalledTimes(1);
+  await run();
+  expect(mock.undo).toHaveBeenCalledTimes(2);
+});
+
+it.each(["validation", "not_found"])(
+  "a 2xx undo with a %s row retires the token without reporting success",
+  async (code) => {
+    mock.undo.mockResolvedValue({
+      ok: true,
+      data: { results: [{ index: 0, status: "error", error: { code, message: "This token is no longer usable." } }] },
+    });
+    const onSpent = vi.fn();
+    const onUndone = vi.fn();
+    const toast: ToastState = {};
+    const run = applyUndoToast(toast as unknown as Toast, "tok-1", { onSpent, onUndone });
+
+    await run();
+    await run();
+
+    expect(mock.undo).toHaveBeenCalledTimes(1);
+    expect(toast).toMatchObject({
+      style: "failure",
+      title: "Could not undo the change",
+      message: "This token is no longer usable.",
+    });
+    expect(toast.primaryAction).toBeUndefined();
+    expect(onSpent).toHaveBeenCalledTimes(1);
+    expect(onUndone).not.toHaveBeenCalled();
+  },
+);
+
 it("finalises the toast after a retry that follows a failed undo", async () => {
   mock.undo.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
   mock.undo.mockResolvedValueOnce({ ok: true, data: {} });

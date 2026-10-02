@@ -50,6 +50,9 @@ Use a test account and remove or undo any blocks created during testing.
   Inbox with over 50 items shows later items too.
 - Edit and move a block. Force a failed request (for example, disconnect the
   network) and verify entered fields stay in place in edit, move, and Inbox forms.
+- In Edit Details and Move, choose a date without a time and submit. Confirm the
+  form stays open and asks for a time without changing the block. Then choose
+  explicit midnight and confirm the edit or move succeeds. Repeat for a whole series.
 - Verify check-off, shift, delete/Undo, search, calendar mirrors, and meeting links.
 - Verify Now with block names hidden and shown; verify opt-in notifications.
 - Test feedback validation locally; submit real feedback only when intended.
