@@ -32,21 +32,22 @@
 
 ### Fixes and improvements
 
-- - Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
-- - Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
-- - When a download type's tool isn't installed, the setup screen also offers the types that already work (e.g. Download as Video Instead), so a missing tool never blocks the form.
-- - WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
-- - Transcripts never overwrite an existing file with the same title (a number is added), and saving a webpage again numbers the new copy instead of replacing the old one.
-- - Transcripts use a video's uploaded captions before YouTube's automatic ones, fall back to the language the video is spoken in when there are no English captions, keep going when one caption track fails to download (e.g. rate limiting), and no longer contain stray `\h` codes.
-- - Update Libraries and the update prompt only update the spotDL The Downloader installed itself; a spotDL from Homebrew or pip is left to its own package manager instead of being replaced.
-- - The Download Video AI tool accepts only real http(s) links, tries sites The Downloader doesn't recognize (like the form's Video option), and downloads with the same settings as the form, including the WebM-to-MKV fallback.
-- - Spotify errors are only reported as a private or unreachable playlist when Spotify's API actually said so.
-- - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
-- - The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
-- - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
-- - Download History refreshes while it's open, shows titles as plain text, and re-applies an entry or removal that a download finishing in another command overwrote.
-- - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
+- Deno is required only for YouTube in the Download form; other video sites no longer send you to the installer without it.
+- Links from sites The Downloader doesn't recognize still save as a webpage by default, but the Download form now also offers Video and Audio for them, since yt-dlp supports many more sites.
+- When a download type's tool isn't installed, the setup screen also offers the types that already work (e.g. Download as Video Instead), so a missing tool never blocks the form.
+- WebM downloads prefer WebM streams and fall back to MKV instead of failing when a site has none, and Quality size estimates now match what's actually downloaded.
+- Transcripts never overwrite an existing file with the same title (a number is added), and saving a webpage again numbers the new copy instead of replacing the old one.
+- Transcripts use a video's uploaded captions before YouTube's automatic ones, fall back to the language the video is spoken in when there are no English captions, keep going when one caption track fails to download (e.g. rate limiting), and no longer contain stray `\h` codes.
+- Update Libraries and the update prompt only update the spotDL The Downloader installed itself; a spotDL from Homebrew or pip is left to its own package manager instead of being replaced.
+- The Download Video AI tool accepts only real http(s) links, tries sites The Downloader doesn't recognize (like the form's Video option), and downloads with the same settings as the form, including the WebM-to-MKV fallback.
+- Spotify errors are only reported as a private or unreachable playlist when Spotify's API actually said so.
+- A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
+- The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
+- On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
+- Download History refreshes while it's open, shows titles as plain text, and re-applies an entry or removal that a download finishing in another command overwrote.
+- Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
 - The Download form's details line shows durations like `1:00` and `1:00:00` (a one-minute video showed `01`).
+- Titles with brackets show as written in Media Preview ("(Official Recap)" rendered as italic math), and the Source field reads "YouTube", "Twitch" or "X" instead of yt-dlp's "Youtube" or "TwitchVod".
 
 - **Deno is optional in Fast Download.** A missing Deno no longer blocks the whole video path — only some extractors (e.g. YouTube) benefit from a JS runtime, so sites like Twitch, Vimeo, or TikTok now download without it, matching the AI tool and transcript behavior.
 - **Titles with punctuation are no longer mangled.** `sanitizeVideoTitle` cut every title at its last `.`/`!`/`?` — "Mr. Robot S01E01" became "Mr" in the form's title line, transcript filenames, and the AI tool's result. The sentence-boundary cut now applies only to titles that actually exceed the 200-character cap.
