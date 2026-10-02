@@ -1,6 +1,6 @@
 # Etherscan Changelog
 
-## [ENSv2 Support] - 2026-09-23
+## [ENSv2 Support] - {PR_MERGE_DATE}
 
 - Recognize imported DNS names in addition to `.eth` names
 

@@ -1,6 +1,6 @@
 # TinyFaces NFT Changelog
 
-## [ENSv2 Support] - 2026-09-23
+## [ENSv2 Support] - {PR_MERGE_DATE}
 
 - Resolve owner names through the ENS Universal Resolver
 

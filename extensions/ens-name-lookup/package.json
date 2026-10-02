@@ -6,6 +6,9 @@
   "icon": "command-icon.png",
   "author": "Yukai",
   "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",
