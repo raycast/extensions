@@ -71,8 +71,17 @@ describe("progressMessage", () => {
 
 describe("escapeMarkdown", () => {
   it("turns link and image syntax in a title into plain text", () => {
-    expect(escapeMarkdown("[Click](https://evil.example)")).toBe("\\[Click\\]\\(https://evil\\.example\\)");
-    expect(escapeMarkdown("![x](y)")).toBe("\\!\\[x\\]\\(y\\)");
+    // An escaped [ is enough: without it there is no link or image.
+    expect(escapeMarkdown("[Click](https://evil.example)")).toBe("\\[Click](https://evil\\.example)");
+    expect(escapeMarkdown("![x](y)")).toBe("\\!\\[x](y)");
+  });
+
+  it("never writes Raycast's math delimiters, so parentheses stay text", () => {
+    // Raycast renders \\( … \\) and \\[ … \\] as LaTeX: "(Official NASA Recap)" came out as italic math.
+    const out = escapeMarkdown("Artemis II Launches (Official NASA Recap) [Music]");
+    expect(out).toBe("Artemis II Launches (Official NASA Recap) \\[Music]");
+    expect(out).not.toMatch(/\\[()\]]/);
+    expect(escapeMarkdown("costs $5 and $10")).toBe("costs \\$5 and \\$10");
   });
 
   it("escapes emphasis, code and HTML markers, and backslashes themselves", () => {

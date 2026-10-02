@@ -69,7 +69,9 @@ export function progressMessage(p: { percent?: number; speed?: number; eta?: num
  * renders as plain text — a `[title](url)` can't become a link.
  */
 export function escapeMarkdown(text: string): string {
-  return text.replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, "\\$&");
+  // Not ] ( ): Raycast renders \( … \) and \[ … \] as LaTeX math, and an escaped [
+  // already keeps any link or image from forming. $ is escaped so $…$ isn't math either.
+  return text.replace(/[\\`*_{}[#+\-.!|<>~$]/g, "\\$&");
 }
 
 /**
