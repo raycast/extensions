@@ -2,7 +2,7 @@ import { Action, ActionPanel, Alert, closeMainWindow, confirmAlert, Icon, Keyboa
 import { createDeeplink, showFailureToast, useLocalStorage } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { CommandForm, CommandFormValues } from "./command-form";
-import { DEFAULT_COMMANDS, SavedCommand, STORAGE_KEY } from "./storage";
+import { DEFAULT_COMMANDS, getSavedCommands, SavedCommand, STORAGE_KEY } from "./storage";
 import { runInTerminal } from "./terminal";
 
 export default function Command() {
@@ -12,13 +12,18 @@ export default function Command() {
     isLoading,
   } = useLocalStorage<SavedCommand[]>(STORAGE_KEY, DEFAULT_COMMANDS);
 
+  // Reads the stored list instead of `commands`, which can be stale or still loading when a form submits.
+  async function updateCommands(update: (savedCommands: SavedCommand[]) => SavedCommand[]) {
+    await setCommands(update(await getSavedCommands()));
+  }
+
   async function createCommand(values: CommandFormValues) {
-    await setCommands([...(commands ?? []), { id: randomUUID(), ...values }]);
+    await updateCommands((savedCommands) => [...savedCommands, { id: randomUUID(), ...values }]);
   }
 
   async function editCommand(id: string, values: CommandFormValues) {
-    await setCommands(
-      (commands ?? []).map((savedCommand) => (savedCommand.id === id ? { id, ...values } : savedCommand)),
+    await updateCommands((savedCommands) =>
+      savedCommands.map((savedCommand) => (savedCommand.id === id ? { id, ...values } : savedCommand)),
     );
   }
 
@@ -30,7 +35,7 @@ export default function Command() {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (confirmed) {
-      await setCommands((commands ?? []).filter(({ id }) => id !== savedCommand.id));
+      await updateCommands((savedCommands) => savedCommands.filter(({ id }) => id !== savedCommand.id));
     }
   }
 

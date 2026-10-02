@@ -17,5 +17,7 @@ export async function runInTerminal(command: string) {
     end run
     `,
     [command],
+    // No timeout: the first run waits on the macOS Automation permission prompt for Terminal.
+    { timeout: 0 },
   );
 }
