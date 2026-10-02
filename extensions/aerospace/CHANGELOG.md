@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Fix Window Switcher Dismissal] - {PR_MERGE_DATE}
+
+- Close Raycast after successful window actions instead of leaving Root Search visible.
+
 ## [Open Window Switcher Directly] - 2026-08-28
 
 - Open Switch Apps in Workspace immediately without showing a launcher argument form
