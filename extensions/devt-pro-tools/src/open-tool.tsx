@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
-import { APP_WEBSITE_URL, openInApp, OpenResult, withInput } from "./shared/links";
+import { APP_WEBSITE_URL, canSendInput, openInApp, OpenResult, withInput } from "./shared/links";
 import { categorySortIndex, iconFor, ToolEntry, tools } from "./shared/tools";
 
 const PINNED_TOOLS_KEY = "pinned-tools";
@@ -53,6 +53,7 @@ async function notifyLaunchResult(result: OpenResult, successTitle: string, succ
  */
 function ToolInputForm({ tool, initialInput = "" }: { tool: ToolEntry; initialInput?: string }) {
   const { pop } = useNavigation();
+  const [inputError, setInputError] = useState<string | undefined>();
 
   return (
     <Form
@@ -63,7 +64,12 @@ function ToolInputForm({ tool, initialInput = "" }: { tool: ToolEntry; initialIn
             title="Open Tool"
             icon={Icon.ArrowRight}
             onSubmit={async (values: { input: string }) => {
-              const result = await openInApp(withInput(tool.deepLink, values.input ?? ""));
+              const input = values.input ?? "";
+              if (!canSendInput(tool.deepLink, input)) {
+                setInputError("Too large to send. Paste it in DevT Pro instead.");
+                return;
+              }
+              const result = await openInApp(withInput(tool.deepLink, input));
               await notifyLaunchResult(result, `Opened ${tool.name}`);
               if (result.ok) pop();
             }}
@@ -72,7 +78,15 @@ function ToolInputForm({ tool, initialInput = "" }: { tool: ToolEntry; initialIn
       }
     >
       <Form.Description text={`Provide input for ${tool.name}`} />
-      <Form.TextArea id="input" title="Input" placeholder="Enter text here" defaultValue={initialInput} autoFocus />
+      <Form.TextArea
+        id="input"
+        title="Input"
+        placeholder="Enter text here"
+        defaultValue={initialInput}
+        error={inputError}
+        onChange={() => setInputError(undefined)}
+        autoFocus
+      />
     </Form>
   );
 }
@@ -180,6 +194,13 @@ export default function Command() {
 
     const clipboard = await readClipboardText();
     if (clipboard.trim().length > 0) {
+      if (!canSendInput(tool.deepLink, clipboard)) {
+        // The clipboard doesn't fit in a link. Open the tool empty so the user
+        // can paste there, rather than failing or truncating the text.
+        const result = await openInApp(tool.deepLink);
+        await notifyLaunchResult(result, `Opened ${tool.name}`, "Clipboard too large to send. Paste it in DevT Pro.");
+        return;
+      }
       const result = await openInApp(withInput(tool.deepLink, clipboard));
       await notifyLaunchResult(result, `Opened ${tool.name}`, "Used clipboard content");
     } else {

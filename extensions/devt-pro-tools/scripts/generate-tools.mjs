@@ -89,7 +89,7 @@ const errors = [];
 /** @type {Map<string, string>} route path → tool name */
 const toolNameByRoute = new Map();
 
-for (const block of toolBlocks) {
+for (const [index, block] of toolBlocks.entries()) {
   const name = extractString(block, "name");
   const category = extractString(block, "category");
   const routeRef = extractString(block, "route");
@@ -97,8 +97,20 @@ for (const block of toolBlocks) {
   const supportsInput = extractBool(block, "supportsDeepLinkInput");
   const dartIcon = extractString(block, "faIcon") || extractString(block, "icon");
 
-  if (!name || !category || !routeRef) {
-    // Skip malformed blocks (e.g. the class definition at the top).
+  // The class constructor (`const Tool({required this.name, ...})`) also
+  // matches the split. It is the only block that is allowed to be skipped.
+  if (/^\s*\{/.test(block)) continue;
+
+  // Any other block that can't be read is an error. Skipping it would write a
+  // partial index that silently drops the tool.
+  const missing = [
+    !name && "name",
+    !category && "category",
+    !routeRef && "route",
+  ].filter(Boolean);
+  if (missing.length > 0) {
+    const label = name ? `"${name}"` : `Tool entry #${index}`;
+    errors.push(`${label}: could not read ${missing.join(", ")}`);
     continue;
   }
 
@@ -143,7 +155,7 @@ for (const block of toolBlocks) {
 }
 
 if (errors.length > 0) {
-  console.error(`✖ Found ${errors.length} invalid tool route(s). tools.json was not written.`);
+  console.error(`✖ Found ${errors.length} invalid tool entr${errors.length === 1 ? "y" : "ies"}. tools.json was not written.`);
   for (const error of errors) console.error(`  - ${error}`);
   process.exit(1);
 }

@@ -81,6 +81,8 @@ Start-Process "devtpro://encoders_decoders/base64/encode?input=hello%20world"
 
 The app must continue to handle those links through its deep-link router on both platforms.
 
+Input travels inside the link, so `MAX_DEEP_LINK_LENGTH` in `src/shared/links.ts` caps the link length (2,000 characters on Windows, 100,000 on macOS). Longer input is not sent: **Open Tool** opens the tool empty, and the input form shows an error. Before raising a limit, open a link of that length on that platform and confirm the tool receives the whole input.
+
 ## Raycast Store release
 
 1. Confirm `npm run lint` and `npm run build` pass with the latest `@raycast/api` (`npm install @raycast/api@latest`). `ray lint` also checks the manifest against the Store, including the `author` handle.

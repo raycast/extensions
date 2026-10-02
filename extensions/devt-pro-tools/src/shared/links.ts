@@ -59,6 +59,26 @@ export async function openInApp(deepLink: string): Promise<OpenResult> {
 }
 
 /**
+ * Longest deep link, in characters, that the extension opens.
+ *
+ * The input travels inside the URL, and the system limits how long a launched
+ * URL can be. Windows shell launches are only reliable up to about 2,000
+ * characters. macOS accepts far longer URLs, so its limit only keeps very
+ * large clipboard contents out of the link.
+ */
+export const MAX_DEEP_LINK_LENGTH = process.platform === "win32" ? 2_000 : 100_000;
+
+/**
+ * Whether `input` is small enough to send to a tool through its deep link.
+ * Callers should open the tool without input when this returns `false`.
+ */
+export function canSendInput(deepLink: string, input: string): boolean {
+  // Percent-encoding never shortens the input, so skip encoding huge text.
+  if (deepLink.length + input.length > MAX_DEEP_LINK_LENGTH) return false;
+  return withInput(deepLink, input).length <= MAX_DEEP_LINK_LENGTH;
+}
+
+/**
  * Append the `input` query parameter to a tool's deep link.
  */
 export function withInput(deepLink: string, input: string): string {

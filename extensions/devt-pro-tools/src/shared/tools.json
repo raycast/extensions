@@ -882,6 +882,16 @@
     ]
   },
   {
+    "name": "Chmod Calculator",
+    "category": "Utilities",
+    "route": "/utilities/chmod_calculator",
+    "deepLink": "devtpro://utilities/chmod_calculator",
+    "description": "Build Unix permissions and copy chmod commands",
+    "supportsInput": true,
+    "iconName": "Lock",
+    "keywords": ["chmod", "permissions", "unix", "linux", "file", "directory", "octal", "mode", "755", "644"]
+  },
+  {
     "name": "Cronjob Parser",
     "category": "Utilities",
     "route": "/utilities/cron_parser",

@@ -23,6 +23,7 @@ Run **Search Tools** in Raycast, then search by tool name, category, description
 
 - **Open Tool** sends your clipboard text to tools that accept input. If the clipboard is empty, Raycast asks you for the input.
 - **Open Tool with Input** always lets you review or type the input first.
+- Input is sent to DevT Pro inside the link, so its size is limited: about 2,000 characters on Windows and 100,000 on macOS, counted after URL encoding. If your clipboard text is larger, the tool opens empty and you can paste the text there.
 - Pinned tools appear at the top of the list.
 
 ## Troubleshooting
