@@ -29,7 +29,7 @@ ${sourcesSection}`;
 function AskDetail({ query }: AskDetailProps) {
   const { data, error, isLoading, revalidate } = usePromise(sourcedAnswer, [query], {
     onError: (error) => {
-      showFailureToast(error, { title: "Failed to get answer", message: formatLinkupError(error) });
+      showFailureToast(new Error(formatLinkupError(error)), { title: "Failed to get answer" });
     },
   });
 

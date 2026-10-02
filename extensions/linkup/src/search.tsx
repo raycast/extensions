@@ -11,7 +11,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   const { data, isLoading } = usePromise(searchResults, [query], {
     execute: query.length > 0,
     onError: (error) => {
-      showFailureToast(error, { title: "Search failed", message: formatLinkupError(error) });
+      showFailureToast(new Error(formatLinkupError(error)), { title: "Search failed" });
     },
   });
 

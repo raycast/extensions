@@ -9,7 +9,7 @@ type PageDetailProps = {
 export function PageDetail({ url }: PageDetailProps) {
   const { data, error, isLoading, revalidate } = usePromise(fetchMarkdown, [url], {
     onError: (error) => {
-      showFailureToast(error, { title: "Failed to fetch page", message: formatLinkupError(error) });
+      showFailureToast(new Error(formatLinkupError(error)), { title: "Failed to fetch page" });
     },
   });
 
