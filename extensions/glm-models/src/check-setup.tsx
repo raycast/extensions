@@ -78,7 +78,11 @@ export default function CheckSetup() {
         return;
       }
 
-      const probe = await probeModelsEndpoint(baseURL, key);
+      // An explicit validation must hit the live endpoint — a cached probe
+      // would report a just-revoked key as still working.
+      const probe = await probeModelsEndpoint(baseURL, key, {
+        bypassCache: true,
+      });
       if (probe.ok) {
         // Extensions cannot write preferences — a combination that differs
         // from the saved one must be applied in the native settings, so say

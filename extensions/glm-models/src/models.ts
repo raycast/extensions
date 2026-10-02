@@ -158,9 +158,11 @@ function buildProviderOptions(
   const effort = request.providerOptions?.raycast?.reasoningEffort;
   if (!effort) return {};
   if (isGlm5(modelId)) {
-    // GLM-5.x: thinking stays on, depth follows reasoning_effort ("none" turns it off).
+    // GLM-5.x: thinking stays on, depth follows reasoning_effort. "none" is
+    // only the picker's off-sentinel — never send it as an API effort value.
+    if (effort === "none") return { thinking: { type: "disabled" } };
     return {
-      thinking: { type: effort === "none" ? "disabled" : "enabled" },
+      thinking: { type: "enabled" },
       reasoning_effort: effort,
     };
   }
