@@ -187,9 +187,9 @@ test("projects with the same folder name stay separate sections", () => {
 test("blocked panes in two folders of the same name stay apart", () => {
   const rows = [
     { handle: "a", worktreePath: "/code/team-a/app", worktreeId: "r1::/code/team-a/app",
-      title: "one", connected: true, stateStartedAt: 1, state: "waiting" },
+      title: "one", connected: true, lastOutputAt: 1, stateStartedAt: 1, state: "waiting" },
     { handle: "b", worktreePath: "/code/team-b/app", worktreeId: "r2::/code/team-b/app",
-      title: "two", connected: true, stateStartedAt: 2, state: "waiting" },
+      title: "two", connected: true, lastOutputAt: 2, stateStartedAt: 2, state: "waiting" },
   ];
 
   assert.deepEqual(rows.map(projectNamer(rows)), ["team-a/app", "team-b/app"]);
