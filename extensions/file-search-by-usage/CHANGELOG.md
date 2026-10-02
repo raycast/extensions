@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Show the last index scan's start and end times and duration, including final index maintenance, in Search Index Settings.
+
 - Show the end of long result paths, with the full location available on hover.
 
 - Count Open With, Show in Finder, and Copy actions as one use each, alongside Open and folder entry.

@@ -453,6 +453,20 @@ export default function Command() {
                   ["Directories", stats.directories.toLocaleString()],
                   ["Symlinks", stats.symlinks.toLocaleString()],
                   [
+                    "Last Scan Started",
+                    stats.lastStartedAt === undefined
+                      ? "Not recorded"
+                      : new Date(stats.lastStartedAt).toLocaleString(),
+                  ],
+                  [
+                    "Last Scan Ended",
+                    stats.lastEndedAt === undefined
+                      ? stats.lastStartedAt === undefined
+                        ? "Not recorded"
+                        : "Not recorded — running or interrupted"
+                      : new Date(stats.lastEndedAt).toLocaleString(),
+                  ],
+                  [
                     "Last Duration",
                     stats.lastDurationMs === undefined
                       ? "Not recorded"

@@ -23,6 +23,8 @@ import {
   readIndexRoots,
   readIndexStats,
   writeLastDuration,
+  writeScanStarted,
+  writeScanEnded,
 } from "../src/lib/index-db";
 import {
   fdArguments,
@@ -1297,6 +1299,31 @@ export async function indexChecks(assert: Assert) {
       readIndexStats(statsOpen.db, statsFile).lastDurationMs === 42,
       "a later scan replaces the recorded duration",
     );
+    assert(
+      stats.lastStartedAt === undefined && stats.lastEndedAt === undefined,
+      "legacy indexes do not invent scan timestamps",
+    );
+    writeScanStarted(statsOpen.db, 1_000);
+    const activeStats = readIndexStats(statsOpen.db, statsFile);
+    assert(
+      activeStats.lastStartedAt === 1_000 &&
+        activeStats.lastEndedAt === undefined &&
+        activeStats.lastDurationMs === undefined,
+      "starting a scan records its start and clears stale completion metadata",
+    );
+    writeScanEnded(statsOpen.db, 1_000, 1_250);
+    const endedStats = readIndexStats(statsOpen.db, statsFile);
+    assert(
+      endedStats.lastStartedAt === 1_000 &&
+        endedStats.lastEndedAt === 1_250 &&
+        endedStats.lastDurationMs === 250,
+      "scan timestamps and total duration round-trip",
+    );
+    writeScanStarted(statsOpen.db, 2_000);
+    assert(
+      readIndexStats(statsOpen.db, statsFile).lastEndedAt === undefined,
+      "an interrupted next scan cannot show the previous scan's end",
+    );
     statsOpen.db.close();
   }
 
@@ -1968,7 +1995,41 @@ export async function indexChecks(assert: Assert) {
       queryIndex(builtRead.db, parseQuery("orchestrated")).entries.length === 1,
     "the built index is immediately queryable",
   );
-  if (builtRead.kind === "opened") builtRead.db.close();
+  if (builtRead.kind === "opened") {
+    const timing = readIndexStats(builtRead.db, buildFile);
+    assert(
+      timing.lastStartedAt !== undefined &&
+        timing.lastEndedAt !== undefined &&
+        timing.lastEndedAt >= timing.lastStartedAt &&
+        timing.lastDurationMs === timing.lastEndedAt - timing.lastStartedAt,
+      "orchestrated builds persist start, end, and full duration",
+    );
+    builtRead.db.close();
+  }
+  const interrupted = await rebuildIndex({
+    file: buildFile,
+    withLock: async (work) => work(() => {}),
+    lookupFd: foundFd,
+    roots: [busyRoot],
+    spawnFd: () => fdOutput([path.join(busyRoot, "orchestrated.txt")]),
+    onFinishing: () => {
+      throw new Error("Simulated finalization failure");
+    },
+  });
+  const interruptedRead = openIndexForRead(buildFile);
+  if (interruptedRead.kind === "opened") {
+    const timing = readIndexStats(interruptedRead.db, buildFile);
+    assert(
+      interrupted.kind === "failed" &&
+        timing.lastStartedAt !== undefined &&
+        timing.lastEndedAt === undefined &&
+        timing.lastDurationMs === undefined,
+      "a failed finalization does not retain the previous build's completion",
+    );
+    interruptedRead.db.close();
+  } else {
+    assert(false, "interrupted build timing remains readable");
+  }
   fs.rmSync(buildDir, { recursive: true, force: true });
 
   const cloudRoots = await cloudStorageIndexRoots(

@@ -6,7 +6,8 @@ import {
   openIndexForWrite,
   resumeFtsSync,
   suspendFtsSync,
-  writeLastDuration,
+  writeScanStarted,
+  writeScanEnded,
 } from "./index-db";
 import {
   ScanProgress,
@@ -172,8 +173,10 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
       // Row-by-row FTS maintenance is the largest cost in a scan. Suspend it for
       // the duration and rebuild once, in a finally so a failed or cancelled
       // scan cannot leave the index permanently out of step.
+      const startedAt = Date.now();
       try {
         assertOwned();
+        writeScanStarted(opened.db, startedAt);
         suspendFtsSync(opened.db);
         const report = await scanRoots({
           fd: lookup.path,
@@ -189,11 +192,6 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           spawnFd: options.spawnFd,
           assertOwned,
         });
-        try {
-          writeLastDuration(opened.db, report.elapsedMs);
-        } catch {
-          /* A missing duration only affects the stats line. */
-        }
         return {
           kind: "done" as const,
           report,
@@ -211,6 +209,7 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           await new Promise((resolve) => setTimeout(resolve, 0));
           assertOwned();
           resumeFtsSync(opened.db);
+          writeScanEnded(opened.db, startedAt, Date.now());
         } finally {
           try {
             opened.db.close();

@@ -310,6 +310,8 @@ export type IndexStats = {
   directories: number;
   symlinks: number;
   lastDurationMs?: number;
+  lastStartedAt?: number;
+  lastEndedAt?: number;
 };
 
 /** Counts for the settings screen. One grouped scan of the table. */
@@ -346,6 +348,13 @@ export function readIndexStats(db: DatabaseSync, file: string): IndexStats {
     .prepare("SELECT value FROM index_meta WHERE key = 'last_duration_ms'")
     .get() as { value: string } | undefined;
   const lastDurationMs = duration ? Number.parseInt(duration.value, 10) : NaN;
+  const timestamp = (key: string): number | undefined => {
+    const row = db
+      .prepare("SELECT value FROM index_meta WHERE key = ?")
+      .get(key) as { value: string } | undefined;
+    const value = Number(row?.value);
+    return Number.isFinite(value) && value > 0 ? value : undefined;
+  };
 
   return {
     bytes,
@@ -353,10 +362,48 @@ export function readIndexStats(db: DatabaseSync, file: string): IndexStats {
     files,
     directories,
     symlinks,
+    lastStartedAt: timestamp("last_started_at"),
+    lastEndedAt: timestamp("last_ended_at"),
     lastDurationMs: Number.isFinite(lastDurationMs)
       ? lastDurationMs
       : undefined,
   };
+}
+
+/** Clear the prior end time so an interrupted rebuild cannot look finished. */
+export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    db.prepare(
+      "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_started_at', ?)",
+    ).run(String(startedAt));
+    db.exec(
+      "DELETE FROM index_meta WHERE key IN ('last_ended_at', 'last_duration_ms')",
+    );
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
+}
+
+/** Includes final FTS maintenance, not just filesystem traversal. */
+export function writeScanEnded(
+  db: DatabaseSync,
+  startedAt: number,
+  endedAt: number,
+): void {
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    db.prepare(
+      "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_ended_at', ?)",
+    ).run(String(endedAt));
+    writeLastDuration(db, endedAt - startedAt);
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
 }
 
 /** Record how long the last scan took, for the stats screen. */

@@ -43,6 +43,8 @@ Changes take effect on the next rebuild. Settings edits are saved one at a time;
 
 You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries; an incomplete or unreachable scope keeps its previously indexed paths.
 
+Search Index Settings shows the last scan's local start and end times and total duration. An unrecorded end means the scan is still running or was interrupted. Older indexes show “Not recorded” until the next rebuild.
+
 ## Searching
 
 The search field responds as you type. Raycast hands your latest text to the extension after a short pause, about 250 ms, so fast typing is not interrupted by list updates.
