@@ -67,11 +67,6 @@ export function calendarEditFields(
   return out;
 }
 
-/** True when a choice asks for a calendar change (so a no-op form can skip it). */
-export function hasCalendarChange(fields: CalendarWriteFields): boolean {
-  return fields.calendarId !== undefined || fields.mirrorCalendarIds !== undefined;
-}
-
 function sameSet(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const set = new Set(b);

@@ -43,13 +43,17 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
 
   function attachUndo(toast: Toast, token: string): void {
     setLastUndoToken(token);
+    // An older toast must not discard a more recent mutation's undo.
+    const forget = () => {
+      setLastUndoToken((current) => (current === token ? null : current));
+      if (lastUndoAction.current?.token === token) lastUndoAction.current = null;
+    };
     const run = applyUndoToast(toast, token, {
       onUndone: async () => {
-        // An older toast must not discard a more recent mutation's undo.
-        setLastUndoToken((current) => (current === token ? null : current));
-        if (lastUndoAction.current?.token === token) lastUndoAction.current = null;
+        forget();
         await revalidate();
       },
+      onSpent: forget,
     });
     lastUndoAction.current = { token, run };
   }

@@ -38,6 +38,7 @@ const KNOWN_CODES: Record<ErrorCode, true> = {
   unauthorized: true,
   permission: true,
   scope: true,
+  stale: true,
   read_only: true,
   not_found: true,
   validation: true,

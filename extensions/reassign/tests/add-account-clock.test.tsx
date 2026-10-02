@@ -68,7 +68,6 @@ vi.mock("../src/components/states", () => ({ refusalView: vi.fn() }));
 vi.mock("../src/components/calendar-fields", () => ({
   useCalendars: () => ({ writable: [] }),
   calendarCreateFields: () => ({}),
-  hasCalendarChange: () => false,
   CalendarFields: "CalendarFields",
   CALENDAR_DEFAULT: "",
 }));

@@ -521,6 +521,39 @@ function renderAgendaMutations(revalidate: () => void) {
   return useAgendaMutations({ revalidate });
 }
 
+it.each(["toast", "panel"])("keeps both Undo actions after a stale refusal from the %s", async (from) => {
+  const revalidate = vi.fn();
+  let hooks = renderAgendaMutations(revalidate);
+  mock.result = { ok: true, data: { results: [{ index: 0, status: "ok" }], undoToken: "tok" } };
+  await hooks.mutate("Shifting", "Shifted", [{ op: "shift", id: "id", byMinutes: 60 }]);
+  hooks = renderAgendaMutations(revalidate);
+  revalidate.mockClear();
+  const toast = mock.toast as { primaryAction?: { onAction: (t: unknown) => Promise<void> }; title: string };
+  mock.undo.mockResolvedValueOnce({ ok: false, code: "stale", message: "A newer change touched it." });
+
+  if (from === "toast") await toast.primaryAction!.onAction(toast);
+  else await hooks.runUndo();
+
+  hooks = renderAgendaMutations(revalidate);
+  expect(hooks.lastUndoToken).toBe("tok");
+  expect(toast.primaryAction).toBeDefined();
+  expect(toast.title).toBe("The block changed since then");
+  expect(revalidate).not.toHaveBeenCalled();
+
+  // The newer edit is undone elsewhere; retry through the other action.
+  if (from === "toast") await hooks.runUndo();
+  else await toast.primaryAction!.onAction(toast);
+
+  hooks = renderAgendaMutations(revalidate);
+  expect(mock.undo.mock.calls).toEqual([[["tok"]], [["tok"]]]);
+  expect(hooks.lastUndoToken).toBeNull();
+  expect(toast.primaryAction).toBeUndefined();
+  expect(toast.title).toBe("Undid the change");
+  expect(revalidate).toHaveBeenCalledTimes(1);
+  await hooks.runUndo();
+  expect(mock.undo).toHaveBeenCalledTimes(2);
+});
+
 it("undoing an older toast preserves the newer panel undo", async () => {
   const revalidate = vi.fn();
   let hooks = renderAgendaMutations(revalidate);

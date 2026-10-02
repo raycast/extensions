@@ -33,6 +33,9 @@ export function describeError(error: ApiError): { title: string; message?: strin
       return { title: "Check the details", message: error.message };
     case "conflict":
       return { title: "That time is already taken", message: error.message };
+    case "stale":
+      // Only an undo refuses with `stale`: a newer change touched the same block.
+      return { title: "The block changed since then", message: error.message };
     case "batch_rejected":
       return { title: "The changes were not applied", message: error.message };
     case "rate_limited":
@@ -63,24 +66,29 @@ export function failToast(toast: Toast, error: ApiError): void {
   toast.message = message;
 }
 
+// A spent or unknown token cannot be retried. A stale token can recover when the newer edit is undone.
+const FINAL_UNDO_CODES: ReadonlySet<string> = new Set(["validation", "not_found"]);
+
 /**
  * Add the standard cmd+Z Undo button to a finished toast. `opts.onUndone` (if
  * set) runs after a successful revert, so a List-backed caller can revalidate
  * its cache — otherwise the toast Undo reverts the server but leaves the
- * on-screen list showing the post-mutation state.
+ * on-screen list showing the post-mutation state. `opts.onSpent` runs when a final
+ * refusal means the token is unusable, so a caller can remove its own Undo action.
  */
 export function applyUndoToast(
   toast: Toast,
   token: string,
-  opts?: { onUndone?: () => void | Promise<unknown> },
+  opts?: { onUndone?: () => void | Promise<unknown>; onSpent?: () => void },
 ): () => Promise<void> {
   let inFlight = false;
   let completed = false;
+  let final = false;
   const action: Toast.ActionOptions = {
     title: "Undo",
     shortcut: { modifiers: ["cmd"], key: "z" },
     onAction: async (t) => {
-      if (inFlight || completed) return;
+      if (inFlight || completed || final) return;
       inFlight = true;
       t.primaryAction = undefined;
       t.style = Toast.Style.Animated;
@@ -92,7 +100,15 @@ export function applyUndoToast(
         t.style = undone.ok ? Toast.Style.Success : Toast.Style.Failure;
         t.title = undone.ok ? "Undid the change" : "Could not undo the change";
         // A sync in flight refuses with `conflict`; its message says to try again.
-        if (!undone.ok) t.message = undone.message;
+        if (!undone.ok) {
+          t.message = undone.message;
+          if (undone.code === "stale") t.title = describeError(undone).title;
+        }
+        // A final refusal gets no retry: the same token fails the same way.
+        if (!undone.ok && FINAL_UNDO_CODES.has(undone.code)) {
+          final = true;
+          opts?.onSpent?.();
+        }
         if (completed) {
           try {
             await opts?.onUndone?.();
@@ -107,7 +123,7 @@ export function applyUndoToast(
         t.title = "Could not undo the change";
       } finally {
         inFlight = false;
-        if (!completed) t.primaryAction = action;
+        if (!completed && !final) t.primaryAction = action;
       }
     },
   };

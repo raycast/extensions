@@ -4,6 +4,7 @@ import { needsSignIn, toClientCode } from "../src/lib/envelope";
 it("keeps a known server code and maps an unknown one by status", () => {
   expect(toClientCode("read_only", 403)).toBe("read_only");
   expect(toClientCode("batch_rejected", 422)).toBe("batch_rejected");
+  expect(toClientCode("stale", 409)).toBe("stale");
   expect(toClientCode("toString", 422)).toBe("validation");
   expect(toClientCode("brand_new", 429)).toBe("rate_limited");
   expect(toClientCode(undefined, 401)).toBe("unauthorized");

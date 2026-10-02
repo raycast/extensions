@@ -50,13 +50,12 @@ it("clears primaryAction after a successful undo so ⌘Z cannot re-fire undo()",
   expect(toast.message).toBeUndefined();
 });
 
-// Guards the composite applyCalendar symptom: a message set on the toast after
-// applyUndoToast registers must not survive onto the post-undo toast.
+// Guards the post-undo toast: a message that a caller set on the toast must not stay.
 it("drops a stale caller-set message on the post-undo toast", async () => {
   mock.undo.mockResolvedValue({ ok: true, data: {} });
   const toast: ToastState = {};
   applyUndoToast(toast as unknown as Toast, "tok-1");
-  toast.message = "The calendar did not apply. Pick it with Edit Details.";
+  toast.message = "Refresh to see the change.";
 
   await toast.primaryAction!.onAction(toast);
 
@@ -77,6 +76,56 @@ it("keeps primaryAction attached on a failed undo so the user can retry", async 
   expect(toast.style).toBe("failure");
   expect(toast.title).toBe("Could not undo the change");
   expect(toast.primaryAction).toBeDefined();
+});
+
+// Reverting the newer change makes the original token usable again.
+it("explains a stale undo refusal and retries after the newer change is undone", async () => {
+  mock.undo.mockResolvedValueOnce({ ok: false, code: "stale", message: "A newer change touched it.", status: 409 });
+  mock.undo.mockResolvedValueOnce({ ok: true, data: {} });
+  const onSpent = vi.fn();
+  const onUndone = vi.fn();
+  const toast: ToastState = {};
+  const run = applyUndoToast(toast as unknown as Toast, "tok-1", { onSpent, onUndone });
+
+  await toast.primaryAction!.onAction(toast);
+
+  expect(toast.style).toBe("failure");
+  expect(toast.title).toBe("The block changed since then");
+  expect(toast.message).toBe("A newer change touched it.");
+  expect(toast.primaryAction).toBeDefined();
+  expect(onSpent).not.toHaveBeenCalled();
+  expect(onUndone).not.toHaveBeenCalled();
+
+  // Another client undoes the newer edit before this retry.
+  await toast.primaryAction!.onAction(toast);
+
+  expect(mock.undo.mock.calls).toEqual([[["tok-1"]], [["tok-1"]]]);
+  expect(toast.style).toBe("success");
+  expect(toast.title).toBe("Undid the change");
+  expect(toast.message).toBeUndefined();
+  expect(toast.primaryAction).toBeUndefined();
+  expect(onSpent).not.toHaveBeenCalled();
+  expect(onUndone).toHaveBeenCalledTimes(1);
+  await run();
+  expect(mock.undo).toHaveBeenCalledTimes(2);
+});
+
+// A spent token is final. The caller hears it once, and a later run sends nothing.
+it("reports a spent token to the caller and sends no second undo", async () => {
+  mock.undo.mockResolvedValue({ ok: false, code: "validation", message: "This token was already used.", status: 422 });
+  const onSpent = vi.fn();
+  const onUndone = vi.fn();
+  const toast: ToastState = {};
+  const run = applyUndoToast(toast as unknown as Toast, "tok-1", { onSpent, onUndone });
+
+  await run();
+  await run();
+
+  expect(mock.undo).toHaveBeenCalledTimes(1);
+  expect(toast.title).toBe("Could not undo the change");
+  expect(toast.primaryAction).toBeUndefined();
+  expect(onSpent).toHaveBeenCalledTimes(1);
+  expect(onUndone).not.toHaveBeenCalled();
 });
 
 it("finalises the toast after a retry that follows a failed undo", async () => {

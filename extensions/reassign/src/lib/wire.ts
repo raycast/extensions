@@ -28,6 +28,7 @@ export type ErrorCode =
   | "unauthorized"
   | "permission"
   | "scope"
+  | "stale"
   | "read_only"
   | "not_found"
   | "validation"

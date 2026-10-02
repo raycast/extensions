@@ -28,7 +28,7 @@ import {
   writeEvents,
 } from "./lib/api";
 import { captureText, captureTextOp, captureToast } from "./lib/capture-text";
-import { batchFailure, needsSignIn } from "./lib/envelope";
+import { needsSignIn } from "./lib/envelope";
 import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
 import {
   addDaysISO,
@@ -54,7 +54,6 @@ import {
   CalendarFormValues,
   CalendarWriteFields,
   calendarCreateFields,
-  hasCalendarChange,
   useCalendars,
 } from "./components/calendar-fields";
 import { ScheduleContext } from "./lib/launch-context";
@@ -328,11 +327,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
         now: accountClock(),
         earliest: parsed?.earliest,
         latest: parsed?.latest,
-        areaId: extras.areaId,
-        activityTypeId: extras.activityTypeId,
-        kind: extras.kind,
-        notes: extras.notes,
-        calendar,
+        fields: { ...extras, ...calendar },
         push,
         onSaved,
       });
@@ -583,11 +578,8 @@ interface FlexibleArgs {
   now: Date;
   earliest?: string;
   latest?: string;
-  areaId?: string;
-  activityTypeId?: string;
-  kind?: EventKind;
-  notes?: string;
-  calendar: CalendarWriteFields;
+  // The optional block fields and the calendar choice, the same as on an exact create.
+  fields: ReturnType<typeof optionalFields> & CalendarWriteFields;
   push: (element: ReactNode) => void;
   onSaved: () => Promise<void>;
 }
@@ -637,10 +629,7 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
     durationMinutes: args.minutes,
     earliest: searchWindow.earliest,
     latest: searchWindow.latest,
-    areaId: args.areaId,
-    activityTypeId: args.activityTypeId,
-    kind: args.kind,
-    notes: args.notes,
+    ...args.fields,
     autoCommitBest: false,
     // The key of this plan: the 503 retry sends it again, and the server
     // replays the first result. The server replays only by this key.
@@ -665,12 +654,7 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
         name={args.name}
         onSaved={args.onSaved}
         request={request}
-        calendar={args.calendar}
-        initial={{
-          options: outcome.options,
-          commitToken: outcome.commitToken,
-          expiresAt: outcome.expiresAt,
-        }}
+        initial={{ options: outcome.options, commitToken: outcome.commitToken }}
       />,
     );
     return;
@@ -681,13 +665,11 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
 interface ProposalState {
   options: Proposal[];
   commitToken: string;
-  expiresAt?: number; // epoch ms; the proposals are stale past this
 }
 
 function ProposalsList(props: {
   name: string;
   request: PlanRequest;
-  calendar: CalendarWriteFields;
   initial: ProposalState;
   onSaved: () => Promise<void>;
 }) {
@@ -699,24 +681,19 @@ function ProposalsList(props: {
   // autoCommitBest off the server never books; it returns the options.
   async function replan(toast: Toast): Promise<void> {
     const result = await planSchedule([{ ...props.request, requestId: randomUUID(), autoCommitBest: false }]);
-    if (!result.ok) {
-      failToast(toast, result);
-      return;
-    }
-    const outcome = readOutcome(result.data);
-    if (outcome.kind === "committed") return finishCommitted(toast, outcome, props);
-    if (outcome.kind === "proposals") {
-      setState({
-        options: outcome.options,
-        commitToken: outcome.commitToken,
-        expiresAt: outcome.expiresAt,
-      });
+    const outcome = result.ok ? readOutcome(result.data) : undefined;
+    if (outcome?.kind === "committed") return finishCommitted(toast, outcome, props);
+    if (outcome?.kind === "proposals") {
+      setState({ options: outcome.options, commitToken: outcome.commitToken });
       toast.style = Toast.Style.Success;
       toast.title = "Refreshed the open slots";
       toast.message = "The earlier ones expired.";
       return;
     }
-    showNoSlot(toast, outcome.error);
+    // The old options are dead, so a tap on one must not send the same plan again.
+    setState((current) => ({ ...current, options: [] }));
+    if (!result.ok) failToast(toast, result);
+    else showNoSlot(toast, outcome?.kind === "failed" ? outcome.error : undefined);
   }
 
   async function confirm(index: number): Promise<void> {
@@ -724,16 +701,11 @@ function ProposalsList(props: {
     confirming.current = true;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Confirming…" });
     try {
-      // Late confirm: the commit token expired. Silently re-plan and re-present,
-      // never a raw "expired" error. The window is server-tunable — trust expiresAt.
-      if (state.expiresAt !== undefined && Date.now() >= state.expiresAt) {
-        toast.title = "Refreshing slots…";
-        await replan(toast);
-        return;
-      }
+      // The server checks the expiry, so a device clock that is wrong cannot block a confirm.
       const result = await confirmSchedule([{ token: state.commitToken, choice: index }]);
       const outcome = result.ok ? readOutcome(result.data) : undefined;
-      // The server refuses an expired token with `not_found`; re-plan as above.
+      // The server refuses an expired token with `not_found`. Re-plan and
+      // re-present the slots, never a raw "expired" error.
       const failure = !result.ok ? result : outcome?.kind === "failed" ? outcome.error : undefined;
       if (failure?.code === "not_found") {
         toast.title = "Refreshing slots…";
@@ -755,6 +727,11 @@ function ProposalsList(props: {
 
   return (
     <List navigationTitle={`Pick a slot for “${props.name}”`}>
+      <List.EmptyView
+        icon={Icon.Calendar}
+        title="No open slots"
+        description="Go back and try another day or a shorter block."
+      />
       {state.options.map((option, index) => (
         <List.Item
           key={index}
@@ -774,34 +751,16 @@ function ProposalsList(props: {
 
 type Committed = Extract<ReturnType<typeof readOutcome>, { kind: "committed" }>;
 
-/** A booked plan: the success toast with Undo, the chosen calendar, then close the form. */
+/** A booked plan: the success toast with Undo, then close the form. */
 async function finishCommitted(
   toast: Toast,
   outcome: Committed,
-  block: { name: string; calendar: CalendarWriteFields; onSaved: () => Promise<void> },
+  block: { name: string; onSaved: () => Promise<void> },
 ): Promise<void> {
   toast.style = Toast.Style.Success;
   toast.title = `Scheduled “${block.name}”`;
   if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
-  await applyCalendar(outcome.eventId, block.calendar, toast);
   await block.onSaved();
-}
-
-/**
- * The flexible fit has no calendar fields, so a chosen calendar lands in a
- * follow-up `update` op on the new event. The block stays scheduled either way;
- * a failure only changes the toast message.
- */
-async function applyCalendar(eventId: string | undefined, calendar: CalendarWriteFields, toast: Toast): Promise<void> {
-  if (!hasCalendarChange(calendar)) return;
-  if (!eventId) {
-    toast.message = "Pick the calendar with Edit Details.";
-    return;
-  }
-  const result = await writeEvents([{ op: "update", id: eventId, ...calendar }]);
-  if (!result.ok || batchFailure(result.data)) {
-    toast.message = "The calendar did not apply. Pick it with Edit Details.";
-  }
 }
 
 /** A plan without a slot. A rejected row shows the server's reason instead. */

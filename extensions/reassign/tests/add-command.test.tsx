@@ -73,7 +73,6 @@ vi.mock("../src/components/states", () => ({ refusalView: vi.fn() }));
 vi.mock("../src/components/calendar-fields", () => ({
   useCalendars: () => ({ writable: [] }),
   calendarCreateFields: () => mock.calendar,
-  hasCalendarChange: (fields: Record<string, unknown>) => Object.keys(fields).length > 0,
   CalendarFields: "CalendarFields",
   CALENDAR_DEFAULT: "",
 }));
@@ -561,26 +560,50 @@ async function openProposals(expiresAt: Date) {
   return () => {
     mock.cursor = 0;
     const tree = nodes((list.type as (props: unknown) => unknown)(list.props));
-    const action = tree.find((n) => n.props.title === "Use This Slot")!;
-    return (action.props as unknown as { onAction: () => Promise<void> }).onAction;
+    const action = tree.find((n) => n.props.title === "Use This Slot");
+    // No slot left gives undefined; the callers that pick a slot call it at once.
+    return (action?.props as unknown as { onAction: () => Promise<void> } | undefined)?.onAction as () => Promise<void>;
   };
 }
 
-it("re-plans instead of sending an expired commit token", async () => {
+it("lets the server judge the expiry, then re-plans with the same calendar", async () => {
+  mock.calendar = { calendarId: null };
+  // A device clock past `expiresAt` must not block the confirm: the server decides.
   const slot = await openProposals(new Date(NOON.getTime() - 60_000));
+  mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "That proposal has expired." });
   mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
   await slot()();
-  expect(mock.confirm).not.toHaveBeenCalled();
+  expect(mock.confirm).toHaveBeenCalledWith([{ token: "tok-1", choice: 0 }]);
   expect(mock.plan).toHaveBeenCalledTimes(2);
   const [first, second] = mock.plan.mock.calls.map((call) => call[0][0]);
   expect(second.requestId).not.toBe(first.requestId);
   expect(second.autoCommitBest).toBe(false);
+  // The confirm sends only the token, so the re-plan must keep the calendar choice ("Reassign only" here).
+  expect(second.calendarId).toBeNull();
 
   // The fresh proposals replace the stale ones, so the next pick sends the new token.
   mock.confirm.mockResolvedValueOnce(booked);
   await slot()();
-  expect(mock.confirm).toHaveBeenCalledWith([{ token: "tok-2", choice: 0 }]);
+  expect(mock.confirm).toHaveBeenLastCalledWith([{ token: "tok-2", choice: 0 }]);
   expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("a sure confirm with a device clock that is wrong still books", async () => {
+  const slot = await openProposals(new Date(NOON.getTime() - 3_600_000));
+  mock.confirm.mockResolvedValueOnce(booked);
+  await slot()();
+  expect(mock.plan).toHaveBeenCalledTimes(1);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("clears the dead slots when the re-plan finds none", async () => {
+  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
+  mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "That proposal has expired." });
+  mock.plan.mockResolvedValueOnce({ ok: true, data: { results: [] } });
+  await slot()();
+  expect(mock.plan).toHaveBeenCalledTimes(2);
+  // No slot is left, so a tap cannot send the same closed window again.
+  expect(slot()).toBeUndefined();
 });
 
 it("re-plans when the server refuses the token with not_found", async () => {
@@ -606,12 +629,13 @@ it("sends one commit for a double tap on a slot", async () => {
   expect(mock.root).toHaveBeenCalledTimes(1);
 });
 
-it("a committed slot applies the chosen calendar, then closes the form", async () => {
+it("the plan carries the chosen calendar, so a committed slot needs no second write", async () => {
   mock.calendar = { calendarId: "work" };
   const slot = await openProposals(new Date(NOON.getTime() + 600_000));
+  expect(mock.plan).toHaveBeenCalledWith([expect.objectContaining({ calendarId: "work" })]);
   mock.confirm.mockResolvedValueOnce(booked);
   await slot()();
-  expect(mock.create).toHaveBeenCalledWith({ op: "update", id: "ev1", calendarId: "work" });
+  expect(mock.create).not.toHaveBeenCalled();
   expect(mock.root).toHaveBeenCalledTimes(1);
 });
 

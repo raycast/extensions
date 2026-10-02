@@ -355,8 +355,11 @@ export function writeEvents(ops: WriteOp[]): Promise<ApiResult<BatchReceipt>> {
   return request<BatchReceipt>("POST", PATHS.events, { ops });
 }
 
-/** One /schedule/plan request. The bounds are local datetimes; `start` excludes the window. */
-export interface PlanRequest {
+/**
+ * One /schedule/plan request. The bounds are local datetimes; `start` excludes the window.
+ * The calendar fields have the same meaning as on a `create` op. The proposal keeps them for `/schedule/confirm`.
+ */
+export interface PlanRequest extends Pick<EventFields, "calendarId" | "mirrorCalendarIds"> {
   name: string;
   durationMinutes: number;
   start?: string;
