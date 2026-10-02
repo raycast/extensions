@@ -13,11 +13,11 @@ const ANDROMELD_URL = "https://andromeld.catchingnow.com";
 
 type AndroidApp = {
   name: string;
+  subtitle: string;
   keywords?: string[];
   packageName: string;
   userId: number;
   deviceSerial: string;
-  deviceName: string;
   iconPath?: string;
   url: string;
 };
@@ -33,7 +33,6 @@ function isAndroidApp(value: unknown): value is AndroidApp {
     typeof app.packageName === "string" &&
     typeof app.url === "string" &&
     typeof app.deviceSerial === "string" &&
-    typeof app.deviceName === "string" &&
     typeof app.userId === "number"
   );
 }
@@ -110,9 +109,8 @@ export default function Command() {
           key={`${app.deviceSerial}:${app.userId}:${app.packageName}`}
           icon={app.iconPath ?? Icon.Mobile}
           title={app.name}
-          subtitle={app.packageName}
+          subtitle={app.subtitle}
           keywords={app.keywords}
-          accessories={[{ text: app.deviceName }]}
           actions={
             <ActionPanel>
               <Action title="Open App" icon={Icon.ArrowRight} onAction={() => open(app.url)} />
