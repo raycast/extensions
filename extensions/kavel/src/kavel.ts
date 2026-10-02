@@ -62,6 +62,7 @@ export async function generate(
     throw new KavelError("Kavel returned no task id.");
   onStatus("Queued: free runs wait a little before they start…");
   const deadline = Date.now() + 6 * 60 * 1000;
+  let refusals = 0;
   while (Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 5000));
     let p: Record<string, unknown>;
@@ -72,9 +73,14 @@ export async function generate(
             `/api/ai/anon-query?taskId=${encodeURIComponent(d.id)}&provider=kie&mediaType=image`,
             auth,
           );
-    } catch {
-      continue; // a dropped poll is not a failed job
+    } catch (e) {
+      // A dropped connection is not a failed job: free runs start on a later
+      // poll, so keep going. A refusal from the API (bad key, unknown task) is
+      // different; report it once it repeats instead of waiting out the deadline.
+      if (e instanceof KavelError && ++refusals >= 3) throw e;
+      continue;
     }
+    refusals = 0;
     const clean = p.cleanImages as string[] | undefined;
     const images = p.images as string[] | undefined;
     if (clean?.length) return clean[0];
