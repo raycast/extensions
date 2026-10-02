@@ -1,9 +1,8 @@
 import { LinearClient, PaginationOrderBy, ReleaseStageType } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { afterDate, client, collect, PageInput, resolveReleasePipeline } from "./linearUtils";
+import { serializeRelease, serializeReleaseStage } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type ReleaseFilter = NonNullable<Parameters<LinearClient["releases"]>[0]>["filter"];
 
@@ -23,7 +22,7 @@ interface Input extends PageInput {
   includeArchived?: boolean;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const pipeline = input.pipeline ? await resolveReleasePipeline(input.pipeline) : undefined;
   const createdAfter = afterDate(input.createdAt);
   const updatedAfter = afterDate(input.updatedAt);
@@ -66,13 +65,13 @@ export default withAccessToken(linear)(async (input: Input) => {
   return {
     ...result,
     nodes: await Promise.all(
-      result.nodes.map(async (release) => ({
-        ...release,
-        pipelineId: release.pipelineId,
-        stage: input.stage || input.stageType ? await release.stage : undefined,
-        hasReleaseNotes: release.releaseNotes.length > 0,
-        releaseNotes: input.includeReleaseNotes ? release.releaseNotes : undefined,
-      })),
+      result.nodes.map(async (release) => {
+        const stage = input.stage || input.stageType ? await release.stage : undefined;
+        return {
+          ...serializeRelease(release, { releaseNotes: input.includeReleaseNotes }),
+          stage: stage ? serializeReleaseStage(stage) : undefined,
+        };
+      }),
     ),
   };
 });
