@@ -138,6 +138,7 @@ export function DownloadHistory() {
   const [entries, setEntries] = useState<HistoryEntry[]>();
   const [filter, setFilter] = useState<HistoryFilter>("all");
   const [showingDetail, setShowingDetail] = useState(true);
+  const [searchText, setSearchText] = useState("");
 
   // Bumped by every local change (Remove, Clear): a read that started before
   // it is older than what's on screen and must not be shown.
@@ -182,6 +183,8 @@ export function DownloadHistory() {
 
   const visible = (entries ?? []).filter((e) => matchesFilter(e, filter));
   const groups = groupByDay(visible);
+  // The detail pane shows type, size and date, and the narrow list beside it would cut them off.
+  const split = showingDetail && visible.length > 0;
 
   async function remove(entry: HistoryEntry) {
     localChanges.current++;
@@ -221,7 +224,9 @@ export function DownloadHistory() {
   return (
     <List
       isLoading={entries === undefined}
-      isShowingDetail={showingDetail && visible.length > 0}
+      isShowingDetail={split}
+      filtering
+      onSearchTextChange={setSearchText}
       navigationTitle="Download History"
       searchBarPlaceholder="Search downloads by title, channel or site"
       searchBarAccessory={
@@ -249,7 +254,12 @@ export function DownloadHistory() {
         />
       )}
       {groups.map((group) => (
-        <List.Section key={group.title} title={group.title} subtitle={plural(group.entries.length, "download")}>
+        <List.Section
+          key={group.title}
+          title={group.title}
+          // Raycast filters the search after this, so a count would include entries it hides.
+          subtitle={searchText ? undefined : plural(group.entries.length, "download")}
+        >
           {group.entries.map((e) => {
             const fileExists = exists.get(e.id);
             const filePath = e.filePath && fileExists ? e.filePath : undefined;
@@ -266,9 +276,13 @@ export function DownloadHistory() {
                 accessories={[
                   ...(e.status === "failed" ? [{ tag: { value: "Failed", color: Color.Red } }] : []),
                   ...(fileExists === false ? [{ tag: { value: "Missing", color: Color.Orange } }] : []),
-                  ...(size ? [{ text: size }] : []),
-                  { tag: { value: kindTitle(e.kind), color: KIND_COLOR[e.kind] } },
-                  { date: new Date(e.finishedAt), tooltip: whenText(e) },
+                  ...(split
+                    ? []
+                    : [
+                        ...(size ? [{ text: size }] : []),
+                        { tag: { value: kindTitle(e.kind), color: KIND_COLOR[e.kind] } },
+                        { date: new Date(e.finishedAt), tooltip: whenText(e) },
+                      ]),
                 ]}
                 detail={
                   <List.Item.Detail
