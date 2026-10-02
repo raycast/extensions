@@ -15,7 +15,7 @@ type Input = {
  * last price, day change, day range, 52-week range, volume, and fundamentals
  * (P/E, EPS, dividend yield, market cap).
  */
-export default withAccessToken(schwabOAuth)(async (input: Input) => {
+const getQuote = withAccessToken(schwabOAuth)(async (input: Input) => {
   const symbols = input.symbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean);
   if (symbols.length === 0) throw new Error("No symbols provided");
 
@@ -44,3 +44,8 @@ export default withAccessToken(schwabOAuth)(async (input: Input) => {
     };
   });
 });
+
+// Keep the input explicit on the exported function for Raycast tool schema extraction.
+export default async function tool(input: Input) {
+  return getQuote(input);
+}
