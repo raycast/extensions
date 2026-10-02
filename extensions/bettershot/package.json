@@ -49,6 +49,18 @@
       ]
     },
     {
+      "name": "capture-scrolling",
+      "title": "Capture Scrolling",
+      "subtitle": "BetterShot",
+      "description": "Capture a scrolling area with BetterShot",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "scroll",
+        "long"
+      ]
+    },
+    {
       "name": "scan-text",
       "title": "Scan Text (OCR)",
       "subtitle": "BetterShot",

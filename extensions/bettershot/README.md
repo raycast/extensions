@@ -1,6 +1,6 @@
 # BetterShot for Raycast
 
-Seven Raycast commands for the [BetterShot macOS app](https://github.com/KartikLabhshetwar/better-shot), using its documented [URL scheme](https://github.com/KartikLabhshetwar/better-shot#automate-captures).
+Eight Raycast commands for the [BetterShot macOS app](https://github.com/KartikLabhshetwar/better-shot), using its documented [URL scheme](https://github.com/KartikLabhshetwar/better-shot#automate-captures).
 
 ## Requirements
 
@@ -19,6 +19,7 @@ For a hotkey, open Raycast Settings → Extensions → BetterShot and assign one
 | Capture Region | `bettershot://capture/region` |
 | Capture Fullscreen | `bettershot://capture/fullscreen` |
 | Capture Window | `bettershot://capture/window` |
+| Capture Scrolling | `bettershot://capture/scroll` |
 | Scan Text (OCR) | `bettershot://ocr` |
 | Pick Color | `bettershot://color-picker` |
 | Open Recording Options | `bettershot://record` |
@@ -44,7 +45,7 @@ npm run build
 npm run lint
 ```
 
-Tests cover all seven command-to-URL mappings, awaiting window closure, and launch failures. They mock the Raycast API; final capture testing must happen inside Raycast.
+Tests cover all eight command-to-URL mappings, awaiting window closure, and launch failures. They mock the Raycast API; final capture testing must happen inside Raycast.
 
 Built against `@raycast/api` 2.2.1 (pinned for compatibility with released Raycast clients) using the [Raycast API documentation](https://developers.raycast.com). Dependencies are pinned by `package-lock.json`. `npm run build` writes bundles into `dist/`; import the extension folder, not an individual bundle.
 

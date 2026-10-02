@@ -4,6 +4,7 @@ export type BetterShotAction =
   | "capture/region"
   | "capture/fullscreen"
   | "capture/window"
+  | "capture/scroll"
   | "ocr"
   | "color-picker"
   | "record"

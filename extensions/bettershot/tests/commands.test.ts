@@ -7,6 +7,7 @@ const routes = {
   "capture-region": "capture/region",
   "capture-fullscreen": "capture/fullscreen",
   "capture-window": "capture/window",
+  "capture-scrolling": "capture/scroll",
   "scan-text": "ocr",
   "pick-color": "color-picker",
   "record-screen": "record",
