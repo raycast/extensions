@@ -16,6 +16,25 @@ type Data = { letters: Letter[]; langs: Record<string, string> };
 
 const data = letters as Data;
 
+/** "māori" → "maori": the same word without its accents, so a name matches however it is typed. */
+const fold = (word: string) => word.normalize("NFD").replace(/\p{M}/gu, "");
+
+/**
+ * The words in a name, lowercased, each with an accent-free copy where it differs. Splitting on
+ * [^A-Za-z] instead cut "Māori" into "m" and "ori", so "maori" found nothing — and the stray "m"
+ * matched every letter Māori uses. One-letter fragments are dropped for the same reason.
+ */
+function tokens(text: string): string[] {
+  const out: string[] = [];
+  for (const word of text.toLowerCase().split(/[^\p{L}\p{N}]+/u)) {
+    if (word.length < 2) continue;
+    out.push(word);
+    const plain = fold(word);
+    if (plain !== word) out.push(plain);
+  }
+  return out;
+}
+
 /**
  * Raycast filters the list itself, indexing `title` and `keywords` only — NOT `subtitle` and NOT
  * `accessories`. So every token someone might type has to be in `keywords`, or it simply will not
@@ -29,15 +48,24 @@ function keywordsFor(letter: Letter, langs: Record<string, string>): string[] {
   words.add(letter.c);
   words.add(letter.u.toLowerCase());
   words.add(`u+${letter.u.toLowerCase()}`);
-  if (letter.m) for (const w of letter.m.split(/[^A-Za-z]+/)) if (w) words.add(w.toLowerCase());
+  if (letter.m) for (const w of tokens(letter.m)) words.add(w);
   for (const code of letter.l ?? []) {
     words.add(code);
     const name = langs[code];
-    if (name) for (const w of name.split(/[^A-Za-z]+/)) if (w) words.add(w.toLowerCase());
+    if (name) for (const w of tokens(name)) words.add(w);
   }
   // The shared search string carries the plain-English wordings ("two dots", "accent going up")
   // that the rest of Accent Letters is searchable by; keep them working here too.
-  if (letter.t) for (const w of letter.t.split(/\s+/)) if (w.length > 1) words.add(w.toLowerCase());
+  // Each word whole, so "u+00e1" and "alt+0225" still match as typed, and also in clean pieces, so
+  // "hacek" and "háček" find what the data writes as "(háček)". tokens() drops one-letter pieces, so
+  // "u+00e1" never adds a bare "u" to every letter.
+  if (letter.t) {
+    for (const w of letter.t.toLowerCase().split(/\s+/)) {
+      if (w.length < 2) continue;
+      words.add(w);
+      for (const piece of tokens(w)) words.add(piece);
+    }
+  }
   // The dataset's search string carries the FRIENDLY description ("small a with acute accent"), not
   // the Unicode name, so "latin" matched nothing even though the listing advertises full-name
   // search. Index the real name too.
