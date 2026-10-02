@@ -1,6 +1,6 @@
 # Folio Changelog
 
-## [Reliability Fixes] - {PR_MERGE_DATE}
+## [Reliability Fixes] - 2026-10-02
 
 - Fixed being signed out for no reason when two Folio commands refreshed the SnapTrade session at the same moment (for example the Menu Bar in the background and a command you opened)
 - The session now refreshes a few minutes before it expires, so requests don't straddle the expiry
