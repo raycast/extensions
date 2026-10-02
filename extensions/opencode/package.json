@@ -41,6 +41,15 @@
       "placeholder": "oc_sk_..."
     },
     {
+      "name": "zen",
+      "title": "OpenCode Zen",
+      "label": "Show OpenCode Zen models",
+      "description": "List the pay-as-you-go models from your OpenCode Console workspace. Uncheck if you only use Go.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "go",
       "title": "OpenCode Go",
       "label": "Show OpenCode Go models",

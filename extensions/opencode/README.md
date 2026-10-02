@@ -14,7 +14,7 @@ Run **Refresh Models** after changing models in the Console to update the picker
 
 ## OpenCode Go
 
-If you subscribe to [OpenCode Go](https://opencode.ai/docs/go/), check **OpenCode Go** in the preferences. Go models use the same API key and show up as `<model> (Go)`.
+If you subscribe to [OpenCode Go](https://opencode.ai/docs/go/), check **OpenCode Go** in the preferences. Go models use the same API key and show up as `<model> (Go)`. If you only use Go, uncheck **OpenCode Zen** to hide the pay-as-you-go models.
 
 ## Ask OpenCode
 

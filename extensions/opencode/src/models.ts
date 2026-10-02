@@ -12,9 +12,11 @@ import { restoreToolNames, shortenMessages, toTools } from "./tools";
 const INFERENCE_URL = "https://opencode.ai/inference";
 
 export const getModels: AI.GetModels = async () => {
-  const { apiKey, go } = getPreferenceValues<Preferences>();
+  const { apiKey, zen, go } = getPreferenceValues<Preferences>();
+  if (!zen && !go) throw new Error("No OpenCode models enabled. Check OpenCode Zen or OpenCode Go in the preferences.");
   const [models, reasoning, goModels] = await Promise.all([
-    loadModels(apiKey),
+    // Go-only setups still read the catalog for Go model metadata, but don't fail without it.
+    zen ? loadModels(apiKey) : loadModels(apiKey).catch(() => []),
     loadReasoningSupport(),
     go ? loadGoModels(apiKey) : [],
   ]);
@@ -48,7 +50,7 @@ export const getModels: AI.GetModels = async () => {
   saveVariants(variants);
   // Go shares model IDs with the catalog, so reuse its metadata where the model is in both.
   const catalog = new Map(models.map((model) => [model.id, model]));
-  return [...registered, ...goModels.map((id) => goModel(id, catalog.get(id)))];
+  return [...(zen ? registered : []), ...goModels.map((id) => goModel(id, catalog.get(id)))];
 };
 
 function goModel(id: string, model?: Awaited<ReturnType<typeof loadModels>>[number]): AI.RegisteredModel {
