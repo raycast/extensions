@@ -6,18 +6,16 @@ import {
   List,
   LocalStorage,
   closeMainWindow,
-  environment,
   getPreferenceValues,
   open,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execFile } from "node:child_process";
-import { join } from "node:path";
-import { promisify } from "node:util";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  press,
+  scan as scanMenuBar,
+} from "swift:../swift/menu-bar-icon-search";
 
-const runFile = promisify(execFile);
-const helper = join(environment.assetsPath, "menubar-helper");
 const cacheKey = "menu-bar-items-v2";
 
 type MenuItem = {
@@ -45,8 +43,7 @@ export default function Command() {
     setError("");
     setIsRefreshing(true);
     try {
-      const { stdout } = await runFile(helper, ["scan"], { timeout: 12000 });
-      const nextScan = JSON.parse(stdout) as Scan;
+      const nextScan: Scan = await scanMenuBar();
       setScan(nextScan);
       if (nextScan.trusted)
         await LocalStorage.setItem(cacheKey, JSON.stringify(nextScan));
@@ -90,17 +87,15 @@ export default function Command() {
   async function activate(item: MenuItem) {
     try {
       await closeMainWindow();
-      const { stdout } = await runFile(helper, [
-        "press",
-        String(item.pid),
-        String(item.index),
+      const response = await press(
+        item.pid,
+        item.index,
         item.title,
         item.identifier ?? "",
         item.role ?? "",
-        String(item.itemCount ?? 0),
+        item.itemCount ?? 0,
         item.bundlePath ?? "",
-      ]);
-      const response = JSON.parse(stdout) as { ok: boolean; error?: string };
+      );
       if (!response.ok)
         throw new Error(response.error ?? "Could not open the menu bar icon.");
     } catch (cause) {
@@ -157,7 +152,7 @@ export default function Command() {
           description={
             error ||
             (scan && !scan.trusted
-              ? "Grant Accessibility access to the helper, then reopen this command."
+              ? "Grant Accessibility access to Raycast, then reopen this command."
               : undefined)
           }
           actions={

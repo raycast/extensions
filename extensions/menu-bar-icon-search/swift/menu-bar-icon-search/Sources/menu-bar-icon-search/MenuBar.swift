@@ -1,8 +1,9 @@
 import AppKit
 import ApplicationServices
 import Foundation
+import RaycastSwiftMacros
 
-private struct Item: Codable {
+struct Item: Codable {
     let pid: Int32
     let index: Int
     let itemCount: Int
@@ -15,12 +16,12 @@ private struct Item: Codable {
     let frame: [Double]?
 }
 
-private struct Scan: Codable {
+struct Scan: Codable {
     let trusted: Bool
     let items: [Item]
 }
 
-private struct Reply: Codable {
+struct Reply: Codable {
     let ok: Bool
     let error: String?
 }
@@ -172,7 +173,7 @@ private enum MenuBar {
     static func press(pid: Int32, index: Int, title: String, identifier: String,
                       role: String, itemCount: Int, bundlePath: String) -> Reply {
         guard AXIsProcessTrusted() else {
-            return Reply(ok: false, error: "Grant Accessibility access to Raycast or the helper.")
+            return Reply(ok: false, error: "Grant Accessibility access to Raycast.")
         }
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == pid }) else {
             return Reply(ok: false, error: "The app is no longer running.")
@@ -196,19 +197,14 @@ private enum MenuBar {
 
 }
 
-func output<T: Encodable>(_ value: T) {
-    let data = (try? JSONEncoder().encode(value)) ?? Data("{}".utf8)
-    FileHandle.standardOutput.write(data)
-    FileHandle.standardOutput.write(Data("\n".utf8))
+@raycast func scan() async -> Scan {
+    await Task.detached { MenuBar.scan() }.value
 }
 
-let args = Array(CommandLine.arguments.dropFirst())
-switch args.first {
-case "scan": output(MenuBar.scan())
-case "press" where args.count == 8:
-    if let pid = Int32(args[1]), let index = Int(args[2]), let itemCount = Int(args[6]) {
-        output(MenuBar.press(pid: pid, index: index, title: args[3], identifier: args[4],
-                             role: args[5], itemCount: itemCount, bundlePath: args[7]))
-    } else { output(Reply(ok: false, error: "Invalid arguments.")) }
-default: output(Reply(ok: false, error: "Invalid command."))
+@raycast func press(pid: Int32, index: Int, title: String, identifier: String,
+                    role: String, itemCount: Int, bundlePath: String) async -> Reply {
+    await Task.detached {
+        MenuBar.press(pid: pid, index: index, title: title, identifier: identifier,
+                      role: role, itemCount: itemCount, bundlePath: bundlePath)
+    }.value
 }

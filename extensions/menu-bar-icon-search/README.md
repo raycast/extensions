@@ -32,16 +32,16 @@ One thing was still missing: a fast way to open the menu of a hidden app icon. I
 - **Open hidden icons.** The extension asks macOS to press the selected item, without changing which icons you have chosen to show.
 - **Keep system controls optional.** Wi-Fi, Sound, Control Center, and other macOS items are excluded by default and can be enabled in the extension's preferences.
 
-The bundled Swift helper handles discovery and activation through macOS Accessibility. It runs only for a scan or an activation; there is no separate app or resident background process. The last scan is stored locally by Raycast.
+A native Swift module, built with Raycast's Swift tools, handles discovery and activation through macOS Accessibility. It runs only for a scan or an activation; there is no separate app or resident background process. The last scan is stored locally by Raycast.
 
 ## Requirements
 
-- Raycast on macOS and Accessibility access for the bundled `menubar-helper`
+- Raycast on macOS with Accessibility access
 
 ## Get started
 
 1. In Raycast, open **Search Menu Bar Icons**.
-2. Grant Accessibility access to `menubar-helper` when macOS requests it, then reopen the command.
+2. Grant Accessibility access to Raycast when macOS requests it, then reopen the command.
 3. Assign a shortcut to **Search Menu Bar Icons** in Raycast's extension settings if you want instant access.
 
 | In the list | Action |
@@ -54,17 +54,15 @@ The bundled Swift helper handles discovery and activation through macOS Accessib
 
 ## Hidden icons and limitations
 
-The helper presses the selected item through Accessibility and lets macOS position its menu. A hidden item's menu may open at the upper-left corner of the screen because macOS does not expose an on-screen position for its icon. The extension does not reveal the icon or change its Menu Bar setting. Some apps may not support an Accessibility press.
+The extension presses the selected item through Accessibility and lets macOS position its menu. A hidden item's menu may open at the upper-left corner of the screen because macOS does not expose an on-screen position for its icon. The extension does not reveal the icon or change its Menu Bar setting. Some apps may not support an Accessibility press.
 
 Results depend on what each app exposes through Accessibility. Items without an Accessibility press action are not listed. The extension removes duplicates when it can identify the same element, frame, or identifier without conflicting positions. A cached result can be briefly out of date until the next scan finishes; use **Refresh Items** if an app changes. An app may control where its own panel opens.
 
-The helper includes Apple silicon and Intel binaries. Visible-icon search on earlier macOS versions and Intel hardware has not been physically verified.
+Raycast builds the Swift module for the Mac it runs on. Visible-icon search on earlier macOS versions and Intel hardware has not been physically verified.
 
 ## Development
 
-Run `npm install` and `npm run dev` to load the extension locally. After changing the Swift helper, run `./build-helper.sh` to rebuild `assets/menubar-helper`. Run `npm run build` and `npm run lint` to check the Raycast extension. The bundled helper is built from [swift/MenuBarHelper.swift](swift/MenuBarHelper.swift) for Apple silicon and Intel Macs.
-
-For a local development installation, Raycast copies the helper to `~/.config/raycast/extensions/menu-bar-icon-search/assets/`. Rebuilding the helper may require granting Accessibility access again.
+Run `npm install` and `npm run dev` to load the extension locally. Run `npm run build` and `npm run lint` to check the Raycast extension. The native code is a Swift package in [swift/menu-bar-icon-search](swift/menu-bar-icon-search), compiled automatically by `ray develop` and `ray build`; it requires Xcode 16.3 or later.
 
 ## License
 
