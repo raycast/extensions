@@ -1,6 +1,6 @@
 # SocialFaktory Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-02
 
 - Add the Write Post command to write three post variants in a brand's voice for X or LinkedIn
 - Post a variant to X or LinkedIn now, or schedule it, from the brand's connected account
