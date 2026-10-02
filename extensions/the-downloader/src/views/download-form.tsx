@@ -31,7 +31,7 @@ import {
   supportedFiletypes,
 } from "../lib/filetype.js";
 import { composeVideoFormat } from "../lib/video-format.js";
-import { fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
+import { LiveStreamError, fetchVideoInfo, isLiveStream, runThumbnailDownload, runVideoDownload } from "../lib/ytdlp.js";
 import { ensureFreshTools, hintOutdatedTool } from "../lib/tool-updates.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
 import { isLoginRequiredError, runGalleryDownload } from "../lib/gallerydl.js";
@@ -150,6 +150,13 @@ function failToast(toast: Toast, error: unknown): boolean {
     toast.style = Toast.Style.Failure;
     toast.title = "Cancelled";
     toast.message = undefined;
+    return false;
+  }
+  if (error instanceof LiveStreamError) {
+    // Not a tool problem, so no "update yt-dlp" hint.
+    toast.style = Toast.Style.Failure;
+    toast.title = error.message;
+    toast.message = "Try again once the stream has ended.";
     return false;
   }
   if (error instanceof RosettaRequiredError) {
@@ -572,9 +579,11 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       const { signal, done } = startAbortable(toast, session);
       session.working();
       try {
+        const denoPath = getDenoPath();
         const { filePath } = await runThumbnailDownload(getytdlPath(), {
           url: submitUrl,
           outputTemplate: path.join(folder, "%(title)s (%(id)s).%(ext)s"),
+          denoPath: fs.existsSync(denoPath) ? denoPath : undefined,
           idleMs: getIdleTimeoutMs(),
           abortSignal: signal,
         });

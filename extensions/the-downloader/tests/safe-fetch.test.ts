@@ -243,6 +243,18 @@ describe("safeFetch", () => {
 
 describe("assertPublicHost", () => {
   const publicOnly = async () => [{ address: "93.184.216.34", family: 4 as const }];
+  const failing = (code: string) => async () => {
+    throw Object.assign(new Error(`getaddrinfo ${code} nowhere.test`), { code });
+  };
+
+  it("says a name doesn't exist only when DNS says so, and passes other lookup errors on", async () => {
+    await expect(assertPublicHost("https://nowhere.test/", { resolve: failing("ENOTFOUND") })).rejects.toThrow(
+      "Couldn't find nowhere.test.",
+    );
+    await expect(assertPublicHost("https://nowhere.test/", { resolve: failing("EAI_AGAIN") })).rejects.toThrow(
+      "getaddrinfo EAI_AGAIN",
+    );
+  });
 
   it("lets a public host through", async () => {
     await expect(assertPublicHost("https://rumble.com/v1-clip.html", { resolve: publicOnly })).resolves.toBeUndefined();

@@ -4,7 +4,7 @@ import path from "path";
 import crypto from "node:crypto";
 import { environment } from "@raycast/api";
 import { forceIpv4, getDenoPath, getffmpegPath, getIdleTimeoutMs, getytdlPath, sanitizeVideoTitle } from "./utils.js";
-import { fetchVideoInfo, isLiveStream } from "./lib/ytdlp.js";
+import { LiveStreamError, fetchVideoInfo, isLiveStream } from "./lib/ytdlp.js";
 import { runWithWatchdog } from "./lib/run.js";
 import SRTParser from "srt-parser-2";
 import { Video } from "./types.js";
@@ -227,7 +227,7 @@ export async function fetchSubtitles(
 
   // Check if it's a live stream
   if (isLiveStream(video)) {
-    throw new Error("Live streams are not supported");
+    throw new LiveStreamError();
   }
 
   const wanted = subtitleLanguages(requested, video.language);

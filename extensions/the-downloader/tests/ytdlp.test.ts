@@ -8,6 +8,7 @@ import {
   buildThumbnailArgs,
   buildVideoDownloadArgs,
   extractDumpJson,
+  LiveStreamError,
   isLiveStream,
   runVideoDownload,
 } from "../src/lib/ytdlp";
@@ -111,6 +112,12 @@ describe("buildVideoDownloadArgs", () => {
     expect(args[args.indexOf("--match-filter") + 1]).toBe("!is_live");
   });
 
+  it("uses only yt-dlp's site extractors when asked, never the generic page reader", () => {
+    const args = buildVideoDownloadArgs({ ...base, format: "best#mp4", knownSitesOnly: true });
+    expect(args[args.indexOf("--use-extractors") + 1]).toBe("default,-generic");
+    expect(buildVideoDownloadArgs({ ...base, format: "best#mp4" })).not.toContain("--use-extractors");
+  });
+
   it("adds the deno JS runtime when denoPath is given", () => {
     const args = buildVideoDownloadArgs({ ...base, format: "bestaudio#mp3", denoPath: "/deno" });
     expect(args[args.indexOf("--js-runtimes") + 1]).toBe("deno:/deno");
@@ -149,7 +156,20 @@ describe("runVideoDownload", () => {
     child.stdout.emit("data", Buffer.from("[download] Launch Live does not pass filter (!is_live), skipping ..\n"));
     child.emit("close", 0);
 
-    await expect(promise).rejects.toThrow("Live streams are not supported");
+    await expect(promise).rejects.toThrow(LiveStreamError);
+  });
+
+  it("keeps a playlist's downloads when one entry was skipped as live", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const promise = runVideoDownload("/yt-dlp", options, vi.fn());
+
+    child.stdout.emit("data", Buffer.from("THE-DOWNLOADER-FILEPATH:/out/Earlier Episode.mp4\n"));
+    child.stdout.emit("data", Buffer.from("[download] Launch Live does not pass filter (!is_live), skipping ..\n"));
+    child.emit("close", 0);
+
+    await expect(promise).resolves.toEqual({ filePath: "/out/Earlier Episode.mp4" });
   });
 
   it("ignores untagged path-like lines (e.g. post-processor [ExtractAudio] Destination) — they no longer overwrite the real after_move filepath", async () => {
@@ -314,6 +334,11 @@ describe("isLiveStream", () => {
     expect(isLiveStream(video("not_live"))).toBe(false);
   });
 
+  it("treats a recording of a past live stream as an ordinary video, and one still processing as live", () => {
+    expect(isLiveStream(video("was_live"))).toBe(false);
+    expect(isLiveStream(video("post_live"))).toBe(true);
+  });
+
   it("treats an absent status as not live", () => {
     expect(isLiveStream(video(undefined))).toBe(false);
   });
@@ -333,5 +358,10 @@ describe("buildThumbnailArgs", () => {
       "/out/%(title)s.%(ext)s",
       "https://example.com/v",
     ]);
+  });
+
+  it("passes the deno JS runtime when it's installed", () => {
+    const args = buildThumbnailArgs({ url: "https://youtu.be/a", outputTemplate: "/o.%(ext)s", denoPath: "/deno" });
+    expect(args[args.indexOf("--js-runtimes") + 1]).toBe("deno:/deno");
   });
 });

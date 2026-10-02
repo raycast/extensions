@@ -31,7 +31,7 @@ export async function fetchVideoInfo(
   url: string,
   forceIpv4: boolean,
   denoPath?: string,
-  opts?: { signal?: AbortSignal; timeoutMs?: number },
+  opts?: { signal?: AbortSignal; timeoutMs?: number; knownSitesOnly?: boolean },
 ): Promise<Video> {
   const result = await execa(
     ytdlPath,
@@ -40,6 +40,7 @@ export async function fetchVideoInfo(
       denoPath ? "--js-runtimes" : "",
       denoPath ? `deno:${denoPath}` : "",
       "--no-playlist",
+      ...(opts?.knownSitesOnly ? KNOWN_SITES_ONLY : []),
       "--no-warnings",
       "--quiet",
       "--dump-json",
@@ -54,16 +55,31 @@ export async function fetchVideoInfo(
   return extractDumpJson(result.stdout);
 }
 
+const LIVE_STATUSES = new Set(["is_live", "is_upcoming", "post_live"]);
+
 /**
- * True when yt-dlp metadata marks the URL as a live (or upcoming/post-live)
- * stream. `live_status` is absent for extractors that never set it and an
- * explicit `null` for some that do — both mean "not live", so only a concrete
- * status other than "not_live" counts. (A `!== undefined` check alone treated
- * `null` as live and blocked ordinary downloads on those extractors.)
+ * True when yt-dlp metadata marks the URL as a stream that is live, upcoming,
+ * or over but not yet processed into a video. A recording of a past stream
+ * (`was_live`) is an ordinary video; an absent or `null` status means not live.
  */
 export function isLiveStream(video: Video): boolean {
-  return video.live_status !== undefined && video.live_status !== null && video.live_status !== "not_live";
+  return LIVE_STATUSES.has(video.live_status ?? "");
 }
+
+/** A download that yt-dlp skipped because the stream is live right now. */
+export class LiveStreamError extends Error {
+  constructor() {
+    super("Live streams are not supported");
+    this.name = "LiveStreamError";
+  }
+}
+
+/**
+ * yt-dlp's site extractors only, without the generic page reader: for links the
+ * AI picked, so a page can't point yt-dlp at whatever it embeds or redirects to
+ * (a router, cloud metadata).
+ */
+const KNOWN_SITES_ONLY = ["--use-extractors", "default,-generic"];
 
 export type VideoDownloadArgs = {
   url: string;
@@ -75,6 +91,8 @@ export type VideoDownloadArgs = {
   idleMs?: number;
   /** Aborting cancels the download mid-flight (used by the form's Stop action and unmount cleanup). */
   abortSignal?: AbortSignal;
+  /** Leave out yt-dlp's generic page reader (see `KNOWN_SITES_ONLY`). */
+  knownSitesOnly?: boolean;
 };
 
 /**
@@ -107,7 +125,8 @@ const FILEPATH_LINE_RE = new RegExp(`^${FILEPATH_TAG}(.+)$`);
  * `--match-filter !is_live` skips a stream that is live right now, whichever
  * command started the download: progress keeps arriving from a live stream, so
  * the idle watchdog would never stop it. yt-dlp then exits 0 with a "does not
- * pass filter" line, which `runVideoDownload` turns into an error.
+ * pass filter" line, which `runVideoDownload` turns into a `LiveStreamError`
+ * when nothing was downloaded (a playlist keeps its other entries).
  *
  * `--newline` makes yt-dlp terminate each progress update with a real newline.
  * On a pipe (non-TTY) it otherwise redraws progress with bare `\r`, which a
@@ -128,6 +147,7 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
     "--no-playlist",
     "--match-filter",
     "!is_live",
+    ...(a.knownSitesOnly ? KNOWN_SITES_ONLY : []),
   ];
   if (a.denoPath) {
     args.push("--js-runtimes", `deno:${a.denoPath}`);
@@ -195,7 +215,7 @@ export async function runVideoDownload(
     onStdoutLine: handleLine,
     abortSignal: options.abortSignal,
   });
-  if (code === 0 && skippedLive) throw new Error("Live streams are not supported");
+  if (code === 0 && skippedLive && !filePath) throw new LiveStreamError();
   if (code === 0) return { filePath };
   throw new Error(stderr.trim() || `yt-dlp exited with code ${code}`);
 }
@@ -203,6 +223,8 @@ export async function runVideoDownload(
 export type ThumbnailDownloadArgs = {
   url: string;
   outputTemplate: string;
+  /** yt-dlp's JS runtime, when installed: YouTube's extractor wants one. */
+  denoPath?: string;
   /** Idle-watchdog window in ms. Defaults to DEFAULT_IDLE_MS if omitted. */
   idleMs?: number;
   /** Aborting cancels the download mid-flight. */
@@ -211,7 +233,15 @@ export type ThumbnailDownloadArgs = {
 
 /** Build yt-dlp CLI args to fetch only a URL's thumbnail image; the video itself is skipped. */
 export function buildThumbnailArgs(a: ThumbnailDownloadArgs): string[] {
-  return ["--write-thumbnail", "--skip-download", "--no-playlist", "-o", a.outputTemplate, a.url];
+  return [
+    "--write-thumbnail",
+    "--skip-download",
+    "--no-playlist",
+    ...(a.denoPath ? ["--js-runtimes", `deno:${a.denoPath}`] : []),
+    "-o",
+    a.outputTemplate,
+    a.url,
+  ];
 }
 
 export type ThumbnailResult = { filePath: string };

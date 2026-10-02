@@ -48,9 +48,9 @@
 - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
 - The Download form's details line shows durations like `1:00` and `1:00:00` (a one-minute video showed `01`).
 - Titles with brackets show as written in Media Preview ("(Official Recap)" rendered as italic math), and the Source field reads "YouTube", "Twitch" or "X" instead of yt-dlp's "Youtube" or "TwitchVod".
-- Live streams are refused wherever a download starts — including Fast Download and a link submitted before its details load — and an earlier live link no longer blocks the next one.
-- The Download Video AI tool refuses links to local or private network addresses, like Read Link.
-- YouTube transcripts and thumbnails offer to install Deno when it's missing.
+- Recordings of past live streams download like any video (they were refused as live). A stream that is live right now is refused wherever a download starts — including Fast Download and a link submitted before its details load — and an earlier live link no longer blocks the next one.
+- The Download Video AI tool refuses links to local or private network addresses, like Read Link, and uses only yt-dlp's site extractors, not its generic page reader.
+- YouTube transcripts offer to install Deno when it's missing; thumbnails use it when it's installed.
 - A chat deleted while a save was pending stays deleted, a download recorded right after Clear History stays, and two saves of the same page started together get separate files.
 
 - **Deno is optional in Fast Download.** A missing Deno no longer blocks the whole video path — only some extractors (e.g. YouTube) benefit from a JS runtime, so sites like Twitch, Vimeo, or TikTok now download without it, matching the AI tool and transcript behavior.

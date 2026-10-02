@@ -190,7 +190,9 @@ export async function assertPublicHost(
     await checkedAddresses(host, options.resolve ?? systemResolve, (ip) => !isBlockedAddress(ip));
   } catch (error) {
     if (error instanceof BlockedAddressError) throw new BlockedAddressError(host, options.action);
-    throw new Error(`Couldn't find ${host}.`);
+    // Offline or a DNS timeout is not "no such site": pass those on as they are.
+    if ((error as NodeJS.ErrnoException).code === "ENOTFOUND") throw new Error(`Couldn't find ${host}.`);
+    throw error;
   }
 }
 

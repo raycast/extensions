@@ -13,7 +13,7 @@ import {
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { fetchVideoInfo, isLiveStream, runVideoDownload } from "../lib/ytdlp.js";
+import { LiveStreamError, fetchVideoInfo, isLiveStream, runVideoDownload } from "../lib/ytdlp.js";
 import { getConfig } from "../lib/config.js";
 import { composeVideoFormat } from "../lib/video-format.js";
 import { detectSource } from "../lib/detect.js";
@@ -33,8 +33,8 @@ export default async function tool(input: Input) {
   // This tool only does video (yt-dlp). A gallery or a Spotify link would hand
   // yt-dlp a URL it can't use and fail with a raw "No video formats found"
   // dump, so point to the Download command instead. Sites it doesn't recognize
-  // are tried, like the Download form's Video option: yt-dlp supports far more
-  // than the known list.
+  // are tried through yt-dlp's site extractors, which cover far more than the
+  // known list — but not its generic page reader (see `knownSitesOnly`).
   // The model supplies this value, so check it like the commands do: only a
   // real http(s) URL may reach yt-dlp, never something it would read as an
   // option (a prompt-injected "--batch-file=…").
@@ -70,11 +70,14 @@ export default async function tool(input: Input) {
 
   // Get video info and available formats. Cap the metadata fetch so a wedged
   // extractor can't hang the agent turn indefinitely.
-  const video = await fetchVideoInfo(ytdlPath, url, forceIpv4, deno, { timeoutMs: getIdleTimeoutMs() });
+  const video = await fetchVideoInfo(ytdlPath, url, forceIpv4, deno, {
+    timeoutMs: getIdleTimeoutMs(),
+    knownSitesOnly: true,
+  });
 
   // Check if it's a live stream
   if (isLiveStream(video)) {
-    throw new Error("Live streams are not supported");
+    throw new LiveStreamError();
   }
 
   // The best video stream (best-first), plus the best audio when it has none,
@@ -104,6 +107,7 @@ export default async function tool(input: Input) {
         ffmpegPath,
         denoPath: deno,
         idleMs: getIdleTimeoutMs(),
+        knownSitesOnly: true,
       },
       () => undefined,
     ));

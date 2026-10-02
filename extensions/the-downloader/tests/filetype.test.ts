@@ -65,13 +65,9 @@ describe("requiredTools", () => {
     expect(requiredTools("video", "video", "youtu.be/abc")).toEqual(withDeno);
     expect(requiredTools("video", "video", "https://notyoutube.com/v")).not.toContain("deno");
   });
-  it("YouTube transcripts and thumbnails need Deno too: they run the same extractor", () => {
+  it("YouTube transcripts need Deno too; thumbnails use it only when it's there", () => {
     expect(requiredTools("video", "transcript", "https://youtu.be/abc")).toEqual(["yt-dlp", "ffmpeg", "deno"]);
-    expect(requiredTools("video", "image", "https://www.youtube.com/watch?v=abc")).toEqual([
-      "yt-dlp",
-      "ffmpeg",
-      "deno",
-    ]);
+    expect(requiredTools("video", "image", "https://www.youtube.com/watch?v=abc")).toEqual(["yt-dlp", "ffmpeg"]);
     expect(requiredTools("video", "transcript", "https://vimeo.com/1")).toEqual(["yt-dlp", "ffmpeg"]);
   });
   it("audio on a Spotify source needs spotdl + ffmpeg", () => {

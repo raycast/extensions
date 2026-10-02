@@ -90,12 +90,13 @@ export function requiredTools(source: SourceType, filetype: Filetype, url = ""):
   if (tool === "monolith") return ["monolith"];
   if (tool === "spotdl") return ["spotdl", "ffmpeg"];
   if (tool === "gallery-dl") return ["gallery-dl"];
-  // tool === "yt-dlp" — transcript and thumbnail skip ffprobe, but still run the
-  // site's extractor, so YouTube needs Deno for them too.
+  // tool === "yt-dlp". Transcripts skip ffprobe but still need YouTube's
+  // extractor to work, so Deno too; a thumbnail is found without it (and uses
+  // Deno when it's there).
   const deno = needsJsRuntime(url) ? ["deno"] : [];
-  return filetype === "transcript" || filetype === "image"
-    ? ["yt-dlp", "ffmpeg", ...deno]
-    : ["yt-dlp", "ffmpeg", "ffprobe", ...deno];
+  if (filetype === "image") return ["yt-dlp", "ffmpeg"];
+  if (filetype === "transcript") return ["yt-dlp", "ffmpeg", ...deno];
+  return ["yt-dlp", "ffmpeg", "ffprobe", ...deno];
 }
 
 /**

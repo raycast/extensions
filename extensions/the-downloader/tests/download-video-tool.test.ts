@@ -68,9 +68,11 @@ describe("download-video tool", () => {
     });
   });
 
-  it("tries sites it doesn't recognize, like the Download form's Video option", async () => {
+  it("tries sites it doesn't recognize, through yt-dlp's site extractors only", async () => {
     await tool({ url: "https://rumble.com/v12345-clip.html" });
-    expect(runVideoDownload).toHaveBeenCalled();
+    // The generic page reader would fetch whatever a page embeds or redirects to.
+    expect(vi.mocked(fetchVideoInfo).mock.calls[0][4]).toMatchObject({ knownSitesOnly: true });
+    expect(vi.mocked(runVideoDownload).mock.calls[0][1]).toMatchObject({ knownSitesOnly: true });
   });
 
   it("still sends galleries and Spotify links to the Download command", async () => {

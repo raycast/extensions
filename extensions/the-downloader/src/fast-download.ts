@@ -16,7 +16,7 @@ import {
 import { detectSource } from "./lib/detect.js";
 import { getConfig } from "./lib/config.js";
 import { composeVideoFormat } from "./lib/video-format.js";
-import { runVideoDownload } from "./lib/ytdlp.js";
+import { LiveStreamError, runVideoDownload } from "./lib/ytdlp.js";
 import { ensureFreshTools, hintOutdatedTool } from "./lib/tool-updates.js";
 import { isLoginRequiredError, runGalleryDownload } from "./lib/gallerydl.js";
 import { resolveBrowser } from "./lib/browsers.js";
@@ -414,7 +414,8 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.message = errorMessage(error);
       toast.primaryAction = { title: "Copy Error", onAction: () => Clipboard.copy(errorMessage(error)) };
       toast.secondaryAction = undefined;
-      await hintOutdatedTool(toast, "yt-dlp");
+      // A live stream isn't a tool problem, so no "update yt-dlp" hint for it.
+      if (!(error instanceof LiveStreamError)) await hintOutdatedTool(toast, "yt-dlp");
     }
   }
   await settle(session, toast, outcome);
