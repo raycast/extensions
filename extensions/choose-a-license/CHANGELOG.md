@@ -1,6 +1,6 @@
 # Choose a License Changelog
 
-## [Windows support] - 2026-10-02
+## [Windows support] - {PR_MERGE_DATE}
 
 - Add support for Windows platform
 - Bump all dependencies to the latest
