@@ -12,42 +12,49 @@
     {
       "name": "quick-capture",
       "title": "Quick Capture",
+      "subtitle": "Baalda",
       "description": "Capture a thought into your Baalda vault in seconds",
       "mode": "view"
     },
     {
       "name": "create-note",
       "title": "Create Note",
+      "subtitle": "Baalda",
       "description": "Create a markdown note in a selected Baalda vault and folder",
       "mode": "view"
     },
     {
       "name": "manage-notes",
       "title": "Manage Notes",
+      "subtitle": "Baalda",
       "description": "Open, edit, move, rename, append to or delete Baalda notes",
       "mode": "view"
     },
     {
       "name": "create-folder",
       "title": "Create Folder",
+      "subtitle": "Baalda",
       "description": "Create a folder in a selected Baalda vault",
       "mode": "view"
     },
     {
       "name": "manage-folders",
       "title": "Manage Folders",
+      "subtitle": "Baalda",
       "description": "Open, move, rename or delete Baalda folders",
       "mode": "view"
     },
     {
       "name": "search-notes",
       "title": "Search Notes",
+      "subtitle": "Baalda",
       "description": "Search notes across your Baalda vaults",
       "mode": "view"
     },
     {
       "name": "browse-vault",
       "title": "Browse Vault",
+      "subtitle": "Baalda",
       "description": "Browse vaults, folders and recent notes",
       "mode": "view"
     }
@@ -124,6 +131,66 @@
       "description": "Rename or move a Baalda folder and its contents"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@baalda list my vaults",
+        "expected": [{ "callsTool": { "name": "baalda-list-vaults" } }]
+      },
+      {
+        "input": "@baalda list the folders in my vault",
+        "expected": [{ "callsTool": { "name": "baalda-list-folders" } }]
+      },
+      {
+        "input": "@baalda list my notes",
+        "expected": [{ "callsTool": { "name": "baalda-list-notes" } }]
+      },
+      {
+        "input": "@baalda search my notes about Q4 budget",
+        "expected": [{ "callsTool": { "name": "baalda-search-notes" } }]
+      },
+      {
+        "input": "@baalda read the note with docId note-123",
+        "expected": [{ "callsTool": { "name": "baalda-read-note" } }]
+      },
+      {
+        "input": "@baalda create a note at Ideas/draft.md titled Draft",
+        "expected": [{ "callsTool": { "name": "baalda-create-note" } }]
+      },
+      {
+        "input": "@baalda replace the full content of note note-123 with Updated markdown",
+        "expected": [{ "callsTool": { "name": "baalda-update-note" } }]
+      },
+      {
+        "input": "@baalda append Follow-up: check the forecast to note note-123",
+        "expected": [{ "callsTool": { "name": "baalda-append-to-note" } }]
+      },
+      {
+        "input": "@baalda in note note-123 replace the exact text old heading with new heading",
+        "expected": [{ "callsTool": { "name": "baalda-edit-note" } }]
+      },
+      {
+        "input": "@baalda delete the note with docId note-123",
+        "expected": [{ "callsTool": { "name": "baalda-delete-note" } }]
+      },
+      {
+        "input": "@baalda create a folder named Projects",
+        "expected": [{ "callsTool": { "name": "baalda-create-folder" } }]
+      },
+      {
+        "input": "@baalda delete the empty folder with id folder-123",
+        "expected": [{ "callsTool": { "name": "baalda-delete-folder" } }]
+      },
+      {
+        "input": "@baalda move note note-123 to Archive/note.md",
+        "expected": [{ "callsTool": { "name": "baalda-move-note" } }]
+      },
+      {
+        "input": "@baalda rename folder folder-123 to Archive",
+        "expected": [{ "callsTool": { "name": "baalda-move-folder" } }]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "serverUrl",

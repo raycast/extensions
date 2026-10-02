@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   ROOT_FOLDER,
@@ -11,10 +11,6 @@ import {
   type Folder,
   type Vault,
 } from "../lib/baalda";
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 function chooseDefaultVault(vaults: Vault[], preferred?: string): string {
   const wanted = (preferred ?? prefs().defaultVaultId)?.trim().toLowerCase();
@@ -29,12 +25,7 @@ function chooseDefaultVault(vaults: Vault[], preferred?: string): string {
 export function CreateFolderForm({ defaultVaultId, onDone }: { defaultVaultId?: string; onDone?: () => void }) {
   const { pop } = useNavigation();
   const { data: vaults, isLoading: loadingVaults } = useCachedPromise(listVaults, [], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load vaults",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load vaults" }),
   });
   const [vaultId, setVaultId] = useState(defaultVaultId ?? "");
   const [parentId, setParentId] = useState(ROOT_FOLDER);
@@ -51,12 +42,7 @@ export function CreateFolderForm({ defaultVaultId, onDone }: { defaultVaultId?: 
     (id: string) => (id ? listFolders(id) : Promise.resolve([] as Folder[])),
     [vaultId],
     {
-      onError: (error) =>
-        void showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't load folders",
-          message: errorMessage(error),
-        }),
+      onError: (error) => void showFailureToast(error, { title: "Couldn't load folders" }),
     },
   );
   const { handleSubmit, itemProps } = useForm<{ name: string }>({
@@ -79,9 +65,8 @@ export function CreateFolderForm({ defaultVaultId, onDone }: { defaultVaultId?: 
         if (onDone) pop();
         else popToRoot();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Create failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Create failed" });
       }
     },
   });
@@ -115,12 +100,7 @@ export function CreateFolderForm({ defaultVaultId, onDone }: { defaultVaultId?: 
 export function MoveFolderForm({ vaultId, folder, onDone }: { vaultId: string; folder: Folder; onDone?: () => void }) {
   const { pop } = useNavigation();
   const { data: folders, isLoading } = useCachedPromise(listFolders, [vaultId], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load folders",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load folders" }),
   });
   const [parentId, setParentId] = useState(folder.parentId ?? ROOT_FOLDER);
   const { handleSubmit, itemProps } = useForm<{ name: string }>({
@@ -143,9 +123,8 @@ export function MoveFolderForm({ vaultId, folder, onDone }: { vaultId: string; f
         onDone?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Move failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Move failed" });
       }
     },
   });

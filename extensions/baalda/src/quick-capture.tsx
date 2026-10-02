@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showHUD, showToast, Keyboard } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { BaaldaError, capturePath, createNote, listVaults, resolveVaultId, type Vault } from "./lib/baalda";
 
@@ -11,11 +11,7 @@ export default function QuickCapture() {
     listVaults()
       .then(setVaults)
       .catch((e: unknown) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't load vaults",
-          message: e instanceof Error ? e.message : String(e),
-        });
+        void showFailureToast(e, { title: "Couldn't load vaults" });
       })
       .finally(() => setLoadingVaults(false));
   }, []);
@@ -51,15 +47,13 @@ export default function QuickCapture() {
             await popToRoot();
             return;
           } catch (e2) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Capture failed";
-            toast.message = e2 instanceof Error ? e2.message : String(e2);
+            await toast.hide();
+            await showFailureToast(e2, { title: "Capture failed" });
             return;
           }
         }
-        toast.style = Toast.Style.Failure;
-        toast.title = "Capture failed";
-        toast.message = e instanceof Error ? e.message : String(e);
+        await toast.hide();
+        await showFailureToast(e, { title: "Capture failed" });
       }
     },
     validation: {

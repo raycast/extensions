@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Form, Icon, List, Toast, showToast, useNavigation, Keyboard } from "@raycast/api";
-import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import {
   appendNote,
   listVaults,
@@ -35,9 +35,8 @@ function AppendView({ note, onDone }: { note: NoteContent; onDone: () => void })
         onDone();
         pop();
       } catch (e) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Append failed";
-        toast.message = e instanceof Error ? e.message : String(e);
+        await toast.hide();
+        await showFailureToast(e, { title: "Append failed" });
       }
     },
     validation: { text: FormValidation.Required },
@@ -108,7 +107,7 @@ export default function SearchNotes() {
   const [vaultFilter, setVaultFilter] = useCachedState<string>("search-vault-filter", "all");
 
   const { data: vaults, isLoading: loadingVaults } = useCachedPromise(listVaults, [], {
-    onError: (e) => void showToast({ style: Toast.Style.Failure, title: "Couldn't load vaults", message: String(e) }),
+    onError: (e) => void showFailureToast(e, { title: "Couldn't load vaults" }),
   });
 
   const {
@@ -149,8 +148,7 @@ export default function SearchNotes() {
     [query, vaultFilter, vaults],
     {
       keepPreviousData: true,
-      onError: (error) =>
-        void showToast({ style: Toast.Style.Failure, title: "Search failed", message: errorMessage(error) }),
+      onError: (error) => void showFailureToast(error, { title: "Search failed" }),
     },
   );
 

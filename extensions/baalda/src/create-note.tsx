@@ -1,11 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ROOT_FOLDER, createNote, listFolders, listVaults, prefs, type Folder, type Vault } from "./lib/baalda";
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 function chooseDefaultVault(vaults: Vault[], preferredOverride?: string): string {
   const preferred = (preferredOverride ?? prefs().defaultVaultId)?.trim().toLowerCase();
@@ -26,12 +22,7 @@ function markdownFileName(value: string): string {
 
 export function CreateNoteForm({ defaultVaultId }: { defaultVaultId?: string } = {}) {
   const { data: vaults, isLoading: loadingVaults } = useCachedPromise(listVaults, [], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load vaults",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load vaults" }),
   });
   const [vaultId, setVaultId] = useState("");
   const [folderId, setFolderId] = useState(ROOT_FOLDER);
@@ -48,12 +39,7 @@ export function CreateNoteForm({ defaultVaultId }: { defaultVaultId?: string } =
     (id: string) => (id ? listFolders(id) : Promise.resolve([] as Folder[])),
     [vaultId],
     {
-      onError: (error) =>
-        void showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't load folders",
-          message: errorMessage(error),
-        }),
+      onError: (error) => void showFailureToast(error, { title: "Couldn't load folders" }),
     },
   );
   const { handleSubmit, itemProps } = useForm<{
@@ -81,9 +67,8 @@ export function CreateNoteForm({ defaultVaultId }: { defaultVaultId?: string } =
         await showHUD(`Created ${result.relPath ?? relPath}`);
         await popToRoot();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Create failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Create failed" });
       }
     },
   });

@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, Icon, List, Toast, showToast, Keyboard } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Icon, List, Keyboard } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { listFolders, listNotes, listVaults, readNote, type Folder, type NoteSummary } from "./lib/baalda";
 
 function NotePreview({ docId }: { docId: string }) {
@@ -26,7 +26,7 @@ function NotesList({ vaultId, vaultName, folder }: { vaultId: string; vaultName:
     (vid: string, fid?: string) => listNotes(vid, fid),
     [vaultId, folder?.folderId],
     {
-      onError: (e) => void showToast({ style: Toast.Style.Failure, title: "Couldn't list notes", message: String(e) }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't list notes" }),
     },
   );
 
@@ -58,7 +58,7 @@ function NotesList({ vaultId, vaultName, folder }: { vaultId: string; vaultName:
 
 function FoldersAndNotes({ vaultId, vaultName }: { vaultId: string; vaultName: string }) {
   const { data: folders, isLoading } = useCachedPromise(listFolders, [vaultId], {
-    onError: (e) => void showToast({ style: Toast.Style.Failure, title: "Couldn't list folders", message: String(e) }),
+    onError: (e) => void showFailureToast(e, { title: "Couldn't list folders" }),
   });
 
   return (
@@ -102,7 +102,7 @@ function FoldersAndNotes({ vaultId, vaultName }: { vaultId: string; vaultName: s
 
 export default function BrowseVault() {
   const { data: vaults, isLoading } = useCachedPromise(listVaults, [], {
-    onError: (e) => void showToast({ style: Toast.Style.Failure, title: "Couldn't load vaults", message: String(e) }),
+    onError: (e) => void showFailureToast(e, { title: "Couldn't load vaults" }),
   });
 
   return (

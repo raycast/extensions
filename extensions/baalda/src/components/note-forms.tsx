@@ -10,7 +10,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { type ReactNode, useState } from "react";
 import {
   appendNote,
@@ -26,10 +26,6 @@ import {
   type NoteEdit,
 } from "../lib/baalda";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function markdownFileName(value: string): string {
   const name = value.trim().replace(/^\/+/, "");
   if (!name) return "note.md";
@@ -38,12 +34,7 @@ function markdownFileName(value: string): string {
 
 function NoteLoader({ docId, children }: { docId: string; children: (note: NoteContent) => ReactNode }) {
   const { data: note, isLoading } = useCachedPromise(readNote, [docId], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't read note",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't read note" }),
   });
 
   if (!note) {
@@ -85,9 +76,8 @@ export function DeleteNoteAction({
           onDeleted?.();
           if (closeOnDelete) pop();
         } catch (error) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Delete failed";
-          toast.message = errorMessage(error);
+          await toast.hide();
+          await showFailureToast(error, { title: "Delete failed" });
         }
       }}
     />
@@ -100,12 +90,7 @@ export function NoteDetailView({ docId, onChanged }: { docId: string; onChanged?
     isLoading,
     revalidate,
   } = useCachedPromise(readNote, [docId], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't read note",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't read note" }),
   });
 
   if (!note) {
@@ -179,9 +164,8 @@ function AppendNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => vo
         onDone?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Append failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Append failed" });
       }
     },
   });
@@ -229,9 +213,8 @@ function UpdateNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => vo
         onDone?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Update failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Update failed" });
       }
     },
   });
@@ -289,9 +272,8 @@ function EditNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => void
         onDone?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Edit failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Edit failed" });
       }
     },
   });
@@ -354,12 +336,7 @@ function MoveNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => void
     (id: string) => (id ? listFolders(id) : Promise.resolve([] as Folder[])),
     [vaultId],
     {
-      onError: (error) =>
-        void showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't load folders",
-          message: errorMessage(error),
-        }),
+      onError: (error) => void showFailureToast(error, { title: "Couldn't load folders" }),
     },
   );
   const currentFolderId = note.folderId ?? ROOT_FOLDER;
@@ -386,9 +363,8 @@ function MoveNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => void
         onDone?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Move failed";
-        toast.message = errorMessage(error);
+        await toast.hide();
+        await showFailureToast(error, { title: "Move failed" });
       }
     },
   });

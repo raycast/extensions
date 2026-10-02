@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { listNotes, listVaults, prefs, type NoteSummary, type Vault } from "./lib/baalda";
 import { CreateNoteForm } from "./create-note";
@@ -11,10 +11,6 @@ import {
   NoteDetailView,
   UpdateNoteView,
 } from "./components/note-forms";
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 function chooseDefaultVault(vaults: Vault[]): string {
   const preferred = prefs().defaultVaultId?.trim().toLowerCase();
@@ -29,12 +25,7 @@ function chooseDefaultVault(vaults: Vault[]): string {
 
 export default function ManageNotes() {
   const { data: vaults, isLoading: loadingVaults } = useCachedPromise(listVaults, [], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load vaults",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load vaults" }),
   });
   const [vaultId, setVaultId] = useState("");
 
@@ -47,12 +38,7 @@ export default function ManageNotes() {
     isLoading: loadingNotes,
     revalidate,
   } = useCachedPromise((id: string) => (id ? listNotes(id) : Promise.resolve([] as NoteSummary[])), [vaultId], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load notes",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load notes" }),
   });
 
   const selectedVault = vaults?.find((vault) => vault.vaultId === vaultId);

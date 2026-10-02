@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   deleteFolder,
@@ -14,10 +14,6 @@ import {
 import { NoteDetailView } from "./components/note-forms";
 import { CreateFolderForm, MoveFolderForm } from "./components/folder-forms";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function chooseDefaultVault(vaults: Vault[]): string {
   const preferred = prefs().defaultVaultId?.trim().toLowerCase();
   return (
@@ -31,12 +27,7 @@ function chooseDefaultVault(vaults: Vault[]): string {
 
 export default function ManageFolders() {
   const { data: vaults, isLoading: loadingVaults } = useCachedPromise(listVaults, [], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load vaults",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load vaults" }),
   });
   const [vaultId, setVaultId] = useState("");
 
@@ -49,12 +40,7 @@ export default function ManageFolders() {
     isLoading: loadingFolders,
     revalidate,
   } = useCachedPromise((id: string) => (id ? listFolders(id) : Promise.resolve([] as Folder[])), [vaultId], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load folders",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load folders" }),
   });
   const selectedVault = vaults?.find((vault) => vault.vaultId === vaultId);
 
@@ -152,20 +138,14 @@ async function deleteFolderWithConfirmation(folder: Folder, recursive: boolean, 
     toast.title = recursive ? `Deleted folder and ${result.deletedNotes} note(s)` : "Folder deleted";
     onChanged();
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Delete failed";
-    toast.message = errorMessage(error);
+    await toast.hide();
+    await showFailureToast(error, { title: "Delete failed" });
   }
 }
 
 function FolderNotesView({ vaultId, folder }: { vaultId: string; folder: Folder }) {
   const { data: notes, isLoading } = useCachedPromise(listNotes, [vaultId, folder.folderId], {
-    onError: (error) =>
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't load folder notes",
-        message: errorMessage(error),
-      }),
+    onError: (error) => void showFailureToast(error, { title: "Couldn't load folder notes" }),
   });
 
   return (
