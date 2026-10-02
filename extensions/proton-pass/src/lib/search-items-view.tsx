@@ -67,7 +67,6 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
-  // Failures of the last load, shown in the empty view of a vault that couldn't load.
   const [failedVaults, setFailedVaults] = useState<VaultFailure[]>([]);
   const [loadFailureMessage, setLoadFailureMessage] = useState<string>();
   const preferences = getPreferenceValues<Preferences>();
@@ -111,16 +110,33 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
-    const [cachedItems, cachedVaults] = await Promise.all([getCachedItems(), getCachedVaults()]);
+    const [sharedItems, cachedVaults, legacyItems] = await Promise.all([
+      getCachedItems(),
+      getCachedVaults(),
+      initialVault ? getCachedItems(initialVault.shareId) : null,
+    ]);
+    const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
+    // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
+    // Replace that vault's items rather than unioning snapshots, so deleted items do not return.
+    const cachedItems =
+      legacyItems && (!sharedHasVault || legacyItems.timestamp > (sharedItems?.timestamp ?? 0))
+        ? {
+            data: [
+              ...(sharedItems?.data.filter((item) => item.shareId !== initialVault?.shareId) ?? []),
+              ...legacyItems.data,
+            ],
+            isStale: true,
+          }
+        : sharedItems;
     if (!isLatest()) return;
-    if (cachedItems && cachedVaults && !hasLoadedFromCache.current) {
+    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
       // Show cached metadata right away, even when stale: the first pass-cli call can take
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
-      setVaults(cachedVaults.data);
+      setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
       hasLoadedFromCache.current = true;
 
-      const isStale = cachedItems.isStale || cachedVaults.isStale;
+      const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
       if (!isStale && !backgroundRefreshEnabled) {
         setIsLoading(false);
         return;
@@ -146,13 +162,15 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       const { items: nextItems, isComplete, failureMessage } = getRefreshResult(freshItems, itemsRef.current, failures);
       updateItems(nextItems);
       setVaults(freshVaults);
+
+      // A failed listing with nothing to show must stay an error, rather than a successful empty result.
       if (failureMessage) throw new Error(failureMessage);
 
-      // Only complete listings renew the cache: after a failure, it stays stale so that the next launch retries.
+      // Only complete listings renew the cache; partial failures must remain eligible for a retry.
       // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
       if (isComplete) {
         await cacheWrites.run(async () => {
-          if (isLatest()) await Promise.all([setCachedItems(nextItems), setCachedVaults(freshVaults)]);
+          if (isLatest()) await Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]);
         });
       }
       if (!isLatest()) return;
@@ -191,7 +209,6 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
     () => (selectedVaultId === ALL_VAULTS_VALUE ? items : items.filter((item) => item.shareId === selectedVaultId)),
     [items, selectedVaultId],
   );
-  // A vault that couldn't load says so in its empty view, with Retry, instead of looking empty.
   const emptyFailureMessage =
     failedVaults.find(({ vault }) => vault.shareId === selectedVaultId)?.message ?? loadFailureMessage;
   const suggestedItems = useMemo(() => {

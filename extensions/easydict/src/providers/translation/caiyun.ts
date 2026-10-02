@@ -1,19 +1,16 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
 import { ProviderConfig } from "@/providers/shared/config";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { timedFetch } from "@/utils/http";
-import { logTrace } from "@/utils/logger";
+import { timedFetch } from "@/shared/http";
+import { logTrace } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
-
-export interface CaiyunTranslateResult {
-  rc: string;
-  target: string[];
-  confidence: number;
-}
+import { invalidResponse } from "./response";
 
 /**
  * Caiyun translate API. Cost time: 0.2s
@@ -23,7 +20,7 @@ export interface CaiyunTranslateResult {
 export class CaiyunTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Caiyun;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
 
     const url = "https://api.interpreter.caiyunai.com/v1/translator";
@@ -31,18 +28,11 @@ export class CaiyunTranslateProvider extends BaseNonStreamingTranslateProvider {
     const to = getLangCode(toLanguage, "caiyunLangCode");
     const trans_type = `${from}2${to}`; // "auto2xx";
 
-    const type = TranslationType.Caiyun;
-
     // Note that Caiyun Translate only supports these types of translation at present.
     const supportedTranslatType = ["zh2en", "zh2ja", "en2zh", "ja2zh"];
     if (!supportedTranslatType.includes(trans_type)) {
       logTrace(this.type, `translate not support language: ${fromLanguage} --> ${toLanguage}`);
-      return {
-        type,
-        result: undefined,
-        translations: [],
-        queryWordInfo,
-      };
+      return { kind: "translation", query: queryWordInfo, paragraphs: [] };
     }
 
     const params = {
@@ -55,20 +45,19 @@ export class CaiyunTranslateProvider extends BaseNonStreamingTranslateProvider {
       "x-authorization": "token " + ProviderConfig.caiyunToken,
     };
 
-    const caiyunResult = await timedFetch<CaiyunTranslateResult>(url, {
+    const caiyunResult = await timedFetch<unknown>(url, {
       method: "POST",
       body: params,
       headers,
       signal,
     });
 
-    const translations = caiyunResult.target;
-
-    return {
-      type,
-      result: caiyunResult,
-      translations,
-      queryWordInfo,
-    };
+    if (
+      !isRecord(caiyunResult) ||
+      !Array.isArray(caiyunResult.target) ||
+      !caiyunResult.target.every((text: unknown) => typeof text === "string")
+    )
+      throw invalidResponse(this.type);
+    return { kind: "translation", query: queryWordInfo, paragraphs: caiyunResult.target };
   }
 }

@@ -109,7 +109,6 @@ async function listItemsFromVault(shareId: string, vaultName: string): Promise<I
   try {
     return await (await getAdapter()).listItems(shareId, vaultName);
   } catch (error) {
-    // As in listVaults(): items cached by an ended session must not show up again.
     if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
     throw error;
   }

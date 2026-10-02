@@ -11,6 +11,8 @@ import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "./lib/constants";
 import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
+import { markFirstEpisodeWatched } from "./lib/media-mutations";
+import { useWatchlistState } from "./lib/use-watchlist-ids";
 import { TraktMediaType, TraktMovieBaseItem, TraktShowBaseItem, withPagination } from "./lib/schema";
 
 export default function Command() {
@@ -18,6 +20,7 @@ export default function Command() {
   const [mediaType, setMediaType] = useState<TraktMediaType>("movie");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  const { setListed } = useWatchlistState();
   const {
     isLoading: isMovieLoading,
     data: movies,
@@ -130,6 +133,7 @@ export default function Command() {
         signal: abortable.current?.signal,
       },
     });
+    setListed("movie", movie.ids.trakt, true);
   }, []);
 
   const addMovieToHistory = useCallback(async (movie: TraktMovieBaseItem) => {
@@ -171,6 +175,7 @@ export default function Command() {
         signal: abortable.current?.signal,
       },
     });
+    setListed("show", show.ids.trakt, true);
   }, []);
 
   const addShowToHistory = useCallback(async (show: TraktShowBaseItem) => {
@@ -191,40 +196,11 @@ export default function Command() {
     });
   }, []);
 
-  const checkInFirstEpisodeToHistory = useCallback(async (show: TraktShowBaseItem) => {
-    const response = await traktClient.shows.getEpisode({
-      params: {
-        showid: show.ids.trakt,
-        seasonNumber: 1,
-        episodeNumber: 1,
-      },
-      query: {
-        extended: "full",
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-
-    if (response.status !== 200) throw new Error("Failed to get first episode");
-    const firstEpisode = response.body;
-
-    await traktClient.shows.checkInEpisode({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: firstEpisode.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
+  const markFirstEpisodeWatchedAction = useCallback(
+    (show: TraktShowBaseItem) =>
+      markFirstEpisodeWatched(traktClient, show.ids.trakt, { signal: abortable.current?.signal }),
+    [],
+  );
 
   const handleMovieAction = useCallback(
     async (movie: TraktMovieBaseItem, action: (movie: TraktMovieBaseItem) => Promise<void>, message: string) => {
@@ -403,10 +379,10 @@ export default function Command() {
               target={<SeasonGrid showId={item.ids.trakt} slug={item.ids.slug} imdbId={item.ids.imdb} />}
             />
             <Action
-              title="Check-In"
+              title="Mark First Episode as Watched"
               icon={Icon.Checkmark}
               shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-              onAction={() => handleShowAction(item, checkInFirstEpisodeToHistory, "First episode checked-in")}
+              onAction={() => handleShowAction(item, markFirstEpisodeWatchedAction, "First episode marked as watched")}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

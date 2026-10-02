@@ -1,27 +1,21 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { getYoudaoLangCode, volcanoMap } from "@/core/language/utils";
+import type { DetectionObservation } from "@/core/detect/types";
+import { getLanguageFromProviderCode, isLanguageCode } from "@/core/language/utils";
+import { LanguageDetectType } from "@/core/results/kinds";
 import { hasVolcanoAppKey } from "@/providers/shared/config";
 import { genVolcanoSign } from "@/providers/shared/volcano-sign";
-import { LanguageDetectType } from "@/types/api";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logError, logWarn } from "@/utils/logger";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
+import { logWarn } from "@/shared/logger";
 
-import type { DetectOptions } from "./base";
-import { BaseDetectProvider } from "./base";
+import { BaseDetectProvider, type DetectOptions } from "./base";
+import { detectionNumber, detectionObject, detectionString } from "./response";
 
-interface VolcanoDetectResult {
-  DetectedLanguageList: { Language: string; Confidence: number }[];
-  ResponseMetaData: {
-    Error?: { Code: string; Message: string };
-  };
-}
-
-export class VolcanoDetectProvider extends BaseDetectProvider<VolcanoDetectResult> {
+export class VolcanoDetectProvider extends BaseDetectProvider {
   type = LanguageDetectType.Volcano;
 
-  isEnabled(): boolean {
+  isEnabled() {
     if (!hasVolcanoAppKey()) {
       logWarn(this.type, "detect has no app key");
       return false;
@@ -29,42 +23,31 @@ export class VolcanoDetectProvider extends BaseDetectProvider<VolcanoDetectResul
     return true;
   }
 
-  protected async doDetect(text: string, options?: DetectOptions) {
-    const query = { Action: "LangDetect", Version: "2020-06-01" };
+  protected async doDetect(text: string, options?: DetectOptions): Promise<DetectionObservation> {
     const params = { TextList: [text] };
-
-    const signObject = genVolcanoSign(query, params);
-    if (!signObject) {
-      throw new RequestError(this.type, "AccessKey or SecretKey is empty", "");
+    const sign = genVolcanoSign({ Action: "LangDetect", Version: "2020-06-01" }, params);
+    if (!sign) throw new RequestError(this.type, "AccessKey or SecretKey is empty", "");
+    const response = detectionObject(
+      await timedFetch<unknown>(sign.getUrl(), {
+        method: "POST",
+        body: params,
+        headers: sign.getConfig().headers,
+        signal: options?.signal,
+      }),
+    );
+    const metadata = detectionObject(response.ResponseMetaData);
+    if (metadata.Error !== undefined) {
+      const error = detectionObject(metadata.Error);
+      throw new RequestError(this.type, detectionString(error.Message), detectionString(error.Code));
     }
-
-    const url = signObject.getUrl();
-    const config = signObject.getConfig();
-
-    const volcanoDetectResult = await timedFetch<VolcanoDetectResult>(url, {
-      method: "POST",
-      body: params,
-      headers: config.headers,
-      signal: options?.signal,
-    });
-
-    const volcanoError = volcanoDetectResult.ResponseMetaData.Error;
-    if (volcanoError) {
-      logError(this.type, `detect error: ${volcanoError.Message}`);
-      throw new RequestError(LanguageDetectType.Volcano, volcanoError.Message || "", volcanoError.Code || "");
-    }
-
-    const detectedLanguage = volcanoDetectResult.DetectedLanguageList[0];
-    const volcanoLangCode = detectedLanguage.Language;
-    const youdaoLangCode = getYoudaoLangCode(volcanoLangCode, volcanoMap);
-    const isConfirmed = detectedLanguage.Confidence > 0.5;
-
+    if (!Array.isArray(response.DetectedLanguageList)) throw new Error("Volcano detect: invalid language list");
+    const detected = detectionObject(response.DetectedLanguageList[0]);
+    const language = getLanguageFromProviderCode(detectionString(detected.Language), "volcanoLangCode");
     return {
-      type: LanguageDetectType.Volcano,
-      sourceLangCode: volcanoLangCode,
-      youdaoLangCode,
-      confirmed: isConfirmed,
-      result: volcanoDetectResult,
+      kind: "single",
+      type: this.type,
+      language: isLanguageCode(language) ? language : undefined,
+      confidence: detectionNumber(detected.Confidence),
     };
   }
 }

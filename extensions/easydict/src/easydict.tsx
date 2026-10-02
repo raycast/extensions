@@ -2,9 +2,9 @@
 
 import type { LaunchProps } from "@raycast/api";
 
-import SearchWord from "@/components/pages/SearchWord";
-import { checkIfPreferredLanguagesConflict } from "@/components/ui/LanguageConflictError";
-import { logTrace } from "@/utils/logger";
+import { checkIfPreferredLanguagesConflict } from "@/features/search/LanguageConflictError";
+import SearchWord from "@/features/search/SearchWord";
+import { logTrace } from "@/shared/logger";
 
 logTrace("Easydict", "module loaded");
 

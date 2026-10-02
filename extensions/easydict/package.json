@@ -3,7 +3,7 @@
   "name": "easydict",
   "title": "Easy Dictionary",
   "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
-  "icon": "Eudic.png",
+  "icon": "extension-icon.png",
   "author": "isfeng",
   "license": "MIT",
   "contributors": [
@@ -72,8 +72,8 @@
   ],
   "dependencies": {
     "@deeplx/core": "^0.2.2",
-    "@raycast/api": "^2.1.3",
-    "@raycast/utils": "^2.3.0",
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
     "@xsai/shared-chat": "^0.5.0",
     "@xsai/stream-text": "^0.5.0",
     "franc": "^6.2.0",
@@ -690,6 +690,31 @@
       "required": false,
       "description": "Hide country flags next to language names, respecting that flags represent countries, not languages.",
       "default": false
+    },
+    {
+      "title": "Anki",
+      "name": "enableAutomaticAddFavoriteToAnki",
+      "type": "checkbox",
+      "label": "Add Favorites to Anki Automatically",
+      "required": false,
+      "description": "When a word is added to Favorites, also add it to Anki through the AnkiConnect add-on. Removing a favorite does not delete its Anki card.",
+      "default": false
+    },
+    {
+      "title": "Anki Deck",
+      "name": "ankiDeckName",
+      "type": "textfield",
+      "required": true,
+      "default": "Easydict",
+      "description": "Deck used when adding favorites to Anki. It is created in Anki if it does not exist."
+    },
+    {
+      "title": "AnkiConnect URL",
+      "name": "ankiConnectUrl",
+      "type": "textfield",
+      "required": true,
+      "default": "http://127.0.0.1:8765",
+      "description": "Address of the AnkiConnect add-on. Change it when AnkiConnect listens on a custom port or on another machine."
     },
     {
       "title": "Dictionary Services",

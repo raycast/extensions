@@ -14,12 +14,14 @@ export default async function Command() {
     const warning = expiryWarning([upload], expires);
     if (warning) {
       toast.style = Toast.Style.Failure;
-      toast.title = `Uploaded ${upload.filename}`;
-      toast.message = `Link copied. ${warning}`;
+      toast.title = upload.reused ? "Already uploaded" : `Uploaded ${upload.filename}`;
+      toast.message = `${upload.reused ? "Copied the existing link" : "Link copied"}. ${warning}`;
       return;
     }
     await toast.hide();
-    await showHUD(`Uploaded ${upload.filename}, link copied`);
+    await showHUD(
+      upload.reused ? "Already uploaded, copied the existing link" : `Uploaded ${upload.filename}, link copied`,
+    );
   } catch (error) {
     await showAktarFailure(error, "Couldn't upload the clipboard");
   }

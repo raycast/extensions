@@ -6,10 +6,9 @@ import { Item } from "./types";
 
 /** Full note in its own view, with the original formatting. */
 export function NoteView({ item, store }: { item: Item; store: ItemDetailStore }) {
+  const concealSecrets = getPreferenceValues<Preferences>().copyPasswordTransient ?? true;
   const { data: detail, isLoading, error } = usePromise((current: Item) => store.load(current), [item]);
   const note = detail?.note;
-  // Like the other secrets, kept out of clipboard history unless Transient Clipboard is off.
-  const concealed = getPreferenceValues<Preferences>().copyPasswordTransient ?? true;
 
   let markdown = "";
   if (error) markdown = "Couldn't load this note.";
@@ -24,7 +23,7 @@ export function NoteView({ item, store }: { item: Item; store: ItemDetailStore }
       actions={
         note ? (
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Note" content={note} concealed={concealed} />
+            <Action.CopyToClipboard title="Copy Note" content={note} concealed={concealSecrets} />
           </ActionPanel>
         ) : undefined
       }
