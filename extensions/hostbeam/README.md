@@ -35,7 +35,9 @@ you turned it off: **Hostbeam → Preferences → General → Beaming → Let ot
 apps control Hostbeam**. The message comes with an **Open Hostbeam Settings**
 button that takes you straight there.
 
-If it says a newer Hostbeam is needed, update from Hostbeam's About pane.
+If it says a newer Hostbeam is needed, its **Download Latest Hostbeam** button
+gets the current version from [hostbeam.app](https://hostbeam.app). Open it and
+drag Hostbeam into Applications to replace the old one.
 
 ## Privacy
 

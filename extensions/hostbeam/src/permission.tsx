@@ -7,17 +7,22 @@ import {
   type HostbeamConfig,
 } from "./hostbeam";
 
-/** The Mac release each link first worked in. A link an older app does not
+/** The oldest Mac release each command drives. A link an older app does not
  *  know is ignored in silence, which is the failure this whole file exists to
  *  turn into a sentence. */
 export const NEEDS = {
-  beam: "0.1.22",
+  /** `beam` itself works from 0.1.22, but the switch toast's button opens
+   *  `preferences`, which 0.1.22 ignores. 0.1.23 shipped the same day. */
+  beam: "0.1.23",
   /** `host` and `preferences` ship together, in the release after 0.1.22. */
   host: "0.1.23",
 } as const;
 
 /** Where the switch lives, said the way the app says it. */
 const WHERE = "Hostbeam → Preferences → General → Beaming";
+
+/** Always the latest Mac build — the site's download button points here too. */
+const DOWNLOAD = "https://download.hostbeam.app/Hostbeam.dmg";
 
 /** Opens Preferences on the pane holding the switch.
  *
@@ -56,14 +61,14 @@ export async function allowedToDrive(
     await showToast({
       style: Toast.Style.Failure,
       title: `Hostbeam ${minimum} or newer is needed`,
-      message: `This Mac has ${version}. Updating is in About.`,
+      message: `This Mac has ${version}. Download the latest to update.`,
       primaryAction: {
-        title: "Open Hostbeam About",
+        title: "Download Latest Hostbeam",
         onAction: async (toast) => {
-          // The About pane holds Check for updates, and this link is the one
-          // that works without permission — so the fix is reachable from the
-          // state that needs it.
-          await open("hostbeam://preferences?tab=about");
+          // Not `hostbeam://preferences?tab=about`: that link arrived in
+          // 0.1.23, after every version old enough to land here, so the app
+          // would ignore it in silence. The download works from any version.
+          await open(DOWNLOAD);
           await toast.hide();
         },
       },
