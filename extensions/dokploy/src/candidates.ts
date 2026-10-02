@@ -73,15 +73,22 @@ export interface Candidate {
    * this, not `instanceName`, wherever a candidate needs a unique key. */
   instanceKey: string;
   instanceName: string;
+  projectId: string;
   projectName: string;
+  /** Unset for a legacy (pre-v0.25.0) project, whose services have no environment. */
+  environmentId?: string;
   environmentName: string;
   url: string;
   headers: Record<string, string>;
 }
 
-function scopesForProject(project: Project): { name: string; services: ServiceCollections }[] {
+function scopesForProject(project: Project): { name: string; environmentId?: string; services: ServiceCollections }[] {
   if (isModernProject(project)) {
-    return project.environments.map((environment) => ({ name: environment.name, services: environment }));
+    return project.environments.map((environment) => ({
+      name: environment.name,
+      environmentId: environment.environmentId,
+      services: environment,
+    }));
   }
   return [{ name: project.name, services: project }];
 }
@@ -108,7 +115,9 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
             status: raw[STATUS_FIELDS[kind]],
             instanceKey: instanceId(instance),
             instanceName: instance.name,
+            projectId: project.projectId,
             projectName: project.name,
+            environmentId: scope.environmentId,
             environmentName: scope.name,
             url,
             headers,

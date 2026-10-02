@@ -9,8 +9,12 @@ import {
   fixtureBalanceHistory,
   fixtureHoldings,
 } from "../fixtures";
-import { AuthError } from "./auth";
+import { AuthError, isSignedIn } from "./auth";
+import { type FetchMeta, isTimeout } from "./api";
+import { clearLastGood, readLastGood, saveLastGood } from "./last-good";
+import { failFast, keyedLimiter } from "./limit";
 import { authMode } from "./preferences";
+import { assembleAccounts, HoldingsRefreshError, type LastGood, oldest, toLastGood } from "./snapshot";
 import {
   createConnectionPortalLink,
   getAccountActivities,
@@ -72,35 +76,105 @@ function dayChangeFrom(history: AccountValueHistoryResponse | null, currency: st
   if (points.length < 2 || !currency) return undefined;
   const last = points[points.length - 1];
   const prev = points[points.length - 2];
-  return { amount: Number(last.total_value) - Number(prev.total_value), currency, asOf: last.date! };
+  return {
+    amount: Number(last.total_value) - Number(prev.total_value),
+    currency,
+    asOf: last.date!,
+    from: prev.date!,
+  };
 }
+
+/**
+ * On the real-time plan every balances and positions request is a live pull from the brokerage, and
+ * brokerages rate-limit bursts on one login. So at most 2 of those run at once per connection
+ * (brokerage_authorization); different connections still load in parallel.
+ */
+const perConnection = keyedLimiter(2);
+
+type FailFast = ReturnType<typeof failFast>;
 
 async function snapshotFor(
   account: Account,
   fresh: boolean,
   mode: ReturnType<typeof authMode>,
+  stalled: FailFast,
 ): Promise<AccountSnapshot> {
   if (mode === "fixtures") {
     return {
       account,
       holdings: fixtureHoldings(account.id),
       dayChange: dayChangeFrom(fixtureBalanceHistory(account.id), account.balance.total?.currency),
+      fetchedAt: new Date().toISOString(),
     };
   }
-  const [balances, positions, history] = await Promise.all([
-    getAccountBalances(account.id, fresh),
-    getAccountPositions(account.id, fresh),
-    getBalanceHistory(account.id, fresh),
-  ]);
+  const connection = account.brokerage_authorization || account.id;
+  const balancesMeta: FetchMeta = {};
+  const positionsMeta: FetchMeta = {};
+  const currency = account.balance.total?.currency;
+  const history = getBalanceHistory(account.id, fresh); // never rejects
+  let balances: Awaited<ReturnType<typeof getAccountBalances>>;
+  let positions: Awaited<ReturnType<typeof getAccountPositions>>;
+  try {
+    [balances, positions] = await Promise.all([
+      perConnection(connection, () => stalled(connection, () => getAccountBalances(account.id, fresh, balancesMeta))),
+      perConnection(connection, () => stalled(connection, () => getAccountPositions(account.id, fresh, positionsMeta))),
+    ]);
+  } catch (e) {
+    if (e instanceof AuthError) throw e;
+    // Keep the day change: if this account falls back to its last holdings, its change is still current.
+    throw new HoldingsRefreshError(e, dayChangeFrom(await history, currency));
+  }
   const holdings = buildHoldings(account, Array.isArray(balances) ? balances : [], positions.results ?? []);
-  return { account, holdings, dayChange: dayChangeFrom(history, account.balance.total?.currency) };
+  return {
+    account,
+    holdings,
+    dayChange: dayChangeFrom(await history, currency),
+    fetchedAt: oldest([balancesMeta.fetchedAt, positionsMeta.fetchedAt]) ?? new Date().toISOString(),
+    dataAsOf: positions.data_freshness?.as_of,
+  };
+}
+
+function lastGoodKey(mode: ReturnType<typeof authMode>, accountId: string): string {
+  return `${mode}:${accountId}`;
 }
 
 export async function loadPortfolio(fresh = false): Promise<PortfolioSnapshot> {
   const mode = authMode();
-  const accounts = (mode === "fixtures" ? FIXTURE_ACCOUNTS : await listAccounts(fresh)).filter(isInvestmentAccount);
-  const { ok: snapshots, failures } = await perAccount(accounts, (a) => snapshotFor(a, fresh, mode));
-  return { accounts: snapshots, failures, fetchedAt: new Date().toISOString() };
+  const accountsMeta: FetchMeta = {};
+  const accounts = (mode === "fixtures" ? FIXTURE_ACCOUNTS : await listAccounts(fresh, accountsMeta)).filter(
+    isInvestmentAccount,
+  );
+  // Once a connection times out in this load, its other queued requests fail at once (same error)
+  // instead of each waiting out its own 60 s behind the per-connection limit.
+  const stalled = failFast(isTimeout);
+  const results = await Promise.allSettled(accounts.map((a) => snapshotFor(a, fresh, mode, stalled)));
+  const failed = accounts.filter((_, i) => results[i].status === "rejected");
+  const fallback =
+    mode === "fixtures" || failed.length === 0
+      ? new Map<string, LastGood>()
+      : await readLastGood(failed.map((a) => lastGoodKey(mode, a.id)));
+  const { snapshots, failures } = assembleAccounts(
+    accounts,
+    results,
+    (id) => fallback.get(lastGoodKey(mode, id)),
+    (e) => e instanceof AuthError,
+  );
+  // Skip if the user signed out while this load was running, so sign-out's cleanup isn't undone;
+  // check again afterwards in case the sign-out landed between the check and the write.
+  if (mode !== "fixtures" && (await isSignedIn())) {
+    await saveLastGood(
+      snapshots.flatMap((s): [string, LastGood][] => {
+        const keep = toLastGood(s);
+        return keep ? [[lastGoodKey(mode, s.account.id), keep]] : [];
+      }),
+      new Set(accounts.map((a) => lastGoodKey(mode, a.id))),
+    );
+    if (!(await isSignedIn())) await clearLastGood();
+  }
+  const fetchedAt =
+    oldest([accountsMeta.fetchedAt, ...snapshots.filter((s) => !s.stale).map((s) => s.fetchedAt)]) ??
+    new Date().toISOString();
+  return { accounts: snapshots, failures, fetchedAt };
 }
 
 function isoDate(d: Date): string {

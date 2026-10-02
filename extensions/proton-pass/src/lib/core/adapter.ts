@@ -28,16 +28,18 @@ export function vaultListArgs(): string[] {
   return ["vault", "list", "--output", "json"];
 }
 
+// IDs are passed as `--flag=value`: they are base64url and can start with "-", which pass-cli would
+// otherwise parse as another option ("unexpected argument '-5' found").
 export function itemListArgs(shareId: string): string[] {
-  return ["item", "list", "--share-id", shareId, "--output", "json", "--show-secrets"];
+  return ["item", "list", `--share-id=${shareId}`, "--output", "json", "--show-secrets"];
 }
 
 export function itemViewArgs(shareId: string, itemId: string): string[] {
-  return ["item", "view", "--share-id", shareId, "--item-id", itemId, "--output", "json"];
+  return ["item", "view", `--share-id=${shareId}`, `--item-id=${itemId}`, "--output", "json"];
 }
 
 export function itemTotpArgs(shareId: string, itemId: string): string[] {
-  return ["item", "totp", "--share-id", shareId, "--item-id", itemId, "--output", "json"];
+  return ["item", "totp", `--share-id=${shareId}`, `--item-id=${itemId}`, "--output", "json"];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -78,7 +80,7 @@ export interface PassCliAdapter {
   checkAuth(): Promise<boolean>;
   listVaults(): Promise<Vault[]>;
   listItems(shareId: string, vaultName: string): Promise<Item[]>;
-  getItem(shareId: string, itemId: string): Promise<ItemDetail>;
+  getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
 }
 
@@ -124,9 +126,9 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
         )
         .map((item) => normalizeItem(item, vaultName, shareId));
     },
-    getItem: async (shareId, itemId) => {
+    getItem: async (shareId, itemId, vaultName) => {
       const data = parseJson(await run(itemViewArgs(shareId, itemId)), "item view");
-      return normalizeItemDetail(unwrapItemResponse(data), undefined, shareId);
+      return normalizeItemDetail(unwrapItemResponse(data), vaultName, shareId);
     },
     getTotpCodes: async (shareId, itemId) => {
       const data = parseJson(await run(itemTotpArgs(shareId, itemId)), "item totp");

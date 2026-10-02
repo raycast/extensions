@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, open, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
@@ -12,10 +12,12 @@ import {
 
 import { CreateReminderForm } from "../create-reminder";
 import { getAttachedUrls, getPriorityIcon } from "../helpers";
+import { openAttachedUrls } from "../helpers/open-attached-urls";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
 import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
+import CompletedRemindersAction from "./CompletedRemindersAction";
 import CreateCalendarEvent from "./CreateCalendarEvent";
 import EditReminder from "./EditReminder";
 import LocationForm from "./LocationForm";
@@ -278,25 +280,7 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
         <Action
           title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
           icon={Icon.Link}
-          onAction={async () => {
-            let failedCount = 0;
-            for (const url of attachedUrls) {
-              try {
-                await open(url);
-              } catch (error) {
-                console.error("Failed to open URL", url, error);
-                failedCount++;
-              }
-            }
-
-            if (failedCount > 0) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
-                message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
-              });
-            }
-          }}
+          onAction={() => openAttachedUrls(attachedUrls)}
         />
       ) : null}
 
@@ -371,12 +355,7 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action
-          title={`${viewProps.completed.value ? "Hide" : "Display"} Completed Reminders`}
-          icon={viewProps.completed.value ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-          onAction={() => viewProps.completed.toggle()}
-        />
+        <CompletedRemindersAction completed={viewProps.completed} />
 
         {viewProps.groupBy ? (
           <ActionPanel.Submenu
@@ -441,7 +420,7 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
           title="Create Reminder"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
-          target={<CreateReminderForm listId={listId} />}
+          target={<CreateReminderForm listId={listId} mutate={mutate} />}
         />
       </ActionPanel.Section>
 
@@ -478,7 +457,9 @@ export default function ReminderActions({ reminder, listId, lists = [], viewProp
           title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={() => mutate()}
+          onAction={async () => {
+            await Promise.all([mutate(), viewProps.completed.value ? viewProps.completed.mutate?.() : undefined]);
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>

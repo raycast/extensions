@@ -36,18 +36,28 @@ struct ReminderList: Codable {
 struct RemindersData: Codable {
   let reminders: [Reminder]
   let lists: [ReminderList]
+  let hasMoreReminders: Bool
 }
 
-enum RemindersError: Error {
+enum RemindersError: Error, LocalizedError {
   case accessDenied
   case noRemindersFound
   case noReminderFound
   case noListFound
   case unableToSaveReminder
   case other
+
+  var errorDescription: String? {
+    switch self {
+    case .noListFound:
+      return "The selected reminders list no longer exists. Choose another list."
+    default:
+      return nil
+    }
+  }
 }
 
-@raycast func getData() async throws -> RemindersData {
+@raycast func getData(listId: String?, searchText: String?) async throws -> RemindersData {
   let eventStore = EKEventStore()
 
   let granted: Bool
@@ -60,26 +70,30 @@ enum RemindersError: Error {
     throw RemindersError.accessDenied
   }
 
+  let calendars = eventStore.calendars(for: .reminder)
+  let selectedCalendars = try calendarsForReminderQuery(listId: listId, calendars: calendars)
   let predicate = eventStore.predicateForIncompleteReminders(
     withDueDateStarting: nil,
     ending: nil,
-    calendars: nil
+    calendars: selectedCalendars
   )
   guard let reminders = await eventStore.fetchReminders(matching: predicate) else {
     throw RemindersError.noRemindersFound
   }
 
-  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
+  let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
 
-  let calendars = eventStore.calendars(for: .reminder)
   let defaultList = eventStore.defaultCalendarForNewReminders()
 
   let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
 
-  return RemindersData(reminders: remindersData, lists: listsData)
+  return RemindersData(
+    reminders: remindersData, lists: listsData, hasMoreReminders: matches.count > reminderResultLimit
+  )
 }
 
-@raycast func getCompletedReminders(listId: String?) async throws -> [Reminder] {
+@raycast func getCompletedReminders(listId: String?, searchText: String?) async throws -> [Reminder] {
   let eventStore = EKEventStore()
 
   let granted: Bool
@@ -92,12 +106,7 @@ enum RemindersError: Error {
     throw RemindersError.accessDenied
   }
 
-  let calendars: [EKCalendar]?
-  if let listId {
-    calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
-  } else {
-    calendars = nil
-  }
+  let calendars = try calendarsForReminderQuery(listId: listId, calendars: eventStore.calendars(for: .reminder))
 
   let predicate = eventStore.predicateForCompletedReminders(
     withCompletionDateStarting: nil,
@@ -109,7 +118,8 @@ enum RemindersError: Error {
     throw RemindersError.noRemindersFound
   }
 
-  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  let matches = remindersMatchingQuery(reminders, listId: listId, searchText: searchText)
+  let remindersData = matches.prefix(reminderResultLimit).map { $0.toStruct() }
   return remindersData
 }
 

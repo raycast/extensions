@@ -20,10 +20,25 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 
 - **Upload Clipboard**: uploads the copied file or screenshot and copies its link.
 - **Upload Selected Files**: uploads the files selected in Finder to your default destination.
-- **Upload File**: pick files, a destination, an optional folder, and when to delete them.
-- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, and delete uploads. Uploads set to auto-delete show the day they go away.
-- **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, rename, move, delete, create folders, and upload into any folder.
+- **Upload File**: pick files, a destination, an optional folder, and when to delete them. With a single file, the optional **Name** field uploads it under a different name (its extension is kept unless you type one); it's what replaces `{filename}` in the destination's path template.
+- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, show a QR code for the link, and delete uploads. Uploads set to auto-delete show the day they go away.
+- **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, show QR codes for either, rename, move, delete, create folders, and upload into any folder.
 - **Connect to Aktar**: pairs the extension with the app.
+
+## QR Codes
+
+**Show QR Code** (⌘⇧Q) in Search Uploads or Browse Buckets shows a QR code for the file's link, to open it on your phone or put it on a slide. Copy the QR code image to paste it anywhere, or save it as a PNG in your Downloads folder. In Browse Buckets you can also show a QR code for a temporary link (1 hour, 1 day, or 7 days), which works even for private buckets. **Create New Link** (⌘R) makes a fresh one when it has expired.
+
+The QR code is made on your Mac. The link is never sent to a QR service. The QR images of temporary links are removed from the extension's support folder once those links expire.
+
+## What Aktar Does for You
+
+Uploads from Raycast go through the Aktar app, so they follow its settings:
+
+- **Already uploaded** (Aktar 0.10.0 or later): when the same file is already in that destination with the same Delete After time, Aktar doesn't upload it again and copies its existing link. The extension tells you with an "Already uploaded" message and the day the existing file is deleted, with a warning when that's not the Delete After you picked. Older Aktar versions upload the file again.
+- **Image conversion**: Aktar can convert images to WebP or AVIF before uploading (Aktar 0.10.0 or later).
+- **Hash file names**: path templates can use `{md5}` and `{sha256}` for names that only change when the file does.
+- **Large files**: files over 5 GB are uploaded in parts automatically.
 
 ## Auto-Delete
 

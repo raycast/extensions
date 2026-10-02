@@ -2,6 +2,24 @@
 
 This extension is a meta registry for MCP servers. It is used to discover and install MCP servers. You can install servers in Raycast but also other clients that support MCP such as Claude or Cursor.
 
+## Installation requirements
+
+Local servers require the runtime shown in their details. Install [Node.js with npm](https://nodejs.org/en/download) for `npx` servers such as Google Drive and Filesystem, or [uv](https://docs.astral.sh/uv/getting-started/installation/) for `uvx` servers such as Git. Server-specific credentials and allowed folders may also be required; check the server's homepage.
+
+Linear connects directly to its [hosted MCP endpoint](https://linear.app/docs/mcp) in Raycast and prompts you to sign in. It does not require Node.js in Raycast. Installation into other clients retains the `mcp-remote` proxy and requires Node.js.
+
+## Troubleshooting installation
+
+### `spawn npx ENOENT` or `spawn uvx ENOENT`
+
+Raycast could not find the executable. Check `node --version` and `npx --version`, or `uvx --version`, in Terminal. Install the required runtime if the commands are missing. Restart Raycast after installation or PATH changes so it picks up the updated environment, as described in the [Raycast MCP manual](https://manual.raycast.com/ai/model-context-protocol).
+
+If the command works in Terminal but still fails in Raycast, use `command -v npx` or `command -v uvx` to find its full path and set it as the server's command. For `npx`, also include the directory containing `node` in the server's `PATH` environment variable while retaining the rest of your PATH. An absolute path to `npx` alone does not fix a missing `node` executable.
+
+### Linear fails with `Cannot find module 'iconv-lite'`
+
+This error comes from the local npm proxy's dependencies. Update the registry extension and install Linear again in Raycast using its direct HTTP connection. Existing server configurations are not changed automatically. You can also edit the existing server to use HTTP with `https://mcp.linear.app/mcp`, then sign in. The old `/sse` endpoint is no longer available.
+
 ## How to contribute?
 
 There are three ways you can contribute to the registry:
@@ -12,7 +30,7 @@ There are three ways you can contribute to the registry:
 
 ### Add a new MCP server to the registry
 
-To add a new MCP server to the registry, you need to create a new entry in the `src/registries/builtin/entries.ts` file. You can add to the `OFFICIAL_ENTRIES` or `COMMUNITY_ENTRIES` array. Former is used for servers that are officially supported by the companies or makers of the service. Latter is used for community servers.
+To add a new MCP server to the registry, you need to create a new entry in the `src/registries/builtin/entries.ts` file. You can add to the `OFFICIAL_ENTRIES` or `COMMUNITY_ENTRIES` array. Former is used for servers that are officially supported by the companies or makers of the service. Latter is used for community servers. For a hosted server that supports direct HTTP connections in Raycast, set `remoteUrl` to its MCP endpoint and retain `configuration` as the local proxy fallback for other clients.
 
 ### Add a new MCP client to the registry
 
@@ -94,6 +112,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Thena](https://thena.ai) | A Model Context Protocol server that enables AI assistants to interact with Thena's services, providing seamless integration and enhanced capabilities for AI-powered applications. |
 | [Trends MCP](https://trendsmcp.ai) | Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai. |
 | [Tripsy](https://tripsy.app) | Tripsy's official MCP server connects AI assistants to your Tripsy account so you can create trips and manage flights, stays, activities, expenses, and itinerary details through natural language. |
+| [Trvlrr](https://trvlrr.app/features/ai-assistant) | Your travel journal in Raycast: every trip you've taken and the ones you're planning, with their flights, stays, activities and expenses, plus lifetime stats (countries, cities, flights, distance) and, with Trvlrr Plus, photo search. Ask about a trip, add a booking by pasting it, or import a whole trip from anywhere. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key to paste. |
 | [Xero](https://github.com/XeroAPI/xero-mcp-server) | This is a Model Context Protocol (MCP) server implementation for Xero. It provides a bridge between the MCP protocol and Xero's API, allowing for standardized access to Xero's accounting and business features. |
 | [Firecrawl](https://github.com/mendableai/firecrawl-mcp-server) | A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities. |
 | [Playwright](https://github.com/microsoft/playwright-mcp) | A Model Context Protocol server that provides browser automation capabilities using Playwright. This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models. |
@@ -123,6 +142,19 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Structured](https://mcp.structured.app) | Structured is an all-in-one day planner that combines tasks and to-dos in a visual timeline. Its MCP server lets AI assistants view schedules and inbox tasks, and create, update, complete, delete, and manage recurring tasks. Remote Streamable HTTP server with Structured Cloud OAuth sign-in; some features require Structured Pro. |
 | [One](https://www.withone.ai/docs/mcp) | One is an MCP server that connects your AI tools to 700+ apps like Gmail, Slack, Stripe, Shopify, HubSpot, Notion, and Linear. Four tools cover everything: list your connected accounts, search a platform's actions, read an action's real API documentation, and execute it. Remote Streamable HTTP server with One OAuth sign-in, so no API keys are stored locally. |
 | [smart-me](https://github.com/eCarUp/smart-me-mcp) | Your building's energy in real time: live meter readings, quarter-hourly load profiles and daily series, EV charging stations with their sessions and load-management groups, and the tariffs, invoice positions and ZEV (tenant) billing of a property on the smart-me platform. The remote Streamable HTTP server uses smart-me OAuth sign-in through an `mcp-remote` bridge. |
+| [BioFlow](https://getbioflow.com/mcp) | Edit and publish your link-in-bio page, its links and blocks, and read page analytics and signups from BioFlow. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [DoDomain](https://dodomain.io/docs/connecting-ai-assistants) | Connect customers' custom domains to your product: guided DNS setup, verification and certificates, managed from DoDomain. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [GetItDone](https://nowgetitdone.com/docs/connecting-ai-assistants) | Create, update and track tasks and projects across your GetItDone team workspaces. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [Notifly](https://notifly.io/developers) | Manage notification workflows, subscribers and topics, and trigger delivery across email, SMS, push, chat and in-app channels with Notifly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [Postify](https://usepostify.com/developers) | Draft, schedule and publish social media posts to your connected channels, and read post analytics, from your Postify calendar. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [Sendly](https://docs.sendly.now/guides/mcp) | Send transactional email, run campaigns, and manage contacts, lists and segments in Sendly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [Shorty](https://aishorty.com/docs/connecting-ai-assistants) | Summarize and transcribe videos, audio files, documents and web pages with Shorty. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [SnapVisor](https://snapvisor.io/docs) | Review visual regression builds, approve or reject screenshot changes, and manage SnapVisor projects. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [SuperBooks](https://docs.superbooks.io/mcp) | Work with your SuperBooks books: transactions and categories, invoices, customers, receipts, time tracking and financial reports. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [uNotes](https://unotes.net/docs) | Search a library of university course materials (past exams, assignments, lab reports, lecture notes) and your uNotes flashcards and quizzes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [upAPI](https://upapi.io/docs/mcp) | Call a catalog of ready-to-use APIs through one upAPI account and key, without signing up for each upstream service. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [Uptimely](https://getuptimely.com/integrations) | Manage uptime monitors, incidents and status pages, and read check results, in Uptimely. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [VoiceLabs](https://voicelabs.now/mcp) | Generate speech from text in your voices and transcribe audio with VoiceLabs. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
 
 ### Community MCP Servers
 

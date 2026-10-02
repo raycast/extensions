@@ -55,11 +55,11 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
             <Action
               title="Download Image"
               icon={Icon.Download}
-              onAction={() => {
+              onAction={async () => {
                 try {
                   const candidates = [block.image?.original?.url, block.image?.display?.url, block.image?.thumb?.url];
                   const fileUrl = candidates.find(isHttpUrl);
-                  if (fileUrl) downloadFile(fileUrl);
+                  if (fileUrl) await downloadFile(fileUrl, block.image?.filename);
                 } catch (error) {
                   showFailureToast(error, { title: "Failed to download image" });
                 }
@@ -72,10 +72,10 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
           <Action
             title="Download Attachment"
             icon={Icon.Download}
-            onAction={() => {
+            onAction={async () => {
               try {
                 if (block.attachment?.url) {
-                  downloadFile(block.attachment.url);
+                  await downloadFile(block.attachment.url, block.attachment.file_name);
                 }
               } catch (error) {
                 showFailureToast(error, { title: "Failed to download attachment" });
@@ -185,13 +185,13 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
               icon={Icon.Link}
               title="Copy Link"
               content={url}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
             />
             <Action.OpenInBrowser
               icon={Icon.Globe}
               title="Open in Browser"
               url={url}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } }}
             />
           </>
         )}

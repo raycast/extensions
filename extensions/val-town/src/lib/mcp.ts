@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { parseEventStream } from "./sse";
+import { unwrapUntrusted } from "./untrusted";
 
 const MCP_URL = "https://api.val.town/v3/mcp";
 
@@ -75,7 +76,7 @@ export async function callTool<T>(name: string, args: Record<string, unknown> = 
 
   if (result.structuredContent !== undefined) return result.structuredContent as T;
 
-  const text = result.content?.find((part) => part.type === "text")?.text ?? "";
+  const text = unwrapUntrusted(result.content?.find((part) => part.type === "text")?.text ?? "");
   // Handing back undefined here renders as an empty view with nothing to explain it.
   if (!text) throw new McpError(`${name} returned nothing`);
 

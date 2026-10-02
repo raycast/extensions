@@ -210,7 +210,7 @@ describe("parseBrewVulns", () => {
     expect(tesseract?.open.find((v) => v.id === "CVE-2026-88047")?.aliases).toEqual(["GHSA-5j2p-r5vc-q7f3"]);
   });
 
-  it("normalises severity, mapping brew's `moderate` onto MEDIUM", () => {
+  it("normalizes severity, mapping brew's `moderate` onto MEDIUM", () => {
     const tesseract = results.findings.find((f) => f.formula === "tesseract");
     expect(tesseract?.open.find((v) => v.id === "CVE-2026-88048")?.severity).toBe("MEDIUM");
     const synthetic = results.findings.find((f) => f.formula === "synthetic-formula");

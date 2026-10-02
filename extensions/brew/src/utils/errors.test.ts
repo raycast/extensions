@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
 import { isAbortError } from "./errors";
 
 describe("isAbortError", () => {
-  it("recognises the abort a DOM AbortController raises", () => {
+  it("recognizes the abort a DOM AbortController raises", () => {
     // What `AbortController.abort()` produces, and what `execBrew` re-throws.
     const aborted = new Error("The operation was aborted");
     aborted.name = "AbortError";

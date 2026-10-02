@@ -80,7 +80,7 @@ A pin is a lock, and Homebrew enforces it:
 - `brew uninstall` refuses a pinned package of **either** kind without `--force`.
 - Therefore: never offer a pinned row a bare upgrade, or a copy/terminal command it cannot run.
   An action may lift a pin only when it **names the unpin in its own title** — `PinAction`
-  ("Unpin Formula") and `FormulaUpgradeAction` ("Unpin Formula and Upgrade *name*") are the two
+  ("Unpin Formula") and `FormulaUpgradeAction` ("Unpin Formula and Upgrade _name_") are the two
   that do. `FormulaUninstallAction` takes the same consent through a confirmation instead, whose
   primary button reads "Unpin Formula and Force Uninstall".
   Decide from brew's pin directory, not the payload: it is a snapshot, and another command or the
@@ -102,7 +102,7 @@ A pin is a lock, and Homebrew enforces it:
 - **Every `Toast.Style.Failure` needs a Copy Error / Copy Logs action** so a user can report
   what actually happened.
 - **Match the icon vocabulary** in `src/components/palette.ts` — `STATUS_COLOR` names meanings, not
-  colours: green up to date, blue in progress or informational, orange needs attention (update
+  colors: green up to date, blue in progress or informational, orange needs attention (update
   available, deprecated), red brew refused or failed, secondary-text muted. `SEVERITY_COLOR` maps
   advisory severity on top of it, and is the only place yellow appears (LOW). Pick a meaning from
   those tables rather than a `Color.*` literal. `Color` may still be named outside `palette.ts`
@@ -112,10 +112,10 @@ A pin is a lock, and Homebrew enforces it:
 
 ## Homebrew is the source of truth
 
-Do not describe Homebrew behaviour from memory — read its source (`$(brew --repo)`) or
+Do not describe Homebrew behavior from memory — read its source (`$(brew --repo)`) or
 [docs.brew.sh](https://docs.brew.sh). Comments in this codebase have been confidently wrong
 about brew for months at a time, including claims about features that already shipped. Cite the
-Ruby file when a non-obvious behaviour drives your change.
+Ruby file when a non-obvious behavior drives your change.
 
 ## CHANGELOG
 
@@ -136,7 +136,7 @@ they are refactored, and nothing compiles a changelog.
 - Title: `Update Brew extension`, or `[Brew] <fix>` when one change dominates. No Conventional
   Commits.
 - Describe the change for someone who has never seen the code, and double-check the description
-  names *this* extension.
+  names _this_ extension.
 - Say what you tested by hand. Anything visual is eyes-only.
 
 ## Useful links

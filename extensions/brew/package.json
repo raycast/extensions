@@ -97,6 +97,13 @@
       ]
     },
     {
+      "name": "adopt-apps",
+      "title": "Adopt Apps",
+      "subtitle": "Homebrew",
+      "description": "Find applications already on your Mac that Homebrew can manage, and adopt them into a cask.",
+      "mode": "view"
+    },
+    {
       "name": "upgrade",
       "title": "Upgrade All",
       "subtitle": "Brew",

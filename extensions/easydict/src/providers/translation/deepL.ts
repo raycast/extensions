@@ -3,34 +3,28 @@ import querystring from "node:querystring";
 
 import { FetchError } from "ofetch";
 
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
 import { ProviderConfig } from "@/providers/shared/config";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logTrace } from "@/utils/logger";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
+import { logTrace } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
-
-export interface DeepLTranslateResult {
-  translations: DeepLTranslationItem[];
-}
-
-export interface DeepLTranslationItem {
-  detected_source_language: string;
-  text: string;
-}
+import { invalidResponse } from "./response";
 
 /**
  * DeepL translate API. Cost time: > 1s
  *
  * https://www.deepl.com/zh/docs-api/translating-text
  */
-export class DeepLTranslateProvider extends BaseNonStreamingTranslateProvider<DeepLTranslateResult> {
+export class DeepLTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.DeepL;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
     const sourceLang = getLangCode(fromLanguage, "deepLSourceId");
     const targetLang = getLangCode(toLanguage, "deepLTargetId") || getLangCode(toLanguage, "deepLSourceId");
@@ -38,12 +32,7 @@ export class DeepLTranslateProvider extends BaseNonStreamingTranslateProvider<De
     // if language is not supported, return null
     if (!sourceLang || !targetLang) {
       logTrace(this.type, `translate not support language: ${fromLanguage} --> ${toLanguage}`);
-      return {
-        type: TranslationType.DeepL,
-        result: undefined,
-        translations: [],
-        queryWordInfo,
-      };
+      return { kind: "translation", query: queryWordInfo, paragraphs: [] };
     }
 
     const deepLAuthKey = ProviderConfig.deepLAuthKey;
@@ -68,9 +57,9 @@ export class DeepLTranslateProvider extends BaseNonStreamingTranslateProvider<De
       target_lang: targetLang,
     };
 
-    let deepLResult: DeepLTranslateResult;
+    let deepLResult: unknown;
     try {
-      deepLResult = await timedFetch<DeepLTranslateResult>(url, {
+      deepLResult = await timedFetch<unknown>(url, {
         method: "POST",
         body: querystring.stringify(params),
         headers: {
@@ -90,13 +79,9 @@ export class DeepLTranslateProvider extends BaseNonStreamingTranslateProvider<De
       throw error;
     }
 
-    const translatedText = deepLResult.translations[0].text;
-
-    return {
-      type: TranslationType.DeepL,
-      result: deepLResult,
-      translations: translatedText.split("\n"),
-      queryWordInfo,
-    };
+    const translated =
+      isRecord(deepLResult) && Array.isArray(deepLResult.translations) ? deepLResult.translations[0] : undefined;
+    if (!isRecord(translated) || typeof translated.text !== "string") throw invalidResponse(this.type);
+    return { kind: "translation", query: queryWordInfo, paragraphs: translated.text.split("\n") };
   }
 }

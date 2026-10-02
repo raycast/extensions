@@ -69,6 +69,42 @@ export function formatDate(iso: string | null | undefined): string {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
+/** Parses an ISO time (epoch ms), reading one without a zone as UTC, not the Mac's local time. */
+export function parseTime(iso: string): number {
+  return Date.parse(/(Z|[+-]\d{2}:?\d{2})$/i.test(iso) || !iso.includes("T") ? iso : `${iso}Z`);
+}
+
+/**
+ * A fetch time for "Updated …" / "as of …" labels: "10:42 AM" today, "Sep 29, 10:42 AM" otherwise
+ * (local time). `now` is injectable for tests.
+ */
+export function formatAsOf(iso: string | null | undefined, now: Date = new Date()): string {
+  if (!iso) return "—";
+  const d = new Date(parseTime(iso));
+  if (Number.isNaN(d.getTime())) return iso;
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  if (d.toDateString() === now.toDateString()) return time;
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const date = d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+  });
+  return `${date}, ${time}`;
+}
+
+/** "Sep 28" for a YYYY-MM-DD snapshot date, read as a calendar date (not shifted by time zone). */
+export function formatSnapshotDate(date: string): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return date;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/** The period a balance-history change covers: "Sep 27 → Sep 28", or "to Sep 28" if the start is unknown. */
+export function formatSnapshotPeriod(c: { asOf: string; from?: string }): string {
+  return c.from ? `${formatSnapshotDate(c.from)} → ${formatSnapshotDate(c.asOf)}` : `to ${formatSnapshotDate(c.asOf)}`;
+}
+
 export function formatRelativeDays(days: number | null): string {
   if (days === null) return "—";
   if (days === 0) return "today";

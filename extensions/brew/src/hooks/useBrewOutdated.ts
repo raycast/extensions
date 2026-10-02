@@ -133,7 +133,7 @@ export function useBrewOutdated(options?: { backgroundRefresh?: boolean }) {
         }
       } catch (error) {
         if (controller.signal.aborted) {
-          brewLogger.log("Background refresh cancelled");
+          brewLogger.log("Background refresh canceled");
         } else {
           brewLogger.warn("Background refresh failed", { error });
         }
