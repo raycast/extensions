@@ -64,7 +64,15 @@ describe("requiredTools", () => {
     expect(requiredTools("video", "audio", "https://music.youtube.com/watch?v=abc")).toEqual(withDeno);
     expect(requiredTools("video", "video", "youtu.be/abc")).toEqual(withDeno);
     expect(requiredTools("video", "video", "https://notyoutube.com/v")).not.toContain("deno");
-    expect(requiredTools("video", "transcript", "https://youtu.be/abc")).toEqual(["yt-dlp", "ffmpeg"]);
+  });
+  it("YouTube transcripts and thumbnails need Deno too: they run the same extractor", () => {
+    expect(requiredTools("video", "transcript", "https://youtu.be/abc")).toEqual(["yt-dlp", "ffmpeg", "deno"]);
+    expect(requiredTools("video", "image", "https://www.youtube.com/watch?v=abc")).toEqual([
+      "yt-dlp",
+      "ffmpeg",
+      "deno",
+    ]);
+    expect(requiredTools("video", "transcript", "https://vimeo.com/1")).toEqual(["yt-dlp", "ffmpeg"]);
   });
   it("audio on a Spotify source needs spotdl + ffmpeg", () => {
     expect(requiredTools("spotify", "audio")).toEqual(["spotdl", "ffmpeg"]);
@@ -143,7 +151,10 @@ describe("filetypeGuidance", () => {
 });
 
 describe("installedAlternatives", () => {
-  const installed = (...tools: string[]) => (tool: string) => tools.includes(tool);
+  const installed =
+    (...tools: string[]) =>
+    (tool: string) =>
+      tools.includes(tool);
 
   it("offers the source's other filetypes whose tools are all installed", () => {
     const ytdlpOnly = installed("yt-dlp", "ffmpeg", "ffprobe");

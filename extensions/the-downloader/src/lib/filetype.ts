@@ -90,10 +90,12 @@ export function requiredTools(source: SourceType, filetype: Filetype, url = ""):
   if (tool === "monolith") return ["monolith"];
   if (tool === "spotdl") return ["spotdl", "ffmpeg"];
   if (tool === "gallery-dl") return ["gallery-dl"];
-  // tool === "yt-dlp" — transcript and thumbnail need only yt-dlp + ffmpeg.
+  // tool === "yt-dlp" — transcript and thumbnail skip ffprobe, but still run the
+  // site's extractor, so YouTube needs Deno for them too.
+  const deno = needsJsRuntime(url) ? ["deno"] : [];
   return filetype === "transcript" || filetype === "image"
-    ? ["yt-dlp", "ffmpeg"]
-    : ["yt-dlp", "ffmpeg", "ffprobe", ...(needsJsRuntime(url) ? ["deno"] : [])];
+    ? ["yt-dlp", "ffmpeg", ...deno]
+    : ["yt-dlp", "ffmpeg", "ffprobe", ...deno];
 }
 
 /**
