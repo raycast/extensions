@@ -1,5 +1,11 @@
 # Linear Changelog
 
+## [Fix AI Tool Errors] - 2026-10-02
+
+- Fix AI tools failing with "POST body missing, invalid Content-Type, or JSON object has no keys". For tools such as **Save Issue**, the change had already been saved, so retrying created duplicates.
+- AI tools now return plain, explicitly shaped data instead of Linear SDK objects. Related entities like assignees, teams, states, and labels are returned as compact references.
+- **List Projects** now includes members and milestones when `includeMembers` or `includeMilestones` is set, even without listing them in `fields`.
+
 ## [Fix Preferred Team in Create Issue for Myself] - 2026-09-28
 
 - Fix **Create Issue for Myself** ignoring the Preferred Team in workspaces with more than 50 teams. The team is now looked up by key directly instead of searching the first page of teams, and the key is matched case-insensitively.

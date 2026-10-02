@@ -1,9 +1,8 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { afterDate, client, collect, PageInput, resolveRelease, resolveReleasePipeline } from "./linearUtils";
+import { serializeRelease, serializeReleaseNote } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type ReleaseNoteFilter = NonNullable<Parameters<LinearClient["releaseNotes"]>[0]>["filter"];
 
@@ -21,7 +20,7 @@ interface Input extends PageInput {
   includeArchived?: boolean;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const pipeline = input.pipeline ? await resolveReleasePipeline(input.pipeline) : undefined;
   const release = input.release ? await resolveRelease(input.release) : undefined;
   const createdAfter = afterDate(input.createdAt);
@@ -48,10 +47,8 @@ export default withAccessToken(linear)(async (input: Input) => {
     ...result,
     nodes: await Promise.all(
       result.nodes.map(async (note) => ({
-        ...note,
-        pipelineId: note.pipelineId,
-        content: input.includeContent ? note.documentContent?.content : undefined,
-        releases: input.includeReleases ? await note.releases : undefined,
+        ...serializeReleaseNote(note, { content: input.includeContent }),
+        releases: input.includeReleases ? (await note.releases).map((release) => serializeRelease(release)) : undefined,
       })),
     ),
   };

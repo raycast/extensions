@@ -1,8 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { collect, CursorPageInput, resolveTeam } from "./linearUtils";
+import { mapPage, serializeWorkflowState } from "./serializers";
+import { withLinear } from "./withLinear";
 
 interface Input extends CursorPageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -10,7 +8,8 @@ interface Input extends CursorPageInput {
   team: string;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const team = await resolveTeam(input.team);
-  return collect(({ first, after }) => team.states({ first, after }), input);
+  const page = await collect(({ first, after }) => team.states({ first, after }), input);
+  return mapPage(page, serializeWorkflowState);
 });
