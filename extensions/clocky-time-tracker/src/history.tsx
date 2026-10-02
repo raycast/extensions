@@ -145,6 +145,14 @@ export default function Command() {
     setVacationDays(updated);
   };
 
+  const addSessionAction = (
+    <Action.Push
+      title="Add Session"
+      icon={Icon.Plus}
+      target={<SessionForm title="Add Session" onSave={addSession} />}
+    />
+  );
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter sessions">
       {groups.map((group) => (
@@ -162,6 +170,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action title="Remove Vacation Day" icon={Icon.Circle} onAction={() => toggleVacation(group.date)} />
+                  {addSessionAction}
                 </ActionPanel>
               }
             />
@@ -195,11 +204,7 @@ export default function Command() {
                       icon={Icon.Pause}
                       target={<PauseList sessionId={session.id} onRefresh={refresh} />}
                     />
-                    <Action.Push
-                      title="Add Session"
-                      icon={Icon.Plus}
-                      target={<SessionForm title="Add Session" onSave={addSession} />}
-                    />
+                    {addSessionAction}
                     <Action
                       title={group.isVacation ? "Remove Vacation Day" : "Mark Vacation Day"}
                       icon={Icon.Calendar}
@@ -221,15 +226,7 @@ export default function Command() {
       <List.EmptyView
         title="No sessions yet"
         icon={Icon.Clock}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Add Session"
-              icon={Icon.Plus}
-              target={<SessionForm title="Add Session" onSave={addSession} />}
-            />
-          </ActionPanel>
-        }
+        actions={<ActionPanel>{addSessionAction}</ActionPanel>}
       />
     </List>
   );

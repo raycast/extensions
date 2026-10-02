@@ -1,15 +1,7 @@
 import { List, ActionPanel, Detail, Action, Icon } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { getSessions, getTargetConfig, getVacationDays, toggleVacationDay } from "./storage";
-import {
-  dayKey,
-  formatDayLabel,
-  formatDelta,
-  getDaySummary,
-  getVisibleWeekDays,
-  msToClock,
-  startOfWeek,
-} from "./utils";
+import { dayKey, formatDayLabel, formatDelta, getWeekSummary, msToClock, startOfWeek } from "./utils";
 import { Session } from "./types";
 
 export default function Command() {
@@ -42,15 +34,11 @@ export default function Command() {
   const nowIso = now.toISOString();
   const weekStart = startOfWeek(referenceDate, 1);
   const isCurrentWeek = weekStart.getTime() === startOfWeek(now, 1).getTime();
-  const days = useMemo(() => {
-    return getVisibleWeekDays(weekStart, workDaysPerWeek).map((day) => {
-      const summary = getDaySummary(sessions, day, nowIso);
-      const isVacation = vacationDays.includes(dayKey(day));
-      const targetMs = isVacation ? 0 : targetHours * 3600 * 1000;
-      const delta = summary.totals.net - targetMs;
-      return { day, summary, delta, isVacation };
-    });
-  }, [sessions, targetHours, workDaysPerWeek, vacationDays, weekStart.getTime(), nowIso]);
+  const week = useMemo(
+    () => getWeekSummary(sessions, weekStart, workDaysPerWeek, targetHours, vacationDays, nowIso),
+    [sessions, targetHours, workDaysPerWeek, vacationDays, weekStart.getTime(), nowIso],
+  );
+  const { days, totals: weeklyTotals, delta: weeklyDelta } = week;
 
   const goToPreviousWeek = () => {
     const previous = new Date(weekStart);
@@ -70,18 +58,6 @@ export default function Command() {
       <Action title="Next Week" icon={Icon.ArrowRight} onAction={goToNextWeek} />
     </ActionPanel.Section>
   );
-
-  const weeklyTotals = days.reduce(
-    (acc, d) => ({
-      work: acc.work + d.summary.totals.work,
-      breaks: acc.breaks + d.summary.totals.breaks,
-      net: acc.net + d.summary.totals.net,
-    }),
-    { work: 0, breaks: 0, net: 0 },
-  );
-  const vacationCount = days.filter((d) => d.isVacation).length;
-  const weeklyTarget = Math.max(0, targetHours * (workDaysPerWeek - vacationCount) * 3600 * 1000);
-  const weeklyDelta = weeklyTotals.net - weeklyTarget;
 
   const toggleVacation = async (day: Date) => {
     const updated = await toggleVacationDay(dayKey(day));
@@ -116,14 +92,16 @@ export default function Command() {
                       <Detail
                         markdown={`# ${formatDayLabel(d.day)}\n\nWork: ${msToClock(d.summary.totals.work)}\nBreaks: ${msToClock(
                           d.summary.totals.breaks,
-                        )}\nNet: ${msToClock(d.summary.totals.net)}\nTarget: ${d.isVacation ? "0 (Vacation)" : msToClock(targetHours * 3600 * 1000)}\nDelta: ${formatDelta(d.delta)}`}
+                        )}\nNet: ${msToClock(d.summary.totals.net)}\nTarget: ${d.isVacation ? "0 (Vacation)" : d.isWorkDay ? msToClock(d.targetMs) : "0 (Non-work day)"}\nDelta: ${formatDelta(d.delta)}`}
                       />
                     }
                   />
-                  <Action
-                    title={d.isVacation ? "Remove Vacation Day" : "Mark Vacation Day"}
-                    onAction={() => toggleVacation(d.day)}
-                  />
+                  {d.isWorkDay ? (
+                    <Action
+                      title={d.isVacation ? "Remove Vacation Day" : "Mark Vacation Day"}
+                      onAction={() => toggleVacation(d.day)}
+                    />
+                  ) : null}
                 </ActionPanel.Section>
                 {weekNavigationActions}
               </ActionPanel>

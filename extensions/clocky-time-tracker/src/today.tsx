@@ -5,7 +5,6 @@ import {
   dayKey,
   formatDayLabel,
   formatDelta,
-  formatTime,
   formatTimeAt,
   getDaySummary,
   getEstimatedWorkEnd,
@@ -94,8 +93,8 @@ export default function Command() {
       >
         {slices.map((slice) => {
           const session = slice.session;
-          const startLabel = formatTime(session.start);
-          const endLabel = session.end ? formatTime(session.end) : "Now";
+          const startLabel = formatTimeAt(slice.start);
+          const endLabel = !session.end && slice.end.getTime() === now.getTime() ? "Now" : formatTimeAt(slice.end);
           const title = `${startLabel} - ${endLabel}`;
           const subtitle = `${msToClock(slice.net)} net | ${msToClock(slice.breaks)} breaks`;
           const accessories = session.end ? [] : [{ text: "Active" }];

@@ -133,6 +133,8 @@ export function isSessionPaused(session: Session) {
 
 export type SessionSlice = {
   session: Session;
+  start: Date;
+  end: Date;
   totalWork: number;
   breaks: number;
   net: number;
@@ -150,8 +152,14 @@ export function getSessionWorkWithinRange(session: Session, rangeStart: Date, ra
 export function getSessionSlicesForDay(sessions: Session[], day = new Date(), nowIso?: string): SessionSlice[] {
   const rangeStart = startOfDay(day);
   const rangeEnd = endOfDay(day);
+  const nowMs = new Date(nowIso ?? new Date().toISOString()).getTime();
   return sessions
-    .map((session) => ({ session, ...getSessionWorkWithinRange(session, rangeStart, rangeEnd, nowIso) }))
+    .map((session) => ({
+      session,
+      start: new Date(Math.max(new Date(session.start).getTime(), rangeStart.getTime())),
+      end: new Date(Math.min(session.end ? new Date(session.end).getTime() : nowMs, rangeEnd.getTime())),
+      ...getSessionWorkWithinRange(session, rangeStart, rangeEnd, nowIso),
+    }))
     .filter((slice) => slice.totalWork > 0 || slice.breaks > 0);
 }
 
@@ -186,13 +194,46 @@ export function normalizeWorkDays(value: number): number {
   return Math.min(7, Math.max(1, Math.floor(value)));
 }
 
-export function getVisibleWeekDays(weekStart: Date, workDaysPerWeek: number): Date[] {
+export type WeekDaySummary = {
+  day: Date;
+  isWorkDay: boolean;
+  isVacation: boolean;
+  summary: ReturnType<typeof getDaySummary>;
+  targetMs: number;
+  delta: number;
+};
+
+export function getWeekSummary(
+  sessions: Session[],
+  weekStart: Date,
+  workDaysPerWeek: number,
+  targetHours: number,
+  vacationDays: string[],
+  nowIso?: string,
+) {
   const rawCount = Number.isFinite(workDaysPerWeek) ? workDaysPerWeek : 7;
-  const count = normalizeWorkDays(rawCount);
+  const workDayCount = normalizeWorkDays(rawCount);
   const start = startOfDay(weekStart);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  return eachDayOfInterval(start, end).slice(0, count);
+  const allDays: WeekDaySummary[] = eachDayOfInterval(start, end).map((day, index) => {
+    const isWorkDay = index < workDayCount;
+    const isVacation = isWorkDay && vacationDays.includes(dayKey(day));
+    const summary = getDaySummary(sessions, day, nowIso);
+    const targetMs = isWorkDay && !isVacation ? targetHours * 3600 * 1000 : 0;
+    return { day, isWorkDay, isVacation, summary, targetMs, delta: summary.totals.net - targetMs };
+  });
+  const totals = allDays.reduce(
+    (acc, d) => ({
+      work: acc.work + d.summary.totals.work,
+      breaks: acc.breaks + d.summary.totals.breaks,
+      net: acc.net + d.summary.totals.net,
+    }),
+    { work: 0, breaks: 0, net: 0 },
+  );
+  const targetMs = allDays.reduce((acc, d) => acc + d.targetMs, 0);
+  const days = allDays.filter((d) => d.isWorkDay || d.summary.slices.length > 0);
+  return { days, totals, targetMs, delta: totals.net - targetMs };
 }
 
 export function hasAnotherOpenSession(sessions: Session[], excludeId?: string): boolean {
@@ -223,12 +264,18 @@ export function isPauseWithinSession(
   sessionEnd: Date | null,
   pauseStart: Date,
   pauseEnd: Date | null,
+  nowIso?: string,
 ): boolean {
   if (pauseStart.getTime() < sessionStart.getTime()) return false;
   if (sessionEnd) {
     if (pauseStart.getTime() > sessionEnd.getTime()) return false;
     if (!pauseEnd || pauseEnd.getTime() > sessionEnd.getTime()) return false;
+    return true;
   }
+  // An open Session's missing end is treated as "now".
+  const now = nowIso ? new Date(nowIso) : new Date();
+  if (pauseStart.getTime() > now.getTime()) return false;
+  if (pauseEnd && pauseEnd.getTime() > now.getTime()) return false;
   return true;
 }
 
@@ -236,10 +283,17 @@ export function allPausesWithinSession(
   pauses: Pause[] | undefined,
   sessionStart: Date,
   sessionEnd: Date | null,
+  nowIso?: string,
 ): boolean {
   if (!pauses || pauses.length === 0) return true;
   return pauses.every((pause) =>
-    isPauseWithinSession(sessionStart, sessionEnd, new Date(pause.start), pause.end ? new Date(pause.end) : null),
+    isPauseWithinSession(
+      sessionStart,
+      sessionEnd,
+      new Date(pause.start),
+      pause.end ? new Date(pause.end) : null,
+      nowIso,
+    ),
   );
 }
 
@@ -293,9 +347,11 @@ export function getForgotClockInSuggestion(
 
 export function closeSessionAt(session: Session, endIso: string) {
   session.end = endIso;
-  for (const pause of session.pauses ?? []) {
-    if (!pause.end) pause.end = endIso;
-  }
+  const endMs = new Date(endIso).getTime();
+  // Keep every Pause within the Session: drop Pauses starting at/after the end, clamp the rest.
+  session.pauses = (session.pauses ?? [])
+    .filter((pause) => new Date(pause.start).getTime() < endMs)
+    .map((pause) => (!pause.end || new Date(pause.end).getTime() > endMs ? { ...pause, end: endIso } : pause));
 }
 
 export function isStatusCommandStale(

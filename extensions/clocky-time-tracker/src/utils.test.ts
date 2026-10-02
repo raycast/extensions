@@ -6,7 +6,7 @@ import {
   getDaySummary,
   getForgotClockInSuggestion,
   getForgotClockOutSuggestion,
-  getVisibleWeekDays,
+  getWeekSummary,
   hasAnotherOpenSession,
   hasOverlappingPause,
   hasOverlappingSession,
@@ -30,32 +30,75 @@ describe("getDaySummary", () => {
   });
 });
 
-describe("getVisibleWeekDays", () => {
-  const monday = new Date("2026-09-07T00:00:00");
+describe("getDaySummary slices", () => {
+  const overnight: Session = { id: "a", start: "2026-09-07T22:00:00", end: "2026-09-08T06:00:00" };
 
-  it("returns the first N days starting from weekStart", () => {
-    const days = getVisibleWeekDays(monday, 3);
-    expect(days.map((d) => d.getDate())).toEqual([7, 8, 9]);
+  it("clips an overnight session to the start of the next day", () => {
+    const [slice] = getDaySummary([overnight], new Date("2026-09-08T12:00:00")).slices;
+    expect(slice.start.getTime()).toBe(new Date("2026-09-08T00:00:00").getTime());
+    expect(slice.end.getTime()).toBe(new Date("2026-09-08T06:00:00").getTime());
   });
 
-  it("returns all 7 days when workDaysPerWeek is 7", () => {
-    const days = getVisibleWeekDays(monday, 7);
-    expect(days).toHaveLength(7);
+  it("clips an overnight session to the end of its first day", () => {
+    const [slice] = getDaySummary([overnight], new Date("2026-09-07T12:00:00")).slices;
+    expect(slice.start.getTime()).toBe(new Date("2026-09-07T22:00:00").getTime());
+    expect(slice.end.getTime()).toBe(new Date("2026-09-07T23:59:59.999").getTime());
+  });
+
+  it("ends an open session's slice at now when viewing today", () => {
+    const nowIso = new Date("2026-09-07T12:00:00").toISOString();
+    const open: Session = { id: "b", start: "2026-09-07T08:00:00" };
+    const [slice] = getDaySummary([open], new Date("2026-09-07T12:00:00"), nowIso).slices;
+    expect(slice.end.toISOString()).toBe(nowIso);
+  });
+});
+
+describe("getWeekSummary", () => {
+  const monday = new Date("2026-09-07T00:00:00");
+  const hour = 3600 * 1000;
+  const saturdaySession: Session = { id: "sat", start: "2026-09-12T09:00:00", end: "2026-09-12T11:00:00" };
+  const nowIso = new Date("2026-09-20T12:00:00").toISOString();
+
+  it("lists only work days when no non-work day has sessions", () => {
+    const { days } = getWeekSummary([], monday, 3, 8, [], nowIso);
+    expect(days.map((d) => d.day.getDate())).toEqual([7, 8, 9]);
+  });
+
+  it("lists all 7 days when workDaysPerWeek is 7", () => {
+    expect(getWeekSummary([], monday, 7, 8, [], nowIso).days).toHaveLength(7);
   });
 
   it("clamps workDaysPerWeek above 7 down to 7", () => {
-    const days = getVisibleWeekDays(monday, 10);
-    expect(days).toHaveLength(7);
+    expect(getWeekSummary([], monday, 10, 8, [], nowIso).days).toHaveLength(7);
   });
 
   it("clamps workDaysPerWeek below 1 up to 1", () => {
-    const days = getVisibleWeekDays(monday, 0);
-    expect(days).toHaveLength(1);
+    expect(getWeekSummary([], monday, 0, 8, [], nowIso).days).toHaveLength(1);
   });
 
   it("floors a fractional workDaysPerWeek", () => {
-    const days = getVisibleWeekDays(monday, 5.9);
-    expect(days).toHaveLength(5);
+    expect(getWeekSummary([], monday, 5.9, 8, [], nowIso).days).toHaveLength(5);
+  });
+
+  it("counts weekend work in the weekly totals and shows the weekend day", () => {
+    const week = getWeekSummary([saturdaySession], monday, 5, 8, [], nowIso);
+    expect(week.totals.net).toBe(2 * hour);
+    expect(week.targetMs).toBe(40 * hour);
+    expect(week.delta).toBe(-38 * hour);
+    const saturday = week.days.find((d) => d.day.getDate() === 12);
+    expect(saturday?.isWorkDay).toBe(false);
+    expect(saturday?.targetMs).toBe(0);
+  });
+
+  it("does not lower the weekly target for a vacation on a non-work day", () => {
+    const week = getWeekSummary([saturdaySession], monday, 5, 8, ["2026-09-12"], nowIso);
+    expect(week.targetMs).toBe(40 * hour);
+    expect(week.days.find((d) => d.day.getDate() === 12)?.isVacation).toBe(false);
+  });
+
+  it("lowers the weekly target for a vacation on a work day", () => {
+    const week = getWeekSummary([], monday, 5, 8, ["2026-09-08"], nowIso);
+    expect(week.targetMs).toBe(32 * hour);
   });
 });
 
@@ -101,6 +144,7 @@ describe("hasAnotherOpenSession", () => {
 describe("isPauseWithinSession", () => {
   const sessionStart = new Date("2026-09-07T08:00:00.000Z");
   const sessionEnd = new Date("2026-09-07T16:00:00.000Z");
+  const nowIso = "2026-09-07T12:00:00.000Z";
 
   it("accepts a pause fully inside a closed session", () => {
     expect(
@@ -129,7 +173,31 @@ describe("isPauseWithinSession", () => {
   });
 
   it("accepts an open-ended pause when the session is still open", () => {
-    expect(isPauseWithinSession(sessionStart, null, new Date("2026-09-07T09:00:00.000Z"), null)).toBe(true);
+    expect(isPauseWithinSession(sessionStart, null, new Date("2026-09-07T09:00:00.000Z"), null, nowIso)).toBe(true);
+  });
+
+  it("accepts a closed pause ending before now on an open session", () => {
+    expect(
+      isPauseWithinSession(
+        sessionStart,
+        null,
+        new Date("2026-09-07T09:00:00.000Z"),
+        new Date("2026-09-07T09:30:00.000Z"),
+        nowIso,
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects a closed pause ending after now on an open session", () => {
+    expect(
+      isPauseWithinSession(
+        sessionStart,
+        null,
+        new Date("2026-09-07T09:00:00.000Z"),
+        new Date("2026-09-07T13:00:00.000Z"),
+        nowIso,
+      ),
+    ).toBe(false);
   });
 
   it("rejects an open pause starting after a closed session's end", () => {
@@ -438,6 +506,30 @@ describe("closeSessionAt", () => {
     closeSessionAt(session, endIso);
     expect(session.end).toBe(endIso);
     expect(session.pauses?.[0].end).toBe("2026-09-07T10:15:00.000Z");
+  });
+
+  it("clamps a closed pause that ends after the session end", () => {
+    const session: Session = {
+      id: "a",
+      start: "2026-09-07T09:00:00.000Z",
+      pauses: [{ start: "2026-09-07T16:30:00.000Z", end: "2026-09-07T17:30:00.000Z" }],
+    };
+    closeSessionAt(session, endIso);
+    expect(session.pauses).toEqual([{ start: "2026-09-07T16:30:00.000Z", end: endIso }]);
+  });
+
+  it("drops pauses that start at or after the session end", () => {
+    const session: Session = {
+      id: "a",
+      start: "2026-09-07T09:00:00.000Z",
+      pauses: [
+        { start: "2026-09-07T10:00:00.000Z", end: "2026-09-07T10:15:00.000Z" },
+        { start: "2026-09-07T17:00:00.000Z" },
+        { start: "2026-09-07T18:00:00.000Z", end: "2026-09-07T18:30:00.000Z" },
+      ],
+    };
+    closeSessionAt(session, endIso);
+    expect(session.pauses).toEqual([{ start: "2026-09-07T10:00:00.000Z", end: "2026-09-07T10:15:00.000Z" }]);
   });
 
   it("handles a session with no pauses", () => {
