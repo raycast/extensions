@@ -106,7 +106,12 @@ export async function listVaults(): Promise<Vault[]> {
 }
 
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
-  return (await getAdapter()).listItems(shareId, vaultName);
+  try {
+    return await (await getAdapter()).listItems(shareId, vaultName);
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    throw error;
+  }
 }
 
 // Each pass-cli call takes ~0.5-1.5s, so listing vaults one after another adds up quickly
@@ -126,6 +131,29 @@ async function mapWithConcurrency<T, R>(values: T[], limit: number, fn: (value: 
   return results;
 }
 
+/** A vault whose items couldn't be listed. */
+export interface VaultFailure {
+  vault: Vault;
+  message: string;
+}
+
+async function listItemsOfVaults(vaults: Vault[]): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
+  const failedVaults: VaultFailure[] = [];
+  const itemsPerVault = await mapWithConcurrency(vaults, VAULT_LIST_CONCURRENCY, async (vault) => {
+    try {
+      return await listItemsFromVault(vault.shareId, vault.name);
+    } catch (error) {
+      // An ended session concerns every vault, so it fails the whole listing.
+      if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Failed to list items from vault ${vault.name}: ${message}`);
+      failedVaults.push({ vault, message });
+      return [];
+    }
+  });
+  return { items: itemsPerVault.flat(), failedVaults };
+}
+
 export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Item[]> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
@@ -138,24 +166,17 @@ export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Ite
     return listItemsFromVault(shareId, vault?.name ?? "Unknown Vault");
   }
 
-  const itemsPerVault = await mapWithConcurrency(knownVaults, VAULT_LIST_CONCURRENCY, async (vault) => {
-    try {
-      return await listItemsFromVault(vault.shareId, vault.name);
-    } catch (error) {
-      const type = error instanceof PassCliError ? error.type : "unknown";
-      const message = error instanceof Error ? error.message : "Unknown error";
-      console.error(`Failed to list items from vault ${vault.name} (${type}): ${message}`);
-      return [];
-    }
-  });
-  return itemsPerVault.flat();
+  return (await listItemsOfVaults(knownVaults)).items;
 }
 
-/** Lists vaults once and reuses them for the item listing, instead of listing vaults twice. */
-export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: Item[] }> {
+/**
+ * Lists vaults once and reuses them for the item listing, instead of listing vaults twice. Vaults whose items
+ * couldn't be listed are reported rather than thrown, so the other vaults still load.
+ */
+export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: Item[]; failedVaults: VaultFailure[] }> {
   const vaults = await listVaults();
-  const items = await listItems(undefined, vaults);
-  return { vaults, items };
+  if (USE_MOCK_DATA) return { vaults, items: await listItems(undefined, vaults), failedVaults: [] };
+  return { vaults, ...(await listItemsOfVaults(vaults)) };
 }
 
 export async function getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail> {
