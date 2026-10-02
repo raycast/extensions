@@ -316,6 +316,15 @@ a failed batch until the bad names are isolated and reports them as
 `unavailable` (the section subtitle's "Won't Load"). Only an unknown-name
 failure is split; a lock or a cancel still throws.
 
+Remove Tap never passes `untap --force`. That flag uninstalls the tap's
+packages first only from Homebrew 6.0.13 (`cmd/untap.rb`, 2026-07-23); before
+then it untaps and leaves them installed, while the confirmation says they are
+uninstalled. `untapCommands` spells the steps out instead: `uninstall --cask`,
+then `uninstall --formula`, then a plain `untap`, and `confirmAndRun` stops at
+the first failure, so a package brew refuses to remove keeps its tap. Note that
+`brew uninstall` autoremoves orphaned dependencies afterward, even when the
+named package failed, unless `HOMEBREW_NO_AUTOREMOVE` is set.
+
 ## Adopt Apps
 
 Matching an installed app to a cask by its bundle NAME alone is unreliable:

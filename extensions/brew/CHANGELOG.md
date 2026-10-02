@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Remove Tap fix] - {PR_MERGE_DATE}
+
+- Fixed: on Homebrew 6.0.12 and earlier, Remove Tap left the tap's installed packages behind although its confirmation said they would be uninstalled. It now uninstalls them, then removes the tap, on every Homebrew version, and keeps the tap if a package can't be uninstalled
+
 ## [Third-party taps] - 2026-10-02
 
 - New **Manage Taps** command: every tap you have added is a section listing the formulae and casks it provides, with a dropdown to narrow to one tap. Add a tap by typing `user/repo` (or `user/repo <url>` for a repository not named `homebrew-…`), and remove it, or on Homebrew 7 trust and stop trusting it, from any of its rows

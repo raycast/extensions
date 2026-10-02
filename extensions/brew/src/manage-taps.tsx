@@ -24,9 +24,11 @@ import {
   InstalledMap,
   parseTapName,
   tapCommandName,
+  untapCommands,
   type Cask,
   type Formula,
   type Tap,
+  type TapInstalls,
   type TapStatus,
   type TapTarget,
 } from "./utils";
@@ -104,11 +106,11 @@ function trustRow(tap: TapStatus, item: Cask | Formula, trustSupported: boolean)
 }
 
 /** Everything installed from this tap, as the qualified names brew prints. */
-function installedFrom(tap: Tap, installed: InstalledMap | undefined): string[] | undefined {
+function installedFrom(tap: Tap, installed: InstalledMap | undefined): TapInstalls | undefined {
   if (!installed) return undefined;
-  return [...installed.formulae.values(), ...installed.casks.values()]
-    .filter((item) => item.tap === tap.name)
-    .map(brewIdentifier);
+  const from = (items: Iterable<Cask | Formula>) =>
+    [...items].filter((item) => item.tap === tap.name).map(brewIdentifier);
+  return { formulae: from(installed.formulae.values()), casks: from(installed.casks.values()) };
 }
 
 async function addTap(target: TapTarget, trustSupported: boolean, onDone: () => void) {
@@ -162,20 +164,22 @@ async function untrustTap(tap: Tap, onDone: () => void) {
   if (ok) onDone();
 }
 
-async function untap(tap: Tap, installed: string[] | undefined, onDone: () => void) {
+async function untap(tap: Tap, installed: TapInstalls | undefined, onDone: () => void) {
   // Unknown (the installed list has not loaded) runs a plain untap: brew itself
   // refuses while packages from the tap are installed, so nothing is lost.
-  const uninstalls = installed ?? [];
-  const force = uninstalls.length > 0;
-  const ok = await confirmAndRun([brewTapCommand("untap", ...(force ? ["--force"] : []), tap.name)], {
-    title: force
+  const known = installed ?? { formulae: [], casks: [] };
+  const uninstalls = [...known.casks, ...known.formulae];
+  const uninstallFirst = uninstalls.length > 0;
+  const ok = await confirmAndRun(untapCommands(tap.name, known), {
+    title: uninstallFirst
       ? `Uninstall ${formatCount(uninstalls.length, "Package")} and Remove ${tap.name}?`
       : `Remove ${tap.name}?`,
-    message: force
+    message: uninstallFirst
       ? `Homebrew will not remove a tap while packages from it are installed, so these are uninstalled first:\n${uninstalls.join("\n")}`
       : "Removes the local copy of this tap. Its packages will no longer appear in Homebrew.",
     showCommands: false,
-    confirmTitle: force ? "Uninstall and Remove" : "Remove",
+    stepNoun: "step",
+    confirmTitle: uninstallFirst ? "Uninstall and Remove" : "Remove",
     labels: {
       progress: `Removing ${tap.name}`,
       success: `Removed ${tap.name}`,

@@ -164,8 +164,9 @@ export {
   brewTapCommand,
   parseTapName,
   tapCommandName,
+  untapCommands,
 } from "./taps";
-export type { PackageTrust, Tap, TapStatus, TapTarget } from "./taps";
+export type { PackageTrust, Tap, TapInstalls, TapStatus, TapTarget } from "./taps";
 
 // Installability (Homebrew 7's ⊘ marker, derived from the API JSON)
 export { installabilityOf } from "./installability";

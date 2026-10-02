@@ -347,3 +347,24 @@ export async function brewFetchQualifiedPackage(fullName: string, cask?: boolean
 export function brewTapCommand(...args: string[]): string {
   return ["brew", ...args].map(shellQuote).join(" ");
 }
+
+/** What is installed from one tap, as qualified names, split by kind. */
+export interface TapInstalls {
+  formulae: string[];
+  casks: string[];
+}
+
+/**
+ * The commands that remove a tap and everything installed from it. Not
+ * `untap --force`: that uninstalls first only from Homebrew 6.0.13, and before
+ * then it untaps and leaves the packages installed. Casks go first, since a
+ * cask can depend on a formula. `confirmAndRun` stops at the first failure, so
+ * a package brew refuses to uninstall keeps its tap.
+ */
+export function untapCommands(tapName: string, installed: TapInstalls): string[] {
+  const commands: string[] = [];
+  if (installed.casks.length > 0) commands.push(brewTapCommand("uninstall", "--cask", ...installed.casks));
+  if (installed.formulae.length > 0) commands.push(brewTapCommand("uninstall", "--formula", ...installed.formulae));
+  commands.push(brewTapCommand("untap", tapName));
+  return commands;
+}

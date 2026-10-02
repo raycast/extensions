@@ -7,7 +7,14 @@ import { describe, expect, it } from "vitest";
 import tapInfo from "../__fixtures__/tap-info.json";
 import type { Cask, Formula } from "../types";
 import { brewIdentifier, thirdPartyTapOf } from "./helpers";
-import { individuallyTrusted, packageTrustState, parseTapInfo, parseTapName, tapCommandName } from "./taps";
+import {
+  individuallyTrusted,
+  packageTrustState,
+  parseTapInfo,
+  parseTapName,
+  tapCommandName,
+  untapCommands,
+} from "./taps";
 
 describe("parseTapInfo", () => {
   it("keeps only taps that are actually tapped", () => {
@@ -194,5 +201,36 @@ describe("thirdPartyTapOf", () => {
     // `brew outdated --json=v2` reports a tapped formula this way, with no `tap`.
     expect(thirdPartyTapOf({ name: "steipete/tap/birdclaw" })).toBe("steipete/tap");
     expect(thirdPartyTapOf({ name: "wget" })).toBeUndefined();
+  });
+});
+
+describe("untapCommands", () => {
+  // `brew untap --force` only uninstalls first from Homebrew 6.0.13; before
+  // that it untaps and leaves the packages behind. Spelled out, the steps do
+  // what the confirmation says on every supported version.
+  it("uninstalls casks, then formulae, then untaps", () => {
+    expect(
+      untapCommands("steipete/tap", { formulae: ["steipete/tap/birdclaw"], casks: ["steipete/tap/codexbar"] }),
+    ).toEqual([
+      "brew uninstall --cask steipete/tap/codexbar",
+      "brew uninstall --formula steipete/tap/birdclaw",
+      "brew untap steipete/tap",
+    ]);
+  });
+
+  it("names every package of a kind in one uninstall", () => {
+    expect(untapCommands("a/b", { formulae: ["a/b/one", "a/b/two"], casks: [] })).toEqual([
+      "brew uninstall --formula a/b/one a/b/two",
+      "brew untap a/b",
+    ]);
+  });
+
+  it("is a plain untap when nothing is installed", () => {
+    expect(untapCommands("a/b", { formulae: [], casks: [] })).toEqual(["brew untap a/b"]);
+  });
+
+  it("never passes --force", () => {
+    const commands = untapCommands("a/b", { formulae: ["a/b/one"], casks: ["a/b/two"] });
+    expect(commands.join(" ")).not.toContain("--force");
   });
 });
