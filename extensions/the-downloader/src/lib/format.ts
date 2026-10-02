@@ -87,8 +87,14 @@ export function escapeMarkdown(text: string): string {
  * they only open when clicked.
  */
 export function withoutImages(markdown: string): string {
-  return markdown
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/!\[([^\]]*)\]\[[^\]]*\]/g, "$1")
-    .replace(/<(img|picture|source|video|audio|iframe|object|embed)\b[^>]*>/gi, "");
+  return (
+    markdown
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/!\[([^\]]*)\]\[[^\]]*\]/g, "$1")
+      .replace(/<(img|picture|source|video|audio|iframe|object|embed)\b[^>]*>/gi, "")
+      // Every image starts with "![": whatever the patterns above missed (brackets in
+      // the alt text, a shortcut reference like ![ref]) is left as a plain link. The
+      // whole run of "!" goes, so "!![" can't fold back into "![".
+      .replace(/!+\[/g, "[")
+  );
 }
