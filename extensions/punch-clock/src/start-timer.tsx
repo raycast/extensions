@@ -96,15 +96,17 @@ export default function StartTimer() {
             message: `Ends around ${formatClock(state.endTime)}`,
           });
         } else {
-          await confirmAlert({
+          const shouldShowMenuBar = await confirmAlert({
             title: "Enable the Menu Bar to See Your Timer",
             message: `Timer started, ends around ${formatClock(state.endTime)}. Enable "Work Timer" in your menu bar to see the countdown.`,
             primaryAction: {
               title: "Show in Menu Bar",
-              onAction: () => void showMenuBar(),
             },
             dismissAction: { title: "OK" },
           });
+          if (shouldShowMenuBar) {
+            await showMenuBar();
+          }
         }
         await popToRoot();
       } catch {
