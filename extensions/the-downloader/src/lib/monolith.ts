@@ -60,8 +60,11 @@ export function webpageOutputPath(folder: string, url: string, exists: (p: strin
  * (the Download form and Fast Download) can't pick the same name.
  */
 export function reserveWebpagePath(folder: string, url: string): string {
+  // lstat, not existsSync: a broken symlink with the name exists for the
+  // exclusive create below, so existsSync would offer that name forever.
+  const taken = (p: string) => fs.lstatSync(p, { throwIfNoEntry: false }) !== undefined;
   for (;;) {
-    const candidate = webpageOutputPath(folder, url);
+    const candidate = webpageOutputPath(folder, url, taken);
     try {
       fs.writeFileSync(candidate, "", { flag: "wx" });
       return candidate;

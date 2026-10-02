@@ -177,6 +177,16 @@ describe("reserveWebpagePath", () => {
     }
   });
 
+  it("steps past a broken symlink with the name instead of retrying it forever", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monolith-"));
+    try {
+      fs.symlinkSync(path.join(dir, "gone.html"), path.join(dir, "example.com-a.html"));
+      expect(path.basename(reserveWebpagePath(dir, "https://example.com/a"))).toBe("example.com-a (2).html");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("removes the reserved empty file when the save fails", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monolith-"));
     try {
