@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Fill Logins] - {PR_MERGE_DATE}
+## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
 - Filling only types into the app Raycast was opened from, and stops if another app comes in front
