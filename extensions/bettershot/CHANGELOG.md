@@ -1,6 +1,6 @@
 # BetterShot Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-02
 
 - Add region, fullscreen, window, and scrolling screenshot commands.
 - Add text scanning, color picking, recording options, and settings commands.
