@@ -15,7 +15,7 @@ flowchart LR
 
 ## Release steps
 
-1. **Prepare `dev/release`** — merge the development branches that belong to this release, then update the version trio together and keep the `{PR_MERGE_DATE}` placeholder in `CHANGELOG.md`: `CHANGELOG.md`, `EASYDICT_VERSION`, and `RELEASE_MARKDOWN` in `src/consts.ts`. Run `npm run lint && npm test && npm run build` and `npm run docs:gen`; `node scripts/release.mts check` validates the trio.
+1. **Prepare `dev/release`** — merge the development branches that belong to this release. The top `CHANGELOG.md` entry already names the release and keeps the `{PR_MERGE_DATE}` placeholder; run `node scripts/release.mts prepare --apply` to adopt its version into `EASYDICT_VERSION`, then refresh the bilingual `RELEASE_MARKDOWN` in `src/consts.ts`. Run `npm run lint && npm test && npm run build` and `npm run docs:gen`; `node scripts/release.mts check` validates the trio and that the English release notes match the CHANGELOG section verbatim.
 2. **Open the draft PR** — `dev/release` → `main` in this repository, as a draft; it stays draft until the Store PR is merged.
 3. **Open the Store PR** — mirror the extension into the Store checkout and open a PR against `raycast/extensions` (see below).
 4. **Sync back** — every edit made on the Store PR, before or after it merges (reviewers, contributors, and the bot's automatic `{PR_MERGE_DATE}` replacement), comes back into `dev/release`, which also updates the draft PR.
@@ -69,5 +69,6 @@ The command reports the files that differ between the Store copy (`origin/main` 
 
 - The mirror copies only committed content (`git archive HEAD`), so untracked files never reach the published copy; `.github/` and `.claude/` stay excluded. `--delete` makes it one-way, so sync onto a fresh branch (`git reset --hard` first if the checkout is dirty — the mirror is reproducible from this repository).
 - macOS ships openrsync: a dry run prints nothing without `-i`, which the sync script passes for you.
+- Between releases, the top `CHANGELOG.md` entry can name an unreleased version while `EASYDICT_VERSION` still names the last release; CI accepts this with `node scripts/release.mts check --development`, while the strict `check` is for release preparation.
 - Commit only `extensions/easydict` in the checkout, and keep `{PR_MERGE_DATE}` here until the Store side replaces it with the real date and you sync that back.
 - Avoid `ray publish`: it re-clones the upstream repository and merges the published branch into the working directory. `npm run build` covers the same local validation.
