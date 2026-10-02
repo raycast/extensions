@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Static Track Title in Menu Bar Player] - {PR_MERGE_DATE}
+
+- The Menu Bar Player dropdown now shows the track title and artist statically instead of a scrolling title, which froze at a random point while the menu was open. Long names are shortened with an ellipsis, and the full text is shown on hover.
+
 ## [Playback and Search Reliability] - 2026-09-28
 
 - Added timeouts for Music scripts and fixed subprocess completion handling.
