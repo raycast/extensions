@@ -55,7 +55,8 @@ function buildFocusScript(windowTitle: string): string {
     tell application "System Events"
       tell process "Cursor"
         set frontmost to true
-        perform action "AXRaise" of (first window whose name is "${escaped}")
+        -- Selecting the native Window menu entry switches to its Space as well.
+        click (first menu item of menu 1 of menu bar item "Window" of menu bar 1 whose name is "${escaped}" and value of attribute "AXIdentifier" is "makeKeyAndOrderFront:")
       end tell
     end tell
   `;
@@ -66,17 +67,27 @@ function getActiveWindowsScript(): string {
     tell application "System Events"
       if exists process "Cursor" then
         tell process "Cursor"
-          set windowNames to name of every window
-          set output to ""
-          repeat with wName in windowNames
-            set output to output & wName & linefeed
-          end repeat
-          return output
+          -- Cursor's Window menu lists user-facing windows across all Spaces;
+          -- its AXWindows list omits other Spaces. Core Graphics is faster but
+          -- needs a native bridge and can require Screen Recording access for titles.
+          set windowMenu to menu 1 of menu bar item "Window" of menu bar 1
+          -- Batch reads avoid an Apple Event round trip for each menu item.
+          -- The attribute filter yields an empty list for items without an ID.
+          set windowNames to name of every menu item of windowMenu
+          set identifiers to value of (every attribute of every menu item of windowMenu whose name is "AXIdentifier")
         end tell
       else
         return ""
       end if
     end tell
+    -- Filter the fetched values locally, outside the System Events tell block.
+    set output to ""
+    repeat with i from 1 to count windowNames
+      if item i of identifiers contains "makeKeyAndOrderFront:" then
+        set output to output & item i of windowNames & linefeed
+      end if
+    end repeat
+    return output
   `;
 }
 
