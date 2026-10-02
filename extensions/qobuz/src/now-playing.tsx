@@ -122,7 +122,7 @@ export default function Command() {
       {data?.current && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
-            title="Copy Share Link"
+            title="Copy Qobuz Link"
             icon={Icon.Clipboard}
             onAction={async () => {
               await Clipboard.copy(deepLink.track(data.current!.id));

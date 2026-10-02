@@ -19,14 +19,21 @@
     },
     {
       "name": "convert-link",
-      "title": "Convert Track Link",
+      "title": "Show Current Track",
       "subtitle": "Qobuz",
-      "description": "Convert the track playing in Qobuz — or a Spotify, YouTube Music, or Qobuz track link from the clipboard — to the other services.",
-      "mode": "view",
+      "description": "See the track playing in Qobuz, how it matches on each streaming service, and copy its share links.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-share-links",
+      "title": "Copy Share Links",
+      "subtitle": "Qobuz",
+      "description": "Copy a ready-to-paste message with a track's title, artist and a link on every streaming service. Uses the track playing in Qobuz, or a Spotify, YouTube Music or Qobuz track link you pass.",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "link",
-          "placeholder": "Track link (optional)",
+          "placeholder": "Track link",
           "type": "text",
           "required": false
         }
@@ -107,20 +114,62 @@
       "title": "Qobuz Token",
       "description": "Your Qobuz user_auth_token (X-User-Auth-Token header from a www.qobuz.com/api.json request). Leave empty to reuse the token from the Qobuz CLI's Keychain entry.",
       "required": false
+    },
+    {
+      "name": "includeSpotify",
+      "type": "checkbox",
+      "title": "Include in Share Message",
+      "label": "Spotify",
+      "description": "Include a Spotify link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeApple",
+      "type": "checkbox",
+      "label": "Apple Music",
+      "description": "Include an Apple Music link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeDeezer",
+      "type": "checkbox",
+      "label": "Deezer",
+      "description": "Include a Deezer link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeTidal",
+      "type": "checkbox",
+      "label": "Tidal",
+      "description": "Include a Tidal link in the share message.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeSonglink",
+      "type": "checkbox",
+      "label": "All platforms (song.link)",
+      "description": "Include a song.link URL that resolves to all other platforms.",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
     "@kud/qobuz": "0.5.5",
-    "@raycast/api": "1.104.20",
-    "@raycast/utils": "2.2.6"
+    "@raycast/api": "2.3.1",
+    "@raycast/utils": "2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "2.1.1",
-    "@types/node": "22.20.0",
-    "@types/react": "19.2.17",
-    "eslint": "9.39.4",
-    "prettier": "3.8.4",
-    "typescript": "5.9.3"
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "4.1.4"
   },
   "scripts": {
     "build": "ray build",
@@ -128,7 +177,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
   },
   "platforms": [
     "macOS"
