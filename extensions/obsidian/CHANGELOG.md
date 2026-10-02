@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Quick Capture] - {PR_MERGE_DATE}
+## [Quick Capture] - 2026-10-02
 
 - Add a Quick Capture command for preset Daily Note, To Do, and Shopping routes without the Advanced URI plugin
 
