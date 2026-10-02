@@ -3,7 +3,7 @@ import { showFailureToast, usePromise } from "@raycast/utils";
 import { readNowPlayingTrackId, type Album, type Track } from "@kud/qobuz";
 import { appLink, BRAND, deepLink, formatDuration, getClient } from "./lib/client";
 import { convertFromQobuz, type FromQobuzResult } from "./lib/convert";
-import { enabledLinks, shareClipboard, shareQuery, slackClipboard, type ShareLink } from "./lib/share";
+import { enabledLinks, shareClipboard, shareQuery, type ShareLink } from "./lib/share";
 
 const EMPTY_MESSAGE = [
   "# Nothing playing in Qobuz",
@@ -59,7 +59,6 @@ const renderActions = (data: FromQobuzResult | null | undefined) => {
   if (!data) return undefined;
 
   const enabled = enabledLinks(data.links);
-  const slackShare = slackClipboard(data.track, data.links);
   const trackUrl = deepLink.track(data.track.id);
   return (
     <ActionPanel>
@@ -68,18 +67,10 @@ const renderActions = (data: FromQobuzResult | null | undefined) => {
         icon={Icon.Link}
         content={shareClipboard(data.track, data.links)}
       />
-      {slackShare && (
-        <Action.CopyToClipboard
-          title="Copy for Slack"
-          icon={Icon.SpeechBubble}
-          content={slackShare}
-          shortcut={{ modifiers: ["cmd"], key: "return" }}
-        />
-      )}
       <Action.CopyToClipboard
         title="Copy Qobuz Link"
         content={trackUrl}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={{ modifiers: ["cmd"], key: "return" }}
       />
       <Action.CopyToClipboard title="Copy Artist & Title" content={shareQuery(data.track)} />
       <ActionPanel.Section title="Other Services">

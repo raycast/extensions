@@ -40,21 +40,6 @@
       ]
     },
     {
-      "name": "copy-for-slack",
-      "title": "Copy for Slack",
-      "subtitle": "Qobuz",
-      "description": "Copy a track's title and one song.link URL, so Slack unfurls a single preview card. Uses the track playing in Qobuz, or a track link you pass.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "link",
-          "placeholder": "Track link",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "now-playing",
       "title": "Now Playing",
       "subtitle": "Qobuz",

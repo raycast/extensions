@@ -212,16 +212,4 @@ export const shareClipboard = (track: Track, links: ShareLink[]): Clipboard.Cont
   };
 };
 
-// Slack unfurls a card for each of the first five links, so the full message
-// draws one per service. One bare song.link URL is the only way to get exactly
-// one card, with artwork, from a pasted message.
-export const slackClipboard = (track: Track, links: ShareLink[]): Clipboard.Content | undefined => {
-  const songlink = links.find(isSonglink);
-  if (!songlink) return undefined;
-  return {
-    text: `🎵 ${shareTitle(track)}\n${songlink.url}`,
-    html: `${htmlTitle(track)}<br>\n${escapeHtml(songlink.url)}`,
-  };
-};
-
 export const countServices = (links: ShareLink[]): number => enabledLinks(links).filter((l) => !isSonglink(l)).length;
