@@ -15,7 +15,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { basename, dirname } from "node:path";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Runner,
   RunnerDirectory,
@@ -232,17 +232,23 @@ export default function Command() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const refreshId = useRef(0);
+
   const refresh = useCallback(async () => {
+    const id = ++refreshId.current;
     setLoading(true);
     try {
-      setRunners(await listRunners(ampPath));
+      const next = await listRunners(ampPath);
+      if (id !== refreshId.current) return;
+      setRunners(next);
       setError("");
     } catch (failure) {
+      if (id !== refreshId.current) return;
       setRunners([]);
       setSelectedRunnerId("");
       setError(errorMessage(failure));
     } finally {
-      setLoading(false);
+      if (id === refreshId.current) setLoading(false);
     }
   }, [ampPath]);
 
