@@ -278,12 +278,3 @@ export function applyPatch(content: string, patches: ContentPatch[]): string {
     return current.slice(0, fromIndex) + patch.new_string + current.slice(toIndex);
   }, content);
 }
-
-export function pick<T extends object, K extends keyof T>(entity: T, fields: readonly K[]): Pick<T, K> {
-  return Object.fromEntries(fields.map((field) => [field, entity[field]])) as Pick<T, K>;
-}
-
-export async function mutationResult<T extends { success: boolean }>(payload: T, entityKey: keyof T) {
-  const value = payload[entityKey];
-  return { success: payload.success, entity: value instanceof Promise ? await value : value };
-}

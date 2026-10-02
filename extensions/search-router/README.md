@@ -24,19 +24,27 @@ Type your query with an optional bang prefix/suffix:
 - Without search engine: `funny videos` uses your default search engine
 - Site-specific search: `funny videos @yt` searches for "funny videos" only within YouTube's domain
 
+Built-in aliases work with both `!` and `@`: `!w` searches Wikipedia, `!gm` searches Google Maps, `!so` searches Stack Overflow, and `!r` searches Reddit. Shortcuts are case-insensitive.
+
+Custom engines take priority over built-in shortcuts. Overriding a primary shortcut also redirects its aliases to the custom engine; a custom engine with an alias as its trigger takes priority for that alias alone.
+
+The query form includes a cheat sheet with everyday searches, code and forum searches, and syntax tips. Examples stay visible while you type, and engine names reflect your custom overrides.
+
 ### Browse Search Engines 🧭
 
 View and manage all available search engines with filtering options. You can:
 
 - **Filter by type**: View all engines, only custom engines, or only built-in engines
-- **Search**: Find engines by name or trigger
+- **Search**: Find engines by name, primary trigger, or alias
 - **Set default**: Choose your default search engine
 - **Manage custom engines**: Add, edit, or delete your custom search engines directly
-- **Copy details**: Copy shortcuts or domains to clipboard
+- **Copy details**: View available aliases and copy primary shortcuts, aliases, or domains to clipboard
 
 ### Add Custom Search Engine ➕
 
 Quickly add a new custom search engine with a personalized trigger and URL.
+
+Existing built-in triggers and aliases can be overridden, including those with non-ASCII characters. Deleting a custom default that used an alias restores the Google fallback rather than selecting the alias's built-in engine.
 
 Example custom search engines:
 

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Symbioza MCP Server] - 2026-10-02
+
+- Add Symbioza to the official registry: Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Estimates are free; running GPU jobs requires prepaid credit added on the Symbioza website.
+
 ## [Add Devino MCP Servers] - 2026-10-01
 
 - Add 13 remote MCP servers from Devino Solutions to the official registry: BioFlow, DoDomain, GetItDone, Notifly, Postify, Sendly, Shorty, SnapVisor, SuperBooks, uNotes, upAPI, Uptimely, VoiceLabs. Each is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.

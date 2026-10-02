@@ -1,9 +1,6 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 
-import { linear } from "../api/linearClient";
-
-import { IssueField, resolveWorkflowState, serializeIssue } from "./issueUtils";
+import { resolveWorkflowState } from "./issueUtils";
 import {
   afterDate,
   client,
@@ -17,6 +14,8 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { IssueField, serializeIssue } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type IssueFilter = NonNullable<Parameters<LinearClient["issues"]>[0]>["filter"];
 
@@ -42,7 +41,7 @@ interface Input extends PageInput {
   includeArchived?: boolean;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const team = input.team ? await resolveTeam(input.team) : undefined;
   const state = input.state ? await resolveState(input.state, team?.id) : undefined;
   const cycle = input.cycle ? await resolveCycle(input.cycle, team?.id) : undefined;

@@ -2,6 +2,9 @@ import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { serializeDocument } from "./serializers";
+import { withLinear } from "./withLinear";
+
 type Input = {
   /** The content of the document/PRD as a Markdown string */
   content: string;
@@ -13,7 +16,7 @@ type Input = {
   projectId: string;
 };
 
-export default withAccessToken(linear)(async (inputs: Input) => {
+export default withLinear(async (inputs: Input) => {
   const { linearClient } = getLinearClient();
   const result = await linearClient.createDocument(inputs);
 
@@ -21,7 +24,12 @@ export default withAccessToken(linear)(async (inputs: Input) => {
     throw new Error("Failed to create document");
   }
 
-  return result.document;
+  const document = await result.document;
+  if (!document) {
+    throw new Error("Failed to create document");
+  }
+
+  return serializeDocument(document);
 });
 
 export const confirmation = withAccessToken(linear)(async ({ title, projectId }: Input) => {

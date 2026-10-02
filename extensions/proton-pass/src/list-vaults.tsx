@@ -1,160 +1,11 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { listVaults, listItems, loginWithBrowser } from "./lib/pass-cli";
-import { Vault, Item, PassCliError, PassCliErrorType, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
-import { getItemIcon } from "./lib/utils";
-import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
-import { openTerminalForLogin } from "./lib/terminal";
-import { renderErrorView } from "./lib/error-views";
+import { listVaults } from "./lib/pass-cli";
+import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { SearchItemsView } from "./lib/search-items-view";
+import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
+import { getCachedVaults, setCachedVaults } from "./lib/cache";
 import { platformShortcut } from "./lib/shortcuts";
-
-async function loginWithBrowserAndReload(reload: () => Promise<void>) {
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Starting Proton Pass login",
-    message: "Complete authentication in your browser",
-  });
-
-  try {
-    await loginWithBrowser();
-    toast.style = Toast.Style.Success;
-    toast.title = "Logged in";
-    toast.message = "Reloading";
-    await reload();
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to login";
-    toast.style = Toast.Style.Failure;
-    toast.title = "Login failed";
-    toast.message = message;
-  }
-}
-
-function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
-  return (
-    <List>
-      <List.EmptyView
-        icon={Icon.Lock}
-        title="Not Logged In"
-        description={
-          process.platform === "darwin"
-            ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
-            : "Use browser login to authenticate with Proton Pass."
-        }
-        actions={
-          <ActionPanel>
-            <Action title="Login with Browser" icon={Icon.Globe} onAction={onLogin} />
-            {process.platform === "darwin" && (
-              <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
-            )}
-            <Action.OpenInBrowser
-              title="View CLI Documentation"
-              url={PROTON_PASS_CLI_DOCS}
-              icon={Icon.Globe}
-              shortcut={platformShortcut(["cmd"], "d")}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
-}
-
-function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
-  const [items, setItems] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
-  const hasLoadedFromCache = useRef(false);
-
-  useEffect(() => {
-    loadVaultItems();
-  }, []);
-
-  async function loadVaultItems() {
-    const cachedItems = await getCachedItemsForVault(vault.shareId);
-    if (cachedItems && !hasLoadedFromCache.current) {
-      setItems(cachedItems.data);
-      hasLoadedFromCache.current = true;
-
-      if (!cachedItems.isStale && !backgroundRefreshEnabled) {
-        setIsLoading(false);
-        return;
-      }
-    }
-
-    setError(null);
-    setIsLoading(true);
-    try {
-      const freshItems = await listItems(vault.shareId);
-      setItems(freshItems);
-      await setCachedItemsForVault(vault.shareId, freshItems);
-    } catch (err: unknown) {
-      const type = err instanceof PassCliError ? err.type : "unknown";
-      const message = err instanceof Error ? err.message : undefined;
-      // A logged-out session must not keep showing cached items, and a failed load must not look like an empty vault.
-      if (type === "not_authenticated") {
-        setItems([]);
-        setError({ type, message });
-      } else if (!hasLoadedFromCache.current) {
-        setError({ type, message });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaultItems)} />;
-  }
-  const errorView = renderErrorView(error?.type ?? null, loadVaultItems, "Load Items", error?.message);
-  if (errorView) return errorView;
-
-  return (
-    <List isLoading={isLoading} navigationTitle={vault.name} searchBarPlaceholder="Search items...">
-      {items.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon={Icon.Folder}
-          title="No Items in This Vault"
-          description="This vault is empty or contains no visible items."
-        />
-      ) : (
-        items.map((item) => (
-          <List.Item
-            key={`${item.shareId}-${item.itemId}`}
-            icon={getItemIcon(item.type)}
-            title={item.title}
-            subtitle={item.username || item.email}
-            accessories={[item.hasTotp ? { icon: Icon.Clock, tooltip: "Has TOTP" } : {}, { text: item.type }].filter(
-              (acc) => Object.keys(acc).length > 0,
-            )}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Title"
-                  content={item.title}
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                />
-                {item.username && (
-                  <Action.CopyToClipboard
-                    title="Copy Username"
-                    content={item.username}
-                    shortcut={platformShortcut(["cmd", "shift"], "u")}
-                  />
-                )}
-                {item.email && (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={item.email}
-                    shortcut={platformShortcut(["cmd", "shift"], "e")}
-                  />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))
-      )}
-    </List>
-  );
-}
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
@@ -352,11 +203,7 @@ export default function Command() {
             ].filter((accessory) => accessory !== undefined)}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Items"
-                  icon={Icon.List}
-                  target={<VaultItems vault={vault} backgroundRefreshEnabled={backgroundRefreshEnabled} />}
-                />
+                <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView initialVault={vault} />} />
                 <Action.CopyToClipboard
                   title="Copy Vault Name"
                   content={vault.name}
