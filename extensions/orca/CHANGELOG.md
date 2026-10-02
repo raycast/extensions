@@ -1,6 +1,6 @@
 # Orca Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-02
 
 - List every agent running in Orca, grouped by project, with the ones waiting for input on top
 - Show what each agent is blocked on, how long it has been waiting, its task and its last reply
