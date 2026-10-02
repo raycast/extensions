@@ -40,4 +40,16 @@ generated from the Unicode Character Database 16.0.0 and CLDR 48.2.0 — the sam
 Letters website, apps and other add-ons, so a letter cannot strip one way here and another way
 there.
 
+## Platforms
+
+macOS. The extension is plain TypeScript with no native code, but it has only been tested on a Mac,
+so Windows is not listed until it has been verified there.
+
+## Licence
+
+The extension's code is MIT-licensed. `data/letters.json` is derived from the Unicode Character
+Database and the Unicode Common Locale Data Repository (CLDR), Copyright © 1991-2026 Unicode, Inc.,
+and is distributed under the Unicode License v3. The full copyright and permission notice is in
+[`data/UNICODE-LICENSE.txt`](data/UNICODE-LICENSE.txt).
+
 More at [accentletters.wiki](https://accentletters.wiki/).
