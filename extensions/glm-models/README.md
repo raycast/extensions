@@ -15,10 +15,10 @@ A Raycast extension that exposes [Z.ai](https://z.ai) / [BigModel](https://open.
 2. **Raycast Pro** — Raycast requires a Pro subscription to *use* models provided by extensions
 3. **Node.js** 22.22.2+ and **npm** 7+ (check with `node -v` — matches `@raycast/api`'s own requirement, also declared in `engines`)
 4. **An API key**:
-   - International: create one at [z.ai](https://z.ai) → API Keys (works with the `Z.ai (international)` platform setting)
-   - China: create one at [open.bigmodel.cn](https://open.bigmodel.cn) (works with the `BigModel (China)` setting)
+   - International: create one at [z.ai](https://z.ai) → API Keys (works with the `Z.ai (pay-as-you-go)` platform setting)
+   - China: create one at [open.bigmodel.cn](https://open.bigmodel.cn) (works with the `BigModel (pay-as-you-go)` setting)
 
-   Keys are **not interchangeable** between the two platforms.
+   Keys are **not interchangeable** between the two platforms. Pay-as-you-go API keys only — GLM Coding Plan and Team Plan keys are **not supported**.
 
 ## Setup
 
@@ -37,7 +37,7 @@ The first time Raycast needs the extension's settings, it shows a setup form ask
 | Preference | What to enter |
 | --- | --- |
 | API Key | Your Z.ai or BigModel key |
-| Platform | `Z.ai (pay-as-you-go)` or `BigModel (pay-as-you-go)` — must match where the key came from; GLM Coding Plan keys must use the matching `Z.ai GLM Coding Plan` / `BigModel GLM Coding Plan` option (Coding Plan uses separate endpoints from pay-as-you-go) |
+| Platform | `Z.ai (pay-as-you-go)` or `BigModel (pay-as-you-go)` — must match where the key came from. Pay-as-you-go keys only: GLM Coding Plan / Team Plan keys are not supported |
 | Custom Base URL | Only if you picked *Custom* (any HTTPS OpenAI-compatible endpoint) |
 | Extra Models | Optional comma-separated model IDs to force-include in the picker |
 

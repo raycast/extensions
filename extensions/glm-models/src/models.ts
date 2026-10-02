@@ -13,6 +13,7 @@ import {
   type ToolResultPart,
 } from "ai";
 import { getModels, getPreferences, isGlm5 } from "./lib/catalog";
+import { log } from "./lib/log";
 
 export { getModels };
 
@@ -58,15 +59,13 @@ function toBytes(
       }
       return bytes;
     } catch {
-      console.warn(
-        "glm-models: image attachment is not valid base64 — dropping it",
-      );
+      log("image attachment is not valid base64 — dropping it");
       return null;
     }
   }
   if (data instanceof URL) {
-    console.warn(
-      "glm-models: image attachment delivered as URL, which cannot be inlined — dropping it",
+    log(
+      "image attachment delivered as URL, which cannot be inlined — dropping it",
     );
     return null;
   }

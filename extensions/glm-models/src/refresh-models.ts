@@ -4,6 +4,7 @@ import {
   platformTitle,
   probeModelsEndpoint,
 } from "./lib/catalog";
+import { log } from "./lib/log";
 
 export default async function Command() {
   const { apiKey, baseURL, platform } = getPreferences();
@@ -25,8 +26,8 @@ export default async function Command() {
       await showHUD(`Refreshed, but validation failed — ${probe.message}`);
     }
   } catch (error) {
-    console.error(
-      `glm-models: model refresh failed (${error instanceof Error ? error.message : String(error)})`,
+    log(
+      `model refresh failed (${error instanceof Error ? error.message : String(error)})`,
     );
     await showHUD("Failed to refresh GLM models");
   }

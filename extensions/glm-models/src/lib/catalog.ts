@@ -1,21 +1,17 @@
 import { AI, LocalStorage, getPreferenceValues } from "@raycast/api";
 
+import { log } from "./log";
+
 export const ZAI_BASE_URL = "https://api.z.ai/api/paas/v4";
 export const BIGMODEL_BASE_URL = "https://open.bigmodel.cn/api/paas/v4";
-export const ZAI_CODING_BASE_URL = "https://api.z.ai/api/coding/paas/v4";
-export const BIGMODEL_CODING_BASE_URL =
-  "https://open.bigmodel.cn/api/coding/paas/v4";
 
-export type Platform =
-  "zai" | "bigmodel" | "zai-coding" | "bigmodel-coding" | "custom";
+export type Platform = "zai" | "bigmodel" | "custom";
 
 const DEFAULT_PLATFORM: Platform = "zai";
 
 export const PLATFORM_OPTIONS: Array<{ value: Platform; title: string }> = [
   { value: "zai", title: "Z.ai (pay-as-you-go)" },
   { value: "bigmodel", title: "BigModel (pay-as-you-go)" },
-  { value: "zai-coding", title: "Z.ai GLM Coding Plan" },
-  { value: "bigmodel-coding", title: "BigModel GLM Coding Plan" },
   { value: "custom", title: "Custom base URL" },
 ];
 
@@ -52,10 +48,6 @@ export function resolveBaseURL(
   switch (platform) {
     case "bigmodel":
       return BIGMODEL_BASE_URL;
-    case "zai-coding":
-      return ZAI_CODING_BASE_URL;
-    case "bigmodel-coding":
-      return BIGMODEL_CODING_BASE_URL;
     case "custom": {
       const url = customBaseUrl?.trim() ?? "";
       if (!url) return null;
@@ -114,8 +106,6 @@ export type ModelMetadata = {
 const MODELS_DEV_SLUG: Record<Exclude<Platform, "custom">, string> = {
   zai: "zai",
   bigmodel: "zai",
-  "zai-coding": "zai-coding-plan",
-  "bigmodel-coding": "zai-coding-plan",
 };
 
 const MODELS_DEV_API_URL = "https://models.dev/api.json";
@@ -279,8 +269,8 @@ async function fetchMetadataForSlug(
   } catch (error) {
     const aborted = error instanceof Error && error.name === "AbortError";
     const cached = await readCachedMetadata(slug);
-    console.log(
-      `glm-models: models.dev lookup failed (${aborted ? "timed out" : error instanceof Error ? error.message : String(error)})${cached ? " — using stale cached metadata" : ""}`,
+    log(
+      `models.dev lookup failed (${aborted ? "timed out" : error instanceof Error ? error.message : String(error)})${cached ? " — using stale cached metadata" : ""}`,
     );
     metadataFailedAt[slug] = Date.now();
     if (cached) {
@@ -503,7 +493,7 @@ async function probeModelsLive(
         ok: false,
         reason: "unauthorized",
         status: res.status,
-        message: `Key rejected (HTTP ${res.status}). Your API key doesn't match this platform, or it is invalid or expired. Z.ai and BigModel keys are not interchangeable. Coding Plan and Team Plan keys are only valid with a GLM Coding Plan option.`,
+        message: `Key rejected (HTTP ${res.status}). Your API key doesn't match this platform, or it is invalid or expired. Z.ai and BigModel keys are not interchangeable. Pay-as-you-go keys only — GLM Coding Plan and Team Plan keys are not supported.`,
       };
     }
     if (!res.ok) {
@@ -582,16 +572,12 @@ export const getModels: AI.GetModels = async () => {
     // when the id set actually changes.
     const signature = [...probe.ids].sort().join("\n");
     if (signature !== lastDiscoverySignature) {
-      console.log(
-        `glm-models: discovered ${probe.ids.length} model ids via ${baseURL}/models`,
-      );
+      log(`discovered ${probe.ids.length} model ids via ${baseURL}/models`);
       lastDiscoverySignature = signature;
     }
     dynamicIds = probe.ids;
   } else {
-    console.log(
-      `glm-models: /models lookup failed on ${baseURL}: ${probe.message}`,
-    );
+    log(`/models lookup failed on ${baseURL}: ${probe.message}`);
     // models.dev mirrors the platform model lists and is already filtered to
     // chat models; the curated catalog is the last resort.
     const catalogIds = Object.keys(metadata);
@@ -602,12 +588,12 @@ export const getModels: AI.GetModels = async () => {
           ? FALLBACK_IDS
           : [];
     if (dynamicIds.length > 0) {
-      console.log(
-        `glm-models: using the ${catalogIds.length > 0 ? "models.dev" : "curated fallback"} model list (${dynamicIds.length} ids)`,
+      log(
+        `using the ${catalogIds.length > 0 ? "models.dev" : "curated fallback"} model list (${dynamicIds.length} ids)`,
       );
     } else {
-      console.log(
-        "glm-models: no model fallback for a Custom endpoint — set the Extra Models preference to force-include model ids",
+      log(
+        "no model fallback for a Custom endpoint — set the Extra Models preference to force-include model ids",
       );
     }
   }
@@ -634,20 +620,16 @@ export const getModels: AI.GetModels = async () => {
     ids.push(id);
   }
   if (probe.ok && filtered > 0) {
-    console.log(
-      `glm-models: ${ids.length} chat models kept, ${filtered} non-chat ids filtered`,
-    );
+    log(`${ids.length} chat models kept, ${filtered} non-chat ids filtered`);
   }
   if (ids.length === 0) {
     if (!allowCuratedFallback) {
-      console.log(
-        "glm-models: no usable models for a Custom endpoint — returning an empty list",
-      );
+      log("no usable models for a Custom endpoint — returning an empty list");
     } else {
       // An account where every discovered id was filtered out shouldn't leave
       // the picker empty.
-      console.log(
-        "glm-models: every discovered id was filtered out — using the curated fallback model list",
+      log(
+        "every discovered id was filtered out — using the curated fallback model list",
       );
       for (const id of FALLBACK_IDS) {
         if (seen.has(id)) continue;

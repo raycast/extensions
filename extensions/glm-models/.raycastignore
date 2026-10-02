@@ -1,0 +1,5 @@
+# Files kept out of the published Store bundle (publish copies the repo
+# contents; these are local development / agent guidance only).
+AGENTS.md
+.zcode/
+.zcodeignore

@@ -16,7 +16,7 @@ Pick **one** platform — they are separate services with separate keys:
 
 > ⚠️ A key from one platform will not work on the other — requests fail with `401`. If that happens, run the extension's **Check Setup** command to diagnose.
 
-> 💡 **GLM Coding Plan or Team Plan subscriber?** Coding Plan and Team Plan keys use different endpoints than pay-as-you-go keys — pick **Z.ai GLM Coding Plan** or **BigModel GLM Coding Plan** to match your subscription. Team Plan members get their key under **Team Coding Plan → My Plan**; it works on the same endpoint as individual Coding Plans. Note that Z.ai describes GLM Coding Plan usage as intended for officially supported coding tools.
+> 💡 **Pay-as-you-go keys only.** GLM Coding Plan and Team Plan keys use different endpoints and are **not supported** by this extension — Coding Plan subscriptions are limited to Z.ai's officially supported coding tools. Create a pay-as-you-go key as described above.
 
 ## 3. Enable the models in Raycast
 

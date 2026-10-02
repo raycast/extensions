@@ -9,6 +9,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import {
   PLATFORM_OPTIONS,
@@ -29,11 +30,7 @@ async function refreshModelsWithToast() {
       title: "Model list refreshed",
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Refresh failed",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Refresh failed" });
   }
 }
 
@@ -118,11 +115,7 @@ export default function CheckSetup() {
         }
       } else {
         setResult({ ok: false, text: `❌ ${probe.message}` });
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Validation failed",
-          message: probe.message,
-        });
+        await showFailureToast(probe.message, { title: "Validation failed" });
       }
     } finally {
       validating.current = false;
