@@ -382,7 +382,7 @@ export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
     );
     db.exec("COMMIT");
   } catch (error) {
-    db.exec("ROLLBACK");
+    rollback(db);
     throw error;
   }
 }
@@ -401,8 +401,17 @@ export function writeScanEnded(
     writeLastDuration(db, endedAt - startedAt);
     db.exec("COMMIT");
   } catch (error) {
-    db.exec("ROLLBACK");
+    rollback(db);
     throw error;
+  }
+}
+
+/** Preserve the database error that prompted the rollback. */
+function rollback(db: DatabaseSync): void {
+  try {
+    db.exec("ROLLBACK");
+  } catch {
+    /* SQLite may already have aborted the transaction. */
   }
 }
 

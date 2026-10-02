@@ -184,7 +184,12 @@ export type AddResult =
  * resolve against whatever directory the Raycast process happens to be in.
  */
 export function addScope(settings: IndexSettings, folder: string): AddResult {
-  const trimmed = folder.trim().replace(/\/+$/u, "");
+  const input = folder.trim();
+  const withoutTrailingSlash = input.replace(/\/+$/u, "");
+  const trimmed =
+    input.startsWith("/") && withoutTrailingSlash === ""
+      ? "/"
+      : withoutTrailingSlash;
   if (trimmed === "")
     return { kind: "invalid", reason: "Choose a folder to index" };
   if (!trimmed.startsWith("/"))

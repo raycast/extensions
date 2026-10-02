@@ -101,7 +101,7 @@ export type BuildOptions = {
   roots?: string[];
   /** Injection point for tests; defaults to reading the saved settings. */
   loadSettings?: () => Promise<IndexSettings>;
-  lookupFd?: (preference?: string) => FdLookup;
+  lookupFd?: (preference?: string) => FdLookup | Promise<FdLookup>;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
 };
@@ -135,12 +135,14 @@ async function captureBuildFailure(
 }
 
 async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
-  const lookup = (options.lookupFd ?? findFd)(options.fdPreference);
-  if (lookup.kind !== "found")
-    return { kind: "no-fd", message: describeFdLookup(lookup) ?? "" };
-
   const outcome = await options.withLock((assertOwned) =>
     captureBuildFailure(async () => {
+      // The automatic download is also serialized by this lock, so concurrent
+      // rebuild commands cannot install over one another.
+      const lookup = await (options.lookupFd ?? findFd)(options.fdPreference);
+      if (lookup.kind !== "found")
+        return { kind: "no-fd", message: describeFdLookup(lookup) ?? "" };
+
       // Settings saves hold this same lock. Read only after acquisition so
       // complete-scan cleanup uses a configuration that cannot change mid-run.
       const settings = options.loadSettings

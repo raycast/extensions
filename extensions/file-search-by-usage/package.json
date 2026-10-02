@@ -58,7 +58,7 @@
     {
       "name": "fdPath",
       "title": "Search Index",
-      "description": "Full path to the fd executable, if it is installed somewhere unusual. Leave empty to look on PATH and in the usual Homebrew locations.",
+      "description": "Optional full path to an fd executable. Leave empty to use an installed copy or download the pinned, checksum-verified portable copy automatically.",
       "type": "textfield",
       "required": false,
       "placeholder": "/opt/homebrew/bin/fd"

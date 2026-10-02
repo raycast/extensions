@@ -8,6 +8,12 @@ import { transformSync } from "esbuild";
 import { between } from "./source-slice";
 import { scopeExceptionChecks } from "./scope-exception-checks";
 import { findFd, FD_DIRECTORIES } from "../src/lib/fd";
+import {
+  ensureFd,
+  PORTABLE_FD_VERSION,
+  portableFdAsset,
+  verifyArchiveChecksum,
+} from "../src/lib/fd-download";
 import { formatSize } from "../src/lib/format";
 import { buildFtsQuery, MIN_INDEX_TERM } from "../src/lib/fts-query";
 import type { Erased } from "../src/lib/erase";
@@ -182,6 +188,53 @@ export async function indexChecks(assert: Assert) {
     findFd(undefined, { PATH: "relative:/abs" }, fakeProbe(["/abs/fd"]))
       .kind === "found",
     "relative PATH entries are skipped",
+  );
+  const armAsset = portableFdAsset("arm64");
+  const intelAsset = portableFdAsset("x64");
+  assert(
+    PORTABLE_FD_VERSION === "10.5.0" &&
+      armAsset?.sha256 ===
+        "b67e1836c468e42e411984b56e52fa7abec08c2bd22c867398e7cc134aac5e12" &&
+      intelAsset?.sha256 ===
+        "7e31028c62c6955877735d0406807aa484c2a5e6f86235a59e26c29c301da590",
+    "both macOS portable fd archives are pinned to the verified 10.5.0 hashes",
+  );
+  assert(
+    portableFdAsset("ia32") === undefined,
+    "unsupported architectures do not receive a portable fd asset",
+  );
+  const archiveFixture = Buffer.from("verified archive", "utf8");
+  const fixtureAsset = {
+    archive: "fixture.tar.gz",
+    bytes: archiveFixture.byteLength,
+    sha256: "040a1170825ade3ff37b189dd280153ecfafb99ee929d1cbebb40fe135afdf26",
+    target: "fixture",
+  };
+  assert(
+    verifyArchiveChecksum(archiveFixture, fixtureAsset) === fixtureAsset.sha256,
+    "the portable fd checksum accepts the exact pinned bytes",
+  );
+  let rejectedArchive = false;
+  try {
+    verifyArchiveChecksum(Buffer.from("altered archive", "utf8"), fixtureAsset);
+  } catch {
+    rejectedArchive = true;
+  }
+  assert(rejectedArchive, "the portable fd checksum rejects altered bytes");
+  const fdProgress: string[] = [];
+  const invalidPortablePreference = await ensureFd({
+    supportPath: tempDir("fd-preference"),
+    preference: "/missing/custom/fd",
+    lookupFd: () => ({
+      kind: "unusable",
+      path: "/missing/custom/fd",
+      reason: "not executable",
+    }),
+    onProgress: (stage) => fdProgress.push(stage),
+  });
+  assert(
+    invalidPortablePreference.kind === "unusable" && fdProgress.length === 0,
+    "an invalid explicit fd preference is reported without an automatic download",
   );
 
   // ------------------------------------------------------------- FTS building
@@ -395,6 +448,11 @@ export async function indexChecks(assert: Assert) {
     oneScope.kind === "added" &&
       oneScope.settings.scopes.join(",") === "/Users/example/Notes",
     "a trailing separator is dropped when a scope is added",
+  );
+  const rootScope = addScope(empty, "/");
+  assert(
+    rootScope.kind === "added" && rootScope.settings.scopes[0] === "/",
+    "the filesystem root remains a valid scope",
   );
   assert(
     addScope(empty, "relative/path").kind === "invalid",
@@ -1325,6 +1383,48 @@ export async function indexChecks(assert: Assert) {
       "an interrupted next scan cannot show the previous scan's end",
     );
     statsOpen.db.close();
+
+    const originalStartError = new Error("start metadata I/O failed");
+    const startFailureDb = {
+      exec(sql: string) {
+        if (sql === "ROLLBACK") throw new Error("no transaction is active");
+        if (sql.startsWith("DELETE")) throw originalStartError;
+      },
+      prepare() {
+        return { run() {} };
+      },
+    } as unknown as DatabaseSync;
+    let reportedStartError: unknown;
+    try {
+      writeScanStarted(startFailureDb, 3_000);
+    } catch (error) {
+      reportedStartError = error;
+    }
+    assert(
+      reportedStartError === originalStartError,
+      "a failed scan-start rollback preserves the original database error",
+    );
+
+    const originalEndError = new Error("end metadata I/O failed");
+    const endFailureDb = {
+      exec(sql: string) {
+        if (sql === "ROLLBACK") throw new Error("no transaction is active");
+        if (sql === "COMMIT") throw originalEndError;
+      },
+      prepare() {
+        return { run() {} };
+      },
+    } as unknown as DatabaseSync;
+    let reportedEndError: unknown;
+    try {
+      writeScanEnded(endFailureDb, 3_000, 3_250);
+    } catch (error) {
+      reportedEndError = error;
+    }
+    assert(
+      reportedEndError === originalEndError,
+      "a failed scan-end rollback preserves the original database error",
+    );
   }
 
   // ------------------------------------------------- the coverage status line
@@ -1933,14 +2033,30 @@ export async function indexChecks(assert: Assert) {
   const foundFd = () =>
     ({ kind: "found", path: "/bin/true", source: "known" }) as const;
 
+  let lookupInsideLock = false;
+  let fdLockHeld = false;
   const noFd = await rebuildIndex({
     file: buildFile,
-    withLock: freeLock,
-    lookupFd: () => ({ kind: "missing", reason: "not here" }),
+    withLock: async (work) => {
+      fdLockHeld = true;
+      const outcome = await work(() => {
+        if (!fdLockHeld) throw new Error("lock was released");
+      });
+      fdLockHeld = false;
+      return outcome;
+    },
+    lookupFd: async () => {
+      lookupInsideLock = fdLockHeld;
+      return { kind: "missing", reason: "not here" };
+    },
   });
   assert(
-    noFd.kind === "no-fd" && /brew install fd/u.test(noFd.message),
-    "a missing fd reports install instructions and installs nothing",
+    noFd.kind === "no-fd" && /automatic download/u.test(noFd.message),
+    "an unavailable fd reports the automatic-download recovery path",
+  );
+  assert(
+    lookupInsideLock,
+    "portable fd resolution is serialized with index writes",
   );
   assert(
     !fs.existsSync(buildFile),

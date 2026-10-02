@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Download the pinned fd 10.5.0 macOS release automatically when fd is not installed, verify its SHA-256 checksum and version, and reuse only an unchanged cached executable.
+
 - Show the last index scan's start and end times and duration, including final index maintenance, in Search Index Settings.
 
 - Show the end of long result paths, with the full location available on hover.
@@ -12,7 +14,7 @@
 - Match Raycast File Search shortcuts for Show in Finder, Open With, and Move to Trash; add a hidden-file toggle on `⇧⌘.` for the current command run.
 - Order the first four actions as Open, Show in Finder, Quick Look, and Open With, keeping Show in Finder in Raycast's secondary `⌘↩` position.
 - Add All Types, Directory, and File filters alongside independent, remembered sort choices in the top-right dropdown.
-- Build a name index with `fd` and query it with SQLite full-text search; requires `fd` and runs only when you ask for it with Rebuild Search Index (`⌘⇧R`).
+- Build a name index with `fd` and query it with SQLite full-text search; obtain fd automatically when needed and run only when you ask for it with Rebuild Search Index (`⌘⇧R`).
 - Choose which folders the index covers and which names to ignore in Search Index Settings, with the built-in exclusions listed alongside your own and index stats for disk usage, entry counts, and the last scan duration.
 - Automatically include all provider folders under `~/Library/CloudStorage`, not just Google Drive, and list them in Search Index Settings.
 - Keep nested scopes independent, so excluding `~/Library` from the home scan does not suppress explicitly included CloudStorage providers; avoid duplicate traversal and preserve child coverage during incomplete scans.

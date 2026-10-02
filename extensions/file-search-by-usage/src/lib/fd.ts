@@ -4,11 +4,10 @@ import path from "node:path";
 /**
  * Locating the `fd` binary.
  *
- * fd is not bundled: it is a third-party tool the user installs. Homebrew puts
- * it under a different prefix on Apple Silicon and Intel, and a manual install
- * can be anywhere on PATH, so every location is probed rather than assumed.
- * When it is missing the extension reports how to install it and never installs
- * anything itself.
+ * An explicitly configured or already installed fd takes precedence over the
+ * verified portable copy downloaded by fd-download.ts. Homebrew puts fd under
+ * a different prefix on Apple Silicon and Intel, and a manual install can be
+ * anywhere on PATH, so every location is probed rather than assumed.
  */
 
 /** Homebrew prefixes plus the common manual locations. */
@@ -23,12 +22,16 @@ export const FD_DIRECTORIES = [
 const FD_NAMES = ["fd", "fdfind"] as const;
 
 export type FdLookup =
-  | { kind: "found"; path: string; source: "preference" | "path" | "known" }
+  | {
+      kind: "found";
+      path: string;
+      source: "preference" | "path" | "known" | "portable";
+    }
   | { kind: "missing"; reason: string }
   | { kind: "unusable"; path: string; reason: string };
 
 export const FD_INSTALL_HINT =
-  "Install fd with `brew install fd`, then run Rebuild Search Index. " +
+  "Clear an invalid fd path to use the verified automatic download, or install fd manually. " +
   "If fd is installed somewhere unusual, set its full path in this extension's preferences.";
 
 function isExecutableFile(candidate: string): boolean {

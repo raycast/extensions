@@ -6,6 +6,7 @@ import {
 } from "@raycast/api";
 import { indexDatabasePath } from "./index-db";
 import { BuildOptions, BuildOutcome, rebuildIndex } from "./index-build";
+import { ensureFd, FdDownloadStage } from "./fd-download";
 import { withIndexingLock } from "./indexing-lock";
 import { loadIndexSettings } from "./index-settings-store";
 
@@ -31,14 +32,25 @@ export async function rebuildSearchIndex(
   options: Omit<BuildOptions, "file" | "withLock"> & {
     file?: string;
     withLock?: BuildOptions["withLock"];
+    onFdDownload?: (stage: FdDownloadStage) => void;
   } = {},
 ): Promise<BuildOutcome> {
+  const { onFdDownload, lookupFd, ...buildOptions } = options;
   return rebuildIndex({
     fdPreference: getPreferenceValues<Preferences>().fdPath,
     loadSettings: loadIndexSettings,
-    ...options,
+    ...buildOptions,
     file: options.file ?? searchIndexPath(),
     withLock: options.withLock ?? ((work) => withIndexingLock(work)),
+    lookupFd:
+      lookupFd ??
+      ((preference) =>
+        ensureFd({
+          preference,
+          supportPath: environment.supportPath,
+          signal: options.signal,
+          onProgress: onFdDownload,
+        })),
   });
 }
 
@@ -51,10 +63,18 @@ export async function rebuildWithFeedback(): Promise<void> {
       "Scanning configured folders with fd. This can take a few minutes.",
   });
   const outcome = await rebuildSearchIndex({
+    onFdDownload: (stage) => {
+      toast.message =
+        stage === "downloading"
+          ? "Downloading the verified fd crawler…"
+          : "Verifying and installing fd…";
+    },
     onFinishing: () => {
+      toast.title = "Building search index…";
       toast.message = "Writing the search index…";
     },
     onProgress: ({ indexed, scanned, elapsedMs }) => {
+      toast.title = "Building search index…";
       toast.message = `${indexed.toLocaleString()} indexed · ${scanned.toLocaleString()} seen · ${Math.round(elapsedMs / 1000)}s`;
     },
   });

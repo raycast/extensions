@@ -6,18 +6,13 @@ The extension builds its own index with `fd` and searches it with SQLite FTS5.
 
 ## Requirements and setup
 
-You need Raycast on macOS and [fd](https://github.com/sharkdp/fd) to build the index:
-
-```bash
-brew install fd
-fd --version
-```
+You need Raycast on macOS. The first rebuild downloads a pinned portable copy of [fd](https://github.com/sharkdp/fd) from its official GitHub release when fd is not already installed. The extension verifies the archive's SHA-256 checksum before using it.
 
 1. Open **Search Index Settings** and check the folders and ignore patterns.
 2. Run **Rebuild Search Index**. Rebuilds happen only when you ask; nothing is scheduled.
 3. Open **Search Files and Folders** to search. You can give it a Raycast hotkey.
 
-The extension looks for fd on `PATH` and in the usual install locations. If yours is somewhere unusual, put its full path in the **Search Index** preference (`fdPath`). Raycast supplies Node.js and SQLite with FTS5, so you do not install those yourself.
+An fd path set in the **Search Index** preference takes precedence, followed by fd on `PATH` or in the usual install locations. Otherwise the verified portable copy is kept in Raycast's extension support directory for later rebuilds. Raycast supplies Node.js and SQLite with FTS5, so you do not install those yourself.
 
 Raycast needs permission to read your folders. If a folder comes back empty, check System Settings, Privacy & Security, including Full Disk Access. Cloud folders and shared-folder shortcuts have to be reachable through their locally mounted provider. The extension does not sign in to any cloud account.
 
@@ -117,7 +112,7 @@ The status line shows the location, the count, and progress: yellow while waitin
 
 ## Privacy and data
 
-The extension sends no analytics, filenames, or usage history anywhere. Its index stores names, paths, sizes, and dates, not file contents. Everything stays in Raycast's storage on your Mac. Reading a cloud folder can still make the provider fetch metadata or content.
+The extension sends no analytics, filenames, or usage history anywhere. If fd is not installed, the first rebuild downloads the pinned executable from fd's official GitHub release; that request contains none of your search or file data. Its index stores names, paths, sizes, and dates, not file contents. Everything stays in Raycast's storage on your Mac. Reading a cloud folder can still make the provider fetch metadata or content.
 
 **Clear All Rankings…** clears recorded usage and nothing else. **Delete All Data and Cache…**, also a standalone command, clears usage, pins, saved searches, remembered pairings, index settings, indexes, and old caches. Each asks for confirmation and leaves your files alone. Your type and sort choices and the extension preferences survive deletion.
 

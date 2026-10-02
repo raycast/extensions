@@ -7,10 +7,10 @@ Implementation notes for maintaining and releasing File Search by Usage. The [RE
 File discovery uses `fd`. Name queries use an in-process SQLite FTS5 index. There is no Spotlight search: no `mdfind` calls and no fallback. Batched `mdls` calls read optional usage counts and last-used dates for folder ranking, never search results. See Caches and storage for their deadline and failure behaviour.
 
 - **Runtime:** Raycast on macOS, with the Node.js runtime it bundles, which exposes `node:sqlite` and SQLite FTS5. Verified against Raycast's Node 22.22.2 and SQLite 3.51.2. Recheck the distribution build in Raycast before release; a successful build does not verify runtime support.
-- **Crawler:** a separately installed `fd` (`brew install fd`, verify with `fd --version`). Required for rebuilds, not for querying an existing index. `src/lib/fd.ts` checks an explicit absolute `fdPath` preference first, then `PATH` and the common install directories. An invalid explicit path is an error, not a reason to silently pick another binary. Scopes and symlink targets must be readable with Raycast's permissions.
+- **Crawler:** `fd` is required for rebuilds, not for querying an existing index. `src/lib/fd.ts` checks an explicit absolute `fdPath` preference first, then `PATH` and the common install directories. If none is found, `src/lib/fd-download.ts` downloads the pinned macOS archive for the current architecture from fd's official GitHub release, checks its exact size and SHA-256, extracts only the executable, verifies `fd --version`, and stores an executable hash in its manifest. The archive and hashes are pinned in that file; update all of them together after verifying a new release. A cached executable is hashed and version-checked before reuse. An invalid explicit path is an error, not a reason to silently download another binary. Scopes and symlink targets must be readable with Raycast's permissions.
 - **Development:** Node.js with `node:sqlite` and FTS5 available without an experimental flag, plus npm. Node 22.22.2 matches the verified Raycast runtime. `npm ci` installs the locked dependencies. Install fd to exercise the real-crawler checks; they are skipped when the binary is absent.
 
-Users install nothing else, and the extension neither bundles nor installs fd.
+Users install nothing else. A manually installed fd remains supported, but is optional.
 
 ## Project layout
 
@@ -63,6 +63,7 @@ src/lib/starting-paths.ts   standard and cloud start locations
 src/lib/spotlight.ts        batched mdls reads for usage metadata
 src/lib/usage-cache.ts      per-directory usage-metadata cache
 src/lib/fd.ts               fd discovery across install locations
+src/lib/fd-download.ts      pinned, checksum-verified portable fd installation
 src/lib/index-db.ts         SQLite schema, pragmas, and connections
 src/lib/index-scan.ts       fd crawl, metadata collection, and refresh semantics
 src/lib/fts-query.ts        injection-safe FTS5 MATCH construction
