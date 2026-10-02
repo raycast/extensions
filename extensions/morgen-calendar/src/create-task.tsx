@@ -32,9 +32,7 @@ export default function CreateTask() {
               timeZone: systemTimeZone(),
             }
           : {}),
-        ...(values.duration !== "none"
-          ? { estimatedDuration: isoDuration(Number(values.duration)) }
-          : {}),
+        ...(values.duration !== "none" ? { estimatedDuration: isoDuration(Number(values.duration)) } : {}),
         priority: Number(values.priority),
       });
       await showSuccess("Task created");
@@ -51,34 +49,17 @@ export default function CreateTask() {
       isLoading={submitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Task"
-            icon={Icon.CheckCircle}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Create Task" icon={Icon.CheckCircle} onSubmit={submit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Review proposal"
-        autoFocus
-      />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional details"
-      />
+      <Form.TextField id="title" title="Title" placeholder="Review proposal" autoFocus />
+      <Form.TextArea id="description" title="Description" placeholder="Optional details" />
       <Form.DatePicker id="due" title="Due" />
       <Form.Dropdown id="duration" title="Estimated Time" defaultValue="none">
         <Form.Dropdown.Item value="none" title="None" />
         {[15, 30, 60, 90, 120, 180, 240].map((minutes) => (
-          <Form.Dropdown.Item
-            key={minutes}
-            value={String(minutes)}
-            title={`${minutes} minutes`}
-          />
+          <Form.Dropdown.Item key={minutes} value={String(minutes)} title={`${minutes} minutes`} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="priority" title="Priority" defaultValue="0">

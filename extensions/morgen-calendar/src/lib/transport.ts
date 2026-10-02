@@ -29,20 +29,14 @@ export async function sendMorgenRequest<T>(
       signal: AbortSignal.timeout(15000),
     });
   } catch {
-    throw new Error(
-      "Could not reach Morgen or the request timed out. Check your connection and try again.",
-    );
+    throw new Error("Could not reach Morgen or the request timed out. Check your connection and try again.");
   }
 
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as {
       message?: string;
     };
-    if (response.status === 401)
-      throw new MorgenError(
-        "Invalid Morgen API key. Check the extension preferences.",
-        401,
-      );
+    if (response.status === 401) throw new MorgenError("Invalid Morgen API key. Check the extension preferences.", 401);
     if (response.status === 403)
       throw new MorgenError(
         "Your Morgen plan may not include API access, or the calendar connection needs attention.",
@@ -54,13 +48,8 @@ export async function sendMorgenRequest<T>(
         429,
       );
     }
-    throw new MorgenError(
-      body.message || `Morgen request failed (${response.status}).`,
-      response.status,
-    );
+    throw new MorgenError(body.message || `Morgen request failed (${response.status}).`, response.status);
   }
 
-  return response.status === 204
-    ? (undefined as T)
-    : ((await response.json()) as T);
+  return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }

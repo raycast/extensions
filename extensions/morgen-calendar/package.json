@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "morgen-calendar",
   "type": "module",
   "title": "Morgen Calendar",
@@ -34,7 +35,7 @@
     "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
-    "@raycast/api": "^2.5.2"
+    "@raycast/api": "2.5.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.0",

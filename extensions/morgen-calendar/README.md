@@ -35,9 +35,9 @@ npm run bundle
 
 This extension uses the Morgen REST API and no native macOS APIs. It declares Windows as its supported platform.
 
-## Store submission
+## Compatibility
 
-The `author` field is set to `ctacta621`. Before publishing, sign in to that Raycast account, test all four commands against an API-enabled Morgen account, and add screenshots captured in Raycast. Raycast recommends at least three real screenshots. Each should be a 2000 × 1250 PNG showing only Raycast and non-sensitive sample data. Save them to this extension's `metadata` folder using Raycast's Window Capture tool, or add the supplied images there before submission. Then run `npm run publish`; Raycast's CLI opens a pull request to [raycast/extensions](https://github.com/raycast/extensions). The Raycast review team decides whether to accept it.
+Requires Raycast v2.5 or later on Windows. The API dependency is pinned to the released version `2.5.2`, which was verified with the Windows client. View Events shows edit and delete actions only when the calendar permits modifying that event.
 
 ## References
 

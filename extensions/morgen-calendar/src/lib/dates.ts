@@ -11,8 +11,7 @@ export function toLocalDateTime(date: Date, timeZone: string): string {
     second: "2-digit",
     hourCycle: "h23",
   }).formatToParts(date);
-  const get = (type: string) =>
-    parts.find((part) => part.type === type)?.value ?? "00";
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "00";
   return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
 }
 
@@ -49,9 +48,7 @@ export function eventStartDate(event: Event): Date {
   if (!Number.isFinite(utcGuess)) return new Date(NaN);
   let timestamp = utcGuess;
   for (let i = 0; i < 3; i++) {
-    const represented = Date.parse(
-      `${toLocalDateTime(new Date(timestamp), zone)}Z`,
-    );
+    const represented = Date.parse(`${toLocalDateTime(new Date(timestamp), zone)}Z`);
     timestamp += utcGuess - represented;
   }
   return new Date(timestamp);

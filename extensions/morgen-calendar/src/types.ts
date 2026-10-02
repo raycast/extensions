@@ -26,6 +26,7 @@ export interface Event {
   showWithoutTime: boolean;
   masterEventId?: string;
   recurrenceId?: string;
+  participants?: Record<string, { accountOwner?: boolean; roles?: { owner?: boolean } }>;
   "morgen.so:metadata"?: { taskId?: string };
 }
 

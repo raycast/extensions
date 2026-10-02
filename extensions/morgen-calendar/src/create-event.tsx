@@ -32,17 +32,12 @@ export default function CreateEvent() {
       .finally(() => setLoading(false));
   }, []);
 
-  const writable = calendars.filter(
-    (calendar) =>
-      calendar.myRights?.mayWriteAll || calendar.myRights?.mayWriteOwn,
-  );
+  const writable = calendars.filter((calendar) => calendar.myRights?.mayWriteAll || calendar.myRights?.mayWriteOwn);
 
   async function submit(values: Values) {
     const calendar = writable.find((item) => item.id === values.calendar);
     if (!calendar || !values.title.trim() || !values.start) {
-      await showFailure(
-        new Error("Enter a title, start time, and writable calendar."),
-      );
+      await showFailure(new Error("Enter a title, start time, and writable calendar."));
       return;
     }
     setSubmitting(true);
@@ -52,9 +47,7 @@ export default function CreateEvent() {
         calendarId: calendar.id,
         title: values.title.trim(),
         description: values.description.trim() || undefined,
-        start: values.allDay
-          ? dateOnly(values.start)
-          : toLocalDateTime(values.start, systemTimeZone()),
+        start: values.allDay ? dateOnly(values.start) : toLocalDateTime(values.start, systemTimeZone()),
         duration: values.allDay ? "P1D" : isoDuration(Number(values.duration)),
         timeZone: values.allDay ? null : systemTimeZone(),
         showWithoutTime: values.allDay,
@@ -77,25 +70,12 @@ export default function CreateEvent() {
       isLoading={loading || submitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Event"
-            icon={Icon.Calendar}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Create Event" icon={Icon.Calendar} onSubmit={submit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Team meeting"
-        autoFocus
-      />
-      <Form.Dropdown
-        id="calendar"
-        title="Calendar"
-        info="Only calendars where you can create events are shown."
-      >
+      <Form.TextField id="title" title="Title" placeholder="Team meeting" autoFocus />
+      <Form.Dropdown id="calendar" title="Calendar" info="Only calendars where you can create events are shown.">
         {writable.map((calendar) => (
           <Form.Dropdown.Item
             key={calendar.id}
@@ -108,36 +88,18 @@ export default function CreateEvent() {
         id="start"
         title="Start"
         defaultValue={defaultStart}
-        type={
-          allDay ? Form.DatePicker.Type.Date : Form.DatePicker.Type.DateTime
-        }
+        type={allDay ? Form.DatePicker.Type.Date : Form.DatePicker.Type.DateTime}
       />
-      <Form.Checkbox
-        id="allDay"
-        label="All-day event"
-        title="All Day"
-        value={allDay}
-        onChange={setAllDay}
-      />
+      <Form.Checkbox id="allDay" label="All-day event" title="All Day" value={allDay} onChange={setAllDay} />
       {!allDay && (
         <Form.Dropdown id="duration" title="Duration" defaultValue="60">
           {[15, 30, 45, 60, 90, 120, 180, 240].map((minutes) => (
-            <Form.Dropdown.Item
-              key={minutes}
-              value={String(minutes)}
-              title={`${minutes} minutes`}
-            />
+            <Form.Dropdown.Item key={minutes} value={String(minutes)} title={`${minutes} minutes`} />
           ))}
         </Form.Dropdown>
       )}
-      <Form.Description
-        text={`Timed events use your Windows time zone: ${systemTimeZone()}.`}
-      />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional details"
-      />
+      <Form.Description text={`Timed events use your Windows time zone: ${systemTimeZone()}.`} />
+      <Form.TextArea id="description" title="Description" placeholder="Optional details" />
     </Form>
   );
 }

@@ -1,22 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Detail,
-  Form,
-  Icon,
-  List,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  closeTask,
-  deleteTask,
-  invalidateCache,
-  listTasks,
-  updateTask,
-} from "./lib/morgen";
+import { closeTask, deleteTask, invalidateCache, listTasks, updateTask } from "./lib/morgen";
 import { showFailure, showSuccess } from "./lib/ui";
 import type { Task } from "./types";
 
@@ -40,22 +24,10 @@ function TaskDetails({ task }: { task: Task }) {
       markdown={`# ${escapeMarkdown(task.title)}\n\n${escapeMarkdown(task.description || "No description")}`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Due"
-            text={task.due?.replace("T", " ") || "No due date"}
-          />
-          <Detail.Metadata.Label
-            title="Estimated Time"
-            text={task.estimatedDuration || "Not set"}
-          />
-          <Detail.Metadata.Label
-            title="Priority"
-            text={String(task.priority ?? 0)}
-          />
-          <Detail.Metadata.Label
-            title="Status"
-            text={task.progress || "needs-action"}
-          />
+          <Detail.Metadata.Label title="Due" text={task.due?.replace("T", " ") || "No due date"} />
+          <Detail.Metadata.Label title="Estimated Time" text={task.estimatedDuration || "Not set"} />
+          <Detail.Metadata.Label title="Priority" text={String(task.priority ?? 0)} />
+          <Detail.Metadata.Label title="Status" text={task.progress || "needs-action"} />
         </Detail.Metadata>
       }
     />
@@ -66,11 +38,7 @@ function EditTask({ task, onSaved }: { task: Task; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const { pop } = useNavigation();
 
-  async function submit(values: {
-    title: string;
-    description: string;
-    priority: string;
-  }) {
+  async function submit(values: { title: string; description: string; priority: string }) {
     if (!values.title.trim()) {
       await showFailure(new Error("Enter a task title."));
       return;
@@ -97,25 +65,13 @@ function EditTask({ task, onSaved }: { task: Task; onSaved: () => void }) {
       isLoading={saving}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Task"
-            icon={Icon.SaveDocument}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title="Save Task" icon={Icon.SaveDocument} onSubmit={submit} />
         </ActionPanel>
       }
     >
       <Form.TextField id="title" title="Title" defaultValue={task.title} />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        defaultValue={task.description || ""}
-      />
-      <Form.Dropdown
-        id="priority"
-        title="Priority"
-        defaultValue={String(task.priority ?? 0)}
-      >
+      <Form.TextArea id="description" title="Description" defaultValue={task.description || ""} />
+      <Form.Dropdown id="priority" title="Priority" defaultValue={String(task.priority ?? 0)}>
         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((priority) => (
           <Form.Dropdown.Item
             key={priority}
@@ -148,13 +104,7 @@ export default function Tasks() {
     void load();
   }, [load]);
 
-  const sorted = useMemo(
-    () =>
-      [...tasks].sort((a, b) =>
-        (a.due || "9999").localeCompare(b.due || "9999"),
-      ),
-    [tasks],
-  );
+  const sorted = useMemo(() => [...tasks].sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999")), [tasks]);
 
   async function complete(task: Task) {
     try {
@@ -187,10 +137,7 @@ export default function Tasks() {
 
   return (
     <List isLoading={loading} searchBarPlaceholder="Search Morgen tasks">
-      <List.EmptyView
-        title="No Open Tasks"
-        description="Morgen returns up to 100 native open tasks here."
-      />
+      <List.EmptyView title="No Open Tasks" description="Morgen returns up to 100 native open tasks here." />
       {sorted.map((task) => (
         <List.Item
           key={task.id}
@@ -198,35 +145,19 @@ export default function Tasks() {
           subtitle={task.description}
           accessories={[
             {
-              text: task.due
-                ? `Due ${task.due.replace("T", " ")}`
-                : "No due date",
+              text: task.due ? `Due ${task.due.replace("T", " ")}` : "No due date",
             },
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Complete Task"
-                icon={Icon.CheckCircle}
-                onAction={() => void complete(task)}
-              />
-              <Action.Push
-                title="View Task"
-                icon={Icon.Eye}
-                target={<TaskDetails task={task} />}
-              />
+              <Action title="Complete Task" icon={Icon.CheckCircle} onAction={() => void complete(task)} />
+              <Action.Push title="View Task" icon={Icon.Eye} target={<TaskDetails task={task} />} />
               <Action.Push
                 title="Edit Task"
                 icon={Icon.Pencil}
-                target={
-                  <EditTask task={task} onSaved={() => void load(true)} />
-                }
+                target={<EditTask task={task} onSaved={() => void load(true)} />}
               />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={() => void load(true)}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load(true)} />
               <Action
                 title="Delete Task"
                 icon={Icon.Trash}
