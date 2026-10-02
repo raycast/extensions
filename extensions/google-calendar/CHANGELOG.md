@@ -1,8 +1,8 @@
 # Google Calendar Changelog
 
-## [Improve Platform Detection] - {PR_MERGE_DATE}
+## [Simplify OAuth Client Selection] - {PR_MERGE_DATE}
 
-- Use the operating system to detect Windows instead of relying on the Raycast version format.
+- Simplify OAuth client selection to match the redirect schemes used by current Raycast versions.
 
 ## [Plan My Week Skill] - 2026-09-24
 

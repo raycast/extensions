@@ -103,15 +103,9 @@ function isInternal() {
 }
 
 export function getClientId() {
-  if (process.platform === "win32") {
-    return isInternal()
-      ? "690234628480-ic526rvseca4983uujs693rnqh49kgjh.apps.googleusercontent.com"
-      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
-  } else {
-    return isInternal()
-      ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
-      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
-  }
+  return isInternal()
+    ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
+    : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
 }
 
 export function toISO8601WithTimezoneOffset(date = new Date()) {
