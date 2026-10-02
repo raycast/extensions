@@ -362,7 +362,12 @@ export function slugify(title: string): string {
 /** Build the vault-relative path for a quick-capture note, honoring the captureFolder preference. */
 export function capturePath(title: string, date = new Date()): { relPath: string; folder: string } {
   const folder = (prefs().captureFolder ?? "").trim().replace(/^\/+|\/+$/g, "");
-  const stamp = date.toISOString().slice(0, 10);
+  // Use the local calendar date, not UTC: toISOString() shifts evening captures in
+  // timezones behind UTC onto tomorrow's date.
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const stamp = `${year}-${month}-${day}`;
   const relPath = `${folder ? `${folder}/` : ""}${stamp}-${slugify(title)}.md`;
   return { relPath, folder };
 }

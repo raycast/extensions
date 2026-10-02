@@ -23,7 +23,9 @@ export default function QuickCapture() {
         const vault = await resolveVaultId(values.vaultId || undefined);
         const title = values.title.trim();
         const { relPath } = capturePath(title);
-        const body = `# ${title}\n\n${values.content.trim()}\n`;
+        // Don't embed the title as an H1 here: readers already render `# {note.title}`
+        // above the content, so doing both produced a duplicate heading.
+        const body = values.content.trim() ? `${values.content.trim()}\n` : "";
         await createNote({ vaultId: vault.vaultId, relPath, title, content: body });
         await toast.hide();
         await showHUD(`✓ Captured to ${vault.name}: ${relPath}`);
@@ -40,7 +42,7 @@ export default function QuickCapture() {
               vaultId: vault.vaultId,
               relPath,
               title,
-              content: `# ${title}\n\n${values.content.trim()}\n`,
+              content: values.content.trim() ? `${values.content.trim()}\n` : "",
             });
             await toast.hide();
             await showHUD(`✓ Captured to ${vault.name}: ${relPath}`);
