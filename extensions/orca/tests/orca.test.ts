@@ -11,6 +11,7 @@ import {
   sessionTitle,
   filterRows,
   mergeAgents,
+  projectNamer,
   summarize,
   unwrap,
 } from "../src/orca.ts";
@@ -162,8 +163,8 @@ test("a waiting row is labelled project-first, like the root search subtitle", (
     worktreePath: "/Users/you/code/api",
   };
 
-  assert.equal(sessionLabel(row, true), "api: /review work_items/450");
-  assert.equal(sessionLabel(row, false), "/review work_items/450");
+  assert.equal(sessionLabel(row, "api"), "api: /review work_items/450");
+  assert.equal(sessionLabel(row), "/review work_items/450");
 });
 
 test("projects with the same folder name stay separate sections", () => {
@@ -181,6 +182,30 @@ test("projects with the same folder name stay separate sections", () => {
     sections.map((section) => section.key),
     ["team-a/app", "team-b/app"],
   );
+});
+
+test("blocked panes in two folders of the same name stay apart", () => {
+  const rows = [
+    { handle: "a", worktreePath: "/code/team-a/app", worktreeId: "r1::/code/team-a/app",
+      title: "one", connected: true, stateStartedAt: 1, state: "waiting" },
+    { handle: "b", worktreePath: "/code/team-b/app", worktreeId: "r2::/code/team-b/app",
+      title: "two", connected: true, stateStartedAt: 2, state: "waiting" },
+  ];
+
+  assert.deepEqual(rows.map(projectNamer(rows)), ["team-a/app", "team-b/app"]);
+  assert.equal(summarize(rows, "sessions", 200), "❓ team-a/app: one · ❓ team-b/app: two");
+  // Down to project names alone, the two are still two.
+  assert.equal(summarize(rows, "sessions", 30), "❓ team-a/app · ❓ team-b/app");
+});
+
+test("a folder name is qualified only when another project shares it", () => {
+  const projectOf = projectNamer([
+    { worktreePath: "/code/team-a/app" },
+    { worktreePath: "/code/team-a/app" },
+    { worktreePath: "/code/api" },
+  ]);
+  assert.equal(projectOf({ worktreePath: "/code/team-a/app" }), "app");
+  assert.equal(projectOf({ worktreePath: "/code/api" }), "api");
 });
 
 test("a pane Orca has not titled yet does not break the list", () => {

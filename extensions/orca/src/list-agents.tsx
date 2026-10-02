@@ -23,7 +23,7 @@ import {
   buildSections,
   filterRows,
   loadAgents,
-  projectName,
+  projectNamer,
   sessionLabel,
 } from "./orca";
 
@@ -130,10 +130,12 @@ export default function Command(
     updateCommandMetadata({ subtitle: EXTENSION_NAME });
   }, []);
 
-  const sections = useMemo(
-    () => buildSections(filterRows(rows, status, agentFilter as AgentFilter)),
+  const visible = useMemo(
+    () => filterRows(rows, status, agentFilter as AgentFilter),
     [rows, status, agentFilter],
   );
+  const sections = useMemo(() => buildSections(visible), [visible]);
+  const projectOf = useMemo(() => projectNamer(visible), [visible]);
 
   const total = sections.reduce(
     (count, section) => count + section.items.length,
@@ -231,7 +233,10 @@ export default function Command(
                         tintColor: agentInfo(agent).color,
                       }
                 }
-                title={sessionLabel(row, section.kind === "waiting")}
+                title={sessionLabel(
+                  row,
+                  section.kind === "waiting" ? projectOf(row) : undefined,
+                )}
                 subtitle={showDetail ? undefined : branch}
                 keywords={[
                   row.worktreePath,
@@ -321,7 +326,7 @@ export default function Command(
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Project"
-                          text={projectName(row)}
+                          text={projectOf(row)}
                         />
                         {branch ? (
                           <List.Item.Detail.Metadata.Label

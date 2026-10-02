@@ -119,9 +119,26 @@ function qualifiedName(path: string): string {
   return path.split("/").filter(Boolean).slice(-2).join("/");
 }
 
-/** Orca groups panes by worktree; the last path segment is what the app shows as the project. */
-export function projectName(row: { worktreePath: string }): string {
-  return folderName(row.worktreePath);
+/**
+ * Orca groups panes by worktree, and the last path segment is what the app
+ * shows as the project. This names projects by that folder, adding the parent
+ * only for folders that two of the given projects share: /team-a/app and
+ * /team-b/app are two projects, and every place that names them — section,
+ * waiting row, subtitle — has to say so.
+ */
+export function projectNamer(
+  rows: { worktreePath: string }[],
+): (row: { worktreePath: string }) => string {
+  const names = [...new Set(rows.map((row) => row.worktreePath))].map(
+    folderName,
+  );
+  const ambiguous = new Set(
+    names.filter((name, index) => names.indexOf(name) !== index),
+  );
+  return ({ worktreePath }) =>
+    ambiguous.has(folderName(worktreePath))
+      ? qualifiedName(worktreePath)
+      : folderName(worktreePath);
 }
 
 export function buildSections(rows: AgentRow[]): Section[] {
@@ -150,19 +167,15 @@ export function buildSections(rows: AgentRow[]): Section[] {
     ]);
   }
 
-  const names = [...byPath.keys()].map(folderName);
-  const ambiguous = new Set(
-    names.filter((name, index) => names.indexOf(name) !== index),
-  );
+  // Over every row, waiting ones included, so a header matches the label the
+  // same project gets in the waiting section.
+  const projectOf = projectNamer(rows);
 
   const recency = (row: AgentRow) => row.lastOutputAt ?? 0;
-  const projects: Section[] = [...byPath.entries()]
-    .map(([path, items]) => ({
+  const projects: Section[] = [...byPath.values()]
+    .map((items) => ({
       kind: "project" as const,
-      // Only the colliding ones pay for the longer label.
-      key: ambiguous.has(folderName(path))
-        ? qualifiedName(path)
-        : folderName(path),
+      key: projectOf(items[0]),
       items: [...items].sort((a, b) => recency(b) - recency(a)),
     }))
     .sort((a, b) => recency(b.items[0]) - recency(a.items[0]));
@@ -239,11 +252,11 @@ function pickLabel(row: {
  * with the project — the same shape the root search subtitle uses.
  */
 export function sessionLabel(
-  row: Parameters<typeof sessionTitle>[0] & { worktreePath: string },
-  withProject: boolean,
+  row: Parameters<typeof sessionTitle>[0],
+  project?: string,
 ): string {
   const title = sessionTitle(row);
-  return withProject ? `${projectName(row)}: ${title}` : title;
+  return project ? `${project}: ${title}` : title;
 }
 
 /** Blocked longest first — the same order the list uses. */
@@ -291,7 +304,8 @@ export function summarize(
     if (waiting.length === 0) return null;
 
     // The project stays whatever happens: it is what tells two panes apart.
-    const entries = waiting.map((row) => ({ row, project: projectName(row) }));
+    const projectOf = projectNamer(waiting);
+    const entries = waiting.map((row) => ({ row, project: projectOf(row) }));
     const label = (project: string, title: string) => `${project}: ${title}`;
 
     const full = joinWithin(
@@ -315,7 +329,7 @@ export function summarize(
       if (trimmed) return trimmed;
     }
 
-    const names = [...new Set(waiting.map(projectName))];
+    const names = [...new Set(waiting.map(projectOf))];
     return (
       joinWithin(names, maxLength) ??
       joinTruncated(names, maxLength) ??

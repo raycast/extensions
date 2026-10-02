@@ -13,7 +13,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 import type { PromptSpec } from "./prompt.ts";
-import { composePrompt, runPrompt } from "./prompt.ts";
+import { composePrompt, runPrompt, worktreeNameFor } from "./prompt.ts";
 
 const execFileAsync = promisify(execFile);
 
@@ -61,6 +61,10 @@ export default async function Command(
     await runPrompt(
       {
         ...spec,
+        // Named from the saved prompt, as Add Prompt previewed it: the extra
+        // text is for the agent, not for the checkout. A name already taken is
+        // Orca's to suffix (-2, -3…), so every run still gets a fresh one.
+        worktreeName: worktreeNameFor(spec),
         prompt: composePrompt(spec.prompt, extra, { clipboard, selection }),
       },
       orcaPath,
