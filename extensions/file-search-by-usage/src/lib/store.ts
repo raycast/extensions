@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { dataGeneration, withStorageLock } from "./storage-lock";
 import { VisitLog } from "./types";
-import { canonicalPath, pathExists } from "./read-dir";
+import { canonicalPath } from "./read-dir";
 import {
   Abbreviations,
   emsScore,
@@ -42,10 +42,9 @@ export async function recordVisit(
     // Canonical paths merge usage across aliases.
     const updated = recordEms(loaded, canonicalPath(path), Date.now());
 
-    const { log, pruned } = pruneVisits(updated);
-    const final = pruned > 0 ? dropMissing(log) : log;
-    await save(final, assertCurrent);
-    return final;
+    const { log } = pruneVisits(updated);
+    await save(log, assertCurrent);
+    return log;
   }, generation);
 }
 
@@ -67,15 +66,6 @@ export async function clearVisits(): Promise<VisitLog> {
     await LocalStorage.removeItem(KEY);
     return EMPTY;
   }, dataGeneration());
-}
-
-/** Forget entries whose file no longer exists. Only run when pruning fired. */
-function dropMissing(log: VisitLog): VisitLog {
-  const items: VisitLog["items"] = {};
-  for (const [key, visit] of Object.entries(log.items)) {
-    if (pathExists(key)) items[key] = visit;
-  }
-  return { tick: log.tick, items };
 }
 
 export { emsScore };

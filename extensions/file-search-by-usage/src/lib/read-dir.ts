@@ -265,12 +265,3 @@ export function canonicalPath(full: string): string {
     return full;
   }
 }
-
-export function pathExists(full: string): boolean {
-  try {
-    fs.statSync(full);
-    return true;
-  } catch {
-    return false;
-  }
-}

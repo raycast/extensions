@@ -961,7 +961,7 @@ async function visitWriteChecks(
   const gated = await prune.store.recordVisit(openedPath);
   assert(
     gated.items[missingPath] !== undefined,
-    "an entry for a deleted file survives while nothing is pruned",
+    "an unavailable path survives while nothing is pruned",
   );
   prune.storage.set(
     "visits",
@@ -970,10 +970,11 @@ async function visitWriteChecks(
       items: { [missingPath]: seedVisit(1, 0), [other]: seedVisit(0, 0) },
     }),
   );
-  const swept = await prune.store.recordVisit(openedPath);
+  const preserved = await prune.store.recordVisit(openedPath);
   assert(
-    swept.items[missingPath] === undefined && swept.items[opened] !== undefined,
-    "a visit that prunes also forgets entries whose file is gone",
+    preserved.items[missingPath] !== undefined &&
+      preserved.items[opened] !== undefined,
+    "an unavailable path survives when another usage entry is pruned",
   );
 
   const cap = prune.history.MAX_ENTRIES;
@@ -984,9 +985,9 @@ async function visitWriteChecks(
       kept: cap,
     },
     {
-      label: "a log over the entry cap drops to the cap and sweeps the missing",
+      label: "a log over the entry cap drops only to the cap",
       seeded: cap,
-      kept: 1,
+      kept: cap,
     },
   ];
   for (const item of capCases) {
@@ -995,10 +996,13 @@ async function visitWriteChecks(
       items[path.join(root, "visits", "gone", `fake-${i}`)] = seedVisit(0.5, 0);
     prune.storage.set("visits", JSON.stringify({ tick: 0, items }));
 
-    await prune.store.recordVisit(openedPath);
+    const result = await prune.store.recordVisit(openedPath);
 
     assert(
-      Object.keys(storedLog(prune.storage)?.items ?? {}).length === item.kept,
+      Object.keys(storedLog(prune.storage)?.items ?? {}).length === item.kept &&
+        result.items[opened] !== undefined &&
+        (item.seeded < cap ||
+          Object.keys(result.items).some((key) => key.includes("/gone/fake-"))),
       item.label,
     );
   }
