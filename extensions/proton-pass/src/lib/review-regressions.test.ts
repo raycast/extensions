@@ -527,9 +527,9 @@ test("hiding item details stops automatic secret loads while showing them select
   }
 });
 
-test("details follow the selection Raycast reports, which is only set when the list appears", () => {
+function loadItemList() {
   const harness = hookHarness();
-  let requested: Item | undefined;
+  const state: { requested?: Item } = {};
   const { ItemList } = loadView("item-list.tsx", {
     react: { ...harness.react, useCallback: (callback: unknown) => callback },
     "@raycast/api": {
@@ -553,27 +553,45 @@ test("details follow the selection Raycast reports, which is only set when the l
         }
       },
       useItemDetail: (_store: unknown, selected: Item | undefined) => {
-        requested = selected;
+        state.requested = selected;
         return {};
       },
     },
     "./utils": { getItemIcon: () => "" },
   });
-  const second = { ...item, itemId: "second" };
-  const anotherVault = { ...item, shareId: "other", itemId: "third" };
   const render = (items: Item[], suggestedItems: Item[] = []) =>
     harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {} });
+  const select = (list: Element, id: string | null) =>
+    (list.props.onSelectionChange as (id: string | null) => void)(id);
+  return { render, select, state };
+}
+
+test("details follow the selection Raycast reports, which is only set when the list appears", () => {
+  const { render, select, state } = loadItemList();
+  const second = { ...item, itemId: "second" };
+  const anotherVault = { ...item, shareId: "other", itemId: "third" };
   const initial = render([item, second], [item]);
   assert.equal(initial.props.selectedItemId, format.itemKey(item));
-  (initial.props.onSelectionChange as (id: string | null) => void)(format.itemKey(second));
-  // Not sent back to Raycast, which would recentre the list on every move.
-  assert.equal(render([item, second], [item]).props.selectedItemId, format.itemKey(item));
-  assert.equal(requested, second);
+  // Once Raycast reports the suggestion it selected, the selection is left to Raycast, which would otherwise
+  // recentre the list on every move.
+  select(initial, format.itemKey(item));
+  select(render([item, second], [item]), format.itemKey(second));
+  assert.equal(render([item, second], [item]).props.selectedItemId, undefined);
+  assert.equal(state.requested, second);
   const changedVault = render([anotherVault]);
-  assert.equal(requested, anotherVault);
-  (changedVault.props.onSelectionChange as (id: string | null) => void)(null);
+  assert.equal(changedVault.props.selectedItemId, undefined);
+  assert.equal(state.requested, anotherVault);
+  select(changedVault, null);
   render([anotherVault]);
-  assert.equal(requested, undefined);
+  assert.equal(state.requested, undefined);
+});
+
+test("a suggestion showing up after the list appeared doesn't move the cursor", () => {
+  const { render } = loadItemList();
+  const second = { ...item, itemId: "second" };
+  assert.equal(render([], []).props.selectedItemId, undefined);
+  assert.equal(render([item, second]).props.selectedItemId, undefined);
+  assert.equal(render([item, second], [second]).props.selectedItemId, undefined);
 });
 
 test("a complete shared cache replaces legacy per-vault caches", async () => {
